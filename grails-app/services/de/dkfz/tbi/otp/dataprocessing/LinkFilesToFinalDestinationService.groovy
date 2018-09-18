@@ -65,17 +65,32 @@ class LinkFilesToFinalDestinationService {
             cleanupWorkDirectory(roddyBamFile, realm)
             executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
             cleanupOldResults(roddyBamFile, realm)
-            if (!roddyBamFile.qcTrafficLightStatus || roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED) {
+            handleQcCheck(roddyBamFile) {
                 linkNewResults(roddyBamFile, realm)
-            } else if (roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) {
-                informResultsAreBlocked(roddyBamFile)
-            } else {
-                throw new RuntimeException("${roddyBamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus here, only ${AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED} and ${AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED} is a valid status.")
             }
-            setBamFileValues(roddyBamFile)
         } else {
             threadLog?.info "The results of ${roddyBamFile} will not be moved since it is marked as withdrawn"
         }
+    }
+
+    void linkToFinalDestinationAndCleanupRna(RnaRoddyBamFile roddyBamFile, Realm realm) {
+        executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
+        cleanupOldRnaResults(roddyBamFile, realm)
+        handleQcCheck(roddyBamFile) {
+            linkNewRnaResults(roddyBamFile, realm)
+        }
+    }
+
+
+    private void handleQcCheck(RoddyBamFile roddyBamFile, Closure linkCall) {
+        if (!roddyBamFile.qcTrafficLightStatus || roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED) {
+            linkCall()
+        } else if (roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) {
+            informResultsAreBlocked(roddyBamFile)
+        } else {
+            throw new RuntimeException("${roddyBamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus here, only ${AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED} and ${AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED} is a valid status.")
+        }
+        setBamFileValues(roddyBamFile)
     }
 
     void setBamFileValues(RoddyBamFile roddyBamFile) {

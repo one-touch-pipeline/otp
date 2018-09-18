@@ -5,6 +5,7 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.*
@@ -69,9 +70,9 @@ ${link}
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         when:
-        TestCase.withMockedremoteShellHelper(service.remoteShellHelper, {
+        TestCase.withMockedremoteShellHelper(service.remoteShellHelper) {
             service.linkNewRnaResults(roddyBamFile, realm)
-        })
+        }
 
         then:
         [
@@ -92,15 +93,15 @@ ${link}
 
         RnaRoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile([workPackage: roddyBamFile.workPackage, config: roddyBamFile.config], RnaRoddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
-        TestCase.withMockedremoteShellHelper(service.remoteShellHelper, {
+        TestCase.withMockedremoteShellHelper(service.remoteShellHelper) {
             service.linkNewRnaResults(roddyBamFile2, realm)
-        })
+        }
         assert roddyBamFile.workDirectory.exists()
 
         when:
-        TestCase.withMockedremoteShellHelper(service.remoteShellHelper, {
+        TestCase.withMockedremoteShellHelper(service.remoteShellHelper) {
             service.cleanupOldRnaResults(roddyBamFile, realm)
-        })
+        }
 
         then:
         !roddyBamFile2.workDirectory.exists()
@@ -197,5 +198,77 @@ link
         name                   | projectMailingList              | subjectHeader  || recipientsCount
         'without mailing list' | null                            | 'TO BE SENT: ' || 1
         'with mailing list'    | "tr_${HelperUtils.randomEmail}" | ''             || 2
+    }
+
+
+    private RnaRoddyBamFile createRnaRoddyBamFile(Map map = [:]) {
+        return DomainFactory.createRnaRoddyBamFile([
+                md5sum             : null,
+                fileSize           : -1,
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
+        ] + map)
+    }
+
+    private void assertBamFileIsFine() {
+        assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        assert roddyBamFile.md5sum == DomainFactory.DEFAULT_MD5_SUM
+        assert roddyBamFile.fileSize > 0
+        assert roddyBamFile.fileExists
+        assert roddyBamFile.dateFromFileSystem != null && roddyBamFile.dateFromFileSystem instanceof Date
+    }
+
+
+    void "linkToFinalDestinationAndCleanupRna, when qcTrafficLightStatus is #QC_PASSED"() {
+        given:
+        roddyBamFile = createRnaRoddyBamFile()
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy() {
+            1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
+            0 * informResultsAreBlocked(_) >> { RoddyBamFile roddyBamFile -> }
+            0 * cleanupWorkDirectory(_, _)
+        }
+        linkFilesToFinalDestinationService.executeRoddyCommandService = Mock(ExecuteRoddyCommandService) {
+            1 * correctPermissionsAndGroups(_, _) >> { RoddyResult roddyResult, Realm realm -> }
+        }
+        linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils) {
+            1 * createAndValidateLinks(_, _) >> { Map<File, File> sourceLinkMap, Realm realm -> }
+        }
+        linkFilesToFinalDestinationService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+            1 * setSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile-> }
+        }
+
+        when:
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanupRna(roddyBamFile, realm)
+
+        then:
+        assertBamFileIsFine()
+    }
+
+    void "linkToFinalDestinationAndCleanupRna, when qcTrafficLightStatus is #BLOCKED"() {
+        given:
+        roddyBamFile = createRnaRoddyBamFile([
+                qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
+        ])
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy() {
+            1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
+            0 * cleanupWorkDirectory(_, _)
+            1 * informResultsAreBlocked(_) >> { RoddyBamFile roddyBamFile -> }
+        }
+        linkFilesToFinalDestinationService.executeRoddyCommandService = Mock(ExecuteRoddyCommandService) {
+            1 * correctPermissionsAndGroups(_, _) >> { RoddyResult roddyResult, Realm realm -> }
+        }
+        linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils) {
+            0 * createAndValidateLinks(_, _) >> { Map<File, File> sourceLinkMap, Realm realm -> }
+        }
+        linkFilesToFinalDestinationService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
+            1 * setSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile-> }
+        }
+
+        when:
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanupRna(roddyBamFile, realm)
+
+        then:
+        assertBamFileIsFine()
     }
 }
