@@ -33,10 +33,7 @@ class LinkRnaAlignmentFilesToFinalDestinationJob extends AbstractEndStateAwareJo
         assert realm : "Realm should not be null"
 
         linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
-        linkFilesToFinalDestinationService.cleanupOldRnaResults(roddyBamFile, realm)
-        executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
-        linkFilesToFinalDestinationService.linkNewRnaResults(roddyBamFile, realm)
-        linkFilesToFinalDestinationService.setBamFileValues(roddyBamFile)
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanupRna(roddyBamFile, realm)
         succeed()
     }
 }

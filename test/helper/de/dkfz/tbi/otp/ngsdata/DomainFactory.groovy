@@ -701,6 +701,12 @@ class DomainFactory {
                 fileOperationStatus         : FileOperationStatus.PROCESSED,
                 fileSize                    : 10000,
                 roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
+                comment                     : {
+                    [
+                            AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
+                            AbstractMergedBamFile.QcTrafficLightStatus.REJECTED,
+                    ].contains(bamFileProperties.qcTrafficLightStatus) ? createComment() : null
+                }
         ], bamFileProperties)
         return bamFile
     }

@@ -66,9 +66,7 @@ class LinkFilesToFinalDestinationServiceTests {
     }
 
     void setUp_allFine() {
-        linkFilesToFinalDestinationService.metaClass.getProcessParameterObject = { -> roddyBamFile }
         linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm -> }
-        linkFilesToFinalDestinationService.metaClass.deleteOldLinks = { RoddyBamFile roddyBamFile, Realm realm -> }
         linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm -> }
         linkFilesToFinalDestinationService.metaClass.informResultsAreBlocked = { RoddyBamFile roddyBamFile-> }
         linkFilesToFinalDestinationService.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm -> }
@@ -512,7 +510,7 @@ class LinkFilesToFinalDestinationServiceTests {
 
 
     @Test
-    void testExecute_AllFine() {
+    void testLinkToFinalDestinationAndCleanup_AllFine() {
         setUp_allFine()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
@@ -530,7 +528,7 @@ class LinkFilesToFinalDestinationServiceTests {
     }
 
     @Test
-    void testExecute_roddyBamFileHasMoreNumberOfReadsThanAllSeqTracksTogether_ShouldBeFine() {
+    void testLinkToFinalDestinationAndCleanup_roddyBamFileHasMoreNumberOfReadsThanAllSeqTracksTogether_ShouldBeFine() {
         setUp_allFine()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
@@ -544,7 +542,7 @@ class LinkFilesToFinalDestinationServiceTests {
     }
 
     @Test
-    void testExecute_wgbsRoddyBamFileHasLessNumberOfReadsThanAllSeqTracksTogether_ShouldBeFine() {
+    void testLinkToFinalDestinationAndCleanup_wgbsRoddyBamFileHasLessNumberOfReadsThanAllSeqTracksTogether_ShouldBeFine() {
         setUp_allFine()
         roddyBamFile.mergingWorkPackage.seqType = DomainFactory.createWholeGenomeSeqType()
         assert roddyBamFile.mergingWorkPackage.save(flush: true)

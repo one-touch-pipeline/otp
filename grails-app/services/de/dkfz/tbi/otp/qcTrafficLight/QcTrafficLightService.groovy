@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.qcTrafficLight
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import org.springframework.security.access.prepost.*
 
 import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdLevel.*
@@ -21,7 +22,11 @@ class QcTrafficLightService {
         commentService.saveComment(bamFile, comment)
         changeQcTrafficLightStatus(bamFile, qcTrafficLightStatus)
         if (bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED) {
-            linkFilesToFinalDestinationService.linkNewResults(bamFile, ConfigService.getDefaultRealm())
+            if (bamFile.seqType.isRna()) {
+                linkFilesToFinalDestinationService.linkNewRnaResults((RnaRoddyBamFile) bamFile, ConfigService.getDefaultRealm())
+            } else {
+                linkFilesToFinalDestinationService.linkNewResults(bamFile, ConfigService.getDefaultRealm())
+            }
         }
     }
 
