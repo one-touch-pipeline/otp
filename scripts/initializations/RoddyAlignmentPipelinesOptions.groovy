@@ -34,7 +34,7 @@ println processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG,
         SeqType.exomePairedSeqType.roddyName,
         null,
-        "otpAlignmentAndQCWorkflowsWES-1.2"
+        "otpAlignmentAndQCWorkflowsWES-1.3"
 )
 
 println processingOptionService.createOrUpdate(
@@ -66,7 +66,7 @@ println processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG,
         SeqType.wholeGenomePairedSeqType.roddyName,
         null,
-        "otpAlignmentAndQCWorkflowsWGS-1.2"
+        "otpAlignmentAndQCWorkflowsWGS-1.3"
 )
 
 println processingOptionService.createOrUpdate(
