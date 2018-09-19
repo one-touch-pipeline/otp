@@ -3,8 +3,8 @@ import grails.util.Environment
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 import org.springframework.security.acls.AclPermissionEvaluator
+import de.dkfz.tbi.otp.security.CustomRequestDataValueProcessor
 
-// Place your Spring DSL code here
 beans = {
     // include Spring Beans with @Component annotation
     xmlns context:"http://www.springframework.org/schema/context"
@@ -55,4 +55,6 @@ beans = {
         roleHierarchy = ref('roleHierarchy')
         permissionCacheOptimizer = null
     }
+
+    requestDataValueProcessor(CustomRequestDataValueProcessor)
 }
