@@ -5,7 +5,13 @@ import org.junit.*
 import workflows.analysis.pair.bamfiles.*
 
 @Ignore
-class WgsIndelWorkflowTests extends AbstractIndelWorkflowTests implements SeqTypeAndInputWgsBamFiles {
+class WgsIndelWorkflowTests extends AbstractIndelWorkflowTests implements SeqTypeAndInputBigBamFiles {
+
+    @Override
+    SeqType seqTypeToUse() {
+        return SeqType.wholeGenomePairedSeqType
+    }
+
     @Override
     void adaptSampleTypes() {
         SampleType tumor = DomainFactory.createSampleType([name: "TUMOR"])
@@ -16,14 +22,4 @@ class WgsIndelWorkflowTests extends AbstractIndelWorkflowTests implements SeqTyp
         assert bamFileControl.save(flush: true)
     }
 
-    @Override
-    BamFileSet getBamFileSet() {
-        return new BamFileSet(
-                new File(getBamFilePairBaseDirectory(), 'wgs-indel'),
-                'tumor_SOMEPID_merged.mdup.chr1.bam',
-                'tumor_SOMEPID_merged.mdup.chr1.bam.bai',
-                'control03_SOMEPID_merged.mdup.chr1.bam',
-                'control03_SOMEPID_merged.mdup.chr1.bam.bai'
-        )
-    }
 }

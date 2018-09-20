@@ -25,8 +25,8 @@ class TestConfigService extends ConfigService {
                         OtpProperty.TEST_WORKFLOW_ACCOUNT,
                         OtpProperty.TEST_WORKFLOW_HOST,
                         OtpProperty.TEST_WORKFLOW_SCHEDULER,
-                        OtpProperty.TEST_WORKFLOW_ROOTDIR,
-
+                        OtpProperty.TEST_WORKFLOW_INPUT_DIR,
+                        OtpProperty.TEST_WORKFLOW_RESULT_DIR,
                         OtpProperty.TEST_TESTING_GROUP,
                 ]
             }
@@ -86,8 +86,12 @@ class TestConfigService extends ConfigService {
         return getAndAssertValue(OtpProperty.TEST_WORKFLOW_HOST)
     }
 
-    File getWorkflowTestRootDir() {
-        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_ROOTDIR))
+    File getWorkflowTestInputRootDir() {
+        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_INPUT_DIR))
+    }
+
+    File getWorkflowTestResultRootDir() {
+        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RESULT_DIR))
     }
 
 

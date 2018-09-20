@@ -1,8 +1,8 @@
-package workflows
+package workflows.alignment
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import org.junit.*
+import org.junit.Ignore
 
 @Ignore
 class PanCanExomeAlignmentWorkflowTests extends PanCanAlignmentWorkflowTests {

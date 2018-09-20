@@ -21,10 +21,10 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
     @Override
     ConfigPerProjectAndSeqType createConfig() {
         DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
-                type: Pipeline.Type.ACESEQ.toString(),
+                name   : ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
+                type   : Pipeline.Type.ACESEQ.toString(),
                 project: null,
-                value: "20",
+                value  : "20",
         ])
         DomainFactory.createAceseqPipelineLazy()
         DomainFactory.createAceseqSeqTypes()
@@ -56,7 +56,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
         referenceGenome.gcContentFile = 'hg19_GRch37_100genomes_gc_content_10kb.txt'
 
-        File referenceGenomePath = new File (referenceGenomeService.referenceGenomeDirectory(referenceGenome, false), 'databases')
+        File referenceGenomePath = new File(referenceGenomeService.referenceGenomeDirectory(referenceGenome, false), 'databases')
         referenceGenome.geneticMapFile = new File(referenceGenomePath, 'IMPUTE/ALL.integrated_phase1_SHAPEIT_16-06-14.nomono/genetic_map_chr${CHR_NAME}_combined_b37.txt').absolutePath
         referenceGenome.geneticMapFileX = new File(referenceGenomePath, 'IMPUTE/ALL_1000G_phase1integrated_v3_impute/genetic_map_chrX_nonPAR_combined_b37.txt').absolutePath
         referenceGenome.knownHaplotypesFile = new File(referenceGenomePath, 'IMPUTE/ALL.integrated_phase1_SHAPEIT_16-06-14.nomono/ALL.chr${CHR_NAME}.integrated_phase1_v3.20101123.snps_indels_svs.genotypes.nomono.haplotypes.gz').absolutePath
@@ -117,7 +117,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     File getWorkflowData() {
-        new File(getDataDirectory(), 'aceseq')
+        new File(getInputRootDirectory(), 'aceseq')
     }
 
     @Override

@@ -1,5 +1,13 @@
 package workflows.analysis.pair.runyapsa
 
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.ngsdata.*
+import grails.plugin.springsecurity.*
+import org.joda.time.*
+import workflows.analysis.pair.*
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -16,6 +24,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import org.joda.time.*
 import workflows.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
 
+
 abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<RunYapsaInstance> {
 
     LsdfFilesService lsdfFilesService
@@ -28,10 +37,10 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
     @Override
     ConfigPerProjectAndSeqType createConfig() {
         DomainFactory.createProcessingOptionLazy([
-                name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
-                type: Pipeline.Type.MUTATIONAL_SIGNATURE.toString(),
+                name   : ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
+                type   : Pipeline.Type.MUTATIONAL_SIGNATURE.toString(),
                 project: null,
-                value: "20",
+                value  : "20",
         ])
         DomainFactory.createRunYapsaPipelineLazy()
         DomainFactory.createRunYapsaSeqTypes()
@@ -44,9 +53,9 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
 
         config = DomainFactory.createRunYapsaConfig([
                 programVersion: "yapsa-devel/80f748e",
-                project : samplePair.project,
-                seqType : samplePair.seqType,
-                pipeline: Pipeline.Name.RUN_YAPSA.pipeline,
+                project       : samplePair.project,
+                seqType       : samplePair.seqType,
+                pipeline      : Pipeline.Name.RUN_YAPSA.pipeline,
         ])
 
 
@@ -111,7 +120,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
 
     @Override
     File getWorkflowData() {
-        new File(getDataDirectory(), 'runYapsa')
+        new File(getInputRootDirectory(), 'runYapsa')
     }
 
     @Override

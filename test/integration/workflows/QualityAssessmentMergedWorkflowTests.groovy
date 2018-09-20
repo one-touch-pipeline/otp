@@ -297,7 +297,7 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
     }
 
     private void createDirectoryForReferenceGenome() {
-        String referenceGenomesDir = "${getRootDirectory()}/files/reference_genomes"
+        String referenceGenomesDir = "${getInputRootDirectory()}/files/reference_genomes"
         String softLinkToReferenceGenomesDir = "${configService.getProcessingRootPath().path}/reference_genomes"
         String cmdBuildSoftLinkToReferenceGenomes = "ln -s ${referenceGenomesDir} ${softLinkToReferenceGenomesDir}"
         remoteShellHelper.executeCommand(realm, "${cmdBuildSoftLinkToReferenceGenomes}")

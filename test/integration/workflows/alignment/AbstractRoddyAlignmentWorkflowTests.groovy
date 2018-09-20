@@ -1,4 +1,4 @@
-package workflows
+package workflows.alignment
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
@@ -15,6 +15,7 @@ import org.codehaus.groovy.grails.web.json.*
 import org.joda.time.*
 import org.junit.*
 import org.junit.rules.*
+import workflows.WorkflowTestCase
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static de.dkfz.tbi.otp.utils.LocalShellHelper.*
@@ -125,21 +126,19 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
     }
 
     void setUpFilesVariables() {
-        baseTestDataDir = new File(rootDirectory, 'PanCanAlignmentSetupFiles')
         testFastqFiles = [
                 readGroup1: [
-                        new File(baseTestDataDir, 'fastq-files/run150319_D00133_0107_BC5YE7ACXX/sequence/D2826_GATCAGA_L002_R1_001.fastq.gz'),
-                        new File(baseTestDataDir, 'fastq-files/run150319_D00133_0107_BC5YE7ACXX/sequence/D2826_GATCAGA_L002_R2_001.fastq.gz'),
+                        new File(inputRootDirectory, 'fastqFiles/wgs/normal/paired/run1/sequence/gerald_D1VCPACXX_6_R1.fastq.bz2'),
+                        new File(inputRootDirectory, 'fastqFiles/wgs/normal/paired/run1/sequence/gerald_D1VCPACXX_6_R2.fastq.bz2'),
                 ].asImmutable(),
                 readGroup2: [
-                        new File(baseTestDataDir, 'fastq-files/run150326_D00695_0025_BC6B2MACXX/sequence/D2826_GATCAGA_L002_R1_001.fastq.gz'),
-                        new File(baseTestDataDir, 'fastq-files/run150326_D00695_0025_BC6B2MACXX/sequence/D2826_GATCAGA_L002_R2_001.fastq.gz'),
+                        new File(inputRootDirectory, 'fastqFiles/wgs/normal/paired/run2/sequence/gerald_D1VCPACXX_7_R1.fastq.bz2'),
+                        new File(inputRootDirectory, 'fastqFiles/wgs/normal/paired/run2/sequence/gerald_D1VCPACXX_7_R2.fastq.bz2'),
                 ].asImmutable(),
         ].asImmutable()
-        firstBamFile = new File(baseTestDataDir, 'first-bam-file/first-bam-file_merged.mdup.bam')
-        refGenDir = new File(baseTestDataDir, 'reference-genomes/bwa06_1KGRef')
-        chromosomeNamesFile = new File(baseTestDataDir, 'reference-genomes/chromosome-names.txt')
-        fingerPrintingFile = new File(baseTestDataDir, 'fingerPrinting/snp138Common.n1000.vh20140318.bed')
+        firstBamFile = new File(inputRootDirectory, 'bamFiles/wgs/first-bam-file/control_merged.mdup.bam')
+        refGenDir = new File(inputRootDirectory, 'reference-genomes/bwa06_1KGRef')
+        fingerPrintingFile = new File(inputRootDirectory, 'reference-genomes/bwa06_1KGRef/fingerPrinting/snp138Common.n1000.vh20140318.bed')
     }
 
     abstract SeqType findSeqType()
@@ -162,7 +161,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         LibraryPreparationKit kit = new LibraryPreparationKit(
                 name: "~* xX liBrArYprEPaRaTioNkiT Xx *~",
                 shortDisplayName: "~* xX lPk Xx *~",
-                adapterFile: new File(getDataDirectory(), 'adapters/TruSeq3-PE.fa').absolutePath,
+                adapterFile: new File(getInputRootDirectory(), 'adapters/TruSeq3-PE.fa').absolutePath,
                 reverseComplementAdapterSequence: "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
         ).save(flush: true, failOnError: true)
 
@@ -292,7 +291,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
 
         SeqTrack seqTrack = createSeqTrack("readGroup1", [run: DomainFactory.createRun(
-                name: 'runName_11',  // This name is encoded in @RG of the test BAM file
+                name: 'runName_33',  // This name is encoded in @RG of the test BAM file
                 seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: [workPackage.seqPlatformGroup]),
         )])
 

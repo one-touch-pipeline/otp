@@ -37,7 +37,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     final Map createProcessMergedBamFileProperties() {
         DomainFactory.randomProcessedBamFileProperties + [
-                coverage: COVERAGE,
+                coverage            : COVERAGE,
                 qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED,
         ]
     }
@@ -209,10 +209,10 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
     abstract File getWorkflowData()
 
     File getBamFilePairBaseDirectory() {
-        new File(getDataDirectory(), 'bamFiles')
+        new File(getInputRootDirectory(), 'bamFiles')
     }
 
-    void createBedFileAndLibPrepKit () {
+    void createBedFileAndLibPrepKit() {
         LibraryPreparationKit kit = DomainFactory.createLibraryPreparationKit(name: "Agilent5withoutUTRs")
         DomainFactory.createBedFile(
                 fileName: "Agilent5withoutUTRs_plain.bed",

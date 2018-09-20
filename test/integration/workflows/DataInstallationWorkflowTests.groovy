@@ -31,8 +31,8 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
 
     @Before
     void setUp() {
-        fastqR1Filepath = "${testDataDir}/35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz"
-        fastqR2Filepath = "${testDataDir}/35-3B_NoIndex_L007_R2_complete_filtered.fastq.gz"
+        fastqR1Filepath = "${inputRootDirectory}/fastqFiles/wgs/normal/paired/run1/sequence/gerald_D1VCPACXX_6_R1.fastq.bz2"
+        fastqR2Filepath = "${inputRootDirectory}/fastqFiles/wgs/normal/paired/run1/sequence/gerald_D1VCPACXX_6_R2.fastq.bz2"
 
         File softLinkFastqR1Filepath = new File("${ftpDir}/${fastqR1Filename}")
         File softLinkFastqR2Filepath = new File("${ftpDir}/${fastqR2Filename}")

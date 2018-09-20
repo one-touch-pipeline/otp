@@ -2,8 +2,9 @@ package workflows.analysis.pair.indel
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
+import org.joda.time.*
 import workflows.analysis.pair.*
 
 abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<IndelCallingInstance> {
@@ -61,12 +62,17 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
 
     @Override
     File getWorkflowData() {
-        new File(getDataDirectory(), 'indel')
+        new File(getInputRootDirectory(), 'indel')
     }
 
     @Override
     void checkAnalysisSpecific(IndelCallingInstance indelCallingInstance) {
         CollectionUtils.exactlyOneElement(IndelQualityControl.findAllByIndelCallingInstance(indelCallingInstance))
         CollectionUtils.exactlyOneElement(IndelSampleSwapDetection.findAllByIndelCallingInstance(indelCallingInstance))
+    }
+
+    @Override
+    Duration getTimeout() {
+        Duration.standardHours(5)
     }
 }

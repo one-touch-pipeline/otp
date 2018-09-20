@@ -113,7 +113,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     File getWorkflowData() {
-        new File(getDataDirectory(), 'sophia')
+        new File(getInputRootDirectory(), 'sophia')
     }
 
     @Override

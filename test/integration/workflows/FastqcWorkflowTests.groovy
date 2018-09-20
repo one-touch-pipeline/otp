@@ -23,8 +23,8 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
     @Before
     void setUp() {
-        sourceFastq = new File(testDataDir, "35-3B_NoIndex_L007_R1_complete_filtered.fastq.gz")
-        expectedFastqc = new File(testDataDir, "expected_result_fastqc-0.11.5-lsf.zip")
+        sourceFastq = new File(inputRootDirectory, "fastqFiles/fastqc/input_fastqc.fastq.gz")
+        expectedFastqc = new File(inputRootDirectory, "fastqFiles/fastqc/asdf_fastqc.zip")
 
         Project project = Project.build(
                 realm: realm
@@ -97,13 +97,13 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         ZipFile expectedResult = new ZipFile(expectedFastqc)
         ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputFile(dataFile))
 
-        LinkedHashMap actualFiles = [:]
+        List<String> actualFiles = []
         actualResult.entries().each { ZipEntry entry ->
-            actualFiles.put(entry.name, entry.size)
+            actualFiles.add(entry.name)
         }
 
         expectedResult.entries().each { ZipEntry entry ->
-            assert actualFiles[entry.name] >= entry.size - 1 && actualFiles[entry.name] <= entry.size + 1
+            assert actualFiles.contains(entry.name)
             actualFiles.remove(entry.name)
         }
         assert actualFiles.isEmpty()

@@ -1,4 +1,4 @@
-package workflows
+package workflows.alignment
 
 import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.*
@@ -31,20 +31,19 @@ class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTes
 
     @Override
     void setUpFilesVariables() {
-        File baseTestDataDirWGBS = new File(rootDirectory, 'WgbsAlignmentSetupFiles/view-by-pid')
+        File baseTestDataDirWGBS = new File(inputRootDirectory, 'fastqFiles/wgbs')
         testFastqFiles = [
                 readGroup1: [
-                        new File(baseTestDataDirWGBS, 'methylationpid/blood/lib1/paired/run1/sequence/id3_R1.fastq.gz'),
-                        new File(baseTestDataDirWGBS, 'methylationpid/blood/lib1/paired/run1/sequence/id3_R2.fastq.gz'),
+                        new File(baseTestDataDirWGBS, 'normal/paired/lib1/run1/sequence/gerald_D1VCPACXX_6_R1.fastq.bz2'),
+                        new File(baseTestDataDirWGBS, 'normal/paired/lib1/run1/sequence/gerald_D1VCPACXX_6_R2.fastq.bz2'),
                 ].asImmutable(),
                 readGroup2: [
-                        new File(baseTestDataDirWGBS, 'methylationpid/blood/lib5/paired/run1/sequence/id1_R1.fastq.gz'),
-                        new File(baseTestDataDirWGBS, 'methylationpid/blood/lib5/paired/run1/sequence/id1_R2.fastq.gz'),
+                        new File(baseTestDataDirWGBS, 'normal/paired/lib2/run1/sequence/gerald_D1VCPACXX_7_R1.fastq.bz2'),
+                        new File(baseTestDataDirWGBS, 'normal/paired/lib2/run1/sequence/gerald_D1VCPACXX_7_R2.fastq.bz2'),
                 ].asImmutable(),
         ].asImmutable()
-        baseTestDataDir = new File(rootDirectory, 'WgbsAlignmentSetupFiles')
-        refGenDir = new File(baseTestDataDir, 'reference-genomes/bwa06_methylCtools_hs37d5_PhiX_Lambda')
-        chromosomeNamesFile = new File(baseTestDataDir, 'reference-genomes/chromosome-names.txt')
+        refGenDir = new File(inputRootDirectory, 'reference-genomes/bwa06_methylCtools_hs37d5_PhiX_Lambda')
+        chromosomeNamesFile = new File(inputRootDirectory, 'reference-genomes/chromosome-names.txt')
     }
 
     @Override

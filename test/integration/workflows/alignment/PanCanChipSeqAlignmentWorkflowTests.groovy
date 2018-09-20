@@ -1,4 +1,4 @@
-package workflows
+package workflows.alignment
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -34,19 +34,18 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
 
     @Override
     void setUpFilesVariables() {
-        File baseTestDataDirChipSeq = new File(rootDirectory, 'ChipSeqTestFiles/view-by-pid')
+        File baseTestDataDirChipSeq = new File(inputRootDirectory, 'fastqFiles/wgs')
         testFastqFiles = [
                 readGroup1: [
-                        new File(baseTestDataDirChipSeq, 'pid/replicate1-Input/paired/run1/sequence/L001_R1.fastq.gz'),
-                        new File(baseTestDataDirChipSeq, 'pid/replicate1-Input/paired/run1/sequence/L001_R2.fastq.gz'),
+                        new File(baseTestDataDirChipSeq, 'normal/paired/run1/sequence/gerald_D1VCPACXX_6_R1.fastq.bz2'),
+                        new File(baseTestDataDirChipSeq, 'normal/paired/run1/sequence/gerald_D1VCPACXX_6_R2.fastq.bz2'),
                 ].asImmutable(),
                 readGroup2: [
-                        new File(baseTestDataDirChipSeq, 'pid/replicate1-Input/paired/run1/sequence/L002_R1.fastq.gz'),
-                        new File(baseTestDataDirChipSeq, 'pid/replicate1-Input/paired/run1/sequence/L002_R2.fastq.gz'),
+                        new File(baseTestDataDirChipSeq, 'normal/paired/run2/sequence/gerald_D1VCPACXX_7_R1.fastq.bz2'),
+                        new File(baseTestDataDirChipSeq, 'normal/paired/run2/sequence/gerald_D1VCPACXX_7_R2.fastq.bz2'),
                 ].asImmutable(),
         ].asImmutable()
-        baseTestDataDir = new File(rootDirectory, 'workflow-data')
-        refGenDir = new File(baseTestDataDir, 'reference-genomes/bwa_hg38')
+        refGenDir = new File(inputRootDirectory, 'reference-genomes/bwa_hg38')
     }
 
     @Test

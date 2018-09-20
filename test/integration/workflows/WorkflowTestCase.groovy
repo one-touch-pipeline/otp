@@ -150,7 +150,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
         DomainFactory.createProcessingOptionLazy(
                 name: OptionName.RODDY_APPLICATION_INI,
-                value: new File(getRootDirectory(), "applicationProperties-3.3-lsf-remote.ini").absolutePath
+                value: new File(getInputRootDirectory(), "applicationProperties-3.3-lsf-remote.ini").absolutePath
         )
 
 
@@ -196,7 +196,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     private void setupDirectoriesAndRealm() {
         // check whether the wf test root dir is mounted
         // (assume it is mounted if it exists and contains files)
-        File rootDirectory = getRootDirectory()
+        File rootDirectory = getInputRootDirectory()
         assert rootDirectory.list()?.size(): "${rootDirectory} seems not to be mounted"
 
         configService.setOtpProperty((OtpProperty.SSH_USER), configService.getWorkflowTestAccountName())
@@ -228,7 +228,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         ])
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.getProcessingRootPath(), "reference_genomes").absolutePath)
 
-        testDataDir = "${getRootDirectory()}/files"
+        testDataDir = "${getInputRootDirectory()}/files"
         ftpDir = "${getBaseDirectory()}/ftp"
     }
 
@@ -329,7 +329,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         // Create the directory like a "singleton", since randomness is involved
         if (!baseDirectory) {
             String mkDirs = """\
-TEMP_DIR=`mktemp -d -p ${new File(getRootDirectory(), "tmp").absolutePath} ${getNonQualifiedClassName()}-${System.getProperty('user.name')}-${HelperUtils.formatter.print(new org.joda.time.DateTime())}-XXXXXXXXXXXXXXXX`
+TEMP_DIR=`mktemp -d -p ${getResultRootDirectory().absolutePath} ${getNonQualifiedClassName()}-${System.getProperty('user.name')}-${HelperUtils.formatter.print(new org.joda.time.DateTime())}-XXXXXXXXXXXXXXXX`
 chmod g+rwx \$TEMP_DIR
 echo \$TEMP_DIR
 """
@@ -343,16 +343,12 @@ echo \$TEMP_DIR
      * The general directory for all runs of this workflow test
      */
     protected File getWorkflowDirectory() {
-        File workflowDirectory = new File(getRootDirectory(), getNonQualifiedClassName())
+        File workflowDirectory = new File(getInputRootDirectory(), getNonQualifiedClassName())
         return workflowDirectory
     }
 
-    protected File getDataDirectory() {
-        return new File(getRootDirectory(), 'workflow-data')
-    }
-
     protected File getReferenceGenomeDirectory() {
-        return new File(getDataDirectory(), 'reference-genomes')
+        return new File(getInputRootDirectory(), 'reference-genomes')
     }
 
     ReferenceGenome createReferenceGenomeWithFile(String referenceGenomeSpecificPath, String fileNamePrefix, String cytosinePositionsIndex = null) {
@@ -369,7 +365,7 @@ echo \$TEMP_DIR
         )
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(source)
 
-        source.eachLine { String chromosomeName ->
+        ["21","22"].each { String chromosomeName ->
             DomainFactory.createReferenceGenomeEntry(
                     referenceGenome: referenceGenome,
                     classification: ReferenceGenomeEntry.Classification.CHROMOSOME,
@@ -408,16 +404,27 @@ echo \$TEMP_DIR
     }
 
     /**
-     * The root directory for all tests. This can be overwritten by the key <code>OtpProperty#TEST_WORKFLOW_ROOTDIR</code>
-     * in the configuration file. This method should not be called directly; check out {@link #getBaseDirectory()}
-     * first.
+     * The input root directory for all tests. This can be overwritten by the key <code>OtpProperty#TEST_WORKFLOW_INPUT</code>
+     * in the configuration file.
      *
      * @return the root directory set in the configuration file, or the default location otherwise.
      *
      * @see #getBaseDirectory()
      */
-    protected File getRootDirectory() {
-        return configService.getWorkflowTestRootDir()
+    protected File getInputRootDirectory() {
+        return configService.getWorkflowTestInputRootDir()
+    }
+
+    /**
+     * The result root directory for all tests. This can be overwritten by the key <code>OtpProperty#TEST_WORKFLOW_RESULT</code>
+     * in the configuration file. This method should not be called directly; check out {@link #getBaseDirectory()}
+     * first.
+     *
+     * @return the root directory set in the configuration file, or the default location otherwise.
+     *
+     */
+    protected File getResultRootDirectory() {
+        return configService.getWorkflowTestResultRootDir()
     }
 
     /**

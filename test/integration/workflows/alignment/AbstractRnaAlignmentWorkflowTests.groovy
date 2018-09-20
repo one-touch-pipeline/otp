@@ -1,4 +1,4 @@
-package workflows
+package workflows.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
@@ -219,22 +219,15 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
 
     void setUpFilesVariables() {
-        File baseTestDataDirRNA = new File(rootDirectory, 'RNATestFiles')
         testFastqFiles = [
                 readGroup1: [
-                        new File(baseTestDataDirRNA, 'rna_100k_reads_L001_R1_complete_filtered.fastq.gz'),
-                        new File(baseTestDataDirRNA, 'rna_100k_reads_L001_R2_complete_filtered.fastq.gz'),
-                ].asImmutable(),
-                readGroup2: [
-                        new File(baseTestDataDirRNA, 'rna_100k_reads_L002_R1_complete_filtered.fastq.gz'),
-                        new File(baseTestDataDirRNA, 'rna_100k_reads_L002_R2_complete_filtered.fastq.gz'),
+                        new File(inputRootDirectory, 'fastqFiles/rna/tumor/paired/run4/sequence/gerald_D1VCPACXX_x_R1.fastq.gz'),
+                        new File(inputRootDirectory, 'fastqFiles/rna/tumor/paired/run4/sequence/gerald_D1VCPACXX_x_R2.fastq.gz'),
                 ].asImmutable(),
         ].asImmutable()
-        baseTestDataDir = new File(rootDirectory, 'PanCanAlignmentSetupFiles')
-        firstBamFile = new File(baseTestDataDir, 'first-bam-file/first-bam-file_merged.mdup.bam')
-        refGenDir = new File(getReferenceGenomeDirectory(), referenceGenomeSpecificPath)
-        chromosomeNamesFile = new File(baseTestDataDir, 'reference-genomes/chromosome-names.txt')
-        fingerPrintingFile = new File(baseTestDataDir, 'fingerPrinting/snp138Common.n1000.vh20140318.bed')
+        firstBamFile = null
+        refGenDir = new File(inputRootDirectory, 'reference-genomes/bwa06_1KGRef_PhiX')
+        fingerPrintingFile = new File(inputRootDirectory, 'reference-genomes/bwa06_1KGRef_PhiX/fingerPrinting/snp138Common.n1000.vh20140318.bed')
     }
 
     @Override

@@ -67,7 +67,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
             [(new File(targetDir, it)): it]
         })
 
-        File bam = new File(getDataDirectory(), "processedMergedBamFiles/tumor_SOMEPID_merged.mdup.bam")
+        File bam = new File(getInputRootDirectory(), "bamFiles/wgs/tumor_SOMEPID_merged.mdup.bam")
 
         remoteShellHelper.executeCommandReturnProcessOutput(realm,
                 "cp ${bam} ${new File(targetDir, bamFileName)}"
@@ -227,7 +227,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
                     checkThatDirectoryExistAndIsNotLink(fs.getPath(baseDirectory.absolutePath, it as String))
                 }
 
-                assert it.maximumReadLength == 251
+                assert it.maximumReadLength == 100
             }
         }
     }
