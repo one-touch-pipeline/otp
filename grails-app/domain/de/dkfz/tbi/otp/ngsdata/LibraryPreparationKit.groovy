@@ -37,7 +37,8 @@ class LibraryPreparationKit implements Entity {
         reverseComplementAdapterSequence nullable: true, blank: false
     }
 
-    public String toString() {
+    @Override
+    String toString() {
         return name
     }
 }

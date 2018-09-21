@@ -19,6 +19,7 @@ class TransferMergedBamFileStartJob extends AbstractStartJobImpl implements Rest
     ProcessedMergedBamFileService processedMergedBamFileService
 
     @Scheduled(fixedDelay = 10000l)
+    @Override
     void execute() {
         doWithPersistenceInterceptor {
             short minPriority = minimumProcessingPriorityForOccupyingASlot

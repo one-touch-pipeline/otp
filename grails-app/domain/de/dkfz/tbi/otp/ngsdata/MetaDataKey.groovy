@@ -7,6 +7,7 @@ class MetaDataKey implements Entity {
     String name
     static constraints = { name(unique: true) }
 
+    @Override
     String toString() {
         name
     }

@@ -16,10 +16,12 @@ class DataFile implements Commentable, Entity {
      */
     String initialDirectory
 
-    /** @deprecated OTP-2311: Redundant with seqTrack.project */ @Deprecated
+    /** @deprecated OTP-2311: Redundant with seqTrack.project  */
+    @Deprecated
     Project project = null;
 
-    /** @deprecated OTP-2311: Redundant with run.dateExecuted */ @Deprecated
+    /** @deprecated OTP-2311: Redundant with run.dateExecuted  */
+    @Deprecated
     Date dateExecuted = null       // when the file was originally produced
     Date dateFileSystem = null     // when the file was created on LSDF
     Date dateCreated = null        // when the object was created in db
@@ -62,7 +64,8 @@ class DataFile implements Commentable, Entity {
 
     Comment comment
 
-    /** @deprecated OTP-2311: Redundant with seqTrack.run */ @Deprecated
+    /** @deprecated OTP-2311: Redundant with seqTrack.run  */
+    @Deprecated
     Run run
     /* OTP-2311: runSegment shall be the same for all DataFiles belonging to the same
      * SeqTrack, so actually this field should be defined in the SeqTrack class. */
@@ -73,12 +76,12 @@ class DataFile implements Commentable, Entity {
     FileType fileType
 
     static belongsTo = [
-        run : Run,
-        runSegment : RunSegment,
-        seqTrack : SeqTrack,
-        mergingLog : MergingLog,
-        alignmentLog : AlignmentLog,
-        fileType : FileType,
+            run         : Run,
+            runSegment  : RunSegment,
+            seqTrack    : SeqTrack,
+            mergingLog  : MergingLog,
+            alignmentLog: AlignmentLog,
+            fileType    : FileType,
     ]
 
     static constraints = {
@@ -113,7 +116,7 @@ class DataFile implements Commentable, Entity {
         comment(nullable: true)
 
         mateNumber nullable: true,  // Shall not be null, but legacy data exists
-            min: 1, validator: { val, obj ->
+                min: 1, validator: { val, obj ->
             if (val != null) {
                 Integer mateCount = LibraryLayout.values().find { it.name() == obj.seqTrack?.seqType?.libraryLayout }?.mateCount
                 if (mateCount != null && val > mateCount) {
@@ -126,7 +129,7 @@ class DataFile implements Commentable, Entity {
                 return true
             }
         }
-        dateLastChecked(nullable: true, validator: {val, obj ->
+        dateLastChecked(nullable: true, validator: { val, obj ->
             if (!val && obj.seqTrack?.dataInstallationState == SeqTrack.DataProcessingState.FINISHED) {
                 return false
             }
@@ -134,13 +137,13 @@ class DataFile implements Commentable, Entity {
     }
 
     String fileSizeString() {
-
-        if (fileSize > 1e9) return String.format("%.2f GB", fileSize/1e9)
-        if (fileSize > 1e6) return String.format("%.2f MB", fileSize/1e6)
-        if (fileSize > 1e3) return String.format("%.2f kB", fileSize/1e3)
+        if (fileSize > 1e9) return String.format("%.2f GB", fileSize / 1e9)
+        if (fileSize > 1e6) return String.format("%.2f MB", fileSize / 1e6)
+        if (fileSize > 1e3) return String.format("%.2f kB", fileSize / 1e3)
         return fileSize
     }
 
+    @Override
     String toString() {
         fileName
     }
@@ -189,6 +192,7 @@ class DataFile implements Commentable, Entity {
         return length
     }
 
+    @Override
     Project getProject() {
         return this.project
     }

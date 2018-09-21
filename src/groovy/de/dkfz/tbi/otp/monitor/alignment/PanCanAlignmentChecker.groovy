@@ -12,15 +12,17 @@ class PanCanAlignmentChecker extends AbstractRoddyAlignmentChecker {
     static final String HEADER_EXOME_NO_BEDFILE =
             'The following SeqTracks have no bedfile kit'
 
-
+    @Override
     String getWorkflowName() {
         return 'PanCanWorkflow'
     }
 
+    @Override
     Pipeline.Name getPipeLineName() {
         return Pipeline.Name.PANCAN_ALIGNMENT
     }
 
+    @Override
     List<SeqType> getSeqTypes() {
         return [SeqType.wholeGenomePairedSeqType, SeqType.exomePairedSeqType, SeqType.chipSeqPairedSeqType]
     }

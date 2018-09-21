@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Scope
 class DataFileStatusStartJob extends AbstractStartJobImpl {
 
     //@Scheduled(cron="0 0 1 * * SAT")
+    @Override
     void execute() {
         doWithPersistenceInterceptor {
             ConsistencyCheck consistencyCheck = new ConsistencyCheck()

@@ -375,6 +375,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     }
 
 
+    @Override
     void withdraw() {
         withTransaction {
             //get later bam files
@@ -414,6 +415,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
         return config
     }
 
+    @Override
     Integer getMaximalReadLength() {
         return getSeqTracks()*.dataFiles.flatten().max { it.meanSequenceLength }.meanSequenceLength
     }

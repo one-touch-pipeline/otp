@@ -12,6 +12,7 @@ import org.springframework.stereotype.*
 class ImportExternallyMergedBamStartJob extends AbstractStartJobImpl{
 
     @Scheduled(fixedDelay=60000l)
+    @Override
     void execute() {
         doWithPersistenceInterceptor {
             short minPriority = minimumProcessingPriorityForOccupyingASlot

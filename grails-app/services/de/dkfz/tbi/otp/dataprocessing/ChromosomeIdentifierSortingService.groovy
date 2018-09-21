@@ -25,7 +25,7 @@ class ChromosomeIdentifierSortingService {
     private int compareTwoInteger(Object identifier1, Object identifier2) {
         Integer identifierAsInteger1 = identifier1.toInteger()
         Integer identifierAsInteger2 = identifier2.toInteger()
-        return identifierAsInteger1.intValue()-identifierAsInteger2.intValue()
+        return identifierAsInteger1.intValue() - identifierAsInteger2.intValue()
     }
 
     private int compareIntegerWithNotInteger(Object identifier1, Object identifier2) {

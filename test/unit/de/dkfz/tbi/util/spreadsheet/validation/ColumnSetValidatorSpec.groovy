@@ -34,12 +34,15 @@ class ColumnSetValidatorSpec extends Specification {
 
         given:
         ColumnSetValidator<ValidationContext> validator = new ColumnSetValidator<ValidationContext>() {
+            @Override
             List<String> getColumnTitles(ValidationContext context) {
                 return ['C1', 'B1', 'A1']
             }
+            @Override
             void validate(ValidationContext context) {
                 assert false : 'should not be called'
             }
+            @Override
             boolean columnMissing(ValidationContext context, String columnTitle) {
                 optionalColumnMissing(context, columnTitle)
                 return true

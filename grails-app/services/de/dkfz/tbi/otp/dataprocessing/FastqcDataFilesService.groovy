@@ -55,8 +55,8 @@ class FastqcDataFilesService {
          * How the name is created from the input file name is looked up from the fastqc tool. The rule is in:
          * uk.ac.babraham.FastQC.Analysis.OfflineRunner.analysisComplete
          */
-        String body = fileName.replaceAll("stdin:","").replaceAll("\\.gz\$","")
-                .replaceAll("\\.bz2\$","").replaceAll("\\.txt\$","")
+        String body = fileName.replaceAll("stdin:", "").replaceAll("\\.gz\$", "")
+                .replaceAll("\\.bz2\$", "").replaceAll("\\.txt\$", "")
                 .replaceAll("\\.fastq\$", "").replaceAll("\\.fq\$", "")
                 .replaceAll("\\.csfastq\$", "").replaceAll("\\.sam\$", "")
                 .replaceAll("\\.bam\$", "");
@@ -68,7 +68,7 @@ class FastqcDataFilesService {
     }
 
     public void createFastqcProcessedFile(DataFile dataFile) {
-        assert(new FastqcProcessedFile(dataFile: dataFile).save(flush: true))
+        assert (new FastqcProcessedFile(dataFile: dataFile).save(flush: true))
     }
 
     public void updateFastqcProcessedFile(FastqcProcessedFile fastqc) {
@@ -79,7 +79,7 @@ class FastqcDataFilesService {
             fastqc.fileSize = fastqcFile.length()
             fastqc.dateFromFileSystem = new Date(fastqcFile.lastModified())
         }
-        assert(fastqc.save(flush: true))
+        assert (fastqc.save(flush: true))
     }
 
     public FastqcProcessedFile getAndUpdateFastqcProcessedFile(DataFile dataFile) {
@@ -90,7 +90,7 @@ class FastqcDataFilesService {
 
     public void setFastqcProcessedFileUploaded(FastqcProcessedFile fastqc) {
         fastqc.contentUploaded = true
-        assert(fastqc.save(flush: true))
+        assert (fastqc.save(flush: true))
     }
 
     /**

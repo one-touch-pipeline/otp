@@ -26,18 +26,19 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
         description(nullable: true)
     }
 
-    public String toString() {
+    @Override
+    String toString() {
         return "QAMP ${id}: pass ${identifier} " + (latestPass ? "(latest) " : "") + "on ${abstractMergedBamFile}"
     }
 
     /**
      * @return Whether this is the most recent QA pass on the referenced {@link AbstractMergedBamFile}.
      */
-    public boolean isLatestPass() {
+    boolean isLatestPass() {
         return identifier == maxIdentifier(abstractMergedBamFile)
     }
 
-    public static Integer maxIdentifier(final AbstractMergedBamFile abstractMergedBamFile) {
+    static Integer maxIdentifier(final AbstractMergedBamFile abstractMergedBamFile) {
         assert abstractMergedBamFile
         return QualityAssessmentMergedPass.createCriteria().get {
             eq("abstractMergedBamFile", abstractMergedBamFile)
@@ -47,7 +48,7 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
         }
     }
 
-    public static int nextIdentifier(final AbstractMergedBamFile abstractMergedBamFile) {
+    static int nextIdentifier(final AbstractMergedBamFile abstractMergedBamFile) {
         assert abstractMergedBamFile
         final Integer maxIdentifier = maxIdentifier(abstractMergedBamFile)
         if (maxIdentifier == null) {
@@ -61,6 +62,7 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
         abstractMergedBamFile index: "quality_assessment_merged_pass_abstract_merged_bam_file_idx"
     }
 
+    @Override
     Project getProject() {
         return abstractMergedBamFile.project
     }

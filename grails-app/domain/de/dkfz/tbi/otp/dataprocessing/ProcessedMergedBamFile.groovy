@@ -95,6 +95,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         return new File(baseDirectory, bamFileName)
     }
 
+    @Override
     AlignmentConfig getAlignmentConfig() {
         throw new MissingPropertyException('AlignmentConfig is not implemented for processed merged BAM files')
     }
@@ -109,6 +110,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         assert false: 'not used for ProcessedMergedBamFile'
     }
 
+    @Override
     void withdraw() {
         withTransaction {
             super.withdraw()

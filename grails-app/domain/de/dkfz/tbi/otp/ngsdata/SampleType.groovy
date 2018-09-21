@@ -1,11 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.utils.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import groovy.transform.ToString
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class SampleType implements Entity {
 
@@ -28,19 +26,19 @@ class SampleType implements Entity {
                 return null
             }
         },
-        DISEASE{
+        DISEASE {
             @Override
             Category correspondingCategory() {
                 return CONTROL
             }
         },
-        CONTROL{
+        CONTROL {
             @Override
             Category correspondingCategory() {
                 return DISEASE
             }
         },
-        IGNORED{
+        IGNORED {
             @Override
             Category correspondingCategory() {
                 return null

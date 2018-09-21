@@ -13,7 +13,7 @@ class IlseSubmission implements Entity, Commentable {
 
     static constraints = {
         ilseNumber unique: true, min: 1000, max: 999999
-        comment nullable: true, validator: {comment, ilseSubmission ->
+        comment nullable: true, validator: { comment, ilseSubmission ->
             if (ilseSubmission.warning) {
                 if (!comment?.comment) {
                     return 'a comment need to be provided'

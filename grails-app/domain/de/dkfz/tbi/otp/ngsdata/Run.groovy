@@ -35,6 +35,7 @@ class Run implements ProcessParameterObject, Entity {
         dateCreated()
     }
 
+    @Override
     String toString() {
         name
     }

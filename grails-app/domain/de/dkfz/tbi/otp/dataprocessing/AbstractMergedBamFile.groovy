@@ -108,16 +108,17 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
     }
 
 
-    public void updateFileOperationStatus(FileOperationStatus status) {
+    void updateFileOperationStatus(FileOperationStatus status) {
         notNull(status, "the input status for the method updateFileOperationStatus is null")
         this.fileOperationStatus = status
     }
 
-    public ReferenceGenome getReferenceGenome() {
+    @Override
+    ReferenceGenome getReferenceGenome() {
         return workPackage.referenceGenome
     }
 
-    public void validateAndSetBamFileInProjectFolder() {
+    void validateAndSetBamFileInProjectFolder() {
         withTransaction {
             assert fileOperationStatus == FileOperationStatus.INPROGRESS
             assert !withdrawn
@@ -131,6 +132,7 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
         }
     }
 
+    @Override
     void withdraw() {
         withTransaction {
             BamFilePairAnalysis.findAllBySampleType1BamFileOrSampleType2BamFile(this, this).each {

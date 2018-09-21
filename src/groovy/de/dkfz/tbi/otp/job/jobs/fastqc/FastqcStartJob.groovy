@@ -18,6 +18,7 @@ class FastqcStartJob extends AbstractStartJobImpl implements RestartableStartJob
     SeqTrackService seqTrackService
 
     @Scheduled(fixedDelay=10000l)
+    @Override
     void execute() {
         doWithPersistenceInterceptor {
             short minPriority = minimumProcessingPriorityForOccupyingASlot

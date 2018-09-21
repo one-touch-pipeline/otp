@@ -14,7 +14,8 @@ class TumorEntity implements Entity {
             projects: Project,
     ]
 
-    public String toString() {
+    @Override
+    String toString() {
         return name
     }
 }

@@ -11,7 +11,7 @@ class SampleIdentifier implements Entity {
     static belongsTo = [sample: Sample]
 
     static constraints = {
-        name(unique: true, nullable: false,blank: false, minSize: 3,
+        name(unique: true, nullable: false, blank: false, minSize: 3,
             validator: { String val, SampleIdentifier obj ->
                 //should neither start nor end with a space
                 if (val.startsWith(' ') || val.endsWith(' ')) {
@@ -44,6 +44,7 @@ class SampleIdentifier implements Entity {
         return sample.sampleType
     }
 
+    @Override
     String toString() {
         name
     }

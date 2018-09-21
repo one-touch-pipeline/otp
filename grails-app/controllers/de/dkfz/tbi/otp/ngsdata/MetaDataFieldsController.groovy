@@ -341,6 +341,7 @@ abstract class CreateImportAliasCommand implements Serializable {
 class CreateModelImportAliasCommand extends CreateImportAliasCommand {
     SeqPlatformModelLabelService seqPlatformModelLabelService
 
+    @Override
     MetadataFieldsService getService() {
         return seqPlatformModelLabelService
     }
@@ -349,6 +350,7 @@ class CreateModelImportAliasCommand extends CreateImportAliasCommand {
 class CreateSequencingKitImportAliasCommand extends CreateImportAliasCommand {
     SequencingKitLabelService sequencingKitLabelService
 
+    @Override
     MetadataFieldsService getService() {
         return sequencingKitLabelService
     }
@@ -358,6 +360,7 @@ class CreateSeqTypeImportAliasCommand extends CreateImportAliasCommand {
     SeqTypeService seqTypeService
     boolean singleCell
 
+    @Override
     MetadataFieldsService getService() {
         return seqTypeService
     }
@@ -366,6 +369,7 @@ class CreateSeqTypeImportAliasCommand extends CreateImportAliasCommand {
 class CreateAntibodyTargetImportAliasCommand extends CreateImportAliasCommand {
     AntibodyTargetService antibodyTargetService
 
+    @Override
     MetadataFieldsService getService() {
         return antibodyTargetService
     }
@@ -374,6 +378,7 @@ class CreateAntibodyTargetImportAliasCommand extends CreateImportAliasCommand {
 class CreateLibraryPreparationKitImportAliasCommand extends CreateImportAliasCommand {
     LibraryPreparationKitService libraryPreparationKitService
 
+    @Override
     MetadataFieldsService getService() {
         libraryPreparationKitService
     }

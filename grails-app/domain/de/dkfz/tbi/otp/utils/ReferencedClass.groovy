@@ -8,6 +8,6 @@ class ReferencedClass implements Entity {
     String className
 
     static constraints = {
-        className(unique:true)
+        className(unique: true)
     }
 }

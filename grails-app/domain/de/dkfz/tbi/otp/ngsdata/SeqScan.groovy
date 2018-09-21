@@ -10,8 +10,10 @@ class SeqScan implements Entity {
     double coverage = 0.0     // from somewhere
 
     @Deprecated
-    enum State {DECLARED, PROCESSING, FINISHED, OBSOLETE}
-    State state  = State.DECLARED
+    enum State {
+        DECLARED, PROCESSING, FINISHED, OBSOLETE
+    }
+    State state = State.DECLARED
 
     String seqCenters = ""
     String insertSize = ""
@@ -21,30 +23,33 @@ class SeqScan implements Entity {
 
     // quality control
     @Deprecated
-    enum QCState {NON, PASS, BLOCK}
+    enum QCState {
+        NON, PASS, BLOCK
+    }
     QCState qcState = QCState.NON
 
     Date dateCreated = new Date()
 
     static belongsTo = [
-        sample : Sample,
-        seqType : SeqType,
-        seqPlatform : SeqPlatform,
+            sample     : Sample,
+            seqType    : SeqType,
+            seqPlatform: SeqPlatform,
     ]
 
     static constraints = {
         insertSize(nullable: true)
-        nBasePairs (nullable: true)
+        nBasePairs(nullable: true)
     }
 
     @Deprecated
+    @Override
     String toString() {
         "${sample} ${seqType}"
     }
 
     @Deprecated
     String basePairsString() {
-        return nBasePairs ? String.format("%.1f G",(nBasePairs/1e9)) : "N/A"
+        return nBasePairs ? String.format("%.1f G", (nBasePairs / 1e9)) : "N/A"
     }
 
     @Deprecated

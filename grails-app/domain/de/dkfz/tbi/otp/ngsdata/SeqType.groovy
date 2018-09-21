@@ -133,6 +133,7 @@ class SeqType implements Entity {
         return !SEQTYPES_MUST_BE_COPIED.contains(seqTypeName)
     }
 
+    @Override
     String toString() {
         return displayNameWithLibraryLayout
     }

@@ -16,7 +16,7 @@ class MergedAlignmentDataFile implements Entity {
     long fileSize = 0
 
     static belongsTo = [
-        mergingLog: MergingLog,
+            mergingLog: MergingLog,
     ]
 
     static constraints = {
@@ -29,9 +29,9 @@ class MergedAlignmentDataFile implements Entity {
     }
 
     String fileSizeString() {
-        if (fileSize > 1e9) return String.format("%.2f GB", fileSize/1e9)
-        if (fileSize > 1e6) return String.format("%.2f MB", fileSize/1e6)
-        if (fileSize > 1e3) return String.format("%.2f kB", fileSize/1e3)
+        if (fileSize > 1e9) return String.format("%.2f GB", fileSize / 1e9)
+        if (fileSize > 1e6) return String.format("%.2f MB", fileSize / 1e6)
+        if (fileSize > 1e3) return String.format("%.2f kB", fileSize / 1e3)
         return fileSize
     }
 

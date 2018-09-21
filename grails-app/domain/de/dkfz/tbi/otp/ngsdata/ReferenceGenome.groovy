@@ -133,6 +133,7 @@ class ReferenceGenome implements Entity {
         knownHaplotypesLegendFileX (nullable: true, maxSize: 500, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
     }
 
+    @Override
     String toString() {
         name
     }

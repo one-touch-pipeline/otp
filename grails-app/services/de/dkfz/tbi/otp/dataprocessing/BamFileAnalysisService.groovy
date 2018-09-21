@@ -50,7 +50,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
             "       AND (ambf${number}.qcTrafficLightStatus is null OR ambf${number}.qcTrafficLightStatus NOT IN (:rejecetedQcTrafficLightStatus))" +
 
             //check that coverage is high enough & number of lanes are enough
-            "       AND EXISTS ( FROM ProcessingThresholds pt "+
+            "       AND EXISTS ( FROM ProcessingThresholds pt " +
             "           WHERE pt.project = ambf${number}.${INDIVIDUAL}.project " +
             "           AND pt.seqType = ambf${number}.${SEQ_TYPE} " +
             "           AND pt.sampleType = ambf${number}.${SAMPLE_TYPE} " +

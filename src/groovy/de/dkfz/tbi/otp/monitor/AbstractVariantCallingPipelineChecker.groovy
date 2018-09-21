@@ -21,7 +21,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
     static final String PROBLEMS_MISSING_SEQ_TRACKS = "bam file misses the following seqtracks"
     static final String PROBLEMS_UNEXPECTED_SEQ_TRACKS = "bam file contains unexpected seqtracks"
 
-
+    @Override
     List handle(List<SamplePair> samplePairs, MonitorOutputCollector output) {
         if (!samplePairs) {
             return []
@@ -152,7 +152,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
         if (!samplePairs) {
             return []
         }
-        Double minCoverage = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, pipelineType.toString(),null) as Double
+        Double minCoverage = ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE, pipelineType.toString(), null) as Double
         if (minCoverage == null) {
             return []
         }

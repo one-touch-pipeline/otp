@@ -5,20 +5,25 @@ import de.dkfz.tbi.otp.utils.Entity
 class AlignmentLog implements Entity {
 
     // quality control flag
-    enum QCState {NON, PASS, BLOCK}
+    enum QCState {
+        NON, PASS, BLOCK
+    }
     QCState qcState = QCState.NON
 
-    enum Execution {UNKNOWN, INITIAL, SYSTEM, UPLOAD}
+    enum Execution {
+        UNKNOWN, INITIAL, SYSTEM, UPLOAD
+    }
     Execution executedBy = Execution.UNKNOWN
 
     static belongsTo = [
-        alignmentParams : AlignmentParams,
-        seqTrack : SeqTrack,
+            alignmentParams: AlignmentParams,
+            seqTrack       : SeqTrack,
     ]
 
     static constraints = {
     }
 
+    @Override
     String toString() {
         List<DataFile> dataFiles = DataFile.findAllByAlignmentLog(this)
         "${alignmentParams} ${dataFiles}"

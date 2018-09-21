@@ -69,6 +69,7 @@ class ReferenceGenomeEntry implements Entity {
         alias(unique: ['referenceGenome'], blank: false)
     }
 
+    @Override
     String toString() {
         return name
     }

@@ -20,7 +20,7 @@ class RunSegment implements Entity {
 
     OtrsTicket otrsTicket
 
-    enum ImportMode{
+    enum ImportMode {
         MANUAL,
         AUTOMATIC
     }

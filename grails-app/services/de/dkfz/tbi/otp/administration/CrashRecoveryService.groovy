@@ -127,12 +127,12 @@ class CrashRecoveryService {
     List<Map<String, Object>> getOutputParametersOfJobs(List<Long> ids) {
         assert null != ids
         List<ProcessingStep> steps = getProcessingSteps(ids)
-        return steps.collect {ProcessingStep step ->
+        return steps.collect { ProcessingStep step ->
             return [
-                id: step.id,
-                jobName: step.jobDefinition.name,
-                parameter: ParameterType.findAllByJobDefinitionAndParameterUsage(step.jobDefinition, ParameterUsage.OUTPUT),
-                ]
+                    id       : step.id,
+                    jobName  : step.jobDefinition.name,
+                    parameter: ParameterType.findAllByJobDefinitionAndParameterUsage(step.jobDefinition, ParameterUsage.OUTPUT),
+            ]
 
         }
     }
@@ -149,7 +149,7 @@ class CrashRecoveryService {
         if (!isCrashRecovery()) {
             throw new RuntimeException("The system is not in Crash Recovery")
         }
-        return ids.collect {Long id ->
+        return ids.collect { Long id ->
             ProcessingStep step = ProcessingStep.getInstance(id)
             if (step.next) {
                 throw new RuntimeException("ProcessingStep ${id} has already been restarted")
@@ -166,11 +166,11 @@ class CrashRecoveryService {
     private ProcessingStepUpdate createNewProcessingStepUpdate(ProcessingStep step, ExecutionState state) {
         processService.setOperatorIsAwareOfFailure(step.process, false)
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: state,
-            previous: step.latestProcessingStepUpdate,
-            processingStep: step
-            )
+                date: new Date(),
+                state: state,
+                previous: step.latestProcessingStepUpdate,
+                processingStep: step
+        )
         if (!update.validate()) {
             log.fatal("Could not create a ${state} Update for ProcessingStep ${step.id}")
             throw new ProcessingException("Could not create a ${state} Update for ProcessingStep ${step.id}")
@@ -185,7 +185,7 @@ class CrashRecoveryService {
      * @param parameters map containing for each processing step the parameter map with key is id of ParameterType and Value the value for the Parameter
      */
     private void storeParameters(List<ProcessingStep> steps, Map<Long, Map<String, String>> parameters) {
-        Parameter.withTransaction {  status ->
+        Parameter.withTransaction { status ->
             steps.each { ProcessingStep step ->
                 parameters[step.id].each { key, value ->
                     ParameterType type = ParameterType.get(key as Long)

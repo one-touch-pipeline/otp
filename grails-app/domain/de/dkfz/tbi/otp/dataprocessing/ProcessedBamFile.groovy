@@ -56,6 +56,7 @@ class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParam
         alignmentPass index: "abstract_bam_file_alignment_pass_idx"
     }
 
+    @Override
     void withdraw() {
         withTransaction {
             super.withdraw()

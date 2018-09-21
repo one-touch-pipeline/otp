@@ -15,6 +15,7 @@ class ProjectCategory implements Entity {
         name(nullable: false, blank: false, unique: true)
     }
 
+    @Override
     public String toString() {
         return name
     }

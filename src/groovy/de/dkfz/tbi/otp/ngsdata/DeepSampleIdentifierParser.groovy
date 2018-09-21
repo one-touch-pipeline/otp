@@ -6,7 +6,8 @@ import org.springframework.stereotype.Component
 @Component
 class DeepSampleIdentifierParser implements SampleIdentifierParser {
 
-    public DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {
+    @Override
+    DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {
         Matcher matcher = sampleIdentifier =~ createRegex(false)
         if (matcher && (matcher.group('libraryStrategy') != 'NOMe')) {
             String replicateNumber = (matcher.group('libraryStrategy') == 'WGBS') ? '1' : matcher.group('replicateNumber')
@@ -21,12 +22,14 @@ class DeepSampleIdentifierParser implements SampleIdentifierParser {
 
     }
 
-    public boolean isForProject(String projectName) {
+    @Override
+    boolean isForProject(String projectName) {
         return projectName == 'DEEP'
     }
 
-    public boolean tryParsePid(String pid) {
-        return pid =~ "^"+getPidRegex()+/$/
+    @Override
+    boolean tryParsePid(String pid) {
+        return pid =~ "^" + getPidRegex() + /$/
     }
 
     private static getPidRegex() {

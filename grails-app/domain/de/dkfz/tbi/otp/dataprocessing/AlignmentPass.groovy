@@ -26,34 +26,36 @@ class AlignmentPass implements ProcessParameterObject, Entity {
     static constraints = {
         identifier(unique: 'seqTrack')
         seqTrack(validator: { SeqTrack seqTrack, AlignmentPass pass ->
-            pass.workPackage?.satisfiesCriteria(seqTrack) })
-        workPackage(validator: {workPackage -> workPackage.pipeline.name == Pipeline.Name.DEFAULT_OTP})
+            pass.workPackage?.satisfiesCriteria(seqTrack)
+        })
+        workPackage(validator: { workPackage -> workPackage.pipeline.name == Pipeline.Name.DEFAULT_OTP })
     }
 
     /**
      * The reference genome which is/was used by this alignment pass. This value does not change (in contrast to the
      * return value of {@link SeqTrack#getConfiguredReferenceGenome()} when the configuration changes).
      */
-    public ReferenceGenome getReferenceGenome() {
+    ReferenceGenome getReferenceGenome() {
         return workPackage.referenceGenome
     }
 
-    public String getDirectory() {
+    String getDirectory() {
         return "pass${identifier}"
     }
 
-    public String toString() {
+    @Override
+    String toString() {
         return "AP ${id}: pass ${identifier} " + (latestPass ? "(latest) " : "") + "on ${seqTrack}"
     }
 
     /**
      * @return <code>true</code>, if this pass is the latest for the referenced {@link MergingWorkPackage} and {@link SeqTrack}
      */
-    public boolean isLatestPass() {
+    boolean isLatestPass() {
         return identifier == maxIdentifier(workPackage, seqTrack)
     }
 
-    public static Integer maxIdentifier(final MergingWorkPackage workPackage, final SeqTrack seqTrack) {
+    static Integer maxIdentifier(final MergingWorkPackage workPackage, final SeqTrack seqTrack) {
         assert workPackage
         assert seqTrack
         return AlignmentPass.createCriteria().get {
@@ -65,7 +67,7 @@ class AlignmentPass implements ProcessParameterObject, Entity {
         }
     }
 
-    public static Integer maxIdentifier(final SeqTrack seqTrack) {
+    static Integer maxIdentifier(final SeqTrack seqTrack) {
         assert seqTrack
         return AlignmentPass.createCriteria().get {
             eq("seqTrack", seqTrack)
@@ -75,7 +77,7 @@ class AlignmentPass implements ProcessParameterObject, Entity {
         }
     }
 
-    public static int nextIdentifier(final SeqTrack seqTrack) {
+    static int nextIdentifier(final SeqTrack seqTrack) {
         assert seqTrack
         final Integer maxIdentifier = maxIdentifier(seqTrack)
         if (maxIdentifier == null) {
@@ -85,6 +87,7 @@ class AlignmentPass implements ProcessParameterObject, Entity {
         }
     }
 
+    @Override
     Project getProject() {
         return seqTrack.project
     }

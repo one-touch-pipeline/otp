@@ -15,7 +15,8 @@ class ChipSeqSeqTrack extends SeqTrack {
             antibodyTarget: AntibodyTarget,
     ]
 
-    public String toString() {
+    @Override
+    String toString() {
         return "${super.toString()} ${antibodyTarget}"
     }
 

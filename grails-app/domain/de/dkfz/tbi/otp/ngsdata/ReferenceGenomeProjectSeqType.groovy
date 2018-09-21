@@ -74,6 +74,7 @@ class ReferenceGenomeProjectSeqType implements Entity {
         statSizeFileName nullable: true, blank: false, matches: TAB_FILE_PATTERN, validator: { it == null || OtpPath.isValidPathComponent(it) }
     }
 
+    @Override
     String toString() {
         return "RGPST ${id}: [${deprecatedDate ? "deprecated ${deprecatedDate}" : "not deprecated"}] (${project.name} ${seqType.name} ${seqType.libraryLayout} sampleType ${sampleType?.name}) -> ${referenceGenome.name} statSizeFileName ${statSizeFileName}"
     }

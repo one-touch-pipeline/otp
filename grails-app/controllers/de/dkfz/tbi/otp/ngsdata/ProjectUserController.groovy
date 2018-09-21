@@ -188,6 +188,7 @@ class ProjectUserController {
 enum PermissionStatus {
     APPROVED, PENDING_APPROVAL, PENDING_DENIAL, DENIED
 
+    @Override
     String toString() {
         return WordUtils.uncapitalize(WordUtils.capitalizeFully(this.name(), ['_'] as char[]).replaceAll("_", ""))
     }

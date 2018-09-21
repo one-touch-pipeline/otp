@@ -40,7 +40,7 @@ class Individual implements Commentable, Entity {
 
     Comment comment
 
-    enum Type {REAL, POOL, CELLLINE, UNDEFINED}
+    enum Type { REAL, POOL, CELLLINE, UNDEFINED }
     Type type
 
     Project project
@@ -52,6 +52,7 @@ class Individual implements Commentable, Entity {
         comment(nullable: true)
     }
 
+    @Override
     String toString() {
         "${mockPid}"
     }

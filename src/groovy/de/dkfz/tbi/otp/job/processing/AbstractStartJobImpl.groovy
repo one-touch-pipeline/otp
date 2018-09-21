@@ -38,11 +38,12 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
     private JobExecutionPlan plan
     private String beanName
 
+    @Override
     void setBeanName(String beanName) {
         this.beanName = beanName
     }
 
-    public Object doWithPersistenceInterceptor(@SuppressWarnings("rawtypes") final Closure closure) {
+    Object doWithPersistenceInterceptor(@SuppressWarnings("rawtypes") final Closure closure) {
         try {
             persistenceInterceptor.init()
             return closure.call();
@@ -58,7 +59,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      * @param plan The JobExecutionPlan this Job belongs to
      * @throws InvalidStateException If the plan has already been set
      */
-    public final void setJobExecutionPlan(JobExecutionPlan plan) throws InvalidStateException {
+    final void setJobExecutionPlan(JobExecutionPlan plan) throws InvalidStateException {
         if (this.plan) {
             throw new InvalidStateException("Execution plan has already been set")
         }

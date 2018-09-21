@@ -14,6 +14,7 @@ class AlignmentParams implements Entity {
         params(nullable: true)
     }
 
+    @Override
     String toString() {
         pipeline.toString()
     }

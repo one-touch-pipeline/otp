@@ -15,7 +15,8 @@ abstract class AbstractParseAlignmentQcJob extends AbstractEndStateAwareJobImpl 
     @Autowired
     QcTrafficLightService qcTrafficLightService
 
-    public void execute() {
+    @Override
+    void execute() {
 
         final RoddyBamFile roddyBamFile = getProcessParameterObject()
 

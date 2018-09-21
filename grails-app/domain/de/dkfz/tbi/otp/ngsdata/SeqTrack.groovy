@@ -10,10 +10,12 @@ import java.text.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+
 /*
  * In the GUI and e-mails sent by OTP this shall be called "Lane", even if it is only part of a multiplexed physical
  * lane. An explaining tooltip should be provided. (Decided together with the OTP Product Owner on 2016-07-19.)
  */
+
 class SeqTrack implements ProcessParameterObject, Entity {
 
     static final String RUN_PREFIX = "run"
@@ -89,7 +91,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
     /** Information about problems that occurred when sequencing this SeqTrack */
     Problem problem
 
-
     /**
      * Holds the information about the state of {@link #libraryPreparationKit}.
      * If the value is {@link InformationReliability#KNOWN} or {@link InformationReliability#INFERRED},
@@ -114,10 +115,10 @@ class SeqTrack implements ProcessParameterObject, Entity {
     List<LogMessage> logMessages = []
 
     static belongsTo = [
-        Run,
-        Sample,
-        SeqType,
-        LibraryPreparationKit,
+            Run,
+            Sample,
+            SeqType,
+            LibraryPreparationKit,
     ]
 
     static hasMany = [
@@ -145,7 +146,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
         libraryName(nullable: true, validator: { String val, SeqTrack obj ->
             !val || OtpPath.isValidPathComponent(val)
         })
-        normalizedLibraryName(nullable: true, validator: {String val, SeqTrack obj ->
+        normalizedLibraryName(nullable: true, validator: { String val, SeqTrack obj ->
             (val == null) ? (obj.libraryName == null) : (val == normalizeLibraryName(obj.libraryName))
         })
         problem nullable: true
@@ -160,7 +161,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
         }
     }
 
-
     // To be consistent on the filesystem the library value to use is created like this and not directly derived from libraryName
     String getLibraryDirectoryName() {
         return (libraryName ? "lib${normalizedLibraryName}" : "libNA")
@@ -172,7 +172,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     @Deprecated
     DataProcessingState getAlignmentState() {
         Collection<AlignmentPass> allPasses = AlignmentPass.findAllBySeqTrack(this)
-        Collection<AlignmentPass> latestPasses = allPasses.findAll( { it.isLatestPass() } )
+        Collection<AlignmentPass> latestPasses = allPasses.findAll({ it.isLatestPass() })
         assert allPasses.empty == latestPasses.empty
         switch (latestPasses.size()) {
             case 0:
@@ -186,7 +186,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     }
 
     String nBaseString() {
-        return nBasePairs ? String.format("%.1f G",(nBasePairs/1e9)) : "N/A"
+        return nBasePairs ? String.format("%.1f G", (nBasePairs / 1e9)) : "N/A"
     }
 
 
@@ -199,9 +199,10 @@ class SeqTrack implements ProcessParameterObject, Entity {
         return text
     }
 
+    @Override
     String toString() {
         return "ST: ${id} lane: ${laneId} run: ${run.name} " +
-        "<br>sample: ${sample} seqType: ${seqType} <br>project: ${project}<br>"
+                "<br>sample: ${sample} seqType: ${seqType} <br>project: ${project}<br>"
     }
 
     /**
@@ -221,6 +222,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
         return sample.individual
     }
 
+    @Override
     Project getProject() {
         return sample.project
     }
@@ -314,8 +316,8 @@ class SeqTrack implements ProcessParameterObject, Entity {
     }
 
     static String getLongestCommonPrefixBeforeLastUnderscore(String filename1, String filename2) {
-        assert filename1 : "The input filename1 must not be null"
-        assert filename2 : "The input filename2 must not be null"
+        assert filename1: "The input filename1 must not be null"
+        assert filename2: "The input filename2 must not be null"
         String commonFastqFilePrefix = StringUtils.longestCommonPrefix(filename1, filename2)
         String pattern = /^(.*)_([^_]*)$/
         def matcher = commonFastqFilePrefix =~ pattern

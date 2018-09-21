@@ -78,6 +78,7 @@ abstract class BamFilePairAnalysis implements TimeStamped, ProcessParameterObjec
         config lazy: false
     }
 
+    @Override
     Project getProject() {
         return samplePair.project
     }

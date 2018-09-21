@@ -17,7 +17,8 @@ class SequencingKitLabel implements Entity {
         name(unique: true, blank: false)
     }
 
-    public String toString() {
+    @Override
+    String toString() {
         return name
     }
 }

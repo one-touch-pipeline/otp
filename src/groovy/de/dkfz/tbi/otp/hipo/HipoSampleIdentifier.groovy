@@ -11,15 +11,17 @@ import org.springframework.stereotype.Component
 @Scope("singleton")
 class HipoSampleIdentifierParser implements SampleIdentifierParser {
 
-    private final static String REGEX =/^(${PIDREGEX})-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([DRPACWY])(\d{1,2}))$/
+    private final static String REGEX = /^(${PIDREGEX})-([${HipoTissueType.values()*.key.join("")}])(\d{1,2})-(([DRPACWY])(\d{1,2}))$/
     private final static String PIDREGEX = "([A-JL-RU-Z])(\\d\\d\\w)-(?:\\w\\w)?\\w\\w\\w(\\w)"
 
-    public boolean isForProject(String projectName) {
+    @Override
+    boolean isForProject(String projectName) {
         return projectName.matches("hipo_[A-JL-RU-Z]")
     }
 
-    public boolean tryParsePid(String pid) {
-        return pid =~ "^"+PIDREGEX+/$/
+    @Override
+    boolean tryParsePid(String pid) {
+        return pid =~ "^" + PIDREGEX + /$/
     }
 
     /**
@@ -27,7 +29,8 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
      * @return A {@link HipoSampleIdentifier} if the supplied string is a valid HIPO sample name,
      * otherwise <code>null</code>.
      */
-    public HipoSampleIdentifier tryParse(String sampleName) {
+    @Override
+    HipoSampleIdentifier tryParse(String sampleName) {
         Matcher matcher = sampleName =~ REGEX
         if (!matcher.matches()) {
             return null
@@ -35,7 +38,7 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
         String projectLetter = matcher.group(2)
         String projectNumber = matcher.group(3)
 
-        if(!(projectLetter ==~ /[HP]/)) {
+        if (!(projectLetter ==~ /[HP]/)) {
             projectNumber = projectLetter + projectNumber
         }
         HipoTissueType tissueType = HipoTissueType.fromKey(matcher.group(5))
@@ -43,7 +46,7 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
         // Project 35 has even more specific rules.
         if (projectNumber == "035") {
             if (projectLetter != "H" || !(matcher.group(4) =~ /^[KM]$/)
-            || ![HipoTissueType.BLOOD, HipoTissueType.CELL].contains(tissueType)) {
+                    || ![HipoTissueType.BLOOD, HipoTissueType.CELL].contains(tissueType)) {
                 return null
             }
         }
@@ -67,7 +70,7 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
                 /* tissueType: */ tissueType,
                 /* sampleNumber: */ matcher.group(6),
                 /* experiment: */ matcher.group(7),
-                )
+        )
     }
 }
 

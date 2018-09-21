@@ -45,6 +45,7 @@ class SeqCenter implements Entity {
         }
     }
 
+    @Override
     String toString() {
         name
     }

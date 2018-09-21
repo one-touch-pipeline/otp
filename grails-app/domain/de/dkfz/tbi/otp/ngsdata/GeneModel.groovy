@@ -37,6 +37,7 @@ class GeneModel implements TimeStamped, Entity {
         }
     }
 
+    @Override
     String toString() {
         fileName
     }

@@ -19,6 +19,7 @@ class QualityAssessmentMergedStartJob extends AbstractStartJobImpl implements Re
     ProcessingOptionService optionService
 
     @Scheduled(fixedDelay = 10000l)
+    @Override
     void execute() {
         doWithPersistenceInterceptor {
             short minPriority = minimumProcessingPriorityForOccupyingASlot

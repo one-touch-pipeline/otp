@@ -19,12 +19,13 @@ class SeqPlatform implements Entity {
     ]
 
     static constraints = {
-        name(blank: false, unique: ['seqPlatformModelLabel','sequencingKitLabel'])
+        name(blank: false, unique: ['seqPlatformModelLabel', 'sequencingKitLabel'])
         seqPlatformModelLabel(nullable: true)
         sequencingKitLabel(nullable: true)
         identifierInRunName(nullable: true, matches: /^[A-Z]{4}$/)
     }
 
+    @Override
     String toString() {
         return fullName()
     }

@@ -32,6 +32,7 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
      * always after the previous execution has finished.
      */
     @Scheduled(fixedDelay=30000l)
+    @Override
     void execute() {
         doWithPersistenceInterceptor {
             if (!hasOpenSlots()) {

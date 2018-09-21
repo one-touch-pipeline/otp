@@ -40,7 +40,8 @@ class OtrsTicket implements Commentable, Entity {
          * This is needed by the {@link TrackingService},
          * which does some stringly-typed magic to dynamically determine which field to set.
          */
-        public String toString() {
+        @Override
+        String toString() {
             return name().toLowerCase(Locale.ENGLISH).replaceAll( "(_)([a-z0-9])", { it -> it[2].toUpperCase() } )
         }
     }
@@ -168,7 +169,7 @@ class OtrsTicket implements Commentable, Entity {
         if (val =~ /^[0-9]{16}$/) {
             try {
                 DateTimeFormatter format = DateTimeFormat.forPattern("yyyyMMdd")
-                format.parseDateTime(val.substring(0,8))
+                format.parseDateTime(val.substring(0, 8))
                 return null
             } catch (IllegalFieldValueException e) {
                 return e.message
@@ -182,6 +183,7 @@ class OtrsTicket implements Commentable, Entity {
         return "${ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.TICKET_SYSTEM_URL, null, null)}/index.pl?Action=AgentTicketZoom;TicketNumber=${ticketNumber}"
     }
 
+    @Override
     String toString() {
         return "OtrsTicket ${id}: #${ticketNumber}"
     }

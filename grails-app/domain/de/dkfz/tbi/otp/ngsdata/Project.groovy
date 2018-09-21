@@ -100,7 +100,7 @@ class Project implements Commentable, Entity {
 
         alignmentDeciderBeanName(blank: false)  // If no alignment is desired, set to noAlignmentDecider instead of leaving blank
 
-        nameInMetadataFiles(nullable: true, blank: false,  validator: {val, obj ->
+        nameInMetadataFiles(nullable: true, blank: false,  validator: { val, obj ->
             if (val) {
                 Project projectByMetadata = atMostOneElement(Project.findAllByNameInMetadataFiles(val))
                 Project projectByName = atMostOneElement(Project.findAllByName(val))
@@ -130,6 +130,7 @@ class Project implements Commentable, Entity {
         tumorEntity(nullable: true)
     }
 
+    @Override
     String toString() {
         name
     }
@@ -161,6 +162,5 @@ class Project implements Commentable, Entity {
             default:
                 return "Unknown Priority value : '${processingPriority}'"
         }
-
     }
 }

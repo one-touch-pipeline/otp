@@ -27,6 +27,7 @@ class MergingPass implements ProcessParameterObject, Entity {
         description(nullable: true)
     }
 
+    @Override
     Project getProject() {
         return mergingSet.project
     }
@@ -63,7 +64,8 @@ class MergingPass implements ProcessParameterObject, Entity {
         return mergingSet.containedSeqTracks
     }
 
-    public String toString() {
+    @Override
+    String toString() {
         return "id: ${mergingSet.id} " +
         "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
         "set: ${mergingSet.identifier} " + (mergingSet.latestSet ? "(latest) " : "") +
@@ -75,11 +77,11 @@ class MergingPass implements ProcessParameterObject, Entity {
     /**
      * @return Whether this is the most recent merging pass on the referenced {@link MergingSet}.
      */
-    public boolean isLatestPass() {
+    boolean isLatestPass() {
         return identifier == maxIdentifier(mergingSet)
     }
 
-    public static Integer maxIdentifier(final MergingSet mergingSet) {
+    static Integer maxIdentifier(final MergingSet mergingSet) {
         assert mergingSet
         return MergingPass.createCriteria().get {
             eq("mergingSet", mergingSet)
@@ -89,7 +91,7 @@ class MergingPass implements ProcessParameterObject, Entity {
         }
     }
 
-    public static int nextIdentifier(final MergingSet mergingSet) {
+    static int nextIdentifier(final MergingSet mergingSet) {
         assert mergingSet
         final Integer maxIdentifier = maxIdentifier(mergingSet)
         if (maxIdentifier == null) {

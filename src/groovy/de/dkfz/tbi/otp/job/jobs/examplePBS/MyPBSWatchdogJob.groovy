@@ -38,7 +38,8 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
     private List<String> queuedJobIds = []
     private final Lock lock = new ReentrantLock()
 
-    public void execute() throws Exception {
+    @Override
+    void execute() throws Exception {
         List<Realm> realms = []
         String jobIds = getParameterValueOrClass(JobParameterKeys.JOB_ID_LIST)
         String realmIds = getParameterValueOrClass(JobParameterKeys.REALM)
@@ -63,6 +64,7 @@ class MyPBSWatchdogJob extends AbstractEndStateAwareJobImpl implements Monitorin
         }
     }
 
+    @Override
     void finished(ClusterJobIdentifier finishedClusterJob) {
         final boolean allFinished
         lock.lock()

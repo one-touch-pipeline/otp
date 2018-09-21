@@ -11,15 +11,17 @@ class UserRole implements Serializable, Entity {
     User user
     Role role
 
+    @Override
     boolean equals(other) {
         if (!(other instanceof UserRole)) {
             return false
         }
 
         other.user?.id == user?.id &&
-            other.role?.id == role?.id
+                other.role?.id == role?.id
     }
 
+    @Override
     int hashCode() {
         def builder = new HashCodeBuilder()
         if (user) builder.append(user.id)
@@ -29,7 +31,7 @@ class UserRole implements Serializable, Entity {
 
     static UserRole get(long userId, long roleId) {
         find 'from UserRole where user.id=:userId and role.id=:roleId',
-            [userId: userId, roleId: roleId]
+                [userId: userId, roleId: roleId]
     }
 
     static UserRole create(User user, Role role, boolean flush = false) {

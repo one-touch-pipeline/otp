@@ -17,7 +17,8 @@ class QualityAssessmentPass implements ProcessParameterObject, Entity {
         description(nullable: true)
     }
 
-    public String toString() {
+    @Override
+    String toString() {
         return "id: ${processedBamFile.id} " +
                 "pass: ${identifier} " + (latestPass ? "(latest) " : "") +
                 "alignmentPass: ${processedBamFile.alignmentPass.identifier} " +
@@ -30,11 +31,11 @@ class QualityAssessmentPass implements ProcessParameterObject, Entity {
     /**
      * @return Whether this is the most recent QA pass on the referenced {@link ProcessedBamFile}.
      */
-    public boolean isLatestPass() {
+    boolean isLatestPass() {
         return identifier == maxIdentifier(processedBamFile)
     }
 
-    public static Integer maxIdentifier(final ProcessedBamFile processedBamFile) {
+    static Integer maxIdentifier(final ProcessedBamFile processedBamFile) {
         assert processedBamFile
         return QualityAssessmentPass.createCriteria().get {
             eq("processedBamFile", processedBamFile)
@@ -44,7 +45,7 @@ class QualityAssessmentPass implements ProcessParameterObject, Entity {
         }
     }
 
-    public static int nextIdentifier(final ProcessedBamFile processedBamFile) {
+    static int nextIdentifier(final ProcessedBamFile processedBamFile) {
         assert processedBamFile
         final Integer maxIdentifier = maxIdentifier(processedBamFile)
         if (maxIdentifier == null) {
@@ -62,6 +63,7 @@ class QualityAssessmentPass implements ProcessParameterObject, Entity {
         return processedBamFile.alignmentPass
     }
 
+    @Override
     Project getProject() {
         return processedBamFile.project
     }

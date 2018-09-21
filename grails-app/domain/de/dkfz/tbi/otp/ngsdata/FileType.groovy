@@ -18,6 +18,7 @@ class FileType implements Entity {
         subType()
     }
 
+    @Override
     String toString() {
         "${type}-${subType}"
     }

@@ -10,6 +10,7 @@ class ChecksumFileServiceUnitTests extends GroovyTestCase {
     final String BAM_FILE_NAME = "bamFileName.merged.mdup.bam"
 
     @Before
+    @Override
     void setUp() {
         checksumFileService = new ChecksumFileService()
     }

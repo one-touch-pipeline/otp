@@ -45,13 +45,16 @@ class ValueTuplesValidatorSpec extends Specification {
         given:
         Collection<ValueTuple> calledFor = null
         ValueTuplesValidator<ValidationContext> validator = new ValueTuplesValidator<ValidationContext>() {
+            @Override
             List<String> getColumnTitles(ValidationContext context) {
                 return ['B', 'C', 'D']
             }
+            @Override
             boolean columnMissing(ValidationContext context, String columnTitle) {
                 optionalColumnMissing(context, columnTitle)
                 return true
             }
+            @Override
             void validateValueTuples(ValidationContext ctx, Collection<ValueTuple> valueTuples) {
                 assert ctx == context
                 assert calledFor == null

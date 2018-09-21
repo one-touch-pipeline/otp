@@ -49,7 +49,8 @@ class BedFile implements Entity {
         targetSize(min: 1L)
     }
 
-    public String toString() {
+    @Override
+    String toString() {
         return "${fileName} for genome ${referenceGenome} and kit ${libraryPreparationKit}"
     }
 

@@ -9,7 +9,8 @@ class ProjectGroup implements Entity {
         name(blank: false, unique: true)
     }
 
-    public String toString() {
+    @Override
+    String toString() {
         return name
     }
 }

@@ -1,5 +1,6 @@
 final String TEST = "*/*test*/*"
 final String SPEC = "*Spec.groovy"
+final String INTEGRATION_SPEC = "*IntegrationSpec.groovy"
 final String CONTROLLER = "*Controller.groovy"
 final String SERVICE = "*Service.groovy"
 
@@ -247,6 +248,7 @@ ruleset {
     JUnitAssertEqualsConstantActualValue
     MissingOverrideAnnotation {
         priority = 1
+        doNotApplyToFileNames = INTEGRATION_SPEC
     }
     UnsafeImplementationAsMap
 

@@ -21,6 +21,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     ConfigService configService
 
     @Scheduled(fixedDelay = 60000l)
+    @Override
     void execute() {
         doWithPersistenceInterceptor {
             short minPriority = minimumProcessingPriorityForOccupyingASlot
@@ -92,6 +93,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
         return getBamFileAnalysisService().samplePairForProcessing(minPriority)
     }
 
+    @Override
     String getFormattedDate() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH'h'mm")
         ZonedDateTime time = ZonedDateTime.of(LocalDateTime.now(), configService.getTimeZoneId())

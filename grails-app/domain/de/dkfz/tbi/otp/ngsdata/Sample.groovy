@@ -16,6 +16,7 @@ class Sample implements Entity {
         sampleType(nullable: false, unique: 'individual')
     }
 
+    @Override
     String toString() {
         // useful for scaffolding
         "${individual?.mockPid} ${sampleType?.name}"

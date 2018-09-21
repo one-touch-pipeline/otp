@@ -10,6 +10,7 @@ import org.springframework.stereotype.*
 @UseJobLog
 class ParseWgbsAlignmentQcJob extends AbstractParseAlignmentQcJob {
 
+    @Override
     RoddyMergedBamQa parseStatistics(RoddyBamFile roddyBamFile) {
         abstractQualityAssessmentService.parseRoddySingleLaneQaStatistics(roddyBamFile)
         if (roddyBamFile.getContainedSeqTracks()*.getLibraryDirectoryName().unique().size() > 1) {

@@ -33,7 +33,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
     static final String BLOCKED_HAS_BLOCKED_QC_STATE = "bam file has blocked qc state"
     static final String BLOCKED_HAS_REJECTED_QC_STATE = "bam file has rejected qc state"
 
-
+    @Override
     List<SamplePair> handle(List<AbstractMergedBamFile> bamFiles, MonitorOutputCollector output) {
         if (!bamFiles) {
             return []

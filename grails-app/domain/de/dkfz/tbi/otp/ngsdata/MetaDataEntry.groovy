@@ -37,6 +37,7 @@ class MetaDataEntry implements Entity {
         value(nullable: false)
     }
 
+    @Override
     String toString() {
         return "${key.name}:${value}"
     }

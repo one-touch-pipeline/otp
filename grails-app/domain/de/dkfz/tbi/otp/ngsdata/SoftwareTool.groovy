@@ -6,7 +6,9 @@ class SoftwareTool implements Entity {
 
     String programName
     String programVersion
-    enum Type {BASECALLING, ALIGNMENT}
+    enum Type {
+        BASECALLING, ALIGNMENT
+    }
     Type type
 
     static constraints = {
@@ -19,6 +21,7 @@ class SoftwareTool implements Entity {
         return "${programName} ${programVersion}"
     }
 
+    @Override
     String toString() {
         return getDisplayName()
     }

@@ -17,6 +17,7 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
     SeqTrackService seqTrackService
 
     @Scheduled(fixedDelay=5000l)
+    @Override
     void execute() {
         doWithPersistenceInterceptor {
             short minPriority = minimumProcessingPriorityForOccupyingASlot
