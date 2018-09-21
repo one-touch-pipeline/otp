@@ -3,8 +3,8 @@ package de.dkfz.tbi.otp.egaSubmission
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.ProjectSelection
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.ProjectService
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 import org.springframework.validation.FieldError
 
@@ -14,10 +14,9 @@ class EgaSubmissionController implements CheckAndCall {
     ProjectService projectService
     ProjectSelectionService projectSelectionService
 
-    def overview() {
-
-        List<Project> projects = projectService.getAllProjects()
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
+    Map overview() {
+        List<Project> projects = projectService.allProjects
+        ProjectSelection selection = projectSelectionService.selectedProject
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
         List<Submission> submissions = Submission.findAllByProject(project).sort { it.submissionName.toLowerCase() }
@@ -26,30 +25,30 @@ class EgaSubmissionController implements CheckAndCall {
                 projects         : projects,
                 project          : project,
                 submissions      : submissions,
-                submissionStates : Submission.State
+                submissionStates : Submission.State,
         ]
     }
 
-    def newSubmission(NewSubmissionControllerSubmitCommand cmd) {
+    Map newSubmission(NewSubmissionControllerSubmitCommand cmd) {
         String message
         boolean hasErrors
         if (cmd.submit == "Submit") {
             hasErrors = cmd.hasErrors()
             if (hasErrors) {
-                FieldError errors = cmd.errors.getFieldError()
-                message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
-            }
-            else {
-                egaSubmissionService.createSubmission([
+                FieldError errors = cmd.errors.fieldError
+                message = "'" + errors.rejectedValue + "' is not a valid value for '" + errors.field + "'. Error code: '" + errors.code + "'"
+            } else {
+                Submission submission = egaSubmissionService.createSubmission([
                         project       : cmd.project,
                         egaBox        : cmd.egaBox,
                         submissionName: cmd.submissionName,
                         studyName     : cmd.studyName,
                         studyType     : cmd.studyType,
                         studyAbstract : cmd.studyAbstract,
-                        pubMedId      : cmd.pubMedId
+                        pubMedId      : cmd.pubMedId,
                 ])
-                redirect(action: "overview")
+                redirect(action: "selectSamples", params: ['submission.id': submission.id])
+                return [:]
             }
         }
 
@@ -60,13 +59,86 @@ class EgaSubmissionController implements CheckAndCall {
                 cmd             : cmd,
                 hasErrors       : hasErrors,
         ]
+    }
 
+    Map editSubmission(EditSubmissionControllerSubmitCommand cmd) {
+        if (cmd.submission.samplesToSubmit.isEmpty()) {
+            redirect(action: "selectSamples", params: ['submission.id': cmd.submission.id])
+            return [:]
+        }
+        redirect(action: "overview")
+        return [:]
+
+        //TODO add new pages in the other issues
+    }
+
+    Map selectSamples(SelectSamplesControllerSubmitCommand cmd) {
+        if (cmd.next == "Next") {
+            cmd.sampleAndSeqType.findAll().each {
+                String[] sampleAndSeqType = it.split("-")
+
+                egaSubmissionService.saveSampleSubmissionObject(
+                        cmd.submission,
+                        Sample.findById(sampleAndSeqType[0] as long),
+                        SeqType.findById(sampleAndSeqType[1] as long)
+                )
+            }
+            redirect(action: "overview")
+            return [:]
+        }
+
+        return [
+                submissionId: cmd.submission.id,
+                project: cmd.submission.project,
+                seqTypes : egaSubmissionService.seqTypeByProject(cmd.submission.project),
+        ]
     }
 
     JSON updateSubmissionState(UpdateSubmissionStateCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             egaSubmissionService.updateSubmissionState(cmd.submission, cmd.state)
-        })
+        }
+    }
+
+    JSON dataTableSelectSamples(DataTableCommand cmd) {
+        Project project = projectService.getProjectByName(params.project)
+        Map dataToRender = cmd.dataToRender()
+
+        List data = []
+        List<List> sampleSeqType = SeqTrack.createCriteria().list {
+            projections {
+                sample {
+                    property('id')
+                    individual {
+                        eq('project', project)
+                        property('pid')
+                    }
+                    sampleType {
+                        property('name')
+                    }
+                }
+                property('seqType')
+            }
+        }.unique().sort()
+
+        sampleSeqType.each {
+            long sampleId = it[0]
+            String individualPid = it[1]
+            String sampleTypeName = it[2]
+            SeqType seqType = it[3]
+
+            data.add([
+                "${sampleId}-${seqType.id}",
+                individualPid,
+                sampleTypeName,
+                seqType.toString(),
+            ])
+        }
+
+        dataToRender.iTotalRecords = data.size()
+        dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
+        dataToRender.aaData = data
+        render dataToRender as JSON
     }
 }
 
@@ -109,4 +181,14 @@ class UpdateSubmissionStateCommand implements Serializable {
     void setValue(String value) {
         this.state = value as Submission.State
     }
+}
+
+class EditSubmissionControllerSubmitCommand implements Serializable {
+    Submission submission
+}
+
+class SelectSamplesControllerSubmitCommand implements Serializable {
+    Submission submission
+    String next
+    List<String> sampleAndSeqType
 }

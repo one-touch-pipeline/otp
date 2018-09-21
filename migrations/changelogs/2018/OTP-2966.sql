@@ -1,0 +1,1 @@
+ALTER TABLE sample_submission_object ADD COLUMN seq_type_id bigint NOT NULL REFERENCES seq_type(id);

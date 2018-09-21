@@ -433,12 +433,12 @@ $.otp.dataTableFilter = {
             $("td.value *", tr).hide();
             $("td.add input", tr).hide();
             if ($(event.target).val() !== "none") {
-                $("td select[name=" + $(this).val() + "]", tr).show();
-                $("td select[name=" + $(this).val() + "] option", tr).show();
-                $("td input[name=" + $(this).val() + "]", tr).show();
-                $("td span[id=" + $(this).val() + "]", tr).show();
-                $("td span[id=" + $(this).val() + "] select", tr).show();
-                $("td span[id=" + $(this).val() + "] select option", tr).show();
+                $("td select[name='" + $(this).val() + "']", tr).show();
+                $("td select[name='" + $(this).val() + "'] option", tr).show();
+                $("td input[name='" + $(this).val() + "']", tr).show();
+                $("td span[id='" + $(this).val() + "']", tr).show();
+                $("td span[id='" + $(this).val() + "'] select", tr).show();
+                $("td span[id='" + $(this).val() + "'] select option", tr).show();
                 $("td.add input", tr).show();
                 $("td.remove input", tr).show();
             } else {

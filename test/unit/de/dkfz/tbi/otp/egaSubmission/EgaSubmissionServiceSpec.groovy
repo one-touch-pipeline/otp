@@ -43,6 +43,8 @@ import spock.lang.Unroll
 ])
 class EgaSubmissionServiceSpec extends Specification {
 
+    EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
+
     @Unroll
     void "test create submission all valid"() {
         given:
@@ -53,11 +55,11 @@ class EgaSubmissionServiceSpec extends Specification {
                 studyName     : studyName,
                 studyType     : Submission.StudyType.CANCER_GENOMICS,
                 studyAbstract : studyAbstract,
-                pubMedId      : pubMedId
+                pubMedId      : pubMedId,
         ]
 
         when:
-        new EgaSubmissionService().createSubmission(params)
+        egaSubmissionService.createSubmission(params)
         Submission submission = CollectionUtils.exactlyOneElement(Submission.list())
 
         then:
@@ -72,7 +74,6 @@ class EgaSubmissionServiceSpec extends Specification {
         egaBox   | submissionName   | studyName   | studyType                            | studyAbstract   | pubMedId
         "egaBox" | "submissionName" | "studyName" | Submission.StudyType.CANCER_GENOMICS | "studyAbstract" | "pubMedId"
         "egaBox" | "submissionName" | "studyName" | Submission.StudyType.CANCER_GENOMICS | "studyAbstract" | null
-
     }
 
     @Unroll
@@ -84,16 +85,15 @@ class EgaSubmissionServiceSpec extends Specification {
                 submissionName: submissionName,
                 studyName     : studyName,
                 studyType     : studyType,
-                studyAbstract : studyAbstract
+                studyAbstract : studyAbstract,
         ]
 
         when:
-        new EgaSubmissionService().createSubmission(params)
+        egaSubmissionService.createSubmission(params)
 
         then:
         ValidationException exception = thrown()
         exception.message.contains(exceptionMessage)
-
 
         where:
         egaBox   | submissionName   | studyName   | studyType                            | studyAbstract   || exceptionMessage
@@ -116,7 +116,7 @@ class EgaSubmissionServiceSpec extends Specification {
         submission.save(flush: true)
 
         when:
-        new EgaSubmissionService().updateSubmissionState(submission, Submission.State.FILE_UPLOAD_STARTED)
+        egaSubmissionService.updateSubmissionState(submission, Submission.State.FILE_UPLOAD_STARTED)
 
         then:
         Submission.State.FILE_UPLOAD_STARTED == submission.state
@@ -127,10 +127,44 @@ class EgaSubmissionServiceSpec extends Specification {
         Submission submission = SubmissionDomainFactory.createSubmission()
 
         when:
-        new EgaSubmissionService().updateSubmissionState(submission, Submission.State.FILE_UPLOAD_STARTED)
+        egaSubmissionService.updateSubmissionState(submission, Submission.State.FILE_UPLOAD_STARTED)
 
         then:
         ValidationException exception = thrown()
         exception.message.contains("rejected value [null]")
+    }
+
+    void "test save submission object all fine"() {
+        given:
+        Submission submission = SubmissionDomainFactory.createSubmission()
+        Sample sample = DomainFactory.createSample()
+        SeqType seqType = DomainFactory.createSeqType()
+
+        when:
+        egaSubmissionService.saveSampleSubmissionObject(submission, sample, seqType)
+
+        then:
+        !submission.samplesToSubmit.isEmpty()
+        submission.samplesToSubmit.first().seqType == seqType
+        submission.samplesToSubmit.first().sample == sample
+    }
+
+    @Unroll
+    void "test save submission object"() {
+        given:
+        Submission submission = SubmissionDomainFactory.createSubmission()
+
+        when:
+        egaSubmissionService.saveSampleSubmissionObject(submission, sample(), seqType())
+
+        then:
+        ValidationException exception = thrown()
+        exception.message.contains("rejected value [null]")
+
+        where:
+        sample                             | seqType
+        ({ null })                         | { DomainFactory.createSeqType() }
+        ({ DomainFactory.createSample() }) | { null }
+
     }
 }

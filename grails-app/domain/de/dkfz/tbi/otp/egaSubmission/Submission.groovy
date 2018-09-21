@@ -14,7 +14,7 @@ class Submission implements Entity {
     State state
 
     static belongsTo = [
-            project: Project
+            project: Project,
     ]
 
     static hasMany = [

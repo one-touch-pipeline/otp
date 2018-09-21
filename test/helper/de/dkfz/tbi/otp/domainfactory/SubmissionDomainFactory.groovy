@@ -26,21 +26,22 @@ class SubmissionDomainFactory extends AbstractDomainFactory {
     static BamFileSubmissionObject createBamFileSubmissionObject(Map properties = [:]) {
         return createDomainObject(BamFileSubmissionObject, [
                 egaAliasName: "bam_file_alias",
-                bamFile: { DomainFactory.createRoddyBamFile() }
+                bamFile: { DomainFactory.createRoddyBamFile() },
         ], properties)
     }
 
     static DataFileSubmissionObject createDataFileSubmissionObject (Map properties = [:]) {
         return createDomainObject(DataFileSubmissionObject , [
                 egaAliasName: "data_file_alias",
-                dataFile: { DomainFactory.createDataFile() }
+                dataFile: { DomainFactory.createDataFile() },
         ], properties)
     }
 
     static SampleSubmissionObject createSampleSubmissionObject(Map properties = [:]) {
         return createDomainObject(SampleSubmissionObject, [
                 egaAliasName: "sample_alias",
-                sample: { DomainFactory.createSample() }
+                sample: { DomainFactory.createSample() },
+                seqType: { DomainFactory.createSeqType() },
         ], properties)
     }
 }
