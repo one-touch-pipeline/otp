@@ -11,7 +11,7 @@ import org.springframework.validation.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-class ProjectUserController {
+class ProjectUserController implements CheckAndCall {
 
     ProjectService projectService
     ProjectSelectionService projectSelectionService
@@ -162,21 +162,6 @@ class ProjectUserController {
 
     JSON updateAspera(UpdateUserAsperaCommand cmd) {
         checkErrorAndCallMethod(cmd, { userService.updateAsperaAccount(cmd.user, cmd.newAspera) })
-    }
-
-    private void checkErrorAndCallMethod(Serializable cmd, Closure method) {
-        Map data
-        if (cmd.hasErrors()) {
-            data = getErrorData(cmd.errors.getFieldError())
-        } else {
-            method()
-            data = [success: true]
-        }
-        render data as JSON
-    }
-
-    private Map getErrorData(FieldError errors) {
-        return [success: false, error: "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"]
     }
 
     JSON getUserSearchSuggestions(UserSearchSuggestionsCommand cmd) {

@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.ega
+package de.dkfz.tbi.otp.egaSubmission
 
 trait SubmissionObject {
 

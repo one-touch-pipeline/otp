@@ -16,7 +16,7 @@ import java.text.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-class ProjectConfigController {
+class ProjectConfigController implements CheckAndCall {
 
     ProjectService projectService
     ProjectOverviewService projectOverviewService
@@ -217,21 +217,6 @@ class ProjectConfigController {
         projectService.updateCustomFinalNotification(project, value.toBoolean())
         Map map = [success: true]
         render map as JSON
-    }
-
-    private void checkErrorAndCallMethod(Serializable cmd, Closure method) {
-        Map data
-        if (cmd.hasErrors()) {
-            data = getErrorData(cmd.errors.getFieldError())
-        } else {
-            method()
-            data = [success: true]
-        }
-        render data as JSON
-    }
-
-    private Map getErrorData(FieldError errors) {
-        return [success: false, error: "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"]
     }
 
     Map<String, String> getDates(Project project) {

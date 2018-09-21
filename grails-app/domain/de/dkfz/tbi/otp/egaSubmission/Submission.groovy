@@ -1,16 +1,21 @@
-package de.dkfz.tbi.otp.ega
+package de.dkfz.tbi.otp.egaSubmission
 
+import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 class Submission implements Entity {
 
     String egaBox
-    String nameOfSubmission
+    String submissionName
     String studyName
     StudyType studyType
     String studyAbstract
     String pubMedId
     State state
+
+    static belongsTo = [
+            project: Project
+    ]
 
     static hasMany = [
             dataFilesToSubmit : DataFileSubmissionObject,

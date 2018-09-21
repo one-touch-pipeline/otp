@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.job.plan
 
+import de.dkfz.tbi.otp.CheckAndCall
 import grails.converters.*
 
-class JobErrorDefinitionController {
+class JobErrorDefinitionController implements CheckAndCall {
 
     JobErrorDefinitionService jobErrorDefinitionService
 
@@ -34,17 +35,6 @@ class JobErrorDefinitionController {
 
     JSON addNewJob(UpdateAddNewJobCommand cmd){
         checkErrorAndCallMethod(cmd, { jobErrorDefinitionService.addNewJob(cmd.jobErrorDefinition, cmd.jobDefinition) })
-    }
-
-    private void checkErrorAndCallMethod(Serializable cmd, Closure method) {
-        Map data
-        if (cmd.hasErrors()) {
-            data = getErrorData(cmd.errors.getFieldError())
-        } else {
-            method()
-            data = [success: true]
-        }
-        render data as JSON
     }
 
     private List getAllJobDefinitions() {

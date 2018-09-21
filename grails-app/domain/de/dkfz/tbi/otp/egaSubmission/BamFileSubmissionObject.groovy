@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.ega
+package de.dkfz.tbi.otp.egaSubmission
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.utils.Entity

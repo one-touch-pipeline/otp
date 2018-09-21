@@ -74,6 +74,7 @@
                             </ul>
                         </li>
                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
+                            <li class="allGranted menuContainerItem"><g:link controller="egaSubmission" action="overview">EGA (WIP)</g:link></li>
                             <li class="navigation menuContainerItem statistic">
                                 <ul>
                                     <li class="allGranted overview_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.statistics"/> &#9661;</g:link>

@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.dataprocessing.*
 import grails.converters.*
 import org.springframework.validation.*
 
 
-class MetaDataFieldsController {
+class MetaDataFieldsController implements CheckAndCall {
     LibraryPreparationKitService libraryPreparationKitService
     SeqTypeService seqTypeService
     SeqPlatformService seqPlatformService
@@ -149,21 +150,6 @@ class MetaDataFieldsController {
 
     void createImportAlias(CreateImportAliasCommand cmd){
         checkErrorAndCallMethod(cmd, { cmd.service.addNewAlias(cmd.name, cmd.importAlias) })
-    }
-
-    private void checkErrorAndCallMethod(Serializable cmd, Closure method) {
-        Map data
-        if (cmd.hasErrors()) {
-            data = getErrorData(cmd.errors.getFieldError())
-        } else {
-            method()
-            data = [success: true]
-        }
-        render data as JSON
-    }
-
-    private Map getErrorData(FieldError errors) {
-        return [success: false, error: "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"]
     }
 }
 

@@ -62,6 +62,11 @@ grails.project.dependency.resolution = {
 
         // AST transformations
         compile "de.dkfz.otp:otp-ast:1"
+
+        // Gebish (GUI Tests)
+        test "org.gebish:geb-spock:2.2"
+        test "org.seleniumhq.selenium:selenium-firefox-driver:3.12.0"
+        test "org.seleniumhq.selenium:selenium-support:3.12.0"
     }
 
     plugins {
