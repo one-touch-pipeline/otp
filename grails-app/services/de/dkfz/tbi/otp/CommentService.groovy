@@ -8,7 +8,7 @@ class CommentService {
 
     SpringSecurityService springSecurityService
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#commentable?.project, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#commentable?.project, 'OTP_READ_ACCESS')")
     Comment saveComment(Commentable commentable, String message) {
         String userName = springSecurityService.principal.username
         return createOrUpdateComment(commentable, message, userName)

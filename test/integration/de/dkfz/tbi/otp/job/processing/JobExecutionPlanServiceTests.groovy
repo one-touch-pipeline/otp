@@ -453,27 +453,11 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
-        // as a user it should fail
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getPlan(plan.id)
-            }
-        }
-        // an operator should see it
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertSame(plan, jobExecutionPlanService.getPlan(plan.id))
         }
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertSame(plan, jobExecutionPlanService.getPlan(plan.id))
-            // grant read priv to testuser
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now the testuser should be able to see it
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertSame(plan, jobExecutionPlanService.getPlan(plan.id))
-        }
-        // but a different user should not be able to see it
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getPlan(plan.id)
             }
@@ -485,37 +469,11 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
-        // a user should not be able to enable a plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.enablePlan(plan)
-            }
-        }
-        // an operator should be able to enable the plan
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             jobExecutionPlanService.enablePlan(plan)
         }
-        // an admin user should be able to enable the plan
-        SpringSecurityUtils.doWithAuth("admin") {
-            jobExecutionPlanService.enablePlan(plan)
-            // let's give read permission to the user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // which actually should not change anything as it requires write permission
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.enablePlan(plan)
-            }
-        }
-        SpringSecurityUtils.doWithAuth("admin") {
-            // so let's add write
-            aclUtilService.addPermission(plan, "testuser", BasePermission.WRITE)
-        }
-        SpringSecurityUtils.doWithAuth("testuser") {
-            jobExecutionPlanService.enablePlan(plan)
-        }
-        // but another user should not see it
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.enablePlan(plan)
             }
@@ -525,39 +483,13 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
     @Test
     void testDisablePlanSecurity() {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
+        plan.save(flush: true)
         assertNotNull(plan)
-        // a user should not be able to disable a plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.disablePlan(plan)
-            }
-        }
-        // an operator should be able to disable the plan
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             jobExecutionPlanService.disablePlan(plan)
         }
-        // an admin user should be able to disable the plan
-        SpringSecurityUtils.doWithAuth("admin") {
-            jobExecutionPlanService.disablePlan(plan)
-            // let's give read permission to the user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // which actually should not change anything as it requires write permission
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.disablePlan(plan)
-            }
-        }
-        SpringSecurityUtils.doWithAuth("admin") {
-            // so let's add write
-            aclUtilService.addPermission(plan, "testuser", BasePermission.WRITE)
-        }
-        SpringSecurityUtils.doWithAuth("testuser") {
-            jobExecutionPlanService.disablePlan(plan)
-        }
-        // but another user should not be allowed to disable the plan
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.disablePlan(plan)
             }
@@ -565,88 +497,32 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
     }
 
     @Test
-    void testGetAllPlansSecurity() {
-        // create three plans
-        JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
-        assertNotNull(plan)
-        JobExecutionPlan plan1 = new JobExecutionPlan(name: "test1", obsoleted: false, planVersion: 0, enabled: true)
-        plan1 = plan1.save(flush: true)
-        assertNotNull(plan1)
-        JobExecutionPlan plan2 = new JobExecutionPlan(name: "test2", obsoleted: false, planVersion: 0, enabled: true)
-        plan2 = plan2.save(flush: true)
-        assertNotNull(plan2)
-        SpringSecurityUtils.doWithAuth('admin') {
-            // Workaround for some Spring Security issue: The ACL was not found, so we create a permission that is not
-            // needed (something other than READ) which will create the ACL and make the test pass as expected.
-            // The cause might be due to a bug in the permissionsFor() method of the AclCacheOptimizer, but noone knows.
-            aclUtilService.addPermission(plan, 'testuser', BasePermission.CREATE)
-            aclUtilService.addPermission(plan1, 'testuser', BasePermission.CREATE)
-            aclUtilService.addPermission(plan2, 'testuser', BasePermission.CREATE)
+    void testGetAllPlansPermission() {
+        int numberOfPlans = 3
+        numberOfPlans.times {
+            JobExecutionPlan plan = new JobExecutionPlan(name: "test${it}", obsoleted: false, planVersion: 0, enabled: true)
+            plan.save(flush: true)
+            assertNotNull(plan)
         }
-        // user should get an empty list
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertTrue(jobExecutionPlanService.getJobExecutionPlans().empty)
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            assertEquals(numberOfPlans, jobExecutionPlanService.getJobExecutionPlans().size())
         }
-        // an operator should see all three plans
-        SpringSecurityUtils.doWithAuth("operator") {
-            assertEquals(3, jobExecutionPlanService.getJobExecutionPlans().size())
-        }
-        // admin should see all three plans
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(3, jobExecutionPlanService.getJobExecutionPlans().size())
-            // grant read to testuser
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now testuser should be able to see them
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(1, jobExecutionPlanService.getJobExecutionPlans().size())
-            assertSame(plan, jobExecutionPlanService.getJobExecutionPlans().first())
-        }
-        // give grant for other plans
-        SpringSecurityUtils.doWithAuth("admin") {
-            // grant read to testuser
-            aclUtilService.addPermission(plan1, "testuser", BasePermission.READ)
-            aclUtilService.addPermission(plan2, "testuser", BasePermission.READ)
-        }
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(3, jobExecutionPlanService.getJobExecutionPlans().size())
-            assertSame(plan, jobExecutionPlanService.getJobExecutionPlans().first())
-            assertSame(plan2, jobExecutionPlanService.getJobExecutionPlans().last())
-        }
-        // but other user should not see anything
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             assertTrue(jobExecutionPlanService.getJobExecutionPlans().empty)
         }
     }
 
     @Test
-    void testGetAllProcessesSecurity() {
+    void testGetAllProcessesPermission() {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
+        plan.save(flush: true)
         assertNotNull(plan)
-        // user should not be able to get processes for the plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getAllProcesses(plan)
-            }
-        }
-        // operator should be able to access the plans
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(jobExecutionPlanService.getAllProcesses(plan).empty)
         }
-        // admin should be able to do so
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertTrue(jobExecutionPlanService.getAllProcesses(plan).empty)
-            // grant read to user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should be able to get the processes
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertTrue(jobExecutionPlanService.getAllProcesses(plan).empty)
-        }
-        // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getAllProcesses(plan)
             }
@@ -658,28 +534,11 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
-        // user should not be able to get the latest updates for the plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getLatestUpdatesForPlan(plan)
-            }
-        }
-        // operator should be able to get the latest updates for the plan
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertNull(jobExecutionPlanService.getLatestUpdatesForPlan(plan).empty)
         }
-        // but admin should
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertNull(jobExecutionPlanService.getLatestUpdatesForPlan(plan).empty)
-            // grant read to user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should also get the updates
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertNull(jobExecutionPlanService.getLatestUpdatesForPlan(plan).empty)
-        }
-        // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getLatestUpdatesForPlan(plan)
             }
@@ -691,28 +550,11 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
-        // user should not be able to get the information about running processes for this plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.isProcessRunning(plan)
-            }
-        }
-        // operator should be able to get information about running processes
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertFalse(jobExecutionPlanService.isProcessRunning(plan))
         }
-        // but admin should
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertFalse(jobExecutionPlanService.isProcessRunning(plan))
-            // grant read to user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should be able to see whether a process is running
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertFalse(jobExecutionPlanService.isProcessRunning(plan))
-        }
-        // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.isProcessRunning(plan)
             }
@@ -724,28 +566,11 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
-        // user should not be able to retrieve the Process count for the plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getProcessCount(plan)
-            }
-        }
-        // an operator should be able to retrieve the Process count
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(0, jobExecutionPlanService.getProcessCount(plan))
         }
-        // but admin should
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(0, jobExecutionPlanService.getProcessCount(plan))
-            // grant read to user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should also be able to retrieve the information
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(0, jobExecutionPlanService.getProcessCount(plan))
-        }
-        // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getProcessCount(plan)
             }
@@ -757,28 +582,11 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
-        // user should not be able to retrieve the last executed Process for the plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getLastExecutedProcess(plan)
-            }
-        }
-        // an operator should be able to retrieve the last executed Process
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertNull(jobExecutionPlanService.getLastExecutedProcess(plan))
         }
-        // but admin should
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertNull(jobExecutionPlanService.getLastExecutedProcess(plan))
-            // grant read to user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should also be able to retrieve the information
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertNull(jobExecutionPlanService.getLastExecutedProcess(plan))
-        }
-        // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getLastExecutedProcess(plan)
             }
@@ -790,28 +598,11 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
-        // user should not be able to retrieve the number of Processes for the plan
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.getNumberOfProcesses(plan)
-            }
-        }
-        // an operator should be able to retrieve the number of Processes
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(0, jobExecutionPlanService.getNumberOfProcesses(plan))
         }
-        // but admin should
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(0, jobExecutionPlanService.getNumberOfProcesses(plan))
-            // grant read to user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should also be able to retrieve the information
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(0, jobExecutionPlanService.getNumberOfProcesses(plan))
-        }
-        // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getNumberOfProcesses(plan)
             }
@@ -827,28 +618,11 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertNotNull(startJob.save())
         plan.startJob = startJob
         assertNotNull(plan.save(flush: true))
-        // user should not be able to retrieve the plan information
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                jobExecutionPlanService.planInformation(plan)
-            }
-        }
-        // an operator should be able to retrieve the plan information
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             jobExecutionPlanService.planInformation(plan)
         }
-        // but admin should
-        SpringSecurityUtils.doWithAuth("admin") {
-            jobExecutionPlanService.planInformation(plan)
-            // grant read to user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should also be able to retrieve the information
-        SpringSecurityUtils.doWithAuth("testuser") {
-            jobExecutionPlanService.planInformation(plan)
-        }
-        // but a different user should not
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.planInformation(plan)
             }

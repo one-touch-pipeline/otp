@@ -28,7 +28,7 @@ class MetaDataService {
      * @throws ChangelogException In case the Changelog Entry could not be created
      * @throws MetaDataEntryUpdateException In case the MetaDataEntry could not be updated
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or ((#entry.dataFile.project != null) and hasPermission(#entry.dataFile.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', write))")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     boolean updateMetaDataEntry(MetaDataEntry entry, String value) throws ChangelogException, MetaDataEntryUpdateException {
         ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(MetaDataEntry.class.getName())
         ChangeLog changelog = new ChangeLog(rowId: entry.id, referencedClass: clazz, columnName: "value", fromValue: entry.value, toValue: value, comment: "-", source: ChangeLog.Source.MANUAL)
@@ -88,7 +88,7 @@ class MetaDataService {
      * @param id The Id of the DataFile.
      * @return DataFile if it exists, otherwise null
      */
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or ((returnObject.project != null) and hasPermission(returnObject.project.id, 'de.dkfz.tbi.otp.ngsdata.Project', 'OTP_READ_ACCESS')) or ((returnObject.run != null) and hasPermission(returnObject.run.seqCenter.id, 'de.dkfz.tbi.otp.ngsdata.SeqCenter', 'read'))")
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or ((returnObject.project != null) and hasPermission(returnObject.project, 'OTP_READ_ACCESS'))")
     DataFile getDataFile(Long id) {
         return DataFile.get(id)
     }

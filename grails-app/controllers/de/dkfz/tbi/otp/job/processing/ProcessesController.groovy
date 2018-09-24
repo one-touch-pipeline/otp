@@ -325,9 +325,11 @@ class ProcessesController {
 
     def processingStep() {
         ProcessingStep step = processService.getProcessingStep(params.id as long)
-        [step: step, hasLog: processService.processingStepLogExists(step), clusterJobs: ClusterJob.findAllByProcessingStep(step).sort {
-            it.clusterJobId
-        }]
+        return [
+                step: step,
+                hasLog: processService.processingStepLogExists(step),
+                clusterJobs: ClusterJob.findAllByProcessingStep(step).sort { it.clusterJobId }
+        ]
     }
 
     def processingStepLog() {

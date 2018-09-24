@@ -18,7 +18,7 @@ class JobExecutionPlanService {
      * @param id The JobExecutionPlan's id
      * @return
      */
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(returnObject, read)")
+    @PostAuthorize("hasRole('ROLE_OPERATOR')")
     public JobExecutionPlan getPlan(long id) {
         return JobExecutionPlan.get(id)
     }
@@ -28,7 +28,7 @@ class JobExecutionPlanService {
      * @param id The JobDefinition's id
      * @return
      */
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.plan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PostAuthorize("hasRole('ROLE_OPERATOR')")
     public JobDefinition getJobDefinition(long id) {
         return JobDefinition.get(id)
     }
@@ -39,7 +39,7 @@ class JobExecutionPlanService {
      * @param plan The JobExecutionPlan to enable.
      * @return The enabled state after the operation. Should be true on success.
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, write)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public boolean enablePlan(JobExecutionPlan plan) {
         if (plan.obsoleted) {
             return false
@@ -61,7 +61,7 @@ class JobExecutionPlanService {
      * @param plan The JobExecutionPlan to disable.
      * @return The enabled state after the operation. Should be false(!) on success.
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, write)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public boolean disablePlan(JobExecutionPlan plan) {
         boolean before = plan.enabled
         plan.enabled = false
@@ -80,7 +80,7 @@ class JobExecutionPlanService {
      * Obsoleted JobExecutionPlans are not considered.
      * @return List of all not obsoleted JobExecutionPlans
      */
-    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, read)")
+    @PostFilter("hasRole('ROLE_OPERATOR')")
     public List<JobExecutionPlan> getJobExecutionPlans() {
         return JobExecutionPlan.findAllByObsoleted(false, [sort: "name", order: "asc"])
     }
@@ -94,7 +94,7 @@ class JobExecutionPlanService {
      * @param order {@code true} for ascending ordering, {@code false} for descending, default {@code false}
      * @return List of all Processes run for the JobExecutionPlan filtered as requested
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public List<Process> getAllProcesses(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         final List<JobExecutionPlan> plans = withParents(plan)
         return Process.findAllByJobExecutionPlanInList(plans, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
@@ -115,7 +115,7 @@ class JobExecutionPlanService {
      * @param state The execution state for restricting the result
      * @return Map of Processes with latest ProcessingStepUpdate
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, ExecutionState state = null) {
         final List<Long> plans = withParents(plan).collect { it.id }
         String query = '''
@@ -163,7 +163,7 @@ AND u.id IN (
      * @param plan The Plan for which the number of run Processes should be returned
      * @return The number of Processes run for this plan
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public int getProcessCount(JobExecutionPlan plan) {
         final List<JobExecutionPlan> plans = withParents(plan)
         return Process.countByJobExecutionPlanInList(plans)
@@ -175,7 +175,7 @@ AND u.id IN (
      * @param plan The JobExecutionPlan for which it should be checked whether a Process is running
      * @return {@code true} in case there is a Process running for plan, {@code false} otherwise
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public boolean isProcessRunning(JobExecutionPlan plan) {
         final List<JobExecutionPlan> plans = withParents(plan)
         final Process process = Process.findByFinishedAndJobExecutionPlanInList(false, plans)
@@ -190,7 +190,7 @@ AND u.id IN (
      * @param plan The JobExecutionPlan for which the last created Process should be returned
      * @return The last created Process, or {@code null} if none is available
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public Process getLastExecutedProcess(JobExecutionPlan plan) {
         final List<Long> plans = withParents(plan).collect { it.id }
         String query = '''
@@ -221,7 +221,7 @@ ORDER BY p.id DESC
      * @param state Optional ExecutionState to restrict the number of Processes returned
      * @return The number of Processes which have been started for plan
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public int getNumberOfProcesses(JobExecutionPlan plan, ExecutionState state = null) {
         final List<JobExecutionPlan> plans = withParents(plan)
         if (!state) {
@@ -255,7 +255,7 @@ AND u.id IN (
      * @param plan The JobExecutionPlan for which the information should be extracted.
      * @return Plan Information in a JSON ready format
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public PlanInformation planInformation(JobExecutionPlan plan) {
         return PlanInformation.fromPlan(plan)
     }
@@ -265,7 +265,7 @@ AND u.id IN (
      * @param plan
      * @return
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#plan, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public List<JobDefinition> jobDefinitions(JobExecutionPlan plan) {
         List<JobDefinition> jobs = []
         JobDefinition job = plan.firstJob

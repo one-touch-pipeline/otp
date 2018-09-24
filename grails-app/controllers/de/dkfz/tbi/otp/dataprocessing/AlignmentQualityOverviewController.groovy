@@ -156,10 +156,13 @@ class AlignmentQualityOverviewController {
             dataToRender.put("success", false)
             dataToRender.put("error", "'${error.getRejectedValue()}' is not a valid value for '${error.getField()}'. Error code: '${error.code}'")
         } else {
-            qcTrafficLightService.changeQcTrafficLightStatusWithComment(cmd.abstractBamFile, cmd.newValue as AbstractMergedBamFile.QcTrafficLightStatus, cmd.comment)
+            qcTrafficLightService.changeQcTrafficLightStatusWithComment(
+                    cmd.abstractBamFile,
+                    cmd.newValue as AbstractMergedBamFile.QcTrafficLightStatus,
+                    cmd.comment
+            )
             dataToRender.put("success", true)
         }
-
         render dataToRender as JSON
     }
 

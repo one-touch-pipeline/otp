@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.prepost.PostFilter;
 import org.springframework.security.access.prepost.PreAuthorize
 
 class SeqCenterService {

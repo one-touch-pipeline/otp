@@ -110,8 +110,8 @@ grails.project.dependency.resolution = {
 codenarc {
     ruleSetFiles = ['file:grails-app/conf/CodeNarcRuleSet.groovy', 'file:grails-app/conf/OtpRuleSet.groovy']
     extraIncludeDirs = ['ast']
-    maxPriority1Violations = 2069
-    maxPriority2Violations = 7966
+    maxPriority1Violations = 2053
+    maxPriority2Violations = 7915
     reports = {
         CodeNarcXmlReport('xml') {
             outputFile = 'target/CodeNarc-Report.xml'

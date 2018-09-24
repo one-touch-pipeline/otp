@@ -38,7 +38,7 @@ class ProcessService {
      * @param id The Process's id
      * @return
      */
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PostAuthorize("hasRole('ROLE_OPERATOR')")
     public Process getProcess(long id) {
         return Process.get(id)
     }
@@ -52,7 +52,7 @@ class ProcessService {
      * @param order {@code true} for ascending ordering, {@code false} for descending, default {@code false}
      * @return List of all ProcessingSteps run for the Process filtered as requested
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public List<ProcessingStep> getAllProcessingSteps(Process process, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         return ProcessingStep.findAllByProcess(process, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
     }
@@ -62,7 +62,7 @@ class ProcessService {
      * @param plan The Process for which the number of ProcessingSteps should be returned
      * @return The number of ProcessingSteps for the given Process
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public int getNumberOfProcessessingSteps(Process process) {
         return ProcessingStep.countByProcess(process)
     }
@@ -72,7 +72,7 @@ class ProcessService {
      * @param id The ProcessingStep's id
      * @return
      */
-    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PostAuthorize("hasRole('ROLE_OPERATOR')")
     public ProcessingStep getProcessingStep(long id) {
         return ProcessingStep.get(id)
     }
@@ -86,7 +86,7 @@ class ProcessService {
      * @param step The ProcessingStep for which it should be looked for a log file
      * @return True if there is a log file, false otherwise
      */
-    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public boolean processingStepLogExists(ProcessingStep step) {
         return getLogForProcessingStep(step).exists()
     }
@@ -96,7 +96,7 @@ class ProcessService {
      * @param step The ProcessingStep for which the log file should be retrieved
      * @return Content of log file or empty String in case log file does not exist
      */
-    @PreAuthorize("hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read) or hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public String processingStepLog(ProcessingStep step) {
         File file = getLogForProcessingStep(step)
         if (!file.exists() || !file.isFile()) {
@@ -125,8 +125,7 @@ class ProcessService {
      * Thin ACL aware wrapper around schedulerService.
      * @param step The ProcessingStep to restart
      */
-    // TODO: better ACL rights?
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', write)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public void restartProcessingStep(ProcessingStep step) {
         schedulerService.restartProcessingStep(step)
     }
@@ -141,7 +140,7 @@ class ProcessService {
      * @param order {@code true} for ascending ordering, {@code false} for descending, default {@code false}
      * @return List of all ProcessingStepUpdates for the Step filtered as requested
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public List<ProcessingStepUpdate> getAllUpdates(ProcessingStep step, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         return ProcessingStepUpdate.findAllByProcessingStep(step, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
     }
@@ -151,7 +150,7 @@ class ProcessService {
      * @param step The ProcessingStep for which the number of Updates should be returned
      * @return The number of ProcessingStepUpdates for the given Step
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public int getNumberOfUpdates(ProcessingStep step) {
         return ProcessingStepUpdate.countByProcessingStep(step)
     }
@@ -162,7 +161,7 @@ class ProcessService {
      * @param process The Process for which the latest Processing step has to be retrieved.
      * @return The latest ProcessingStep of the Process
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public ProcessingStep getLatestProcessingStep(Process process) {
         return ProcessingStep.findByProcessAndNextIsNull(process)
     }
@@ -172,7 +171,7 @@ class ProcessService {
      * @param process The Process for which the ExecutionState should be retrieved
      * @return Latest execution state of the Process
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public ExecutionState getState(Process process) {
         return lastUpdate(process).state
     }
@@ -183,7 +182,7 @@ class ProcessService {
      * @return
      * @see #getState(Process)
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public ExecutionState getState(ProcessingStep step) {
         return step.latestProcessingStepUpdate.state
     }
@@ -194,7 +193,7 @@ class ProcessService {
      * @param process The Process for which the possible error message should be returned.
      * @return
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public String getError(Process process) {
         ProcessingStepUpdate update = lastUpdate(process)
         if (update.error) {
@@ -209,7 +208,7 @@ class ProcessService {
      * @return
      * @see #getError(Process)
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public String getError(ProcessingStep step) {
         ProcessingError error = step.latestProcessingStepUpdate.error
         if (!error) {
@@ -223,7 +222,7 @@ class ProcessService {
      * @param process
      * @return
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public Date getLastUpdate(Process process) {
         return lastUpdate(process).date
     }
@@ -233,7 +232,7 @@ class ProcessService {
      * @param step
      * @return
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public Date getLastUpdate(ProcessingStep step) {
         return step.latestProcessingStepUpdate.date
     }
@@ -243,7 +242,7 @@ class ProcessService {
      * @param step The ProcessingStep for which the latest ProcessingStepUpdate should be retrieved.
      * @return Latest ProcessingStepUpdate
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public ProcessingStepUpdate getLatestProcessingStepUpdate(ProcessingStep step) {
         return step.latestProcessingStepUpdate
     }
@@ -253,7 +252,7 @@ class ProcessService {
      * @param step
      * @return
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public Date getFirstUpdate(ProcessingStep step) {
         return ProcessingStepUpdate.findByProcessingStep(step, [sort: "id", order: "asc"]).date
     }
@@ -264,7 +263,7 @@ class ProcessService {
      * @param step The processing step for which the duration has to be calculated
      * @return The duration between the started and finished event for this ProcessingStep
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#step.process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public Long getProcessingStepDuration(ProcessingStep step) {
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
         if (updates.isEmpty()) {
@@ -312,7 +311,7 @@ class ProcessService {
      * @return Process Information in a JSON ready format
      * @see JobExecutionPlanService#planInformation(JobExecutionPlan)
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#process.jobExecutionPlan.id, 'de.dkfz.tbi.otp.job.plan.JobExecutionPlan', read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public PlanInformation processInformation(Process process) {
         PlanInformation plan = jobExecutionPlanService.planInformation(process.jobExecutionPlan)
         List<ProcessingStep> processingSteps = ProcessingStep.findAllByProcess(process)

@@ -27,7 +27,7 @@ class RunControllerTests implements UserAndRoles{
 
     @Test
     void testShowRunNonExisting() {
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.params.id = "0"
             controller.show()
             assertEquals(404, controller.response.status)
@@ -36,7 +36,7 @@ class RunControllerTests implements UserAndRoles{
 
     @Test
     void testShowRunMissingId() {
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.show()
             assertEquals(404, controller.response.status)
         }
@@ -44,7 +44,7 @@ class RunControllerTests implements UserAndRoles{
 
     @Test
     void testShowRunIdNoLong() {
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.params.id = "test"
             controller.show()
             assertEquals(404, controller.response.status)

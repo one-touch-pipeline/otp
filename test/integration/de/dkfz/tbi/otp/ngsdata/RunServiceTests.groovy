@@ -5,7 +5,6 @@ import static org.junit.Assert.*
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.acls.domain.BasePermission
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -23,7 +22,7 @@ class RunServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetRunWithoutRun() {
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertNull(runService.getRun(null))
             assertNull(runService.getRun(""))
             assertNull(runService.getRun(0))
@@ -32,75 +31,44 @@ class RunServiceTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void testGetRunByIdentifier() {
+    void testGetRunPermission() {
+        Run run = mockRun("testRun")
+        [OPERATOR, ADMIN].each { String username ->
+            SpringSecurityUtils.doWithAuth(username) {
+                assertNotNull(runService.getRun(run.id))
+            }
+        }
+        [USER, TESTUSER].each { String username ->
+            shouldFail(AccessDeniedException) {
+                SpringSecurityUtils.doWithAuth(username) {
+                    runService.getRun(run.id)
+                }
+            }
+        }
+    }
+
+    @Test
+    void testGetRunByLongAndStringIdentifier() {
         Run run = mockRun("test")
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                runService.getRun(run.id)
-                runService.getRun("${run.id}")
-            }
-        }
-        // Role Operator should have access
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(run, runService.getRun(run.id))
             assertEquals(run, runService.getRun("${run.id}"))
-        }
-        // Admin should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(run, runService.getRun(run.id))
-            assertEquals(run, runService.getRun("${run.id}"))
-            // grant read permission to testuser
-            aclUtilService.addPermission(run.seqCenter, "testuser", BasePermission.READ)
-        }
-        // now testuser should succeed
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(run, runService.getRun(run.id))
-            assertEquals(run, runService.getRun("${run.id}"))
-        }
-        // but other user should still fail
-        SpringSecurityUtils.doWithAuth("user") {
-            shouldFail(AccessDeniedException) {
-                runService.getRun(run.id)
-                runService.getRun("${run.id}")
-            }
         }
     }
 
     @Test
     void testGetRunByName() {
         Run run = mockRun("test")
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                runService.getRun("test")
-            }
-        }
-        // operator should have access
-        SpringSecurityUtils.doWithAuth("operator") {
-            assertEquals(run, runService.getRun("test"))
-        }
-        // admin should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(run, runService.getRun("test"))
-            // grant read permission
-            aclUtilService.addPermission(run.seqCenter, "testuser", BasePermission.READ)
-        }
-        // now testuser should succeed
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(run, runService.getRun("test"))
-        }
-        // but other user should still fail
-        SpringSecurityUtils.doWithAuth("user") {
-            shouldFail(AccessDeniedException) {
-                runService.getRun("test")
-            }
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            assertNotNull(runService.getRun(run.name))
         }
     }
 
     @Test
     void testGetRunByNameAsIdentifier() {
-        Run run = mockRun("2")
-        SpringSecurityUtils.doWithAuth("operator") {
-            assertEquals(run, runService.getRun("2"))
+        Run run = mockRun("test")
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            assertEquals(run, runService.getRun("test"))
             run.name = run.id + 1
             assertNotNull(run.save(flush: true))
             assertEquals(run, runService.getRun(run.name))
@@ -111,106 +79,58 @@ class RunServiceTests extends AbstractIntegrationTest {
     }
 
     @Test
-    void testRetrieveProcessParameterEmpty() {
-        SpringSecurityUtils.doWithAuth("testuser") {
-            // any user has access with no run
-            assertTrue(runService.retrieveProcessParameters(null).isEmpty())
-        }
+    void testRetrieveProcessParametersPermission() {
         Run run = mockRun("test")
-        // without ACL accessing a run should fail
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                runService.retrieveProcessParameters(run).isEmpty()
+        [OPERATOR, ADMIN].each { String username ->
+            SpringSecurityUtils.doWithAuth(username) {
+                assertNotNull(runService.retrieveProcessParameters(run))
             }
         }
-        // but not for an operator
-        SpringSecurityUtils.doWithAuth("operator") {
-            assertTrue(runService.retrieveProcessParameters(run).isEmpty())
-        }
-        // neither for an admin
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertTrue(runService.retrieveProcessParameters(run).isEmpty())
-            // grant read permission
-            aclUtilService.addPermission(run.seqCenter, "testuser", BasePermission.READ)
-        }
-        // and not for the testuser after granting permission
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertTrue(runService.retrieveProcessParameters(run).isEmpty())
-        }
-        // but still for any other user
-        SpringSecurityUtils.doWithAuth("user") {
+        [USER, TESTUSER].each { String username ->
             shouldFail(AccessDeniedException) {
-                runService.retrieveProcessParameters(run).isEmpty()
+                SpringSecurityUtils.doWithAuth(username) {
+                    runService.retrieveProcessParameters(run)
+                }
             }
         }
     }
 
     @Test
+    void testRetrieveProcessParameterEmpty() {
+        Run run = mockRun("test")
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            assertTrue(runService.retrieveProcessParameters(run).isEmpty())
+        }
+    }
+
+    @Test
     void testRetrieveProcessParameter() {
-        // create JobExecutionPlan
+        Run run = mockRun("test")
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
-        assertNotNull(jep.save())
+        assert jep.save()
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
-        assertNotNull(jep.save(flush: true))
+        assert jep.save(flush: true)
+
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
-        assertNotNull(process.save())
-
-        // create Run
-        Run run = mockRun("test")
-
+        assert process.save()
         ProcessParameter param = new ProcessParameter(value: run.id, className: Run.class.name, process: process)
-        assertNotNull(param.save())
+        assert param.save()
 
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                runService.retrieveProcessParameters(run).size()
-                runService.retrieveProcessParameters(run).first()
-            }
-        }
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(1, runService.retrieveProcessParameters(run).size())
             assertEquals(param, runService.retrieveProcessParameters(run).first())
-        }
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(1, runService.retrieveProcessParameters(run).size())
-            assertEquals(param, runService.retrieveProcessParameters(run).first())
-            // grant read permission
-            aclUtilService.addPermission(run.seqCenter, "testuser", BasePermission.READ)
-        }
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(1, runService.retrieveProcessParameters(run).size())
-            assertEquals(param, runService.retrieveProcessParameters(run).first())
-        }
-        SpringSecurityUtils.doWithAuth("user") {
-            shouldFail(AccessDeniedException) {
-                runService.retrieveProcessParameters(run).size()
-                runService.retrieveProcessParameters(run).first()
-            }
         }
 
-        // create second Process
         Process process2 = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
-        assertNotNull(process2.save())
+        assert process2.save()
         ProcessParameter param2 = new ProcessParameter(value: run.id, className: Run.class.name, process: process2)
-        assertNotNull(param2.save())
+        assert param2.save()
 
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(2, runService.retrieveProcessParameters(run).size())
             assertEquals(param, runService.retrieveProcessParameters(run).first())
             assertEquals(param2, runService.retrieveProcessParameters(run).last())
-        }
-        SpringSecurityUtils.doWithAuth("operator") {
-            assertEquals(2, runService.retrieveProcessParameters(run).size())
-            assertEquals(param, runService.retrieveProcessParameters(run).first())
-            assertEquals(param2, runService.retrieveProcessParameters(run).last())
-        }
-        SpringSecurityUtils.doWithAuth("user") {
-            shouldFail(AccessDeniedException) {
-                runService.retrieveProcessParameters(run).size()
-                runService.retrieveProcessParameters(run).first()
-                runService.retrieveProcessParameters(run).last()
-            }
         }
     }
 

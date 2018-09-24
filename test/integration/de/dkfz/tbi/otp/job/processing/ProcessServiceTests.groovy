@@ -6,36 +6,33 @@ import org.springframework.beans.factory.annotation.Autowired
 import static org.junit.Assert.*
 
 import org.apache.commons.io.FileUtils
-import org.codehaus.groovy.grails.commons.GrailsApplication
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.acl.AclUtilService
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
 
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.plan.StartJobDefinition
+import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
 
 class ProcessServiceTests extends AbstractIntegrationTest {
-    ProcessService processService
     AclUtilService aclUtilService
     ErrorLogService errorLogService
-    GrailsApplication grailsApplication
+
+    @Autowired
+    ProcessService processService
+
     @Autowired
     LinkGenerator linkGenerator
 
     @Before
     void setUp() {
-        // Setup logic here
         createUserAndRoles()
     }
 
     @After
     void tearDown() {
-        // Tear down logic here
     }
 
     /**
@@ -43,13 +40,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetProcessNonExisting() {
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertNull(processService.getProcess(1))
-        }
-        SpringSecurityUtils.doWithAuth("operator") {
-            assertNull(processService.getProcess(1))
-        }
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertNull(processService.getProcess(1))
         }
     }
@@ -86,22 +77,11 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     void testGetProcessAsUser() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
-        // without ACL it should fail
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getProcess(process.id)
-            }
-        }
-        // now grant the user access
-        SpringSecurityUtils.doWithAuth("admin") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
         }
-        // now user should have access
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertSame(process, processService.getProcess(process.id))
-        }
-        // but different user should not have access
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.getProcess(process.id)
             }
@@ -116,28 +96,11 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     void testGetAllProcessingStepsSecurity() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
-        // user should not have access to the ProcessingSteps
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getAllProcessingSteps(process)
-            }
-        }
-        // operator should have access
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(processService.getAllProcessingSteps(process).empty)
         }
-        // admin should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertTrue(processService.getAllProcessingSteps(process).empty)
-            // grant read permission to testuser
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now the testuser should have access
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertTrue(processService.getAllProcessingSteps(process).empty)
-        }
-        // but a different user should still not have access
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.getAllProcessingSteps(process)
             }
@@ -149,31 +112,14 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * user should only have access if ACL defined on JobExecutionPlan
      */
     @Test
-    void testNumberOfProcessingStepsSecurity() {
+    void testNumberOfProcessingStepsPermission() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
-        // user should not have access to the ProcessingSteps
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getNumberOfProcessessingSteps(process)
-            }
-        }
-        // operator should have access
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(0, processService.getNumberOfProcessessingSteps(process))
         }
-        // admin should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(0, processService.getNumberOfProcessessingSteps(process))
-            // grant read permission to testuser
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now the testuser should have access
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(0, processService.getNumberOfProcessessingSteps(process))
-        }
-        // but a different user should still not have access
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.getNumberOfProcessessingSteps(process)
             }
@@ -185,13 +131,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetProcessingStepNonExisting() {
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertNull(processService.getProcessingStep(1))
-        }
-        SpringSecurityUtils.doWithAuth("operator") {
-            assertNull(processService.getProcessingStep(1))
-        }
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertNull(processService.getProcessingStep(1))
         }
     }
@@ -219,113 +159,56 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             assertSame(step, processService.getProcessingStep(step.id))
         }
     }
 
-    /**
-     * Tests that a user has no access to a processing step unless ACL is defined
-     * on the JobExecutionPlan
-     */
     @Test
-    void testGetProcessingStepAsUser() {
+    void testGetProcessingStepPermission() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
-        // without ACL it should fail
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getProcessingStep(step.id)
-            }
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            processService.getProcessingStep(step.id)
         }
-        // now grant the user access
-        SpringSecurityUtils.doWithAuth("admin") {
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now user should have access
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertSame(step, processService.getProcessingStep(step.id))
-        }
-        // but different user should not have access
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.getProcessingStep(step.id)
             }
         }
     }
 
-    /**
-     * Tests the security of getAllUpdates:
-     * users should only have access if an ACL is defined on the JobExecutionPlan
-     */
     @Test
-    void testGetAllUpdatesSecurity() {
+    void testGetAllUpdatesPermission() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
-        // testuser should not have access to the updates
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getAllUpdates(step)
-            }
-        }
-        // operator should have access
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(processService.getAllUpdates(step).empty)
         }
-        // but admin user should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertTrue(processService.getAllUpdates(step).empty)
-            // grant read permission to testuser
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now the user should have access
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertTrue(processService.getAllUpdates(step).empty)
-        }
-        // but a different usre should not have access
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.getAllUpdates(step)
             }
         }
     }
 
-    /**
-     * Tests security of getNumberOfUpdates:
-     * user should only have access if ACL defined on JobExecutionPlan
-     */
     @Test
-    void testNumberOfUpdatesSecurity() {
+    void testNumberOfUpdatesPermission() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
-        // user should not have access to the ProcessingStepUpdates
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getNumberOfUpdates(step)
-            }
-        }
-        // operator should have access
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(0, processService.getNumberOfUpdates(step))
         }
-        // admin should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(0, processService.getNumberOfUpdates(step))
-            // grant read permission to testuser
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now the testuser should have access
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(0, processService.getNumberOfUpdates(step))
-        }
-        // but a different user should still not have access
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.getNumberOfUpdates(step)
             }
@@ -337,31 +220,14 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * user should only have access if ACL defined on JobExecutionPlan
      */
     @Test
-    void testGetLatestProcessingStepSecurity() {
+    void testGetLatestProcessingStepPermission() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
-        // without ACL user should not see the latest ProcessingStep
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getLatestProcessingStep(process)
-            }
-        }
-        // operator should have access
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertNull(processService.getLatestProcessingStep(process))
         }
-        // but an admin should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertNull(processService.getLatestProcessingStep(process))
-            // let's grant read permission to the user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now the testuser should have access
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertNull(processService.getLatestProcessingStep(process))
-        }
-        // but another user should not
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.getLatestProcessingStep(process)
             }
@@ -373,40 +239,18 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * only if ACL is defined on JobExecutionPlan a user has access
      */
     @Test
-    void testGetStateSecurity() {
+    void testGetStatePermission() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
         ProcessingStepUpdate update = mockProcessingStepUpdate(step)
-        // without ACL user should not be allowed to get the state of the Process
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getState(process)
-            }
-            shouldFail(AccessDeniedException) {
-                processService.getState(step)
-            }
-        }
-        // operator should have access
+
         SpringSecurityUtils.doWithAuth("operator") {
             assertEquals(ExecutionState.CREATED, processService.getState(process))
             assertEquals(ExecutionState.CREATED, processService.getState(step))
         }
-        // admin user should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(ExecutionState.CREATED, processService.getState(process))
-            assertEquals(ExecutionState.CREATED, processService.getState(step))
-            // let's grant read permission to the user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now the testuser should get the state
         SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(ExecutionState.CREATED, processService.getState(process))
-            assertEquals(ExecutionState.CREATED, processService.getState(step))
-        }
-        // but another user should not
-        SpringSecurityUtils.doWithAuth("user") {
             shouldFail(AccessDeniedException) {
                 processService.getState(process)
             }
@@ -416,45 +260,19 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         }
     }
 
-    /**
-     * Tests the security of getError:
-     * only if ACL is defined on JobExecutionPlan a user has access
-     */
     @Test
-    void testGetErrorSecurity() {
+    void testGetErrorPermission() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
-        ProcessingStepUpdate update = mockProcessingStepUpdate(step)
-        // without ACL user should not be allowed to get the error of the Process
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getError(process)
-            }
-            shouldFail(AccessDeniedException) {
-                processService.getError(step)
-            }
-        }
-        // operator should have access
-        SpringSecurityUtils.doWithAuth("operator") {
+        mockProcessingStepUpdate(step)
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertNull(processService.getError(process))
             assertNull(processService.getError(step))
         }
-        // admin user should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertNull(processService.getError(process))
-            assertNull(processService.getError(step))
-            // let's grant read permission to the user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now the testuser should get the error
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertNull(processService.getError(process))
-            assertNull(processService.getError(step))
-        }
-        // but another user should not
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.getError(process)
             }
@@ -469,40 +287,18 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * only if ACL is defined on JobExecutionPlan a user has access
      */
     @Test
-    void testGetLastUpdateSecurity() {
+    void testGetLastUpdatePermission() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
         ProcessingStepUpdate update = mockProcessingStepUpdate(step)
-        // without ACL user should not be allowed to get the last update of the Process
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getLastUpdate(process)
-            }
-            shouldFail(AccessDeniedException) {
-                processService.getLastUpdate(step)
-            }
-        }
-        // operator should have access
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(update.date, processService.getLastUpdate(process))
             assertEquals(update.date, processService.getLastUpdate(step))
         }
-        // admin user should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(update.date, processService.getLastUpdate(process))
-            assertEquals(update.date, processService.getLastUpdate(step))
-            // let's grant read permission to the user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now the testuser should get the update
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(update.date, processService.getLastUpdate(process))
-            assertEquals(update.date, processService.getLastUpdate(step))
-        }
-        // but another user should not
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.getLastUpdate(process)
             }
@@ -512,77 +308,35 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         }
     }
 
-    /**
-     * Tests the security of getLatestProcessingStepUpdate:
-     * only if ACL is defined on JobExecutionPlan a user has access
-     */
     @Test
-    void testGetLatestProcessingStepUpdateSecurity() {
+    void testGetLatestProcessingStepUpdatePermission() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
         ProcessingStepUpdate update = mockProcessingStepUpdate(step)
-        // without ACL user should not see the latest ProcessingStepUpdate
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getLatestProcessingStepUpdate(step)
-            }
-        }
-        // operator should have access
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertSame(update, processService.getLatestProcessingStepUpdate(step))
         }
-        // admin user should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertSame(update, processService.getLatestProcessingStepUpdate(step))
-            // let's grant read permission to the user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now the testuser should have access
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertSame(update, processService.getLatestProcessingStepUpdate(step))
-        }
-        // but another user should not get the ProcessingStepUpdate
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.getLatestProcessingStepUpdate(step)
             }
         }
     }
 
-    /**
-     * Tests the security of getFirstUpdate:
-     * only if ACL is defined on JobExecutionPlan a user has access
-     */
     @Test
-    void testGetFirstUpdateSecurity() {
+    void testGetFirstUpdatePermission() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
         ProcessingStepUpdate update = mockProcessingStepUpdate(step)
-        // without ACL user should not see the first update time
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getFirstUpdate(step)
-            }
-        }
-        // operator should have access
+
         SpringSecurityUtils.doWithAuth("operator") {
             assertEquals(update.date, processService.getFirstUpdate(step))
         }
-        // admin user should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            assertEquals(update.date, processService.getFirstUpdate(step))
-            // let's grant read permission to the user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now a user should have access
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertEquals(update.date, processService.getFirstUpdate(step))
-        }
-        // but another user should not get the first update time
         SpringSecurityUtils.doWithAuth("user") {
             shouldFail(AccessDeniedException) {
                 processService.getFirstUpdate(step)
@@ -590,52 +344,26 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         }
     }
 
-    /**
-     * Tests the security of getProcessingStepDuration:
-     * only if ACL is defined on JobExecutionPlan a user has access
-     */
     @Test
-    void testGetProcessingStepDurationSecurity() {
+    void testGetProcessingStepDurationPermission() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
-        ProcessingStepUpdate update = mockProcessingStepUpdate(step)
-        // without ACL user should not see the processing step duration
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.getProcessingStepDuration(step)
-            }
-        }
-        // operator should have access
-        SpringSecurityUtils.doWithAuth("operator") {
+        mockProcessingStepUpdate(step)
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertNull(processService.getProcessingStepDuration(step))
         }
-        // admin user should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            // null as we don't have any real updates
-            assertNull(processService.getProcessingStepDuration(step))
-            // let's grant read permission to the user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now a user should have access
-        SpringSecurityUtils.doWithAuth("testuser") {
-            assertNull(processService.getProcessingStepDuration(step))
-        }
-        // but another user should not get the processing step duration
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.getProcessingStepDuration(step)
             }
         }
     }
 
-    /**
-     * Tests the security of processInformation:
-     * only if ACL is defined on JobExecutionPlan a user has access
-     */
     @Test
-    void testProcessInformationSecurity() {
+    void testProcessInformationPermission() {
         JobExecutionPlan plan = mockPlan()
         StartJobDefinition startJob = new StartJobDefinition(name: "StartJobTest", bean: "testStartJob", plan: plan)
         assertNotNull(startJob.save(flush: true))
@@ -645,29 +373,11 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
         ProcessingStepUpdate update = mockProcessingStepUpdate(step)
-        // without ACL user should not have access to the process information
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.processInformation(process)
-            }
-        }
-        // operator should have access
-        SpringSecurityUtils.doWithAuth("operator") {
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             processService.processInformation(process)
         }
-        // but admin should have access
-        SpringSecurityUtils.doWithAuth("admin") {
-            // we don't verify the map - needs a dedicated test
-            processService.processInformation(process)
-            // let's grant read permission to the user
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-        }
-        // now our user should have access
-        SpringSecurityUtils.doWithAuth("testuser") {
-            processService.processInformation(process)
-        }
-        // but another user should still not get the process information
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.processInformation(process)
             }
@@ -679,49 +389,19 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      * requires write permission ACL on JobExecutionPlan
      */
     @Test
-    void testRestartProcessingStepSecurity() {
+    void testRestartProcessingStepPermission() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
         ProcessingStepUpdate update = mockProcessingStepUpdate(step)
-        // a user without write permission on the plan should not be allowed to restart the ProcessingStep
-        SpringSecurityUtils.doWithAuth("testuser") {
-            shouldFail(AccessDeniedException) {
-                processService.restartProcessingStep(step)
-            }
-        }
-        // operator should be allowed to restart
-        SpringSecurityUtils.doWithAuth("operator") {
-            // we are in wrong state, so we let if fail on purpose
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             shouldFail(IncorrectProcessingException) {
                 processService.restartProcessingStep(step)
             }
         }
-        // an admin user should be allowed
-        SpringSecurityUtils.doWithAuth("admin") {
-            // still in wrong state
-            shouldFail(IncorrectProcessingException) {
-                processService.restartProcessingStep(step)
-            }
-            // granting read permission should not help
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
-            SpringSecurityUtils.doWithAuth("testuser") {
-                shouldFail(AccessDeniedException) {
-                    processService.restartProcessingStep(step)
-                }
-            }
-            // but granting write permission should
-            aclUtilService.addPermission(plan, "testuser", BasePermission.WRITE)
-        }
-        SpringSecurityUtils.doWithAuth("testuser") {
-            // now it should fail with the IncorrectProcessingException
-            shouldFail(IncorrectProcessingException) {
-                processService.restartProcessingStep(step)
-            }
-        }
-        // but for other users it should still fail
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.restartProcessingStep(step)
             }

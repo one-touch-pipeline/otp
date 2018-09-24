@@ -80,7 +80,7 @@ class QcThresholdService {
         return classesWithProperties
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, read)")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     List<ClassWithThresholds> getClassesWithPropertiesForProjectAndSeqTypes(Project project, List<SeqType> seqTypes) {
         assert seqTypes: "No seqTypes given"
 

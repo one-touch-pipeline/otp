@@ -204,7 +204,7 @@ class IndividualService {
      * @return created Individual
      * @throws IndividualCreationException
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'write')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     public Individual createIndividual(Project project, IndividualCommand command, List<SamplesParser> parsedSamples) throws IndividualCreationException {
         Individual individual = new Individual(
                 pid: command.pid,
@@ -281,7 +281,7 @@ class IndividualService {
      * @throws ChangelogException In case the Changelog Entry could not be created
      * @throws IndividualUpdateException In case the Individual could not be updated
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or ((#individual != null) and hasPermission(#individual.project.id, 'de.dkfz.tbi.otp.ngsdata.Individual', write))")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateField(Individual individual, String key, String value) throws ChangelogException, IndividualUpdateException {
         ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(individual.class.getName())
         // To check if the key handed over matches the field name
@@ -312,7 +312,7 @@ class IndividualService {
      * @param individual The {@link Individual} the Samples are to be associated
      * @param parsedSamples List of SamplesParser containing the Samples
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual, 'write')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void createOrUpdateSamples(Individual individual, List<SamplesParser> parsedSamples) {
         parsedSamples.each { SamplesParser parsedSample ->
             SampleType sampleType = createSampleType(parsedSample.type)
@@ -334,7 +334,7 @@ class IndividualService {
      * @param individual The {@link Individual} to which the new {@link Sample} belongs to
      * @param type The type of the new {@link Sample}
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#individual, 'write')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void createSample(Individual individual, String type) {
         SampleType sampleType = createSampleType(type)
         Sample.findOrSaveByIndividualAndSampleType(individual, sampleType)

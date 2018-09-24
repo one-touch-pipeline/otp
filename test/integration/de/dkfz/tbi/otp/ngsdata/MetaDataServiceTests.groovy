@@ -249,39 +249,16 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
         }
     }
 
-    /**
-     * Tests that a user cannot update a metaDataEntry
-     * if there is no project defined.
-     */
     @Test
-    void testUpdateMetaDataEntryWithProjectAsUser() {
+    void testUpdateMetaDataEntryPermission() {
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.updateMetaDataEntry(entry, "test2")
             }
         }
-        doWithAnonymousAuth {
-            aclUtilService.addPermission(entry.dataFile.project, TESTUSER, BasePermission.READ)
-            aclUtilService.addPermission(entry.dataFile.project, TESTUSER, BasePermission.WRITE)
-        }
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
-        }
-        // other user should not have access
-        SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
-                metaDataService.updateMetaDataEntry(entry, "test3")
-            }
-        }
-        // let's give that user read permission
-        doWithAnonymousAuth {
-            aclUtilService.addPermission(entry.dataFile.project, USER, BasePermission.READ)
-        }
-        SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
-                metaDataService.updateMetaDataEntry(entry, "test3")
-            }
         }
     }
 
