@@ -486,18 +486,21 @@ class ProcessingOption implements Entity {
 
     static constraints = {
         name(blank: false)
-        type nullable: true, validator: { val, obj ->
+        type(nullable: true, validator: { val, obj ->
+            if (obj.dateObsoleted) {
+                return true
+            }
             if (obj.name.validatorForType) {
                 return obj.name.validatorForType.validate(val)
             } else {
                 return (val == null)
             }
-        }
+        })
         project(nullable: true)
         dateObsoleted(nullable: true)
-        value validator: { val, obj ->
-            val != null && obj.name && obj.name.validatorForValue.validate(val)
-        }
+        value(validator: { val, obj ->
+            (val != null && obj.name && obj.name.validatorForValue.validate(val)) || obj.dateObsoleted
+        })
     }
 }
 

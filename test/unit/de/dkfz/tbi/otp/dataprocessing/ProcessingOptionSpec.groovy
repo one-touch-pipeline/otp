@@ -48,6 +48,34 @@ class ProcessingOptionSpec extends Specification {
     }
 
 
+    @Unroll
+    void "validate #optionName with invalid value #value and obsolete date, should be valid"() {
+        when:
+        ProcessingOption processingOption = new ProcessingOption(
+                name: optionName,
+                type: null,
+                value: value,
+                dateObsoleted: new Date(),
+        )
+        then:
+        processingOption.validate()
 
+        where:
+        optionName                                                    | value
+        ProcessingOption.OptionName.TICKET_SYSTEM_AUTO_IMPORT_ENABLED | 't'
+        ProcessingOption.OptionName.TICKET_SYSTEM_AUTO_IMPORT_ENABLED | 'f'
+        ProcessingOption.OptionName.MAXIMUM_SFTP_CONNECTIONS          | 'text'
+    }
 
+    void "validate pipeline min coverage with invalid type #type and obsolete date, should be valid"() {
+        when:
+        ProcessingOption processingOption = new ProcessingOption(
+                name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
+                type: 'test',
+                value: '20.0',
+                dateObsoleted: new Date(),
+        )
+        then:
+        processingOption.validate()
+    }
 }
