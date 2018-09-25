@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.job.jobs.snvcalling.*
@@ -18,6 +18,8 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
 class TrackingService {
+
+    private static final List<Integer> MERGING_WORK_PACKAGE_NUMBERS = [1, 2].asImmutable()
 
     MailHelperService mailHelperService
 
@@ -42,9 +44,7 @@ class TrackingService {
 
     OtrsTicket createOrResetOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         OtrsTicket otrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
-        if (!otrsTicket) {
-            return createOtrsTicket(ticketNumber, seqCenterComment, automaticNotification)
-        } else {
+        if (otrsTicket) {
             otrsTicket.installationFinished = null
             otrsTicket.fastqcFinished = null
             otrsTicket.alignmentFinished = null
@@ -62,6 +62,8 @@ class TrackingService {
             }
             assert otrsTicket.save(flush: true, failOnError: true)
             return otrsTicket
+        } else {
+            return createOtrsTicket(ticketNumber, seqCenterComment, automaticNotification)
         }
     }
 
@@ -98,6 +100,7 @@ class TrackingService {
         return OtrsTicket.findAllByIdInList(otrsIds, [lock: true]) as Set
     }
 
+    @SuppressWarnings('NoJavaUtilDate')
     void setStarted(Collection<OtrsTicket> otrsTickets, OtrsTicket.ProcessingStep step) {
         otrsTickets.unique().each {
             if (it."${step}Started" == null) {
@@ -114,6 +117,7 @@ class TrackingService {
         }
     }
 
+    @SuppressWarnings('NoJavaUtilDate')
     void setFinishedTimestampsAndNotify(OtrsTicket ticket, SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()) {
         if (ticket.finalNotificationSent) {
             return
@@ -154,7 +158,6 @@ class TrackingService {
 
     void sendCustomerNotificationForOneProject(OtrsTicket ticket, ProcessingStatus status, OtrsTicket.ProcessingStep notificationStep) {
         if (notificationStep.notificationSubject != null) {
-
             Collection<SeqTrack> seqTracks = status.seqTrackProcessingStatuses*.seqTrack
             if (!seqTracks) {
                 throw new IllegalArgumentException('ProcessingStatus contains no SeqTracks')
@@ -251,7 +254,8 @@ class TrackingService {
         }
 
         if (OtrsTicket.ticketNumberConstraint(ticketNumber)) {
-            throw new UserException("Ticket number ${ticketNumber} does not pass validation or error while saving. An OTRS ticket must consist of 16 successive digits.")
+            throw new UserException("Ticket number ${ticketNumber} does not pass validation or error while saving. " +
+                    "An OTRS ticket must consist of 16 successive digits.")
         }
 
         // assigning a runSegment that belongs to an otrsTicket which consists of several other runSegments is not allowed,
@@ -260,10 +264,8 @@ class TrackingService {
             throw new UserException("Assigning a runSegment that belongs to an OTRS-Ticket which consists of several other runSegments is not allowed.")
         }
 
-        OtrsTicket newOtrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
-        if (!newOtrsTicket) {
-            newOtrsTicket = createOtrsTicket(ticketNumber, null, true)
-        }
+        OtrsTicket newOtrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber)) ?:
+                createOtrsTicket(ticketNumber, null, true)
 
         if (newOtrsTicket.finalNotificationSent) {
             throw new UserException("It is not allowed to assign to an finally notified OTRS-Ticket.")
@@ -292,35 +294,63 @@ class TrackingService {
                     it.dataInstallationState == SeqTrack.DataProcessingState.FINISHED ? ALL_DONE : NOTHING_DONE_MIGHT_DO,
                     it.fastqcState == SeqTrack.DataProcessingState.FINISHED ? ALL_DONE : NOTHING_DONE_MIGHT_DO, [])
         })
-        fillInMergingWorkPackageProcessingStatuses(status.seqTrackProcessingStatuses, samplePairDiscovery)
+        List<MergingWorkPackageProcessingStatus> allMwpStatuses = fillInMergingWorkPackageProcessingStatuses(status.seqTrackProcessingStatuses)
+        fillInSamplePairStatuses(allMwpStatuses, samplePairDiscovery)
+
         return status
     }
 
-    void fillInMergingWorkPackageProcessingStatuses(Collection<SeqTrackProcessingStatus> seqTrackProcessingStatuses, SamplePairDiscovery samplePairDiscovery) {
+    List<MergingWorkPackageProcessingStatus> fillInMergingWorkPackageProcessingStatuses(Collection<SeqTrackProcessingStatus> seqTrackProcessingStatuses) {
+        List<SeqTrackProcessingStatus> alignableSeqTrackProcessingStatuses = findAlignableSeqtracks(seqTrackProcessingStatuses)
+        List<MergingWorkPackage> mwps = mergingWorkPackageContainingSeqTracks(alignableSeqTrackProcessingStatuses)
+        return createAndConnectMergingWorkPackageProcessingStatus(mwps, alignableSeqTrackProcessingStatuses)
+    }
 
-        Collection<SeqTrackProcessingStatus> alignableSeqTracks =
-                seqTrackProcessingStatuses.findAll {
-                    SeqTrackService.mayAlign(it.seqTrack, false) || it.seqTrack.seqType.singleCell
-                }
+    private List<SeqTrackProcessingStatus> findAlignableSeqtracks(Collection<SeqTrackProcessingStatus> seqTrackProcessingStatuses) {
+        Collection<SeqTrackProcessingStatus> alignableSeqTrackProcessingStatuses = seqTrackProcessingStatuses.findAll {
+            SeqTrackService.mayAlign(it.seqTrack, false)
+        }
+        return alignableSeqTrackProcessingStatuses
+    }
 
-        Collection<MergingWorkPackageProcessingStatus> allMwpStatuses = []
-
-        Map<Map, Collection<SeqTrackProcessingStatus>> seqTracksByMergingProperties =
-                alignableSeqTracks.groupBy { MergingWorkPackage.getMergingProperties(it.seqTrack) }
-        seqTracksByMergingProperties.each { Map mergingProperties, List<SeqTrackProcessingStatus> seqTracksWithProperties ->
-            MergingWorkPackage.findAllWhere(mergingProperties).each { MergingWorkPackage mwp ->
-                AbstractMergedBamFile bamFile = mwp.bamFileThatIsReadyForFurtherAnalysis
-                MergingWorkPackageProcessingStatus mwpStatus =
-                        new MergingWorkPackageProcessingStatus(mwp, bamFile ? ALL_DONE : NOTHING_DONE_MIGHT_DO, bamFile, [])
-                allMwpStatuses.add(mwpStatus)
-                seqTracksWithProperties.each {
-                    it.mergingWorkPackageProcessingStatuses.add(mwpStatus)
-                }
+    private List<MergingWorkPackage> mergingWorkPackageContainingSeqTracks(List<SeqTrackProcessingStatus> alignableSeqTrackProcessingStatuses) {
+        return MergingWorkPackage.createCriteria().listDistinct {
+            seqTracks {
+                'in'('id', alignableSeqTrackProcessingStatuses*.seqTrack.id)
             }
         }
-
-        fillInSamplePairStatuses(allMwpStatuses, samplePairDiscovery)
     }
+
+    private List<MergingWorkPackageProcessingStatus> createAndConnectMergingWorkPackageProcessingStatus(
+            List<MergingWorkPackage> mergingWorkPackages, List<SeqTrackProcessingStatus> alignableSeqTrackProcessingStatuses) {
+        return mergingWorkPackages.collect { MergingWorkPackage mergingWorkPackage ->
+            MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(mergingWorkPackage)
+            connectSeqTrackProcessingStatusAndMergingWorkPackageProcessingStatus(alignableSeqTrackProcessingStatuses, mergingWorkPackage, mwpStatus)
+            return mwpStatus
+        }
+    }
+
+    private MergingWorkPackageProcessingStatus createMergingWorkPackageProcessingStatus(MergingWorkPackage mergingWorkPackage) {
+        AbstractMergedBamFile bamFile = mergingWorkPackage.bamFileThatIsReadyForFurtherAnalysis
+        MergingWorkPackageProcessingStatus mwpStatus = new MergingWorkPackageProcessingStatus(
+                mergingWorkPackage,
+                bamFile ? ALL_DONE : NOTHING_DONE_MIGHT_DO,
+                bamFile,
+                [],
+        )
+        return mwpStatus
+    }
+
+    private void connectSeqTrackProcessingStatusAndMergingWorkPackageProcessingStatus(
+            List<SeqTrackProcessingStatus> alignableSeqTrackProcessingStatuses, MergingWorkPackage mergingWorkPackage,
+            MergingWorkPackageProcessingStatus mwpStatus) {
+        alignableSeqTrackProcessingStatuses.findAll {
+            it.seqTrack in mergingWorkPackage.seqTracks
+        }.each { SeqTrackProcessingStatus it ->
+            it.mergingWorkPackageProcessingStatuses.add(mwpStatus)
+        }
+    }
+
 
     void fillInSamplePairStatuses(Collection<MergingWorkPackageProcessingStatus> mwpStatuses, SamplePairDiscovery samplePairDiscovery) {
         if (mwpStatuses.isEmpty()) {
@@ -339,7 +369,7 @@ class TrackingService {
             }
         }.each { SamplePair samplePair ->
             SamplePairProcessingStatus samplePairStatus = getSamplePairProcessingStatus(samplePair)
-            [1, 2].each {
+            MERGING_WORK_PACKAGE_NUMBERS.each {
                 MergingWorkPackageProcessingStatus mwpStatus = mwpStatusByMwp.get(samplePair."mergingWorkPackage${it}")
                 if (mwpStatus) {
                     mwpStatus.samplePairProcessingStatuses.add(samplePairStatus)
@@ -350,14 +380,14 @@ class TrackingService {
 
     private static WorkflowProcessingStatus getAnalysisProcessingStatus(BamFilePairAnalysis analysis, SamplePair sp, BamFileAnalysisService service) {
         WorkflowProcessingStatus status
-        if (analysis && !analysis.withdrawn && analysis.processingState == AnalysisProcessingStates.FINISHED && [1, 2].every {
+        if (analysis && !analysis.withdrawn && analysis.processingState == AnalysisProcessingStates.FINISHED && MERGING_WORK_PACKAGE_NUMBERS.every {
             AbstractMergedBamFile bamFile = analysis."sampleType${it}BamFile"
             return bamFile == bamFile.mergingWorkPackage.bamFileThatIsReadyForFurtherAnalysis
         }) {
             status = ALL_DONE
         } else if (analysis && !analysis.withdrawn && BamFileAnalysisService.processingStatesNotProcessable.contains(analysis.processingState)) {
             status = NOTHING_DONE_MIGHT_DO
-        } else if ([1, 2].every { sp."mergingWorkPackage${it}".bamFileThatIsReadyForFurtherAnalysis }) {
+        } else if (MERGING_WORK_PACKAGE_NUMBERS.every { sp."mergingWorkPackage${it}".bamFileThatIsReadyForFurtherAnalysis }) {
             if (service.samplePairForProcessing(ProcessingPriority.MINIMUM, sp)) {
                 status = NOTHING_DONE_MIGHT_DO
             } else {
@@ -421,6 +451,7 @@ class TrackingService {
 
         boolean calledCreateMissingDiseaseControlSamplePairs = false
 
+        @SuppressWarnings('BuilderMethodWithSideEffects')
         void createMissingDiseaseControlSamplePairs() {
             if (!calledCreateMissingDiseaseControlSamplePairs) {
                 new SamplePairDiscoveryJob().createMissingDiseaseControlSamplePairs()

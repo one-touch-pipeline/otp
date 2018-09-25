@@ -78,10 +78,10 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME,
         ].collect {
             DomainFactory.createProcessingOptionLazy([
-                    name: it,
-                    type: null,
+                    name   : it,
+                    type   : null,
                     project: null,
-                    value: 'test',
+                    value  : 'test',
             ])
         }
     }
@@ -104,52 +104,57 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         TestCase.assertContainSame(analysisProcessingSteps, testedProcessingSteps)
     }
 
-    def 'test findAllOtrsTickets' () {
-        given:
+    def 'test findAllOtrsTickets'() {
+        given: "a handfull of tickets and linked and unlinked seqtracks"
         TrackingService trackingService = new TrackingService()
+        // one ticket, with two seqtracks
         OtrsTicket otrsTicket01 = DomainFactory.createOtrsTicket()
+        SeqTrack seqTrack1A = DomainFactory.createSeqTrack()
+        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket01), seqTrack: seqTrack1A)
+        SeqTrack seqTrack1B = DomainFactory.createSeqTrack()
+        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket01), seqTrack: seqTrack1B)
+        // one ticket, one seqtrack
         OtrsTicket otrsTicket02 = DomainFactory.createOtrsTicket()
-        OtrsTicket otrsTicket03 = DomainFactory.createOtrsTicket()
-        SeqTrack seqTrack01 = DomainFactory.createSeqTrack()
         SeqTrack seqTrack02 = DomainFactory.createSeqTrack()
-        SeqTrack seqTrack03 = DomainFactory.createSeqTrack()
-        SeqTrack seqTrack04 = DomainFactory.createSeqTrack()
-        SeqTrack seqTrack05 = DomainFactory.createSeqTrack()
-        SeqTrack seqTrack06 = DomainFactory.createSeqTrack()
-        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket01), seqTrack: seqTrack01)
         DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket02), seqTrack: seqTrack02)
+        // another ticket, again one seqtrack
+        OtrsTicket otrsTicket03 = DomainFactory.createOtrsTicket()
+        SeqTrack seqTrack03 = DomainFactory.createSeqTrack()
         DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket03), seqTrack: seqTrack03)
-        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket01), seqTrack: seqTrack05)
-        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(), seqTrack: seqTrack06)
+        // an orphaned seqtrack, no ticket, no datafile
+        SeqTrack seqTrackOrphanNoDatafile = DomainFactory.createSeqTrack()
+        // an orphaned seqtrack, no ticket, but with a datafile
+        SeqTrack seqTrackOrphanWithDatafile = DomainFactory.createSeqTrack()
+        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(), seqTrack: seqTrackOrphanWithDatafile)
 
-        when:
-        Set<OtrsTicket> otrsTickets01 = trackingService.findAllOtrsTickets([seqTrack01, seqTrack02, seqTrack05])
+        when: "looking for seqtrack batches, find all (unique) tickets"
+        Set<OtrsTicket> actualBatch = trackingService.findAllOtrsTickets([seqTrack1A, seqTrack02, seqTrack1B])
         then:
-        TestCase.assertContainSame(otrsTickets01, [otrsTicket01, otrsTicket02])
+        TestCase.assertContainSame(actualBatch, [otrsTicket01, otrsTicket02])
 
-        when:
-        Set<OtrsTicket> otrsTickets02 = trackingService.findAllOtrsTickets([seqTrack03])
+        when: "looking for a single seqtrack, find its ticket"
+        Set<OtrsTicket> actualSingle = trackingService.findAllOtrsTickets([seqTrack03])
         then:
-        TestCase.assertContainSame(otrsTickets02, [otrsTicket03])
+        TestCase.assertContainSame(actualSingle, [otrsTicket03])
 
-        when:
-        Set<OtrsTicket> otrsTickets03 = trackingService.findAllOtrsTickets([seqTrack04])
+        when: "looking for orphans without datafiles, find nothing"
+        Set<OtrsTicket> actualOrphanNoDatafile = trackingService.findAllOtrsTickets([seqTrackOrphanNoDatafile])
         then:
-        TestCase.assertContainSame(otrsTickets03, [])
+        TestCase.assertContainSame(actualOrphanNoDatafile, [])
 
-        when:
-        Set<OtrsTicket> otrsTickets04 = trackingService.findAllOtrsTickets([seqTrack06])
+        when: "looking for orphans with datafiles, find nothing"
+        Set<OtrsTicket> actualOrphanWithDatafile = trackingService.findAllOtrsTickets([seqTrackOrphanWithDatafile])
         then:
-        TestCase.assertContainSame(otrsTickets04, [])
+        TestCase.assertContainSame(actualOrphanWithDatafile, [])
     }
 
     void 'processFinished calls setFinishedTimestampsAndNotify for the tickets of the passed SeqTracks'() {
-        given:
+        given: "tickets with (at least one) fastQC still in progress"
         OtrsTicket ticketA = DomainFactory.createOtrsTicket()
         SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile(
                 [
                         dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
-                        fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS,
+                        fastqcState          : SeqTrack.DataProcessingState.IN_PROGRESS,
                 ],
                 [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketA), fileLinked: true])
 
@@ -157,13 +162,13 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         SeqTrack seqTrackB1 = DomainFactory.createSeqTrackWithOneDataFile(
                 [
                         dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
-                        fastqcState: SeqTrack.DataProcessingState.FINISHED,
+                        fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                 ],
                 [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketB), fileLinked: true])
         DomainFactory.createSeqTrackWithOneDataFile(
                 [
                         dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
-                        fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS,
+                        fastqcState          : SeqTrack.DataProcessingState.IN_PROGRESS,
                 ],
                 [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketB), fileLinked: true])
 
@@ -174,10 +179,10 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         }
         DomainFactory.createProcessingOptionForNotificationRecipient()
 
-        when:
+        when: "running our tracking update"
         trackingService.processFinished([seqTrackA, seqTrackB1] as Set)
 
-        then:
+        then: "installation should be marked as done, but fastQC as still running"
         ticketA.installationFinished != null
         ticketB.installationFinished != null
         ticketB.fastqcFinished == null
@@ -199,9 +204,9 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 [fastqcState: SeqTrack.DataProcessingState.FINISHED],
                 [runSegment: runSegment, fileLinked: true])
 
-        // mailHelperService shall be null such that the test fails with a NullPointerException if the method tries to
-        // send a notification
-        trackingService.mailHelperService = null
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            0 * _
+        }
 
         when:
         trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
@@ -232,9 +237,9 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS],
                 [runSegment: runSegment, fileLinked: true])
 
-        // mailHelperService shall be null such that the test fails with a NullPointerException if the method tries to
-        // send a notification
-        trackingService.mailHelperService = null
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            0 * _
+        }
 
         when:
         trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
@@ -258,14 +263,14 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
                 [
                         dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
-                        fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS,
+                        fastqcState          : SeqTrack.DataProcessingState.IN_PROGRESS,
                 ],
                 [runSegment: runSegment, fileLinked: true])
         ProcessingStatus expectedStatus = [
                 getInstallationProcessingStatus: { -> ALL_DONE },
-                getFastqcProcessingStatus: { -> NOTHING_DONE_MIGHT_DO },
-                getAlignmentProcessingStatus: { -> NOTHING_DONE_WONT_DO },
-                getSnvProcessingStatus: { -> NOTHING_DONE_WONT_DO },
+                getFastqcProcessingStatus      : { -> NOTHING_DONE_MIGHT_DO },
+                getAlignmentProcessingStatus   : { -> NOTHING_DONE_WONT_DO },
+                getSnvProcessingStatus         : { -> NOTHING_DONE_WONT_DO },
         ] as ProcessingStatus
 
         String prefix = "the prefix"
@@ -313,14 +318,14 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithOneDataFile(
                 [
                         dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
-                        fastqcState: SeqTrack.DataProcessingState.FINISHED,
+                        fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                 ],
                 [runSegment: runSegment, fileLinked: true])
         SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithOneDataFile([
-                sample: DomainFactory.createSample(individual: DomainFactory.createIndividual(project: seqTrack1.project)),
+                sample               : DomainFactory.createSample(individual: DomainFactory.createIndividual(project: seqTrack1.project)),
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
-                fastqcState: SeqTrack.DataProcessingState.FINISHED,
-                run: DomainFactory.createRun(
+                fastqcState          : SeqTrack.DataProcessingState.FINISHED,
+                run                  : DomainFactory.createRun(
                         seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                                 seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()],
                         ),
@@ -339,13 +344,13 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 ]),
                 DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack2] as Set],
         ))
-        ((MergingWorkPackage)(abstractMergedBamFile.workPackage)).seqTracks.add(seqTrack2)
+        ((MergingWorkPackage) (abstractMergedBamFile.workPackage)).seqTracks.add(seqTrack2)
         abstractMergedBamFile.workPackage.save(flush: true, failOnError: true)
         ProcessingStatus expectedStatus = [
                 getInstallationProcessingStatus: { -> ALL_DONE },
-                getFastqcProcessingStatus: { -> ALL_DONE },
-                getAlignmentProcessingStatus: { -> PARTLY_DONE_WONT_DO_MORE },
-                getSnvProcessingStatus: { -> NOTHING_DONE_WONT_DO },
+                getFastqcProcessingStatus      : { -> ALL_DONE },
+                getAlignmentProcessingStatus   : { -> PARTLY_DONE_WONT_DO_MORE },
+                getSnvProcessingStatus         : { -> NOTHING_DONE_WONT_DO },
         ] as ProcessingStatus
 
         String prefix = "the prefix"
@@ -398,14 +403,14 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithOneDataFile(
                 [
                         dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
-                        fastqcState: SeqTrack.DataProcessingState.FINISHED,
+                        fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                 ],
                 [runSegment: runSegment, fileLinked: true])
         SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithOneDataFile([
-                sample: DomainFactory.createSample(individual: DomainFactory.createIndividual(project: seqTrack1.project)),
+                sample               : DomainFactory.createSample(individual: DomainFactory.createIndividual(project: seqTrack1.project)),
                 dataInstallationState: SeqTrack.DataProcessingState.IN_PROGRESS,
-                fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
-                run: DomainFactory.createRun(
+                fastqcState          : SeqTrack.DataProcessingState.NOT_STARTED,
+                run                  : DomainFactory.createRun(
                         seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                                 seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()],
                         ),
@@ -549,13 +554,13 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         trackingService.sendCustomerNotification(ticket, status, notificationStep)
 
         where:
-        dataCase  | automaticNotification | notificationStep                       | recipients                            | subject
-        1         | true                  | OtrsTicket.ProcessingStep.INSTALLATION | ['tr_list@test.test', OTRS_RECIPIENT] | 'Project1 sequencing data installed'
-        2         | false                 | OtrsTicket.ProcessingStep.INSTALLATION | [OTRS_RECIPIENT]                      | 'TO BE SENT: Project1 sequencing data installed'
-        3         | true                  | OtrsTicket.ProcessingStep.INSTALLATION | ['tr_list@test.test', OTRS_RECIPIENT] | '[S#1234] Project1 sequencing data installed'
-        4         | true                  | OtrsTicket.ProcessingStep.FASTQC       | []                                    | null
-        5         | true                  | OtrsTicket.ProcessingStep.ALIGNMENT    | [OTRS_RECIPIENT]                      | 'TO BE SENT: Project2 sequencing data aligned'
-        6         | true                  | OtrsTicket.ProcessingStep.SNV          | [OTRS_RECIPIENT]                      | 'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called'
+        dataCase | automaticNotification | notificationStep                       | recipients                            | subject
+        1        | true                  | OtrsTicket.ProcessingStep.INSTALLATION | ['tr_list@test.test', OTRS_RECIPIENT] | 'Project1 sequencing data installed'
+        2        | false                 | OtrsTicket.ProcessingStep.INSTALLATION | [OTRS_RECIPIENT]                      | 'TO BE SENT: Project1 sequencing data installed'
+        3        | true                  | OtrsTicket.ProcessingStep.INSTALLATION | ['tr_list@test.test', OTRS_RECIPIENT] | '[S#1234] Project1 sequencing data installed'
+        4        | true                  | OtrsTicket.ProcessingStep.FASTQC       | []                                    | null
+        5        | true                  | OtrsTicket.ProcessingStep.ALIGNMENT    | [OTRS_RECIPIENT]                      | 'TO BE SENT: Project2 sequencing data aligned'
+        6        | true                  | OtrsTicket.ProcessingStep.SNV          | [OTRS_RECIPIENT]                      | 'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called'
     }
 
     void 'sendCustomerNotification, with multiple projects, sends multiple notifications'() {
@@ -605,7 +610,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
     void "fillInMergingWorkPackageProcessingStatuses, no ST, does not crash"() {
         expect:
-        trackingService.fillInMergingWorkPackageProcessingStatuses([], new SamplePairDiscovery())
+        trackingService.fillInMergingWorkPackageProcessingStatuses([]).empty
     }
 
     void "fillInMergingWorkPackageProcessingStatuses, 1 ST not alignable, returns NOTHING_DONE_WONT_DO"() {
@@ -614,7 +619,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         ProcessingStatus processingStatus = createProcessingStatus(seqTrackStatus)
 
         when:
-        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus], new SamplePairDiscovery())
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
 
         then:
         seqTrackStatus.mergingWorkPackageProcessingStatuses.isEmpty()
@@ -630,7 +635,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
 
         when:
-        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus], new SamplePairDiscovery())
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
 
         then:
         MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrackStatus.mergingWorkPackageProcessingStatuses)
@@ -647,7 +652,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage))
 
         when:
-        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus], new SamplePairDiscovery())
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
 
         then:
         MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrackStatus.mergingWorkPackageProcessingStatuses)
@@ -661,14 +666,14 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     void "fillInMergingWorkPackageProcessingStatuses, 1 ST not alignable, rest merged, returns NOTHING_DONE_WONT_DO_MORE and ALL_DONE"() {
         given:
         AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
-        Set<SeqTrack> seqTracks = new HashSet<SeqTrack>(((MergingWorkPackage)(bamFile.workPackage)).seqTracks)
+        Set<SeqTrack> seqTracks = new HashSet<SeqTrack>(((MergingWorkPackage) (bamFile.workPackage)).seqTracks)
         SeqTrackProcessingStatus seqTrack1Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage, [:], [fileWithdrawn: true]))
-        ((MergingWorkPackage)(bamFile.workPackage)).seqTracks = seqTracks
+        ((MergingWorkPackage) (bamFile.workPackage)).seqTracks = seqTracks
         bamFile.workPackage.save(flush: true, failOnError: true)
         SeqTrackProcessingStatus seqTrack2Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
 
         when:
-        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status], new SamplePairDiscovery())
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status])
 
         then:
         seqTrack1Status.mergingWorkPackageProcessingStatuses.isEmpty()
@@ -689,7 +694,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         ProcessingStatus processingStatus = createProcessingStatus(seqTrackStatus)
 
         when:
-        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus], new SamplePairDiscovery())
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
 
         then:
         seqTrackStatus.mergingWorkPackageProcessingStatuses.isEmpty()
@@ -705,7 +710,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
 
         when:
-        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus], new SamplePairDiscovery())
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
 
         then:
         MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrackStatus.mergingWorkPackageProcessingStatuses)
@@ -723,7 +728,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         SeqTrackProcessingStatus seqTrack2Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile())
 
         when:
-        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status], new SamplePairDiscovery())
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status])
 
         then:
         MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrack1Status.mergingWorkPackageProcessingStatuses)
@@ -745,7 +750,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         SeqTrackProcessingStatus seqTrack2Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile())
 
         when:
-        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status], new SamplePairDiscovery())
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status])
 
         then:
         MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrack1Status.mergingWorkPackageProcessingStatuses)
@@ -769,7 +774,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         SeqTrackProcessingStatus seqTrack3Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile1.mergingWorkPackage))
 
         when:
-        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status, seqTrack3Status], new SamplePairDiscovery())
+        trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status, seqTrack3Status])
 
         then:
         MergingWorkPackageProcessingStatus mwp1Status = exactlyOneElement(seqTrack1Status.mergingWorkPackageProcessingStatuses)
@@ -794,11 +799,11 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         return new MergingWorkPackageProcessingStatus(mergingWorkPackage, processingStatus, null, [])
     }
 
-    private static MergingWorkPackageProcessingStatus createMergingWorkPackageProcessingStatus(AbstractMergedBamFile bamFile) {
+    private MergingWorkPackageProcessingStatus createMergingWorkPackageProcessingStatus(AbstractMergedBamFile bamFile) {
         return new MergingWorkPackageProcessingStatus(bamFile.mergingWorkPackage, ALL_DONE, bamFile, [])
     }
 
-    private static SeqTrackProcessingStatus createSeqTrackProcessingStatus(MergingWorkPackageProcessingStatus... mwpStatuses) {
+    private SeqTrackProcessingStatus createSeqTrackProcessingStatus(MergingWorkPackageProcessingStatus... mwpStatuses) {
         // seqTrack actually must not be null, but for this test it does not matter
         return new SeqTrackProcessingStatus(null, ALL_DONE, ALL_DONE, Arrays.asList(mwpStatuses))
     }
@@ -821,8 +826,8 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
         mwpStatus.indelProcessingStatus == NOTHING_DONE_WONT_DO
         mwpStatus.sophiaProcessingStatus == NOTHING_DONE_WONT_DO
-        mwpStatus.aceseqProcessingStatus== NOTHING_DONE_WONT_DO
-        mwpStatus.runYapsaProcessingStatus== NOTHING_DONE_WONT_DO
+        mwpStatus.aceseqProcessingStatus == NOTHING_DONE_WONT_DO
+        mwpStatus.runYapsaProcessingStatus == NOTHING_DONE_WONT_DO
         createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
     }
 
@@ -908,7 +913,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
             case OtrsTicket.ProcessingStep.RUN_YAPSA:
                 analysisInstance.samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
                 analysisInstance.samplePair.save(flush: true)
-                DomainFactory.createRoddySnvInstanceWithRoddyBamFiles([samplePair:  analysisInstance.samplePair])
+                DomainFactory.createRoddySnvInstanceWithRoddyBamFiles([samplePair: analysisInstance.samplePair])
                 break
         }
 
@@ -976,9 +981,9 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
         samplePairStatus.samplePair == analysisInstance.samplePair
         samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
-        samplePairStatus."${pairAnalysis.processingStatus}"  == NOTHING_DONE_MIGHT_DO
-        mwpStatus."${pairAnalysis.processingStatus}"  == NOTHING_DONE_MIGHT_DO
-        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}"  == NOTHING_DONE_MIGHT_DO
+        samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
 
         where:
         pairAnalysis << listPairAnalysis
@@ -1035,7 +1040,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     }
 
 
-    @Unroll( "fillInSamplePairStatuses, 1 #pairAnalysis.analysisType not FINISHED, returns NOTHING_DONE_MIGHT_DO")
+    @Unroll("fillInSamplePairStatuses, 1 #pairAnalysis.analysisType not FINISHED, returns NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, 1 analysisInstance not FINISHED, returns NOTHING_DONE_MIGHT_DO"() {
         given:
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"()
@@ -1064,7 +1069,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
 
     @Unroll("fillInSamplePairStatuses, with #pairAnalysis.analysisType 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO")
-    void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO"(){
+    void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO"() {
         given:
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
@@ -1097,7 +1102,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     }
 
     @Unroll("fillInSamplePairStatuses, with #pairAnalysis.analysisType 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO")
-    void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO"(){
+    void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO"() {
         given:
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
@@ -1126,7 +1131,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     }
 
     @Unroll("fillInSamplePairStatuses, with #pairAnalysis.analysisType 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO")
-    void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO"(){
+    void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO"() {
 
         given:
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
@@ -1150,15 +1155,15 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         samplePair1Status.samplePair == analysisInstance.samplePair
         samplePair1Status."${pairAnalysis.completeCallingInstance}" == analysisInstance
         samplePair1Status."${pairAnalysis.processingStatus}" == ALL_DONE
-        mwp1Status."${pairAnalysis.processingStatus}"  == ALL_DONE
+        mwp1Status."${pairAnalysis.processingStatus}" == ALL_DONE
 
         SamplePairProcessingStatus samplePair2Status = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
         samplePair2Status.samplePair == analysisInstance2.samplePair
-        samplePair2Status."${pairAnalysis.completeCallingInstance}"  == null
-        samplePair2Status."${pairAnalysis.processingStatus}"  == NOTHING_DONE_MIGHT_DO
-        mwp2Status."${pairAnalysis.processingStatus}"  == NOTHING_DONE_MIGHT_DO
+        samplePair2Status."${pairAnalysis.completeCallingInstance}" == null
+        samplePair2Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+        mwp2Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
 
-        createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalysis.processingStatus}"  == PARTLY_DONE_MIGHT_DO_MORE
+        createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalysis.processingStatus}" == PARTLY_DONE_MIGHT_DO_MORE
 
         where:
         pairAnalysis << listPairAnalysis
@@ -1170,7 +1175,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         return setBamFileInProjectFolder(bamFile)
     }
 
-    private static AbstractMergedBamFile setBamFileInProjectFolder (AbstractMergedBamFile bamFile) {
+    private static AbstractMergedBamFile setBamFileInProjectFolder(AbstractMergedBamFile bamFile) {
         bamFile.mergingWorkPackage.bamFileInProjectFolder = bamFile
         bamFile.mergingWorkPackage.save(flush: true)
 
@@ -1268,9 +1273,9 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         trackingService.metaClass.getProcessingStatus = { Set<SeqTrack> set ->
             return [
                     getInstallationProcessingStatus: { -> ALL_DONE },
-                    getFastqcProcessingStatus: { -> ALL_DONE },
-                    getAlignmentProcessingStatus: { -> PARTLY_DONE_MIGHT_DO_MORE },
-                    getSnvProcessingStatus: { -> NOTHING_DONE_MIGHT_DO },
+                    getFastqcProcessingStatus      : { -> ALL_DONE },
+                    getAlignmentProcessingStatus   : { -> PARTLY_DONE_MIGHT_DO_MORE },
+                    getSnvProcessingStatus         : { -> NOTHING_DONE_MIGHT_DO },
             ] as ProcessingStatus
         }
 
@@ -1286,5 +1291,108 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         null == newOtrsTicket.alignmentFinished
         null == newOtrsTicket.snvStarted
         null == newOtrsTicket.snvFinished
+    }
+
+
+    void "fillInMergingWorkPackageProcessingStatuses, when a SeqTrack is added manually to an existing MergingWorkPackage, then find the MergingWorkPackage for this SeqTrack"() {
+        given: "two seqtracks, with different merging properties, but manually combined in the same MergingWorkPackage"
+        // shared
+        Sample sharedSample = DomainFactory.createSample()
+        SeqType sharedSeqType = DomainFactory.createSeqType()
+
+        // seqtrack A
+        SeqPlatformGroup groupA = DomainFactory.createSeqPlatformGroup()
+        SeqTrack seqTrackA = createSeqTrack(sharedSample, sharedSeqType, groupA)
+        SeqTrackProcessingStatus statusA = new SeqTrackProcessingStatus(seqTrackA,
+                ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+                ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+                []
+        )
+        // seqtrack B
+        SeqPlatformGroup groupB = DomainFactory.createSeqPlatformGroup()
+        SeqTrack seqTrackB = createSeqTrack(sharedSample, sharedSeqType, groupB)
+        SeqTrackProcessingStatus statusB = new SeqTrackProcessingStatus(seqTrackB,
+                ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_MIGHT_DO_MORE,
+                ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_MIGHT_DO_MORE,
+                []
+        )
+        // "existing" merge group
+        MergingWorkPackage mergePackageA = DomainFactory.createMergingWorkPackage([
+                libraryPreparationKit: null, // irrelevant for this test, don't even need to mock it
+                sample               : sharedSample,
+                seqType              : sharedSeqType,
+                seqPlatformGroup     : groupA,
+                seqTracks            : [seqTrackA],
+        ], true)
+
+        // "manually" add seqtrack with mismatching seqPlatformGroup
+        mergePackageA.seqTracks.add(seqTrackB)
+        mergePackageA.save()
+
+        DomainFactory.createMergingCriteriaLazy(project: sharedSample.project, seqType: sharedSeqType)
+
+        when: "looking for B"
+        List<MergingWorkPackageProcessingStatus> statuses = trackingService.fillInMergingWorkPackageProcessingStatuses([statusB])
+
+        then: "we should find A's merging package"
+        statuses*.mergingWorkPackage == [mergePackageA]
+    }
+
+
+    void "fillInMergingWorkPackageProcessingStatuses, when a SeqTrack is removed manually from an existing MergingWorkPackage, then do not find the MergingWorkPackage for this SeqTrack"() {
+        given: "two seqtracks, with same merging properties, but one manually removed from the MergingWorkPackage"
+        // shared
+        Sample sharedSample = DomainFactory.createSample()
+        SeqType sharedSeqType = DomainFactory.createSeqType()
+
+        // seqtrack A
+        SeqPlatformGroup groupA = DomainFactory.createSeqPlatformGroup()
+        SeqTrack seqTrackA = createSeqTrack(sharedSample, sharedSeqType, groupA)
+        SeqTrackProcessingStatus statusA = new SeqTrackProcessingStatus(seqTrackA,
+                ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+                ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+                []
+        )
+        // seqtrack B
+        SeqTrack seqTrackB = createSeqTrack(sharedSample, sharedSeqType, groupA)
+        SeqTrackProcessingStatus statusB = new SeqTrackProcessingStatus(seqTrackB,
+                ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_MIGHT_DO_MORE,
+                ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_MIGHT_DO_MORE,
+                []
+        )
+        // "existing" merge group
+        MergingWorkPackage mergePackageA = DomainFactory.createMergingWorkPackage([
+                libraryPreparationKit: null, // irrelevant for this test, don't even need to mock it
+                sample               : sharedSample,
+                seqType              : sharedSeqType,
+                seqPlatformGroup     : groupA,
+                seqTracks            : [seqTrackA, seqTrackB],
+        ], true)
+
+        // "manually" remove seqtrack with matching seqPlatformGroup
+        mergePackageA.seqTracks.remove(seqTrackB)
+        mergePackageA.save()
+
+        DomainFactory.createMergingCriteriaLazy(project: sharedSample.project, seqType: sharedSeqType)
+
+        when: "looking for B"
+        List<MergingWorkPackageProcessingStatus> statuses = trackingService.fillInMergingWorkPackageProcessingStatuses([statusB])
+
+        then: "we should not find a merging package"
+        statuses.empty
+    }
+
+
+    private SeqTrack createSeqTrack(Sample sample, SeqType seqType, SeqPlatformGroup groupA) {
+        SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile([
+                sample : sample,
+                seqType: seqType,
+                run    : DomainFactory.createRun(
+                        seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
+                                seqPlatformGroups: [groupA],
+                        ),
+                ),
+        ])
+        return seqTrackA
     }
 }

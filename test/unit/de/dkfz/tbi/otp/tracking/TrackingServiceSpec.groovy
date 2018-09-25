@@ -39,17 +39,17 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 ])
 class TrackingServiceSpec extends Specification {
 
-    final static String TICKET_NUMBER = "2000010112345678"
-    final static String PREFIX = "the prefix"
+    private final static String TICKET_NUMBER = "2000010112345678"
+    private final static String PREFIX = "the prefix"
 
-    TrackingService trackingService = new TrackingService()
+    private TrackingService trackingService = new TrackingService()
 
-    def setup() {
+    void setup() {
         trackingService.processingOptionService = new ProcessingOptionService()
     }
 
     @Unroll
-    def 'test createOrResetOtrsTicket, when no OtrsTicket with ticket number exists, creates one'() {
+    void 'test createOrResetOtrsTicket, when no OtrsTicket with ticket number exists, creates one'() {
         given:
         OtrsTicket otrsTicket
         TrackingService trackingService = new TrackingService()
@@ -70,7 +70,8 @@ class TrackingServiceSpec extends Specification {
         ]
     }
 
-    def 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, resets it'() {
+    @SuppressWarnings('NoJavaUtilDate')
+    void 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, resets it'() {
         given:
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket([
                 ticketNumber         : TICKET_NUMBER,
@@ -95,7 +96,7 @@ class TrackingServiceSpec extends Specification {
     }
 
     @Unroll
-    def 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, combine the seq center comment'() {
+    void 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, combine the seq center comment'() {
         given:
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket([
                 ticketNumber    : TICKET_NUMBER,
@@ -119,7 +120,7 @@ class TrackingServiceSpec extends Specification {
     }
 
 
-    def 'test createOrResetOtrsTicket, when ticket number is null, throws ValidationException'() {
+    void 'test createOrResetOtrsTicket, when ticket number is null, throws ValidationException'() {
         given:
         TrackingService trackingService = new TrackingService()
 
@@ -131,7 +132,7 @@ class TrackingServiceSpec extends Specification {
         ex.message.contains("on field 'ticketNumber': rejected value [null]")
     }
 
-    def 'test createOrResetOtrsTicket, when ticket number is blank, throws ValidationException'() {
+    void 'test createOrResetOtrsTicket, when ticket number is blank, throws ValidationException'() {
         given:
         TrackingService trackingService = new TrackingService()
 
@@ -143,7 +144,7 @@ class TrackingServiceSpec extends Specification {
         ex.message.contains("on field 'ticketNumber': rejected value []")
     }
 
-    def 'test resetAnalysisNotification, when OtrsTicket is rest, then final flag is false and finish date of analysis dates are null'() {
+    void 'test resetAnalysisNotification, when OtrsTicket is rest, then final flag is false and finish date of analysis dates are null'() {
         given:
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicketWithEndDatesAndNotificationSent([
                 ticketNumber         : TICKET_NUMBER,
@@ -164,7 +165,7 @@ class TrackingServiceSpec extends Specification {
     }
 
 
-    def 'test setStarted'() {
+    void 'test setStarted'() {
         given:
         TrackingService trackingService = new TrackingService()
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
@@ -185,7 +186,7 @@ class TrackingServiceSpec extends Specification {
         OtrsTicket.ProcessingStep.ACESEQ       | _
     }
 
-    def 'test setStarted, twice'() {
+    void 'test setStarted, twice'() {
         given:
         TrackingService trackingService = new TrackingService()
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
@@ -220,7 +221,9 @@ class TrackingServiceSpec extends Specification {
         String sampleText = "${sample.project.name}, ${sample.individual.pid}, ${sample.sampleType.name}, ${seqType.name} ${seqType.libraryLayout}"
         IlseSubmission ilseSubmission1 = DomainFactory.createIlseSubmission(ilseNumber: 1234)
         IlseSubmission ilseSubmission2 = DomainFactory.createIlseSubmission(ilseNumber: 5678)
-        Closure createInstalledSeqTrack = { Map properties -> DomainFactory.createSeqTrack([dataInstallationState: SeqTrack.DataProcessingState.FINISHED] + properties) }
+        Closure createInstalledSeqTrack = { Map properties ->
+            DomainFactory.createSeqTrack([dataInstallationState: SeqTrack.DataProcessingState.FINISHED] + properties)
+        }
         Set<SeqTrack> seqTracks = [
                 createInstalledSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission2, run: runA, laneId: '1'),
                 createInstalledSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission1, run: runB, laneId: '2'),
@@ -290,8 +293,9 @@ ILSe 5678, runA, lane 1, ${sampleText}
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
         String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
+        String expectedHeader = "${PREFIX}#${ticket.ticketNumber} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})"
         trackingService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})", _, [mailingListName, recipient])
+            1 * sendEmail(expectedHeader, _, [mailingListName, recipient])
         }
 
         expect:
@@ -305,8 +309,10 @@ ILSe 5678, runA, lane 1, ${sampleText}
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
         String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
+        String expectedHeader = "${PREFIX}#${ticket.ticketNumber} Final Processing Status Update [S#${seqTrack.ilseId}] ${seqTrack.individual.pid} " +
+                "(${seqTrack.seqType.displayName})"
         trackingService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update [S#${seqTrack.ilseId}] ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})", _, [recipient])
+            1 * sendEmail(expectedHeader, _, [recipient])
         }
 
         expect:
@@ -324,8 +330,11 @@ ILSe 5678, runA, lane 1, ${sampleText}
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
         String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
+        String expectedHeader = "${PREFIX}#${ticket.ticketNumber} Final Processing Status Update " +
+                "[S#${seqTrack1.ilseId},${seqTrack2.ilseId},${seqTrack3.ilseId}] ${seqTrack1.individual.pid}, ${seqTrack2.individual.pid}, " +
+                "${seqTrack3.individual.pid} (${seqTrack1.seqType.displayName}, ${seqTrack2.seqType.displayName}, ${seqTrack3.seqType.displayName})"
         trackingService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update [S#${seqTrack1.ilseId},${seqTrack2.ilseId},${seqTrack3.ilseId}] ${seqTrack1.individual.pid}, ${seqTrack2.individual.pid}, ${seqTrack3.individual.pid} (${seqTrack1.seqType.displayName}, ${seqTrack2.seqType.displayName}, ${seqTrack3.seqType.displayName})", _, [recipient])
+            1 * sendEmail(expectedHeader, _, [recipient])
         }
 
         expect:
@@ -368,7 +377,6 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
     @Unroll
     void "testCombineStatuses"() {
-
         expect:
         result == TrackingService.combineStatuses([input1, input2], Closure.IDENTITY)
 
