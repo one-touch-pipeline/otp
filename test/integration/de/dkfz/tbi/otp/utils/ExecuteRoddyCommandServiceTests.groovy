@@ -15,6 +15,15 @@ import static de.dkfz.tbi.otp.utils.LocalShellHelper.*
 
 class ExecuteRoddyCommandServiceTests {
 
+    static final private String LOAD_MODULE = "LOAD MODULE"
+
+    static final private String ACTIVATE_JAVA = "ACTIVATE JAVA"
+
+    static final private String ACTIVATE_GROOVY = "ACTIVATE GROOVY"
+
+    static final private String INIT_MODULES = "${LOAD_MODULE}\n${ACTIVATE_JAVA}\n${ACTIVATE_GROOVY}\n"
+
+
     ExecuteRoddyCommandService executeRoddyCommandService
 
     RemoteShellHelper remoteShellHelper
@@ -211,6 +220,7 @@ class ExecuteRoddyCommandServiceTests {
         String viewByPid = roddyBamFile.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
 
         String expectedCmd =
+                INIT_MODULES +
                 "${roddyCommand} rerun ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
                 "${roddyBamFile.individual.pid} " +
                 "--useconfig=${applicationIniPath} " +
@@ -227,6 +237,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_firstRun_AllFine() {
+        initRoddyModule()
         helperFor_testDefaultRoddyExecutionCommand_AllFine()
 
         assert roddyBamFile.roddyExecutionDirectoryNames.empty
@@ -234,6 +245,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_restartWithoutDeletedWorkDirectory_AllFine() {
+        initRoddyModule()
         roddyBamFile.roddyExecutionDirectoryNames = [
                 RODDY_EXECUTION_DIR_NAME_1,
         ]
@@ -248,6 +260,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_restartWithDeletedWorkDirectory_AllFine() {
+        initRoddyModule()
         roddyBamFile.roddyExecutionDirectoryNames = [
                 RODDY_EXECUTION_DIR_NAME_1,
                 RODDY_EXECUTION_DIR_NAME_2,
@@ -261,7 +274,9 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testRoddyGetRuntimeConfigCommand_AllFine() {
+        initRoddyModule()
         String expectedCmd =
+                INIT_MODULES +
                 "${roddyCommand} printidlessruntimeconfig ${CONFIG_NAME}.config@${ANALYSIS_ID} " +
                 "--useconfig=${applicationIniPath} " +
                 "--usefeaturetoggleconfig=${featureTogglesConfigPath} " +
@@ -503,5 +518,12 @@ class ExecuteRoddyCommandServiceTests {
             """.stripIndent()
 
         assert value ==~ expected
+    }
+
+
+    private void initRoddyModule() {
+        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, LOAD_MODULE)
+        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_JAVA, ACTIVATE_JAVA)
+        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY, ACTIVATE_GROOVY)
     }
 }

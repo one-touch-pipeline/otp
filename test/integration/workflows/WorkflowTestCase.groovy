@@ -150,7 +150,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
         DomainFactory.createProcessingOptionLazy(
                 name: OptionName.RODDY_APPLICATION_INI,
-                value: new File(getRootDirectory(), "applicationProperties-3.0-lsf.ini").absolutePath
+                value: new File(getRootDirectory(), "applicationProperties-3.0-lsf-remote.ini").absolutePath
         )
 
 

@@ -376,6 +376,14 @@ class DomainFactory {
         return processingOption
     }
 
+    static ProcessingOption createProcessingOptionLazy(OptionName optionName, String value, String type = null) {
+        return createProcessingOptionLazy([
+                name: optionName,
+                value: value,
+                type: type,
+        ])
+    }
+
     static JobErrorDefinition createJobErrorDefinition(Map properties = [:]) {
         return createDomainObject(JobErrorDefinition, [
                 type           : JobErrorDefinition.Type.MESSAGE,
@@ -389,7 +397,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static void createProcessingOptionForOtrsTicketPrefix(String prefix = "Prefix ${counter++}") {
+    static void createProcessingOptionForOtrsTicketPrefix(String prefix = "Prefix ${counter++}") {
         createProcessingOptionLazy(
                  name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX,
                  type: null,
@@ -398,7 +406,6 @@ class DomainFactory {
         )
     }
 
-    public
     static void createProcessingOptionForNotificationRecipient(String recipientEmail = HelperUtils.randomEmail) {
         createProcessingOptionLazy(
                 name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
@@ -418,7 +425,6 @@ class DomainFactory {
         )
     }
 
-    public
     static void createProcessingOptionForEmailSenderSalutation(String message = "the service team${counter++}") {
         createProcessingOptionLazy(
                 name: OptionName.EMAIL_SENDER_SALUTATION,
@@ -428,7 +434,6 @@ class DomainFactory {
         )
     }
 
-    public
     static ProcessingOption createProcessingOptionBasePathReferenceGenome(String fileName = TestCase.uniqueNonExistentPath.path) {
         return createProcessingOptionLazy(
                 name: OptionName.BASE_PATH_REFERENCE_GENOME,
@@ -436,6 +441,12 @@ class DomainFactory {
                 project: null,
                 value: fileName,
         )
+    }
+
+    static void createProcessingOptionForInitRoddyModule() {
+        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, '')
+        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_JAVA, '')
+        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY, '')
     }
 
     public static MergingPass createMergingPass(Map properties = [:]) {

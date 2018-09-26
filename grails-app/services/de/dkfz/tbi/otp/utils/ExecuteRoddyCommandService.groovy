@@ -17,19 +17,31 @@ class ExecuteRoddyCommandService {
     ProcessingOptionService processingOptionService
 
 
+    String activateModulesForRoddyCommand() {
+        String loadModule = processingOptionService.findOptionAsString(OptionName.COMMAND_LOAD_MODULE_LOADER)
+        String activateJava = processingOptionService.findOptionAsString(OptionName.COMMAND_ACTIVATION_JAVA)
+        String activateGroovy = processingOptionService.findOptionAsString(OptionName.COMMAND_ACTIVATION_GROOVY)
+
+        return [
+                loadModule,
+                activateJava,
+                activateGroovy,
+        ].findAll().join('\n')
+    }
+
     /**
      * returns the part of the command to execute Roddy-Workflows which is equal for all Roddy-Workflows
      *
-     * @param roddyResult, This is the roddyResult on which each workflow works on (i.e. RoddyBamFile)
-     * @param nameInConfigFile, This is the part before the @ in the ProjectConfigFile (i.e. $workflow_$version)
-     * @param analysisIDinConfigFile, This is the part after the @ in the ProjectConfigFile (i.e. EXOME)
-     * @param realm, This is the realm to work on.
+     * @param roddyResult , This is the roddyResult on which each workflow works on (i.e. RoddyBamFile)
+     * @param nameInConfigFile , This is the part before the @ in the ProjectConfigFile (i.e. $workflow_$version)
+     * @param analysisIDinConfigFile , This is the part after the @ in the ProjectConfigFile (i.e. EXOME)
+     * @param realm , This is the realm to work on.
      */
     String defaultRoddyExecutionCommand(RoddyResult roddyResult, String nameInConfigFile, String analysisIDinConfigFile, Realm realm) {
-        assert roddyResult : "The input roddyResult is not allowed to be null"
-        assert nameInConfigFile : "The input nameInConfigFile is not allowed to be null"
-        assert analysisIDinConfigFile : "The input analysisIDinConfigFile is not allowed to be null"
-        assert realm : "The input realm is not allowed to be null"
+        assert roddyResult: "The input roddyResult is not allowed to be null"
+        assert nameInConfigFile: "The input nameInConfigFile is not allowed to be null"
+        assert analysisIDinConfigFile: "The input analysisIDinConfigFile is not allowed to be null"
+        assert realm: "The input realm is not allowed to be null"
 
         if (roddyResult.roddyExecutionDirectoryNames && !roddyResult.workDirectory.exists()) {
             roddyResult.roddyExecutionDirectoryNames.clear()
@@ -44,20 +56,30 @@ class ExecuteRoddyCommandService {
         //base view by pid directory
         File viewByPid = roddyResult.individual.getViewByPidPathBase(roddyResult.seqType).absoluteDataManagementPath
 
-        return [
+        String roddyCommand = [
                 roddyBaseCommand(nameInConfigFile, analysisIDinConfigFile, RoddyInvocationType.EXECUTE),
                 "${roddyResult.individual.pid}",
                 commonRoddy(config, roddyResult.project.realm.jobScheduler),
                 "--useiodir=${viewByPid},${workOutputDir}",
         ].join(" ")
+
+        return [
+                activateModulesForRoddyCommand(),
+                roddyCommand,
+        ].join('\n')
     }
 
 
     String roddyGetRuntimeConfigCommand(RoddyWorkflowConfig config, String nameInConfigFile, String analysisIDinConfigFile) {
-        return [
+        String roddyConfigCommand = [
                 roddyBaseCommand(nameInConfigFile, analysisIDinConfigFile, RoddyInvocationType.CONFIG),
                 commonRoddy(config, null),
         ].join(" ")
+
+        return [
+                activateModulesForRoddyCommand(),
+                roddyConfigCommand,
+        ].join('\n')
     }
 
 
@@ -92,24 +114,23 @@ class ExecuteRoddyCommandService {
     }
 
     String roddyBaseCommand(File roddyPath, String configName, String analysisId, RoddyInvocationType type) {
-        assert roddyPath : "roddyPath is not allowed to be null"
-        assert configName : "configName is not allowed to be null"
-        assert analysisId : "analysisId is not allowed to be null"
-        assert type : "type is not allowed to be null"
+        assert roddyPath: "roddyPath is not allowed to be null"
+        assert configName: "configName is not allowed to be null"
+        assert analysisId: "analysisId is not allowed to be null"
+        assert type: "type is not allowed to be null"
         return "${roddyPath}/roddy.sh ${type.cmd} ${configName}.config@${analysisId}"
     }
-
 
     /**
      * Returns the analysis id which has to be used in this roddy workflow
      */
     String getAnalysisIDinConfigFile(RoddyResult roddyResult) {
-        assert roddyResult : "The input roddyResult must not be null"
-        assert roddyResult.seqType : "There is not seqType available for ${roddyResult}"
+        assert roddyResult: "The input roddyResult must not be null"
+        assert roddyResult.seqType: "There is not seqType available for ${roddyResult}"
 
         if (SeqType.roddyAlignableSeqTypes.contains(roddyResult.seqType)) {
             String roddyName = roddyResult.seqType.roddyName
-            assert roddyName : "roddyName is not specified for ${roddyResult.seqType}"
+            assert roddyName: "roddyName is not specified for ${roddyResult.seqType}"
             return roddyName
         } else {
             throw new RuntimeException("The seqType ${roddyResult.seqType} can not be processed at the moment." as String)
@@ -118,8 +139,8 @@ class ExecuteRoddyCommandService {
 
 
     public void createWorkOutputDirectory(Realm realm, File file) {
-        assert realm : "Realm must not be null"
-        assert file : "File must not be null"
+        assert realm: "Realm must not be null"
+        assert file: "File must not be null"
         if (file.exists()) {
             remoteShellHelper.executeCommand(realm, "umask 027; chgrp ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file} ; chmod 2770 ${file}")
         } else {
@@ -128,7 +149,7 @@ class ExecuteRoddyCommandService {
         }
     }
 
-    void correctPermissionsAndGroups(RoddyResult roddyResult, Realm realm)  {
+    void correctPermissionsAndGroups(RoddyResult roddyResult, Realm realm) {
         executionHelperService.setPermission(realm, roddyResult.workDirectory, CreateClusterScriptService.DIRECTORY_PERMISSION)
         correctPermissions(roddyResult, realm)
         String group = executionHelperService.getGroup(roddyResult.baseDirectory)
@@ -137,7 +158,7 @@ class ExecuteRoddyCommandService {
     }
 
     void correctPermissions(RoddyResult roddyResult, Realm realm) {
-        assert roddyResult : "roddyResult should not be null"
+        assert roddyResult: "roddyResult should not be null"
         String cmd = """\
             set -e
             set -o pipefail
@@ -160,7 +181,7 @@ class ExecuteRoddyCommandService {
     }
 
     void correctGroups(RoddyResult roddyResult, Realm realm) {
-        assert roddyResult : "roddyResult should not be null"
+        assert roddyResult: "roddyResult should not be null"
         String cmd = """\
             set -e
             set -o pipefail

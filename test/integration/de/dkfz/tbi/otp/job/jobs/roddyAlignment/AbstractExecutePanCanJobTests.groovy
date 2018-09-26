@@ -138,9 +138,10 @@ class AbstractExecutePanCanJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_AllFine() {
+        DomainFactory.createProcessingOptionForInitRoddyModule()
         abstractExecutePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
 
-        String expectedCmd = """\
+        String expectedCmd = """
 ${roddyCommand} rerun \
 ${roddyBamFile.pipeline.name}_${roddyBamFile.seqType.roddyName}_${roddyBamFile.seqType.libraryLayout}_\
 ${roddyBamFile.config.pluginVersion}_${roddyBamFile.config.configVersion}.config@WGS \

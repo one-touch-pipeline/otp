@@ -202,6 +202,10 @@ class ProcessingOption implements Entity {
                 "command for groovy",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
         ),
+        COMMAND_ACTIVATION_JAVA(
+                "command to enable the module containing java (executed in Bash, may be empty if not required)",
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+        ),
         COMMAND_ACTIVATION_R(
                 "command to enable the module containing R (executed in Bash, may be empty if not required)",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
@@ -444,6 +448,7 @@ class ProcessingOption implements Entity {
             this.validatorForType = validatorForType
         }
 
+        @Override
         String toString() {
             name()
         }
@@ -475,8 +480,10 @@ class ProcessingOption implements Entity {
 
     OptionName name
     String type
+    @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String value
     Project project
+    @SuppressWarnings("NoJavaUtilDate")
     Date dateCreated = new Date()
     Date dateObsoleted
 

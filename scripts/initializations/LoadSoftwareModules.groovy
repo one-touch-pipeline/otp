@@ -13,6 +13,8 @@ processingOptionService.createOrUpdate(COMMAND_ACTIVATION_FASTQC, "module load f
 processingOptionService.createOrUpdate(COMMAND_GROOVY, 'groovy')
 processingOptionService.createOrUpdate(COMMAND_ACTIVATION_GROOVY, 'module load groovy/2.4.15')
 
+processingOptionService.createOrUpdate(COMMAND_ACTIVATION_JAVA, 'module load java/1.8.0_131')
+
 processingOptionService.createOrUpdate(COMMAND_SAMTOOLS, 'samtools')
 processingOptionService.createOrUpdate(COMMAND_ACTIVATION_SAMTOOLS, 'module load samtools/1.2')
 

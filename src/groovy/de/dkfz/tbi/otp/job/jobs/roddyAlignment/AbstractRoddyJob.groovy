@@ -39,6 +39,9 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     @Autowired
     SchedulerService schedulerService
 
+    @Autowired
+    RemoteShellHelper remoteShellHelper
+
     // Example:
     // Running job r150428_104246480_stds_snvCallingMetaScript => 3504988
     static final Pattern roddyOutputPattern = Pattern.compile(/^\s*(?:Running|Rerun)\sjob\s(.*_(\S+))\s=>\s(\S+)\s*$/)
@@ -55,7 +58,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
             roddyMemoryUsage.acquire()
             ProcessOutput output
             try {
-                output = LocalShellHelper.executeAndWait(cmd).assertExitCodeZero()
+                output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd).assertExitCodeZero()
             } finally {
                 roddyMemoryUsage.release()
             }

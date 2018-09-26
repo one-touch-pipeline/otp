@@ -1,31 +1,22 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.config.OtpProperty
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.infrastructure.ClusterJobService
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
-import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
-import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import org.codehaus.groovy.control.io.NullWriter
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+import de.dkfz.tbi.otp.utils.logging.*
+import org.codehaus.groovy.control.io.*
+import org.junit.*
+import org.junit.rules.*
 
-import static de.dkfz.tbi.TestConstants.ARBITRARY_MESSAGE
-import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
+import static de.dkfz.tbi.TestConstants.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class AbstractRoddyJobTests {
 
@@ -93,7 +84,7 @@ class AbstractRoddyJobTests {
         roddyJob.configService = configService
         roddyJob.clusterJobService = new ClusterJobService()
         roddyJob.clusterJobSchedulerService = [
-                retrieveAndSaveJobInformationAfterJobStarted: { ClusterJob clusterJob -> }
+                retrieveAndSaveJobInformationAfterJobStarted: { ClusterJob clusterJob -> },
         ] as ClusterJobSchedulerService
     }
 
@@ -122,10 +113,7 @@ Creating the following execution directory to store information about this proce
 ${workExecutionDir.absolutePath}
 newLine"""
 
-        LocalShellHelper.metaClass.static.executeAndWait = { String cmd ->
-            executeCommandCounter++
-            return new LocalShellHelper.ProcessOutput(stdout: stdout, stderr: stderr, exitCode: 0)
-        }
+        mockProcessOutput(stdout, stderr)
 
         return workExecutionDir
     }
@@ -137,20 +125,27 @@ newLine"""
 Creating the following execution directory to java.lang.OutOfMemoryError store information about this process:
 ${workExecutionDir.absolutePath}
 newLine"""
-
-        LocalShellHelper.metaClass.static.executeAndWait = { String cmd ->
-            executeCommandCounter++
-            return new LocalShellHelper.ProcessOutput(stdout: "", stderr: stderr, exitCode: 0)
-        }
+        mockProcessOutput("", stderr)
 
         return workExecutionDir
     }
 
+    private void mockProcessOutput(String output, String error) {
+        roddyJob.remoteShellHelper = [
+                executeCommandReturnProcessOutput: { Realm realm, String cmd ->
+                    executeCommandCounter++
+                    return new LocalShellHelper.ProcessOutput(stdout: output, stderr: error, exitCode: 0)
+                }
+        ] as RemoteShellHelper
+    }
+
     private void mockProcessOutput_noClusterJobsSubmitted() {
-        LocalShellHelper.metaClass.static.executeAndWait = { String cmd ->
-            executeCommandCounter++
-            return OUTPUT_NO_CLUSTER_JOBS_SUBMITTED
-        }
+        roddyJob.remoteShellHelper = [
+                executeCommandReturnProcessOutput: { Realm realm, String cmd ->
+                    executeCommandCounter++
+                    return OUTPUT_NO_CLUSTER_JOBS_SUBMITTED
+                }
+        ]  as RemoteShellHelper
     }
 
     @Test
@@ -234,7 +229,7 @@ newLine"""
     void testExecute_finishedClusterJobsIsNull_Validate() {
         roddyJob = [
                 validate: { -> validateCounter++ },
-                failedOrNotFinishedClusterJobs: { Collection<? extends ClusterJobIdentifier> finishedClusterJobs -> [:] }
+                failedOrNotFinishedClusterJobs: { Collection<? extends ClusterJobIdentifier> finishedClusterJobs -> [:] },
         ] as AbstractRoddyJob
         roddyJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
 
