@@ -299,7 +299,9 @@ class TrackingService {
     void fillInMergingWorkPackageProcessingStatuses(Collection<SeqTrackProcessingStatus> seqTrackProcessingStatuses, SamplePairDiscovery samplePairDiscovery) {
 
         Collection<SeqTrackProcessingStatus> alignableSeqTracks =
-                seqTrackProcessingStatuses.findAll { SeqTrackService.mayAlign(it.seqTrack, false) }
+                seqTrackProcessingStatuses.findAll {
+                    SeqTrackService.mayAlign(it.seqTrack, false) || it.seqTrack.seqType.singleCell
+                }
 
         Collection<MergingWorkPackageProcessingStatus> allMwpStatuses = []
 
@@ -321,7 +323,6 @@ class TrackingService {
     }
 
     void fillInSamplePairStatuses(Collection<MergingWorkPackageProcessingStatus> mwpStatuses, SamplePairDiscovery samplePairDiscovery) {
-
         if (mwpStatuses.isEmpty()) {
             return
         }
@@ -347,8 +348,7 @@ class TrackingService {
         }
     }
 
-    private
-    static WorkflowProcessingStatus getAnalysisProcessingStatus(BamFilePairAnalysis analysis, SamplePair sp, BamFileAnalysisService service) {
+    private static WorkflowProcessingStatus getAnalysisProcessingStatus(BamFilePairAnalysis analysis, SamplePair sp, BamFileAnalysisService service) {
         WorkflowProcessingStatus status
         if (analysis && !analysis.withdrawn && analysis.processingState == AnalysisProcessingStates.FINISHED && [1, 2].every {
             AbstractMergedBamFile bamFile = analysis."sampleType${it}BamFile"

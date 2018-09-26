@@ -115,7 +115,7 @@ class ProjectConfigController implements CheckAndCall {
 
     JSON getAlignmentInfo() {
         Project project = exactlyOneElement(Project.findAllByName(params.project, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
-        Map<String, ProjectOverviewService.AlignmentInfo> alignmentInfo = null
+        Map<String, AlignmentInfo> alignmentInfo = null
         String alignmentError = null
         try {
             alignmentInfo = projectOverviewService.getAlignmentInformation(project)

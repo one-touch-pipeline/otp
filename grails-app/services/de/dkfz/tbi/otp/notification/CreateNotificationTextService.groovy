@@ -169,12 +169,11 @@ class CreateNotificationTextService {
                                     seqType           : seqType.displayNameWithLibraryLayout,
                                     individuals       : individuals,
                                     referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
-                                    alignmentProgram  : alignmentInfo.bwaCommand,
-                                    alignmentParameter: alignmentInfo.bwaOptions,
-                                    mergingProgram    : alignmentInfo.mergeCommand,
-                                    mergingParameter  : alignmentInfo.mergeOptions,
-                                    samtoolsProgram   : alignmentInfo.samToolsCommand,
+                                    alignmentProgram  : alignmentInfo.alignmentProgram,
+                                    alignmentParameter: alignmentInfo.alignmentParameter,
                             ])
+                            Map<String, Object> codeAndParams = alignmentInfo.getAlignmentSpecificMessageAttributes()
+                            builder << createMessage(codeAndParams.code as String, codeAndParams.params as Map)
                         }
                     }
         }
@@ -283,7 +282,6 @@ class CreateNotificationTextService {
         }
         return new SimpleTemplateEngine().createTemplate(template).make(properties).toString()
     }
-
 
     String createOtpLinks(List<Project> projects, String controller, String action) {
         assert projects

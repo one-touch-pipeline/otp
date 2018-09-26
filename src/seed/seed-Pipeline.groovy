@@ -6,6 +6,7 @@ seed = {
             Pipeline.Name.PANCAN_ALIGNMENT,
             Pipeline.Name.RODDY_RNA_ALIGNMENT,
             Pipeline.Name.EXTERNALLY_PROCESSED,
+            Pipeline.Name.CELL_RANGER,
 
             //analysis
             Pipeline.Name.RODDY_SNV,

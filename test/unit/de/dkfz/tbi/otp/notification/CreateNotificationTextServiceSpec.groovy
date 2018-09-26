@@ -135,19 +135,19 @@ class CreateNotificationTextServiceSpec extends Specification {
 
     void "createMessage, when template exist, return notification text"() {
         given:
-        String templeteName = "notification.template.base"
+        String templateName = "notification.template.base"
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
                     _ * getMessageInternal("notification.template.base", [], _) >> 'Some text ${placeholder} some text'
                 }
         )
+
         when:
-        String message = createNotificationTextService.createMessage(templeteName, [placeholder: 'information'])
+        String message = createNotificationTextService.createMessage(templateName, [placeholder: 'information'])
 
         then:
         'Some text information some text' == message
     }
-
 
     void "getSampleName, when seqTracks is null, throw assert"() {
         when:
@@ -570,7 +570,7 @@ ${expectedAlign}"""
             expectedSamples << "${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.sampleId1}, ${data2.sampleId2})"
             if (indel | snv | sophia | aceseq | runYapsa) {
                 samplePairWithVariantCalling.add(data2.samplePair)
-                //The If cases have to be ordered alphabetically
+                // the If-cases have to be ordered alphabetically
                 if (aceseq) {
                     variantCallingPipelines << 'CNV (from ACEseq)'
                 }
@@ -591,21 +591,20 @@ ${expectedAlign}"""
             }
         }
 
-
         String expectedLinks = seqTracks*.project.unique().collect { 'link' }.join('\n')
         List<String> alignments = []
         if (projectCount == 2) {
             alignments << "***********************"
             alignments << data1.seqTrack.project.name
         }
-        alignments << createAlignmentInfoString(data1)
+        alignments << createAlignmentInfoString(data1) + "\n" + createRoddyAlignmentInfoString(data1)
         if (alignmentCount == 2) {
             alignments << ''
             if (projectCount == 2) {
                 alignments << "***********************"
                 alignments << data2.seqTrack.project.name
             }
-            alignments << createAlignmentInfoString(data2)
+            alignments << createAlignmentInfoString(data2) + "\n" + createRoddyAlignmentInfoString(data2)
         }
         String expectedPaths = createNotificationTextService.getMergingDirectories(seqTracks)
         String expectedAlignment = alignments.join('\n').trim()
@@ -647,6 +646,53 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         false            | false            | true                | true  | true  | true   | true   | true
         false            | false            | true                | false | false | true   | true   | false
         true             | true             | true                | true  | true  | true   | true   | true
+    }
+
+    @Unroll
+    void "alignmentNotification, test difference between Single Cell and Roddy"() {
+        given:
+        DomainFactory.createRoddyAlignableSeqTypes()
+        DomainFactory.createProcessingOptionForNotificationRecipient()
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
+
+        Map data1 = createData([
+                sampleId1                : "sampleId1",
+                alignmentProcessingStatus: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+                singleCell               : singleCell,
+        ])
+
+        ProcessingStatus processingStatus = new ProcessingStatus([
+                data1.seqTrackProcessingStatus,
+        ])
+
+        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
+                projectOverviewService: Mock(ProjectOverviewService) {
+                    1 * getAlignmentInformationFromConfig(_) >> data1.alignmentInfo
+                    0 * _
+                },
+                linkGenerator: Mock(LinkGenerator) {
+                    1 * link(_) >> "link"
+                },
+        )
+        createNotificationTextService.processingOptionService = new ProcessingOptionService()
+        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
+            1 * getMessageInternal("notification.template.alignment.base", [], _) >> ""
+            1 * getMessageInternal("notification.template.alignment.processing", [], _) >> ""
+            1 * getMessageInternal("notification.template.alignment.noFurtherProcessing", [], _) >> ""
+            (singleCell ? 0 : 1) * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
+            (singleCell ? 1 : 0) * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
+        }
+
+        when:
+        createNotificationTextService.alignmentNotification(processingStatus)
+
+        then:
+        true
+
+        where:
+        singleCell |_
+        true       |_
+        false      |_
     }
 
     @Unroll("#pairAnalysisList.type, when ProcessingStatus is null, throw assert")
@@ -782,7 +828,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         thrown(MissingMethodException)
     }
 
-    private static Map createData(Map properties = [:]) {
+    private Map createData(Map properties = [:]) {
         Project project = properties.project ?: DomainFactory.createProject()
         String pid = properties.pid ?: "pid_${DomainFactory.counter++}"
         SeqType seqType = properties.seqType ?: DomainFactory.createSeqTypePaired()
@@ -832,7 +878,12 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
 
         SamplePair samplePair = DomainFactory.createDisease(mergingWorkPackage)
 
-        ProjectOverviewService.AlignmentInfo alignmentInfo = createAlignmentInfo(seqTrack)
+        AlignmentInfo alignmentInfo
+        if (properties.singleCell == true) {
+            alignmentInfo = createSingleCellAlignmentInfo(seqTrack)
+        } else {
+            alignmentInfo = createRoddyAlignmentInfo(seqTrack)
+        }
 
         SeqTrackProcessingStatus seqTrackProcessingStatus = new SeqTrackProcessingStatus(
                 seqTrack,
@@ -873,24 +924,36 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         ]
     }
 
-    private static ProjectOverviewService.AlignmentInfo createAlignmentInfo(SeqTrack seqTrack) {
+    private RoddyAlignmentInfo createRoddyAlignmentInfo(SeqTrack seqTrack) {
         String prefix = "${seqTrack.project.name}_${seqTrack.seqType.displayNameWithLibraryLayout}"
-        return new ProjectOverviewService.AlignmentInfo(
-                bwaCommand: "${prefix}_bwaCommand",
-                bwaOptions: "${prefix}_bwaOptions",
-                samToolsCommand: "${prefix}_samTools",
-                mergeCommand: "${prefix}_mergeCommand",
-                mergeOptions: "${prefix}_mergeOptions",
-        )
+        return new RoddyAlignmentInfo([
+                alignmentProgram  : "${prefix}_alignmentProgram",
+                alignmentParameter: "${prefix}_alignmentParameter",
+                mergeCommand      : "${prefix}_mergeCommand",
+                mergeOptions      : "${prefix}_mergeOptions",
+                samToolsCommand   : "${prefix}_samTools",
+        ])
     }
 
-    private static String createAlignmentInfoString(Map data) {
+    private SingleCellAlignmentInfo createSingleCellAlignmentInfo(SeqTrack seqTrack) {
+        String prefix = "${seqTrack.project.name}_${seqTrack.seqType.displayNameWithLibraryLayout}"
+        return new SingleCellAlignmentInfo([
+                alignmentProgram  : "${prefix}_alignmentProgram",
+                alignmentParameter: "${prefix}_alignmentParameter",
+        ])
+    }
+
+    private String createAlignmentInfoString(Map data) {
         return """\
 alignment information
 seqType: ${data.seqTrack.seqType.displayNameWithLibraryLayout}
 referenceGenome: ${data.referenceGenome}
-alignmentProgram: ${data.alignmentInfo.bwaCommand}
-alignmentParameter: ${data.alignmentInfo.bwaOptions}
+alignmentProgram: ${data.alignmentInfo.alignmentProgram}
+alignmentParameter: ${data.alignmentInfo.alignmentParameter}"""
+    }
+
+    private String createRoddyAlignmentInfoString(Map data) {
+        return """
 mergingProgram: ${data.alignmentInfo.mergeCommand}
 mergingParameter: ${data.alignmentInfo.mergeOptions}
 samtoolsProgram: ${data.alignmentInfo.samToolsCommand}"""
@@ -928,6 +991,8 @@ seqType: ${seqType}
 referenceGenome: ${referenceGenome}
 alignmentProgram: ${alignmentProgram}
 alignmentParameter: ${alignmentParameter}
+'''
+            _ * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> '''
 mergingProgram: ${mergingProgram}
 mergingParameter: ${mergingParameter}
 samtoolsProgram: ${samtoolsProgram}

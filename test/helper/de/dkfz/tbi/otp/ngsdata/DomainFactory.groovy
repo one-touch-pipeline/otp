@@ -9,6 +9,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.infrastructure.*
@@ -171,6 +172,10 @@ class DomainFactory {
 
     static Pipeline createRnaPipeline() {
         createPipeline(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
+    }
+
+    static Pipeline createCellRangerPipeline() {
+        createPipeline(Pipeline.Name.CELL_RANGER, Pipeline.Type.ALIGNMENT)
     }
 
     @Deprecated
@@ -713,8 +718,44 @@ class DomainFactory {
                 roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
                 comment                     : {
                     [
-                            AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
-                            AbstractMergedBamFile.QcTrafficLightStatus.REJECTED,
+                        AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
+                        AbstractMergedBamFile.QcTrafficLightStatus.REJECTED,
+                    ].contains(bamFileProperties.qcTrafficLightStatus) ? createComment() : null
+                }
+        ], bamFileProperties)
+        return bamFile
+    }
+
+    static SingleCellBamFile createSingleCellBamFile(Map bamFileProperties = [:]) {
+        SingleCellMergingWorkPackage workPackage = bamFileProperties.workPackage
+        if (!workPackage) {
+            workPackage = createSingleCellMergingWorkPackage()
+            createReferenceGenomeProjectSeqType(
+                    referenceGenome : workPackage.referenceGenome,
+                    project         : workPackage.project,
+                    seqType         : workPackage.seqType,
+                    statSizeFileName: workPackage.statSizeFileName,
+            )
+        }
+        Collection<SeqTrack> seqTracks = bamFileProperties.seqTracks ?: [createSeqTrackWithDataFiles(workPackage)]
+        workPackage.seqTracks = seqTracks
+        workPackage.save(flush: true, failOnError: true)
+        SingleCellBamFile bamFile = createDomainObject(SingleCellBamFile, [
+                numberOfMergedLanes: seqTracks.size(),
+                workDirectoryName  : "singleCell_${counter++}",
+                seqTracks          : seqTracks as Set,
+                workPackage        : workPackage,
+                identifier         : SingleCellBamFile.nextIdentifier(workPackage),
+                type               : AbstractBamFile.BamType.MDUP,
+                md5sum             : {
+                    (!bamFileProperties.containsKey('fileOperationStatus') || bamFileProperties.fileOperationStatus == FileOperationStatus.PROCESSED) ? HelperUtils.randomMd5sum : null
+                },
+                fileOperationStatus: FileOperationStatus.PROCESSED,
+                fileSize           : 10000,
+                comment            : {
+                    [
+                        AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
+                        AbstractMergedBamFile.QcTrafficLightStatus.REJECTED,
                     ].contains(bamFileProperties.qcTrafficLightStatus) ? createComment() : null
                 }
         ], bamFileProperties)
@@ -1462,6 +1503,14 @@ class DomainFactory {
         ], seqTypeProperties, saveAndValidate)
     }
 
+    static SeqType createSingleCellSeqType(Map map = [:]) {
+        createSeqType([
+                name       : "singlecell_${counter++}",
+                displayName: "singlecell_display_${counter++}",
+                singleCell : true,
+        ] + map)
+    }
+
     static SeqType createSeqTypePaired(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
         return createSeqType([libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED] + seqTypeProperties, saveAndValidate)
     }
@@ -1633,19 +1682,24 @@ class DomainFactory {
         ], properties)
     }
 
-    static MergingWorkPackage createMergingWorkPackage(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(MergingWorkPackage, [
+    private static Map<String, ?> baseMergingWorkPackageProperties(Map properties) {
+        [
                 libraryPreparationKit: { properties.seqType?.isWgbs() ? null : createLibraryPreparationKit() },
                 sample               : { createSample() },
-                seqType              : { createSeqType() },
                 seqPlatformGroup     : { createSeqPlatformGroup() },
                 referenceGenome      : { createReferenceGenome() },
-                statSizeFileName     : {
+                antibodyTarget       : { properties.seqType?.isChipSeq() ? createAntibodyTarget() : null },
+        ]
+    }
+
+    static MergingWorkPackage createMergingWorkPackage(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(MergingWorkPackage, baseMergingWorkPackageProperties(properties) + [
+                seqType         : { createSeqType() },
+                pipeline        : { createPanCanPipeline() },
+                statSizeFileName: {
                     properties.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT || properties.pipeline == null ?
                             "statSizeFileName_${counter++}.tab" : null
                 },
-                pipeline             : { createPanCanPipeline() },
-                antibodyTarget       : { properties.seqType?.isChipSeq() ? createAntibodyTarget() : null },
         ], properties, saveAndValidate)
     }
 
@@ -1653,9 +1707,27 @@ class DomainFactory {
         return createDomainObject(ExternalMergingWorkPackage, [
                 sample         : { createSample() },
                 seqType        : { createSeqType() },
-                referenceGenome: { createReferenceGenome() },
                 pipeline       : { createExternallyProcessedPipelineLazy() },
+                referenceGenome: { createReferenceGenome() },
         ], properties)
+    }
+
+    static SingleCellMergingWorkPackage createSingleCellMergingWorkPackage(Map properties = [:], boolean saveAndValidate = true) {
+        Pipeline pipeline = properties.pipeline ?: createCellRangerPipeline()
+        SeqType seqType = properties.seqType ?: createSingleCellSeqType()
+        Sample sample = properties.sample  ?: createSample()
+        return createDomainObject(SingleCellMergingWorkPackage, baseMergingWorkPackageProperties(properties) + [
+                seqType : seqType,
+                pipeline: pipeline,
+                sample  : sample,
+                config  : {
+                    createSingleCellConfig([
+                            pipeline: pipeline,
+                            seqType : seqType,
+                            project : sample.project,
+                ])
+                },
+        ], properties, saveAndValidate)
     }
 
     static <E extends AbstractMergingWorkPackage> E createMergingWorkPackage(Class<E> clazz, Map properties = [:]) {
@@ -1664,6 +1736,8 @@ class DomainFactory {
                 return DomainFactory.createMergingWorkPackage(properties)
             case ExternalMergingWorkPackage:
                 return DomainFactory.createExternalMergingWorkPackage(properties)
+            case SingleCellMergingWorkPackage:
+                return DomainFactory.createSingleCellMergingWorkPackage(properties)
             default:
                 throw new RuntimeException("Unknown subclass of AbstractMergingWorkPackage: ${clazz}")
         }
@@ -1681,6 +1755,8 @@ class DomainFactory {
                 ] + properties)
             case Pipeline.Name.EXTERNALLY_PROCESSED:
                 return createExternalMergingWorkPackage(properties)
+            case Pipeline.Name.CELL_RANGER:
+                return createSingleCellMergingWorkPackage(properties)
             default:
                 throw new RuntimeException("Unknown alignment pipeline: ${pipelineName}")
         }
@@ -1760,8 +1836,8 @@ class DomainFactory {
                 seqType       : { properties.seqType ?: createSeqType() },
                 project       : { properties.project ?: createProject() },
                 programVersion: "programmVersion${counter++}",
-                dateCreated          : { new Date() },
-                lastUpdated          : { new Date() },
+                dateCreated   : { new Date() },
+                lastUpdated   : { new Date() },
         ]
     }
 
@@ -1770,7 +1846,26 @@ class DomainFactory {
     }
 
     static RunYapsaConfig createRunYapsaConfigLazy(Map properties = [:], boolean saveAndValidate = true) {
-        createDomainObjectLazy(RunYapsaConfig, createRunYapsaConfigMapHelper(properties), properties, saveAndValidate)
+        return createDomainObjectLazy(RunYapsaConfig, createRunYapsaConfigMapHelper(properties), properties, saveAndValidate)
+    }
+
+    static private Map createSingleCellConfigMapHelper(properties) {
+        return [
+                pipeline      : createCellRangerPipeline(),
+                seqType       : { properties.seqType ?: createSingleCellSeqType() },
+                project       : { properties.project ?: createProject() },
+                programVersion: "programmVersion${counter++}",
+                dateCreated   : { new Date() },
+                lastUpdated   : { new Date() },
+        ]
+    }
+
+    static SingleCellConfig createSingleCellConfig(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(SingleCellConfig, createSingleCellConfigMapHelper(properties), properties, saveAndValidate)
+    }
+
+    static SingleCellConfig createSingleCellConfigLazy(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObjectLazy(SingleCellConfig, createSingleCellConfigMapHelper(properties), properties, saveAndValidate)
     }
 
     static SeqTrack createSeqTrack(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {

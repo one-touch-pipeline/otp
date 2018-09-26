@@ -9,15 +9,16 @@ class Pipeline implements Entity {
     @TupleConstructor
     static enum Name {
         @Deprecated DEFAULT_OTP(Type.ALIGNMENT, false, 'bwa\u00A0aln'),
-        PANCAN_ALIGNMENT    (Type.ALIGNMENT, true,  'bwa\u00A0mem'),
-        EXTERNALLY_PROCESSED(Type.ALIGNMENT, false, 'external'),
-        @Deprecated OTP_SNV (Type.SNV,       false, null),
-        RODDY_SNV           (Type.SNV,       true,  null),
-        RODDY_INDEL         (Type.INDEL,     true,  null),
-        RODDY_RNA_ALIGNMENT (Type.ALIGNMENT, true, 'STAR'),
-        RODDY_SOPHIA        (Type.SOPHIA, true, null),
-        RODDY_ACESEQ        (Type.ACESEQ, true, null),
-        RUN_YAPSA           (Type.MUTATIONAL_SIGNATURE, false, null),
+        PANCAN_ALIGNMENT       (Type.ALIGNMENT, true,  'bwa\u00A0mem'),
+        EXTERNALLY_PROCESSED   (Type.ALIGNMENT, false, 'external'),
+        RODDY_RNA_ALIGNMENT    (Type.ALIGNMENT, true,  'STAR'),
+        CELL_RANGER            (Type.ALIGNMENT, false, 'cell ranger'),
+        @Deprecated OTP_SNV    (Type.SNV,       false, null),
+        RODDY_SNV              (Type.SNV,       true,  null),
+        RODDY_INDEL            (Type.INDEL,     true,  null),
+        RODDY_SOPHIA           (Type.SOPHIA, true, null),
+        RODDY_ACESEQ           (Type.ACESEQ, true, null),
+        RUN_YAPSA              (Type.MUTATIONAL_SIGNATURE, false, null),
 
         final Type type
         final boolean usesRoddy

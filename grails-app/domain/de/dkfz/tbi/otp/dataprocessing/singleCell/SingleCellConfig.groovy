@@ -20,4 +20,9 @@ class SingleCellConfig extends ConfigPerProjectAndSeqType implements WithProgram
             }
         }
     }
+
+    @Override
+    AlignmentInfo getAlignmentInformation() {
+        return new SingleCellAlignmentInfo(alignmentProgram: "cellranger", alignmentParameter: "")
+    }
 }

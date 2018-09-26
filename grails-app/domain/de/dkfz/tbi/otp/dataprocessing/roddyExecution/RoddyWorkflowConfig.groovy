@@ -95,6 +95,11 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
         }
     }
 
+    @Override
+    AlignmentInfo getAlignmentInformation() {
+        throw new UnsupportedOperationException("RoddyWorkflowConfig can not yet provide its own AlignmentInfo")
+    }
+
     protected static RoddyWorkflowConfig getLatest(final Project project, final Individual individual, final SeqType seqType, final Pipeline pipeline) {
         assert project : "The project is not allowed to be null"
         assert seqType : "The seqType is not allowed to be null"

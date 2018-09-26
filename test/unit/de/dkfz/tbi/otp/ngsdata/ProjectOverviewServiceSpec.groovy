@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellConfig
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import org.apache.commons.logging.impl.*
@@ -21,16 +22,14 @@ import spock.lang.*
 ])
 class ProjectOverviewServiceSpec extends Specification {
 
-
-    void "getRoddyAlignmentInformation, when roddyWorkflowConfig is null, throw assert"() {
+    void "getRoddyAlignmentInformation, throws AssertionError when WorkflowConfig is null"() {
         when:
         new ProjectOverviewService().getRoddyAlignmentInformation(null)
 
         then:
         AssertionError e = thrown()
-        e.message.contains('assert workflowConfig')
+        e.message.contains('assert config')
     }
-
 
     @Unroll
     void "getRoddyAlignmentInformation, when useConfig is #useConvey and mergeTool is #mergeTool, return alignment info with the correct data"() {
@@ -70,12 +69,12 @@ class ProjectOverviewServiceSpec extends Specification {
         }
 
         when:
-        ProjectOverviewService.AlignmentInfo alignmentInfo = service.getRoddyAlignmentInformation(roddyWorkflowConfig)
+        AlignmentInfo alignmentInfo = service.getRoddyAlignmentInformation(roddyWorkflowConfig)
 
         then:
         alignmentInfo
-        alignCommand == alignmentInfo.bwaCommand
-        alignOpt == alignmentInfo.bwaOptions
+        alignCommand == alignmentInfo.alignmentProgram
+        alignOpt == alignmentInfo.alignmentParameter
         mergeCommand == alignmentInfo.mergeCommand
         mergeOpt == alignmentInfo.mergeOptions
         'Version 6.0' == alignmentInfo.samToolsCommand
@@ -91,7 +90,6 @@ class ProjectOverviewServiceSpec extends Specification {
         false     | MergeConstants.MERGE_TOOL_SAMBAMBA  || 'BWA Version 1.0'    || 'alnOpt'           || 'Sambamba Version 5.0'                    || 'sambambaOpt'  || 'pluginVersion:1.1.0'
         true      | MergeConstants.MERGE_TOOL_BIOBAMBAM || 'bwa-bb Version 2.0' || 'alnOpt conveyOpt' || 'Biobambam bammarkduplicates Version 3.0' || 'bioBamBamOpt' || 'pluginVersion:1.1.0'
     }
-
 
     void "getRoddyAlignmentInformation, when rna, return alignment info with the correct data"() {
         given:
@@ -123,11 +121,11 @@ class ProjectOverviewServiceSpec extends Specification {
         }
 
         when:
-        ProjectOverviewService.AlignmentInfo alignmentInfo = service.getRoddyAlignmentInformation(roddyWorkflowConfig)
+        AlignmentInfo alignmentInfo = service.getRoddyAlignmentInformation(roddyWorkflowConfig)
 
         then:
-        'STAR Version 2.0' == alignmentInfo.bwaCommand
-        ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].join(' ') == alignmentInfo.bwaOptions
+        'STAR Version 2.0' == alignmentInfo.alignmentProgram
+        ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].join(' ') == alignmentInfo.alignmentParameter
         'Sambamba Version 3.0' == alignmentInfo.mergeCommand
         '' == alignmentInfo.mergeOptions
         'Version 1.0' == alignmentInfo.samToolsCommand
@@ -174,7 +172,6 @@ class ProjectOverviewServiceSpec extends Specification {
         'no merging values'   | 'useAcceleratedHardware=false\nBWA_VERSION=aln' | 'some'                                                                      | 0        || 'Could not extract merging configuration value from the roddy output'
     }
 
-
     void "getAlignmentInformationFromConfig, when config is null, throw assert"() {
         when:
         new ProjectOverviewService().getAlignmentInformationFromConfig(null)
@@ -184,19 +181,19 @@ class ProjectOverviewServiceSpec extends Specification {
         e.message.contains('assert config')
     }
 
-
-    void "getAlignmentInformationFromConfig, when config is instance of RoddyWorkflowConfig, then call getRoddyAlignmentInformation"() {
+    @Unroll
+    void "getAlignmentInformationFromConfig, from Roddy WorkflowConfig and AlignmentInfo"() {
         given:
-        ProjectOverviewService.AlignmentInfo alignmentInfo = new ProjectOverviewService.AlignmentInfo()
+        AlignmentInfo alignmentInfo = new RoddyAlignmentInfo()
+        AlignmentConfig alignmentConfig = new RoddyWorkflowConfig()
+
         ProjectOverviewService projectOverviewService = Spy(ProjectOverviewService) {
             1 * getRoddyAlignmentInformation(_) >> alignmentInfo
-            0 * getDefaultOtpAlignmentInformation(_)
         }
 
         expect:
-        alignmentInfo == projectOverviewService.getAlignmentInformationFromConfig(new RoddyWorkflowConfig())
+        alignmentInfo == projectOverviewService.getAlignmentInformationFromConfig(alignmentConfig)
     }
-
 
     void "listReferenceGenome, when one item, show one item in listing"() {
         given:
@@ -208,7 +205,6 @@ class ProjectOverviewServiceSpec extends Specification {
         then:
         CollectionUtils.containSame(list, [rgpst])
     }
-
 
     void "listReferenceGenome, when searching other project, don't find this"() {
         given:
@@ -222,7 +218,6 @@ class ProjectOverviewServiceSpec extends Specification {
         CollectionUtils.containSame(list, [])
     }
 
-
     void "listReferenceGenome, when searching deprecated reference genome, don't find it"() {
         given:
         ReferenceGenomeProjectSeqType rgpst = DomainFactory.createReferenceGenomeProjectSeqType([deprecatedDate: new Date()])
@@ -233,7 +228,6 @@ class ProjectOverviewServiceSpec extends Specification {
         then:
         CollectionUtils.containSame(list, [])
     }
-
 
     void "listReferenceGenome, when multiple items, show all of them"() {
         given:

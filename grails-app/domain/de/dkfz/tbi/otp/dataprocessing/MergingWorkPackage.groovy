@@ -80,16 +80,20 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         }
 
         statSizeFileName nullable: true, blank: false, matches: ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN, validator : { val, obj ->
-            if (obj.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT) {
-                val != null && OtpPath.isValidPathComponent(val)
-            } else if (obj.pipeline?.name == Pipeline.Name.DEFAULT_OTP) {
-                val == null
-            } else if (obj.pipeline?.name == Pipeline.Name.EXTERNALLY_PROCESSED) {
-                val == null
-            } else if (obj.pipeline?.name == Pipeline.Name.RODDY_RNA_ALIGNMENT) {
-               return val == null
-            } else {
-                assert false: "Pipeline name is unknown: ${obj.pipeline?.name}"
+            switch (obj.pipeline?.name) {
+                case Pipeline.Name.CELL_RANGER:
+                case Pipeline.Name.DEFAULT_OTP:
+                case Pipeline.Name.EXTERNALLY_PROCESSED:
+                    val == null
+                    break
+                case Pipeline.Name.PANCAN_ALIGNMENT:
+                    val != null && OtpPath.isValidPathComponent(val)
+                    break
+                case Pipeline.Name.RODDY_RNA_ALIGNMENT:
+                    return val == null
+                    break
+                default:
+                    throw new RuntimeException("Pipeline name is unknown: ${obj.pipeline?.name}")
             }
         }
 

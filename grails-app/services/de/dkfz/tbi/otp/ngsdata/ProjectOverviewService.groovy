@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.utils.*
 import groovy.sql.*
-import groovy.transform.*
 import org.springframework.beans.factory.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
@@ -19,9 +18,10 @@ class ProjectOverviewService {
 
     ExecuteRoddyCommandService executeRoddyCommandService
     ProcessingOptionService processingOptionService
+    DataSource dataSource
+
     @Autowired
     ApplicationContext applicationContext
-    DataSource dataSource
 
     static final Collection PROJECT_TO_HIDE_SAMPLE_IDENTIFIER = [
             "MMML",
@@ -31,18 +31,16 @@ class ProjectOverviewService {
     ].asImmutable()
 
     /**
-     * determine, if the column sample identifier should be hide in the view
+     * determine, if the column sample identifier should be hidden in the view
      */
     static boolean hideSampleIdentifier(Project project) {
         return PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(project?.name)
     }
 
-    protected AlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig workflowConfig) {
-        assert workflowConfig
-
-        ProcessOutput output = getRoddyProcessOutput(workflowConfig)
-
-        return generateAlignmentInfo(output, workflowConfig.seqType, workflowConfig.pluginVersion)
+    protected RoddyAlignmentInfo getRoddyAlignmentInformation(RoddyWorkflowConfig config) {
+        assert config
+        ProcessOutput output = getRoddyProcessOutput(config)
+        return generateRoddyAlignmentInfo(output, config.seqType, config.pluginVersion)
     }
 
     /**
@@ -68,18 +66,16 @@ class ProjectOverviewService {
         }
 
         return output
-
     }
 
     /**
-     * Generate Alignment Info by calling necessary Methods
-     * for res, bwa and merge Map and creating a new ALignment Info
-     * on the basic of this Maps
+     * Generate a new RoddyAlignmentInfo by calling necessary Methods
+     * for res, bwa and merge
      * @param output ProcessOutput of Roddy File
      * @param seqType
      * @return new Alignment info
      */
-    private AlignmentInfo generateAlignmentInfo(ProcessOutput output, SeqType seqType, String pluginVersion) {
+    private RoddyAlignmentInfo generateRoddyAlignmentInfo(ProcessOutput output, SeqType seqType, String pluginVersion) {
 
         Map<String, String> res = extractConfigRoddyOutput(output)
 
@@ -87,15 +83,14 @@ class ProjectOverviewService {
 
         Map merge = createMergeCommandOptionsMap(res, output, seqType)
 
-        return new AlignmentInfo(
-                bwaCommand: bwa.command,
-                bwaOptions: bwa.options,
-                samToolsCommand: res.get("SAMTOOLS_VERSION") ? "Version ${res.get("SAMTOOLS_VERSION")}" : "",
-                mergeCommand: merge.command,
-                mergeOptions: merge.options,
-                pluginVersion: pluginVersion,
+        return new RoddyAlignmentInfo(
+                alignmentProgram  : bwa.command,
+                alignmentParameter: bwa.options,
+                samToolsCommand   : res.get("SAMTOOLS_VERSION") ? "Version ${res.get("SAMTOOLS_VERSION")}" : "",
+                mergeCommand      : merge.command,
+                mergeOptions      : merge.options,
+                pluginVersion     : pluginVersion,
         )
-
     }
 
     /**
@@ -197,7 +192,7 @@ class ProjectOverviewService {
     }
 
     /**
-     * Extracts Configurations from the roddy Output into the Map res
+     * Extracts Configurations from the roddy Output as a map
      * @param output of Roddy
      * @return Map with Roddy config value output
      */
@@ -222,12 +217,10 @@ class ProjectOverviewService {
 
     AlignmentInfo getAlignmentInformationFromConfig(AlignmentConfig config) {
         assert config
-
-        if (config instanceof RoddyWorkflowConfig) {
-            return getRoddyAlignmentInformation(config)
-        } else {
-            throw new UnsupportedOperationException("${config} is not a ${RoddyWorkflowConfig.simpleName}.")
+        if (config.class == RoddyWorkflowConfig.class) {
+            return getRoddyAlignmentInformation((RoddyWorkflowConfig) config)
         }
+        return config.getAlignmentInformation()
     }
 
     Map<String, AlignmentInfo> getAlignmentInformation(Project project) throws Exception {
@@ -252,16 +245,6 @@ class ProjectOverviewService {
         } catch (NoSuchBeanDefinitionException e) {
             throw new Exception("Alignment is configured wrong!")
         }
-    }
-
-    @Immutable
-    static class AlignmentInfo {
-        String bwaCommand
-        String bwaOptions
-        String samToolsCommand
-        String mergeCommand
-        String mergeOptions
-        String pluginVersion
     }
 
     List overviewProjectQuery(projectName) {
@@ -575,4 +558,3 @@ where
         return accessPersons.unique()
     }
 }
-

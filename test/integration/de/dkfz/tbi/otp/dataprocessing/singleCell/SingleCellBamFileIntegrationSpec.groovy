@@ -1,6 +1,5 @@
-package de.dkfz.tbi.otp.dataprocessing
+package de.dkfz.tbi.otp.dataprocessing.singleCell
 
-import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import spock.lang.Specification
 
 class SingleCellBamFileIntegrationSpec extends Specification {
