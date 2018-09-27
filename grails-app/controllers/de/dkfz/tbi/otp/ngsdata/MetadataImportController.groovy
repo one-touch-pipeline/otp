@@ -313,14 +313,13 @@ class MetadataImportControllerSubmitCommand implements Serializable {
         })
     }
 
-    void setTicketNumber(String ticketNumber) {
+    String getTicketNumber() {
         String prefix = processingOptionService.findOptionAsString(OptionName.TICKET_SYSTEM_NUMBER_PREFIX)
         Matcher matcher = ticketNumber =~ /^\s*(((${Pattern.quote(prefix)})?#)?(?<number>(\d{16})))?\s*$/
         if (matcher.matches()) {
-            this.ticketNumber = matcher.group('number') ?: null
+            return matcher.group('number') ?: null
         } else {
-            this.ticketNumber = ticketNumber
+            return ticketNumber
         }
-
     }
 }
