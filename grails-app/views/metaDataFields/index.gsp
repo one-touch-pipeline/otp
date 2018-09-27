@@ -376,7 +376,7 @@
                                             <label for="mate_pair">
                                                 <g:message code="dataFields.seqType.mate"/>
                                             </label>
-                                            <input name="type" id="mate_pair" type="checkbox"/>
+                                            <input name="mate_pair" id="mate_pair" type="checkbox"/>
                                         </td>
                                     </tr>
                                     </tbody>
