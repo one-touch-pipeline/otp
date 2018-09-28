@@ -64,10 +64,11 @@ class SamplePair implements TimeStamped, Entity {
     ProcessingStatus runYapsaProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
 
     boolean isProcessingDisabled() {
-        return  snvProcessingStatus    == ProcessingStatus.DISABLED &&
-                indelProcessingStatus  == ProcessingStatus.DISABLED &&
-                sophiaProcessingStatus == ProcessingStatus.DISABLED &&
-                aceseqProcessingStatus == ProcessingStatus.DISABLED
+        return  snvProcessingStatus      == ProcessingStatus.DISABLED &&
+                indelProcessingStatus    == ProcessingStatus.DISABLED &&
+                sophiaProcessingStatus   == ProcessingStatus.DISABLED &&
+                aceseqProcessingStatus   == ProcessingStatus.DISABLED &&
+                runYapsaProcessingStatus == ProcessingStatus.DISABLED
     }
 
     static constraints = {
