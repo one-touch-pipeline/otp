@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.utils.DataTableCommand
-import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
-import org.grails.databinding.BindingFormat
+import de.dkfz.tbi.otp.utils.*
+import grails.converters.*
+import grails.plugin.springsecurity.annotation.*
+import org.grails.databinding.*
 
 class ProjectProgressDataTableCommand extends DataTableCommand {
 
@@ -52,19 +52,14 @@ class ProjectProgressController {
     }
 
     private List fillTable(List<Run> runs) {
-        List data = []
-        int n=1
-        for (Run run in runs) {
+        return runs.collect { Run run ->
             List line = []
-            Set<SampleIdentifier> samples = projectProgressService.getSampleIdentifier(run)
-
+            Set<Sample> samples = projectProgressService.getSamples(run)
             line << run.id
-            line << n++
             line << run.name
             line << run.seqCenter.toString().toLowerCase()
-            line << samples.sort{it.sample.project.name + " "  + it.name }.collect {[it.sample.individual.id, it.name]}
-            data << line
+            line << samples.sort { it.project.name + " "  + it.displayName }.collect { [it.individual.id, it.displayName] }
+            return line
         }
-        return data
     }
 }

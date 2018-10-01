@@ -8,17 +8,10 @@ class ProjectProgressService {
 
     List<Run> getListOfRuns(List<Project> projects, Date startDate, Date endDate) {
         List<DataFile> files = DataFile.findAllByProjectInListAndDateFileSystemBetween(projects, startDate, endDate)
-        List<String> runNames = files*.run.name
-        List<Run> runs = Run.findAllByNameInList(runNames, [sort: "seqCenter"])
-        return runs
+        return files*.seqTrack*.run.sort { it.seqCenter.name }.unique()
     }
 
-    Set<SampleIdentifier> getSampleIdentifier(Run run) {
-        Set<SampleIdentifier> sampleIdentifiers = []
-        SeqTrack.findAllByRun(run).each { SeqTrack track ->
-            Sample sample = track.sample
-            sampleIdentifiers << SampleIdentifier.findBySample(sample)
-        }
-        return sampleIdentifiers
+    Set<Sample> getSamples(Run run) {
+        SeqTrack.findAllByRun(run)*.sample.unique()
     }
 }

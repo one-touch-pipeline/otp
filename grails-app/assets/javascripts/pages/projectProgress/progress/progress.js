@@ -53,13 +53,13 @@ $.otp.projectProgressTable = {
                         var i, j, rowData, row;
                         for (i = 0; i < json.aaData.length; i += 1) {
                             row = json.aaData[i];
-                            var samples = []
-                            for (j=0;j<row[4].length; j++) {
+                            var samples = [];
+                            for (j=0; j<row[3].length; j++) {
                                 samples.push($.otp.createLinkMarkup({
                                     controller: 'individual',
                                     action: 'show',
-                                    id: row[4][j][0],
-                                    text: row[4][j][1]
+                                    id: row[3][j][0],
+                                    text: row[3][j][1]
                                 }));
                             }
                             rowData = [
@@ -67,11 +67,11 @@ $.otp.projectProgressTable = {
                                     controller: 'run',
                                     action: 'show',
                                     id: row[0],
-                                    title: row[2],
-                                    text: row[2]
-                                    }),
-                                    row[3],
-                                    samples
+                                    title: row[1],
+                                    text: row[1]
+                                }),
+                                row[2],
+                                samples.join(", ")
                             ];
                             json.aaData[i] = rowData;
                         }

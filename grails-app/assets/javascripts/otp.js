@@ -19,10 +19,10 @@ $.otp = {
         if (component === undefined || !component) {
             return link;
         }
-        if (!isNaN(link)) {
+        if (typeof link !== 'string') {
             link = link.toString();
         }
-        if (!isNaN(component)) {
+        if (typeof component !== 'string') {
             component = component.toString();
         }
         if (link.charAt(link.length - 1) !== "/" && component.charAt(0) !== "/") {
