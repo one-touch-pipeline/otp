@@ -20,15 +20,15 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
     @Override
     void execute() {
         doWithPersistenceInterceptor {
-            short minPriority = minimumProcessingPriorityForOccupyingASlot
-            if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
+            ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
+            if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
                 return
             }
 
             List<SeqTrack> seqTracks = seqTrackService.seqTracksReadyToInstall(minPriority)
             if (seqTracks) {
                 for (SeqTrack seqTrack : seqTracks) {
-                    if (seqTrack.processingPriority >= minimumProcessingPriorityForOccupyingASlot) {
+                    if (seqTrack.processingPriority >= minimumProcessingPriorityForOccupyingASlot.priority) {
                         SeqTrack.withTransaction {
                             trackingService.setStartedForSeqTracks([seqTrack], OtrsTicket.ProcessingStep.INSTALLATION)
                             seqTrack.dataInstallationState = SeqTrack.DataProcessingState.IN_PROGRESS

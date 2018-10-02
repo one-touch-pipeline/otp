@@ -44,7 +44,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
         DomainFactory.createExomeSeqType()
 
         expect:
-        samplePair == getService().findSamplePairToProcess(ProcessingPriority.NORMAL_PRIORITY)
+        samplePair == getService().findSamplePairToProcess(ProcessingPriority.NORMAL)
     }
 
     void "findSamplePairToProcess, wrong seqType should return null"() {
@@ -57,7 +57,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Integr
         assert samplePair.mergingWorkPackage2.save(flush: true)
 
         expect:
-        null == getService().findSamplePairToProcess(ProcessingPriority.NORMAL_PRIORITY)
+        null == getService().findSamplePairToProcess(ProcessingPriority.NORMAL)
     }
 
     void "prepareCreatingTheProcessAndTriggerTracking, when input is null shall throw an exception"() {

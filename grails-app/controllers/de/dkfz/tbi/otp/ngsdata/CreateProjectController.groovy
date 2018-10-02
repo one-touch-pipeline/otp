@@ -39,7 +39,7 @@ class CreateProjectController {
                         mailingListName: cmd.mailingListName,
                         costCenter: cmd.costCenter,
                         description: cmd.description,
-                        processingPriority: cmd.priority,
+                        processingPriority: cmd.processingPriority,
                         tumorEntity: cmd.tumorEntity,
                         projectInfoFile: cmd.projectInfoFile,
                 )
@@ -51,7 +51,8 @@ class CreateProjectController {
         return [
             projectGroups: ["No Group"] + projectGroupService.availableProjectGroups()*.name,
             tumorEntities: ["No tumor entity"] + TumorEntity.list().sort()*.name,
-            processingPriorities: ProjectService.processingPriorities,
+            processingPriorities: ProcessingPriority.displayPriorities,
+            defaultProcessingPriority: ProcessingPriority.NORMAL,
             projectCategories: ProjectCategory.listOrderByName(),
             message: message,
             cmd: cmd,
@@ -75,7 +76,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     MultipartFile projectInfoFile
     String description
     String submit
-    short priority
+    ProcessingPriority processingPriority
     boolean copyFiles
     boolean fingerPrinting = true
 
@@ -153,17 +154,6 @@ class CreateProjectControllerSubmitCommand implements Serializable {
         this.nameInMetadataFiles = nameInMetadataFiles?.trim()?.replaceAll(" +", " ")
         if (this.nameInMetadataFiles == "") {
             this.nameInMetadataFiles = null
-        }
-    }
-
-    void setProcessingPriority(String processingPriority) {
-        switch (processingPriority) {
-            case "NORMAL":
-                this.priority = ProcessingPriority.NORMAL_PRIORITY
-                break
-            case "FAST_TRACK":
-                this.priority = ProcessingPriority.FAST_TRACK_PRIORITY
-                break
         }
     }
 

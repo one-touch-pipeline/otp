@@ -24,8 +24,8 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     @Override
     void execute() {
         doWithPersistenceInterceptor {
-            short minPriority = minimumProcessingPriorityForOccupyingASlot
-            if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
+            ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
+            if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
                 return
             }
             SamplePair.withTransaction {
@@ -89,7 +89,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
         remoteShellHelper.executeCommandReturnProcessOutput(realm, deleteFiles)
     }
 
-    SamplePair findSamplePairToProcess(short minPriority) {
+    SamplePair findSamplePairToProcess(ProcessingPriority minPriority) {
         return getBamFileAnalysisService().samplePairForProcessing(minPriority)
     }
 

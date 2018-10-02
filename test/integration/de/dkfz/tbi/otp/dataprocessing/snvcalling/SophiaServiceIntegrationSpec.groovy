@@ -35,7 +35,7 @@ class SophiaServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createSamplePairWithProcessedMergedBamFiles()
 
         expect:
-        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
     @Unroll
@@ -49,7 +49,7 @@ class SophiaServiceIntegrationSpec extends IntegrationSpec {
 
 
         expect:
-        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         property             | value
@@ -68,7 +68,7 @@ class SophiaServiceIntegrationSpec extends IntegrationSpec {
         SamplePair samplePair = DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
 
         expect:
-        samplePair == sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        samplePair == sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         property             | value

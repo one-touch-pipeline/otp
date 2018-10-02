@@ -1,24 +1,31 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import groovy.transform.*
+
 /**
  * Data with a higher processing priority value should be processed before data with a lower processing priority value.
  */
-class ProcessingPriority {
+@TupleConstructor
+enum ProcessingPriority {
 
-    static final short MINIMUM_PRIORITY = Short.MIN_VALUE
+    MINIMUM(Short.MIN_VALUE),
 
-    static final short NORMAL_PRIORITY = 0
+    NORMAL(0 as short),
 
-    static final short FAST_TRACK_PRIORITY = 10000
+    FAST_TRACK(10000 as short),
 
-    static final short MAXIMUM_PRIORITY = Short.MAX_VALUE - 1
+    MAXIMUM(Short.MAX_VALUE - 1 as short),
 
     /**
      * A priority value which is strictly greater than the processing value of all data.
      */
-    static final short SUPREMUM_PRIORITY = Short.MAX_VALUE
+    SUPREMUM(Short.MAX_VALUE),
 
-    static {
-        assert SUPREMUM_PRIORITY > MAXIMUM_PRIORITY
+    final short priority
+
+    static final List<ProcessingPriority> displayPriorities = [MINIMUM, NORMAL, FAST_TRACK]
+
+    static getByPriorityNumber(short priority) {
+        return values().find { it.priority == priority }
     }
 }

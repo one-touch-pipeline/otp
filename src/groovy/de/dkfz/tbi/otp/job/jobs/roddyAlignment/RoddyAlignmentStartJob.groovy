@@ -19,8 +19,8 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
     }
 
     protected void startRoddyAlignment() {
-        short minPriority = minimumProcessingPriorityForOccupyingASlot
-        if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
+        ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
+        if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
             return
         }
 
@@ -55,7 +55,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
 
     abstract List<SeqType> getSeqTypes()
 
-    List<MergingWorkPackage> findProcessableMergingWorkPackages(short minPriority) {
+    List<MergingWorkPackage> findProcessableMergingWorkPackages(ProcessingPriority minPriority) {
         return MergingWorkPackage.findAll(
                 'FROM MergingWorkPackage mwp ' +
                 'WHERE needsProcessing = true ' +
@@ -71,7 +71,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
                 'ORDER BY sample.individual.project.processingPriority DESC, mwp.id ASC',
                 [
                         processed: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
-                        minPriority: minPriority,
+                        minPriority: minPriority.priority,
                         seqTypes: seqTypes,
                 ]
         )

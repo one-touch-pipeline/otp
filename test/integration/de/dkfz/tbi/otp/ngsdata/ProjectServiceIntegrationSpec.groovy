@@ -124,7 +124,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         project.name == name
         project.dirName == dirName
         project.dirAnalysis == dirAnalysis
-        project.processingPriority == processingPriority
+        project.processingPriority == processingPriority.priority
         project.projectGroup == ProjectGroup.findByName(projectGroup)
         project.nameInMetadataFiles == nameInMetadataFiles
         project.hasToBeCopied == copyFiles
@@ -134,12 +134,12 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
         where:
         name      | dirName | dirAnalysis | projectGroup    | nameInMetadataFiles | copyFiles | mailingListName          | description   | category     | processingPriority
-        'project' | 'dir'   | ''          | ''              | 'project'           | true      | "tr_project@MailingList" | 'description' | ["category"] | ProcessingPriority.NORMAL_PRIORITY
-        'project' | 'dir'   | ''          | ''              | null                | true      | "tr_project@MailingList" | ''            | ["category"] | ProcessingPriority.FAST_TRACK_PRIORITY
-        'project' | 'dir'   | ''          | 'projectGroup'  | 'project'           | true      | "tr_project@MailingList" | 'description' | ["category"] | ProcessingPriority.NORMAL_PRIORITY
-        'project' | 'dir'   | ''          | ''              | 'project'           | false     | "tr_project@MailingList" | ''            | ["category"] | ProcessingPriority.FAST_TRACK_PRIORITY
-        'project' | 'dir'   | ''          | ''              | 'project'           | true      | ""                       | 'description' | ["category"] | ProcessingPriority.NORMAL_PRIORITY
-        'project' | 'dir'   | '/dirA'     | ''              | 'project'           | true      | ""                       | 'description' | []           | ProcessingPriority.FAST_TRACK_PRIORITY
+        'project' | 'dir'   | ''          | ''              | 'project'           | true      | "tr_project@MailingList" | 'description' | ["category"] | ProcessingPriority.NORMAL
+        'project' | 'dir'   | ''          | ''              | null                | true      | "tr_project@MailingList" | ''            | ["category"] | ProcessingPriority.FAST_TRACK
+        'project' | 'dir'   | ''          | 'projectGroup'  | 'project'           | true      | "tr_project@MailingList" | 'description' | ["category"] | ProcessingPriority.NORMAL
+        'project' | 'dir'   | ''          | ''              | 'project'           | false     | "tr_project@MailingList" | ''            | ["category"] | ProcessingPriority.FAST_TRACK
+        'project' | 'dir'   | ''          | ''              | 'project'           | true      | ""                       | 'description' | ["category"] | ProcessingPriority.NORMAL
+        'project' | 'dir'   | '/dirA'     | ''              | 'project'           | true      | ""                       | 'description' | []           | ProcessingPriority.FAST_TRACK
     }
 
     void "test createProject if directory is created"() {
@@ -161,7 +161,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 copyFiles: false,
                 mailingListName: "tr_Mailing@ListName",
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL_PRIORITY,
+                processingPriority: ProcessingPriority.NORMAL,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -199,7 +199,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 copyFiles: true,
                 mailingListName: "tr_Mailing@ListName",
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL_PRIORITY,
+                processingPriority: ProcessingPriority.NORMAL,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -237,7 +237,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 copyFiles: false,
                 mailingListName: "tr_Mailing@ListName",
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL_PRIORITY,
+                processingPriority: ProcessingPriority.NORMAL,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -267,7 +267,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 copyFiles: false,
                 mailingListName: "invalidMailingListName",
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL_PRIORITY,
+                processingPriority: ProcessingPriority.NORMAL,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -297,7 +297,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 copyFiles: false,
                 mailingListName: "tr_Mailing@ListName",
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL_PRIORITY,
+                processingPriority: ProcessingPriority.NORMAL,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -337,7 +337,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 copyFiles: false,
                 mailingListName: "tr_Mailing@ListName",
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL_PRIORITY,
+                processingPriority: ProcessingPriority.NORMAL,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -402,7 +402,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 copyFiles: true,
                 mailingListName: "tr_Mailing@ListName",
                 description: '',
-                processingPriority: ProcessingPriority.NORMAL_PRIORITY,
+                processingPriority: ProcessingPriority.NORMAL,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -516,11 +516,11 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         when:
         assert !project.processingPriority
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.updateProjectField(ProcessingPriority.FAST_TRACK_PRIORITY, "processingPriority", project)
+            projectService.updateProjectField(ProcessingPriority.FAST_TRACK.priority, "processingPriority", project)
         }
 
         then:
-        project.processingPriority == ProcessingPriority.FAST_TRACK_PRIORITY
+        project.processingPriority == ProcessingPriority.FAST_TRACK.priority
     }
 
     void "test updateTumor valid name"() {

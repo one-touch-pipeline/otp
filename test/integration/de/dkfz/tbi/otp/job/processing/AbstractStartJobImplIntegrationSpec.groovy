@@ -31,7 +31,7 @@ class AbstractStartJobImplIntegrationSpec extends IntegrationSpec {
         ] as AbstractStartJobImpl
 
         expect:
-        job.minimumProcessingPriorityForOccupyingASlot == ProcessingPriority.SUPREMUM_PRIORITY
+        job.minimumProcessingPriorityForOccupyingASlot == ProcessingPriority.SUPREMUM
     }
 
     @Unroll
@@ -45,10 +45,10 @@ class AbstractStartJobImplIntegrationSpec extends IntegrationSpec {
 
         where:
         obsoleted | enabled || priority
-        true      | true    || ProcessingPriority.SUPREMUM_PRIORITY
-        true      | false   || ProcessingPriority.SUPREMUM_PRIORITY
-        false     | true    || ProcessingPriority.MINIMUM_PRIORITY
-        false     | false   || ProcessingPriority.SUPREMUM_PRIORITY
+        true      | true    || ProcessingPriority.SUPREMUM
+        true      | false   || ProcessingPriority.SUPREMUM
+        false     | true    || ProcessingPriority.MINIMUM
+        false     | false   || ProcessingPriority.SUPREMUM
     }
 
     @Unroll
@@ -61,9 +61,9 @@ class AbstractStartJobImplIntegrationSpec extends IntegrationSpec {
 
         where:
         runningProcesses || priority
-        3                || ProcessingPriority.SUPREMUM_PRIORITY
-        2                || ProcessingPriority.FAST_TRACK_PRIORITY
-        1                || ProcessingPriority.MINIMUM_PRIORITY
+        3                || ProcessingPriority.SUPREMUM
+        2                || ProcessingPriority.FAST_TRACK
+        1                || ProcessingPriority.MINIMUM
     }
 
     private void prepareTestGetMinimumProcessingPriorityForOccupyingASlot(final int runningProcesses) {

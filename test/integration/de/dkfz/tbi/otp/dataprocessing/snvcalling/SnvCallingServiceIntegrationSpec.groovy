@@ -41,7 +41,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         assert roddyConfig1.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         property << ["project", "seqType"]
@@ -53,7 +53,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         assert roddyConfig1.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
     void "samplePairForProcessing when the snvCallingInstance is already in progress"() {
@@ -67,7 +67,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         )
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
 
@@ -83,7 +83,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         )
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
     void "samplePairForProcessing when other samplePair inProcess"() {
@@ -101,7 +101,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
 
         expect:
         samplePair1.individual != samplePair2.individual
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
 
@@ -115,7 +115,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         }
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         number << [1, 2]
@@ -142,7 +142,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         samplePair1.delete(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         number << [1, 2]
@@ -159,7 +159,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         assert bamFileInProgress.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         number << [1, 2]
@@ -174,7 +174,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         assert problematicBamFile.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         number << [1, 2]
@@ -190,7 +190,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         assert thresholds.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         number << [1, 2]
@@ -205,7 +205,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         }
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
 
@@ -217,7 +217,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         }
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
 
@@ -231,7 +231,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         assert thresholds.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         number << [1, 2]
@@ -250,7 +250,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         assert thresholds.save(flush: true)
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         number | property
@@ -269,7 +269,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         assert problematicBamFile.save(flush: true)
 
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         number << [1, 2]
@@ -281,7 +281,7 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createProcessableSamplePair()
 
         expect:
-        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        samplePair1 == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
 
@@ -289,17 +289,17 @@ class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
         given:
         SamplePair samplePairFastTrack = DomainFactory.createProcessableSamplePair().samplePair
         Project project = samplePairFastTrack.project
-        project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        project.processingPriority = ProcessingPriority.FAST_TRACK.priority
         assert project.save(flush: true)
 
         expect:
-        samplePairFastTrack == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        samplePairFastTrack == snvCallingService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
 
     void "samplePairForProcessing, make sure that min processing priority is taken into account"() {
         expect:
-        null == snvCallingService.samplePairForProcessing(ProcessingPriority.FAST_TRACK_PRIORITY)
+        null == snvCallingService.samplePairForProcessing(ProcessingPriority.FAST_TRACK)
     }
 
 

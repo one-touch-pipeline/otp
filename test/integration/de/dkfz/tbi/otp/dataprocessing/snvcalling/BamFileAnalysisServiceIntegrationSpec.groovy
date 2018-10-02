@@ -60,7 +60,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         ])
 
         expect:
-        null == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == service.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         processingStatus            | pipeline                                       | service               | optionName
@@ -104,7 +104,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         ])
 
         expect:
-        !service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        !service.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         processingStatus         | pipeline                                     | service                   | qc
@@ -153,7 +153,7 @@ class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
         ])
 
         expect:
-        samplePair1 == service.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        samplePair1 == service.samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
         processingStatus         | pipeline                                     | service                   | qc

@@ -49,7 +49,7 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     public String prepareAndReturnAdditionalImports(R roddyResult) {
         assert roddyResult: "roddyResult must not be null"
 
-        String fasttrack = (roddyResult.processingPriority == ProcessingPriority.FAST_TRACK_PRIORITY) ?
+        String fasttrack = (roddyResult.processingPriority == ProcessingPriority.FAST_TRACK) ?
                 "-fasttrack"
                 : ""
         String pluginVersion = roddyResult.config.pluginVersion

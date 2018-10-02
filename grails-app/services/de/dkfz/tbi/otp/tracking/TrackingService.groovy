@@ -358,7 +358,7 @@ class TrackingService {
         } else if (analysis && !analysis.withdrawn && BamFileAnalysisService.processingStatesNotProcessable.contains(analysis.processingState)) {
             status = NOTHING_DONE_MIGHT_DO
         } else if ([1, 2].every { sp."mergingWorkPackage${it}".bamFileThatIsReadyForFurtherAnalysis }) {
-            if (service.samplePairForProcessing(ProcessingPriority.MINIMUM_PRIORITY, sp)) {
+            if (service.samplePairForProcessing(ProcessingPriority.MINIMUM, sp)) {
                 status = NOTHING_DONE_MIGHT_DO
             } else {
                 status = NOTHING_DONE_WONT_DO

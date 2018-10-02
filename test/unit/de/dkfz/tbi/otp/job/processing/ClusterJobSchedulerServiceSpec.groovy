@@ -8,12 +8,8 @@ import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
-import de.dkfz.tbi.otp.utils.logging.*
 import grails.test.mixin.*
-import org.junit.*
-import org.junit.rules.*
 import spock.lang.*
 
 @Mock([
@@ -153,7 +149,7 @@ ${jobId}.host.long-doma  someUser    fast     r160224_18005293    --      1     
 
         ProcessParameterObject ppo = Stub(ProcessParameterObject) {
             getSeqType() >> seqType
-            getProcessingPriority() >> ProcessingPriority.NORMAL_PRIORITY
+            getProcessingPriority() >> ProcessingPriority.NORMAL.priority
         }
         ProcessingStep step = Stub(ProcessingStep) {
             getProcessParameterObject() >> ppo

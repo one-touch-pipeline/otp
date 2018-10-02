@@ -139,7 +139,7 @@ class QualityAssessmentMergedPassServiceTests {
 
     @Test
     void testCreatePassQualityAssessmentStatusWrong() {
-        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL))
     }
 
     @Test
@@ -147,7 +147,7 @@ class QualityAssessmentMergedPassServiceTests {
         processedMergedBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
         processedMergedBamFile.type = BamType.SORTED
         assert processedMergedBamFile.save(flush: true)
-        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL))
     }
 
     @Test
@@ -155,7 +155,7 @@ class QualityAssessmentMergedPassServiceTests {
         processedMergedBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
         processedMergedBamFile.withdrawn = true
         assert processedMergedBamFile.save(flush: true)
-        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL_PRIORITY))
+        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL))
     }
 
     @Test
@@ -163,7 +163,7 @@ class QualityAssessmentMergedPassServiceTests {
         processedMergedBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
         assert processedMergedBamFile.save(flush: true)
         assertEquals(1, QualityAssessmentMergedPass.list().size())
-        QualityAssessmentMergedPass qualityAssessmentMergedPass1 = qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL_PRIORITY)
+        QualityAssessmentMergedPass qualityAssessmentMergedPass1 = qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL)
         assertEquals(1, qualityAssessmentMergedPass1.identifier)
         assertEquals(2, QualityAssessmentMergedPass.list().size())
     }
@@ -179,10 +179,10 @@ class QualityAssessmentMergedPassServiceTests {
         fastTrackBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
         assert fastTrackBamFile.save(flush: true)
 
-        fastTrackBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        fastTrackBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
         assert fastTrackBamFile.project.save(flush: true)
 
-        QualityAssessmentMergedPass fastTrackPass = qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL_PRIORITY)
+        QualityAssessmentMergedPass fastTrackPass = qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL)
         assert fastTrackPass.abstractMergedBamFile == fastTrackBamFile
     }
 
@@ -192,13 +192,13 @@ class QualityAssessmentMergedPassServiceTests {
         assert processedMergedBamFile.save(flush: true)
         assertEquals(1, QualityAssessmentMergedPass.list().size())
 
-        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.FAST_TRACK_PRIORITY))
+        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.FAST_TRACK))
         assertEquals(1, QualityAssessmentMergedPass.list().size())
 
-        processedMergedBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        processedMergedBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
         assert processedMergedBamFile.project.save(flush: true)
 
-        qualityAssessmentMergedPassService.createPass(ProcessingPriority.FAST_TRACK_PRIORITY)
+        qualityAssessmentMergedPassService.createPass(ProcessingPriority.FAST_TRACK)
         assertEquals(2, QualityAssessmentMergedPass.list().size())
     }
 

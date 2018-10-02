@@ -29,7 +29,7 @@ class AceSeqServiceIntegrationSpec extends IntegrationSpec {
         prepareSophiaForAceseqBase()
 
         expect:
-        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
     void "samplePairForProcessing, for Aceseq pipeline, when last sophia instance is running and not withdrawn and an older finish exist, should not return SamplePair"() {
@@ -37,7 +37,7 @@ class AceSeqServiceIntegrationSpec extends IntegrationSpec {
         prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: false], [processingState: AnalysisProcessingStates.IN_PROGRESS, withdrawn: false])
 
         expect:
-        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
     void "samplePairForProcessing, for Aceseq pipeline, when last sophia instance is running and withdrawn and an older finish exist, should return SamplePair"() {
@@ -45,7 +45,7 @@ class AceSeqServiceIntegrationSpec extends IntegrationSpec {
         prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: false], [processingState: AnalysisProcessingStates.IN_PROGRESS, withdrawn: true])
 
         expect:
-        samplePair1 == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        samplePair1 == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
 
@@ -55,7 +55,7 @@ class AceSeqServiceIntegrationSpec extends IntegrationSpec {
         prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: true], [processingState: AnalysisProcessingStates.FINISHED, withdrawn: true])
 
         expect:
-        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        null == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
     void "samplePairForProcessing, for ACEseq pipeline, coverage is not high enough, should not return SamplePair"() {
@@ -69,7 +69,7 @@ class AceSeqServiceIntegrationSpec extends IntegrationSpec {
         ])
 
         expect:
-        !aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        !aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
 

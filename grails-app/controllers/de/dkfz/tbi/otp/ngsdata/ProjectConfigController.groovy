@@ -105,7 +105,8 @@ class ProjectConfigController implements CheckAndCall {
                 costCenter                : project?.costCenter,
                 tumorEntities             : TumorEntity.list().sort(),
                 tumorEntity               : project?.tumorEntity,
-                processingPriorities      : ProjectService.processingPriorities,
+                processingPriority        : ProcessingPriority.getByPriorityNumber(project?.processingPriority),
+                processingPriorities      : ProcessingPriority.displayPriorities,
                 checkSophiaReferenceGenome: checkSophiaReferenceGenome,
                 checkAceseqReferenceGenome: checkAceseqReferenceGenome,
                 projectInfos              : project?.projectInfos,
@@ -161,7 +162,7 @@ class ProjectConfigController implements CheckAndCall {
 
     JSON updateProcessingPriority(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, {
-            projectService.updateProjectField(ProcessingPriority."${cmd.value}_PRIORITY", cmd.fieldName, cmd.project)
+            projectService.updateProjectField(ProcessingPriority.valueOf(cmd.value).priority, cmd.fieldName, cmd.project)
         })
     }
 

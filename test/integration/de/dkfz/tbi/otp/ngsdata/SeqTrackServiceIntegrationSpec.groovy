@@ -33,7 +33,7 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
                 laneId: "2",
 
         )
-        seqTrack2.project.processingPriority = priority
+        seqTrack2.project.processingPriority = priority.priority
 
         when:
         List<String> laneIds = seqTrackService.seqTracksReadyToInstall(inputPriority)*.laneId
@@ -42,11 +42,11 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         expectedLaneIds == laneIds
 
         where:
-        state                                    | priority                               | inputPriority                          || expectedLaneIds
-        UNKNOWN     | ProcessingPriority.NORMAL_PRIORITY     | ProcessingPriority.NORMAL_PRIORITY     || []
-        NOT_STARTED | ProcessingPriority.NORMAL_PRIORITY     | ProcessingPriority.NORMAL_PRIORITY     || ["1", "2"]
-        NOT_STARTED | ProcessingPriority.FAST_TRACK_PRIORITY | ProcessingPriority.NORMAL_PRIORITY     || ["2", "1"]
-        NOT_STARTED | ProcessingPriority.FAST_TRACK_PRIORITY | ProcessingPriority.FAST_TRACK_PRIORITY || ["2"]
+        state       | priority                              | inputPriority                 || expectedLaneIds
+        UNKNOWN     | ProcessingPriority.NORMAL             | ProcessingPriority.NORMAL     || []
+        NOT_STARTED | ProcessingPriority.NORMAL             | ProcessingPriority.NORMAL     || ["1", "2"]
+        NOT_STARTED | ProcessingPriority.FAST_TRACK         | ProcessingPriority.NORMAL     || ["2", "1"]
+        NOT_STARTED | ProcessingPriority.FAST_TRACK         | ProcessingPriority.FAST_TRACK || ["2"]
 
     }
 
@@ -57,7 +57,7 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createSeqTrack(params())
 
         when:
-        SeqTrack result = seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        SeqTrack result = seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL)
 
         then:
         shouldFind? result : !result
@@ -83,7 +83,7 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         ])
 
         when:
-        SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL)
 
         then:
         result == alignableSeqTrack
@@ -98,7 +98,7 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createSeqTrack ([fastqcState: NOT_STARTED])
 
         when:
-        SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL)
 
         then:
         result == oldestSeqTrack
@@ -112,16 +112,16 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createSeqTrack ([fastqcState: NOT_STARTED])
         SeqTrack importantSeqTrack = DomainFactory.createSeqTrack ([fastqcState: NOT_STARTED])
         Project importantProject = importantSeqTrack.project
-        importantProject.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        importantProject.processingPriority = ProcessingPriority.FAST_TRACK.priority
         importantProject.save(flush: true)
 
         when: "asked for normal priority"
-        SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL_PRIORITY)
+        SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL)
         then:
         result == importantSeqTrack
 
         when: "asked for high priority fastTrack"
-        result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.FAST_TRACK_PRIORITY)
+        result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.FAST_TRACK)
         then:
         result == importantSeqTrack
     }
@@ -133,7 +133,7 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         DomainFactory.createSeqTrack ([fastqcState: NOT_STARTED])
 
         when:
-        SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.FAST_TRACK_PRIORITY)
+        SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.FAST_TRACK)
 
         then:
         result == null

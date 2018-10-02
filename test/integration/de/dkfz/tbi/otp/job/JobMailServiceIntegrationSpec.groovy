@@ -27,7 +27,7 @@ class JobMailServiceIntegrationSpec extends Specification {
 
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        seqTrack.project.processingPriority = processingPriority
+        seqTrack.project.processingPriority = processingPriority.priority
         seqTrack.ilseSubmission = DomainFactory.createIlseSubmission()
         seqTrack.save(flush: true)
 
@@ -85,7 +85,7 @@ class JobMailServiceIntegrationSpec extends Specification {
         JobMailService jobMailService = new JobMailService([
                 mailHelperService      : Mock(MailHelperService) {
                     1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> recipients ->
-                        assert emailSubject.startsWith(processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY ? "FASTTRACK ERROR:" : "ERROR:")
+                        assert emailSubject.startsWith(processingPriority >= ProcessingPriority.FAST_TRACK ? "FASTTRACK ERROR:" : "ERROR:")
                         assert emailSubject.contains("${step.jobExecutionPlan.name} ${step.processParameterObject.individual.displayName} ${step.processParameterObject.project.name}")
                         assert content.contains('\nWorkflow:\n')
                         assert content.contains('\nOTP Job:\n')
@@ -121,12 +121,12 @@ class JobMailServiceIntegrationSpec extends Specification {
 
         where:
         completedCount | failedCount | processingPriority
-        0              | 0           | ProcessingPriority.NORMAL_PRIORITY
-        5              | 0           | ProcessingPriority.NORMAL_PRIORITY
-        0              | 5           | ProcessingPriority.NORMAL_PRIORITY
-        2              | 3           | ProcessingPriority.NORMAL_PRIORITY
-        0              | 0           | ProcessingPriority.FAST_TRACK_PRIORITY
-        5              | 0           | ProcessingPriority.FAST_TRACK_PRIORITY
+        0              | 0           | ProcessingPriority.NORMAL
+        5              | 0           | ProcessingPriority.NORMAL
+        0              | 5           | ProcessingPriority.NORMAL
+        2              | 3           | ProcessingPriority.NORMAL
+        0              | 0           | ProcessingPriority.FAST_TRACK
+        5              | 0           | ProcessingPriority.FAST_TRACK
     }
 
 

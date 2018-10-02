@@ -72,8 +72,8 @@ class ClusterJobSchedulerService {
         options.putAll(jobSubmissionOptions)
 
         // check if the project has FASTTRACK priority
-        short processingPriority = domainObject?.processingPriority ?: ProcessingPriority.NORMAL_PRIORITY
-        if (processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) {
+        short processingPriority = domainObject?.processingPriority ?: ProcessingPriority.NORMAL.priority
+        if (processingPriority >= ProcessingPriority.FAST_TRACK.priority) {
             options.put(
                     JobSubmissionOption.QUEUE,
                     processingOptionService.findOptionAsString(CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE)

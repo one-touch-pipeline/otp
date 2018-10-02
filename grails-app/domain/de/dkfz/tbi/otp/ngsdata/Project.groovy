@@ -26,7 +26,7 @@ class Project implements Commentable, Entity {
     Realm realm
     String dirAnalysis
 
-    short processingPriority = ProcessingPriority.NORMAL_PRIORITY
+    short processingPriority = ProcessingPriority.NORMAL.priority
     String alignmentDeciderBeanName
 
     /**
@@ -96,7 +96,7 @@ class Project implements Commentable, Entity {
 
         projectGroup(nullable: true)
 
-        processingPriority max: ProcessingPriority.MAXIMUM_PRIORITY
+        processingPriority max: ProcessingPriority.MAXIMUM.priority
 
         alignmentDeciderBeanName(blank: false)  // If no alignment is desired, set to noAlignmentDecider instead of leaving blank
 
@@ -149,18 +149,5 @@ class Project implements Commentable, Entity {
     @Override
     Project getProject() {
         return this
-    }
-
-    String getProcessingPriorityAsString() {
-        switch (processingPriority) {
-            case ProcessingPriority.MINIMUM_PRIORITY:
-                return "MINIMUM"
-            case ProcessingPriority.NORMAL_PRIORITY:
-                return "NORMAL"
-            case ProcessingPriority.FAST_TRACK_PRIORITY:
-                return "FAST_TRACK"
-            default:
-                return "Unknown Priority value : '${processingPriority}'"
-        }
     }
 }

@@ -28,7 +28,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
      * - pair is not already in processing
      * - config file is available
      */
-    SamplePair samplePairForProcessing(short minPriority, SamplePair sp = null) {
+    SamplePair samplePairForProcessing(ProcessingPriority minPriority, SamplePair sp = null) {
         final String WORKPACKAGE = "workPackage"
         final String SAMPLE = "${WORKPACKAGE}.sample"
         final String SAMPLE_TYPE = "${SAMPLE}.sampleType"
@@ -101,7 +101,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
         Map parameters = [
                 needsProcessing: ProcessingStatus.NEEDS_PROCESSING,
                 processingStates: processingStatesNotProcessable,
-                minPriority: minPriority,
+                minPriority: minPriority.priority,
                 analysis: getAnalysisType(),
                 seqTypes: seqTypes,
                 threshold: threshold,

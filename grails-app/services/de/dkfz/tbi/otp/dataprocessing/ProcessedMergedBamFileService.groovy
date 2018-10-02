@@ -152,7 +152,7 @@ class ProcessedMergedBamFileService {
     /**
      * @return the ProcessedMergedBamFile, which has to be copied to the project folder
      */
-    public ProcessedMergedBamFile mergedBamFileWithFinishedQA(short minPriority) {
+    public ProcessedMergedBamFile mergedBamFileWithFinishedQA(ProcessingPriority minPriority) {
         List<AbstractBamFile.State> disallowedStatesAbstractBamFile = [
             AbstractBamFile.State.NEEDS_PROCESSING,
             AbstractBamFile.State.INPROGRESS,
@@ -186,7 +186,7 @@ class ProcessedMergedBamFileService {
                         sample {
                             individual {
                                 project {
-                                    ge('processingPriority', minPriority)
+                                    ge('processingPriority', minPriority.priority)
                                     order("processingPriority", "desc")
                                 }
                             }

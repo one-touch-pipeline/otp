@@ -22,8 +22,8 @@ class TransferMergedBamFileStartJob extends AbstractStartJobImpl implements Rest
     @Override
     void execute() {
         doWithPersistenceInterceptor {
-            short minPriority = minimumProcessingPriorityForOccupyingASlot
-            if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
+            ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
+            if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
                 return
             }
 

@@ -2,7 +2,6 @@ package workflows
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.LinkFileUtils
 import grails.test.mixin.*
 import grails.test.mixin.integration.*
 import org.joda.time.*
@@ -94,7 +93,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     @Test
     void testDataInstallationWithFastTrack() {
         SeqTrack seqTrack = createWholeGenomeSetup()
-        seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
+        seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK
         assert seqTrack.project.save(flush: true)
 
         execute()

@@ -245,11 +245,11 @@ class SeqTrackService {
      * @return a seqTrack without fastqc
      * @see SeqType#getDefaultOtpAlignableSeqTypes()
      */
-    public SeqTrack getSeqTrackReadyForFastqcProcessing(short minPriority) {
+    public SeqTrack getSeqTrackReadyForFastqcProcessing(ProcessingPriority minPriority) {
 
         List<SeqType> seqTypes = SeqType.getAllAlignableSeqTypes()
         List args = [SeqTrack.DataProcessingState.NOT_STARTED.toString(),
-                     minPriority,
+                     minPriority.priority,
         ] + seqTypes*.id
 
 
@@ -515,13 +515,13 @@ AND entry.value = :value
         }.unique().findAll()
     }
 
-    List<SeqTrack> seqTracksReadyToInstall(short minPriority) {
+    List<SeqTrack> seqTracksReadyToInstall(ProcessingPriority minPriority) {
         return SeqTrack.createCriteria().list {
             eq('dataInstallationState', SeqTrack.DataProcessingState.NOT_STARTED)
             sample {
                 individual {
                     project {
-                        ge('processingPriority', minPriority)
+                        ge('processingPriority', minPriority.priority)
                         order('processingPriority', 'desc')
                     }
                 }

@@ -36,7 +36,7 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.processingPriority"/></td>
-                <td><g:select class="criteria" id="priority" name='processingPriority' from='${processingPriorities}' value="${cmd.priority}"/></td>
+                <td><g:select class="criteria" id="priority" name='processingPriority' from='${processingPriorities}' value="${cmd.processingPriority ?: defaultProcessingPriority}"/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.metadata.name"/></td>

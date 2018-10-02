@@ -29,6 +29,6 @@ class ConsistencyCheck implements ProcessParameterObject, Entity {
 
     @Override
     short getProcessingPriority() {
-        ProcessingPriority.NORMAL_PRIORITY
+        ProcessingPriority.NORMAL.priority
     }
 }

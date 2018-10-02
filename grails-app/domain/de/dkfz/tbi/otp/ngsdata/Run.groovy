@@ -78,7 +78,7 @@ class Run implements ProcessParameterObject, Entity {
      */
     @Override
     short getProcessingPriority() {
-        return DataFile.findAllByRun(this)*.project*.processingPriority.max() ?: ProcessingPriority.NORMAL_PRIORITY
+        return DataFile.findAllByRun(this)*.project*.processingPriority.max() ?: ProcessingPriority.NORMAL.priority
     }
 
     static mapping = {

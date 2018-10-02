@@ -24,7 +24,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 class ProjectService {
 
     static final String PHIX_INFIX = 'PhiX'
-    static final List<String> processingPriorities = ["MINIMUM", "NORMAL", "FAST_TRACK"]
 
     //constants for rna configurations
     static final String ARRIBA_KNOWN_FUSIONS = "ARRIBA_KNOWN_FUSIONS"
@@ -128,7 +127,7 @@ class ProjectService {
         Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realm, projectParams.alignmentDeciderBeanName, projectParams.categoryNames)
         project.phabricatorAlias = projectParams.phabricatorAlias
         project.dirAnalysis = projectParams.dirAnalysis
-        project.processingPriority = projectParams.processingPriority
+        project.processingPriority = projectParams.processingPriority.priority
         project.hasToBeCopied = projectParams.copyFiles
         project.fingerPrinting = projectParams.fingerPrinting
         project.nameInMetadataFiles = projectParams.nameInMetadataFiles
@@ -212,7 +211,7 @@ class ProjectService {
         String mailingListName
         String costCenter
         String description
-        short processingPriority
+        ProcessingPriority processingPriority
         TumorEntity tumorEntity
         MultipartFile projectInfoFile
     }

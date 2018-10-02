@@ -38,23 +38,23 @@ class RoddyAlignmentStartJobTest {
     @Test
     void testFindProcessableMergingWorkPackages_WhenSeveralMergingWorkPackages_ShouldReturnOrderedMergingWorkPackageList() {
         MergingWorkPackage tooLowPriority = createMergingWorkPackage()
-        tooLowPriority.project.processingPriority = 5
+        tooLowPriority.project.processingPriority = ProcessingPriority.MINIMUM.priority
         assert tooLowPriority.save(flush: true, failOnError: true)
 
         MergingWorkPackage lowPriority = createMergingWorkPackage()
-        lowPriority.project.processingPriority = 100
+        lowPriority.project.processingPriority = ProcessingPriority.NORMAL.priority
         assert lowPriority.save(flush: true, failOnError: true)
 
         MergingWorkPackage highPriority = createMergingWorkPackage()
-        highPriority.project.processingPriority = 1000
+        highPriority.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
         assert highPriority.save(flush: true, failOnError: true)
 
         MergingWorkPackage doesNotNeedProcessing = createMergingWorkPackage()
-        doesNotNeedProcessing.project.processingPriority = 1000
+        doesNotNeedProcessing.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
         doesNotNeedProcessing.needsProcessing = false
         assert doesNotNeedProcessing.save(flush: true, failOnError: true)
 
-        assert [highPriority, lowPriority] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(10 as short)
+        assert [highPriority, lowPriority] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.NORMAL)
     }
 
     @Test
@@ -63,7 +63,7 @@ class RoddyAlignmentStartJobTest {
         mwp.seqTracks = null
         mwp.save()
 
-        assert [] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(0 as short)
+        assert [] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
     }
 
     @Test
@@ -75,7 +75,7 @@ class RoddyAlignmentStartJobTest {
                 withdrawn: false,
         ])
 
-        assert [] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(Short.MIN_VALUE)
+        assert [] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
     }
 
     @Test
@@ -87,7 +87,7 @@ class RoddyAlignmentStartJobTest {
                 withdrawn: true,
         ])
 
-        assert [roddyBamFile.workPackage] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(Short.MIN_VALUE)
+        assert [roddyBamFile.workPackage] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
     }
 
     @Test
@@ -98,7 +98,7 @@ class RoddyAlignmentStartJobTest {
                 withdrawn: false,
         ])
 
-        assert [roddyBamFile.workPackage] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(Short.MIN_VALUE)
+        assert [roddyBamFile.workPackage] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
     }
 
     @Test
@@ -297,7 +297,7 @@ class RoddyAlignmentStartJobTest {
     @Test
     void testStartRoddyAlignment_WhenProcessingPriorityIsTooLow_ShouldNotCreateProcess() {
         MergingWorkPackage mwp = createMergingWorkPackage()
-        mwp.project.processingPriority = ProcessingPriority.NORMAL_PRIORITY - 1
+        mwp.project.processingPriority = ProcessingPriority.NORMAL.priority - 1 as short
         assert mwp.save(flush: true, failOnError: true)
 
         withJobExecutionPlan {

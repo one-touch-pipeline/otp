@@ -12,7 +12,7 @@ abstract class AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpe
         samplePair.save(flush: true)
 
         expect:
-        null == getService().findSamplePairToProcess(ProcessingPriority.NORMAL_PRIORITY)
+        null == getService().findSamplePairToProcess(ProcessingPriority.NORMAL)
     }
 
     void "don't findSamplePairToProcess, when at least one prereq still running"() {
@@ -25,6 +25,6 @@ abstract class AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpe
         createDependeeInstance(samplePair, AnalysisProcessingStates.IN_PROGRESS)
 
         expect:
-        null == getService().findSamplePairToProcess(ProcessingPriority.NORMAL_PRIORITY)
+        null == getService().findSamplePairToProcess(ProcessingPriority.NORMAL)
     }
 }

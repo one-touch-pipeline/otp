@@ -142,7 +142,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      * {@link #getMinimumProcessingPriorityForOccupyingASlot()} instead.
      */
     protected boolean isFreeSlotAvailable() {
-        return minimumProcessingPriorityForOccupyingASlot <= ProcessingPriority.MAXIMUM_PRIORITY
+        return minimumProcessingPriorityForOccupyingASlot.priority <= ProcessingPriority.MAXIMUM.priority
     }
 
     /**
@@ -160,21 +160,21 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      *         the name specified by {@link OptionName#MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK}).</li>
      * </ul>
      */
-    protected short getMinimumProcessingPriorityForOccupyingASlot() {
+    protected ProcessingPriority getMinimumProcessingPriorityForOccupyingASlot() {
         final JobExecutionPlan plan = getJobExecutionPlan()
         if (!plan || plan.obsoleted || !plan.enabled) {
-            return ProcessingPriority.SUPREMUM_PRIORITY
+            return ProcessingPriority.SUPREMUM
         }
         final int occupiedSlots = Process.countByFinishedAndJobExecutionPlan(false, plan)
         final int totalSlots = optionService.findOptionAsInteger(OptionName.MAXIMUM_NUMBER_OF_JOBS, plan.name)
         if (occupiedSlots >= totalSlots) {
-            return ProcessingPriority.SUPREMUM_PRIORITY
+            return ProcessingPriority.SUPREMUM
         }
         final int slotsReservedForFastTrack = optionService.findOptionAsInteger(OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, plan.name)
         if (occupiedSlots < totalSlots - slotsReservedForFastTrack) {
-            return ProcessingPriority.MINIMUM_PRIORITY
+            return ProcessingPriority.MINIMUM
         } else {
-            return ProcessingPriority.FAST_TRACK_PRIORITY
+            return ProcessingPriority.FAST_TRACK
         }
     }
 }

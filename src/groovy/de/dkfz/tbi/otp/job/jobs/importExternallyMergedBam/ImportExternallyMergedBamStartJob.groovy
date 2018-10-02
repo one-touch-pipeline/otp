@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.*
 import org.springframework.context.annotation.*
 import org.springframework.scheduling.annotation.*
 import org.springframework.stereotype.*
@@ -15,8 +14,8 @@ class ImportExternallyMergedBamStartJob extends AbstractStartJobImpl{
     @Override
     void execute() {
         doWithPersistenceInterceptor {
-            short minPriority = minimumProcessingPriorityForOccupyingASlot
-            if (minPriority > ProcessingPriority.MAXIMUM_PRIORITY) {
+            ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
+            if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
                 return
             }
 

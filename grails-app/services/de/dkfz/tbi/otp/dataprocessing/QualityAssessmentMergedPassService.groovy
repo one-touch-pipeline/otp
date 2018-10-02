@@ -10,7 +10,7 @@ class QualityAssessmentMergedPassService {
     ConfigService configService
     ProcessingOptionService processingOptionService
 
-    public QualityAssessmentMergedPass createPass(short minPriority) {
+    public QualityAssessmentMergedPass createPass(ProcessingPriority minPriority) {
 
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.createCriteria().get {
             eq ("qualityAssessmentStatus", AbstractBamFile.QaProcessingStatus.NOT_STARTED)
@@ -23,7 +23,7 @@ class QualityAssessmentMergedPassService {
                         sample {
                             individual {
                                 project {
-                                    ge('processingPriority', minPriority)
+                                    ge('processingPriority', minPriority.priority)
                                     order("processingPriority", "desc")
                                 }
                             }

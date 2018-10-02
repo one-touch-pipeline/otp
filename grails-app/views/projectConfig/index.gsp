@@ -60,7 +60,7 @@
                                 template="dropDown"
                                 link="${g.createLink(controller: 'projectConfig', action: "updateProcessingPriority", params: ['project.id': project.id, 'fieldName': 'processingPriority'])}"
                                 values="${processingPriorities}"
-                                value="${project?project.getProcessingPriorityAsString():""}"/>
+                                value="${processingPriority ?: ""}"/>
                     </td>
                 </tr>
                 <tr>
@@ -70,7 +70,7 @@
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateCategory', params: ['project.id': project.id])}"
                                 availableValues="${projectCategories}"
-                                selectedValues="${project?project.projectCategories*.name:""}"/>
+                                selectedValues="${project ? project.projectCategories*.name : ""}"/>
                     </td>
                 </tr>
                 <tr>

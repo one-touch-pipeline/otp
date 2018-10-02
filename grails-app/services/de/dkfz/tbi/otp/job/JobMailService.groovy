@@ -43,7 +43,7 @@ class JobMailService {
         String subjectPrefix = ""
         if (!object) {
             return //general workflow, no processing
-        } else if (object.processingPriority >= ProcessingPriority.FAST_TRACK_PRIORITY) {
+        } else if (object.processingPriority >= ProcessingPriority.FAST_TRACK.priority) {
             subjectPrefix = "FASTTRACK "
         }
         Collection<SeqTrack> seqTracks = object.containedSeqTracks

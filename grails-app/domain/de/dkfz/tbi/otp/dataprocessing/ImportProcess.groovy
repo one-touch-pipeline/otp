@@ -68,6 +68,6 @@ class ImportProcess implements Entity, ProcessParameterObject {
 
     @Override
     short getProcessingPriority() {
-        return 0
+        return ProcessingPriority.NORMAL.priority
     }
 }

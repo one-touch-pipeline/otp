@@ -17,10 +17,10 @@ import org.junit.*
 class ProcessingPriorityUnitTest {
 
     private void assertPriority(def domainObject) {
-        assert ProcessingPriority.NORMAL_PRIORITY == domainObject.processingPriority
+        assert ProcessingPriority.NORMAL.priority == domainObject.processingPriority
 
-        domainObject.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
-        assert ProcessingPriority.FAST_TRACK_PRIORITY == domainObject.processingPriority
+        domainObject.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
+        assert ProcessingPriority.FAST_TRACK.priority== domainObject.processingPriority
     }
 
 
@@ -65,11 +65,11 @@ class ProcessingPriorityUnitTest {
     void testGetProcessingPriority() {
         Run run = Run.build()
         DataFile datafile = DomainFactory.createDataFile(run: run)
-        datafile.project.processingPriority = ProcessingPriority.NORMAL_PRIORITY
-        assert ProcessingPriority.NORMAL_PRIORITY == run.processingPriority
+        datafile.project.processingPriority = ProcessingPriority.NORMAL.priority
+        assert ProcessingPriority.NORMAL.priority == run.processingPriority
 
         DataFile datafileFasttrack = DomainFactory.createDataFile(run: run)
-        datafileFasttrack.project.processingPriority = ProcessingPriority.FAST_TRACK_PRIORITY
-        assert ProcessingPriority.FAST_TRACK_PRIORITY == run.processingPriority
+        datafileFasttrack.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
+        assert ProcessingPriority.FAST_TRACK.priority == run.processingPriority
     }
 }
