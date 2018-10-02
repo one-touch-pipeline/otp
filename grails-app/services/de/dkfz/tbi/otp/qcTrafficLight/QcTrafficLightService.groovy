@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.tracking.TrackingService
 import org.springframework.security.access.prepost.*
 
 import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdLevel.*
@@ -14,6 +15,9 @@ class QcTrafficLightService {
     ConfigService configService
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
 
+    TrackingService trackingService
+
+
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#bamFile?.project, 'OTP_READ_ACCESS')")
     void changeQcTrafficLightStatusWithComment(AbstractMergedBamFile bamFile, AbstractMergedBamFile.QcTrafficLightStatus qcTrafficLightStatus, String comment) {
         assert bamFile: "the bamFile must not be null"
@@ -23,6 +27,9 @@ class QcTrafficLightService {
         commentService.saveComment(bamFile, comment)
         changeQcTrafficLightStatus(bamFile, qcTrafficLightStatus)
         if (bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED) {
+            trackingService.findAllOtrsTickets(bamFile.containedSeqTracks).each {
+                trackingService.resetAnalysisNotification(it)
+            }
             if (bamFile.seqType.isRna()) {
                 linkFilesToFinalDestinationService.linkNewRnaResults((RnaRoddyBamFile) bamFile, configService.getDefaultRealm())
             } else {

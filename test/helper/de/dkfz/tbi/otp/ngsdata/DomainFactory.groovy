@@ -2146,6 +2146,28 @@ class DomainFactory {
         ], properties)
     }
 
+    static OtrsTicket createOtrsTicketWithEndDatesAndNotificationSent(Map properties = [:]) {
+        return createOtrsTicket([
+                installationStarted  : new Date(),
+                installationFinished : new Date(),
+                fastqcStarted        : new Date(),
+                fastqcFinished       : new Date(),
+                alignmentStarted     : new Date(),
+                alignmentFinished    : new Date(),
+                snvStarted           : new Date(),
+                snvFinished          : new Date(),
+                indelStarted         : new Date(),
+                indelFinished        : new Date(),
+                sophiaStarted        : new Date(),
+                sophiaFinished       : new Date(),
+                aceseqStarted        : new Date(),
+                aceseqFinished       : new Date(),
+                runYapsaStarted      : new Date(),
+                runYapsaFinished     : new Date(),
+                finalNotificationSent: true,
+        ] + properties)
+    }
+
     static TumorEntity createTumorEntity(Map properties = [:]) {
         return createDomainObject(TumorEntity, [
                 name: "AML/ALL",

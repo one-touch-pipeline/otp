@@ -65,6 +65,16 @@ class TrackingService {
         }
     }
 
+    void resetAnalysisNotification(OtrsTicket otrsTicket) {
+        otrsTicket.snvFinished = null
+        otrsTicket.indelFinished = null
+        otrsTicket.sophiaFinished = null
+        otrsTicket.aceseqFinished = null
+        otrsTicket.runYapsaFinished = null
+        otrsTicket.finalNotificationSent = false
+        assert otrsTicket.save(flush: true, failOnError: true)
+    }
+
     public void setStartedForSeqTracks(Collection<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
         setStarted(findAllOtrsTickets(seqTracks), step)
     }

@@ -79,7 +79,9 @@ class TrackingServiceSpec extends Specification {
                 alignmentFinished    : new Date(),
                 snvFinished          : new Date(),
                 indelFinished        : new Date(),
+                sophiaFinished       : new Date(),
                 aceseqFinished       : new Date(),
+                runYapsaFinished     : new Date(),
                 finalNotificationSent: true,
                 automaticNotification: true,
         ])
@@ -140,6 +142,27 @@ class TrackingServiceSpec extends Specification {
         ValidationException ex = thrown()
         ex.message.contains("on field 'ticketNumber': rejected value []")
     }
+
+    def 'test resetAnalysisNotification, when OtrsTicket is rest, then final flag is false and finish date of analysis dates are null'() {
+        given:
+        OtrsTicket otrsTicket = DomainFactory.createOtrsTicketWithEndDatesAndNotificationSent([
+                ticketNumber         : TICKET_NUMBER,
+                automaticNotification: true,
+        ])
+        TrackingService trackingService = new TrackingService()
+
+        when:
+        trackingService.resetAnalysisNotification(otrsTicket)
+
+        then:
+        otrsTicket.snvFinished == null
+        otrsTicket.indelFinished == null
+        otrsTicket.sophiaFinished == null
+        otrsTicket.aceseqFinished == null
+        otrsTicket.runYapsaFinished == null
+        otrsTicket.finalNotificationSent == false
+    }
+
 
     def 'test setStarted'() {
         given:

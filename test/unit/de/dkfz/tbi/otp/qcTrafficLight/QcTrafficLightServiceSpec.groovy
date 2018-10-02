@@ -5,12 +5,14 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.*
 import grails.test.mixin.*
 import spock.lang.*
 
 @Mock([
         AbstractMergedBamFile,
         DataFile,
+        Comment,
         ExomeSeqTrack,
         FileType,
         Individual,
@@ -20,6 +22,7 @@ import spock.lang.*
         Pipeline,
         Project,
         ProcessingOption,
+        OtrsTicket,
         Realm,
         ReferenceGenome,
         ReferenceGenomeProjectSeqType,
@@ -52,11 +55,14 @@ class QcTrafficLightServiceSpec extends Specification {
         roddyBamFile.comment = new Comment(comment: "oldComment", author: "author", modificationDate: new Date())
         qcTrafficLightService = new QcTrafficLightService()
         qcTrafficLightService.linkFilesToFinalDestinationService = Mock(LinkFilesToFinalDestinationService) {
-            linkResultsExecutions * linkNewResults(_, _)
-            linkRnaResultsExecutions * linkNewRnaResults(_, _)
+            linkCount * linkNewResults(_, _)
+            linkRnaCount * linkNewRnaResults(_, _)
         }
         qcTrafficLightService.commentService = Mock(CommentService) {
             1 * saveComment(roddyBamFile, "comment")
+        }
+        qcTrafficLightService.trackingService = Mock(TrackingService) {
+            otrsCount * findAllOtrsTickets(roddyBamFile.seqTracks) >> []
         }
         qcTrafficLightService.configService = testConfigService
         qcTrafficLightService.configService.processingOptionService = new ProcessingOptionService()
@@ -68,13 +74,13 @@ class QcTrafficLightServiceSpec extends Specification {
         roddyBamFile.qcTrafficLightStatus == qcStatus
 
         where:
-        rna   | qcStatus                                            | linkResultsExecutions | linkRnaResultsExecutions
-        false | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED  | 0                     | 0
-        false | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 1                     | 0
-        false | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | 0                     | 0
-        true  | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED  | 0                     | 0
-        true  | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 0                     | 1
-        true  | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | 0                     | 0
+        rna   | qcStatus                                            | linkCount | linkRnaCount | otrsCount
+        false | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED  | 0         | 0            | 0
+        false | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 1         | 0            | 1
+        false | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | 0         | 0            | 0
+        true  | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED  | 0         | 0            | 0
+        true  | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED | 0         | 1            | 1
+        true  | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | 0         | 0            | 0
     }
 
     void "test changeQcTrafficLightStatusWithComment invalid input, fails"() {
@@ -93,5 +99,50 @@ class QcTrafficLightServiceSpec extends Specification {
         true       | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | ""
         true       | null                                                | "comment"
         false      | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | "comment"
+    }
+
+    void "test changeQcTrafficLightStatusWithComment set analysis of otrs to not sent"() {
+        given:
+        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
+                qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.REJECTED,
+        ])
+        OtrsTicket otrsTicket1 = DomainFactory.createOtrsTicketWithEndDatesAndNotificationSent()
+        OtrsTicket otrsTicket2 = DomainFactory.createOtrsTicketWithEndDatesAndNotificationSent()
+        DomainFactory.createDefaultRealmWithProcessingOption()
+
+        testConfigService = new TestConfigService()
+        qcTrafficLightService = new QcTrafficLightService()
+        qcTrafficLightService.linkFilesToFinalDestinationService = Mock(LinkFilesToFinalDestinationService) {
+            1 * linkNewResults(_, _)
+        }
+        qcTrafficLightService.commentService = Mock(CommentService) {
+            1 * saveComment(roddyBamFile, "comment")
+        }
+        qcTrafficLightService.trackingService = Spy(TrackingService) {
+            1 * findAllOtrsTickets(roddyBamFile.seqTracks) >> [otrsTicket1, otrsTicket2]
+        }
+        qcTrafficLightService.configService = testConfigService
+        qcTrafficLightService.configService.processingOptionService = new ProcessingOptionService()
+
+        when:
+        qcTrafficLightService.changeQcTrafficLightStatusWithComment(
+                roddyBamFile,
+                AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED,
+                "comment")
+
+        then:
+        false == otrsTicket1.finalNotificationSent
+        null == otrsTicket1.snvFinished
+        null == otrsTicket1.indelFinished
+        null == otrsTicket1.sophiaFinished
+        null == otrsTicket1.aceseqFinished
+        null == otrsTicket1.runYapsaFinished
+
+        false == otrsTicket2.finalNotificationSent
+        null == otrsTicket1.snvFinished
+        null == otrsTicket2.indelFinished
+        null == otrsTicket2.sophiaFinished
+        null == otrsTicket2.aceseqFinished
+        null == otrsTicket2.runYapsaFinished
     }
 }
