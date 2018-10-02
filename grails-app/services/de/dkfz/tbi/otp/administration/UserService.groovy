@@ -248,12 +248,17 @@ class UserService {
     }
 
     boolean isPrivacyPolicyAccepted() {
+        // HACK: skip in  case we are not logged in yet, otherwise we will never get to the log-in page...
+        // (this _should_ probably be solved in a different layer of OTP)
         if (!springSecurityService.isLoggedIn()) {
             return true
         }
+        // switched users need not be checked, because before switching, they must have been a user that must
+        // have already accepted the policy (or else they couldn't have reached the "switch user" page in the first place)
         if (SpringSecurityUtils.isSwitched()) {
             return true
         }
+
         User user = springSecurityService.getCurrentUser()
         return user.acceptedPrivacyPolicy
     }
