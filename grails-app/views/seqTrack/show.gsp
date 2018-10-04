@@ -57,7 +57,7 @@
        </tr>
        <tr>
             <td class="myKey"><g:message code="seqTrack.show.pipelineVersion"/></td>
-            <td class="myValue">${seqTrack.pipelineVersion.programName}</td>
+            <td class="myValue">${seqTrack.pipelineVersion.getDisplayName()}</td>
        </tr>
     </table>
     <g:if test="${jobExecutionPlans}">

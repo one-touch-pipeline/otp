@@ -68,6 +68,7 @@ class PropertiesValidationService {
 class PropertyProblem {
     final String message
 
+    @Override
     String toString() {
         return "${message}"
     }
@@ -76,9 +77,12 @@ class PropertyProblem {
 class OptionProblem {
     final String message
     ProblemType type
+    
     enum ProblemType {
         MISSING, TYPE_INVALID, VALUE_INVALID
     }
+
+    @Override
     String toString() {
         return "${message} - ${type}"
     }
