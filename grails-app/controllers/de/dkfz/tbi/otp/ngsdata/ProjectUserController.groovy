@@ -22,15 +22,14 @@ class ProjectUserController implements CheckAndCall {
 
     def index() {
         List<Project> projects = projectService.getAllProjects()
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
-
-        Project project
-        if (selection.projects.size() == 1) {
-            project = selection.projects.first()
-        } else {
-            project = projects.first()
+        if (!projects) {
+            return [
+                    projects: projects
+            ]
         }
 
+        ProjectSelection selection = projectSelectionService.getSelectedProject()
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
         project = exactlyOneElement(Project.findAllByName(project.name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
 
         List<User> projectUsers = UserProjectRole.findAllByProject(project)*.user

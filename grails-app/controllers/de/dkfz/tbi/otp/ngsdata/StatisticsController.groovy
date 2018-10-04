@@ -28,10 +28,13 @@ class StatisticsController {
 
     def kpi() {
         ProjectSelection selection = projectSelectionService.getSelectedProject()
+        if (!selection.projects){
+            return [
+                    numberOfProject : 0
+            ]
+        }
 
-        HibernateCriteriaBuilder c
-
-        c = Sample.createCriteria()
+        HibernateCriteriaBuilder c = Sample.createCriteria()
         int samples = c.count {
             individual {
                 'in'('project', selection.projects)
