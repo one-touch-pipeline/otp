@@ -66,7 +66,6 @@ ignore_regexps = [
     r'^([cC]hg|[fF]ix|[nN]ew)\s*:\s*[p|P]kg:',
     r'^([cC]hg|[fF]ix|[nN]ew)\s*:\s*[d|D]ev:',
     r'^(.{3,3}\s*:)?\s*[fF]irst commit.?\s*$',
-    r'^$',  ## ignore commits with empty messages
 ]
 
 
@@ -84,7 +83,7 @@ ignore_regexps = [
 ##
 section_regexps = [
     ('New Features', [
-        r'^[nN][eE][wW]\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
+        r'^([nN][eE][wW])|([aA][dD][dD])\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
      ]),
     ('Changes and Improvements', [
         r'^([cC][hH](([aA][nN][gG][eE])|([gG])))\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n]*)$',
@@ -142,7 +141,7 @@ body_process = ReSub(r'((^|\n)[A-Z]\w+(-\w+)*: .*(\n\s+.*)*)+$', r'') | ReSub(r'
 ##
 ## Available constructs are those listed in ``body_process`` doc.
 subject_process = (strip |
-    ReSub(r'^([cC][hH][gG]|[cC][hH][aA][nN][gG][eE]|[bB][uU][gG][fF][iI][xX]|[fF][iI][xX]|[nN]ew)\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n@]*)(@[a-z]+\s+)*$', r'\4') |
+    ReSub(r'^([cC][hH][gG]|[aA][dD][dD]|[cC][hH][aA][nN][gG][eE]|[bB][uU][gG][fF][iI][xX]|[fF][iI][xX]|[nN]ew)\s*:\s*((dev|use?r|pkg|test|doc)\s*:\s*)?([^\n@]*)(@[a-z]+\s+)*$', r'\4') |
     SetIfEmpty("No commit message.") | ucfirst | final_dot)
 
 
