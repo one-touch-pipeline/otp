@@ -1419,6 +1419,8 @@ chmod 440 ${newDirectFileName}
         notNull(inputInformationOTP.lane)
         notNull(inputInformationOTP.oldSeqTypeName)
         notNull(inputInformationOTP.newSeqTypeName)
+        notNull(inputInformationOTP.oldSingleCell)
+        notNull(inputInformationOTP.newSingleCell)
         notNull(inputInformationOTP.oldLibraryLayout)
         notNull(inputInformationOTP.newLibraryLayout)
         notNull(bashScriptName)
@@ -1475,9 +1477,9 @@ chmod 440 ${newDirectFileName}
             newSample = new Sample(individual: newIndividual, sampleType: newSampleType).save(flush: true)
         }
 
-        SeqType oldSeqType = SeqType.findByNameAndLibraryLayout(inputInformationOTP.oldSeqTypeName, inputInformationOTP.oldLibraryLayout)
+        SeqType oldSeqType = SeqType.findByNameAndLibraryLayoutAndSingleCell(inputInformationOTP.oldSeqTypeName, inputInformationOTP.oldLibraryLayout, inputInformationOTP.oldSingleCell)
         notNull(oldSeqType, "The old seqtype ${inputInformationOTP.oldSeqTypeName} ${inputInformationOTP.oldLibraryLayout} does not exist")
-        SeqType newSeqType = SeqType.findByNameAndLibraryLayout(inputInformationOTP.newSeqTypeName, inputInformationOTP.newLibraryLayout)
+        SeqType newSeqType = SeqType.findByNameAndLibraryLayoutAndSingleCell(inputInformationOTP.newSeqTypeName, inputInformationOTP.newLibraryLayout, inputInformationOTP.newSingleCell)
         notNull(newSeqType, "The new seqtype ${inputInformationOTP.newSeqTypeName} ${inputInformationOTP.oldLibraryLayout} does not exist")
 
         List<SeqTrack> seqTracks = SeqTrack.findAllBySampleAndRunAndLaneIdInList(oldSample, run, inputInformationOTP.lane)
@@ -1506,6 +1508,7 @@ chmod 440 ${newDirectFileName}
                         pid: inputInformationOTP.oldPid,
                         sampleType: oldSampleType.name,
                         seqType: oldSeqType.name,
+                        singleCell: oldSeqType.singleCell,
                         libraryLayout: oldSeqType.libraryLayout,
                 ],
                 [
@@ -1515,6 +1518,7 @@ chmod 440 ${newDirectFileName}
                         pid: inputInformationOTP.newPid,
                         sampleType: newSampleType.name,
                         seqType: newSeqType.name,
+                        singleCell: newSeqType.singleCell,
                         libraryLayout: newSeqType.libraryLayout,
                 ],
                 "run: ${run.name}\nlane: ${inputInformationOTP.lane}"

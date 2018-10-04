@@ -37,6 +37,7 @@ List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
                 'seqType2',
                 ])
         eq('libraryLayout', SeqType.LIBRARYLAYOUT_PAIRED)
+        eq('singleCell', 'TRUE OR FALSE')
     }
     order('id')
 }
@@ -50,6 +51,7 @@ def adaptValues = { SeqTrack oldSeqTrack ->
             newPid           : oldSeqTrack.individual.pid,
             newSampleTypeName: oldSeqTrack.sampleType.name,
             newSeqTypeName   : oldSeqTrack.seqType.name,
+            newSingleCell    : oldSeqTrack.seqType.singleCell,
             newLibraryLayout : oldSeqTrack.seqType.libraryLayout,
     ]
 }
@@ -105,6 +107,8 @@ seqTracks.each { seqTrack ->
                 "newSampleTypeName": "${newValues.newSampleTypeName}",
                 "oldSeqTypeName"   : "${seqTrack.seqType.name}",
                 "newSeqTypeName"   : "${newValues.newSeqTypeName}",
+                "oldSingleCell"    : "${seqTrack.seqType.singleCell}",
+                "newSingleCell"    : "${newValues.newSingleCell}",
                 "oldLibraryLayout" : "${seqTrack.seqType.libraryLayout}",
                 "newLibraryLayout" : "${newValues.newLibraryLayout}",
                 "runName"          : "${seqTrack.run.name}",

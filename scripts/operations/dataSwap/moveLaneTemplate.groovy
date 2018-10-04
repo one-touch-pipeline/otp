@@ -47,6 +47,8 @@ try {
                 'newSampleTypeName': 'NewSampleType',
                 'oldSeqTypeName'   : 'OldSeqTypeName',
                 'newSeqTypeName'   : 'NewSeqTypeName',
+                'oldSingleCell'    : 'OldSingleCell',
+                'newSingleCell'    : 'NewSingleCell',
                 'oldLibraryLayout' : 'OldLibraryLayout',
                 'newLibraryLayout' : 'NewLibraryLayout',
                 'runName'          : 'RunName',

@@ -177,6 +177,8 @@ dataSwapService.swapLane([
         'newSampleTypeName': '${newSampleType.name}',
         'oldSeqTypeName'   : '${seqTrack.seqType.name}',
         'newSeqTypeName'   : '${seqTrack.seqType.name}',
+        'oldSingleCell'    : '${seqTrack.seqType.singleCell}',
+        'newSingleCell'    : '${seqTrack.seqType.singleCell}',        
         'oldLibraryLayout' : '${seqTrack.seqType.libraryLayout}',
         'newLibraryLayout' : '${seqTrack.seqType.libraryLayout}',
         'runName'          : '${seqTrack.run.name}',
