@@ -100,7 +100,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
     }
 
     @Override
-    public JobExecutionPlan getJobExecutionPlan() {
+    JobExecutionPlan getJobExecutionPlan() {
         initializeJobExecutionPlan()
         return plan
     }
@@ -130,7 +130,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
         return schedulerService.createProcess(this, input, processParameter)
     }
 
-    public static createProcessParameter(Object processParameter) {
+    static ProcessParameter createProcessParameter(Object processParameter) {
         return new ProcessParameter(value: processParameter.id.toString(), className: Hibernate.getClass(processParameter).name)
     }
 

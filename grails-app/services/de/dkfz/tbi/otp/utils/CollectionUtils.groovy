@@ -9,7 +9,7 @@ class CollectionUtils {
      * @return The only element in the collection.
      * @throws AssertionError If the collection does not contain exactly one element.
      */
-    public static <T> T exactlyOneElement(final Collection<T> collection, String customErrorMessage = null) throws AssertionError {
+    static <T> T exactlyOneElement(final Collection<T> collection, String customErrorMessage = null) throws AssertionError {
         return singleElement(collection, false, customErrorMessage)
     }
 
@@ -18,7 +18,7 @@ class CollectionUtils {
      * @return The only element in the collection or <code>null</code> if the collection is empty.
      * @throws AssertionError If the collection does not contain at most one element.
      */
-    public static <T> T atMostOneElement(final Collection<T> collection, String customErrorMessage = null) throws AssertionError {
+    static <T> T atMostOneElement(final Collection<T> collection, String customErrorMessage = null) throws AssertionError {
         return singleElement(collection, true, customErrorMessage)
     }
 
@@ -29,7 +29,7 @@ class CollectionUtils {
      * <code>allowNone</code> is <code>true</code>.
      * @throws AssertionError If the collection contains an unexpected number of elements.
      */
-    public static <T> T singleElement(
+    static <T> T singleElement(
             final Collection<T> collection, final boolean allowNone = true, String customErrorMessage = null) throws AssertionError {
         notNull collection
         final int size = collection.size()
@@ -48,7 +48,7 @@ class CollectionUtils {
      * Returns whether two collections contain the same set of elements. Each collection must not contain any two
      * elements which are equal.
      */
-    public static <T> boolean containSame(final Collection<? extends T> c1, final Collection<? extends T> c2) {
+    static <T> boolean containSame(final Collection<? extends T> c1, final Collection<? extends T> c2) {
         final c1Set = c1.toSet()
         assert c1Set.size() == c1.size() : "c1 contains elements which are equal."
         final c2Set = c2.toSet()
@@ -61,7 +61,7 @@ class CollectionUtils {
      * In case the map does not contain specified key, it gets defined with the given default value.
      * @param d default value
      */
-    public static <K, V> V getOrPut(Map<K, V> map, K key, V d) {
+    static <K, V> V getOrPut(Map<K, V> map, K key, V d) {
         V value = map.get(key)
         if (value != null || map.containsKey(key)) {
             return value

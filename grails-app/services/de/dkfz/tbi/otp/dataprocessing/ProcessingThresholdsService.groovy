@@ -10,7 +10,7 @@ class ProcessingThresholdsService {
      * @return List of ProcessingThresolds for an project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public List<ProcessingThresholds> findByProject(Project project) {
+    List<ProcessingThresholds> findByProject(Project project) {
         return ProcessingThresholds.findAllByProject(project)
     }
 

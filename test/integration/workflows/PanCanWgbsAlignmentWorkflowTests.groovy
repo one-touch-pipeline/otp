@@ -9,7 +9,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 @Ignore
 class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
 
-    public String getRefGenFileNamePrefix() {
+    String getRefGenFileNamePrefix() {
         return 'hs37d5_PhiX_Lambda.conv'
     }
 

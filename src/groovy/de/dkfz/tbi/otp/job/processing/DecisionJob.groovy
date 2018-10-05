@@ -21,5 +21,5 @@ interface DecisionJob extends EndStateAwareJob {
      * @return The Decision
      * @throws InvalidStateException if the Job has not succeeded (yet).
      */
-    public JobDecision getDecision() throws InvalidStateException
+    JobDecision getDecision() throws InvalidStateException
 }

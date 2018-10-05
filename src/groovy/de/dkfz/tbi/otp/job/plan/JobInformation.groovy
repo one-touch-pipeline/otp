@@ -34,7 +34,7 @@ class JobInformation implements Serializable {
      * @param job
      * @return
      */
-    public static JobInformation fromJob(JobDefinition job) {
+    static JobInformation fromJob(JobDefinition job) {
         JobInformation ret = new JobInformation()
         def bean = job.domainClass.grailsApplication.mainContext.getBean(job.bean)
         ret.startJob = (bean instanceof StartJob)

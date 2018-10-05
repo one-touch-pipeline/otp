@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 /**
  * Holds possible seqType names for using in the code
  */
-public enum SeqTypeNames {
+enum SeqTypeNames {
     WHOLE_GENOME,
     WHOLE_GENOME_BISULFITE,
     RNA,
@@ -32,11 +32,11 @@ public enum SeqTypeNames {
         this.factory = factory
     }
 
-    public boolean isWgbs() {
+    boolean isWgbs() {
         return SeqType.WGBS_SEQ_TYPE_NAMES.contains(this)
     }
 
-    public static SeqTypeNames fromSeqTypeName(String seqTypeName) {
+    static SeqTypeNames fromSeqTypeName(String seqTypeName) {
         return values().find { it.seqTypeName == seqTypeName }
     }
 }

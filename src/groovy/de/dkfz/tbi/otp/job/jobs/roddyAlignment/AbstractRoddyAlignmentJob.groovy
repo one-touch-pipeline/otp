@@ -9,7 +9,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyBamFile> {
 
-    public List<String> prepareAndReturnAlignmentCValues(RoddyBamFile roddyBamFile) {
+    List<String> prepareAndReturnAlignmentCValues(RoddyBamFile roddyBamFile) {
         assert roddyBamFile
 
         List<String> cValues = []

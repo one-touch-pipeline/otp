@@ -51,7 +51,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
 
 
     @Rule
-    TemporaryFolder temporaryFolder
+    public TemporaryFolder temporaryFolder
 
 
     void "prepareAndReturnWorkflowSpecificCValues, when roddyIndelCallingInstance is null, throw assert"() {

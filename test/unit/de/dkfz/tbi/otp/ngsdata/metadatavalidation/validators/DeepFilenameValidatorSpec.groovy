@@ -21,7 +21,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
         SampleIdentifier,
         SampleType,
 ])
-public class DeepFilenameValidatorSpec extends Specification {
+class DeepFilenameValidatorSpec extends Specification {
 
     DeepFilenameValidator validator = withSampleIdentifierService(new DeepFilenameValidator())
 

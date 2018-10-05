@@ -430,7 +430,7 @@ class MetadataImportService {
         return exactlyOneElement(rows*.getCell(column)*.text.unique())
     }
 
-    public static ExtractedValue extractBarcode(Row row) {
+    static ExtractedValue extractBarcode(Row row) {
         String barcode = null
         Set<Cell> cells = [] as Set
 
@@ -456,7 +456,7 @@ class MetadataImportService {
         }
     }
 
-    public static ExtractedValue extractMateNumber(Row row) {
+    static ExtractedValue extractMateNumber(Row row) {
         Cell libraryLayoutCell = row.getCellByColumnTitle(LIBRARY_LAYOUT.name())
         Cell mateNumberCell = row.getCellByColumnTitle(MATE.name())
         int mateNumber
@@ -489,7 +489,7 @@ class MetadataImportService {
         return new ExtractedValue(Integer.toString(mateNumber), [filenameCell] as Set)
     }
 
-    public static String getSeqTypeNameFromMetadata(ValueTuple tuple) {
+    static String getSeqTypeNameFromMetadata(ValueTuple tuple) {
         String tagmentation = tuple.getValue(TAGMENTATION_BASED_LIBRARY.name())?.toLowerCase()
         return tuple.getValue(SEQUENCING_TYPE.name()) + ((tagmentation && ["1", "true"].contains(tagmentation)) ? SeqType.TAGMENTATION_SUFFIX : '')
     }

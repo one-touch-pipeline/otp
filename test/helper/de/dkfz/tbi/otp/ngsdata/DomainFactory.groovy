@@ -212,7 +212,7 @@ class DomainFactory {
         return (atMostOneElement(Pipeline.list(max: 1)) ?: createPanCanPipeline())
     }
 
-    public static MergingSet createMergingSet(Map properties = [:]) {
+    static MergingSet createMergingSet(Map properties = [:]) {
         MergingWorkPackage mergingWorkPackage = properties.mergingWorkPackage ?: createMergingWorkPackage([pipeline: createDefaultOtpPipeline()])
         return createDomainObject(MergingSet, [
                 mergingWorkPackage: mergingWorkPackage,
@@ -220,27 +220,27 @@ class DomainFactory {
         ], properties)
     }
 
-    public static MergingSet createMergingSet(final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
+    static MergingSet createMergingSet(final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         return createDomainObject(MergingSet, [
                 mergingWorkPackage: mergingWorkPackage,
                 identifier        : MergingSet.nextIdentifier(mergingWorkPackage),
         ], properties)
     }
 
-    public static MergingSetAssignment createMergingSetAssignment(Map properties = [:]) {
+    static MergingSetAssignment createMergingSetAssignment(Map properties = [:]) {
         return createDomainObject(MergingSetAssignment, [
                 mergingSet: { createMergingSet() },
                 bamFile   : { createProcessedBamFile() },
         ], properties)
     }
 
-    public static QualityAssessmentMergedPass createQualityAssessmentMergedPass(Map properties = [:]) {
+    static QualityAssessmentMergedPass createQualityAssessmentMergedPass(Map properties = [:]) {
         return createDomainObject(QualityAssessmentMergedPass, [
                 abstractMergedBamFile: { createProcessedMergedBamFile() }
         ], properties)
     }
 
-    public static Map defaultValuesForAbstractQualityAssessment = [
+    static Map defaultValuesForAbstractQualityAssessment = [
             qcBasesMapped                  : 0,
             totalReadCounter               : 0,
             qcFailedReads                  : 0,
@@ -259,20 +259,20 @@ class DomainFactory {
             referenceLength                : 1,
     ].asImmutable()
 
-    public static OverallQualityAssessmentMerged createOverallQualityAssessmentMerged(Map properties = [:]) {
+    static OverallQualityAssessmentMerged createOverallQualityAssessmentMerged(Map properties = [:]) {
         return createDomainObject(OverallQualityAssessmentMerged, defaultValuesForAbstractQualityAssessment + [
                 qualityAssessmentMergedPass: { createQualityAssessmentMergedPass() },
         ], properties)
     }
 
-    public static ChromosomeQualityAssessmentMerged createChromosomeQualityAssessmentMerged(Map properties = [:]) {
+    static ChromosomeQualityAssessmentMerged createChromosomeQualityAssessmentMerged(Map properties = [:]) {
         return createDomainObject(ChromosomeQualityAssessmentMerged, defaultValuesForAbstractQualityAssessment + [
                 chromosomeName             : "chromosomeName_${counter++}",
                 qualityAssessmentMergedPass: { createQualityAssessmentMergedPass() },
         ], properties)
     }
 
-    public static JobExecutionPlan createJobExecutionPlan(Map properties = [:]) {
+    static JobExecutionPlan createJobExecutionPlan(Map properties = [:]) {
         return createDomainObject(JobExecutionPlan, [
                 name       : "planName_${counter++}",
                 planVersion: 0,
@@ -280,7 +280,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static Process createProcess(Map properties = [:]) {
+    static Process createProcess(Map properties = [:]) {
         return createDomainObject(Process, [
                 started         : new Date(),
                 startJobClass   : "startJobClass",
@@ -288,7 +288,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static JobDefinition createJobDefinition(Map properties = [:]) {
+    static JobDefinition createJobDefinition(Map properties = [:]) {
         return createDomainObject(JobDefinition, [
                 plan: { createJobExecutionPlan() },
                 name: "name_${counter++}",
@@ -296,7 +296,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static ProcessParameter createProcessParameter(Map properties = [:]) {
+    static ProcessParameter createProcessParameter(Map properties = [:]) {
         return createDomainObject(ProcessParameter, [
                 process  : { createProcessingStepUpdate().process },
                 value    : "${counter++}",
@@ -304,7 +304,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static ProcessingStep createProcessingStep(Map properties = [:]) {
+    static ProcessingStep createProcessingStep(Map properties = [:]) {
         JobExecutionPlan jobExecutionPlan = properties.jobDefinition?.plan ?: properties.process?.jobExecutionPlan ?: createJobExecutionPlan()
         return createDomainObject(ProcessingStep, [
                 jobDefinition: { createJobDefinition(plan: jobExecutionPlan) },
@@ -313,7 +313,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static RestartedProcessingStep createRestartedProcessingStep(Map properties = [:]) {
+    static RestartedProcessingStep createRestartedProcessingStep(Map properties = [:]) {
         ProcessingStep original = properties.original ?: createProcessingStep()
         return createDomainObject(RestartedProcessingStep, [
                 jobDefinition: original.jobDefinition,
@@ -323,7 +323,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static ProcessingStepUpdate createProcessingStepUpdate(Map properties = [:]) {
+    static ProcessingStepUpdate createProcessingStepUpdate(Map properties = [:]) {
         if (!properties.containsKey('processingStep') && properties.containsKey('state') && properties.state != ExecutionState.CREATED) {
             properties.processingStep = createProcessingStepUpdate().processingStep
         }
@@ -352,7 +352,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static ClusterJob createClusterJob(Map properties = [:]) {
+    static ClusterJob createClusterJob(Map properties = [:]) {
         return createDomainObject(ClusterJob, [
                 processingStep: { createProcessingStep() },
                 realm         : { createRealm() },
@@ -364,7 +364,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static ProcessingOption createProcessingOptionLazy(Map properties = [:]) {
+    static ProcessingOption createProcessingOptionLazy(Map properties = [:]) {
         ProcessingOption processingOption = createDomainObjectLazy(ProcessingOption,
                 [value: properties.containsKey("value") ? properties['value'] : "processingOptionValue_${counter++}"],
                 properties.findAll { it.key != "value" },
@@ -449,7 +449,7 @@ class DomainFactory {
         DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY, '')
     }
 
-    public static MergingPass createMergingPass(Map properties = [:]) {
+    static MergingPass createMergingPass(Map properties = [:]) {
         MergingSet mergingSet = properties.mergingSet ?: createMergingSet()
         return createDomainObject(MergingPass, [
                 mergingSet: mergingSet,
@@ -457,14 +457,14 @@ class DomainFactory {
         ], properties)
     }
 
-    public static MergingPass createMergingPass(final MergingSet mergingSet) {
+    static MergingPass createMergingPass(final MergingSet mergingSet) {
         return createDomainObject(MergingPass, [
                 mergingSet: mergingSet,
                 identifier: MergingPass.nextIdentifier(mergingSet),
         ], [:])
     }
 
-    public static Map getRandomProcessedBamFileProperties() {
+    static Map getRandomProcessedBamFileProperties() {
         return [
                 fileSize           : ++counter,
                 md5sum             : HelperUtils.randomMd5sum,
@@ -472,7 +472,7 @@ class DomainFactory {
         ]
     }
 
-    public static createComment(Map properties = [:]) {
+    static createComment(Map properties = [:]) {
         return createDomainObject(Comment, [
                 comment         : "comment ${counter++}",
                 author          : "author ${counter++}",
@@ -480,14 +480,14 @@ class DomainFactory {
         ], properties)
     }
 
-    public static createIlseSubmission(Map properties = [:], boolean saveAndValidate = true) {
+    static createIlseSubmission(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(IlseSubmission, [
                 ilseNumber: { counter++ % 999000 + 1000 },
                 warning   : false,
         ], properties, saveAndValidate)
     }
 
-    public static AlignmentPass createAlignmentPass(Map properties = [:]) {
+    static AlignmentPass createAlignmentPass(Map properties = [:]) {
         final SeqTrack seqTrack = properties.get('seqTrack') ?: createSeqTrack([:])
 
         if (!seqTrack.seqPlatform.seqPlatformGroups) {
@@ -538,7 +538,7 @@ class DomainFactory {
     }
 
 
-    public static ReferenceGenome createReferenceGenomeLazy() {
+    static ReferenceGenome createReferenceGenomeLazy() {
         return ReferenceGenome.find { true } ?: createReferenceGenome()
     }
 
@@ -620,13 +620,13 @@ class DomainFactory {
         return processedMergedBamFile
     }
 
-    public static ProcessedBamFile assignNewProcessedBamFile(final ProcessedMergedBamFile processedMergedBamFile) {
+    static ProcessedBamFile assignNewProcessedBamFile(final ProcessedMergedBamFile processedMergedBamFile) {
         final ProcessedBamFile bamFile = assignNewProcessedBamFile(processedMergedBamFile.mergingSet)
         processedMergedBamFile.numberOfMergedLanes++
         return bamFile
     }
 
-    public static ProcessedBamFile assignNewProcessedBamFile(final MergingSet mergingSet) {
+    static ProcessedBamFile assignNewProcessedBamFile(final MergingSet mergingSet) {
         final ProcessedBamFile bamFile = createProcessedBamFile(mergingSet.mergingWorkPackage)
         createMergingSetAssignment([
                 mergingSet: mergingSet,
@@ -635,7 +635,7 @@ class DomainFactory {
         return bamFile
     }
 
-    public static ProcessedBamFile createProcessedBamFile(Map properties = [:], boolean saveAndValidate = true) {
+    static ProcessedBamFile createProcessedBamFile(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ProcessedBamFile, [
                 alignmentPass     : { createAlignmentPass() },
                 md5sum            : { HelperUtils.randomMd5sum },
@@ -653,7 +653,7 @@ class DomainFactory {
         ], properties, saveAndValidate)
     }
 
-    public static ProcessedBamFile createProcessedBamFile(
+    static ProcessedBamFile createProcessedBamFile(
             final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         SeqTrack seqTrack = createSeqTrackWithDataFiles(mergingWorkPackage)
         mergingWorkPackage.seqTracks.add(seqTrack)
@@ -672,7 +672,7 @@ class DomainFactory {
         return bamFile
     }
 
-    public static <T> T createRoddyBamFile(Map bamFileProperties = [:], Class<T> clazz = RoddyBamFile) {
+    static <T> T createRoddyBamFile(Map bamFileProperties = [:], Class<T> clazz = RoddyBamFile) {
         MergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
             SeqType seqType = (clazz == RnaRoddyBamFile) ? createRnaPairedSeqType() : createWholeGenomeSeqType()
@@ -721,11 +721,11 @@ class DomainFactory {
         return bamFile
     }
 
-    public static RnaRoddyBamFile createRnaRoddyBamFile(Map bamFileProperties = [:]) {
+    static RnaRoddyBamFile createRnaRoddyBamFile(Map bamFileProperties = [:]) {
         createRoddyBamFile(bamFileProperties, RnaRoddyBamFile)
     }
 
-    public static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
+    static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
         RoddyBamFile bamFile = createDomainObject(RoddyBamFile, [
                 baseBamFile        : baseBamFile,
                 config             : baseBamFile.config,
@@ -744,7 +744,7 @@ class DomainFactory {
     /**
      * Because RoddyMergedBamQa defines a unique constraint with 'class', the instance can only be created in integration tests.
      */
-    public static createRoddyMergedBamQa(Map properties = [:]) {
+    static createRoddyMergedBamQa(Map properties = [:]) {
         return createDomainObject(RoddyMergedBamQa, defaultValuesForAbstractQualityAssessment + [
                 qualityAssessmentMergedPass  : {
                     createQualityAssessmentMergedPass(
@@ -761,7 +761,7 @@ class DomainFactory {
     /**
      * Because RoddyMergedBamQa defines a unique constraint with 'class', the instance can only be created in integration tests.
      */
-    public static createRoddyMergedBamQa(RoddyBamFile roddyBamFile, Map properties = [:]) {
+    static createRoddyMergedBamQa(RoddyBamFile roddyBamFile, Map properties = [:]) {
         return createRoddyMergedBamQa([
                 qualityAssessmentMergedPass: createQualityAssessmentMergedPass(
                         abstractMergedBamFile: roddyBamFile
@@ -774,7 +774,7 @@ class DomainFactory {
      * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different
      * {@link SampleType}.
      */
-    public static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base) {
+    static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base) {
         return createMergingWorkPackage(base, createSampleType())
     }
 
@@ -782,7 +782,7 @@ class DomainFactory {
      * Creates a {@link MergingWorkPackage} with the same properties as the specified one but a different
      * {@link SampleType}.
      */
-    public static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base, SampleType sampleType) {
+    static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base, SampleType sampleType) {
         Sample sample = new Sample(
                 individual: base.individual,
                 sampleType: sampleType,
@@ -1067,7 +1067,7 @@ class DomainFactory {
     }
 
     @Deprecated
-    public static SnvConfig createSnvConfig(Map properties = [:]) {
+    static SnvConfig createSnvConfig(Map properties = [:]) {
         return createDomainObject(SnvConfig, [
                 configuration        : "configuration_${counter++}",
                 externalScriptVersion: "1.0",
@@ -1277,7 +1277,7 @@ class DomainFactory {
     }
 
 
-    public static AceseqQc createAceseqQcWithExistingAceseqInstance(AceseqInstance aceseqInstance) {
+    static AceseqQc createAceseqQcWithExistingAceseqInstance(AceseqInstance aceseqInstance) {
         createAceseqQc([:], [:], [:], aceseqInstance)
     }
 
@@ -1310,21 +1310,21 @@ class DomainFactory {
     }
 
 
-    public static AntibodyTarget createAntibodyTarget(Map properties = [:]) {
+    static AntibodyTarget createAntibodyTarget(Map properties = [:]) {
         return createDomainObject(AntibodyTarget, [
                 name       : 'antibodyTargetName_' + (counter++),
                 importAlias: [],
         ], properties)
     }
 
-    public static SeqCenter createSeqCenter(Map seqCenterProperties = [:]) {
+    static SeqCenter createSeqCenter(Map seqCenterProperties = [:]) {
         return createDomainObject(SeqCenter, [
                 name   : 'seqCenterName_' + (counter++),
                 dirName: 'seqCenterDirName_' + (counter++),
         ], seqCenterProperties)
     }
 
-    public static SeqPlatform createSeqPlatformWithSeqPlatformGroup(Map seqPlatformProperties = [:]) {
+    static SeqPlatform createSeqPlatformWithSeqPlatformGroup(Map seqPlatformProperties = [:]) {
         Set<SeqPlatformGroup> spg = seqPlatformProperties.seqPlatformGroups as Set ?: [createSeqPlatformGroup()] as Set
 
         SeqPlatform sp = createSeqPlatform([seqPlatformGroups: spg] + seqPlatformProperties)
@@ -1344,21 +1344,21 @@ class DomainFactory {
         ], seqPlatformProperties)
     }
 
-    public static SeqPlatformModelLabel createSeqPlatformModelLabel(Map properties = [:]) {
+    static SeqPlatformModelLabel createSeqPlatformModelLabel(Map properties = [:]) {
         return createDomainObject(SeqPlatformModelLabel, [
                 name       : 'seqPlatformModelLabel_' + (counter++),
                 importAlias: [],
         ], properties)
     }
 
-    public static SequencingKitLabel createSequencingKitLabel(Map properties = [:]) {
+    static SequencingKitLabel createSequencingKitLabel(Map properties = [:]) {
         return createDomainObject(SequencingKitLabel, [
                 name       : 'SequencingKitLabel_' + (counter++),
                 importAlias: [],
         ], properties)
     }
 
-    public static SeqPlatformGroup createSeqPlatformGroup(Map properties = [:]) {
+    static SeqPlatformGroup createSeqPlatformGroup(Map properties = [:]) {
         return createDomainObject(SeqPlatformGroup, [:], properties)
     }
 
@@ -1371,7 +1371,7 @@ class DomainFactory {
 
     }
 
-    public static Run createRun(Map runProperties = [:]) {
+    static Run createRun(Map runProperties = [:]) {
         return createDomainObject(Run, [
                 name       : 'runName_' + (counter++),
                 seqCenter  : { createSeqCenter() },
@@ -1379,13 +1379,13 @@ class DomainFactory {
         ], runProperties)
     }
 
-    public static RunSegment createRunSegment(Map runSegmentProperties = [:]) {
+    static RunSegment createRunSegment(Map runSegmentProperties = [:]) {
         return createDomainObject(RunSegment, [
                 importMode: RunSegment.ImportMode.AUTOMATIC,
         ], runSegmentProperties)
     }
 
-    public static Project createProject(Map projectProperties = [:]) {
+    static Project createProject(Map projectProperties = [:]) {
         return createDomainObject(Project, [
                 name                    : 'project_' + (counter++),
                 phabricatorAlias        : 'phabricatorAlias_' + (counter++),
@@ -1395,13 +1395,13 @@ class DomainFactory {
         ], projectProperties)
     }
 
-    public static ProjectCategory createProjectCategory(Map projectProperties = [:]) {
+    static ProjectCategory createProjectCategory(Map projectProperties = [:]) {
         return createDomainObject(ProjectCategory, [
                 name: 'projectCategory_' + (counter++),
         ], projectProperties)
     }
 
-    public static UserProjectRole createUserProjectRole(Map userProjectRoleProperties = [:]) {
+    static UserProjectRole createUserProjectRole(Map userProjectRoleProperties = [:]) {
         return createDomainObject(UserProjectRole, [
                 user       : { createUser() },
                 project    : { createProject() },
@@ -1410,7 +1410,7 @@ class DomainFactory {
         ], userProjectRoleProperties)
     }
 
-    public static ProjectRole createProjectRole(Map projectRoleProperties = [:]) {
+    static ProjectRole createProjectRole(Map projectRoleProperties = [:]) {
         return createDomainObject(ProjectRole, [
                 name                  : 'roleName_' + (counter++),
                 accessToOtp           : false,
@@ -1419,7 +1419,7 @@ class DomainFactory {
         ], projectRoleProperties)
     }
 
-    public static Individual createIndividual(Map individualProperties = [:]) {
+    static Individual createIndividual(Map individualProperties = [:]) {
         return createDomainObject(Individual, [
                 pid         : 'pid_' + (counter++),
                 mockPid     : 'mockPid_' + (counter++),
@@ -1429,28 +1429,28 @@ class DomainFactory {
         ], individualProperties)
     }
 
-    public static SampleType createSampleType(Map sampleTypeProperties = [:]) {
+    static SampleType createSampleType(Map sampleTypeProperties = [:]) {
         return createDomainObject(SampleType, [
                 name                   : 'sampleTypeName-' + (counter++),
                 specificReferenceGenome: SpecificReferenceGenome.USE_PROJECT_DEFAULT,
         ], sampleTypeProperties)
     }
 
-    public static Sample createSample(Map sampleProperties = [:]) {
+    static Sample createSample(Map sampleProperties = [:]) {
         return createDomainObject(Sample, [
                 individual: { createIndividual() },
                 sampleType: { createSampleType() },
         ], sampleProperties)
     }
 
-    public static SampleIdentifier createSampleIdentifier(Map properties = [:]) {
+    static SampleIdentifier createSampleIdentifier(Map properties = [:]) {
         return createDomainObject(SampleIdentifier, [
                 sample: { createSample() },
                 name  : 'sampleIdentifierName_' + (counter++),
         ], properties)
     }
 
-    public static SeqType createSeqType(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
+    static SeqType createSeqType(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
         String defaultName = 'seqTypeName_' + (counter++)
         return createDomainObject(SeqType, [
                 name         : defaultName,
@@ -1462,11 +1462,11 @@ class DomainFactory {
         ], seqTypeProperties, saveAndValidate)
     }
 
-    public static SeqType createSeqTypePaired(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
+    static SeqType createSeqTypePaired(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
         return createSeqType([libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED] + seqTypeProperties, saveAndValidate)
     }
 
-    public static SoftwareTool createSoftwareTool(Map softwareToolProperties = [:]) {
+    static SoftwareTool createSoftwareTool(Map softwareToolProperties = [:]) {
         return createDomainObject(SoftwareTool, [
                 programName: 'softwareToolProgramName_' + (counter++),
                 type       : SoftwareTool.Type.ALIGNMENT,
@@ -1474,7 +1474,7 @@ class DomainFactory {
     }
 
 
-    public static SoftwareToolIdentifier createSoftwareToolIdentifier(Map properties = [:]) {
+    static SoftwareToolIdentifier createSoftwareToolIdentifier(Map properties = [:]) {
         return createDomainObject(SoftwareToolIdentifier, [
                 name        : 'softwareToolIdentifier_' + (counter++),
                 softwareTool: { createSoftwareTool() },
@@ -1602,7 +1602,7 @@ class DomainFactory {
         ]
     }
 
-    public static SeqTrack createSeqTrack(Map properties = [:]) {
+    static SeqTrack createSeqTrack(Map properties = [:]) {
         if (properties.seqType?.isChipSeq()) {
             return createChipSeqSeqTrack(properties)
         }
@@ -1614,20 +1614,20 @@ class DomainFactory {
         ], properties)
     }
 
-    public static ExomeSeqTrack createExomeSeqTrack(Map properties = [:]) {
+    static ExomeSeqTrack createExomeSeqTrack(Map properties = [:]) {
         return createDomainObject(ExomeSeqTrack, seqTrackProperties(properties) + [
                 seqType: { createExomeSeqType() },
         ], properties)
     }
 
-    public static ChipSeqSeqTrack createChipSeqSeqTrack(Map properties = [:]) {
+    static ChipSeqSeqTrack createChipSeqSeqTrack(Map properties = [:]) {
         return createDomainObject(ChipSeqSeqTrack, seqTrackProperties(properties) + [
                 seqType       : { createChipSeqType() },
                 antibodyTarget: { createAntibodyTarget() },
         ], properties)
     }
 
-    public static FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
+    static FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
         return createDomainObject(FastqcProcessedFile, [
                 dataFile: { createDataFile() },
         ], properties)
@@ -1773,11 +1773,11 @@ class DomainFactory {
         createDomainObjectLazy(RunYapsaConfig, createRunYapsaConfigMapHelper(properties), properties, saveAndValidate)
     }
 
-    public static SeqTrack createSeqTrack(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {
+    static SeqTrack createSeqTrack(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {
         return createSeqTrack(getMergingProperties(mergingWorkPackage) + seqTrackProperties)
     }
 
-    public static Map getMergingProperties(MergingWorkPackage mergingWorkPackage) {
+    static Map getMergingProperties(MergingWorkPackage mergingWorkPackage) {
         SeqPlatform seqPlatform = mergingWorkPackage?.seqPlatformGroup?.seqPlatforms?.sort()?.first()
         if (!seqPlatform) {
             seqPlatform = createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: [mergingWorkPackage.seqPlatformGroup])
@@ -1818,7 +1818,7 @@ class DomainFactory {
         return seqTrack
     }
 
-    public static SeqTrack createSeqTrackWithOneDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
+    static SeqTrack createSeqTrackWithOneDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
         SeqTrack seqTrack
         if (seqTrackProperties.seqType?.name == SeqTypeNames.EXOME.seqTypeName) {
             seqTrack = createExomeSeqTrack(seqTrackProperties)
@@ -1856,7 +1856,7 @@ class DomainFactory {
         return seqTrack
     }
 
-    public static DataFile createSequenceDataFile(final Map properties = [:]) {
+    static DataFile createSequenceDataFile(final Map properties = [:]) {
         Map defaultProperties = [
                 dateCreated   : new Date(),  // In unit tests Grails (sometimes) does not automatically set dateCreated.
                 used          : true,
@@ -1870,7 +1870,7 @@ class DomainFactory {
     }
 
 
-    public static RoddySnvCallingInstance createRoddySnvCallingInstance(Map properties = [:]) {
+    static RoddySnvCallingInstance createRoddySnvCallingInstance(Map properties = [:]) {
         return createDomainObject(RoddySnvCallingInstance, [
                 processingState: AnalysisProcessingStates.IN_PROGRESS,
                 config: properties.config ?:
@@ -1895,7 +1895,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static ProcessingStep createAndSaveProcessingStep(ProcessParameterObject processParameterObject = null) {
+    static ProcessingStep createAndSaveProcessingStep(ProcessParameterObject processParameterObject = null) {
         return createAndSaveProcessingStep("de.dkfz.tbi.otp.test.job.jobs.NonExistentDummyJob", processParameterObject)
     }
 
@@ -1917,14 +1917,14 @@ class DomainFactory {
         return step
     }
 
-    public static RestartedProcessingStep createAndSaveRestartedProcessingStep(ProcessingStep step = null) {
+    static RestartedProcessingStep createAndSaveRestartedProcessingStep(ProcessingStep step = null) {
         ProcessingStep originalStep = step ?: createAndSaveProcessingStep()
         final RestartedProcessingStep restartedProcessingStep = RestartedProcessingStep.create(originalStep)
         assert restartedProcessingStep.save(flush: true)
         return restartedProcessingStep
     }
 
-    public static ProcessingStepUpdate createProcessingStepUpdate(
+    static ProcessingStepUpdate createProcessingStepUpdate(
             final ProcessingStep step, final ExecutionState state) {
         return createProcessingStepUpdate([
                 date          : new Date(),
@@ -1943,7 +1943,7 @@ class DomainFactory {
         return processingStep
     }
 
-    public static ProcessParameter createProcessParameter(
+    static ProcessParameter createProcessParameter(
             final Process process, final ProcessParameterObject parameterValue, Map properties = [:]) {
         return createDomainObject(ProcessParameter, [
                 process  : process,
@@ -1952,7 +1952,7 @@ class DomainFactory {
         ], properties)
     }
 
-    public static ProcessParameter createProcessParameter(
+    static ProcessParameter createProcessParameter(
             final Process process, final String className, final String value) {
         return createDomainObject(ProcessParameter, [
                 process  : process,
@@ -1961,7 +1961,7 @@ class DomainFactory {
         ], [:])
     }
 
-    public static ClusterJob createClusterJob(
+    static ClusterJob createClusterJob(
             final ProcessingStep processingStep, final ClusterJobIdentifier clusterJobIdentifier,
             final Map myProps = [
                     clusterJobName   : "testName_${processingStep.nonQualifiedJobClass}",

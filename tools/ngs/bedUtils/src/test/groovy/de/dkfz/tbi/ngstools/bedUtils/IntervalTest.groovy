@@ -22,12 +22,12 @@ class IntervalTest {
     List<Interval> intervalList
 
     @Before
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         intervalList = []
     }
 
     @After
-    public void tearDown() throws Exception {
+    void tearDown() throws Exception {
         intervalList = null
     }
 

@@ -13,7 +13,7 @@ import org.springframework.stereotype.*
 @UseJobLog
 class FailingValidatingTestJob extends AbstractValidatingJobImpl {
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         setValidatedSucceeded(false)
         succeed()
     }

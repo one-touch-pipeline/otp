@@ -34,7 +34,7 @@ class TargetIntervalsImpl implements TargetIntervals {
      * - create interval tree on sorted and merged set of intervals
      * @param bedFilePath - path to the bed file
      */
-    public TargetIntervalsImpl(String bedFilePath, List<String> referenceGenomeEntryNames) {
+    TargetIntervalsImpl(String bedFilePath, List<String> referenceGenomeEntryNames) {
         // bedFilePath checking
         notNull(bedFilePath, "the bedFilePath parameter can not be null")
         File bedFile = new File(bedFilePath)
@@ -48,7 +48,7 @@ class TargetIntervalsImpl implements TargetIntervals {
         this.intervalsPerSequence = [:]
     }
 
-    public void createTreeMapFromBedFile() {
+    void createTreeMapFromBedFile() {
         Map<String, List<Interval>> map = parseBedFile(bedFilePath)
         validateBedFileContent(referenceGenomeEntryNames, map)
         baseCount = calculateBaseCount(map)
@@ -147,7 +147,7 @@ class TargetIntervalsImpl implements TargetIntervals {
         }
     }
 
-    public long getOverlappingBaseCount(String refSeqName, long startPosition, long endPosition) {
+    long getOverlappingBaseCount(String refSeqName, long startPosition, long endPosition) {
         notNull(refSeqName, "refSeqName in method getOverlappingBaseCount is null")
         notNull(startPosition, "start in method getOverlappingBaseCount is null")
         notNull(endPosition, "end in method getOverlappingBaseCount is null")
@@ -193,29 +193,29 @@ class TargetIntervalsImpl implements TargetIntervals {
         }
     }
 
-    public long getUniqueBaseCount() {
+    long getUniqueBaseCount() {
         parseBedFileIfRequired()
         return uniqueBaseCount
     }
 
-    public long getBaseCount() {
+    long getBaseCount() {
         parseBedFileIfRequired()
         return baseCount
     }
 
-    public boolean hasOverlappingIntervals() {
+    boolean hasOverlappingIntervals() {
         parseBedFileIfRequired()
         return baseCount > uniqueBaseCount
     }
 
-    public boolean containsReference(String refSeqName) {
+    boolean containsReference(String refSeqName) {
         notNull(refSeqName, "The input of the method contains is null")
         notEmpty(refSeqName, "The input of the method containsReference is empty")
         parseBedFileIfRequired()
         return intervalsPerSequence.containsKey(refSeqName)
     }
 
-    public Set<String> getReferenceSequenceNames() {
+    Set<String> getReferenceSequenceNames() {
         parseBedFileIfRequired()
         return intervalsPerSequence.keySet()
     }

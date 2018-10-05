@@ -27,7 +27,7 @@ class CheckQaResultsChecksumMD5Job extends AbstractEndStateAwareJobImpl {
     ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile file = ProcessedMergedBamFile.get(id)
         String temporalqaDestinationDir = processedMergedBamFileService.qaResultTempDestinationDirectory(file)

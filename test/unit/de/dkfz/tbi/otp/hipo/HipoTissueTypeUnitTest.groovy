@@ -8,7 +8,7 @@ import static org.junit.Assert.assertNull
 class HipoTissueTypeUnitTest {
 
     @Test
-    public void testFromKey() {
+    void testFromKey() {
         assertEquals(HipoTissueType.BLOOD, HipoTissueType.fromKey("B"))
         assertNull(HipoTissueType.fromKey("-"))
     }

@@ -5,14 +5,14 @@ import org.springframework.security.access.prepost.*
 
 abstract class MetadataFieldsService<T> {
 
-    public T findByNameOrImportAlias(String nameOrImportAlias, Map properties = [:]) {
+    T findByNameOrImportAlias(String nameOrImportAlias, Map properties = [:]) {
         assert nameOrImportAlias: "the input 'nameOrImportAlias' is null"
 
         return findByName(nameOrImportAlias, properties) ?: findByImportAlias(nameOrImportAlias, properties)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void addNewAlias(String name, String importAlias) {
+    void addNewAlias(String name, String importAlias) {
         assert name: "the input name must not be null"
         assert importAlias: "the input importAlias must not be null"
         T tFromImportAlias = findByNameOrImportAlias(importAlias)
@@ -22,7 +22,7 @@ abstract class MetadataFieldsService<T> {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public T create(String name, Map properties = [:], List<String> importAliases = []) {
+    T create(String name, Map properties = [:], List<String> importAliases = []) {
         assert name: "the input name '${name}' must not be null"
         checkProperties(properties)
         checkNameAndAliases(name, properties, importAliases)

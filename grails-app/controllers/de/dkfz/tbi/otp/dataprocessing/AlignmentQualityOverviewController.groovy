@@ -12,8 +12,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class AlignmentQualityOverviewController {
 
-    public static final String CHR_X_HG19 = 'chrX'
-    public static final String CHR_Y_HG19 = 'chrY'
+    static final String CHR_X_HG19 = 'chrX'
+    static final String CHR_Y_HG19 = 'chrY'
 
     private static final List<String> chromosomes = [Chromosomes.CHR_X.alias, Chromosomes.CHR_Y.alias, CHR_X_HG19, CHR_Y_HG19].asImmutable()
 

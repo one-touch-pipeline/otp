@@ -46,7 +46,7 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
         ].join(" ")
     }
 
-    public String prepareAndReturnAdditionalImports(R roddyResult) {
+    String prepareAndReturnAdditionalImports(R roddyResult) {
         assert roddyResult: "roddyResult must not be null"
 
         String fasttrack = (roddyResult.processingPriority == ProcessingPriority.FAST_TRACK) ?
@@ -58,14 +58,14 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     }
 
 
-    public String prepareAndReturnCValues(R roddyResult) {
+    String prepareAndReturnCValues(R roddyResult) {
         assert roddyResult: "roddyResult must not be null"
         List<String> cValues = prepareAndReturnWorkflowSpecificCValues(roddyResult)
         return "--cvalues=\"${cValues.join(',').replace('$', '\\$')}\""
     }
 
 
-    public String getChromosomeIndexParameterWithMitochondrium(ReferenceGenome referenceGenome) {
+    String getChromosomeIndexParameterWithMitochondrium(ReferenceGenome referenceGenome) {
         assert referenceGenome
 
         List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(referenceGenome,
@@ -78,7 +78,7 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     }
 
 
-    public String getChromosomeIndexParameterWithoutMitochondrium(ReferenceGenome referenceGenome) {
+    String getChromosomeIndexParameterWithoutMitochondrium(ReferenceGenome referenceGenome) {
         assert referenceGenome
 
         List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(referenceGenome,

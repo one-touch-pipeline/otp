@@ -29,7 +29,7 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
     }
 
     @Override
-    public String toString() {
+    String toString() {
         return "AI ${id}${withdrawn ? ' (withdrawn)': ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
     }
 

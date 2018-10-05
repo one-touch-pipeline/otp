@@ -63,15 +63,15 @@ class TestCase {
         }
     }
 
-    public static void assertEquals(final GString expected, final String actual) {
+    static void assertEquals(final GString expected, final String actual) {
         Assert.assertEquals(expected.toString(), actual)
     }
 
-    public static String createUniqueString() {
+    static String createUniqueString() {
         return HelperUtils.getUniqueString()
     }
 
-    public static File getUniqueNonExistentPath() {
+    static File getUniqueNonExistentPath() {
         return new File("/dev/null/otp-test/${HelperUtils.uniqueString}")
     }
 
@@ -80,7 +80,7 @@ class TestCase {
      * soon as you do not need it anymore, or delete all test directories using {@link #cleanTestDirectory()}.
      */
     @Deprecated
-    public static File createEmptyTestDirectory() {
+    static File createEmptyTestDirectory() {
         if (!cleanTestDirectoryShutdownHookInstalled) {
             addShutdownHook { cleanTestDirectory() }
             cleanTestDirectoryShutdownHookInstalled = true
@@ -91,7 +91,7 @@ class TestCase {
     }
 
     @Deprecated
-    public static boolean cleanTestDirectory() {
+    static boolean cleanTestDirectory() {
         return TEST_DIRECTORY.deleteDir()
     }
 
@@ -99,11 +99,11 @@ class TestCase {
      * @see CollectionUtils#containSame(java.util.Collection, java.util.Collection)
      */
     @Deprecated
-    public static <T> boolean containSame(final Collection<? extends T> c1, final Collection<? extends T> c2) {
+    static <T> boolean containSame(final Collection<? extends T> c1, final Collection<? extends T> c2) {
         return CollectionUtils.containSame(c1, c2)
     }
 
-    public static <T> boolean assertContainSame(final Collection<? extends T> c1, final Collection<? extends T> c2) {
+    static <T> boolean assertContainSame(final Collection<? extends T> c1, final Collection<? extends T> c2) {
         if (!CollectionUtils.containSame(c1, c2)) {
             Set c1Set = c1.toSet()
             Set c2Set = c2.toSet()
@@ -151,7 +151,7 @@ class TestCase {
         }, "validation has not failed with expected error:\nEXPECTED: ${failedField} ${failedConstraint} ${rejectedValue}\nFOUND: ${objectToCheck.errors}"
     }
 
-    public static void removeMetaClass(final Class clazz, final Object object) {
+    static void removeMetaClass(final Class clazz, final Object object) {
         // Both of the following statements are necessary. See http://stackoverflow.com/a/15953102
         // But their order does not matter.
         // Replacing the clazz parameter with object.class does not work because of Spring's magic wrapper classes.

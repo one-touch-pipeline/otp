@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.OtpException
  */
 class QualityAssessmentException extends OtpException {
 
-    public QualityAssessmentException(String msg) {
+    QualityAssessmentException(String msg) {
         super(msg)
     }
 }

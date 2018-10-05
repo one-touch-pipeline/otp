@@ -98,7 +98,7 @@ abstract class AbstractJobImpl implements Job {
     }
 
     @Override
-    public void start() throws InvalidStateException {
+    void start() throws InvalidStateException {
         switch (state) {
             case State.CREATED:
                 state = State.STARTED
@@ -109,7 +109,7 @@ abstract class AbstractJobImpl implements Job {
     }
 
     @Override
-    public void end() throws InvalidStateException {
+    void end() throws InvalidStateException {
         switch (state) {
             case State.STARTED:
                 state = State.FINISHED
@@ -120,7 +120,7 @@ abstract class AbstractJobImpl implements Job {
     }
 
     @Override
-    public Set<Parameter> getOutputParameters() throws InvalidStateException {
+    Set<Parameter> getOutputParameters() throws InvalidStateException {
         switch (state) {
             case State.FINISHED:
                 return outputParameters
@@ -142,7 +142,7 @@ abstract class AbstractJobImpl implements Job {
     }
 
     @Override
-    public ProcessingStep getProcessingStep() {
+    ProcessingStep getProcessingStep() {
         return ProcessingStep.getInstance(processingStepId)
     }
 
@@ -156,7 +156,7 @@ abstract class AbstractJobImpl implements Job {
      * @return The parameter value or the class of the instance.
      * @throws RuntimeException In case the parameter could not be found.
      */
-    public <T> T getParameterValueOrClass(String typeName) {
+    def <T> T getParameterValueOrClass(String typeName) {
         Parameter parameter = processingStep.input.find { it.type.name == typeName }
         if (!parameter) {
             throw new RuntimeException("Required parameter not found")
@@ -171,7 +171,7 @@ abstract class AbstractJobImpl implements Job {
      * Returns the object which is referenced by the {@link ProcessParameter} for the {@link Process} that this job
      * belongs to. If there is no such process parameter or object, this method will throw an exception.
      */
-    public ProcessParameterObject getProcessParameterObject() {
+    ProcessParameterObject getProcessParameterObject() {
         ProcessParameterObject object = getProcessParameter().toObject()
         if (object == null) {
             throw new RuntimeException("Object referenced by ProcessParameter was not found.")
@@ -179,21 +179,21 @@ abstract class AbstractJobImpl implements Job {
         return object
     }
 
-    public ProcessParameterObject getRefreshedProcessParameterObject() {
+    ProcessParameterObject getRefreshedProcessParameterObject() {
         ProcessParameterObject object = getProcessParameterObject()
         object.refresh()
         return object
     }
 
-    public String getProcessParameterValue() {
+    String getProcessParameterValue() {
         return getProcessParameter().value
     }
 
-    public ProcessParameter getProcessParameter() {
+    ProcessParameter getProcessParameter() {
         return exactlyOneElement(ProcessParameter.findAllByProcess(processingStep.process))
     }
 
-    public Collection<ClusterJob> failedOrNotFinishedClusterJobs() {
+    Collection<ClusterJob> failedOrNotFinishedClusterJobs() {
         // For none multi jobs the LogFiles belong to the otp job sending the cluster job and not to the job validating the cluster job, which can fail.
         // The sending cluster job is two steps before the validating one.
         ProcessingStep sendStep = processingStep.previous?.previous

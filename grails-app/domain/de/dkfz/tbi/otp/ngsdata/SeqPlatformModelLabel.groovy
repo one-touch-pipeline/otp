@@ -17,7 +17,7 @@ class SeqPlatformModelLabel implements Entity {
     static hasMany = [importAlias : String]
 
     @Override
-    public String toString() {
+    String toString() {
         return name
     }
 }

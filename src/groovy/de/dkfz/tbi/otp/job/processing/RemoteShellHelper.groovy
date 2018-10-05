@@ -53,7 +53,7 @@ class RemoteShellHelper {
      * @param command The command to be executed
      * @return standard output of the command executed
      */
-    public String executeCommand(Realm realm, String command) {
+    String executeCommand(Realm realm, String command) {
         return executeCommandReturnProcessOutput(realm, command).stdout
     }
 
@@ -64,7 +64,7 @@ class RemoteShellHelper {
      * @param command The command to be executed
      * @return process output of the command executed
      */
-    public ProcessOutput executeCommandReturnProcessOutput(Realm realm, String command) {
+    ProcessOutput executeCommandReturnProcessOutput(Realm realm, String command) {
         assert realm: "No realm specified."
         assert command: "No command specified to be run remotely."
         String sshUser = configService.getSshUser()

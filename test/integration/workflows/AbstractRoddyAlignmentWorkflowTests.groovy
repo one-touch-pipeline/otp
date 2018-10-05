@@ -24,7 +24,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
     //The number of reads of the example fastqc files
     static final int NUMBER_OF_READS = 1000
 
-    public String getRefGenFileNamePrefix() {
+    String getRefGenFileNamePrefix() {
         return 'hs37d5'
     }
 
@@ -83,7 +83,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    TemporaryFolder temporaryFolder = new TemporaryFolder()
 
 
     @Override

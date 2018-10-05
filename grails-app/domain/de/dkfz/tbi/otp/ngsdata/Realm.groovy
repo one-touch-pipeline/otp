@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.utils.*
 
 class Realm implements Entity, Serializable {
 
-    public enum JobScheduler {
+    enum JobScheduler {
         LSF,
         PBS,
 

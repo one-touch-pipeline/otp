@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.OtpException
  */
 class GroupCreationException extends OtpException {
 
-    public GroupCreationException(String reason) {
+    GroupCreationException(String reason) {
         super(reason);
     }
 

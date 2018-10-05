@@ -15,13 +15,13 @@ class ProcessedMergedBamFileQaFileService {
     ProcessedMergedBamFileService processedMergedBamFileService
     QualityAssessmentMergedPassService qualityAssessmentMergedPassService
 
-    public static final String QUALITY_ASSESSMENT_DIR_NAME = "QualityAssessment"
-    public static final MD5SUM_NAME = 'MD5SUMS'
+    static final String QUALITY_ASSESSMENT_DIR_NAME = "QualityAssessment"
+    static final MD5SUM_NAME = 'MD5SUMS'
 
     /**
      * returns the directory for the given {@link QualityAssessmentMergedPass}.
      */
-    public String directoryPath(QualityAssessmentMergedPass pass) {
+    String directoryPath(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         String baseDir = processedMergedBamFileService.directory((ProcessedMergedBamFile)pass.abstractMergedBamFile)
         String qaDir = QUALITY_ASSESSMENT_DIR_NAME
@@ -29,18 +29,18 @@ class ProcessedMergedBamFileQaFileService {
         return "${baseDir}/${qaDir}/${passDir}"
     }
 
-    public File qaProcessingDirectory(final MergingPass mergingPass) {
+    File qaProcessingDirectory(final MergingPass mergingPass) {
         return new File(processedMergedBamFileService.processingDirectory(mergingPass), QUALITY_ASSESSMENT_DIR_NAME)
     }
 
-    public File qaPassProcessingDirectory(final QualityAssessmentMergedPass pass) {
+    File qaPassProcessingDirectory(final QualityAssessmentMergedPass pass) {
         return new File(qaProcessingDirectory(pass.mergingPass), passDirectory(pass))
     }
 
     /**
      * returns the part of the directory for the pass for the given {@link QualityAssessmentMergedPass}.
      */
-    public String passDirectory(QualityAssessmentMergedPass pass) {
+    String passDirectory(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         return "pass${pass.identifier}"
     }
@@ -48,7 +48,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file path (file name + directory) for the JSON file.
      */
-    public String qualityAssessmentDataFilePath(QualityAssessmentMergedPass pass) {
+    String qualityAssessmentDataFilePath(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         String dir = directoryPath(pass)
         String filename = qualityAssessmentDataFileName((ProcessedMergedBamFile)pass.abstractMergedBamFile)
@@ -58,7 +58,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file path (file name + directory) for the coverage file.
      */
-    public String coverageDataFilePath(QualityAssessmentMergedPass pass) {
+    String coverageDataFilePath(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         String dir = directoryPath(pass)
         String filename = coverageDataFileName((ProcessedMergedBamFile)pass.abstractMergedBamFile)
@@ -68,7 +68,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file path (file name + directory) for the mapped, filtered and sorted coverage file.
      */
-    public String mappedFilteredSortedCoverageDataFilePath(QualityAssessmentMergedPass pass) {
+    String mappedFilteredSortedCoverageDataFilePath(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         String dir = directoryPath(pass)
         String filename = sortedCoverageDataFileName((ProcessedMergedBamFile)pass.abstractMergedBamFile)
@@ -78,7 +78,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file path (file name + directory) for the coverage plot.
      */
-    public String coveragePlotFilePath(QualityAssessmentMergedPass pass) {
+    String coveragePlotFilePath(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         String dir = directoryPath(pass)
         String filename = coveragePlotFileName((ProcessedMergedBamFile)pass.abstractMergedBamFile)
@@ -88,7 +88,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file path (file name + directory) for the file the insert size plot is created from.
      */
-    public String insertSizeDataFilePath(QualityAssessmentMergedPass pass) {
+    String insertSizeDataFilePath(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         String dir = directoryPath(pass)
         String filename = insertSizeDataFileName((ProcessedMergedBamFile)pass.abstractMergedBamFile)
@@ -98,7 +98,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file path (file name + directory) for the insert size plot.
      */
-    public String insertSizePlotFilePath(QualityAssessmentMergedPass pass) {
+    String insertSizePlotFilePath(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         String dir = directoryPath(pass)
         String filename = insertSizePlotFileName((ProcessedMergedBamFile)pass.abstractMergedBamFile)
@@ -108,7 +108,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file path (file name + directory) chromosome mapping, filtering and sorting.
      */
-    public String chromosomeMappingFilePath(QualityAssessmentMergedPass pass) {
+    String chromosomeMappingFilePath(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         String dir = directoryPath(pass)
         String filename = chromosomeMappingFileName((ProcessedMergedBamFile)pass.abstractMergedBamFile)
@@ -118,7 +118,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file name for the JSON file.
      */
-    public String qualityAssessmentDataFileName(ProcessedMergedBamFile bamFile) {
+    String qualityAssessmentDataFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
         String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_quality.json"
@@ -127,7 +127,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file name for the coverage file.
      */
-    public String coverageDataFileName(ProcessedMergedBamFile bamFile) {
+    String coverageDataFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
         String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_coverage.tsv"
@@ -136,7 +136,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file name for the mapped, filtered and sorted coverage file.
      */
-    public String sortedCoverageDataFileName(ProcessedMergedBamFile bamFile) {
+    String sortedCoverageDataFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
         String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_mappedFilteredAndSortedCoverage.tsv"
@@ -145,7 +145,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file name for the coverage plot.
      */
-    public String coveragePlotFileName(ProcessedMergedBamFile bamFile) {
+    String coveragePlotFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
         String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_coveragePlot.png"
@@ -154,7 +154,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file name for the data the insert size plot is created from.
      */
-    public String insertSizeDataFileName(ProcessedMergedBamFile bamFile) {
+    String insertSizeDataFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
         String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_qualityDistribution.hst"
@@ -163,7 +163,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file name for the insert size plot.
      */
-    public String insertSizePlotFileName(ProcessedMergedBamFile bamFile) {
+    String insertSizePlotFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
         String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_insertSizePlot.png"
@@ -172,13 +172,13 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * returns the file name for the chromosome mapping, filtering and sorting.
      */
-    public String chromosomeMappingFileName(ProcessedMergedBamFile bamFile) {
+    String chromosomeMappingFileName(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the processed merged bam file is null")
         String fileName = bamFile.fileNameNoSuffix()
         return "${fileName}_chromosomeMapping.json"
     }
 
-    public Collection<String> allFileNames(final ProcessedMergedBamFile bamFile) {
+    Collection<String> allFileNames(final ProcessedMergedBamFile bamFile) {
         return [
                 qualityAssessmentDataFileName(bamFile),
                 coverageDataFileName(bamFile),
@@ -194,7 +194,7 @@ class ProcessedMergedBamFileQaFileService {
     /**
      * validates the existence (read access and size bigger zero) of the QA data files.
      */
-    public void validateQADataFiles(QualityAssessmentMergedPass pass) {
+    void validateQADataFiles(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         String errors = [
             coverage : coverageDataFilePath(pass),
@@ -215,7 +215,7 @@ class ProcessedMergedBamFileQaFileService {
      *
      * @return <code>true</code>, if the plot exist, <code>false</code> otherwise
      */
-    public boolean validateCoveragePlotAndUpdateProcessedMergedBamFileStatus(QualityAssessmentMergedPass pass) {
+    boolean validateCoveragePlotAndUpdateProcessedMergedBamFileStatus(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         pass.abstractMergedBamFile.hasCoveragePlot = validateFile(coveragePlotFilePath(pass))
         assertSave(pass.abstractMergedBamFile)
@@ -227,7 +227,7 @@ class ProcessedMergedBamFileQaFileService {
      *
      * @return <code>true</code>, if the plot exist, <code>false</code> otherwise
      */
-    public boolean validateInsertSizePlotAndUpdateProcessedMergedBamFileStatus(QualityAssessmentMergedPass pass) {
+    boolean validateInsertSizePlotAndUpdateProcessedMergedBamFileStatus(QualityAssessmentMergedPass pass) {
         notNull(pass, "the quality assessment merged pass is null")
         pass.abstractMergedBamFile.hasInsertSizePlot = validateFile(insertSizePlotFilePath(pass))
         assertSave(pass.abstractMergedBamFile)
@@ -238,7 +238,7 @@ class ProcessedMergedBamFileQaFileService {
      * @param file, the ProcessedMergedBamFile for which the QA results were produced
      * @return path to the directory where the file with the calculated md5sums for the latest qa results is stored
      */
-    public String qaResultsMd5sumFile(ProcessedMergedBamFile file) {
+    String qaResultsMd5sumFile(ProcessedMergedBamFile file) {
         notNull(file, "the input of the method qaResultDirectory is null")
         QualityAssessmentMergedPass pass = qualityAssessmentMergedPassService.latestQualityAssessmentMergedPass(file)
         return directoryPath(pass) + "/" + MD5SUM_NAME
@@ -251,7 +251,7 @@ class ProcessedMergedBamFileQaFileService {
      *
      * @return true if there is no serious inconsistency.
      */
-    public boolean checkConsistencyForProcessingFilesDeletion(final QualityAssessmentMergedPass pass) {
+    boolean checkConsistencyForProcessingFilesDeletion(final QualityAssessmentMergedPass pass) {
         notNull pass
         ProcessedMergedBamFile bamFile = (ProcessedMergedBamFile)pass.abstractMergedBamFile
         if (!pass.isLatestPass() || !pass.mergingPass.isLatestPass() || !pass.mergingSet.isLatestSet()) {
@@ -272,7 +272,7 @@ class ProcessedMergedBamFileQaFileService {
      *
      * @return The number of bytes that have been freed on the file system.
      */
-    public long deleteProcessingFiles(final QualityAssessmentMergedPass pass) {
+    long deleteProcessingFiles(final QualityAssessmentMergedPass pass) {
         notNull pass
         ProcessedMergedBamFile bamFile = (ProcessedMergedBamFile)pass.abstractMergedBamFile
         if (!checkConsistencyForProcessingFilesDeletion(pass)) {

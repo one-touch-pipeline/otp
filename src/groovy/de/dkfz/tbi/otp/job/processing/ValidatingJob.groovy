@@ -12,11 +12,11 @@ package de.dkfz.tbi.otp.job.processing
  * A validating job should never fail. It should always succeed. Because of that it is an
  * EndStateAwareJob. It knows that it succeeded when the end of the execute method is reached.
  */
-public interface ValidatingJob extends EndStateAwareJob {
+interface ValidatingJob extends EndStateAwareJob {
     /**
      * @return ProcessingStep this Job is validating.
      */
-    public ProcessingStep getValidatorFor()
+    ProcessingStep getValidatorFor()
 
     /**
      * Used by the Scheduler to add a concrete Processing Step to validate
@@ -24,7 +24,7 @@ public interface ValidatingJob extends EndStateAwareJob {
      *
      * @param step A Processing Step this Job is validating
      */
-    public void setValidatorFor(ProcessingStep step)
+    void setValidatorFor(ProcessingStep step)
 
     /**
      * Used by the Scheduler to determine whether the validated job succeeded
@@ -33,5 +33,5 @@ public interface ValidatingJob extends EndStateAwareJob {
      * marked as failed.
      * @return Whether the validated Job succeeded
      */
-    public boolean hasValidatedJobSucceeded()
+    boolean hasValidatedJobSucceeded()
 }

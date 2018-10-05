@@ -112,7 +112,7 @@ class MetaDataService {
      * @return mate number, 1 or 2
      * @throws RuntimeException if the mate number cannot be found.
      */
-    public static int findOutMateNumber(String dataFileName) {
+    static int findOutMateNumber(String dataFileName) {
         assert dataFileName, "for non single-mate fastq files, file name must be provided"
         def patterns = [
             //SOMEPID_L001_R2.fastq.gz

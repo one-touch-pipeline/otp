@@ -10,30 +10,30 @@ class ChecksumFileService {
 
     def lsdfFilesService
 
-    public String pathToMd5File(DataFile file) {
+    String pathToMd5File(DataFile file) {
         String path = lsdfFilesService.getFileFinalPath(file)
         return "${path}.md5sum"
     }
 
-    public String md5FileName(DataFile file) {
+    String md5FileName(DataFile file) {
         return "${file.fileName}.md5sum"
     }
 
     /**
      * example: BLOOD_SomePid_WHOLE_GENOME_PAIRED_merged.mdup.bam.md5sum
     */
-    public String md5FileName(String fileName) {
+    String md5FileName(String fileName) {
         return "${fileName}.md5sum"
     }
 
     /**
      * example: BLOOD_SomePid_WHOLE_GENOME_PAIRED_merged.mdup.bam.md5
      */
-    public String picardMd5FileName(String fileName) {
+    String picardMd5FileName(String fileName) {
         return "${fileName}.md5"
     }
 
-    public boolean compareMd5(DataFile file) {
+    boolean compareMd5(DataFile file) {
         String path = pathToMd5File(file)
         File md5File = new File(path)
         FileService.ensureFileIsReadableAndNotEmpty(md5File.toPath())

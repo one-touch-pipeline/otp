@@ -32,12 +32,12 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
      * @see MergingPass#isLatestPass()
      */
     @Override
-    public boolean isMostRecentBamFile() {
+    boolean isMostRecentBamFile() {
         return (mergingPass.isLatestPass() && mergingSet.isLatestSet())
     }
 
     @Override
-    public String toString() {
+    String toString() {
         MergingWorkPackage mergingWorkPackage = mergingPass.mergingSet.mergingWorkPackage
         return "PMBF ${id}: " +
         "pass: ${mergingPass.identifier} " + (mergingPass.latestPass ? "(latest) " : "") +
@@ -73,19 +73,19 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
             maxResults 1
         }
     }
-    public String fileNameNoSuffix() {
+    String fileNameNoSuffix() {
         String seqTypeName = "${this.seqType.name}_${this.seqType.libraryLayout}"
         return "${this.sampleType.name}_${this.individual.pid}_${seqTypeName}_merged.mdup"
     }
 
     @Override
-    public String getBamFileName() {
+    String getBamFileName() {
         String body = this.fileNameNoSuffix()
         return "${body}.bam"
     }
 
     @Override
-    public String getBaiFileName() {
+    String getBaiFileName() {
         String body = this.fileNameNoSuffix()
         return "${body}.bai"
     }

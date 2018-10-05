@@ -76,7 +76,7 @@ class IndividualService {
      * @param filter Filter restrictions
      * @return List of Individuals matching the criterias and ACL restricted
      * */
-    public List<Individual> listIndividuals(boolean sortOrder, IndividualSortColumn column, IndividualFiltering filtering, String filter) {
+    List<Individual> listIndividuals(boolean sortOrder, IndividualSortColumn column, IndividualFiltering filtering, String filter) {
         List projects = projectService.getAllProjects()
         if (!projects) {
             return []
@@ -141,7 +141,7 @@ class IndividualService {
      * @param filter Restrict on this search filter if at least three characters
      * @return Number of Individuals matching the filtering
      */
-    public int countIndividual(IndividualFiltering filtering, String filter) {
+    int countIndividual(IndividualFiltering filtering, String filter) {
         if (filtering.enabled || filter.length() >= 3) {
             def c = Individual.createCriteria()
             return c.get {
@@ -205,7 +205,7 @@ class IndividualService {
      * @throws IndividualCreationException
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Individual createIndividual(Project project, IndividualCommand command, List<SamplesParser> parsedSamples) throws IndividualCreationException {
+    Individual createIndividual(Project project, IndividualCommand command, List<SamplesParser> parsedSamples) throws IndividualCreationException {
         Individual individual = new Individual(
                 pid: command.pid,
                 mockPid: command.mockPid,
@@ -228,7 +228,7 @@ class IndividualService {
      * @param pid The pid to check
      * @return true if there is already a Individual with the pid, false otherwise
      */
-    public boolean individualExists(String pid) {
+    boolean individualExists(String pid) {
         return (Individual.findByPid(pid) != null)
     }
 
@@ -236,7 +236,7 @@ class IndividualService {
      * Fetches all SampleTypes available
      * @return List of SampleTypes
      */
-    public List<String> getSampleTypeNames() {
+    List<String> getSampleTypeNames() {
         return SampleType.list([sort: "name", order: "asc"])*.name
     }
 
@@ -245,7 +245,7 @@ class IndividualService {
      * @return List of SampleIdentifiers
      */
     @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject.sample.individual.project, 'OTP_READ_ACCESS')")
-    public List<SampleIdentifier> getSampleIdentifiers() {
+    List<SampleIdentifier> getSampleIdentifiers() {
         return SampleIdentifier.list()
     }
 
@@ -256,7 +256,7 @@ class IndividualService {
      * @return List of SampleIdentifiers
      */
     @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject.sample.individual.project, 'OTP_READ_ACCESS')")
-    public List<SampleIdentifier> getSampleIdentifiers(Long individualId, String sType) {
+    List<SampleIdentifier> getSampleIdentifiers(Long individualId, String sType) {
         List<SampleIdentifier> sampleIdentifiers = SampleIdentifier.withCriteria {
             sample {
                 and {
@@ -378,7 +378,7 @@ class IndividualService {
      * show the List of Individual per Project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    public List findAllMockPidsByProject(Project project) {
+    List findAllMockPidsByProject(Project project) {
         List seq = Sequence.withCriteria {
             eq("projectId", project.id)
             projections {
@@ -398,7 +398,7 @@ class IndividualService {
      * @param newProperties a Map that contains the new properties of the individual/sample/lane
      * @param additionalInformation a String with additional information that will be displayed between header and old/new properties
      */
-    public void createComment(String operation, Map oldProperties, Map newProperties, String additionalInformation = null) {
+    void createComment(String operation, Map oldProperties, Map newProperties, String additionalInformation = null) {
         assert oldProperties
         assert oldProperties.individual
         assert newProperties

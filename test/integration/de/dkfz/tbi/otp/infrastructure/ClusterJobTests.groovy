@@ -13,16 +13,16 @@ import static org.junit.Assert.*
 
 class ClusterJobTests {
 
-    public static final int REQUESTED_MEMORY = 1000
-    public static final int USED_MEMORY = 800
-    public static final int CPU_TIME = 12 * 60 * 60 * 1000
-    public static final int REQUESTED_CORES = 10
-    public static final int USED_CORES = 10
-    public static final int REQUESTED_WALLTIME = 24 * 60 * 60 * 1000
-    public static final int ELAPSED_WALLTIME = 24 * 60 * 60 * 1000
-    public static final DateTime QUEUED = new DateTime(1993, 5, 15, 12, 0, 0)
-    public static final DateTime STARTED = QUEUED.plusDays(1)
-    public static final DateTime ENDED = STARTED.plusDays(1)
+    static final int REQUESTED_MEMORY = 1000
+    static final int USED_MEMORY = 800
+    static final int CPU_TIME = 12 * 60 * 60 * 1000
+    static final int REQUESTED_CORES = 10
+    static final int USED_CORES = 10
+    static final int REQUESTED_WALLTIME = 24 * 60 * 60 * 1000
+    static final int ELAPSED_WALLTIME = 24 * 60 * 60 * 1000
+    static final DateTime QUEUED = new DateTime(1993, 5, 15, 12, 0, 0)
+    static final DateTime STARTED = QUEUED.plusDays(1)
+    static final DateTime ENDED = STARTED.plusDays(1)
 
     TestConfigService configService
     ProcessingOptionService processingOptionService
@@ -64,7 +64,7 @@ class ClusterJobTests {
     }
 
     @Test
-    public void testGetter () {
+    void testGetter () {
 
         ClusterJob clusterJob = new ClusterJob(
                                                     processingStep: step,
@@ -96,7 +96,7 @@ class ClusterJobTests {
     }
 
     @Test
-    public void testNullable () {
+    void testNullable () {
 
         ClusterJob clusterJob = new ClusterJob(
                                                     processingStep: null,
@@ -140,7 +140,7 @@ class ClusterJobTests {
     }
 
     @Test
-    public void testBeforeValidate_WhenNBasesIsNullAndFileSizeGiven_ShouldFillNBases() {
+    void testBeforeValidate_WhenNBasesIsNullAndFileSizeGiven_ShouldFillNBases() {
         Long fileSize = 100L
         double basesPerBytesFastQFactor = processingOptionService.findOptionAsDouble(OptionName.STATISTICS_BASES_PER_BYTES_FASTQ)
         ClusterJob clusterJob = new ClusterJob(
@@ -160,7 +160,7 @@ class ClusterJobTests {
     }
 
     @Test
-    public void testBeforeValidate_WhenNBasesIsNotNullAndFileSizeGiven_ShouldNotFillBases() {
+    void testBeforeValidate_WhenNBasesIsNotNullAndFileSizeGiven_ShouldNotFillBases() {
         Long fileSize = 1000L
         Long nBases = 100L
         ClusterJob clusterJob = new ClusterJob(
@@ -180,7 +180,7 @@ class ClusterJobTests {
     }
 
     @Test
-    public void testBeforeValidate_WhenClusterJobExistsAndNBasesIsNullAndFileSizeGiven_ShouldFillNBases() {
+    void testBeforeValidate_WhenClusterJobExistsAndNBasesIsNullAndFileSizeGiven_ShouldFillNBases() {
         Long fileSize = 100L
         double basesPerBytesFastQFactor = processingOptionService.findOptionAsDouble(OptionName.STATISTICS_BASES_PER_BYTES_FASTQ)
         ClusterJob clusterJob = new ClusterJob(

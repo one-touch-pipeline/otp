@@ -13,12 +13,12 @@ class AbstractMergedBamFileService {
      * @return the final directory of the mergedBamFile after copying
      */
     @Deprecated
-    public static String destinationDirectory (AbstractMergedBamFile bamFile) {
+    static String destinationDirectory (AbstractMergedBamFile bamFile) {
         notNull(bamFile, "the input of the method destinationDirectory is null")
         return bamFile.baseDirectory.absolutePath + '/'
     }
 
-    public void setSamplePairStatusToNeedProcessing(AbstractMergedBamFile finishedBamFile) {
+    void setSamplePairStatusToNeedProcessing(AbstractMergedBamFile finishedBamFile) {
         assert finishedBamFile: "The input bam file must not be null"
         SamplePair.createCriteria().list {
             or {

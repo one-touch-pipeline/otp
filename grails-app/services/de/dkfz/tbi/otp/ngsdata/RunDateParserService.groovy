@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 
 class RunDateParserService {
 
-    public Date parseDateFromRunName(String runName) {
+    Date parseDateFromRunName(String runName) {
         return parseDate("yyMMdd", runName.substring(0, 6))
     }
 

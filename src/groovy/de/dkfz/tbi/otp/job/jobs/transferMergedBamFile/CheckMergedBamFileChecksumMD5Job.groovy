@@ -24,7 +24,7 @@ class CheckMergedBamFileChecksumMD5Job extends AbstractEndStateAwareJobImpl {
     ChecksumFileService checksumFileService
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile file = ProcessedMergedBamFile.get(id)
         Map<String, String> locations = processedMergedBamFileService.locationsForFileCopying(file)

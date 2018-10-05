@@ -26,10 +26,10 @@ import static de.dkfz.tbi.TestCase.*
 ])
 class AbstractRoddyJobUnitTests {
 
-    public static final String STATUS_CODE_STARTED = "57427"
-    public static final String STATUS_CODE_FINISHED = "0"
-    public static final String STATUS_CODE_FAILED = "1"
-    public static final String RANDOM_RODDY_EXECUTION_DIR = "/exec_150707_142149946_USER_WGS"
+    static final String STATUS_CODE_STARTED = "57427"
+    static final String STATUS_CODE_FINISHED = "0"
+    static final String STATUS_CODE_FAILED = "1"
+    static final String RANDOM_RODDY_EXECUTION_DIR = "/exec_150707_142149946_USER_WGS"
 
     AbstractRoddyJob abstractRoddyJob
     RoddyBamFile roddyBamFile

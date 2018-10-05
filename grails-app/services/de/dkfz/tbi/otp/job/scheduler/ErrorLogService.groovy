@@ -39,7 +39,7 @@ class ErrorLogService {
      * @param thrownException The thrown exception
      * @return Unique hash of caught exception.
      */
-    public String log(Throwable thrownException) {
+    String log(Throwable thrownException) {
         String exceptionElements = thrownException.getMessage()
         thrownException.stackTrace.each {
             exceptionElements += it.toString()
@@ -54,7 +54,7 @@ class ErrorLogService {
      * @param identifier The stacktrace's identifier
      * @return The stacktrace if found otherwise an exception is thrown with the reason why the stacktrace can not be returned
      */
-    public String loggedError(String identifier) {
+    String loggedError(String identifier) {
         File stacktraceFile = getStackTracesFile(identifier)
         if (!stacktraceFile.isFile()) {
             throw new RuntimeException("${stacktraceFile.getPath()} is not a file ")

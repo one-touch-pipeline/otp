@@ -8,15 +8,15 @@ import de.dkfz.tbi.otp.OtpException
  */
 class ChangelogException extends OtpException {
 
-    public ChangelogException() {
+    ChangelogException() {
         super()
     }
 
-    public ChangelogException(String message) {
+    ChangelogException(String message) {
         super(message);
     }
 
-    public ChangelogException(String message, Throwable cause) {
+    ChangelogException(String message, Throwable cause) {
         super(message, cause);
     }
 

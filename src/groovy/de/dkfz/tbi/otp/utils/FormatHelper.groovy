@@ -8,7 +8,7 @@ class FormatHelper {
      * If the number is an integer, is formatted with group separators (groups of 3 digits are separated by a comma)
      * If the number is null, return empty string
      */
-    public static String formatNumber(Number number) {
+    static String formatNumber(Number number) {
         if (number == null) {
             return ""
         } else if (number instanceof Float || number instanceof Double || number instanceof BigDecimal) {

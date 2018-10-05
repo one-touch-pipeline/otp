@@ -16,7 +16,7 @@ class ProcessedBamFileServiceUnitTests {
 
 
     @Before
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         //if something failed and the toString method is called, the criteria in isLatestPass makes Problems
         //Therefore this method is mocked.
         AlignmentPass.metaClass.isLatestPass= {true}

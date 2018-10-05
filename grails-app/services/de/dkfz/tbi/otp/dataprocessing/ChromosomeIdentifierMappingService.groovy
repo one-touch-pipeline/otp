@@ -13,7 +13,7 @@ class ChromosomeIdentifierMappingService {
 
 
 
-    public Map<String, String> mappingAll(ReferenceGenome referenceGenome) {
+    Map<String, String> mappingAll(ReferenceGenome referenceGenome) {
         notNull(referenceGenome, "referenceGenome in method mappingAll is null")
         Map<String, String> mappedIdentifier = [:]
         List<ReferenceGenomeEntry> referenceGenomeEntries = ReferenceGenomeEntry.findAllByReferenceGenome(referenceGenome)
@@ -24,7 +24,7 @@ class ChromosomeIdentifierMappingService {
         return mappedIdentifier
     }
 
-    public String mappingOne(String referenceGenomeIdentifierForOneChromosome, ReferenceGenome referenceGenome) {
+    String mappingOne(String referenceGenomeIdentifierForOneChromosome, ReferenceGenome referenceGenome) {
         notNull(referenceGenomeIdentifierForOneChromosome, "identifier ist null")
         notNull(referenceGenome, "referenceGenome in method mappingOne is null")
         return mappingAll(referenceGenome).get(referenceGenomeIdentifierForOneChromosome)

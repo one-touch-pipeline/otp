@@ -35,7 +35,7 @@ class CreateQAResultStatisticsFileJob extends AbstractEndStateAwareJobImpl {
     QAResultStatisticsService qaResultStatisticsService
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.get(id)
 

@@ -12,7 +12,7 @@ class ProcessedBamFileService {
     ProcessedAlignmentFileService processedAlignmentFileService
     ConfigService configService
 
-    public String getFilePath(ProcessedBamFile bamFile) {
+    String getFilePath(ProcessedBamFile bamFile) {
         String dir = getDirectory(bamFile)
         String filename = getFileName(bamFile)
         return "${dir}/${filename}"
@@ -27,24 +27,24 @@ class ProcessedBamFileService {
      * @param saiFile processed bam file object
      * @return Path to the outputted error file produced by bwa sampe
      */
-    public String bwaSampeErrorLogFilePath(ProcessedBamFile bamFile) {
+    String bwaSampeErrorLogFilePath(ProcessedBamFile bamFile) {
         return "${getFilePath(bamFile)}_bwaSampeErrorLog.txt"
     }
 
-    public String baiFilePath(ProcessedBamFile bamFile) {
+    String baiFilePath(ProcessedBamFile bamFile) {
         return "${getFilePath(bamFile)}.bai"
     }
 
-    public String getDirectory(ProcessedBamFile bamFile) {
+    String getDirectory(ProcessedBamFile bamFile) {
         return processedAlignmentFileService.getDirectory(bamFile.alignmentPass)
     }
 
-    public String getFileName(ProcessedBamFile bamFile) {
+    String getFileName(ProcessedBamFile bamFile) {
         String body = getFileNameNoSuffix(bamFile)
         return "${body}.bam"
     }
 
-    public String getFileNameNoSuffix(ProcessedBamFile bamFile) {
+    String getFileNameNoSuffix(ProcessedBamFile bamFile) {
         SeqTrack seqTrack = bamFile.alignmentPass.seqTrack
         String sampleType = seqTrack.sample.sampleType.dirName
         String runName = seqTrack.run.name
@@ -72,7 +72,7 @@ class ProcessedBamFileService {
      *
      * @return true if there is no serious inconsistency.
      */
-    public boolean checkConsistencyForProcessingFilesDeletion(final ProcessedBamFile bamFile) {
+    boolean checkConsistencyForProcessingFilesDeletion(final ProcessedBamFile bamFile) {
         notNull bamFile
         return dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(bamFile, new File(getFilePath(bamFile)))
     }
@@ -84,7 +84,7 @@ class ProcessedBamFileService {
      *
      * @return The number of bytes that have been freed on the file system.
      */
-    public long deleteProcessingFiles(final ProcessedBamFile bamFile) {
+    long deleteProcessingFiles(final ProcessedBamFile bamFile) {
         notNull bamFile
         return dataProcessingFilesService.deleteProcessingFiles(
                 bamFile,

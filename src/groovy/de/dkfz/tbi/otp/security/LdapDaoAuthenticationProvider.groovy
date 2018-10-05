@@ -23,7 +23,7 @@ class LdapDaoAuthenticationProvider implements AuthenticationProvider {
     UserDetailsService userDetailsService
 
     @Override
-    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    Authentication authenticate(Authentication authentication) throws AuthenticationException {
         assert authentication
 
         // authenticate with LDAP first, so that it can't be found out whether an account

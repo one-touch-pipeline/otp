@@ -26,7 +26,7 @@ class PlanInformation implements Serializable {
      * @param plan
      * @return
      */
-    public static PlanInformation fromPlan(JobExecutionPlan plan) {
+    static PlanInformation fromPlan(JobExecutionPlan plan) {
         PlanInformation ret = new PlanInformation()
         ret.name = plan.name
 

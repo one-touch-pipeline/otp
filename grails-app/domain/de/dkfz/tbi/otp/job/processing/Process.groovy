@@ -23,7 +23,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
  * @see Job
  * @see StartJob
  */
-public class Process implements Serializable, Commentable, Entity {
+class Process implements Serializable, Commentable, Entity {
     /**
      * The Date when this process was started.
      */

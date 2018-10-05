@@ -1249,7 +1249,7 @@ chmod 440 ${newDirectFileName}
      * create a bash script to delete files from roddy,
      * the script must be executed as other user
      */
-    public void createBashScriptRoddy(List<SeqTrack> seqTrackList, List<File> dirsToDelete, StringBuilder outputStringBuilder, File bashScriptToMoveFiles, File bashScriptToMoveFilesAsOtherUser, boolean enableChecks = true) {
+    void createBashScriptRoddy(List<SeqTrack> seqTrackList, List<File> dirsToDelete, StringBuilder outputStringBuilder, File bashScriptToMoveFiles, File bashScriptToMoveFilesAsOtherUser, boolean enableChecks = true) {
         List<RoddyBamFile> roddyBamFiles = RoddyBamFile.createCriteria().list {
             seqTracks {
                 inList("id", seqTrackList*.id)

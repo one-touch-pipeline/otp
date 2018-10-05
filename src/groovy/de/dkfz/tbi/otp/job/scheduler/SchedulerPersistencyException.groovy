@@ -9,15 +9,15 @@ package de.dkfz.tbi.otp.job.scheduler
 */
 class SchedulerPersistencyException extends SchedulerException {
 
-    public SchedulerPersistencyException() {
+    SchedulerPersistencyException() {
         this("unknown")
     }
 
-    public SchedulerPersistencyException(String message) {
+    SchedulerPersistencyException(String message) {
         super(message)
     }
 
-    public SchedulerPersistencyException(String message, Throwable cause) {
+    SchedulerPersistencyException(String message, Throwable cause) {
         super(message, cause)
     }
 

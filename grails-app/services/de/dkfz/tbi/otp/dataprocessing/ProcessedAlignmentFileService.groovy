@@ -26,7 +26,7 @@ class ProcessedAlignmentFileService {
     AbstractBamFileService abstractBamFileService
     DataProcessingFilesService dataProcessingFilesService
 
-    public String getDirectory(AlignmentPass alignmentPass) {
+    String getDirectory(AlignmentPass alignmentPass) {
         Individual ind = alignmentPass.seqTrack.sample.individual
         def dirType = DataProcessingFilesService.OutputDirectories.ALIGNMENT
         String baseDir = dataProcessingFilesService.getOutputDirectory(ind, dirType)
@@ -34,7 +34,7 @@ class ProcessedAlignmentFileService {
         return "${baseDir}/${middleDir}/${alignmentPass.getDirectory()}"
     }
 
-    public String getRunLaneDirectory(SeqTrack seqTrack) {
+    String getRunLaneDirectory(SeqTrack seqTrack) {
         String runName = seqTrack.run.name
         String lane = seqTrack.laneId
         return "${runName}_${lane}"
@@ -54,7 +54,7 @@ class ProcessedAlignmentFileService {
      *
      * @return The number of bytes that have been freed on the file system.
      */
-    public long deleteProcessingFiles(final AlignmentPass alignmentPass) {
+    long deleteProcessingFiles(final AlignmentPass alignmentPass) {
         notNull alignmentPass
         final Project project = alignmentPass.project
         long freedBytes = 0L
@@ -116,7 +116,7 @@ class ProcessedAlignmentFileService {
      *
      * @return The number of bytes that have been freed on the file system.
      */
-    public long deleteOldAlignmentProcessingFiles(final Date createdBefore, final long millisMaxRuntime = Long.MAX_VALUE) {
+    long deleteOldAlignmentProcessingFiles(final Date createdBefore, final long millisMaxRuntime = Long.MAX_VALUE) {
         notNull createdBefore
         return dataProcessingFilesService.deleteOldProcessingFiles(this, "alignment", createdBefore, millisMaxRuntime, {
             final String query1 =
@@ -156,7 +156,7 @@ class ProcessedAlignmentFileService {
         })
     }
 
-    public boolean mayProcessingFilesBeDeleted(final AlignmentPass pass, final Date createdBefore) {
+    boolean mayProcessingFilesBeDeleted(final AlignmentPass pass, final Date createdBefore) {
         notNull pass
         notNull createdBefore
         // The ProcessedBamFile and all ProcessedSaiFiles of one alignment pass should have the same dateCreated, but

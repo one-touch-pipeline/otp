@@ -13,7 +13,7 @@ class ChecksumFileServiceSpec extends Specification {
     Path file
 
     @Rule
-    public TemporaryFolder tempFolder = new TemporaryFolder()
+    TemporaryFolder tempFolder = new TemporaryFolder()
 
     void setup() {
         checksumFileService = new ChecksumFileService()

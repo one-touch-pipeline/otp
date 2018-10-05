@@ -21,7 +21,7 @@ class JobHtmlLayout extends HTMLLayout {
 
     private StringBuffer msgBuffer = new StringBuffer(BUF_SIZE);
 
-    public JobHtmlLayout() {
+    JobHtmlLayout() {
         super()
     }
 
@@ -32,7 +32,7 @@ class JobHtmlLayout extends HTMLLayout {
      * Basically everything is the same, except we add HTML pre-tags around the message for better reading.
      */
     @Override
-    public String format(LoggingEvent event) {
+    String format(LoggingEvent event) {
         if (msgBuffer.capacity() > MAX_CAPACITY) {
             msgBuffer = new StringBuffer(BUF_SIZE)
         } else {

@@ -13,7 +13,7 @@ import de.dkfz.tbi.otp.utils.WaitingFileUtils
  * With this interface it is ensured that all information, needed to call Roddy out of OTP, are provided.
  */
 
-public trait RoddyResult {
+trait RoddyResult {
 
     static final String RODDY_EXECUTION_STORE_DIR = "roddyExecutionStore"
     static final String RODDY_EXECUTION_DIR_PATTERN = /exec_\d{6}_\d{8,9}_.+_.+/

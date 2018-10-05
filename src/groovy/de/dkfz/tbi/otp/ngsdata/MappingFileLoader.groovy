@@ -16,7 +16,7 @@ class MappingFileLoader {
      * @param proj - project to which individuals are assigned
      * @param path - path to the mapping file
      */
-    public void loadMappingFile(Project proj, String path) {
+    void loadMappingFile(Project proj, String path) {
         project = proj
         String text = readFile(path)
         text.eachLine {String line ->

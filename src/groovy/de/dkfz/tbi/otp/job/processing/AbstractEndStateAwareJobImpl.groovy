@@ -5,7 +5,7 @@ package de.dkfz.tbi.otp.job.processing
  *
  * @see EndStateAwareJob
  */
-abstract public class AbstractEndStateAwareJobImpl extends AbstractJobImpl implements EndStateAwareJob {
+abstract class AbstractEndStateAwareJobImpl extends AbstractJobImpl implements EndStateAwareJob {
 
    private ExecutionState endState = null
 
@@ -28,7 +28,7 @@ abstract public class AbstractEndStateAwareJobImpl extends AbstractJobImpl imple
     }
 
     @Override
-    public final ExecutionState getEndState() throws InvalidStateException {
+    final ExecutionState getEndState() throws InvalidStateException {
         if (!endState) {
             throw new InvalidStateException("EndState accessed without end state being set")
         }

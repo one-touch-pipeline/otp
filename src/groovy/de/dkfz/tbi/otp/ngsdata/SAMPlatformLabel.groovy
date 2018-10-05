@@ -35,7 +35,7 @@ enum SAMPlatformLabel {
      * @throws IllegalArgumentException if the input label can not be
      * mapped to any of SAM-header platform labels
      */
-    public static SAMPlatformLabel map(String platformLabel) {
+    static SAMPlatformLabel map(String platformLabel) {
         String label = platformLabel.toLowerCase()
         List<SAMPlatformLabel> matchingLabels = []
         SAMPlatformLabel.values().each { SAMPlatformLabel samLabel ->

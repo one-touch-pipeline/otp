@@ -58,11 +58,11 @@ class ProjectService {
      * @return List of all available Projects
      */
     @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')")
-    public List<Project> getAllProjects() {
+    List<Project> getAllProjects() {
         return Project.list(sort: "name", order: "asc", fetch: [projectCategories: 'join', projectGroup: 'join'])
     }
 
-    public int getProjectCount() {
+    int getProjectCount() {
         return Project.count()
     }
 
@@ -72,21 +72,21 @@ class ProjectService {
      * @return The Project
      */
     @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
-    public Project getProject(Long id) {
+    Project getProject(Long id) {
         return Project.get(id)
     }
 
     @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
-    public Project getProjectByName(String name) {
+    Project getProjectByName(String name) {
         return Project.findByName(name)
     }
 
-    public List<Project> projectByProjectGroup(ProjectGroup projectGroup) {
+    List<Project> projectByProjectGroup(ProjectGroup projectGroup) {
         return Project.findAllByProjectGroup(projectGroup, [sort: "name", order: "asc"])
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public List<Project> getAllProjectsWithConfigFile(SeqType seqType, Pipeline pipeline) {
+    List<Project> getAllProjectsWithConfigFile(SeqType seqType, Pipeline pipeline) {
         return RoddyWorkflowConfig.findAllBySeqTypeAndPipelineAndObsoleteDateIsNullAndIndividualIsNull(seqType, pipeline)*.project.unique().sort({
             it.name.toUpperCase()
         })
@@ -100,7 +100,7 @@ class ProjectService {
      * @return The created project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Project createProject(String name, String dirName, Realm realm, String alignmentDeciderBeanName, List<String> categoryNames) {
+    Project createProject(String name, String dirName, Realm realm, String alignmentDeciderBeanName, List<String> categoryNames) {
         // check that our dirName is relative to the configured data root.
         Path rootPath = configService.getRootPath().toPath()
         List<String> rootPathElements = rootPath.toList()*.toString()
@@ -122,7 +122,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Project createProject(ProjectParams projectParams) {
+    Project createProject(ProjectParams projectParams) {
         assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
         Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realm, projectParams.alignmentDeciderBeanName, projectParams.categoryNames)
         project.phabricatorAlias = projectParams.phabricatorAlias
@@ -195,7 +195,7 @@ class ProjectService {
         ] as Set)
     }
 
-    public static class ProjectParams {
+    static class ProjectParams {
         String name
         String phabricatorAlias
         String dirName
@@ -217,7 +217,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void updateCategory(List<String> categoryNames, Project project) {
+    void updateCategory(List<String> categoryNames, Project project) {
         updateProjectField(
                 categoryNames.collect { exactlyOneElement(ProjectCategory.findAllByName(it)) },
                 "projectCategories",
@@ -226,7 +226,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public <T> void updateProjectField (T fieldValue, String fieldName, Project project) {
+    <T> void updateProjectField (T fieldValue, String fieldName, Project project) {
         assert fieldName && [
                 "costCenter",
                 "description",
@@ -244,7 +244,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    public void updatePhabricatorAlias(String value, Project project) {
+    void updatePhabricatorAlias(String value, Project project) {
         project.phabricatorAlias = value
         project.save(flush: true)
     }

@@ -15,11 +15,11 @@ class DataTableCommand implements Serializable {
     static constraints = {
     }
 
-    public void setIDisplayStart(int start) {
+    void setIDisplayStart(int start) {
         this.iDisplayStart = start
     }
 
-    public void setIDisplayLength(int length) {
+    void setIDisplayLength(int length) {
         if (length <= 100) {
             this.iDisplayLength = length
         } else {
@@ -27,7 +27,7 @@ class DataTableCommand implements Serializable {
         }
     }
 
-    public Map dataToRender() {
+    Map dataToRender() {
         return [
             sEcho: this.sEcho,
             offset: this.iDisplayStart,
@@ -37,7 +37,7 @@ class DataTableCommand implements Serializable {
             ]
     }
 
-    public boolean getSortOrder() {
+    boolean getSortOrder() {
         return this.sSortDir_0 == "asc"
     }
 

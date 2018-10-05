@@ -8,11 +8,11 @@ package de.dkfz.tbi.otp.user
  */
 class UserNotFoundException extends UserManagementException implements Serializable{
     private static final long serialVersionUID = 1L
-    public UserNotFoundException(Long id) {
+    UserNotFoundException(Long id) {
         super("No user for given id ${id}".toString(), id)
     }
 
-    public UserNotFoundException(String userName) {
+    UserNotFoundException(String userName) {
         super("User with identifier ${userName} not found".toString(), userName)
     }
 }

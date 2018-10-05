@@ -48,7 +48,7 @@ class RoddyBamFileUnitTests {
 
     TestConfigService configService
 
-    public static final String RODDY_EXECUTION_DIR_NAME = "exec_000000_000000000_a_a"
+    static final String RODDY_EXECUTION_DIR_NAME = "exec_000000_000000000_a_a"
     SampleType sampleType
     Individual individual
     RoddyBamFile roddyBamFile

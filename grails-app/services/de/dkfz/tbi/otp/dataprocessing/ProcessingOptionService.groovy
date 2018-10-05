@@ -10,7 +10,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 class ProcessingOptionService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public ProcessingOption createOrUpdate(OptionName name, String value, String type = null, Project project = null) {
+    ProcessingOption createOrUpdate(OptionName name, String value, String type = null, Project project = null) {
         ProcessingOption option = findOption(name, type, project)
         if (option) {
             if (option.value == value) {
@@ -74,7 +74,7 @@ class ProcessingOptionService {
 
 
     @Deprecated
-    public static String findOptionSafe(OptionName name, String type, Project project) {
+    static String findOptionSafe(OptionName name, String type, Project project) {
         ProcessingOption option = findOption(name, type, project)
         return option?.value != null ? option?.value : name.defaultValue
     }
@@ -84,7 +84,7 @@ class ProcessingOptionService {
      * can not be cast to a number.
      */
     @Deprecated
-    public static long findOptionAsNumber(OptionName name, String type, Project project) {
+    static long findOptionAsNumber(OptionName name, String type, Project project) {
         String value = findOptionSafe(name, type, project)
         return value.toLong()
     }
@@ -94,7 +94,7 @@ class ProcessingOptionService {
      * @return List of ProcessingOptions
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public List<ProcessingOption> listProcessingOptions() {
+    List<ProcessingOption> listProcessingOptions() {
         ProcessingOption.findAllByDateObsoletedIsNull().findAll {
             !it.name.isDeprecated()
         }

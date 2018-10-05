@@ -11,10 +11,10 @@ package de.dkfz.tbi.otp.job.processing
  * This interface should only be used by short jobs. A job should not perform own error handling
  * in order to determine whether it succeeded. Such tasks are better passed to a {@link ValidatingJob}.
  */
-public interface EndStateAwareJob extends Job {
+interface EndStateAwareJob extends Job {
     /**
      * @return The ExecutionState after the method finished as determined by the Job itself.
      * @throws InvalidStateException If the Job execution has not yet finished.
      */
-    public ExecutionState getEndState() throws InvalidStateException;
+    ExecutionState getEndState() throws InvalidStateException;
 }

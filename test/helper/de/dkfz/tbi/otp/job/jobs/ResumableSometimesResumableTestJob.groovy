@@ -12,22 +12,22 @@ import org.springframework.stereotype.*
 class ResumableSometimesResumableTestJob extends AbstractJobImpl implements SometimesResumableJob {
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         throw new Error('should never be called')
     }
 
     @Override
-    public void planSuspend() {
+    void planSuspend() {
         throw new Error('should never be called')
     }
 
     @Override
-    public void cancelSuspend() {
+    void cancelSuspend() {
         throw new Error('should never be called')
     }
 
     @Override
-    public boolean isResumable() {
+    boolean isResumable() {
         throw new Error('should never be called')
     }
 }

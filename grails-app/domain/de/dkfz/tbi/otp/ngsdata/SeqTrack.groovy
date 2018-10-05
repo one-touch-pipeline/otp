@@ -287,7 +287,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
         return DataFile.findAllBySeqTrack(this)
     }
 
-    public void log(String message, boolean saveInSeqTrack = true) {
+    void log(String message, boolean saveInSeqTrack = true) {
         threadLog?.info(MessageFormat.format(message, " " + this))
         if (saveInSeqTrack) {
             withTransaction {

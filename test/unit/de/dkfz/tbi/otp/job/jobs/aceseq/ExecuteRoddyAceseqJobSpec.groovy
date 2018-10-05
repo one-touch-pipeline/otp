@@ -53,7 +53,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification {
 
 
     @Rule
-    TemporaryFolder temporaryFolder
+    public TemporaryFolder temporaryFolder
 
     AceseqInstance aceseqInstance
 

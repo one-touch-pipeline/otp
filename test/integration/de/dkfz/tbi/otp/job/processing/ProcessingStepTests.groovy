@@ -16,7 +16,7 @@ class ProcessingStepTests  {
     }
 
     @Test
-    public void testFindTopMostProcessingStep_WhenRestartedProcessingStep_ShouldReturnOriginalProcessingStep() {
+    void testFindTopMostProcessingStep_WhenRestartedProcessingStep_ShouldReturnOriginalProcessingStep() {
         ProcessingStep originalStep = DomainFactory.createAndSaveProcessingStep()
         RestartedProcessingStep step1 = DomainFactory.createAndSaveRestartedProcessingStep(originalStep)
         RestartedProcessingStep step2 = DomainFactory.createAndSaveRestartedProcessingStep(step1)
@@ -25,7 +25,7 @@ class ProcessingStepTests  {
     }
 
     @Test
-    public void testFindTopMostProcessingStep_WhenProcessingStep_ShouldReturnProcessingStep() {
+    void testFindTopMostProcessingStep_WhenProcessingStep_ShouldReturnProcessingStep() {
         ProcessingStep step = DomainFactory.createAndSaveProcessingStep()
 
         assert step == ProcessingStep.findTopMostProcessingStep(step)

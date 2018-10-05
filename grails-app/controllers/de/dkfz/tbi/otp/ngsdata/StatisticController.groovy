@@ -114,7 +114,7 @@ class StatisticController {
         render dataToRender as JSON
     }
 
-    public JSON projectCountPerSequenceType(ProjectGroupCommand command) {
+    JSON projectCountPerSequenceType(ProjectGroupCommand command) {
         ProjectGroup projectGroup
         if (command.projectGroupName) {
             projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)

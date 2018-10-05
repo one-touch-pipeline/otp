@@ -25,8 +25,8 @@ import grails.test.mixin.Mock
 ])
 class JobStateLogFileUnitTests {
 
-    public static final String STATUS_CODE_FAILED = "1"
-    public static final String STATUS_CODE_FINISHED = "0"
+    static final String STATUS_CODE_FAILED = "1"
+    static final String STATUS_CODE_FINISHED = "0"
 
     ClusterJobIdentifier clusterJobIdentifier
 

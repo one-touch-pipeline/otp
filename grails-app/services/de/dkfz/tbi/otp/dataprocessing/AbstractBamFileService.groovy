@@ -22,14 +22,14 @@ class AbstractBamFileService {
     /**
      * Same criteria as in {@link #hasBeenQualityAssessedAndMerged(AbstractBamFile, Date)}.
      */
-    public static final String QUALITY_ASSESSED_AND_MERGED_QUERY =
+    static final String QUALITY_ASSESSED_AND_MERGED_QUERY =
             QUALITY_ASSESSED_AND_MERGED_QUERY_PART +
                 // Make sure that the PMBF (bf3) which this BAM file (bf1) has been merged into has already been
                 // quality assessed.
                 "AND bf3.qualityAssessmentStatus = :qaStatus)) "
 
 
-    public static final String QUALITY_ASSESSED_AND_MERGED_QUERY_WITHOUT_QA_CHECK =
+    static final String QUALITY_ASSESSED_AND_MERGED_QUERY_WITHOUT_QA_CHECK =
             QUALITY_ASSESSED_AND_MERGED_QUERY_PART + ")) "
 
 
@@ -45,7 +45,7 @@ class AbstractBamFileService {
     /**
      * @return bam files connected directly with this processedMergedBamFile.mergingSet
      */
-    public List<AbstractBamFile> findByProcessedMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
+    List<AbstractBamFile> findByProcessedMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
         notNull(processedMergedBamFile, "The parameter processedMergedBamFile is not allowed to be null")
         return processedMergedBamFile.mergingPass.mergingSet.bamFiles
     }
@@ -54,7 +54,7 @@ class AbstractBamFileService {
      * returns a list of all single lane bam files, which are merged in several step to the final processedMergedBamFile.
      * It is assumed that only new lanes are merged with the old mergedBamFile to a new one.
      */
-    public List<ProcessedBamFile> findAllByProcessedMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
+    List<ProcessedBamFile> findAllByProcessedMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
         notNull(processedMergedBamFile, "The parameter processedMergedBamFile is not allowed to be null")
         List<AbstractBamFile> results = [processedMergedBamFile]
         while (results.find { it instanceof ProcessedMergedBamFile }) {
@@ -68,7 +68,7 @@ class AbstractBamFileService {
     /**
      * Same criteria as in {@link #QUALITY_ASSESSED_AND_MERGED_QUERY}.
      */
-    public boolean hasBeenQualityAssessedAndMerged(final AbstractBamFile bamFile, final Date before) {
+    boolean hasBeenQualityAssessedAndMerged(final AbstractBamFile bamFile, final Date before) {
         notNull bamFile
         if (bamFile.qualityAssessmentStatus != AbstractBamFile.QaProcessingStatus.FINISHED ||
                 bamFile.status != AbstractBamFile.State.PROCESSED) {

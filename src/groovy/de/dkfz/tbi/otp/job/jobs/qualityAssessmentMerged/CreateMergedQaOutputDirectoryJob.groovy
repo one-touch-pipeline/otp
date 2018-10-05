@@ -23,7 +23,7 @@ class CreateMergedQaOutputDirectoryJob extends AbstractEndStateAwareJobImpl {
     RemoteShellHelper remoteShellHelper
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         long passId = getProcessParameterValue() as long
         QualityAssessmentMergedPass pass = QualityAssessmentMergedPass.get(passId)
 

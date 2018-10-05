@@ -27,13 +27,13 @@ class JobMailService {
     ProcessingOptionService processingOptionService
 
 
-    public void sendErrorNotification(Job job, Throwable exceptionToBeHandled) {
+    void sendErrorNotification(Job job, Throwable exceptionToBeHandled) {
         assert job: 'job may not be null'
         assert exceptionToBeHandled: 'exceptionToBeHandled may not be null'
         sendErrorNotification(job, exceptionToBeHandled.message)
     }
 
-    public void sendErrorNotification(Job job, String errorMessage) {
+    void sendErrorNotification(Job job, String errorMessage) {
         assert job: 'job may not be null'
         assert errorMessage: 'message may not be null'
 

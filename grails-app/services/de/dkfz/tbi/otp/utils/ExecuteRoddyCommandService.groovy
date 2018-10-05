@@ -138,7 +138,7 @@ class ExecuteRoddyCommandService {
     }
 
 
-    public void createWorkOutputDirectory(Realm realm, File file) {
+    void createWorkOutputDirectory(Realm realm, File file) {
         assert realm: "Realm must not be null"
         assert file: "File must not be null"
         if (file.exists()) {

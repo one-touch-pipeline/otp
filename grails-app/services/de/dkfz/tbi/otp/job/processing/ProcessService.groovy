@@ -39,7 +39,7 @@ class ProcessService {
      * @return
      */
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
-    public Process getProcess(long id) {
+    Process getProcess(long id) {
         return Process.get(id)
     }
 
@@ -53,7 +53,7 @@ class ProcessService {
      * @return List of all ProcessingSteps run for the Process filtered as requested
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public List<ProcessingStep> getAllProcessingSteps(Process process, int max = 10, int offset = 0, String column = "id", boolean order = false) {
+    List<ProcessingStep> getAllProcessingSteps(Process process, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         return ProcessingStep.findAllByProcess(process, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
     }
 
@@ -63,7 +63,7 @@ class ProcessService {
      * @return The number of ProcessingSteps for the given Process
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public int getNumberOfProcessessingSteps(Process process) {
+    int getNumberOfProcessessingSteps(Process process) {
         return ProcessingStep.countByProcess(process)
     }
 
@@ -73,7 +73,7 @@ class ProcessService {
      * @return
      */
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
-    public ProcessingStep getProcessingStep(long id) {
+    ProcessingStep getProcessingStep(long id) {
         return ProcessingStep.get(id)
     }
 
@@ -87,7 +87,7 @@ class ProcessService {
      * @return True if there is a log file, false otherwise
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public boolean processingStepLogExists(ProcessingStep step) {
+    boolean processingStepLogExists(ProcessingStep step) {
         return getLogForProcessingStep(step).exists()
     }
 
@@ -97,7 +97,7 @@ class ProcessService {
      * @return Content of log file or empty String in case log file does not exist
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public String processingStepLog(ProcessingStep step) {
+    String processingStepLog(ProcessingStep step) {
         File file = getLogForProcessingStep(step)
         if (!file.exists() || !file.isFile()) {
             return ""
@@ -111,7 +111,7 @@ class ProcessService {
      * @return Content of log file or empty String in case log file does not exist
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public String processingStepClusterJobLog(ClusterJob clusterJob) {
+    String processingStepClusterJobLog(ClusterJob clusterJob) {
 
         File file = new File(clusterJob.jobLog)
         if (!file.exists() || !file.isFile()) {
@@ -126,7 +126,7 @@ class ProcessService {
      * @param step The ProcessingStep to restart
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void restartProcessingStep(ProcessingStep step) {
+    void restartProcessingStep(ProcessingStep step) {
         schedulerService.restartProcessingStep(step)
     }
 
@@ -141,7 +141,7 @@ class ProcessService {
      * @return List of all ProcessingStepUpdates for the Step filtered as requested
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public List<ProcessingStepUpdate> getAllUpdates(ProcessingStep step, int max = 10, int offset = 0, String column = "id", boolean order = false) {
+    List<ProcessingStepUpdate> getAllUpdates(ProcessingStep step, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         return ProcessingStepUpdate.findAllByProcessingStep(step, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
     }
 
@@ -151,7 +151,7 @@ class ProcessService {
      * @return The number of ProcessingStepUpdates for the given Step
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public int getNumberOfUpdates(ProcessingStep step) {
+    int getNumberOfUpdates(ProcessingStep step) {
         return ProcessingStepUpdate.countByProcessingStep(step)
     }
 
@@ -162,7 +162,7 @@ class ProcessService {
      * @return The latest ProcessingStep of the Process
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public ProcessingStep getLatestProcessingStep(Process process) {
+    ProcessingStep getLatestProcessingStep(Process process) {
         return ProcessingStep.findByProcessAndNextIsNull(process)
     }
 
@@ -172,7 +172,7 @@ class ProcessService {
      * @return Latest execution state of the Process
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public ExecutionState getState(Process process) {
+    ExecutionState getState(Process process) {
         return lastUpdate(process).state
     }
 
@@ -183,7 +183,7 @@ class ProcessService {
      * @see #getState(Process)
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public ExecutionState getState(ProcessingStep step) {
+    ExecutionState getState(ProcessingStep step) {
         return step.latestProcessingStepUpdate.state
     }
 
@@ -194,7 +194,7 @@ class ProcessService {
      * @return
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public String getError(Process process) {
+    String getError(Process process) {
         ProcessingStepUpdate update = lastUpdate(process)
         if (update.error) {
             return update.error.errorMessage
@@ -209,7 +209,7 @@ class ProcessService {
      * @see #getError(Process)
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public String getError(ProcessingStep step) {
+    String getError(ProcessingStep step) {
         ProcessingError error = step.latestProcessingStepUpdate.error
         if (!error) {
             return null
@@ -223,7 +223,7 @@ class ProcessService {
      * @return
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Date getLastUpdate(Process process) {
+    Date getLastUpdate(Process process) {
         return lastUpdate(process).date
     }
 
@@ -233,7 +233,7 @@ class ProcessService {
      * @return
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Date getLastUpdate(ProcessingStep step) {
+    Date getLastUpdate(ProcessingStep step) {
         return step.latestProcessingStepUpdate.date
     }
 
@@ -243,7 +243,7 @@ class ProcessService {
      * @return Latest ProcessingStepUpdate
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public ProcessingStepUpdate getLatestProcessingStepUpdate(ProcessingStep step) {
+    ProcessingStepUpdate getLatestProcessingStepUpdate(ProcessingStep step) {
         return step.latestProcessingStepUpdate
     }
 
@@ -253,7 +253,7 @@ class ProcessService {
      * @return
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Date getFirstUpdate(ProcessingStep step) {
+    Date getFirstUpdate(ProcessingStep step) {
         return ProcessingStepUpdate.findByProcessingStep(step, [sort: "id", order: "asc"]).date
     }
 
@@ -264,7 +264,7 @@ class ProcessService {
      * @return The duration between the started and finished event for this ProcessingStep
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Long getProcessingStepDuration(ProcessingStep step) {
+    Long getProcessingStepDuration(ProcessingStep step) {
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
         if (updates.isEmpty()) {
             throw new IllegalArgumentException("ProcessingStep has no updates")
@@ -312,7 +312,7 @@ class ProcessService {
      * @see JobExecutionPlanService#planInformation(JobExecutionPlan)
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public PlanInformation processInformation(Process process) {
+    PlanInformation processInformation(Process process) {
         PlanInformation plan = jobExecutionPlanService.planInformation(process.jobExecutionPlan)
         List<ProcessingStep> processingSteps = ProcessingStep.findAllByProcess(process)
         List<Long> jobIdsOfProcessingSteps = processingSteps.collect { it.jobDefinition.id }
@@ -346,11 +346,11 @@ class ProcessService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void setOperatorIsAwareOfFailureWithAuthentication(Process process, boolean operatorIsAwareOfFailure) {
+    void setOperatorIsAwareOfFailureWithAuthentication(Process process, boolean operatorIsAwareOfFailure) {
         setOperatorIsAwareOfFailure(process, operatorIsAwareOfFailure)
     }
 
-    public void setOperatorIsAwareOfFailure(Process process, boolean operatorIsAwareOfFailure) {
+    void setOperatorIsAwareOfFailure(Process process, boolean operatorIsAwareOfFailure) {
         process.operatorIsAwareOfFailure = operatorIsAwareOfFailure
         process.save(flush: true)
     }
@@ -360,7 +360,7 @@ class ProcessService {
      * @param id The id of the ProcessingError
      * @return The stacktrace or throws an exception if not found
      */
-    public String getProcessingErrorStackTrace(long id) {
+    String getProcessingErrorStackTrace(long id) {
         ProcessingError error = ProcessingError.get(id)
         if(!error) {
             throw new RuntimeException("No Processing Error could be found for the id: " + id)

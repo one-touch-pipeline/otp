@@ -16,14 +16,14 @@ import org.junit.Test
 class ProcessedBamFileQaFileServiceUnitTests {
 
     @Before
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         //these domain methods are mocked, since the contained critera makes problems
         QualityAssessmentPass.metaClass.isLatestPass = {true}
         AlignmentPass.metaClass.isLatestPass = {true}
     }
 
     @After
-    public void tearDown() {
+    void tearDown() {
         QualityAssessmentPass.metaClass.isLatestPass = null
         AlignmentPass.metaClass.isLatestPass = null
     }
@@ -47,7 +47,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
 
 
     @Test
-    public void testCheckConsistencyForProcessingFilesDeletion() {
+    void testCheckConsistencyForProcessingFilesDeletion() {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
@@ -66,7 +66,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testCheckConsistencyForProcessingFilesDeletion_QualityAssessmentPassIsNull() {
+    void testCheckConsistencyForProcessingFilesDeletion_QualityAssessmentPassIsNull() {
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
             checkConsistencyWithFinalDestinationForDeletion: {final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
@@ -80,7 +80,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testCheckConsistencyForProcessingFilesDeletion_notLastQualityAsssesmentPass() {
+    void testCheckConsistencyForProcessingFilesDeletion_notLastQualityAsssesmentPass() {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
@@ -94,7 +94,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testCheckConsistencyForProcessingFilesDeletion_notLastAlignmentPass() {
+    void testCheckConsistencyForProcessingFilesDeletion_notLastAlignmentPass() {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
@@ -108,7 +108,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testDeleteProcessingFiles() {
+    void testDeleteProcessingFiles() {
         final int FILE_LENGTH = 10
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
@@ -127,7 +127,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testDeleteProcessingFiles_QualityAssessmentPassIsNull() {
+    void testDeleteProcessingFiles_QualityAssessmentPassIsNull() {
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
             deleteProcessingFilesAndDirectory: { final Project project, final File processingDirectory, final Collection<String> fileNames ->
@@ -141,7 +141,7 @@ class ProcessedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testDeleteProcessingFiles_NotConsistent() {
+    void testDeleteProcessingFiles_NotConsistent() {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [

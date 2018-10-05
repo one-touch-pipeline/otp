@@ -92,7 +92,7 @@ class SchedulerService {
      * detected the changes to the ProcessingSteps are discarded, so that this method can be executed
      * once again after the manual intervention fixed all ProcessingSteps in unknown state.
      */
-    public void startup() {
+    void startup() {
         if (schedulerActive || startupOk) {
             return
         }
@@ -170,7 +170,7 @@ class SchedulerService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void suspendScheduler() {
+    void suspendScheduler() {
         if (!startupOk) {
             return
         }
@@ -179,7 +179,7 @@ class SchedulerService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void resumeScheduler() {
+    void resumeScheduler() {
         if (!startupOk) {
             return
         }
@@ -201,11 +201,11 @@ class SchedulerService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public boolean isStartupOk() {
+    boolean isStartupOk() {
         return startupOk
     }
 
-    public void createNextProcessingStep(ProcessingStep previous) {
+    void createNextProcessingStep(ProcessingStep previous) {
         // test whether the Process ended
         if (!previous.jobDefinition.next && !(previous.jobDefinition instanceof DecidingJobDefinition)) {
             endProcess(previous)
@@ -245,7 +245,7 @@ class SchedulerService {
      * @param processParameter ProcessParameter provided by the StartJob for this Process.
      * @return the new created process
      */
-    public Process createProcess(StartJob startJob, List<Parameter> input, ProcessParameter processParameter = null) {
+    Process createProcess(StartJob startJob, List<Parameter> input, ProcessParameter processParameter = null) {
         if (!schedulerActive) {
             throw new RuntimeException("Scheduler is disabled")
         }
@@ -281,7 +281,7 @@ class SchedulerService {
      * Invokes the primitive scheduler to determine which job is to execute next if any at all.
      */
     @Scheduled(fixedRate = 1000l)
-    public void schedule() throws Exception {
+    void schedule() throws Exception {
         if (!schedulerActive) {
             return
         }
@@ -310,7 +310,7 @@ class SchedulerService {
      * Do not invoke this method manually.
      */
     @Scheduled(fixedDelay = 30000l)
-    public void clusterJobCheck() {
+    void clusterJobCheck() {
         if (!schedulerActive) {
             return
         }
@@ -359,7 +359,7 @@ class SchedulerService {
      *
      * @param job The Job which ended
      */
-    public void doEndCheck(Job job) {
+    void doEndCheck(Job job) {
         job.end()
         removeRunningJob(job)
         ProcessingStep step = ProcessingStep.get(job.processingStep.id)
@@ -520,7 +520,7 @@ class SchedulerService {
      * @param step The ProcessignStep which failed
      * @param error The error message why this step failed.
      */
-    public void markProcessAsFailed(ProcessingStep step, String error) {
+    void markProcessAsFailed(ProcessingStep step, String error) {
         Process process = Process.get(step.process.id)
         process.finished = true
         if (!process.save(flush: true)) {
@@ -538,7 +538,7 @@ class SchedulerService {
      * @param jobClass The Job Class to use in logging in case of severe error
      * @throws ProcessingException In case the ProcessingError cannot be saved.
      */
-    public void createError(ProcessingStep step, String errorMessage, Class jobClass) {
+    void createError(ProcessingStep step, String errorMessage, Class jobClass) {
         processService.setOperatorIsAwareOfFailure(step.process, false)
         ProcessingStepUpdate update = new ProcessingStepUpdate(
                 date: new Date(),
@@ -563,7 +563,7 @@ class SchedulerService {
      * Removes the Job from the list of running jobs.
      * @param job The Job which finished
      */
-    public void removeRunningJob(Job job) {
+    void removeRunningJob(Job job) {
         // unregister the logging
         Logger logger = Logger.getLogger(job.class.getName())
         if (logger) {
@@ -605,7 +605,7 @@ class SchedulerService {
      * @param step The failed ProcessingStep which needs to be restarted.
      * @param schedule Whether to add the restarted ProcessingStep to the scheduler or not
      */
-    public void restartProcessingStep(ProcessingStep step, boolean schedule = true, boolean resume3in1job = false) {
+    void restartProcessingStep(ProcessingStep step, boolean schedule = true, boolean resume3in1job = false) {
         ProcessingStep restartedStep = null
         ProcessingStep.withTransaction {
             final ProcessingStepUpdate lastUpdate = step.latestProcessingStepUpdate
@@ -690,7 +690,7 @@ class SchedulerService {
      * {@link ProcessingStepUpdate} in {@link ProcessingStepUpdate#state state}
      * {@link ExecutionState#STARTED STARTED} or {@link ExecutionState#RESUMED RESUMED}.
      */
-    public List<ProcessingStep> retrieveRunningProcessingSteps() {
+    List<ProcessingStep> retrieveRunningProcessingSteps() {
         List<ProcessingStep> runningSteps = []
         List<Process> process = Process.findAllByFinished(false)
         List<ProcessingStep> lastProcessingSteps = ProcessingStep.findAllByProcessInListAndNextIsNull(process)
@@ -845,7 +845,7 @@ class SchedulerService {
      * Must be called by a thread when it starts to execute a {@link Job}.
      * @param job The job that the current thread is about to execute.
      */
-    public void startingJobExecutionOnCurrentThread(final Job job) {
+    void startingJobExecutionOnCurrentThread(final Job job) {
         //log.debug "Job ${System.identityHashCode(job)}, Thread ${Thread.currentThread()}", new Throwable()
         notNull job
         notNull job.log
@@ -865,7 +865,7 @@ class SchedulerService {
      * Must be called by a thread when it finishes to execute a {@link Job}.
      * @param job The job that the current thread just finished executing.
      */
-    public void finishedJobExecutionOnCurrentThread(final Job job) {
+    void finishedJobExecutionOnCurrentThread(final Job job) {
         //log.debug "Job ${System.identityHashCode(job)}, Thread ${Thread.currentThread()}", new Throwable()
         notNull job
         final Job currentJob = jobExecutedByCurrentThread
@@ -887,7 +887,7 @@ class SchedulerService {
      * @return The {@link Job} which is executed by the current thread or null if the current thread is not executing
      *      any job.
      */
-    public Job getJobExecutedByCurrentThread() {
+    Job getJobExecutedByCurrentThread() {
         return jobByThread.get()
     }
 

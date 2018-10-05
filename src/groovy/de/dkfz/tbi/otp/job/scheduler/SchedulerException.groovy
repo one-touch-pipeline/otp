@@ -12,15 +12,15 @@ import de.dkfz.tbi.otp.job.processing.ProcessingException
 */
 class SchedulerException extends ProcessingException {
 
-    public SchedulerException() {
+    SchedulerException() {
         this("unknown")
     }
 
-    public SchedulerException(String message) {
+    SchedulerException(String message) {
         super(message)
     }
 
-    public SchedulerException(String message, Throwable cause) {
+    SchedulerException(String message, Throwable cause) {
         super(message, cause)
     }
 

@@ -13,7 +13,7 @@ class JobExecutionPlanChangedEvent extends ApplicationEvent {
      */
     Long planId
 
-    public JobExecutionPlanChangedEvent(Object source, Long planId) {
+    JobExecutionPlanChangedEvent(Object source, Long planId) {
         super(source);
         this.planId = planId
     }

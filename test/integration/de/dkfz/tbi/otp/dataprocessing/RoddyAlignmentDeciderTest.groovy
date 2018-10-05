@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.utils.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.*
 
-public class RoddyAlignmentDeciderTest {
+class RoddyAlignmentDeciderTest {
     @Autowired
     PanCanAlignmentDecider decider
 

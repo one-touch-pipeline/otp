@@ -16,7 +16,7 @@ class ConsistencyService {
      * @param dataFile
      * @return Consistency status of the DataFile
      */
-    public Status checkStatus(DataFile dataFile) {
+    Status checkStatus(DataFile dataFile) {
         String path = lsdfFilesService.getFileFinalPath(dataFile)
         // if there is no path to the file the status will be considered consistent
         if (!path) {

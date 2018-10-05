@@ -17,7 +17,7 @@ class ChipSeqSeqTrackTests {
     ChipSeqSeqTrack chipSeqSeqTrack
 
     @Before
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         chipSeqSeqTrack =  new ChipSeqSeqTrack(
                         laneId: "lane",
                         run: new Run(),
@@ -29,7 +29,7 @@ class ChipSeqSeqTrackTests {
     }
 
     @After
-    public void tearDown() throws Exception {
+    void tearDown() throws Exception {
         chipSeqSeqTrack = null
     }
 

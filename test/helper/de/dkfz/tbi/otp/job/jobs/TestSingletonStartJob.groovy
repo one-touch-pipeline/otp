@@ -28,7 +28,7 @@ class TestSingletonStartJob implements StartJob, ApplicationListener<JobExecutio
     }
 
     @Override
-    public JobExecutionPlan getJobExecutionPlan() {
+    JobExecutionPlan getJobExecutionPlan() {
         if (planNeedsRefresh) {
             plan = JobExecutionPlan.get(plan.id)
             planNeedsRefresh = false
@@ -39,7 +39,7 @@ class TestSingletonStartJob implements StartJob, ApplicationListener<JobExecutio
     @SuppressWarnings("EmptyMethod")
     void execute() {}
 
-    public void setExecutionPlan(JobExecutionPlan plan) {
+    void setExecutionPlan(JobExecutionPlan plan) {
         this.plan = JobExecutionPlan.get(plan?.id)
     }
 

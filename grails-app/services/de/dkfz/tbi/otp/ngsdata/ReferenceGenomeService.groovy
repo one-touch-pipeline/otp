@@ -14,8 +14,8 @@ class ReferenceGenomeService {
     ConfigService configService
     ProcessingOptionService processingOptionService
 
-    public final static String CHROMOSOME_SIZE_FILES_PREFIX = "stats"
-    public final static String FINGER_PRINTING_FILE_FOLDER_NAME = "fingerPrinting"
+    final static String CHROMOSOME_SIZE_FILES_PREFIX = "stats"
+    final static String FINGER_PRINTING_FILE_FOLDER_NAME = "fingerPrinting"
 
     /**
      * load the {@link ReferenceGenome} with the given id from the database and returns it.
@@ -23,7 +23,7 @@ class ReferenceGenomeService {
      * @param id the id of the {@link ReferenceGenome} to load
      * @return the loaded {@link ReferenceGenome} or <code>null</code>, if not founded
      */
-    public ReferenceGenome referenceGenome(long id) {
+    ReferenceGenome referenceGenome(long id) {
         return ReferenceGenome.get(id)
     }
 
@@ -31,14 +31,14 @@ class ReferenceGenomeService {
      * @param referenceGenome the reference genome for which the directory path is created
      * @return path to a directory storing files for the given reference genome
      */
-    public File referenceGenomeDirectory(ReferenceGenome referenceGenome, boolean checkExistence = true) {
+    File referenceGenomeDirectory(ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull referenceGenome, "The reference genome is not specified"
         String path = processingOptionService.findOptionAsString(OptionName.BASE_PATH_REFERENCE_GENOME)
         assert OtpPath.isValidAbsolutePath(path)
         return checkFileExistence(new File(path, referenceGenome.path), checkExistence)
     }
 
-    public File fingerPrintingFile(ReferenceGenome referenceGenome, boolean checkExistence = true) {
+    File fingerPrintingFile(ReferenceGenome referenceGenome, boolean checkExistence = true) {
         File referenceGenomeBasePath = referenceGenomeDirectory(referenceGenome, checkExistence)
         File fingerPrintingFile = new File(referenceGenomeBasePath, "${FINGER_PRINTING_FILE_FOLDER_NAME}/${referenceGenome.fingerPrintingFileName}")
         return checkFileExistence(fingerPrintingFile, checkExistence)
@@ -48,7 +48,7 @@ class ReferenceGenomeService {
      * returns the path to the fasta file for the given reference genome
      * @param the reference genome for which the file path is created
      */
-    public File fastaFilePath(ReferenceGenome referenceGenome, boolean checkExistence = true) {
+    File fastaFilePath(ReferenceGenome referenceGenome, boolean checkExistence = true) {
         return checkFileExistence(new File(referenceGenomeDirectory(referenceGenome, checkExistence),
                 "${referenceGenome.fileNamePrefix}.fa"), checkExistence)
     }
@@ -57,7 +57,7 @@ class ReferenceGenomeService {
      * returns the entries in the reference genome, which belong to a chromosome
      * @param referenceGenome, the reference genome, for which the chromosomes shall be returned
      */
-    public List<ReferenceGenomeEntry> chromosomesInReferenceGenome(ReferenceGenome referenceGenome) {
+    List<ReferenceGenomeEntry> chromosomesInReferenceGenome(ReferenceGenome referenceGenome) {
         notNull(referenceGenome, "the referenceGenome in method chromosomesInReferenceGenome is null")
         Classification classification = Classification.CHROMOSOME
         return ReferenceGenomeEntry.findAllByReferenceGenomeAndClassification(referenceGenome, classification)
@@ -67,7 +67,7 @@ class ReferenceGenomeService {
      * returns the path to the cytosine position index file for the given reference genome depending on project
      * @param the reference genome for which the file path is created and the belonging project
      */
-    public File cytosinePositionIndexFilePath(ReferenceGenome referenceGenome) {
+    File cytosinePositionIndexFilePath(ReferenceGenome referenceGenome) {
         assert referenceGenome.cytosinePositionsIndex : "cytosinePositionsIndex is not set"
         File file = new File(referenceGenomeDirectory(referenceGenome), referenceGenome.cytosinePositionsIndex)
         return checkFileExistence(file, true)
@@ -76,18 +76,18 @@ class ReferenceGenomeService {
     /**
      * returns the path to the file containing the reference genome meta information (names, length values)
      */
-    public File referenceGenomeMetaInformationPath(ReferenceGenome referenceGenome) {
+    File referenceGenomeMetaInformationPath(ReferenceGenome referenceGenome) {
         notNull(referenceGenome, "The input referenceGenome of the method referenceGenomeMetaInformationPath is null")
         return new File(referenceGenomeDirectory(referenceGenome), "metaInformation.txt")
     }
 
-    public File pathToChromosomeSizeFilesPerReference(ReferenceGenome referenceGenome, boolean checkExistence = true) {
+    File pathToChromosomeSizeFilesPerReference(ReferenceGenome referenceGenome, boolean checkExistence = true) {
         notNull(referenceGenome, "The reference genome is not specified")
         File file = new File(referenceGenomeDirectory(referenceGenome, checkExistence), CHROMOSOME_SIZE_FILES_PREFIX)
         return checkFileExistence(file, checkExistence)
     }
 
-    public File chromosomeStatSizeFile(MergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
+    File chromosomeStatSizeFile(MergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
         assert mergingWorkPackage, "The mergingWorkPackage is not specified"
         assert mergingWorkPackage.statSizeFileName : "No stat file size name is defined for ${mergingWorkPackage}"
         File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence), mergingWorkPackage.statSizeFileName)
@@ -125,7 +125,7 @@ class ReferenceGenomeService {
      * @param cytosinePositionsIndex only for methylCtools processed reference genomes
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void loadReferenceGenome(String name, String path, String fileNamePrefix, String cytosinePositionsIndex, String chromosomePrefix, String chromosomeSuffix,
+    void loadReferenceGenome(String name, String path, String fileNamePrefix, String cytosinePositionsIndex, String chromosomePrefix, String chromosomeSuffix,
                                     List<FastaEntry> fastaEntries, List<String> statSizeFileNames) {
         // get list of all standard chromosomes (1…22, X, Y)
         List<String> standardChromosomes = Chromosomes.allLabels()

@@ -69,11 +69,11 @@ class Pipeline implements Entity {
         type validator: { Type type, Pipeline pipeline -> type == pipeline?.name?.type }
     }
 
-    public boolean usesRoddy() {
+    boolean usesRoddy() {
         return name.usesRoddy
     }
 
-    public getDisplayName() {
+    String getDisplayName() {
         return name.displayName
     }
 

@@ -23,13 +23,13 @@ class SeqCenterServiceUnitTests {
     final static String DIFFERENT_SEQ_CENTER_DIR = "DifferentSeqCenterDir"
 
     @Before
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         seqCenterService = new SeqCenterService()
     }
 
 
     @After
-    public void tearDown() throws Exception {
+    void tearDown() throws Exception {
         seqCenterService = null
     }
 

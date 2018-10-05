@@ -10,10 +10,10 @@ import static org.junit.Assert.assertNotNull
 
 class ClusterJobServiceUnitTests extends GroovyTestCase {
 
-    public static final LocalDate SDATE_LOCALDATE = new LocalDate()
-    public static final LocalDate EDATE_LOCALDATE = SDATE_LOCALDATE.plusDays(1)
-    public static final DateTime SDATE_DATETIME = SDATE_LOCALDATE.toDateTimeAtStartOfDay()
-    public static final DateTime EDATE_DATETIME = EDATE_LOCALDATE.toDateTimeAtStartOfDay()
+    static final LocalDate SDATE_LOCALDATE = new LocalDate()
+    static final LocalDate EDATE_LOCALDATE = SDATE_LOCALDATE.plusDays(1)
+    static final DateTime SDATE_DATETIME = SDATE_LOCALDATE.toDateTimeAtStartOfDay()
+    static final DateTime EDATE_DATETIME = EDATE_LOCALDATE.toDateTimeAtStartOfDay()
 
 
     ClusterJobService clusterJobService = new ClusterJobService()

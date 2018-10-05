@@ -36,7 +36,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 class BamMetadataImportServiceSpec extends Specification {
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    TemporaryFolder temporaryFolder
 
     void "getImplementedValidations returns descriptions of validations"() {
 

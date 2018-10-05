@@ -25,13 +25,13 @@ class JobLogMessage {
      */
     ProcessingStep processingStep
 
-    public JobLogMessage(Object message, ProcessingStep processingStep) {
+    JobLogMessage(Object message, ProcessingStep processingStep) {
         this.message = message
         this.processingStep = processingStep
     }
 
     @Override
-    public String toString() {
+    String toString() {
         return "[ProcessingStep ${processingStep.id}] ${message}"
     }
 }

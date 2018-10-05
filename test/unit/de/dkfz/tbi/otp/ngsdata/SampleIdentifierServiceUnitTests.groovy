@@ -274,11 +274,11 @@ class TestParser_CanParse implements SampleIdentifierParser {
         return new DefaultParsedSampleIdentifier(someString, someString, someString, someString)
     }
 
-    public boolean isForProject(String projectName) {
+    boolean isForProject(String projectName) {
         return true
     }
 
-    public boolean tryParsePid(String pid) {
+    boolean tryParsePid(String pid) {
         return true
     }
 }
@@ -289,11 +289,11 @@ class TestParser_CannotParse implements SampleIdentifierParser {
         return null
     }
 
-    public boolean isForProject(String projectName) {
+    boolean isForProject(String projectName) {
         return false
     }
 
-    public boolean tryParsePid(String pid) {
+    boolean tryParsePid(String pid) {
         return false
     }
 }

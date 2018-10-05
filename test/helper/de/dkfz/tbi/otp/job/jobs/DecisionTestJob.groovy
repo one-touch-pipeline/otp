@@ -14,7 +14,7 @@ import org.springframework.stereotype.*
 class DecisionTestJob extends AbstractDecisionJobImpl {
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         println("Executing Decision Test Job")
         setDecision(getAvailableDecisions().first())
     }

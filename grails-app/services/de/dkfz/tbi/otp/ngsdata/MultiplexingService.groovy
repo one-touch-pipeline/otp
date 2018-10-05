@@ -4,7 +4,7 @@ import java.util.regex.Matcher
 
 class MultiplexingService {
 
-    public static final String BARCODE_DELIMITER = '_'
+    static final String BARCODE_DELIMITER = '_'
 
     /**
      * find and extract barcodes of the file. It uses the following patterns in the given order:
@@ -17,7 +17,7 @@ class MultiplexingService {
      * @param fileName the name of the file to check for
      * @return the extracted barcode or null
      */
-    public static String barcode(String fileName) {
+    static String barcode(String fileName) {
         final List<String> regExpression = [
             /_([GATC]{6,8})_/ ,
             /_[0-9]_([0-9]{3})[\._]/ ,
@@ -31,7 +31,7 @@ class MultiplexingService {
         return null
     }
 
-    public static String combineLaneNumberAndBarcode(String laneNumber, String barcode) {
+    static String combineLaneNumberAndBarcode(String laneNumber, String barcode) {
         assert laneNumber
         if (barcode != null) {
             return "${laneNumber}${BARCODE_DELIMITER}${barcode}"

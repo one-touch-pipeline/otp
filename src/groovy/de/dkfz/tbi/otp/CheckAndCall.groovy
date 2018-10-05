@@ -5,7 +5,7 @@ import org.springframework.validation.FieldError
 
 trait CheckAndCall {
 
-    public void checkErrorAndCallMethod(Serializable cmd, Closure method) {
+    void checkErrorAndCallMethod(Serializable cmd, Closure method) {
         Map data
         if (cmd.hasErrors()) {
             data = getErrorData(cmd.errors.getFieldError())

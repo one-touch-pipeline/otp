@@ -44,13 +44,13 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
         REJECTED
     }
 
-    public abstract boolean isMostRecentBamFile()
+    abstract boolean isMostRecentBamFile()
 
-    public abstract String getBamFileName()
+    abstract String getBamFileName()
 
-    public abstract String getBaiFileName()
+    abstract String getBaiFileName()
 
-    public abstract AlignmentConfig getAlignmentConfig()
+    abstract AlignmentConfig getAlignmentConfig()
 
     abstract File getFinalInsertSizeFile()
 

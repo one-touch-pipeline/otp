@@ -16,12 +16,12 @@ class DirectTestJob implements Job {
     private ProcessingStep step
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         // TODO Auto-generated method stub
     }
 
     @Override
-    public Set<Parameter> getOutputParameters() throws InvalidStateException {
+    Set<Parameter> getOutputParameters() throws InvalidStateException {
         return [new Parameter(value: "abcd", type: ParameterType.findByJobDefinition(step.jobDefinition))]
     }
 
@@ -31,17 +31,17 @@ class DirectTestJob implements Job {
     }
 
     @Override
-    public ProcessingStep getProcessingStep() {
+    ProcessingStep getProcessingStep() {
         return step
     }
 
     @Override
-    public void start() throws InvalidStateException {
+    void start() throws InvalidStateException {
         // TODO Auto-generated method stub
     }
 
     @Override
-    public void end() throws InvalidStateException {
+    void end() throws InvalidStateException {
         // TODO Auto-generated method stub
     }
 }

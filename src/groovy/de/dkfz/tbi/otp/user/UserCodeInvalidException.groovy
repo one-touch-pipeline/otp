@@ -16,7 +16,7 @@ class UserCodeInvalidException extends UserManagementException implements Serial
         setId(id)
     }
 
-    public String getCode() {
+    String getCode() {
         return code
     }
 }

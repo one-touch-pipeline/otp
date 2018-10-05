@@ -13,7 +13,7 @@ enum InformTissueType {
     private InformTissueType(String key) {
         this.key = key
     }
-    public static InformTissueType fromKey(String key) {
+    static InformTissueType fromKey(String key) {
         InformTissueType informTissueType = values().find { it.key == key }
         if (informTissueType == null) {
             throw new IllegalArgumentException()

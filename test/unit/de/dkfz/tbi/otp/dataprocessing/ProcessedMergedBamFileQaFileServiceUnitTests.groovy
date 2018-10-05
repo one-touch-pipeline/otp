@@ -67,7 +67,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
 
 
     @Test
-    public void testCheckConsistencyForProcessingFilesDeletion() {
+    void testCheckConsistencyForProcessingFilesDeletion() {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
         (qualityAssessmentMergedPass, processedMergedBamFileQaFileService) = createDataForDeleteChecking(true)
@@ -76,7 +76,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testCheckConsistencyForProcessingFilesDeletion_NoQualityAssessmentMergedPass() {
+    void testCheckConsistencyForProcessingFilesDeletion_NoQualityAssessmentMergedPass() {
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService = new ProcessedMergedBamFileQaFileService()
 
         assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
@@ -85,7 +85,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testCheckConsistencyForProcessingFilesDeletion_NotLatestQualityAssessmentMergedPass() {
+    void testCheckConsistencyForProcessingFilesDeletion_NotLatestQualityAssessmentMergedPass() {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
         (qualityAssessmentMergedPass, processedMergedBamFileQaFileService) = createDataForDeleteChecking()
@@ -95,7 +95,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testCheckConsistencyForProcessingFilesDeletion_NotLatestMergingPass() {
+    void testCheckConsistencyForProcessingFilesDeletion_NotLatestMergingPass() {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
         (qualityAssessmentMergedPass, processedMergedBamFileQaFileService) = createDataForDeleteChecking()
@@ -105,7 +105,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testCheckConsistencyForProcessingFilesDeletion_NotLatestMergingSet() {
+    void testCheckConsistencyForProcessingFilesDeletion_NotLatestMergingSet() {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
         (qualityAssessmentMergedPass, processedMergedBamFileQaFileService) = createDataForDeleteChecking()
@@ -115,7 +115,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testDeleteProcessingFiles() {
+    void testDeleteProcessingFiles() {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
         (qualityAssessmentMergedPass, processedMergedBamFileQaFileService) = createDataForDeleteChecking(true)
@@ -124,7 +124,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testDeleteProcessingFiles_NoQualityAssessmentMergedPass() {
+    void testDeleteProcessingFiles_NoQualityAssessmentMergedPass() {
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService = new ProcessedMergedBamFileQaFileService()
 
         assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
@@ -133,7 +133,7 @@ class ProcessedMergedBamFileQaFileServiceUnitTests {
     }
 
     @Test
-    public void testDeleteProcessingFiles_CheckConsistenceIsWrong() {
+    void testDeleteProcessingFiles_CheckConsistenceIsWrong() {
         QualityAssessmentMergedPass qualityAssessmentMergedPass
         ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
         (qualityAssessmentMergedPass, processedMergedBamFileQaFileService) = createDataForDeleteChecking(false)

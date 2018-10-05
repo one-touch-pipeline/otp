@@ -10,7 +10,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 @Ignore
 class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
 
-    public String getRefGenFileNamePrefix() {
+    String getRefGenFileNamePrefix() {
         return 'hg_GRCh38'
     }
 

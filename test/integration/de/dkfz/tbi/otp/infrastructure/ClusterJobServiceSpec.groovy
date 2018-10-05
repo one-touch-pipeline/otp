@@ -17,15 +17,15 @@ import static java.util.concurrent.TimeUnit.*
 
 class ClusterJobServiceSpec extends Specification {
 
-    public static final org.joda.time.LocalDate SDATE_LOCALDATE = new org.joda.time.LocalDate()
-    public static final org.joda.time.LocalDate EDATE_LOCALDATE = SDATE_LOCALDATE.plusDays(1)
-    public static final org.joda.time.DateTime SDATE_DATETIME = SDATE_LOCALDATE.toDateTimeAtStartOfDay()
-    public static final org.joda.time.DateTime EDATE_DATETIME = EDATE_LOCALDATE.toDateTimeAtStartOfDay()
+    static final org.joda.time.LocalDate SDATE_LOCALDATE = new org.joda.time.LocalDate()
+    static final org.joda.time.LocalDate EDATE_LOCALDATE = SDATE_LOCALDATE.plusDays(1)
+    static final org.joda.time.DateTime SDATE_DATETIME = SDATE_LOCALDATE.toDateTimeAtStartOfDay()
+    static final org.joda.time.DateTime EDATE_DATETIME = EDATE_LOCALDATE.toDateTimeAtStartOfDay()
 
-    public static final Long MINUTES_TO_MILLIS = MINUTES.toMillis(1)
-    public static final Long HOURS_TO_MILLIS = HOURS.toMillis(1)
+    static final Long MINUTES_TO_MILLIS = MINUTES.toMillis(1)
+    static final Long HOURS_TO_MILLIS = HOURS.toMillis(1)
 
-    public static final Long GiB_TO_KiB = 1024 * 1024
+    static final Long GiB_TO_KiB = 1024 * 1024
 
     ClusterJobService clusterJobService
     ConfigService configService

@@ -12,7 +12,7 @@ import java.util.concurrent.FutureTask
 class SynchronousTestingExecutorService {
     @Delegate grails.plugin.executor.PersistenceContextExecutorWrapper trueExecutorService
 
-    public <T> Future<T> submit(Callable<T> callable) {
+    def <T> Future<T> submit(Callable<T> callable) {
         FutureTask<T> value = new FutureTask<T>(callable)
         value.run()
         value.get()

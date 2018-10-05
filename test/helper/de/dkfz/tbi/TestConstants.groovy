@@ -9,7 +9,7 @@ class TestConstants {
     /**
      * The default error message a Assert.notNull of spring produced.
      */
-    public final static String ERROR_MESSAGE_SPRING_NOT_NULL = "[Assertion failed] - this argument is required; it must not be null"
+    final static String ERROR_MESSAGE_SPRING_NOT_NULL = "[Assertion failed] - this argument is required; it must not be null"
 
     static final String ARBITRARY_CLUSTER_JOB_ID = '5678'
 

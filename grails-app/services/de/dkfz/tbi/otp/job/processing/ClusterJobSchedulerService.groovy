@@ -57,7 +57,7 @@ class ClusterJobSchedulerService {
      * @param jobSubmissionOptions additional options for the job
      * @return the cluster job ID
      */
-    public String executeJob(Realm realm, String script, Map<String, String> environmentVariables = [:], Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) throws Throwable {
+    String executeJob(Realm realm, String script, Map<String, String> environmentVariables = [:], Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) throws Throwable {
         if (!script) {
             throw new ProcessingException("No job script specified.")
         }
@@ -155,7 +155,7 @@ class ClusterJobSchedulerService {
      * @param userName The name of the user whose jobs should be checked
      * @return A map containing job identifiers and their status
      */
-    public Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status> retrieveKnownJobsWithState(Realm realm, String userName) throws Exception {
+    Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status> retrieveKnownJobsWithState(Realm realm, String userName) throws Exception {
         assert realm: "No realm specified."
         assert userName: "No user name specified."
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(realm)
@@ -197,7 +197,7 @@ class ClusterJobSchedulerService {
     }
 
 
-    public void retrieveAndSaveJobInformationAfterJobStarted(ClusterJob clusterJob) throws Exception {
+    void retrieveAndSaveJobInformationAfterJobStarted(ClusterJob clusterJob) throws Exception {
         BEJobID beJobID = new BEJobID(clusterJob.clusterJobId)
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(clusterJob.realm)
         GenericJobInfo jobInfo = null
@@ -218,7 +218,7 @@ class ClusterJobSchedulerService {
         }
     }
 
-    public void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJobIdentifier jobIdentifier) throws Exception {
+    void retrieveAndSaveJobStatisticsAfterJobFinished(ClusterJobIdentifier jobIdentifier) throws Exception {
         BatchEuphoriaJobManager jobManager = clusterJobManagerFactoryService.getJobManager(jobIdentifier.realm)
         GenericJobInfo jobInfo = jobManager.queryExtendedJobStateById([new BEJobID(jobIdentifier.clusterJobId)])
                 .get(new BEJobID(jobIdentifier.clusterJobId))
@@ -266,13 +266,13 @@ enum JobSubmissionOption {
 }
 
 @EqualsAndHashCode(includes = ["userName", "realm"])
-public class RealmAndUser {
+class RealmAndUser {
 
     final Realm realm
 
     final String userName
 
-    public RealmAndUser(final Realm realm, final String userName) {
+    RealmAndUser(final Realm realm, final String userName) {
         assert realm: "Realm not specified"
         assert userName: "User name not specified"
         this.realm = realm

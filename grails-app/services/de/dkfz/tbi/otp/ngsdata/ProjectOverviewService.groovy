@@ -306,7 +306,7 @@ class ProjectOverviewService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Map<String, Map<String, List<String>>> listSampleIdentifierByProject(Project project) {
+    Map<String, Map<String, List<String>>> listSampleIdentifierByProject(Project project) {
         return SampleIdentifier.createCriteria().list {
             projections {
                 sample {
@@ -323,7 +323,7 @@ class ProjectOverviewService {
         }.groupBy([{ it[0] }, { it[1] }])
     }
 
-    public List patientsAndSamplesGBCountPerProject(Project project) {
+    List patientsAndSamplesGBCountPerProject(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
             projections {
@@ -339,7 +339,7 @@ class ProjectOverviewService {
         return seq
     }
 
-    public Long individualCountByProject(Project project) {
+    Long individualCountByProject(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
             projections { countDistinct("mockPid") }
@@ -347,7 +347,7 @@ class ProjectOverviewService {
         return seq[0]
     }
 
-    public List sampleTypeNameCountBySample(Project project) {
+    List sampleTypeNameCountBySample(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
             projections {
@@ -358,7 +358,7 @@ class ProjectOverviewService {
         return seq
     }
 
-    public List centerNameRunId(Project project) {
+    List centerNameRunId(Project project) {
         List seq = Sequence.withCriteria {
             eq("projectId", project?.id)
             projections {
@@ -370,7 +370,7 @@ class ProjectOverviewService {
         return seq
     }
 
-    public List centerNameRunIdLastMonth(Project project) {
+    List centerNameRunIdLastMonth(Project project) {
         Calendar cal = Calendar.getInstance()
         cal.add(Calendar.MONTH, -6)
         Date date = cal.getTime()
@@ -389,7 +389,7 @@ class ProjectOverviewService {
      * @param project the project for filtering the result
      * @return all SeqTypes used in the project
      */
-    public List<SeqType> seqTypeByProject(Project project) {
+    List<SeqType> seqTypeByProject(Project project) {
         List<Long> seqTypeIds = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
             projections {
@@ -410,7 +410,7 @@ class ProjectOverviewService {
      * @param project the project for filtering the result
      * @return all MockPids used in the project
      */
-    public List<String> mockPidByProject(Project project) {
+    List<String> mockPidByProject(Project project) {
         List<String> mockPids = AggregateSequences.withCriteria {
             eq("projectId", project.id)
             projections {
@@ -420,7 +420,7 @@ class ProjectOverviewService {
         return mockPids
     }
 
-    public List<String> sampleTypeByProject(Project project) {
+    List<String> sampleTypeByProject(Project project) {
         List<String> sampleTypes = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
             projections {
@@ -438,7 +438,7 @@ class ProjectOverviewService {
      * @param project the project for filtering the result
      * @return all combination of individual(mockPid) and sampleTypeName as list
      */
-    public List<List<String>> overviewMockPidSampleType(Project project) {
+    List<List<String>> overviewMockPidSampleType(Project project) {
         List<List<String>> mockPidSampleTypes = AggregateSequences.withCriteria {
             eq("projectId", project.id)
             projections {
@@ -457,7 +457,7 @@ class ProjectOverviewService {
      * @return all combination of name of individual(mockPid) and sampleTypeName with the first SampleIdentifier as list
      *
      */
-    public List<Object> overviewSampleIdentifier(Project project) {
+    List<Object> overviewSampleIdentifier(Project project) {
         List<Object> sampleIdentifiers = SampleIdentifier.withCriteria {
             projections {
                 sample {
@@ -487,7 +487,7 @@ class ProjectOverviewService {
      * @param project the project for filtering the result
      * @return all combination of  name of {@link Individual}(mockPid) and sampleTypeName with with the number of lanes depend of {@link SeqType}  as list
      */
-    public List<Map> laneCountForSeqtypesPerPatientAndSampleType(Project project) {
+    List<Map> laneCountForSeqtypesPerPatientAndSampleType(Project project) {
         List lanes = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
             projections {
@@ -516,7 +516,7 @@ class ProjectOverviewService {
         return ret
     }
 
-    public Collection<AbstractMergedBamFile> abstractMergedBamFilesInProjectFolder(Project project) {
+    Collection<AbstractMergedBamFile> abstractMergedBamFilesInProjectFolder(Project project) {
         if (!project) {
             return []
         }
@@ -530,12 +530,12 @@ where
 """, [project: project, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED])
     }
 
-    public List listReferenceGenome(Project project) {
+    List listReferenceGenome(Project project) {
         return ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
     }
 
     @PreAuthorize("hasRole('ROLE_MMML_MAPPING')")
-    public List tableForMMMLMapping() {
+    List tableForMMMLMapping() {
         def seq = Individual.withCriteria {
             project {
                 'in'("name", PROJECT_TO_HIDE_SAMPLE_IDENTIFIER)
@@ -550,11 +550,11 @@ where
         return seq
     }
 
-    public List getAccessPersons(Project project) {
+    List getAccessPersons(Project project) {
         getAccessPersons([project])
     }
 
-    public List getAccessPersons(List<Project> projects) {
+    List getAccessPersons(List<Project> projects) {
         String query = """\
         SELECT username
         FROM users

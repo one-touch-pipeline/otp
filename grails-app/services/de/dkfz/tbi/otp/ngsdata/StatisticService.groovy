@@ -17,7 +17,7 @@ class StatisticService {
 
     private DateTimeFormatter simpleDateFormatter = DateTimeFormat.forPattern("MMM yyyy").withLocale(Locale.ENGLISH)
 
-    public List projectDateSortAfterDate(ProjectGroup projectGroup) {
+    List projectDateSortAfterDate(ProjectGroup projectGroup) {
         List seq = Sequence.withCriteria {
             projections {
                 if (projectGroup) {
@@ -32,7 +32,7 @@ class StatisticService {
         return seq
     }
 
-    public List sampleCountPerSequenceType(ProjectGroup projectGroup) {
+    List sampleCountPerSequenceType(ProjectGroup projectGroup) {
         List seq = AggregateSequences.withCriteria {
             projections {
                 if (projectGroup) {
@@ -47,7 +47,7 @@ class StatisticService {
         return seq
     }
 
-    public List patientsCountPerSequenceType(ProjectGroup projectGroup) {
+    List patientsCountPerSequenceType(ProjectGroup projectGroup) {
         List seq = AggregateSequences.withCriteria {
             projections {
                 if (projectGroup) {
@@ -62,7 +62,7 @@ class StatisticService {
         return seq
     }
 
-    public List laneCountPerDay(List<Project> projectList) {
+    List laneCountPerDay(List<Project> projectList) {
         List<Project> projects = projectList ?: Project.findAll()
 
         def sql = new Sql(dataSource)
@@ -100,7 +100,7 @@ SELECT DISTINCT seq.seq_track_id
         return laneCountPerDay
     }
 
-    public List gigaBasesPerDay(List<Project> projectList) {
+    List gigaBasesPerDay(List<Project> projectList) {
         List<Project> projects = projectList ?: Project.findAll()
 
         def sql = new Sql(dataSource)
@@ -141,7 +141,7 @@ WHERE
         return gigaBasesPerDay
     }
 
-    public List projectCountPerSequenceType(ProjectGroup projectGroup) {
+    List projectCountPerSequenceType(ProjectGroup projectGroup) {
         List seq = Sequence.withCriteria {
             projections {
                 if (projectGroup) {
@@ -156,7 +156,7 @@ WHERE
         return seq
     }
 
-    public List sampleTypeCountBySeqType(Project project) {
+    List sampleTypeCountBySeqType(Project project) {
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
             projections {
@@ -168,7 +168,7 @@ WHERE
         return seq
     }
 
-    public List sampleTypeCountByPatient(Project project) {
+    List sampleTypeCountByPatient(Project project) {
         List seq = Sequence.withCriteria {
             eq("projectId", project?.id)
             projections {
@@ -184,7 +184,7 @@ WHERE
      * Convert creation date of data to a format to be used for scatter plots
      * @param data A list containing lists with two elements, where the first element is a date and the second element is an integer
      */
-    public Map dataPerDate(List data) {
+    Map dataPerDate(List data) {
         getCountPerDate(data, true)
     }
 
@@ -192,7 +192,7 @@ WHERE
      * Convert creation date of projects to a format to be used for scatter plots
      * @param data A list containing lists with one element which is a date
      */
-    public Map projectCountPerDate(List data) {
+    Map projectCountPerDate(List data) {
         getCountPerDate(data)
     }
 

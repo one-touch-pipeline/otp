@@ -100,11 +100,11 @@ class MergingSet implements Entity {
     /**
      * @return Whether this is the most recent merging set on the referenced {@link MergingWorkPackage}.
      */
-    public boolean isLatestSet() {
+    boolean isLatestSet() {
         return identifier == maxIdentifier(mergingWorkPackage)
     }
 
-    public static Integer maxIdentifier(final MergingWorkPackage mergingWorkPackage) {
+    static Integer maxIdentifier(final MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
         return MergingSet.createCriteria().get {
             eq("mergingWorkPackage", mergingWorkPackage)
@@ -114,7 +114,7 @@ class MergingSet implements Entity {
         }
     }
 
-    public static int nextIdentifier(final MergingWorkPackage mergingWorkPackage) {
+    static int nextIdentifier(final MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
         final Integer maxIdentifier = maxIdentifier(mergingWorkPackage)
         if (maxIdentifier == null) {

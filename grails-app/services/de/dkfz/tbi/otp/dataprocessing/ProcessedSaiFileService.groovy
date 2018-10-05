@@ -10,7 +10,7 @@ class ProcessedSaiFileService {
     DataProcessingFilesService dataProcessingFilesService
     ProcessedAlignmentFileService processedAlignmentFileService
 
-    public String getFilePath(ProcessedSaiFile saiFile) {
+    String getFilePath(ProcessedSaiFile saiFile) {
         String dir = getDirectory(saiFile)
         String filename = getFileName(saiFile)
         return "${dir}/${filename}"
@@ -25,15 +25,15 @@ class ProcessedSaiFileService {
      * @param saiFile processed sai file object
      * @return Path to the outputted error file produced by bwa aln
      */
-    public String bwaAlnErrorLogFilePath(ProcessedSaiFile saiFile) {
+    String bwaAlnErrorLogFilePath(ProcessedSaiFile saiFile) {
         return "${getFilePath(saiFile)}_bwaAlnErrorLog.txt"
     }
 
-    public String getDirectory(ProcessedSaiFile saiFile) {
+    String getDirectory(ProcessedSaiFile saiFile) {
         return processedAlignmentFileService.getDirectory(saiFile.alignmentPass)
     }
 
-    public String getFileName(ProcessedSaiFile saiFile) {
+    String getFileName(ProcessedSaiFile saiFile) {
         SeqTrack seqTrack = saiFile.alignmentPass.seqTrack
         String sampleType = seqTrack.sample.sampleType.dirName
         String runName = seqTrack.run.name
@@ -49,7 +49,7 @@ class ProcessedSaiFileService {
      *
      * @return true if there is no serious inconsistency.
      */
-    public boolean checkConsistencyForProcessingFilesDeletion(final ProcessedSaiFile saiFile) {
+    boolean checkConsistencyForProcessingFilesDeletion(final ProcessedSaiFile saiFile) {
         notNull saiFile
         return dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(saiFile, new File(getFilePath(saiFile)))
     }
@@ -61,7 +61,7 @@ class ProcessedSaiFileService {
      *
      * @return The number of bytes that have been freed on the file system.
      */
-    public long deleteProcessingFiles(final ProcessedSaiFile saiFile) {
+    long deleteProcessingFiles(final ProcessedSaiFile saiFile) {
         notNull saiFile
         return dataProcessingFilesService.deleteProcessingFiles(
                 saiFile,

@@ -30,7 +30,7 @@ class TrackingService {
 
     CreateNotificationTextService createNotificationTextService
 
-    public OtrsTicket createOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
+    OtrsTicket createOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         OtrsTicket otrsTicket = new OtrsTicket(
                 ticketNumber: ticketNumber,
                 seqCenterComment: seqCenterComment,
@@ -40,7 +40,7 @@ class TrackingService {
         return otrsTicket
     }
 
-    public OtrsTicket createOrResetOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
+    OtrsTicket createOrResetOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         OtrsTicket otrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
         if (!otrsTicket) {
             return createOtrsTicket(ticketNumber, seqCenterComment, automaticNotification)
@@ -75,11 +75,11 @@ class TrackingService {
         assert otrsTicket.save(flush: true, failOnError: true)
     }
 
-    public void setStartedForSeqTracks(Collection<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
+    void setStartedForSeqTracks(Collection<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
         setStarted(findAllOtrsTickets(seqTracks), step)
     }
 
-    public Set<OtrsTicket> findAllOtrsTickets(Collection<SeqTrack> seqTracks) {
+    Set<OtrsTicket> findAllOtrsTickets(Collection<SeqTrack> seqTracks) {
         if (!seqTracks) {
             return [] as Set
         }
@@ -98,7 +98,7 @@ class TrackingService {
         return OtrsTicket.findAllByIdInList(otrsIds, [lock: true]) as Set
     }
 
-    public void setStarted(Collection<OtrsTicket> otrsTickets, OtrsTicket.ProcessingStep step) {
+    void setStarted(Collection<OtrsTicket> otrsTickets, OtrsTicket.ProcessingStep step) {
         otrsTickets.unique().each {
             if (it."${step}Started" == null) {
                 it."${step}Started" = new Date()
@@ -107,7 +107,7 @@ class TrackingService {
         }
     }
 
-    public void processFinished(Set<SeqTrack> seqTracks) {
+    void processFinished(Set<SeqTrack> seqTracks) {
         SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()
         for (OtrsTicket ticket : findAllOtrsTickets(seqTracks)) {
             setFinishedTimestampsAndNotify(ticket, samplePairDiscovery)

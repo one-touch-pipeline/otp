@@ -9,7 +9,7 @@ class RealBedFileTest {
     TargetIntervalsImpl targetIntervalsImpl
 
     @Before
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         String bedFilePath = "./testdata/Agilent4withoutUTRs_chr.bed"
         List<String> referenceGenomeEntryNames = [
             "chr1", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16",
@@ -21,7 +21,7 @@ class RealBedFileTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    void tearDown() throws Exception {
         targetIntervalsImpl = null
     }
 

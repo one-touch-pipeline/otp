@@ -11,12 +11,12 @@ class MonitorOutputCollector {
     final static String INDENT2 = "${INDENT}${INDENT}"
     final static String INDENT3 = "${INDENT2}${INDENT}"
 
-    public static final String HEADER_NOT_TRIGGERED = 'The following objects are not triggered'
-    public static final String HEADER_SHOULD_START = 'The following objects needs processing'
-    public static final String HEADER_WAITING = 'The following objects are waiting'
-    public static final String HEADER_RUNNING = 'The following objects are in processing'
-    public static final String HEADER_FINISHED = 'The following objects are finished'
-    public static final String HEADER_NOT_SUPPORTED_SEQTYPES = 'The following SeqTypes are unsupported by this workflow'
+    static final String HEADER_NOT_TRIGGERED = 'The following objects are not triggered'
+    static final String HEADER_SHOULD_START = 'The following objects needs processing'
+    static final String HEADER_WAITING = 'The following objects are waiting'
+    static final String HEADER_RUNNING = 'The following objects are in processing'
+    static final String HEADER_FINISHED = 'The following objects are finished'
+    static final String HEADER_NOT_SUPPORTED_SEQTYPES = 'The following SeqTypes are unsupported by this workflow'
 
 
     final boolean showFinishedEntries

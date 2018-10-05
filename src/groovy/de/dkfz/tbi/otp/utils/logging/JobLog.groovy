@@ -22,13 +22,13 @@ class JobLog implements Log {
      */
     Log log = null
 
-    public JobLog(ProcessingStep processingStep, Log log) {
+    JobLog(ProcessingStep processingStep, Log log) {
         this.processingStep = processingStep
         this.log = log
     }
 
     @Override
-    public void debug(Object message) {
+    void debug(Object message) {
         if (!log) {
             return
         }
@@ -36,7 +36,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public void debug(Object message, Throwable throwable) {
+    void debug(Object message, Throwable throwable) {
         if (!log) {
             return
         }
@@ -44,7 +44,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public void error(Object message) {
+    void error(Object message) {
         if (!log) {
             return
         }
@@ -52,7 +52,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public void error(Object message, Throwable throwable) {
+    void error(Object message, Throwable throwable) {
         if (!log) {
             return
         }
@@ -60,7 +60,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public void fatal(Object message) {
+    void fatal(Object message) {
         if (!log) {
             return
         }
@@ -68,7 +68,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public void fatal(Object message, Throwable throwable) {
+    void fatal(Object message, Throwable throwable) {
         if (!log) {
             return
         }
@@ -76,7 +76,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public void info(Object message) {
+    void info(Object message) {
         if (!log) {
             return
         }
@@ -84,7 +84,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public void info(Object message, Throwable throwable) {
+    void info(Object message, Throwable throwable) {
         if (!log) {
             return
         }
@@ -92,7 +92,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public boolean isDebugEnabled() {
+    boolean isDebugEnabled() {
         if (log) {
             return log.isDebugEnabled()
         }
@@ -100,7 +100,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public boolean isErrorEnabled() {
+    boolean isErrorEnabled() {
         if (log) {
             return log.isErrorEnabled()
         }
@@ -108,7 +108,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public boolean isFatalEnabled() {
+    boolean isFatalEnabled() {
         if (log) {
             return log.isFatalEnabled()
         }
@@ -116,7 +116,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public boolean isInfoEnabled() {
+    boolean isInfoEnabled() {
         if (log) {
             return log.isInfoEnabled()
         }
@@ -124,7 +124,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public boolean isTraceEnabled() {
+    boolean isTraceEnabled() {
         if (log) {
             return log.isTraceEnabled()
         }
@@ -132,7 +132,7 @@ class JobLog implements Log {
     }
 
     @Override
-    public boolean isWarnEnabled() {
+    boolean isWarnEnabled() {
         if (log) {
             return log.isWarnEnabled()
         }
@@ -140,22 +140,22 @@ class JobLog implements Log {
     }
 
     @Override
-    public void trace(Object message) {
+    void trace(Object message) {
         log.trace(wrap(message))
     }
 
     @Override
-    public void trace(Object message, Throwable throwable) {
+    void trace(Object message, Throwable throwable) {
         log.trace(wrap(message), throwable)
     }
 
     @Override
-    public void warn(Object message) {
+    void warn(Object message) {
         log.warn(wrap(message))
     }
 
     @Override
-    public void warn(Object message, Throwable throwable) {
+    void warn(Object message, Throwable throwable) {
         log.warn(wrap(message), throwable)
     }
 

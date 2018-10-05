@@ -24,7 +24,7 @@ class CreateSeqScanJob extends AbstractEndStateAwareJobImpl {
      * @throws Exception
      */
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         long seqTrackId = Long.parseLong(getProcessParameterValue())
         SeqTrack seqTrack = SeqTrack.get(seqTrackId)
         seqScanService.buildSeqScan(seqTrack)

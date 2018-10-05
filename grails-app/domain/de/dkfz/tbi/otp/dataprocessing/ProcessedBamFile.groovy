@@ -15,12 +15,12 @@ class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParam
         }
     }
 
-    public SeqTrack getSeqTrack() {
+    SeqTrack getSeqTrack() {
         return alignmentPass.seqTrack
     }
 
     @Override
-    public String toString() {
+    String toString() {
         return "PBF ${id} of ${alignmentPass}"
     }
 
@@ -28,7 +28,7 @@ class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParam
      * @return <code>true</code>, if this {@link ProcessedBamFile} is from the latest alignment
      * @see AlignmentPass#isLatestPass()
      */
-    public boolean isMostRecentBamFile() {
+    boolean isMostRecentBamFile() {
         return alignmentPass.isLatestPass()
     }
 

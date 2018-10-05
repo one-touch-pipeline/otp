@@ -83,7 +83,7 @@ class ClusterJobMonitoringService {
         }
     }
 
-    public void check() {
+    void check() {
         if (queuedJobs.isEmpty()) {
             return
         }

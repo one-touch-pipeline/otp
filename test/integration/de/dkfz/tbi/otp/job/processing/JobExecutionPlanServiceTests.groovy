@@ -225,7 +225,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
     }
 
     @Test
-    public void testGetLastExecutedProcess() {
+    void testGetLastExecutedProcess() {
         JobExecutionPlanService service = new JobExecutionPlanService()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
         assertNotNull(plan.save())
@@ -280,7 +280,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
     }
 
     @Test
-    public void testGetLatestUpdatesForPlanInStateFailure() {
+    void testGetLatestUpdatesForPlanInStateFailure() {
         JobExecutionPlanService service = new JobExecutionPlanService()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
         assertNotNull(plan.save())

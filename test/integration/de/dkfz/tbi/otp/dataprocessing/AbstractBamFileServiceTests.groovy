@@ -455,7 +455,7 @@ class AbstractBamFileServiceTests {
     }
 
 
-    public ProcessedMergedBamFile createProcessedMergedBamFile(MergingSet mergingSet) {
+    ProcessedMergedBamFile createProcessedMergedBamFile(MergingSet mergingSet) {
         MergingPass mergingPass1 = new MergingPass(
                 identifier: 1,
                 mergingSet: mergingSet

@@ -378,7 +378,7 @@ enum SampleSwapLevel {
 
     SampleSwapLevel(int id) { this.id = id; }
 
-    public int getValue() { return id; }
+    int getValue() { return id; }
 }
 
 class SampleSwapInfo {

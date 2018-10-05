@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.job.plan.JobDecision
  *
  * @see DecisionJob
  */
-abstract public class AbstractDecisionJobImpl extends AbstractEndStateAwareJobImpl implements DecisionJob {
+abstract class AbstractDecisionJobImpl extends AbstractEndStateAwareJobImpl implements DecisionJob {
     private JobDecision decision
 
     /**
@@ -41,7 +41,7 @@ abstract public class AbstractDecisionJobImpl extends AbstractEndStateAwareJobIm
     }
 
     @Override
-    public final JobDecision getDecision() throws InvalidStateException {
+    final JobDecision getDecision() throws InvalidStateException {
         if (getState() != AbstractJobImpl.State.FINISHED && endState != ExecutionState.SUCCESS) {
             throw new InvalidStateException("Decision accessed, but not in succeeded state")
         }

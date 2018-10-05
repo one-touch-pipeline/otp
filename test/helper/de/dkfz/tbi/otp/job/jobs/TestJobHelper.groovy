@@ -10,7 +10,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  */
 class TestJobHelper {
 
-    public static TestJob createTestJobWithProcessingStep(final ProcessParameterObject processParameterValue = null) {
+    static TestJob createTestJobWithProcessingStep(final ProcessParameterObject processParameterValue = null) {
         ProcessingStep processingStep = createAndSaveProcessingStep()
         if (processParameterValue != null) {
             assert createProcessParameter(processingStep.process, processParameterValue).save(failOnError: true)
@@ -19,11 +19,11 @@ class TestJobHelper {
         return testJob
     }
 
-    public static Collection<Process> findProcessesForPlanName(String planName) {
+    static Collection<Process> findProcessesForPlanName(String planName) {
         return Process.findAllByJobExecutionPlan(findJobExecutionPlan(planName))
     }
 
-    public static JobExecutionPlan findJobExecutionPlan(String planName) {
+    static JobExecutionPlan findJobExecutionPlan(String planName) {
         return exactlyOneElement(JobExecutionPlan.findAllByName(planName))
     }
 }

@@ -20,12 +20,12 @@ import org.junit.Assert
  *
  * If an exception is thrown, the further checks are disabled, because the queue may no longer be correct.
  */
-public class CheckedLogger implements Log {
+class CheckedLogger implements Log {
 
     /**
      * Defines the message level.
      */
-    public enum Level {
+    enum Level {
         FATAL,
         ERROR,
         WARN,
@@ -44,14 +44,14 @@ public class CheckedLogger implements Log {
 
         final Object message
 
-        public ExpectedMessage(Level level, Object message) {
+        ExpectedMessage(Level level, Object message) {
             super()
             this.level = level
             this.message = message
         }
 
         @Override
-        public String toString() {
+        String toString() {
             "${level}: ${message}"
         }
     }
@@ -163,94 +163,94 @@ public class CheckedLogger implements Log {
 
 
     @Override
-    public void fatal(Object object) {
+    void fatal(Object object) {
         checkConsumedMessage(Level.FATAL, object)
     }
 
     @Override
-    public void fatal(Object object, Throwable throwable) {
+    void fatal(Object object, Throwable throwable) {
         checkConsumedMessage(Level.FATAL, object)
     }
 
     @Override
-    public void error(Object object) {
+    void error(Object object) {
         checkConsumedMessage(Level.ERROR, object)
     }
 
     @Override
-    public void error(Object object, Throwable throwable) {
+    void error(Object object, Throwable throwable) {
         checkConsumedMessage(Level.ERROR, object)
     }
 
     @Override
-    public void warn(Object object) {
+    void warn(Object object) {
         checkConsumedMessage(Level.WARN, object)
     }
 
     @Override
-    public void warn(Object object, Throwable throwable) {
+    void warn(Object object, Throwable throwable) {
         checkConsumedMessage(Level.WARN, object)
     }
 
     @Override
-    public void debug(Object object) {
+    void debug(Object object) {
         checkConsumedMessage(Level.DEBUG, object)
     }
 
     @Override
-    public void debug(Object object, Throwable throwable) {
+    void debug(Object object, Throwable throwable) {
         checkConsumedMessage(Level.DEBUG, object)
     }
 
     @Override
-    public void info(Object object) {
+    void info(Object object) {
         checkConsumedMessage(Level.INFO, object)
     }
 
     @Override
-    public void info(Object object, Throwable throwable) {
+    void info(Object object, Throwable throwable) {
         checkConsumedMessage(Level.INFO, object)
     }
 
     @Override
-    public void trace(Object object) {
+    void trace(Object object) {
         checkConsumedMessage(Level.TRACE, object)
     }
 
     @Override
-    public void trace(Object object, Throwable throwable) {
+    void trace(Object object, Throwable throwable) {
         checkConsumedMessage(Level.TRACE, object)
     }
 
 
 
     @Override
-    public boolean isFatalEnabled() {
+    boolean isFatalEnabled() {
         Assert.fail("Method isFatalEnabled not expected to be called")
     }
 
     @Override
-    public boolean isErrorEnabled() {
+    boolean isErrorEnabled() {
         Assert.fail("Method isErrorEnabled not expected to be called")
     }
 
     @Override
-    public boolean isWarnEnabled() {
+    boolean isWarnEnabled() {
         Assert.fail("Method isWarnEnabled not expected to be called")
     }
 
     @Override
-    public boolean isInfoEnabled() {
+    boolean isInfoEnabled() {
         Assert.fail("Method isInfoEnabled not expected to be called")
     }
 
     @Override
-    public boolean isDebugEnabled() {
+    boolean isDebugEnabled() {
         Assert.fail("Method isDebugEnabled not expected to be called")
     }
 
     @Override
-    public boolean isTraceEnabled() {
+    boolean isTraceEnabled() {
         Assert.fail("Method isTraceEnabled not expected to be called")
     }
 }

@@ -20,17 +20,17 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class AbstractRoddyJobTests {
 
-    public static final String SNV_CALLING_META_SCRIPT_PBSID = "3504988"
-    public static final String SNV_CALLING_META_SCRIPT_JOB_NAME = "r150428_104246480_stds_snvCallingMetaScript"
-    public static final String SNV_CALLING_META_SCRIPT_JOB_CLASS = "snvCallingMetaScript"
-    public static final String SNV_ANNOTATION_PBSID = "3504989"
-    public static final String SNV_ANNOTATION_JOB_NAME = "r150428_104246480_stds_snvAnnotation"
-    public static final String SNV_ANNOTATION_JOB_CLASS = "snvAnnotation"
-    public static final String ALIGN_AND_PAIR_SLIM_PBSID = "3744601"
-    public static final String ALIGN_AND_PAIR_SLIM_JOB_NAME = "r150623_153422293_123456_alignAndPairSlim"
-    public static final String ALIGN_AND_PAIR_SLIM_JOB_CLASS = "alignAndPairSlim"
-    public static final String RODDY_EXECUTION_STORE_DIRECTORY_NAME = 'exec_150625_102449388_username_analysis'
-    public static final ProcessOutput OUTPUT_CLUSTER_JOBS_SUBMITTED = new ProcessOutput(
+    static final String SNV_CALLING_META_SCRIPT_PBSID = "3504988"
+    static final String SNV_CALLING_META_SCRIPT_JOB_NAME = "r150428_104246480_stds_snvCallingMetaScript"
+    static final String SNV_CALLING_META_SCRIPT_JOB_CLASS = "snvCallingMetaScript"
+    static final String SNV_ANNOTATION_PBSID = "3504989"
+    static final String SNV_ANNOTATION_JOB_NAME = "r150428_104246480_stds_snvAnnotation"
+    static final String SNV_ANNOTATION_JOB_CLASS = "snvAnnotation"
+    static final String ALIGN_AND_PAIR_SLIM_PBSID = "3744601"
+    static final String ALIGN_AND_PAIR_SLIM_JOB_NAME = "r150623_153422293_123456_alignAndPairSlim"
+    static final String ALIGN_AND_PAIR_SLIM_JOB_CLASS = "alignAndPairSlim"
+    static final String RODDY_EXECUTION_STORE_DIRECTORY_NAME = 'exec_150625_102449388_username_analysis'
+    static final ProcessOutput OUTPUT_CLUSTER_JOBS_SUBMITTED = new ProcessOutput(
             stderr: "",
             stdout: "Running job ${SNV_CALLING_META_SCRIPT_JOB_NAME} => ${SNV_CALLING_META_SCRIPT_PBSID}  \n" +
                     "\n" +
@@ -39,7 +39,7 @@ class AbstractRoddyJobTests {
                     "Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}",
             exitCode: 0,
     )
-    public static final ProcessOutput OUTPUT_NO_CLUSTER_JOBS_SUBMITTED = new ProcessOutput(
+    static final ProcessOutput OUTPUT_NO_CLUSTER_JOBS_SUBMITTED = new ProcessOutput(
             stderr: "Creating the following execution directory to store information about this process:\n" +
                     "\t${new File(TestCase.uniqueNonExistentPath, RODDY_EXECUTION_STORE_DIRECTORY_NAME)}" +
                     "${AbstractRoddyJob.NO_STARTED_JOBS_MESSAGE}",

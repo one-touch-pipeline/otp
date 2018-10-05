@@ -107,7 +107,7 @@ class MergingPassServiceTests {
 
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_NoProcessedMergedBamFile() {
+    void testDeleteOldMergingProcessingFiles_NoProcessedMergedBamFile() {
         Date createdBeforeDate = new Date()
         createMergingPassService()
 
@@ -115,7 +115,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionAlreadyTransferred_Ok() {
+    void testDeleteOldMergingProcessingFiles_ConditionAlreadyTransferred_Ok() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileAlreadyTransfered()
         createMergingPassService([processedMergedBamFile])
@@ -124,7 +124,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionAlreadyTransferred_5Files() {
+    void testDeleteOldMergingProcessingFiles_ConditionAlreadyTransferred_5Files() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = (1..5).collect { createProcessedMergedBamFileAlreadyTransfered() //
         }
@@ -143,7 +143,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionAlreadyTransferred_WrongQaStatus() {
+    void testDeleteOldMergingProcessingFiles_ConditionAlreadyTransferred_WrongQaStatus() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileAlreadyTransfered(qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS)
         createMergingPassService()
@@ -152,7 +152,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionAlreadyTransferred_WrongFileOperationStateAndNoMd5sum() {
+    void testDeleteOldMergingProcessingFiles_ConditionAlreadyTransferred_WrongFileOperationStateAndNoMd5sum() {
         //FileOperationState and md5sum are can't check seperatly, because they are related together
         Date createdBeforeDate = new Date().plus(1)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileAlreadyTransfered(fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS, md5sum: null)
@@ -164,7 +164,7 @@ class MergingPassServiceTests {
 
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionLaterPass_Ok() {
+    void testDeleteOldMergingProcessingFiles_ConditionLaterPass_Ok() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithLaterProcessedPass()
         createMergingPassService([processedMergedBamFiles[0]])
@@ -173,7 +173,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionLaterPass_PassIdentifierIsSmaller() {
+    void testDeleteOldMergingProcessingFiles_ConditionLaterPass_PassIdentifierIsSmaller() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithLaterProcessedPass([:], [identifier: 1])
         createMergingPassService()
@@ -182,7 +182,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionLaterPass_OtherMergingSet() {
+    void testDeleteOldMergingProcessingFiles_ConditionLaterPass_OtherMergingSet() {
         Date createdBeforeDate = new Date().plus(1)
         MergingSet mergingSet = DomainFactory.createMergingSet()
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithLaterProcessedPass(
@@ -194,7 +194,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionLaterPass_LaterBamFileIsWithdrawn() {
+    void testDeleteOldMergingProcessingFiles_ConditionLaterPass_LaterBamFileIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFile = createProcessedMergedBamFileWithLaterProcessedPass([withdrawn: true])
         createMergingPassService([processedMergedBamFile[1]])
@@ -203,7 +203,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionLaterPass_BothBamFilesAreWithdrawn() {
+    void testDeleteOldMergingProcessingFiles_ConditionLaterPass_BothBamFilesAreWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithLaterProcessedPass([withdrawn: true])
         ProcessedMergedBamFile processedMergedBamFile = processedMergedBamFiles[0]
@@ -215,7 +215,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionLaterPass_CreateDateIsLater() {
+    void testDeleteOldMergingProcessingFiles_ConditionLaterPass_CreateDateIsLater() {
         Date createdBeforeDate = new Date().plus(-1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithLaterProcessedPass()
         createMergingPassService()
@@ -230,7 +230,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionLaterPass_QualityAssessmentStatusIsNotFinished() {
+    void testDeleteOldMergingProcessingFiles_ConditionLaterPass_QualityAssessmentStatusIsNotFinished() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithLaterProcessedPass([qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS])
         createMergingPassService()
@@ -239,7 +239,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionLaterPass_MergingSetStatusIsNotProcessed() {
+    void testDeleteOldMergingProcessingFiles_ConditionLaterPass_MergingSetStatusIsNotProcessed() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithLaterProcessedPass([:], [:], [status: MergingSet.State.INPROGRESS])
         createMergingPassService()
@@ -250,7 +250,7 @@ class MergingPassServiceTests {
 
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_Ok() {
+    void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_Ok() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithFurtherMerged()
         createMergingPassService([processedMergedBamFiles[0]])
@@ -259,7 +259,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_CheckBamFileWrongQAStatus() {
+    void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_CheckBamFileWrongQAStatus() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithFurtherMerged(
                         [qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS]
@@ -270,7 +270,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_CheckBamFileWrongStatus() {
+    void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_CheckBamFileWrongStatus() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithFurtherMerged(
                         [status: AbstractBamFile.State.INPROGRESS]
@@ -281,7 +281,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_CheckBamFileWrongMergingSetStatus() {
+    void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_CheckBamFileWrongMergingSetStatus() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithFurtherMerged(
                         [:], [:], [:],
@@ -293,7 +293,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_WrongFurtherBamFile() {
+    void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_WrongFurtherBamFile() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithFurtherMerged()
         processedMergedBamFiles[0].save(flush: true)
@@ -306,7 +306,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_FurtherBamFileQAStatusWrong() {
+    void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_FurtherBamFileQAStatusWrong() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithFurtherMerged(
                         [:], [:], [:],
@@ -318,7 +318,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_FurtherBamFileTooYoung() {
+    void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_FurtherBamFileTooYoung() {
         Date createdBeforeDate = new Date().plus(-1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithFurtherMerged()
         createMergingPassService()
@@ -333,7 +333,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_FurtherBamFileIsWithdrawn() {
+    void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_FurtherBamFileIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithFurtherMerged(
                         [:], [:], [:],
@@ -345,7 +345,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_BothBamFileIsWithdrawn() {
+    void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_BothBamFileIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithFurtherMerged(
                         [withdrawn: true], [:], [:],
@@ -358,7 +358,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_FurtherBamFileIsHasOtherMergingSet() {
+    void testDeleteOldMergingProcessingFiles_ConditionFurtherMerged_FurtherBamFileIsHasOtherMergingSet() {
         Date createdBeforeDate = new Date().plus(1)
         MergingSet mergingSet = DomainFactory.createMergingSet()
         List<ProcessedMergedBamFile> processedMergedBamFiles = createProcessedMergedBamFileWithFurtherMerged(
@@ -373,7 +373,7 @@ class MergingPassServiceTests {
 
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_GeneralCondition_FileDoesNotExistAndDeletionDateIsNotSet() {
+    void testDeleteOldMergingProcessingFiles_GeneralCondition_FileDoesNotExistAndDeletionDateIsNotSet() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileAlreadyTransfered([
             fileExists: false,
@@ -385,7 +385,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_GeneralCondition_FileDoesNotExistAndDeletionDateIsSet() {
+    void testDeleteOldMergingProcessingFiles_GeneralCondition_FileDoesNotExistAndDeletionDateIsSet() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileAlreadyTransfered([
             fileExists: false,
@@ -397,7 +397,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_GeneralCondition_FileDoesExistAndDeletionDateIsNotSet() {
+    void testDeleteOldMergingProcessingFiles_GeneralCondition_FileDoesExistAndDeletionDateIsNotSet() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileAlreadyTransfered([
             fileExists: true,
@@ -409,7 +409,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_GeneralCondition_FileDoesExistAndDeletionDateIsSet() {
+    void testDeleteOldMergingProcessingFiles_GeneralCondition_FileDoesExistAndDeletionDateIsSet() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileAlreadyTransfered([
             fileExists: true,
@@ -421,7 +421,7 @@ class MergingPassServiceTests {
     }
 
     @Test
-    public void testDeleteOldMergingProcessingFiles_GeneralCondition_CreateDateToLate() {
+    void testDeleteOldMergingProcessingFiles_GeneralCondition_CreateDateToLate() {
         Date createdBeforeDate = new Date().plus(-1)
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileAlreadyTransfered()
         createMergingPassService()

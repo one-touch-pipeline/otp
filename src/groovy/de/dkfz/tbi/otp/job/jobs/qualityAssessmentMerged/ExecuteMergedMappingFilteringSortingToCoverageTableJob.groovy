@@ -24,7 +24,7 @@ class ExecuteMergedMappingFilteringSortingToCoverageTableJob extends AbstractJob
     QualityAssessmentMergedPassService qualityAssessmentMergedPassService
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         long passId = getProcessParameterValue() as long
         QualityAssessmentMergedPass pass = QualityAssessmentMergedPass.get(passId)
         String chromosomeMappingFilePath = processedMergedBamFileQaFileService.chromosomeMappingFilePath(pass)

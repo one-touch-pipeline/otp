@@ -8,15 +8,15 @@ package de.dkfz.tbi.otp.job.processing
 */
 class JobExcecutionException extends ProcessingException {
 
-    public JobExcecutionException() {
+    JobExcecutionException() {
         this("unknown")
     }
 
-    public JobExcecutionException(String message) {
+    JobExcecutionException(String message) {
         super(message)
     }
 
-    public JobExcecutionException(String message, Throwable cause) {
+    JobExcecutionException(String message, Throwable cause) {
         super(message, cause)
     }
 

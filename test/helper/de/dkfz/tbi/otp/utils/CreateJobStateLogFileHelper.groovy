@@ -7,7 +7,7 @@ import org.junit.rules.TemporaryFolder
 
 class CreateJobStateLogFileHelper {
 
-    public static JobStateLogFile createJobStateLogFile(File tempDir, List<LogFileEntry> listOfLogFileEntryValues) {
+    static JobStateLogFile createJobStateLogFile(File tempDir, List<LogFileEntry> listOfLogFileEntryValues) {
         File file = new File(tempDir, JobStateLogFile.JOB_STATE_LOG_FILE_NAME)
         file.createNewFile()
 
@@ -17,19 +17,19 @@ class CreateJobStateLogFileHelper {
     }
 
 
-    public static void withWorkExecutionDir(TemporaryFolder tmpDir, Closure code, String workExecutionStoreName = "exec_890420_133730004_user_analysis") {
+    static void withWorkExecutionDir(TemporaryFolder tmpDir, Closure code, String workExecutionStoreName = "exec_890420_133730004_user_analysis") {
         File workExecutionDirectory = tmpDir.newFolder(workExecutionStoreName)
         withWorkExecutionDir(workExecutionDirectory, code)
     }
 
-    public static void withJobStateLogFile(TemporaryFolder tmpDir, List<LogFileEntry> listOfLogFileEntryValues, Closure code, String workExecutionDirName = "exec_890420_133730004_user_analysis") {
+    static void withJobStateLogFile(TemporaryFolder tmpDir, List<LogFileEntry> listOfLogFileEntryValues, Closure code, String workExecutionDirName = "exec_890420_133730004_user_analysis") {
         File workExecutionDirectory = tmpDir.newFolder(workExecutionDirName)
         createJobStateLogFile(workExecutionDirectory, listOfLogFileEntryValues)
 
         withWorkExecutionDir(workExecutionDirectory, code)
     }
 
-    public static void withWorkExecutionDir(File workExecutionDirectory, Closure code) {
+    static void withWorkExecutionDir(File workExecutionDirectory, Closure code) {
         RoddyBamFile.metaClass.getWorkExecutionStoreDirectory = { ->
             return workExecutionDirectory.parentFile
         }
@@ -40,7 +40,7 @@ class CreateJobStateLogFileHelper {
         }
     }
 
-    public static LogFileEntry createJobStateLogFileEntry(Map properties = [:]) {
+    static LogFileEntry createJobStateLogFileEntry(Map properties = [:]) {
         return new LogFileEntry([
                 clusterJobId: "testJobId",
                 statusCode: "0",

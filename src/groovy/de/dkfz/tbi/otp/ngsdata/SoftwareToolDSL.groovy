@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 class SoftwareToolDSL {
 
-    public static def softwareToolDef = { String programName, SoftwareTool.Type type, c1 ->
+    static def softwareToolDef = { String programName, SoftwareTool.Type type, c1 ->
 
         c1.version = { String programVersion, c2 ->
             SoftwareTool tool = new SoftwareTool(programName: programName, programVersion: programVersion, type: type)

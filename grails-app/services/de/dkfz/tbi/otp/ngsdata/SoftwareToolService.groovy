@@ -32,7 +32,7 @@ class SoftwareToolService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public SoftwareTool updateSoftwareTool(Long id, String version) {
+    SoftwareTool updateSoftwareTool(Long id, String version) {
         SoftwareTool softwareTool = getSoftwareTool(id)
         softwareTool.programVersion = version
         return assertSave(softwareTool)
@@ -50,14 +50,14 @@ class SoftwareToolService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public SoftwareToolIdentifier updateSoftwareToolIdentifier(Long id, String alias) {
+    SoftwareToolIdentifier updateSoftwareToolIdentifier(Long id, String alias) {
         SoftwareToolIdentifier softwareToolIdentifier = getSoftwareToolIdentifier(id)
         softwareToolIdentifier.name = alias;
         return assertSave(softwareToolIdentifier)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public SoftwareToolIdentifier createSoftwareToolIdentifier(SoftwareTool softwareTool, String alias) {
+    SoftwareToolIdentifier createSoftwareToolIdentifier(SoftwareTool softwareTool, String alias) {
         SoftwareToolIdentifier softwareToolIdentifier = new SoftwareToolIdentifier(
                 name: alias,
                 softwareTool: softwareTool

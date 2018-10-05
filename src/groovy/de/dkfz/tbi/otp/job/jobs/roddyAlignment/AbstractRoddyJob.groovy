@@ -24,8 +24,8 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
  */
 abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubmitWaitValidateJob {
 
-    public static final String NO_STARTED_JOBS_MESSAGE = '\nThere were no started jobs, the execution directory will be removed.\n'
-    public static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddySnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
+    static final String NO_STARTED_JOBS_MESSAGE = '\nThere were no started jobs, the execution directory will be removed.\n'
+    static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddySnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
 
     @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService
@@ -115,7 +115,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
         return analyseFinishedClusterJobs(finishedClusterJobs, jobStateLogFile)
     }
 
-    public Map<ClusterJobIdentifier, String> analyseFinishedClusterJobs(
+    Map<ClusterJobIdentifier, String> analyseFinishedClusterJobs(
             Collection<? extends ClusterJobIdentifier> finishedClusterJobs, JobStateLogFile jobStateLogFile) {
 
         Map<ClusterJobIdentifier, String> failedOrNotFinishedClusterJobs = [:]
@@ -162,7 +162,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
         return submittedClusterJobs
     }
 
-    public void saveRoddyExecutionStoreDirectory(RoddyResult roddyResult, String roddyOutput) {
+    void saveRoddyExecutionStoreDirectory(RoddyResult roddyResult, String roddyOutput) {
         assert roddyResult
 
         File directory = parseRoddyExecutionStoreDirectoryFromRoddyOutput(roddyOutput)
@@ -176,7 +176,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
         assert roddyResult.save(flush: true, failOnError: true)
     }
 
-    public File parseRoddyExecutionStoreDirectoryFromRoddyOutput(String roddyOutput) {
+    File parseRoddyExecutionStoreDirectoryFromRoddyOutput(String roddyOutput) {
         Matcher m = roddyOutput =~ roddyExecutionStoreDirectoryPattern
         if (m.find()) {
             File directory = new File(m.group(1))

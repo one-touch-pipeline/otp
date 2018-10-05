@@ -13,7 +13,7 @@ class WaitingFileUtils {
      * Waits until the specified file system object exists or the specified timeout elapsed.
      */
     @Deprecated
-    public static void waitUntilExists(File file) {
+    static void waitUntilExists(File file) {
         FileService.waitUntilExists(file.toPath())
     }
 
@@ -21,7 +21,7 @@ class WaitingFileUtils {
      * Waits until the specified file system object does not exist or the specified timeout elapsed.
      */
     @Deprecated
-    public static void waitUntilDoesNotExist(File file) {
+    static void waitUntilDoesNotExist(File file) {
         FileService.waitUntilDoesNotExist(file.toPath())
     }
 }

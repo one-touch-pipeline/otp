@@ -4,7 +4,7 @@ package de.dkfz.tbi.otp.ngsdata
 class ReferenceGenomeIndexService {
     ReferenceGenomeService referenceGenomeService
 
-    public static final String REFERENCE_GENOME_INDEX_PATH_COMPONENT = "indexes"
+    static final String REFERENCE_GENOME_INDEX_PATH_COMPONENT = "indexes"
 
     File getFile(ReferenceGenomeIndex referenceGenomeIndex) {
         assert referenceGenomeIndex : "referenceGenomeIndex is null"

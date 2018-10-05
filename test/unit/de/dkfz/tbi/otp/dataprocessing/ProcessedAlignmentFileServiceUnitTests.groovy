@@ -31,13 +31,13 @@ class ProcessedAlignmentFileServiceUnitTests {
 
 
     @Before
-    public void setUp() {
+    void setUp() {
         checkedLogger = new CheckedLogger()
         LogThreadLocal.setThreadLog(checkedLogger)
     }
 
     @After
-    public void tearDown() {
+    void tearDown() {
         LogThreadLocal.removeThreadLog()
         checkedLogger.assertAllMessagesConsumed()
     }

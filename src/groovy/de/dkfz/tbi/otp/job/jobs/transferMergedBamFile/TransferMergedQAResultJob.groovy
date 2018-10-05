@@ -34,7 +34,7 @@ class TransferMergedQAResultJob extends AbstractEndStateAwareJobImpl{
     QualityAssessmentMergedPassService qualityAssessmentMergedPassService
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile bamFile = ProcessedMergedBamFile.get(id)
         Project project = processedMergedBamFileService.project(bamFile)

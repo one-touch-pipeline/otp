@@ -45,7 +45,7 @@ class ImportProcess implements Entity, ProcessParameterObject {
         }
     }
 
-    public void updateState(State state) {
+    void updateState(State state) {
         notNull(state, "the input state for the method updateState is null")
         this.state = state
         assert this.save(flush:true)

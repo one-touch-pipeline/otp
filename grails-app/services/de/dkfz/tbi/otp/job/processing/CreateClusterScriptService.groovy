@@ -34,7 +34,7 @@ class CreateClusterScriptService {
             this.command = command
         }
 
-        public String getCommand() {
+        String getCommand() {
             return command
         }
     }

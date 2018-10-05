@@ -12,12 +12,12 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
  * How the StartJob is triggered is completely open to the implementing class. It may be a cron job
  * or a thread just sleeping for some time.
  */
-public interface StartJob {
+interface StartJob {
     /**
      * @return The JobExecutionPlan which is triggered by this StartJob. May be null (for example when Grails is not
      * fully initialized yet).
      */
-    public JobExecutionPlan getJobExecutionPlan()
+    JobExecutionPlan getJobExecutionPlan()
 
     /**
      * This method can be implemented by the StartJob for the checking.
@@ -26,5 +26,5 @@ public interface StartJob {
      *
      * It is recommended to use the {@code @Scheduled} annotation on this method.
      */
-    public void execute()
+    void execute()
 }

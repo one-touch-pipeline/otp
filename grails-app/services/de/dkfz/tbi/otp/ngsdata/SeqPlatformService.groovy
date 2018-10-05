@@ -20,7 +20,7 @@ class SeqPlatformService {
     }
 
 
-    public static SeqPlatform createNewSeqPlatform(String seqPlatformName,
+    static SeqPlatform createNewSeqPlatform(String seqPlatformName,
                                                    SeqPlatformModelLabel seqPlatformModelLabel = null,
                                                    SequencingKitLabel sequencingKitLabel = null) {
         assert seqPlatformName : "The input seqPlatformName must not be null"
@@ -38,7 +38,7 @@ class SeqPlatformService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public SeqPlatform createNewSeqPlatform(String seqPlatformName, String seqPlatformModelLabelName, String sequencingKitLabelName) {
+    SeqPlatform createNewSeqPlatform(String seqPlatformName, String seqPlatformModelLabelName, String sequencingKitLabelName) {
         assert seqPlatformName : "the input seqplatformname '${seqPlatformName}' must not be null"
         SeqPlatformModelLabel seqPlatformModelLabel = null
         SequencingKitLabel sequencingKitLabel = null
@@ -53,7 +53,7 @@ class SeqPlatformService {
         return seqPlatform
     }
 
-    public SeqPlatform findSeqPlatform(String seqPlatformName, String seqPlatformModelLabelNameOrAlias, String sequencingKitLabelNameOrAlias) {
+    SeqPlatform findSeqPlatform(String seqPlatformName, String seqPlatformModelLabelNameOrAlias, String sequencingKitLabelNameOrAlias) {
         SeqPlatformModelLabel seqPlatformModelLabel = null
         if (seqPlatformModelLabelNameOrAlias) {
             seqPlatformModelLabel = seqPlatformModelLabelService.findByNameOrImportAlias(seqPlatformModelLabelNameOrAlias)

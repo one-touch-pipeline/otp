@@ -18,7 +18,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
     final static String ADAPTER_SEQUENCE1 = "ATGCCCTTGAATC"
 
     @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder()
+    TemporaryFolder tmpDir = new TemporaryFolder()
     TestConfigService configService
 
     void setup() {

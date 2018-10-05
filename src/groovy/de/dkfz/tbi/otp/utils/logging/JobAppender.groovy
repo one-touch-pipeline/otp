@@ -30,16 +30,16 @@ class JobAppender extends AppenderSkeleton {
     private boolean closed = false
     private Map<Long, Appender> appenders = [:]
 
-    public JobAppender() {
+    JobAppender() {
     }
 
-    public JobAppender(boolean isActive) {
+    JobAppender(boolean isActive) {
         super(isActive)
     }
 
     @SuppressWarnings("CloseWithoutCloseable")
     @Override
-    public void close() {
+    void close() {
         appenders.each { k, v ->
             v.close()
         }
@@ -47,7 +47,7 @@ class JobAppender extends AppenderSkeleton {
     }
 
     @Override
-    public boolean requiresLayout() {
+    boolean requiresLayout() {
         return true
     }
 
@@ -77,7 +77,7 @@ class JobAppender extends AppenderSkeleton {
      * internal list.
      * @param step The ProcessingStep to unregister
      */
-    public void unregisterProcessingStep(ProcessingStep step) {
+    void unregisterProcessingStep(ProcessingStep step) {
         if (!appenders.containsKey(step.id)) {
             // no appender for this step - nothing todo
             return
@@ -128,7 +128,7 @@ class JobAppender extends AppenderSkeleton {
         return appender
     }
 
-    public void setLogDirectory(File logDirectory) {
+    void setLogDirectory(File logDirectory) {
         // creates the log directory if it does not yet exist
         if (!logDirectory.exists()) {
             logDirectory.mkdirs()

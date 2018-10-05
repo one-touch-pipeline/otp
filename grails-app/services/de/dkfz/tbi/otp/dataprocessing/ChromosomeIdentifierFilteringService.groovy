@@ -18,7 +18,7 @@ class ChromosomeIdentifierFilteringService {
     /**
      * returns the chromosome names to filter out for coverage
      */
-    public List<String> filteringCoverage(ReferenceGenome referenceGenome) {
+    List<String> filteringCoverage(ReferenceGenome referenceGenome) {
         notNull(referenceGenome, "the referenceGenome in method filteringCoverage is null")
         List<ReferenceGenomeEntry> referenceGenomeEntries = referenceGenomeService.chromosomesInReferenceGenome(referenceGenome)
         return referenceGenomeEntries*.alias

@@ -74,9 +74,9 @@ abstract class AbstractBamFile implements Entity {
     State status = State.DECLARED
 
 
-    public abstract AbstractMergingWorkPackage getMergingWorkPackage()
-    public abstract Set<SeqTrack> getContainedSeqTracks()
-    public abstract AbstractQualityAssessment getOverallQualityAssessment()
+    abstract AbstractMergingWorkPackage getMergingWorkPackage()
+    abstract Set<SeqTrack> getContainedSeqTracks()
+    abstract AbstractQualityAssessment getOverallQualityAssessment()
 
     static constraints = {
         // Type is not nullable for BamFiles except RoddyBamFile,

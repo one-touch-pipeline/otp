@@ -118,7 +118,7 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
      * Example: H456-ABCD-T3-D1
      */
     @Override
-    public String getFullSampleName() {
+    String getFullSampleName() {
         return "${pid}-${tissueType.key}${sampleNumber}-${analyteTypeAndNumber}"
     }
 
@@ -128,7 +128,7 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
      * Example: TUMOR03
      */
     @Override
-    public String getSampleTypeDbName() {
+    String getSampleTypeDbName() {
         String dbName = tissueType.name()
         // In project 59 "1" and "01" have different meanings, so use
         // the sample number exactly as given in the sample identifier.
@@ -146,7 +146,7 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
     }
 
     @Override
-    public String toString() {
+    String toString() {
         return fullSampleName
     }
 }

@@ -2,10 +2,10 @@ package de.dkfz.tbi.otp.ngsdata
 
 interface SampleIdentifierParser {
 
-    public ParsedSampleIdentifier tryParse(String sampleIdentifier)
+    ParsedSampleIdentifier tryParse(String sampleIdentifier)
 
-    public boolean tryParsePid(String pid)
+    boolean tryParsePid(String pid)
 
-    public boolean isForProject(String projectName)
+    boolean isForProject(String projectName)
 
 }

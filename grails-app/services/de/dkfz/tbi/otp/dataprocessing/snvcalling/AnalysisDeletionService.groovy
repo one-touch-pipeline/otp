@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 
-public class AnalysisDeletionService {
+class AnalysisDeletionService {
 
     /**
      * Delete all subclasses of BamFilePairAnalysis (such as SnvCallingInstance, IndelCallingInstance, etc) from the database.

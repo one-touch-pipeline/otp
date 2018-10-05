@@ -24,7 +24,7 @@ class CheckDataFileStatusJob extends AbstractEndStateAwareJobImpl {
     LsdfFilesService lsdfFilesService
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         ConsistencyCheck consistencyCheck = ConsistencyCheck.get(Long.parseLong(getProcessParameterValue()))
         List<DataFile> dataFiles = dataFilesWithConsistentStatus()
         long numberOfInconsistencies = 0

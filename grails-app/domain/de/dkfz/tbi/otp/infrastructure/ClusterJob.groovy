@@ -227,7 +227,7 @@ class ClusterJob implements Entity {
      * describes how efficient the memory was used
      * {@link #usedMemory} divided by {@link #requestedMemory}
      */
-    public Double getMemoryEfficiency () {
+    Double getMemoryEfficiency () {
         if (usedMemory != null && requestedMemory != null) {
              return usedMemory * 1.0 / requestedMemory
         } else {
@@ -238,7 +238,7 @@ class ClusterJob implements Entity {
     /**
      * cpu time per core
      */
-    public Double getCpuTimePerCore () {
+    Double getCpuTimePerCore () {
         if (cpuTime != null && usedCores != null) {
             return cpuTime.millis / usedCores
         } else {
@@ -249,7 +249,7 @@ class ClusterJob implements Entity {
     /**
      * average cpu cores utilized
      */
-    public Double getCpuAvgUtilised () {
+    Double getCpuAvgUtilised () {
         if (cpuTime != null && elapsedWalltime != null && elapsedWalltime.millis != 0) {
             (cpuTime.millis * 1.0) / elapsedWalltime.millis
         } else {
@@ -260,7 +260,7 @@ class ClusterJob implements Entity {
     /**
      * elapsed walltime for the job
      */
-    public Duration getElapsedWalltime () {
+    Duration getElapsedWalltime () {
         if (ended != null && started != null) {
             return new Duration(started, ended)
         } else {
@@ -271,7 +271,7 @@ class ClusterJob implements Entity {
     /**
      * difference of requested and elapsed walltime
      */
-    public Duration getWalltimeDiff () {
+    Duration getWalltimeDiff () {
         if (requestedWalltime != null && elapsedWalltime != null) {
             return requestedWalltime.minus(elapsedWalltime)
         } else {
@@ -279,23 +279,23 @@ class ClusterJob implements Entity {
         }
     }
 
-    public String getRequestedWalltimeAsISO () {
+    String getRequestedWalltimeAsISO () {
         return formatPeriodAsISOString(requestedWalltime.getMillis())
     }
 
-    public String getElapsedWalltimeAsISO () {
+    String getElapsedWalltimeAsISO () {
         return formatPeriodAsISOString(elapsedWalltime.getMillis())
     }
 
-    public String getWalltimeDiffAsISO () {
+    String getWalltimeDiffAsISO () {
         return formatPeriodAsISOString(walltimeDiff.getMillis())
     }
 
-    public String getCpuTimeAsISO () {
+    String getCpuTimeAsISO () {
         return formatPeriodAsISOString(cpuTime.getMillis())
     }
 
-    public String getCpuTimePerCoreAsISO () {
+    String getCpuTimePerCoreAsISO () {
         return formatPeriodAsISOString(new Duration(Math.round(cpuTimePerCore)))
     }
 
@@ -303,7 +303,7 @@ class ClusterJob implements Entity {
         return PeriodFormat.getDefault().print(new Period(value))
     }
 
-    public static ClusterJob findByClusterJobIdentifier(ClusterJobIdentifier identifier) {
+    static ClusterJob findByClusterJobIdentifier(ClusterJobIdentifier identifier) {
         return exactlyOneElement(findAllWhere(
                 realm: identifier.realm,
                 clusterJobId: identifier.clusterJobId,
@@ -311,7 +311,7 @@ class ClusterJob implements Entity {
     }
 
     @Override
-    public String toString() {
+    String toString() {
         return "Cluster job ${clusterJobId} on realm ${realm}"
     }
 }

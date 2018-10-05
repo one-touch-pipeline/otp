@@ -31,7 +31,7 @@ class RunService {
      * @return Run
      */
 
-    public List<Run> listRuns(boolean sortOrder, RunSortColumn column, RunFiltering filtering, String filter) {
+    List<Run> listRuns(boolean sortOrder, RunSortColumn column, RunFiltering filtering, String filter) {
         List seqCenters = seqCenterService.allSeqCenters()
         if (!seqCenters) {
             return []
@@ -89,7 +89,7 @@ class RunService {
      * @param filter Restrict on this search filter if at least three characters
      * @return Number of Runs matching the filtering
      */
-    public int countRun(RunFiltering filtering, String filter) {
+    int countRun(RunFiltering filtering, String filter) {
         if (filtering.enabled) {
             def c = Run.createCriteria()
             return c.get {

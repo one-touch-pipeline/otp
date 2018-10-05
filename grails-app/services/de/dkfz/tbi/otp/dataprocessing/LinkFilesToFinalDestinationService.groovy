@@ -44,7 +44,7 @@ class LinkFilesToFinalDestinationService {
     @Autowired
     ProcessingOptionService processingOptionService
 
-    public void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
+    void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "roddyBamFile must not be null"
         if (!roddyBamFile.withdrawn) {
             RoddyBamFile.withTransaction {
@@ -60,7 +60,7 @@ class LinkFilesToFinalDestinationService {
         }
     }
 
-    public void linkToFinalDestinationAndCleanup(RoddyBamFile roddyBamFile, Realm realm) {
+    void linkToFinalDestinationAndCleanup(RoddyBamFile roddyBamFile, Realm realm) {
         assert roddyBamFile: "roddyBamFile must not be null"
         assert realm: "realm must not be null"
         if (!roddyBamFile.withdrawn) {

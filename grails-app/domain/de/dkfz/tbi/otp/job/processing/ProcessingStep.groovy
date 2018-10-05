@@ -23,7 +23,7 @@ import org.hibernate.*
  * @see Job
  * @see Parameter
  */
-public class ProcessingStep implements Serializable, Entity {
+class ProcessingStep implements Serializable, Entity {
     /**
      * Input Parameters added to this ProcessingStep.
      */
@@ -164,7 +164,7 @@ public class ProcessingStep implements Serializable, Entity {
      * @return The latest {@link ProcessingStepUpdate} belonging to this {@link ProcessingStep} or
      * <code>null</code> if this {@link ProcessingStep} has no {@link ProcessingStepUpdate}s.
      */
-    public ProcessingStepUpdate getLatestProcessingStepUpdate() {
+    ProcessingStepUpdate getLatestProcessingStepUpdate() {
         return ProcessingStepUpdate.findByProcessingStep(this, [sort: "id", order: "desc"])
     }
 
@@ -172,7 +172,7 @@ public class ProcessingStep implements Serializable, Entity {
      * @return The first {@link ProcessingStepUpdate} belonging to this {@link ProcessingStep} or
      * <code>null</code> if this {@link ProcessingStep} has no {@link ProcessingStepUpdate}s.
      */
-    public ProcessingStepUpdate getFirstProcessingStepUpdate() {
+    ProcessingStepUpdate getFirstProcessingStepUpdate() {
         return ProcessingStepUpdate.findByProcessingStep(this, [sort: "id", order: "asc"])
     }
 
@@ -196,7 +196,7 @@ public class ProcessingStep implements Serializable, Entity {
         return instance
     }
 
-    public String getClusterJobName() {
+    String getClusterJobName() {
         String env
         switch (Environment.current) {
             case Environment.PRODUCTION:
@@ -222,7 +222,7 @@ public class ProcessingStep implements Serializable, Entity {
         ].findAll().join('_')
     }
 
-    public boolean belongsToMultiJob() {
+    boolean belongsToMultiJob() {
         Class jobClass = Class.forName(jobClass, true, getClass().getClassLoader())
         return AbstractMultiJob.isAssignableFrom(jobClass)
     }
@@ -231,7 +231,7 @@ public class ProcessingStep implements Serializable, Entity {
         return process.processParameterObject
     }
 
-    public static ProcessingStep findTopMostProcessingStep(ProcessingStep step) {
+    static ProcessingStep findTopMostProcessingStep(ProcessingStep step) {
         if (RestartedProcessingStep.isAssignableFrom(Hibernate.getClass(step))) {
             if (step.original) {
                 return findTopMostProcessingStep(step.original)

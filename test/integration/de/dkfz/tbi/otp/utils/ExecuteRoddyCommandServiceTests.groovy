@@ -36,8 +36,8 @@ class ExecuteRoddyCommandServiceTests {
     final String CONFIG_NAME = "WORKFLOW_VERSION"
     final String ANALYSIS_ID = "WHOLE_GENOME"
 
-    public static final String RODDY_EXECUTION_DIR_NAME_1 = "exec_000000_000000000_a_a"
-    public static final String RODDY_EXECUTION_DIR_NAME_2 = "exec_000000_000000000_b_b"
+    static final String RODDY_EXECUTION_DIR_NAME_1 = "exec_000000_000000000_a_a"
+    static final String RODDY_EXECUTION_DIR_NAME_2 = "exec_000000_000000000_b_b"
 
     TestConfigService configService
     File roddyPath

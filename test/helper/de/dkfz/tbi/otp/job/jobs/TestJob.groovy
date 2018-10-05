@@ -13,7 +13,7 @@ import org.springframework.stereotype.*
 @UseJobLog
 class TestJob extends AbstractJobImpl {
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         println("Execute method of TestJob called")
         addOutputParameter("test", "1234")
         addOutputParameter("test2", "1234")

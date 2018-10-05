@@ -36,11 +36,11 @@ abstract class UserManagementException extends OtpException implements Serializa
         this.id = id
     }
 
-    public String getUserName() {
+    String getUserName() {
         return this.userName
     }
 
-    public Long getId() {
+    Long getId() {
         return this.id
     }
 }

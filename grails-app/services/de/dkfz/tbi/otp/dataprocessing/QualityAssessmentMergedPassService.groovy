@@ -10,8 +10,7 @@ class QualityAssessmentMergedPassService {
     ConfigService configService
     ProcessingOptionService processingOptionService
 
-    public QualityAssessmentMergedPass createPass(ProcessingPriority minPriority) {
-
+    QualityAssessmentMergedPass createPass(ProcessingPriority minPriority) {
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.createCriteria().get {
             eq ("qualityAssessmentStatus", AbstractBamFile.QaProcessingStatus.NOT_STARTED)
             eq ("type", AbstractBamFile.BamType.MDUP)
@@ -47,7 +46,7 @@ class QualityAssessmentMergedPassService {
         return qualityAssessmentMergedPass
     }
 
-    public void passStarted(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
+    void passStarted(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
         notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method passStarted is null")
         update(qualityAssessmentMergedPass, AbstractBamFile.QaProcessingStatus.IN_PROGRESS)
     }
@@ -56,7 +55,7 @@ class QualityAssessmentMergedPassService {
      * When the quality assessment of the merged bam files is done, the qaProcessingStatus is set to finished.
      * Furthermore the fileOperationStatus is set to NEEDS_PROCESSING to trigger the Transfer-Workflow
      */
-    public void passFinished(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
+    void passFinished(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
         notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method passFinished is null")
         update(qualityAssessmentMergedPass, AbstractBamFile.QaProcessingStatus.FINISHED)
         qualityAssessmentMergedPass.abstractMergedBamFile.updateFileOperationStatus(AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING)
@@ -71,12 +70,12 @@ class QualityAssessmentMergedPassService {
         assertSave(abstractMergedBamFile)
     }
 
-    public Realm realmForDataProcessing(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
+    Realm realmForDataProcessing(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
         notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method realmForDataProcessing is null")
         return project(qualityAssessmentMergedPass).realm
     }
 
-    public Project project(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
+    Project project(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
         notNull(qualityAssessmentMergedPass, "The input qualityAssessmentMergedPass of the method project is null")
         return qualityAssessmentMergedPass.project
     }
@@ -93,7 +92,7 @@ class QualityAssessmentMergedPassService {
      * @param bamFile, for which the qa results were calculated
      * @return a sorted List (by identifier, in descending order) of all QualityAssessmentPass, which were created for this ProcessedMergedBamFile
      */
-    public List<QualityAssessmentMergedPass> allQualityAssessmentMergedPasses(ProcessedMergedBamFile bamFile) {
+    List<QualityAssessmentMergedPass> allQualityAssessmentMergedPasses(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the input for the method allQualityAssessmentPasses is null")
         return QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(bamFile, [sort: "id", order: "desc"])
     }
@@ -102,7 +101,7 @@ class QualityAssessmentMergedPassService {
      * @param bamFile, for which the qa results were calculated
      * @return the latest QualityAssessmentPass which was created for this ProcessedMergedBamFile
      */
-    public QualityAssessmentMergedPass latestQualityAssessmentMergedPass(ProcessedMergedBamFile bamFile) {
+    QualityAssessmentMergedPass latestQualityAssessmentMergedPass(ProcessedMergedBamFile bamFile) {
         notNull(bamFile, "the input for the method latestQualityAssessmentPasses is null")
         //the output of allQualityAssessmentPasses needs to be sorted in descending order
         return allQualityAssessmentMergedPasses(bamFile).first()

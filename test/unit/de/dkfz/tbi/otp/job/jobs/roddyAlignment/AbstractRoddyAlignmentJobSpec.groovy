@@ -47,7 +47,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
 
     @Rule
-    TemporaryFolder temporaryFolder
+    public TemporaryFolder temporaryFolder
 
 
     void "prepareAndReturnAlignmentCValues, when RoddyBamFile is null, throw assert"() {

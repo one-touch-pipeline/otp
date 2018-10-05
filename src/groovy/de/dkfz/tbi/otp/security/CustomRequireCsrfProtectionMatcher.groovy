@@ -12,7 +12,7 @@ import javax.servlet.http.HttpServletRequest
 class CustomRequireCsrfProtectionMatcher implements RequestMatcher {
 
     @Override
-    public boolean matches(HttpServletRequest request) {
+    boolean matches(HttpServletRequest request) {
         if (request.isGet()) {
             return false
         }

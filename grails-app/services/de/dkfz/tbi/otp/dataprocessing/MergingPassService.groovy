@@ -34,7 +34,7 @@ class MergingPassService {
      *
      * @return The number of bytes that have been freed on the file system.
      */
-    public long deleteProcessingFiles(final MergingPass mergingPass) {
+    long deleteProcessingFiles(final MergingPass mergingPass) {
         notNull mergingPass
         final Project project = mergingPass.project
         long freedBytes = 0L
@@ -88,7 +88,7 @@ class MergingPassService {
      *
      * @return The number of bytes that have been freed on the file system.
      */
-    public long deleteOldMergingProcessingFiles(final Date createdBefore, final long millisMaxRuntime = Long.MAX_VALUE) {
+    long deleteOldMergingProcessingFiles(final Date createdBefore, final long millisMaxRuntime = Long.MAX_VALUE) {
         notNull createdBefore
         return dataProcessingFilesService.deleteOldProcessingFiles(this, "merging", createdBefore, millisMaxRuntime, {
             ProcessedMergedBamFile.findAll(

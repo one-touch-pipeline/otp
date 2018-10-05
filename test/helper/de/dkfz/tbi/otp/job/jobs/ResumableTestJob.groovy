@@ -12,7 +12,7 @@ import org.springframework.stereotype.*
 class ResumableTestJob extends AbstractJobImpl {
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         throw new Error('should never be called')
     }
 

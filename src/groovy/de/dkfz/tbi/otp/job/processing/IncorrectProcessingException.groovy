@@ -11,15 +11,15 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerException
 */
 class IncorrectProcessingException extends SchedulerException {
 
-    public IncorrectProcessingException() {
+    IncorrectProcessingException() {
         this("unknown")
     }
 
-    public IncorrectProcessingException(String message) {
+    IncorrectProcessingException(String message) {
         super(message)
     }
 
-    public IncorrectProcessingException(String message, Throwable cause) {
+    IncorrectProcessingException(String message, Throwable cause) {
         super(message, cause)
     }
 

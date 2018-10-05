@@ -23,7 +23,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends IntegrationSpec {
     ParseWgbsAlignmentQcJob parseWgbsAlignmentQcJob
 
     @Rule
-    public TemporaryFolder temporaryFolder = new TemporaryFolder()
+    TemporaryFolder temporaryFolder = new TemporaryFolder()
 
     QcTrafficLightService qcTrafficLightService
     TestConfigService configService

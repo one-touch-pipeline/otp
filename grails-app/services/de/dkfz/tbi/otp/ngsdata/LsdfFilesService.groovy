@@ -23,7 +23,7 @@ class LsdfFilesService {
     /**
      * Similar to {@link java.nio.file.Paths#get(String, String...)} from Java 7.
      */
-    public static File getPath(final String first, final String... more) {
+    static File getPath(final String first, final String... more) {
         validatePathSegment(first, "first")
         File file = new File(first)
         for (int i = 0; i < more.length; i++) {
@@ -49,7 +49,7 @@ class LsdfFilesService {
      * This function return path to the initial location
      * of the given dataFile
      */
-    public static String getFileInitialPath(DataFile dataFile) {
+    static String getFileInitialPath(DataFile dataFile) {
         return "${dataFile.initialDirectory}/${dataFile.fileName}"
     }
 
@@ -61,7 +61,7 @@ class LsdfFilesService {
      * @param file
      * @return String with path or null if path can not be established
      */
-    public String getFileFinalPath(DataFile file) {
+    String getFileFinalPath(DataFile file) {
         if (!checkFinalPathDefined(file)) {
             return null
         }
@@ -85,7 +85,7 @@ class LsdfFilesService {
         return true
     }
 
-    public String seqTypeDirectory(DataFile file) {
+    String seqTypeDirectory(DataFile file) {
         if (file.seqTrack) {
             return file.seqTrack.seqType?.dirName
         }
@@ -250,12 +250,12 @@ class LsdfFilesService {
         return path
     }
 
-    public createDirectory(File dir, Realm realm) {
+    void createDirectory(File dir, Realm realm) {
         String cmd = createClusterScriptService.makeDirs([dir], "2770")
         assert remoteShellHelper.executeCommand(realm, cmd) ==~ /^0\s*$/
     }
 
-    public void deleteFilesRecursive(Realm realm, Collection<File> filesOrDirectories) {
+    void deleteFilesRecursive(Realm realm, Collection<File> filesOrDirectories) {
         assert realm: 'realm may not be null'
         assert filesOrDirectories != null: 'filesOrDirectories may not be null'
         if (filesOrDirectories.empty) {

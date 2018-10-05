@@ -20,7 +20,7 @@ import org.junit.*
         SeqType,
 ])
 @TestMixin(ControllerUnitTestMixin)
-public class RoddyWorkflowConfigUnitTests {
+class RoddyWorkflowConfigUnitTests {
 
     File configDir
     File configFile

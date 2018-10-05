@@ -211,7 +211,7 @@ class TestData {
         ] + properties)
     }
 
-    public static ReferenceGenome createReferenceGenome(Map properties = [:]) {
+    static ReferenceGenome createReferenceGenome(Map properties = [:]) {
         return DomainFactory.createReferenceGenome([
                 name :"hg19_1_24",
                 path: "referenceGenome",

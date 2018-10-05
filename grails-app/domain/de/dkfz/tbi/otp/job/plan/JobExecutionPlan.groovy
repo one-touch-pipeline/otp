@@ -58,7 +58,7 @@ class JobExecutionPlan implements Serializable, Entity {
     }
 
     @Override
-    public String toString() {
+    String toString() {
         return this.name
     }
 }

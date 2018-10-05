@@ -20,7 +20,7 @@ class FastqcDataFilesServiceUnitTests {
     Realm realm
 
     @Before
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         configService = new TestConfigService()
         fastqcDataFilesService = new FastqcDataFilesService()
         fastqcDataFilesService.lsdfFilesService = new LsdfFilesService()
@@ -37,7 +37,7 @@ class FastqcDataFilesServiceUnitTests {
     }
 
     @After
-    public void tearDown() throws Exception {
+    void tearDown() throws Exception {
         fastqcDataFilesService = null
 
         seqTrack = null

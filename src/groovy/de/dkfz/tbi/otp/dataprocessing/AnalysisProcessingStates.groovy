@@ -6,7 +6,7 @@ package de.dkfz.tbi.otp.dataprocessing
  * successfully, it does not mean that the produced files are meaningful from the scientific point of view.
  */
 
-public enum AnalysisProcessingStates {
+enum AnalysisProcessingStates {
     /**
      * At the moment a ${@link BamFilePairAnalysis} is created, the analysis workflow starts working on it.
      * Therefore the first state is already {@link AnalysisProcessingStates#IN_PROGRESS}.

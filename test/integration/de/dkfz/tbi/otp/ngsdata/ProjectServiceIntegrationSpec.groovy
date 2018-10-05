@@ -35,7 +35,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
 
     @Rule
-    public TemporaryFolder temporaryFolder
+    TemporaryFolder temporaryFolder
 
 
     def setup() {

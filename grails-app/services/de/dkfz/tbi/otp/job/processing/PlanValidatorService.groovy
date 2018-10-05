@@ -17,25 +17,25 @@ import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
  * The validation does not yet validate plans correctly containing DecisionJobs.
  */
 class PlanValidatorService {
-    public static final String NO_STARTJOB = "No StartJob defined for JobExecutionPlan"
-    public static final String STARTJOB_BEAN_MISSING = "The bean specified as a StartJob does not exist in the Spring context"
-    public static final String STARTJOB_BEAN_NOT_IMPLEMENTING_STARTJOB = "The bean specified as StartJob does not implement the StartJob interface"
-    public static final String NO_FIRSTJOB = "First JobDefinition not defined for JobExecutionPlan"
-    public static final String JOB_BEAN_MISSING = "The bean specified as Job does not exists in Spring context (JobDefinition, Bean name): "
-    public static final String JOB_BEAN_NOT_IMPLEMENTING_JOB = "The bean specified as a Job does not implement the Job interface (JobDefinition, Bean name): "
-    public static final String LAST_JOB_NOT_ENDSTATE_AWARE = "The last specified Job does not implement the end state aware interface"
-    public static final String CIRCULAR_JOBS = "The Job Execution Plan contains a circular Job dependency"
-    public static final String NOT_ALL_JOBS_LINKED = "Not all Job Definitions defined for this Job Execution Plan are linked through the next relationship"
-    public static final String VALIDATOR_LOOP = "Validator is specified before the job it should validate"
-    public static final String VALIDATOR_BEAN_NOT_IMPLEMENTING_INTERFACE = "The bean specified as a ValidatingJob does not implement the ValidatingJob interface (JobDefinition, Bean name): "
-    public static final String VALIDATOR_ON_ENDSTATE = "The to be validated job is endstate aware (JobDefinition, Bean name): "
+    static final String NO_STARTJOB = "No StartJob defined for JobExecutionPlan"
+    static final String STARTJOB_BEAN_MISSING = "The bean specified as a StartJob does not exist in the Spring context"
+    static final String STARTJOB_BEAN_NOT_IMPLEMENTING_STARTJOB = "The bean specified as StartJob does not implement the StartJob interface"
+    static final String NO_FIRSTJOB = "First JobDefinition not defined for JobExecutionPlan"
+    static final String JOB_BEAN_MISSING = "The bean specified as Job does not exists in Spring context (JobDefinition, Bean name): "
+    static final String JOB_BEAN_NOT_IMPLEMENTING_JOB = "The bean specified as a Job does not implement the Job interface (JobDefinition, Bean name): "
+    static final String LAST_JOB_NOT_ENDSTATE_AWARE = "The last specified Job does not implement the end state aware interface"
+    static final String CIRCULAR_JOBS = "The Job Execution Plan contains a circular Job dependency"
+    static final String NOT_ALL_JOBS_LINKED = "Not all Job Definitions defined for this Job Execution Plan are linked through the next relationship"
+    static final String VALIDATOR_LOOP = "Validator is specified before the job it should validate"
+    static final String VALIDATOR_BEAN_NOT_IMPLEMENTING_INTERFACE = "The bean specified as a ValidatingJob does not implement the ValidatingJob interface (JobDefinition, Bean name): "
+    static final String VALIDATOR_ON_ENDSTATE = "The to be validated job is endstate aware (JobDefinition, Bean name): "
 
     /**
      * Dependency Injection of grailsApplication
      */
     def grailsApplication
 
-    public List<String> validate(JobExecutionPlan plan) {
+    List<String> validate(JobExecutionPlan plan) {
         List<String> foundErrors = []
         if (hasStartJob(plan)) {
             // perform validation on StartJob

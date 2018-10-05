@@ -108,7 +108,7 @@ class Group implements Entity {
      * @param role The role for this Group
      * @return The created Group
      */
-    static public Group fromCommandObject(GroupCommand command, Role role) {
+    static Group fromCommandObject(GroupCommand command, Role role) {
         Group group = new Group(name: command.name,
                                 description: command.description,
                                 role: role,

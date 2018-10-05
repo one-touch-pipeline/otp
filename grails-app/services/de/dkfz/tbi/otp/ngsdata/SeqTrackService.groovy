@@ -53,7 +53,7 @@ class SeqTrackService {
      * @param filtering Filtering restrictions
      * @return List of matching Sequences
      */
-    public List<Sequence> listSequences(int offset, int max, boolean sortOrder, SequenceSortColumn column, SequenceFiltering filtering) {
+    List<Sequence> listSequences(int offset, int max, boolean sortOrder, SequenceSortColumn column, SequenceFiltering filtering) {
         if (filtering.enabled) {
             def c = Sequence.createCriteria()
             return c.list {
@@ -109,7 +109,7 @@ class SeqTrackService {
      * @param filtering The filters to apply on the data
      * @return Number of Sequences matching the filtering
      */
-    public int countSequences(SequenceFiltering filtering) {
+    int countSequences(SequenceFiltering filtering) {
         if (filtering.enabled) {
             def c = Sequence.createCriteria()
             return c.get {
@@ -245,8 +245,7 @@ class SeqTrackService {
      * @return a seqTrack without fastqc
      * @see SeqType#getDefaultOtpAlignableSeqTypes()
      */
-    public SeqTrack getSeqTrackReadyForFastqcProcessing(ProcessingPriority minPriority) {
-
+    SeqTrack getSeqTrackReadyForFastqcProcessing(ProcessingPriority minPriority) {
         List<SeqType> seqTypes = SeqType.getAllAlignableSeqTypes()
         List args = [SeqTrack.DataProcessingState.NOT_STARTED.toString(),
                      minPriority.priority,
@@ -279,17 +278,17 @@ LIMIT 1
         return SeqTrack.get(seqTrack?.id)
     }
 
-    public static void setFastqcInProgress(SeqTrack seqTrack) {
+    static void setFastqcInProgress(SeqTrack seqTrack) {
         seqTrack.fastqcState = SeqTrack.DataProcessingState.IN_PROGRESS
         assert(seqTrack.save(flush: true))
     }
 
-    public void setFastqcFinished(SeqTrack seqTrack) {
+    void setFastqcFinished(SeqTrack seqTrack) {
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
         assert(seqTrack.save(flush: true))
     }
 
-    public List<DataFile> getSequenceFilesForSeqTrack(SeqTrack seqTrack) {
+    List<DataFile> getSequenceFilesForSeqTrack(SeqTrack seqTrack) {
         List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
         List<DataFile> filteredFiles = []
         files.each {
@@ -317,7 +316,7 @@ LIMIT 1
         }
     }
 
-    public void fillBaseCount(SeqTrack seqTrack) {
+    void fillBaseCount(SeqTrack seqTrack) {
         long basePairs = 0
         DataFile.findAllBySeqTrack(seqTrack).each { DataFile file ->
             assert (file.sequenceLength && file.nReads): "The sequence length or nReads for datafile ${file} are not provided."
@@ -451,7 +450,7 @@ AND entry.value = :value
     }
 
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.sample.individual.project, 'OTP_READ_ACCESS')")
-    public SeqTrack getSeqTrack(String identifier) {
+    SeqTrack getSeqTrack(String identifier) {
         if (!identifier) {
             return null
         }

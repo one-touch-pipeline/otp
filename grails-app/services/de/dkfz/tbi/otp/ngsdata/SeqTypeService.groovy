@@ -20,12 +20,12 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         }.sort { it.name }
     }
 
-    public static boolean hasSeqTypeByNameOrDisplayName(String nameOrDisplayName) {
+    static boolean hasSeqTypeByNameOrDisplayName(String nameOrDisplayName) {
         assert nameOrDisplayName: "the input nameOrDisplayName '${nameOrDisplayName}' is null"
         return SeqType.findByNameOrDisplayName(nameOrDisplayName, nameOrDisplayName)
     }
 
-    public static boolean isSingleCell(String baseMaterial) {
+    static boolean isSingleCell(String baseMaterial) {
         if (baseMaterial in [SeqType.SINGLE_CELL_DNA, SeqType.SINGLE_CELL_RNA]) {
             return true
         }
@@ -33,7 +33,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void createMultiple(String name, List<String> libraryLayouts, Map properties = [:], List<String> importAliases = []) {
+    void createMultiple(String name, List<String> libraryLayouts, Map properties = [:], List<String> importAliases = []) {
         assert libraryLayouts: "the input libraryLayout must not be empty"
         assert !libraryLayouts.findAll({
             it != SeqType.LIBRARYLAYOUT_SINGLE && it != SeqType.LIBRARYLAYOUT_PAIRED && it != SeqType.LIBRARYLAYOUT_MATE_PAIR
@@ -55,7 +55,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
 
 
     @Override
-    public void getTAndAddAlias(String name, String importAlias) {
+    void getTAndAddAlias(String name, String importAlias) {
         List<SeqType> seqTypes = []
         seqTypes += findByNameOrImportAlias(name, [libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE, singleCell: false]) ?: []
         seqTypes += findByNameOrImportAlias(name, [libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE, singleCell: true]) ?: []

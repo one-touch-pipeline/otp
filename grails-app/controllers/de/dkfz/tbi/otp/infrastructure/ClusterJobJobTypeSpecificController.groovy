@@ -9,7 +9,7 @@ import org.joda.time.format.PeriodFormat
 
 class ClusterJobJobTypeSpecificController {
 
-    public static final int GIGABASES_TO_BASES = 1000000000
+    static final int GIGABASES_TO_BASES = 1000000000
 
     ClusterJobService clusterJobService
 

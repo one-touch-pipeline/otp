@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
-public enum ExecutionState {
+enum ExecutionState {
     /** The Job has been created but not yet started*/
     CREATED,
     /** The Job has been started, that is the processing is running*/

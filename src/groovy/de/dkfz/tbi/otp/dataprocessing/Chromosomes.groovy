@@ -14,7 +14,7 @@ enum Chromosomes {
         this.chr = chr
     }
 
-    public getAlias() {
+    String getAlias() {
         return chr
     }
 

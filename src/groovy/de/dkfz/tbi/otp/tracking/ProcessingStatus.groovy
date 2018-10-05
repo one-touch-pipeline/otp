@@ -5,7 +5,7 @@ import groovy.transform.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.*
 
 @TupleConstructor
-public class ProcessingStatus {
+class ProcessingStatus {
 
     @TupleConstructor
     static enum WorkflowProcessingStatus {
@@ -69,7 +69,7 @@ public class ProcessingStatus {
 
 
     @Override
-    public String toString() {
+    String toString() {
         return """
 Installation: ${installationProcessingStatus}
 FastQC:       ${fastqcProcessingStatus}

@@ -16,20 +16,20 @@ class SeqType implements Entity {
 
     final static LIBRARYLAYOUT_MATE_PAIR = LibraryLayout.MATE_PAIR.name()
 
-    public final static SINGLE_CELL_DNA = "Single-cell DNA"
+    final static SINGLE_CELL_DNA = "Single-cell DNA"
 
-    public final static SINGLE_CELL_RNA = "Single-cell RNA"
+    final static SINGLE_CELL_RNA = "Single-cell RNA"
 
-    public static final TAGMENTATION_SUFFIX = '_TAGMENTATION'
+    static final TAGMENTATION_SUFFIX = '_TAGMENTATION'
 
-    public static final Collection<SeqTypeNames> WGBS_SEQ_TYPE_NAMES = [
+    static final Collection<SeqTypeNames> WGBS_SEQ_TYPE_NAMES = [
             SeqTypeNames.WHOLE_GENOME_BISULFITE,
             SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION,
     ].asImmutable()
 
     // files with these seqTypes must be copied because the corresponding workflows don't support incremental merging
     // TODO OTP-2726
-    public static final Collection<SeqTypeNames> SEQTYPES_MUST_BE_COPIED = WGBS_SEQ_TYPE_NAMES + [
+    static final Collection<SeqTypeNames> SEQTYPES_MUST_BE_COPIED = WGBS_SEQ_TYPE_NAMES + [
             SeqTypeNames.RNA,
             SeqTypeNames.CHIP_SEQ,
     ].asImmutable()

@@ -27,7 +27,7 @@ class CreateViewByPidJob extends AbstractEndStateAwareJobImpl implements AutoRes
 
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         SeqTrack seqTrack = SeqTrack.get(Long.parseLong(getProcessParameterValue()))
         Realm realm = seqTrack.project.realm
 

@@ -70,7 +70,7 @@ class ChromosomeIdentifierSortingService {
      * @param chromosomeIdentifier the chromosome identifiers to sort
      * @return the sorted chromosome identifiers
      */
-    public List<String> sortIdentifiers(Collection<String> chromosomeIdentifiers) {
+    List<String> sortIdentifiers(Collection<String> chromosomeIdentifiers) {
         notNull(chromosomeIdentifiers, "the input for the method sortIdentifiers is null")
         return chromosomeIdentifiers.sort(listComparator)
     }

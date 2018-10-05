@@ -311,7 +311,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteFastQCInformationFromDataFile() throws Exception {
+    void testDeleteFastQCInformationFromDataFile() throws Exception {
         DataFile dataFile = DomainFactory.createDataFile()
         FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.build(dataFile: dataFile)
 
@@ -321,7 +321,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteMetaDataEntryForDataFile() throws Exception {
+    void testDeleteMetaDataEntryForDataFile() throws Exception {
         DataFile dataFile = DomainFactory.createDataFile()
         MetaDataEntry metaDataEntry = MetaDataEntry.build(dataFile: dataFile)
 
@@ -331,7 +331,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteConsistencyStatusInformationForDataFile() throws Exception {
+    void testDeleteConsistencyStatusInformationForDataFile() throws Exception {
         DataFile dataFile = DomainFactory.createDataFile()
         ConsistencyStatus consistencyStatus = ConsistencyStatus.build(dataFile: dataFile)
 
@@ -342,7 +342,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     @Test
-    public void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedBamFile() throws Exception {
+    void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedBamFile() throws Exception {
         AbstractBamFile abstractBamFile = ProcessedBamFile.build()
 
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build(processedBamFile: abstractBamFile)
@@ -357,7 +357,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedMergedBamFile() throws Exception {
+    void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedMergedBamFile() throws Exception {
         AbstractBamFile abstractBamFile = DomainFactory.createProcessedMergedBamFile()
 
         QualityAssessmentMergedPass qualityAssessmentPass = QualityAssessmentMergedPass.build(abstractMergedBamFile: abstractBamFile)
@@ -374,7 +374,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteQualityAssessmentInfoForAbstractBamFile_RoddyBamFile() throws Exception {
+    void testDeleteQualityAssessmentInfoForAbstractBamFile_RoddyBamFile() throws Exception {
         AbstractBamFile abstractBamFile = DomainFactory.createRoddyBamFile()
 
         QualityAssessmentMergedPass qualityAssessmentPass = QualityAssessmentMergedPass.build(abstractMergedBamFile: abstractBamFile)
@@ -391,7 +391,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteQualityAssessmentInfoForAbstractBamFile_null() throws Exception {
+    void testDeleteQualityAssessmentInfoForAbstractBamFile_null() throws Exception {
         AbstractBamFile abstractBamFile = null
 
         final shouldFail = new GroovyTestCase().&shouldFail
@@ -402,7 +402,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteMergingRelatedConnectionsOfBamFile() throws Exception {
+    void testDeleteMergingRelatedConnectionsOfBamFile() throws Exception {
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 pipeline: DomainFactory.createDefaultOtpPipeline()
         ])
@@ -421,7 +421,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteDataFile() throws Exception {
+    void testDeleteDataFile() throws Exception {
         DataFile dataFile = DomainFactory.createDataFile()
         FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.build(dataFile: dataFile)
 
@@ -435,7 +435,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteConnectionFromSeqTrackRepresentingABamFile() throws Exception {
+    void testDeleteConnectionFromSeqTrackRepresentingABamFile() throws Exception {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         AlignmentLog alignmentLog = AlignmentLog.build(seqTrack: seqTrack)
         DataFile dataFile = DomainFactory.createDataFile(alignmentLog: alignmentLog)
@@ -447,7 +447,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_ProcessedBamFile() throws Exception {
+    void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_ProcessedBamFile() throws Exception {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         ProcessedSaiFile processedSaiFile = ProcessedSaiFile.build(dataFile: dataFile)
@@ -472,7 +472,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     @Test
-    public void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_RoddyBamFile() throws Exception {
+    void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_RoddyBamFile() throws Exception {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
         roddyBamFile.workPackage.save(flush: true)
@@ -485,7 +485,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     @Test
-    public void testDeleteSeqScanAndCorrespondingInformation() throws Exception {
+    void testDeleteSeqScanAndCorrespondingInformation() throws Exception {
         SeqScan seqScan = SeqScan.build()
         MergingLog mergingLog = MergingLog.build(seqScan: seqScan)
         MergedAlignmentDataFile mergedAlignmentDataFile = MergedAlignmentDataFile.build(mergingLog: mergingLog)
@@ -498,7 +498,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteSeqTrack() throws Exception {
+    void testDeleteSeqTrack() throws Exception {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         MergingAssignment mergingAssignment = MergingAssignment.build(seqTrack: seqTrack)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
@@ -511,7 +511,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteSeqTrack_seqTrackIsOnlyLinked() throws Exception {
+    void testDeleteSeqTrack_seqTrackIsOnlyLinked() throws Exception {
         SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
         MergingAssignment mergingAssignment = MergingAssignment.build(seqTrack: seqTrack)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
@@ -522,7 +522,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteRun() throws Exception {
+    void testDeleteRun() throws Exception {
         StringBuilder outputStringBuilder = new StringBuilder()
         Run run = Run.build()
         DataFile dataFile = DomainFactory.createDataFile(run: run)
@@ -534,7 +534,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteRunByName() throws Exception {
+    void testDeleteRunByName() throws Exception {
         StringBuilder outputStringBuilder = new StringBuilder()
         Run run = Run.build()
         DataFile dataFile = DomainFactory.createDataFile(run: run)
@@ -546,7 +546,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testThrowExceptionInCaseOfExternalMergedBamFileIsAttached() throws Exception {
+    void testThrowExceptionInCaseOfExternalMergedBamFileIsAttached() throws Exception {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DomainFactory.createExternallyProcessedMergedBamFile(
                 workPackage: DomainFactory.createExternalMergingWorkPackage(
@@ -562,7 +562,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testThrowExceptionInCaseOfSeqTracksAreOnlyLinked() throws Exception {
+    void testThrowExceptionInCaseOfSeqTracksAreOnlyLinked() throws Exception {
         SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "seqTracks only linked") {
@@ -572,7 +572,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     @Test
-    public void testDeleteProcessingFilesOfProject_EmptyProject() {
+    void testDeleteProcessingFilesOfProject_EmptyProject() {
         Project project = DomainFactory.createProject()
 
         shouldFail AssertionError, {
@@ -582,7 +582,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     @Test
-    public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesMissing() {
+    void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesMissing() {
         SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         Project project = seqTrack.project
 
@@ -593,14 +593,14 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     @Test
-    public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesAvailable() {
+    void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesAvailable() {
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
 
         dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
     }
 
     @Test
-    public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked() {
+    void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked() {
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
         markFilesAsLinked(SeqTrack.list())
 
@@ -611,7 +611,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked_Verified() {
+    void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked_Verified() {
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
         markFilesAsLinked(SeqTrack.list())
 
@@ -619,7 +619,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesWithdrawn() {
+    void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesWithdrawn() {
         SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         Project project = seqTrack.project
         markFilesAsWithdrawn([seqTrack])
@@ -630,7 +630,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesWithdrawn_IgnoreWithdrawn() {
+    void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesWithdrawn_IgnoreWithdrawn() {
         SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         Project project = seqTrack.project
         markFilesAsWithdrawn([seqTrack])
@@ -639,7 +639,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_explicitSeqTrack() {
+    void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_explicitSeqTrack() {
         SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         createFastqFiles([st])
 
@@ -647,7 +647,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_explicitSeqTrackDifferentProject_ShouldFail() {
+    void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_explicitSeqTrackDifferentProject_ShouldFail() {
         SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         createFastqFiles([st])
 
@@ -737,7 +737,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     @Test
-    public void testDeleteProcessingFilesOfProject_PMBF() {
+    void testDeleteProcessingFilesOfProject_PMBF() {
         ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
 
         File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
@@ -753,7 +753,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     @Test
-    public void testDeleteProcessingFilesOfProject_PMBF_notVerified() {
+    void testDeleteProcessingFilesOfProject_PMBF_notVerified() {
         ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
 
         File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
@@ -787,7 +787,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     @Test
-    public void testDeleteProcessingFilesOfProject_RBF() {
+    void testDeleteProcessingFilesOfProject_RBF() {
         RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
 
         File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
@@ -802,7 +802,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     @Test
-    public void testDeleteProcessingFilesOfProject_RBF_notVerified() {
+    void testDeleteProcessingFilesOfProject_RBF_notVerified() {
         RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
 
         File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
@@ -846,7 +846,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     @Test
-    public void testDeleteProcessingFilesOfProject_RBF_SNV() {
+    void testDeleteProcessingFilesOfProject_RBF_SNV() {
         AbstractSnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
 
         dataSwapService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder.path, true)
@@ -856,7 +856,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
 
     @Test
-    public void testDeleteProcessingFilesOfProject_RBF_SNV_notVerified() {
+    void testDeleteProcessingFilesOfProject_RBF_SNV_notVerified() {
         AbstractSnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
 
         dataSwapService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder.path)
@@ -896,7 +896,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached() {
+    void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached() {
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "external merged bam files", {
@@ -905,7 +905,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified() {
+    void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified() {
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
         dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)
@@ -914,7 +914,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_nonMergedSeqTrackExists_Verified() {
+    void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_nonMergedSeqTrackExists_Verified() {
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles([sample: bamFile.sample, seqType: bamFile.seqType])
@@ -935,12 +935,12 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     }
 
     @Test
-    public void testDeleteIndividual_SnvWasExecuted() {
+    void testDeleteIndividual_SnvWasExecuted() {
         testDeleteIndividualMethod(DomainFactory.createSnvInstanceWithRoddyBamFiles())
     }
 
     @Test
-    public void testDeleteIndividual_IndelWasExecuted() {
+    void testDeleteIndividual_IndelWasExecuted() {
         testDeleteIndividualMethod(DomainFactory.createIndelCallingInstanceWithRoddyBamFiles())
     }
 

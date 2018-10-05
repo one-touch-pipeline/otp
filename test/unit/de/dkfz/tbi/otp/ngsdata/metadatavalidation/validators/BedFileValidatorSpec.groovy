@@ -102,11 +102,11 @@ class BedFileValidatorSpec extends Specification {
                                         return null
                                     }
                                 }
-                                public boolean tryParsePid(String pid) {
+                                boolean tryParsePid(String pid) {
                                     return true
                                 }
 
-                                public boolean isForProject(String projectName){
+                                boolean isForProject(String projectName){
                                     return true
                                 }
                             }]

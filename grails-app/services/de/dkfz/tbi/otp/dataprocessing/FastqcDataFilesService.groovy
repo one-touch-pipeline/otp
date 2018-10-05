@@ -26,14 +26,14 @@ class FastqcDataFilesService {
     final String FASTQC_ZIP_SUFFIX = ".zip"
 
 
-    public String fastqcOutputDirectory(SeqTrack seqTrack) {
+    String fastqcOutputDirectory(SeqTrack seqTrack) {
         def type = DataProcessingFilesService.OutputDirectories.FASTX_QC
 
         File baseString = lsdfFilesService.getFileViewByPidDirectory(seqTrack)
         return "${baseString}/${type.toString().toLowerCase()}"
     }
 
-    public String fastqcOutputFile(DataFile dataFile) {
+    String fastqcOutputFile(DataFile dataFile) {
         SeqTrack seqTrack = dataFile.seqTrack
         if (!seqTrack) {
             throw new ProcessingException("DataFile not assigned to a SeqTrack")
@@ -43,7 +43,7 @@ class FastqcDataFilesService {
         return "${base}/${fileName}"
     }
 
-    public String fastqcFileName(DataFile dataFile) {
+    String fastqcFileName(DataFile dataFile) {
         return "${fastqcFileNameWithoutZipSuffix(dataFile)}${FASTQC_ZIP_SUFFIX}"
     }
 
@@ -63,15 +63,15 @@ class FastqcDataFilesService {
         return "${body}${FASTQC_FILE_SUFFIX}"
     }
 
-    public Realm fastqcRealm(SeqTrack seqTrack) {
+    Realm fastqcRealm(SeqTrack seqTrack) {
         return seqTrack.project.realm
     }
 
-    public void createFastqcProcessedFile(DataFile dataFile) {
+    void createFastqcProcessedFile(DataFile dataFile) {
         assert (new FastqcProcessedFile(dataFile: dataFile).save(flush: true))
     }
 
-    public void updateFastqcProcessedFile(FastqcProcessedFile fastqc) {
+    void updateFastqcProcessedFile(FastqcProcessedFile fastqc) {
         String path = fastqcOutputFile(fastqc.dataFile)
         File fastqcFile = new File(path)
         if (fastqcFile.canRead()) {
@@ -82,13 +82,13 @@ class FastqcDataFilesService {
         assert (fastqc.save(flush: true))
     }
 
-    public FastqcProcessedFile getAndUpdateFastqcProcessedFile(DataFile dataFile) {
+    FastqcProcessedFile getAndUpdateFastqcProcessedFile(DataFile dataFile) {
         FastqcProcessedFile fastqc = CollectionUtils.exactlyOneElement(FastqcProcessedFile.findAllByDataFile(dataFile))
         updateFastqcProcessedFile(fastqc)
         return fastqc
     }
 
-    public void setFastqcProcessedFileUploaded(FastqcProcessedFile fastqc) {
+    void setFastqcProcessedFileUploaded(FastqcProcessedFile fastqc) {
         fastqc.contentUploaded = true
         assert (fastqc.save(flush: true))
     }
@@ -99,7 +99,7 @@ class FastqcDataFilesService {
      * @param withinZipPath Path to the resource within the zip file
      * @return An inputStream for the combination of zipPath and the withinZipPath parameters
      */
-    public InputStream getInputStreamFromZipFile(DataFile dataFile, String withinZipPath) {
+    InputStream getInputStreamFromZipFile(DataFile dataFile, String withinZipPath) {
         String zipPath = fastqcOutputFile(dataFile)
         withinZipPath = "${fastqcFileNameWithoutZipSuffix(dataFile)}/${withinZipPath}"
         File input = new File(zipPath)
@@ -114,13 +114,13 @@ class FastqcDataFilesService {
         return zipFile.getInputStream(zipEntry)
     }
 
-    public Path pathToFastQcResultFromSeqCenter(DataFile dataFile) {
+    Path pathToFastQcResultFromSeqCenter(DataFile dataFile) {
         String fastqcFileName = this.fastqcFileName(dataFile)
         File pathToSeqCenterFastQcFile = new File(lsdfFilesService.getFileInitialPath(dataFile)).parentFile
         return fileSystemService.filesystemForFastqImport.getPath(pathToSeqCenterFastQcFile.path, fastqcFileName)
     }
 
-    public Path pathToFastQcResultMd5SumFromSeqCenter(DataFile dataFile) {
+    Path pathToFastQcResultMd5SumFromSeqCenter(DataFile dataFile) {
         return fileSystemService.filesystemForFastqImport.getPath("${pathToFastQcResultFromSeqCenter(dataFile)}.md5sum")
     }
 }

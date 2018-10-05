@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.job.jobs
 
 import de.dkfz.tbi.otp.job.processing.*
 
-public interface RestartableStartJob extends StartJob {
+interface RestartableStartJob extends StartJob {
 
     Process restart(Process process)
 }

@@ -17,23 +17,23 @@ class ProcessedBamFileQaFileService {
 
     private static final String QUALITY_ASSESSMENT_DIR_NAME = "QualityAssessment"
 
-    public String directoryPath(QualityAssessmentPass pass) {
+    String directoryPath(QualityAssessmentPass pass) {
         String baseAndQaDir = directoryPath(pass.alignmentPass)
         String passDir = passDirectoryName(pass)
         return "${baseAndQaDir}/${passDir}"
     }
 
-    public String directoryPath(AlignmentPass alignmentPass) {
+    String directoryPath(AlignmentPass alignmentPass) {
         String baseDir = processedAlignmentFileService.getDirectory(alignmentPass)
         String qaDir = QUALITY_ASSESSMENT_DIR_NAME
         return "${baseDir}/${qaDir}"
     }
 
-    public String passDirectoryName(QualityAssessmentPass pass) {
+    String passDirectoryName(QualityAssessmentPass pass) {
         return "pass${pass.identifier}"
     }
 
-    public File finalDestinationDirectory(final QualityAssessmentPass pass) {
+    File finalDestinationDirectory(final QualityAssessmentPass pass) {
         return getPath(
                 configService.getRootPath().path,
                 mergedAlignmentDataFileService.buildRelativePath(pass.seqType, pass.sample),
@@ -42,42 +42,42 @@ class ProcessedBamFileQaFileService {
         )
     }
 
-    public String qualityAssessmentDataFileName(ProcessedBamFile bamFile) {
+    String qualityAssessmentDataFileName(ProcessedBamFile bamFile) {
         String fileName = processedBamFileService.getFileNameNoSuffix(bamFile)
         return "${fileName}_quality.json"
     }
 
-    public String coverageDataFileName(ProcessedBamFile bamFile) {
+    String coverageDataFileName(ProcessedBamFile bamFile) {
         String fileName = processedBamFileService.getFileNameNoSuffix(bamFile)
         return "${fileName}_coverage.tsv"
     }
 
-    public String sortedCoverageDataFileName(ProcessedBamFile bamFile) {
+    String sortedCoverageDataFileName(ProcessedBamFile bamFile) {
         String fileName = processedBamFileService.getFileNameNoSuffix(bamFile)
         return "${fileName}_mappedFilteredAndSortedCoverage.tsv"
     }
 
-    public String coveragePlotFileName(ProcessedBamFile bamFile) {
+    String coveragePlotFileName(ProcessedBamFile bamFile) {
         String fileName = processedBamFileService.getFileNameNoSuffix(bamFile)
         return "${fileName}_coveragePlot.png"
     }
 
-    public String insertSizeDataFileName(ProcessedBamFile bamFile) {
+    String insertSizeDataFileName(ProcessedBamFile bamFile) {
         String fileName = processedBamFileService.getFileNameNoSuffix(bamFile)
         return "${fileName}_qualityDistribution.hst"
     }
 
-    public String insertSizePlotFileName(ProcessedBamFile bamFile) {
+    String insertSizePlotFileName(ProcessedBamFile bamFile) {
         String fileName = processedBamFileService.getFileNameNoSuffix(bamFile)
         return "${fileName}_insertSizePlot.png"
     }
 
-    public String chromosomeMappingFileName(ProcessedBamFile bamFile) {
+    String chromosomeMappingFileName(ProcessedBamFile bamFile) {
         String fileName = processedBamFileService.getFileNameNoSuffix(bamFile)
         return "${fileName}_chromosomeMapping.json"
     }
 
-    public Collection<String> allFileNames(final ProcessedBamFile bamFile) {
+    Collection<String> allFileNames(final ProcessedBamFile bamFile) {
         return [
             qualityAssessmentDataFileName(bamFile),
             coverageDataFileName(bamFile),
@@ -96,7 +96,7 @@ class ProcessedBamFileQaFileService {
      *
      * @return true if there is no serious inconsistency.
      */
-    public boolean checkConsistencyForProcessingFilesDeletion(final QualityAssessmentPass pass) {
+    boolean checkConsistencyForProcessingFilesDeletion(final QualityAssessmentPass pass) {
         notNull pass
         if (!pass.isLatestPass() || !pass.alignmentPass.isLatestPass()) {
             // The QA results of this pass are outdated, so in the final location they will have been overwritten with
@@ -115,7 +115,7 @@ class ProcessedBamFileQaFileService {
      *
      * @return The number of bytes that have been freed on the file system.
      */
-    public long deleteProcessingFiles(final QualityAssessmentPass pass) {
+    long deleteProcessingFiles(final QualityAssessmentPass pass) {
         notNull pass
         if (!checkConsistencyForProcessingFilesDeletion(pass)) {
             return 0L

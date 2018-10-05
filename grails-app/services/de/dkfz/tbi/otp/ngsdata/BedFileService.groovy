@@ -11,7 +11,7 @@ class BedFileService {
      * @return absolute path to the given {@link BedFile}
      * at given {@link Realm}
      */
-    public String filePath(BedFile bedFile, boolean checkExistence = true) {
+    String filePath(BedFile bedFile, boolean checkExistence = true) {
         notNull(bedFile, "bedFile must not be null")
         String refGenomePath = referenceGenomeService.referenceGenomeDirectory(bedFile.referenceGenome, checkExistence).path
         String bedFilePath = "${refGenomePath}/${TARGET_REGIONS_DIR}/${bedFile.fileName}"

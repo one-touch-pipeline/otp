@@ -19,7 +19,7 @@ class ProjectSelectionService {
     private static final String PROJECT_SELECTION_KEY = "PROJECT_SELECTION"
 
 
-    public ProjectSelection getSelectedProject() {
+    ProjectSelection getSelectedProject() {
         if (springSecurityService.isLoggedIn()) {
             GrailsHttpSession session = WebUtils.retrieveGrailsWebRequest().getSession()
             if (!(ProjectSelection) session.getAttribute(PROJECT_SELECTION_KEY)) {
@@ -37,7 +37,7 @@ class ProjectSelectionService {
     }
 
     @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
-    public Project getProjectFromProjectSelectionOrAllProjects(ProjectSelection projectSelection) {
+    Project getProjectFromProjectSelectionOrAllProjects(ProjectSelection projectSelection) {
         if (projectSelection.projects.size() == 1) {
             return projectSelection.projects.first()
         } else if (projectService.allProjects.size() > 0) {
@@ -48,7 +48,7 @@ class ProjectSelectionService {
     }
 
     @PreFilter(value = "hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')", filterTarget = "projects")
-    public setSelectedProject(List<Project> projects, String displayName) {
+    void setSelectedProject(List<Project> projects, String displayName) {
         GrailsHttpSession session = WebUtils.retrieveGrailsWebRequest().getSession()
         ProjectSelection projectSelection = new ProjectSelection(projects: projects, displayName: displayName)
         session.setAttribute(PROJECT_SELECTION_KEY, projectSelection)

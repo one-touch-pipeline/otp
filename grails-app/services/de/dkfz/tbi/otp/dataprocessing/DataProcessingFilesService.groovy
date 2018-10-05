@@ -11,7 +11,7 @@ class DataProcessingFilesService {
     ConfigService configService
     LsdfFilesService lsdfFilesService
 
-    public enum OutputDirectories {
+    enum OutputDirectories {
         BASE,
         ALIGNMENT,
         MERGING,
@@ -23,20 +23,20 @@ class DataProcessingFilesService {
         STRUCTURAL_VARIATION
     }
 
-    public String getOutputDirectory(Individual individual) {
+    String getOutputDirectory(Individual individual) {
         return getOutputDirectory(individual, OutputDirectories.BASE)
     }
 
-    public String getOutputDirectory(Individual individual, String dir) {
+    String getOutputDirectory(Individual individual, String dir) {
         return dir ? getOutputDirectory(individual, dir.toUpperCase() as OutputDirectories) : getOutputDirectory(individual)
     }
 
-    public String getOutputDirectory(Individual individual, OutputDirectories dir) {
+    String getOutputDirectory(Individual individual, OutputDirectories dir) {
         String postfix = (!dir || dir == OutputDirectories.BASE) ? "" : "${dir.toString().toLowerCase()}/"
         return "${individual.resultsPerPidPath.absoluteDataProcessingPath}/${postfix}"
     }
 
-    public long deleteOldProcessingFiles(final Object passService, final String passTypeName, final Date createdBefore, final long millisMaxRuntime, final Closure<Collection> passesFunc) {
+    long deleteOldProcessingFiles(final Object passService, final String passTypeName, final Date createdBefore, final long millisMaxRuntime, final Closure<Collection> passesFunc) {
         notNull passService
         notNull passTypeName
         notNull createdBefore
@@ -72,7 +72,7 @@ class DataProcessingFilesService {
      * @param dbFile Any object with properties fileExists, deletionDate and dateFromFileSystem.
      * @return true if there is no serious inconsistency.
      */
-    public boolean checkConsistencyWithDatabaseForDeletion(final def dbFile, final File fsFile) {
+    boolean checkConsistencyWithDatabaseForDeletion(final def dbFile, final File fsFile) {
         notNull dbFile
         notNull fsFile
         if (!dbFile.fileExists) {
@@ -108,7 +108,7 @@ class DataProcessingFilesService {
      *
      * @return true if there is no serious inconsistency.
      */
-    public boolean checkConsistencyWithFinalDestinationForDeletion(final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames) {
+    boolean checkConsistencyWithFinalDestinationForDeletion(final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames) {
         notNull processingDirectory
         notNull finalDestinationDirectory
         notNull fileNames
@@ -153,7 +153,7 @@ class DataProcessingFilesService {
      *
      * @return The number of bytes that have been freed on the file system.
      */
-    public long deleteProcessingFiles(final def dbFile, final File fsFile, final File... additionalFiles) {
+    long deleteProcessingFiles(final def dbFile, final File fsFile, final File... additionalFiles) {
         notNull dbFile
         notNull fsFile
         notNull additionalFiles
@@ -176,7 +176,7 @@ class DataProcessingFilesService {
     /**
      * @return The number of bytes that have been freed on the file system.
      */
-    public long deleteProcessingFiles(final Project project, final File processingDirectory, final Collection<String> fileNames) {
+    long deleteProcessingFiles(final Project project, final File processingDirectory, final Collection<String> fileNames) {
         notNull project
         notNull processingDirectory
         notNull fileNames
@@ -190,7 +190,7 @@ class DataProcessingFilesService {
     /**
      * @return The number of bytes that have been freed on the file system.
      */
-    public long deleteProcessingFilesAndDirectory(final Project project, final File processingDirectory, final Collection<String> fileNames) {
+    long deleteProcessingFilesAndDirectory(final Project project, final File processingDirectory, final Collection<String> fileNames) {
         notNull project
         notNull processingDirectory
         notNull fileNames
@@ -203,7 +203,7 @@ class DataProcessingFilesService {
      * Deletes the specified file if it exists. Otherwise logs a warning.
      * @return The number of freed bytes (i.e. the size of the file if it existed, otherwise 0).
      */
-    public long deleteProcessingFile(final Project project, final String filePath) {
+    long deleteProcessingFile(final Project project, final String filePath) {
         notNull project
         notNull filePath
         return deleteProcessingFile(project, new File(filePath))
@@ -213,7 +213,7 @@ class DataProcessingFilesService {
      * Deletes the specified file if it exists. Otherwise logs a warning.
      * @return The number of freed bytes (i.e. the size of the file if it existed, otherwise 0).
      */
-    public long deleteProcessingFile(final Project project, final File file) {
+    long deleteProcessingFile(final Project project, final File file) {
         notNull project
         notNull file
         if (file.exists()) {
@@ -230,7 +230,7 @@ class DataProcessingFilesService {
      * Deletes the specified directory if it exists and is empty. If it does not exist, logs a warning. If it is not
      * empty, logs an error.
      */
-    public void deleteProcessingDirectory(final Project project, final String directoryPath) {
+    void deleteProcessingDirectory(final Project project, final String directoryPath) {
         notNull project
         notNull directoryPath
         deleteProcessingDirectory(project, new File(directoryPath))
@@ -240,7 +240,7 @@ class DataProcessingFilesService {
      * Deletes the specified directory if it exists and is empty. If it does not exist, logs a warning. If it is not
      * empty, logs an error.
      */
-    public void deleteProcessingDirectory(final Project project, final File directory) {
+    void deleteProcessingDirectory(final Project project, final File directory) {
         notNull project
         notNull directory
         if (!directory.exists()) {

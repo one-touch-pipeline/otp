@@ -137,7 +137,7 @@ class QcThreshold implements Entity {
         return members
     }
 
-    public static List<String> getValidQcPropertyForQcClass(String cl) {
+    static List<String> getValidQcPropertyForQcClass(String cl) {
         Class clasz = getValidQcClass().find { it.name == cl }
         if (clasz) {
             List<String> propertiesWithAnnotations = getAnnotatedMembers(clasz)

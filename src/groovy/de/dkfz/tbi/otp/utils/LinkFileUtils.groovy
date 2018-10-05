@@ -27,7 +27,7 @@ class LinkFileUtils {
      * Links which already exist are overwritten, parent directories are created automatically if necessary.
      * @param sourceLinkMap The values of the map are used as link names, the keys as the link targets.
      */
-    public void createAndValidateLinks(Map<File, File> sourceLinkMap, Realm realm) {
+    void createAndValidateLinks(Map<File, File> sourceLinkMap, Realm realm) {
         assert sourceLinkMap
         assert realm
 

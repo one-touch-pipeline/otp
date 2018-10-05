@@ -97,7 +97,7 @@ class JobStatusLoggingService {
      *     not finished yet. Note that the returned ClusterJobIdentifier objects are <em>not</em> identical to ones
      *     passed in the argument.
      */
-    public Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs(
+    Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs(
             final ProcessingStep processingStep, final Collection<ClusterJobIdentifier> clusterJobs) {
         notNull processingStep
         notNull clusterJobs
@@ -120,7 +120,7 @@ class JobStatusLoggingService {
      * @return The jobs which have not completed successfully. This includes jobs which have failed and jobs which have
      *     not finished yet.
      */
-    public Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs(
+    Collection<ClusterJobIdentifier> failedOrNotFinishedClusterJobs(
             final ProcessingStep processingStep, final Map<Realm, Collection<ClusterJobIdentifier>> clusterJobMap) {
         notNull processingStep
         notNull clusterJobMap

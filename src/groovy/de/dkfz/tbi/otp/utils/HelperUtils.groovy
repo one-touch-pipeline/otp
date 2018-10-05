@@ -8,20 +8,20 @@ class HelperUtils {
     static Random random = new Random()
     static DateTimeFormatter formatter = DateTimeFormat.forPattern('yyyy-MM-dd-HH-mm-ss-SSSZ')
 
-    public static String getUniqueString() {
+    static String getUniqueString() {
         return "${formatter.print(new DateTime())}-${sprintf('%016X', random.nextLong())}"
     }
 
-    public static String getRandomMd5sum() {
+    static String getRandomMd5sum() {
         return sprintf('%016x', random.nextLong()) + sprintf('%016x', random.nextLong())
     }
 
-    public static String getRandomEmail() {
+    static String getRandomEmail() {
         return sprintf('%016x.%016x@%016x.com', random.nextLong(), random.nextLong(), random.nextLong())
     }
 
 
-    public static String byteArrayToHexString(byte[] bytes) {
+    static String byteArrayToHexString(byte[] bytes) {
         assert bytes
         return new BigInteger(1, bytes).toString(16).padLeft(bytes.length * 2, '0')
     }

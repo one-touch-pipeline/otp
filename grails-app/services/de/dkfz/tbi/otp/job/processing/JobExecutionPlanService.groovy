@@ -19,7 +19,7 @@ class JobExecutionPlanService {
      * @return
      */
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
-    public JobExecutionPlan getPlan(long id) {
+    JobExecutionPlan getPlan(long id) {
         return JobExecutionPlan.get(id)
     }
 
@@ -29,7 +29,7 @@ class JobExecutionPlanService {
      * @return
      */
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
-    public JobDefinition getJobDefinition(long id) {
+    JobDefinition getJobDefinition(long id) {
         return JobDefinition.get(id)
     }
 
@@ -40,7 +40,7 @@ class JobExecutionPlanService {
      * @return The enabled state after the operation. Should be true on success.
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public boolean enablePlan(JobExecutionPlan plan) {
+    boolean enablePlan(JobExecutionPlan plan) {
         if (plan.obsoleted) {
             return false
         }
@@ -62,7 +62,7 @@ class JobExecutionPlanService {
      * @return The enabled state after the operation. Should be false(!) on success.
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public boolean disablePlan(JobExecutionPlan plan) {
+    boolean disablePlan(JobExecutionPlan plan) {
         boolean before = plan.enabled
         plan.enabled = false
         plan = plan.save(flush: true)
@@ -81,7 +81,7 @@ class JobExecutionPlanService {
      * @return List of all not obsoleted JobExecutionPlans
      */
     @PostFilter("hasRole('ROLE_OPERATOR')")
-    public List<JobExecutionPlan> getJobExecutionPlans() {
+    List<JobExecutionPlan> getJobExecutionPlans() {
         return JobExecutionPlan.findAllByObsoleted(false, [sort: "name", order: "asc"])
     }
 
@@ -95,7 +95,7 @@ class JobExecutionPlanService {
      * @return List of all Processes run for the JobExecutionPlan filtered as requested
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public List<Process> getAllProcesses(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false) {
+    List<Process> getAllProcesses(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         final List<JobExecutionPlan> plans = withParents(plan)
         return Process.findAllByJobExecutionPlanInList(plans, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
     }
@@ -116,7 +116,7 @@ class JobExecutionPlanService {
      * @return Map of Processes with latest ProcessingStepUpdate
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, ExecutionState state = null) {
+    Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, ExecutionState state = null) {
         final List<Long> plans = withParents(plan).collect { it.id }
         String query = '''
 SELECT p, max(u.id)
@@ -164,7 +164,7 @@ AND u.id IN (
      * @return The number of Processes run for this plan
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public int getProcessCount(JobExecutionPlan plan) {
+    int getProcessCount(JobExecutionPlan plan) {
         final List<JobExecutionPlan> plans = withParents(plan)
         return Process.countByJobExecutionPlanInList(plans)
     }
@@ -176,7 +176,7 @@ AND u.id IN (
      * @return {@code true} in case there is a Process running for plan, {@code false} otherwise
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public boolean isProcessRunning(JobExecutionPlan plan) {
+    boolean isProcessRunning(JobExecutionPlan plan) {
         final List<JobExecutionPlan> plans = withParents(plan)
         final Process process = Process.findByFinishedAndJobExecutionPlanInList(false, plans)
         return (process != null)
@@ -191,7 +191,7 @@ AND u.id IN (
      * @return The last created Process, or {@code null} if none is available
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Process getLastExecutedProcess(JobExecutionPlan plan) {
+    Process getLastExecutedProcess(JobExecutionPlan plan) {
         final List<Long> plans = withParents(plan).collect { it.id }
         String query = '''
 SELECT p
@@ -222,7 +222,7 @@ ORDER BY p.id DESC
      * @return The number of Processes which have been started for plan
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public int getNumberOfProcesses(JobExecutionPlan plan, ExecutionState state = null) {
+    int getNumberOfProcesses(JobExecutionPlan plan, ExecutionState state = null) {
         final List<JobExecutionPlan> plans = withParents(plan)
         if (!state) {
             return Process.countByJobExecutionPlanInList(plans)
@@ -256,7 +256,7 @@ AND u.id IN (
      * @return Plan Information in a JSON ready format
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public PlanInformation planInformation(JobExecutionPlan plan) {
+    PlanInformation planInformation(JobExecutionPlan plan) {
         return PlanInformation.fromPlan(plan)
     }
 
@@ -266,7 +266,7 @@ AND u.id IN (
      * @return
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public List<JobDefinition> jobDefinitions(JobExecutionPlan plan) {
+    List<JobDefinition> jobDefinitions(JobExecutionPlan plan) {
         List<JobDefinition> jobs = []
         JobDefinition job = plan.firstJob
         while (job) {
@@ -375,7 +375,7 @@ GROUP BY
      * @return Map of job execution plan names -> date of last process with given state
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public Map<String, Date> lastProcessDate(ExecutionState state) {
+    Map<String, Date> lastProcessDate(ExecutionState state) {
         ProcessingStepUpdate.createCriteria().list {
             createAlias("processingStep", "step")
             createAlias("processingStep.process", "proc")

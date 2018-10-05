@@ -19,24 +19,24 @@ class Interval implements Comparable<Interval>{
     final long to
 
     /** the math.min lowest of [from,to] */
-    public long getLowEnd() {
+    long getLowEnd() {
         return Math.min(from, to)
     }
 
     /** the math.max highest of [from,to] */
-    public long getHighEnd() {
+    long getHighEnd() {
         return Math.max(from, to)
     }
 
     /** this interval from <= to? */
-    public boolean isAscending() {
+    boolean isAscending() {
         return from <= to
     }
 
     /**
      * returns this interval, but always in ascending order, guaranteeing that for the returned <code>Interval, from&lt;=to</code>
      */
-    public Interval asAscending() {
+    Interval asAscending() {
         if (isAscending()) {
             return this
         } else {
@@ -47,12 +47,12 @@ class Interval implements Comparable<Interval>{
     /**
      * @return the same interval, but from/to flipped
      */
-    public Interval flip() {
+    Interval flip() {
         return new Interval(to, from)
     }
 
     /** does this interval share at least one whole index with the specified other? */
-    public boolean overlaps(Interval other) {
+    boolean overlaps(Interval other) {
         // the intervals don't overlap if either
         // - we are completely before them or
         // - they are completely before us
@@ -68,7 +68,7 @@ class Interval implements Comparable<Interval>{
      * </p>
      *
      */
-    public boolean abuts(Interval other) {
+    boolean abuts(Interval other) {
         // compare both in ascending order, so we can ignore the direction in this comparison
         return (this.highEnd+1 == other.lowEnd || other.highEnd+1 == this.lowEnd)
     }
@@ -79,7 +79,7 @@ class Interval implements Comparable<Interval>{
      * @param other the other interval.
      * @return the overlapping section, in the same direction as the original, or <code>null</code> if no overlap
      */
-    public Interval intersect(Interval other) {
+    Interval intersect(Interval other) {
         // fail fast if no overlap at all
         if (!this.overlaps(other)) {
             return null
@@ -105,7 +105,7 @@ class Interval implements Comparable<Interval>{
      * @see #abuts(Interval)
      * @see #overlaps(Interval)
      */
-    public Interval union(Interval joinCandidate) {
+    Interval union(Interval joinCandidate) {
         if (this.abuts(joinCandidate) || this.overlaps(joinCandidate)) {
             // return merged interval, in same direction as this object
             long newLowEnd = Math.min(this.lowEnd, joinCandidate.lowEnd)
@@ -127,7 +127,7 @@ class Interval implements Comparable<Interval>{
      * compares this interval to another, first by beginnings, then by endings.
      */
     @Override
-    public int compareTo(Interval other) {
+    int compareTo(Interval other) {
         // compare beginnings
         int retVal = from <=> other.from
 
@@ -142,12 +142,12 @@ class Interval implements Comparable<Interval>{
      * the lenght of the interval, inclusive
      * so <code>new Interval(3,3).length()</code> = 1
      */
-    public long length() {
+    long length() {
         return highEnd - lowEnd + 1
     }
 
     @Override
-    public String toString() {
+    String toString() {
         return "Interval(${from},${to})"
     }
 }

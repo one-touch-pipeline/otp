@@ -13,7 +13,7 @@ class TargetIntervalsImplTest {
     List<String> referenceGenomeEntryNames
 
     @Before
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         //creation of the different possible test cases
         bedFilePath = "/tmp/kitname.bed"
         fileContent = "chr1\t0\t101\nchr2\t32\t106\nchr3\t10000000\t249250622"
@@ -32,7 +32,7 @@ class TargetIntervalsImplTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    void tearDown() throws Exception {
         targetIntervalsImpl = null
         bedFilePath = null
         file.delete()

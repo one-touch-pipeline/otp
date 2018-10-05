@@ -7,7 +7,7 @@ import org.joda.time.LocalDate
 class ClusterJobGeneralController {
 
 
-    public enum GeneralClusterJobsColumns {
+    enum GeneralClusterJobsColumns {
         CLUSTER_JOB_ID(0, 'clusterJobId'),
         CLUSTER_JOB_NAME(1, 'clusterJobName'),
         EXIT_STATUS(2, 'exitStatus'),
@@ -30,7 +30,7 @@ class ClusterJobGeneralController {
     }
 
 
-    public static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
+    static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
 
     ClusterJobService clusterJobService
 

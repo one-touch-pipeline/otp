@@ -13,7 +13,7 @@ import org.springframework.context.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-public class AbstractAlignmentDeciderTest {
+class AbstractAlignmentDeciderTest {
 
     @Autowired
     ApplicationContext applicationContext

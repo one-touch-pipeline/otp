@@ -21,7 +21,7 @@ class TransferSingleLaneQAResultJob extends AbstractEndStateAwareJobImpl{
 
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         long id = Long.parseLong(getProcessParameterValue())
         ProcessedMergedBamFile mergedBamFile = ProcessedMergedBamFile.get(id)
         Project project = processedMergedBamFileService.project(mergedBamFile)

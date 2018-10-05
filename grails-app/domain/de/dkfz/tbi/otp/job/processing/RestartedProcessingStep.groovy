@@ -33,7 +33,7 @@ class RestartedProcessingStep extends ProcessingStep {
      * @param step The original to be restarted ProcessingStep
      * @return The RestartedProcessingStep
      */
-    public static RestartedProcessingStep create(ProcessingStep step) {
+    static RestartedProcessingStep create(ProcessingStep step) {
         RestartedProcessingStep restartedStep = new RestartedProcessingStep()
         restartedStep.jobDefinition = step.jobDefinition
         restartedStep.process = step.process

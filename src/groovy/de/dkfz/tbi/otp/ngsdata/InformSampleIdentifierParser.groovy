@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 @Component
 class InformSampleIdentifierParser implements SampleIdentifierParser {
 
-    public static final String REGEX = createRegex()
+    static final String REGEX = createRegex()
 
     @Override
     DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {

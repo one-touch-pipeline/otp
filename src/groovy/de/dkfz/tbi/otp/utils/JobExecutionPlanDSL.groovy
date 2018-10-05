@@ -189,7 +189,7 @@ class JobExecutionPlanDSL {
         helper.previous = jobDefinition
     }
 
-    public static def plan = { String name, def ctx = null, boolean validate = false, c ->
+    static def plan = { String name, def ctx = null, boolean validate = false, c ->
         // If there is a previous plan, obsolete it
         JobExecutionPlan plan = CollectionUtils.atMostOneElement(JobExecutionPlan.findAllByNameAndObsoleted(name, false))
         plan?.obsoleted = true

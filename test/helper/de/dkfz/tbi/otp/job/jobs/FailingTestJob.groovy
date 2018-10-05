@@ -17,7 +17,7 @@ class FailingTestJob extends AbstractJobImpl implements AutoRestartableJob {
     static final String EXCEPTION_MESSAGE = HelperUtils.uniqueString
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         throw new Exception(EXCEPTION_MESSAGE)
     }
 }

@@ -51,7 +51,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
     TestConfigService configService
 
     @Rule
-    TemporaryFolder temporaryFolder
+    public TemporaryFolder temporaryFolder
 
 
     void "prepareAndReturnWorkflowSpecificCValues, when roddySnvCallingInstance is null, throw assert"() {

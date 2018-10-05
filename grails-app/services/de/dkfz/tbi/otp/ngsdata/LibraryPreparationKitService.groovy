@@ -8,7 +8,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparationKit> {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public LibraryPreparationKit addAdapterFileToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String adapterFile) {
+    LibraryPreparationKit addAdapterFileToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String adapterFile) {
         assert libraryPreparationKit : "libraryPreparationKit must not be null"
         assert adapterFile : "adapterFile must not be null"
         libraryPreparationKit.adapterFile = adapterFile
@@ -17,7 +17,7 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public LibraryPreparationKit addAdapterSequenceToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String reverseComplementAdapterSequence) {
+    LibraryPreparationKit addAdapterSequenceToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String reverseComplementAdapterSequence) {
         assert libraryPreparationKit : "libraryPreparationKit must not be null"
         assert reverseComplementAdapterSequence : "reverseComplementAdapterSequence must not be null"
         libraryPreparationKit.reverseComplementAdapterSequence = reverseComplementAdapterSequence

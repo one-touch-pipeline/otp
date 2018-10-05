@@ -59,7 +59,7 @@ class MergingIntervalCollection implements Iterable<Interval> {
      * @see TreeMap
      * @see TreeMap#subMap(Object, boolean, Object, boolean)
      */
-    public Set<Interval> getOverlappingIntervals(Interval interval) {
+    Set<Interval> getOverlappingIntervals(Interval interval) {
         // step 1: get all the intervals with beginnings inside the target region
         // This gets 3a+3b+4
         final NavigableMap<Long, Interval> overlappingBeginnings = beginnings.subMap(interval.lowEnd, true, interval.highEnd, true)
@@ -91,14 +91,14 @@ class MergingIntervalCollection implements Iterable<Interval> {
      * @param targetStart inclusive, that is: any interval that includes this position is included (even if it is the last position of said interval)
      * @param targetEnd   inclusive, that is: any interval that includes this position is included (even if it is the starting position of said interval)
      */
-    public Set<Interval> getOverlappingIntervals(long targetFrom, long targetTo) {
+    Set<Interval> getOverlappingIntervals(long targetFrom, long targetTo) {
         return getOverlappingIntervals(new Interval(targetFrom, targetTo))
     }
 
     /**
      * passthrough method for {@link #add(long, long)}
      */
-    public void add(Interval interval) {
+    void add(Interval interval) {
         add(interval.from, interval.to)
     }
 
@@ -115,7 +115,7 @@ class MergingIntervalCollection implements Iterable<Interval> {
      *
      * @see #add(Interval)
      */
-    public void add(final long newFrom, final long newTo) {
+    void add(final long newFrom, final long newTo) {
         // grow range by 1 in both direction, to also find abutting intervals
         // this needs to take direction into account
         final long expandedFrom
@@ -151,20 +151,20 @@ class MergingIntervalCollection implements Iterable<Interval> {
     /**
      * @return an immutable view of the currently contained Intervals
      */
-    public Collection<Interval> getValues() {
+    Collection<Interval> getValues() {
         return beginnings.values().asImmutable()
     }
 
-    public Iterator<Interval> iterator() {
+    Iterator<Interval> iterator() {
         return getValues().iterator()
     }
 
-    public void clear() {
+    void clear() {
         beginnings.clear()
         endings.clear()
     }
 
-    public MergingIntervalCollection() {
+    MergingIntervalCollection() {
         beginnings = new TreeMap<Long, Interval>()
         endings = new TreeMap<Long, Interval>()
     }

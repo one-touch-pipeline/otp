@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.OtpException
  */
 class IndividualCreationException extends OtpException {
 
-    public IndividualCreationException(String reason) {
+    IndividualCreationException(String reason) {
         super(reason)
     }
 

@@ -13,11 +13,11 @@ import java.util.Date
 
 class ProcessingTimeStatisticsService {
 
-    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm"
+    static final String DATE_FORMAT = "yyyy-MM-dd HH:mm"
 
     DataSource dataSource
 
-    public List<OtrsTicket> findAllOtrsTicketsByDateBetweenAndSearch(LocalDate dateFrom, LocalDate dateTo, String search) {
+    List<OtrsTicket> findAllOtrsTicketsByDateBetweenAndSearch(LocalDate dateFrom, LocalDate dateTo, String search) {
         assert dateFrom : "No date 'from' is defined."
         assert dateTo : "No date 'to' is defined."
 
@@ -58,7 +58,7 @@ ${search ? """
         return tickets
     }
 
-    public List formatData(OtrsTicket ticket) {
+    List formatData(OtrsTicket ticket) {
         assert ticket : "No OTRS ticket defined."
 
         List<SeqTrack> seqTracks = ticket.findAllSeqTracks() as List
@@ -120,7 +120,7 @@ ${search ? """
         return SeqTrack.executeQuery("SELECT DISTINCT ${property} FROM SeqTrack AS st WHERE st IN (:seqTracks) ORDER BY ${property}", [seqTracks: seqTracks]) as List<String>
     }
 
-    public static String getFormattedPeriod(Date d1, Date d2) {
+    static String getFormattedPeriod(Date d1, Date d2) {
         if (!d1 || !d2) {
             return ""
         }
@@ -146,7 +146,7 @@ ${search ? """
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    public void editTimestampProperty(OtrsTicket ticket, String property, String dateString) {
+    void editTimestampProperty(OtrsTicket ticket, String property, String dateString) {
         if (dateString == "") {
             ticket.submissionReceivedNotice = null
         } else {

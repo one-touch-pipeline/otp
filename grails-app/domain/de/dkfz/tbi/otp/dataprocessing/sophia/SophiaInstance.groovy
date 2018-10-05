@@ -25,7 +25,7 @@ class SophiaInstance extends BamFilePairAnalysis implements ProcessParameterObje
 
 
     @Override
-    public String toString() {
+    String toString() {
         return "SI ${id}${withdrawn ? ' (withdrawn)': ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
     }
 

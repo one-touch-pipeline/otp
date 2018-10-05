@@ -7,11 +7,11 @@ class FastqcResultsService {
 
     SeqTrackService seqTrackService
 
-    public boolean isFastqcAvailable(DataFile dataFile) {
+    boolean isFastqcAvailable(DataFile dataFile) {
         return FastqcProcessedFile.findByDataFileAndContentUploaded(dataFile, true)
     }
 
-    public Map<Long, Boolean> fastqcLinkMap(Run run) {
+    Map<Long, Boolean> fastqcLinkMap(Run run) {
         Map<Long, Boolean> map = [:]
         List<SeqTrack> seqTracks= SeqTrack.findAllByRun(run) // to be protected by ACLs
         seqTracks.each { SeqTrack seqTrack ->

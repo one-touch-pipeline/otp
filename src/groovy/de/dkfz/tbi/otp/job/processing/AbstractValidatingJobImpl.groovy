@@ -5,7 +5,7 @@ package de.dkfz.tbi.otp.job.processing
  *
  * @see ValidatingJob
  */
-abstract public class AbstractValidatingJobImpl extends AbstractEndStateAwareJobImpl implements ValidatingJob {
+abstract class AbstractValidatingJobImpl extends AbstractEndStateAwareJobImpl implements ValidatingJob {
     private ProcessingStep validatedStep
     private Boolean validatedStepSucceeded = null
 
@@ -18,7 +18,7 @@ abstract public class AbstractValidatingJobImpl extends AbstractEndStateAwareJob
     }
 
     @Override
-    public ProcessingStep getValidatorFor() {
+    ProcessingStep getValidatorFor() {
         if (!validatedStep) {
             throw new RuntimeException("Validated Step accessed before set")
         }
@@ -26,12 +26,12 @@ abstract public class AbstractValidatingJobImpl extends AbstractEndStateAwareJob
     }
 
     @Override
-    public void setValidatorFor(ProcessingStep step) {
+    void setValidatorFor(ProcessingStep step) {
         validatedStep = step;
     }
 
     @Override
-    public boolean hasValidatedJobSucceeded() {
+    boolean hasValidatedJobSucceeded() {
         if (validatedStepSucceeded == null) {
             throw new RuntimeException("Step not yet marked as validated")
         }

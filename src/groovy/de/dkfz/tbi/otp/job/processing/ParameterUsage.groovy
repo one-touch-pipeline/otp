@@ -8,7 +8,7 @@ package de.dkfz.tbi.otp.job.processing
  * @see ParameterType
  * @see Parameter
  */
-public enum ParameterUsage {
+enum ParameterUsage {
     /**
      * Used as Input Parameter
      */

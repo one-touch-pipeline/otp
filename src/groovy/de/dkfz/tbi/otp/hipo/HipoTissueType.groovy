@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.hipo
 /**
  * Tissue types as defined by the HIPO project.
  */
-public enum HipoTissueType {
+enum HipoTissueType {
     TUMOR                     ('T'),
     METASTASIS                ('M'),
     SPHERE                    ('S'),
@@ -30,7 +30,7 @@ public enum HipoTissueType {
      * Returns the corresponding {@link HipoTissueType} for a key or <code>null</code> if no
      * {@link HipoTissueType} with that key exists.
      */
-    public static HipoTissueType fromKey(String key) {
+    static HipoTissueType fromKey(String key) {
         return values().find { it.key == key }
     }
 }

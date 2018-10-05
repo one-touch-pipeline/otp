@@ -4,12 +4,12 @@ class ProjectGroupService {
 
     ProjectService projectService
 
-        public List<ProjectGroup> availableProjectGroups() {
+        List<ProjectGroup> availableProjectGroups() {
             List<Project> projects = projectService.getAllProjects()
             return projects*.projectGroup.unique().findAll{it != null}.sort {it.name}
         }
 
-        public ProjectGroup projectGroupByName(String projectGroupName) {
+        ProjectGroup projectGroupByName(String projectGroupName) {
             return ProjectGroup.findByName(projectGroupName)
         }
     }

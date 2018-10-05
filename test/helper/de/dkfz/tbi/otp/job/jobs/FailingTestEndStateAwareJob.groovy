@@ -15,7 +15,7 @@ import org.springframework.stereotype.*
 class FailingTestEndStateAwareJob extends AbstractEndStateAwareJobImpl {
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         println("Execute method of FailingTestEndStateAwareJob called")
         addOutputParameter("test", "1234")
         addOutputParameter("test2", "1234")

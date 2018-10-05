@@ -12,7 +12,7 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
  * Base class for jobs which submit cluster jobs and wait for them to finish and optionally do other
  * things (for example validation).
  */
-public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements SometimesResumableJob, MonitoringJob {
+abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements SometimesResumableJob, MonitoringJob {
 
     enum NextAction {
         /**
@@ -41,7 +41,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
     private boolean executing = false
 
     @Override
-    public final void execute() throws Exception {
+    final void execute() throws Exception {
         synchronized (lockForJobCollections) {
             assert monitoredClusterJobs == null
             assert finishedClusterJobs == null
@@ -72,7 +72,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
     }
 
     @Override
-    public void finished(final ClusterJobIdentifier finishedClusterJob) {
+    void finished(final ClusterJobIdentifier finishedClusterJob) {
         final boolean allFinished
         final int finishedCount
         synchronized (lockForJobCollections) {
@@ -167,7 +167,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
     }
 
     @Override
-    public void planSuspend() {
+    void planSuspend() {
         log.info "Suspension of this job is planned."
         synchronized (lockForResumable) {
             suspendPlanned = true
@@ -175,7 +175,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
     }
 
     @Override
-    public void cancelSuspend() {
+    void cancelSuspend() {
         log.info "Suspension of this job is cancelled."
         synchronized (lockForResumable) {
             suspendPlanned = false
@@ -184,7 +184,7 @@ public abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl impl
     }
 
     @Override
-    public boolean isResumable() {
+    boolean isResumable() {
         synchronized (lockForResumable) {
             return !executing
         }

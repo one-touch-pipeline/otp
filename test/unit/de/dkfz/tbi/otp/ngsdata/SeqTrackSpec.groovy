@@ -22,7 +22,7 @@ import spock.lang.*
         SeqType,
         SoftwareTool,
 ])
-public class SeqTrackSpec extends Specification {
+class SeqTrackSpec extends Specification {
 
     void "test getNReads, returns null"() {
         given:

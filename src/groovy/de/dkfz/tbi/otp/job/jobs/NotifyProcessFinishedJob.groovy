@@ -16,7 +16,7 @@ class NotifyProcessFinishedJob extends AbstractEndStateAwareJobImpl implements A
     TrackingService trackingService
 
     @Override
-    public void execute() throws Exception {
+    void execute() throws Exception {
         trackingService.processFinished(processParameterObject.containedSeqTracks)
         succeed()
     }

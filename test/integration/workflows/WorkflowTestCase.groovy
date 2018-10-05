@@ -109,7 +109,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
 
     @Before
-    public void setUpWorkflowTests() {
+    void setUpWorkflowTests() {
         // NOTE: the following assumptions won't work (they will cause the tests to fail if not true)
         // before Grails 2.1. This means we can't remove the @Ignore annotations yet, but it will
         // prevent the tests from being run with wrong settings. (TODO: remove this comments when
@@ -172,7 +172,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
 
 
     @After
-    public void tearDownWorkflowTests() {
+    void tearDownWorkflowTests() {
         // stop scheduled tasks in SchedulerService and start job
         scheduler.shutdownNow()
         startJobRunning = false
@@ -232,11 +232,11 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         ftpDir = "${getBaseDirectory()}/ftp"
     }
 
-    public void createDirectories(List<File> files) {
+    void createDirectories(List<File> files) {
         createDirectories(files, "2770")
     }
 
-    public void createDirectories(List<File> files, String mode) {
+    void createDirectories(List<File> files, String mode) {
         String mkDirs = createClusterScriptService.makeDirs(files, mode)
         assert remoteShellHelper.executeCommand(realm, mkDirs).toInteger() == 0
         files.each {
@@ -244,11 +244,11 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }
     }
 
-    public void createDirectoriesString(List<String> fileNames) {
+    void createDirectoriesString(List<String> fileNames) {
         createDirectories(fileNames.collect { new File(it) })
     }
 
-    public void createFilesWithContent(Map<File, String> files) {
+    void createFilesWithContent(Map<File, String> files) {
         createDirectories(files.keySet()*.parentFile.unique())
         String cmd = files.collect { File key, String value ->
             "echo '${value}' > ${key}"
@@ -355,7 +355,7 @@ echo \$TEMP_DIR
         return new File(getDataDirectory(), 'reference-genomes')
     }
 
-    public ReferenceGenome createReferenceGenomeWithFile(String referenceGenomeSpecificPath, String fileNamePrefix, String cytosinePositionsIndex = null) {
+    ReferenceGenome createReferenceGenomeWithFile(String referenceGenomeSpecificPath, String fileNamePrefix, String cytosinePositionsIndex = null) {
         File sourceDir = new File(getReferenceGenomeDirectory(), referenceGenomeSpecificPath)
         File source = new File(sourceDir, CHROMOSOME_NAMES_FILE)
 
