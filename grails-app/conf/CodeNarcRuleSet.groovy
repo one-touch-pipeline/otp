@@ -91,8 +91,12 @@ ruleset {
     }
 
     // rulesets/concurrency.xml
-    BusyWait
-    DoubleCheckedLocking
+    BusyWait {
+        priority = 1
+    }
+    DoubleCheckedLocking {
+        priority = 1
+    }
     InconsistentPropertyLocking
     InconsistentPropertySynchronization
     NestedSynchronization
@@ -101,12 +105,16 @@ ruleset {
     StaticDateFormatField
     StaticMatcherField
     StaticSimpleDateFormatField
-    SynchronizedMethod
+    SynchronizedMethod {
+        priority = 1
+    }
     SynchronizedOnBoxedPrimitive
     SynchronizedOnGetClass
     SynchronizedOnReentrantLock
     SynchronizedOnString
-    SynchronizedOnThis
+    SynchronizedOnThis {
+        priority = 1
+    }
     SynchronizedReadObjectMethod
     SystemRunFinalizersOnExit
     ThisReferenceEscapesConstructor {
@@ -188,11 +196,15 @@ ruleset {
         applyToFileNames = SERVICE
         priority = 2
     }
-    AssignmentToStaticFieldFromInstanceMethod
+    AssignmentToStaticFieldFromInstanceMethod {
+        priority = 2
+    }
     BooleanMethodReturnsNull {
         priority = 2
     }
-    BuilderMethodWithSideEffects
+    BuilderMethodWithSideEffects {
+        priority = 2
+    }
     CloneableWithoutClone
     CloseWithoutCloseable {
         priority = 2
@@ -317,7 +329,7 @@ ruleset {
     BracesForIfElse
     BracesForMethod
     BracesForTryCatchFinally
-    ClassJavadoc
+    //ClassJavadoc
     ClosureStatementOnOpeningLineOfMultipleLineClosure {
         priority = 1
     }
@@ -328,7 +340,9 @@ ruleset {
     Indentation {
         priority = 2
     }
-    LineLength
+    LineLength {
+        length = 160
+    }
     MissingBlankLineAfterImports {
         priority = 1
     }
@@ -411,7 +425,7 @@ ruleset {
     GrailsMassAssignment
     GrailsPublicControllerMethod
     GrailsServletContextReference
-    GrailsStatelessService
+    //GrailsStatelessService //seems to have problems with Spring
 
     // rulesets/groovyism.xml
     AssignCollectionSort {
@@ -675,49 +689,93 @@ ruleset {
     UnnecessaryCallToSubstring
     UnnecessaryCast
     UnnecessaryCatchBlock
-    UnnecessaryCollectCall
-    UnnecessaryCollectionCall
+    UnnecessaryCollectCall {
+        priority = 3
+    }
+    UnnecessaryCollectionCall {
+        priority = 1
+    }
     UnnecessaryConstructor
-    UnnecessaryDefInFieldDeclaration
-    UnnecessaryDefInMethodDeclaration
-    UnnecessaryDefInVariableDeclaration
+    //UnnecessaryDefInFieldDeclaration
+    //UnnecessaryDefInMethodDeclaration
+    //UnnecessaryDefInVariableDeclaration
     UnnecessaryDotClass
     UnnecessaryDoubleInstantiation
-    UnnecessaryElseStatement
+    UnnecessaryElseStatement {
+        priority = 3
+    }
     UnnecessaryFinalOnPrivateMethod
     UnnecessaryFloatInstantiation
     //UnnecessaryGString //We would prefer a rule to only use GStrings
-    UnnecessaryGetter
-    UnnecessaryIfStatement
-    UnnecessaryInstanceOfCheck
+    UnnecessaryGetter {
+        priority = 3
+    }
+    UnnecessaryIfStatement {
+        priority = 1
+    }
+    UnnecessaryInstanceOfCheck {
+        priority = 1
+    }
     UnnecessaryInstantiationToGetClass
     UnnecessaryIntegerInstantiation
     UnnecessaryLongInstantiation
     UnnecessaryModOne
     UnnecessaryNullCheck
-    UnnecessaryNullCheckBeforeInstanceOf
-    UnnecessaryObjectReferences
+    UnnecessaryNullCheckBeforeInstanceOf {
+        priority = 1
+    }
+    UnnecessaryObjectReferences {
+        priority = 3
+    }
     UnnecessaryOverridingMethod
-    UnnecessaryPackageReference
-    UnnecessaryParenthesesForMethodCallWithClosure
-    UnnecessaryPublicModifier
+    UnnecessaryPackageReference {
+        priority = 2
+    }
+    UnnecessaryParenthesesForMethodCallWithClosure {
+        priority = 1
+    }
+    UnnecessaryPublicModifier {
+        priority = 1
+    }
     //UnnecessaryReturnKeyword //no
     UnnecessarySafeNavigationOperator
-    UnnecessarySelfAssignment
-    UnnecessarySemicolon
-    UnnecessarySetter
+    UnnecessarySelfAssignment {
+        priority = 1
+    }
+    UnnecessarySemicolon {
+        priority = 1
+    }
+    UnnecessarySetter {
+        priority = 3
+    }
     UnnecessaryStringInstantiation
-    UnnecessarySubstring
+    //UnnecessarySubstring
     UnnecessaryTernaryExpression
-    UnnecessaryToString
+    UnnecessaryToString {
+        priority = 1
+    }
     UnnecessaryTransientModifier
 
     // rulesets/unused.xml
-    UnusedArray
-    UnusedMethodParameter
-    UnusedObject
-    UnusedPrivateField
-    UnusedPrivateMethod
-    UnusedPrivateMethodParameter
-    UnusedVariable
+    UnusedArray {
+        priority = 1
+    }
+    UnusedMethodParameter {
+        priority = 1
+    }
+    UnusedObject {
+        priority = 1
+    }
+    UnusedPrivateField {
+        priority = 1
+    }
+    UnusedPrivateMethod {
+        priority = 1
+    }
+    UnusedPrivateMethodParameter {
+        priority = 1
+    }
+    UnusedVariable {
+        priority = 1
+    }
 }
