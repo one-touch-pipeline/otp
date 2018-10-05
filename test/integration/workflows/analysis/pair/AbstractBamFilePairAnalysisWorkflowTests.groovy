@@ -55,8 +55,16 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 config     : bamFileTumor.config,
         ])
 
-        DomainFactory.createRoddyMergedBamQa(bamFileTumor)
-        DomainFactory.createRoddyMergedBamQa(bamFileControl)
+        //The qa values are taken from the wgs alignment workflow with one lane
+        Map qaValues = [
+                insertSizeMedian  : 406,
+                insertSizeCV      : 23,
+                properlyPaired    : 1919,
+                pairedInSequencing: 2120,
+        ]
+
+        DomainFactory.createRoddyMergedBamQa(bamFileTumor, qaValues)
+        DomainFactory.createRoddyMergedBamQa(bamFileControl, qaValues)
 
         commonBamFileSetup()
         createBedFileAndLibPrepKit()

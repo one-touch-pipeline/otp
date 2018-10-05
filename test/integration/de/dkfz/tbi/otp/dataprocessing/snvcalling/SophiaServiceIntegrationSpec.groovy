@@ -58,6 +58,8 @@ class SophiaServiceIntegrationSpec extends IntegrationSpec {
         'maximumReadLength'  | null
     }
 
+    //TODO: re-enable after OTP-2950
+    @Ignore
     @Unroll
     void "samplePairForProcessing, for Sophia pipeline, only EPMBF available with #property is #value, should return new instance"() {
         given:

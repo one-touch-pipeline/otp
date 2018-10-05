@@ -26,14 +26,12 @@ class SophiaService extends BamFileAnalysisService implements RoddyBamFileAnalys
 
     @Override
     protected String pipelineSpecificBamFileChecks(String number) {
+        //TODO: After solving OTP-2950 re-enable external bam files which has all required values:
+        // insertSizeFile, maximumReadLength, controlMedianIsize, tumorMedianIsize, controlStdIsizePercentage,
+        // tumorStdIsizePercentage, controlProperPairPercentage, tumorProperPairPercentage,
         return """
         AND (
             ambf${number}.class = de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-            OR (
-                ambf${number}.class = de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
-                AND ambf${number}.insertSizeFile IS NOT NULL
-                AND ambf${number}.maximumReadLength IS NOT NULL
-            )
         )
         """.replaceAll('\n', ' ')
     }
