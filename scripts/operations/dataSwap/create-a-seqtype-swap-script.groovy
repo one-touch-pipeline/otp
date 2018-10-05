@@ -66,6 +66,7 @@ script << """
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.config.*
 
 import static org.springframework.util.Assert.*
 
@@ -86,15 +87,15 @@ try {
 """
 
 seqTracks.each { seqTrack ->
-    String name = "${seqTrack.individual.pid}__${seqTrack.run.name}__${seqTrack.laneId}__${seqTrack.seqType.name}__to__${newSeqType.name}".replace('-', '_')
+    Map newValues = adaptValues(seqTrack)
+
+    String name = "${seqTrack.individual.pid}__${seqTrack.run.name}__${seqTrack.laneId}__${seqTrack.seqType.name}__to__${newValues.newSeqTypeName}".replace('-', '_')
     String fileName = "swap_${String.valueOf(counter++).padLeft(4, '0')}_${name}"
     files << fileName
 
-    Map newValues = adaptValues(seqTrack)
-
     script << """
     {
-        laneSwap(
+        dataSwapService.swapLane(
             [
                 "oldProjectName"   : "${seqTrack.project.name}",
                 "newProjectName"   : "${newValues.newProjectName}",
@@ -103,7 +104,7 @@ seqTracks.each { seqTrack ->
                 "oldSampleTypeName": "${seqTrack.sampleType.name}",
                 "newSampleTypeName": "${newValues.newSampleTypeName}",
                 "oldSeqTypeName"   : "${seqTrack.seqType.name}",
-                "newSeqTypeName"   : "${newValues.newSampleTypeName}",
+                "newSeqTypeName"   : "${newValues.newSeqTypeName}",
                 "oldLibraryLayout" : "${seqTrack.seqType.libraryLayout}",
                 "newLibraryLayout" : "${newValues.newLibraryLayout}",
                 "runName"          : "${seqTrack.run.name}",
@@ -119,7 +120,11 @@ seqTracks.each { seqTrack ->
     script << """
             ],
             '${fileName}',
-            SCRIPT_OUTPUT_DIRECTORY)
+            outputStringBuilder,
+            failOnMissingFiles,
+            SCRIPT_OUTPUT_DIRECTORY,
+            linkedFilesVerified,
+            )
     },
 """
 }

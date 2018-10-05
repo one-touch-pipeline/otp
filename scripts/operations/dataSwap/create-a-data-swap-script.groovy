@@ -81,10 +81,11 @@ def createScript = { ->
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.config.*
 
 import static org.springframework.util.Assert.*
 
-DataSwapService dataSwapService = dataSwapService
+DataSwapService dataSwapService = ctx.dataSwapService
 
 StringBuilder outputStringBuilder = new StringBuilder()
 
