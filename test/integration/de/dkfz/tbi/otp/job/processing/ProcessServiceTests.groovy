@@ -244,7 +244,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
-        ProcessingStepUpdate update = mockProcessingStepUpdate(step)
+        mockProcessingStepUpdate(step)
 
         SpringSecurityUtils.doWithAuth("operator") {
             assertEquals(ExecutionState.CREATED, processService.getState(process))
@@ -372,7 +372,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
-        ProcessingStepUpdate update = mockProcessingStepUpdate(step)
+        mockProcessingStepUpdate(step)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             processService.processInformation(process)
@@ -394,7 +394,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
-        ProcessingStepUpdate update = mockProcessingStepUpdate(step)
+        mockProcessingStepUpdate(step)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             shouldFail(IncorrectProcessingException) {

@@ -372,7 +372,7 @@ class MergingWorkPackageUnitTests {
     @Test
     void test_constraint_ExternalMergingWorkPackageExistsAlready_NewMergingWorkPackageHasToBaSaved() {
         ExternalMergingWorkPackage externalMergingWorkPackage = DomainFactory.createExternalMergingWorkPackage()
-        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
+        DomainFactory.createMergingWorkPackage([
                 sample: externalMergingWorkPackage.sample,
                 seqType: externalMergingWorkPackage.seqType,
         ])

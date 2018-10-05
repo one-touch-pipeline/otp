@@ -213,14 +213,14 @@ class AbstractBamFileServiceTests {
         assertEquals(abstractBamFilesExp, abstractBamFilesAct)
 
         ProcessedBamFile processedBamFile2 = createAndSaveProcessedBamFileAndQAObjects(seqTrack, "3")
-        MergingSetAssignment mergingSetAssignment2 = assignToMergingSet(mergingSet, processedBamFile2)
+        assignToMergingSet(mergingSet, processedBamFile2)
 
         abstractBamFilesExp.add(processedBamFile2)
         abstractBamFilesAct = abstractBamFileService.findByProcessedMergedBamFile(pmbf_WholeGenome)
         assertEquals(abstractBamFilesExp, abstractBamFilesAct)
 
         ProcessedMergedBamFile processedMergedBamFile2 = createProcessedMergedBamFile(mergingSet)
-        MergingSetAssignment mergingSetAssignment3 = assignToMergingSet(mergingSet, processedMergedBamFile2)
+        assignToMergingSet(mergingSet, processedMergedBamFile2)
 
         abstractBamFilesExp.add(processedMergedBamFile2)
         abstractBamFilesAct = abstractBamFileService.findByProcessedMergedBamFile(pmbf_WholeGenome)

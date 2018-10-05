@@ -58,7 +58,7 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends IntegrationSpec {
         seqTrackA.sample.individual.project.save(flush: true)
         seqTrackA.run.name = "run_1"
         seqTrackA.run.save(flush: true)
-        def (ticketB, seqTrackB) = createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate(), ticketNumber: "2016122422222222",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)])
+        SeqTrack seqTrackB = createOtrsTicketWithSeqTrack([dateCreated: dateFrom.toDate(), ticketNumber: "2016122422222222",], [ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)])[1] as SeqTrack
         seqTrackB.sample.individual.project.name = "proj_2"
         seqTrackB.sample.individual.project.save(flush: true)
         seqTrackB.run.name = "run_2"
@@ -167,7 +167,7 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends IntegrationSpec {
         Individual individual = DomainFactory.createIndividual(project: project)
         Sample sample = DomainFactory.createSample(individual: individual)
 
-        def (ticket, seqTrack) = createOtrsTicketWithSeqTrack(otrsTicketProperties, [sample: sample])
+        OtrsTicket ticket = createOtrsTicketWithSeqTrack(otrsTicketProperties, [sample: sample])[0] as OtrsTicket
 
         return [ticket, project]
     }

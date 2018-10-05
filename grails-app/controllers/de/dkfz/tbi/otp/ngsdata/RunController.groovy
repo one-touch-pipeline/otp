@@ -117,7 +117,7 @@ class RunFiltering {
             return filtering
         }
         def slurper = new JsonSlurper()
-        def each = slurper.parseText(json).each {
+        slurper.parseText(json).each {
             switch (it.type) {
                 case "runSearch":
                     if (it.value && it.value.length() >= 3) {

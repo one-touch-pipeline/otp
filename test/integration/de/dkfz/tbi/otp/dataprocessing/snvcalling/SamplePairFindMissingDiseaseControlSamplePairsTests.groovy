@@ -266,8 +266,8 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testFindNoExternalMergingWorkPackage() {
-        ExternalMergingWorkPackage disease2 = DomainFactory.createExternalMergingWorkPackage([sample: diseaseMwp.sample, seqType: diseaseMwp.seqType])
-        ExternalMergingWorkPackage control2 = DomainFactory.createExternalMergingWorkPackage([sample: controlMwp.sample, seqType: controlMwp.seqType])
+        DomainFactory.createExternalMergingWorkPackage([sample: diseaseMwp.sample, seqType: diseaseMwp.seqType])
+        DomainFactory.createExternalMergingWorkPackage([sample: controlMwp.sample, seqType: controlMwp.seqType])
 
         diseaseMwp.delete(flush: true)
         controlMwp.delete(flush: true)

@@ -419,7 +419,6 @@ class CrashRecoveryControllerUnitTests {
 
     @Test
     void test_parametersOfJob_ShouldReturnModel() {
-        final String SUCCESS_MESSAGE = '{"success":true}'
         List modelDefiniation = [
             [
                 id: 1,

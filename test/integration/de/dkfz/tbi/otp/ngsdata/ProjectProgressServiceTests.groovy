@@ -76,13 +76,13 @@ class ProjectProgressServiceTests {
         Date toDate = new Date()
         List<Run> runs = projectProgressService.getListOfRuns(projects, date, toDate)
         for (Run run in runs) {
-            Set<String> samples = projectProgressService.getSamples(run)
+            projectProgressService.getSamples(run)
         }
     }
 
     @Test
     void testProject() {
         List<String> names = Project.list()*.name
-        List<Project> projects = projectProgressService.getProjectsFromNameList(names)
+        projectProgressService.getProjectsFromNameList(names)
     }
 }

@@ -197,7 +197,7 @@ class RoddyAlignmentDeciderTest {
         RoddyBamFile bamFile1 = DomainFactory.createRoddyBamFile(
                 withdrawn: false,
         )
-        RoddyBamFile bamFile2 = DomainFactory.createRoddyBamFile(
+        DomainFactory.createRoddyBamFile(
                 withdrawn: false,
                 identifier: bamFile1.identifier + 1,
                 workPackage: bamFile1.workPackage,
@@ -244,7 +244,7 @@ class RoddyAlignmentDeciderTest {
                 config: bamFile1.config,
                 ]
         )
-        RoddyBamFile bamFile3 = DomainFactory.createRoddyBamFile(
+        DomainFactory.createRoddyBamFile(
                 withdrawn: true,
                 md5sum: null,
                 fileOperationStatus: FileOperationStatus.DECLARED,
@@ -276,7 +276,7 @@ class RoddyAlignmentDeciderTest {
                 fileOperationStatus: FileOperationStatus.DECLARED,
                 fileSize: -1,
         )
-        RoddyBamFile bamFile2 = DomainFactory.createRoddyBamFile(
+        DomainFactory.createRoddyBamFile(
                 withdrawn: true,
                 md5sum: null,
                 fileOperationStatus: FileOperationStatus.DECLARED,
@@ -286,7 +286,7 @@ class RoddyAlignmentDeciderTest {
                 seqTracks: [bamFile1.seqTracks.iterator().next()] as Set<SeqTrack>,
                 config: bamFile1.config,
         )
-        RoddyBamFile bamFile3 = DomainFactory.createRoddyBamFile(
+        DomainFactory.createRoddyBamFile(
                 withdrawn: true,
                 md5sum: null,
                 fileOperationStatus: FileOperationStatus.DECLARED,

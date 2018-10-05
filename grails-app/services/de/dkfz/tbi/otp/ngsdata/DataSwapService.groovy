@@ -1542,8 +1542,7 @@ chmod 440 ${newDirectFileName}
             seqTracksOfOldSample.each { SeqTrack seqTrack ->
 
                 bashScriptToMoveFiles << "\n\n#Delete Alignment- & Merging stuff from ${seqTrack} and retrigger Alignment.\n"
-                List<AlignmentPass> alignmentsPasses = AlignmentPass.findAllBySeqTrack(seqTrack)
-                List<ProcessedBamFile> processedBamFiles = ProcessedBamFile.findAllByAlignmentPassInList(alignmentsPasses)
+                AlignmentPass.findAllBySeqTrack(seqTrack)
                 dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !linkedFilesVerified)
 
                 def alignmentDirType = DataProcessingFilesService.OutputDirectories.ALIGNMENT

@@ -178,7 +178,7 @@ class CrashRecoveryServiceUnitTests {
         Map parameters = null
 
         assert shouldFail(PowerAssertionError) {
-            service.markJobsAsFinished(ids, null)
+            service.markJobsAsFinished(ids, parameters)
         }.contains("parameters")
     }
 
@@ -348,7 +348,7 @@ class CrashRecoveryServiceUnitTests {
         Map parameters = null
 
         assert shouldFail(PowerAssertionError) {
-            service.markJobsAsSucceeded(ids, null)
+            service.markJobsAsSucceeded(ids, parameters)
         }.contains("parameters")
     }
 
@@ -494,7 +494,7 @@ class CrashRecoveryServiceUnitTests {
         Map parameters = null
 
         assert shouldFail(PowerAssertionError) {
-            service.markJobsAsFailed(ids, null)
+            service.markJobsAsFailed(ids, parameters)
         }.contains("reason")
     }
 
@@ -583,7 +583,7 @@ class CrashRecoveryServiceUnitTests {
         Map parameters = null
 
         assert shouldFail(PowerAssertionError) {
-            service.restartJobs(ids, null)
+            service.restartJobs(ids, parameters)
         }.contains("reason")
     }
 
@@ -591,7 +591,6 @@ class CrashRecoveryServiceUnitTests {
     void test_restartJobs_ShouldFailBecauseIdsAreUnknown() {
         createServices()
         List ids = [1]
-        Map parameters = [:]
 
         assert shouldFail(RuntimeException) {
             service.restartJobs(ids, ERROR_MESSAGE)
@@ -602,7 +601,6 @@ class CrashRecoveryServiceUnitTests {
     void test_restartJobs_ShouldFailBecauseCrashRecoveryNotActive() {
         createServices(true)
         List ids = [ProcessingStep.build().id]
-        Map parameters = [:]
 
         assert shouldFail(RuntimeException) {
             service.restartJobs(ids, ERROR_MESSAGE)
@@ -655,7 +653,7 @@ class CrashRecoveryServiceUnitTests {
     @Test
     void test_crashJobs_ShouldFailBecauseCrashRecoveryNotActive() {
         createServices(true)
-        ProcessingStep processingStep = ProcessingStep.build()
+        ProcessingStep.build()
 
         assert shouldFail(RuntimeException) { service.crashedJobs() } == "Not in Crash Recovery"
     }
@@ -697,7 +695,6 @@ class CrashRecoveryServiceUnitTests {
     void test_getOutputParametersOfJobs_ShouldFailBecauseIdsAreUnknown() {
         createServices()
         List ids = [1]
-        Map parameters = [:]
 
         assert shouldFail(RuntimeException) { service.getOutputParametersOfJobs(ids) }.contains("No ProcessingStep")
     }
@@ -706,7 +703,6 @@ class CrashRecoveryServiceUnitTests {
     void test_getOutputParametersOfJobs_ShouldFailBecauseCrashRecoveryNotActive() {
         createServices(true)
         List ids = [ProcessingStep.build().id]
-        Map parameters = [:]
 
         assert shouldFail(RuntimeException) { service.getOutputParametersOfJobs(ids) } == "The system is not in Crash Recovery"
     }

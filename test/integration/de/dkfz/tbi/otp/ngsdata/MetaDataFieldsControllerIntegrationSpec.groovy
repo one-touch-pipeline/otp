@@ -242,7 +242,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         given:
         SeqPlatformModelLabel seqPlatformModelLabel = DomainFactory.createSeqPlatformModelLabel(name: "SeqPlatformModelLabel")
         SequencingKitLabel sequencingKitLabel = DomainFactory.createSequencingKitLabel(name: "SequencingKitLabel")
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform(
+        DomainFactory.createSeqPlatform(
                 name: "SeqPlatform",
                 seqPlatformModelLabel: seqPlatformModelLabel,
                 sequencingKitLabel: sequencingKitLabel,

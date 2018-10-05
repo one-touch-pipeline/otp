@@ -66,7 +66,7 @@ class BamMetadataImportServiceSpec extends Specification {
         metadataFile.bytes = 'Header\nI am metadata!'.getBytes(BamMetadataValidationContext.CHARSET)
         File qualityDirectory = new File(testDirectory,"quality")
         assert qualityDirectory.mkdirs()
-        File qualityControlFile = new File(qualityDirectory, "file.qc")
+        new File(qualityDirectory, "file.qc")
         List<String> furtherFiles = ["/quality"]
 
         BamMetadataImportService service = new BamMetadataImportService()

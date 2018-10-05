@@ -361,7 +361,7 @@ newLine"""
 
     @Test
     void testSaveRoddyExecutionStoreDirectory_WhenParsedExecutionStoreDirNotEqualsToExpectedPath_ShouldFail() {
-        File workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
+        setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.metaClass.getWorkExecutionStoreDirectory = {
             return tmpDir.newFolder("Folder")

@@ -13,8 +13,6 @@ import org.joda.time.*
 
 class IndividualService {
     def springSecurityService
-    def sampleTypeService
-    def sampleService
     def sampleIdentifierService
     def projectService
     CommentService commentService
@@ -81,7 +79,6 @@ class IndividualService {
         if (!projects) {
             return []
         }
-        String columnName = "project"
         def c = Individual.createCriteria()
         return c.list {
             'in'('project', projects)

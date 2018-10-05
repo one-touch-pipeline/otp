@@ -27,7 +27,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         )
         indelCallingInstance = DomainFactory.createIndelCallingInstanceWithSameSamplePair(snvCallingInstance)
         aceseqInstance = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance)
-        Realm realm = DomainFactory.createRealm()
+        DomainFactory.createRealm()
 
         samplePair2 = DomainFactory.createDisease(samplePair.mergingWorkPackage2)
         bamFileTumor2 = DomainFactory.createProcessedMergedBamFile(

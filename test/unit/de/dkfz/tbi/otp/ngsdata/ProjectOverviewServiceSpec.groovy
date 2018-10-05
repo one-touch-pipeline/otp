@@ -213,7 +213,7 @@ class ProjectOverviewServiceSpec extends Specification {
     void "listReferenceGenome, when searching other project, don't find this"() {
         given:
         Project otherProject = DomainFactory.createProject()
-        ReferenceGenomeProjectSeqType rgpst = DomainFactory.createReferenceGenomeProjectSeqType()
+        DomainFactory.createReferenceGenomeProjectSeqType()
 
         when:
         List<ReferenceGenomeProjectSeqType> list = new ProjectOverviewService().listReferenceGenome(otherProject)

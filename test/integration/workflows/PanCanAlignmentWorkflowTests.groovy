@@ -105,7 +105,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
     void testAlignLanesOnly_NoBaseBamExist_OneLane_WithFingerPrinting_allFine() {
 
         // prepare
-        SeqTrack seqTrack = createSeqTrack("readGroup1")
+        createSeqTrack("readGroup1")
         setUpFingerPrintingFile()
 
         executeAndVerify_AlignLanesOnly_AllFine()

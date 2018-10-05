@@ -41,8 +41,7 @@ class ClusterJobServiceSpec extends Specification {
         given:
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
 
-        def(job, run) = createClusterJobWithRun(null, [seqType: seqType])
-        job = job as ClusterJob
+        ClusterJob job = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
 
         ClusterJob c2 = createClusterJob(seqType: seqType)
 
@@ -69,8 +68,7 @@ class ClusterJobServiceSpec extends Specification {
         given:
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
 
-        def(job, run) = createClusterJobWithRun(null, [seqType: seqType])
-        job = job as ClusterJob
+        ClusterJob job = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
 
         GenericJobInfo jobInfo = new GenericJobInfo(null, null, null, null, null)
 
@@ -91,8 +89,7 @@ class ClusterJobServiceSpec extends Specification {
         given:
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
 
-        def(job, run) = createClusterJobWithRun(null, [seqType: seqType])
-        job = job as ClusterJob
+        ClusterJob job = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
 
         ClusterJob c2 = createClusterJob(seqType: seqType)
 
@@ -143,8 +140,7 @@ class ClusterJobServiceSpec extends Specification {
         given:
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Canada/Saskatchewan")
 
-        def(job, run) = createClusterJobWithRun(null, [seqType: seqType])
-        job = job as ClusterJob
+        ClusterJob job = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
         org.joda.time.DateTime queued = job.queued
 
         ClusterJobIdentifier clusterJobIdentifier = new ClusterJobIdentifier(job.realm, job.clusterJobId, job.userName)
@@ -259,7 +255,7 @@ class ClusterJobServiceSpec extends Specification {
 
     void testGetBasesSum_WhenNoContainedSeqTracks_ShouldReturnNull() {
         given:
-        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+        ClusterJob job = setupClusterJobsOfSameProcessingStepAndRun()[0] as ClusterJob
 
         expect:
         null == ClusterJobService.getBasesSum(job)
@@ -288,7 +284,7 @@ class ClusterJobServiceSpec extends Specification {
 
     void testGetFileSizesSum_WhenNoContainedDataFiles_ShouldReturnNull() {
         given:
-        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+        ClusterJob job = setupClusterJobsOfSameProcessingStepAndRun()[0] as ClusterJob
 
         expect:
         null == ClusterJobService.getFileSizesSum(job)
@@ -307,7 +303,7 @@ class ClusterJobServiceSpec extends Specification {
 
     void testGetReadsSum_WhenNoContainedSeqTracks_ShouldReturnNull() {
         given:
-        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+        ClusterJob job = setupClusterJobsOfSameProcessingStepAndRun()[0] as ClusterJob
 
         expect:
         null == ClusterJobService.getReadsSum(job)

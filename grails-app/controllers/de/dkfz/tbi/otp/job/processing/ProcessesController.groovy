@@ -67,7 +67,6 @@ class ProcessesController {
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
         Map<String, Long> processCounts
-        Map<String, Long> successProcessCounts
         Map<String, Long> finishedProcessCounts
         Map<String, Long> failedProcessCounts
         Map<String, Date> lastSuccessDates

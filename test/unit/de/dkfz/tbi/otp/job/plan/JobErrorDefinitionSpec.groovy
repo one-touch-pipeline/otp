@@ -16,7 +16,7 @@ class JobErrorDefinitionSpec extends Specification {
 
 
     def setup() {
-        JobDefinition jobDefinition = DomainFactory.createJobDefinition()
+        DomainFactory.createJobDefinition()
 
         JobErrorDefinition jobErrorDefinition = new JobErrorDefinition(errorExpression: "jobErrorDefinition", type: JobErrorDefinition.Type.MESSAGE, action: JobErrorDefinition.Action.STOP)
         jobErrorDefinition.save(flush: true)

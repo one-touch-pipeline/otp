@@ -16,11 +16,11 @@ class ClusterJobUnitTests {
     void testFindByClusterJobIdentifier() {
         ClusterJob clusterJob = ClusterJob.build()
         ClusterJobIdentifier identifier = new ClusterJobIdentifier(clusterJob)
-        ClusterJob differentJobId = ClusterJob.build(
+        ClusterJob.build(
                 realm: identifier.realm,
                 clusterJobId: getUniqueString(),
         )
-        ClusterJob differentRealm = ClusterJob.build(
+        ClusterJob.build(
                 realm: Realm.build(),
                 clusterJobId: identifier.clusterJobId,
         )

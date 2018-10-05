@@ -206,7 +206,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     void createBedFileAndLibPrepKit () {
         LibraryPreparationKit kit = DomainFactory.createLibraryPreparationKit(name: "Agilent5withoutUTRs")
-        BedFile bedFile = DomainFactory.createBedFile(
+        DomainFactory.createBedFile(
                 fileName: "Agilent5withoutUTRs_plain.bed",
                 libraryPreparationKit: kit,
                 referenceGenome: referenceGenome,

@@ -34,7 +34,6 @@ class AbstractMergedBamFileServiceSpec extends Specification {
     @Unroll
     void "getExistingBamFilePath, when fail for #failCase, throw an exception"() {
         given:
-        String errorMessage = HelperUtils.uniqueString
         File file = CreateFileHelper.createFile(temporaryFolder.newFile())
         AbstractMergedBamFileService service = new AbstractMergedBamFileService()
         AbstractMergedBamFile bamFile = Mock(AbstractMergedBamFile) {

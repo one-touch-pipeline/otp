@@ -290,7 +290,7 @@ class RoddyAlignmentStartJobTest {
         assert 0 == RoddyWorkflowConfig.list().size()
 
         assert TestCase.shouldFail (AssertionError) {
-            RoddyBamFile rbf = testRoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
+            testRoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
         }.contains('RoddyWorkflowConfig')
     }
 

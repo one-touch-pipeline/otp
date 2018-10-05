@@ -83,7 +83,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
         String seqCenterDirName = "core"
         // Run
         String runName = "runName"
-        String runDirName = "run${runName}"
 
 
         Project project = DomainFactory.createProject(

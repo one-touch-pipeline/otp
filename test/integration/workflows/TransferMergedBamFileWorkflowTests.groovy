@@ -86,16 +86,11 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
         // Project
         String projectName = "project"
         String projectDirName = "project1"
-        // SeqType
-        String seqTypeDirName = "whole_genome_sequencing"
-        String seqTypeName = SeqTypeNames.WHOLE_GENOME.seqTypeName
-        String seqTypeLibrary = SeqType.LIBRARYLAYOUT_PAIRED
         // SeqCenter
         String seqCenterName = "DKFZ"
         String seqCenterDirName = "core"
         // Run
         String runName = "runName"
-        String runDirName = "run${runName}"
 
 
         Project project = DomainFactory.createProject(

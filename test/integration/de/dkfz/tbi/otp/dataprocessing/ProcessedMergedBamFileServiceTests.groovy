@@ -91,7 +91,7 @@ class ProcessedMergedBamFileServiceTests {
     @Test(expected = IllegalArgumentException)
     void testFileNameForMetricsBamFileIsNull() {
         ProcessedMergedBamFile processedMergedBamFile = null
-        String nameAct = processedMergedBamFileService.fileNameForMetrics(processedMergedBamFile)
+        processedMergedBamFileService.fileNameForMetrics(processedMergedBamFile)
     }
 
     @Test
@@ -193,7 +193,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testMergedBamFileWithFinishedQAWhenStatusNotProcessed() {
-        ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
+        createProcessedMergedBamFile()
         assertNull(processedMergedBamFileService.mergedBamFileWithFinishedQA(ProcessingPriority.NORMAL))
     }
 
@@ -256,7 +256,7 @@ class ProcessedMergedBamFileServiceTests {
 
     @Test
     void testMergedBamFileWithFinishedQA_FastTrackFirst() {
-        ProcessedMergedBamFile processedMergedBamFileNormalPriority = setupForSuccessfulMergedBamFileWithFinishedQa()
+        setupForSuccessfulMergedBamFileWithFinishedQa()
 
         ProcessedMergedBamFile processedMergedBamFileFastTrackPriority = setupForSuccessfulMergedBamFileWithFinishedQa()
 
@@ -350,8 +350,8 @@ class ProcessedMergedBamFileServiceTests {
     @Test
     void testSample() {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
-        Sample sampleExp = mergedBamFile.sample
-        Sample sampleAct = processedMergedBamFileService.sample(mergedBamFile)
+        mergedBamFile.sample
+        processedMergedBamFileService.sample(mergedBamFile)
     }
 
     @Test(expected = IllegalArgumentException)

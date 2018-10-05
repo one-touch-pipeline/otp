@@ -67,6 +67,6 @@ class ChromosomeIdentifierFilteringServiceTests {
     @Test(expected = IllegalArgumentException)
     void testfilteringCoverageReferenceGeomeIsNull() {
         referenceGenome = null
-        List<String> chromosomesNamesAct = chromosomeIdentifierFilteringService.filteringCoverage(referenceGenome)
+        chromosomeIdentifierFilteringService.filteringCoverage(referenceGenome)
     }
 }

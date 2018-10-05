@@ -19,7 +19,6 @@ class ProcessStatusService {
      */
     String statusLogFile(String path) {
         notNull(path, "the import for the method statusLogFile is null")
-        File dir = new File(path)
         return path + "/status.log"
     }
 

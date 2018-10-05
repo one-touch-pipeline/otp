@@ -77,7 +77,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameAndModelGivenAndKitIsNull() {
-        def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
+        SeqPlatformModelLabel model = createDataFor_findForNameAndModelAndSequencingKit()[0] as SeqPlatformModelLabel
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, null)
         assert seqPlatform
@@ -88,7 +88,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameAndKitGivenAndModelIsNull() {
-        def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
+        SequencingKitLabel kit = createDataFor_findForNameAndModelAndSequencingKit()[1] as SequencingKitLabel
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, null, kit)
         assert seqPlatform
@@ -99,7 +99,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameGivenAndModelAndKitIsNull() {
-        def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
+        createDataFor_findForNameAndModelAndSequencingKit()
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, null, null)
         assert seqPlatform
@@ -129,7 +129,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnNull_UnknownModelGiven() {
-        def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
+        SequencingKitLabel kit = createDataFor_findForNameAndModelAndSequencingKit()[1] as SequencingKitLabel
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, SeqPlatformModelLabel.build(), kit)
         assert null == seqPlatform
@@ -137,7 +137,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnNull_UnknownKitGiven() {
-        def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
+        SeqPlatformModelLabel model = createDataFor_findForNameAndModelAndSequencingKit()[0] as SeqPlatformModelLabel
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, SequencingKitLabel.build())
         assert null == seqPlatform

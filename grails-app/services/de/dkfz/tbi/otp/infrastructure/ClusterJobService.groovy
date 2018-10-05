@@ -885,8 +885,6 @@ WHERE
      * @return map ["queue": [percentQueue, queueInMillis], "process": [percentProcess, processInMillis]]
      */
     Map findJobSpecificStatesTimeDistributionByJobId(Long id) {
-        def sql = new Sql(dataSource)
-
         ClusterJob job = ClusterJob.get(id)
         if (!job) {
             return null

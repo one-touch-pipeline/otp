@@ -96,7 +96,7 @@ class AbstractAlignmentDeciderTest {
     void testDecideAndPrepareForAlignment_whenWrongReferenceGenome_shouldThrowAssertionError() {
         SeqTrack seqTrack = buildSeqTrack()
 
-        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
+        DomainFactory.createMergingWorkPackage(
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
@@ -112,7 +112,7 @@ class AbstractAlignmentDeciderTest {
     void testDecideAndPrepareForAlignment_whenWrongPipeline_shouldThrowAssertionError() {
         SeqTrack seqTrack = buildSeqTrack()
 
-        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
+        DomainFactory.createMergingWorkPackage(
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
@@ -139,7 +139,7 @@ class AbstractAlignmentDeciderTest {
 
         boolean emailIsSent = false
 
-        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
+        DomainFactory.createMergingWorkPackage(
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),

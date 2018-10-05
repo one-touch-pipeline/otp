@@ -23,7 +23,6 @@ class ClusterJobSubmissionOptionsService {
     Map<JobSubmissionOption, String> readOptionsFromDatabase(ProcessingStep processingStep, Realm realm) {
         ProcessParameterObject parameterObject = processingStep.processParameterObject
         assert parameterObject
-        Project project = parameterObject.project
         SeqType seqType = parameterObject.seqType
         String jobClass = processingStep.nonQualifiedJobClass
 

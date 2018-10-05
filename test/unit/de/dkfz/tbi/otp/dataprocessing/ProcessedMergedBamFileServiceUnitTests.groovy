@@ -68,7 +68,7 @@ class ProcessedMergedBamFileServiceUnitTests {
     @Test(expected = IllegalArgumentException)
     void testLibraryPreparationKitNoSingleLaneBamFiles() {
         ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile()
-        Map input = createKitAndSingleLaneBamFiles(SeqTypeNames.EXOME.seqTypeName, ExomeSeqTrack, mergedBamFile)
+        createKitAndSingleLaneBamFiles(SeqTypeNames.EXOME.seqTypeName, ExomeSeqTrack, mergedBamFile)
         def abstractBamFileService = [
             findAllByProcessedMergedBamFile: { []}
         ] as AbstractBamFileService

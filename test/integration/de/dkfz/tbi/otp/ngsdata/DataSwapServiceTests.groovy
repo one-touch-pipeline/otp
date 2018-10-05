@@ -57,7 +57,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
             dataFileLinks.add(lsdfFilesService.getFileViewByPidPath(it))
         }
 
-        String fileName = "FILE_NAME"
         String dataFileName1 = 'DataFileFileName_R1.gz'
         String dataFileName2 = 'DataFileFileName_R2.gz'
 
@@ -139,8 +138,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
         List<File> roddyFilesToDelete = createRoddyFileListToDelete(bamFile)
         File destinationDirectory = bamFile.baseDirectory
-
-        String fileName = "FILE_NAME"
 
         File scriptFolder = temporaryFolder.newFolder("files")
 
@@ -230,7 +227,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         MetaDataKey metaDataKey = MetaDataKey.build(name: "SAMPLE_ID")
-        MetaDataEntry metaDataEntry = MetaDataEntry.build(key: metaDataKey, dataFile: dataFile)
+        MetaDataEntry.build(key: metaDataKey, dataFile: dataFile)
 
         dataSwapService.renameSampleIdentifiers(sample, new StringBuilder())
 
@@ -425,9 +422,9 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         DataFile dataFile = DomainFactory.createDataFile()
         FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.build(dataFile: dataFile)
 
-        MetaDataEntry metaDataEntry = MetaDataEntry.build(dataFile: dataFile)
+        MetaDataEntry.build(dataFile: dataFile)
 
-        ConsistencyStatus consistencyStatus = ConsistencyStatus.build(dataFile: dataFile)
+        ConsistencyStatus.build(dataFile: dataFile)
 
         dataSwapService.deleteDataFile(dataFile)
 
@@ -452,7 +449,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         ProcessedSaiFile processedSaiFile = ProcessedSaiFile.build(dataFile: dataFile)
 
-        TestData testData = new TestData()
+        new TestData()
         AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(seqTrack: seqTrack)
         MergingWorkPackage workPackage = alignmentPass.workPackage
         MergingSet mergingSet = MergingSet.build(mergingWorkPackage: workPackage)
@@ -513,8 +510,8 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     @Test
     void testDeleteSeqTrack_seqTrackIsOnlyLinked() throws Exception {
         SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
-        MergingAssignment mergingAssignment = MergingAssignment.build(seqTrack: seqTrack)
-        DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
+        MergingAssignment.build(seqTrack: seqTrack)
+        DomainFactory.createDataFile(seqTrack: seqTrack)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "seqTracks only linked") {
             dataSwapService.deleteSeqTrack(seqTrack)
@@ -660,7 +657,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
     private SeqTrack deleteProcessingFilesOfProject_NoProcessedData_Setup() {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
-        Project project = seqTrack.project
 
         return seqTrack
     }

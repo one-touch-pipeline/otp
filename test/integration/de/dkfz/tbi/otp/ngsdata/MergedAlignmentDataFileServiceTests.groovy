@@ -12,7 +12,7 @@ class MergedAlignmentDataFileServiceTests {
     void testAlignmentSequenceFiles() {
         List<SeqScan> scans = SeqScan.list([max: 10])
         for (SeqScan scan in scans) {
-            List<DataFile> files = mergedAlignmentDataFileService.alignmentSequenceFiles(scan)
+            mergedAlignmentDataFileService.alignmentSequenceFiles(scan)
         }
     }
 
@@ -22,7 +22,7 @@ class MergedAlignmentDataFileServiceTests {
         SeqType type = SeqType.findByNameAndLibraryLayout("RNA", SeqType.LIBRARYLAYOUT_PAIRED)
         List<SeqScan> scans = SeqScan.findAllBySeqType(type)
         for (SeqScan scan in scans) {
-            List<DataFile> files = mergedAlignmentDataFileService.alignmentSequenceFiles(scan)
+            mergedAlignmentDataFileService.alignmentSequenceFiles(scan)
         }
     }
 

@@ -80,7 +80,6 @@ class QAResultStatisticsService {
         notNull(bamFile, "the input for the method prepareFetchingMergedBamFileResults is null")
         Sample sample = processedMergedBamFileService.sample(bamFile)
         Individual individual = sample.individual
-        Project project = individual.project
         SeqType seqType = processedMergedBamFileService.seqType(bamFile)
         LibraryPreparationKit kit = null
         if (seqType.name == SeqTypeNames.EXOME.seqTypeName) {
