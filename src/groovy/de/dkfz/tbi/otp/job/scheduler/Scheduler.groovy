@@ -29,7 +29,6 @@ import static org.springframework.util.Assert.*
  * @see ProcessingStepUpdate
  */
 @Component("scheduler")
-@SuppressWarnings(["CatchException", "CatchRuntimeException"])
 class Scheduler {
 
     @Autowired

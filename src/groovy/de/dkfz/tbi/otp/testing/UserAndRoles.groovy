@@ -44,7 +44,7 @@ trait UserAndRoles {
         }
     }
 
-    static Object doWithAnonymousAuth(@SuppressWarnings("rawtypes") final Closure closure) {
+    static Object doWithAnonymousAuth(final Closure closure) {
         Authentication previousAuth = SecurityContextHolder.getContext().getAuthentication()
         AnonymousAuthenticationToken auth = new AnonymousAuthenticationToken("test", new Principal(username: "Anonymous"), [new SimpleGrantedAuthority("ROLE_ANONYMOUS")])
         SecurityContextHolder.getContext().setAuthentication(auth)
@@ -62,7 +62,7 @@ trait UserAndRoles {
         }
     }
 
-    static Object doAsSwitchedToUser(final String username, @SuppressWarnings("rawtypes") final Closure closure) {
+    static Object doAsSwitchedToUser(final String username, final Closure closure) {
         Authentication previousAuth = SecurityContextHolder.getContext().getAuthentication()
         Authentication primaryAuth = previousAuth
         if (primaryAuth == null) {

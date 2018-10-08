@@ -15,7 +15,6 @@ class LinkFilesToFinalDestinationService {
     @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService
 
-    @SuppressWarnings("GrailsStatelessService")
     @Autowired
     LinkFileUtils linkFileUtils
 
@@ -28,7 +27,6 @@ class LinkFilesToFinalDestinationService {
     @Autowired
     CreateClusterScriptService createClusterScriptService
 
-    @SuppressWarnings("GrailsStatelessService")
     @Autowired
     RemoteShellHelper remoteShellHelper
 

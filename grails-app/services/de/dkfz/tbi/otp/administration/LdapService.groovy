@@ -13,8 +13,7 @@ import java.util.regex.*
 
 import static org.springframework.ldap.query.LdapQueryBuilder.*
 
-@SuppressWarnings("ExplicitCallToAndMethod")
-@SuppressWarnings("ExplicitCallToOrMethod")
+@SuppressWarnings(["ExplicitCallToAndMethod", "ExplicitCallToOrMethod"])
 class LdapService implements InitializingBean {
 
     ConfigService configService

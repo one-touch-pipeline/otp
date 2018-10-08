@@ -4,8 +4,7 @@ import javax.servlet.*
 import javax.servlet.descriptor.JspConfigDescriptor
 import org.apache.commons.io.FileUtils
 
-@SuppressWarnings("UnusedMethodParameter")
-@SuppressWarnings("MissingOverrideAnnotation")
+@SuppressWarnings(["UnusedMethodParameter", "MissingOverrideAnnotation"])
 class OTPServletContext implements ServletContext {
     String getRealPath(String relativePath) {
         return System.getProperty("user.dir") + relativePath

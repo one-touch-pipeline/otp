@@ -16,16 +16,6 @@ class PlanValidatorServiceTests {
      */
     def planValidatorService
 
-    @SuppressWarnings("EmptyMethod")
-    @Before
-    void setUp() {
-    }
-
-    @SuppressWarnings("EmptyMethod")
-    @After
-    void tearDown() {
-    }
-
     @Test
     void testMissingStartJob() {
         plan("test") {

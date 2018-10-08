@@ -16,7 +16,6 @@ import org.springframework.security.core.context.*
 
 import java.util.concurrent.*
 
-@SuppressWarnings("GrailsPublicControllerMethod")
 class ProcessesController {
     private enum PlanStatus {
         /**

@@ -43,7 +43,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
         this.beanName = beanName
     }
 
-    Object doWithPersistenceInterceptor(@SuppressWarnings("rawtypes") final Closure closure) {
+    Object doWithPersistenceInterceptor(final Closure closure) {
         try {
             persistenceInterceptor.init()
             return closure.call();

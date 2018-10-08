@@ -27,7 +27,6 @@ import java.util.concurrent.locks.*
 // this class is NOT transactional
 class SchedulerService {
 
-    @SuppressWarnings("GrailsStatelessService")
     @Autowired
     GrailsApplication grailsApplication
 
@@ -40,7 +39,6 @@ class SchedulerService {
     @Autowired
     JobMailService jobMailService
 
-    @SuppressWarnings("GrailsStatelessService")
     @Autowired
     PersistenceContextInterceptor persistenceInterceptor
 
@@ -66,14 +64,12 @@ class SchedulerService {
      * Whether the Scheduler is currently active.
      * This is false when shutting down the server
      */
-    @SuppressWarnings("GrailsStatelessService")
     private boolean schedulerActive = false
     /**
      * Whether the scheduler startup has been successful.
      * False as long as the server has not started. If false the scheduler cannot be started,
      * if true the startup cannot be performed again.
      */
-    @SuppressWarnings("GrailsStatelessService")
     private boolean startupOk = false
 
     private final ThreadLocal<Job> jobByThread = new ThreadLocal<Job>()
