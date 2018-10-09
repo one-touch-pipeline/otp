@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.monitor.alignment
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.monitor.*
 import de.dkfz.tbi.otp.ngsdata.*
 import spock.lang.*
@@ -53,20 +52,20 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
     List<SeqTrack> createSeqTracksWithMergingWorkPackages(Map mergingWorkPackageProperties = [:], Map seqTrackProperties = [:]) {
         createSeqTracks(seqTrackProperties).each {
-            createMergingWorkPackage(it, mergingWorkPackageProperties)
+            createMWP(it, mergingWorkPackageProperties)
         }
     }
 
 
-    MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
+    MergingWorkPackage createMWP(Map properties = [:]) {
         return DomainFactory.createMergingWorkPackage([
                 pipeline: createPipeLine(),
                 seqType : seqTypes.first(),
         ] + properties)
     }
 
-    MergingWorkPackage createMergingWorkPackage(SeqTrack seqTrack, Map properties = [:]) {
-        return createMergingWorkPackage([
+    MergingWorkPackage createMWP(SeqTrack seqTrack, Map properties = [:]) {
+        return createMWP([
                 seqType              : seqTrack.seqType,
                 sample               : seqTrack.sample,
                 libraryPreparationKit: seqTrack.libraryPreparationKit,
@@ -76,7 +75,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
     List<MergingWorkPackage> createMergingWorkPackages(Map properties = [:]) {
         return seqTypes.collect {
-            createMergingWorkPackage([
+            createMWP([
                     seqType        : it,
                     needsProcessing: true,
             ] + properties)
@@ -154,7 +153,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
         List<SeqTrack> seqTracksWrongSeqType = createSeqTracks()
 
         List<SeqTrack> seqTracksCorrect = createSeqTracks().each {
-            expectedMergingWorkPackage << createMergingWorkPackage(it)
+            expectedMergingWorkPackage << createMWP(it)
         }
 
         List<SeqTrack> seqTracksWrongSample = createSeqTracksWithMergingWorkPackages([
@@ -168,12 +167,12 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
         List<SeqTrack> seqTracksCorrectNoLibraryPreparationKit = createSeqTracks([
                 libraryPreparationKit: null,
         ]).each {
-            expectedMergingWorkPackage << createMergingWorkPackage(it)
+            expectedMergingWorkPackage << createMWP(it)
         }
 
         List<SeqTrack> seqTrackWrongLibraryPreparationKit = createSeqTracks().each {
             if (!it.seqType.isWgbs()) {
-                createMergingWorkPackage(it, [
+                createMWP(it, [
                         libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
                 ])
             }
@@ -267,7 +266,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
         List<MergingWorkPackage> waiting = []
         List<SeqTrack> mergingWorkPackageWaiting = createSeqTracksWithConfig().each {
-            waiting << createMergingWorkPackage(it, [
+            waiting << createMWP(it, [
                     needsProcessing: true,
             ])
         }
@@ -281,7 +280,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
         List<MergingWorkPackage> mergingWorkPackagesWithoutBam = []
         List<SeqTrack> mergingWorkPackageWithoutBam = createSeqTracksWithConfig().each {
-            mergingWorkPackagesWithoutBam << createMergingWorkPackage(it, [
+            mergingWorkPackagesWithoutBam << createMWP(it, [
                     needsProcessing: false,
             ])
         }

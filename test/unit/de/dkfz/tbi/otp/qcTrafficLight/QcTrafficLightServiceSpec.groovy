@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import grails.test.mixin.*
@@ -41,7 +42,7 @@ import spock.lang.*
         SeqTrack,
         SoftwareTool,
 ])
-class QcTrafficLightServiceSpec extends Specification {
+class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory {
 
     QcTrafficLightService qcTrafficLightService
     TestConfigService testConfigService
@@ -49,7 +50,7 @@ class QcTrafficLightServiceSpec extends Specification {
     @Unroll
     void "test changeQcTrafficLightStatusWithComment valid input (is rna: #rna, qcStatus: #qcStatus), succeeds"() {
         given:
-        RoddyBamFile roddyBamFile = rna ? DomainFactory.createRnaRoddyBamFile() : DomainFactory.createRoddyBamFile()
+        RoddyBamFile roddyBamFile = rna ? RoddyRnaFactory.super.createBamFile() : DomainFactory.createRoddyBamFile()
         DomainFactory.createDefaultRealmWithProcessingOption()
         testConfigService = new TestConfigService()
         roddyBamFile.comment = new Comment(comment: "oldComment", author: "author", modificationDate: new Date())

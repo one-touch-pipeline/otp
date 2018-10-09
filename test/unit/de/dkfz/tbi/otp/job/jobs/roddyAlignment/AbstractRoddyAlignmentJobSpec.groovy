@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
@@ -43,7 +44,7 @@ import spock.lang.*
         Run,
         RunSegment,
 ])
-class AbstractRoddyAlignmentJobSpec extends Specification {
+class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFactory {
 
 
     @Rule
@@ -296,10 +297,9 @@ class AbstractRoddyAlignmentJobSpec extends Specification {
 
         }
 
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
+        RoddyBamFile roddyBamFile = RoddyRnaFactory.super.createBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
-                md5sum             : null,
-        ], RnaRoddyBamFile)
+        ])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         roddyBamFile.workSingleLaneQAJsonFiles.values().each { File file ->
             file.delete()

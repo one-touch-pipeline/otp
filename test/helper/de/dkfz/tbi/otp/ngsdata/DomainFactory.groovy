@@ -6,12 +6,13 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
-import de.dkfz.tbi.otp.dataprocessing.singleCell.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
+import de.dkfz.tbi.otp.domainFactory.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -25,10 +26,22 @@ import org.joda.time.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
+@SuppressWarnings('EmptyClass')
+class DomainFactoryProxyCore implements DomainFactoryCore { }
+@SuppressWarnings('EmptyClass')
+class DomainFactoryProxyRoddy implements IsRoddy { }
+@SuppressWarnings('EmptyClass')
+class DomainFactoryProxyCellRanger implements CellRangerFactory { }
+
 class DomainFactory {
 
     private DomainFactory() {
     }
+
+    // These objects are used to access the methods, of the traits they inherit, in a static context
+    static DomainFactoryProxyCore proxyCore = new DomainFactoryProxyCore()
+    static DomainFactoryProxyRoddy proxyRoddy = new DomainFactoryProxyRoddy()
+    static DomainFactoryProxyCellRanger proxyCellRanger = new DomainFactoryProxyCellRanger()
 
     /**
      * @deprecated Use {@link HelperUtils#getRandomMd5sum()} instead.
@@ -68,20 +81,26 @@ class DomainFactory {
     }
 
     /**
-     * Check whether one or more domain objects with the given parameterProperties exists,
-     * if yes return an arbitrary one, otherwise create a new one and return it.
+     * returns a DomainObject of the desired class, matching all requiredSearchProperties,
+     * either by re-using a pre-exiting one, or creating a new one.
+     *
+     * If no (or empty) search properties are provided, the first object from the DB is returned.
+     *
+     * @param requiredSearchProperties the properties ABSOLUTELY required by the test
+     * @param defaultCreationProperties if no matching pre-existing object was found, use these parameters, combined
+     * with the requiredSearchProperties, to create a new one (additional properties to make the creation pass validation)
+     *
      */
     private
-    static <T> T createDomainObjectLazy(Class<T> domainClass, Map defaultProperties, Map parameterProperties, boolean saveAndValidate = true) {
-        T domainObject
-        if (parameterProperties) {
-            domainObject = domainClass.findWhere(parameterProperties)
-        } else {
-            domainObject = atMostOneElement(domainClass.list(limit: 1))
-        }
+    static <T> T findOrCreateDomainObject(Class<T> domainClass, Map defaultCreationProperties, Map requiredSearchProperties, boolean saveAndValidate = true) {
+        assert requiredSearchProperties: 'Required search properties are missing.'
+
+        T domainObject = domainClass.findWhere(requiredSearchProperties)
+
         if (!domainObject) {
-            domainObject = createDomainObject(domainClass, defaultProperties, parameterProperties, saveAndValidate)
+            domainObject = createDomainObject(domainClass, defaultCreationProperties, requiredSearchProperties, saveAndValidate)
         }
+
         return domainObject
     }
 
@@ -116,7 +135,7 @@ class DomainFactory {
     }
 
     static Role createRoleLazy(Map properties = [:]) {
-        return createDomainObjectLazy(Role, [
+        return findOrCreateDomainObject(Role, [
                 authority: "ROLE_${counter++}",
         ], properties)
     }
@@ -156,7 +175,7 @@ class DomainFactory {
      * @return returns a created Pipeline due to given Params
      */
     static Pipeline createPipeline(Pipeline.Name name, Pipeline.Type type) {
-        return createDomainObjectLazy(Pipeline, [:], [
+        return findOrCreateDomainObject(Pipeline, [:], [
                 name: name,
                 type: type,
         ])
@@ -172,10 +191,6 @@ class DomainFactory {
 
     static Pipeline createRnaPipeline() {
         createPipeline(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
-    }
-
-    static Pipeline createCellRangerPipeline() {
-        createPipeline(Pipeline.Name.CELL_RANGER, Pipeline.Type.ALIGNMENT)
     }
 
     @Deprecated
@@ -218,7 +233,7 @@ class DomainFactory {
     }
 
     static MergingSet createMergingSet(Map properties = [:]) {
-        MergingWorkPackage mergingWorkPackage = properties.mergingWorkPackage ?: createMergingWorkPackage([pipeline: createDefaultOtpPipeline()])
+        MergingWorkPackage mergingWorkPackage = properties.mergingWorkPackage ?: createMergingWorkPackage([pipeline: createDefaultOtpPipeline(), seqType: createSeqType()])
         return createDomainObject(MergingSet, [
                 mergingWorkPackage: mergingWorkPackage,
                 identifier        : MergingSet.nextIdentifier(mergingWorkPackage),
@@ -370,7 +385,7 @@ class DomainFactory {
     }
 
     static ProcessingOption createProcessingOptionLazy(Map properties = [:]) {
-        ProcessingOption processingOption = createDomainObjectLazy(ProcessingOption,
+        ProcessingOption processingOption = findOrCreateDomainObject(ProcessingOption,
                 [value: properties.containsKey("value") ? properties['value'] : "processingOptionValue_${counter++}"],
                 properties.findAll { it.key != "value" },
         )
@@ -383,9 +398,9 @@ class DomainFactory {
 
     static ProcessingOption createProcessingOptionLazy(OptionName optionName, String value, String type = null) {
         return createProcessingOptionLazy([
-                name: optionName,
+                name : optionName,
                 value: value,
-                type: type,
+                type : type,
         ])
     }
 
@@ -404,10 +419,10 @@ class DomainFactory {
 
     static void createProcessingOptionForOtrsTicketPrefix(String prefix = "Prefix ${counter++}") {
         createProcessingOptionLazy(
-                 name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX,
-                 type: null,
-                 project: null,
-                 value: prefix,
+                name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX,
+                type: null,
+                project: null,
+                value: prefix,
         )
     }
 
@@ -606,7 +621,7 @@ class DomainFactory {
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile([
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 md5sum             : HelperUtils.randomMd5sum,
-                fileSize           : counter++ ,
+                fileSize           : counter++,
         ] + properties)
         MergingWorkPackage mergingWorkPackage = processedMergedBamFile.mergingWorkPackage
         mergingWorkPackage.bamFileInProjectFolder = processedMergedBamFile
@@ -666,93 +681,9 @@ class DomainFactory {
         return bamFile
     }
 
-    static <T> T createRoddyBamFile(Map bamFileProperties = [:], Class<T> clazz = RoddyBamFile) {
-        MergingWorkPackage workPackage = bamFileProperties.workPackage
-        if (!workPackage) {
-            SeqType seqType = (clazz == RnaRoddyBamFile) ? createRnaPairedSeqType() : createWholeGenomeSeqType()
-            Pipeline pipeline = (clazz == RnaRoddyBamFile) ? createRoddyRnaPipeline() : createPanCanPipeline()
-            workPackage = createMergingWorkPackage(
-                    pipeline: pipeline,
-                    seqType: seqType,
-            )
-            createReferenceGenomeProjectSeqType(
-                    referenceGenome: workPackage.referenceGenome,
-                    project: workPackage.project,
-                    seqType: workPackage.seqType,
-                    statSizeFileName: workPackage.statSizeFileName,
-            )
-        }
-        Collection<SeqTrack> seqTracks = bamFileProperties.seqTracks ?: [createSeqTrackWithDataFiles(workPackage)]
-        workPackage.seqTracks = seqTracks
-        workPackage.save(flush: true, failOnError: true)
-        T bamFile = createDomainObject(clazz, [
-                numberOfMergedLanes         : seqTracks.size(),
-                workDirectoryName           : "${RoddyBamFile.WORK_DIR_PREFIX}_${counter++}",
-                seqTracks                   : seqTracks as Set,
-                workPackage                 : workPackage,
-                identifier                  : RoddyBamFile.nextIdentifier(workPackage),
-                config                      : {
-                    createRoddyWorkflowConfigLazy(
-                            pipeline: workPackage.pipeline,
-                            project: workPackage.project,
-                            seqType: workPackage.seqType,
-                            adapterTrimmingNeeded: workPackage.seqType.isRna() || workPackage.seqType.isWgbs() || workPackage.seqType.isChipSeq(),
-                    )
-                },
-                md5sum                      : {
-                    (!bamFileProperties.containsKey('fileOperationStatus') || bamFileProperties.fileOperationStatus == FileOperationStatus.PROCESSED) ? HelperUtils.randomMd5sum : null
-                },
-                fileOperationStatus         : FileOperationStatus.PROCESSED,
-                fileSize                    : 10000,
-                roddyExecutionDirectoryNames: [DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
-                comment                     : {
-                    [
-                        AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
-                        AbstractMergedBamFile.QcTrafficLightStatus.REJECTED,
-                    ].contains(bamFileProperties.qcTrafficLightStatus) ? createComment() : null
-                }
-        ], bamFileProperties)
-        return bamFile
-    }
-
-    static SingleCellBamFile createSingleCellBamFile(Map bamFileProperties = [:]) {
-        CellRangerMergingWorkPackage workPackage = bamFileProperties.workPackage
-        if (!workPackage) {
-            workPackage = createCellRangerMergingWorkPackage()
-            createReferenceGenomeProjectSeqType(
-                    referenceGenome : workPackage.referenceGenome,
-                    project         : workPackage.project,
-                    seqType         : workPackage.seqType,
-                    statSizeFileName: workPackage.statSizeFileName,
-            )
-        }
-        Collection<SeqTrack> seqTracks = bamFileProperties.seqTracks ?: [createSeqTrackWithDataFiles(workPackage)]
-        workPackage.seqTracks = seqTracks
-        workPackage.save(flush: true, failOnError: true)
-        SingleCellBamFile bamFile = createDomainObject(SingleCellBamFile, [
-                numberOfMergedLanes: seqTracks.size(),
-                workDirectoryName  : "singleCell_${counter++}",
-                seqTracks          : seqTracks as Set,
-                workPackage        : workPackage,
-                identifier         : SingleCellBamFile.nextIdentifier(workPackage),
-                type               : AbstractBamFile.BamType.MDUP,
-                md5sum             : {
-                    (!bamFileProperties.containsKey('fileOperationStatus') || bamFileProperties.fileOperationStatus == FileOperationStatus.PROCESSED) ? HelperUtils.randomMd5sum : null
-                },
-                fileOperationStatus: FileOperationStatus.PROCESSED,
-                fileSize           : 10000,
-                comment            : {
-                    [
-                        AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
-                        AbstractMergedBamFile.QcTrafficLightStatus.REJECTED,
-                    ].contains(bamFileProperties.qcTrafficLightStatus) ? createComment() : null
-                }
-        ], bamFileProperties)
-        return bamFile
-    }
-
-    static RnaRoddyBamFile createRnaRoddyBamFile(Map bamFileProperties = [:]) {
-        createRoddyBamFile(bamFileProperties, RnaRoddyBamFile)
+    @Deprecated
+    static <T> T createRoddyBamFile(Map properties = [:]) {
+        return proxyRoddy.createBamFile(properties)
     }
 
     static createRoddyBamFile(RoddyBamFile baseBamFile, Map bamFileProperties = [:]) {
@@ -900,7 +831,7 @@ class DomainFactory {
     }
 
     static SampleTypePerProject createSampleTypePerProjectLazy(Map properties = [:]) {
-        return createDomainObjectLazy(SampleTypePerProject, sampleTypeMap, properties)
+        return findOrCreateDomainObject(SampleTypePerProject, sampleTypeMap, properties)
     }
 
     static SampleTypePerProject createSampleTypePerProjectForMergingWorkPackage(AbstractMergingWorkPackage mergingWorkPackage, SampleType.Category category = SampleType.Category.DISEASE) {
@@ -1161,9 +1092,9 @@ class DomainFactory {
 
         if (!diseaseBamFile) {
             diseaseBamFile = createRoddyBamFile(
-                    [ workPackage: diseaseWorkPackage ] +
-                    (controlBamFile ? [ config: controlBamFile.config ] : [:]) +
-                    bamFile1Properties
+                    [workPackage: diseaseWorkPackage] +
+                            (controlBamFile ? [config: controlBamFile.config] : [:]) +
+                            bamFile1Properties
             )
         }
         if (!controlBamFile) {
@@ -1306,7 +1237,6 @@ class DomainFactory {
         ], properties)
     }
 
-
     static AceseqQc createAceseqQcWithExistingAceseqInstance(AceseqInstance aceseqInstance) {
         createAceseqQc([:], [:], [:], aceseqInstance)
     }
@@ -1324,7 +1254,6 @@ class DomainFactory {
                 solutionPossible: 1,
         ], properties)
     }
-
 
     static RunYapsaInstance createRunYapsaInstanceWithRoddyBamFiles(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:]) {
         Map map = createAnalysisInstanceWithRoddyBamFilesMapHelper(properties, bamFile1Properties, bamFile2Properties)
@@ -1414,15 +1343,9 @@ class DomainFactory {
         ], runSegmentProperties)
     }
 
-    static Project createProject(Map projectProperties = [:]) {
-        return createDomainObject(Project, [
-                name                          : 'project_' + (counter++),
-                phabricatorAlias              : 'phabricatorAlias_' + (counter++),
-                dirName                       : 'projectDirName_' + (counter++),
-                realm                         : { createRealm() },
-                alignmentDeciderBeanName      : 'DUMMY_BEAN_NAME',
-                sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER
-        ], projectProperties)
+    @Deprecated
+    static Project createProject(Map projectProperties = [:], boolean saveAndValidate = true) {
+        return proxyCore.createProject(projectProperties, saveAndValidate)
     }
 
     static ProjectCategory createProjectCategory(Map projectProperties = [:]) {
@@ -1467,11 +1390,9 @@ class DomainFactory {
         ], sampleTypeProperties)
     }
 
-    static Sample createSample(Map sampleProperties = [:]) {
-        return createDomainObject(Sample, [
-                individual: { createIndividual() },
-                sampleType: { createSampleType() },
-        ], sampleProperties)
+    @Deprecated
+    static Sample createSample(Map sampleProperties = [:], boolean saveAndValidate = true) {
+        return proxyCore.createSample(sampleProperties, saveAndValidate)
     }
 
     static SampleIdentifier createSampleIdentifier(Map properties = [:]) {
@@ -1481,24 +1402,9 @@ class DomainFactory {
         ], properties)
     }
 
+    @Deprecated
     static SeqType createSeqType(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
-        String defaultName = 'seqTypeName_' + (counter++)
-        return createDomainObject(SeqType, [
-                name         : defaultName,
-                libraryLayout: LibraryLayout.SINGLE,
-                dirName      : 'seqTypeDirName_' + (counter++),
-                displayName  : seqTypeProperties.get('displayName') ?: seqTypeProperties.get('name') ?: defaultName,
-                importAlias  : [],
-                singleCell   : false,
-        ], seqTypeProperties, saveAndValidate)
-    }
-
-    static SeqType createSingleCellSeqType(Map map = [:]) {
-        createSeqType([
-                name       : "singlecell_${counter++}",
-                displayName: "singlecell_display_${counter++}",
-                singleCell : true,
-        ] + map)
+        return proxyCore.createSeqType(seqTypeProperties, saveAndValidate)
     }
 
     static SeqType createSeqTypePaired(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
@@ -1614,7 +1520,7 @@ class DomainFactory {
     }
 
     static ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqTypeLazy(Map properties = [:]) {
-        return createDomainObjectLazy(ReferenceGenomeProjectSeqType, [
+        return findOrCreateDomainObject(ReferenceGenomeProjectSeqType, [
                 project        : { createProject() },
                 seqType        : { createSeqType() },
                 referenceGenome: { createReferenceGenome() },
@@ -1682,15 +1588,9 @@ class DomainFactory {
         ]
     }
 
+    @Deprecated
     static MergingWorkPackage createMergingWorkPackage(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(MergingWorkPackage, baseMergingWorkPackageProperties(properties) + [
-                seqType         : { createSeqType() },
-                pipeline        : { createPanCanPipeline() },
-                statSizeFileName: {
-                    properties.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT || properties.pipeline == null ?
-                            "statSizeFileName_${counter++}.tab" : null
-                },
-        ], properties, saveAndValidate)
+        return proxyRoddy.createMergingWorkPackage(properties, saveAndValidate)
     }
 
     static ExternalMergingWorkPackage createExternalMergingWorkPackage(Map properties = [:]) {
@@ -1702,32 +1602,12 @@ class DomainFactory {
         ], properties)
     }
 
-    static CellRangerMergingWorkPackage createCellRangerMergingWorkPackage(Map properties = [:], boolean saveAndValidate = true) {
-        Pipeline pipeline = properties.pipeline ?: createCellRangerPipeline()
-        SeqType seqType = properties.seqType ?: createSingleCellSeqType()
-        Sample sample = properties.sample  ?: createSample()
-        return createDomainObject(CellRangerMergingWorkPackage, baseMergingWorkPackageProperties(properties) + [
-                seqType : seqType,
-                pipeline: pipeline,
-                sample  : sample,
-                config  : {
-                    createCellRangerConfig([
-                            pipeline: pipeline,
-                            seqType : seqType,
-                            project : sample.project,
-                ])
-                },
-        ], properties, saveAndValidate)
-    }
-
     static <E extends AbstractMergingWorkPackage> E createMergingWorkPackage(Class<E> clazz, Map properties = [:]) {
         switch (clazz) {
             case MergingWorkPackage:
-                return DomainFactory.createMergingWorkPackage(properties)
+                return createMergingWorkPackage(properties)
             case ExternalMergingWorkPackage:
-                return DomainFactory.createExternalMergingWorkPackage(properties)
-            case CellRangerMergingWorkPackage:
-                return DomainFactory.createCellRangerMergingWorkPackage(properties)
+                return createExternalMergingWorkPackage(properties)
             default:
                 throw new RuntimeException("Unknown subclass of AbstractMergingWorkPackage: ${clazz}")
         }
@@ -1745,8 +1625,6 @@ class DomainFactory {
                 ] + properties)
             case Pipeline.Name.EXTERNALLY_PROCESSED:
                 return createExternalMergingWorkPackage(properties)
-            case Pipeline.Name.CELL_RANGER:
-                return createCellRangerMergingWorkPackage(properties)
             default:
                 throw new RuntimeException("Unknown alignment pipeline: ${pipelineName}")
         }
@@ -1817,7 +1695,7 @@ class DomainFactory {
     }
 
     static RoddyWorkflowConfig createRoddyWorkflowConfigLazy(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObjectLazy(RoddyWorkflowConfig, createRoddyWorkflowConfigMapHelper(properties), properties, saveAndValidate)
+        return findOrCreateDomainObject(RoddyWorkflowConfig, createRoddyWorkflowConfigMapHelper(properties), properties, saveAndValidate)
     }
 
     static private Map createRunYapsaConfigMapHelper(properties) {
@@ -1836,26 +1714,7 @@ class DomainFactory {
     }
 
     static RunYapsaConfig createRunYapsaConfigLazy(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObjectLazy(RunYapsaConfig, createRunYapsaConfigMapHelper(properties), properties, saveAndValidate)
-    }
-
-    static private Map createCellRangerConfigMapHelper(properties) {
-        return [
-                pipeline      : createCellRangerPipeline(),
-                seqType       : { properties.seqType ?: createSingleCellSeqType() },
-                project       : { properties.project ?: createProject() },
-                programVersion: "programmVersion${counter++}",
-                dateCreated   : { new Date() },
-                lastUpdated   : { new Date() },
-        ]
-    }
-
-    static CellRangerConfig createCellRangerConfig(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(CellRangerConfig, createCellRangerConfigMapHelper(properties), properties, saveAndValidate)
-    }
-
-    static CellRangerConfig createCellRangerConfigLazy(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObjectLazy(CellRangerConfig, createCellRangerConfigMapHelper(properties), properties, saveAndValidate)
+        return findOrCreateDomainObject(RunYapsaConfig, createRunYapsaConfigMapHelper(properties), properties, saveAndValidate)
     }
 
     static SeqTrack createSeqTrack(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {
@@ -1955,14 +1814,14 @@ class DomainFactory {
     static RoddySnvCallingInstance createRoddySnvCallingInstance(Map properties = [:]) {
         return createDomainObject(RoddySnvCallingInstance, [
                 processingState: AnalysisProcessingStates.IN_PROGRESS,
-                config: properties.config ?:
+                config         : properties.config ?:
                         properties.samplePair ?
-                            createRoddyWorkflowConfig(
-                                    project: properties.samplePair.project,
-                                    seqType: properties.samplePair.seqType,
-                            )
-                            : createRoddyWorkflowConfig(),
-                instanceName: "instance-${counter++}",
+                                createRoddyWorkflowConfig(
+                                        project: properties.samplePair.project,
+                                        seqType: properties.samplePair.seqType,
+                                )
+                                : createRoddyWorkflowConfig(),
+                instanceName   : "instance-${counter++}",
         ], properties)
     }
 
@@ -2005,8 +1864,7 @@ class DomainFactory {
         return restartedProcessingStep
     }
 
-    static ProcessingStepUpdate createProcessingStepUpdate(
-            final ProcessingStep step, final ExecutionState state) {
+    static ProcessingStepUpdate createProcessingStepUpdate(final ProcessingStep step, final ExecutionState state) {
         return createProcessingStepUpdate([
                 date          : new Date(),
                 state         : state,
@@ -2023,8 +1881,7 @@ class DomainFactory {
         return processingStep
     }
 
-    static ProcessParameter createProcessParameter(
-            final Process process, final ProcessParameterObject parameterValue, Map properties = [:]) {
+    static ProcessParameter createProcessParameter(final Process process, final ProcessParameterObject parameterValue, Map properties = [:]) {
         return createDomainObject(ProcessParameter, [
                 process  : process,
                 className: parameterValue.class.name,
@@ -2032,8 +1889,7 @@ class DomainFactory {
         ], properties)
     }
 
-    static ProcessParameter createProcessParameter(
-            final Process process, final String className, final String value) {
+    static ProcessParameter createProcessParameter(final Process process, final String className, final String value) {
         return createDomainObject(ProcessParameter, [
                 process  : process,
                 className: className,
@@ -2059,14 +1915,19 @@ class DomainFactory {
         ], myProps)
     }
 
-    static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName, String roddyName = null, LibraryLayout libraryLayout = LibraryLayout.PAIRED, boolean singleCell = false) {
-        createDomainObjectLazy(SeqType, [:], [
-                name         : seqTypeNames.seqTypeName,
-                displayName  : displayName,
-                roddyName    : roddyName,
-                dirName      : dirName,
-                libraryLayout: libraryLayout,
-                singleCell   : singleCell,
+    /**
+     * @deprecated can be removed as soon as there is a 'SeqTypeDomainFactory' or another system how to handle the
+     * creation of the different seqTypes.
+     */
+    @Deprecated
+    private static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName, String roddyName = null, LibraryLayout libraryLayout = LibraryLayout.PAIRED, boolean singleCell = false) {
+        findOrCreateDomainObject(SeqType, [:], [
+                name         :  seqTypeNames.seqTypeName,
+                displayName  :  displayName,
+                dirName      :  dirName,
+                roddyName    :  roddyName,
+                libraryLayout:  libraryLayout,
+                singleCell   :  singleCell
         ]).refresh()
     }
 
@@ -2096,10 +1957,6 @@ class DomainFactory {
 
     static SeqType createRnaSingleSeqType() {
         createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA", LibraryLayout.SINGLE)
-    }
-
-    static SeqType create10xSingleCellRnaSeqType() {
-        createSeqTypeLazy(SeqTypeNames._10X_SCRNA, '10x_scRNA', '10x_scRNA_sequencing', null, LibraryLayout.PAIRED, true)
     }
 
     static List<SeqType> createDefaultOtpAlignableSeqTypes() {
@@ -2135,7 +1992,7 @@ class DomainFactory {
 
     static List<SeqType> createCellRangerAlignableSeqTypes() {
         [
-                create10xSingleCellRnaSeqType(),
+                proxyCellRanger.createSeqType(),
         ].flatten()
     }
 
@@ -2192,7 +2049,7 @@ class DomainFactory {
     }
 
     static MetaDataKey createMetaDataKeyLazy(Map properties = [:]) {
-        return createDomainObjectLazy(MetaDataKey, [
+        return findOrCreateDomainObject(MetaDataKey, [
                 name: "name_${counter++}",
         ], properties)
     }
@@ -2444,7 +2301,7 @@ class DomainFactory {
         qaFile.parentFile.mkdirs()
         // the values are from the documentation on the Wiki: https://wiki.local/NGS/OTP-Roddy+Interface#HTheQCData
         qaFile <<
-                """
+        """
 {
   "8": {
     "genomeWithoutNCoverageQcBases": 0.011,
@@ -2609,13 +2466,12 @@ class DomainFactory {
         ], properties)
     }
 
-
-    static MergingCriteria createMergingCriteriaLazy(Map properties = [:]) {
+    static MergingCriteria createMergingCriteriaLazy(Map properties) {
         if ((properties.get("seqType") as SeqType)?.isWgbs()) {
             properties.get("libPrepKit") ?: properties.put("libPrepKit", false)
         }
 
-        return createDomainObjectLazy(MergingCriteria, [
+        return findOrCreateDomainObject(MergingCriteria, [
                 project: { createProject() },
                 seqType: { createSeqType() },
         ], properties)

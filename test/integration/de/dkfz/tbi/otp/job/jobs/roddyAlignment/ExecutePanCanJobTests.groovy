@@ -5,13 +5,14 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.junit.*
 import org.junit.rules.*
 import org.springframework.beans.factory.annotation.*
 
-class ExecutePanCanJobTests {
+class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Autowired
     ExecutePanCanJob executePanCanJob
@@ -279,7 +280,7 @@ class ExecutePanCanJobTests {
 
     @Test
     void testWorkflowSpecificValidation_RnaBamFile_AllFine() {
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
+        RoddyBamFile roddyBamFile = RoddyRnaFactory.super.createBamFile()
         assert roddyBamFile.project.save(flush: true)
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
@@ -288,7 +289,7 @@ class ExecutePanCanJobTests {
 
     @Test
     void testWorkflowSpecificValidation_RnaBamFile_ChimericFileDoesNotExist() {
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
+        RoddyBamFile roddyBamFile = RoddyRnaFactory.super.createBamFile()
         assert roddyBamFile.project.save(flush: true)
 
         assert TestCase.shouldFail(AssertionError) {

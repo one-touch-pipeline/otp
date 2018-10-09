@@ -23,7 +23,7 @@ class MergingCriteriaSpec extends Specification {
 
     void "test that for Exome data LibPrepKit must be true, should fail when it is false"() {
         given:
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy()
+        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria()
         SeqType seqType = DomainFactory.createExomeSeqType()
 
         when:
@@ -44,7 +44,7 @@ class MergingCriteriaSpec extends Specification {
 
     void "test that for WGBS data LibPrepKit must be false, should fail when it is true"() {
         given:
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy()
+        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria()
         SeqType seqType = DomainFactory.createWholeGenomeBisulfiteSeqType()
 
         when:

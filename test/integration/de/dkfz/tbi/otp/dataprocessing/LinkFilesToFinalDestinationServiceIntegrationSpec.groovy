@@ -6,6 +6,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.*
@@ -17,7 +18,7 @@ import org.junit.rules.*
 import org.springframework.beans.factory.annotation.*
 import spock.lang.*
 
-class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec {
+class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec implements RoddyRnaFactory {
     LinkFilesToFinalDestinationService service
 
     @Autowired
@@ -57,7 +58,7 @@ ${link}
                 }
         )
 
-        roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
+        roddyBamFile = createBamFile()
 
         realm = roddyBamFile.project.realm
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
@@ -93,7 +94,7 @@ ${link}
         given:
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
-        RnaRoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile([workPackage: roddyBamFile.workPackage, config: roddyBamFile.config], RnaRoddyBamFile)
+        RnaRoddyBamFile roddyBamFile2 = createBamFile([workPackage: roddyBamFile.workPackage, config: roddyBamFile.config])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
         TestCase.withMockedremoteShellHelper(service.remoteShellHelper) {
             service.linkNewRnaResults(roddyBamFile2, realm)
@@ -179,15 +180,6 @@ link
         'with userProjectRole'    | true                  | ''             || 2
     }
 
-
-    private RnaRoddyBamFile createRnaRoddyBamFile(Map map = [:]) {
-        return DomainFactory.createRnaRoddyBamFile([
-                md5sum             : null,
-                fileSize           : -1,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
-        ] + map)
-    }
-
     private void assertBamFileIsFine() {
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
         assert roddyBamFile.md5sum == DomainFactory.DEFAULT_MD5_SUM
@@ -199,7 +191,7 @@ link
 
     void "linkToFinalDestinationAndCleanupRna, when qcTrafficLightStatus is #QC_PASSED"() {
         given:
-        roddyBamFile = createRnaRoddyBamFile()
+        roddyBamFile = createBamFile([fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy() {
             1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
@@ -225,7 +217,8 @@ link
 
     void "linkToFinalDestinationAndCleanupRna, when qcTrafficLightStatus is #BLOCKED"() {
         given:
-        roddyBamFile = createRnaRoddyBamFile([
+        roddyBamFile = createBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
                 qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
         ])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)

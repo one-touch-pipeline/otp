@@ -7,6 +7,10 @@ import spock.lang.*
 class AbstractMergingWorkPackageServiceSpec extends Specification {
 
 
+    /**
+     * this test, tests the opposite of  "findMergingWorkPackage, with chipSeq, find the correct one"()
+     * therefore only Pipelines that can align ChipSeq were chosen
+    **/
     void "findMergingWorkPackage, no chipSeq, find the correct one"() {
         given:
         Individual individual1 = DomainFactory.createIndividual()
@@ -14,6 +18,7 @@ class AbstractMergingWorkPackageServiceSpec extends Specification {
         SeqType seqType1 = DomainFactory.createSeqType()
         SeqType seqType2 = DomainFactory.createSeqType()
 
+        // the three Pipelines that support ChipSeq
         [
                 Pipeline.Name.PANCAN_ALIGNMENT,
                 Pipeline.Name.DEFAULT_OTP,
@@ -43,6 +48,7 @@ class AbstractMergingWorkPackageServiceSpec extends Specification {
         mergingWorkPackages*.pipeline.unique().size() == 3
     }
 
+    // this test, tests the opposite of  "findMergingWorkPackage, without chipSeq, find the correct one"()
     void "findMergingWorkPackage, with chipSeq, find the correct one"() {
         given:
         Individual individual1 = DomainFactory.createIndividual()
@@ -51,6 +57,7 @@ class AbstractMergingWorkPackageServiceSpec extends Specification {
         AntibodyTarget antibodyTarget1 = DomainFactory.createAntibodyTarget()
         AntibodyTarget antibodyTarget2 = DomainFactory.createAntibodyTarget()
 
+        // the three Pipelines that support ChipSeq
         [
                 Pipeline.Name.PANCAN_ALIGNMENT,
                 Pipeline.Name.DEFAULT_OTP,

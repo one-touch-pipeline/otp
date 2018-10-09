@@ -297,7 +297,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
     def "test addPlatformToNewGroup, not authorized"() {
         given:
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy()
+        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria()
 
         when:
         doWithAnonymousAuth {

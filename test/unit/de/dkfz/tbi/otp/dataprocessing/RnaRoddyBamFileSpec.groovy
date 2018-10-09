@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
 import spock.lang.*
@@ -33,13 +35,17 @@ import spock.lang.*
         SoftwareTool,
         MergingWorkPackage,
 ])
-class RnaRoddyBamFileSpec extends Specification {
+class RnaRoddyBamFileSpec extends Specification implements RoddyRnaFactory {
+
+    void setup() {
+        new TestConfigService()
+    }
 
     void "test method getCorrespondingWorkChimericBamFile"() {
         given:
-        RnaRoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
+        RnaRoddyBamFile roddyBamFile = createBamFile()
         String testDir = "${roddyBamFile.individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}/${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
-        AbstractMergedBamFileService.metaClass.static.destinationDirectory = { AbstractMergedBamFile bamFile -> return TEST_DIR }
+        AbstractMergedBamFileService.metaClass.static.destinationDirectory = { AbstractMergedBamFile bamFile -> return testDir }
 
         expect:
         "${testDir}/${roddyBamFile.workDirectoryName}/${roddyBamFile.sampleType.dirName}_${roddyBamFile.individual.pid}_${RnaRoddyBamFile.CHIMERIC_BAM_SUFFIX}" == roddyBamFile.correspondingWorkChimericBamFile.path

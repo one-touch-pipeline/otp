@@ -2,11 +2,12 @@ package de.dkfz.tbi.otp.monitor.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.monitor.*
 import de.dkfz.tbi.otp.ngsdata.*
 import spock.lang.*
 
-class AllRoddyAlignmentsCheckerIntegrationSpec extends Specification {
+class AllRoddyAlignmentsCheckerIntegrationSpec extends Specification implements RoddyRnaFactory {
 
 
     void "handle, if SeqTracks given, then return finished RoddyBamFile, call Roddy alignments workflows with correct seqTracks and output SeqTypes not supported by any workflow"() {
@@ -24,7 +25,7 @@ class AllRoddyAlignmentsCheckerIntegrationSpec extends Specification {
                     )
             )
         }
-        RnaRoddyBamFile rnaRoddyBamFile = DomainFactory.createRnaRoddyBamFile([
+        RnaRoddyBamFile rnaRoddyBamFile = createBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
         ])
 

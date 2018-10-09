@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -11,7 +12,7 @@ import grails.test.spock.*
 import org.junit.*
 import org.junit.rules.*
 
-class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
+class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec implements RoddyRnaFactory {
 
     ExecuteRnaAlignmentJob executeRnaAlignmentJob
 
@@ -83,7 +84,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec {
         executeRnaAlignmentJob.referenceGenomeService.processingOptionService = new ProcessingOptionService()
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(tmpDir.root.absolutePath)
-        RnaRoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([:], RnaRoddyBamFile)
+        RnaRoddyBamFile roddyBamFile = createBamFile()
         roddyBamFile.containedSeqTracks.each { SeqTrack s ->
             s.dataFiles.each { DataFile dataFile ->
                 File file = new File(executeRnaAlignmentJob.lsdfFilesService.getFileViewByPidPath(dataFile))

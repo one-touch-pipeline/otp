@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
 import grails.validation.*
@@ -37,13 +38,12 @@ import spock.lang.*
         SeqType,
         SoftwareTool,
 ])
-class RoddyBamFileSpec extends Specification {
-
+class RoddyBamFileSpec extends Specification implements IsRoddy {
 
     RoddyBamFile roddyBamFile
 
     def setup() {
-        roddyBamFile = DomainFactory.createRoddyBamFile()
+        roddyBamFile = createBamFile()
         new TestConfigService()
     }
 

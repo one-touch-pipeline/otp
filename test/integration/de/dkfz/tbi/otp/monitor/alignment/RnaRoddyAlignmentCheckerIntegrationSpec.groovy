@@ -2,9 +2,10 @@ package de.dkfz.tbi.otp.monitor.alignment
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.*
 
-class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentCheckerIntegrationSpec {
+class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentCheckerIntegrationSpec implements RoddyRnaFactory {
 
     @Override
     AbstractRoddyAlignmentChecker createRoddyAlignmentChecker() {
@@ -13,7 +14,7 @@ class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentChec
 
     @Override
     Pipeline createPipeLine() {
-        return DomainFactory.createRoddyRnaPipeline()
+        return RoddyRnaFactory.super.findOrCreatePipeline()
     }
 
     @Override
@@ -23,7 +24,7 @@ class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentChec
 
     @Override
     RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
-        DomainFactory.createRnaRoddyBamFile([
+        createBamFile([
                 workPackage: mergingWorkPackage,
         ] + properties)
     }

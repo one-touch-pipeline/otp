@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
@@ -20,6 +21,9 @@ class RoddyWorkflowConfigSpec extends Specification {
     final static String PLUGIN_VERSION = 'pluginVersion:1.1.1'
     final static String CONFIG_VERSION = 'v1_0'
 
+    void setup() {
+        new TestConfigService()
+    }
 
     @Unroll
     void "test constraint, when value for constraint #constraint on #property is invalid, then validate should return false"() {
@@ -87,7 +91,7 @@ class RoddyWorkflowConfigSpec extends Specification {
         given:
         RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig()
         config.adapterTrimmingNeeded = false
-        config.seqType = DomainFactory.createSeqTypeLazy(seqTypeName, "asdf", "asdf", "asdf")
+        config.seqType = DomainFactory.createSeqType(name: seqTypeName)
 
         expect:
         TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'adapterTrimmingNeeded must be set for WGBS, ChipSeq and RNA alignment', config.adapterTrimmingNeeded)
@@ -114,7 +118,7 @@ class RoddyWorkflowConfigSpec extends Specification {
     void "test constraint, adapterTrimming set correctly, succeeds"() {
         given:
         RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig(
-                [seqType: DomainFactory.createSeqTypeLazy(seqTypeName, "asdf", "asdf")],
+                [seqType: DomainFactory.createSeqType(name: seqTypeName)],
                 false,
         )
         config.adapterTrimmingNeeded = adapterTrimming
