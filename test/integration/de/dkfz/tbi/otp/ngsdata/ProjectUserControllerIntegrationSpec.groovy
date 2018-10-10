@@ -32,6 +32,7 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         }
         controller.projectSelectionService = Mock(ProjectSelectionService) {
             getSelectedProject() >> new ProjectSelection(projects: [project])
+            getProjectFromProjectSelectionOrAllProjects(_) >> project
         }
         controller.ldapService = Mock(LdapService) {
             getDistinguishedNameOfGroupByGroupName(_) >> project.unixGroup
