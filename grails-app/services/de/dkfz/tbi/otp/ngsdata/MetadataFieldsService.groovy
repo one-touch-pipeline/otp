@@ -56,6 +56,7 @@ abstract class MetadataFieldsService<T> {
         return CollectionUtils.atMostOneElement(clazz.findAllByNameIlike(name))
     }
 
+    @SuppressWarnings("UnusedMethodParameter")
     protected T findByImportAlias(String importAlias, Map properties = [:]) {
         return CollectionUtils.atMostOneElement(clazz.list().findAll {
             it.importAlias*.toLowerCase()?.contains(importAlias.toLowerCase())

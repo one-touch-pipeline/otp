@@ -104,6 +104,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
         ]
     }
 
+    @SuppressWarnings("UnusedMethodParameter")
     List<File> filesToCheck(RunYapsaInstance runYapsaInstance) {
         return []
     }

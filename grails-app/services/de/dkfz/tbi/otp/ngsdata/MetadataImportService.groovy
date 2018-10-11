@@ -88,7 +88,7 @@ class MetadataImportService {
     MetadataValidationContext validate(Path metadataFile, String directoryStructureName) {
         MetadataValidationContext context = MetadataValidationContext.createFromFile(
                 metadataFile,
-                getDirectoryStructure(getDirectoryStructureBeanName(directoryStructureName, metadataFile)),
+                getDirectoryStructure(getDirectoryStructureBeanName(directoryStructureName)),
         )
         if (context.spreadsheet) {
             metadataValidators*.validate(context)
@@ -230,9 +230,8 @@ class MetadataImportService {
         return applicationContext.getBeansOfType(MetadataValidator).values().sort { it.getClass().name }
     }
 
-    protected static String getDirectoryStructureBeanName(String directoryStructureName, Path metadataFile) {
+    protected static String getDirectoryStructureBeanName(String directoryStructureName) {
         if (directoryStructureName == AUTO_DETECT_DIRECTORY_STRUCTURE_NAME) {
-            // TODO: Really do auto-detection based on the metadata file path
             return DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME
         } else {
             return directoryStructureName

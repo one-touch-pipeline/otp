@@ -235,6 +235,7 @@ abstract class AbstractRoddyAlignmentChecker extends PipelinesChecker<SeqTrack> 
     /**
      * Subclass can override this method to do additional filtering
      */
+    @SuppressWarnings("UnusedMethodParameter")
     List<SeqTrack> filter(List<SeqTrack> seqTracks, MonitorOutputCollector output) {
         return seqTracks
     }

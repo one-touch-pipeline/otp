@@ -249,7 +249,7 @@ class Scheduler {
                 log.fatal("Could not create a FAILURE Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a FAILURE Update for Job")
             }
-            markProcessAsFailed(step, error.errorMessage)
+            markProcessAsFailed(step)
             log.debug("doErrorHandling performed for ${job.class} with ProcessingStep ${step.id}")
             restartHandlerService.handleRestart(job)
         } finally {
@@ -262,7 +262,7 @@ class Scheduler {
      * @param step The ProcessingStep which failed
      * @param error The error message why this step failed.
      */
-    private void markProcessAsFailed(ProcessingStep step, String error) {
-        schedulerService.markProcessAsFailed(step, error)
+    private void markProcessAsFailed(ProcessingStep step) {
+        schedulerService.markProcessAsFailed(step)
     }
 }

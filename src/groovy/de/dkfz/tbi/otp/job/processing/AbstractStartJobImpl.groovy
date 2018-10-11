@@ -105,6 +105,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
         return plan
     }
 
+    @SuppressWarnings("UnusedMethodParameter")
     void onApplicationEvent(JobExecutionPlanChangedEvent event) {
         // If the plan has been changed, clear the cache.
         plan = null

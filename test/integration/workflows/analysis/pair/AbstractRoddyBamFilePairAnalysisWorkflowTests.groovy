@@ -55,6 +55,7 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
 
     abstract List<File> filesToCheck(Instance instance)
 
-    void checkAnalysisSpecific(Instance instance) {}
+    @SuppressWarnings("UnusedMethodParameter")
+    void checkAnalysisSpecific(Instance instance) { }
 
 }

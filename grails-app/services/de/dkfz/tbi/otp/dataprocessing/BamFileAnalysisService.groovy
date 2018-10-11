@@ -124,6 +124,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
         }
     }
 
+    @SuppressWarnings("UnusedMethodParameter")
     protected String pipelineSpecificBamFileChecks(String number) {
         return ''
     }

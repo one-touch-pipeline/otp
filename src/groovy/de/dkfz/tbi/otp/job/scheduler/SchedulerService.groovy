@@ -395,7 +395,7 @@ class SchedulerService {
             // at least one output parameter is wrong - set to failure
             createError(step, "Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of type Output.", job.class)
             log.error("Parameter ${failedOutputParameter.value} is either not defined for JobDefintion ${step.jobDefinition.id} or not of type Output.")
-            markProcessAsFailed(step, "Parameter ${failedOutputParameter.value} is either not defined for JobDefintion $step.jobDefinition.id} or not of type Output.")
+            markProcessAsFailed(step)
             return
         }
         // check that all Output Parameters are set
@@ -412,7 +412,7 @@ class SchedulerService {
                 // a required output parameter has not been generated
                 createError(step, "Required Output Parameter of type ${parameterType.id} is not set.", job.class)
                 log.error("Required Output Parameter of type ${parameterType.id} is not set.")
-                markProcessAsFailed(step, "Required Output Parameter of type ${parameterType.id} is not set.")
+                markProcessAsFailed(step)
                 return
             }
         }
@@ -456,7 +456,7 @@ class SchedulerService {
                         log.fatal("Could not create a FAILURE Update for Job of type ${jobClass}")
                         throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
                     }
-                    markProcessAsFailed(step, "Something went wrong in endStateAwareJob of type ${job.class}, execution state set to FAILURE")
+                    markProcessAsFailed(step)
                     log.debug("doEndCheck performed for ${job.class} with ProcessingStep ${step.id}")
                     return
                 }
@@ -516,7 +516,7 @@ class SchedulerService {
      * @param step The ProcessignStep which failed
      * @param error The error message why this step failed.
      */
-    void markProcessAsFailed(ProcessingStep step, String error) {
+    void markProcessAsFailed(ProcessingStep step) {
         Process process = Process.get(step.process.id)
         process.finished = true
         if (!process.save(flush: true)) {

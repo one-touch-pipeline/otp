@@ -268,6 +268,7 @@ class SampleIdentifierServiceUnitTests {
     }
 }
 
+@SuppressWarnings("UnusedMethodParameter")
 class TestParser_CanParse implements SampleIdentifierParser {
 
     ParsedSampleIdentifier tryParse(String someString) {
@@ -283,6 +284,7 @@ class TestParser_CanParse implements SampleIdentifierParser {
     }
 }
 
+@SuppressWarnings("UnusedMethodParameter")
 class TestParser_CannotParse implements SampleIdentifierParser {
 
     ParsedSampleIdentifier tryParse(String sampleIdentifier) {

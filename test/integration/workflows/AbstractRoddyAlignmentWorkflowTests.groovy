@@ -429,7 +429,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
     void checkAllAfterRoddyClusterJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes() {
         checkDataBaseState_alignBaseBamAndNewLanes()
         RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1L)
-        checkFileSystemState(latestBamFile, 1)
+        checkFileSystemState(latestBamFile)
     }
 
     void checkDataBaseState_alignBaseBamAndNewLanes() {
@@ -518,7 +518,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         assert false == workPackage.needsProcessing
     }
 
-    void checkFileSystemState(RoddyBamFile bamFile, Integer numberOfWorkflowRestarts = 0) {
+    void checkFileSystemState(RoddyBamFile bamFile) {
 
         //content of the final dir: root
         if (!bamFile.seqType.isRna()) {
