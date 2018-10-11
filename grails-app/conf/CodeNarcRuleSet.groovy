@@ -161,9 +161,11 @@ ruleset {
     }
     MethodReturnTypeRequired {
         priority = 2
+        doNotApplyToFileNames = CONTROLLER
     }
     NoDef {
         priority = 2
+        doNotApplyToFileNames = CONTROLLER
     }
     NoJavaUtilDate {
         priority = 2
