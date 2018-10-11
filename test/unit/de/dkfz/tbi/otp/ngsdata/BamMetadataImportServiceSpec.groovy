@@ -127,10 +127,10 @@ class BamMetadataImportServiceSpec extends Specification {
         Path metadataFile = temporaryFolder.newFile("bamMetadata.tsv").toPath()
         metadataFile.bytes = ("""\
 ${REFERENCE_GENOME},${SEQUENCING_TYPE},${BAM_FILE_PATH},${SAMPLE_TYPE},${INDIVIDUAL},${LIBRARY_LAYOUT},${PROJECT},${COVERAGE},${INSERT_SIZE_FILE}
-refGen1,seqType1,${bamFilesDir}/bamfile1_merged.mdup.bam,sampleType1,individual1,SINGLE,project_01,,insertSize.txt
-refGen2,seqType2,${bamFilesDir}/bamfile2_merged.mdup.bam,sampleType2,individual2,SINGLE,project_01,,qualityDir/insertSize.txt
-refGen3,seqType3,${bamFilesDir}/bamfile3_merged.mdup.bam,sampleType3,individual3,SINGLE,project_01,,qualityDirinsertSize.txt
-refGen4,seqType4,${bamFilesDir}/bamfile4_merged.mdup.bam,sampleType4,individual4,SINGLE,project_01,,qualityFileinsertSize.txt
+refGen1,seqType1,${bamFilesDir}/bamfile1_merged.mdup.bam,sampleType1,individual1,${LibraryLayout.SINGLE},project_01,,insertSize.txt
+refGen2,seqType2,${bamFilesDir}/bamfile2_merged.mdup.bam,sampleType2,individual2,${LibraryLayout.SINGLE},project_01,,qualityDir/insertSize.txt
+refGen3,seqType3,${bamFilesDir}/bamfile3_merged.mdup.bam,sampleType3,individual3,${LibraryLayout.SINGLE},project_01,,qualityDirinsertSize.txt
+refGen4,seqType4,${bamFilesDir}/bamfile4_merged.mdup.bam,sampleType4,individual4,${LibraryLayout.SINGLE},project_01,,qualityFileinsertSize.txt
 """.replaceAll(',', '\t')).getBytes(BamMetadataValidationContext.CHARSET)
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(metadataFile: metadataFile)
@@ -161,7 +161,7 @@ refGen4,seqType4,${bamFilesDir}/bamfile4_merged.mdup.bam,sampleType4,individual4
             assert epmbf : "${pid} not found in the result"
             assert epmbf.referenceGenome.name == "refGen${it}"
             assert epmbf.project.name == "project_01"
-            assert epmbf.seqType.libraryLayout == "SINGLE"
+            assert epmbf.seqType.libraryLayout == LibraryLayout.SINGLE
             assert epmbf.seqType.name == "seqType${it}"
             assert epmbf.sampleType.name == "sampleType${it}"
             assert epmbf.importedFrom == new File(bamFilesDir, "bamfile${it}_merged.mdup.bam").path

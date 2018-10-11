@@ -31,7 +31,7 @@ class ChromosomeIdentifierMappingServiceTests {
         project = DomainFactory.createProject()
         project.save(flush: true)
 
-        seqType = DomainFactory.createWholeGenomeSeqType(SeqType.LIBRARYLAYOUT_SINGLE)
+        seqType = DomainFactory.createWholeGenomeSeqType(LibraryLayout.SINGLE)
 
         referenceGenome = DomainFactory.createReferenceGenome([
                         name: "hg19_1_24",

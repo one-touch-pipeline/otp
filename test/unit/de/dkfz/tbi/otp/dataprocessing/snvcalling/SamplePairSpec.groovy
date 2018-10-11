@@ -32,7 +32,7 @@ class SamplePairSpec extends Specification {
                 project: project,
         )
         SeqType seqType = DomainFactory.createSeqType(
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED
+                libraryLayout: LibraryLayout.PAIRED
         )
         SampleType sampleType1 = DomainFactory.createSampleType(
                 name: "TUMOR",

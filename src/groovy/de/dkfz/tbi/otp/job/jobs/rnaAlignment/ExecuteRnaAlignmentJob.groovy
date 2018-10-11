@@ -30,9 +30,9 @@ class ExecuteRnaAlignmentJob extends ExecutePanCanJob {
         cValues.add("ALIGNMENT_DIR:${roddyBamFile.workDirectory}")
         cValues.add("outputBaseDirectory:${roddyBamFile.workDirectory}")
 
-        if (roddyBamFile.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_SINGLE) {
+        if (roddyBamFile.seqType.libraryLayout == LibraryLayout.SINGLE) {
             cValues.add("useSingleEndProcessing:true")
-        } else if (roddyBamFile.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED) {
+        } else if (roddyBamFile.seqType.libraryLayout == LibraryLayout.PAIRED) {
             cValues.add("useSingleEndProcessing:false")
         }
 

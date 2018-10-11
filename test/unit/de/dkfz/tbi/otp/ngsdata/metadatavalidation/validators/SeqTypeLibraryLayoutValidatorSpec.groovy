@@ -65,30 +65,30 @@ value1\tvalue2
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\t${MetaDataColumn.BASE_MATERIAL}
-SeqType1\tLibraryLayout1\t
-SeqType1\tLibraryLayout2\t
-SeqType2\tLibraryLayout1\t
-SeqType2\tLibraryLayout2\t
-SeqType2\tLibraryLayout2\ttrue
-SeqType3\tLibraryLayout3\t\t${SeqType.SINGLE_CELL_RNA}
-SeqType3\tLibraryLayout3\t\t${SeqType.SINGLE_CELL_DNA}
+SeqType1\t${LibraryLayout.SINGLE}\t
+SeqType1\t${LibraryLayout.PAIRED}\t
+SeqType2\t${LibraryLayout.SINGLE}\t
+SeqType2\t${LibraryLayout.PAIRED}\t
+SeqType2\t${LibraryLayout.PAIRED}\ttrue
+SeqType3\t${LibraryLayout.MATE_PAIR}\t\t${SeqType.SINGLE_CELL_RNA}
+SeqType3\t${LibraryLayout.MATE_PAIR}\t\t${SeqType.SINGLE_CELL_DNA}
 """)
-        SeqType seqType1ll1 = DomainFactory.createSeqType(name: 'SeqType1', dirName: 'NameSeqType1', libraryLayout: 'LibraryLayout1', singleCell: false)
-        SeqType seqType1ll2 = DomainFactory.createSeqType(name: 'SeqType1', dirName: 'NameSeqType1', libraryLayout: 'LibraryLayout2', singleCell: false)
-        SeqType seqType2ll1 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'NameSeqType2', libraryLayout: 'LibraryLayout1', singleCell: false)
-        SeqType seqType2ll2 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'NameSeqType2', libraryLayout: 'LibraryLayout2', singleCell: false)
-        SeqType seqType3ll3True = DomainFactory.createSeqType(name: 'SeqType3', dirName: 'NameSeqType3', libraryLayout: 'LibraryLayout3', singleCell: true)
-        SeqType seqType2Tagll2 = DomainFactory.createSeqType(name: 'SeqType2_TAGMENTATION', dirName: 'SeqType2_TAGMENTATION', libraryLayout: 'LibraryLayout2', singleCell: false)
+        SeqType seqType1ll1 = DomainFactory.createSeqType(name: 'SeqType1', dirName: 'NameSeqType1', libraryLayout: LibraryLayout.SINGLE, singleCell: false)
+        SeqType seqType1ll2 = DomainFactory.createSeqType(name: 'SeqType1', dirName: 'NameSeqType1', libraryLayout: LibraryLayout.PAIRED, singleCell: false)
+        SeqType seqType2ll1 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'NameSeqType2', libraryLayout: LibraryLayout.SINGLE, singleCell: false)
+        SeqType seqType2ll2 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'NameSeqType2', libraryLayout: LibraryLayout.PAIRED, singleCell: false)
+        SeqType seqType3ll3True = DomainFactory.createSeqType(name: 'SeqType3', dirName: 'NameSeqType3', libraryLayout: LibraryLayout.MATE_PAIR, singleCell: true)
+        SeqType seqType2Tagll2 = DomainFactory.createSeqType(name: 'SeqType2_TAGMENTATION', dirName: 'SeqType2_TAGMENTATION', libraryLayout: LibraryLayout.PAIRED, singleCell: false)
 
         when:
         SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
         validator.seqTypeService = Mock(SeqTypeService) {
-            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: 'LibraryLayout1', singleCell: false]) >> seqType1ll1
-            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: 'LibraryLayout2', singleCell: false]) >> seqType1ll2
-            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: 'LibraryLayout1', singleCell: false]) >> seqType2ll1
-            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: 'LibraryLayout2', singleCell: false]) >> seqType2ll2
-            2 * findByNameOrImportAlias('SeqType3', [libraryLayout: 'LibraryLayout3', singleCell: true]) >> seqType3ll3True
-            1 * findByNameOrImportAlias('SeqType2_TAGMENTATION', [libraryLayout: 'LibraryLayout2', singleCell: false]) >> seqType2Tagll2
+            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> seqType1ll1
+            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> seqType1ll2
+            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> seqType2ll1
+            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> seqType2ll2
+            2 * findByNameOrImportAlias('SeqType3', [libraryLayout: LibraryLayout.MATE_PAIR, singleCell: true]) >> seqType3ll3True
+            1 * findByNameOrImportAlias('SeqType2_TAGMENTATION', [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> seqType2Tagll2
             2 * findByNameOrImportAlias('SeqType1') >> seqType1ll1
             2 * findByNameOrImportAlias('SeqType2') >> seqType2ll1
             1 * findByNameOrImportAlias('SeqType2_TAGMENTATION') >> seqType2Tagll2
@@ -105,17 +105,19 @@ SeqType3\tLibraryLayout3\t\t${SeqType.SINGLE_CELL_DNA}
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\t${MetaDataColumn.BASE_MATERIAL}
-SeqTypeUnknown\tLibraryLayout1\t\twer
+SeqTypeUnknown\t${LibraryLayout.SINGLE}\t\twer
 SeqType1\tLibraryLayoutUnknown\t\twer
-\tLibraryLayout1\t\twer
+\t${LibraryLayout.SINGLE}\t\twer
 SeqType1\t\t\twer
+SeqType1\t${LibraryLayout.SINGLE}\t\twer
 """)
-        SeqType seqType = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout1')
+        SeqType seqType = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: LibraryLayout.SINGLE)
 
         SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
         validator.seqTypeService = Mock(SeqTypeService) {
             1 * findByNameOrImportAlias('SeqTypeUnknown') >> null
             1 * findByNameOrImportAlias('SeqType1') >> seqType
+            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> seqType
         }
 
         when:
@@ -130,41 +132,41 @@ SeqType1\t\t\twer
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\t${MetaDataColumn.BASE_MATERIAL}
-SeqType1\tLibraryLayout1\t\twer
-SeqType1\tLibraryLayout2\t\twer
-SeqType1\tLibraryLayout3\t\twer
-SeqType2\tLibraryLayout1\t\twer
-SeqType2\tLibraryLayout2\t\twer
-SeqType2\tLibraryLayout3\t\trt
-SeqType3\tLibraryLayout1\t\tert
-SeqType3\tLibraryLayout2\t\tewer
-SeqType3\tLibraryLayout3\t\twer
-SeqType3\tLibraryLayout3\ttrue\terwr
-SeqType3\tLibraryLayout2\ttrue\t${SeqType.SINGLE_CELL_DNA}
-SeqType2\tLibraryLayout2\t\t${SeqType.SINGLE_CELL_RNA}
+SeqType1\t${LibraryLayout.SINGLE}\t\twer
+SeqType1\t${LibraryLayout.PAIRED}\t\twer
+SeqType1\t${LibraryLayout.MATE_PAIR}\t\twer
+SeqType2\t${LibraryLayout.SINGLE}\t\twer
+SeqType2\t${LibraryLayout.PAIRED}\t\twer
+SeqType2\t${LibraryLayout.MATE_PAIR}\t\trt
+SeqType3\t${LibraryLayout.SINGLE}\t\tert
+SeqType3\t${LibraryLayout.PAIRED}\t\tewer
+SeqType3\t${LibraryLayout.MATE_PAIR}\t\twer
+SeqType3\t${LibraryLayout.MATE_PAIR}\ttrue\terwr
+SeqType3\t${LibraryLayout.PAIRED}\ttrue\t${SeqType.SINGLE_CELL_DNA}
+SeqType2\t${LibraryLayout.PAIRED}\t\t${SeqType.SINGLE_CELL_RNA}
 """)
 
-        SeqType seqType1ll1 = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: 'LibraryLayout1')
-        SeqType seqType2ll2 = DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: 'LibraryLayout2')
+        SeqType seqType1ll1 = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: LibraryLayout.SINGLE)
+        SeqType seqType2ll2 = DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: LibraryLayout.PAIRED)
         SeqType seqType3 = DomainFactory.createSeqType(name: 'SeqType3')
         SeqType seqType3Tag =  DomainFactory.createSeqType(name: 'SeqType3_TAGMENTATION')
-        DomainFactory.createSeqType(libraryLayout: 'LibraryLayout3')
+        DomainFactory.createSeqType(libraryLayout: LibraryLayout.MATE_PAIR)
 
 
         SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
         validator.seqTypeService = Mock(SeqTypeService) {
-            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: 'LibraryLayout1', singleCell: false]) >> seqType1ll1
-            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: 'LibraryLayout2', singleCell: false]) >> null
-            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: 'LibraryLayout3', singleCell: false]) >> null
-            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: 'LibraryLayout1', singleCell: false]) >> null
-            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: 'LibraryLayout2', singleCell: false]) >> seqType2ll2
-            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: 'LibraryLayout3', singleCell: false]) >> null
-            1 * findByNameOrImportAlias('SeqType3', [libraryLayout: 'LibraryLayout1', singleCell: false]) >> null
-            1 * findByNameOrImportAlias('SeqType3', [libraryLayout: 'LibraryLayout2', singleCell: false]) >> null
-            1 * findByNameOrImportAlias('SeqType3', [libraryLayout: 'LibraryLayout3', singleCell: false]) >> null
-            1 * findByNameOrImportAlias('SeqType3_TAGMENTATION', [libraryLayout: 'LibraryLayout3', singleCell: false]) >> null
-            1 * findByNameOrImportAlias('SeqType3_TAGMENTATION', [libraryLayout: 'LibraryLayout2', singleCell: true]) >> null
-            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: 'LibraryLayout2', singleCell: true]) >> null
+            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> seqType1ll1
+            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType1', [libraryLayout: LibraryLayout.MATE_PAIR, singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> seqType2ll2
+            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: LibraryLayout.MATE_PAIR, singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType3', [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType3', [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType3', [libraryLayout: LibraryLayout.MATE_PAIR, singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType3_TAGMENTATION', [libraryLayout: LibraryLayout.MATE_PAIR, singleCell: false]) >> null
+            1 * findByNameOrImportAlias('SeqType3_TAGMENTATION', [libraryLayout: LibraryLayout.PAIRED, singleCell: true]) >> null
+            1 * findByNameOrImportAlias('SeqType2', [libraryLayout: LibraryLayout.PAIRED, singleCell: true]) >> null
             3 * findByNameOrImportAlias('SeqType1') >> seqType1ll1
             4 * findByNameOrImportAlias('SeqType2') >> seqType2ll2
             3 * findByNameOrImportAlias('SeqType3') >> seqType3
@@ -173,25 +175,25 @@ SeqType2\tLibraryLayout2\t\t${SeqType.SINGLE_CELL_RNA}
         }
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType1' and library layout 'LibraryLayout2' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType1' and library layout '${LibraryLayout.PAIRED}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType1' and library layout 'LibraryLayout3' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType1' and library layout '${LibraryLayout.MATE_PAIR}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[3].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType2' and library layout 'LibraryLayout1' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType2' and library layout '${LibraryLayout.SINGLE}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType2' and library layout 'LibraryLayout3' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType2' and library layout '${LibraryLayout.MATE_PAIR}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[6].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout1' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3' and library layout '${LibraryLayout.SINGLE}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout2' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3' and library layout '${LibraryLayout.PAIRED}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3' and library layout 'LibraryLayout3' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3' and library layout '${LibraryLayout.MATE_PAIR}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[9].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3_TAGMENTATION' and library layout 'LibraryLayout3' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3_TAGMENTATION' and library layout '${LibraryLayout.MATE_PAIR}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[10].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType3_TAGMENTATION' and library layout 'LibraryLayout2' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType3_TAGMENTATION' and library layout '${LibraryLayout.PAIRED}' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[11].cells as Set, Level.ERROR,
-                        "The combination of sequencing type 'SeqType2' and library layout 'LibraryLayout2' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database."),
+                        "The combination of sequencing type 'SeqType2' and library layout '${LibraryLayout.PAIRED}' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database."),
         ]
 
         when:

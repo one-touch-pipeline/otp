@@ -531,7 +531,7 @@ class SeqTrackValidatorSpec extends Specification {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, mateColumns + LIBRARY_LAYOUT, 0),
-                        Level.ERROR, "Mate 2 is missing for run 'runA', lane 'L1', barcode 'ABC' with library layout 'PAIRED'.", "A mate is missing for at least one seqTrack."),
+                        Level.ERROR, "Mate 2 is missing for run 'runA', lane 'L1', barcode 'ABC' with library layout '${LibraryLayout.PAIRED}'.", "A mate is missing for at least one seqTrack."),
         ]
 
         when:
@@ -555,7 +555,7 @@ class SeqTrackValidatorSpec extends Specification {
         ).replace(' ', '\t'))
         Collection<Problem> expectedProblems = [
                 new Problem(cells(context, mateColumns + LIBRARY_LAYOUT, 0),
-                        Level.ERROR, "The following mates are missing for run 'runA', lane 'L1', barcode 'ABC' with library layout 'PAIRED': 1, 2", "Mates are missing for at least one seqTrack."),
+                        Level.ERROR, "The following mates are missing for run 'runA', lane 'L1', barcode 'ABC' with library layout '${LibraryLayout.PAIRED}': 1, 2", "Mates are missing for at least one seqTrack."),
         ]
 
         when:

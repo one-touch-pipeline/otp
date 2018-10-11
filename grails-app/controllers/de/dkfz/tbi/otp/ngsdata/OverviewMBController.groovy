@@ -26,12 +26,12 @@ class OverviewMBController {
         }
 
         List<SeqType> wp = WorkPackagesDSL.make {
-            seqType("WHOLE_GENOME", SeqType.LIBRARYLAYOUT_PAIRED)
-            seqType("EXON", SeqType.LIBRARYLAYOUT_PAIRED)
-            seqType("WHOLE_GENOME_BISULFITE", SeqType.LIBRARYLAYOUT_PAIRED)
-            seqType("WHOLE_GENOME", SeqType.LIBRARYLAYOUT_MATE_PAIR)
-            seqType("RNA", SeqType.LIBRARYLAYOUT_PAIRED)
-            seqType("MI_RNA", SeqType.LIBRARYLAYOUT_SINGLE)
+            seqType("WHOLE_GENOME", LibraryLayout.PAIRED)
+            seqType("EXON", LibraryLayout.PAIRED)
+            seqType("WHOLE_GENOME_BISULFITE", LibraryLayout.PAIRED)
+            seqType("WHOLE_GENOME", LibraryLayout.MATE_PAIR)
+            seqType("RNA", LibraryLayout.PAIRED)
+            seqType("MI_RNA", LibraryLayout.SINGLE)
         }
 
         List stringTypes = []

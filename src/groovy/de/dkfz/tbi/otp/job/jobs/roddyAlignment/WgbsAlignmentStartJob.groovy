@@ -12,7 +12,7 @@ class WgbsAlignmentStartJob extends RoddyAlignmentStartJob {
 
     @Override
     List<SeqType> getSeqTypes() {
-        return SeqType.findAllByNameInListAndLibraryLayout(SeqType.WGBS_SEQ_TYPE_NAMES*.seqTypeName, SeqType.LIBRARYLAYOUT_PAIRED)
+        return SeqType.findAllByNameInListAndLibraryLayout(SeqType.WGBS_SEQ_TYPE_NAMES*.seqTypeName, LibraryLayout.PAIRED)
     }
 
     /**

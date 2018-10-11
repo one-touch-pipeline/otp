@@ -108,7 +108,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
     void testExecuteCorrectExomeWithBedFile() {
 
         seqType.name = SeqTypeNames.EXOME.seqTypeName
-        seqType.libraryLayout = 'PAIRED'
+        seqType.libraryLayout = LibraryLayout.PAIRED
 
         BedFile bedfile = new BedFile(
             referenceGenome: referenceGenome,
@@ -129,7 +129,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
     void testExecuteCorrectExomeWithoutBedFile() {
 
         seqType.name = SeqTypeNames.EXOME.seqTypeName
-        seqType.libraryLayout = 'PAIRED'
+        seqType.libraryLayout = LibraryLayout.PAIRED
 
         job.clusterJobSchedulerService = [executeJob: { realm, cmd ->
             assert false //this method should not be executed
@@ -144,7 +144,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
     void testExecuteCorrectWholeGenome() {
 
         seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
-        seqType.libraryLayout = 'PAIRED'
+        seqType.libraryLayout = LibraryLayout.PAIRED
 
         job.clusterJobSchedulerService = [executeJob: { realm, cmd ->
                 String expCommand = "qualityAssessment.sh processedBamFileFilePath baiFilePath qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath false ${Chromosomes.overallChromosomesLabel()} 36 25 0 1 1000 10 false; chmod 440 qualityAssessmentDataFilePath coverageDataFilePath insertSizeDataFilePath"
@@ -159,7 +159,7 @@ class ExecuteMergedBamFileQaAnalysisJobUnitTests {
     void testExecuteNotSupportedSeqType() {
 
         seqType.name = SeqTypeNames.WHOLE_GENOME.seqTypeName
-        seqType.libraryLayout = 'SINGLE'
+        seqType.libraryLayout = LibraryLayout.SINGLE
         job.execute()
     }
 }

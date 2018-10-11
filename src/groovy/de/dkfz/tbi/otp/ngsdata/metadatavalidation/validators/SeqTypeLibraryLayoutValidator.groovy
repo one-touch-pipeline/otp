@@ -52,18 +52,21 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
             } else {
                 seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(it)
             }
-            String libraryLayoutName = it.getValue(LIBRARY_LAYOUT.name())
+
             String baseMaterial = it.getValue(BASE_MATERIAL.name())
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
+
+            LibraryLayout libraryLayout = LibraryLayout.findByName(it.getValue(LIBRARY_LAYOUT.name()))
+
             if (seqTypeName &&
-                    libraryLayoutName &&
+                    libraryLayout &&
                     seqTypeService.findByNameOrImportAlias(seqTypeName) &&
-                    SeqType.findByLibraryLayout(libraryLayoutName) &&
-                    !seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayoutName, singleCell: isSingleCell])) {
+                    SeqType.findByLibraryLayout(libraryLayout) &&
+                    !seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayout, singleCell: isSingleCell])) {
                 if (isSingleCell)
-                    context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayoutName}' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database.")
+                    context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayout}' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database.")
                 else
-                    context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayoutName}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database.")
+                    context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayout}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database.")
             }
         }
     }

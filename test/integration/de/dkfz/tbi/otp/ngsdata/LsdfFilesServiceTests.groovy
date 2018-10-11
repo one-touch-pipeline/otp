@@ -30,7 +30,7 @@ class LsdfFilesServiceTests {
     String softwareToolName = "CASAVA"
     String softwareToolVersion = "1.8.2"
     String pipeLineVersion = "${softwareToolName}-${softwareToolVersion}"
-    String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED
+    String libraryLayout = LibraryLayout.PAIRED
     String instrumentPlatform = "Illumina"
     String instrumentModel = "HiSeq2000"
     String libraryPreparationKit = "Agilent SureSelect V3"
@@ -164,7 +164,7 @@ class LsdfFilesServiceTests {
         dataFile.seqTrack = null
         assertNotNull(dataFile.save([flush: true]))
 
-        String correctPath = "${SEQ_TYPE_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqType.libraryLayout.toLowerCase()}/run${runName}/${VBP_PATH}/"
+        String correctPath = "${SEQ_TYPE_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqTrack.seqType.libraryLayoutDirName}/run${runName}/${VBP_PATH}/"
         String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
         assertEquals(new File(correctPath).path, new File(path).path)
     }
@@ -177,7 +177,7 @@ class LsdfFilesServiceTests {
 
         SeqTrack seqTrack = createSeqTrack(seqType: seqType)
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
-        String correctPath = "${SEQ_TYPE_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqType.libraryLayout.toLowerCase()}/run${runName}/${VBP_PATH}/"
+        String correctPath = "${SEQ_TYPE_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqTrack.seqType.libraryLayoutDirName}/run${runName}/${VBP_PATH}/"
         String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
         assertEquals(new File(correctPath).path, new File(path).path)
     }
@@ -204,7 +204,7 @@ class LsdfFilesServiceTests {
         seqTrack.pipelineVersion = softwareTool
         assertNotNull(seqTrack.save([flush: true]))
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
-        String correctPath = "${CHIP_SEQ_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}-${ANTIBODY_TARGET_NAME}/${seqType.libraryLayout.toLowerCase()}/run${runName}/${VBP_PATH}/"
+        String correctPath = "${CHIP_SEQ_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}-${ANTIBODY_TARGET_NAME}/${seqTrack.seqType.libraryLayoutDirName}/run${runName}/${VBP_PATH}/"
         String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
         assertEquals(new File(correctPath).path, new File(path).path)
     }
@@ -218,7 +218,7 @@ class LsdfFilesServiceTests {
         SeqTrack seqTrack = createSeqTrack()
         seqTrack.seqType = DomainFactory.createChipSeqType()
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
-        String correctPath = "${seqTrack.seqType.dirName}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqTrack.seqType.libraryLayout.toLowerCase()}/run${runName}/${VBP_PATH}/"
+        String correctPath = "${seqTrack.seqType.dirName}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqTrack.seqType.libraryLayoutDirName}/run${runName}/${VBP_PATH}/"
         String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
         assertEquals(new File(correctPath).path, new File(path).path)
     }

@@ -61,7 +61,7 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
 
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
             List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-            assert LibraryLayout.valueOf(seqTrack.seqType.libraryLayout).mateCount == dataFiles.size()
+            assert seqTrack.seqType.libraryLayout.mateCount == dataFiles.size()
             dataFiles.sort {it.mateNumber}.each { DataFile dataFile ->
                 String pathName = lsdfFilesService.getFileViewByPidPath(dataFile)
                 FileSystem fs = dataFile.fileLinked ?
@@ -74,7 +74,7 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
             }
         }
 
-        if (LibraryLayout.valueOf(roddyBamFile.seqType.libraryLayout).mateCount == 2) {
+        if (roddyBamFile.seqType.libraryLayout.mateCount == 2) {
             vbpDataFiles.collate(2).each {
                 MetaDataService.ensurePairedSequenceFileNameConsistency(it.first().path, it.last().path)
             }

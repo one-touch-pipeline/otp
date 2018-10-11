@@ -34,7 +34,7 @@ String configVersion = 'v1_0'
  */
 String seqTypeRoddyName = ''
 
-String libraryLayout = 'PAIRED'
+String libraryLayout = LibraryLayout.PAIRED
 
 /**
  * the complete path to the config file.

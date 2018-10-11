@@ -55,7 +55,7 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
 
         seqType = DomainFactory.createSeqType(
                         name: "seq-type",
-                        libraryLayout: "library",
+                        libraryLayout: LibraryLayout.PAIRED,
                         dirName: "seq-type-dir"
                         )
         assertNotNull(seqType.save([flush: true]))
@@ -86,7 +86,7 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
     @Test
     void testGetFile() {
         String otpFile = bamFile.getBamFile().absolutePath
-        String expectedFile = "${configService.getRootPath()}/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/nonOTP/analysisImport_REF_GEN/FILE_NAME"
+        String expectedFile = "${configService.getRootPath()}/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/paired/merged-alignment/nonOTP/analysisImport_REF_GEN/FILE_NAME"
         assert otpFile == expectedFile
     }
 }

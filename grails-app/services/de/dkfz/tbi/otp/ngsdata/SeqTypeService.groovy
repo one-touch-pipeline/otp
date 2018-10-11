@@ -33,22 +33,22 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void createMultiple(String name, List<String> libraryLayouts, Map properties = [:], List<String> importAliases = []) {
+    void createMultiple(String name, List<LibraryLayout> libraryLayouts, Map properties = [:], List<String> importAliases = []) {
         assert libraryLayouts: "the input libraryLayout must not be empty"
         assert !libraryLayouts.findAll({
-            it != SeqType.LIBRARYLAYOUT_SINGLE && it != SeqType.LIBRARYLAYOUT_PAIRED && it != SeqType.LIBRARYLAYOUT_MATE_PAIR
+            it != LibraryLayout.SINGLE && it != LibraryLayout.PAIRED && it != LibraryLayout.MATE_PAIR
         }): "the input libraryLayout has invalid values"
 
-        if (libraryLayouts.contains(SeqType.LIBRARYLAYOUT_SINGLE)) {
-            create(name, properties + [libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE], importAliases)
+        if (libraryLayouts.contains(LibraryLayout.SINGLE)) {
+            create(name, properties + [libraryLayout: LibraryLayout.SINGLE], importAliases)
 
         }
-        if (libraryLayouts.contains(SeqType.LIBRARYLAYOUT_PAIRED)) {
-            create(name, properties + [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED], importAliases)
+        if (libraryLayouts.contains(LibraryLayout.PAIRED)) {
+            create(name, properties + [libraryLayout: LibraryLayout.PAIRED], importAliases)
 
         }
-        if (libraryLayouts.contains(SeqType.LIBRARYLAYOUT_MATE_PAIR)) {
-            create(name, properties + [libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR], importAliases)
+        if (libraryLayouts.contains(LibraryLayout.MATE_PAIR)) {
+            create(name, properties + [libraryLayout: LibraryLayout.MATE_PAIR], importAliases)
 
         }
     }
@@ -57,12 +57,12 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     @Override
     void getTAndAddAlias(String name, String importAlias) {
         List<SeqType> seqTypes = []
-        seqTypes += findByNameOrImportAlias(name, [libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE, singleCell: false]) ?: []
-        seqTypes += findByNameOrImportAlias(name, [libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE, singleCell: true]) ?: []
-        seqTypes += findByNameOrImportAlias(name, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false]) ?: []
-        seqTypes += findByNameOrImportAlias(name, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: true]) ?: []
-        seqTypes += findByNameOrImportAlias(name, [libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR, singleCell: false]) ?: []
-        seqTypes += findByNameOrImportAlias(name, [libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR, singleCell: true]) ?: []
+        seqTypes += findByNameOrImportAlias(name, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) ?: []
+        seqTypes += findByNameOrImportAlias(name, [libraryLayout: LibraryLayout.SINGLE, singleCell: true]) ?: []
+        seqTypes += findByNameOrImportAlias(name, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) ?: []
+        seqTypes += findByNameOrImportAlias(name, [libraryLayout: LibraryLayout.PAIRED, singleCell: true]) ?: []
+        seqTypes += findByNameOrImportAlias(name, [libraryLayout: LibraryLayout.MATE_PAIR, singleCell: false]) ?: []
+        seqTypes += findByNameOrImportAlias(name, [libraryLayout: LibraryLayout.MATE_PAIR, singleCell: true]) ?: []
         assert seqTypes: "No ${clazz} with name or importAlias ${name} exists"
 
         seqTypes.each { SeqType seqType ->

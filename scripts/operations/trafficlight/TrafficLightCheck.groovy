@@ -1,6 +1,7 @@
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.ngsdata.*
 
 /**
  * Script show for one individual, sampleType and seqType, which thresholds are failing
@@ -10,7 +11,7 @@ import de.dkfz.tbi.otp.utils.*
 String pid = ""
 String sampleTypeName = ""
 String seqTypeName = ""
-String libraryLayout = "PAIRED"
+String libraryLayout = LibraryLayout.PAIRED
 
 //-----------------
 

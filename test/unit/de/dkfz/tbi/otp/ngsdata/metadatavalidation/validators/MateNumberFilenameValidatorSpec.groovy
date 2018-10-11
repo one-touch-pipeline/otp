@@ -8,7 +8,6 @@ import spock.lang.*
 
 import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class MateNumberFilenameValidatorSpec extends Specification {
 
@@ -24,7 +23,7 @@ class MateNumberFilenameValidatorSpec extends Specification {
         new MateNumberFilenameValidator().validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        assertContainSame(context.problems, expectedProblems)
     }
 
     void 'validate, when column MATE missing, then add expected problem'() {
@@ -39,7 +38,7 @@ class MateNumberFilenameValidatorSpec extends Specification {
         new MateNumberFilenameValidator().validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        assertContainSame(context.problems, expectedProblems)
     }
 
     void 'validate, when columns FASTQ_FILE and LIBRARY_LAYOUT, adds expected problems'() {
@@ -50,23 +49,23 @@ class MateNumberFilenameValidatorSpec extends Specification {
                         "NB_E_789_R.1.fastq.gz\t${LibraryLayout.SINGLE}\n" +
                         "NB_E_789_R.2.fastq.gz\t${LibraryLayout.SINGLE}\n" +
                         "testFileName.fastq.gz\t${LibraryLayout.SINGLE}\n" +
-                        "NB_E_789_R.1.fastq.gz\ttestLibraryLayout\n" +
-                        "testFileName.fastq.gz\ttestLibraryLayout\n"
+                        "NB_E_789_R.1.fastq.gz\t${LibraryLayout.PAIRED}\n" +
+                        "testFileName.fastq.gz\t${LibraryLayout.PAIRED}\n"
         )
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.WARNING,
                         "Optional column 'MATE' is missing. OTP will try to guess the mate numbers from the filenames.", "Optional column 'MATE' is missing. OTP will try to guess the mate numbers from the filenames."),
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING,
-                        "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout 'SINGLE'." +
+                        "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout '${LibraryLayout.SINGLE}'." +
                                 " If you ignore this warning, OTP will ignore the mate number parsed from the filename.", "At least one mate number parsed from filename is not viable with the library layout."),
                 new Problem(context.spreadsheet.dataRows[4].cells as Set, Level.ERROR,
-                        "Cannot extract mate number, because neither a ${MATE} column exists, nor can a mate number be parsed from filename 'testFileName.fastq.gz' using any pattern known to OTP, nor can one be implied from the library layout 'testLibraryLayout'.", "Cannot extract mate number"),
+                        "Cannot extract mate number, because neither a ${MATE} column exists, nor can a mate number be parsed from filename 'testFileName.fastq.gz' using any pattern known to OTP, nor can one be implied from the library layout '${LibraryLayout.PAIRED}'.", "Cannot extract mate number"),
         ]
         when:
         new MateNumberFilenameValidator().validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        assertContainSame(context.problems, expectedProblems)
     }
 
     void 'validate, when columns FASTQ_FILE and MATE, adds expected problems'() {
@@ -93,7 +92,7 @@ class MateNumberFilenameValidatorSpec extends Specification {
         new MateNumberFilenameValidator().validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        assertContainSame(context.problems, expectedProblems)
     }
 
     void 'validate, when columns FASTQ_FILE, LIBRARY_LAYOUT and MATE, adds expected problems'() {
@@ -119,13 +118,13 @@ class MateNumberFilenameValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[3].cells.findAll({it.columnAddress=="A" || it.columnAddress=="B"}) as Set, Level.WARNING,
-                        "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout 'SINGLE'." +
+                        "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout '${LibraryLayout.SINGLE}'." +
                                 " If you ignore this warning, OTP will ignore the mate number parsed from the filename.", "At least one mate number parsed from filename is not viable with the library layout."),
                 new Problem(context.spreadsheet.dataRows[4].cells.findAll({it.columnAddress=="A" || it.columnAddress=="B"}) as Set, Level.WARNING,
-                        "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout 'SINGLE'." +
+                        "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout '${LibraryLayout.SINGLE}'." +
                                 " If you ignore this warning, OTP will ignore the mate number parsed from the filename.", "At least one mate number parsed from filename is not viable with the library layout."),
                 new Problem(context.spreadsheet.dataRows[5].cells.findAll({it.columnAddress=="A" || it.columnAddress=="B"}) as Set, Level.WARNING,
-                        "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout 'SINGLE'." +
+                        "The mate number '2' parsed from filename 'NB_E_789_R.2.fastq.gz' is not viable with library layout '${LibraryLayout.SINGLE}'." +
                                 " If you ignore this warning, OTP will ignore the mate number parsed from the filename.", "At least one mate number parsed from filename is not viable with the library layout."),
                 new Problem(context.spreadsheet.dataRows[10].cells.findAll({it.columnAddress=="A" || it.columnAddress=="C"}) as Set, Level.WARNING,
                         "The value '2' in the MATE column is different from the mate number '1' parsed from the filename 'NB_E_789_R.1.fastq.gz'. " +

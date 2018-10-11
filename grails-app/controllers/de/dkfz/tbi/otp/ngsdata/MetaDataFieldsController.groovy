@@ -62,9 +62,9 @@ class MetaDataFieldsController implements CheckAndCall {
                     libraryLayouts: SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().reverse().join(' | '),
                     layouts       :
                             [
-                                    SINGLE   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SeqType.LIBRARYLAYOUT_SINGLE, it.singleCell) ? true : false,
-                                    PAIRED   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SeqType.LIBRARYLAYOUT_PAIRED, it.singleCell) ? true : false,
-                                    MATE_PAIR: SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, SeqType.LIBRARYLAYOUT_MATE_PAIR, it.singleCell) ? true : false,
+                                    SINGLE   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.SINGLE, it.singleCell) ? true : false,
+                                    PAIRED   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.PAIRED, it.singleCell) ? true : false,
+                                    MATE_PAIR: SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.MATE_PAIR, it.singleCell) ? true : false,
                             ],
                     displayName   : it.displayName,
                     importAliases : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(' | '),
@@ -386,16 +386,16 @@ abstract class CreateWithLayoutCommand implements Serializable {
         })
     }
 
-    List<String> getLibraryLayouts() {
-        List<String> libraryLayouts = []
+    List<LibraryLayout> getLibraryLayouts() {
+        List<LibraryLayout> libraryLayouts = []
         if (this.single) {
-            libraryLayouts.add(SeqType.LIBRARYLAYOUT_SINGLE)
+            libraryLayouts.add(LibraryLayout.SINGLE)
         }
         if (this.paired) {
-            libraryLayouts.add(SeqType.LIBRARYLAYOUT_PAIRED)
+            libraryLayouts.add(LibraryLayout.PAIRED)
         }
         if (this.mate_pair) {
-            libraryLayouts.add(SeqType.LIBRARYLAYOUT_MATE_PAIR)
+            libraryLayouts.add(LibraryLayout.MATE_PAIR)
         }
         return libraryLayouts
     }
@@ -449,17 +449,17 @@ class CreateLayoutCommand extends CreateWithLayoutCommand {
 
     static constraints = {
         single(validator: { val, obj ->
-            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE, singleCell: obj.singleCell])) {
+            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: LibraryLayout.SINGLE, singleCell: obj.singleCell])) {
                 return 'Duplicate'
             }
         })
         paired(validator: { val, obj ->
-            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: obj.singleCell])) {
+            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: LibraryLayout.PAIRED, singleCell: obj.singleCell])) {
                 return 'Duplicate'
             }
         })
         mate_pair(validator: { val, obj ->
-            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR, singleCell: obj.singleCell])) {
+            if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: LibraryLayout.MATE_PAIR, singleCell: obj.singleCell])) {
                 return 'Duplicate'
             }
         })

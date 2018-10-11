@@ -345,7 +345,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
     void linkFastqFiles(SeqTrack seqTrack, String readGroupNum) {
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-        assert LibraryLayout.valueOf(seqTrack.seqType.libraryLayout).mateCount == dataFiles.size()
+        assert seqTrack.seqType.libraryLayout.mateCount == dataFiles.size()
 
         Map sourceLinkMap = [:]
         dataFiles.eachWithIndex { dataFile, index ->

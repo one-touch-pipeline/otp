@@ -30,7 +30,7 @@ class MergingSetAssignmentTests {
                 sampleType: sampleType,
         )
 
-        SeqType seqType = DomainFactory.createWholeGenomeSeqType(SeqType.LIBRARYLAYOUT_SINGLE)
+        SeqType seqType = DomainFactory.createWholeGenomeSeqType(LibraryLayout.SINGLE)
 
         Run run = DomainFactory.createRun()
 

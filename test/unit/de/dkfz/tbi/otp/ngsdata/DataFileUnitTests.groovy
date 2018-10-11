@@ -53,7 +53,7 @@ class DataFileUnitTests {
         FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
         DomainFactory.createDataFile(
                 seqTrack: DomainFactory.createSeqTrack(
-                        seqType: DomainFactory.createSeqType(libraryLayout: LibraryLayout.PAIRED.name())
+                        seqType: DomainFactory.createSeqType(libraryLayout: LibraryLayout.PAIRED)
                 ),
                 fileType: fileType,
                 mateNumber: 2,

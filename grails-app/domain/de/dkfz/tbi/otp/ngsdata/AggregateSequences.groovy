@@ -34,7 +34,7 @@ class AggregateSequences implements Serializable {
     /** fields from {@link SeqType} */
     String seqTypeName
     String seqTypeDisplayName
-    String libraryLayout
+    LibraryLayout libraryLayout
     String dirName
     boolean singleCell
 

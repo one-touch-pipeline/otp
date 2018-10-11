@@ -37,10 +37,11 @@ class MateNumberFilenameValidator extends ValueTuplesValidator<MetadataValidatio
         Integer libraryLayoutColumnIndex = context.spreadsheet.header.getCellByColumnTitle(LIBRARY_LAYOUT.name())?.columnIndex
         Integer mateColumnIndex = context.spreadsheet.header.getCellByColumnTitle(MATE.name())?.columnIndex
         valueTuples.each { ValueTuple valueTuple ->
-            String libraryLayout = valueTuple.getValue(LIBRARY_LAYOUT.name())
+            LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(LIBRARY_LAYOUT.name()))
+
             String mateNumber = valueTuple.getValue(MATE.name())
             String fileName = valueTuple.getValue(FASTQ_FILE.name())
-            Integer mateCount = LibraryLayout.values().find { it.name() == libraryLayout }?.mateCount
+            Integer mateCount = libraryLayout?.mateCount
             try {
                 int fileNameMateNumber = MetaDataService.findOutMateNumber(fileName)
                 if (mateCount == 1) {

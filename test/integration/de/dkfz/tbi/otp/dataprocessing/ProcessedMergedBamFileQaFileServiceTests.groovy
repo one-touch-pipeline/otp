@@ -26,7 +26,7 @@ class ProcessedMergedBamFileQaFileServiceTests {
         MergingPass mergingPass = createMergingPass()
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROCESSING_ROOT): '/processing_root_path'])
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile(mergingPass)
-        String destinationExp = configService.getInstance().getProcessingRootPath().path + "/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0/QualityAssessment/pass1/MD5SUMS"
+        String destinationExp = configService.getInstance().getProcessingRootPath().path + "/project-dir/results_per_pid/patient/merging//sample-type/seq-type/${LibraryLayout.SINGLE.name().toLowerCase()}/DEFAULT/0/pass0/QualityAssessment/pass1/MD5SUMS"
         String destinationAct = processedMergedBamFileQaFileService.qaResultsMd5sumFile(mergedBamFile)
         configService.clean()
         assertEquals(destinationExp, destinationAct)
@@ -61,7 +61,6 @@ class ProcessedMergedBamFileQaFileServiceTests {
 
         SeqType seqType = DomainFactory.createSeqType(
                         name: "seq-type",
-                        libraryLayout: "library",
                         dirName: "seq-type-dir"
         )
 

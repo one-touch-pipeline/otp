@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import groovy.transform.TupleConstructor
+import groovy.transform.*
 
 @TupleConstructor
 enum LibraryLayout {
@@ -10,4 +10,10 @@ enum LibraryLayout {
     MATE_PAIR(2)
 
     final int mateCount
+
+    static LibraryLayout findByName(String name) {
+        return values().find {
+            it.name() == name
+        }
+    }
 }

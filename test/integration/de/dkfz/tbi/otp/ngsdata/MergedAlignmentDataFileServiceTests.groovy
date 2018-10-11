@@ -19,7 +19,7 @@ class MergedAlignmentDataFileServiceTests {
     @Test
     void testScansWithSingleLane() {
 
-        SeqType type = SeqType.findByNameAndLibraryLayout("RNA", SeqType.LIBRARYLAYOUT_PAIRED)
+        SeqType type = SeqType.findByNameAndLibraryLayout("RNA", LibraryLayout.PAIRED)
         List<SeqScan> scans = SeqScan.findAllBySeqType(type)
         for (SeqScan scan in scans) {
             mergedAlignmentDataFileService.alignmentSequenceFiles(scan)

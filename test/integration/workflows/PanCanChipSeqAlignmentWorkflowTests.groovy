@@ -28,7 +28,7 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
     SeqType findSeqType() {
         return exactlyOneElement(SeqType.findAllWhere(
                 name: SeqTypeNames.CHIP_SEQ.seqTypeName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
+                libraryLayout: LibraryLayout.PAIRED,
         ))
     }
 

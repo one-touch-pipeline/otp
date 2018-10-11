@@ -49,7 +49,11 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
             if (seqTypeName.isEmpty()) {
                 return
             }
-            SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: valueTuple.getValue(LIBRARY_LAYOUT.name()), singleCell: singleCell])
+            LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(LIBRARY_LAYOUT.name()))
+            if (!libraryLayout) {
+                return
+            }
+            SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayout, singleCell: singleCell])
             LibraryPreparationKit kit
             if (valueTuple.getValue(LIB_PREP_KIT.name())) {
                 kit = libraryPreparationKitService.findByNameOrImportAlias(valueTuple.getValue(LIB_PREP_KIT.name()))

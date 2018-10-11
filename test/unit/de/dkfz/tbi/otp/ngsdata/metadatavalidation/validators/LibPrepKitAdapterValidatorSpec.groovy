@@ -50,11 +50,11 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
                 }
         ] as SampleIdentifierService
         validator.seqTypeService = Mock(SeqTypeService) {
-            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME.seqTypeName, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false]) >> SeqType.wholeGenomePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false])  >> SeqType.exomePairedSeqType
-            9 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false])  >> SeqType.wholeGenomeBisulfitePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false])  >> SeqType.rnaPairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false])  >> SeqType.chipSeqPairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqType.wholeGenomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqType.exomePairedSeqType
+            9 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqType.wholeGenomeBisulfitePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqType.rnaPairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqType.chipSeqPairedSeqType
         }
 
         LibraryPreparationKit kitWithoutAdapterFileAndSequence = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_file_and_sequence')
@@ -106,34 +106,34 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SEQUENCING_TYPE.name()}\t${LIB_PREP_KIT.name()}\t${SAMPLE_ID.name()}\t${LIBRARY_LAYOUT.name()}\n" +
-                        "${SeqTypeNames.WHOLE_GENOME.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${normalIdentifier}\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
-                        "${SeqTypeNames.EXOME.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${normalIdentifier}\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${normalIdentifier}\t${LibraryLayout.PAIRED}\n" +
+                        "${SeqTypeNames.EXOME.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${normalIdentifier}\t${LibraryLayout.PAIRED}\n" +
                         // project config -> adapter file missing
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFile.name}\t${identifierWithProjectRoddyConfig}\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFile.name}\t${identifierWithProjectRoddyConfig}\t${LibraryLayout.PAIRED}\n" +
                         // individual config -> adapter file missing
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFile.name}\t${identifierWithIndividualRoddyConfig}\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFile.name}\t${identifierWithIndividualRoddyConfig}\t${LibraryLayout.PAIRED}\n" +
                         // RNA project config -> adapter sequence missing
-                        "${SeqTypeNames.RNA.seqTypeName}\t${kitWithoutAdapterSequence.name}\t${identifierRnaWithProjectRoddyConfig}\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "${SeqTypeNames.RNA.seqTypeName}\t${kitWithoutAdapterSequence.name}\t${identifierRnaWithProjectRoddyConfig}\t${LibraryLayout.PAIRED}\n" +
                         // parsed sample identifier -> adapter file missing
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFile.name}\tsample01\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFile.name}\tsample01\t${LibraryLayout.PAIRED}\n" +
                         // parse sample identifier with unknown project
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\tsample02\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\tsample02\t${LibraryLayout.PAIRED}\n" +
                         // using OTP alignment
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${identifierWithOtpAlignment}\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${identifierWithOtpAlignment}\t${LibraryLayout.PAIRED}\n" +
                         // unknown lib prep kit
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\tunknown_kit\t${identifierWithProjectRoddyConfig}\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\tunknown_kit\t${identifierWithProjectRoddyConfig}\t${LibraryLayout.PAIRED}\n" +
                         // empty lib prep kit
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t\t${identifierWithProjectRoddyConfig}\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t\t${identifierWithProjectRoddyConfig}\t${LibraryLayout.PAIRED}\n" +
                         // unknown sample identifier
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\tunknown_sample\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\tunknown_sample\t${LibraryLayout.PAIRED}\n" +
                         // empty sample identifier
-                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t\t${LibraryLayout.PAIRED}\n" +
                         // unknown seq type
-                        "WHOLE_UNKNOWN_SEQUENCING\t${kitWithoutAdapterFileAndSequence.name}\t${identifierWithProjectRoddyConfig}\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "WHOLE_UNKNOWN_SEQUENCING\t${kitWithoutAdapterFileAndSequence.name}\t${identifierWithProjectRoddyConfig}\t${LibraryLayout.PAIRED}\n" +
                         // empty seq type
-                        "\t${kitWithoutAdapterFileAndSequence.name}\t${identifierWithProjectRoddyConfig}\t${SeqType.LIBRARYLAYOUT_PAIRED}\n" +
+                        "\t${kitWithoutAdapterFileAndSequence.name}\t${identifierWithProjectRoddyConfig}\t${LibraryLayout.PAIRED}\n" +
                         // non roddy seq type
-                        "${SeqTypeNames.CHIP_SEQ.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${identifierWithProjectRoddyConfig}\t${SeqType.LIBRARYLAYOUT_PAIRED}\n"
+                        "${SeqTypeNames.CHIP_SEQ.seqTypeName}\t${kitWithoutAdapterFileAndSequence.name}\t${identifierWithProjectRoddyConfig}\t${LibraryLayout.PAIRED}\n"
         )
 
         when:

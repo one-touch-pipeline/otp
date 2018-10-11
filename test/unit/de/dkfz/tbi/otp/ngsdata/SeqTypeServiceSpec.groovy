@@ -17,13 +17,13 @@ class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> {
         properties = [
                 dirName      : SEQ_TYPE_DIR,
                 displayName  : SEQ_TYPE_DISPLAY_NAME,
-                libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
+                libraryLayout: LibraryLayout.SINGLE,
                 singleCell   : false,
         ]
         otherProperties = [
                 dirName      : "Other${SEQ_TYPE_DIR}",
                 displayName  : "Other${SEQ_TYPE_DISPLAY_NAME}",
-                libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
+                libraryLayout: LibraryLayout.SINGLE,
                 singleCell   : false,
         ]
     }
@@ -33,7 +33,7 @@ class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> {
         DomainFactory.<SeqType> createDomainWithImportAlias(service.clazz, [name: NAME, importAlias: [IMPORT_ALIAS]] + properties)
 
         when:
-        service.create("newName", [displayName: displayName, libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE, singleCell: false])
+        service.create("newName", [displayName: displayName, libraryLayout: LibraryLayout.SINGLE, singleCell: false])
 
         then:
         thrown(AssertionError)
@@ -63,10 +63,10 @@ class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> {
 
         where:
         name | dirName      | libraryLayout                | singleCell
-        null | SEQ_TYPE_DIR | SeqType.LIBRARYLAYOUT_SINGLE | false
-        NAME | null         | SeqType.LIBRARYLAYOUT_SINGLE | false
+        null | SEQ_TYPE_DIR | LibraryLayout.SINGLE | false
+        NAME | null         | LibraryLayout.SINGLE | false
         NAME | SEQ_TYPE_DIR | null                         | false
-        NAME | SEQ_TYPE_DIR | SeqType.LIBRARYLAYOUT_SINGLE | null
+        NAME | SEQ_TYPE_DIR | LibraryLayout.SINGLE | null
     }
 
     void "test createMultiple fails with invalid arguments"() {
@@ -84,36 +84,36 @@ class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> {
 
         where:
         name | dirName      | libraryLayouts                 | singleCell
-        null | SEQ_TYPE_DIR | [SeqType.LIBRARYLAYOUT_SINGLE] | false
-        NAME | null         | [SeqType.LIBRARYLAYOUT_SINGLE] | false
+        null | SEQ_TYPE_DIR | [LibraryLayout.SINGLE] | false
+        NAME | null         | [LibraryLayout.SINGLE] | false
         NAME | SEQ_TYPE_DIR | null                           | false
         NAME | SEQ_TYPE_DIR | []                             | false
         NAME | SEQ_TYPE_DIR | ["invalid"]                    | false
-        NAME | SEQ_TYPE_DIR | [SeqType.LIBRARYLAYOUT_SINGLE] | null
+        NAME | SEQ_TYPE_DIR | [LibraryLayout.SINGLE] | null
     }
 
     void "test create SeqType with and without single cell, succeeds"() {
         when:
-        service.create(NAME, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, dirName: SEQ_TYPE_DIR, displayName: SEQ_TYPE_DISPLAY_NAME, singleCell: false])
-        service.create(NAME, [libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, singleCell: true])
+        service.create(NAME, [libraryLayout: LibraryLayout.PAIRED, dirName: SEQ_TYPE_DIR, displayName: SEQ_TYPE_DISPLAY_NAME, singleCell: false])
+        service.create(NAME, [libraryLayout: LibraryLayout.PAIRED, dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, singleCell: true])
 
         then:
-        service.findByNameOrImportAlias(NAME, [dirName: SEQ_TYPE_DIR, displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false])
-        service.findByNameOrImportAlias(NAME, [dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: true])
+        service.findByNameOrImportAlias(NAME, [dirName: SEQ_TYPE_DIR, displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: LibraryLayout.PAIRED, singleCell: false])
+        service.findByNameOrImportAlias(NAME, [dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: LibraryLayout.PAIRED, singleCell: true])
     }
 
     void "test createMultiple with name, succeeds"() {
         when:
-        service.createMultiple(NAME, [SeqType.LIBRARYLAYOUT_PAIRED, SeqType.LIBRARYLAYOUT_SINGLE], [dirName: SEQ_TYPE_DIR, displayName: SEQ_TYPE_DISPLAY_NAME, singleCell: false])
-        service.createMultiple(NAME, [SeqType.LIBRARYLAYOUT_MATE_PAIR], [dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, singleCell: true])
+        service.createMultiple(NAME, [LibraryLayout.PAIRED, LibraryLayout.SINGLE], [dirName: SEQ_TYPE_DIR, displayName: SEQ_TYPE_DISPLAY_NAME, singleCell: false])
+        service.createMultiple(NAME, [LibraryLayout.MATE_PAIR], [dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, singleCell: true])
 
         then:
-        service.findByNameOrImportAlias(NAME, [dirName: SEQ_TYPE_DIR, displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE, singleCell: false])
-        service.findByNameOrImportAlias(NAME, [dirName: SEQ_TYPE_DIR, displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false])
-        !service.findByNameOrImportAlias(NAME, [dirName: SEQ_TYPE_DIR, displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR, singleCell: false])
-        !service.findByNameOrImportAlias(NAME, [dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE, singleCell: true])
-        !service.findByNameOrImportAlias(NAME, [dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: true])
-        service.findByNameOrImportAlias(NAME, [dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR, singleCell: true])
+        service.findByNameOrImportAlias(NAME, [dirName: SEQ_TYPE_DIR, displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: LibraryLayout.SINGLE, singleCell: false])
+        service.findByNameOrImportAlias(NAME, [dirName: SEQ_TYPE_DIR, displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: LibraryLayout.PAIRED, singleCell: false])
+        !service.findByNameOrImportAlias(NAME, [dirName: SEQ_TYPE_DIR, displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: LibraryLayout.MATE_PAIR, singleCell: false])
+        !service.findByNameOrImportAlias(NAME, [dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: LibraryLayout.SINGLE, singleCell: true])
+        !service.findByNameOrImportAlias(NAME, [dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: LibraryLayout.PAIRED, singleCell: true])
+        service.findByNameOrImportAlias(NAME, [dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: LibraryLayout.MATE_PAIR, singleCell: true])
     }
 
     @Override

@@ -98,7 +98,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
     SeqType findSeqType() {
         return CollectionUtils.exactlyOneElement(SeqType.findAllWhere(
                 name: SeqTypeNames.WHOLE_GENOME.seqTypeName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED,
+                libraryLayout: LibraryLayout.PAIRED,
         ))
     }
 }

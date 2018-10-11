@@ -52,8 +52,8 @@ class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
         String seqTypeNaturalId = seqType.getNaturalId()
 
         List allowedSeqTypes = [
-            [name:SeqTypeNames.EXOME.seqTypeName, lib:'PAIRED'],
-            [name:SeqTypeNames.WHOLE_GENOME.seqTypeName, lib:'PAIRED'],
+            [name:SeqTypeNames.EXOME.seqTypeName, lib: LibraryLayout.PAIRED],
+            [name:SeqTypeNames.WHOLE_GENOME.seqTypeName, lib: LibraryLayout.PAIRED],
         ]
         boolean isSupported = allowedSeqTypes.any { map ->
             [name: seqType.name, lib: seqType.libraryLayout ] == map
@@ -78,7 +78,7 @@ class ExecuteMergedBamFileQaAnalysisJob extends AbstractJobImpl {
         // The qa.jar is started with different parameters, depending on the sequencing type -> check which seq type is the current one
         // In case the seqType is exome, there are two more parameter needed to run the qa.jar:
         // BedFile and File containing the names of the reference genome entries
-        boolean isExonePaired = (seqType.name == SeqTypeNames.EXOME.seqTypeName && seqType.libraryLayout == 'PAIRED')
+        boolean isExonePaired = (seqType.name == SeqTypeNames.EXOME.seqTypeName && seqType.libraryLayout == LibraryLayout.PAIRED)
         if (isExonePaired) {
             ReferenceGenome referenceGenome = pass.referenceGenome
             LibraryPreparationKit libraryPreparationKit = processedMergedBamFileService.libraryPreparationKit(processedMergedBamFile)

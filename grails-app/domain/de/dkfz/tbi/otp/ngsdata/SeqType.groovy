@@ -10,12 +10,6 @@ import de.dkfz.tbi.otp.utils.*
  */
 class SeqType implements Entity {
 
-    final static LIBRARYLAYOUT_PAIRED = LibraryLayout.PAIRED.name()
-
-    final static LIBRARYLAYOUT_SINGLE = LibraryLayout.SINGLE.name()
-
-    final static LIBRARYLAYOUT_MATE_PAIR = LibraryLayout.MATE_PAIR.name()
-
     final static SINGLE_CELL_DNA = "Single-cell DNA"
 
     final static SINGLE_CELL_RNA = "Single-cell RNA"
@@ -39,7 +33,7 @@ class SeqType implements Entity {
      * Used in file system paths, for example by ProcessedMergedBamFileService.fileNameNoSuffix(ProcessedMergedBamFile).
      */
     String name
-    String libraryLayout
+    LibraryLayout libraryLayout
     String dirName
 
     boolean singleCell
@@ -55,8 +49,7 @@ class SeqType implements Entity {
     static hasMany = [importAlias : String]
 
     static constraints = {
-        name(blank: false)
-        libraryLayout(blank: false, unique: ['name', 'singleCell'], validator: { OtpPath.isValidPathComponent(it) })
+        name(blank: false, unique: ['libraryLayout', 'singleCell'])
         dirName(blank: false, unique: ['libraryLayout', 'singleCell'], validator: { String val, SeqType obj ->
             if (!OtpPath.isValidPathComponent(val)) {
                 return "no valid path component"
@@ -94,11 +87,7 @@ class SeqType implements Entity {
     }
 
     String getLibraryLayoutDirName() {
-        return getLibraryLayoutDirName(libraryLayout)
-    }
-
-    static String getLibraryLayoutDirName(final String libraryLayout) {
-        return libraryLayout.toLowerCase()
+        return libraryLayout.name().toLowerCase()
     }
 
     String getProcessingOptionName() {
@@ -141,43 +130,43 @@ class SeqType implements Entity {
 
     static SeqType getWholeGenomePairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.WHOLE_GENOME.seqTypeName, LIBRARYLAYOUT_PAIRED, false), 'WGS PAIRED not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.WHOLE_GENOME.seqTypeName, LibraryLayout.PAIRED, false), 'WGS PAIRED not found'
         )
     }
 
     static SeqType getExomePairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.EXOME.seqTypeName, LIBRARYLAYOUT_PAIRED, false), 'WES PAIRED not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.EXOME.seqTypeName, LibraryLayout.PAIRED, false), 'WES PAIRED not found'
         )
     }
 
     static SeqType getWholeGenomeBisulfitePairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, LIBRARYLAYOUT_PAIRED, false), 'WGBS PAIRED not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, LibraryLayout.PAIRED, false), 'WGBS PAIRED not found'
         )
     }
 
     static SeqType getWholeGenomeBisulfiteTagmentationPairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, LIBRARYLAYOUT_PAIRED, false), 'WGBS_TAG PAIRED not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, LibraryLayout.PAIRED, false), 'WGBS_TAG PAIRED not found'
         )
     }
 
     static SeqType getRnaPairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.RNA.seqTypeName, LIBRARYLAYOUT_PAIRED, false), 'RNA PAIRED not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.RNA.seqTypeName, LibraryLayout.PAIRED, false), 'RNA PAIRED not found'
         )
     }
 
     static SeqType getChipSeqPairedSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.CHIP_SEQ.seqTypeName, LIBRARYLAYOUT_PAIRED, false), 'CHIP_SEQ PAIRED not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.CHIP_SEQ.seqTypeName, LibraryLayout.PAIRED, false), 'CHIP_SEQ PAIRED not found'
         )
     }
 
     static SeqType getRnaSingleSeqType() {
         return CollectionUtils.exactlyOneElement(
-                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.RNA.seqTypeName, LIBRARYLAYOUT_SINGLE, false), 'RNA SINGLE not found'
+                findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.RNA.seqTypeName, LibraryLayout.SINGLE, false), 'RNA SINGLE not found'
         )
     }
 

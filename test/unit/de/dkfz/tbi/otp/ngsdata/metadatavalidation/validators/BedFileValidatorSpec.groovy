@@ -26,7 +26,7 @@ import static de.dkfz.tbi.TestCase.*
         Realm,
         ReferenceGenome,
         ReferenceGenomeProjectSeqType,
-])
+        ])
 class BedFileValidatorSpec extends Specification {
 
     static
@@ -102,12 +102,14 @@ class BedFileValidatorSpec extends Specification {
                                         return null
                                     }
                                 }
+
                                 @SuppressWarnings("UnusedMethodParameter")
                                 boolean tryParsePid(String pid) {
                                     return true
                                 }
+
                                 @SuppressWarnings("UnusedMethodParameter")
-                                boolean isForProject(String projectName){
+                                boolean isForProject(String projectName) {
                                     return true
                                 }
                             }]
@@ -119,34 +121,34 @@ class BedFileValidatorSpec extends Specification {
         assertContainSame(context.problems, expectedProblems)
 
         where:
-        seqTypeName                    | libraryLayout                | libPrepKitName    | sampleId                        | createSample | alignmentDeciderBeanName     | connectProjectToReferenceGenome | createBedFile | tagmentationBasedLibrary  || expectError
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | true          | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || true
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | 'true'                       || false
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | false                           | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'noAlignmentDecider'         | true                            | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | ''                | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | 'unknown'         | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | ''                           | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | 'nonPaired'                  | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        ''                             | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        'nonExome'                     | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
+        seqTypeName                    | libraryLayout        | libPrepKitName    | sampleId                        | createSample | alignmentDeciderBeanName     | connectProjectToReferenceGenome | createBedFile | tagmentationBasedLibrary || expectError
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | true          | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || true
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | 'true'                   || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | false                           | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'noAlignmentDecider'         | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | ''                | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | 'unknown'         | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | ''                   | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | 'nonPaired'          | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        ''                             | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        'nonExome'                     | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | SAMPLE_ID                       | true         | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
 
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | ''                              | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | 'unknown'                       | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | ''                              | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | 'unknown'                       | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
 
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | true          | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || true
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | false                           | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'noAlignmentDecider'         | true                            | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | ''                | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | 'unknown'         | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | ''                           | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | 'nonPaired'                  | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        ''                             | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        'nonExome'                     | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID_NEW_PROJECT     | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
-        SeqTypeNames.EXOME.seqTypeName | SeqType.LIBRARYLAYOUT_PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID_NEW_SAMPLE_TYPE | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                        || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | true          | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || true
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | false                           | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'noAlignmentDecider'         | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | ''                | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | 'unknown'         | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | ''                   | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | 'nonPaired'          | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        ''                             | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        'nonExome'                     | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID                 | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID_NEW_PROJECT     | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
+        SeqTypeNames.EXOME.seqTypeName | LibraryLayout.PAIRED | LIB_PREP_KIT_NAME | PARSE_SAMPLE_ID_NEW_SAMPLE_TYPE | false        | 'defaultOtpAlignmentDecider' | true                            | false         | ''                       || false
     }
 
     @Unroll

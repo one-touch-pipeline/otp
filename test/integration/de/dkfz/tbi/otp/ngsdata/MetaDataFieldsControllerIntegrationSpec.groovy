@@ -361,9 +361,9 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         then:
         controller.response.status == 200
         controller.response.json.success
-        !single || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', SeqType.LIBRARYLAYOUT_SINGLE, singleCell)
-        !paired || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', SeqType.LIBRARYLAYOUT_PAIRED, singleCell)
-        !mate_pair || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', SeqType.LIBRARYLAYOUT_MATE_PAIR, singleCell)
+        !single || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', LibraryLayout.SINGLE, singleCell)
+        !paired || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', LibraryLayout.PAIRED, singleCell)
+        !mate_pair || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', LibraryLayout.MATE_PAIR, singleCell)
 
         where:
         single | paired | mate_pair | singleCell
@@ -386,7 +386,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     @Unroll
     void "test JSON createSeqType invalid input"() {
         given:
-        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'seqtype', displayName: 'SEQ TYPE', importAlias: ['importAlias'], libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'seqtype', displayName: 'SEQ TYPE', importAlias: ['importAlias'], libraryLayout: LibraryLayout.SINGLE)
 
         when:
         controller.params.type = type
@@ -422,10 +422,10 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     @Unroll
     void "test JSON createLayout valid input"() {
         given:
-        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE, singleCell: false)
-        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false)
-        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3', libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR, singleCell: false)
-        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE_SC', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: true)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: LibraryLayout.SINGLE, singleCell: false)
+        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', libraryLayout: LibraryLayout.PAIRED, singleCell: false)
+        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3', libraryLayout: LibraryLayout.MATE_PAIR, singleCell: false)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE_SC', libraryLayout: LibraryLayout.PAIRED, singleCell: true)
 
         when:
         controller.params.name = name
@@ -441,9 +441,9 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         then:
         controller.response.status == 200
         controller.response.json.success
-        !single || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, SeqType.LIBRARYLAYOUT_SINGLE,singleCell)
-        !paired || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, SeqType.LIBRARYLAYOUT_PAIRED,singleCell)
-        !mate_pair || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, SeqType.LIBRARYLAYOUT_MATE_PAIR,singleCell)
+        !single || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.SINGLE,singleCell)
+        !paired || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.PAIRED,singleCell)
+        !mate_pair || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.MATE_PAIR,singleCell)
 
         where:
         name       | single | paired | mate_pair | singleCell
@@ -464,10 +464,10 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     @Unroll
     void "test JSON createLayout invalid input"() {
         given:
-        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE, singleCell: false)
-        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: false)
-        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3', libraryLayout: SeqType.LIBRARYLAYOUT_MATE_PAIR, singleCell: false)
-        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE_SC', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED, singleCell: true)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: LibraryLayout.SINGLE, singleCell: false)
+        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', libraryLayout: LibraryLayout.PAIRED, singleCell: false)
+        DomainFactory.createSeqType(name: 'SEQTYPE3', dirName: 'SEQTYPE3', libraryLayout: LibraryLayout.MATE_PAIR, singleCell: false)
+        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE_SC', libraryLayout: LibraryLayout.PAIRED, singleCell: true)
 
         when:
         controller.params.name = name
@@ -502,8 +502,8 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
 
     void "test JSON createSeqTypeAlias valid input"() {
         given:
-        SeqType seqTypeSingle = DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
-        SeqType seqTypePaired = DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        SeqType seqTypeSingle = DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: LibraryLayout.SINGLE)
+        SeqType seqTypePaired = DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: LibraryLayout.PAIRED)
 
         when:
         controller.params.name = name
@@ -527,8 +527,8 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     @Unroll
     void "test JSON createSeqTypeAlias invalid input"() {
         given:
-        DomainFactory.createSeqType(name: 'SEQTYPE1', dirName: 'SEQTYPE1', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
-        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', importAlias: ['importAlias2'], libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
+        DomainFactory.createSeqType(name: 'SEQTYPE1', dirName: 'SEQTYPE1', libraryLayout: LibraryLayout.SINGLE)
+        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', importAlias: ['importAlias2'], libraryLayout: LibraryLayout.SINGLE)
 
         when:
         controller.params.name = name

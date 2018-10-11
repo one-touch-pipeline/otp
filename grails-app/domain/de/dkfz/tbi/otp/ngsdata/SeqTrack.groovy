@@ -301,7 +301,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     String getReadGroupName() {
         Run run = run
-        if (seqType.libraryLayout == SeqType.LIBRARYLAYOUT_SINGLE) {
+        if (seqType.libraryLayout == LibraryLayout.SINGLE) {
             DataFile dataFile = exactlyOneElement(getDataFiles())
             String fileNameWithoutExtension = dataFile.vbpFileName.split(/\./).first()
             return "${RUN_PREFIX}${run.name}_${fileNameWithoutExtension}"

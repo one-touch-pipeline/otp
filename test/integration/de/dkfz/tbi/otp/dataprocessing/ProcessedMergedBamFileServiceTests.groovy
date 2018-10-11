@@ -36,8 +36,8 @@ class ProcessedMergedBamFileServiceTests {
     void setUp() {
         testDirectory = tmpDir.newFolder('otp-test')
 
-        directory = testDirectory.absolutePath + "/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/library/DEFAULT/0/pass0"
-        baseFile = "sample-type_patient_seq-type_library_merged.mdup"
+        directory = testDirectory.absolutePath + "/processing/project-dir/results_per_pid/patient/merging//sample-type/seq-type/${LibraryLayout.PAIRED.name().toLowerCase()}/DEFAULT/0/pass0"
+        baseFile = "sample-type_patient_seq-type_${LibraryLayout.PAIRED}_merged.mdup"
         basePath = directory + "/" + baseFile
 
         realm =DomainFactory.createRealm()
@@ -151,7 +151,7 @@ class ProcessedMergedBamFileServiceTests {
         assertEquals(pathExp, pathAct)
         bamFile.fileOperationStatus = FileOperationStatus.PROCESSED
         bamFile.md5sum = "68b329da9893e34099c7d8ad5cb9c940"
-        pathExp = testDirectory.absolutePath + "/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/"
+        pathExp = testDirectory.absolutePath + "/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/${LibraryLayout.PAIRED.name().toLowerCase()}/merged-alignment/"
         pathAct = processedMergedBamFileService.directory(bamFile.mergingPass)
         assertEquals(pathExp, pathAct)
     }
@@ -301,13 +301,13 @@ class ProcessedMergedBamFileServiceTests {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
         Map<String, String> locations = processedMergedBamFileService.locationsForFileCopying(mergedBamFile)
         DataProcessingFilesService.OutputDirectories dirType = DataProcessingFilesService.OutputDirectories.MERGING
-        String sourceDirectoryExp = dataProcessingFilesService.getOutputDirectory(mergedBamFile.individual, dirType) + "/sample-type/seq-type/library/DEFAULT/0/pass0"
+        String sourceDirectoryExp = dataProcessingFilesService.getOutputDirectory(mergedBamFile.individual, dirType) + "/sample-type/seq-type/${LibraryLayout.PAIRED.name().toLowerCase()}/DEFAULT/0/pass0"
         assertEquals(sourceDirectoryExp, locations["sourceDirectory"])
-        String destinationDirectoryExp =  testDirectory.absolutePath + "/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/"
+        String destinationDirectoryExp =  testDirectory.absolutePath + "/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/${LibraryLayout.PAIRED.name().toLowerCase()}/merged-alignment/"
         assertEquals(destinationDirectoryExp, locations["destinationDirectory"])
-        String bamFileExp = "sample-type_patient_seq-type_library_merged.mdup.bam"
+        String bamFileExp = "sample-type_patient_seq-type_${LibraryLayout.PAIRED.name()}_merged.mdup.bam"
         assertEquals(bamFileExp, locations["bamFile"])
-        String baiFileExp = "sample-type_patient_seq-type_library_merged.mdup.bai"
+        String baiFileExp = "sample-type_patient_seq-type_${LibraryLayout.PAIRED.name()}_merged.mdup.bai"
         assertEquals(baiFileExp, locations["baiFile"])
         String md5BamFileExp = bamFileExp + ".md5sum"
         assertEquals(md5BamFileExp, locations["md5BamFile"])
@@ -324,7 +324,7 @@ class ProcessedMergedBamFileServiceTests {
     @Test
     void testDestinationTempDirectory() {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
-        String destinationExp =  testDirectory.absolutePath + "/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/.tmp"
+        String destinationExp =  testDirectory.absolutePath + "/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/${LibraryLayout.PAIRED.name().toLowerCase()}/merged-alignment/.tmp"
         String destinationAct = processedMergedBamFileService.destinationTempDirectory(mergedBamFile)
         assertEquals(destinationExp, destinationAct)
     }
@@ -337,7 +337,7 @@ class ProcessedMergedBamFileServiceTests {
     @Test
     void testQaResultTempDestinationDirectory() {
         ProcessedMergedBamFile mergedBamFile = createProcessedMergedBamFile()
-        String destinationExp =  testDirectory.absolutePath + "/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/library/merged-alignment/.tmp/QualityAssessment"
+        String destinationExp =  testDirectory.absolutePath + "/root/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/${LibraryLayout.PAIRED.name().toLowerCase()}/merged-alignment/.tmp/QualityAssessment"
         String destinationAct = processedMergedBamFileService.qaResultTempDestinationDirectory(mergedBamFile)
         assertEquals(destinationExp, destinationAct)
     }
@@ -456,7 +456,7 @@ class ProcessedMergedBamFileServiceTests {
         mergedBamFile.sampleType.name = 'sample-type'
         mergedBamFile.seqType.name = 'seq-type'
         mergedBamFile.seqType.dirName = 'seq-type-dir'
-        mergedBamFile.seqType.libraryLayout = 'library'
+        mergedBamFile.seqType.libraryLayout = LibraryLayout.PAIRED
         mergedBamFile.md5sum = null
         mergedBamFile.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
         mergedBamFile.fileSize = 10000

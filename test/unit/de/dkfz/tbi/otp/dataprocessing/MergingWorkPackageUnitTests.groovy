@@ -55,7 +55,7 @@ class MergingWorkPackageUnitTests {
             sampleType: sampleType)
         this.sample.save(flush: true)
 
-        this.seqType = DomainFactory.createWholeGenomeSeqType(SeqType.LIBRARYLAYOUT_SINGLE)
+        this.seqType = DomainFactory.createWholeGenomeSeqType(LibraryLayout.SINGLE)
     }
 
     @After

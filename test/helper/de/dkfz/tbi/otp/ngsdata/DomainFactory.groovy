@@ -1495,7 +1495,7 @@ class DomainFactory {
         String defaultName = 'seqTypeName_' + (counter++)
         return createDomainObject(SeqType, [
                 name         : defaultName,
-                libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE,
+                libraryLayout: LibraryLayout.SINGLE,
                 dirName      : 'seqTypeDirName_' + (counter++),
                 displayName  : seqTypeProperties.get('displayName') ?: seqTypeProperties.get('name') ?: defaultName,
                 importAlias  : [],
@@ -1512,7 +1512,7 @@ class DomainFactory {
     }
 
     static SeqType createSeqTypePaired(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
-        return createSeqType([libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED] + seqTypeProperties, saveAndValidate)
+        return createSeqType([libraryLayout: LibraryLayout.PAIRED] + seqTypeProperties, saveAndValidate)
     }
 
     static SoftwareTool createSoftwareTool(Map softwareToolProperties = [:]) {
@@ -1898,7 +1898,7 @@ class DomainFactory {
                 kitInfoReliability: mergingWorkPackage.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
         ] + seqTrackProperties
         SeqTrack seqTrack
-        if (mergingWorkPackage.seqType.libraryLayout == SeqType.LIBRARYLAYOUT_PAIRED) {
+        if (mergingWorkPackage.seqType.libraryLayout == LibraryLayout.PAIRED) {
             seqTrack = createSeqTrackWithTwoDataFiles(map, dataFileProperties, dataFileProperties)
         } else {
             seqTrack = createSeqTrackWithOneDataFile(map, dataFileProperties)
@@ -2074,7 +2074,7 @@ class DomainFactory {
         ], myProps)
     }
 
-    static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName, String roddyName = null, String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
+    static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName, String roddyName = null, LibraryLayout libraryLayout = LibraryLayout.PAIRED) {
         createDomainObjectLazy(SeqType, [:], [
                 name         : seqTypeNames.seqTypeName,
                 displayName  : displayName,
@@ -2084,11 +2084,11 @@ class DomainFactory {
         ]).refresh()
     }
 
-    static SeqType createWholeGenomeSeqType(String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
+    static SeqType createWholeGenomeSeqType(LibraryLayout libraryLayout = LibraryLayout.PAIRED) {
         createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME, 'WGS', 'whole_genome_sequencing', 'WGS', libraryLayout)
     }
 
-    static SeqType createExomeSeqType(String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
+    static SeqType createExomeSeqType(LibraryLayout libraryLayout = LibraryLayout.PAIRED) {
         createSeqTypeLazy(SeqTypeNames.EXOME, 'EXOME', 'exon_sequencing', 'WES', libraryLayout)
     }
 
@@ -2100,7 +2100,7 @@ class DomainFactory {
         createSeqTypeLazy(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, 'WGBS_TAG', 'whole_genome_bisulfite_tagmentation_sequencing', 'WGBSTAG')
     }
 
-    static SeqType createChipSeqType(String libraryLayout = SeqType.LIBRARYLAYOUT_PAIRED) {
+    static SeqType createChipSeqType(LibraryLayout libraryLayout = LibraryLayout.PAIRED) {
         createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ", libraryLayout)
     }
 
@@ -2109,7 +2109,7 @@ class DomainFactory {
     }
 
     static SeqType createRnaSingleSeqType() {
-        createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA", LibraryLayout.SINGLE.name())
+        createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA", LibraryLayout.SINGLE)
     }
 
     static List<SeqType> createDefaultOtpAlignableSeqTypes() {
@@ -2427,7 +2427,7 @@ class DomainFactory {
         createProcessingThresholdsForMergingWorkPackage(bamFile.mergingWorkPackage, properties)
     }
 
-    static void changeSeqType(RoddyBamFile bamFile, SeqType seqType, String libraryName = null) {
+    static void changeSeqType(RoddyBamFile bamFile, SeqType seqType, LibraryLayout libraryName = null) {
 
         bamFile.mergingWorkPackage.seqType = seqType
         if (seqType.isWgbs()) {
@@ -2661,7 +2661,7 @@ class DomainFactory {
                 seqTypeName            : "{seqTypeName${counter++}",
                 seqTypeDisplayName     : "seqTypeDisplayName${counter}",
                 dirName                : "dirName${counter++}",
-                libraryLayout          : "libraryLayout${counter++}",
+                libraryLayout          : LibraryLayout.PAIRED,
                 sampleTypeName         : "sampleTypeName${counter}",
                 pid                    : "pid${counter++}",
                 mockPid                : "mockPid${counter++}",

@@ -54,7 +54,7 @@ class ProcessedMergedBamFileService {
         Individual individual = sample.individual
         DataProcessingFilesService.OutputDirectories dirType = DataProcessingFilesService.OutputDirectories.MERGING
         String baseDir = dataProcessingFilesService.getOutputDirectory(individual, dirType)
-        String seqTypeName = "${mergingWorkPackage.seqType.name}/${mergingWorkPackage.seqType.libraryLayout}"
+        String seqTypeName = "${mergingWorkPackage.seqType.name}/${mergingWorkPackage.seqType.getLibraryLayoutDirName()}"
         String workPackageCriteriaPart = "${(mergingWorkPackage.processingType == MergingWorkPackage.ProcessingType.SYSTEM ? 'DEFAULT' : MergingWorkPackage.ProcessingType.MANUAL)}"
         String workPackageNamePart = "${seqTypeName}/${workPackageCriteriaPart}"
         String dir = "${sample.sampleType.name}/${workPackageNamePart}/${mergingSet.identifier}/pass${mergingPass.identifier}"

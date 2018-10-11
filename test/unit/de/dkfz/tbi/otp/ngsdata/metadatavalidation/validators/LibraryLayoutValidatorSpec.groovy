@@ -34,11 +34,11 @@ class LibraryLayoutValidatorSpec extends Specification {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.LIBRARY_LAYOUT}\n" +
-                "LibraryLayout1\n" +
-                "LibraryLayout2\n" +
-                "LibraryLayout1\n")
-        DomainFactory.createSeqType(libraryLayout: 'LibraryLayout2')
-        DomainFactory.createSeqType(libraryLayout: 'LibraryLayout2')
+                "invalidLayout\n" +
+                "${LibraryLayout.PAIRED}\n" +
+                "invalidLayout\n")
+        DomainFactory.createSeqType(libraryLayout: LibraryLayout.PAIRED)
+        DomainFactory.createSeqType(libraryLayout: LibraryLayout.PAIRED)
 
         when:
         new LibraryLayoutValidator().validate(context)
@@ -47,6 +47,6 @@ class LibraryLayoutValidatorSpec extends Specification {
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
         containSame(problem.affectedCells*.cellAddress, ['A2', 'A4'])
-        problem.message.contains("Library layout 'LibraryLayout1' is not registered in OTP.")
+        problem.message.contains("Library layout 'invalidLayout' is not registered in OTP.")
     }
 }

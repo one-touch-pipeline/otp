@@ -77,7 +77,7 @@ testDataConfig {
         }
         'de.dkfz.tbi.otp.ngsdata.SeqType' {
             name = {'seqTypeName_' + (counter++)}
-            libraryLayout  = {'seqTypelibraryLayout_' + (counter++)}
+            libraryLayout  = LibraryLayout.PAIRED
             dirName  = {'seqTypeDirName_' + (counter++)}
         }
         'de.dkfz.tbi.otp.ngsdata.SoftwareTool' {

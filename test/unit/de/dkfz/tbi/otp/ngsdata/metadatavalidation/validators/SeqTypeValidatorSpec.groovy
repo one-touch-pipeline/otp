@@ -36,8 +36,8 @@ class SeqTypeValidatorSpec extends Specification {
                         "SeqType1\n" +
                         "SeqType2\n" +
                         "SeqType1\n")
-        SeqType seqType2 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
-        DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        SeqType seqType2 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: LibraryLayout.SINGLE)
+        DomainFactory.createSeqType(name: 'SeqType2', dirName: 'SeqType2', libraryLayout: LibraryLayout.PAIRED)
 
         when:
         SeqTypeValidator validator = new SeqTypeValidator()
@@ -81,9 +81,9 @@ class SeqTypeValidatorSpec extends Specification {
                         "SeqType2\t\n" +
                         "SeqType2\ttrue\n" +
                         "SeqType2\tfalse\n")
-        SeqType seqType1 = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: SeqType.LIBRARYLAYOUT_SINGLE)
-        SeqType seqType2 = DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
-        SeqType seqType1Tag = DomainFactory.createSeqType(name: 'SeqType1_TAGMENTATION', libraryLayout: SeqType.LIBRARYLAYOUT_PAIRED)
+        SeqType seqType1 = DomainFactory.createSeqType(name: 'SeqType1', libraryLayout: LibraryLayout.SINGLE)
+        SeqType seqType2 = DomainFactory.createSeqType(name: 'SeqType2', libraryLayout: LibraryLayout.PAIRED)
+        SeqType seqType1Tag = DomainFactory.createSeqType(name: 'SeqType1_TAGMENTATION', libraryLayout: LibraryLayout.PAIRED)
 
         when:
         SeqTypeValidator validator = new SeqTypeValidator()
