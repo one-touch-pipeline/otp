@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.administration
 
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.user.*
 import de.dkfz.tbi.otp.utils.*
@@ -32,10 +33,8 @@ class UserService {
      * Dependency injection of grails Application
      */
     def grailsApplication
-    /**
-     * Random number generator for creating user validation ids.
-     */
-    private final Random random = new Random(System.currentTimeMillis())
+
+    ConfigService configService
 
     void changePassword(String oldPassword, String newPassword) throws BadCredentialsException {
         User user = (User)springSecurityService.getCurrentUser()
@@ -256,6 +255,10 @@ class UserService {
         // switched users need not be checked, because before switching, they must have been a user that must
         // have already accepted the policy (or else they couldn't have reached the "switch user" page in the first place)
         if (SpringSecurityUtils.isSwitched()) {
+            return true
+        }
+        // privacy policy does not need to be accepted when OTP is executed with a backdoor user
+        if (configService.useBackdoor()) {
             return true
         }
 
