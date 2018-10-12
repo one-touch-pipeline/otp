@@ -36,17 +36,16 @@ class ClusterJobSchedulerService {
 
     final DateTimeFormatter PATH_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd/HH-mm-ss'.txt'")
 
-    ClusterJobSubmissionOptionsService clusterJobSubmissionOptionsService
-    JobStatusLoggingService jobStatusLoggingService
     SchedulerService schedulerService
-    ClusterJobService clusterJobService
-    ClusterJobManagerFactoryService clusterJobManagerFactoryService
-    ConfigService configService
-    ProcessingOptionService processingOptionService
 
     ClusterJobLoggingService clusterJobLoggingService
-
+    ClusterJobManagerFactoryService clusterJobManagerFactoryService
+    ClusterJobService clusterJobService
+    ClusterJobSubmissionOptionsService clusterJobSubmissionOptionsService
+    ConfigService configService
     FileService fileService
+    JobStatusLoggingService jobStatusLoggingService
+    ProcessingOptionService processingOptionService
 
     /**
      * Executes a job on a cluster specified by the realm.
@@ -138,6 +137,7 @@ class ClusterJobSchedulerService {
         }
         jobManager.startHeldJobs([job])
 
+        processingStep.refresh() // processingStep.jobClass might be outdated by now
         ClusterJob clusterJob = clusterJobService.createClusterJob(
                 realm, job.jobID.shortID, configService.getSshUser(), processingStep, seqType, jobName
         )

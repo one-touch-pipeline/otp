@@ -49,7 +49,9 @@ class ClusterJob implements Entity {
      * name of the cluster job
      */
     String clusterJobName
-    /** Location of the job log on the file system (absolute path) */
+    /**
+     * Location of the job log on the file system (absolute path)
+     */
     String jobLog
     /**
      * class of the {@link Job} that submitted this cluster job
@@ -132,17 +134,29 @@ class ClusterJob implements Entity {
      * actually used memory to process the job in KiB
      */
     Long usedMemory
-    /** swap space used */
+    /**
+     * swap space used
+     */
     Integer usedSwap
-    /** cluster node the job was executed on */
+    /**
+     * cluster node the job was executed on
+     */
     String node
-    /** the account that was requested when submitting the job (not the user account of the user submitting the job) */
+    /**
+     * the account that was requested when submitting the job (not the user account of the user submitting the job)
+     */
     String accountName
-    /** duration the job was in suspended state, caused by the system */
+    /**
+     * duration the job was in suspended state, caused by the system
+     */
     Duration systemSuspendStateDuration
-    /** duration the job was in suspended state, caused by the user */
+    /**
+     * duration the job was in suspended state, caused by the user
+     */
     Duration userSuspendStateDuration
-    /** how often the job was started */
+    /**
+     * how often the job was started
+     */
     Integer startCount
 
     Set<ClusterJob> dependencies
@@ -159,7 +173,7 @@ class ClusterJob implements Entity {
         realm(nullable: false)
         clusterJobId(blank: false, nullable: false)
         userName blank: false
-        clusterJobName(blank: false, nullable: false, validator: { clusterJobName, clusterJob -> clusterJobName.endsWith("_${clusterJob.jobClass}") } )
+        clusterJobName(blank: false, nullable: false, validator: { clusterJobName, clusterJob -> clusterJobName.endsWith("_${clusterJob.jobClass}") })
         jobClass(blank: false, nullable: false)
         seqType(nullable: true)
         nBases(nullable: true)
@@ -168,7 +182,7 @@ class ClusterJob implements Entity {
         basesPerBytesFastq(nullable: true)
         xten(nullable: true)
         queued(nullable: false)
-        jobLog nullable: true, validator: {  !it || new File(it).isAbsolute() } // can't use OtpPath.isValidAbsolutePath(it) here, because path may contain ":"
+        jobLog nullable: true, validator: { !it || new File(it).isAbsolute() } // can't use OtpPath.isValidAbsolutePath(it) here, because path may contain ":"
         // the following values must be nullable because they get filled after the job is finished
         // and may not be available from every cluster job scheduler
         exitStatus(nullable: true)

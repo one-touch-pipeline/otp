@@ -85,6 +85,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         createDataFiles(seqTrack)
         seqTrack.project.realm = realm
         assert seqTrack.project.save(flush: true)
+
         execute()
 
         checkThatWorkflowWasSuccessful(seqTrack)

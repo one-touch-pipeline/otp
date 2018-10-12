@@ -46,9 +46,25 @@ class ClusterJobGeneralController {
         LocalDate endDate = LocalDate.parse(params.to)
         String sortColumnName = GeneralClusterJobsColumns.fromDataTable(cmd.iSortCol_0).columnName
 
-        def clusterJobs = clusterJobService.findAllClusterJobsByDateBetween(startDate, endDate, cmd.sSearch, cmd.iDisplayStart, cmd.iDisplayLength, sortColumnName, cmd.sSortDir_0)
+        def clusterJobs = clusterJobService.findAllClusterJobsByDateBetween(
+                startDate,
+                endDate,
+                cmd.sSearch,
+                cmd.iDisplayStart,
+                cmd.iDisplayLength,
+                sortColumnName,
+                cmd.sSortDir_0
+        )
         def data = clusterJobs.collect {
-            return [it.clusterJobId, it.clusterJobName, it.exitStatus?.toString(), it.queued?.toString(FORMAT_STRING), it.started?.toString(FORMAT_STRING), it.ended?.toString(FORMAT_STRING), it.id]
+            return [
+                    it.clusterJobId,
+                    it.clusterJobName,
+                    it.exitStatus?.toString(),
+                    it.queued?.toString(FORMAT_STRING),
+                    it.started?.toString(FORMAT_STRING),
+                    it.ended?.toString(FORMAT_STRING),
+                    it.id,
+            ]
         }
         dataToRender.iTotalRecords = clusterJobService.countAllClusterJobsByDateBetween(startDate, endDate, cmd.sSearch)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords

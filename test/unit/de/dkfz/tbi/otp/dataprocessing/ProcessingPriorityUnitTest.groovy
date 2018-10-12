@@ -20,7 +20,7 @@ class ProcessingPriorityUnitTest {
         assert ProcessingPriority.NORMAL.priority == domainObject.processingPriority
 
         domainObject.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
-        assert ProcessingPriority.FAST_TRACK.priority== domainObject.processingPriority
+        assert ProcessingPriority.FAST_TRACK.priority == domainObject.processingPriority
     }
 
 

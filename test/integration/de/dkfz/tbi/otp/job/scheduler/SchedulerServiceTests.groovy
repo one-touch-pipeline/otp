@@ -30,7 +30,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
     void setUp() {
         originalSchedulerActive = schedulerService.schedulerActive
         createUserAndRoles()
-        SpringSecurityUtils.doWithAuth(getADMIN()) {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             originalStartupOk = schedulerService.startupOk
         }
         schedulerService.schedulerActive = true
@@ -50,8 +50,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testEndOfProcess() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -78,14 +77,12 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(process.finished)
         assertNotNull(step.jobClass)
         assertEquals(TestEndStateAwareJob.class.name, step.jobClass)
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
     }
 
     @Test
     void testCompleteProcess() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -137,8 +134,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // TODO: why is that needed?
         process = Process.get(process.id)
         assertTrue(process.finished)
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertEquals(2, ProcessingStep.countByProcess(process))
 
         step = ProcessingStep.findByProcessAndPrevious(process, step)
@@ -152,8 +148,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testConstantParameterPassing() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with three Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -192,8 +187,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(update.save(flush: true))
 
         // running the JobExecutionPlan
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertTrue(schedulerService.queue.add(step))
         schedulerService.schedule()
         // another Job should be be scheduled
@@ -229,8 +223,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // continue
         schedulerService.schedule()
         // the third Job should be scheduled
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertTrue(step3.process.finished)
 
         // run another process for same JobExecutionPlan, but trigger an exception by using an OUTPUT parameter as constant
@@ -250,8 +243,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
             )
         assertNotNull(update.save(flush: true))
         // running the JobExecutionPlan
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertTrue(schedulerService.queue.add(step))
         schedulerService.schedule()
         // another Job should be be scheduled
@@ -262,8 +254,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assert shouldFail(ExecutionException, {
             schedulerService.schedule()
         }).contains('SchedulerException')
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertFalse(process.finished)
         // the last JobDefinition should have a ProcessingStep with a created and a failed update
         ProcessingStep failedStep = ProcessingStep.findAllByJobDefinition(jobDefinition3).toList().sort { it.id }.last()
@@ -275,8 +266,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testParameterMapping() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with three Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -323,8 +313,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(update.save(flush: true))
 
         // running the JobExecutionPlan
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertTrue(schedulerService.queue.add(step))
         schedulerService.schedule()
         // another Job should be be scheduled
@@ -359,8 +348,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testPassthroughParameters() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -391,8 +379,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(update.save(flush: true))
 
         // running the JobExecutionPlan
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertTrue(schedulerService.queue.add(step))
         assertNull(Parameter.findByType(passThrough))
         schedulerService.schedule()
@@ -410,8 +397,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // schedule the next Job
         schedulerService.schedule()
         // no Job should be be scheduled
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // there should be three output parameters
         assertNotNull(step2.output)
         List<Parameter> params = step2.output.toList().sort{ it.value }
@@ -430,8 +416,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testOneToManyParameterMapping() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -473,8 +458,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
             )
         assertNotNull(update.save(flush: true))
         // running the JobExecutionPlan
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertTrue(schedulerService.queue.add(step))
         assertNull(Parameter.findByType(passThrough))
         schedulerService.schedule()
@@ -495,8 +479,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // schedule the next Job
         schedulerService.schedule()
         // no Job should be be scheduled
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // there should be three output parameters
         assertNotNull(step2.output)
         List<Parameter> params = step2.output.toList().sort{ it.value }
@@ -513,8 +496,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testCreateProcess() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with one Job Definition
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -545,14 +527,12 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // running the job should work
         schedulerService.schedule()
         assertTrue(process.finished)
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
     }
 
     @Test
     void testCreateProcessWithDisabledScheduler() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with one Job Definition
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -570,12 +550,12 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         job.jobExecutionPlan = jep
         assertNotNull(job)
         try {
-            SpringSecurityUtils.doWithAuth("admin") {
+            SpringSecurityUtils.doWithAuth(ADMIN) {
                 schedulerService.suspendScheduler()
             }
             TestCase.shouldFailWithMessage(RuntimeException, "Scheduler is disabled", { schedulerService.createProcess(job, []) })
         } finally {
-            SpringSecurityUtils.doWithAuth("admin") {
+            SpringSecurityUtils.doWithAuth(ADMIN) {
                 schedulerService.resumeScheduler()
             }
         }
@@ -583,8 +563,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testCreateProcessWithParameters() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with one Job Definition
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -641,15 +620,13 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertSame(input, step.input.toList()[0].type)
         // running the Job should create more output params
         schedulerService.schedule()
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertEquals(3, step.output.size())
     }
 
     @Test
     void testCreateProcessWithProcessParameter() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with one Job Definition
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -702,16 +679,14 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertSame(schedulerService.queue.first().jobDefinition, jobDefinition)
         assertFalse(process.finished)
         schedulerService.schedule()
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // process parameter should be accessible
         assertEquals("test", ProcessParameter.findByProcess(process).value)
     }
 
     @Test
     void testDecisions() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with one Job Definition
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -777,15 +752,13 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertFalse(Process.list().first().finished)
         // let the job run
         schedulerService.schedule()
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertTrue(Process.list().first().finished)
     }
 
     @Test
     void testFailingEndOfProcess() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with one Job Definition
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -814,8 +787,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testFailingValidation() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = createTestJob("test", jep)
@@ -864,8 +836,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertEquals(ExecutionState.FINISHED, updates[2].state)
         assertEquals(ExecutionState.FAILURE, updates[3].state)
         // no further jobs should be scheduled
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // the validating job itself should be succeeded
         step = ProcessingStep.list().last()
         assertEquals(4, ProcessingStepUpdate.countByProcessingStep(step))
@@ -878,8 +849,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testSuccessfulValidation() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = createTestJob("test", jep)
@@ -941,14 +911,12 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // this should end the process
         schedulerService.schedule()
         assertTrue(process.finished)
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
     }
 
     @Test
     void testRestartProcessingStepInCorrectState() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -1065,14 +1033,12 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertEquals(10, ProcessingStepUpdate.countByProcessingStep(step))
         assertEquals(ExecutionState.RESTARTED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
         assertFalse(process.finished)
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
     }
 
     @Test
     void testRestartProcessingStepProcessFinished() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -1102,14 +1068,12 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertEquals(5, ProcessingStepUpdate.countByProcessingStep(step))
         assertEquals(ExecutionState.RESTARTED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
         assertFalse(process.finished)
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
     }
 
     @Test
     void testRestartProcessingStepHasUpdates() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -1134,14 +1098,12 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertEquals(5, ProcessingStepUpdate.countByProcessingStep(step))
         assertEquals(ExecutionState.RESTARTED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
         assertFalse(process.finished)
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
     }
 
     @Test
     void testRestartProcessingStep() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -1163,8 +1125,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertEquals(5, ProcessingStepUpdate.countByProcessingStep(step))
         assertEquals(ExecutionState.RESTARTED, ProcessingStepUpdate.findAllByProcessingStep(step).last().state)
         assertFalse(process.finished)
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // now the same with schedule
         ProcessingStepUpdate update = ProcessingStepUpdate.findAllByProcessingStep(step).last()
         update = new ProcessingStepUpdate(
@@ -1204,8 +1165,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertFalse(process.finished)
         schedulerService.schedule()
         assertTrue(process.finished)
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertTrue(process.finished)
     }
 
@@ -1214,8 +1174,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testRestartProcessingStepUpdatesLink() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -1257,8 +1216,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertEquals(1, RestartedProcessingStep.count())
         schedulerService.schedule()
         schedulerService.schedule()
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertTrue(process.finished)
         // validate new chain
         step = ProcessingStep.findByJobDefinition(jobDefinition)
@@ -1279,8 +1237,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testRestartProcessingStepKeepsLinks() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -1314,8 +1271,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         schedulerService.schedule()
         schedulerService.schedule()
         schedulerService.schedule()
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertTrue(process.finished)
         // let's get our ProcessingSteps
         ProcessingStep secondStep = ProcessingStep.findByJobDefinition(jobDefinition2)
@@ -1336,8 +1292,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         schedulerService.schedule()
         schedulerService.schedule()
         schedulerService.schedule()
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         assertTrue(process.finished)
         // verify the chain of ProcessingSteps
         assertEquals(1, RestartedProcessingStep.count())
@@ -1440,8 +1395,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
     }
 
     private ProcessingStep createFailedProcessingStep() {
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
@@ -1471,8 +1425,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // no RestartedProcessingSteps should be created
         assertEquals([], RestartedProcessingStep.findAllByOriginal(step))
         assertFalse(step.process.finished)
-        assertTrue(schedulerService.queue.isEmpty())
-        assertTrue(schedulerService.running.isEmpty())
+        assertQueueAndRunningToBeEmpty()
     }
 
     @Test
@@ -1527,6 +1480,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
     void testIsJobResumable_sometimesResumable_noRunningJob() {
         final ProcessingStep processingStep = new ProcessingStep(jobClass: SometimesResumableTestJob.class.name)
         shouldFail RuntimeException, { schedulerService.isJobResumable(processingStep) }
+    }
+
+    private void assertQueueAndRunningToBeEmpty() {
+        assertTrue(schedulerService.queue.isEmpty())
+        assertTrue(schedulerService.running.isEmpty())
     }
 
     private ProcessingStepUpdate mockProcessingStepAsFinished(ProcessingStep step) {

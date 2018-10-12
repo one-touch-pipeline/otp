@@ -39,7 +39,7 @@ class ProcessingError implements Entity {
         processingStepUpdate(nullable: false, validator: { val ->
             return val.state == ExecutionState.FAILURE
         })
-        errorMessage(nullable: false, empty: false)
+        errorMessage(nullable: false, blank: false)
         stackTraceIdentifier(nullable: true)
     }
 
