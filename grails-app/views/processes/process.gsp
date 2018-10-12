@@ -22,7 +22,7 @@
                     <tr>
                         <td>
                             <g:form name="operatorIsAwareOfFailureForm" controller="processes" action="updateOperatorIsAwareOfFailure">
-                                <g:message code="processes.process.operatorIsAwareOfFailure"/> <g:checkBox name="operatorIsAwareOfFailure" value="${operatorIsAwareOfFailure}" onChange="submit();"/>
+                                <g:message code="processes.process.operatorIsAwareOfFailure"/> <g:checkBox name="operatorIsAwareOfFailure" checked="${operatorIsAwareOfFailure}" value="true" onChange="submit();"/>
                                 <g:hiddenField name="process.id" value="${id}"/>
                             </g:form>
                         </td>

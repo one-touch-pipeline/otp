@@ -35,7 +35,7 @@
                     </g:elseif>
                     <g:else>
                         <sec:ifAllGranted roles="ROLE_OPERATOR">
-                            <g:checkBox name="libPrepKit" value="${mergingCriteria.libPrepKit}" id="libPrepKit"/>
+                            <g:checkBox name="libPrepKit" checked="${mergingCriteria.libPrepKit}" value="true" id="libPrepKit"/>
                         </sec:ifAllGranted>
                         <sec:ifNotGranted roles="ROLE_OPERATOR">
                             ${mergingCriteria.libPrepKit}
