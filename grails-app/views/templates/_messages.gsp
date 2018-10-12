@@ -13,6 +13,13 @@
                         </g:each>
                     </ul>
                 </g:if>
+                <g:elseif test="${flash.errors instanceof List}">
+                    <ul>
+                        <g:each in="${flash.errors}" var="error">
+                            <li>${error}</li>
+                        </g:each>
+                    </ul>
+                </g:elseif>
                 <g:else>
                     <ul>
                         <li>${flash.errors}</li>

@@ -39,7 +39,7 @@ class SubmissionDomainFactory extends AbstractDomainFactory {
 
     static SampleSubmissionObject createSampleSubmissionObject(Map properties = [:]) {
         return createDomainObject(SampleSubmissionObject, [
-                egaAliasName: "sample_alias",
+                egaAliasName: "sample_alias${DomainFactory.counter++}",
                 sample: { DomainFactory.createSample() },
                 seqType: { DomainFactory.createSeqType() },
         ], properties)

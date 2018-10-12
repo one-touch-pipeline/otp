@@ -7,10 +7,12 @@ import de.dkfz.tbi.otp.utils.Entity
 class SampleSubmissionObject implements Entity, SubmissionObject {
 
     SeqType seqType
+    boolean useBamFile = false
+    boolean useFastqFile = false
 
     static belongsTo = [sample: Sample]
 
     static constraints = {
-        egaAliasName nullable: true
+        egaAliasName nullable: true, unique: true
     }
 }

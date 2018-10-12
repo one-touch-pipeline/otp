@@ -13,7 +13,7 @@
                 <tr>
                     <td id="projectName">${project.name}</td>
                     <td>
-                        <span class="blue_label"><g:message code="egaSubmission.selectSamples.seqType"/>:</span>
+                        <span class="blue_label"><g:message code="egaSubmission.seqType"/>:</span>
                     </td>
                     <td>
                         <table id="searchCriteriaTableSeqType">
@@ -38,9 +38,9 @@
                 <otp:dataTable
                     codes="${[
                             '',
-                            'egaSubmission.selectSamples.individual',
-                            'egaSubmission.selectSamples.sampleType',
-                            'egaSubmission.selectSamples.seqType'
+                            'egaSubmission.individual',
+                            'egaSubmission.sampleType',
+                            'egaSubmission.seqType'
                     ]}"
                     id="selectSamplesTable" />
             </div>
