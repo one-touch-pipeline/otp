@@ -128,7 +128,7 @@ class ExecuteRoddyCommandService {
         assert roddyResult: "The input roddyResult must not be null"
         assert roddyResult.seqType: "There is not seqType available for ${roddyResult}"
 
-        if (SeqType.roddyAlignableSeqTypes.contains(roddyResult.seqType)) {
+        if (SeqTypeService.roddyAlignableSeqTypes.contains(roddyResult.seqType)) {
             String roddyName = roddyResult.seqType.roddyName
             assert roddyName: "roddyName is not specified for ${roddyResult.seqType}"
             return roddyName

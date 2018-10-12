@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
 import grails.test.mixin.*
-import org.junit.*
 import spock.lang.Specification
 
 @Mock([
@@ -12,7 +11,7 @@ class SeqTypeSpec extends Specification {
 
     void "test get WGS Paired SeqType, no SeqType in DB, should fail"() {
         when:
-        SeqType.wholeGenomePairedSeqType
+        SeqTypeService.wholeGenomePairedSeqType
 
         then:
         AssertionError e = thrown()
@@ -22,7 +21,7 @@ class SeqTypeSpec extends Specification {
     void "test get WGS Paired SeqType, no WGS Paired SeqType in DB, should fail"() {
         when:
         DomainFactory.createWholeGenomeSeqType(LibraryLayout.SINGLE)
-        SeqType.wholeGenomePairedSeqType
+        SeqTypeService.wholeGenomePairedSeqType
 
         then:
         AssertionError e = thrown()
@@ -34,13 +33,13 @@ class SeqTypeSpec extends Specification {
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
         then:
-        seqType == SeqType.wholeGenomePairedSeqType
+        seqType == SeqTypeService.wholeGenomePairedSeqType
     }
 
 
     void "test get Exome Paired SeqType, no SeqType in DB, should fail"() {
         when:
-        SeqType.exomePairedSeqType
+        SeqTypeService.exomePairedSeqType
 
         then:
         AssertionError e = thrown()
@@ -50,7 +49,7 @@ class SeqTypeSpec extends Specification {
     void "test get Exome Paired SeqType, no Exome Paired SeqType in DB, should fail"() {
         when:
         DomainFactory.createExomeSeqType(LibraryLayout.SINGLE)
-        SeqType.exomePairedSeqType
+        SeqTypeService.exomePairedSeqType
 
         then:
         AssertionError e = thrown()
@@ -62,7 +61,7 @@ class SeqTypeSpec extends Specification {
         SeqType seqType = DomainFactory.createExomeSeqType()
 
         then:
-        seqType == SeqType.exomePairedSeqType
+        seqType == SeqTypeService.exomePairedSeqType
     }
 
     void "test create SeqTypes with unique Name And LibraryLayout combination, all fine"() {
@@ -155,7 +154,7 @@ class SeqTypeSpec extends Specification {
     void "ensure only the basic Exome+WholeGenome seqtypes are the 'default' since this assumption is implicit in much old OTP code"() {
         given:
         DomainFactory.createDefaultOtpAlignableSeqTypes()
-        List<SeqType> alignableSeqTypes = SeqType.getDefaultOtpAlignableSeqTypes()
+        List<SeqType> alignableSeqTypes = SeqTypeService.getDefaultOtpAlignableSeqTypes()
 
         expect:
         2 == alignableSeqTypes.size()

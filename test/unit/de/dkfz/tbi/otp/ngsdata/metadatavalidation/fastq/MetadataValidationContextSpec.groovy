@@ -66,10 +66,10 @@ ${SeqTypeNames.CHIP_SEQ.seqTypeName}\ttest3SampleLib\t\t${LibraryLayout.PAIRED}
         new SampleLibraryValidator().validate(context)
         LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
         libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
-            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqType.wholeGenomeBisulfitePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqType.exomePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> SeqType.rnaSingleSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqType.chipSeqPairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> SeqTypeService.rnaSingleSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.chipSeqPairedSeqType
         }
         libPrepKitSeqTypeValidator.validate(context)
 

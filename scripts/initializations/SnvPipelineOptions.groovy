@@ -10,7 +10,7 @@ processingOptionService.createOrUpdate(
         'SNVCallingWorkflow'
 )
 
-List<SeqType> snvSeqTypes = SeqType.snvPipelineSeqTypes
+List<SeqType> snvSeqTypes = SeqTypeService.snvPipelineSeqTypes
 
 assert snvSeqTypes.size() == 2
 
@@ -25,11 +25,11 @@ snvSeqTypes.each { SeqType seqType ->
 processingOptionService.createOrUpdate(
         PIPELINE_RODDY_SNV_DEFAULT_BASE_PROJECT_CONFIG,
         'otpSNVCallingWorkflowWGS-1.0',
-        SeqType.wholeGenomePairedSeqType.roddyName,
+        SeqTypeService.wholeGenomePairedSeqType.roddyName,
 )
 
 processingOptionService.createOrUpdate(
         PIPELINE_RODDY_SNV_DEFAULT_BASE_PROJECT_CONFIG,
         'otpSNVCallingWorkflowWES-1.0',
-        SeqType.exomePairedSeqType.roddyName,
+        SeqTypeService.exomePairedSeqType.roddyName,
 )

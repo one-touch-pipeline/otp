@@ -40,7 +40,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
     SamplePair createSamplePair(Map properties = [:]) {
         return DomainFactory.createSamplePairPanCan([
                 mergingWorkPackage1: DomainFactory.createMergingWorkPackage([
-                        seqType: SeqType.wholeGenomePairedSeqType,
+                        seqType: SeqTypeService.wholeGenomePairedSeqType,
                         pipeline: DomainFactory.createPanCanPipeline(),
                 ])
         ] + properties)
@@ -49,6 +49,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
     void "samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject, when some sample pairs have a config and some not some not, return project and seqtype of sample pairs without config"() {
         given:
+        createPipeLine()
         AbstractVariantCallingPipelineChecker pipelineChecker = createVariantCallingPipelineChecker()
 
         SamplePair samplePair1 = DomainFactory.createSamplePair()
@@ -141,10 +142,11 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
     void "toLittleCoverageForAnalysis, when some sample pairs have bam files with to less coverage, return this samplePairs"() {
         given:
+        createPipeLine()
         AbstractVariantCallingPipelineChecker pipelineChecker = createVariantCallingPipelineChecker()
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
-                type: pipelineChecker.pipelineType.toString(),
+                type: pipelineChecker.getPipeline().type.toString(),
                 value: '30.0',
         )
 
@@ -300,13 +302,14 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
     void "handle, if samplePairs given, then return analysis and create output for the others"() {
         given:
-        DomainFactory.createAllAnalysableSeqTypes()
+        createPipeLine()
+        DomainFactory.createRoddyAlignableSeqTypes()
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
         AbstractVariantCallingPipelineChecker pipelineChecker = Spy(createVariantCallingPipelineChecker().class)
 
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
-                type: pipelineChecker.pipelineType.toString(),
+                type: pipelineChecker.getPipeline().type.toString(),
                 value: '20.0',
         )
 
@@ -314,7 +317,7 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
-                type: pipelineChecker.pipelineType.toString(),
+                type: pipelineChecker.getPipeline().type.toString(),
                 value: '30.0',
         )
 

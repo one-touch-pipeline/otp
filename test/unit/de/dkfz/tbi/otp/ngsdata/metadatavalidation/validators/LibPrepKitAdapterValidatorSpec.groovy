@@ -50,11 +50,11 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
                 }
         ] as SampleIdentifierService
         validator.seqTypeService = Mock(SeqTypeService) {
-            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqType.wholeGenomePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqType.exomePairedSeqType
-            9 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqType.wholeGenomeBisulfitePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqType.rnaPairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqType.chipSeqPairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqTypeService.exomePairedSeqType
+            9 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqTypeService.rnaPairedSeqType
+            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false])  >> SeqTypeService.chipSeqPairedSeqType
         }
 
         LibraryPreparationKit kitWithoutAdapterFileAndSequence = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_file_and_sequence')

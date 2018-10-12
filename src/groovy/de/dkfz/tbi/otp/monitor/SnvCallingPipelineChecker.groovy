@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.monitor
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.ngsdata.*
 
 class SnvCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
@@ -17,13 +16,8 @@ class SnvCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
     }
 
     @Override
-    Pipeline.Type getPipelineType() {
-        Pipeline.Type.SNV
-    }
-
-    @Override
-    List<SeqType> getSeqTypes() {
-        SeqType.snvPipelineSeqTypes
+    Pipeline getPipeline() {
+        return Pipeline.findByName(Pipeline.Name.RODDY_SNV)
     }
 
     @Override

@@ -140,19 +140,19 @@ class ExecuteRoddyCommandServiceTests {
     @Test
     void testGetAnalysisIDinConfigFile_SeqTypeWGS() {
         DomainFactory.createRoddyAlignableSeqTypes()
-        roddyBamFile.mergingWorkPackage.seqType = SeqType.wholeGenomePairedSeqType
+        roddyBamFile.mergingWorkPackage.seqType = SeqTypeService.wholeGenomePairedSeqType
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
-        assert SeqType.wholeGenomePairedSeqType.roddyName == executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
+        assert SeqTypeService.wholeGenomePairedSeqType.roddyName == executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
     }
 
     @Test
     void testGetAnalysisIDinConfigFile_SeqTypeEXOME() {
         DomainFactory.createRoddyAlignableSeqTypes()
-        roddyBamFile.mergingWorkPackage.seqType = SeqType.exomePairedSeqType
+        roddyBamFile.mergingWorkPackage.seqType = SeqTypeService.exomePairedSeqType
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
-        assert SeqType.exomePairedSeqType.roddyName == executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
+        assert SeqTypeService.exomePairedSeqType.roddyName == executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
     }
 
     @Test

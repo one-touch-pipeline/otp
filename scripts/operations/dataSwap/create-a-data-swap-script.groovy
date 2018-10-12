@@ -35,7 +35,7 @@ String newProjectName = ''
 /**
  * Allow to filter for specific seqTypes. If given, only SeqTracks of the given SeqTypes will be swapped.
  *
- * For example: SeqType.wholeGenomePairedSeqType
+ * For example: SeqTypeService.wholeGenomePairedSeqType
  */
 def seqTypeFilterList = [
 ]

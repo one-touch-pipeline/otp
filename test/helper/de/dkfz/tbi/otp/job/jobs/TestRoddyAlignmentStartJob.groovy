@@ -19,6 +19,6 @@ class TestRoddyAlignmentStartJob extends RoddyAlignmentStartJob {
 
     @Override
     List<SeqType> getSeqTypes() {
-        return [SeqType.getWholeGenomePairedSeqType()]
+        return [SeqTypeService.getWholeGenomePairedSeqType()]
     }
 }

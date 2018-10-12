@@ -65,9 +65,9 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         where:
         shouldFind | params
         false | {[ fastqcState: UNKNOWN ]}
-        false | {[ fastqcState: UNKNOWN,     seqType: SeqType.getExomePairedSeqType()]}
+        false | {[ fastqcState: UNKNOWN,     seqType: SeqTypeService.getExomePairedSeqType()]}
         true  | {[ fastqcState: NOT_STARTED ]}
-        true  | {[ fastqcState: NOT_STARTED, seqType: SeqType.getExomePairedSeqType()]}
+        true  | {[ fastqcState: NOT_STARTED, seqType: SeqTypeService.getExomePairedSeqType()]}
 
     }
 

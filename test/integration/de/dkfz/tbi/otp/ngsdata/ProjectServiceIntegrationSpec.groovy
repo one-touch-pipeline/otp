@@ -884,7 +884,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         setup:
         RoddyConfiguration configuration = new RoddyConfiguration(
                 project          : Project.findByName("testProjectAlignment"),
-                seqType          : SeqType.wholeGenomePairedSeqType,
+                seqType          : SeqTypeService.wholeGenomePairedSeqType,
                 pluginName       : 'plugin',
                 pluginVersion    : '1.2.3',
                 baseProjectConfig: 'baseConfig',
@@ -1215,7 +1215,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         setup:
         SnvConfig configuration = DomainFactory.createSnvConfig([
                 project          : Project.findByName("testProjectAlignment"),
-                seqType          : SeqType.exomePairedSeqType,
+                seqType          : SeqTypeService.exomePairedSeqType,
         ])
         File projectDirectory = LsdfFilesService.getPath(
                 configService.getRootPath().absolutePath,
@@ -1484,7 +1484,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     private PanCanAlignmentConfiguration createPanCanAlignmentConfiguration(Map properties = [:]) {
         PanCanAlignmentConfiguration configuration = new PanCanAlignmentConfiguration([
                 project          : Project.findByName("testProjectAlignment"),
-                seqType          : SeqType.wholeGenomePairedSeqType,
+                seqType          : SeqTypeService.wholeGenomePairedSeqType,
                 referenceGenome  : "testReferenceGenome",
                 statSizeFileName : 'testStatSizeFileName.tab',
                 bwaMemVersion    : "bwa-mem",
@@ -1509,7 +1509,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     private RnaAlignmentReferenceGenomeConfiguration createRnaAlignmentConfiguration(Map properties = [:]) {
         RnaAlignmentReferenceGenomeConfiguration configuration = new RnaAlignmentReferenceGenomeConfiguration([
                 project             : Project.findByName("testProjectAlignment"),
-                seqType             : SeqType.rnaPairedSeqType,
+                seqType             : SeqTypeService.rnaPairedSeqType,
                 referenceGenome     : "testReferenceGenome",
                 referenceGenomeIndex: [
                         DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: "${ProjectService.GENOME_STAR_INDEX}_200")),
@@ -1533,7 +1533,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     private RoddyConfiguration createRoddySnvConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : Project.findByName("testProjectAlignment"),
-                seqType          : SeqType.exomePairedSeqType,
+                seqType          : SeqTypeService.exomePairedSeqType,
                 pluginName       : 'SNVCallingWorkflow',
                 pluginVersion    : '1.0.166-1',
                 baseProjectConfig: 'otpSNVCallingWorkflowWES-1.0',
@@ -1546,7 +1546,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     private RoddyConfiguration createRoddyIndelConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : Project.findByName("testProjectAlignment"),
-                seqType          : SeqType.exomePairedSeqType,
+                seqType          : SeqTypeService.exomePairedSeqType,
                 pluginName       : 'IndelCallingWorkflow',
                 pluginVersion    : '1.0.166-1',
                 baseProjectConfig: 'otpIndelCallingWorkflowWES-1.0',
@@ -1559,7 +1559,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     private RoddyConfiguration createRoddySophiaConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : Project.findByName("testProjectAlignment"),
-                seqType          : SeqType.wholeGenomePairedSeqType,
+                seqType          : SeqTypeService.wholeGenomePairedSeqType,
                 pluginName       : 'SophiaWorkflow',
                 pluginVersion    : '1.0.14',
                 baseProjectConfig: 'otpSophia-1.0',
@@ -1572,7 +1572,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     private RoddyConfiguration createRoddyAceseqConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : Project.findByName("testProjectAlignment"),
-                seqType          : SeqType.wholeGenomePairedSeqType,
+                seqType          : SeqTypeService.wholeGenomePairedSeqType,
                 pluginName       : 'ACEseqWorkflow',
                 pluginVersion    : '1.2.6',
                 baseProjectConfig: 'otpACEseq-1.0',

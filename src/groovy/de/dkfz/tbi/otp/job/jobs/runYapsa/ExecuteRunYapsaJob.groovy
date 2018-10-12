@@ -54,9 +54,9 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
         runYapsaCall << configService.getToolsPath().getAbsolutePath() + "/" + runYapsaCommand
         runYapsaCall << "-i ${instance.samplePair.findLatestSnvCallingInstance().getResultRequiredForRunYapsa()}"
         runYapsaCall << "-o ${outputDirectory.absolutePath}"
-        if (instance.seqType == SeqType.wholeGenomePairedSeqType) {
+        if (instance.seqType == SeqTypeService.wholeGenomePairedSeqType) {
             runYapsaCall << "-s WGS"
-        } else if (instance.seqType == SeqType.exomePairedSeqType) {
+        } else if (instance.seqType == SeqTypeService.exomePairedSeqType) {
             runYapsaCall << "-s WES"
             BedFile bedFile = BedFile.findByReferenceGenomeAndLibraryPreparationKit(
                     referenceGenome,

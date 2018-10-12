@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-
 class IndelCallingService extends BamFileAnalysisService implements RoddyBamFileAnalysis {
 
     @Override
@@ -22,11 +20,6 @@ class IndelCallingService extends BamFileAnalysisService implements RoddyBamFile
     @Override
     Pipeline.Name getPipelineName() {
         return Pipeline.Name.RODDY_INDEL
-    }
-
-    @Override
-    protected List<SeqType> getSeqTypes() {
-        return SeqType.indelPipelineSeqTypes
     }
 
     @Override

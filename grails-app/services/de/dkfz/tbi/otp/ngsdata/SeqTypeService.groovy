@@ -10,7 +10,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         return SeqTrack.createCriteria().listDistinct {
             projections {
                 groupProperty('seqType')
-                'in'('seqType', SeqType.getAllAlignableSeqTypes())
+                'in'('seqType', getAllAlignableSeqTypes())
                 sample {
                     individual {
                         eq("project", project)
@@ -113,4 +113,155 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     protected Class getClazz() {
         return SeqType
     }
+
+
+    static SeqType getWholeGenomePairedSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                SeqType.findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.WHOLE_GENOME.seqTypeName, LibraryLayout.PAIRED, false), 'WGS PAIRED not found'
+        )
+    }
+
+    static SeqType getExomePairedSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                SeqType.findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.EXOME.seqTypeName, LibraryLayout.PAIRED, false), 'WES PAIRED not found'
+        )
+    }
+
+    static SeqType getWholeGenomeBisulfitePairedSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                SeqType.findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, LibraryLayout.PAIRED, false), 'WGBS PAIRED not found'
+        )
+    }
+
+    static SeqType getWholeGenomeBisulfiteTagmentationPairedSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                SeqType.findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName, LibraryLayout.PAIRED, false), 'WGBS_TAG PAIRED not found'
+        )
+    }
+
+    static SeqType getRnaPairedSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                SeqType.findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.RNA.seqTypeName, LibraryLayout.PAIRED, false), 'RNA PAIRED not found'
+        )
+    }
+
+    static SeqType getChipSeqPairedSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                SeqType.findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.CHIP_SEQ.seqTypeName, LibraryLayout.PAIRED, false), 'CHIP_SEQ PAIRED not found'
+        )
+    }
+
+    static SeqType getRnaSingleSeqType() {
+        return CollectionUtils.exactlyOneElement(
+                SeqType.findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames.RNA.seqTypeName, LibraryLayout.SINGLE, false), 'RNA SINGLE not found'
+        )
+    }
+
+    static List<SeqType> getDefaultOtpAlignableSeqTypes() {
+        return [
+                getExomePairedSeqType(),
+                getWholeGenomePairedSeqType(),
+        ]
+    }
+
+    static List<SeqType> getPanCanAlignableSeqTypes() {
+        return [
+                getExomePairedSeqType(),
+                getWholeGenomePairedSeqType(),
+                getWholeGenomeBisulfitePairedSeqType(),
+                getWholeGenomeBisulfiteTagmentationPairedSeqType(),
+                getChipSeqPairedSeqType(),
+        ]
+    }
+
+    static List<SeqType> getRnaAlignableSeqTypes() {
+        return [
+                getRnaPairedSeqType(),
+                getRnaSingleSeqType(),
+        ]
+    }
+
+    static List<SeqType> getRoddyAlignableSeqTypes() {
+        return [
+                getPanCanAlignableSeqTypes(),
+                getRnaAlignableSeqTypes(),
+        ].flatten()
+    }
+
+    static List<SeqType> getAllAlignableSeqTypes() {
+        return [
+                getDefaultOtpAlignableSeqTypes(),
+                getRoddyAlignableSeqTypes(),
+        ].flatten().unique()
+    }
+
+    static List<SeqType> getSeqTypesRequiredLibPrepKit() {
+        return [
+                exomePairedSeqType,
+                wholeGenomeBisulfitePairedSeqType,
+                wholeGenomeBisulfiteTagmentationPairedSeqType,
+                chipSeqPairedSeqType,
+                rnaPairedSeqType,
+                rnaSingleSeqType,
+        ]
+    }
+
+    static List<SeqType> getSnvPipelineSeqTypes() {
+        return [
+                getExomePairedSeqType(),
+                getWholeGenomePairedSeqType(),
+        ]
+    }
+
+    static List<SeqType> getIndelPipelineSeqTypes() {
+        return [
+                getExomePairedSeqType(),
+                getWholeGenomePairedSeqType(),
+        ]
+    }
+
+    static List<SeqType> getSophiaPipelineSeqTypes() {
+        return [
+                getExomePairedSeqType(),
+                getWholeGenomePairedSeqType(),
+        ]
+    }
+
+    static List<SeqType> getAceseqPipelineSeqTypes() {
+        return [
+                getWholeGenomePairedSeqType(),
+        ]
+    }
+
+    static List<SeqType> getRunYapsaPipelineSeqTypes() {
+        return [
+                getExomePairedSeqType(),
+                getWholeGenomePairedSeqType(),
+        ]
+    }
+
+    static List<SeqType> getAllAnalysableSeqTypes() {
+        return [
+                getSnvPipelineSeqTypes(),
+                getIndelPipelineSeqTypes(),
+                getSophiaPipelineSeqTypes(),
+                getAceseqPipelineSeqTypes(),
+                getRunYapsaPipelineSeqTypes(),
+        ].flatten().unique()
+    }
+
+    static List<SeqType> getAllProcessableSeqTypes() {
+        return [
+                getAllAlignableSeqTypes(),
+                getAllAnalysableSeqTypes(),
+        ].flatten().unique()
+    }
+
+    static List<SeqType> getSeqTypesIgnoringLibraryPreparationKitForMerging() {
+        return [
+                getWholeGenomeBisulfitePairedSeqType(),
+                getWholeGenomeBisulfiteTagmentationPairedSeqType(),
+        ].flatten().unique()
+    }
+
 }

@@ -10,7 +10,7 @@ processingOptionService.createOrUpdate(
         'ACEseqWorkflow'
 )
 
-SeqType.aceseqPipelineSeqTypes.each { SeqType seqType ->
+SeqTypeService.aceseqPipelineSeqTypes.each { SeqType seqType ->
     processingOptionService.createOrUpdate(
             PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION,
             '1.2.8-4',

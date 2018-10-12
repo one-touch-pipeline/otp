@@ -17,6 +17,6 @@ class WgbsRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
 
     @Override
     List<SeqType> getSeqTypes() {
-        return [SeqType.wholeGenomeBisulfitePairedSeqType, SeqType.wholeGenomeBisulfiteTagmentationPairedSeqType]
+        return [SeqTypeService.wholeGenomeBisulfitePairedSeqType, SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType]
     }
 }

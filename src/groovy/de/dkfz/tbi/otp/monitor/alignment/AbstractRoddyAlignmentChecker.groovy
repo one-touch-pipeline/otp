@@ -172,7 +172,7 @@ abstract class AbstractRoddyAlignmentChecker extends PipelinesChecker<SeqTrack> 
                 """, [
                 seqTracks                                    : seqTracks,
                 pipeLineName                                 : getPipeLineName(),
-                seqTypesCanHaveDifferentLibraryPreperationKit: SeqType.getSeqTypesIgnoringLibraryPreparationKitForMerging(),
+                seqTypesCanHaveDifferentLibraryPreperationKit: SeqTypeService.getSeqTypesIgnoringLibraryPreparationKitForMerging(),
         ])
 
         List seqTracksWithoutMergingWorkpackage = seqTracks - list.collect {

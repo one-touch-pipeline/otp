@@ -18,7 +18,7 @@ class QcThresholdController {
 
 
     def defaultConfiguration() {
-        List<SeqType> seqTypes = SeqType.allProcessableSeqTypes
+        List<SeqType> seqTypes = SeqTypeService.allProcessableSeqTypes
 
         List<ClassWithThreshold> classesWithProperties = qcThresholdService.getClassesWithProperties()
 
@@ -33,7 +33,7 @@ class QcThresholdController {
         ProjectSelection selection = projectSelectionService.getSelectedProject()
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
-        List<SeqType> seqTypes = SeqType.allProcessableSeqTypes
+        List<SeqType> seqTypes = SeqTypeService.allProcessableSeqTypes
 
         List<ClassWithThresholds> classesWithProperties = qcThresholdService.getClassesWithPropertiesForProjectAndSeqTypes(project, seqTypes)
 

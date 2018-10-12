@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.monitor
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
 
 class AceseqCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
@@ -16,13 +15,8 @@ class AceseqCallingPipelineChecker extends AbstractVariantCallingPipelineChecker
     }
 
     @Override
-    Pipeline.Type getPipelineType() {
-        Pipeline.Type.ACESEQ
-    }
-
-    @Override
-    List<SeqType> getSeqTypes() {
-        SeqType.aceseqPipelineSeqTypes
+    Pipeline getPipeline() {
+        return Pipeline.findByName(Pipeline.Name.RODDY_ACESEQ)
     }
 
     @Override

@@ -3,7 +3,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 def d = RoddyBamFile.createCriteria().list {
     workPackage {
-        eq('seqType', SeqType.exomePairedSeqType)
+        eq('seqType', SeqTypeService.exomePairedSeqType)
     }
 }.findAll {
     it.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED && it.isMostRecentBamFile()

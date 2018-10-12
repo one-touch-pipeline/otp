@@ -256,7 +256,7 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
 
     private void createAdditionalWholeGenomeData() {
 
-        SeqType seqType = SeqType.wholeGenomePairedSeqType
+        SeqType seqType = SeqTypeService.wholeGenomePairedSeqType
         List<SeqTrack> seqTracks = []
         2.times {
             SeqTrack seqTrack = new SeqTrack(seqType: seqType)
@@ -276,7 +276,7 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
         List<SeqTrack> seqTracks = []
         2.times {
             SeqTrack seqTrack = new ExomeSeqTrack(
-                    seqType: SeqType.exomePairedSeqType,
+                    seqType: SeqTypeService.exomePairedSeqType,
                     kitInfoReliability: InformationReliability.KNOWN,
                     libraryPreparationKit: kit
             )

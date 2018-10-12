@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.monitor
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 class IndelCallingPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipelineCheckerIntegrationSpec {
@@ -43,8 +42,11 @@ class IndelCallingPipelineCheckerIntegrationSpec extends AbstractVariantCallingP
     }
 
     void "pipelineType, should return Pipeline.Type.INDEL"() {
+        given:
+        createPipeLine()
+
         expect:
-        Pipeline.Type.INDEL == new IndelCallingPipelineChecker().getPipelineType()
+        Pipeline.Type.INDEL == new IndelCallingPipelineChecker().getPipeline().type
     }
 
     void "bamFilePairAnalysisClass, should return IndelCallingInstance.class"() {

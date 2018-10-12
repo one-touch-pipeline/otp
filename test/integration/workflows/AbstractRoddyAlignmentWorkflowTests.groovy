@@ -10,7 +10,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.converters.*
-import grails.plugin.springsecurity.*
 import org.codehaus.groovy.grails.web.json.*
 import org.joda.time.*
 import org.junit.*
@@ -107,7 +106,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
         createProjectConfig(workPackage)
 
-        if (SeqType.getExomePairedSeqType() == findSeqType()) {
+        if (SeqTypeService.getExomePairedSeqType() == findSeqType()) {
             BedFile bedFile = new BedFile(
                     referenceGenome: workPackage.referenceGenome,
                     libraryPreparationKit: workPackage.libraryPreparationKit,

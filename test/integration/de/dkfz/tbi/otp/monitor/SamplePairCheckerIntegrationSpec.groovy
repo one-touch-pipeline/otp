@@ -14,7 +14,7 @@ class SamplePairCheckerIntegrationSpec extends Specification {
     SamplePair createSamplePair(Map properties = [:]) {
         return DomainFactory.createSamplePairPanCan([
                 mergingWorkPackage1: DomainFactory.createMergingWorkPackage([
-                        seqType : SeqType.wholeGenomePairedSeqType,
+                        seqType : SeqTypeService.wholeGenomePairedSeqType,
                         pipeline: DomainFactory.createDefaultOtpPipeline(),
                 ])
         ] + properties)

@@ -10,7 +10,7 @@ processingOptionService.createOrUpdate(
         'IndelCallingWorkflow'
 )
 
-SeqType.indelPipelineSeqTypes.each { SeqType seqType ->
+SeqTypeService.indelPipelineSeqTypes.each { SeqType seqType ->
     processingOptionService.createOrUpdate(
             PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_VERSION,
             '1.2.177',

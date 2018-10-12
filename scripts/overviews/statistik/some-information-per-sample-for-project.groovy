@@ -17,8 +17,8 @@ List<Project> projects = """
 }
 
 List<SeqType> seqTypes = [
-        SeqType.wholeGenomeBisulfitePairedSeqType,
-        SeqType.wholeGenomeBisulfiteTagmentationPairedSeqType
+        SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+        SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
 ]
 
 

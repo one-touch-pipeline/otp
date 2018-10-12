@@ -27,7 +27,7 @@ class SeedSpec extends Specification {
         seedService.installSeedData('application.seed-SeqType')
 
         then:
-        SeqType.allAlignableSeqTypes
+        SeqTypeService.allAlignableSeqTypes
     }
 
     void "seed, ensure that all needed acl Roles are created"() {

@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
-import de.dkfz.tbi.otp.ngsdata.*
 
 class SophiaService extends BamFileAnalysisService implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
 
@@ -23,11 +22,6 @@ class SophiaService extends BamFileAnalysisService implements RoddyBamFileAnalys
     @Override
     Pipeline.Name getPipelineName() {
         return Pipeline.Name.RODDY_SOPHIA
-    }
-
-    @Override
-    protected List<SeqType> getSeqTypes() {
-        return SeqType.sophiaPipelineSeqTypes
     }
 
     @Override

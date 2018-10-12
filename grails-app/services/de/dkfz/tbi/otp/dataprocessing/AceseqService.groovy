@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-
 class AceseqService extends BamFileAnalysisService implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
 
     @Override
@@ -33,11 +31,6 @@ class AceseqService extends BamFileAnalysisService implements RoddyBamFileAnalys
     @Override
     Pipeline.Name getPipelineName() {
         return Pipeline.Name.RODDY_ACESEQ
-    }
-
-    @Override
-    protected List<SeqType> getSeqTypes() {
-        return SeqType.aceseqPipelineSeqTypes
     }
 
     @Override

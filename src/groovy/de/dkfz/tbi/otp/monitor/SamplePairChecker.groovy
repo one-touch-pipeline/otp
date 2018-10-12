@@ -40,7 +40,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
         }
         output.showWorkflow("Sample pairs", false)
 
-        List<SeqType> supportedSeqTypes = SeqType.allAnalysableSeqTypes
+        List<SeqType> supportedSeqTypes = SeqTypeService.allAnalysableSeqTypes
 
         Map bamFileOfSupportedSeqType = bamFiles.groupBy {
             supportedSeqTypes.contains(it.seqType)

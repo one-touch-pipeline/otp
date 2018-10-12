@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 
 
@@ -58,7 +57,7 @@ class ConfigureAnalysisController {
                 sampleTypePerProjects*.sampleType,
                 processingThresholds*.sampleType,
         ].flatten().unique{it.id}.sort {it.name}
-        List<SeqType> seqTypes = SeqType.getAllAnalysableSeqTypes()
+        List<SeqType> seqTypes = SeqTypeService.getAllAnalysableSeqTypes()
         Map groupedDiseaseTypes = sampleTypePerProjects.groupBy{it.sampleType.id}
         Map groupedThresholds = processingThresholds.groupBy([{it.sampleType.id}, {it.seqType.id}])
         return [

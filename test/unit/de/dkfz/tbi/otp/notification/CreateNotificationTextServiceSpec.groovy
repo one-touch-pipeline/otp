@@ -716,13 +716,13 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
 
         Map data1 = createData([
                 (pairAnalysisContentsPermutationList.customProcessingStatus): ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
-                seqType: SeqType."${pairAnalysisContentsPermutationList.type}PipelineSeqTypes".first(),
+                seqType: SeqTypeService."${pairAnalysisContentsPermutationList.type}PipelineSeqTypes".first(),
         ])
 
         Map data2 = createData(
                 project: pairAnalysisContentsPermutationList.multipleProjects ? DomainFactory.createProject() : data1.seqTrack.project,
                 (pairAnalysisContentsPermutationList.customProcessingStatus): pairAnalysisContentsPermutationList.processingStatus,
-                seqType: SeqType."${pairAnalysisContentsPermutationList.type}PipelineSeqTypes".first(),
+                seqType: SeqTypeService."${pairAnalysisContentsPermutationList.type}PipelineSeqTypes".first(),
         )
 
         Map data3 = createData(

@@ -32,7 +32,7 @@ class SamplePairDeciderServiceSpec extends Specification {
         given:
         DomainFactory.createAllAlignableSeqTypes()
         AbstractMergingWorkPackage mergingWorkPackage1 = DomainFactory.createMergingWorkPackageForPipeline(pipelineName1, [
-                seqType: SeqType.wholeGenomePairedSeqType,
+                seqType: SeqTypeService.wholeGenomePairedSeqType,
         ])
         AbstractMergingWorkPackage mergingWorkPackage2 = DomainFactory.createMergingWorkPackageForPipeline(pipelineName2, [
                 seqType: mergingWorkPackage1.seqType,

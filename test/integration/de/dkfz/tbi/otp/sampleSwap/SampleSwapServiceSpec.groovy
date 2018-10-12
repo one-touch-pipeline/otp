@@ -1,7 +1,5 @@
 package de.dkfz.tbi.otp.sampleSwap
 
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.sampleswap.*
 import de.dkfz.tbi.otp.testing.*
@@ -771,9 +769,9 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with SeqType EXOME, WGBS and RNA no libPrepKit, fails"() {
         given:
-        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [seqType: SeqType.exomePairedSeqType.displayName], 1)
-        SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [seqType: SeqType.wholeGenomeBisulfitePairedSeqType.displayName], 2)
-        SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, [seqType: SeqType.rnaPairedSeqType.displayName], 3)
+        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [seqType: SeqTypeService.exomePairedSeqType.displayName], 1)
+        SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [seqType: SeqTypeService.wholeGenomeBisulfitePairedSeqType.displayName], 2)
+        SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, [seqType: SeqTypeService.rnaPairedSeqType.displayName], 3)
 
 
         Map data = [
@@ -888,7 +886,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput when datafile is linked and will be realigned, shows warning"() {
         given:
-        seqTrack1.seqType = SeqType.getExomePairedSeqType()
+        seqTrack1.seqType = SeqTypeService.getExomePairedSeqType()
         DomainFactory.createRoddyWorkflowConfig(seqType: seqTrack1.seqType, project: seqTrack1.individual.project, individual: null, pipeline: DomainFactory.createPanCanPipeline())
         File initialFile = temporaryFolder.newFile("test/initial/linkedFileName")
         DataFile dataFile1 = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: initialFile.name, initialDirectory: "${testFolder.absolutePath}/initial")
@@ -921,7 +919,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput when datafile is linked and will not be realigned, fails"() {
         given:
-        seqTrack1.seqType = SeqType.getExomePairedSeqType()
+        seqTrack1.seqType = SeqTypeService.getExomePairedSeqType()
         DomainFactory.createPanCanPipeline()
         File initialFile = temporaryFolder.newFile("test/initial/linkedFileName")
         DataFile dataFile1 = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: initialFile.name, initialDirectory: "${testFolder.absolutePath}/initial")
@@ -995,7 +993,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
             1 * getFileFinalPath(dataFile1) >> "${testFolder.absolutePath}/linked/fileName"
         }
 
-        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [seqType: SeqType.exomePairedSeqType.displayName, libPrepKit: DomainFactory.createLibraryPreparationKit().name], 1)
+        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [seqType: SeqTypeService.exomePairedSeqType.displayName, libPrepKit: DomainFactory.createLibraryPreparationKit().name], 1)
 
         Map data = [
                 data      : [sampleSwapData1],

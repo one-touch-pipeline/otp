@@ -44,7 +44,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         seqTrack = DomainFactory.createSeqTrack(
                 sample: sample,
                 fastqcState: SeqTrack.DataProcessingState.NOT_STARTED,
-                seqType: SeqType.wholeGenomePairedSeqType,
+                seqType: SeqTypeService.wholeGenomePairedSeqType,
                 run: run,
         )
 

@@ -5,8 +5,8 @@ String projectName = ''
 assert projectName : 'Please select a project'
 
 List<SeqType> seqTypes = [
-        SeqType.exomePairedSeqType,
-        SeqType.wholeGenomePairedSeqType,
+        SeqTypeService.exomePairedSeqType,
+        SeqTypeService.wholeGenomePairedSeqType,
 ]
 
 println "sample with different seqplatformgroups"

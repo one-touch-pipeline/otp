@@ -50,7 +50,7 @@ SamplePair.withTransaction {
             """, [
             disease           : SampleType.Category.DISEASE,
             control           : [SampleType.Category.DISEASE, SampleType.Category.CONTROL],
-            analysableSeqTypes: SeqType.getAllAnalysableSeqTypes(),
+            analysableSeqTypes: SeqTypeService.getAllAnalysableSeqTypes(),
             project           : project,
     ], [readOnly: true]).collect {
         SamplePair samplePair = SamplePair.createInstance(

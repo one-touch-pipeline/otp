@@ -11,7 +11,7 @@ class VariantCallingPipelinesCheckerSpec extends Specification {
     SamplePair createSamplePair(Map properties = [:]) {
         return DomainFactory.createSamplePairPanCan([
                 mergingWorkPackage1: DomainFactory.createMergingWorkPackage([
-                        seqType: SeqType.wholeGenomePairedSeqType,
+                        seqType: SeqTypeService.wholeGenomePairedSeqType,
                         pipeline: DomainFactory.createPanCanPipeline(),
                 ])
         ] + properties)

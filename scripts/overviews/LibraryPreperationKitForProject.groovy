@@ -3,13 +3,13 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 String projectName = ''
 
-//SeqType seqType = SeqType.exomePairedSeqType
-//SeqType seqType = SeqType.wholeGenomePairedSeqType
-//SeqType seqType = SeqType.wholeGenomeBisulfitePairedSeqType
-//SeqType seqType = SeqType.wholeGenomeBisulfiteTagmentationPairedSeqType
-//SeqType seqType = SeqType.rnaPairedSeqType
-//SeqType seqType = SeqType.rnaSingleSeqType
-//SeqType seqType = SeqType.chipSeqPairedSeqType
+//SeqType seqType = SeqTypeService.exomePairedSeqType
+//SeqType seqType = SeqTypeService.wholeGenomePairedSeqType
+//SeqType seqType = SeqTypeService.wholeGenomeBisulfitePairedSeqType
+//SeqType seqType = SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
+//SeqType seqType = SeqTypeService.rnaPairedSeqType
+//SeqType seqType = SeqTypeService.rnaSingleSeqType
+//SeqType seqType = SeqTypeService.chipSeqPairedSeqType
 
 //---------------------------
 

@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.*
 
 abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
@@ -133,10 +133,13 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
         return CollectionUtils.<Pipeline> exactlyOneElement(Pipeline.findAllByName(getPipelineName()))
     }
 
+    final List<SeqType> getSeqTypes() {
+        return getPipelineName().getSeqTypes()
+    }
+
     abstract protected String getProcessingStateCheck()
     abstract Class<BamFilePairAnalysis> getAnalysisClass()
     abstract protected Pipeline.Type getAnalysisType()
-    abstract protected List<SeqType> getSeqTypes()
     abstract Pipeline.Name getPipelineName()
 
     String checkConfig() {

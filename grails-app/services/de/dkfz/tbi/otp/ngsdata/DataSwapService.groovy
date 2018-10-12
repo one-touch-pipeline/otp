@@ -330,7 +330,7 @@ chmod 440 ${newDirectFileName}
      * The input SeqTrack is passed to the AlignmentDecider
      */
     String startAlignmentForSeqTrack(SeqTrack seqTrack) {
-        if (SeqType.getAllAlignableSeqTypes().contains(seqTrack.seqType)) {
+        if (SeqTypeService.getAllAlignableSeqTypes().contains(seqTrack.seqType)) {
             return "// lane: ${seqTrack}\nctx.seqTrackService.decideAndPrepareForAlignment(SeqTrack.get(${seqTrack.id}))\n"
         } else {
             return "// The SeqTrack ${seqTrack} has the seqType ${seqTrack.seqType.name} and will not be aligned\n"

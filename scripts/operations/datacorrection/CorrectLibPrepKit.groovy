@@ -19,7 +19,7 @@ List<Long> ilseNumbers = [
         // ilse numbers to update
 
 ]
-SeqType seqType = SeqType.rnaPairedSeqType
+SeqType seqType = SeqTypeService.rnaPairedSeqType
 
 String commentInfo = '' //some additional Information about the change, perhaps link to OTRS ticket
 

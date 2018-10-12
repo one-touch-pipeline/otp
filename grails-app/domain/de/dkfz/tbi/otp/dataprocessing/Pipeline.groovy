@@ -8,21 +8,22 @@ class Pipeline implements Entity {
 
     @TupleConstructor
     static enum Name {
-        @Deprecated DEFAULT_OTP(Type.ALIGNMENT, false, 'bwa\u00A0aln'),
-        PANCAN_ALIGNMENT       (Type.ALIGNMENT, true,  'bwa\u00A0mem'),
-        EXTERNALLY_PROCESSED   (Type.ALIGNMENT, false, 'external'),
-        RODDY_RNA_ALIGNMENT    (Type.ALIGNMENT, true,  'STAR'),
-        CELL_RANGER            (Type.ALIGNMENT, false, 'cell ranger'),
-        @Deprecated OTP_SNV    (Type.SNV,       false, null),
-        RODDY_SNV              (Type.SNV,       true,  null),
-        RODDY_INDEL            (Type.INDEL,     true,  null),
-        RODDY_SOPHIA           (Type.SOPHIA, true, null),
-        RODDY_ACESEQ           (Type.ACESEQ, true, null),
-        RUN_YAPSA              (Type.MUTATIONAL_SIGNATURE, false, null),
+        @Deprecated DEFAULT_OTP(Type.ALIGNMENT, false, 'bwa\u00A0aln', { SeqTypeService.defaultOtpAlignableSeqTypes }),
+        PANCAN_ALIGNMENT       (Type.ALIGNMENT, true,  'bwa\u00A0mem', { SeqTypeService.panCanAlignableSeqTypes }),
+        EXTERNALLY_PROCESSED   (Type.ALIGNMENT, false, 'external', { [] }),
+        RODDY_RNA_ALIGNMENT    (Type.ALIGNMENT, true,  'STAR', { SeqTypeService.roddyAlignableSeqTypes }),
+        CELL_RANGER            (Type.ALIGNMENT, false, 'cell ranger', { [] }),
+        @Deprecated OTP_SNV    (Type.SNV,       false, null, { SeqTypeService.snvPipelineSeqTypes }),
+        RODDY_SNV              (Type.SNV,       true,  null, { SeqTypeService.snvPipelineSeqTypes }),
+        RODDY_INDEL            (Type.INDEL,     true,  null, { SeqTypeService.indelPipelineSeqTypes }),
+        RODDY_SOPHIA           (Type.SOPHIA, true, null, { SeqTypeService.sophiaPipelineSeqTypes }),
+        RODDY_ACESEQ           (Type.ACESEQ, true, null, { SeqTypeService.aceseqPipelineSeqTypes }),
+        RUN_YAPSA              (Type.MUTATIONAL_SIGNATURE, false, null, { SeqTypeService.runYapsaPipelineSeqTypes }),
 
         final Type type
         final boolean usesRoddy
         final String displayName
+        final Closure<List<SeqType>> seqTypes
 
         static Name forSeqType(SeqType seqType) {
             assert seqType
@@ -45,6 +46,10 @@ class Pipeline implements Entity {
                     type,
                     this,
             ))
+        }
+
+        List<SeqType> getSeqTypes() {
+            return seqTypes()
         }
     }
     Name name
@@ -81,5 +86,9 @@ class Pipeline implements Entity {
     @Override
     String toString() {
         return "${name} ${type}"
+    }
+
+    final List<SeqType> getSeqTypes() {
+        return name.getSeqTypes()
     }
 }

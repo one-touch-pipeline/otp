@@ -81,8 +81,8 @@ boolean showUnsupportedSeqTypes = false
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 MonitorOutputCollector output = new MonitorOutputCollector(showFinishedEntries, showUnsupportedSeqTypes)
 
-SeqType exomePaired = SeqType.exomePairedSeqType
-List<SeqType> alignableSeqtypes = SeqType.allAlignableSeqTypes
+SeqType exomePaired = SeqTypeService.exomePairedSeqType
+List<SeqType> alignableSeqtypes = SeqTypeService.allAlignableSeqTypes
 
 MetaDataKey libPrepKitKey = MetaDataKey.findByName(MetaDataColumn.LIB_PREP_KIT.name())
 MetaDataKey enrichmentKitKey = MetaDataKey.findByName("ENRICHMENT_KIT") // old name for LIB_PREP_KIT, keep as-is!

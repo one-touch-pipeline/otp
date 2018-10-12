@@ -42,22 +42,28 @@ class ProjectConfigController implements CheckAndCall {
         Map<String, String> dates = getDates(project)
 
         List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
-        Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqType.roddyAlignableSeqTypes.collectEntries { SeqType seqType ->
+        Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqTypeService.roddyAlignableSeqTypes.collectEntries { SeqType seqType ->
             [(seqType): mergingCriteria.find { it.seqType == seqType }]
         }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
 
         List<List> thresholdsTable = createThresholdTable(project)
 
-        List snvConfigTable = createAnalysisConfigTable(project, SeqType.getSnvPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_SNV))
-        List indelConfigTable = createAnalysisConfigTable(project, SeqType.getIndelPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_INDEL))
-        List sophiaConfigTable = createAnalysisConfigTable(project, SeqType.getSophiaPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_SOPHIA))
-        List aceseqConfigTable = createAnalysisConfigTable(project, SeqType.getAceseqPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RODDY_ACESEQ))
-        List runYapsaConfigTable = createAnalysisConfigTable(project, SeqType.getRunYapsaPipelineSeqTypes(), Pipeline.findByName(Pipeline.Name.RUN_YAPSA))
+        Pipeline snv = Pipeline.findByName(Pipeline.Name.RODDY_SNV)
+        Pipeline indel = Pipeline.findByName(Pipeline.Name.RODDY_INDEL)
+        Pipeline sophia = Pipeline.findByName(Pipeline.Name.RODDY_SOPHIA)
+        Pipeline aceseq= Pipeline.findByName(Pipeline.Name.RODDY_ACESEQ)
+        Pipeline runYapsa = Pipeline.findByName(Pipeline.Name.RUN_YAPSA)
 
-        Map<SeqType, String> checkSophiaReferenceGenome = SeqType.sophiaPipelineSeqTypes.collectEntries {
+        List snvConfigTable = createAnalysisConfigTable(project, snv)
+        List indelConfigTable = createAnalysisConfigTable(project,indel)
+        List sophiaConfigTable = createAnalysisConfigTable(project, sophia)
+        List aceseqConfigTable = createAnalysisConfigTable(project, aceseq)
+        List runYapsaConfigTable = createAnalysisConfigTable(project, runYapsa)
+
+        Map<SeqType, String> checkSophiaReferenceGenome = sophia.getSeqTypes().collectEntries {
             [(it): projectService.checkReferenceGenomeForSophia(project, it).getError()]
         }
-        Map<SeqType, String> checkAceseqReferenceGenome = SeqType.aceseqPipelineSeqTypes.collectEntries {
+        Map<SeqType, String> checkAceseqReferenceGenome = aceseq.getSeqTypes().collectEntries {
             [(it): projectService.checkReferenceGenomeForAceseq(project, it).getError()]
         }
 
@@ -78,12 +84,12 @@ class ProjectConfigController implements CheckAndCall {
                 comment                   : project?.comment,
                 nameInMetadata            : project?.nameInMetadataFiles ?: '',
                 seqTypeMergingCriteria    : seqTypeMergingCriteria,
-                seqTypes                  : SeqType.roddyAlignableSeqTypes.sort { it.displayNameWithLibraryLayout },
-                snvSeqTypes               : SeqType.snvPipelineSeqTypes,
-                indelSeqTypes             : SeqType.indelPipelineSeqTypes,
-                sophiaSeqTypes            : SeqType.sophiaPipelineSeqTypes,
-                aceseqSeqTypes            : SeqType.aceseqPipelineSeqTypes,
-                runYapsaSeqTypes          : SeqType.runYapsaPipelineSeqTypes,
+                seqTypes                  : SeqTypeService.roddyAlignableSeqTypes.sort { it.displayNameWithLibraryLayout },
+                snvSeqTypes               : snv.getSeqTypes(),
+                indelSeqTypes             : indel.getSeqTypes(),
+                sophiaSeqTypes            : sophia.getSeqTypes(),
+                aceseqSeqTypes            : aceseq.getSeqTypes(),
+                runYapsaSeqTypes          : runYapsa.getSeqTypes(),
                 snv                       : project?.snv,
                 thresholdsTable           : thresholdsTable,
                 snvConfigTable            : snvConfigTable,
@@ -233,10 +239,10 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     private
-    static List<List<String>> createAnalysisConfigTable(Project project, List<SeqType> seqTypes, Pipeline pipeline) {
+    static List<List<String>> createAnalysisConfigTable(Project project, Pipeline pipeline) {
         List<List<String>> table = []
         table.add(["", "Config created", "Version"])
-        seqTypes.each { SeqType seqType ->
+        pipeline.getSeqTypes().each { SeqType seqType ->
             List<String> row = []
             row.add(seqType.displayNameWithLibraryLayout)
             SnvConfig snvConfig = atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
@@ -262,7 +268,7 @@ class ProjectConfigController implements CheckAndCall {
 
     private List<List<String>> createThresholdTable(Project project) {
         List<List<String>> thresholdsTable = []
-        List<SeqType> seqTypes = SeqType.getAllAnalysableSeqTypes()
+        List<SeqType> seqTypes = SeqTypeService.getAllAnalysableSeqTypes()
 
         List row = []
         row.add(message(code: "projectOverview.analysis.sampleType"))

@@ -6,7 +6,7 @@ trait SeqTypeAndInputWesBamFiles implements SeqTypeAndInputBamFiles {
 
 
     SeqType seqTypeToUse() {
-        return SeqType.exomePairedSeqType
+        return SeqTypeService.exomePairedSeqType
     }
 
 

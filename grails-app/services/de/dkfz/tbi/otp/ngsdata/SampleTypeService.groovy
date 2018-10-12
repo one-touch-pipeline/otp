@@ -11,7 +11,7 @@ class SampleTypeService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     List findUsedSampleTypesForProject(Project project) {
-        List<SeqType> allAnalysableSeqTypes = SeqType.allAnalysableSeqTypes
+        List<SeqType> allAnalysableSeqTypes = SeqTypeService.allAnalysableSeqTypes
 
         List<SampleType> sampleTypes = SeqTrack.createCriteria().list{
             projections {

@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.monitor
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
-import de.dkfz.tbi.otp.ngsdata.*
 
 class SophiaCallingPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
@@ -17,13 +16,8 @@ class SophiaCallingPipelineChecker extends AbstractVariantCallingPipelineChecker
     }
 
     @Override
-    Pipeline.Type getPipelineType() {
-        Pipeline.Type.SOPHIA
-    }
-
-    @Override
-    List<SeqType> getSeqTypes() {
-        SeqType.sophiaPipelineSeqTypes
+    Pipeline getPipeline() {
+        return Pipeline.findByName(Pipeline.Name.RODDY_SOPHIA)
     }
 
     @Override

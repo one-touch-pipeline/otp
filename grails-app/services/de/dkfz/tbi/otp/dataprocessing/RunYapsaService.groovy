@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
-import de.dkfz.tbi.otp.ngsdata.*
 
 class RunYapsaService extends BamFileAnalysisService implements WithReferenceGenomeRestriction {
 
@@ -34,11 +33,6 @@ class RunYapsaService extends BamFileAnalysisService implements WithReferenceGen
     @Override
     Pipeline.Name getPipelineName() {
         return Pipeline.Name.RUN_YAPSA
-    }
-
-    @Override
-    protected List<SeqType> getSeqTypes() {
-        return SeqType.runYapsaPipelineSeqTypes
     }
 
     @Override

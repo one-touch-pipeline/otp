@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.dataprocessing.*
+
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.otp.utils.*
@@ -98,7 +98,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
         ReferenceGenome referenceGenome = ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(
                 project,
-                SeqType.exomePairedSeqType,
+                SeqTypeService.exomePairedSeqType,
                 sampleType,
         )?.referenceGenome
         if (!referenceGenome) {

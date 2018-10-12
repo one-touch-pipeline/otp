@@ -12,8 +12,7 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.ProjectService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import grails.plugin.springsecurity.*
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import org.joda.time.*
 import workflows.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
 
@@ -71,9 +70,9 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
     void createRunYapsaInput() {
         File sourceSnvCallingInputFile
 
-        if (seqType == SeqType.wholeGenomePairedSeqType) {
+        if (seqType == SeqTypeService.wholeGenomePairedSeqType) {
             sourceSnvCallingInputFile = new File(workflowData, "snvs_stds_somatic_snvs_conf_8_to_10-wgs.vcf")
-        } else if (seqType == SeqType.exomePairedSeqType) {
+        } else if (seqType == SeqTypeService.exomePairedSeqType) {
             sourceSnvCallingInputFile = new File(workflowData, "snvs_stds_somatic_snvs_conf_8_to_10-wes.vcf")
         } else {
             throw new Exception("The SeqType '${seqType}' is not supported by runYapsa workflow")

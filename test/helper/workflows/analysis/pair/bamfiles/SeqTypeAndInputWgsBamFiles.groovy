@@ -6,7 +6,7 @@ trait SeqTypeAndInputWgsBamFiles implements SeqTypeAndInputBamFiles {
 
 
     SeqType seqTypeToUse() {
-        return SeqType.wholeGenomePairedSeqType
+        return SeqTypeService.wholeGenomePairedSeqType
     }
 
 

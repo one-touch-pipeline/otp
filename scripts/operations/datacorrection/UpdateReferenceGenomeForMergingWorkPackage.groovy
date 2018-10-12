@@ -13,12 +13,12 @@ String pid = ''
 String sampleTypeName = ''
 SeqType seqType
 
-//seqType = SeqType.exomePairedSeqType
-//seqType = SeqType.wholeGenomePairedSeqType
-//seqType = SeqType.wholeGenomeBisulfitePairedSeqType
-//seqType = SeqType.wholeGenomeBisulfiteTagmentationPairedSeqType
-//seqType = SeqType.rnaPairedSeqType
-//seqType = SeqType.chipSeqPairedSeqType
+//seqType = SeqTypeService.exomePairedSeqType
+//seqType = SeqTypeService.wholeGenomePairedSeqType
+//seqType = SeqTypeService.wholeGenomeBisulfitePairedSeqType
+//seqType = SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType
+//seqType = SeqTypeService.rnaPairedSeqType
+//seqType = SeqTypeService.chipSeqPairedSeqType
 
 //--------------------------
 

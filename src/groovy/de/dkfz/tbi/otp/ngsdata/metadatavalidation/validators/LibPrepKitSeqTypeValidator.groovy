@@ -16,7 +16,7 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the sequencing type is ${SeqType.seqTypesRequiredLibPrepKit*.nameWithLibraryLayout.join(' or ')}, the library preparation kit must not be empty."]
+        return ["If the sequencing type is ${SeqTypeService.seqTypesRequiredLibPrepKit*.nameWithLibraryLayout.join(' or ')}, the library preparation kit must not be empty."]
     }
 
     @Override
@@ -34,7 +34,7 @@ class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
-        List<SeqType> seqTypes = SeqType.getSeqTypesRequiredLibPrepKit()
+        List<SeqType> seqTypes = SeqTypeService.getSeqTypesRequiredLibPrepKit()
         valueTuples.each { ValueTuple valueTuple ->
             String seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
             LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(LIBRARY_LAYOUT.name()))

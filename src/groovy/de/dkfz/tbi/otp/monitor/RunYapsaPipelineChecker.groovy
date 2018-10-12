@@ -1,8 +1,7 @@
 package de.dkfz.tbi.otp.monitor
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 
 class RunYapsaPipelineChecker extends AbstractVariantCallingPipelineChecker {
 
@@ -17,13 +16,8 @@ class RunYapsaPipelineChecker extends AbstractVariantCallingPipelineChecker {
     }
 
     @Override
-    Pipeline.Type getPipelineType() {
-        Pipeline.Type.MUTATIONAL_SIGNATURE
-    }
-
-    @Override
-    List<SeqType> getSeqTypes() {
-        SeqType.runYapsaPipelineSeqTypes
+    Pipeline getPipeline() {
+        return Pipeline.findByName(Pipeline.Name.RUN_YAPSA)
     }
 
     @Override

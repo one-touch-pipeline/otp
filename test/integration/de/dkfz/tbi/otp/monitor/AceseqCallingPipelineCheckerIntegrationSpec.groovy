@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.monitor
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 class AceseqCallingPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipelineCheckerIntegrationSpec {
@@ -43,8 +42,11 @@ class AceseqCallingPipelineCheckerIntegrationSpec extends AbstractVariantCalling
     }
 
     void "pipelineType, should return Pipeline.Type.ACESEQ"() {
+        given:
+        createPipeLine()
+
         expect:
-        Pipeline.Type.ACESEQ == createVariantCallingPipelineChecker().getPipelineType()
+        Pipeline.Type.ACESEQ == createVariantCallingPipelineChecker().getPipeline().type
     }
 
     void "bamFilePairAnalysisClass, should return AceseqInstance.class"() {

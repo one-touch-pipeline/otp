@@ -232,7 +232,7 @@ class CreateNotificationTextService {
     String variantCallingNotification(ProcessingStatus status, ProcessingStep notificationStep) {
         assert status
 
-        List<SeqType> seqTypes = SeqType."${notificationStep}PipelineSeqTypes"
+        List<SeqType> seqTypes = SeqTypeService."${notificationStep}PipelineSeqTypes"
         Map<WorkflowProcessingStatus, List<SamplePairProcessingStatus>> map =
                 status.samplePairProcessingStatuses.findAll {
                     it.samplePair.seqType in seqTypes

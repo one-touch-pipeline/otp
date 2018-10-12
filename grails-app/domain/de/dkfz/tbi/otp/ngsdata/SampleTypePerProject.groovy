@@ -45,6 +45,6 @@ class SampleTypePerProject implements TimeStamped, Entity {
             "WHERE st.seqType IN (:seqTypes) " +
             "AND NOT EXISTS (FROM DataFile WHERE seqTrack = st AND fileType.type = :fileType AND fileWithdrawn = true) " +
             "AND NOT EXISTS (FROM SampleTypePerProject stpp WHERE stpp.project = st.sample.individual.project AND stpp.sampleType = st.sample.sampleType)",
-            [seqTypes: SeqType.getAllAnalysableSeqTypes(), fileType: FileType.Type.SEQUENCE], [readOnly: true])
+            [seqTypes: SeqTypeService.getAllAnalysableSeqTypes(), fileType: FileType.Type.SEQUENCE], [readOnly: true])
     }
 }

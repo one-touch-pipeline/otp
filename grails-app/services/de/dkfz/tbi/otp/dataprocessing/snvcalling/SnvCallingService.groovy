@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
 
 class SnvCallingService extends BamFileAnalysisService implements RoddyBamFileAnalysis {
 
@@ -23,10 +22,5 @@ class SnvCallingService extends BamFileAnalysisService implements RoddyBamFileAn
     @Override
     Pipeline.Name getPipelineName() {
         return Pipeline.Name.RODDY_SNV
-    }
-
-    @Override
-    protected List<SeqType> getSeqTypes() {
-        return SeqType.snvPipelineSeqTypes
     }
 }

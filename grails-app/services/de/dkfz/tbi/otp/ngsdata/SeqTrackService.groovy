@@ -245,10 +245,9 @@ class SeqTrackService {
      * otherwise the most high prioritized, oldest {@link SeqTrack} waiting for fastqc.
      *
      * @return a seqTrack without fastqc
-     * @see SeqType#getDefaultOtpAlignableSeqTypes()
      */
     SeqTrack getSeqTrackReadyForFastqcProcessing(ProcessingPriority minPriority) {
-        List<SeqType> seqTypes = SeqType.getAllAlignableSeqTypes()
+        List<SeqType> seqTypes = SeqTypeService.getAllAlignableSeqTypes()
         List args = [SeqTrack.DataProcessingState.NOT_STARTED.toString(),
                      minPriority.priority,
         ] + seqTypes*.id

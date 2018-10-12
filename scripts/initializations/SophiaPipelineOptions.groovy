@@ -10,7 +10,7 @@ processingOptionService.createOrUpdate(
         'SophiaWorkflow'
 )
 
-SeqType.sophiaPipelineSeqTypes.each { SeqType seqType ->
+SeqTypeService.sophiaPipelineSeqTypes.each { SeqType seqType ->
     processingOptionService.createOrUpdate(
             PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS,
             '1.2.16',

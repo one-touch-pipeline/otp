@@ -54,7 +54,7 @@ class SampleTypePerProjectIntegrationSpec extends IntegrationSpec {
 
     void "ChIPseq (which doesn't support SVN calling) shouldn't yield combinations"() {
         given:
-        DomainFactory.createSeqTrack(sample: sampleProject1Type1, seqType: SeqType.getChipSeqPairedSeqType())
+        DomainFactory.createSeqTrack(sample: sampleProject1Type1, seqType: SeqTypeService.getChipSeqPairedSeqType())
 
         expect:
         SampleTypePerProject.findMissingCombinations().isEmpty()
@@ -76,7 +76,7 @@ class SampleTypePerProjectIntegrationSpec extends IntegrationSpec {
 
     void "Should find missing combinations for all alignable seqtypes, but only distinct combinations - multiple sampletype&project"() {
         given: "four seqtracks for four combinations"
-        SeqType exome = SeqType.getExomePairedSeqType()
+        SeqType exome = SeqTypeService.getExomePairedSeqType()
         DomainFactory.createSeqTrack(sample: sampleProject1Type1, seqType: exome)
         DomainFactory.createSeqTrack(sample: sampleProject1Type2, seqType: exome)
         DomainFactory.createSeqTrack(sample: sampleProject2Type1, seqType: exome)
@@ -94,8 +94,8 @@ class SampleTypePerProjectIntegrationSpec extends IntegrationSpec {
 
     void "combinations with (only) withdrawn data should be skipped" () {
         given: "A combination with only some datafiles withdrawn"
-        SeqType wholeGenome = SeqType.getWholeGenomePairedSeqType()
-        SeqType exome = SeqType.getExomePairedSeqType()
+        SeqType wholeGenome = SeqTypeService.getWholeGenomePairedSeqType()
+        SeqType exome = SeqTypeService.getExomePairedSeqType()
 
         final SeqTrack sampleProject1Type1Exome = DomainFactory.createSeqTrack(sample: sampleProject1Type1, seqType: exome)
         final SeqTrack sampleProject1Type1WholeGenome = DomainFactory.createSeqTrack(sample: sampleProject1Type1, seqType: wholeGenome)
@@ -123,7 +123,7 @@ class SampleTypePerProjectIntegrationSpec extends IntegrationSpec {
 
     void "shouldn't find previously-created SampleTypePerProject"() {
         given: "seqtracks for all four possible combinations"
-        SeqType exome = SeqType.getExomePairedSeqType()
+        SeqType exome = SeqTypeService.getExomePairedSeqType()
 
         DomainFactory.createSeqTrack(sample: sampleProject1Type1, seqType: exome)
         DomainFactory.createSeqTrack(sample: sampleProject1Type2, seqType: exome)

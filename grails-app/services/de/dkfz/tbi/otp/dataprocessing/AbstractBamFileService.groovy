@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.springframework.util.Assert.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
+
+import static org.springframework.util.Assert.*
 
 class AbstractBamFileService {
 
@@ -95,7 +96,7 @@ class AbstractBamFileService {
     Double calculateCoverageWithoutN(AbstractBamFile bamFile) {
         assert bamFile : 'Parameter bamFile must not be null'
 
-        if (SeqType.getAllAlignableSeqTypes().contains(bamFile.seqType)) {
+        if (SeqTypeService.getAllAlignableSeqTypes().contains(bamFile.seqType)) {
             calculateCoverage(bamFile, 'lengthWithoutN')
         } else {
             throw new RuntimeException("The 'without N' coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")

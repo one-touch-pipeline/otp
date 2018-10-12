@@ -262,8 +262,8 @@ class ProjectService {
         project.alignmentDeciderBeanName = "defaultOtpAlignmentDecider"
         project.save(flush: true, failOnError: true)
         ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(referenceGenomeName))
-        SeqType seqType_wgp = SeqType.getWholeGenomePairedSeqType()
-        SeqType seqType_exome = SeqType.getExomePairedSeqType()
+        SeqType seqType_wgp = SeqTypeService.getWholeGenomePairedSeqType()
+        SeqType seqType_exome = SeqTypeService.getExomePairedSeqType()
         [seqType_wgp, seqType_exome].each { seqType ->
             ReferenceGenomeProjectSeqType refSeqType = new ReferenceGenomeProjectSeqType()
             refSeqType.project = project

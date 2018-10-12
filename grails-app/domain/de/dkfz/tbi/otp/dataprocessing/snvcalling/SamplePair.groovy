@@ -258,7 +258,7 @@ class SamplePair implements TimeStamped, Entity {
             """, [
                 disease: SampleType.Category.DISEASE,
                 control: SampleType.Category.CONTROL,
-                analysableSeqTypes: SeqType.getAllAnalysableSeqTypes(),
+                analysableSeqTypes: SeqTypeService.getAllAnalysableSeqTypes(),
             ], [readOnly: true])
         return queryResults.collect {
             return createInstance(
