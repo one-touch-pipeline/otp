@@ -9,6 +9,7 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
 
     CommentService commentService
 
+    static final TEST_MESSAGE = "testMessage"
 
     def setup() {
         createUserAndRoles()
@@ -20,13 +21,13 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
         Comment comment
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            comment = commentService.saveComment(project, "testMessage")
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            comment = commentService.saveComment(project, TEST_MESSAGE)
         }
 
         then:
-        comment.comment == "testMessage"
-        comment.author == "admin"
+        comment.comment == TEST_MESSAGE
+        comment.author == ADMIN
         project.comment == comment
     }
 
@@ -36,13 +37,13 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
         Comment comment
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            comment = commentService.saveComment(individual, "testMessage")
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            comment = commentService.saveComment(individual, TEST_MESSAGE)
         }
 
         then:
-        comment.comment == "testMessage"
-        comment.author == "admin"
+        comment.comment == TEST_MESSAGE
+        comment.author == ADMIN
         individual.comment == comment
     }
 
@@ -52,13 +53,13 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
         Comment comment
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            comment = commentService.saveComment(datafile, "testMessage")
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            comment = commentService.saveComment(datafile, TEST_MESSAGE)
         }
 
         then:
-        comment.comment == "testMessage"
-        comment.author == "admin"
+        comment.comment == TEST_MESSAGE
+        comment.author == ADMIN
         datafile.comment == comment
     }
 
@@ -68,13 +69,13 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
         Comment comment
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
-            comment = commentService.saveComment(process, "testMessage")
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            comment = commentService.saveComment(process, TEST_MESSAGE)
         }
 
         then:
-        comment.comment == "testMessage"
-        comment.author == "admin"
+        comment.comment == TEST_MESSAGE
+        comment.author == ADMIN
         process.comment == comment
     }
 
@@ -83,11 +84,11 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
         Commentable process = DomainFactory.createProcess()
 
         when:
-        Comment comment = commentService.createOrUpdateComment(process, 'testMessage', 'some user')
+        Comment comment = commentService.createOrUpdateComment(process, 'testMessage', USER)
 
         then:
         comment.comment == 'testMessage'
-        comment.author == 'some user'
+        comment.author == USER
         process.comment == comment
     }
 }

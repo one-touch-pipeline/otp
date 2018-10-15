@@ -27,7 +27,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         controller.params.shortDisplayName = 'LPK'
         controller.params.adapterFile = '/asdf'
         controller.params.reverseComplementAdapterSequence = 'GATC'
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createLibraryPreparationKit()
         }
 
@@ -45,7 +45,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         when:
         controller.params.name = name
         controller.params.shortDisplayName = shortDisplayName
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createLibraryPreparationKit()
         }
 
@@ -69,7 +69,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
 
         when:
         controller.params.importAlias = 'LibraryPreparationKitImportAlias'
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createLibraryPreparationKitImportAlias()
         }
 
@@ -87,7 +87,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
 
         when:
         controller.params.importAlias = importAlias
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createLibraryPreparationKitImportAlias()
         }
 
@@ -102,7 +102,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     void "test JSON createAntibodyTarget valid input"() {
         when:
         controller.params.name = 'AntibodyTarget'
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createAntibodyTarget()
         }
 
@@ -119,7 +119,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
 
         when:
         controller.params.name = name
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createAntibodyTarget()
         }
 
@@ -135,7 +135,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         when:
         controller.params.name = 'SEQCENTER'
         controller.params.dirName = 'seqcenter'
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSeqCenter()
         }
 
@@ -153,7 +153,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         when:
         controller.params.name = name
         controller.params.dirName = dirName
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSeqCenter()
         }
 
@@ -181,7 +181,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         controller.params.platform = platform
         controller.params.model = model
         controller.params.kit = kit
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSeqPlatform()
         }
 
@@ -217,7 +217,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         controller.params.platform = platform
         controller.params.model = model
         controller.params.kit = kit
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSeqPlatform()
         }
 
@@ -252,7 +252,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         controller.params.platform = platform
         controller.params.model = model
         controller.params.kit = kit
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSeqPlatform()
         }
 
@@ -276,7 +276,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
 
         when:
         controller.params.importAlias = 'SeqPlatformModelLabelAlias'
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createModelImportAlias()
         }
 
@@ -294,7 +294,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
 
         when:
         controller.params.importAlias = importAlias
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createModelImportAlias()
         }
 
@@ -313,7 +313,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
 
         when:
         controller.params.importAlias = 'SequencingKitLabelAlias'
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSequencingKitImportAlias()
         }
 
@@ -331,7 +331,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
 
         when:
         controller.params.importAlias = importAlias
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSequencingKitImportAlias()
         }
 
@@ -354,7 +354,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         controller.params.mate_pair = mate_pair
         controller.params.singleCell = singleCell
         controller.params.anyLayout = single || paired || mate_pair
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSeqType()
         }
 
@@ -397,7 +397,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         controller.params.mate_pair = mate_pair
         controller.params.singleCell = singleCell
         controller.params.anyLayout = single || paired || mate_pair
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSeqType()
         }
 
@@ -434,7 +434,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         controller.params.mate_pair = mate_pair
         controller.params.singleCell = singleCell
         controller.params.anyLayout = single || paired || mate_pair
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createLayout()
         }
 
@@ -476,7 +476,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         controller.params.mate_pair = mate_pair
         controller.params.singleCell = singleCell
         controller.params.anyLayout = single || paired || mate_pair
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createLayout()
         }
 
@@ -508,7 +508,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         when:
         controller.params.name = name
         controller.params.importAlias = importAlias
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSeqTypeImportAlias()
         }
 
@@ -533,7 +533,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         when:
         controller.params.name = name
         controller.params.importAlias = importAlias
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSeqTypeImportAlias()
         }
 
@@ -556,7 +556,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         when:
         controller.params.name = name
         controller.params.importAlias = importAlias
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createAntibodyTargetImportAlias()
         }
 
@@ -579,7 +579,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         when:
         controller.params.name = name
         controller.params.importAlias = importAlias
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createAntibodyTargetImportAlias()
         }
 

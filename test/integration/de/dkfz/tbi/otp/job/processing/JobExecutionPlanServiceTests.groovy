@@ -365,12 +365,12 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertNotNull(plan)
         assertFalse(plan.enabled)
         // let's enable the Plan
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             jobExecutionPlanService.enablePlan(plan)
         }
         assertTrue(plan.enabled)
         // enabling the plan again should not change anything
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             jobExecutionPlanService.enablePlan(plan)
         }
         assertTrue(plan.enabled)
@@ -396,7 +396,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertFalse(plan.enabled)
         assertFalse(job.jobExecutionPlan.enabled)
         // let's enable the Plan
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             jobExecutionPlanService.enablePlan(plan)
         }
         assertTrue(plan.enabled)
@@ -410,12 +410,12 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertNotNull(plan)
         assertTrue(plan.enabled)
         // let's disable the Plan
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             jobExecutionPlanService.disablePlan(plan)
         }
         assertFalse(plan.enabled)
         // disabling the plan again should not change anything
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             jobExecutionPlanService.disablePlan(plan)
         }
         assertFalse(plan.enabled)
@@ -441,7 +441,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertTrue(plan.enabled)
         assertTrue(job.jobExecutionPlan.enabled)
         // let's disable the Plan
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             jobExecutionPlanService.disablePlan(plan)
         }
         assertFalse(plan.enabled)
@@ -678,7 +678,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
 
         when:
         def result
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             result = jobExecutionPlanService.processCount()
         }
 
@@ -693,7 +693,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
 
         when:
         def result
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             result = jobExecutionPlanService.finishedProcessCount()
         }
 
@@ -755,7 +755,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
 
         when:
         def result
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             result = jobExecutionPlanService.failedProcessCount()
         }
 
@@ -783,7 +783,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
 
         when:
         def result
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             result = jobExecutionPlanService.lastProcessDate(ExecutionState.SUCCESS)
         }
 

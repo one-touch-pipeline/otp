@@ -29,7 +29,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
         )
         lsdfFilesService.createDirectory(configService.getProjectSequencePath(project), realm)
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             config = projectService.configureSophiaPipelineProject(
                     new RoddyConfiguration([
                             project          : project,
@@ -48,7 +48,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
     ReferenceGenome createReferenceGenome() {
         ReferenceGenome referenceGenome = super.createReferenceGenome()
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             processingOptionService.createOrUpdate(
                     ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                     referenceGenome.name

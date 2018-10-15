@@ -33,7 +33,7 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
         )
         lsdfFilesService.createDirectory(configService.getProjectSequencePath(project), realm)
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             config = projectService.configureSnvPipelineProject(
                     new RoddyConfiguration([
                             project          : project,

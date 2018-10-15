@@ -52,7 +52,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     void testGetProcessAsOperator() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertSame(process, processService.getProcess(process.id))
         }
     }
@@ -64,7 +64,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     void testGetProcessAsAdmin() {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             assertSame(process, processService.getProcess(process.id))
         }
     }
@@ -79,7 +79,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         Process process = mockProcess(plan)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            aclUtilService.addPermission(plan, "testuser", BasePermission.READ)
+            aclUtilService.addPermission(plan, TESTUSER, BasePermission.READ)
         }
         SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
@@ -145,7 +145,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
         ProcessingStep step = mockProcessingStep(process, job)
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertSame(step, processService.getProcessingStep(step.id))
         }
     }
@@ -246,11 +246,11 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         ProcessingStep step = mockProcessingStep(process, job)
         mockProcessingStepUpdate(step)
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(ExecutionState.CREATED, processService.getState(process))
             assertEquals(ExecutionState.CREATED, processService.getState(step))
         }
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 processService.getState(process)
             }
@@ -334,10 +334,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         ProcessingStep step = mockProcessingStep(process, job)
         ProcessingStepUpdate update = mockProcessingStepUpdate(step)
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(update.date, processService.getFirstUpdate(step))
         }
-        SpringSecurityUtils.doWithAuth("user") {
+        SpringSecurityUtils.doWithAuth(USER) {
             shouldFail(AccessDeniedException) {
                 processService.getFirstUpdate(step)
             }
@@ -424,7 +424,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     @Test(expected = RuntimeException)
     void testGetProcessingErrorStackTraceIdFoundAndPermissionsWrong() {
         ProcessingError processingError = mockProcessingError()
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             processService.getProcessingErrorStackTrace(processingError.id)
         }
     }
@@ -450,7 +450,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
   </timestamp>
 </stacktraceElement>
 """
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             String expectedMessage = errorLogService.loggedError(processingError.stackTraceIdentifier)
             String actualMessage = processService.getProcessingErrorStackTrace(processingError.id)
             assertEquals(expectedMessage, actualMessage)

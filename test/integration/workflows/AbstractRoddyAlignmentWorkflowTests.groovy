@@ -198,7 +198,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
         lsdfFilesService.createDirectory(new File(configService.getProjectSequencePath(workPackage.project).path), realm)
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             projectService.configurePanCanAlignmentDeciderProject(new PanCanAlignmentConfiguration([
                     project          : workPackage.project,
                     seqType          : workPackage.seqType,

@@ -184,7 +184,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
                 path: "blacklist_hs37d5_gencode19_2017-01-09.tsv.gz",
         )
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             projectService.configureRnaAlignmentConfig(new RoddyConfiguration([
                     project          : workPackage.project,
                     seqType          : workPackage.seqType,

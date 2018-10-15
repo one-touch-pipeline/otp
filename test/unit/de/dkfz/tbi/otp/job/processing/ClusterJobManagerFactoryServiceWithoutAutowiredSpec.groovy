@@ -15,11 +15,13 @@ import spock.lang.*
 ])
 class ClusterJobManagerFactoryServiceWithoutAutowiredSpec extends Specification {
 
+    final static String SSH_USER = "user"
+
     def "test getJobManager, get correct manager"(Realm.JobScheduler type, Class managerClass) {
         given:
         ClusterJobManagerFactoryService service = new ClusterJobManagerFactoryService()
         service.configService = Mock(ConfigService) {
-            getSshUser() >> "user"
+            getSshUser() >> SSH_USER
         }
         Realm realm = DomainFactory.createRealm(
                 jobScheduler: type,
@@ -41,7 +43,7 @@ class ClusterJobManagerFactoryServiceWithoutAutowiredSpec extends Specification 
         given:
         ClusterJobManagerFactoryService service = new ClusterJobManagerFactoryService()
         service.configService = Mock(ConfigService) {
-            getSshUser() >> "user"
+            getSshUser() >> SSH_USER
         }
         Realm realm = DomainFactory.createRealm(
                 jobScheduler: Realm.JobScheduler.LSF,
@@ -60,7 +62,7 @@ class ClusterJobManagerFactoryServiceWithoutAutowiredSpec extends Specification 
         given:
         ClusterJobManagerFactoryService service = new ClusterJobManagerFactoryService()
         service.configService = Mock(ConfigService) {
-            getSshUser() >> "user"
+            getSshUser() >> SSH_USER
         }
         Realm realm = DomainFactory.createRealm(
                 jobScheduler: Realm.JobScheduler.LSF,

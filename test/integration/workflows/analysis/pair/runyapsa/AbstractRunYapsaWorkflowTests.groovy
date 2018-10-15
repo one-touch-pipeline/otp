@@ -56,7 +56,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
     ReferenceGenome createReferenceGenome() {
         ReferenceGenome referenceGenome = super.createReferenceGenome()
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             processingOptionService.createOrUpdate(
                     OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME,
                     referenceGenome.name

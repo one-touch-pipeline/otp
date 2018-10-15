@@ -26,7 +26,7 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
     void setup() {
         createUserAndRoles()
         seqTrack = DomainFactory.createSeqTrack()
-        addUserWithReadAccessToProject(User.findByUsername("user"), seqTrack.project)
+        addUserWithReadAccessToProject(User.findByUsername(USER), seqTrack.project)
     }
 
     void cleanupSpec() {
@@ -47,10 +47,10 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
         0 == seqTypes.size()
 
         where:
-        user       | _
-        "admin"    | _
-        "operator" | _
-        "user"     | _
+        user     | _
+        ADMIN    | _
+        OPERATOR | _
+        USER     | _
     }
 
     void "test testAlignableSeqTypesByProject with different users, when one seqType is connected to the project"() {
@@ -69,10 +69,10 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
         1 == seqTypes.size()
 
         where:
-        user       | _
-        "admin"    | _
-        "operator" | _
-        "user"     | _
+        user     | _
+        ADMIN    | _
+        OPERATOR | _
+        USER     | _
     }
 
     void "test testAlignableSeqTypesByProject with different users, when two seqTypes are connected to the project"() {
@@ -93,15 +93,15 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
         2 == seqTypes.size()
 
         where:
-        user       | _
-        "admin"    | _
-        "operator" | _
-        "user"     | _
+        user     | _
+        ADMIN    | _
+        OPERATOR | _
+        USER     | _
     }
 
     void "test testAlignableSeqTypesByProject with user that has no access to the project, throws exception"()  {
         when:
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             seqTypeService.alignableSeqTypesByProject(seqTrack.project)
         }
 

@@ -35,7 +35,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
         )
         lsdfFilesService.createDirectory(new File(configService.getProjectSequencePath(project).path), realm)
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             config = projectService.configureAceseqPipelineProject(
                     new RoddyConfiguration([
                             project          : project,
@@ -67,7 +67,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
         referenceGenome.replicationTimeFile = new File(referenceGenomePath, 'ENCODE/ReplicationTime_10cellines_mean_10KB.Rda').absolutePath
         referenceGenome.save(flush: true)
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             processingOptionService.createOrUpdate(
                     OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
                     referenceGenome.name

@@ -1169,7 +1169,7 @@ a: 2
 
         DateTimeUtils.setCurrentMillisFixed(ARBITRARY_TIMESTAMP)
 
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             individualService.createComment(operation, mapOld, mapNew)
         }
 

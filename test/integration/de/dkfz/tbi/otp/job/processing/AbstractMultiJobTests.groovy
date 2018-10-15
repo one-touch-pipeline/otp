@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.restarting.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.testing.UserAndRoles
 import org.apache.commons.logging.impl.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.*
@@ -20,7 +21,7 @@ import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.*
 import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
 import static junit.framework.TestCase.*
 
-class AbstractMultiJobTests {
+class AbstractMultiJobTests implements UserAndRoles {
 
     static final String CLUSTER_JOB_1_ID = '123'
     static final String CLUSTER_JOB_2_ID = '456'
@@ -34,9 +35,9 @@ class AbstractMultiJobTests {
 
     final ProcessingStep step = createAndSaveProcessingStep()
     final Realm realm = createRealm()
-    final ClusterJobIdentifier clusterJob1 = new ClusterJobIdentifier(realm, CLUSTER_JOB_1_ID, "user")
-    final ClusterJobIdentifier clusterJob2 = new ClusterJobIdentifier(realm, CLUSTER_JOB_2_ID, "user")
-    final ClusterJobIdentifier clusterJob3 = new ClusterJobIdentifier(realm, CLUSTER_JOB_3_ID, "user")
+    final ClusterJobIdentifier clusterJob1 = new ClusterJobIdentifier(realm, CLUSTER_JOB_1_ID, USER)
+    final ClusterJobIdentifier clusterJob2 = new ClusterJobIdentifier(realm, CLUSTER_JOB_2_ID, USER)
+    final ClusterJobIdentifier clusterJob3 = new ClusterJobIdentifier(realm, CLUSTER_JOB_3_ID, USER)
     final Collection<ClusterJobIdentifier> clusterJobs1 = [clusterJob1, clusterJob2]
     final Collection<ClusterJobIdentifier> clusterJobs2 = [clusterJob3]
 

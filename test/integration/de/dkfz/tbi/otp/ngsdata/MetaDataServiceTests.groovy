@@ -11,7 +11,7 @@ import org.springframework.security.acls.domain.*
 
 import static org.junit.Assert.*
 
-class MetaDataServiceTests extends AbstractIntegrationTest {
+class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRoles {
     MetaDataService metaDataService
     AclUtilService aclUtilService
 
@@ -269,7 +269,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testUpdateMetaDataEntryWithProjectAsOperator() {
         MetaDataEntry entry = mockEntry()
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
         }
     }
@@ -281,7 +281,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     @Test
     void testUpdateMetaDataEntryWithProjectAsAdmin() {
         MetaDataEntry entry = mockEntry()
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
         }
     }
@@ -295,29 +295,29 @@ class MetaDataServiceTests extends AbstractIntegrationTest {
     void testRetrieveChangelogWithoutProject() {
         MetaDataEntry entry = mockEntry()
         // admin should always be able to see the entry
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             assertTrue(metaDataService.retrieveChangeLog(entry).empty)
         }
         // also the operator
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(metaDataService.retrieveChangeLog(entry).empty)
         }
         // but a user should not
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.retrieveChangeLog(entry)
             }
         }
         // creating a changelog entry should not change anything
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             metaDataService.updateMetaDataEntry(entry, "test2")
             assertEquals(1, metaDataService.retrieveChangeLog(entry).size())
         }
-        SpringSecurityUtils.doWithAuth("operator") {
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(1, metaDataService.retrieveChangeLog(entry).size())
         }
         // a user should still not be able to see it
-        SpringSecurityUtils.doWithAuth("testuser") {
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 metaDataService.retrieveChangeLog(entry)
             }

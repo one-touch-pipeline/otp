@@ -67,7 +67,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
         File scriptFolder = temporaryFolder.newFolder("files")
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             dataSwapService.moveSample(
                     bamFile.project.name,
                     bamFile.project.name,
@@ -143,7 +143,7 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
 
         StringBuilder outputStringBuilder = new StringBuilder()
 
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             dataSwapService.moveIndividual(
                     bamFile.project.name,
                     newProject.name,

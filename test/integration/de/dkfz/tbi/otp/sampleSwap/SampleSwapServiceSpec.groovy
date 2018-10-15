@@ -74,7 +74,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -107,7 +107,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -133,7 +133,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -166,7 +166,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -193,7 +193,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -220,7 +220,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -259,7 +259,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -292,7 +292,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -319,7 +319,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -352,7 +352,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -383,7 +383,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -416,7 +416,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -449,7 +449,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -485,7 +485,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -513,7 +513,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -536,7 +536,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -561,7 +561,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -584,7 +584,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -613,7 +613,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -645,7 +645,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -671,7 +671,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -714,7 +714,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -750,7 +750,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -781,7 +781,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -813,7 +813,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -843,7 +843,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -872,7 +872,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -905,7 +905,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -937,7 +937,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -970,7 +970,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -1002,7 +1002,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
@@ -1023,7 +1023,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         ]
 
         when:
-        SpringSecurityUtils.doWithAuth("admin") {
+        SpringSecurityUtils.doWithAuth(ADMIN) {
             sampleSwapService.validateInput(data)
         }
 
