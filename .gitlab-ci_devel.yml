@@ -1,10 +1,10 @@
 ---
 image: grails:2.5.1
 
-#notes:
-# recursive expansion of variables does not work
-# having multiple commends in one variable does not work
-# putting the expire time to a variable does not work
+# notes:
+## recursive expansion of variables does not work
+## having multiple commends in one variable does not work
+## putting the expire time to a variable does not work
 
 
 variables:
