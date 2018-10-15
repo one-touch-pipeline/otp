@@ -93,7 +93,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     @Test
     void testDataInstallationWithFastTrack() {
         SeqTrack seqTrack = createWholeGenomeSetup()
-        seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK
+        seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
         assert seqTrack.project.save(flush: true)
 
         execute()

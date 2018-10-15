@@ -696,7 +696,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
     void fastTrackSetup() {
         SeqTrack seqTrack = createSeqTrack("readGroup1")
-        seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK
+        seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
         assert seqTrack.project.save(flush: true)
     }
 
