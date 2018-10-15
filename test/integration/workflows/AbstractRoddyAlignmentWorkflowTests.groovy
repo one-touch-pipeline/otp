@@ -82,10 +82,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
     ProjectService projectService
 
 
-    @Rule
-    TemporaryFolder temporaryFolder = new TemporaryFolder()
-
-
     @Override
     List<String> getWorkflowScripts() {
         return [
