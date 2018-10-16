@@ -32,6 +32,7 @@
                     <sec:access expression="hasRole('ROLE_OPERATOR')">
                         <th><g:message code="projectUser.table.manageUsersAndDelegate"/></th>
                     </sec:access>
+                    <th><g:message code="projectUser.table.receivesNotifications"/></th>
                     <th><g:message code="projectUser.table.asperaAccount"/></th>
                     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                         <th><g:message code="projectUser.table.projectAccess"/></th>
@@ -105,7 +106,7 @@
                                     <span class="icon-${userEntry.fileAccess}"></span>
                                 </sec:noAccess>
                             </td>
-                            <td class="large">
+                            <td class="small">
                                 <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">
                                     <otp:editorSwitch
                                             template="toggle"
@@ -129,11 +130,22 @@
                         <g:else>
                             <td class="small"><span class="icon-${userEntry.otpAccess}"></span></td>
                             <td class="small"><span class="icon-${userEntry.fileAccess}"></span></td>
-                            <td class="large"><span class="icon-${userEntry.manageUsers}"></span></td>
+                            <td class="small"><span class="icon-${userEntry.manageUsers}"></span></td>
                             <sec:access expression="hasRole('ROLE_OPERATOR')">
                                 <td class="large"><span class="icon-${userEntry.manageUsersAndDelegate}"></span></td>
                             </sec:access>
                         </g:else>
+                        <td class="large">
+                            <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                                <otp:editorSwitch
+                                        template="toggle"
+                                        link="${g.createLink(controller: "projectUser", action: "toggleReceivesNotifications", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
+                                        value="${userEntry.receivesNotifications.toBoolean()}"/>
+                            </sec:access>
+                            <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                                <span class="icon-${userEntry.receivesNotifications}"></span>
+                            </sec:noAccess>
+                        </td>
                         <td>
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
@@ -281,11 +293,15 @@
                             <td><g:checkBox name="manageUsers" class="inputField ldapUser" value="true" checked="false"/></td>
                         </tr>
                         <sec:access expression="hasRole('ROLE_OPERATOR')">
-                        <tr>
-                            <td><g:message code="projectUser.addMember.manageUsersAndDelegate"/></td>
-                            <td><g:checkBox name="manageUsersAndDelegate" class="inputField ldapUser" value="true" checked="false"/></td>
-                        </tr>
+                            <tr>
+                                <td><g:message code="projectUser.addMember.manageUsersAndDelegate"/></td>
+                                <td><g:checkBox name="manageUsersAndDelegate" class="inputField ldapUser" value="true" checked="false"/></td>
+                            </tr>
                         </sec:access>
+                        <tr>
+                            <td><g:message code="projectUser.addMember.receivesNotification"/></td>
+                            <td><g:checkBox name="receivesNotifications" class="inputField ldapUser" value="true" checked="true"/></td>
+                        </tr>
                     </table>
                 </div>
                 <sec:access expression="hasRole('ROLE_OPERATOR')">

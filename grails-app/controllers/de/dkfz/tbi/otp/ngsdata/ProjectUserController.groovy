@@ -17,7 +17,6 @@ class ProjectUserController implements CheckAndCall {
     ProjectSelectionService projectSelectionService
     UserService userService
     UserProjectRoleService userProjectRoleService
-
     LdapService ldapService
 
     def index() {
@@ -112,6 +111,7 @@ class ProjectUserController implements CheckAndCall {
                                 accessToFiles         : cmd.accessToFiles,
                                 manageUsers           : cmd.manageUsers,
                                 manageUsersAndDelegate: cmd.manageUsersAndDelegate,
+                                receivesNotifications : cmd.receivesNotifications
                             ]
                     )
                 } else {
@@ -151,6 +151,10 @@ class ProjectUserController implements CheckAndCall {
 
     JSON toggleManageUsersAndDelegate(ToggleValueCommand cmd) {
         checkErrorAndCallMethod(cmd, { userProjectRoleService.toggleManageUsersAndDelegate(cmd.userProjectRole) })
+    }
+
+    JSON toggleReceivesNotifications(ToggleValueCommand cmd) {
+        checkErrorAndCallMethod(cmd, { userProjectRoleService.toggleReceivesNotifications(cmd.userProjectRole) })
     }
 
     JSON updateName(UpdateUserRealNameCommand cmd) {
@@ -195,6 +199,7 @@ class UserEntry {
     PermissionStatus fileAccess
     PermissionStatus manageUsers
     PermissionStatus manageUsersAndDelegate
+    PermissionStatus receivesNotifications
     boolean deactivated
     UserProjectRole userProjectRole
 
@@ -209,20 +214,21 @@ class UserEntry {
         this.projectRoleName = userProjectRole.projectRole.name
         this.deactivated = inLdap ? ldapUserDetails.deactivated : false
 
-        this.otpAccess = inLdap && userProjectRole.accessToOtp ? PermissionStatus.APPROVED : PermissionStatus.DENIED
+        this.otpAccess = getPermissionStatus(inLdap && userProjectRole.accessToOtp)
         this.fileAccess = getPermissionStatus(inLdap && userProjectRole.accessToFiles, project.unixGroup in ldapUserDetails?.memberOfGroupList)
-        this.manageUsers = inLdap && userProjectRole.manageUsers ? PermissionStatus.APPROVED : PermissionStatus.DENIED
-        this.manageUsersAndDelegate = inLdap && userProjectRole.manageUsersAndDelegate ? PermissionStatus.APPROVED : PermissionStatus.DENIED
+        this.manageUsers = getPermissionStatus(inLdap && userProjectRole.manageUsers)
+        this.manageUsersAndDelegate = getPermissionStatus(inLdap && userProjectRole.manageUsersAndDelegate)
+        this.receivesNotifications = getPermissionStatus(userProjectRole.receivesNotifications)
     }
 
-    private static PermissionStatus getPermissionStatus(boolean hasProjectRolePermission, boolean isMemberOfGroup) {
-        if (hasProjectRolePermission && isMemberOfGroup) {
+    private static PermissionStatus getPermissionStatus(boolean should, boolean is = should) {
+        if (should && is) {
             return PermissionStatus.APPROVED
-        } else if (hasProjectRolePermission && !isMemberOfGroup) {
+        } else if (should && !is) {
             return PermissionStatus.PENDING_APPROVAL
-        } else if (!hasProjectRolePermission && isMemberOfGroup) {
+        } else if (!should && is) {
             return PermissionStatus.PENDING_DENIAL
-        } else if (!hasProjectRolePermission && !isMemberOfGroup) {
+        } else if (!should && !is) {
             return PermissionStatus.DENIED
         }
     }
@@ -321,6 +327,7 @@ class AddUserToProjectCommand implements Serializable {
     boolean accessToFiles = false
     boolean manageUsers = false
     boolean manageUsersAndDelegate = false
+    boolean receivesNotifications = true
 
     String realName
     String email
@@ -340,6 +347,7 @@ class AddUserToProjectCommand implements Serializable {
         accessToFiles(blank: false)
         manageUsers(blank: false)
         manageUsersAndDelegate(blank: false)
+        receivesNotifications(blank: false)
         realName(nullable: true, validator: { val, obj ->
             if (!obj.addViaLdap && !obj.realName?.trim()) {
                 return "Real name can not be empty"

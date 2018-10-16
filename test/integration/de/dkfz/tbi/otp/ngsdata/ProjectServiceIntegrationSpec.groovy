@@ -988,9 +988,9 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         generalRefGenConfig.referenceGenome == newReferenceGenome
 
         where:
-        deprecateConfigurations |_
-        false                   |_
-        true                    |_
+        deprecateConfigurations | _
+        false                   | _
+        true                    | _
     }
 
     void "test configureDefaultOtpAlignmentDecider to configurePanCanAlignmentDeciderProject"() {

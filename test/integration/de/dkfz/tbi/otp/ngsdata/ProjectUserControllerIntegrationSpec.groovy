@@ -56,7 +56,7 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         model.unknownUsersWithFileAccess == [unknownUsername]
     }
 
-    void "test addUserToProject, switch between different methods calls respective function"() {
+    void "test addUserToProject, switch between respective functions to add users"() {
         given:
         createUserAndRoles()
 
@@ -115,6 +115,7 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         controller.params.accessToFiles = true
         controller.params.manageUsers = true
         controller.params.manageUsersAndDelegate = true
+        controller.params.receivesNotifications = true
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.addUserToProject()

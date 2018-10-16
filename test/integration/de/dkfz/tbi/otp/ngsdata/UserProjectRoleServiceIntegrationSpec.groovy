@@ -104,7 +104,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         [UNIX_GROUP]  | false         | true          | 0
     }
 
-    void "addUserToProjectAndNotifyGroupManagementAuthorities, create User if non is found for username or email"() {
+    void "addUserToProjectAndNotifyGroupManagementAuthority, create User if non is found for username or email"() {
         given:
         Project project = DomainFactory.createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
@@ -130,7 +130,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         User.findByUsernameAndEmail(ldapUserDetails.cn, ldapUserDetails.mail)
     }
 
-    void "addUserToProjectAndNotifyGroupManagementAuthorities, throw exception when user is already connected to project"() {
+    void "addUserToProjectAndNotifyGroupManagementAuthority, throw exception when user is already connected to project"() {
         given:
         User user = DomainFactory.createUser()
         Project project = DomainFactory.createProject()
@@ -158,7 +158,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         e.message.contains('is already part of project')
     }
 
-    void "addUserToProjectAndNotifyGroupManagementAuthorities, create UserProjectRole for new User"() {
+    void "addUserToProjectAndNotifyGroupManagementAuthority, create UserProjectRole for new User"() {
         given:
         User user = DomainFactory.createUser()
         Project project = DomainFactory.createProject()
@@ -184,7 +184,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole.findByUserAndProjectAndProjectRole(user, project, projectRole)
     }
 
-    void "addUserToProjectAndNotifyGroupManagementAuthorities, unsuccessful ldap search throws exception"() {
+    void "addUserToProjectAndNotifyGroupManagementAuthority, unsuccessful ldap search throws exception"() {
         given:
         Project project = DomainFactory.createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
@@ -203,7 +203,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
-    void "addUserToProjectAndNotifyGroupManagementAuthorities, send mail only for users with access to files (accessToFiles = #accessToFiles)"() {
+    void "addUserToProjectAndNotifyGroupManagementAuthority, send mail only for users with access to files (accessToFiles = #accessToFiles)"() {
         given:
         User user = DomainFactory.createUser()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
@@ -413,11 +413,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         where:
-        flag                     |_
-        "accessToOtp"            |_
-        "accessToFiles"          |_
-        "manageUsers"            |_
-        "manageUsersAndDelegate" |_
+        flag                     | _
+        "accessToOtp"            | _
+        "accessToFiles"          | _
+        "manageUsers"            | _
+        "manageUsersAndDelegate" | _
+        "receivesNotifications"  | _
     }
 
     void "requestToRemoveUserFromUnixGroupIfRequired, removed user has file access role in project with same unix group"() {

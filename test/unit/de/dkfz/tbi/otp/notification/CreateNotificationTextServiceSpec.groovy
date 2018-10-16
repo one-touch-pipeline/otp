@@ -690,9 +690,9 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         true
 
         where:
-        singleCell |_
-        true       |_
-        false      |_
+        singleCell | _
+        true       | _
+        false      | _
     }
 
     @Unroll("#pairAnalysisList.type, when ProcessingStatus is null, throw assert")

@@ -13,6 +13,7 @@ class UserProjectRole implements Serializable, Entity {
     boolean accessToFiles = false
     boolean manageUsers = false
     boolean manageUsersAndDelegate = false
+    boolean receivesNotifications = true
 
     static constraints = {
         user(unique: ['project'])

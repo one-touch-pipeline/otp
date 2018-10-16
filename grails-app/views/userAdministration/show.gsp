@@ -53,6 +53,7 @@
                     <th><g:message code="user.administration.projectOverview.fileAccess"/></th>
                     <th><g:message code="user.administration.projectOverview.manageUsers"/></th>
                     <th><g:message code="user.administration.projectOverview.manageUsersAndDelegate"/></th>
+                    <th><g:message code="user.administration.projectOverview.receivesNotifications"/></th>
                 </tr>
                 <g:if test="${!userProjectRolesSortedByProjectName}">
                     <tr>
@@ -69,6 +70,7 @@
                         <td><span class="icon-${userProjectRole.accessToFiles}"></span></td>
                         <td><span class="icon-${userProjectRole.manageUsers}"></span></td>
                         <td><span class="icon-${userProjectRole.manageUsersAndDelegate}"></span></td>
+                        <td><span class="icon-${userProjectRole.receivesNotifications}"></span></td>
                     </tr>
                 </g:each>
             </table>

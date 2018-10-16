@@ -75,14 +75,14 @@ $.otp.userAdministration.loadUserList = function () {
                         rowData[3] = createUserChangeMarkup(userId, 'enable', rowData[3]);
                         rowData[4] = createUserChangeMarkup(userId, 'expireAccount', rowData[4]);
                         rowData[5] = createUserChangeMarkup(userId, 'lockAccount', rowData[5]);
-                        rowData[6] = '<input type="hidden" value="' + rowData[1] + '"/><button>Switch to ' + rowData[1] + '</button>';
+                        rowData[6] = '<input type="hidden" value="' + rowData[1] + '"/><button class="changeUserButton">Switch to ' + rowData[1] + '</button>';
                     }
                     fnCallback(json);
                 }
             });
         },
         fnRowCallback: function (nRow) {
-            $("td:eq(7) button", nRow).click(function (event) {
+            $("button.changeUserButton", nRow).click(function (event) {
                 var form;
                 event.preventDefault();
                 form = $("#switch-user-form");

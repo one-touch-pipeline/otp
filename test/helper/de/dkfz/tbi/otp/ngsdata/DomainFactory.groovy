@@ -1451,6 +1451,7 @@ class DomainFactory {
                 accessToFiles         : false,
                 manageUsers           : false,
                 manageUsersAndDelegate: false,
+                receivesNotifications : true,
         ], userProjectRoleProperties)
     }
 

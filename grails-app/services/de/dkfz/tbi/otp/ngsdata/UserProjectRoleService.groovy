@@ -156,6 +156,16 @@ class UserProjectRoleService {
         return upr
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'MANAGE_USERS')")
+    UserProjectRole toggleReceivesNotifications(UserProjectRole upr) {
+        assert upr: USER_PROJECT_ROLE_REQUIRED
+        upr.receivesNotifications = !upr.receivesNotifications
+        assert upr.save(flush: true)
+        String message = getFlagChangeLogMessage("Receives Notification", upr.receivesNotifications, upr.user.username, upr.project.name)
+        auditLogService.logAction(PROJECT_USER_CHANGED_RECEIVES_NOTIFICATION, message)
+        return upr
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole updateEnabledStatus(UserProjectRole userProjectRole, boolean enabled) {
         assert userProjectRole: USER_PROJECT_ROLE_REQUIRED

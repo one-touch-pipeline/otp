@@ -70,9 +70,9 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         thrown(IllegalArgumentException)
 
         where:
-        permission          |_
-        'unknownPermission' |_
-        true                |_
+        permission          | _
+        'unknownPermission' | _
+        true                | _
     }
 
     void "hasPermission, string permission but unknown target domain results in false"() {
