@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.*
 
 import java.nio.file.*
 import java.nio.file.attribute.*
+import java.time.LocalDateTime
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -104,7 +106,7 @@ class ProjectService {
         // check that our dirName is relative to the configured data root.
         Path rootPath = configService.getRootPath().toPath()
         List<String> rootPathElements = rootPath.toList()*.toString()
-        assert rootPathElements.every { !dirName.startsWith("${it}${File.separator}") } :
+        assert rootPathElements.every { !dirName.startsWith("${it}${File.separator}") }:
                 "project directory (${dirName}) contains (partial) data processing root path (${rootPath})"
 
         Project project = new Project(
@@ -226,7 +228,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    <T> void updateProjectField (T fieldValue, String fieldName, Project project) {
+    <T> void updateProjectField(T fieldValue, String fieldName, Project project) {
         assert fieldName && [
                 "costCenter",
                 "description",
@@ -343,6 +345,9 @@ class ProjectService {
         if (config) {
             config.makeObsolete()
         }
+        if (pipeline.name == Pipeline.Name.CELL_RANGER) {
+            deprecateReferenceGenomeProjectSeqType(project, seqType)
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -368,9 +373,44 @@ class ProjectService {
         return null
     }
 
+    void deprecateReferenceGenomeProjectSeqType(Project project, SeqType seqType) {
+        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(project, seqType)
+
+        if (referenceGenomeProjectSeqType) {
+            referenceGenomeProjectSeqType.deprecatedDate = new Date()
+            referenceGenomeProjectSeqType.save(flush: true)
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors createOrUpdateCellRangerConfig(Project project, SeqType seqType, String programVersion, ReferenceGenomeIndex referenceGenomeIndex) {
+        Pipeline pipeline = Pipeline.findByName(Pipeline.Name.CELL_RANGER)
+        ConfigPerProjectAndSeqType latest = getLatestCellRangerConfig(project, seqType)
+
+        latest?.makeObsolete()
+        try {
+            new CellRangerConfig(
+                    project: project,
+                    seqType: seqType,
+                    referenceGenomeIndex: referenceGenomeIndex,
+                    pipeline: pipeline,
+                    programVersion: programVersion,
+                    previousConfig: latest,
+            ).save(flush: true)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     RunYapsaConfig getLatestRunYapsaConfig(Project project, SeqType seqType) {
-        RunYapsaConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)
+        return RunYapsaConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    CellRangerConfig getLatestCellRangerConfig(Project project, SeqType seqType) {
+        return CellRangerConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -472,7 +512,8 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void copyPanCanAlignmentXml(Project basedProject, SeqType seqType, Project project) {
-        ReferenceGenomeProjectSeqType refSeqType = exactlyOneElement(ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(basedProject, seqType))
+        ReferenceGenomeProjectSeqType refSeqType = ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(basedProject, seqType)
+        assert refSeqType
 
         deprecateAllReferenceGenomesByProjectAndSeqType(project, seqType)
 
@@ -594,14 +635,14 @@ class ProjectService {
     Result<ReferenceGenome, String> checkReferenceGenomeForAceseq(Project project, SeqType seqType) {
         return Result.ofNullable(project, "project must not be null")
                 .map { Project p ->
-                    ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
-                        project, seqType)
-                }
-                .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
+            ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
+                    project, seqType)
+        }
+        .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
                 .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }
                 .ensure({ ReferenceGenome referenceGenome -> referenceGenome in aceseqService.checkReferenceGenomeMap()['referenceGenomes'] }, "Reference genome is not compatible with ACESeq.")
                 .ensure({ ReferenceGenome referenceGenome ->
-                    referenceGenome.knownHaplotypesLegendFileX &&
+            referenceGenome.knownHaplotypesLegendFileX &&
                     referenceGenome.knownHaplotypesLegendFile &&
                     referenceGenome.knownHaplotypesFileX &&
                     referenceGenome.knownHaplotypesFile &&
@@ -610,17 +651,17 @@ class ProjectService {
                     referenceGenome.gcContentFile &&
                     referenceGenome.mappabilityFile &&
                     referenceGenome.replicationTimeFile
-                }, "The selected reference genome is not configured for CNV (from ACEseq) (files are missing).")
+        }, "The selected reference genome is not configured for CNV (from ACEseq) (files are missing).")
     }
 
 
     Result<ReferenceGenome, String> checkReferenceGenomeForSophia(Project project, SeqType seqType) {
         return Result.ofNullable(project, "project must not be null")
                 .map { Project p ->
-                    ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
-                        project, seqType)
-                }
-                .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
+            ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
+                    project, seqType)
+        }
+        .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
                 .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }
                 .ensure({ ReferenceGenome referenceGenome -> referenceGenome in sophiaService.checkReferenceGenomeMap()['referenceGenomes'] }, "Reference genome is not compatible with SOPHIA.")
     }

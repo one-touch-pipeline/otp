@@ -3,17 +3,13 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 import groovy.transform.*
 import org.springframework.validation.*
 
-import java.nio.file.*
-
-class ConfigurePipelineController {
+class ConfigurePipelineController implements ConfigurePipelineHelper {
 
     ProjectService projectService
     ProjectSelectionService projectSelectionService
@@ -297,78 +293,6 @@ class ConfigurePipelineController {
         render data as JSON
     }
 
-    def snv(ConfigurePipelineSubmitCommand cmd) {
-        Pipeline pipeline = Pipeline.Name.RODDY_SNV.pipeline
-
-        String defaultPluginName = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName)
-        String defaultPluginVersion = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName)
-        String defaultBaseProjectConfig = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_SNV_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName)
-
-        return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
-    }
-
-    def indel(ConfigurePipelineSubmitCommand cmd) {
-        Pipeline pipeline = Pipeline.Name.RODDY_INDEL.pipeline
-
-        String defaultPluginName = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName)
-        String defaultPluginVersion = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName)
-        String defaultBaseProjectConfig = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_INDEL_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName)
-
-        return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
-    }
-
-    def sophia(ConfigurePipelineSubmitCommand cmd) {
-        Pipeline pipeline = Pipeline.Name.RODDY_SOPHIA.pipeline
-
-        String defaultPluginName = processingOptionService.findOptionAsString(OptionName.PIPELINE_SOPHIA_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName)
-        String defaultPluginVersion = processingOptionService.findOptionAsString(OptionName.PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS, cmd.seqType.roddyName)
-        String defaultBaseProjectConfig = processingOptionService.findOptionAsString(OptionName.PIPELINE_SOPHIA_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName)
-
-        return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
-    }
-
-    def aceseq(ConfigurePipelineSubmitCommand cmd) {
-        Pipeline pipeline = Pipeline.Name.RODDY_ACESEQ.pipeline
-
-        String defaultPluginName = processingOptionService.findOptionAsString(OptionName.PIPELINE_ACESEQ_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName)
-        String defaultPluginVersion = processingOptionService.findOptionAsString(OptionName.PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName)
-        String defaultBaseProjectConfig = processingOptionService.findOptionAsString(OptionName.PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName)
-
-        return createAnalysisConfig(cmd, pipeline, defaultPluginName, defaultPluginVersion, defaultBaseProjectConfig)
-    }
-
-    def runYapsa(BaseConfigurePipelineSubmitCommand cmd) {
-        Pipeline pipeline = Pipeline.Name.RUN_YAPSA.pipeline
-
-        RunYapsaConfig config = projectService.getLatestRunYapsaConfig(cmd.project, cmd.seqType)
-        String currentVersion = config?.programVersion
-
-        String defaultVersion = processingOptionService.findOptionAsString(OptionName.PIPELINE_RUNYAPSA_DEFAULT_VERSION)
-        List<String> availableVersions = processingOptionService.findOptionAsList(OptionName.PIPELINE_RUNYAPSA_AVAILABLE_VERSIONS)
-
-        return [
-                project: cmd.project,
-                seqType: cmd.seqType,
-                pipeline: pipeline,
-
-                defaultVersion: defaultVersion,
-                currentVersion: currentVersion,
-                availableVersions: availableVersions,
-        ]
-    }
-
-    def updateRunYapsa(ConfigureRunYapsaSubmitCommand cmd) {
-        Errors errors = projectService.createOrUpdateRunYapsaConfig(cmd.project, cmd.seqType, cmd.programVersion)
-        if (errors) {
-            flash.message = g.message(code: "configurePipeline.store.failure")
-            flash.errors = errors
-            redirect action: "runYapsa"
-        } else {
-            flash.message = g.message(code: "configurePipeline.store.success")
-            redirect controller: "projectConfig"
-        }
-    }
-
     def invalidateConfig(InvalidateConfigurationCommand cmd) {
         boolean hasErrors = cmd.hasErrors()
 
@@ -381,121 +305,6 @@ class ConfigurePipelineController {
             flash.message = g.message(code: "configurePipeline.invalidate.success")
             redirect(controller: "projectConfig")
         }
-    }
-
-    private Map createAnalysisConfig(ConfigurePipelineSubmitCommand cmd, Pipeline pipeline, String defaultPluginName, String defaultPluginVersion, String defaultBaseProjectConfig) {
-        Map result = checkErrorsIfSubmitted(cmd, pipeline)
-        if (!result) {
-            RoddyConfiguration configuration = new RoddyConfiguration([
-                    project          : cmd.project,
-                    seqType          : cmd.seqType,
-                    pluginName       : cmd.pluginName,
-                    pluginVersion    : cmd.pluginVersion,
-                    baseProjectConfig: cmd.baseProjectConfig,
-                    configVersion    : cmd.config,
-            ])
-
-            switch (pipeline.name) {
-                case Pipeline.Name.RODDY_ACESEQ:
-                    projectService.configureAceseqPipelineProject(configuration)
-                    break
-                case Pipeline.Name.RODDY_INDEL:
-                    projectService.configureIndelPipelineProject(configuration)
-                    break
-                case Pipeline.Name.RODDY_SNV:
-                    projectService.configureSnvPipelineProject(configuration)
-                    break
-                case Pipeline.Name.RODDY_SOPHIA:
-                    projectService.configureSophiaPipelineProject(configuration)
-                    break
-            }
-
-            flash.message = g.message(code: "configurePipeline.store.success")
-            redirect(controller: "projectConfig")
-        }
-
-        result << params
-        result << getValues(cmd.project, cmd.seqType, pipeline)
-
-        result << [
-                pipeline                : pipeline,
-
-                pluginName              : defaultPluginName,
-                defaultPluginName       : defaultPluginName,
-
-                pluginVersion           : defaultPluginVersion,
-                defaultPluginVersion    : defaultPluginVersion,
-
-                baseProjectConfig       : defaultBaseProjectConfig,
-                defaultBaseProjectConfig: defaultBaseProjectConfig,
-        ]
-        return result
-    }
-
-    private static Map checkErrorsIfSubmitted(ConfigurePipelineSubmitCommand cmd, Pipeline pipeline) {
-        boolean hasErrors = false
-        String message = ""
-        if (cmd.submit) {
-            hasErrors = cmd.hasErrors()
-            boolean duplicateConfigVersion = false
-            RoddyWorkflowConfig.findAllWhere([
-                    project      : cmd.project,
-                    seqType      : cmd.seqType,
-                    pipeline     : pipeline,
-                    pluginVersion: "${cmd.pluginName}:${cmd.pluginVersion}",
-            ]).each({
-                if (it.configVersion == cmd.config) {
-                    duplicateConfigVersion = true
-                }
-            })
-            if (hasErrors) {
-                FieldError errors = cmd.errors.getFieldError()
-                message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
-            } else if (duplicateConfigVersion) {
-                hasErrors = true
-                message = "'${cmd.config}' is not a valid value for 'Config Version'. Error code: 'duplicate'"
-            } else {
-                return [:] // == success
-            }
-            return [
-                    message          : message,
-                    hasErrors        : hasErrors,
-                    pluginName       : cmd.pluginName,
-                    pluginVersion    : cmd.pluginVersion,
-                    baseProjectConfig: cmd.baseProjectConfig,
-                    config           : cmd.config,
-            ]
-        }
-        return [
-                message  : message,
-                hasErrors: hasErrors,
-        ]
-    }
-
-    private Map getValues(Project project, SeqType seqType, Pipeline pipeline) {
-        String configVersion = CollectionUtils.atMostOneElement(
-                RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1]))?.configVersion
-        if (configVersion) {
-            Set<String> versions = configVersion.split("_")
-            final int MAIN_CONFIG_VERSION_INDEX = 0
-            final int SUB_CONFIG_VERSION_INDEX = 1
-            configVersion = versions[MAIN_CONFIG_VERSION_INDEX] + "_" + (versions[SUB_CONFIG_VERSION_INDEX].toInteger() + 1)
-        } else {
-            configVersion = "v1_0"
-        }
-
-        String latestRoddyConfig = ""
-        RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
-        if (config) {
-            FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
-            latestRoddyConfig = fs.getPath(config.configFilePath).text
-        }
-        return [
-                project        : project,
-                seqType        : seqType,
-                config         : configVersion,
-                lastRoddyConfig: latestRoddyConfig,
-        ]
     }
 
     private List getToolNames() {
@@ -569,6 +378,12 @@ class ConfigureRnaAlignmentSubmitCommand extends BaseConfigurePipelineSubmitComm
 
 @ToString(includeNames = true, includeSuper = true)
 class ConfigureRunYapsaSubmitCommand extends BaseConfigurePipelineSubmitCommand {
+    String programVersion
+}
+
+@ToString(includeNames = true, includeSuper = true)
+class ConfigureCellRangerSubmitCommand extends BaseConfigurePipelineSubmitCommand {
+    ReferenceGenomeIndex referenceGenomeIndex
     String programVersion
 }
 

@@ -133,6 +133,10 @@ class ReferenceGenome implements Entity {
         knownHaplotypesLegendFileX (nullable: true, maxSize: 500, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
     }
 
+    static hasMany = [
+        referenceGenomeIndexes: ReferenceGenomeIndex,
+    ]
+
     @Override
     String toString() {
         name

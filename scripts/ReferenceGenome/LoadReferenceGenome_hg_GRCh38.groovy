@@ -218,8 +218,8 @@ List<FastaEntry> fastaEntries = [
 
 
 ToolName tool = new ToolName(
-        name: "cellranger",
-        type: ToolName.Type.CELLRANGER,
+        name: "CELL_RANGER",
+        type: ToolName.Type.SINGLE_CELL,
         path: "cellranger",
 )
 tool.save(flush: true)

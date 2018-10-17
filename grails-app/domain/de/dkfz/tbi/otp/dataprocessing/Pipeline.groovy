@@ -36,6 +36,8 @@ class Pipeline implements Entity {
                     return Name.PANCAN_ALIGNMENT
                 case SeqTypeNames.RNA:
                     return Name.RODDY_RNA_ALIGNMENT
+                case SeqTypeNames._10X_SCRNA:
+                    return Name.CELL_RANGER
                 default:
                     return null
             }

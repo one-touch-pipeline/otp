@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
@@ -46,6 +47,18 @@ class ProjectConfigController implements CheckAndCall {
             [(seqType): mergingCriteria.find { it.seqType == seqType }]
         }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
 
+
+        List<Map> cellRangerOverview = SeqTypeService.singleCellAlignableSeqTypes.sort{ it.name }.collect { SeqType seqType ->
+            CellRangerConfig config = projectService.getLatestCellRangerConfig(project, seqType)
+            ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(project, seqType)
+            return [
+                    seqType: seqType,
+                    config: config,
+            ]
+        }
+
+
+
         List<List> thresholdsTable = createThresholdTable(project)
 
         Pipeline snv = Pipeline.findByName(Pipeline.Name.RODDY_SNV)
@@ -84,7 +97,8 @@ class ProjectConfigController implements CheckAndCall {
                 comment                   : project?.comment,
                 nameInMetadata            : project?.nameInMetadataFiles ?: '',
                 seqTypeMergingCriteria    : seqTypeMergingCriteria,
-                seqTypes                  : SeqTypeService.roddyAlignableSeqTypes.sort { it.displayNameWithLibraryLayout },
+                roddySeqTypes             : SeqTypeService.getRoddyAlignableSeqTypes().sort { it.displayNameWithLibraryLayout },
+                singleCellSeqTypes        : SeqTypeService.getSingleCellAlignableSeqTypes().sort { it.displayNameWithLibraryLayout },
                 snvSeqTypes               : snv.getSeqTypes(),
                 indelSeqTypes             : indel.getSeqTypes(),
                 sophiaSeqTypes            : sophia.getSeqTypes(),
@@ -116,6 +130,7 @@ class ProjectConfigController implements CheckAndCall {
                 checkSophiaReferenceGenome: checkSophiaReferenceGenome,
                 checkAceseqReferenceGenome: checkAceseqReferenceGenome,
                 projectInfos              : project?.projectInfos,
+                cellRangerOverview        : cellRangerOverview,
         ]
     }
 

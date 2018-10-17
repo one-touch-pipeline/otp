@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellConfig
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import org.apache.commons.logging.impl.*

@@ -157,6 +157,12 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         )
     }
 
+    static SeqType get10xSingleCellRnaSeqType() {
+        return CollectionUtils.exactlyOneElement(
+            SeqType.findAllByNameAndLibraryLayoutAndSingleCell(SeqTypeNames._10X_SCRNA.seqTypeName, LibraryLayout.PAIRED, true), '10x_scRNA PAIRED not found'
+        )
+    }
+
     static List<SeqType> getDefaultOtpAlignableSeqTypes() {
         return [
                 getExomePairedSeqType(),
@@ -188,10 +194,17 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ].flatten()
     }
 
+    static List<SeqType> getSingleCellAlignableSeqTypes() {
+        return [
+                get10xSingleCellRnaSeqType(),
+        ].flatten()
+    }
+
     static List<SeqType> getAllAlignableSeqTypes() {
         return [
                 getDefaultOtpAlignableSeqTypes(),
                 getRoddyAlignableSeqTypes(),
+                getSingleCellAlignableSeqTypes(),
         ].flatten().unique()
     }
 

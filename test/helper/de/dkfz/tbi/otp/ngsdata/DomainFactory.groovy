@@ -716,9 +716,9 @@ class DomainFactory {
     }
 
     static SingleCellBamFile createSingleCellBamFile(Map bamFileProperties = [:]) {
-        SingleCellMergingWorkPackage workPackage = bamFileProperties.workPackage
+        CellRangerMergingWorkPackage workPackage = bamFileProperties.workPackage
         if (!workPackage) {
-            workPackage = createSingleCellMergingWorkPackage()
+            workPackage = createCellRangerMergingWorkPackage()
             createReferenceGenomeProjectSeqType(
                     referenceGenome : workPackage.referenceGenome,
                     project         : workPackage.project,
@@ -1701,16 +1701,16 @@ class DomainFactory {
         ], properties)
     }
 
-    static SingleCellMergingWorkPackage createSingleCellMergingWorkPackage(Map properties = [:], boolean saveAndValidate = true) {
+    static CellRangerMergingWorkPackage createCellRangerMergingWorkPackage(Map properties = [:], boolean saveAndValidate = true) {
         Pipeline pipeline = properties.pipeline ?: createCellRangerPipeline()
         SeqType seqType = properties.seqType ?: createSingleCellSeqType()
         Sample sample = properties.sample  ?: createSample()
-        return createDomainObject(SingleCellMergingWorkPackage, baseMergingWorkPackageProperties(properties) + [
+        return createDomainObject(CellRangerMergingWorkPackage, baseMergingWorkPackageProperties(properties) + [
                 seqType : seqType,
                 pipeline: pipeline,
                 sample  : sample,
                 config  : {
-                    createSingleCellConfig([
+                    createCellRangerConfig([
                             pipeline: pipeline,
                             seqType : seqType,
                             project : sample.project,
@@ -1725,8 +1725,8 @@ class DomainFactory {
                 return DomainFactory.createMergingWorkPackage(properties)
             case ExternalMergingWorkPackage:
                 return DomainFactory.createExternalMergingWorkPackage(properties)
-            case SingleCellMergingWorkPackage:
-                return DomainFactory.createSingleCellMergingWorkPackage(properties)
+            case CellRangerMergingWorkPackage:
+                return DomainFactory.createCellRangerMergingWorkPackage(properties)
             default:
                 throw new RuntimeException("Unknown subclass of AbstractMergingWorkPackage: ${clazz}")
         }
@@ -1745,7 +1745,7 @@ class DomainFactory {
             case Pipeline.Name.EXTERNALLY_PROCESSED:
                 return createExternalMergingWorkPackage(properties)
             case Pipeline.Name.CELL_RANGER:
-                return createSingleCellMergingWorkPackage(properties)
+                return createCellRangerMergingWorkPackage(properties)
             default:
                 throw new RuntimeException("Unknown alignment pipeline: ${pipelineName}")
         }
@@ -1838,7 +1838,7 @@ class DomainFactory {
         return createDomainObjectLazy(RunYapsaConfig, createRunYapsaConfigMapHelper(properties), properties, saveAndValidate)
     }
 
-    static private Map createSingleCellConfigMapHelper(properties) {
+    static private Map createCellRangerConfigMapHelper(properties) {
         return [
                 pipeline      : createCellRangerPipeline(),
                 seqType       : { properties.seqType ?: createSingleCellSeqType() },
@@ -1849,12 +1849,12 @@ class DomainFactory {
         ]
     }
 
-    static SingleCellConfig createSingleCellConfig(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(SingleCellConfig, createSingleCellConfigMapHelper(properties), properties, saveAndValidate)
+    static CellRangerConfig createCellRangerConfig(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(CellRangerConfig, createCellRangerConfigMapHelper(properties), properties, saveAndValidate)
     }
 
-    static SingleCellConfig createSingleCellConfigLazy(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObjectLazy(SingleCellConfig, createSingleCellConfigMapHelper(properties), properties, saveAndValidate)
+    static CellRangerConfig createCellRangerConfigLazy(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObjectLazy(CellRangerConfig, createCellRangerConfigMapHelper(properties), properties, saveAndValidate)
     }
 
     static SeqTrack createSeqTrack(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:]) {
@@ -2058,13 +2058,14 @@ class DomainFactory {
         ], myProps)
     }
 
-    static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName, String roddyName = null, LibraryLayout libraryLayout = LibraryLayout.PAIRED) {
+    static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName, String roddyName = null, LibraryLayout libraryLayout = LibraryLayout.PAIRED, boolean singleCell = false) {
         createDomainObjectLazy(SeqType, [:], [
                 name         : seqTypeNames.seqTypeName,
                 displayName  : displayName,
                 roddyName    : roddyName,
                 dirName      : dirName,
                 libraryLayout: libraryLayout,
+                singleCell   : singleCell,
         ]).refresh()
     }
 
@@ -2094,6 +2095,10 @@ class DomainFactory {
 
     static SeqType createRnaSingleSeqType() {
         createSeqTypeLazy(SeqTypeNames.RNA, 'RNA', 'rna_sequencing', "RNA", LibraryLayout.SINGLE)
+    }
+
+    static SeqType create10xSingleCellRnaSeqType() {
+        createSeqTypeLazy(SeqTypeNames._10X_SCRNA, '10x_scRNA', '10x_scRNA_sequencing', null, LibraryLayout.PAIRED, true)
     }
 
     static List<SeqType> createDefaultOtpAlignableSeqTypes() {
@@ -2127,10 +2132,17 @@ class DomainFactory {
         ].flatten()
     }
 
+    static List<SeqType> createCellRangerAlignableSeqTypes() {
+        [
+                create10xSingleCellRnaSeqType(),
+        ].flatten()
+    }
+
     static List<SeqType> createAllAlignableSeqTypes() {
         [
                 createDefaultOtpAlignableSeqTypes(),
                 createRoddyAlignableSeqTypes(),
+                createCellRangerAlignableSeqTypes(),
         ].flatten().unique()
     }
 

@@ -76,6 +76,15 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
         ),
 
+        PIPELINE_CELLRANGER_DEFAULT_VERSION(
+                "Default Cell Ranger version, used when configuring the pipeline",
+                Necessity.OPTIONAL, "cellranger/2.1.1", TypeValidators.SINGLE_LINE_TEXT
+        ),
+        PIPELINE_CELLRANGER_AVAILABLE_VERSIONS(
+                "Cell Ranger versions, comma-separated",
+                Necessity.OPTIONAL, "cellranger/2.1.1", TypeValidators.SINGLE_LINE_TEXT
+        ),
+
         PIPELINE_SOPHIA_DEFAULT_PLUGIN_NAME(
                 "Default name of the Sophia pipeline plugin, used when configuring the pipeline",
                 Necessity.OPTIONAL, "SophiaWorkflow", TypeValidators.SINGLE_WORD_TEXT,

@@ -18,4 +18,13 @@ class ReferenceGenomeIndex implements Entity {
         }
         indexToolVersion unique: ['toolName', 'referenceGenome'], blank: false
     }
+
+    static belongsTo = [
+            referenceGenome: ReferenceGenome,
+    ]
+
+    @Override
+    String toString() {
+        return "${referenceGenome.name} ${toolName.name} ${indexToolVersion}"
+    }
 }

@@ -11,7 +11,6 @@ class ReferenceGenomeIndexService {
         new File(getBasePath(referenceGenomeIndex), referenceGenomeIndex.path)
     }
 
-
     private File getBasePath(ReferenceGenomeIndex referenceGenomeIndex) {
         new File(new File(referenceGenomeService.referenceGenomeDirectory(referenceGenomeIndex.referenceGenome, false),
                 REFERENCE_GENOME_INDEX_PATH_COMPONENT), referenceGenomeIndex.toolName.path)

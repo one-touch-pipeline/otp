@@ -58,8 +58,8 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier {
     }
 
     @Override
-    SingleCellMergingWorkPackage getMergingWorkPackage() {
-        return SingleCellMergingWorkPackage.get(workPackage?.id)
+    CellRangerMergingWorkPackage getMergingWorkPackage() {
+        return CellRangerMergingWorkPackage.get(workPackage?.id)
     }
 
     @Override

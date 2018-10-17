@@ -69,7 +69,7 @@ class ProcessingOptionService {
         findOptionAsString(name, type) == "true"
     }
     List<String> findOptionAsList(OptionName name, String type = null) {
-        findOptionAsString(name, type).split(',')*.trim()
+        findOptionAsString(name, type)?.split(',')*.trim()
     }
 
 

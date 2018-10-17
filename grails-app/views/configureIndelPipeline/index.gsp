@@ -24,7 +24,7 @@
         </g:else>
         <g:message code="configurePipeline.info"/>
         <div><g:message code="configurePipeline.note.human"/></div>
-        <g:form controller="configurePipeline" action="indel" params='["project.id": project.id, "seqType.id": seqType.id]'>
+        <g:form action="index" params='["project.id": project.id, "seqType.id": seqType.id]'>
             <table class="pipelineTable">
                 <tr>
                     <th></th>
@@ -67,7 +67,7 @@
         </g:form>
         <g:if test="${lastRoddyConfig}">
             <h2><g:message code="configurePipeline.last.config"/></h2>
-            <g:form controller="configurePipeline" action="invalidateConfig"
+            <g:form action="invalidateConfig"
                     params='["project.id": project.id, "seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName]'>
                 <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
             </g:form>

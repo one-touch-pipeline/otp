@@ -93,6 +93,12 @@ class ReferenceGenomeProjectSeqType implements Entity {
         getConfiguredReferenceGenomeProjectSeqType(seqTrack.project, seqTrack.seqType, seqTrack.sampleType)
     }
 
+    static ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType(Project project, SeqType seqType) {
+        return CollectionUtils.atMostOneElement(
+                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
+        )
+    }
+
     static ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqType(Project project, SeqType seqType, SampleType sampleType) {
         assert project
         assert seqType

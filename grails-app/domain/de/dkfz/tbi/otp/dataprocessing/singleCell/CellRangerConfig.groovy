@@ -1,22 +1,25 @@
 package de.dkfz.tbi.otp.dataprocessing.singleCell
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-class SingleCellConfig extends ConfigPerProjectAndSeqType implements WithProgramVersion, AlignmentConfig {
+class CellRangerConfig extends ConfigPerProjectAndSeqType implements WithProgramVersion, AlignmentConfig {
+
+    ReferenceGenomeIndex referenceGenomeIndex
 
     static constraints = {
         programVersion(blank: false)
         obsoleteDate validator: { val, obj ->
             if (!val) {
-                SingleCellConfig singleCellConfig = atMostOneElement(SingleCellConfig.findAllWhere(
+                CellRangerConfig cellRangerConfig = atMostOneElement(CellRangerConfig.findAllWhere(
                         project: obj.project,
                         seqType: obj.seqType,
                         pipeline: obj.pipeline,
                         obsoleteDate: null,
                 ))
-                !singleCellConfig || singleCellConfig == obj
+                !cellRangerConfig || cellRangerConfig == obj
             }
         }
     }

@@ -188,10 +188,10 @@
         <h2>${g.message(code: 'projectOverview.alignmentInformation.title')}</h2>
         <div>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
-                <h3><g:message code="projectOverview.alignmentInformation.configure"/></h3>
+                <h3><g:message code="projectOverview.alignmentInformation.configureRoddy"/></h3>
                 <div class="show_button">
                     <ul>
-                        <g:each in="${seqTypes}" var="seqType">
+                        <g:each in="${roddySeqTypes}" var="seqType">
                             <li>
                                 <g:if test="${seqType.isRna()}">
                                     <g:link controller='configurePipeline' action='rnaAlignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
@@ -244,6 +244,42 @@
                     </tr>
                 </g:each>
             </table>
+        </div>
+        <div>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <h3><g:message code="projectOverview.alignmentInformation.configureCellRanger"/></h3>
+                <div class="show_button">
+                    <ul>
+                        <g:each in="${singleCellSeqTypes}" var="seqType">
+                            <li>
+                                <g:link controller='configureCellRangerPipeline' action='index' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                    ${seqType.displayNameWithLibraryLayout}
+                                </g:link>
+                            </li>
+                        </g:each>
+                    </ul>
+                </div>
+            </sec:ifAllGranted>
+                <table>
+                    <tr>
+                        <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.seqType')}</th>
+                        <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.version')}</th>
+                        <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.referenceGenomeIndex')}</th>
+                    </tr>
+                    <g:each in="${cellRangerOverview}" var="m">
+                        <tr>
+                            <td>
+                                ${m.seqType?.getDisplayNameWithLibraryLayout()}
+                            </td>
+                            <td>
+                                ${m.config?.programVersion ?: "Not configured"}
+                            </td>
+                            <td>
+                                ${m.config?.referenceGenomeIndex ?: "Not configured"}
+                            </td>
+                        </tr>
+                    </g:each>
+                </table>
         </div>
         <br>
         <div class="otpDataTables">
@@ -302,7 +338,7 @@
                 <ul>
                     <g:each in="${snvSeqTypes}" var="seqType">
                         <li>
-                            <g:link controller='configurePipeline' action='snv' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                            <g:link controller='ConfigureSnvPipeline' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
                                 ${seqType.displayNameWithLibraryLayout}
                             </g:link>
                         </li>
@@ -345,7 +381,7 @@
                 <ul>
                     <g:each in="${indelSeqTypes}" var="seqType">
                         <li>
-                            <g:link controller='configurePipeline' action='indel' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                            <g:link controller='ConfigureIndelPipeline' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
                                 ${seqType.displayNameWithLibraryLayout}
                             </g:link>
                         </li>
@@ -376,7 +412,7 @@
                     <g:each in="${sophiaSeqTypes}" var="seqType">
                         <li>
                             <g:if test="${!checkSophiaReferenceGenome[seqType]}">
-                                <g:link controller='configurePipeline' action='sophia' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                <g:link controller='ConfigureSophiaPipeline' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
                                     ${seqType.displayNameWithLibraryLayout}
                                 </g:link>
                             </g:if>
@@ -411,7 +447,7 @@
                     <g:each in="${aceseqSeqTypes}" var="seqType">
                         <li>
                             <g:if test="${!checkAceseqReferenceGenome[seqType]}">
-                                <g:link controller='configurePipeline' action='aceseq' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                <g:link controller='ConfigureAceseqPipeline' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
                                     ${seqType.displayNameWithLibraryLayout}
                                 </g:link>
                             </g:if>
@@ -445,7 +481,7 @@
                 <ul>
                     <g:each in="${runYapsaSeqTypes}" var="seqType">
                         <li>
-                            <g:link controller='configurePipeline' action='runYapsa' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                            <g:link controller='configureRunYapsaPipeline' action='index' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
                                 ${seqType.displayNameWithLibraryLayout}
                             </g:link>
                         </li>

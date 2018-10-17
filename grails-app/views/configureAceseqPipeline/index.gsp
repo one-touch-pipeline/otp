@@ -24,7 +24,7 @@
     </g:else>
     <g:message code="configurePipeline.info"/>
     <div><g:message code="configurePipeline.note.human"/></div>
-    <g:form controller="configurePipeline" action="aceseq" params='["project.id": project.id, "seqType.id": seqType.id]'>
+    <g:form action="index" params='["project.id": project.id, "seqType.id": seqType.id]'>
         <table class="pipelineTable">
             <tr>
                 <th></th>

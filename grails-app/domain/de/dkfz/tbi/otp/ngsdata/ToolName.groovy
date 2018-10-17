@@ -8,7 +8,7 @@ class ToolName implements Entity {
 
     enum Type {
         RNA,
-        CELLRANGER,
+        SINGLE_CELL,
     }
 
     String name
@@ -22,4 +22,8 @@ class ToolName implements Entity {
             OtpPath.isValidPathComponent(val)
         }
     }
+
+    static hasMany = [
+            referenceGenomeIndexes: ReferenceGenomeIndex,
+    ]
 }

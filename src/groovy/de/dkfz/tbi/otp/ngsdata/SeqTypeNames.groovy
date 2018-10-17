@@ -4,6 +4,7 @@ package de.dkfz.tbi.otp.ngsdata
  * Holds possible seqType names for using in the code
  */
 enum SeqTypeNames {
+    _10X_SCRNA("10x_scRNA"),
     WHOLE_GENOME,
     WHOLE_GENOME_BISULFITE,
     RNA,
