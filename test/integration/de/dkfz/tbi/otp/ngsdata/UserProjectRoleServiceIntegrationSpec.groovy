@@ -6,9 +6,8 @@ import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
+import org.codehaus.groovy.grails.context.support.*
 import spock.lang.*
-
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 class UserProjectRoleServiceIntegrationSpec extends Specification implements UserAndRoles {
     final static String UNIX_GROUP = "UNIX_GROUP"
@@ -20,13 +19,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     def setup() {
         userProjectRoleService = new UserProjectRoleService()
+        userProjectRoleService.messageSource = getMessageSource()
         userProjectRoleService.auditLogService = new AuditLogService()
         userProjectRoleService.auditLogService.springSecurityService = new SpringSecurityService()
         createUserAndRoles()
         userProjectRoleService.mailHelperService = Mock(MailHelperService)
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
         DomainFactory.createProcessingOptionLazy(
-                name: EMAIL_LINUX_GROUP_ADMINISTRATION,
+                name: ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION,
                 type: null,
                 project: null,
                 value: email,
@@ -60,8 +60,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
-                "Request to ${formattedAction} user '${user.username}' ${conjunction} project '${project.name}'",
-                "adtool group${formattedAction}user ${project.unixGroup} ${user.username}",
+                "${formattedAction}\n${user.username}\n${conjunction}\n${project.name}",
+                "${formattedAction}\n${project.unixGroup}\n${user.username}",
                 email
         )
 
@@ -90,7 +90,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         userProjectRole.enabled == valueToUpdate
-        invocations * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
+        invocations             * userProjectRoleService.mailHelperService.sendEmail(_, _, _ as String)
+        (valueToUpdate ? 1 : 0) * userProjectRoleService.mailHelperService.sendEmail(_, _, _ as List<String>)
 
         where:
         ldapResult    | accessToFiles | valueToUpdate | invocations
@@ -227,10 +228,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        invocations * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
+        invocationsString * userProjectRoleService.mailHelperService.sendEmail(_, _, _ as String)
+        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, _ as List<String>)
 
         where:
-        accessToFiles | invocations
+        accessToFiles | invocationsString
         true          | 1
         false         | 0
     }
@@ -297,6 +299,95 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole.findByUserAndProjectAndProjectRole(user, project, projectRole)
     }
 
+    void "addExternalUserToProject, sends a mail when a user is added"() {
+        given:
+        ProjectRole projectRole = DomainFactory.createProjectRole()
+        User user = DomainFactory.createUser()
+        Project project = DomainFactory.createProject()
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.addExternalUserToProject(project, user.realName, user.email, projectRole)
+        }
+
+        then:
+        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, _ as List<String>)
+    }
+
+    void "notifyProjectAuthoritiesAndUser, uses the mails of each project authority and the affected user"() {
+        given:
+        int numberOfRoles = 5
+        int disabledRoles = 2
+        ProjectRole pi = DomainFactory.createProjectRole(name: "PI")
+        Project project = DomainFactory.createProject()
+
+        User userToAdd = DomainFactory.createUser()
+        List<String> authorityMails = (1..numberOfRoles).findResults {
+            UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
+                    user: DomainFactory.createUser(),
+                    project: project,
+                    projectRole: pi
+            )
+            if (it < numberOfRoles - disabledRoles) {
+                userProjectRole.enabled = false
+                return null
+            }
+            return userProjectRole.user.email
+        }
+
+        List<String> allMails = authorityMails + userToAdd.email
+
+        assert numberOfRoles == UserProjectRole.findAllByProjectAndProjectRole(project, pi).size()
+        assert authorityMails.size() == numberOfRoles - disabledRoles
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.notifyProjectAuthoritiesAndUser(project, userToAdd)
+        }
+
+        then:
+        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, allMails)
+    }
+
+    void "notifyProjectAuthoritiesAndUser, is unaffected by receivesNotification flag"() {
+        given:
+        Project project = DomainFactory.createProject()
+
+        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
+                user: DomainFactory.createUser(),
+                project: project,
+                projectRole: DomainFactory.createProjectRole(name: "PI"),
+                receivesNotifications: false,
+        )
+        User user = DomainFactory.createUser()
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.notifyProjectAuthoritiesAndUser(project, user)
+        }
+
+        then:
+        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, [userProjectRole.user.email, user.email])
+    }
+
+    void "notifyProjectAuthoritiesAndUser sends email with correct content"() {
+        given:
+        User user = DomainFactory.createUser()
+        Project project = DomainFactory.createProject()
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.notifyProjectAuthoritiesAndUser(project, user)
+        }
+
+        then:
+        1 * userProjectRoleService.mailHelperService.sendEmail(
+                "${project.name}",
+                "${project.name}\n${user.realName}",
+                _ as List<String>
+        )
+    }
+
     void "requestToAddUserToUnixGroupIfRequired, only send notification when user is not already in group"() {
         given:
         User user = DomainFactory.createUser()
@@ -309,6 +400,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             userProjectRoleService.requestToAddUserToUnixGroupIfRequired(user, project)
         }
+
         then:
         invocations * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
 
@@ -462,5 +554,21 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         ldapResult    | invocations
         [UNIX_GROUP]  | 1
         [OTHER_GROUP] | 0
+    }
+
+    PluginAwareResourceBundleMessageSource getMessageSource() {
+        return Mock(PluginAwareResourceBundleMessageSource) {
+            _ * getMessageInternal("projectUser.notification.addToUnixGroup.subject", [], _) >>
+                    '''${action}\n${username}\n${conjunction}\n${projectName}'''
+
+            _ * getMessageInternal("projectUser.notification.addToUnixGroup.body", [], _) >>
+                    '''${action}\n${projectUnixGroup}\n${username}'''
+
+            _ * getMessageInternal("projectUser.notification.newProjectMember.subject", [], _) >>
+                    '''${projectName}'''
+
+            _ * getMessageInternal("projectUser.notification.newProjectMember.body", [], _) >>
+                    '''${projectName}\n${userIdentifier}'''
+        }
     }
 }

@@ -26,13 +26,13 @@
                     <th><g:message code="projectUser.table.department"/></th>
                     <th><g:message code="projectUser.table.mail"/></th>
                     <th><g:message code="projectUser.table.role"/></th>
-                    <th><g:message code="projectUser.table.otpAccess"/></th>
-                    <th><g:message code="projectUser.table.fileAccess"/></th>
-                    <th><g:message code="projectUser.table.manageUsers"/></th>
+                    <th title="${g.message(code: 'projectUser.table.otpAccess.tooltip')}"><g:message code="projectUser.table.otpAccess"/></th>
+                    <th title="${g.message(code: 'projectUser.table.fileAccess.tooltip')}"><g:message code="projectUser.table.fileAccess"/></th>
+                    <th title="${g.message(code: 'projectUser.table.manageUsers.tooltip')}"><g:message code="projectUser.table.manageUsers"/></th>
                     <sec:access expression="hasRole('ROLE_OPERATOR')">
-                        <th><g:message code="projectUser.table.manageUsersAndDelegate"/></th>
+                        <th title="${g.message(code: 'projectUser.table.manageUsersAndDelegate.tooltip')}"><g:message code="projectUser.table.manageUsersAndDelegate"/></th>
                     </sec:access>
-                    <th><g:message code="projectUser.table.receivesNotifications"/></th>
+                    <th title="${g.message(code: 'projectUser.table.receivesNotifications.tooltip')}"><g:message code="projectUser.table.receivesNotifications"/></th>
                     <th><g:message code="projectUser.table.asperaAccount"/></th>
                     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                         <th><g:message code="projectUser.table.projectAccess"/></th>
