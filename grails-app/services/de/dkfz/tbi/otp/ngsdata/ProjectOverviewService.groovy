@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.utils.*
-import groovy.sql.*
 import org.springframework.beans.factory.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
@@ -531,30 +530,5 @@ where
             order("id", "desc")
         }
         return seq
-    }
-
-    List getAccessPersons(Project project) {
-        getAccessPersons([project])
-    }
-
-    List getAccessPersons(List<Project> projects) {
-        String query = """\
-        SELECT username
-        FROM users
-        JOIN user_role ON users.id = user_role.user_id
-        JOIN role AS r ON user_role.role_id = r.id
-        JOIN acl_sid ON r.authority = acl_sid.sid
-        JOIN acl_entry ON acl_sid.id = acl_entry.sid
-        JOIN acl_object_identity ON acl_entry.acl_object_identity = acl_object_identity.id
-        JOIN acl_class ON acl_object_identity.object_id_class = acl_class.id
-        WHERE object_id_identity in ( ${projects*.id.join(', ')} ) AND acl_class.class = :className
-        GROUP BY username ORDER BY username
-        """
-        List accessPersons = []
-        def sql = new Sql(dataSource)
-        sql.eachRow(query, [className: Project.name]) {
-            accessPersons.add(it.username)
-        }
-        return accessPersons.unique()
     }
 }

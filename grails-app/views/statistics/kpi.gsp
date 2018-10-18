@@ -18,13 +18,13 @@
         </div>
         <div class="col-xs-12 col-sm-12 statistics-container">
             <div class="statistics-box">
-                <p class="projects"><span class="hide-on-xs">${g.message(code: "start.numbers.numberOf")}  Users</span>
+                <p class="projects"><span class="hide-on-xs">${g.message(code: "start.numbers.numberOf")} </span>${g.message(code: "start.numbers.users")}
                     <span class="highlight">${numberOfUsers}</span></p>
-                <p class="projects"><span class="hide-on-xs">${g.message(code: "start.numbers.numberOf")} Projects</span>
+                <p class="projects"><span class="hide-on-xs">${g.message(code: "start.numbers.numberOf")} </span>${g.message(code: "start.numbers.projects")}
                     <span class="highlight">${numberOfProject}</span></p>
-                <p class="projects"><span class="hide-on-xs">${g.message(code: "start.numbers.numberOf")} ${g.message(code: "start.numbers.samples")}</span>
+                <p class="projects"><span class="hide-on-xs">${g.message(code: "start.numbers.numberOf")} </span>${g.message(code: "start.numbers.samples")}
                     <span class="highlight">${numberOfSamples}</span></p>
-                <p class="projects"><span class="hide-on-xs">${g.message(code: "start.numbers.numberOf")} ClusterJobs</span>
+                <p class="projects"><span class="hide-on-xs">${g.message(code: "start.numbers.numberOf")} </span>${g.message(code: "start.numbers.clusterJobs")}
                     <span class="highlight">${numberOfClusterJobs}</span></p>
             </div>
             Download <g:link action="downloadDirectoriesCSV">

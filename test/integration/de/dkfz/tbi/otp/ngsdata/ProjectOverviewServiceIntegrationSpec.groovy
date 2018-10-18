@@ -133,18 +133,6 @@ class ProjectOverviewServiceIntegrationSpec extends IntegrationSpec implements U
         CollectionUtils.containSame(results, [sampleType1.name, sampleType2.name, sampleType3.name])
     }
 
-    void "test getAccessPersons with some Data"() {
-        given:
-        Project project = DomainFactory.createProject()
-        createUserAndRoles()
-        DomainFactory.createAclObjects(project)
-
-        expect:
-        projectOverviewService.getAccessPersons(project).contains(ADMIN)
-        !projectOverviewService.getAccessPersons(project).contains(TESTUSER)
-        !projectOverviewService.getAccessPersons(project).contains("username")
-    }
-
     private void createAggregateSequences(Project project, SampleType sampleType) {
         DomainFactory.createAggregateSequences([projectId: project.id, sampleTypeName: sampleType.name, sampleTypeId: sampleType.id])
     }

@@ -1,16 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.ProjectSelection
-import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.infrastructure.*
-import grails.converters.*
 import grails.orm.*
-import grails.plugin.springsecurity.*
 
 class StatisticsController {
     ProjectService projectService
     ProjectSelectionService projectSelectionService
-    ProjectOverviewService projectOverviewService
+    UserProjectRoleService userProjectRoleService
 
     def downloadDirectoriesCSV() {
         ProjectSelection selection = projectSelectionService.getSelectedProject()
@@ -48,10 +45,12 @@ class StatisticsController {
             }
         }
 
+        int users = userProjectRoleService.getNumberOfValidUsersForProjects(selection.projects)
+
         return [
                 numberOfProject    : selection.projects.size(),
                 numberOfSamples    : samples,
-                numberOfUsers      : projectOverviewService.getAccessPersons(selection.projects).size(),
+                numberOfUsers      : users,
                 numberOfClusterJobs: clusterJobs,
         ]
     }

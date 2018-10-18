@@ -223,6 +223,16 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
+    int getNumberOfValidUsersForProjects(List<Project> projects) {
+        return UserProjectRole.createCriteria().get {
+            'in'("project", projects)
+            eq("enabled", true)
+            projections {
+                countDistinct("user")
+            }
+        } as int
+    }
+
     private String createMessage(String templateName, Map properties = [:]) {
         assert templateName
         String template
