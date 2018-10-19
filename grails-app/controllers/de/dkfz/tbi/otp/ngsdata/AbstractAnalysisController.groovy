@@ -2,12 +2,12 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.utils.*
 import groovy.transform.*
 
-class AbstractAnalysisController {
+abstract class AbstractAnalysisController {
 
     ProjectService projectService
-    AnalysisService analysisService
     ProjectSelectionService projectSelectionService
 
     Map results() {
@@ -44,4 +44,8 @@ class BamFilePairAnalysisCommand {
         bamFilePairAnalysis nullable: false
         plotType nullable: false
     }
+}
+
+class ResultTableCommand extends DataTableCommand {
+    Project project
 }

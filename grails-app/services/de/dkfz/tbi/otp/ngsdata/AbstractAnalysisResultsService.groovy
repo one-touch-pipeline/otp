@@ -5,16 +5,20 @@ import org.hibernate.criterion.*
 import org.hibernate.sql.*
 import org.springframework.security.access.prepost.*
 
-class AnalysisService {
+import java.text.*
+
+abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
 
     ProjectService projectService
 
-    List getCallingInstancesForProject(Class<BamFilePairAnalysis> callingInstance, String projectName) {
+    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat('yyyy-MM-dd HH:mm')
+
+    List getCallingInstancesForProject(String projectName) {
         Project proj = projectService.getProjectByName(projectName)
         if (!proj) {
             return []
         }
-        return callingInstance.withCriteria {
+        List results = instanceClass.withCriteria {
             eq('withdrawn', false)
             samplePair {
                 mergingWorkPackage1 {
@@ -60,14 +64,46 @@ class AnalysisService {
                     }
                 }
                 config {
-                    property('pluginVersion', "pluginVersion")
+                    property(getVersionAttributeName(), 'version')
                 }
                 property('processingState', "processingState")
                 property('id', "instanceId")
                 property('dateCreated', "dateCreated")
             }
         }
+
+        return results.collect { Map properties ->
+            T instance = instanceClass.get(properties.instanceId)
+            properties.putAll(getQcData(instance))
+
+            Collection<String> libPrepKitShortNames
+            if (SeqTypeNames.fromSeqTypeName(properties.seqTypeName)?.isWgbs()) {
+                assert properties.libPrepKit1 == null && properties.libPrepKit2 == null
+                libPrepKitShortNames = instance.containedSeqTracks*.
+                        libraryPreparationKit*.shortDisplayName
+            } else {
+                libPrepKitShortNames = [(String) properties.libPrepKit1, (String) properties.libPrepKit2]
+            }
+            properties.libPrepKits = libPrepKitShortNames.unique().collect { it ?: 'unknown' }.join(", <br>")
+            properties.remove('libPrepKit1')
+            properties.remove('libPrepKit2')
+            properties.sampleTypes = "${properties.sampleType1} \u2013 ${properties.sampleType2}"
+            properties.remove('sampleType1')
+            properties.remove('sampleType2')
+            properties.dateCreated = DATE_FORMATTER.format(properties.dateCreated)
+            if (properties.processingState != AnalysisProcessingStates.FINISHED) {
+                properties.remove('instanceId')
+            }
+            return properties
+        }
     }
+
+    abstract String getVersionAttributeName()
+
+    abstract Class<T> getInstanceClass()
+
+    abstract Map getQcData(T analysis)
+
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#callingInstance.project, 'OTP_READ_ACCESS')")
     List<File> getFiles(BamFilePairAnalysis callingInstance, PlotType plotType) {
@@ -100,8 +136,8 @@ class AnalysisService {
                 }
                 break
             case PlotType.INDEL_TINDA:
-                if (callingInstance.getCombinedPlotPathTiNDA().exists()) {
-                    files.add(callingInstance.getCombinedPlotPathTiNDA())
+                if ((callingInstance as IndelCallingInstance).getCombinedPlotPathTiNDA().exists()) {
+                    files.add((callingInstance as IndelCallingInstance).getCombinedPlotPathTiNDA())
                 }
                 break
             default:

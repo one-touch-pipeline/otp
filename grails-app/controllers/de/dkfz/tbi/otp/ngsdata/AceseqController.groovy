@@ -1,37 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.dataprocessing.aceseq.*
 import grails.converters.*
-
-import java.text.*
-
 
 class AceseqController extends AbstractAnalysisController {
 
+    AceseqResultsService aceseqResultsService
+
     JSON dataTableResults(ResultTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd HH:mm')
-        List results = analysisService.getCallingInstancesForProject(AceseqInstance, cmd.project?.name)
-        List data = results.collect { Map properties ->
-            AceseqQc qc = AceseqQc.findByAceseqInstanceAndNumber(AceseqInstance.get(properties.instanceId as long), 1)
-            properties.putAll([
-                    tcc: FormatHelper.formatNumber(qc?.tcc),
-                    ploidy: FormatHelper.formatNumber(qc?.ploidy),
-                    ploidyFactor: qc?.ploidyFactor,
-                    goodnessOfFit: FormatHelper.formatNumber(qc?.goodnessOfFit),
-                    gender: qc?.gender,
-                    solutionPossible: qc?.solutionPossible,
-            ])
-            properties.remove('libPrepKit1')
-            properties.remove('libPrepKit2')
-            properties.dateCreated = sdf.format(properties.dateCreated)
-            if (properties.processingState != AnalysisProcessingStates.FINISHED) {
-                properties.remove('instanceId')
-            }
-            return properties
-        }
-
+        List data = aceseqResultsService.getCallingInstancesForProject(cmd.project?.name)
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
@@ -48,13 +26,13 @@ class AceseqController extends AbstractAnalysisController {
 
         Map<PlotType, List<Integer>> plotNumber = [:]
 
-        if (analysisService.getFiles(cmd.bamFilePairAnalysis, PlotType.ACESEQ_EXTRA)) {
-            int count = analysisService.getFiles(cmd.bamFilePairAnalysis, PlotType.ACESEQ_EXTRA).size()
+        if (aceseqResultsService.getFiles(cmd.bamFilePairAnalysis, PlotType.ACESEQ_EXTRA)) {
+            int count = aceseqResultsService.getFiles(cmd.bamFilePairAnalysis, PlotType.ACESEQ_EXTRA).size()
             plotNumber.put(PlotType.ACESEQ_EXTRA, count ? (0..count - 1) : [])
         }
 
-        if (analysisService.getFiles(cmd.bamFilePairAnalysis, PlotType.ACESEQ_ALL)) {
-            int count = analysisService.getFiles(cmd.bamFilePairAnalysis, PlotType.ACESEQ_ALL).size()
+        if (aceseqResultsService.getFiles(cmd.bamFilePairAnalysis, PlotType.ACESEQ_ALL)) {
+            int count = aceseqResultsService.getFiles(cmd.bamFilePairAnalysis, PlotType.ACESEQ_ALL).size()
             plotNumber.put(PlotType.ACESEQ_ALL, count ? (0..count - 1) : [])
         }
 
@@ -71,7 +49,7 @@ class AceseqController extends AbstractAnalysisController {
             render status: 404
             return
         }
-        List<File> files = analysisService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
+        List<File> files = aceseqResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
 
         if (files) {
             if (cmd.plotType in [PlotType.ACESEQ_EXTRA, PlotType.ACESEQ_ALL]) {
@@ -86,8 +64,4 @@ class AceseqController extends AbstractAnalysisController {
                 pid: "no File",
         ]
     }
-}
-
-class ResultTableCommand extends DataTableCommand {
-    Project project
 }

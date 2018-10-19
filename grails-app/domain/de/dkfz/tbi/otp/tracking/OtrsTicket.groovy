@@ -19,7 +19,7 @@ class OtrsTicket implements Commentable, Entity {
         INDEL('Indel calling', 'Indel-called', 'indel', 'results', ALIGNMENT),
         SOPHIA('SV calling', 'SV-called', 'sophia', 'results', ALIGNMENT),
         ACESEQ('CNV calling', 'CNV-called', 'aceseq', 'results', SOPHIA),
-        RUN_YAPSA('YAPSA signature analysis', 'YAPSA-analysed', null, null, SNV),
+        RUN_YAPSA('YAPSA signature analysis', 'YAPSA-analysed', "runYapsa", "results", SNV),
 
         final String displayName
         /**

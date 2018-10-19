@@ -1,6 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.aceseq.*
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.testing.*
@@ -8,9 +11,9 @@ import grails.plugin.springsecurity.*
 import grails.test.spock.*
 import spock.lang.*
 
-class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
+class AbstractAnalysisResultsServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 
-    AnalysisService analysisService = new AnalysisService()
+    AbstractAnalysisResultsService abstractAnalysisResultsService
 
     void setup() {
         createUserAndRoles()
@@ -20,29 +23,35 @@ class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndR
     void "getCallingInstancesForProject with #analysis Instance"(){
         given:
         BamFilePairAnalysis analysisInstance = DomainFactory."create${analysis}InstanceWithRoddyBamFiles"()
+        abstractAnalysisResultsService = service.newInstance()
+        abstractAnalysisResultsService.projectService = [
+                getProjectByName: { projectName -> analysisInstance.project }
+        ] as ProjectService
 
         when:
         List callingInstances
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            callingInstances = analysisService.getCallingInstancesForProject(instance, analysisInstance.samplePair.project.name)
+            callingInstances = abstractAnalysisResultsService.getCallingInstancesForProject(analysisInstance.samplePair.project.name)
         }
 
         then:
         callingInstances.size() == 1
 
         where:
-        analysis       | instance
-        "RoddySnv"     | RoddySnvCallingInstance
-        "IndelCalling" | IndelCallingInstance
-        "Aceseq"       | AceseqInstance
-        "Sophia"       | SophiaInstance
+        service                | analysis       | instance
+        SnvResultsService      | "RoddySnv"     | RoddySnvCallingInstance
+        IndelResultsService    | "IndelCalling" | IndelCallingInstance
+        AceseqResultsService   | "Aceseq"       | AceseqInstance
+        SophiaResultsService   | "Sophia"       | SophiaInstance
+        RunYapsaResultsService | "RunYapsa"     | RunYapsaInstance
     }
 
     void "checkFile with no callingInstance"() {
         when:
-        File result
+         abstractAnalysisResultsService = Mock(AbstractAnalysisResultsService)
+       File result
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            result = analysisService.getFiles(null, null)
+            result = abstractAnalysisResultsService.getFiles(null, null)
         }
 
         then:
@@ -52,14 +61,14 @@ class AnalysisServiceIntegrationSpec extends IntegrationSpec implements UserAndR
     @Unroll
     void "checkFile with #instance and no File"(){
         given:
-        BamFilePairAnalysis analysisInstance = DomainFactory."create${analysis}InstanceWithRoddyBamFiles"(
-        )
+        abstractAnalysisResultsService = Mock(AbstractAnalysisResultsService)
+        BamFilePairAnalysis analysisInstance = DomainFactory."create${analysis}InstanceWithRoddyBamFiles"()
         DomainFactory.createRealm()
 
         when:
         File file
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            file = analysisService.getFiles(analysisInstance, plotType) ? analysisService.getFiles(analysisInstance, plotType).first() : null
+            file = abstractAnalysisResultsService.getFiles(analysisInstance, plotType) ? abstractAnalysisResultsService.getFiles(analysisInstance, plotType).first() : null
         }
 
         then:

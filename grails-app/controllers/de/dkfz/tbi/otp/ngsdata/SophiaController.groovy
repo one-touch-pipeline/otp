@@ -1,35 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import grails.converters.*
 
-import java.text.*
-
 class SophiaController extends AbstractAnalysisController {
+
+    SophiaResultsService sophiaResultsService
 
     JSON dataTableResults(ResultTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        SimpleDateFormat sdf = new SimpleDateFormat('yyyy-MM-dd HH:mm')
-        List results = analysisService.getCallingInstancesForProject(SophiaInstance, cmd.project?.name)
-        List data = results.collect { Map properties ->
-            SophiaQc qc = SophiaQc.findBySophiaInstance(SophiaInstance.get(properties.instanceId as long))
-            properties.putAll([
-                    controlMassiveInvPrefilteringLevel: qc?.controlMassiveInvPrefilteringLevel,
-                    tumorMassiveInvFilteringLevel: qc?.tumorMassiveInvFilteringLevel,
-                    rnaContaminatedGenesMoreThanTwoIntron: qc?.rnaContaminatedGenesMoreThanTwoIntron,
-                    rnaContaminatedGenesCount: qc?.rnaContaminatedGenesCount,
-                    rnaDecontaminationApplied: qc?.rnaDecontaminationApplied,
-            ])
-            properties.remove('libPrepKit1')
-            properties.remove('libPrepKit2')
-            properties.dateCreated = sdf.format(properties.dateCreated)
-            if (properties.processingState != AnalysisProcessingStates.FINISHED) {
-                properties.remove('instanceId')
-            }
-            return properties
-        }
-
+        List data = sophiaResultsService.getCallingInstancesForProject(cmd.project?.name)
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
@@ -42,7 +22,7 @@ class SophiaController extends AbstractAnalysisController {
             render status: 404
             return
         }
-        if (analysisService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)) {
+        if (sophiaResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)) {
             return [
                     id: cmd.bamFilePairAnalysis.id,
                     pid: cmd.bamFilePairAnalysis.individual.pid,
@@ -61,7 +41,7 @@ class SophiaController extends AbstractAnalysisController {
             response.sendError(404)
             return
         }
-        List<File> stream = analysisService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
+        List<File> stream = sophiaResultsService.getFiles(cmd.bamFilePairAnalysis, cmd.plotType)
         if (stream) {
             render file: stream.first(), contentType: "application/pdf"
         } else {

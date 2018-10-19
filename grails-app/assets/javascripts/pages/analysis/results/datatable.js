@@ -70,14 +70,14 @@ $.otp.resultsTable = {
                         id: row.individualId,
                         text: row.individualPid,
                     }),
-                    row.sampleType1 + " \u2013 " + row.sampleType2,
+                    row.sampleTypes,
                     row.tcc,
                     row.ploidy,
                     row.ploidyFactor,
                     row.goodnessOfFit,
                     row.gender,
                     row.solutionPossible,
-                    row.pluginVersion,
+                    row.version,
                     row.dateCreated,
                     row.processingState,
                 ];
@@ -133,7 +133,7 @@ $.otp.resultsTable = {
                         id: row.individualId,
                         text: row.individualPid,
                     }),
-                    row.sampleType1 + " \u2013 " + row.sampleType2,
+                    row.sampleTypes,
                     row.seqType,
                     row.libPrepKits,
                     row.numIndels,
@@ -151,7 +151,7 @@ $.otp.resultsTable = {
                     row.tindaSomaticAfterRescue,
                     row.tindaSomaticAfterRescueMedianAlleleFreqInControl,
                     plotTinda,
-                    row.pluginVersion,
+                    row.version,
                     row.dateCreated,
                     row.processingState,];
                 return result;
@@ -175,13 +175,13 @@ $.otp.resultsTable = {
                         id: row.individualId,
                         text: row.individualPid,
                     }),
-                    row.sampleType1 + " \u2013 " + row.sampleType2,
+                    row.sampleTypes,
                     row.seqType,
                     row.controlMassiveInvPrefilteringLevel,
                     row.tumorMassiveInvFilteringLevel,
                     row.rnaContaminatedGenesCount,
                     row.rnaDecontaminationApplied,
-                    row.pluginVersion,
+                    row.version,
                     row.dateCreated,
                     row.processingState,
                 ];
@@ -220,10 +220,10 @@ $.otp.resultsTable = {
                         id: row.individualId,
                         text: row.individualPid,
                     }),
-                    row.sampleType1 + " \u2013 " + row.sampleType2,
+                    row.sampleTypes,
                     row.seqType,
                     row.libPrepKits,
-                    row.pluginVersion,
+                    row.version,
                     row.dateCreated,
                     row.processingState,
                 ];
@@ -239,6 +239,34 @@ $.otp.resultsTable = {
                 } else {
                     result.push("")
                 }
+                return result;
+            }
+        );
+    },
+    registerRunYapsa: function () {
+        "use strict";
+        $.otp.resultsTable.registerDataTable(
+            $('#resultsTable'),
+            $.otp.createLink({
+                controller: 'runYapsa',
+                action: 'dataTableResults'
+            }),
+            function (row) {
+                var result = [
+                    $.otp.createLinkMarkup({
+                        controller: 'individual',
+                        action: 'show',
+                        id: row.individualId,
+                        text: row.individualPid,
+                    }),
+                    row.sampleTypes,
+                    row.seqType,
+                    row.libPrepKits,
+                    row.version,
+                    row.dateCreated,
+                    row.processingState,
+                ];
+                result.push("")
                 return result;
             }
         );
