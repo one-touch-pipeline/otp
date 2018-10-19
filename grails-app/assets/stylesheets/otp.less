@@ -1146,11 +1146,19 @@ td span {
         background: url(error.png) left center no-repeat;
     }
 }
-#otp .addButton {
-    padding-right: 15px;
-    padding-left: 15px;
+#otp .addButtonContainer {
+    width: 42%;
     float: left;
     clear: left;
+    .addButton {
+        padding: 10px;
+        margin-right: 10px;
+        float: left;
+    }
+    .legalNotice {
+        display: inline;
+        vertical-align: middle;
+    }
 }
 #otp .addUserForm {
     overflow: auto;

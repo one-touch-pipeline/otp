@@ -340,8 +340,11 @@
                         </table>
                     </div>
                 </sec:access>
-                <input type="hidden" name="projectName" value="${project}">
-                <g:submitButton class="addButton" name="${g.message(code: 'projectUser.addMember.add')}"/>
+                <div class="addButtonContainer">
+                    <input type="hidden" name="projectName" value="${project}">
+                    <g:submitButton class="addButton" name="${g.message(code: 'projectUser.addMember.add')}"/>
+                    <span class="legalNotice"><g:message code="projectUser.annotation.legalNotice"/></span>
+                </div>
             </g:form>
             <br>
         </sec:access>
