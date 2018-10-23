@@ -314,9 +314,17 @@ class TrackingService {
     }
 
     private List<MergingWorkPackage> mergingWorkPackageContainingSeqTracks(List<SeqTrackProcessingStatus> alignableSeqTrackProcessingStatuses) {
+        List<SeqTrack> tracks = alignableSeqTrackProcessingStatuses*.seqTrack
+
+        if (tracks.empty) {
+            // avoid Postgres syntax errors when 'in'-query gets an empty list.
+            // "in ()" works in H2 in-memory SQL, but not in PostGreSQL
+            return []
+        }
+
         return MergingWorkPackage.createCriteria().listDistinct {
             seqTracks {
-                'in'('id', alignableSeqTrackProcessingStatuses*.seqTrack.id)
+                'in'('id', tracks*.id)
             }
         }
     }
