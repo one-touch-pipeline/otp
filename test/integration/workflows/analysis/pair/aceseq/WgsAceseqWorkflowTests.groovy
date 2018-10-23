@@ -5,10 +5,10 @@ import org.junit.*
 import workflows.analysis.pair.bamfiles.*
 
 @Ignore
-class WgsAceseqWorkflowTests extends AbstractAceseqWorkflowTests implements SeqTypeAndInputBigBamFiles {
+class WgsAceseqWorkflowTests extends AbstractAceseqWorkflowTests implements SeqTypeAndInputWgsAceseqBigBamFiles {
 
     @Override
     SeqType seqTypeToUse() {
-        return SeqType.wholeGenomePairedSeqType
+        return SeqTypeService.wholeGenomePairedSeqType
     }
 }

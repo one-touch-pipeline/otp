@@ -2,6 +2,7 @@ package workflows.analysis.pair.bamfiles
 
 trait SeqTypeAndInputBigBamFiles implements SeqTypeAndInputBamFiles {
 
+    @Override
     BamFileSet getBamFileSet() {
         return new BamFileSet(
                 new File(getBamFilePairBaseDirectory(), 'gms'),
