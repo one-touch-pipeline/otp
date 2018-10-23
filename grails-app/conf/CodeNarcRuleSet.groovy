@@ -3,6 +3,7 @@ final String SPEC = "*Spec.groovy"
 final String INTEGRATION_SPEC = "*IntegrationSpec.groovy"
 final String CONTROLLER = "*Controller.groovy"
 final String SERVICE = "*Service.groovy"
+final int DEFAULT = 1 //Value for rules that we have no explicitly discussed yet
 
 ruleset {
 
@@ -16,65 +17,133 @@ ruleset {
     AssertWithinFinallyBlock {
         priority = 1
     }
-    AssignmentInConditional
-    BigDecimalInstantiation
-    BitwiseOperatorInConditional
-    BooleanGetBoolean
-    BrokenNullCheck
-    BrokenOddnessCheck
+    AssignmentInConditional {
+        priority = DEFAULT
+    }
+    BigDecimalInstantiation {
+        priority = DEFAULT
+    }
+    BitwiseOperatorInConditional {
+        priority = DEFAULT
+    }
+    BooleanGetBoolean {
+        priority = DEFAULT
+    }
+    BrokenNullCheck {
+        priority = DEFAULT
+    }
+    BrokenOddnessCheck {
+        priority = DEFAULT
+    }
     ClassForName {
         priority = 1
     }
-    ComparisonOfTwoConstants
+    ComparisonOfTwoConstants {
+        priority = DEFAULT
+    }
     ComparisonWithSelf {
         priority = 1
     }
     ConstantAssertExpression {
         priority = 3
     }
-    ConstantIfExpression
-    ConstantTernaryExpression
+    ConstantIfExpression {
+        priority = DEFAULT
+    }
+    ConstantTernaryExpression {
+        priority = DEFAULT
+    }
     DeadCode {
         priority = 1
     }
-    DoubleNegative
-    DuplicateCaseStatement
-    DuplicateMapKey
+    DoubleNegative {
+        priority = DEFAULT
+    }
+    DuplicateCaseStatement {
+        priority = DEFAULT
+    }
+    DuplicateMapKey {
+        priority = DEFAULT
+    }
     DuplicateSetValue {
         priority = 2
     }
     EmptyCatchBlock {
         priority = 2
     }
-    EmptyClass
-    EmptyElseBlock
-    EmptyFinallyBlock
-    EmptyForStatement
+    EmptyClass {
+        priority = DEFAULT
+    }
+    EmptyElseBlock {
+        priority = DEFAULT
+    }
+    EmptyFinallyBlock {
+        priority = DEFAULT
+    }
+    EmptyForStatement {
+        priority = DEFAULT
+    }
     EmptyIfStatement {
         priority = 1
     }
-    EmptyInstanceInitializer
+    EmptyInstanceInitializer {
+        priority = DEFAULT
+    }
     EmptyMethod {
         priority = 2
         doNotApplyToFileNames = CONTROLLER
     }
-    EmptyStaticInitializer
-    EmptySwitchStatement
-    EmptySynchronizedStatement
-    EmptyTryBlock
-    EmptyWhileStatement
-    EqualsAndHashCode
-    EqualsOverloaded
-    ExplicitGarbageCollection
-    ForLoopShouldBeWhileLoop
-    HardCodedWindowsFileSeparator
-    HardCodedWindowsRootDirectory
-    IntegerGetInteger
-    MultipleUnaryOperators
-    RandomDoubleCoercedToZero
-    RemoveAllOnSelf
-    ReturnFromFinallyBlock
-    ThrowExceptionFromFinallyBlock
+    EmptyStaticInitializer {
+        priority = DEFAULT
+    }
+    EmptySwitchStatement {
+        priority = DEFAULT
+    }
+    EmptySynchronizedStatement {
+        priority = DEFAULT
+    }
+    EmptyTryBlock {
+        priority = DEFAULT
+    }
+    EmptyWhileStatement {
+        priority = DEFAULT
+    }
+    EqualsAndHashCode {
+        priority = DEFAULT
+    }
+    EqualsOverloaded {
+        priority = DEFAULT
+    }
+    ExplicitGarbageCollection {
+        priority = DEFAULT
+    }
+    ForLoopShouldBeWhileLoop {
+        priority = DEFAULT
+    }
+    HardCodedWindowsFileSeparator {
+        priority = DEFAULT
+    }
+    HardCodedWindowsRootDirectory {
+        priority = DEFAULT
+    }
+    IntegerGetInteger {
+        priority = DEFAULT
+    }
+    MultipleUnaryOperators {
+        priority = DEFAULT
+    }
+    RandomDoubleCoercedToZero {
+        priority = DEFAULT
+    }
+    RemoveAllOnSelf {
+        priority = DEFAULT
+    }
+    ReturnFromFinallyBlock {
+        priority = DEFAULT
+    }
+    ThrowExceptionFromFinallyBlock {
+        priority = DEFAULT
+    }
 
     // rulesets/braces.xml
     ElseBlockBraces {
@@ -97,38 +166,78 @@ ruleset {
     DoubleCheckedLocking {
         priority = 1
     }
-    InconsistentPropertyLocking
-    InconsistentPropertySynchronization
-    NestedSynchronization
-    StaticCalendarField
-    StaticConnection
-    StaticDateFormatField
-    StaticMatcherField
-    StaticSimpleDateFormatField
+    InconsistentPropertyLocking {
+        priority = DEFAULT
+    }
+    InconsistentPropertySynchronization {
+        priority = DEFAULT
+    }
+    NestedSynchronization {
+        priority = DEFAULT
+    }
+    StaticCalendarField {
+        priority = DEFAULT
+    }
+    StaticConnection {
+        priority = DEFAULT
+    }
+    StaticDateFormatField {
+        priority = DEFAULT
+    }
+    StaticMatcherField {
+        priority = DEFAULT
+    }
+    StaticSimpleDateFormatField {
+        priority = DEFAULT
+    }
     SynchronizedMethod {
         priority = 1
     }
-    SynchronizedOnBoxedPrimitive
-    SynchronizedOnGetClass
-    SynchronizedOnReentrantLock
-    SynchronizedOnString
+    SynchronizedOnBoxedPrimitive {
+        priority = DEFAULT
+    }
+    SynchronizedOnGetClass {
+        priority = DEFAULT
+    }
+    SynchronizedOnReentrantLock {
+        priority = DEFAULT
+    }
+    SynchronizedOnString {
+        priority = DEFAULT
+    }
     SynchronizedOnThis {
         priority = 1
     }
-    SynchronizedReadObjectMethod
-    SystemRunFinalizersOnExit
+    SynchronizedReadObjectMethod {
+        priority = DEFAULT
+    }
+    SystemRunFinalizersOnExit {
+        priority = DEFAULT
+    }
     ThisReferenceEscapesConstructor {
         priority = 2
     }
-    ThreadGroup
+    ThreadGroup {
+        priority = DEFAULT
+    }
     ThreadLocalNotStaticFinal {
         priority = 1
     }
-    ThreadYield
-    UseOfNotifyMethod
-    VolatileArrayField
-    VolatileLongOrDoubleField
-    WaitOutsideOfWhileLoop
+    ThreadYield {
+        priority = DEFAULT
+    }
+    UseOfNotifyMethod {
+        priority = DEFAULT
+    }
+    VolatileArrayField {
+        priority = DEFAULT
+    }
+    VolatileLongOrDoubleField {
+        priority = DEFAULT
+    }
+    WaitOutsideOfWhileLoop {
+        priority = DEFAULT
+    }
 
     // rulesets/convention.xml
     ConfusingTernary {
@@ -193,7 +302,9 @@ ruleset {
     }
 
     // rulesets/design.xml
-    AbstractClassWithPublicConstructor
+    AbstractClassWithPublicConstructor {
+        priority = DEFAULT
+    }
     AbstractClassWithoutAbstractMethod {
         applyToFileNames = SERVICE
         priority = 2
@@ -207,25 +318,33 @@ ruleset {
     BuilderMethodWithSideEffects {
         priority = 2
     }
-    CloneableWithoutClone
+    CloneableWithoutClone {
+        priority = DEFAULT
+    }
     CloseWithoutCloseable {
         priority = 2
     }
-    CompareToWithoutComparable
+    CompareToWithoutComparable {
+        priority = DEFAULT
+    }
     ConstantsOnlyInterface {
         priority = 2
     }
     EmptyMethodInAbstractClass {
         priority = 3
     }
-    FinalClassWithProtectedMember
+    FinalClassWithProtectedMember {
+        priority = DEFAULT
+    }
     ImplementationAsType {
         priority = 1
     }
     Instanceof {
         priority = 2
     }
-    LocaleSetDefault
+    LocaleSetDefault {
+        priority = DEFAULT
+    }
     NestedForLoop {
         priority = 1
     }
@@ -244,8 +363,12 @@ ruleset {
     SimpleDateFormatMissingLocale {
         priority = 1
     }
-    StatelessSingleton
-    ToStringReturnsNull
+    StatelessSingleton {
+        priority = DEFAULT
+    }
+    ToStringReturnsNull {
+        priority = DEFAULT
+    }
 
     // rulesets/dry.xml
     DuplicateListLiteral {
@@ -258,13 +381,19 @@ ruleset {
     //DuplicateStringLiteral //has problems with stuff like .split(",")
 
     // rulesets/enhanced.xml
-    CloneWithoutCloneable
-    JUnitAssertEqualsConstantActualValue
+    CloneWithoutCloneable {
+        priority = DEFAULT
+    }
+    JUnitAssertEqualsConstantActualValue {
+        priority = DEFAULT
+    }
     MissingOverrideAnnotation {
         priority = 1
         doNotApplyToFileNames = INTEGRATION_SPEC
     }
-    UnsafeImplementationAsMap
+    UnsafeImplementationAsMap {
+        priority = DEFAULT
+    }
 
     // rulesets/exceptions.xml
     CatchArrayIndexOutOfBoundsException {
@@ -291,17 +420,27 @@ ruleset {
     CatchThrowable {
         priority = 1
     }
-    ConfusingClassNamedException
-    ExceptionExtendsError
-    ExceptionExtendsThrowable
-    ExceptionNotThrown
+    ConfusingClassNamedException {
+        priority = DEFAULT
+    }
+    ExceptionExtendsError {
+        priority = DEFAULT
+    }
+    ExceptionExtendsThrowable {
+        priority = DEFAULT
+    }
+    ExceptionNotThrown {
+        priority = DEFAULT
+    }
     MissingNewInThrowStatement {
         priority = 1
     }
     ReturnNullFromCatchBlock {
         priority = 1
     }
-    SwallowThreadDeath
+    SwallowThreadDeath {
+        priority = DEFAULT
+    }
     ThrowError {
         priority = 1
     }
@@ -325,17 +464,31 @@ ruleset {
     BlockEndsWithBlankLine {
         priority = 3
     }
-    BlockStartsWithBlankLine
-    BracesForClass
-    BracesForForLoop
-    BracesForIfElse
-    BracesForMethod
-    BracesForTryCatchFinally
+    BlockStartsWithBlankLine {
+        priority = 2
+    }
+    BracesForClass {
+        priority = DEFAULT
+    }
+    BracesForForLoop {
+        priority = DEFAULT
+    }
+    BracesForIfElse {
+        priority = DEFAULT
+    }
+    BracesForMethod {
+        priority = DEFAULT
+    }
+    BracesForTryCatchFinally {
+        priority = DEFAULT
+    }
     //ClassJavadoc
     ClosureStatementOnOpeningLineOfMultipleLineClosure {
         priority = 1
     }
-    ConsecutiveBlankLines
+    ConsecutiveBlankLines {
+        priority = 3
+    }
     FileEndsWithoutNewline {
         priority = 2
     }
@@ -400,15 +553,33 @@ ruleset {
     }
 
     // rulesets/generic.xml
-    IllegalClassMember
-    IllegalClassReference
-    IllegalPackageReference
-    IllegalRegex
-    IllegalString
-    IllegalSubclass
-    RequiredRegex
-    RequiredString
-    StatelessClass
+    IllegalClassMember {
+        priority = DEFAULT
+    }
+    IllegalClassReference {
+        priority = DEFAULT
+    }
+    IllegalPackageReference {
+        priority = DEFAULT
+    }
+    IllegalRegex {
+        priority = DEFAULT
+    }
+    IllegalString {
+        priority = DEFAULT
+    }
+    IllegalSubclass {
+        priority = DEFAULT
+    }
+    RequiredRegex {
+        priority = DEFAULT
+    }
+    RequiredString {
+        priority = DEFAULT
+    }
+    StatelessClass {
+        priority = DEFAULT
+    }
 
     // rulesets/grails.xml
     //GrailsDomainHasEquals //Entity provides equals()
@@ -417,16 +588,24 @@ ruleset {
         priority = 1
     }
     //GrailsDomainStringPropertyMaxSize //done by hibernate
-    GrailsDomainWithServiceReference
+    GrailsDomainWithServiceReference {
+        priority = DEFAULT
+    }
     GrailsDuplicateConstraint {
         priority = 1
     }
     GrailsDuplicateMapping {
         priority = 1
     }
-    GrailsMassAssignment
-    GrailsPublicControllerMethod
-    GrailsServletContextReference
+    GrailsMassAssignment {
+        priority = DEFAULT
+    }
+    GrailsPublicControllerMethod {
+        priority = DEFAULT
+    }
+    GrailsServletContextReference {
+        priority = DEFAULT
+    }
     //GrailsStatelessService //seems to have problems with Spring
 
     // rulesets/groovyism.xml
@@ -439,8 +618,12 @@ ruleset {
     ClosureAsLastMethodParameter {
         priority = 2
     }
-    CollectAllIsDeprecated
-    ConfusingMultipleReturns
+    CollectAllIsDeprecated {
+        priority = DEFAULT
+    }
+    ConfusingMultipleReturns {
+        priority = DEFAULT
+    }
     ExplicitArrayListInstantiation {
         priority = 1
     }
@@ -510,12 +693,18 @@ ruleset {
     GStringExpressionWithinString {
         priority = 1
     }
-    GetterMethodCouldBeProperty
+    GetterMethodCouldBeProperty {
+        priority = 3
+    }
     GroovyLangImmutable {
         priority = 1
     }
-    UseCollectMany
-    UseCollectNested
+    UseCollectMany {
+        priority = 2
+    }
+    UseCollectNested {
+        priority = DEFAULT
+    }
 
     // rulesets/imports.xml
     DuplicateImport {
@@ -537,19 +726,35 @@ ruleset {
     }
 
     // rulesets/jdbc.xml
-    DirectConnectionManagement
-    JdbcConnectionReference
-    JdbcResultSetReference
-    JdbcStatementReference
+    DirectConnectionManagement {
+        priority = DEFAULT
+    }
+    JdbcConnectionReference {
+        priority = DEFAULT
+    }
+    JdbcResultSetReference {
+        priority = DEFAULT
+    }
+    JdbcStatementReference {
+        priority = DEFAULT
+    }
 
     // rulesets/junit.xml
     ChainedTest {
         priority = 2
     }
-    CoupledTestCase
-    JUnitAssertAlwaysFails
-    JUnitAssertAlwaysSucceeds
-    JUnitFailWithoutMessage
+    CoupledTestCase {
+        priority = DEFAULT
+    }
+    JUnitAssertAlwaysFails {
+        priority = DEFAULT
+    }
+    JUnitAssertAlwaysSucceeds {
+        priority = DEFAULT
+    }
+    JUnitFailWithoutMessage {
+        priority = DEFAULT
+    }
     JUnitLostTest {
         doNotApplyToFileNames = SPEC
     }
@@ -562,15 +767,25 @@ ruleset {
         priority = 1
     }
     //JUnitStyleAssertions //will be fixed by converting to spock
-    JUnitTearDownCallsSuper
+    JUnitTearDownCallsSuper {
+        priority = DEFAULT
+    }
     JUnitTestMethodWithoutAssert {
         doNotApplyToFileNames = SPEC
     }
-    JUnitUnnecessarySetUp
-    JUnitUnnecessaryTearDown
-    JUnitUnnecessaryThrowsException
-    SpockIgnoreRestUsed
-    UnnecessaryFail
+    JUnitUnnecessarySetUp {
+        priority = DEFAULT
+    }
+    JUnitUnnecessaryTearDown {
+        priority = DEFAULT
+    }
+    //JUnitUnnecessaryThrowsException
+    SpockIgnoreRestUsed {
+        priority = DEFAULT
+    }
+    UnnecessaryFail {
+        priority = DEFAULT
+    }
     //UseAssertEqualsInsteadOfAssertTrue
     //UseAssertFalseInsteadOfNegation
     //UseAssertNullInsteadOfAssertEquals
@@ -579,42 +794,68 @@ ruleset {
     //UseAssertTrueInsteadOfNegation
 
     // rulesets/logging.xml
-    LoggerForDifferentClass
-    LoggerWithWrongModifiers
+    LoggerForDifferentClass {
+        priority = DEFAULT
+    }
+    LoggerWithWrongModifiers {
+        priority = DEFAULT
+    }
     LoggingSwallowsStacktrace {
         priority = 1
     }
-    MultipleLoggers
+    MultipleLoggers {
+        priority = DEFAULT
+    }
     PrintStackTrace {
         priority = 1
     }
     Println {
         priority = 1
     }
-    SystemErrPrint
+    SystemErrPrint {
+        priority = DEFAULT
+    }
     SystemOutPrint {
         priority = 1
     }
 
     // rulesets/naming.xml
-    AbstractClassName
-    ClassName
-    ClassNameSameAsFilename
+    AbstractClassName {
+        priority = DEFAULT
+    }
+    ClassName {
+        priority = DEFAULT
+    }
+    ClassNameSameAsFilename {
+        priority = DEFAULT
+    }
     ClassNameSameAsSuperclass {
         priority = 2
     }
-    ConfusingMethodName
+    ConfusingMethodName {
+        priority = DEFAULT
+    }
     //FactoryMethodName //we don't do this
-    FieldName
-    InterfaceName
-    InterfaceNameSameAsSuperInterface
+    FieldName {
+        priority = DEFAULT
+    }
+    InterfaceName {
+        priority = DEFAULT
+    }
+    InterfaceNameSameAsSuperInterface {
+        priority = DEFAULT
+    }
     MethodName {
         priority = 2
         doNotApplyToFileNames = TEST
     }
-    ObjectOverrideMisspelledMethodName
+    ObjectOverrideMisspelledMethodName {
+        priority = DEFAULT
+    }
     //PackageName //we use camelCase
-    PackageNameMatchesFilePath
+    PackageNameMatchesFilePath {
+        priority = DEFAULT
+    }
     ParameterName {
         priority = 2
     }
@@ -628,25 +869,45 @@ ruleset {
     }
 
     // rulesets/security.xml
-    FileCreateTempFile
+    FileCreateTempFile {
+        priority = DEFAULT
+    }
     InsecureRandom {
         priority = 1
     }
-    JavaIoPackageAccess
+    JavaIoPackageAccess {
+        priority = 2
+    }
     NonFinalPublicField {
         priority = 2
         doNotApplyToFileNames = TEST
     }
-    NonFinalSubclassOfSensitiveInterface
-    ObjectFinalize
-    PublicFinalizeMethod
-    SystemExit
-    UnsafeArrayDeclaration
+    NonFinalSubclassOfSensitiveInterface {
+        priority = DEFAULT
+    }
+    ObjectFinalize {
+        priority = DEFAULT
+    }
+    PublicFinalizeMethod {
+        priority = DEFAULT
+    }
+    SystemExit {
+        priority = DEFAULT
+    }
+    UnsafeArrayDeclaration {
+        priority = DEFAULT
+    }
 
     // rulesets/serialization.xml
-    EnumCustomSerializationIgnored
-    SerialPersistentFields
-    SerialVersionUID
+    EnumCustomSerializationIgnored {
+        priority = DEFAULT
+    }
+    SerialPersistentFields {
+        priority = DEFAULT
+    }
+    SerialVersionUID {
+        priority = DEFAULT
+    }
     SerializableClassMustDefineSerialVersionUID {
         priority = 3
     }
@@ -678,36 +939,66 @@ ruleset {
     }
 
     // rulesets/unnecessary.xml
-    AddEmptyString
-    ConsecutiveLiteralAppends
-    ConsecutiveStringConcatenation
-    UnnecessaryBigDecimalInstantiation
-    UnnecessaryBigIntegerInstantiation
+    AddEmptyString {
+        priority = DEFAULT
+    }
+    ConsecutiveLiteralAppends {
+        priority = DEFAULT
+    }
+    ConsecutiveStringConcatenation {
+        priority = DEFAULT
+    }
+    UnnecessaryBigDecimalInstantiation {
+        priority = DEFAULT
+    }
+    UnnecessaryBigIntegerInstantiation {
+        priority = DEFAULT
+    }
     UnnecessaryBooleanExpression {
         doNotApplyToFileNames = TEST
     }
-    UnnecessaryBooleanInstantiation
-    UnnecessaryCallForLastElement
-    UnnecessaryCallToSubstring
-    UnnecessaryCast
-    UnnecessaryCatchBlock
+    UnnecessaryBooleanInstantiation {
+        priority = DEFAULT
+    }
+    UnnecessaryCallForLastElement {
+        priority = DEFAULT
+    }
+    UnnecessaryCallToSubstring {
+        priority = DEFAULT
+    }
+    UnnecessaryCast {
+        priority = DEFAULT
+    }
+    UnnecessaryCatchBlock {
+        priority = DEFAULT
+    }
     UnnecessaryCollectCall {
         priority = 3
     }
     UnnecessaryCollectionCall {
         priority = 1
     }
-    UnnecessaryConstructor
+    UnnecessaryConstructor {
+        priority = DEFAULT
+    }
     //UnnecessaryDefInFieldDeclaration
     //UnnecessaryDefInMethodDeclaration
     //UnnecessaryDefInVariableDeclaration
-    UnnecessaryDotClass
-    UnnecessaryDoubleInstantiation
+    UnnecessaryDotClass {
+        priority = DEFAULT
+    }
+    UnnecessaryDoubleInstantiation {
+        priority = DEFAULT
+    }
     UnnecessaryElseStatement {
         priority = 3
     }
-    UnnecessaryFinalOnPrivateMethod
-    UnnecessaryFloatInstantiation
+    UnnecessaryFinalOnPrivateMethod {
+        priority = DEFAULT
+    }
+    UnnecessaryFloatInstantiation {
+        priority = DEFAULT
+    }
     //UnnecessaryGString //We would prefer a rule to only use GStrings
     UnnecessaryGetter {
         priority = 3
@@ -718,18 +1009,30 @@ ruleset {
     UnnecessaryInstanceOfCheck {
         priority = 1
     }
-    UnnecessaryInstantiationToGetClass
-    UnnecessaryIntegerInstantiation
-    UnnecessaryLongInstantiation
-    UnnecessaryModOne
-    UnnecessaryNullCheck
+    UnnecessaryInstantiationToGetClass {
+        priority = DEFAULT
+    }
+    UnnecessaryIntegerInstantiation {
+        priority = DEFAULT
+    }
+    UnnecessaryLongInstantiation {
+        priority = DEFAULT
+    }
+    UnnecessaryModOne {
+        priority = DEFAULT
+    }
+    UnnecessaryNullCheck {
+        priority = DEFAULT
+    }
     UnnecessaryNullCheckBeforeInstanceOf {
         priority = 1
     }
     UnnecessaryObjectReferences {
         priority = 3
     }
-    UnnecessaryOverridingMethod
+    UnnecessaryOverridingMethod {
+        priority = DEFAULT
+    }
     UnnecessaryPackageReference {
         priority = 2
     }
@@ -740,7 +1043,9 @@ ruleset {
         priority = 1
     }
     //UnnecessaryReturnKeyword //no
-    UnnecessarySafeNavigationOperator
+    UnnecessarySafeNavigationOperator {
+        priority = DEFAULT
+    }
     UnnecessarySelfAssignment {
         priority = 1
     }
@@ -750,13 +1055,19 @@ ruleset {
     UnnecessarySetter {
         priority = 3
     }
-    UnnecessaryStringInstantiation
+    UnnecessaryStringInstantiation {
+        priority = DEFAULT
+    }
     //UnnecessarySubstring
-    UnnecessaryTernaryExpression
+    UnnecessaryTernaryExpression {
+        priority = DEFAULT
+    }
     UnnecessaryToString {
         priority = 1
     }
-    UnnecessaryTransientModifier
+    UnnecessaryTransientModifier {
+        priority = DEFAULT
+    }
 
     // rulesets/unused.xml
     UnusedArray {
