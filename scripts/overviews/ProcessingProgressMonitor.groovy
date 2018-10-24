@@ -594,7 +594,7 @@ if (allProcessed) {
         where
             mergingWorkPackage.needsProcessing = true
     """).each {
-        List<SeqTrack> mergeableSeqTracks = it.seqTracks
+        Collection<SeqTrack> mergeableSeqTracks = it.seqTracks
         if(mergeableSeqTracks) {
             seqTracks += mergeableSeqTracks - (it.seqType.isWgbs() ? ctx.WgbsAlignmentStartJob : ctx.PanCanStartJob).findUsableBaseBamFile(it)?.containedSeqTracks
         }
