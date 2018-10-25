@@ -40,11 +40,11 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2018/OTP-2966.sql')
     }
 
-    changeSet(author: "kosnac", id:"OTP-2941-SQL") {
+    changeSet(author: "kosnac", id: "OTP-2941-SQL") {
         sqlFile(path: 'changelogs/2018/OTP-2941.sql')
     }
 
-    changeSet(author: "kosnac", id:"OTP-2991-SQL") {
+    changeSet(author: "kosnac", id: "OTP-2991-SQL") {
         sqlFile(path: 'changelogs/2018/OTP-2991.sql')
     }
 
@@ -55,4 +55,9 @@ databaseChangeLog = {
     changeSet(author: "strubelp", id: "OTP-2890-SQL") {
         sqlFile(path: 'changelogs/2018/OTP-2890.sql')
     }
+
+    changeSet(author: "gruenj", id: "OTP-2878-SQL") {
+        sqlFile(path: 'changelogs/2018/OTP-2878.sql')
+    }
+
 }

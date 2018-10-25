@@ -9,29 +9,12 @@
 <h2><g:message code="info.templates.link" /></h2>
 
 <ul>
-    <g:if test="${Document.Name.PROJECT_FORM in availableTemplates}">
+    <g:each in="${availableTemplates}" var="template">
         <li>
-            ${g.message(code: "info.template.projectForm.info")}<br>
-            <g:link controller="document" action="download" params="[file: Document.Name.PROJECT_FORM, to: DocumentController.Action.DOWNLOAD]">${g.message(code: "info.template.projectForm.link")}</g:link>
+            ${template.documentType.description}<br>
+            <g:link controller="document" action="download" params="['document.id': template.id, to: DocumentController.Action.DOWNLOAD]"><g:message code="info.template.download" args="[template.getFileNameWithExtension()]"/></g:link>
         </li>
-    </g:if>
-    <g:if test="${Document.Name.METADATA_TEMPLATE in availableTemplates}">
-        <li>
-            ${g.message(code: "info.template.metadataTemplate.info")}<br>
-            <g:link controller="document" action="download" params="[file: Document.Name.METADATA_TEMPLATE, to: DocumentController.Action.DOWNLOAD]">${g.message(code: "info.template.metadataTemplate.link")}</g:link>
-        </li>
-    </g:if>
-    <g:if test="${Document.Name.PROCESSING_INFORMATION in availableTemplates}">
-        <li>
-            ${g.message(code: "info.template.processingInformation.info")}<br>
-            <g:link controller="document" action="download" params="[file: Document.Name.PROCESSING_INFORMATION, to: DocumentController.Action.DOWNLOAD]">${g.message(code: "info.template.processingInformation.link")}</g:link>
-        </li>
-    </g:if>
-    <g:if test="${availableTemplates.empty}">
-        <li>
-            ${g.message(code: "info.template.none")}
-        </li>
-    </g:if>
+    </g:each>
 </ul>
 ${g.message(code: "info.template.request")} <a href="mailto:${contactDataSupportEmail}">${contactDataSupportEmail}</a>
 </body>

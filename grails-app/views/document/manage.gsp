@@ -18,15 +18,17 @@
                 <th>${g.message(code: "document.type")}</th>
                 <th>${g.message(code: "document.document")}</th>
                 <th>${g.message(code: "document.update")}</th>
+                <th>${g.message(code: "document.delete")}</th>
+
             </tr>
             <g:each in="${documents}" var="document">
                 <tr>
-                    <td>${document.key}</td>
+                    <td title="${document.key.description}">${document.key.title}</td>
                     <g:if test="${document.value}">
-                        <td>${document.value.type}</td>
+                        <td>${document.value.formatType}</td>
                         <td>
-                            <g:link action="download" params="[file: document.key, to: DocumentController.Action.VIEW]">${g.message(code: "document.view")}</g:link> |
-                            <g:link action="download" params="[file: document.key, to: DocumentController.Action.DOWNLOAD]">${g.message(code: "document.download")}</g:link>
+                            <g:link action="download" params="['document.id': document.value.id, to: DocumentController.Action.VIEW]">${g.message(code: "document.view")}</g:link> |
+                            <g:link action="download" params="['document.id': document.value.id, to: DocumentController.Action.DOWNLOAD]">${g.message(code: "document.download")}</g:link>
                         </td>
                     </g:if>
                     <g:else>
@@ -35,15 +37,29 @@
                     </g:else>
                     <td>
                         <g:uploadForm action="upload" useToken="true">
-                            <input type="hidden" name="name" value="${document.key}"/>
+                            <input type="hidden" name="documentType.id" value="${document.key.id}"/>
                             <input type="file" name="content" />
-                            <g:select name="type" from="${Document.Type}" optionValue="displayName" noSelection="${[(""): "Select type"]}" />
+                            <g:select name="formatType" from="${Document.FormatType}" optionValue="displayName" noSelection="${[(""): "Select format type"]}" />
                             <g:submitButton name="${g.message(code: "document.update")}"/>
+                        </g:uploadForm>
+                    </td>
+                    <td>
+                        <g:uploadForm action="delete" useToken="true">
+                            <input type="hidden" name="documentType.id" value="${document.key.id}"/>
+                            <g:submitButton name="${g.message(code: "document.delete")}"/>
                         </g:uploadForm>
                     </td>
                 </tr>
             </g:each>
         </table>
+        <h2>${g.message(code: "document.documentType")}</h2>
+        <g:form action="createDocumentType" useToken="true">
+            <label for="title_input"><g:message code="document.title"/></label>
+            <input type="text" name="title_input" size="20">
+            <label for="text_input"><g:message code="document.description"/></label>
+            <input type="text_input" name="description" size="100">
+            <g:submitButton name="${g.message(code: "document.createType")}"/>
+        </g:form>
     </div>
 </div>
 </body>

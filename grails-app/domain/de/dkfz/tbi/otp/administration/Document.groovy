@@ -3,16 +3,10 @@ package de.dkfz.tbi.otp.administration
 import de.dkfz.tbi.otp.utils.*
 import groovy.transform.*
 
-
 class Document implements Entity {
-    enum Name {
-        PROJECT_FORM,
-        METADATA_TEMPLATE,
-        PROCESSING_INFORMATION,
-    }
 
     @TupleConstructor
-    enum Type {
+    enum FormatType {
         PDF("application/pdf", "pdf"),
         WORD("application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx"),
         WORD_97("application/msword", "doc"),
@@ -20,6 +14,7 @@ class Document implements Entity {
         EXCEL_97("application/vnd.ms-excel", "xls"),
         CSV("text/csv", "csv"),
         TSV("text/tab-separated-values", "tsv"),
+        TXT("text/plain", "txt"),
 
         final String mimeType
         final String extension
@@ -29,10 +24,11 @@ class Document implements Entity {
         }
     }
 
-    Type type
-    Name name
+    FormatType formatType
+    DocumentType documentType
     byte[] content
 
+    @SuppressWarnings('DuplicateNumberLiteral')
     static constraints = {
         // limit file size to 1MB
         content maxSize: 1024 * 1024, blank: false, validator: {
@@ -43,6 +39,14 @@ class Document implements Entity {
     }
 
     static mapping = {
-        name index: "document__name_idx"
+        documentType index: "document__document_type_idx"
+    }
+
+    static belongsTo = [
+            documentType: DocumentType,
+    ]
+
+    String getFileNameWithExtension() {
+        return "${documentType.title}.${formatType.extension}".toLowerCase()
     }
 }

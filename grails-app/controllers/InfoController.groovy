@@ -5,8 +5,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import grails.compiler.*
 import grails.converters.*
 
-import static de.dkfz.tbi.otp.administration.Document.Name.*
-
 /*
  * show information about OTP
  */
@@ -20,34 +18,33 @@ class InfoController {
 
     def about() {
         String aboutOtp = processingOptionService.findOptionAsString(OptionName.GUI_ABOUT_OTP)
-        [aboutOtp: aboutOtp,]
+        return [
+                aboutOtp: aboutOtp,
+        ]
     }
 
     def imprint() {
         String imprint = processingOptionService.findOptionAsString(OptionName.GUI_IMPRINT)
-        [imprint: imprint]
+        return [
+                imprint: imprint,
+        ]
     }
 
     def numbers() {
-        return [projects: projectService.getProjectCount()]
+        return [
+                projects: projectService.getProjectCount()
+        ]
     }
 
-    def faq() {}
+    def faq() { }
 
-    def contact() {}
+    def contact() { }
 
-    def partners() {}
+    def partners() { }
 
     def templates() {
-        List<Document.Name> availableTemplates = [
-                PROJECT_FORM,
-                METADATA_TEMPLATE,
-                PROCESSING_INFORMATION,
-        ].findAll {
-            documentService.getDocument(it)
-        }
         return [
-                availableTemplates: availableTemplates,
+                availableTemplates: documentService.listDocuments(),
         ]
     }
 

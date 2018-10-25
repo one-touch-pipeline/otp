@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.administration
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.testing.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.plugin.springsecurity.*
 import org.codehaus.groovy.grails.web.servlet.mvc.*
 import org.springframework.security.access.*
@@ -21,14 +22,14 @@ class DocumentControllerIntegrationSpec extends Specification implements UserAnd
 
     void "test upload, successful"() {
         given:
-        Document.Name name = Document.Name.PROJECT_FORM
-        Document.Type type = Document.Type.CSV
+        DocumentType documentType = DomainFactory.createDocumentType()
+        Document.FormatType formatType = Document.FormatType.CSV
         String content = "ABC"
 
         when:
         controller.request.method = 'POST'
-        controller.params.name = name
-        controller.params.type = type
+        controller.params.documentType = documentType
+        controller.params.formatType = formatType
         controller.params.content = content.bytes
 
         SynchronizerTokensHolder tokenHolder = SynchronizerTokensHolder.store(controller.session)
@@ -44,22 +45,22 @@ class DocumentControllerIntegrationSpec extends Specification implements UserAnd
         controller.response.redirectedUrl == "/document/manage"
         controller.flash.message == "The document was stored successfully"
         Document d = exactlyOneElement(Document.all)
-        d.name == name
-        d.type == type
+        d.documentType == documentType
+        d.formatType == formatType
         d.content == content.bytes
     }
 
     @Unroll
     void "test upload, fails because of missing #problem"() {
         given:
-        Document.Name name = Document.Name.PROJECT_FORM
-        Document.Type type = Document.Type.CSV
+        DocumentType documentType = DomainFactory.createDocumentType()
+        Document.FormatType formatType = Document.FormatType.CSV
         String content = "ABC"
 
         when:
         controller.request.method = 'POST'
-        controller.params.name = name
-        controller.params.type = type
+        controller.params.documentType = documentType
+        controller.params.formatType = formatType
         if (problem != "file") {
             controller.params.content = content.bytes
         }
@@ -128,18 +129,18 @@ class DocumentControllerIntegrationSpec extends Specification implements UserAnd
 
     void "test download"() {
         given:
-        Document.Name name = Document.Name.PROJECT_FORM
-        Document.Type type = Document.Type.CSV
+        DocumentType documentType = DomainFactory.createDocumentType()
+        Document.FormatType formatType = Document.FormatType.CSV
         String content = "ABC"
 
-        DomainFactory.createDocument(
-                name: name,
+         Document document = DomainFactory.createDocument(
+                documentType: documentType,
                 content: content,
-                type: type,
+                formatType: formatType,
         )
 
         when:
-        controller.params.file = name
+        controller.params.document = document
         controller.params.to = to
 
         doWithAnonymousAuth {
@@ -148,9 +149,9 @@ class DocumentControllerIntegrationSpec extends Specification implements UserAnd
 
         then:
         controller.response.status == SC_OK
-        controller.response.contentType.startsWith(Document.Type.CSV.mimeType)
+        controller.response.contentType.startsWith(Document.FormatType.CSV.mimeType)
         controller.response.header("Content-Disposition") == ((to == DocumentController.Action.DOWNLOAD) ?
-                "attachment;filename=${name.toString().toLowerCase()}.${type.extension}" :
+                "attachment;filename=${documentType.title.toLowerCase()}.${formatType.extension}" :
                 null)
         controller.response.contentAsByteArray == content.bytes
 
@@ -162,10 +163,10 @@ class DocumentControllerIntegrationSpec extends Specification implements UserAnd
 
     void "test manage"() {
         given:
-        Document.Name name = Document.Name.PROJECT_FORM
+        DocumentType documentType = DomainFactory.createDocumentType()
 
         Document document = DomainFactory.createDocument(
-                name: name,
+                documentType: documentType,
         )
 
         when:
@@ -176,7 +177,7 @@ class DocumentControllerIntegrationSpec extends Specification implements UserAnd
         then:
         controller.response.status == SC_OK
         model.documents instanceof Map
-        model.documents.get(name) == document
-        model.documents.keySet() == Document.Name.values() as Set
+        model.documents.get(documentType) == document
+        exactlyOneElement(model.documents.keySet()) ==  documentType
     }
 }

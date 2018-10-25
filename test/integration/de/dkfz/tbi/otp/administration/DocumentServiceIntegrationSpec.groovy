@@ -7,37 +7,118 @@ import grails.plugin.springsecurity.*
 import grails.test.spock.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.security.access.*
+import org.springframework.validation.Errors
 
 class DocumentServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
+
+    private static final String TITLE = "title"
+    private static final String DESCRIPTION = "description"
+
+    void setup() {
+        createUserAndRoles()
+    }
 
     @Autowired
     DocumentService service
 
-
-    void "test getDocument, available document"() {
+    void "test createDocumentType, valid input succeeds"() {
         given:
-        Document.Name name = Document.Name.PROJECT_FORM
-        Document document = DomainFactory.createDocument(
-                name: name,
-        )
+        Errors errors
 
-        expect:
-        document == service.getDocument(name)
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            errors = service.createDocumentType(TITLE, DESCRIPTION)
+        }
+
+        then:
+        DocumentType.findAllByTitleAndDescription(TITLE, DESCRIPTION)
+        !errors
     }
 
-    void "test getDocument, document not available"() {
-        expect:
-        null == service.getDocument(Document.Name.PROJECT_FORM)
+    void "test createDocumentType, invalid input fails"() {
+        given:
+        Errors errors
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            errors = service.createDocumentType(title, description)
+        }
+
+        then:
+        errors
+
+        where:
+        title | description
+        null  | null
+        null  | DESCRIPTION
+        TITLE | null
+        ""    | ""
+        ""    | DESCRIPTION
+        TITLE | ""
     }
 
+    void "test createDocumentType, twice with same titles fails"() {
+        given:
+        Errors errors
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            errors = service.createDocumentType(TITLE, DESCRIPTION)
+            errors = service.createDocumentType(TITLE, DESCRIPTION)
+        }
+
+        then:
+        errors
+    }
+
+    void "test deleteDocument, no document for documentType succeeds"() {
+        given:
+        Errors errors
+        DocumentType documentType = DomainFactory.createDocumentType()
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            errors = service.deleteDocumentType(documentType)
+        }
+
+        then:
+        !errors
+        !DocumentType.all
+    }
+
+    void "test deleteDocument, one document for documentType succeeds"() {
+        given:
+        Errors errors
+        Document document = DomainFactory.createDocument()
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            errors = service.deleteDocumentType(document.documentType)
+        }
+
+        then:
+        !errors
+        !Document.all
+        !DocumentType.all
+    }
+
+    void "test deleteDocument, no documentType fails"() {
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            service.deleteDocumentType(null)
+        }
+
+        then:
+        thrown(AssertionError)
+    }
 
     void "test updateDocument, not authenticated"() {
         given:
-        createUserAndRoles()
+        DocumentType documentType = DomainFactory.createDocumentType()
 
         when:
         SpringSecurityUtils.doWithAuth(USER) {
-            service.updateDocument(Document.Name.PROJECT_FORM, "adf".getBytes(), Document.Type.PDF)
+            service.updateDocument(documentType, HelperUtils.getUniqueString().bytes, Document.FormatType.PDF)
         }
 
         then:
@@ -46,79 +127,70 @@ class DocumentServiceIntegrationSpec extends IntegrationSpec implements UserAndR
 
     void "test updateDocument, create new document"() {
         given:
-        createUserAndRoles()
-        Document.Name name = Document.Name.PROJECT_FORM
-        byte[] content = "asdf".getBytes()
-        Document.Type type = Document.Type.PDF
+        DocumentType documentType = DomainFactory.createDocumentType()
+        byte[] content = HelperUtils.getUniqueString().bytes
+        Document.FormatType type = Document.FormatType.PDF
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            service.updateDocument(name, content, type)
+            service.updateDocument(documentType, content, type)
         }
 
         then:
         Document d = CollectionUtils.exactlyOneElement(Document.all)
-        d.name == name
+        d.documentType == documentType
         d.content == content
-        d.type == type
+        d.formatType == type
     }
 
     void "test updateDocument, update existing document"() {
         given:
-        createUserAndRoles()
-        Document.Name name = Document.Name.PROJECT_FORM
-        DomainFactory.createDocument(
-                name: name,
-        )
-        byte[] content = "qwertz".getBytes()
-        Document.Type type = Document.Type.PDF
+        DocumentType documentType = DomainFactory.createDocumentType()
+        DomainFactory.createDocument([
+                documentType: documentType,
+        ])
+        byte[] content = HelperUtils.getUniqueString().bytes
+        Document.FormatType type = Document.FormatType.CSV
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            service.updateDocument(name, content, type)
+            service.updateDocument(documentType, content, type)
         }
 
         then:
         Document d = CollectionUtils.exactlyOneElement(Document.all)
-        d.name == name
+        d.documentType == documentType
         d.content == content
-        d.type == type
+        d.formatType == type
     }
 
-
-    void "test listDocuments, not authenticated"() {
-        given:
-        createUserAndRoles()
-
+    void "test listDocumentTypes, not authenticated"() {
         when:
         SpringSecurityUtils.doWithAuth(USER) {
-            service.listDocuments()
+            service.listDocumentTypes()
         }
 
         then:
         thrown(AccessDeniedException)
     }
 
-    void "test listDocuments, none found"() {
-        given:
-        createUserAndRoles()
-
+    void "test listDocumentTypes and listDocuments, none found"() {
         expect:
         [] == SpringSecurityUtils.doWithAuth(ADMIN) {
-            service.listDocuments()
+            service.listDocumentTypes()
         }
+        [] == service.listDocuments()
     }
 
-    void "test listDocuments, documents found"() {
+    void "test listDocumentTypes and listDocuments, documentTypes and documents found"() {
         given:
-        createUserAndRoles()
-        Document document = DomainFactory.createDocument(
-                name: Document.Name.PROJECT_FORM,
-        )
+        Document document = DomainFactory.createDocument()
 
         expect:
-        [document] == SpringSecurityUtils.doWithAuth(ADMIN) {
-            service.listDocuments()
+        [document] == service.listDocuments()
+
+        [document.documentType] == SpringSecurityUtils.doWithAuth(ADMIN) {
+            service.listDocumentTypes()
         }
     }
 }

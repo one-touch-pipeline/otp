@@ -2634,7 +2634,15 @@ class DomainFactory {
     static Document createDocument(Map properties = [:]) {
         return createDomainObject(Document, [
                 content: HelperUtils.getUniqueString().bytes,
-                type   : Document.Type.PDF,
+                formatType   : Document.FormatType.PDF,
+                documentType: { createDocumentType() },
+        ], properties)
+    }
+
+    static DocumentType createDocumentType(Map properties = [:]) {
+        return createDomainObject(DocumentType, [
+                title: "title${counter++}",
+                description: 'description',
         ], properties)
     }
 
