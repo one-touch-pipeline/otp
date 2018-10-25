@@ -11,8 +11,6 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
 
     ProjectService projectService
 
-    private static final SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat('yyyy-MM-dd HH:mm')
-
     List getCallingInstancesForProject(String projectName) {
         Project proj = projectService.getProjectByName(projectName)
         if (!proj) {
@@ -71,6 +69,7 @@ abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
                 property('dateCreated', "dateCreated")
             }
         }
+        SimpleDateFormat DATE_FORMATTER = new SimpleDateFormat('yyyy-MM-dd HH:mm')
 
         return results.collect { Map properties ->
             T instance = instanceClass.get(properties.instanceId)

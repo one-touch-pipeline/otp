@@ -4,6 +4,11 @@ final String INTEGRATION_SPEC = "*IntegrationSpec.groovy"
 final String CONTROLLER = "*Controller.groovy"
 final String SERVICE = "*Service.groovy"
 final int DEFAULT = 1 //Value for rules that we have no explicitly discussed yet
+final int CRITICAL = 1
+final int HIGH = 2
+final int MIDDLE = 3
+final int LOW = 4
+
 
 ruleset {
 
@@ -15,7 +20,7 @@ ruleset {
 
     // rulesets/basic.xml
     AssertWithinFinallyBlock {
-        priority = 1
+        priority = HIGH
     }
     AssignmentInConditional {
         priority = DEFAULT
@@ -36,16 +41,16 @@ ruleset {
         priority = DEFAULT
     }
     ClassForName {
-        priority = 1
+        priority = HIGH
     }
     ComparisonOfTwoConstants {
         priority = DEFAULT
     }
     ComparisonWithSelf {
-        priority = 1
+        priority = CRITICAL
     }
     ConstantAssertExpression {
-        priority = 3
+        priority = LOW
     }
     ConstantIfExpression {
         priority = DEFAULT
@@ -54,7 +59,7 @@ ruleset {
         priority = DEFAULT
     }
     DeadCode {
-        priority = 1
+        priority = HIGH
     }
     DoubleNegative {
         priority = DEFAULT
@@ -66,10 +71,10 @@ ruleset {
         priority = DEFAULT
     }
     DuplicateSetValue {
-        priority = 2
+        priority = MIDDLE
     }
     EmptyCatchBlock {
-        priority = 2
+        priority = MIDDLE
     }
     EmptyClass {
         priority = DEFAULT
@@ -84,13 +89,13 @@ ruleset {
         priority = DEFAULT
     }
     EmptyIfStatement {
-        priority = 1
+        priority = HIGH
     }
     EmptyInstanceInitializer {
         priority = DEFAULT
     }
     EmptyMethod {
-        priority = 2
+        priority = MIDDLE
         doNotApplyToFileNames = CONTROLLER
     }
     EmptyStaticInitializer {
@@ -147,24 +152,24 @@ ruleset {
 
     // rulesets/braces.xml
     ElseBlockBraces {
-        priority = 1
+        priority = HIGH
     }
     ForStatementBraces {
-        priority = 1
+        priority = CRITICAL
     }
     IfStatementBraces {
-        priority = 1
+        priority = HIGH
     }
     WhileStatementBraces {
-        priority = 1
+        priority = CRITICAL
     }
 
     // rulesets/concurrency.xml
     BusyWait {
-        priority = 1
+        priority = HIGH
     }
     DoubleCheckedLocking {
-        priority = 1
+        priority = HIGH
     }
     InconsistentPropertyLocking {
         priority = DEFAULT
@@ -191,7 +196,7 @@ ruleset {
         priority = DEFAULT
     }
     SynchronizedMethod {
-        priority = 1
+        priority = HIGH
     }
     SynchronizedOnBoxedPrimitive {
         priority = DEFAULT
@@ -206,7 +211,7 @@ ruleset {
         priority = DEFAULT
     }
     SynchronizedOnThis {
-        priority = 1
+        priority = HIGH
     }
     SynchronizedReadObjectMethod {
         priority = DEFAULT
@@ -215,13 +220,13 @@ ruleset {
         priority = DEFAULT
     }
     ThisReferenceEscapesConstructor {
-        priority = 2
+        priority = MIDDLE
     }
     ThreadGroup {
         priority = DEFAULT
     }
     ThreadLocalNotStaticFinal {
-        priority = 1
+        priority = HIGH
     }
     ThreadYield {
         priority = DEFAULT
@@ -241,64 +246,64 @@ ruleset {
 
     // rulesets/convention.xml
     ConfusingTernary {
-        priority = 1
+        priority = HIGH
     }
     CouldBeElvis {
-        priority = 1
+        priority = HIGH
     }
     CouldBeSwitchStatement {
-        priority = 1
+        priority = HIGH
     }
     //FieldTypeRequired //does not work well with Grails
     HashtableIsObsolete {
-        priority = 1
+        priority = CRITICAL
     }
     IfStatementCouldBeTernary {
-        priority = 2
+        priority = MIDDLE
     }
     InvertedCondition {
-        priority = 3
+        priority = LOW
     }
     InvertedIfElse {
-        priority = 2
+        priority = MIDDLE
     }
     LongLiteralWithLowerCaseL {
-        priority = 1
+        priority = HIGH
     }
     MethodParameterTypeRequired {
-        priority = 1
+        priority = HIGH
     }
     MethodReturnTypeRequired {
-        priority = 2
+        priority = MIDDLE
         doNotApplyToFileNames = CONTROLLER
     }
     NoDef {
-        priority = 2
+        priority = MIDDLE
         doNotApplyToFileNames = CONTROLLER
     }
     NoJavaUtilDate {
-        priority = 2
+        priority = MIDDLE
     }
     NoTabCharacter {
-        priority = 1
+        priority = HIGH
     }
     ParameterReassignment {
-        priority = 1
+        priority = HIGH
     }
     //PublicMethodsBeforeNonPublicMethods //does not fit with OTP-Convention of grouping related methods by topic
     //StaticFieldsBeforeInstanceFields //does not fit with OTP-Convention of Services before class fields including statics
     //StaticMethodsBeforeInstanceMethods //does not fit with OTP-Convention of grouping related methods by topic
     TernaryCouldBeElvis {
-        priority = 1
+        priority = CRITICAL
     }
     TrailingComma {
-        priority = 1
+        priority = HIGH
     }
     VariableTypeRequired {
-        priority = 2
+        priority = MIDDLE
     }
     VectorIsObsolete {
-        priority = 1
+        priority = CRITICAL
     }
 
     // rulesets/design.xml
@@ -307,61 +312,61 @@ ruleset {
     }
     AbstractClassWithoutAbstractMethod {
         applyToFileNames = SERVICE
-        priority = 2
+        priority = MIDDLE
     }
     AssignmentToStaticFieldFromInstanceMethod {
-        priority = 2
+        priority = MIDDLE
     }
     BooleanMethodReturnsNull {
-        priority = 2
+        priority = MIDDLE
     }
     BuilderMethodWithSideEffects {
-        priority = 2
+        priority = MIDDLE
     }
     CloneableWithoutClone {
         priority = DEFAULT
     }
     CloseWithoutCloseable {
-        priority = 2
+        priority = MIDDLE
     }
     CompareToWithoutComparable {
         priority = DEFAULT
     }
     ConstantsOnlyInterface {
-        priority = 2
+        priority = MIDDLE
     }
     EmptyMethodInAbstractClass {
-        priority = 3
+        priority = LOW
     }
     FinalClassWithProtectedMember {
         priority = DEFAULT
     }
     ImplementationAsType {
-        priority = 1
+        priority = HIGH
     }
     Instanceof {
-        priority = 2
+        priority = MIDDLE
     }
     LocaleSetDefault {
         priority = DEFAULT
     }
     NestedForLoop {
-        priority = 1
+        priority = HIGH
     }
     PrivateFieldCouldBeFinal {
-        priority = 2
+        priority = MIDDLE
     }
     PublicInstanceField {
-        priority = 2
+        priority = MIDDLE
     }
     ReturnsNullInsteadOfEmptyArray {
-        priority = 1
+        priority = CRITICAL
     }
     ReturnsNullInsteadOfEmptyCollection {
-        priority = 1
+        priority = HIGH
     }
     SimpleDateFormatMissingLocale {
-        priority = 1
+        priority = HIGH
     }
     StatelessSingleton {
         priority = DEFAULT
@@ -372,11 +377,11 @@ ruleset {
 
     // rulesets/dry.xml
     DuplicateListLiteral {
-        priority = 2
+        priority = MIDDLE
     }
     //DuplicateMapLiteral //has problems with stuff like .save(flush: true)
     DuplicateNumberLiteral {
-        priority = 2
+        priority = MIDDLE
     }
     //DuplicateStringLiteral //has problems with stuff like .split(",")
 
@@ -388,7 +393,7 @@ ruleset {
         priority = DEFAULT
     }
     MissingOverrideAnnotation {
-        priority = 1
+        priority = CRITICAL
         doNotApplyToFileNames = INTEGRATION_SPEC
     }
     UnsafeImplementationAsMap {
@@ -397,28 +402,28 @@ ruleset {
 
     // rulesets/exceptions.xml
     CatchArrayIndexOutOfBoundsException {
-        priority = 1
+        priority = CRITICAL
     }
     CatchError {
-        priority = 1
+        priority = CRITICAL
     }
     CatchException {
-        priority = 1
+        priority = HIGH
     }
     CatchIllegalMonitorStateException {
-        priority = 1
+        priority = CRITICAL
     }
     CatchIndexOutOfBoundsException {
-        priority = 1
+        priority = CRITICAL
     }
     CatchNullPointerException {
-        priority = 1
+        priority = CRITICAL
     }
     CatchRuntimeException {
-        priority = 1
+        priority = HIGH
     }
     CatchThrowable {
-        priority = 1
+        priority = HIGH
     }
     ConfusingClassNamedException {
         priority = DEFAULT
@@ -433,39 +438,39 @@ ruleset {
         priority = DEFAULT
     }
     MissingNewInThrowStatement {
-        priority = 1
+        priority = CRITICAL
     }
     ReturnNullFromCatchBlock {
-        priority = 1
+        priority = HIGH
     }
     SwallowThreadDeath {
         priority = DEFAULT
     }
     ThrowError {
-        priority = 1
+        priority = HIGH
     }
     ThrowException {
-        priority = 1
+        priority = HIGH
     }
     ThrowNullPointerException {
-        priority = 1
+        priority = CRITICAL
     }
     ThrowRuntimeException {
-        priority = 1
+        priority = HIGH
     }
     ThrowThrowable {
-        priority = 1
+        priority = CRITICAL
     }
 
     // rulesets/formatting.xml
     BlankLineBeforePackage {
-        priority = 3
+        priority = LOW
     }
     BlockEndsWithBlankLine {
-        priority = 3
+        priority = LOW
     }
     BlockStartsWithBlankLine {
-        priority = 2
+        priority = MIDDLE
     }
     BracesForClass {
         priority = DEFAULT
@@ -484,72 +489,73 @@ ruleset {
     }
     //ClassJavadoc
     ClosureStatementOnOpeningLineOfMultipleLineClosure {
-        priority = 1
+        priority = CRITICAL
     }
     ConsecutiveBlankLines {
-        priority = 3
+        priority = LOW
     }
     FileEndsWithoutNewline {
-        priority = 2
+        priority = MIDDLE
     }
     Indentation {
-        priority = 2
+        priority = MIDDLE
     }
     LineLength {
+        priority = MIDDLE
         length = 160
     }
     MissingBlankLineAfterImports {
-        priority = 1
+        priority = CRITICAL
     }
     MissingBlankLineAfterPackage {
-        priority = 1
+        priority = CRITICAL
     }
     SpaceAfterCatch {
-        priority = 1
+        priority = CRITICAL
     }
     SpaceAfterClosingBrace {
-        priority = 3
+        priority = LOW
     }
     SpaceAfterComma {
-        priority = 1
+        priority = HIGH
     }
     SpaceAfterFor {
-        priority = 1
+        priority = CRITICAL
     }
     SpaceAfterIf {
-        priority = 1
+        priority = HIGH
     }
     SpaceAfterOpeningBrace {
-        priority = 1
+        priority = HIGH
     }
     SpaceAfterSemicolon {
-        priority = 1
+        priority = CRITICAL
     }
     SpaceAfterSwitch {
-        priority = 1
+        priority = CRITICAL
     }
     SpaceAfterWhile {
-        priority = 1
+        priority = CRITICAL
     }
     SpaceAroundClosureArrow {
-        priority = 1
+        priority = HIGH
     }
     SpaceAroundMapEntryColon {
         characterBeforeColonRegex = /.*/
         characterAfterColonRegex = /\s+/
-        priority = 1
+        priority = HIGH
     }
     SpaceAroundOperator {
-        priority = 1
+        priority = HIGH
     }
     SpaceBeforeClosingBrace {
-        priority = 1
+        priority = HIGH
     }
     SpaceBeforeOpeningBrace {
-        priority = 1
+        priority = HIGH
     }
     TrailingWhitespace {
-        priority = 1
+        priority = HIGH
     }
 
     // rulesets/generic.xml
@@ -585,17 +591,17 @@ ruleset {
     //GrailsDomainHasEquals //Entity provides equals()
     //GrailsDomainHasToString //we don't do this in OTP
     GrailsDomainReservedSqlKeywordName {
-        priority = 1
+        priority = HIGH
     }
     //GrailsDomainStringPropertyMaxSize //done by hibernate
     GrailsDomainWithServiceReference {
         priority = DEFAULT
     }
     GrailsDuplicateConstraint {
-        priority = 1
+        priority = CRITICAL
     }
     GrailsDuplicateMapping {
-        priority = 1
+        priority = CRITICAL
     }
     GrailsMassAssignment {
         priority = DEFAULT
@@ -610,13 +616,13 @@ ruleset {
 
     // rulesets/groovyism.xml
     AssignCollectionSort {
-        priority = 1
+        priority = CRITICAL
     }
     AssignCollectionUnique {
-        priority = 2
+        priority = MIDDLE
     }
     ClosureAsLastMethodParameter {
-        priority = 2
+        priority = MIDDLE
     }
     CollectAllIsDeprecated {
         priority = DEFAULT
@@ -625,82 +631,82 @@ ruleset {
         priority = DEFAULT
     }
     ExplicitArrayListInstantiation {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitCallToAndMethod {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitCallToCompareToMethod {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitCallToDivMethod {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitCallToEqualsMethod {
-        priority = 1
+        priority = HIGH
     }
     ExplicitCallToGetAtMethod {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitCallToLeftShiftMethod {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitCallToMinusMethod {
-        priority = 1
+        priority = HIGH
     }
     ExplicitCallToModMethod {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitCallToMultiplyMethod {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitCallToOrMethod {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitCallToPlusMethod {
-        priority = 1
+        priority = HIGH
     }
     ExplicitCallToPowerMethod {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitCallToRightShiftMethod {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitCallToXorMethod {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitHashMapInstantiation {
-        priority = 1
+        priority = HIGH
     }
     ExplicitHashSetInstantiation {
-        priority = 1
+        priority = HIGH
     }
     ExplicitLinkedHashMapInstantiation {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitLinkedListInstantiation {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitStackInstantiation {
-        priority = 1
+        priority = CRITICAL
     }
     ExplicitTreeSetInstantiation {
-        priority = 1
+        priority = CRITICAL
     }
     GStringAsMapKey {
-        priority = 1
+        priority = HIGH
     }
     GStringExpressionWithinString {
-        priority = 1
+        priority = HIGH
     }
     GetterMethodCouldBeProperty {
-        priority = 3
+        priority = LOW
     }
     GroovyLangImmutable {
-        priority = 1
+        priority = CRITICAL
     }
     UseCollectMany {
-        priority = 2
+        priority = MIDDLE
     }
     UseCollectNested {
         priority = DEFAULT
@@ -708,21 +714,21 @@ ruleset {
 
     // rulesets/imports.xml
     DuplicateImport {
-        priority = 1
+        priority = HIGH
     }
     ImportFromSamePackage {
-        priority = 1
+        priority = HIGH
     }
     ImportFromSunPackages {
-        priority = 2
+        priority = MIDDLE
     }
     //MisorderedStaticImports //we do the opposite
     //NoWildcardImports //does not fit with OTP-Convention of using only WildcardImports
     UnnecessaryGroovyImport {
-        priority = 2
+        priority = MIDDLE
     }
     UnusedImport {
-        priority = 1
+        priority = HIGH
     }
 
     // rulesets/jdbc.xml
@@ -741,7 +747,7 @@ ruleset {
 
     // rulesets/junit.xml
     ChainedTest {
-        priority = 2
+        priority = MIDDLE
     }
     CoupledTestCase {
         priority = DEFAULT
@@ -756,21 +762,23 @@ ruleset {
         priority = DEFAULT
     }
     JUnitLostTest {
+        priority = MIDDLE
         doNotApplyToFileNames = SPEC
     }
     //JUnitPublicField
     //JUnitPublicNonTestMethod
     JUnitPublicProperty {
-        priority = 3
+        priority = LOW
     }
     JUnitSetUpCallsSuper {
-        priority = 1
+        priority = HIGH
     }
     //JUnitStyleAssertions //will be fixed by converting to spock
     JUnitTearDownCallsSuper {
         priority = DEFAULT
     }
     JUnitTestMethodWithoutAssert {
+        priority = MIDDLE
         doNotApplyToFileNames = SPEC
     }
     JUnitUnnecessarySetUp {
@@ -801,22 +809,22 @@ ruleset {
         priority = DEFAULT
     }
     LoggingSwallowsStacktrace {
-        priority = 1
+        priority = CRITICAL
     }
     MultipleLoggers {
         priority = DEFAULT
     }
     PrintStackTrace {
-        priority = 1
+        priority = HIGH
     }
     Println {
-        priority = 1
+        priority = HIGH
     }
     SystemErrPrint {
         priority = DEFAULT
     }
     SystemOutPrint {
-        priority = 1
+        priority = HIGH
     }
 
     // rulesets/naming.xml
@@ -830,14 +838,14 @@ ruleset {
         priority = DEFAULT
     }
     ClassNameSameAsSuperclass {
-        priority = 2
+        priority = MIDDLE
     }
     ConfusingMethodName {
         priority = DEFAULT
     }
     //FactoryMethodName //we don't do this
     FieldName {
-        priority = DEFAULT
+        priority = HIGH
     }
     InterfaceName {
         priority = DEFAULT
@@ -846,7 +854,7 @@ ruleset {
         priority = DEFAULT
     }
     MethodName {
-        priority = 2
+        priority = MIDDLE
         doNotApplyToFileNames = TEST
     }
     ObjectOverrideMisspelledMethodName {
@@ -857,14 +865,14 @@ ruleset {
         priority = DEFAULT
     }
     ParameterName {
-        priority = 2
+        priority = MIDDLE
     }
     PropertyName {
-        priority = 2
+        priority = MIDDLE
         doNotApplyToFileNames = TEST
     }
     VariableName {
-        priority = 2
+        priority = MIDDLE
         doNotApplyToFileNames = TEST
     }
 
@@ -873,13 +881,13 @@ ruleset {
         priority = DEFAULT
     }
     InsecureRandom {
-        priority = 1
+        priority = HIGH
     }
     JavaIoPackageAccess {
-        priority = 2
+        priority = MIDDLE
     }
     NonFinalPublicField {
-        priority = 2
+        priority = MIDDLE
         doNotApplyToFileNames = TEST
     }
     NonFinalSubclassOfSensitiveInterface {
@@ -909,33 +917,33 @@ ruleset {
         priority = DEFAULT
     }
     SerializableClassMustDefineSerialVersionUID {
-        priority = 3
+        priority = LOW
     }
 
     // rulesets/size.xml
     AbcMetric {
-        priority = 1
+        priority = HIGH
     }
     ClassSize {
-        priority = 2
+        priority = MIDDLE
     }
     CrapMetric {
-        priority = 2
+        priority = MIDDLE
     }
     CyclomaticComplexity {
-        priority = 1
+        priority = HIGH
     }
     MethodCount {
-        priority = 2
+        priority = MIDDLE
     }
     MethodSize {
-        priority = 2
+        priority = MIDDLE
     }
     NestedBlockDepth {
-        priority = 2
+        priority = MIDDLE
     }
     ParameterCount {
-        priority = 2
+        priority = MIDDLE
     }
 
     // rulesets/unnecessary.xml
@@ -973,25 +981,25 @@ ruleset {
         priority = DEFAULT
     }
     UnnecessaryCollectCall {
-        priority = 3
+        priority = LOW
     }
     UnnecessaryCollectionCall {
-        priority = 1
+        priority = CRITICAL
     }
     UnnecessaryConstructor {
-        priority = DEFAULT
+        priority = HIGH
     }
     //UnnecessaryDefInFieldDeclaration
     //UnnecessaryDefInMethodDeclaration
     //UnnecessaryDefInVariableDeclaration
     UnnecessaryDotClass {
-        priority = DEFAULT
+        priority = LOW
     }
     UnnecessaryDoubleInstantiation {
         priority = DEFAULT
     }
     UnnecessaryElseStatement {
-        priority = 3
+        priority = LOW
     }
     UnnecessaryFinalOnPrivateMethod {
         priority = DEFAULT
@@ -1001,13 +1009,13 @@ ruleset {
     }
     //UnnecessaryGString //We would prefer a rule to only use GStrings
     UnnecessaryGetter {
-        priority = 3
+        priority = LOW
     }
     UnnecessaryIfStatement {
-        priority = 1
+        priority = HIGH
     }
     UnnecessaryInstanceOfCheck {
-        priority = 1
+        priority = CRITICAL
     }
     UnnecessaryInstantiationToGetClass {
         priority = DEFAULT
@@ -1025,35 +1033,35 @@ ruleset {
         priority = DEFAULT
     }
     UnnecessaryNullCheckBeforeInstanceOf {
-        priority = 1
+        priority = HIGH
     }
     UnnecessaryObjectReferences {
-        priority = 3
+        priority = LOW
     }
     UnnecessaryOverridingMethod {
         priority = DEFAULT
     }
     UnnecessaryPackageReference {
-        priority = 2
+        priority = MIDDLE
     }
     UnnecessaryParenthesesForMethodCallWithClosure {
-        priority = 1
+        priority = HIGH
     }
     UnnecessaryPublicModifier {
-        priority = 1
+        priority = CRITICAL
     }
     //UnnecessaryReturnKeyword //no
     UnnecessarySafeNavigationOperator {
         priority = DEFAULT
     }
     UnnecessarySelfAssignment {
-        priority = 1
+        priority = HIGH
     }
     UnnecessarySemicolon {
-        priority = 1
+        priority = HIGH
     }
     UnnecessarySetter {
-        priority = 3
+        priority = LOW
     }
     UnnecessaryStringInstantiation {
         priority = DEFAULT
@@ -1063,7 +1071,7 @@ ruleset {
         priority = DEFAULT
     }
     UnnecessaryToString {
-        priority = 1
+        priority = HIGH
     }
     UnnecessaryTransientModifier {
         priority = DEFAULT
@@ -1071,24 +1079,24 @@ ruleset {
 
     // rulesets/unused.xml
     UnusedArray {
-        priority = 1
+        priority = CRITICAL
     }
     UnusedMethodParameter {
-        priority = 1
+        priority = HIGH
     }
     UnusedObject {
-        priority = 1
+        priority = CRITICAL
     }
     UnusedPrivateField {
-        priority = 1
+        priority = HIGH
     }
     UnusedPrivateMethod {
-        priority = 1
+        priority = HIGH
     }
     UnusedPrivateMethodParameter {
-        priority = 1
+        priority = CRITICAL
     }
     UnusedVariable {
-        priority = 1
+        priority = CRITICAL
     }
 }

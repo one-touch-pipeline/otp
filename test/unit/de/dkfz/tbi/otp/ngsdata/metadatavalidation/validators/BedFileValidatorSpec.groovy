@@ -104,11 +104,13 @@ class BedFileValidatorSpec extends Specification {
                                 }
 
                                 @SuppressWarnings("UnusedMethodParameter")
+                                @Override
                                 boolean tryParsePid(String pid) {
                                     return true
                                 }
 
                                 @SuppressWarnings("UnusedMethodParameter")
+                                @Override
                                 boolean isForProject(String projectName) {
                                     return true
                                 }

@@ -10,6 +10,9 @@ import java.util.regex.*
  * This is a copy of {@link org.springframework.security.web.servlet.support.csrf.CsrfRequestDataValueProcessor}
  * but the GET was removed from the DISABLE_CSRF_TOKEN_PATTERN. Otherwise the form do not get the token.
  */
+@SuppressWarnings(['UnnecessarySemicolon','UnnecessaryPublicModifier','UnusedMethodParameter',
+        'SpaceAfterComma', 'MissingOverrideAnnotation', 'ExplicitCallToEqualsMethod', 'FieldName',
+        'PrivateFieldCouldBeFinal', 'EmptyMethod', 'NoDef', 'MethodName', 'MethodReturnTypeRequired'])
 class CustomRequestDataValueProcessor implements RequestDataValueProcessor {
     private Pattern DISABLE_CSRF_TOKEN_PATTERN = Pattern.compile("(?i)^(HEAD|TRACE|OPTIONS)\$");
     private String DISABLE_CSRF_TOKEN_ATTR = "DISABLE_CSRF_TOKEN_ATTR";
