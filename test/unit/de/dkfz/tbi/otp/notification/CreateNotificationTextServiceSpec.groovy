@@ -568,7 +568,7 @@ ${expectedAlign}"""
         if (secondSampleAligned) {
             seqTracks.add(data2.seqTrack)
             expectedSamples << "${createNotificationTextService.getSampleName(data2.seqTrack)} (${data2.sampleId1}, ${data2.sampleId2})"
-            if (indel | snv | sophia | aceseq | runYapsa) {
+            if (indel || snv || sophia || aceseq || runYapsa) {
                 samplePairWithVariantCalling.add(data2.samplePair)
                 // the If-cases have to be ordered alphabetically
                 if (aceseq) {
