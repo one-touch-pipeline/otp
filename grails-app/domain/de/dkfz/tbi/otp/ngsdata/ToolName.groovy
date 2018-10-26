@@ -8,6 +8,7 @@ class ToolName implements Entity {
 
     enum Type {
         RNA,
+        CELLRANGER,
     }
 
     String name
