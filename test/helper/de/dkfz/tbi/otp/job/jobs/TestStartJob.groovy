@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component
 class TestStartJob extends AbstractStartJobImpl {
 
     @SuppressWarnings("EmptyMethod")
+    @Override
     void execute() {
     }
 }

@@ -420,7 +420,6 @@ class DomainFactory {
         )
     }
 
-    public
     static void createProcessingOptionForErrorRecipient(String recipientEmail = HelperUtils.randomEmail) {
         createProcessingOptionLazy(
                 name: OptionName.EMAIL_RECIPIENT_ERRORS,
@@ -516,7 +515,6 @@ class DomainFactory {
         return alignmentPass
     }
 
-    public
     static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null, Pipeline pipeline = null) {
         createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         if (referenceGenome == null || pipeline == null) {
@@ -547,20 +545,17 @@ class DomainFactory {
         return ReferenceGenome.find { true } ?: createReferenceGenome()
     }
 
-    public
     static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:], boolean saveAndValidate = true) {
         MergingSet mergingSet = createMergingSet(mergingWorkPackage)
         return createProcessedMergedBamFileWithoutProcessedBamFile(mergingSet, properties, saveAndValidate)
     }
 
-    public
     static ProcessedMergedBamFile createProcessedMergedBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:], boolean saveAndValidate = true) {
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile(mergingWorkPackage, properties, saveAndValidate)
         assignNewProcessedBamFile(processedMergedBamFile)
         return processedMergedBamFile
     }
 
-    public
     static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(Map properties = [:], boolean saveAndValidate = true) {
         MergingPass mergingPass = properties.mergingPass ?: properties.workPackage ?
                 createMergingPass(createMergingSet([mergingWorkPackage: properties.workPackage])) :
@@ -574,14 +569,12 @@ class DomainFactory {
         return processedMergedBamFile
     }
 
-    public
     static ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:], boolean saveAndValidate = true) {
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile(properties, saveAndValidate)
         assignNewProcessedBamFile(processedMergedBamFile)
         return processedMergedBamFile
     }
 
-    public
     static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(MergingSet mergingSet, Map properties = [:], boolean saveAndValidate = true) {
         return createProcessedMergedBamFileWithoutProcessedBamFile(properties + [
                 mergingPass: createMergingPass([
@@ -591,28 +584,24 @@ class DomainFactory {
         ], saveAndValidate)
     }
 
-    public
     static ProcessedMergedBamFile createProcessedMergedBamFile(MergingSet mergingSet, Map properties = [:], boolean saveAndValidate = true) {
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile(mergingSet, properties, saveAndValidate)
         assignNewProcessedBamFile(processedMergedBamFile)
         return processedMergedBamFile
     }
 
-    public
     static ProcessedMergedBamFile createProcessedMergedBamFileWithoutProcessedBamFile(MergingPass mergingPass, Map properties = [:], boolean saveAndValidate = true) {
         return createProcessedMergedBamFileWithoutProcessedBamFile([
                 mergingPass: mergingPass,
         ] + properties, saveAndValidate)
     }
 
-    public
     static ProcessedMergedBamFile createProcessedMergedBamFile(MergingPass mergingPass, Map properties = [:], boolean saveAndValidate = true) {
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile(mergingPass, properties, saveAndValidate)
         assignNewProcessedBamFile(processedMergedBamFile)
         return processedMergedBamFile
     }
 
-    public
     static ProcessedMergedBamFile createFinishedProcessedMergedBamFile(Map properties = [:], boolean saveAndValidate = true) {
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile([
                 fileOperationStatus: FileOperationStatus.PROCESSED,
@@ -1322,7 +1311,6 @@ class DomainFactory {
         createAceseqQc([:], [:], [:], aceseqInstance)
     }
 
-    public
     static AceseqQc createAceseqQc(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:], AceseqInstance aceseqInstance = null) {
         aceseqInstance = aceseqInstance ?: createAceseqInstanceWithRoddyBamFiles(properties, bamFile1Properties, bamFile2Properties)
         return createDomainObject(AceseqQc, [
@@ -1893,7 +1881,6 @@ class DomainFactory {
         return properties
     }
 
-    public
     static SeqTrack createSeqTrackWithDataFiles(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
         Map map = getMergingProperties(mergingWorkPackage) + [
                 kitInfoReliability: mergingWorkPackage.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,
@@ -1927,12 +1914,10 @@ class DomainFactory {
         return seqTrack
     }
 
-    public
     static SeqTrack createSeqTrackWithTwoDataFiles(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:], Map dataFileProperties1 = [:], Map dataFileProperties2 = [:]) {
         return createSeqTrackWithTwoDataFiles(getMergingProperties(mergingWorkPackage) + seqTrackProperties, dataFileProperties1, dataFileProperties2)
     }
 
-    public
     static SeqTrack createSeqTrackWithTwoDataFiles(Map seqTrackProperties = [:], Map dataFileProperties1 = [:], Map dataFileProperties2 = [:]) {
         FileType fileType = createFileType()
         Map defaultMap1 = [
@@ -1995,7 +1980,6 @@ class DomainFactory {
         return createAndSaveProcessingStep("de.dkfz.tbi.otp.test.job.jobs.NonExistentDummyJob", processParameterObject)
     }
 
-    public
     static ProcessingStep createAndSaveProcessingStep(String jobClass, ProcessParameterObject processParameterObject = null) {
         final JobExecutionPlan jep = new JobExecutionPlan(name: "DontCare" + sprintf('%016X', new Random().nextLong()), planVersion: 0, startJobBean: "DontCare")
         assert jep.save()
@@ -2030,7 +2014,6 @@ class DomainFactory {
         ])
     }
 
-    public
     static ProcessingStep createProcessingStepWithUpdates(ProcessingStep processingStep = createProcessingStep()) {
         ProcessingStepUpdate last = createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.CREATED)
         last = createProcessingStepUpdate(processingStep: processingStep, state: ExecutionState.STARTED, previous: last)

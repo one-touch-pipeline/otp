@@ -397,7 +397,7 @@ ruleset {
         doNotApplyToFileNames = INTEGRATION_SPEC
     }
     UnsafeImplementationAsMap {
-        priority = DEFAULT
+        priority = HIGH
     }
 
     // rulesets/exceptions.xml

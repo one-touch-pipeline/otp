@@ -37,6 +37,7 @@ class TestSingletonStartJob implements StartJob, ApplicationListener<JobExecutio
     }
 
     @SuppressWarnings("EmptyMethod")
+    @Override
     void execute() {}
 
     void setExecutionPlan(JobExecutionPlan plan) {

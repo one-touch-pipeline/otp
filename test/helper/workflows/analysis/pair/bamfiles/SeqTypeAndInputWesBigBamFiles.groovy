@@ -4,12 +4,12 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 trait SeqTypeAndInputWesBigBamFiles implements SeqTypeAndInputBamFiles {
 
-
+    @Override
     SeqType seqTypeToUse() {
         return SeqTypeService.exomePairedSeqType
     }
 
-
+    @Override
     BamFileSet getBamFileSet() {
         return new BamFileSet(
                 new File(getBamFilePairBaseDirectory(), 'wesbig'),
