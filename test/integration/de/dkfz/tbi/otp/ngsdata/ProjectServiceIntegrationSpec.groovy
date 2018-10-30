@@ -185,7 +185,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         String group = configService.getTestingGroup()
 
         when:
-        Project project
         ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
                 name: name,
                 dirName: dirName,
@@ -202,7 +201,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 processingPriority: ProcessingPriority.NORMAL,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            project = projectService.createProject(projectParams)
+            projectService.createProject(projectParams)
         }
 
         then:
@@ -223,7 +222,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject invalid unix group"() {
         when:
-        Project project
         ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
                 name: 'project',
                 dirName: 'dir',
@@ -240,7 +238,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 processingPriority: ProcessingPriority.NORMAL,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            project = projectService.createProject(projectParams)
+            projectService.createProject(projectParams)
         }
 
         then:
@@ -253,7 +251,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         String group = configService.getTestingGroup()
 
         when:
-        Project project
         ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
                 name: 'project',
                 dirName: 'dir',
@@ -270,7 +267,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 processingPriority: ProcessingPriority.NORMAL,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            project = projectService.createProject(projectParams)
+            projectService.createProject(projectParams)
         }
 
         then:
@@ -283,7 +280,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         String group = configService.getTestingGroup()
 
         when:
-        Project project
         ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
                 name: 'project',
                 dirName: 'dir',
@@ -300,7 +296,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 processingPriority: ProcessingPriority.NORMAL,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            project = projectService.createProject(projectParams)
+            projectService.createProject(projectParams)
         }
 
         then:
@@ -388,7 +384,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         String group = configService.getTestingGroup()
 
         when:
-        Project project
         ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
                 name: 'project',
                 dirName: 'dir',
@@ -405,7 +400,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 processingPriority: ProcessingPriority.NORMAL,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            project = projectService.createProject(projectParams)
+            projectService.createProject(projectParams)
         }
 
         then:
@@ -591,7 +586,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test configureDefaultOtpAlignmentDecider invalid input"() {
         setup:
         Project project = Project.findByName("testProjectAlignment")
-        ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
+        ReferenceGenome.findByName("testReferenceGenome")
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {

@@ -1303,7 +1303,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         // seqtrack A
         SeqPlatformGroup groupA = DomainFactory.createSeqPlatformGroup()
         SeqTrack seqTrackA = createSeqTrack(sharedSample, sharedSeqType, groupA)
-        SeqTrackProcessingStatus statusA = new SeqTrackProcessingStatus(seqTrackA,
+        new SeqTrackProcessingStatus(seqTrackA,
                 ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
                 ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
                 []
@@ -1348,7 +1348,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         // seqtrack A
         SeqPlatformGroup groupA = DomainFactory.createSeqPlatformGroup()
         SeqTrack seqTrackA = createSeqTrack(sharedSample, sharedSeqType, groupA)
-        SeqTrackProcessingStatus statusA = new SeqTrackProcessingStatus(seqTrackA,
+        new SeqTrackProcessingStatus(seqTrackA,
                 ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
                 ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
                 []
