@@ -19,7 +19,7 @@ class MappingFileLoader {
     void loadMappingFile(Project proj, String path) {
         project = proj
         String text = readFile(path)
-        text.eachLine {String line ->
+        text.eachLine { String line ->
             readLine(line)
         }
     }
@@ -51,11 +51,11 @@ class MappingFileLoader {
     }
 
     private String parsePid(String line) {
-        return line.substring(line.indexOf(separator1)+1, line.indexOf(separator2))
+        return line.substring(line.indexOf(separator1) + 1, line.indexOf(separator2))
     }
 
     private SampleType parseType(String line) {
-        String name = line.substring(line.indexOf(separator2)+1)
+        String name = line.substring(line.indexOf(separator2) + 1)
         return SampleType.findByNameIlike(name)
     }
 

@@ -23,7 +23,6 @@ enum InformationReliability {
      */
     INFERRED
 
-
     /**
      * The raw value of the information reliability.
      * <p>

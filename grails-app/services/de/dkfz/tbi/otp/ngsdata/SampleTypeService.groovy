@@ -13,7 +13,7 @@ class SampleTypeService {
     List findUsedSampleTypesForProject(Project project) {
         List<SeqType> allAnalysableSeqTypes = SeqTypeService.allAnalysableSeqTypes
 
-        List<SampleType> sampleTypes = SeqTrack.createCriteria().list{
+        List<SampleType> sampleTypes = SeqTrack.createCriteria().list {
             projections {
                 sample {
                     individual {
@@ -25,7 +25,7 @@ class SampleTypeService {
             'in'("seqType", allAnalysableSeqTypes)
         }
 
-        sampleTypes.addAll(AbstractMergingWorkPackage.createCriteria().list{
+        sampleTypes.addAll(AbstractMergingWorkPackage.createCriteria().list {
             projections {
                 sample {
                     individual { eq('project', project) }

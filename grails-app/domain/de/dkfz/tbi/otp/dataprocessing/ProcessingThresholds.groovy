@@ -31,10 +31,10 @@ class ProcessingThresholds implements TimeStamped, Entity {
     Integer numberOfLanes
 
     static constraints = {
-        coverage nullable: true, validator: {val, obj ->
+        coverage nullable: true, validator: { val, obj ->
             return (val != null && val > 0) || (val == null && obj.numberOfLanes != null)
         }
-        numberOfLanes nullable: true, validator: {val, obj ->
+        numberOfLanes nullable: true, validator: { val, obj ->
             return (val != null && val > 0) || (val == null && obj.coverage != null)
         }
     }

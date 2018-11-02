@@ -14,7 +14,7 @@ class SeqCenterService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    SeqCenter createSeqCenter(String name, String dirName){
+    SeqCenter createSeqCenter(String name, String dirName) {
         assert name : "the input name '${name}' must not be null"
         assert dirName : "the input dirname '${dirName}' must not be null"
         assert !SeqCenter.findByName(name) : "The SeqCenter '${name}' exists already"

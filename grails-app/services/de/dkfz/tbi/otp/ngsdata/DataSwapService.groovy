@@ -53,7 +53,6 @@ class DataSwapService {
             """.stripIndent()
 
 
-
     /**
      * Adapts the MetaDataFile copy in the database, when the corresponding values, which are stored in other objects, are changed
      *
@@ -194,7 +193,7 @@ mv '${oldDataFileName}' '${newDataFileName}';
 oldName: ${oldDataFileName}
 newName: ${newDataFileName}
 """
-                if(failOnMissingFiles) {
+                if (failOnMissingFiles) {
                     throw new RuntimeException(message)
                 } else {
                     outputStringBuilder << '\n' << message
@@ -264,8 +263,8 @@ newName: ${newDataFileName}
             String bashMoveDirectFile = ""
             String bashMoveVbpFile = ""
 
-            String oldDirectFileName = oldDataFileNameMap.find {key, value -> key.id == it.id}.value["directFileName"]
-            String oldVbpFileName = oldDataFileNameMap.find {key, value -> key.id == it.id}.value["vbpFileName"]
+            String oldDirectFileName = oldDataFileNameMap.find { key, value -> key.id == it.id }.value["directFileName"]
+            String oldVbpFileName = oldDataFileNameMap.find { key, value -> key.id == it.id }.value["vbpFileName"]
             File directFile = new File(oldDirectFileName)
             File vbpFile = new File(oldVbpFileName)
 
@@ -468,7 +467,7 @@ chmod 440 ${newDirectFileName}
 
         samples = Sample.findAllByIndividual(oldIndividual)
         seqTracks = SeqTrack.findAllBySampleInList(samples)
-        List<DataFile> newDataFiles =DataFile.findAllBySeqTrackInList(seqTracks)
+        List<DataFile> newDataFiles = DataFile.findAllBySeqTrackInList(seqTracks)
         List<String> newFastqcFileNames = newDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
 
         bashScriptToMoveFiles << "\n\n\n ################ move fastq files ################ \n"
@@ -676,7 +675,7 @@ chmod 440 ${newDirectFileName}
             List<SeqTrack> seqTracks = SeqTrack.findAllBySample(sample)
 
             seqTracks.each { SeqTrack seqTrack ->
-                seqTrack.dataFiles.each {DataFile dataFile ->
+                seqTrack.dataFiles.each { DataFile dataFile ->
                     stringBuilder << "rm -rf ${new File(lsdfFilesService.getFileFinalPath(dataFile)).absolutePath}\n"
                 }
                 Map<String, List<File>> seqTrackDirsToDelete = deleteSeqTrack(seqTrack, check)
@@ -905,7 +904,7 @@ chmod 440 ${newDirectFileName}
             }
         }
         return ["dirsToDelete": dirsToDelete,
-                "dirsToDeleteWithOtherUser": dirsToDeleteWithOtherUser]
+                "dirsToDeleteWithOtherUser": dirsToDeleteWithOtherUser,]
     }
 
 
@@ -1007,7 +1006,7 @@ chmod 440 ${newDirectFileName}
             }
         }
         return ["dirsToDelete": dirsToDelete,
-                "dirsToDeleteWithOtherUser": dirsToDeleteWithOtherUser]
+                "dirsToDeleteWithOtherUser": dirsToDeleteWithOtherUser,]
     }
 
 
@@ -1491,7 +1490,7 @@ chmod 440 ${newDirectFileName}
         isTrue(seqTracks.size() == inputInformationOTP.lane.size())
         List<File> dirsToDelete = []
 
-        List<String> oldFastqcFileNames = DataFile.findAllBySeqTrackInList(seqTracks).sort {it.id}.collect {
+        List<String> oldFastqcFileNames = DataFile.findAllBySeqTrackInList(seqTracks).sort { it.id }.collect {
             fastqcDataFilesService.fastqcOutputFile(it)
         }
 
@@ -1578,7 +1577,7 @@ chmod 440 ${newDirectFileName}
         bashScriptToMoveFiles << "\n\n#copy and remove fastq files\n"
         bashScriptToMoveFiles << renameDataFiles(DataFile.findAllBySeqTrackInList(seqTracks), newProject, dataFileMap, oldPathsPerDataFile, sameLsdf, outputStringBuilder)
 
-        List<String> newFastqcFileNames = DataFile.findAllBySeqTrackInList(seqTracks).sort {it.id}.collect {
+        List<String> newFastqcFileNames = DataFile.findAllBySeqTrackInList(seqTracks).sort { it.id }.collect {
             fastqcDataFilesService.fastqcOutputFile(it)
         }
 

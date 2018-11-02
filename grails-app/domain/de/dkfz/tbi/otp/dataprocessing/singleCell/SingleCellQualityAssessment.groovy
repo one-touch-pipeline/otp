@@ -114,7 +114,4 @@ class SingleCellQualityAssessment extends AbstractQualityAssessment {
      */
     @QcThresholdEvaluated
     Double medianUmiCountsPerCell
-
-    static constraints = { }
-
 }

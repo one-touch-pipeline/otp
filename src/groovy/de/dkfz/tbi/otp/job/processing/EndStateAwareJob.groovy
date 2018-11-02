@@ -16,5 +16,5 @@ interface EndStateAwareJob extends Job {
      * @return The ExecutionState after the method finished as determined by the Job itself.
      * @throws InvalidStateException If the Job execution has not yet finished.
      */
-    ExecutionState getEndState() throws InvalidStateException;
+    ExecutionState getEndState() throws InvalidStateException
 }

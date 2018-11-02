@@ -7,7 +7,7 @@ class SoftwareToolDSL {
         c1.version = { String programVersion, c2 ->
             SoftwareTool tool = new SoftwareTool(programName: programName, programVersion: programVersion, type: type)
             assert(tool.save())
-            c2.name = {String name ->
+            c2.name = { String name ->
                 assert((new SoftwareToolIdentifier(name: name, softwareTool: tool)).save())
             }
             c2()

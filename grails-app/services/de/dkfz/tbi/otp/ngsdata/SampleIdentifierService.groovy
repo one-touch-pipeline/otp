@@ -66,10 +66,10 @@ class SampleIdentifierService {
     }
 
     Sample findOrSaveSample(ParsedSampleIdentifier identifier) {
-        String sampleTypeWithoutUnderscore=identifier.sampleTypeDbName.replace('_', '-')
+        String sampleTypeWithoutUnderscore = identifier.sampleTypeDbName.replace('_', '-')
         return Sample.findOrSaveWhere(
                 individual: findOrSaveIndividual(identifier),
-                sampleType: SampleType.findWhere(name: identifier.sampleTypeDbName) ?: SampleType.findWhere(name: sampleTypeWithoutUnderscore)?: createSampleTypeXenograftDepending(sampleTypeWithoutUnderscore),
+                sampleType: SampleType.findWhere(name: identifier.sampleTypeDbName) ?: SampleType.findWhere(name: sampleTypeWithoutUnderscore) ?: createSampleTypeXenograftDepending(sampleTypeWithoutUnderscore),
         )
     }
 

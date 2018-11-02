@@ -7,7 +7,7 @@ import org.springframework.stereotype.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Component
-class SampleTypeValidator extends SingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator{
+class SampleTypeValidator extends SingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {

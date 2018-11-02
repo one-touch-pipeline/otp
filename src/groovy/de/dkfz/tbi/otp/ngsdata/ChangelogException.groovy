@@ -13,11 +13,11 @@ class ChangelogException extends OtpException {
     }
 
     ChangelogException(String message) {
-        super(message);
+        super(message)
     }
 
     ChangelogException(String message, Throwable cause) {
-        super(message, cause);
+        super(message, cause)
     }
 
 }

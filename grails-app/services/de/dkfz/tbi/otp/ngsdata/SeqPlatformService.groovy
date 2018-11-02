@@ -13,20 +13,18 @@ class SeqPlatformService {
 
     SequencingKitLabelService sequencingKitLabelService
 
-
     static SeqPlatform findForNameAndModelAndSequencingKit(String platformName, SeqPlatformModelLabel seqPlatformModelLabel, SequencingKitLabel sequencingKitLabel) {
         assert platformName
         return SeqPlatform.findByNameIlikeAndSeqPlatformModelLabelAndSequencingKitLabel(platformName, seqPlatformModelLabel, sequencingKitLabel)
     }
 
-
     static SeqPlatform createNewSeqPlatform(String seqPlatformName,
-                                                   SeqPlatformModelLabel seqPlatformModelLabel = null,
-                                                   SequencingKitLabel sequencingKitLabel = null) {
-        assert seqPlatformName : "The input seqPlatformName must not be null"
+                                            SeqPlatformModelLabel seqPlatformModelLabel = null,
+                                            SequencingKitLabel sequencingKitLabel = null) {
+        assert seqPlatformName: "The input seqPlatformName must not be null"
 
-        assert !findForNameAndModelAndSequencingKit(seqPlatformName, seqPlatformModelLabel, sequencingKitLabel) :
-            "The seqPlatform for this name, model and kit exists already"
+        assert !findForNameAndModelAndSequencingKit(seqPlatformName, seqPlatformModelLabel, sequencingKitLabel):
+                "The seqPlatform for this name, model and kit exists already"
 
         SeqPlatform seqPlatform = new SeqPlatform(
                 name: seqPlatformName,
@@ -39,15 +37,15 @@ class SeqPlatformService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SeqPlatform createNewSeqPlatform(String seqPlatformName, String seqPlatformModelLabelName, String sequencingKitLabelName) {
-        assert seqPlatformName : "the input seqplatformname '${seqPlatformName}' must not be null"
+        assert seqPlatformName: "the input seqplatformname '${seqPlatformName}' must not be null"
         SeqPlatformModelLabel seqPlatformModelLabel = null
         SequencingKitLabel sequencingKitLabel = null
 
-        if(seqPlatformModelLabelName) {
-            seqPlatformModelLabel = seqPlatformModelLabelService.findByNameOrImportAlias(seqPlatformModelLabelName)?: seqPlatformModelLabelService.create(seqPlatformModelLabelName)
+        if (seqPlatformModelLabelName) {
+            seqPlatformModelLabel = seqPlatformModelLabelService.findByNameOrImportAlias(seqPlatformModelLabelName) ?: seqPlatformModelLabelService.create(seqPlatformModelLabelName)
         }
-        if(sequencingKitLabelName) {
-            sequencingKitLabel = sequencingKitLabelService.findByNameOrImportAlias(sequencingKitLabelName)?: sequencingKitLabelService.create(sequencingKitLabelName)
+        if (sequencingKitLabelName) {
+            sequencingKitLabel = sequencingKitLabelService.findByNameOrImportAlias(sequencingKitLabelName) ?: sequencingKitLabelService.create(sequencingKitLabelName)
         }
         SeqPlatform seqPlatform = createNewSeqPlatform(seqPlatformName, seqPlatformModelLabel, sequencingKitLabel)
         return seqPlatform

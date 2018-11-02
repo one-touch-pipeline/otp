@@ -17,9 +17,9 @@ class OnlyOneRunValidator implements MetadataValidator {
 
     @Override
     void validate(MetadataValidationContext context) {
-        List<Cell> runCells = context.spreadsheet.dataRows.collect {it.getCell(context.spreadsheet.getColumn(MetaDataColumn.RUN_ID.name()))}
+        List<Cell> runCells = context.spreadsheet.dataRows.collect { it.getCell(context.spreadsheet.getColumn(MetaDataColumn.RUN_ID.name())) }
         List<String> runNames = runCells*.text.unique()
-        List<Cell> ilseCells = context.spreadsheet.dataRows.collect {it.getCell(context.spreadsheet.getColumn(MetaDataColumn.ILSE_NO.name()))}
+        List<Cell> ilseCells = context.spreadsheet.dataRows.collect { it.getCell(context.spreadsheet.getColumn(MetaDataColumn.ILSE_NO.name())) }
         List<String> ilsen = ilseCells*.text.unique()
 
         if (runNames.size() > 1 &&

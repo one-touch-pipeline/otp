@@ -34,8 +34,8 @@ class BamHeaderParsingService {
             if (token.startsWith("ID:")) {
                 int sepId = token.indexOf("_s_")
                 if (sepId > -1) {
-                    String runName = token.substring(3, sepId);
-                    String lane = token.substring(token.lastIndexOf("_")+1)
+                    String runName = token.substring(3, sepId)
+                    String lane = token.substring(token.lastIndexOf("_") + 1)
                     log.info("${runName} ${lane}")
                     return getSeqTrack(runName, lane)
                 }
@@ -49,8 +49,8 @@ class BamHeaderParsingService {
             if (token.startsWith("ID:")) {
                 int sepId = token.indexOf("_lane")
                 if (sepId > -1) {
-                    String runName = token.substring(3, sepId);
-                    String lane = token.substring(sepId+5, sepId+6)
+                    String runName = token.substring(3, sepId)
+                    String lane = token.substring(sepId + 5, sepId + 6)
                     log.info("${runName} ${lane}")
                     return getSeqTrack(runName, lane)
                 }
@@ -106,8 +106,8 @@ class BamHeaderParsingService {
             if (token.startsWith("ID:")) {
                 int sepId = token.indexOf("_L")
                 if (sepId > -1) {
-                    String runName = token.substring(3, sepId);
-                    String lane = token.substring(sepId+2)
+                    String runName = token.substring(3, sepId)
+                    String lane = token.substring(sepId + 2)
                     int laneNo = lane as int
                     log.info("${runName} ${laneNo}")
                     return getSeqTrack(runName, laneNo as String)

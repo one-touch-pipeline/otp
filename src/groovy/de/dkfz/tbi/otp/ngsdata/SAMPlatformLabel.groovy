@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.ngsdata;
+package de.dkfz.tbi.otp.ngsdata
 
 /**
  * Reflects the ngs platform labels used in
@@ -17,12 +17,12 @@ enum SAMPlatformLabel {
     SOLID("solid"),
     HELICOS("helicos"),
     IONTORRENT("torrent"),
-    PACBIO("pacbio")
+    PACBIO("pacbio"),
 
     private final String key
 
     private SAMPlatformLabel(String key) {
-        this.key = key;
+        this.key = key
     }
 
     /**

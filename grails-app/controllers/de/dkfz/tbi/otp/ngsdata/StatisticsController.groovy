@@ -22,12 +22,11 @@ class StatisticsController {
         render file: new ByteArrayInputStream(output.toString().getBytes("UTF-8")), fileName:'directories.csv', contentType: 'text/csv'
     }
 
-
     def kpi() {
         ProjectSelection selection = projectSelectionService.getSelectedProject()
-        if (!selection.projects){
+        if (!selection.projects) {
             return [
-                    numberOfProject : 0
+                    numberOfProject : 0,
             ]
         }
 

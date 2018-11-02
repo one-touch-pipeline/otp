@@ -13,7 +13,7 @@ class FastqcResultsService {
 
     Map<Long, Boolean> fastqcLinkMap(Run run) {
         Map<Long, Boolean> map = [:]
-        List<SeqTrack> seqTracks= SeqTrack.findAllByRun(run) // to be protected by ACLs
+        List<SeqTrack> seqTracks = SeqTrack.findAllByRun(run) // to be protected by ACLs
         seqTracks.each { SeqTrack seqTrack ->
             List<DataFile> files = seqTrackService.getSequenceFilesForSeqTrack(seqTrack)
             files.each { DataFile file ->

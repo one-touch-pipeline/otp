@@ -6,5 +6,8 @@
       <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1" />
       <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="1" />
     </GroovyCodeStyleSettings>
+    <MarkdownNavigatorCodeStyleSettings>
+      <option name="RIGHT_MARGIN" value="72" />
+    </MarkdownNavigatorCodeStyleSettings>
   </code_scheme>
 </component>

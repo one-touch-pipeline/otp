@@ -43,7 +43,6 @@ class StatisticController {
         render statisticService.dataPerDate(data) as JSON
     }
 
-
     JSON sampleCountPerSequenceType(ProjectGroupCommand command) {
         ProjectGroup projectGroup
         if (command.projectGroupName) {
@@ -78,7 +77,7 @@ class StatisticController {
                 labels          : labels,
                 labelsPercentage: labelsPercentage,
                 data            : values,
-                count           : values.size()
+                count           : values.size(),
         ]
         render dataToRender as JSON
     }
@@ -109,7 +108,7 @@ class StatisticController {
                 labels          : labels,
                 labelsPercentage: labelsPercentage,
                 data            : values,
-                count           : values.size()
+                count           : values.size(),
         ]
         render dataToRender as JSON
     }
@@ -140,7 +139,7 @@ class StatisticController {
                 labels          : labels,
                 labelsPercentage: labelsPercentage,
                 data            : values,
-                count           : values.size()
+                count           : values.size(),
         ]
         render dataToRender as JSON
     }
@@ -167,7 +166,7 @@ class StatisticController {
                 labels          : labels,
                 labelsPercentage: labelsPercentage,
                 data            : values,
-                count           : values.size()
+                count           : values.size(),
         ]
         render dataToRender as JSON
     }
@@ -188,7 +187,7 @@ class StatisticController {
                 project  : project?.name,
                 labels   : labels,
                 data     : values,
-                count    : values.size()
+                count    : values.size(),
         ]
         render dataToRender as JSON
     }

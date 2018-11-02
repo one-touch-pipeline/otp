@@ -53,7 +53,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
         // TODO OTP-1401: In the future there may be more than one MWP for one sample and seqType.
         // As soon as you loosen this constraint, un-ignore:
         // - AlignmentPassUnitTests.testIsLatestPass_2PassesDifferentWorkPackages
-        sample(validator: {val, obj ->
+        sample(validator: { val, obj ->
             MergingWorkPackage mergingWorkPackage = CollectionUtils.atMostOneElement(
                     MergingWorkPackage.findAllBySampleAndSeqTypeAndAntibodyTarget(val, obj.seqType, obj.antibodyTarget),
                     "More than one MWP exists for sample ${val} and seqType ${obj.seqType} and antibodyTarget ${obj.antibodyTarget}")
@@ -62,13 +62,13 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
             }
         })
 
-        needsProcessing(validator: {val, obj -> !val || [Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Name.RODDY_RNA_ALIGNMENT].contains(obj?.pipeline?.name)})
+        needsProcessing(validator: { val, obj -> !val || [Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Name.RODDY_RNA_ALIGNMENT].contains(obj?.pipeline?.name) })
         pipeline(validator: { pipeline ->
             pipeline.type == Pipeline.Type.ALIGNMENT &&
             pipeline.name != Pipeline.Name.EXTERNALLY_PROCESSED
         })
 
-        libraryPreparationKit validator: {val, obj ->
+        libraryPreparationKit validator: { val, obj ->
             SeqTypeNames seqTypeName = obj.seqType?.seqTypeName
             if (seqTypeName == SeqTypeNames.EXOME) {
                 return val != null
@@ -84,20 +84,17 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                 case Pipeline.Name.CELL_RANGER:
                 case Pipeline.Name.DEFAULT_OTP:
                 case Pipeline.Name.EXTERNALLY_PROCESSED:
-                    val == null
-                    break
+                    return val == null
                 case Pipeline.Name.PANCAN_ALIGNMENT:
-                    val != null && OtpPath.isValidPathComponent(val)
-                    break
+                    return val != null && OtpPath.isValidPathComponent(val)
                 case Pipeline.Name.RODDY_RNA_ALIGNMENT:
                     return val == null
-                    break
                 default:
                     throw new RuntimeException("Pipeline name is unknown: ${obj.pipeline?.name}")
             }
         }
 
-        seqTracks(validator: {val, obj ->
+        seqTracks(validator: { val, obj ->
             val.each {
                 if (!obj.satisfiesCriteria(it)) {
                     return false
