@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.egaSubmission.BamFileSubmissionObject
 import de.dkfz.tbi.otp.egaSubmission.DataFileSubmissionObject
 import de.dkfz.tbi.otp.egaSubmission.SampleSubmissionObject
 import de.dkfz.tbi.otp.egaSubmission.Submission
+import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class SubmissionDomainFactory extends AbstractDomainFactory {
@@ -20,6 +21,7 @@ class SubmissionDomainFactory extends AbstractDomainFactory {
                 studyAbstract : "studyAbstract",
                 pubMedId      : "pubMedId",
                 state         : Submission.State.SELECTION,
+                selectionState: Submission.SelectionState.SELECT_SAMPLES,
         ], properties)
     }
 
@@ -27,6 +29,7 @@ class SubmissionDomainFactory extends AbstractDomainFactory {
         return createDomainObject(BamFileSubmissionObject, [
                 egaAliasName: "bam_file_alias",
                 bamFile: { DomainFactory.createRoddyBamFile() },
+                sampleSubmissionObject: { createSampleSubmissionObject() },
         ], properties)
     }
 
@@ -34,6 +37,7 @@ class SubmissionDomainFactory extends AbstractDomainFactory {
         return createDomainObject(DataFileSubmissionObject , [
                 egaAliasName: "data_file_alias",
                 dataFile: { DomainFactory.createDataFile() },
+                sampleSubmissionObject: { createSampleSubmissionObject() },
         ], properties)
     }
 

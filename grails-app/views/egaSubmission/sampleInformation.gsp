@@ -4,7 +4,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
     <title><g:message code="egaSubmission.sampleInformation.title"/></title>
-    <asset:javascript src="pages/egaSubmission/sampleInformation/datatable.js"/>
+    <asset:javascript src="pages/egaSubmission/datatable.js"/>
 </head>
 <body>
 <div class="body">
@@ -39,7 +39,7 @@
                     <g:each status="i" in="${sampleSubmissionObjects}" var="it">
                         <g:set var="individual" value="${it.sample.individual.displayName}" />
                         <g:set var="sampleType" value="${it.sample.sampleType.displayName}" />
-                        <g:set var="seqType" value="${it.seqType.displayName}" />
+                        <g:set var="seqType" value="${it.seqType.toString()}" />
                         <g:set var="key" value="${individual + sampleType + seqType}" />
                         <tr>
                             <g:hiddenField name="sampleObjectId[${i}]" value="${it.id}"/>
@@ -59,7 +59,7 @@
     </div>
     <asset:script>
         $(function() {
-            $.otp.sampleInformationTable.makeDataTable();
+            $.otp.egaTable.makeDataTable();
         });
     </asset:script>
 </div>

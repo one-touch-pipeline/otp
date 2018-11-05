@@ -5,9 +5,10 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.domainfactory.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.*
 import grails.test.mixin.*
 import grails.validation.*
+import org.junit.*
+import org.junit.rules.*
 import spock.lang.*
 
 @Mock([
@@ -43,7 +44,7 @@ import spock.lang.*
 ])
 class EgaSubmissionServiceSpec extends Specification {
 
-    EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
+    private EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
 
     @Unroll
     void "test create submission all valid"() {
@@ -107,9 +108,13 @@ class EgaSubmissionServiceSpec extends Specification {
     void "test update state all fine"() {
         given:
         Submission submission = SubmissionDomainFactory.createSubmission()
-        BamFileSubmissionObject bamFileSubmissionObject = SubmissionDomainFactory.createBamFileSubmissionObject()
-        DataFileSubmissionObject dataFileSubmissionObject = SubmissionDomainFactory.createDataFileSubmissionObject()
         SampleSubmissionObject sampleSubmissionObject = SubmissionDomainFactory.createSampleSubmissionObject()
+        BamFileSubmissionObject bamFileSubmissionObject = SubmissionDomainFactory.createBamFileSubmissionObject(
+                sampleSubmissionObject: sampleSubmissionObject,
+        )
+        DataFileSubmissionObject dataFileSubmissionObject = SubmissionDomainFactory.createDataFileSubmissionObject(
+                sampleSubmissionObject: sampleSubmissionObject,
+        )
         submission.addToBamFilesToSubmit(bamFileSubmissionObject)
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
         submission.addToSamplesToSubmit(sampleSubmissionObject)
@@ -169,126 +174,16 @@ class EgaSubmissionServiceSpec extends Specification {
 
     void "test update submission object all fine"() {
         given:
+        Submission submission = SubmissionDomainFactory.createSubmission()
         SampleSubmissionObject sampleSubmissionObject = SubmissionDomainFactory.createSampleSubmissionObject()
 
         when:
-        egaSubmissionService.updateSampleSubmissionObjects(["${sampleSubmissionObject.id}"], ["newAlias"], [EgaSubmissionService.FileType.BAM])
+        egaSubmissionService.updateSampleSubmissionObjects(submission, ["${sampleSubmissionObject.id}"], ["newAlias"], [EgaSubmissionService.FileType.BAM])
 
         then:
         sampleSubmissionObject.egaAliasName == "newAlias"
         sampleSubmissionObject.useBamFile
         !sampleSubmissionObject.useFastqFile
-    }
-
-    void "test generate csv content file"() {
-        given:
-        SampleSubmissionObject sampleSubmissionObject1 = SubmissionDomainFactory.createSampleSubmissionObject()
-        SampleSubmissionObject sampleSubmissionObject2 = SubmissionDomainFactory.createSampleSubmissionObject()
-        List<String> sampleObjectId = [sampleSubmissionObject1.id as String, sampleSubmissionObject2.id as String]
-        List<String> egaSampleAlias = ["abc", "dfg"]
-        List<FileType> fileType = [EgaSubmissionService.FileType.FASTQ, EgaSubmissionService.FileType.BAM]
-
-        when:
-        String content = egaSubmissionService.generateCsvFile(sampleObjectId, egaSampleAlias, fileType)
-
-        then:
-        content == "${egaSubmissionService.INDIVIDUAL}," +
-                "${egaSubmissionService.SAMPLE_TYPE}," +
-                "${egaSubmissionService.SEQ_TYPE}," +
-                "${egaSubmissionService.EGA_SAMPLE_ALIAS}," +
-                "${egaSubmissionService.FILE_TYPE}\n" +
-                "${sampleSubmissionObject1.sample.individual.displayName}," +
-                "${sampleSubmissionObject1.sample.sampleType.displayName}," +
-                "${sampleSubmissionObject1.seqType.displayName}," +
-                "${egaSampleAlias[0]}," +
-                "${fileType[0]}\n" +
-                "${sampleSubmissionObject2.sample.individual.displayName}," +
-                "${sampleSubmissionObject2.sample.sampleType.displayName}," +
-                "${sampleSubmissionObject2.seqType.displayName}," +
-                "${egaSampleAlias[1]}," +
-                "${fileType[1]}\n"
-    }
-
-    void "test read from file"() {
-        given:
-        SampleSubmissionObject sampleSubmissionObject1 = SubmissionDomainFactory.createSampleSubmissionObject()
-        SampleSubmissionObject sampleSubmissionObject2 = SubmissionDomainFactory.createSampleSubmissionObject()
-        List<String> sampleObjectId = [sampleSubmissionObject1.id as String, sampleSubmissionObject2.id as String]
-        List<String> egaSampleAlias = ["abc", "dfg"]
-        List<FileType> fileType = [EgaSubmissionService.FileType.FASTQ, EgaSubmissionService.FileType.BAM]
-        String content = egaSubmissionService.generateCsvFile(sampleObjectId, egaSampleAlias, fileType)
-        Spreadsheet spreadsheet = new Spreadsheet(content, ",")
-
-        when:
-        Map egaSampleAliases = egaSubmissionService.readEgaSampleAliasesFromFile(spreadsheet)
-        Map fastqs = egaSubmissionService.readBoxesFromFile(spreadsheet, EgaSubmissionService.FileType.FASTQ)
-        Map bams = egaSubmissionService.readBoxesFromFile(spreadsheet, EgaSubmissionService.FileType.BAM)
-
-        then:
-        egaSampleAliases.size() == 2
-        fastqs*.value == [true, false]
-        bams*.value  == [false, true]
-    }
-
-    void "test validate rows"() {
-        given:
-        Submission submission = SubmissionDomainFactory.createSubmission()
-        SampleSubmissionObject sampleSubmissionObject1 = SubmissionDomainFactory.createSampleSubmissionObject()
-        submission.addToSamplesToSubmit(sampleSubmissionObject1)
-        SampleSubmissionObject sampleSubmissionObject2 = SubmissionDomainFactory.createSampleSubmissionObject()
-        submission.addToSamplesToSubmit(sampleSubmissionObject2)
-        List<String> sampleObjectId = [sampleSubmissionObject1.id as String, sampleSubmissionObject2.id as String]
-        List<String> egaSampleAlias = ["abc", "dfg"]
-        List<FileType> fileType = [EgaSubmissionService.FileType.FASTQ, EgaSubmissionService.FileType.BAM]
-        String content = egaSubmissionService.generateCsvFile(sampleObjectId, egaSampleAlias, fileType)
-        Spreadsheet spreadsheet = new Spreadsheet(content, ",")
-
-        expect:
-        egaSubmissionService.validateRows(spreadsheet, submission).valid
-    }
-
-    void "test validate rows with less rows"() {
-        given:
-        Submission submission = SubmissionDomainFactory.createSubmission()
-        SampleSubmissionObject sampleSubmissionObject1 = SubmissionDomainFactory.createSampleSubmissionObject()
-        submission.addToSamplesToSubmit(sampleSubmissionObject1)
-        submission.addToSamplesToSubmit(SubmissionDomainFactory.createSampleSubmissionObject())
-        List<String> sampleObjectId = [sampleSubmissionObject1.id as String]
-        List<String> egaSampleAlias = ["abc"]
-        List<FileType> fileType = [EgaSubmissionService.FileType.FASTQ]
-        String content = egaSubmissionService.generateCsvFile(sampleObjectId, egaSampleAlias, fileType)
-        Spreadsheet spreadsheet = new Spreadsheet(content, ",")
-
-        expect:
-        !egaSubmissionService.validateRows(spreadsheet, submission).valid
-        egaSubmissionService.validateRows(spreadsheet, submission).error == "There are less rows in the file as samples where selected"
-    }
-
-    void "test validate rows with wrong samples"() {
-        given:
-        Submission submission = SubmissionDomainFactory.createSubmission()
-        SampleSubmissionObject sampleSubmissionObject1 = SubmissionDomainFactory.createSampleSubmissionObject()
-        submission.addToSamplesToSubmit(sampleSubmissionObject1)
-        List<String> sampleObjectId = [SubmissionDomainFactory.createSampleSubmissionObject().id as String]
-        List<String> egaSampleAlias = ["abc"]
-        List<FileType> fileType = [EgaSubmissionService.FileType.FASTQ]
-        String content = egaSubmissionService.generateCsvFile(sampleObjectId, egaSampleAlias, fileType)
-        Spreadsheet spreadsheet = new Spreadsheet(content, ",")
-
-        expect:
-        !egaSubmissionService.validateRows(spreadsheet, submission).valid
-        egaSubmissionService.validateRows(spreadsheet, submission).error == "Found and expected samples are different"
-    }
-
-    void "test getting identifier key from sample submission object"() {
-        given:
-        SampleSubmissionObject sampleSubmissionObject = SubmissionDomainFactory.createSampleSubmissionObject()
-        String string = sampleSubmissionObject.sample.individual.displayName +
-                sampleSubmissionObject.sample.sampleType.displayName +
-                sampleSubmissionObject.seqType.displayName
-
-        expect:
-        string == egaSubmissionService.getIdentifierKeyFromSampleSubmissionObject(sampleSubmissionObject)
     }
 
     @Unroll
@@ -328,46 +223,80 @@ class EgaSubmissionServiceSpec extends Specification {
         true         | true      | false
     }
 
-    @Unroll
-    void "test validate sample information form input"() {
+    void "test get bam files and alias"() {
         given:
-        SampleSubmissionObject sampleSubmissionObject1 = SubmissionDomainFactory.createSampleSubmissionObject(
-                egaAliasName: "testAlias",
+        Submission submission = SubmissionDomainFactory.createSubmission()
+        RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
+        SampleSubmissionObject sampleSubmissionObject = SubmissionDomainFactory.createSampleSubmissionObject(
+                sample: bamFile.sample,
+                seqType: bamFile.seqType,
         )
-        SampleSubmissionObject sampleSubmissionObject2 = SubmissionDomainFactory.createSampleSubmissionObject()
-        List<String> sampleObjectIds = ["${sampleSubmissionObject1.id}", "${sampleSubmissionObject2.id}"]
+        BamFileSubmissionObject bamFileSubmissionObject = SubmissionDomainFactory.createBamFileSubmissionObject(
+                bamFile: bamFile,
+                sampleSubmissionObject: sampleSubmissionObject,
+        )
+        submission.addToBamFilesToSubmit(bamFileSubmissionObject)
 
         when:
-        Map map = egaSubmissionService.validateSampleInformationFormInput(sampleObjectIds, aliases, fileType)
+        List bamFilesAndAlias = egaSubmissionService.getBamFilesAndAlias(submission)
 
         then:
-        map.hasErrors == hasErrors
-        !map.errors ?: map.errors.contains(errorMessages)
-
-        where:
-        aliases            | fileType                                                                 || hasErrors | errorMessages
-        ["a", "b"]         | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || false     | ""
-        ["a", "a"]         | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || true      | "Not all aliases are unique."
-        ["a", ""]          | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || true      | "For some samples no alias is configured."
-        ["a", "testAlias"] | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || true      | "Alias testAlias already exist."
-        ["a", "b"]         | [EgaSubmissionService.FileType.BAM, null]                                || true      | "For some samples files types are not selected."
+        bamFilesAndAlias*.get(0) == [bamFile]
+        bamFilesAndAlias*.get(1) == [sampleSubmissionObject.egaAliasName]
     }
 
-    @Unroll
-    void "test validate file type from input"() {
+    void "test create data file submission objects"() {
         given:
-        List<String> sampleObjectId = [SubmissionDomainFactory.createSampleSubmissionObject().id as String]
-        List<String> egaSampleAlias = ["abc"]
-        List<FileType> fileTypeList = [EgaSubmissionService.FileType.FASTQ]
-        String content = egaSubmissionService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypeList).replace("FASTQ", fileType)
-        Spreadsheet spreadsheet = new Spreadsheet(content, ",")
+        Submission submission = SubmissionDomainFactory.createSubmission()
+        List<Boolean> selectBox = [true, null]
+        List<String> filenames = [DomainFactory.createDataFile().fileName, DomainFactory.createDataFile().fileName]
+        List<String> egaSampleAliases = [
+                SubmissionDomainFactory.createSampleSubmissionObject().egaAliasName,
+                SubmissionDomainFactory.createSampleSubmissionObject().egaAliasName,
+        ]
 
-        expect:
-        egaSubmissionService.validateFileTypeFromInput(spreadsheet) == result
+        when:
+        egaSubmissionService.createDataFileSubmissionObjects(submission, selectBox, filenames, egaSampleAliases)
 
-        where:
-        fileType | result
-        "FASTQ"  | true
-        "WRONG"  | false
+        then:
+        submission.dataFilesToSubmit.size() == DataFileSubmissionObject.findAll().size()
+    }
+
+    void "test update data file submission objects"() {
+        given:
+        Submission submission = SubmissionDomainFactory.createSubmission()
+        List<String> egaFileAliases = ["someMagicAlias"]
+        DataFile dataFile = DomainFactory.createDataFile()
+        List<String> fileNames = [dataFile.fileName]
+        DataFileSubmissionObject dataFileSubmissionObject = SubmissionDomainFactory.createDataFileSubmissionObject(
+                dataFile: dataFile,
+        )
+        submission.addToDataFilesToSubmit(dataFileSubmissionObject)
+
+        when:
+        egaSubmissionService.updateDataFileSubmissionObjects(fileNames, egaFileAliases, submission)
+
+        then:
+        dataFileSubmissionObject.egaAliasName == egaFileAliases.first()
+    }
+
+    void "test create bam file submission objects"() {
+        given:
+        Submission submission = SubmissionDomainFactory.createSubmission()
+        List<String> filenames = [DomainFactory.createRoddyBamFile().id, DomainFactory.createRoddyBamFile().id]
+        List<String> egaSampleAliases = [
+                SubmissionDomainFactory.createSampleSubmissionObject().egaAliasName,
+                SubmissionDomainFactory.createSampleSubmissionObject().egaAliasName,
+        ]
+        List<String> egaFileAliases = [
+                "alias1",
+                "alias2",
+        ]
+
+        when:
+        egaSubmissionService.createBamFileSubmissionObjects(submission, filenames, egaFileAliases, egaSampleAliases)
+
+        then:
+        submission.bamFilesToSubmit.size() == BamFileSubmissionObject.findAll().size()
     }
 }

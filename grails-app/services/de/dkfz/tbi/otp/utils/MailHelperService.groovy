@@ -20,6 +20,10 @@ class MailHelperService {
     }
 
     void sendEmail(String emailSubject, String content, List<String> recipients) {
+        sendEmail(emailSubject, content, recipients, processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER))
+    }
+
+    void sendEmail(String emailSubject, String content, List<String> recipients, String sender) {
         assert emailSubject
         assert content
         assert recipients
@@ -27,7 +31,7 @@ class MailHelperService {
         log.info "Send email: subject: '${emailSubject}', to: '${recipients}', content: '${content}'"
         if (configService.otpSendsMails()) {
             mailService.sendMail {
-                from processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER)
+                from sender
                 to recipients
                 subject emailSubject
                 body content

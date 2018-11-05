@@ -33,7 +33,7 @@
                 </tr>
             </table>
         </div>
-        <g:form controller="egaSubmission" action="selectSamples">
+        <g:form controller="egaSubmission" action="selectSamplesForm">
             <div class="otpDataTables">
                 <otp:dataTable
                     codes="${[

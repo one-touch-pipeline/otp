@@ -7,16 +7,8 @@
 </head>
 <body>
     <div class="body">
-        <g:if test="${hasErrors}">
-            <div class="errors"> <li>${message}</li></div>
-        </g:if>
-        <g:elseif test="${message}">
-            <div class="message">${message}</div>
-        </g:elseif>
-        <g:else>
-            <div class="empty"><br></div>
-        </g:else>
-        <g:uploadForm controller="egaSubmission" action="newSubmission">
+        <g:render template="/templates/messages"/>
+        <g:uploadForm controller="egaSubmission" action="newSubmissionForm">
             <table>
                 <tr>
                     <td class="myKey"><g:message code="egaSubmission.newSubmissionProject"/></td>
@@ -24,27 +16,27 @@
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="egaSubmission.newSubmissionEgaBox"/></td>
-                    <td><g:textField name="egaBox" size="130" value="${cmd.egaBox}"/></td>
+                    <td><g:textField name="egaBox" size="130" value="${cmd?.egaBox?: ""}"/></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="egaSubmission.newSubmissionName"/></td>
-                    <td><g:textField name="submissionName" size="130" value="${cmd.submissionName}"/></td>
+                    <td><g:textField name="submissionName" size="130" value="${cmd?.submissionName?: ""}"/></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="egaSubmission.newSubmissionStudyName"/></td>
-                    <td><g:textField name="studyName" size="130" value="${cmd.studyName}"/></td>
+                    <td><g:textField name="studyName" size="130" value="${cmd?.studyName?: ""}"/></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="egaSubmission.newSubmissionStudyType"/></td>
-                    <td><g:select class="criteria" id="studyType" name='studyType' from='${studyTypes}' value="${cmd.studyType}"/></td>
+                    <td><g:select class="criteria" id="studyType" name='studyType' from='${studyTypes}' value="${cmd?.studyType?: defaultStudyType}"/></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="egaSubmission.newSubmissionStudyAbstract"/></td>
-                    <td><g:textArea name="studyAbstract" value="${cmd.studyAbstract}"/></td>
+                    <td><g:textArea name="studyAbstract" value="${cmd?.studyAbstract}"/></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="egaSubmission.newSubmissionPubMedId"/></td>
-                    <td><g:textField name="pubMedId" size="130" value="${cmd.pubMedId}"/></td>
+                    <td><g:textField name="pubMedId" size="130" value="${cmd?.pubMedId}"/></td>
                 </tr>
                 <tr>
                     <td></td>

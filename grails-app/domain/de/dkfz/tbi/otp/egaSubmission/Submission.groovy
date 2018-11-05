@@ -12,6 +12,7 @@ class Submission implements Entity {
     String studyAbstract
     String pubMedId
     State state
+    SelectionState selectionState
 
     static belongsTo = [
             project: Project,
@@ -26,10 +27,10 @@ class Submission implements Entity {
     static constraints = {
         pubMedId nullable: true
         dataFilesToSubmit validator: { val, obj ->
-            return (val || obj.state == State.SELECTION)
+            return (val || obj.state == State.SELECTION || !obj.bamFilesToSubmit?.isEmpty())
         }
         bamFilesToSubmit validator: { val, obj ->
-            return (val || obj.state == State.SELECTION)
+            return (val || obj.state == State.SELECTION || !obj.dataFilesToSubmit?.isEmpty())
         }
         samplesToSubmit validator: { val, obj ->
             return (val || obj.state == State.SELECTION)
@@ -46,6 +47,13 @@ class Submission implements Entity {
         FILE_UPLOAD_FINISHED,
         METADATA_UPLOAD_FINISHED,
         PUBLISHED,
+    }
+
+    enum SelectionState {
+        SELECT_SAMPLES,
+        SAMPLE_INFORMATION,
+        SELECT_FASTQ_FILES,
+        SELECT_BAM_FILES,
     }
 
     enum StudyType {

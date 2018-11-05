@@ -26,20 +26,19 @@ class NewSubmissionControllerSubmitCommand implements Serializable {
 }
 
 @Validateable
-class UpdateSubmissionStateCommand implements Serializable {
+class UpdateSubmissionStateSubmitCommand implements Serializable {
     Submission submission
     Submission.State state
 
     static constraints = {
         state(validator: { val, obj ->
-            if (val != Submission.State.SELECTION && !obj.submission.bamFilesToSubmit) {
-                return 'No bam files to submit are selected yet'
-            }
-            if (val != Submission.State.SELECTION && !obj.submission.dataFilesToSubmit) {
-                return 'No data files to submit are selected yet'
-            }
-            if (val != Submission.State.SELECTION && !obj.submission.samplesToSubmit) {
-                return 'No samples to submit are selected yet'
+            if (val != Submission.State.SELECTION) {
+                if (!obj.submission.samplesToSubmit) {
+                    return 'No samples to submit are selected yet'
+                }
+                if (!obj.submission.bamFilesToSubmit || !obj.submission.dataFilesToSubmit) {
+                    return 'No files to submit are selected yet'
+                }
             }
         })
     }
@@ -50,11 +49,6 @@ class UpdateSubmissionStateCommand implements Serializable {
 }
 
 @Validateable
-class EditSubmissionControllerSubmitCommand implements Serializable {
-    Submission submission
-}
-
-@Validateable
 class SelectSamplesControllerSubmitCommand implements Serializable {
     Submission submission
     String next
@@ -62,10 +56,14 @@ class SelectSamplesControllerSubmitCommand implements Serializable {
 }
 
 @Validateable
-class SampleInformationUploadFormSubmitCommand implements Serializable {
+class UploadFormSubmitCommand implements Serializable {
     Submission submission
     String upload
     MultipartFile file
+
+    static constraints = {
+        upload matches: "Upload [A-Z]+ meta file"
+    }
 }
 
 @Validateable
@@ -81,4 +79,45 @@ class SampleInformationFormsSubmitCommand implements Serializable {
         next nullable: true
         csv nullable: true
     }
+}
+
+@Validateable
+class SelectFilesDataFilesFormSubmitCommand implements Serializable {
+    Submission submission
+    String saveSelection
+    String download
+    String saveAliases
+    List<Boolean> selectBox
+    List<String> filename
+    List<String> egaFileAlias
+    List<String> egaSampleAlias
+
+    static constraints = {
+        download nullable: true
+        selectBox nullable: true
+        saveSelection nullable: true
+        saveAliases nullable: true
+        egaFileAlias nullable: true
+    }
+}
+
+@Validateable
+class SelectFilesBamFilesFormSubmitCommand implements Serializable {
+    Submission submission
+    String save
+    String download
+    List<String> fileId
+    List<String> egaFileAlias
+    List<String> egaSampleAlias
+
+    static constraints = {
+        download nullable: true
+        save nullable: true
+    }
+}
+
+@Validateable
+class GenerateFilesToUploadFileSubmitCommand implements Serializable {
+    Submission submission
+    String save
 }

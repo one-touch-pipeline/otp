@@ -1,18 +1,12 @@
 package de.dkfz.tbi.otp.egaSubmission
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.util.spreadsheet.Row
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
-import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.access.prepost.*
 
 class EgaSubmissionService {
 
-    static final String INDIVIDUAL = "Individual"
-    static final String SAMPLE_TYPE = "Sample Type"
-    static final String SEQ_TYPE = "Sequence Type"
-    static final String EGA_SAMPLE_ALIAS = "EGA Sample Alias"
-    static final String FILE_TYPE = "File Type"
+    SeqTrackService seqTrackService
 
     enum FileType {
         BAM,
@@ -23,6 +17,7 @@ class EgaSubmissionService {
     Submission createSubmission(Map params) {
         Submission submission = new Submission( params + [
                 state: Submission.State.SELECTION,
+                selectionState: Submission.SelectionState.SELECT_SAMPLES,
         ])
         assert submission.save(flush: true, failOnError: true)
 
@@ -59,6 +54,8 @@ class EgaSubmissionService {
                 seqType: seqType
         ).save(flush: true)
         submission.addToSamplesToSubmit(sampleSubmissionObject)
+        submission.selectionState = Submission.SelectionState.SAMPLE_INFORMATION
+        submission.save(flush: true)
     }
 
     Map<SampleSubmissionObject, Boolean> checkFastqFiles(Submission submission) {
@@ -81,158 +78,14 @@ class EgaSubmissionService {
     Map<SampleSubmissionObject, Boolean> checkBamFiles(Submission submission) {
         Map<SampleSubmissionObject, Boolean> map = [:]
 
-        submission.samplesToSubmit.each { sampleSubmissionObject ->
-            List<AbstractMergedBamFile> abstractMergedBamFiles = AbstractMergedBamFile.createCriteria().list {
-                workPackage {
-                    eq('sample', sampleSubmissionObject.sample)
-                    eq('seqType', sampleSubmissionObject.seqType)
-                }
-                eq('withdrawn', false)
-                eq('fileOperationStatus', AbstractMergedBamFile.FileOperationStatus.PROCESSED)
-            }.findAll {
-                it.isMostRecentBamFile()
-            }
-
-            map.put(sampleSubmissionObject, !abstractMergedBamFiles.empty)
+        submission.samplesToSubmit.each {
+           map.put(it, !getAbstractMergedBamFiles(it).empty)
         }
 
         return map
     }
 
-    Map<String, String> readEgaSampleAliasesFromFile(Spreadsheet spreadsheet) {
-        Map<String, String> egaSampleAliases = [:]
-
-        spreadsheet.dataRows.each {
-            egaSampleAliases.put(getIdentifierKey(it), it.getCellByColumnTitle(EGA_SAMPLE_ALIAS).text)
-        }
-
-        return egaSampleAliases
-    }
-
-    Map<String, Boolean> readBoxesFromFile(Spreadsheet spreadsheet, FileType fileType) {
-        Map<String, Boolean> map = [:]
-
-        spreadsheet.dataRows.each {
-            map.put(getIdentifierKey(it), it.getCellByColumnTitle(FILE_TYPE).text.toUpperCase() as FileType == fileType)
-        }
-
-        return map
-    }
-
-    Map validateRows(Spreadsheet spreadsheet, Submission submission) {
-        if (spreadsheet.dataRows.size() == submission.samplesToSubmit.size()) {
-            List samplesFromDB = submission.samplesToSubmit.collect {
-                getIdentifierKeyFromSampleSubmissionObject(it)
-            }.sort()
-
-            List samplesFromFile = spreadsheet.dataRows.collect {
-                getIdentifierKey(it)
-            }.sort()
-
-            return [
-                "valid": samplesFromDB == samplesFromFile,
-                "error": "Found and expected samples are different",
-            ]
-        }
-
-        return [
-            "valid": false,
-            "error": "There are ${spreadsheet.dataRows.size() > submission.samplesToSubmit.size() ? "more" : "less"} " +
-                     "rows in the file as samples where selected",
-        ]
-    }
-
-    private static String getIdentifierKey(Row row) {
-        return row.getCellByColumnTitle(INDIVIDUAL).text +
-               row.getCellByColumnTitle(SAMPLE_TYPE).text +
-               row.getCellByColumnTitle(SEQ_TYPE).text
-    }
-
-    String getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
-        return sampleSubmissionObject.sample.individual.displayName +
-               sampleSubmissionObject.sample.sampleType.displayName +
-               sampleSubmissionObject.seqType.displayName
-    }
-
-    String generateCsvFile(List<String> sampleObjectId, List<String> alias, List<FileType> fileType) {
-        StringBuilder contentBody = new StringBuilder()
-
-        sampleObjectId.eachWithIndex { it, i ->
-            SampleSubmissionObject sampleSubmissionObject = SampleSubmissionObject.findById(it as Long)
-
-            contentBody.append("${sampleSubmissionObject.sample.individual.displayName},")
-            contentBody.append("${sampleSubmissionObject.sample.sampleType.displayName},")
-            contentBody.append("${sampleSubmissionObject.seqType.displayName},")
-            contentBody.append("${alias?.getAt(i) ?: ""},")
-            contentBody.append("${fileType?.getAt(i) ?: FileType.FASTQ}\n")
-        }
-
-        String contentHeader = [
-                INDIVIDUAL,
-                SAMPLE_TYPE,
-                SEQ_TYPE,
-                EGA_SAMPLE_ALIAS,
-                FILE_TYPE,
-        ].join(',')
-
-        return "${contentHeader}\n${contentBody}"
-    }
-
-    Map validateSampleInformationFormInput(List<String> sampleObjectId, List<String> alias, List<FileType> fileType) {
-        List<String> errors = []
-        boolean hasErrors = false
-        Map<String, String> sampleAliases =  [:]
-        Map<String, Boolean> fastqs = [:]
-        Map<String, Boolean> bams = [:]
-
-        if (fileType.findAll().size() != sampleObjectId.size()) {
-            hasErrors = true
-            errors += "For some samples files types are not selected."
-        }
-        if (alias.unique(false).size() != sampleObjectId.size()) {
-            hasErrors = true
-            errors += "Not all aliases are unique."
-        }
-        alias.sort(false).each {
-            if (it == "" ) {
-                hasErrors = true
-                errors += "For some samples no alias is configured."
-            }
-            if (SampleSubmissionObject.findByEgaAliasName(it)) {
-                hasErrors = true
-                errors += "Alias ${it} already exist.".toString()
-            }
-        }
-
-        alias.eachWithIndex { it, i ->
-            sampleAliases.put(getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject.findById(sampleObjectId[i] as Long)), it)
-        }
-        sampleObjectId.eachWithIndex { it, i ->
-            fastqs.put(getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject.findById(it as Long)), fileType[i] == FileType.FASTQ)
-            bams.put(getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject.findById(it as Long)), fileType[i] == FileType.BAM)
-        }
-
-        return [
-                hasErrors: hasErrors,
-                errors: errors.unique(),
-                fastqs: fastqs,
-                bams: bams,
-                sampleAliases: sampleAliases,
-        ]
-    }
-
-    boolean validateFileTypeFromInput(Spreadsheet spreadsheet) {
-        List<String> fileTypes = spreadsheet.dataRows.collect {
-            it.getCellByColumnTitle(FILE_TYPE).text.toUpperCase()
-        }
-
-        if (!(fileTypes.unique().size() > 2)) {
-            return FileType.collect { it.toString() }.containsAll(fileTypes.unique())
-        }
-        return false
-    }
-
-    void updateSampleSubmissionObjects(List<String> sampleObjectId, List<String> alias, List<FileType> fileType) {
+    void updateSampleSubmissionObjects(Submission submission, List<String> sampleObjectId, List<String> alias, List<FileType> fileType) {
         if (sampleObjectId.size() == alias.size() && sampleObjectId.size() == fileType.size()) {
             sampleObjectId.eachWithIndex { it, i ->
                 SampleSubmissionObject sampleSubmissionObject = SampleSubmissionObject.findById(it as Long)
@@ -241,6 +94,109 @@ class EgaSubmissionService {
                 sampleSubmissionObject.useFastqFile = fileType[i] == FileType.FASTQ
                 sampleSubmissionObject.save(flush: true)
             }
+            if (submission.samplesToSubmit.any { it.useFastqFile } ) {
+                submission.selectionState = Submission.SelectionState.SELECT_FASTQ_FILES
+            } else {
+                submission.selectionState = Submission.SelectionState.SELECT_BAM_FILES
+            }
+            submission.save(flush: true)
         }
+    }
+
+    void updateDataFileSubmissionObjects(List<String> filename, List<String> egaFileAlias, Submission submission) {
+        filename.eachWithIndex { it, i ->
+            DataFileSubmissionObject dataFileSubmissionObject = DataFileSubmissionObject.findByDataFile(DataFile.findByFileName(it))
+            dataFileSubmissionObject.egaAliasName = egaFileAlias[i]
+            dataFileSubmissionObject.save(flush: true)
+        }
+        if (submission.samplesToSubmit.any { it.useBamFile } ) {
+            submission.selectionState = Submission.SelectionState.SELECT_BAM_FILES
+            submission.save(flush: true)
+        }
+    }
+
+    List getDataFilesAndAlias(Submission submission) {
+        if (submission.dataFilesToSubmit) {
+            return submission.dataFilesToSubmit.collect {
+                [it.dataFile, SampleSubmissionObject.findBySampleAndSeqType(it.dataFile.seqTrack.sample, it.dataFile.seqType).egaAliasName]
+            }.sort { it[1] }
+        } else {
+            return submission.samplesToSubmit.findAll { it.useFastqFile }.collectMany {
+                seqTrackService.getSequenceFilesForSeqTrack(SeqTrack.findBySampleAndSeqType(it.sample, it.seqType))
+            }.collect {
+                [it, SampleSubmissionObject.findBySampleAndSeqType(it.seqTrack.sample, it.seqType).egaAliasName]
+            }.sort { it[1] }
+        }
+    }
+
+    List getBamFilesAndAlias(Submission submission) {
+        if (submission.bamFilesToSubmit) {
+            return submission.bamFilesToSubmit.collect {
+                [it.bamFile, SampleSubmissionObject.findBySampleAndSeqType(it.bamFile.sample, it.bamFile.seqType).egaAliasName]
+            }.sort { it[1] }
+        } else {
+            submission.samplesToSubmit.findAll { it.useBamFile }.collectMany { sampleSubmissionObject ->
+                getAbstractMergedBamFiles(sampleSubmissionObject)
+            }.collect {
+                [it, SampleSubmissionObject.findBySampleAndSeqType(it.sample, it.seqType).egaAliasName]
+            }.sort { it[1] }
+        }
+    }
+
+    private List<AbstractMergedBamFile> getAbstractMergedBamFiles(SampleSubmissionObject sampleSubmissionObject) {
+        return AbstractMergedBamFile.createCriteria().list {
+            workPackage {
+                eq('sample', sampleSubmissionObject.sample)
+                eq('seqType', sampleSubmissionObject.seqType)
+            }
+            eq('withdrawn', false)
+            eq('fileOperationStatus', AbstractMergedBamFile.FileOperationStatus.PROCESSED)
+        }.findAll {
+            it.isMostRecentBamFile()
+        }
+    }
+
+    void createDataFileSubmissionObjects(Submission submission, List<Boolean> selectBox, List<String> filename, List<String> egaSampleAlias) {
+        selectBox.eachWithIndex { it, i ->
+            if (it) {
+                DataFileSubmissionObject dataFileSubmissionObject = new DataFileSubmissionObject(
+                        dataFile: DataFile.findByFileName(filename[i]),
+                        sampleSubmissionObject: SampleSubmissionObject.findByEgaAliasName(egaSampleAlias[i])
+                ).save(flush: true)
+                submission.addToDataFilesToSubmit(dataFileSubmissionObject)
+            }
+        }
+    }
+
+    void createBamFileSubmissionObjects(Submission submission, List<String> fileId, List<String> egaFileAliases, List<String> egaSampleAliases) {
+        egaFileAliases.eachWithIndex { it, i ->
+            if (it) {
+                BamFileSubmissionObject bamFileSubmissionObject = new BamFileSubmissionObject(
+                        bamFile: AbstractMergedBamFile.findById(fileId[i] as Long),
+                        sampleSubmissionObject: SampleSubmissionObject.findByEgaAliasName(egaSampleAliases[i]),
+                        egaAliasName: it
+                ).save(flush: true)
+                submission.addToBamFilesToSubmit(bamFileSubmissionObject)
+            }
+        }
+    }
+
+    List<List> getSampleAndSeqType(Project project) {
+        return SeqTrack.createCriteria().list {
+            projections {
+                sample {
+                    property('id')
+                    individual {
+                        eq('project', project)
+                        property('pid')
+                        order('pid', 'asc')
+                    }
+                    sampleType {
+                        property('name')
+                    }
+                }
+                property('seqType')
+            }
+        }.unique()
     }
 }

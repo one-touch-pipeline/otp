@@ -5,9 +5,9 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class DataFileSubmissionObject implements Entity, SubmissionObject {
 
-    static belongsTo = [dataFile: DataFile]
+    static belongsTo = [dataFile: DataFile, sampleSubmissionObject: SampleSubmissionObject]
 
     static constraints = {
-        egaAliasName nullable: true
+        egaAliasName nullable: true, unique: true
     }
 }

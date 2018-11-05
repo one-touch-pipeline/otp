@@ -39,7 +39,7 @@ $.otp.selectSamplesTable = {
                     "success": function (json) {
                         for (var i = 0; i < json.aaData.length; i += 1) {
                             var column = json.aaData[i];
-                            column[0] = '<input type="checkbox" name="sampleAndSeqType[' + i + ']" value="'+ column[0] +'"/>';
+                            column[0] = '<input type="checkbox" name="sampleAndSeqType" value="'+ column[0] +'"/>';
                         }
                         fnCallback(json);
                     }

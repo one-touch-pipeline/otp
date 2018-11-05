@@ -13,7 +13,7 @@
         </g:if>
 
         <div class="buttons">
-            <g:link action="newSubmission" params="[project: project.id]"><g:message code="egaSubmission.newSubmission"/></g:link>
+            <g:link action="newSubmission" params="[id: project.id]"><g:message code="egaSubmission.newSubmission"/></g:link>
         </div>
         <h3><g:message code="egaSubmission.submissionHeader"/></h3>
         <table>
@@ -35,7 +35,7 @@
                             value="${it.state}"/></td>
                     <td>
                         <g:if test="${it.state == de.dkfz.tbi.otp.egaSubmission.Submission.State.SELECTION}">
-                            <g:link action="editSubmission" params="['submission.id': it.id]"><g:message code="egaSubmission.submissionEdit"/></g:link>
+                            <g:link action="editSubmission" params="['id': it.id]"><g:message code="egaSubmission.submissionEdit"/></g:link>
                         </g:if>
                     </td>
                 </tr>

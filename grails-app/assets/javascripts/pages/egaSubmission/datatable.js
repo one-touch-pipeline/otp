@@ -1,7 +1,7 @@
 /*jslint browser: true */
 /*global $ */
 
-$.otp.sampleInformationTable = {
+$.otp.egaTable = {
 
     makeDataTable: function () {
         "use strict";
