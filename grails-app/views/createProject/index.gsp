@@ -55,6 +55,10 @@
                 <td><g:select class="criteria" id="group" name='projectGroup' from='${projectGroups}' value="${cmd.projectGroup}"/></td>
             </tr>
             <tr>
+                <td class="myKey"><g:message code="createProject.sampleParse"/></td>
+                <td><g:select class="criteria" id="group" name='sampleIdentifierParserBeanName' from='${sampleIdentifierParserBeanNames}' value="${cmd.sampleIdentifierParserBeanName}" optionValue="displayName"/></td>
+            </tr>
+            <tr>
                 <td class="myKey"><g:message code="createProject.tumorEntity"/></td>
                 <td><g:select class="criteria" name='tumorName' from='${tumorEntities}' value="${cmd.tumorEntity}"/></td>
             </tr>

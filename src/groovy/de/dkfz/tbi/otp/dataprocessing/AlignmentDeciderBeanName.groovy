@@ -1,20 +1,17 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-enum AlignmentDeciderBeanNames {
+import groovy.transform.*
+
+@TupleConstructor
+enum AlignmentDeciderBeanName {
     NO_ALIGNMENT('noAlignmentDecider', 'No Alignment'),
     OTP_ALIGNMENT('defaultOtpAlignmentDecider', 'OTP Alignment'),
     PAN_CAN_ALIGNMENT('panCanAlignmentDecider', 'PanCan Alignment');
 
-    final String bean
+    final String beanName
     final String displayName
 
-    private AlignmentDeciderBeanNames(String bean, String displayName) {
-        this.bean = bean
-        this.displayName = displayName
-    }
-
     static String findByBeanName(String bean) {
-        values().find {it.bean == bean}
+        values().find {it.beanName == bean}
     }
-
 }

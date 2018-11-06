@@ -31,7 +31,7 @@ class ProjectServiceWithoutAutowiredSpec extends Specification {
                 'project',
                 dirName,
                 new Realm(),
-                AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 ['category']
         )
 

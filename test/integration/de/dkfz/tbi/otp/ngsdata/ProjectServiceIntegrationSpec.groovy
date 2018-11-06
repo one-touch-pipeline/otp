@@ -32,6 +32,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     TestConfigService configService
 
     static final String FILE_NAME = "fileName"
+    static final byte[] CONTENT = 0..3
 
 
     @Rule
@@ -106,7 +107,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: dirName,
                 dirAnalysis: dirAnalysis,
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
+                sampleIdentifierParserBeanName: sampleIdentifierParserBeanName,
                 categoryNames: category,
                 unixGroup: group,
                 projectGroup: projectGroup,
@@ -131,13 +133,13 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         project.description == description
 
         where:
-        name      | dirName | dirAnalysis | projectGroup   | nameInMetadataFiles | copyFiles | description   | category     | processingPriority
-        'project' | 'dir'   | ''          | ''             | 'project'           | true      | 'description' | ["category"] | ProcessingPriority.NORMAL
-        'project' | 'dir'   | ''          | ''             | null                | true      | ''            | ["category"] | ProcessingPriority.FAST_TRACK
-        'project' | 'dir'   | ''          | 'projectGroup' | 'project'           | true      | 'description' | ["category"] | ProcessingPriority.NORMAL
-        'project' | 'dir'   | ''          | ''             | 'project'           | false     | ''            | ["category"] | ProcessingPriority.FAST_TRACK
-        'project' | 'dir'   | ''          | ''             | 'project'           | true      | 'description' | ["category"] | ProcessingPriority.NORMAL
-        'project' | 'dir'   | '/dirA'     | ''             | 'project'           | true      | 'description' | []           | ProcessingPriority.FAST_TRACK
+        name      | dirName | dirAnalysis | projectGroup   | nameInMetadataFiles | copyFiles | description   | category     | processingPriority            | sampleIdentifierParserBeanName
+        'project' | 'dir'   | ''          | ''             | 'project'           | true      | 'description' | ["category"] | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.NO_PARSER
+        'project' | 'dir'   | ''          | ''             | null                | true      | ''            | ["category"] | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM
+        'project' | 'dir'   | ''          | 'projectGroup' | 'project'           | true      | 'description' | ["category"] | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO
+        'project' | 'dir'   | ''          | ''             | 'project'           | false     | ''            | ["category"] | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.HIPO2
+        'project' | 'dir'   | ''          | ''             | 'project'           | true      | 'description' | ["category"] | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP
+        'project' | 'dir'   | '/dirA'     | ''             | 'project'           | true      | 'description' | []           | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER
     }
 
     void "test createProject if directory is created"() {
@@ -151,7 +153,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
@@ -159,6 +161,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 copyFiles: false,
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
+                sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -187,7 +190,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: dirName,
                 dirAnalysis: '/dirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
@@ -195,6 +198,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 copyFiles: true,
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
+                sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -223,7 +227,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['category'],
                 unixGroup: 'invalidValue',
                 projectGroup: '',
@@ -231,6 +235,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 copyFiles: false,
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
+                sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -251,7 +256,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: 'dir',
                 dirAnalysis: 'invalidDirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
@@ -290,7 +295,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
@@ -298,6 +303,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 copyFiles: false,
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
+                sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -353,7 +359,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
+                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['invalid category'],
                 unixGroup: group,
                 projectGroup: '',
@@ -506,7 +512,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean
+        project.alignmentDeciderBeanName == AlignmentDeciderBeanName.OTP_ALIGNMENT.beanName
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
         referenceGenomeProjectSeqTypes.every { it.referenceGenome == referenceGenome }
         referenceGenomeProjectSeqTypes.size() == 2
@@ -525,7 +531,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean
+        project.alignmentDeciderBeanName == AlignmentDeciderBeanName.OTP_ALIGNMENT.beanName
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
         referenceGenomeProjectSeqTypes.every { it.referenceGenome == referenceGenome2 }
         referenceGenomeProjectSeqTypes.size() == 2
@@ -556,7 +562,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
         List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
                 configuration.project,
                 configuration.seqType,
@@ -586,7 +592,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
         Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersion(
                 configuration.project,
                 Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT),
@@ -800,7 +806,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.OTP_ALIGNMENT.beanName
         Collection<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull()
         referenceGenomeProjectSeqTypes.every {
             it.referenceGenome.name == configuration.referenceGenome && it.statSizeFileName == null
@@ -819,7 +825,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.NO_ALIGNMENT.bean
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.NO_ALIGNMENT.beanName
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 0
     }
 
@@ -870,7 +876,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = CollectionUtils.exactlyOneElement(
                 ReferenceGenomeProjectSeqType.list()
         )
@@ -924,7 +930,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
         List<ReferenceGenomeProjectSeqType> leftOverConfigurations = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
         leftOverConfigurations.size() == (deprecateConfigurations ? 1 : configuredSampleTypes + 1)
         ReferenceGenomeProjectSeqType generalRefGenConfig = leftOverConfigurations.find { it.sampleType == null }
@@ -947,7 +953,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
         RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
                 configuration.project,
                 Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT),
@@ -1042,7 +1048,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         assert roddyWorkflowConfigs.size() == 1
         File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
         assert roddyWorkflowConfig.exists()
-        assert project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        assert project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
     }
 
 
@@ -1059,7 +1065,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.NO_ALIGNMENT.bean
+        project.alignmentDeciderBeanName == AlignmentDeciderBeanName.NO_ALIGNMENT.beanName
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 0
     }
 
@@ -1354,8 +1360,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test createProjectInfoAndUploadFile, succeeds"() {
         given:
         Project project = DomainFactory.createProject()
-        byte[] content = [0, 1, 2, 3]
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, content)
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
         mockMultipartFile.originalFilename = FILE_NAME
 
         when:
@@ -1367,16 +1372,15 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         Path projectInfoFile = Paths.get("${project.getProjectDirectory()}/${projectService.PROJECT_INFO}/${FILE_NAME}")
         PosixFileAttributes attrs = Files.readAttributes(projectInfoFile, PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
 
-        projectInfoFile.bytes == content
+        projectInfoFile.bytes == CONTENT
         TestCase.assertContainSame(attrs.permissions(), [PosixFilePermission.OWNER_READ])
     }
 
     void "test copyprojectInfoToProjectFolder, succeeds"() {
         given:
         Project project = DomainFactory.createProject()
-        byte[] content = [0, 1, 2, 3]
         byte[] projectInfoContent = []
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, content)
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
         mockMultipartFile.originalFilename = FILE_NAME
 
 
@@ -1387,15 +1391,14 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        projectInfoContent == content
+        projectInfoContent == CONTENT
     }
 
     void "test copyprojectInfoToProjectFolder, when no file exists, returns []"() {
         given:
         Project project = DomainFactory.createProject()
-        byte[] content = [0, 1, 2, 3]
         byte[] projectInfoContent = []
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, content)
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
         mockMultipartFile.originalFilename = FILE_NAME
 
 

@@ -64,7 +64,7 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
         SampleIdentifier normalIdentifier = DomainFactory.createSampleIdentifier()
 
         SampleIdentifier identifierWithIndividualRoddyConfig = DomainFactory.createSampleIdentifier()
-        identifierWithIndividualRoddyConfig.sample.individual.project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        identifierWithIndividualRoddyConfig.sample.individual.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
         identifierWithIndividualRoddyConfig.sample.individual.project.save(flush: true)
         DomainFactory.createRoddyWorkflowConfig([
                 individual: identifierWithIndividualRoddyConfig.individual,
@@ -74,7 +74,7 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
         ])
 
         SampleIdentifier identifierWithProjectRoddyConfig = DomainFactory.createSampleIdentifier()
-        identifierWithProjectRoddyConfig.sample.individual.project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        identifierWithProjectRoddyConfig.sample.individual.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
         identifierWithProjectRoddyConfig.sample.individual.project.save(flush: true)
         DomainFactory.createRoddyWorkflowConfig([
                 project: identifierWithProjectRoddyConfig.project,
@@ -84,7 +84,7 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
         ])
 
         SampleIdentifier identifierRnaWithProjectRoddyConfig = DomainFactory.createSampleIdentifier()
-        identifierRnaWithProjectRoddyConfig.sample.individual.project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        identifierRnaWithProjectRoddyConfig.sample.individual.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
         identifierRnaWithProjectRoddyConfig.sample.individual.project.save(flush: true)
         DomainFactory.createRoddyWorkflowConfig([
                 project: identifierRnaWithProjectRoddyConfig.project,
@@ -94,14 +94,14 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
         ])
 
         DomainFactory.createRoddyWorkflowConfig([
-                project: DomainFactory.createProject(name: "project01", alignmentDeciderBeanName: AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean),
+                project: DomainFactory.createProject(name: "project01", alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName),
                 seqType: DomainFactory.createWholeGenomeBisulfiteSeqType(),
                 pipeline: DomainFactory.createPanCanPipeline(),
                 adapterTrimmingNeeded: true,
         ])
 
         SampleIdentifier identifierWithOtpAlignment = DomainFactory.createSampleIdentifier()
-        identifierWithOtpAlignment.sample.individual.project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean
+        identifierWithOtpAlignment.sample.individual.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.OTP_ALIGNMENT.beanName
         identifierWithOtpAlignment.sample.individual.project.save(flush: true)
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(

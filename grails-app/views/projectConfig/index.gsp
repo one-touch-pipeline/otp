@@ -87,6 +87,17 @@
                     <td id="group">${projectGroup}</td>
                 </tr>
                 <tr>
+                    <td class="myKey"><g:message code="projectOverview.sampleParser"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateSampleIdentifierParserBeanName", params: ['project.id': project.id, 'fieldName': 'sampleIdentifierParserBeanName'])}"
+                                values="${sampleIdentifierParserBeanNames}"
+                                value="${sampleIdentifierParserBeanName}"/>
+                    </td>
+                </tr>
+                <tr>
                     <td class="myKey"><g:message code="projectOverview.copyFiles"/></td>
                     <td id="copyFiles">${copyFiles}</td>
                 </tr>

@@ -64,11 +64,11 @@ class ProjectConfigController implements CheckAndCall {
         Pipeline snv = Pipeline.findByName(Pipeline.Name.RODDY_SNV)
         Pipeline indel = Pipeline.findByName(Pipeline.Name.RODDY_INDEL)
         Pipeline sophia = Pipeline.findByName(Pipeline.Name.RODDY_SOPHIA)
-        Pipeline aceseq= Pipeline.findByName(Pipeline.Name.RODDY_ACESEQ)
+        Pipeline aceseq = Pipeline.findByName(Pipeline.Name.RODDY_ACESEQ)
         Pipeline runYapsa = Pipeline.findByName(Pipeline.Name.RUN_YAPSA)
 
         List snvConfigTable = createAnalysisConfigTable(project, snv)
-        List indelConfigTable = createAnalysisConfigTable(project,indel)
+        List indelConfigTable = createAnalysisConfigTable(project, indel)
         List sophiaConfigTable = createAnalysisConfigTable(project, sophia)
         List aceseqConfigTable = createAnalysisConfigTable(project, aceseq)
         List runYapsaConfigTable = createAnalysisConfigTable(project, runYapsa)
@@ -90,46 +90,48 @@ class ProjectConfigController implements CheckAndCall {
         }
 
         return [
-                projects                  : projects,
-                project                   : project,
-                creationDate              : dates.creationDate,
-                lastReceivedDate          : dates.lastReceivedDate,
-                comment                   : project?.comment,
-                nameInMetadata            : project?.nameInMetadataFiles ?: '',
-                seqTypeMergingCriteria    : seqTypeMergingCriteria,
-                roddySeqTypes             : SeqTypeService.getRoddyAlignableSeqTypes().sort { it.displayNameWithLibraryLayout },
-                singleCellSeqTypes        : SeqTypeService.getSingleCellAlignableSeqTypes().sort { it.displayNameWithLibraryLayout },
-                snvSeqTypes               : snv.getSeqTypes(),
-                indelSeqTypes             : indel.getSeqTypes(),
-                sophiaSeqTypes            : sophia.getSeqTypes(),
-                aceseqSeqTypes            : aceseq.getSeqTypes(),
-                runYapsaSeqTypes          : runYapsa.getSeqTypes(),
-                snv                       : project?.snv,
-                thresholdsTable           : thresholdsTable,
-                snvConfigTable            : snvConfigTable,
-                indelConfigTable          : indelConfigTable,
-                sophiaConfigTable         : sophiaConfigTable,
-                aceseqConfigTable         : aceseqConfigTable,
-                runYapsaConfigTable       : runYapsaConfigTable,
-                snvDropDown               : Project.Snv.values(),
-                directory                 : projectDirectory ?: '',
-                analysisDirectory         : project?.dirAnalysis ?: '',
-                projectGroup              : project?.projectGroup,
-                copyFiles                 : project?.hasToBeCopied,
-                fingerPrinting            : project?.fingerPrinting,
-                description               : project?.description,
-                customFinalNotification   : project?.customFinalNotification,
-                projectCategories         : ProjectCategory.listOrderByName()*.name,
-                unixGroup                 : project?.unixGroup,
-                costCenter                : project?.costCenter,
-                tumorEntities             : TumorEntity.list().sort(),
-                tumorEntity               : project?.tumorEntity,
-                processingPriority        : ProcessingPriority.getByPriorityNumber(project?.processingPriority),
-                processingPriorities      : ProcessingPriority.displayPriorities,
-                checkSophiaReferenceGenome: checkSophiaReferenceGenome,
-                checkAceseqReferenceGenome: checkAceseqReferenceGenome,
-                projectInfos              : project?.projectInfos,
-                cellRangerOverview        : cellRangerOverview,
+                projects                       : projects,
+                project                        : project,
+                creationDate                   : dates.creationDate,
+                lastReceivedDate               : dates.lastReceivedDate,
+                comment                        : project?.comment,
+                nameInMetadata                 : project?.nameInMetadataFiles ?: '',
+                seqTypeMergingCriteria         : seqTypeMergingCriteria,
+                seqTypes                       : SeqTypeService.getRoddyAlignableSeqTypes().sort { it.displayNameWithLibraryLayout },
+                singleCellSeqTypes             : SeqTypeService.getSingleCellAlignableSeqTypes().sort { it.displayNameWithLibraryLayout },
+                snvSeqTypes                    : snv.getSeqTypes(),
+                indelSeqTypes                  : indel.getSeqTypes(),
+                sophiaSeqTypes                 : sophia.getSeqTypes(),
+                aceseqSeqTypes                 : aceseq.getSeqTypes(),
+                runYapsaSeqTypes               : runYapsa.getSeqTypes(),
+                snv                            : project?.snv,
+                thresholdsTable                : thresholdsTable,
+                snvConfigTable                 : snvConfigTable,
+                indelConfigTable               : indelConfigTable,
+                sophiaConfigTable              : sophiaConfigTable,
+                aceseqConfigTable              : aceseqConfigTable,
+                runYapsaConfigTable            : runYapsaConfigTable,
+                snvDropDown                    : Project.Snv.values(),
+                directory                      : projectDirectory ?: '',
+                analysisDirectory              : project?.dirAnalysis ?: '',
+                projectGroup                   : project?.projectGroup,
+                sampleIdentifierParserBeanName : project?.sampleIdentifierParserBeanName,
+                sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
+                copyFiles                      : project?.hasToBeCopied,
+                fingerPrinting                 : project?.fingerPrinting,
+                description                    : project?.description,
+                customFinalNotification        : project?.customFinalNotification,
+                projectCategories              : ProjectCategory.listOrderByName()*.name,
+                unixGroup                      : project?.unixGroup,
+                costCenter                     : project?.costCenter,
+                tumorEntities                  : TumorEntity.list().sort(),
+                tumorEntity                    : project?.tumorEntity,
+                processingPriority             : ProcessingPriority.getByPriorityNumber(project?.processingPriority),
+                processingPriorities           : ProcessingPriority.displayPriorities,
+                checkSophiaReferenceGenome     : checkSophiaReferenceGenome,
+                checkAceseqReferenceGenome     : checkAceseqReferenceGenome,
+                projectInfos                   : project?.projectInfos,
+                cellRangerOverview             : cellRangerOverview,
         ]
     }
 
@@ -193,6 +195,13 @@ class ProjectConfigController implements CheckAndCall {
             projectService.updateProjectField(Project.Snv.valueOf(cmd.value), cmd.fieldName, cmd.project)
         })
     }
+
+    JSON updateSampleIdentifierParserBeanName(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd, {
+            projectService.updateProjectField(SampleIdentifierParserBeanName.valueOf(cmd.value), cmd.fieldName, cmd.project)
+        })
+    }
+
 
     def addProjectInfo(AddProjectInfoCommand cmd) {
         withForm {

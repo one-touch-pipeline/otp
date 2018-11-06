@@ -50,7 +50,7 @@ boolean adapterTrimmingNeeded = false
 
 //-----------------------
 RoddyWorkflowConfigService roddyWorkflowConfigService = ctx.roddyWorkflowConfigService
-String panCanAlignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+String panCanAlignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
 
 LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
     assert projectName

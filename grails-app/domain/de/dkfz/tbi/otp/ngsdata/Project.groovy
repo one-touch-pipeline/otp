@@ -67,6 +67,8 @@ class Project implements Commentable, Entity {
 
     TumorEntity tumorEntity
 
+    SampleIdentifierParserBeanName sampleIdentifierParserBeanName = SampleIdentifierParserBeanName.NO_PARSER
+
     static belongsTo = [
             ProjectGroup,
             Realm,

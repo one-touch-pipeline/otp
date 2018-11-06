@@ -6,4 +6,5 @@ ruleset {
 
     rule("file:grails-app/codenarcRules/ScheduledServiceBugRule.groovy")
     rule("file:grails-app/codenarcRules/DoNotCreateServicesWithNewRule.groovy")
+    rule("file:grails-app/codenarcRules/EnumForBeanNameRule.groovy")
 }

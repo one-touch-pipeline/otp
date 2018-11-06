@@ -32,6 +32,7 @@ class CreateProjectController {
                         categoryNames: cmd.projectCategories,
                         unixGroup: cmd.unixGroup,
                         projectGroup: cmd.projectGroup,
+                        sampleIdentifierParserBeanName: cmd.sampleIdentifierParserBeanName,
                         nameInMetadataFiles: cmd.nameInMetadataFiles,
                         copyFiles: cmd.copyFiles,
                         fingerPrinting: cmd.fingerPrinting,
@@ -47,14 +48,15 @@ class CreateProjectController {
             }
         }
         return [
-                projectGroups            : ["No Group"] + projectGroupService.availableProjectGroups()*.name,
-                tumorEntities            : ["No tumor entity"] + TumorEntity.list().sort()*.name,
-                processingPriorities     : ProcessingPriority.displayPriorities,
-                defaultProcessingPriority: ProcessingPriority.NORMAL,
-                projectCategories        : ProjectCategory.listOrderByName(),
-                message                  : message,
-                cmd                      : cmd,
-                hasErrors                : hasErrors,
+            projectGroups: ["No Group"] + projectGroupService.availableProjectGroups()*.name,
+            tumorEntities: ["No tumor entity"] + TumorEntity.list().sort()*.name,
+            sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values(),
+            processingPriorities: ProcessingPriority.displayPriorities,
+            defaultProcessingPriority: ProcessingPriority.NORMAL,
+            projectCategories: ProjectCategory.listOrderByName(),
+            message: message,
+            cmd: cmd,
+            hasErrors: hasErrors,
         ]
     }
 }
@@ -68,6 +70,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     String unixGroup
     String costCenter
     String projectGroup
+    SampleIdentifierParserBeanName sampleIdentifierParserBeanName
     TumorEntity tumorEntity
     List<String> projectCategories = [].withLazyDefault { new String() }
     MultipartFile projectInfoFile

@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.ngsdata
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class DeepSampleIdentifierParserSpec extends Specification{
+class DeepSampleIdentifierParserSpec extends Specification {
     DeepSampleIdentifierParser deepSampleIdentifierParser = new DeepSampleIdentifierParser()
 
     void "test parsing invalid input"() {

@@ -1416,11 +1416,12 @@ class DomainFactory {
 
     static Project createProject(Map projectProperties = [:]) {
         return createDomainObject(Project, [
-                name                    : 'project_' + (counter++),
-                phabricatorAlias        : 'phabricatorAlias_' + (counter++),
-                dirName                 : 'projectDirName_' + (counter++),
-                realm                   : { createRealm() },
-                alignmentDeciderBeanName: 'DUMMY_BEAN_NAME',
+                name                          : 'project_' + (counter++),
+                phabricatorAlias              : 'phabricatorAlias_' + (counter++),
+                dirName                       : 'projectDirName_' + (counter++),
+                realm                         : { createRealm() },
+                alignmentDeciderBeanName      : 'DUMMY_BEAN_NAME',
+                sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER
         ], projectProperties)
     }
 

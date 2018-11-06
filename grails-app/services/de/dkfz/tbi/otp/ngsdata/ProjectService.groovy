@@ -134,6 +134,7 @@ class ProjectService {
         project.fingerPrinting = projectParams.fingerPrinting
         project.nameInMetadataFiles = projectParams.nameInMetadataFiles
         project.setProjectGroup(ProjectGroup.findByName(projectParams.projectGroup))
+        project.sampleIdentifierParserBeanName = projectParams.sampleIdentifierParserBeanName
         project.description = projectParams.description
         project.unixGroup = projectParams.unixGroup
         project.costCenter = projectParams.costCenter
@@ -211,6 +212,7 @@ class ProjectService {
         boolean fingerPrinting
         String costCenter
         String description
+        SampleIdentifierParserBeanName sampleIdentifierParserBeanName
         ProcessingPriority processingPriority
         TumorEntity tumorEntity
         MultipartFile projectInfoFile
@@ -236,6 +238,7 @@ class ProjectService {
                 "projectCategories",
                 "snv",
                 "tumorEntity",
+                "sampleIdentifierParserBeanName",
         ].contains(fieldName)
 
         project."${fieldName}" = fieldValue
@@ -419,7 +422,7 @@ class ProjectService {
         } else {
             deprecateReferenceGenomeByProjectAndSeqTypeAndNoSampleType(rnaAlignmentConfiguration.project, rnaAlignmentConfiguration.seqType)
         }
-        rnaAlignmentConfiguration.project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        rnaAlignmentConfiguration.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
 
         Map alignmentProperties = [:]
 
@@ -463,12 +466,12 @@ class ProjectService {
     }
 
     private void deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(ProjectSeqTypeReferenceGenomeConfiguration config) {
-        if (config.project.alignmentDeciderBeanName == AlignmentDeciderBeanNames.OTP_ALIGNMENT.bean) {
+        if (config.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.OTP_ALIGNMENT.beanName) {
             deprecateAllReferenceGenomesByProject(config.project)
         } else {
             deprecateAllReferenceGenomesByProjectAndSeqType(config.project, config.seqType)
         }
-        config.project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        config.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
         config.project.save(flush: true, failOnError: true)
     }
 
@@ -546,7 +549,7 @@ class ProjectService {
                 roddyWorkflowConfigBasedProject.configVersion,
                 roddyWorkflowConfigBasedProject.adapterTrimmingNeeded,
         )
-        project.alignmentDeciderBeanName = AlignmentDeciderBeanNames.PAN_CAN_ALIGNMENT.bean
+        project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
         project.save(flush: true)
     }
 
