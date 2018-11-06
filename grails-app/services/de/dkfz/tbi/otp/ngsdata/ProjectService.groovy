@@ -134,7 +134,6 @@ class ProjectService {
         project.fingerPrinting = projectParams.fingerPrinting
         project.nameInMetadataFiles = projectParams.nameInMetadataFiles
         project.setProjectGroup(ProjectGroup.findByName(projectParams.projectGroup))
-        project.mailingListName = projectParams.mailingListName
         project.description = projectParams.description
         project.unixGroup = projectParams.unixGroup
         project.costCenter = projectParams.costCenter
@@ -210,7 +209,6 @@ class ProjectService {
         String nameInMetadataFiles
         boolean copyFiles
         boolean fingerPrinting
-        String mailingListName
         String costCenter
         String description
         ProcessingPriority processingPriority
@@ -233,7 +231,6 @@ class ProjectService {
                 "costCenter",
                 "description",
                 "dirAnalysis",
-                "mailingListName",
                 "nameInMetadataFiles",
                 "processingPriority",
                 "projectCategories",

@@ -117,7 +117,6 @@ class ProjectConfigController implements CheckAndCall {
                 projectGroup              : project?.projectGroup,
                 copyFiles                 : project?.hasToBeCopied,
                 fingerPrinting            : project?.fingerPrinting,
-                mailingListName           : project?.mailingListName,
                 description               : project?.description,
                 customFinalNotification   : project?.customFinalNotification,
                 projectCategories         : ProjectCategory.listOrderByName()*.name,
@@ -147,10 +146,6 @@ class ProjectConfigController implements CheckAndCall {
 
         Map map = [alignmentInfo: alignmentInfo, alignmentError: alignmentError]
         render map as JSON
-    }
-
-    JSON updateMailingListName(UpdateMailingListCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
     }
 
     JSON updateDescription(UpdateProjectCommand cmd) {
@@ -360,18 +355,6 @@ class UpdateProjectCommand implements Serializable {
 
     static constraints = {
         fieldName(nullable: true)
-    }
-}
-
-class UpdateMailingListCommand extends UpdateProjectCommand {
-    static constraints = {
-        value(nullable: true, validator: { val, obj ->
-            if (val) {
-                if (!(val.startsWith("tr_") && val.contains('@'))) {
-                    return "Has to Start with 'tr_' and contain a '@'."
-                }
-            }
-        })
     }
 }
 

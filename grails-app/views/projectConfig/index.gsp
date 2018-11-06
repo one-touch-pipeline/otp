@@ -102,15 +102,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.mailingListName"/></td>
-                    <td>
-                        <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            link="${g.createLink(controller: 'projectConfig', action: 'updateMailingListName', params: ['project.id': project.id, 'fieldName': 'mailingListName'])}"
-                            value="${mailingListName}"/>
-                    </td>
-                </tr>
-                <tr>
                     <td class="myKey"><g:message code="projectOverview.phabricatorAlias"/></td>
                     <td>
                         <otp:editorSwitch

@@ -21,8 +21,7 @@ class CreateProjectController {
             if (hasErrors) {
                 FieldError errors = cmd.errors.getFieldError()
                 message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
-            }
-            else {
+            } else {
                 ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
                         name: cmd.name,
                         phabricatorAlias: cmd.phabricatorAlias,
@@ -36,7 +35,6 @@ class CreateProjectController {
                         nameInMetadataFiles: cmd.nameInMetadataFiles,
                         copyFiles: cmd.copyFiles,
                         fingerPrinting: cmd.fingerPrinting,
-                        mailingListName: cmd.mailingListName,
                         costCenter: cmd.costCenter,
                         description: cmd.description,
                         processingPriority: cmd.processingPriority,
@@ -49,14 +47,14 @@ class CreateProjectController {
             }
         }
         return [
-            projectGroups: ["No Group"] + projectGroupService.availableProjectGroups()*.name,
-            tumorEntities: ["No tumor entity"] + TumorEntity.list().sort()*.name,
-            processingPriorities: ProcessingPriority.displayPriorities,
-            defaultProcessingPriority: ProcessingPriority.NORMAL,
-            projectCategories: ProjectCategory.listOrderByName(),
-            message: message,
-            cmd: cmd,
-            hasErrors: hasErrors,
+                projectGroups            : ["No Group"] + projectGroupService.availableProjectGroups()*.name,
+                tumorEntities            : ["No tumor entity"] + TumorEntity.list().sort()*.name,
+                processingPriorities     : ProcessingPriority.displayPriorities,
+                defaultProcessingPriority: ProcessingPriority.NORMAL,
+                projectCategories        : ProjectCategory.listOrderByName(),
+                message                  : message,
+                cmd                      : cmd,
+                hasErrors                : hasErrors,
         ]
     }
 }
@@ -68,11 +66,10 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     String analysisDirectory
     String nameInMetadataFiles
     String unixGroup
-    String mailingListName
     String costCenter
     String projectGroup
     TumorEntity tumorEntity
-    List<String> projectCategories = [].withLazyDefault {new String()}
+    List<String> projectCategories = [].withLazyDefault { new String() }
     MultipartFile projectInfoFile
     String description
     String submit
@@ -81,7 +78,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     boolean fingerPrinting = true
 
     static constraints = {
-        name(blank: false, validator: {val, obj ->
+        name(blank: false, validator: { val, obj ->
             if (Project.findByName(val)) {
                 return 'A project with this name exists already'
             }
@@ -90,17 +87,17 @@ class CreateProjectControllerSubmitCommand implements Serializable {
             }
         })
         phabricatorAlias(nullable: true)
-        directory(blank: false, validator: {val, obj ->
+        directory(blank: false, validator: { val, obj ->
             if (Project.findByDirName(val)) {
                 return 'This path \'' + val + '\' is used by another project already'
             }
         })
         analysisDirectory(validator: { String val ->
-            if(!(!val || OtpPath.isValidAbsolutePath(val))) {
+            if (!(!val || OtpPath.isValidAbsolutePath(val))) {
                 return "\'${val}\' is not a valid absolute path"
             }
         })
-        unixGroup(blank: false, validator: {val, obj ->
+        unixGroup(blank: false, validator: { val, obj ->
             if (val == "") {
                 return 'Empty'
             }
@@ -108,13 +105,8 @@ class CreateProjectControllerSubmitCommand implements Serializable {
                 return 'Unix group contains invalid characters'
             }
         })
-        mailingListName(nullable: true, validator: {val, obj ->
-            if (val) {
-                return val.startsWith("tr_")
-            }
-        })
         costCenter(nullable: true)
-        nameInMetadataFiles(nullable: true, validator: {val, obj ->
+        nameInMetadataFiles(nullable: true, validator: { val, obj ->
             if (val && Project.findByNameInMetadataFiles(val)) {
                 return '\'' + val + '\' exists already in another project as nameInMetadataFiles entry'
             }
@@ -164,10 +156,10 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     }
 
     void setProjectInfoFile(MultipartFile projectInfoFile) {
-        if (!projectInfoFile?.originalFilename) {
-            this.projectInfoFile = null
-        } else  {
+        if (projectInfoFile?.originalFilename) {
             this.projectInfoFile = projectInfoFile
+        } else {
+            this.projectInfoFile = null
         }
     }
 }

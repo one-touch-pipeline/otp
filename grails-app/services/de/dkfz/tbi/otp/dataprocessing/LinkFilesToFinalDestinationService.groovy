@@ -42,6 +42,9 @@ class LinkFilesToFinalDestinationService {
     @Autowired
     ProcessingOptionService processingOptionService
 
+    @Autowired
+    UserProjectRoleService userProjectRoleService
+
     void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "roddyBamFile must not be null"
         if (!roddyBamFile.withdrawn) {
@@ -158,9 +161,9 @@ class LinkFilesToFinalDestinationService {
         linkFileUtils.createAndValidateLinks(linkMapSourceLink, realm)
     }
 
-    String createResultsAreBlockedSubject(RoddyBamFile roddyBamFile) {
+    String createResultsAreBlockedSubject(RoddyBamFile roddyBamFile, boolean toBeSent) {
         StringBuilder subject = new StringBuilder()
-        if (!roddyBamFile.project.mailingListName) {
+        if (toBeSent) {
             subject << 'TO BE SENT: '
         }
 
@@ -187,12 +190,10 @@ class LinkFilesToFinalDestinationService {
     }
 
     void informResultsAreBlocked(RoddyBamFile roddyBamFile) {
-        List<String> recipients = [
-                roddyBamFile.project.mailingListName,
-                processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION),
-        ].findAll()
-        String subject = createResultsAreBlockedSubject(roddyBamFile)
+        List<String> recipients = userProjectRoleService.getEmailAdressesForNotifying(roddyBamFile.project)
+        String subject = createResultsAreBlockedSubject(roddyBamFile, recipients.empty)
         String content = createResultsAreBlockedMessage(roddyBamFile)
+        recipients << processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)
         mailHelperService.sendEmail(subject, content, recipients)
     }
 

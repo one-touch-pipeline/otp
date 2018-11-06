@@ -29,6 +29,7 @@ class TrackingService {
     AceseqService aceseqService
     RunYapsaService runYapsaService
     ProcessingOptionService processingOptionService
+    UserProjectRoleService userProjectRoleService
 
     CreateNotificationTextService createNotificationTextService
 
@@ -165,21 +166,16 @@ class TrackingService {
             Project project = CollectionUtils.exactlyOneElement(seqTracks*.project.unique())
             Set<IlseSubmission> ilseSubmissions = seqTracks*.ilseSubmission.findAll() as Set
 
-            String mailingList = null
-            if (ticket.automaticNotification) {
-                mailingList = project.mailingListName
-            }
-
             List<String> recipients = []
-            if (mailingList) {
-                recipients.add(mailingList)
+            if (ticket.automaticNotification) {
+                recipients = userProjectRoleService.getEmailAdressesForNotifying(project)
             }
-            recipients.add(processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION))
-
             StringBuilder subject = new StringBuilder("[${processingOptionService.findOptionAsString(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}] ")
-            if (!mailingList) {
+            if (!recipients) {
                 subject.append('TO BE SENT: ')
             }
+            recipients << processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)
+
             if (ilseSubmissions) {
                 subject.append("[S#${ilseSubmissions*.ilseNumber.sort().join(',')}] ")
             }
@@ -213,16 +209,11 @@ class TrackingService {
             subject.append(" ${individuals*.pid.sort().join(', ')} ")
             List seqTypes = seqTracks*.seqType.findAll().unique()
             subject.append("(${seqTypes*.displayName.sort().join(', ')})")
-            String mailingList = null
             if (ticket.automaticNotification) {
-                mailingList = projects.first().mailingListName
-            }
-            if (mailingList) {
-                recipients.add(mailingList)
+                recipients = userProjectRoleService.getEmailAdressesForNotifying(projects)
             }
         }
-
-        recipients.add(processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION))
+        recipients << processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)
 
         StringBuilder content = new StringBuilder()
         content.append(status.toString())
@@ -395,7 +386,9 @@ class TrackingService {
             status = ALL_DONE
         } else if (analysis && !analysis.withdrawn && BamFileAnalysisService.processingStatesNotProcessable.contains(analysis.processingState)) {
             status = NOTHING_DONE_MIGHT_DO
-        } else if (MERGING_WORK_PACKAGE_NUMBERS.every { sp."mergingWorkPackage${it}".bamFileThatIsReadyForFurtherAnalysis }) {
+        } else if (MERGING_WORK_PACKAGE_NUMBERS.every {
+            sp."mergingWorkPackage${it}".bamFileThatIsReadyForFurtherAnalysis
+        }) {
             if (service.samplePairForProcessing(ProcessingPriority.MINIMUM, sp)) {
                 status = NOTHING_DONE_MIGHT_DO
             } else {

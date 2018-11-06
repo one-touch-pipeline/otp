@@ -47,10 +47,6 @@
                 <td><g:textField name="unixGroup" size="130" value="${cmd.unixGroup}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="createProject.mailingListName"/></td>
-                <td><g:textField name="mailingListName" size="130" value="${cmd.mailingListName}"/></td>
-            </tr>
-            <tr>
                 <td class="myKey"><g:message code="createProject.costCenter"/></td>
                 <td><g:textField name="costCenter" size="130" value="${cmd.costCenter}"/></td>
             </tr>

@@ -57,8 +57,6 @@ class Project implements Commentable, Entity {
 
     Comment comment
 
-    String mailingListName
-
     String description
 
     ProjectGroup projectGroup
@@ -114,12 +112,6 @@ class Project implements Commentable, Entity {
         })
 
         comment(nullable: true)
-
-        mailingListName(nullable: true, validator: { val, obj ->
-            if (val) {
-                return val.startsWith("tr_") && val.contains('@')
-            }
-        })
 
         description(nullable: true)
 

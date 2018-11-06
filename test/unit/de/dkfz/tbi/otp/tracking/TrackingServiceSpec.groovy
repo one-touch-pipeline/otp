@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.tracking
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import grails.test.mixin.web.*
@@ -18,6 +19,7 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
         IlseSubmission,
         Individual,
         OtrsTicket,
+        ProjectRole,
         MergingWorkPackage,
         ProcessingOption,
         Project,
@@ -36,6 +38,8 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
         SeqTrack,
         SeqType,
         SoftwareTool,
+        User,
+        UserProjectRole,
 ])
 class TrackingServiceSpec extends Specification {
 
@@ -46,6 +50,7 @@ class TrackingServiceSpec extends Specification {
 
     void setup() {
         trackingService.processingOptionService = new ProcessingOptionService()
+        trackingService.userProjectRoleService = new UserProjectRoleService()
     }
 
     @Unroll
@@ -283,23 +288,6 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
         expect:
         trackingService.sendOperatorNotification(ticket, [DomainFactory.createSeqTrack()] as Set, new ProcessingStatus(), true)
-    }
-
-    void 'sendOperatorNotification, when finalNotification is true and project.customFinalNotification is true and no Ilse, sends final notification with correct subject and to project list'() {
-        given:
-        OtrsTicket ticket = DomainFactory.createOtrsTicket()
-        String mailingListName = 'tr_a.b@c.d'
-        SeqTrack seqTrack = createSeqTrackforCustomFinalNotification(DomainFactory.createProject(mailingListName: mailingListName), null, ticket)
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
-        String recipient = HelperUtils.randomEmail
-        DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
-        String expectedHeader = "${PREFIX}#${ticket.ticketNumber} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})"
-        trackingService.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(expectedHeader, _, [mailingListName, recipient])
-        }
-
-        expect:
-        trackingService.sendOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
     }
 
     void 'sendOperatorNotification, when finalNotification is true and project.customFinalNotification is true and has an Ilse Number, sends final notification with correct subject'() {

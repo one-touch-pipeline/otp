@@ -26,8 +26,12 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     RunYapsaService runYapsaService
     CreateNotificationTextService createNotificationTextService
     ProcessingOptionService processingOptionService
+    UserProjectRoleService UserProjectRoleService
 
     List<ProcessingOption> referenceGenomeProcessingOptions
+
+    final static String EMAIL = HelperUtils.getRandomEmail()
+    final static String PREFIX = "the prefix"
 
     static List listPairAnalysis = [
             [
@@ -69,6 +73,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 runYapsaService: runYapsaService,
                 createNotificationTextService: createNotificationTextService,
                 processingOptionService: processingOptionService,
+                userProjectRoleService: userProjectRoleService,
         )
         DomainFactory.createAllAnalysableSeqTypes()
 
@@ -461,19 +466,19 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
     @Unroll
     void 'sendCustomerNotification sends expected notification'(int dataCase, boolean automaticNotification, OtrsTicket.ProcessingStep notificationStep, List<String> recipients, String subject) {
         given:
+        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
+                project: DomainFactory.createProject(name: 'Project1'),
+                user: DomainFactory.createUser(email: EMAIL),
+        )
         Sample sample1 = DomainFactory.createSample(
                 individual: DomainFactory.createIndividual(
-                        project: DomainFactory.createProject(
-                                name: 'Project1',
-                                mailingListName: 'tr_list@test.test',
-                        )
+                        project: userProjectRole.project,
                 )
         )
         Sample sample2 = DomainFactory.createSample(
                 individual: DomainFactory.createIndividual(
                         project: DomainFactory.createProject(
                                 name: 'Project2',
-                                mailingListName: null,
                         )
                 )
         )
@@ -554,26 +559,27 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         trackingService.sendCustomerNotification(ticket, status, notificationStep)
 
         where:
-        dataCase | automaticNotification | notificationStep                       | recipients                            | subject
-        1        | true                  | OtrsTicket.ProcessingStep.INSTALLATION | ['tr_list@test.test', OTRS_RECIPIENT] | 'Project1 sequencing data installed'
-        2        | false                 | OtrsTicket.ProcessingStep.INSTALLATION | [OTRS_RECIPIENT]                      | 'TO BE SENT: Project1 sequencing data installed'
-        3        | true                  | OtrsTicket.ProcessingStep.INSTALLATION | ['tr_list@test.test', OTRS_RECIPIENT] | '[S#1234] Project1 sequencing data installed'
-        4        | true                  | OtrsTicket.ProcessingStep.FASTQC       | []                                    | null
-        5        | true                  | OtrsTicket.ProcessingStep.ALIGNMENT    | [OTRS_RECIPIENT]                      | 'TO BE SENT: Project2 sequencing data aligned'
-        6        | true                  | OtrsTicket.ProcessingStep.SNV          | [OTRS_RECIPIENT]                      | 'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called'
+        dataCase | automaticNotification | notificationStep                       | recipients              | subject
+        1        | true                  | OtrsTicket.ProcessingStep.INSTALLATION | [EMAIL, OTRS_RECIPIENT] | 'Project1 sequencing data installed'
+        2        | false                 | OtrsTicket.ProcessingStep.INSTALLATION | [OTRS_RECIPIENT]        | 'TO BE SENT: Project1 sequencing data installed'
+        3        | true                  | OtrsTicket.ProcessingStep.INSTALLATION | [EMAIL, OTRS_RECIPIENT] | '[S#1234] Project1 sequencing data installed'
+        4        | true                  | OtrsTicket.ProcessingStep.FASTQC       | []                      | null
+        5        | true                  | OtrsTicket.ProcessingStep.ALIGNMENT    | [OTRS_RECIPIENT]        | 'TO BE SENT: Project2 sequencing data aligned'
+        6        | true                  | OtrsTicket.ProcessingStep.SNV          | [OTRS_RECIPIENT]        | 'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called'
     }
 
     void 'sendCustomerNotification, with multiple projects, sends multiple notifications'() {
         given:
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         ProcessingStatus status = new ProcessingStatus([1, 2].collect { int index ->
+            UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
+                    user: DomainFactory.createUser(email: "project${index}@test.com"),
+                    project: DomainFactory.createProject(name: "Project_X${index}"),
+            )
             new SeqTrackProcessingStatus(DomainFactory.createSeqTrack(
                     sample: DomainFactory.createSample(
                             individual: DomainFactory.createIndividual(
-                                    project: DomainFactory.createProject(
-                                            name: "Project_X${index}",
-                                            mailingListName: "tr_project${index}@test.test",
-                                    )
+                                    project: userProjectRole.project,
                             )
                     )
             ))
@@ -584,9 +590,9 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         trackingService.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X1 sequencing data installed",
-                    'Project_X1', ['tr_project1@test.test', OTRS_RECIPIENT])
+                    'Project_X1', ['project1@test.com', OTRS_RECIPIENT])
             1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X2 sequencing data installed",
-                    'Project_X2', ['tr_project2@test.test', OTRS_RECIPIENT])
+                    'Project_X2', ['project2@test.com', OTRS_RECIPIENT])
             0 * sendEmail(_, _, _)
         }
         trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
@@ -1394,5 +1400,31 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 ),
         ])
         return seqTrackA
+    }
+
+    void 'sendOperatorNotification, when finalNotification is true and project.customFinalNotification is true and no Ilse, sends final notification with correct subject and to project list'() {
+        given:
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(project: DomainFactory.createProject(customFinalNotification: true))
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
+                [
+                        ilseSubmission: null,
+                        sample        : DomainFactory.createSample(
+                                individual: DomainFactory.createIndividual(
+                                        project: userProjectRole.project
+                                )
+                        ),
+                ],
+                [runSegment: DomainFactory.createRunSegment(otrsTicket: ticket), fileLinked: true])
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
+        String recipient = HelperUtils.randomEmail
+        DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
+        String expectedHeader = "${PREFIX}#${ticket.ticketNumber} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})"
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmail(expectedHeader, _, [userProjectRole.user.email, recipient])
+        }
+
+        expect:
+        trackingService.sendOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
     }
 }

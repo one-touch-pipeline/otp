@@ -76,13 +76,13 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         projectService.roddyWorkflowConfigService.fileSystemService = new TestFileSystemService()
 
         DomainFactory.createProcessingOptionLazy([
-                name: OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE,
-                type: null,
+                name : OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE,
+                type : null,
                 value: "bwa-mem",
         ])
         DomainFactory.createProcessingOptionLazy([
-                name: OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE,
-                type: null,
+                name : OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE,
+                type : null,
                 value: "sambamba",
         ])
 
@@ -112,7 +112,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: projectGroup,
                 nameInMetadataFiles: nameInMetadataFiles,
                 copyFiles: copyFiles,
-                mailingListName: mailingListName,
                 description: description,
                 processingPriority: processingPriority,
         )
@@ -129,17 +128,16 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         project.nameInMetadataFiles == nameInMetadataFiles
         project.hasToBeCopied == copyFiles
         project.projectCategories == category.collect { ProjectCategory.findByName(it) } as Set
-        project.mailingListName == mailingListName
         project.description == description
 
         where:
-        name      | dirName | dirAnalysis | projectGroup    | nameInMetadataFiles | copyFiles | mailingListName          | description   | category     | processingPriority
-        'project' | 'dir'   | ''          | ''              | 'project'           | true      | "tr_project@MailingList" | 'description' | ["category"] | ProcessingPriority.NORMAL
-        'project' | 'dir'   | ''          | ''              | null                | true      | "tr_project@MailingList" | ''            | ["category"] | ProcessingPriority.FAST_TRACK
-        'project' | 'dir'   | ''          | 'projectGroup'  | 'project'           | true      | "tr_project@MailingList" | 'description' | ["category"] | ProcessingPriority.NORMAL
-        'project' | 'dir'   | ''          | ''              | 'project'           | false     | "tr_project@MailingList" | ''            | ["category"] | ProcessingPriority.FAST_TRACK
-        'project' | 'dir'   | ''          | ''              | 'project'           | true      | ""                       | 'description' | ["category"] | ProcessingPriority.NORMAL
-        'project' | 'dir'   | '/dirA'     | ''              | 'project'           | true      | ""                       | 'description' | []           | ProcessingPriority.FAST_TRACK
+        name      | dirName | dirAnalysis | projectGroup   | nameInMetadataFiles | copyFiles | description   | category     | processingPriority
+        'project' | 'dir'   | ''          | ''             | 'project'           | true      | 'description' | ["category"] | ProcessingPriority.NORMAL
+        'project' | 'dir'   | ''          | ''             | null                | true      | ''            | ["category"] | ProcessingPriority.FAST_TRACK
+        'project' | 'dir'   | ''          | 'projectGroup' | 'project'           | true      | 'description' | ["category"] | ProcessingPriority.NORMAL
+        'project' | 'dir'   | ''          | ''             | 'project'           | false     | ''            | ["category"] | ProcessingPriority.FAST_TRACK
+        'project' | 'dir'   | ''          | ''             | 'project'           | true      | 'description' | ["category"] | ProcessingPriority.NORMAL
+        'project' | 'dir'   | '/dirA'     | ''             | 'project'           | true      | 'description' | []           | ProcessingPriority.FAST_TRACK
     }
 
     void "test createProject if directory is created"() {
@@ -159,7 +157,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: '',
                 nameInMetadataFiles: null,
                 copyFiles: false,
-                mailingListName: "tr_Mailing@ListName",
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
         )
@@ -196,7 +193,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: '',
                 nameInMetadataFiles: nameInMetadataFiles,
                 copyFiles: true,
-                mailingListName: "tr_Mailing@ListName",
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
         )
@@ -233,7 +229,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: '',
                 nameInMetadataFiles: null,
                 copyFiles: false,
-                mailingListName: "tr_Mailing@ListName",
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
         )
@@ -244,35 +239,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         then:
         AssertionError ex = thrown()
         ex.message.contains('Expected exit code to be 0, but it is 1')
-    }
-
-    void "test createProject with invalid mailingListName"() {
-        given:
-        String group = configService.getTestingGroup()
-
-        when:
-        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
-                name: 'project',
-                dirName: 'dir',
-                dirAnalysis: '/dirA',
-                realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanNames.NO_ALIGNMENT.bean,
-                categoryNames: ['category'],
-                unixGroup: group,
-                projectGroup: '',
-                nameInMetadataFiles: null,
-                copyFiles: false,
-                mailingListName: "invalidMailingListName",
-                description: '',
-                processingPriority: ProcessingPriority.NORMAL,
-        )
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.createProject(projectParams)
-        }
-
-        then:
-        ValidationException exception = thrown()
-        exception.message.contains("mailingListName")
     }
 
     void "test createProject with invalid dirAnalysis"() {
@@ -291,7 +257,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: '',
                 nameInMetadataFiles: null,
                 copyFiles: false,
-                mailingListName: "tr_Mailing@ListName",
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
         )
@@ -331,7 +296,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: '',
                 nameInMetadataFiles: null,
                 copyFiles: false,
-                mailingListName: "tr_Mailing@ListName",
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
         )
@@ -373,10 +337,10 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
 
         where:
-        name           || errorName | errorLocaction
-        'testProject'  || 'this nameInMetadataFiles is already used in another project as name entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
+        name           || errorName                                                                                  | errorLocaction
+        'testProject'  || 'this nameInMetadataFiles is already used in another project as name entry'                | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
         'testProject2' || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
-        ''             || 'blank' | 'on field \'nameInMetadataFiles\': rejected value []'
+        ''             || 'blank'                                                                                    | 'on field \'nameInMetadataFiles\': rejected value []'
     }
 
     void "test createProject invalid project category should fail"() {
@@ -395,7 +359,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 projectGroup: '',
                 nameInMetadataFiles: 'project',
                 copyFiles: true,
-                mailingListName: "tr_Mailing@ListName",
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
         )
@@ -424,10 +387,10 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         project.phabricatorAlias == phabricatorAlias
 
         where:
-        username   | _
-        ADMIN      | _
-        OPERATOR   | _
-        USER       | _
+        username | _
+        ADMIN    | _
+        OPERATOR | _
+        USER     | _
     }
 
     void "test updatePhabricatorAlias valid alias and invalide user"() {
@@ -472,21 +435,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
         then:
         project.projectCategories == [projectCategory] as Set
-    }
-
-    void "test updateMailingListName valid name"() {
-        given:
-        String mailingListName = "tr_test@Name"
-        Project project = Project.findByName("testProject")
-
-        when:
-        assert !project.mailingListName
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.updateProjectField(mailingListName, "mailingListName", project)
-        }
-
-        then:
-        project.mailingListName == mailingListName
     }
 
     void "test updateAnalysisDirectory valid name"() {
@@ -757,7 +705,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test configurePanCanAlignmentDeciderProject invalid alignment version input"() {
         setup:
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
-                bwaMemVersion:  'invalidBwa_memVersion',
+                bwaMemVersion: 'invalidBwa_memVersion',
         )
 
         when:
@@ -878,12 +826,12 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test configureRnaAlignmentConfig valid input"() {
         setup:
         RoddyConfiguration configuration = new RoddyConfiguration(
-                project          : Project.findByName("testProjectAlignment"),
-                seqType          : SeqTypeService.wholeGenomePairedSeqType,
-                pluginName       : 'plugin',
-                pluginVersion    : '1.2.3',
+                project: Project.findByName("testProjectAlignment"),
+                seqType: SeqTypeService.wholeGenomePairedSeqType,
+                pluginName: 'plugin',
+                pluginVersion: '1.2.3',
                 baseProjectConfig: 'baseConfig',
-                configVersion    : 'v1_0',
+                configVersion: 'v1_0',
         )
         File projectDirectory = LsdfFilesService.getPath(
                 configService.getRootPath().path,
@@ -1098,7 +1046,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     }
 
 
-
     void "test configureDefaultOtpAlignmentDecider to configureNoAlignmentDeciderProject"() {
         setup:
         Project project = Project.findByName("testProjectAlignment")
@@ -1166,7 +1113,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         setup:
         RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"()
         RoddyConfiguration configuration2 = "createRoddy${analysisName}Configuration"([
-                configVersion   : 'v1_1',
+                configVersion: 'v1_1',
         ])
         if (analysisName in ["Sophia", "Aceseq"]) {
             ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
@@ -1209,8 +1156,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test configure Snv PipelineProject valid input, old otp snv config exist"() {
         setup:
         SnvConfig configuration = DomainFactory.createSnvConfig([
-                project          : Project.findByName("testProjectAlignment"),
-                seqType          : SeqTypeService.exomePairedSeqType,
+                project: Project.findByName("testProjectAlignment"),
+                seqType: SeqTypeService.exomePairedSeqType,
         ])
         File projectDirectory = LsdfFilesService.getPath(
                 configService.getRootPath().absolutePath,
@@ -1220,7 +1167,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
 
         RoddyConfiguration configuration2 = createRoddySnvConfiguration([
-                configVersion   : 'v1_1',
+                configVersion: 'v1_1',
         ])
 
         when:
@@ -1407,7 +1354,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test createProjectInfoAndUploadFile, succeeds"() {
         given:
         Project project = DomainFactory.createProject()
-        byte[] content = [0, 1 , 2 , 3]
+        byte[] content = [0, 1, 2, 3]
         MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, content)
         mockMultipartFile.originalFilename = FILE_NAME
 
@@ -1478,17 +1425,17 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     private PanCanAlignmentConfiguration createPanCanAlignmentConfiguration(Map properties = [:]) {
         PanCanAlignmentConfiguration configuration = new PanCanAlignmentConfiguration([
-                project          : Project.findByName("testProjectAlignment"),
-                seqType          : SeqTypeService.wholeGenomePairedSeqType,
-                referenceGenome  : "testReferenceGenome",
-                statSizeFileName : 'testStatSizeFileName.tab',
-                bwaMemVersion    : "bwa-mem",
-                sambambaVersion  : "sambamba",
-                mergeTool        : MergeConstants.MERGE_TOOL_PICARD,
-                pluginName       : 'plugin',
-                pluginVersion    : '1.2.3',
-                baseProjectConfig: 'baseConfig',
-                configVersion    : 'v1_0',
+                project              : Project.findByName("testProjectAlignment"),
+                seqType              : SeqTypeService.wholeGenomePairedSeqType,
+                referenceGenome      : "testReferenceGenome",
+                statSizeFileName     : 'testStatSizeFileName.tab',
+                bwaMemVersion        : "bwa-mem",
+                sambambaVersion      : "sambamba",
+                mergeTool            : MergeConstants.MERGE_TOOL_PICARD,
+                pluginName           : 'plugin',
+                pluginVersion        : '1.2.3',
+                baseProjectConfig    : 'baseConfig',
+                configVersion        : 'v1_0',
                 adapterTrimmingNeeded: true,
         ] + properties)
         File projectDirectory = LsdfFilesService.getPath(
@@ -1513,8 +1460,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                         DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.ARRIBA_KNOWN_FUSIONS)),
                         DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.ARRIBA_BLACKLIST)),
                 ],
-                geneModel          : DomainFactory.createGeneModel(),
-                mouseData          : true,
+                geneModel           : DomainFactory.createGeneModel(),
+                mouseData           : true,
         ] + properties)
         File projectDirectory = LsdfFilesService.getPath(
                 configService.getRootPath().absolutePath,

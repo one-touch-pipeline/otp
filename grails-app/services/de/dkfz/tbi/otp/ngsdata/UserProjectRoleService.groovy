@@ -23,14 +23,14 @@ class UserProjectRoleService {
     UserService userService
 
     private UserProjectRole createUserProjectRole(User user, Project project, ProjectRole projectRole, Map flags = [:]) {
-        assert user : "the user must not be null"
-        assert project : "the project must not be null"
+        assert user: "the user must not be null"
+        assert project: "the project must not be null"
 
         UserProjectRole userProjectRole = new UserProjectRole([
                 user       : user,
                 project    : project,
                 projectRole: projectRole,
-            ] + flags
+        ] + flags
         )
         userProjectRole.save(flush: true, failOnError: true)
         return userProjectRole
@@ -38,18 +38,18 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
     void addUserToProjectAndNotifyGroupManagementAuthority(Project project, ProjectRole projectRole, String username, Map flags = [:]) throws AssertionError {
-        assert project : "project must not be null"
+        assert project: "project must not be null"
 
         LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(username)
-        assert ldapUserDetails : "'${username}' can not be resolved to a user via LDAP"
-        assert ldapUserDetails.mail : "Could not get a mail for this user via LDAP"
+        assert ldapUserDetails: "'${username}' can not be resolved to a user via LDAP"
+        assert ldapUserDetails.mail: "Could not get a mail for this user via LDAP"
 
         User user = User.findByUsernameOrEmail(ldapUserDetails.cn, ldapUserDetails.mail)
         if (!user) {
             user = userService.createUser(ldapUserDetails.cn, ldapUserDetails.mail, ldapUserDetails.realName)
         }
         UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
-        assert !userProjectRole : "User '${user.username}' is already part of project '${project.name}'"
+        assert !userProjectRole: "User '${user.username}' is already part of project '${project.name}'"
         userProjectRole = createUserProjectRole(user, project, projectRole, flags)
 
         if (flags.accessToFiles ?: false) {
@@ -61,14 +61,14 @@ class UserProjectRoleService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
     void addExternalUserToProject(Project project, String realName, String email, ProjectRole projectRole) throws AssertionError {
-        assert project : "project must not be null"
+        assert project: "project must not be null"
 
         User user = User.findByEmail(email)
         if (!user) {
             user = userService.createUser(null, email, realName)
         }
         UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
-        assert !userProjectRole : "User '${user.realName}' is already part of project '${project.name}'"
+        assert !userProjectRole: "User '${user.realName}' is already part of project '${project.name}'"
         userProjectRole = createUserProjectRole(user, project, projectRole)
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.realName} for ${userProjectRole.project.name}")
         notifyProjectAuthoritiesAndUser(project, user)
@@ -84,11 +84,12 @@ class UserProjectRoleService {
     private void requestToRemoveUserFromUnixGroupIfRequired(User user, Project project) {
         String[] groupNames = ldapService.getGroupsOfUserByUsername(user.username)
         if (project.unixGroup in groupNames &&
-            !UserProjectRole.findAllByUserAndProjectInListAndAccessToFilesAndEnabled(
-                    user,
-                    Project.findAllByUnixGroupAndIdNotEqual(project.unixGroup, project.id),
-                    true,
-                    true)
+                !UserProjectRole.findAllByUserAndProjectInListAndAccessToFilesAndEnabled(
+                        user,
+                        Project.findAllByUnixGroupAndIdNotEqual(project.unixGroup, project.id),
+                        true,
+                        true
+                )
         ) {
             notifyAdministration(user, project, AdtoolAction.REMOVE)
         }
@@ -125,8 +126,8 @@ class UserProjectRoleService {
         List<String> allMails = (projectAuthorities*.email + user.email).unique()
         String subject = createMessage("projectUser.notification.newProjectMember.subject", [projectName: project.name])
         String body = createMessage("projectUser.notification.newProjectMember.body", [
-                projectName          : project.name,
-                userIdentifier       : user.realName ?: user.username,
+                projectName   : project.name,
+                userIdentifier: user.realName ?: user.username,
         ])
         mailHelperService.sendEmail(subject, body, allMails)
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL, "Notified project authorities (${projectAuthorities*.realName.join(", ")}) and user (${user.username})")
@@ -242,5 +243,23 @@ class UserProjectRoleService {
             return ''
         }
         return new SimpleTemplateEngine().createTemplate(template).make(properties).toString()
+    }
+
+    List<String> getEmailAdressesForNotifying(Project project) {
+        return getEmailAdressesForNotifying([project])
+    }
+
+    List<String> getEmailAdressesForNotifying(List<Project> projects) {
+        return UserProjectRole.createCriteria().list {
+            and {
+                'in'('project', projects)
+                eq('receivesNotifications', true)
+            }
+            projections {
+                user {
+                    distinct("email")
+                }
+            }
+        } ?: []
     }
 }

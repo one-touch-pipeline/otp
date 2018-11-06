@@ -45,6 +45,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
         service.executeRoddyCommandService = new ExecuteRoddyCommandService()
         service.executeRoddyCommandService.remoteShellHelper = service.remoteShellHelper
         service.processingOptionService = new ProcessingOptionService()
+        service.userProjectRoleService = new UserProjectRoleService()
         service.createNotificationTextService = new CreateNotificationTextService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
                     _ * getMessageInternal('notification.template.alignment.qcTrafficBlockedSubject', [], _) >> '''QC traffic alignment header ${roddyBamFile.sample} ${roddyBamFile.seqType}'''
@@ -121,30 +122,6 @@ ${link}
         !roddyBamFile.finalMd5sumFile.exists()
     }
 
-    void "test createResultsAreBlockedSubject when mailing list exists"() {
-        given:
-        roddyBamFile.project.mailingListName = "tr_test@MailingList"
-        assert roddyBamFile.project.save(flush: true)
-
-        when:
-        String result = service.createResultsAreBlockedSubject(roddyBamFile)
-
-        then:
-        result == "QC traffic alignment header ${roddyBamFile.sample} ${roddyBamFile.seqType}"
-    }
-
-    void "test createResultsAreBlockedSubject when no mailing list exists"() {
-        given:
-        roddyBamFile.project.mailingListName = null
-        assert roddyBamFile.project.save(flush: true)
-
-        when:
-        String result = service.createResultsAreBlockedSubject(roddyBamFile)
-
-        then:
-        result == "TO BE SENT: QC traffic alignment header ${roddyBamFile.sample} ${roddyBamFile.seqType}"
-    }
-
     void "test createResultsAreBlockedMessage "() {
         given:
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
@@ -189,16 +166,17 @@ link
         }
         DomainFactory.createProcessingOptionForNotificationRecipient()
 
-        roddyBamFile.project.mailingListName = projectMailingList
-        roddyBamFile.project.save()
+        if (createUserProjectRole) {
+            DomainFactory.createUserProjectRole(project: roddyBamFile.project)
+        }
 
         expect:
         service.informResultsAreBlocked(roddyBamFile)
 
         where:
-        name                   | projectMailingList              | subjectHeader  || recipientsCount
-        'without mailing list' | null                            | 'TO BE SENT: ' || 1
-        'with mailing list'    | "tr_${HelperUtils.randomEmail}" | ''             || 2
+        name                      | createUserProjectRole | subjectHeader  || recipientsCount
+        'without userProjectRole' | false                 | 'TO BE SENT: ' || 1
+        'with userProjectRole'    | true                  | ''             || 2
     }
 
 
@@ -235,7 +213,7 @@ link
             1 * createAndValidateLinks(_, _) >> { Map<File, File> sourceLinkMap, Realm realm -> }
         }
         linkFilesToFinalDestinationService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
-            1 * setSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile-> }
+            1 * setSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile -> }
         }
 
         when:
@@ -263,7 +241,7 @@ link
             0 * createAndValidateLinks(_, _) >> { Map<File, File> sourceLinkMap, Realm realm -> }
         }
         linkFilesToFinalDestinationService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
-            1 * setSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile-> }
+            1 * setSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile -> }
         }
 
         when:
