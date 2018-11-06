@@ -9,7 +9,7 @@ class WgsIndelWorkflowTests extends AbstractIndelWorkflowTests implements SeqTyp
 
     @Override
     SeqType seqTypeToUse() {
-        return SeqType.wholeGenomePairedSeqType
+        return SeqTypeService.wholeGenomePairedSeqType
     }
 
     @Override

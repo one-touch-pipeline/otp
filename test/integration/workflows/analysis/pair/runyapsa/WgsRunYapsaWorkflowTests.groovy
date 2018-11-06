@@ -9,6 +9,6 @@ class WgsRunYapsaWorkflowTests extends AbstractRunYapsaWorkflowTests implements 
 
     @Override
     SeqType seqTypeToUse() {
-        return SeqType.wholeGenomePairedSeqType
+        return SeqTypeService.wholeGenomePairedSeqType
     }
 }

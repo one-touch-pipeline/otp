@@ -9,7 +9,7 @@ class WesIndelWorkflowTests extends AbstractIndelWorkflowTests implements SeqTyp
 
     @Override
     SeqType seqTypeToUse() {
-        return SeqType.exomePairedSeqType
+        return SeqTypeService.exomePairedSeqType
     }
 
     @Override

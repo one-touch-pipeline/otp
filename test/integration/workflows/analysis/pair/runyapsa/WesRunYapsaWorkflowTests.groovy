@@ -9,7 +9,7 @@ class WesRunYapsaWorkflowTests extends AbstractRunYapsaWorkflowTests implements 
 
     @Override
     SeqType seqTypeToUse() {
-        return SeqType.exomePairedSeqType
+        return SeqTypeService.exomePairedSeqType
     }
 
 }

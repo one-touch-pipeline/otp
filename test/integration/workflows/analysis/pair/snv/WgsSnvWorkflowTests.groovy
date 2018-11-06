@@ -9,6 +9,6 @@ class WgsSnvWorkflowTests extends AbstractSnvWorkflowTests implements SeqTypeAnd
 
     @Override
     SeqType seqTypeToUse() {
-        return SeqType.wholeGenomePairedSeqType
+        return SeqTypeService.wholeGenomePairedSeqType
     }
 }

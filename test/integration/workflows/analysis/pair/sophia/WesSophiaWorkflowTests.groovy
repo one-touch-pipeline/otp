@@ -9,6 +9,6 @@ class WesSophiaWorkflowTests extends AbstractSophiaWorkflowTests implements SeqT
 
     @Override
     SeqType seqTypeToUse() {
-        return SeqType.exomePairedSeqType
+        return SeqTypeService.exomePairedSeqType
     }
 }

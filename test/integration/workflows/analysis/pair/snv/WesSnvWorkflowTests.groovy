@@ -9,6 +9,6 @@ class WesSnvWorkflowTests extends AbstractSnvWorkflowTests implements SeqTypeAnd
 
     @Override
     SeqType seqTypeToUse() {
-        return SeqType.exomePairedSeqType
+        return SeqTypeService.exomePairedSeqType
     }
 }

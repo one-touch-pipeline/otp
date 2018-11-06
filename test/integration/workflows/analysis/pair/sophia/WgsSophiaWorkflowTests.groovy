@@ -9,6 +9,6 @@ class WgsSophiaWorkflowTests extends AbstractSophiaWorkflowTests implements SeqT
 
     @Override
     SeqType seqTypeToUse() {
-        return SeqType.wholeGenomePairedSeqType
+        return SeqTypeService.wholeGenomePairedSeqType
     }
 }
