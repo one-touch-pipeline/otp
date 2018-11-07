@@ -4,12 +4,11 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
-import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.qcTrafficLight.*
 import grails.converters.*
 import org.codehaus.groovy.grails.web.json.*
-import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
 
@@ -41,7 +40,6 @@ class ParseIndelQcJob extends AbstractEndStateAwareJobImpl implements AutoRestar
             IndelSampleSwapDetection sampleSwap = sampleSwapJson
             sampleSwap.indelCallingInstance = instance
             assert sampleSwap.save(flush: true)
-
 
             [indelQc, sampleSwap].each { QcTrafficLightValue qc ->
                 qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(instance, qc)

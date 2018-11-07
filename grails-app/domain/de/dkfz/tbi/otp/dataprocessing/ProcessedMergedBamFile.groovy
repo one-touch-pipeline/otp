@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.hibernate.*
+
 /**
  * Represents a merged bam file stored on the file system
  * and produced by the merging process identified by the
@@ -73,6 +74,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
             maxResults 1
         }
     }
+
     String fileNameNoSuffix() {
         String seqTypeName = "${this.seqType.name}_${this.seqType.libraryLayout}"
         return "${this.sampleType.name}_${this.individual.pid}_${seqTypeName}_merged.mdup"
@@ -118,5 +120,4 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
             withdrawDownstreamBamFiles()
         }
     }
-
 }

@@ -260,33 +260,19 @@ class DomainFactory {
         ], properties)
     }
 
-    static Map defaultValuesForAbstractQualityAssessment = [
-            qcBasesMapped                  : 0,
-            totalReadCounter               : 0,
-            qcFailedReads                  : 0,
-            duplicates                     : 0,
-            totalMappedReadCounter         : 0,
-            pairedInSequencing             : 0,
-            pairedRead1                    : 0,
-            pairedRead2                    : 0,
-            properlyPaired                 : 0,
-            withItselfAndMateMapped        : 0,
-            withMateMappedToDifferentChr   : 0,
-            withMateMappedToDifferentChrMaq: 0,
-            singletons                     : 0,
-            insertSizeMedian               : 0,
-            insertSizeSD                   : 0,
-            referenceLength                : 1,
-    ].asImmutable()
+    @Deprecated
+    static Map<String, ?> getDefaultValuesForAbstractQualityAssessment() {
+        return proxyCellRanger.getDefaultValuesForAbstractQualityAssessment()
+    }
 
     static OverallQualityAssessmentMerged createOverallQualityAssessmentMerged(Map properties = [:]) {
-        return createDomainObject(OverallQualityAssessmentMerged, defaultValuesForAbstractQualityAssessment + [
+        return createDomainObject(OverallQualityAssessmentMerged, getDefaultValuesForAbstractQualityAssessment() + [
                 qualityAssessmentMergedPass: { createQualityAssessmentMergedPass() },
         ], properties)
     }
 
     static ChromosomeQualityAssessmentMerged createChromosomeQualityAssessmentMerged(Map properties = [:]) {
-        return createDomainObject(ChromosomeQualityAssessmentMerged, defaultValuesForAbstractQualityAssessment + [
+        return createDomainObject(ChromosomeQualityAssessmentMerged, getDefaultValuesForAbstractQualityAssessment() + [
                 chromosomeName             : "chromosomeName_${counter++}",
                 qualityAssessmentMergedPass: { createQualityAssessmentMergedPass() },
         ], properties)
@@ -706,7 +692,7 @@ class DomainFactory {
      * Because RoddyMergedBamQa defines a unique constraint with 'class', the instance can only be created in integration tests.
      */
     static createRoddyMergedBamQa(Map properties = [:]) {
-        return createDomainObject(RoddyMergedBamQa, defaultValuesForAbstractQualityAssessment + [
+        return createDomainObject(RoddyMergedBamQa, getDefaultValuesForAbstractQualityAssessment() + [
                 qualityAssessmentMergedPass  : {
                     createQualityAssessmentMergedPass(
                             abstractMergedBamFile: createRoddyBamFile()
@@ -1435,18 +1421,9 @@ class DomainFactory {
         ], properties)
     }
 
+    @Deprecated
     static ReferenceGenome createReferenceGenome(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(ReferenceGenome, [
-                name                        : "referencegenome_name${counter++}",
-                path                        : HelperUtils.uniqueString,
-                fileNamePrefix              : "referencegenome-prefix_${counter++}",
-                length                      : 1,
-                lengthWithoutN              : 1,
-                lengthRefChromosomes        : 1,
-                lengthRefChromosomesWithoutN: 1,
-                chromosomePrefix            : "",
-                chromosomeSuffix            : "",
-        ], properties, saveAndValidate)
+        return proxyCore.createReferenceGenome(properties, saveAndValidate)
     }
 
     static ReferenceGenome createAceseqReferenceGenome() {
@@ -1483,21 +1460,14 @@ class DomainFactory {
         }
     }
 
-    static ReferenceGenomeIndex createReferenceGenomeIndex(Map properties = [:]) {
-        return createDomainObject(ReferenceGenomeIndex, [
-                referenceGenome : { createReferenceGenome() },
-                toolName        : { createToolName() },
-                path            : "path_${counter++}",
-                indexToolVersion: "indexToolVersion_${counter++}",
-        ], properties)
+    @Deprecated
+    static ReferenceGenomeIndex createReferenceGenomeIndex(Map properties = [:], boolean saveAndValidate = true) {
+        return proxyCore.createReferenceGenomeIndex(properties, saveAndValidate)
     }
 
-    static ToolName createToolName(Map properties = [:]) {
-        return createDomainObject(ToolName, [
-                name: "GENOME_STAR_INDEX_${counter++}",
-                type: ToolName.Type.RNA,
-                path: "path_${counter++}",
-        ], properties)
+    @Deprecated
+    static ToolName createToolName(Map properties = [:], boolean saveAndValidate = true) {
+        return proxyCore.createToolName(properties, saveAndValidate)
     }
 
     static GeneModel createGeneModel(Map properties = [:]) {
@@ -2064,7 +2034,6 @@ class DomainFactory {
         ], properties)
     }
 
-
     static MetaDataEntry createMetaDataKeyAndEntry(DataFile dataFile, String key, String value) {
         MetaDataKey metaDataKey = createMetaDataKeyLazy(name: key)
 
@@ -2365,7 +2334,6 @@ class DomainFactory {
 """
     }
 
-
     static void createSophiaQcFileOnFileSystem(File qcFile) {
         qcFile.parentFile.mkdirs()
         qcFile << """\
@@ -2415,7 +2383,6 @@ class DomainFactory {
 """
     }
 
-
     static void createIndelSampleSwapDetectionFileOnFileSystem(File qcFile, Individual individual) {
         qcFile.parentFile.mkdirs()
         qcFile << """
@@ -2445,9 +2412,7 @@ class DomainFactory {
     "somaticSmallVarsInTumorCommonInGnomadPer":22,
 }
 """
-
     }
-
 
     static void createAclObjects(Object domainObject, Map properties = [:]) {
         AclObjectIdentity aclObjectIdentity = createDomainObject(AclObjectIdentity, [objectId: domainObject.id, aclClass: {

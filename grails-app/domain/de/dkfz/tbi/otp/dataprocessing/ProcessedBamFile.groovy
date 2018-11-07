@@ -52,6 +52,7 @@ class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParam
             maxResults 1
         }
     }
+
     static mapping = {
         alignmentPass index: "abstract_bam_file_alignment_pass_idx"
     }

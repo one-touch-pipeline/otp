@@ -1,11 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.singleCell.CellRangerConfig
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 
 class ConfigureCellRangerPipelineController extends AbstractConfigureNonRoddyPipelineController {
-
-    ReferenceGenomeIndexService referenceGenomeIndexService
 
     def update(ConfigureCellRangerSubmitCommand cmd) {
         updatePipeline(projectService.createOrUpdateCellRangerConfig(cmd.project, cmd.seqType, cmd.programVersion, cmd.referenceGenomeIndex),

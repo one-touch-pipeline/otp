@@ -102,7 +102,6 @@ class AbstractQualityAssessmentService {
         }
     }
 
-
     RoddyMergedBamQa parseRoddyMergedBamQaStatistics(RoddyBamFile roddyBamFile) {
         File qaFile = roddyBamFile.getWorkMergedQAJsonFile()
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, { roddyBamFile.workMergedQATargetExtractJsonFile })

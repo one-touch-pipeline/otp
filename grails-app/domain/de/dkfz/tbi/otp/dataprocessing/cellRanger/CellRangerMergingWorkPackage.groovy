@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.dataprocessing.singleCell
+package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.utils.CollectionUtils

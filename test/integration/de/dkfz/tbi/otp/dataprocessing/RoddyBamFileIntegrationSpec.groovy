@@ -25,6 +25,7 @@ class RoddyBamFileIntegrationSpec extends Specification {
             insertSizeSD                   : ARBITRARY_UNUSED_VALUE,
             referenceLength                : ARBITRARY_UNUSED_VALUE,
     ].asImmutable()
+
     static final Map NULL_QA_VALUES = [
             qcBasesMapped                  : null,
             totalReadCounter               : null,
@@ -73,9 +74,9 @@ class RoddyBamFileIntegrationSpec extends Specification {
                         chromosome                   : '12',
                         referenceLength              : 1,
                         genomeWithoutNCoverageQcBases: 1,
-
                 ]
         )
+
         RoddyMergedBamQa mergedQa = DomainFactory.createRoddyMergedBamQa(
                 ARBITRARY_QA_VALUES + [
                         qualityAssessmentMergedPass  : qaPass,
@@ -83,7 +84,8 @@ class RoddyBamFileIntegrationSpec extends Specification {
                         insertSizeCV                 : 123,
                         percentageMatesOnDifferentChr: 0.123,
                         genomeWithoutNCoverageQcBases: 1,
-                ])
+                ]
+        )
 
         expect:
         mergedQa == bamFile.overallQualityAssessment

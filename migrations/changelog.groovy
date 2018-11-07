@@ -79,4 +79,8 @@ databaseChangeLog = {
     changeSet(author: "borufka", id: "rename-COMMAND_ACTIVATION_RUN_YAPSA_PREFIX") {
         sqlFile(path: 'changelogs/2018/rename-COMMAND_ACTIVATION_RUN_YAPSA_PREFIX-to-COMMAND_ENABLE_MODULE.sql')
     }
+
+    changeSet(author: "kosnac", id: "OTP-2899-SQL") {
+        sqlFile(path: 'changelogs/2018/OTP-2899.sql')
+    }
 }

@@ -3,9 +3,9 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
-import de.dkfz.tbi.otp.dataprocessing.singleCell.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -19,7 +19,6 @@ import org.springframework.web.multipart.*
 
 import java.nio.file.*
 import java.nio.file.attribute.*
-import java.time.LocalDateTime
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 

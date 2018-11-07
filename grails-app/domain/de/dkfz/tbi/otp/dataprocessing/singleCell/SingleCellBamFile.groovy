@@ -1,9 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing.singleCell
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier {
+class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, ProcessParameterObject {
+
+    static final String METRICS_SUMMARY_CSV_FILE_NAME = "metrics_summary.csv"
 
     Set<SeqTrack> seqTracks
 
@@ -59,9 +63,17 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier {
         throw new MissingPropertyException("Maximal read length is not implemented for single cell BAM files")
     }
 
+    File getWorkDirectory() {
+        return new File(baseDirectory, workDirectoryName)
+    }
+
     @Override
     protected File getPathForFurtherProcessingNoCheck() {
-        return new File(workDirectoryName, bamFileName)
+        return new File(workDirectory, bamFileName)
+    }
+
+    File getQualityAssessmentCsvFile() {
+        return new File(workDirectory, METRICS_SUMMARY_CSV_FILE_NAME)
     }
 
     @Override
@@ -74,16 +86,20 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier {
         return seqTracks
     }
 
-    @SuppressWarnings("DeadCode")
+    QualityAssessmentMergedPass findOrSaveQaPass() {
+        return QualityAssessmentMergedPass.findOrSaveWhere(
+                abstractMergedBamFile: this,
+                identifier: 0,
+        )
+    }
+
     @Override
-    SingleCellQualityAssessment getOverallQualityAssessment() {
-        throw new UnsupportedOperationException("This Method is not yet implemented.") //This has to be removed once all required Domain Classes are implemented
-        SingleCellQualityAssessment.createCriteria().get {
+    CellRangerQualityAssessment getOverallQualityAssessment() {
+        CellRangerQualityAssessment.createCriteria().get {
             qualityAssessmentMergedPass {
                 eq 'abstractMergedBamFile', this
+                eq 'identifier', 0
             }
-            order 'id', 'desc'
-            maxResults 1
-        }
+        } as CellRangerQualityAssessment
     }
 }

@@ -13,7 +13,7 @@ import org.springframework.stereotype.*
 @Component
 @Scope("prototype")
 @UseJobLog
-class ParseRnaAlignmentQcJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob{
+class ParseRnaAlignmentQcJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
 
     @Autowired
     AbstractQualityAssessmentService abstractQualityAssessmentService
