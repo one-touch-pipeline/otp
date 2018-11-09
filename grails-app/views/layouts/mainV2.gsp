@@ -156,8 +156,6 @@
                                         <li class="dropdown">
                                             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">${g.message(code: "otp.menu.statistics")}<span class="caret"></span></a>
                                             <ul class="dropdown-menu">
-                                                <li><g:link controller="overviewMB" action="index">${g.message(code: "otp.menu.generalStatistics")}</g:link></li>
-                                                <li role="separator" class="divider"></li>
                                                 <li><g:link controller="clusterJobGeneral" action="index"><g:message code="otp.menu.jobstats.general"/></g:link></li>
                                                 <li><g:link controller="clusterJobJobTypeSpecific" action="index">${g.message(code: "otp.menu.jobstats.jobTypeSpecific")}</g:link></li>
                                                 <li role="separator" class="divider"></li>

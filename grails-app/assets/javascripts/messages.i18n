@@ -130,11 +130,6 @@ overview.statistic.center.name
 overview.statistic.center.totalCount
 overview.statistic.center.newCount
 
-#overview statistic sequencing
-overview.statistic.seq.name
-overview.statistic.total.laneCount
-overview.statistic.recent.laneCount
-
 # auto refresh
 otp.refresh.enable
 otp.refresh.disable
