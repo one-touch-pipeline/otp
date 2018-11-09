@@ -63,6 +63,7 @@ class ClusterJobSchedulerService {
         assert realm: 'No realm specified.'
 
         ProcessingStep processingStep = schedulerService.jobExecutedByCurrentThread.processingStep
+        processingStep.refresh() // processingStep.jobClass might be outdated by now
         ProcessParameterObject domainObject = processingStep.processParameterObject
 
         SeqType seqType = domainObject?.seqType
@@ -137,7 +138,6 @@ class ClusterJobSchedulerService {
         }
         jobManager.startHeldJobs([job])
 
-        processingStep.refresh() // processingStep.jobClass might be outdated by now
         ClusterJob clusterJob = clusterJobService.createClusterJob(
                 realm, job.jobID.shortID, configService.getSshUser(), processingStep, seqType, jobName
         )
