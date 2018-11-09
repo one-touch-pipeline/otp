@@ -39,7 +39,7 @@
                                                   title="${g.message(code: "processingOption.list.headers.value")}"/>
                                     </g:if>
                                     <g:else>
-                                        <input class="" name="value" value="${option.value.value}"
+                                        <input class="" name="value" value="${option.value.tooltip}"
                                                title="${g.message(code: "processingOption.list.headers.value")}">
                                     </g:else>
                                 </span>
