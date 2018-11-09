@@ -68,4 +68,7 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2018/OTP-2822.sql')
     }
 
+    changeSet(author: "gruenj", id: "remove-identifierInRunName-from-database-SQL") {
+        sqlFile(path: 'changelogs/2018/remove-identifierInRunName-from-datadase.sql')
+    }
 }
