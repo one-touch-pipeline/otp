@@ -457,25 +457,6 @@ class SeqTrackValidatorSpec extends Specification {
         context.problems.isEmpty()
     }
 
-    void 'validate, when mate extraction fails, does not crash'() {
-        given:
-        MetadataValidationContext context = createContext((
-                "${FASTQ_FILE}\t${RUN_ID}\t${LANE_NO}\t${LIBRARY_LAYOUT}\n" +
-                        "a.fa stq.gz\trunA\tL1\t${SINGLE}\n" +
-                        "c.fastq.gz\trunA\tL1\t${SINGLE}\n"
-        ))
-        Collection<Problem> expectedProblems = [
-                new Problem((context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells) as Set, Level.ERROR,
-                        "The filenames 'a.fa stq.gz', 'c.fastq.gz' for run 'runA', lane 'L1', no barcode do not differ in exactly one character. They must differ in exactly one character which is the mate number.", "The filenames of one seqTrack do not differ in exactly one character. They must differ in exactly one character which is the mate number."),
-                new Problem((context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells) as Set, Level.ERROR,
-                        "There must be no more than one row for run 'runA', lane 'L1', no barcode, mate '1'.", "There must be no more than one row for one mate.")]
-        when:
-        validator.validate(context)
-
-        then:
-        assertContainSame(context.problems, expectedProblems)
-    }
-
     void 'validate, when no mate is missing, succeeds'() {
         given:
         MetadataValidationContext context = createContext((

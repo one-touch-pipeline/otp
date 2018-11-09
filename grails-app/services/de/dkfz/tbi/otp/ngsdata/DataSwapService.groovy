@@ -278,11 +278,8 @@ newName: ${newDataFileName}
             it.fileName = it.vbpFileName = dataFileMap[it.fileName]
             if (it.mateNumber == null && it.fileWithdrawn && it.fileType && it.fileType.type == FileType.Type.SEQUENCE && it.fileType.vbpPath == "/sequence/") {
                 outputStringBuilder << "\n====> set mate number for withdrawn data file"
-                if (it.seqTrack.seqType.libraryLayout == LibraryLayout.SINGLE) {
-                    it.mateNumber = '1'
-                } else {
-                    it.mateNumber = MetaDataService.findOutMateNumber(it.fileName)
-                }
+                assert it.seqTrack.seqType.libraryLayout == LibraryLayout.SINGLE: "library layout it not ${LibraryLayout.SINGLE}"
+                it.mateNumber = 1
             }
             it.save(flush: true)
             outputStringBuilder << "\n    changed ${old} to ${it.fileName}"

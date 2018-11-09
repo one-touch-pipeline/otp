@@ -459,7 +459,6 @@ class MetadataImportService {
     }
 
     static ExtractedValue extractMateNumber(Row row) {
-        Cell libraryLayoutCell = row.getCellByColumnTitle(LIBRARY_LAYOUT.name())
         Cell mateNumberCell = row.getCellByColumnTitle(MATE.name())
         int mateNumber
 
@@ -471,24 +470,7 @@ class MetadataImportService {
             }
             return new ExtractedValue(Integer.toString(mateNumber), [mateNumberCell] as Set)
         }
-
-        if (libraryLayoutCell && LibraryLayout.values().find { it.name() == libraryLayoutCell.text }?.mateCount == 1) {
-            return new ExtractedValue('1', [libraryLayoutCell] as Set)
-        }
-        Cell filenameCell = row.getCellByColumnTitle(FASTQ_FILE.name())
-        if (!filenameCell) {
-            return null
-        }
-        try {
-            mateNumber = MetaDataService.findOutMateNumber(filenameCell.text)
-        } catch (RuntimeException e) {
-            if (e.message == "cannot find mateNumber for ${filenameCell.text}".toString()) {
-                return null
-            } else {
-                throw e
-            }
-        }
-        return new ExtractedValue(Integer.toString(mateNumber), [filenameCell] as Set)
+        return null
     }
 
     static String getSeqTypeNameFromMetadata(ValueTuple tuple) {
