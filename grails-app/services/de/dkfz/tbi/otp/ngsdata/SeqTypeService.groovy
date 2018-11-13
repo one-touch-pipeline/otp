@@ -91,7 +91,9 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     protected SeqType findByImportAlias(String importAlias, Map properties = [:]) {
         if (properties.libraryLayout && properties.singleCell != null) {
             return CollectionUtils.<SeqType> atMostOneElement(clazz.list().findAll {
-                it.importAlias*.toLowerCase()?.contains(importAlias.toLowerCase()) && it.libraryLayout == properties.libraryLayout && it.singleCell == properties.singleCell
+                it.importAlias*.toLowerCase()?.contains(importAlias.toLowerCase()) &&
+                        it.libraryLayout == properties.libraryLayout &&
+                        it.singleCell == properties.singleCell
             })
         } else {
             return clazz.list().find {

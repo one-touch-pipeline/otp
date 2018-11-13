@@ -304,12 +304,15 @@ class MetadataImportService {
             MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
         }.each { String laneId, List<Row> rows ->
             String ilseNumber = uniqueColumnValue(rows, ILSE_NO)
-            String tagmentation = uniqueColumnValue(rows, TAGMENTATION_BASED_LIBRARY)?.toLowerCase()
+            String seqTypeRaw = uniqueColumnValue(rows, SEQUENCING_TYPE)
+            String tagmentationRaw = uniqueColumnValue(rows, TAGMENTATION_BASED_LIBRARY)?.toLowerCase()
             String baseMaterial = uniqueColumnValue(rows, BASE_MATERIAL)
             boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
+            LibraryLayout libLayout = LibraryLayout.findByName(uniqueColumnValue(rows, LIBRARY_LAYOUT))
+
             SeqType seqType = seqTypeService.findByNameOrImportAlias(
-                    uniqueColumnValue(rows, SEQUENCING_TYPE) + ((tagmentation && ["1", "true"].contains(tagmentation)) ? '_TAGMENTATION' : ''),
-                    [libraryLayout: uniqueColumnValue(rows, LIBRARY_LAYOUT), singleCell: isSingleCell]
+                    seqTypeMaybeTagmentationName(seqTypeRaw, tagmentationRaw),
+                    [libraryLayout: libLayout, singleCell: isSingleCell]
             )
             SeqTypeNames seqTypeName = seqType.seqTypeName
             String pipelineVersionString = uniqueColumnValue(rows, PIPELINE_VERSION) ?: 'unknown'
@@ -490,9 +493,15 @@ class MetadataImportService {
 
     static String getSeqTypeNameFromMetadata(ValueTuple tuple) {
         String tagmentation = tuple.getValue(TAGMENTATION_BASED_LIBRARY.name())?.toLowerCase()
-        return tuple.getValue(SEQUENCING_TYPE.name()) + ((tagmentation && ["1", "true"].contains(tagmentation)) ? SeqType.TAGMENTATION_SUFFIX : '')
+        String seqType = tuple.getValue(SEQUENCING_TYPE.name())
+        return seqTypeMaybeTagmentationName(seqType, tagmentation)
     }
 
+    /** small helper to parse seqtypes and boolean-like uservalues into a proper OTP name */
+    static String seqTypeMaybeTagmentationName(String seqType, String tagmentationRawValue) {
+        boolean isTagmentation = tagmentationRawValue in ["1", "true"]
+        return seqType + (isTagmentation ? SeqType.TAGMENTATION_SUFFIX : '')
+    }
 }
 
 @TupleConstructor
