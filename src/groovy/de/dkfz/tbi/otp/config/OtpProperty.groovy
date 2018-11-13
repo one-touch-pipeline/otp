@@ -39,7 +39,12 @@ enum OtpProperty {
     DATABASE_USERNAME('otp.database.username', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     DATABASE_PASSWORD('otp.database.password', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
 
-    CONFIG_ACTIVATE_EMAIL('otp.mail.allowOtpToSendMails', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
+    CONFIG_EMAIL_ENABLED('otp.mail.allowOtpToSendMails', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
+    CONFIG_EMAIL_SERVER('otp.mail.server', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION), 'localhost'),
+    CONFIG_EMAIL_PORT('otp.mail.port', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION), '25'),
+    CONFIG_EMAIL_USERNAME('otp.mail.username', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION), ''),
+    CONFIG_EMAIL_PASSWORD('otp.mail.password', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION), ''),
+
     CONFIG_JOB_SYSTEM_START('otp.jobsystem.start', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION), 'false'),
     CONFIG_SERVER_URL('otp.server.url', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION)),
     CONFIG_ENVIRONMENT_NAME('otp.environment.name', TypeValidators.SINGLE_LINE_TEXT, EnumSet.of(UsedIn.PRODUCTION), Environment.getCurrent().name),

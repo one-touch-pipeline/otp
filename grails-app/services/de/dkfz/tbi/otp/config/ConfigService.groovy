@@ -115,7 +115,7 @@ class ConfigService implements ApplicationContextAware {
 
 
     boolean otpSendsMails() {
-        return getBooleanValue(OtpProperty.CONFIG_ACTIVATE_EMAIL, false)
+        return getBooleanValue(OtpProperty.CONFIG_EMAIL_ENABLED, false)
     }
 
     boolean isJobSystemEnabled() {
