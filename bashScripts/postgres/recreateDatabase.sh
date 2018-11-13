@@ -34,6 +34,16 @@ rebuild_image
 start_container
 echo "Database created"
 
+if [[ ! -v LATEST_DUMP_LOCATION ]] || [[ ! ${LATEST_DUMP_LOCATION} ]]; then
+    echo "Dump location not set, leaving database empty."
+    exit
+fi
+
+if [[ ! -d ${LATEST_DUMP_LOCATION} ]] || [[ ! -r ${LATEST_DUMP_LOCATION} ]]; then
+    echo "Dump location not found or not accessible, leaving database empty."
+    exit
+fi
+
 # Wait a few seconds for the server to come up. Just in case.
 sleep 10
 
