@@ -10,15 +10,15 @@
     <g:render template="/templates/messages"/>
 
     <div>
-        <h2>${g.message(code: "otp.menu.documents")}</h2>
-        ${g.message(code: "document.notice")}
+        <h2><g:message code="otp.menu.documents"/></h2>
+        <g:message code="document.notice"/>
         <table>
             <tr>
-                <th>${g.message(code: "document.name")}</th>
-                <th>${g.message(code: "document.type")}</th>
-                <th>${g.message(code: "document.document")}</th>
-                <th>${g.message(code: "document.update")}</th>
-                <th>${g.message(code: "document.delete")}</th>
+                <th><g:message code="document.name"/></th>
+                <th><g:message code="document.type"/></th>
+                <th><g:message code="document.document"/></th>
+                <th><g:message code="document.update"/></th>
+                <th><g:message code="document.delete"/></th>
 
             </tr>
             <g:each in="${documents}" var="document">
@@ -52,12 +52,12 @@
                 </tr>
             </g:each>
         </table>
-        <h2>${g.message(code: "document.documentType")}</h2>
+        <h2><g:message code="document.documentType"/></h2>
         <g:form action="createDocumentType" useToken="true">
             <label for="title_input"><g:message code="document.title"/></label>
-            <input type="text" name="title_input" size="20">
-            <label for="text_input"><g:message code="document.description"/></label>
-            <input type="text_input" name="description" size="100">
+            <input id="title_input" type="text" name="title">
+            <label for="description_input"><g:message code="document.description"/></label>
+            <input id="description_input" type="text" name="description" style="width: 700px">
             <g:submitButton name="${g.message(code: "document.createType")}"/>
         </g:form>
     </div>
