@@ -168,7 +168,7 @@ class TrackingService {
 
             List<String> recipients = []
             if (ticket.automaticNotification) {
-                recipients = userProjectRoleService.getEmailAdressesForNotifying(project)
+                recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project)
             }
             StringBuilder subject = new StringBuilder("[${processingOptionService.findOptionAsString(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}] ")
             if (!recipients) {
@@ -210,7 +210,7 @@ class TrackingService {
             List seqTypes = seqTracks*.seqType.findAll().unique()
             subject.append("(${seqTypes*.displayName.sort().join(', ')})")
             if (ticket.automaticNotification) {
-                recipients = userProjectRoleService.getEmailAdressesForNotifying(projects)
+                recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(projects)
             }
         }
         recipients << processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)

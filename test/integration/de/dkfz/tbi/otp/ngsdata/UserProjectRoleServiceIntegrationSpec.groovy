@@ -90,7 +90,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         userProjectRole.enabled == valueToUpdate
-        invocations             * userProjectRoleService.mailHelperService.sendEmail(_, _, _ as String)
+        invocations * userProjectRoleService.mailHelperService.sendEmail(_, _, _ as String)
         (valueToUpdate ? 1 : 0) * userProjectRoleService.mailHelperService.sendEmail(_, _, _ as List<String>)
 
         where:
@@ -110,9 +110,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = DomainFactory.createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
-                cn:       "unknownUser",
+                cn: "unknownUser",
                 realName: "Unknown User",
-                mail:     "unknownUser@dummy.com",
+                mail: "unknownUser@dummy.com",
         )
         userProjectRoleService.userService = new UserService()
         userProjectRoleService.ldapService = Mock(LdapService) {
@@ -137,13 +137,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = DomainFactory.createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
         DomainFactory.createUserProjectRole(
-                user:    user,
+                user: user,
                 project: project
         )
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
-                cn:       user.username,
+                cn: user.username,
                 realName: user.realName,
-                mail:     user.email,
+                mail: user.email,
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
             getLdapUserDetailsByUsername(_) >> ldapUserDetails
@@ -165,9 +165,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = DomainFactory.createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
-                cn:       user.username,
+                cn: user.username,
                 realName: user.realName,
-                mail:     user.email,
+                mail: user.email,
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
             getLdapUserDetailsByUsername(_) >> ldapUserDetails
@@ -208,9 +208,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         User user = DomainFactory.createUser()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
-                cn:       user.username,
+                cn: user.username,
                 realName: user.realName,
-                mail:     user.email,
+                mail: user.email,
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
             getLdapUserDetailsByUsername(_) >> ldapUserDetails
@@ -267,7 +267,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 email: email,
         )
         DomainFactory.createUserProjectRole(
-                user:    user,
+                user: user,
                 project: project,
         )
 
@@ -554,6 +554,32 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         ldapResult    | invocations
         [UNIX_GROUP]  | 1
         [OTHER_GROUP] | 0
+    }
+
+    void "getEmailsOfToBeNotifiedProjectUsers, only return emails of users that receive notification and are enabled"() {
+        given:
+        Project project = DomainFactory.createProject()
+        List<String> expectedEmails = []
+        int numberOfUsers = 12
+        numberOfUsers.times { int i ->
+            boolean notification = (i <= numberOfUsers / 2)
+            boolean enabled = (i % 2 == 0)
+            UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
+                user: DomainFactory.createUser(),
+                project: project,
+                receivesNotifications: notification,
+                enabled: enabled,
+            )
+            if (notification && enabled) {
+                expectedEmails << userProjectRole.user.email
+            }
+        }
+
+        when:
+        List<String> emails = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project)
+
+        then:
+        emails.sort() == expectedEmails.sort()
     }
 
     PluginAwareResourceBundleMessageSource getMessageSource() {

@@ -190,7 +190,7 @@ class LinkFilesToFinalDestinationService {
     }
 
     void informResultsAreBlocked(RoddyBamFile roddyBamFile) {
-        List<String> recipients = userProjectRoleService.getEmailAdressesForNotifying(roddyBamFile.project)
+        List<String> recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(roddyBamFile.project)
         String subject = createResultsAreBlockedSubject(roddyBamFile, recipients.empty)
         String content = createResultsAreBlockedMessage(roddyBamFile)
         recipients << processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)

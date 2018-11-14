@@ -245,15 +245,16 @@ class UserProjectRoleService {
         return new SimpleTemplateEngine().createTemplate(template).make(properties).toString()
     }
 
-    List<String> getEmailAdressesForNotifying(Project project) {
-        return getEmailAdressesForNotifying([project])
+    List<String> getEmailsOfToBeNotifiedProjectUsers(Project project) {
+        return getEmailsOfToBeNotifiedProjectUsers([project])
     }
 
-    List<String> getEmailAdressesForNotifying(List<Project> projects) {
+    List<String> getEmailsOfToBeNotifiedProjectUsers(List<Project> projects) {
         return UserProjectRole.createCriteria().list {
             and {
                 'in'('project', projects)
                 eq('receivesNotifications', true)
+                eq('enabled', true)
             }
             projections {
                 user {
