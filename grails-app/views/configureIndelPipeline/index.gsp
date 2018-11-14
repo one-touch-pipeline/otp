@@ -67,7 +67,7 @@
         </g:form>
         <g:if test="${lastRoddyConfig}">
             <h2><g:message code="configurePipeline.last.config"/></h2>
-            <g:form action="invalidateConfig"
+            <g:form controller="configurePipeline" action="invalidateConfig"
                     params='["project.id": project.id, "seqType.id": seqType.id, "pipeline.id": pipeline.id, "originAction": actionName]'>
                 <g:submitButton name="invalidateConfig" value="Invalidate Config"/>
             </g:form>

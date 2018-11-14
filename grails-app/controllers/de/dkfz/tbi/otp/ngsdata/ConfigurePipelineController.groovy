@@ -12,8 +12,6 @@ import org.springframework.validation.*
 class ConfigurePipelineController implements ConfigurePipelineHelper {
 
     ProjectService projectService
-    ProjectSelectionService projectSelectionService
-    FileSystemService fileSystemService
     ProcessingOptionService processingOptionService
 
     static allowedMethods = [
@@ -49,6 +47,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
             flash.message = g.message(code: "configurePipeline.store.success")
             redirect(controller: "projectConfig")
+            return
         }
 
         if (cmd.copy) {

@@ -97,7 +97,7 @@ class ProjectConfigController implements CheckAndCall {
                 comment                        : project?.comment,
                 nameInMetadata                 : project?.nameInMetadataFiles ?: '',
                 seqTypeMergingCriteria         : seqTypeMergingCriteria,
-                seqTypes                       : SeqTypeService.getRoddyAlignableSeqTypes().sort { it.displayNameWithLibraryLayout },
+                roddySeqTypes                  : SeqTypeService.getRoddyAlignableSeqTypes().sort { it.displayNameWithLibraryLayout },
                 singleCellSeqTypes             : SeqTypeService.getSingleCellAlignableSeqTypes().sort { it.displayNameWithLibraryLayout },
                 snvSeqTypes                    : snv.getSeqTypes(),
                 indelSeqTypes                  : indel.getSeqTypes(),
