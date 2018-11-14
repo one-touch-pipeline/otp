@@ -5,11 +5,11 @@ trait SeqTypeAndInputWgsAceseqBigBamFiles implements SeqTypeAndInputBamFiles {
     @Override
     BamFileSet getBamFileSet() {
         return new BamFileSet(
-                new File(getBamFilePairBaseDirectory(), 'aceseq'),
-                'HCC1187C_S1.bam',
-                'HCC1187C_S1.bam.bai',
-                'HCC1187BL_S1.bam',
-                'HCC1187BL_S1.bam.bai '
+                new File(new File(getBamFilePairBaseDirectory(), 'wgs'), 'aceseq'),
+                'tumor_HCC1187_merged.mdup.bam',
+                'tumor_HCC1187_merged.mdup.bam.bai',
+                'blood_HCC1187_merged.mdup.bam',
+                'blood_HCC1187_merged.mdup.bam.bai '
         )
     }
 }
