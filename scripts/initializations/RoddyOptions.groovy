@@ -25,5 +25,5 @@ processingOptionService.createOrUpdate(
 
 processingOptionService.createOrUpdate(
         RODDY_FEATURE_TOGGLES_CONFIG_PATH,
-        "${roddy_base_path}/configs/featureToggles-3.3.2.ini"
+        "${roddy_base_path}/configs/featureToggles.ini"
 )
