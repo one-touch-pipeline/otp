@@ -505,6 +505,8 @@ chmod 440 ${newDirectFileName}
      * @param oldSampleTypeName the name of the sample type the sample currently belongs to
      * @param newSampleTypeName the name of the existing  sample type the sample should be belong to.
      * @param dataFileMap A map of old file name and new file name. The map have to contain the file name of all datafiles of the individual
+     * @param linkedFilesVerified when the source-fastq files have been linked from the sequencing facility, this flag
+     * asserts that a human has checked that the symlinks still work (i.e. files still exist at the sequencing facility)
      */
     void moveSample(String oldProjectName, String newProjectName, String oldPid, String newPid, String oldSampleTypeName,
                     String newSampleTypeName, Map<String, String> dataFileMap, String bashScriptName,
