@@ -75,4 +75,8 @@ databaseChangeLog = {
     changeSet(author: "strubelp", id: "remove-unique-constraint-SQL") {
         sqlFile(path: 'changelogs/2018/remove-unique-constraint.sql')
     }
+
+    changeSet(author: "borufka", id: "rename-COMMAND_ACTIVATION_RUN_YAPSA_PREFIX") {
+        sqlFile(path: 'changelogs/2018/rename-COMMAND_ACTIVATION_RUN_YAPSA_PREFIX-to-COMMAND_ENABLE_MODULE.sql')
+    }
 }

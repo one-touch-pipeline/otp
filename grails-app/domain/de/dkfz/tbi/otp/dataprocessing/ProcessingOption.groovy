@@ -187,6 +187,10 @@ class ProcessingOption implements Entity {
                 "command to load the module system (executed in Bash, may be empty if not required)",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
         ),
+        COMMAND_ENABLE_MODULE(
+                "command to enable a module. The module name will provided somewhere else",
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
+        ),
         COMMAND_ACTIVATION_FASTQC(
                 "command to enable the module containing fastqc (executed in Bash, may be empty if not required)",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
@@ -221,10 +225,6 @@ class ProcessingOption implements Entity {
         ),
         COMMAND_R(
                 "command for R",
-                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
-        ),
-        COMMAND_ACTIVATION_RUN_YAPSA_PREFIX(
-                "command to enable the module containing runYAPSA (executed in Bash, may be empty if not required)",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
         ),
         COMMAND_RUN_YAPSA(

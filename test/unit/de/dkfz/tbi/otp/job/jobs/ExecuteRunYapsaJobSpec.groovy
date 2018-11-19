@@ -63,7 +63,7 @@ class ExecuteRunYapsaJobSpec extends Specification {
                 value: "load r",
         )
         DomainFactory.createProcessingOptionLazy(
-                name: COMMAND_ACTIVATION_RUN_YAPSA_PREFIX,
+                name: COMMAND_ENABLE_MODULE,
                 value: "load",
         )
         DomainFactory.createProcessingOptionLazy(
