@@ -187,6 +187,7 @@ class SequenceFiltering {
     List<Long> sampleType = []
     List<String> seqType = []
     List<String> libraryLayout = []
+    List<Boolean> singleCell = []
     List<Integer> ilseId = []
     List<Integer> seqCenter = []
     List<String> run = []
@@ -235,6 +236,12 @@ class SequenceFiltering {
                 case "libraryLayoutSelection":
                     if (it.value) {
                         filtering.libraryLayout << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "singleCell":
+                    if (it.value) {
+                        filtering.singleCell << it.value.toBoolean()
                         filtering.enabled = true
                     }
                     break

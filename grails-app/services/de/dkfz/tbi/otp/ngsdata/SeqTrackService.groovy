@@ -59,42 +59,8 @@ class SeqTrackService {
         if (filtering.enabled) {
             def c = Sequence.createCriteria()
             return c.list {
-                'in'('projectName', projectService.getAllProjects().collect { it.name })
-                if (filtering.project) {
-                    'in'('projectName', filtering.project)
-                }
-                if (filtering.individual) {
-                    or {
-                        filtering.individual.each {
-                            ilike('mockPid', "%${it}%")
-                        }
-                    }
-                }
-                if (filtering.sampleType) {
-                    'in'('sampleTypeId', filtering.sampleType)
-                }
-                if (filtering.seqType) {
-                    'in'('seqTypeDisplayName', filtering.seqType)
-                }
-                if (filtering.libraryLayout) {
-                    'in'('libraryLayout', filtering.libraryLayout)
-                }
-                if (filtering.seqCenter) {
-                    'in'('seqCenterId', filtering.seqCenter)
-                }
-                if (filtering.libraryPreparationKit) {
-                    'in'('libraryPreparationKit', filtering.libraryPreparationKit)
-                }
-                if (filtering.ilseId) {
-                    'in'('ilseId', filtering.ilseId)
-                }
-                if (filtering.run) {
-                    or {
-                        filtering.run.each {
-                            ilike('name', "%${it}%")
-                        }
-                    }
-                }
+                filteringClosure.delegate = delegate
+                filteringClosure(filtering)
                 if (max != -1) { //-1 indicate in jquery datatable, that no paging is used. Therefore in that case no maxResult are set
                     maxResults(max)
                 }
@@ -115,42 +81,8 @@ class SeqTrackService {
         if (filtering.enabled) {
             def c = Sequence.createCriteria()
             return c.get {
-                'in'('projectName', projectService.getAllProjects().collect { it.name })
-                if (filtering.project) {
-                    'in'('projectName', filtering.project)
-                }
-                if (filtering.individual) {
-                    or {
-                        filtering.individual.each {
-                            ilike('mockPid', "%${it}%")
-                        }
-                    }
-                }
-                if (filtering.sampleType) {
-                    'in'('sampleTypeId', filtering.sampleType)
-                }
-                if (filtering.seqType) {
-                    'in'('seqTypeDisplayName', filtering.seqType)
-                }
-                if (filtering.libraryLayout) {
-                    'in'('libraryLayout', filtering.libraryLayout)
-                }
-                if (filtering.seqCenter) {
-                    'in'('seqCenterId', filtering.seqCenter)
-                }
-                if (filtering.libraryPreparationKit) {
-                    'in'('libraryPreparationKit', filtering.libraryPreparationKit)
-                }
-                if (filtering.ilseId) {
-                    'in'('ilseId', filtering.ilseId)
-                }
-                if (filtering.run) {
-                    or {
-                        filtering.run.each {
-                            ilike('name', "%${it}%")
-                        }
-                    }
-                }
+                filteringClosure.delegate = delegate
+                filteringClosure(filtering)
                 projections { count('mockPid') }
             }
         } else {
@@ -159,7 +91,47 @@ class SeqTrackService {
         }
     }
 
-
+    Closure filteringClosure = { SequenceFiltering filtering ->
+        'in'('projectName', projectService.getAllProjects().collect { it.name })
+        if (filtering.project) {
+            'in'('projectName', filtering.project)
+        }
+        if (filtering.individual) {
+            or {
+                filtering.individual.each {
+                    ilike('mockPid', "%${it}%")
+                }
+            }
+        }
+        if (filtering.sampleType) {
+            'in'('sampleTypeId', filtering.sampleType)
+        }
+        if (filtering.seqType) {
+            'in'('seqTypeDisplayName', filtering.seqType)
+        }
+        if (filtering.libraryLayout) {
+            'in'('libraryLayout', filtering.libraryLayout)
+        }
+        if (filtering.singleCell) {
+            'in'('singleCell', filtering.singleCell)
+        }
+        if (filtering.seqCenter) {
+            'in'('seqCenterId', filtering.seqCenter)
+        }
+        if (filtering.libraryPreparationKit) {
+            'in'('libraryPreparationKit', filtering.libraryPreparationKit)
+        }
+        if (filtering.ilseId) {
+            'in'('ilseId', filtering.ilseId)
+        }
+        if (filtering.run) {
+            or {
+                filtering.run.each {
+                    ilike('name', "%${it}%")
+                }
+            }
+        }
+    }
 
     /**
      * Calls the {@link AlignmentDecider#decideAndPrepareForAlignment(SeqTrack, boolean)} method of the

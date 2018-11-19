@@ -27,6 +27,7 @@
                             <option value="seqTypeSelection"><g:message code="sequence.search.seqType"/></option>
                             <option value="ilseIdSearch"><g:message code="sequence.search.ilse"/></option>
                             <option value="libraryLayoutSelection"><g:message code="sequence.search.libLayout"/></option>
+                            <option value="singleCell"><g:message code="sequence.search.singleCell"/></option>
                             <option value="libraryPreparationKitSelection"><g:message code="sequence.search.libPrepKit"/></option>
                             <option value="seqCenterSelection"><g:message code="sequence.search.seqCenter"/></option>
                             <option value="runSearch"><g:message code="sequence.search.run"/></option>
@@ -39,6 +40,7 @@
                         <g:select class="criteria" name="seqTypeSelection" from="${seqTypes}" style="display: none"/>
                         <input class="criteria" type="text" name="ilseIdSearch" style="display: none"/>
                         <g:select class="criteria" name="libraryLayoutSelection" from="${libraryLayouts}" style="display: none"/>
+                        <g:select class="criteria" name="singleCell" from="[true, false]" style="display: none"/>
                         <g:select class="criteria" name="libraryPreparationKitSelection" from="${libaryPreparationKits}" style="display: none"/>
                         <g:select class="criteria" name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
                         <input class="criteria" type="text" name="runSearch" style="display: none" placeholder="min. 3 characters"/>
