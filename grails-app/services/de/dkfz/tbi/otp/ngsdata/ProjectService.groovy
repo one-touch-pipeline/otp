@@ -403,12 +403,12 @@ class ProjectService {
         return null
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     RunYapsaConfig getLatestRunYapsaConfig(Project project, SeqType seqType) {
         return RunYapsaConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     CellRangerConfig getLatestCellRangerConfig(Project project, SeqType seqType) {
         return CellRangerConfig.findByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType)
     }

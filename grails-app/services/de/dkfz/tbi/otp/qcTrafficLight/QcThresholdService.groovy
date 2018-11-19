@@ -121,7 +121,7 @@ class QcThresholdService {
     }
 
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     Errors createThreshold(Project project, String clasz, String property, SeqType seqType, QcThreshold.ThresholdStrategy condition,
                            Double errorThresholdLower, Double warningThresholdLower,
                            Double warningThresholdUpper, Double errorThresholdUpper, String property2) {
@@ -147,7 +147,7 @@ class QcThresholdService {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#qcThreshold?.project, 'OTP_READ_ACCESS')")
     Errors updateThreshold(QcThreshold qcThreshold, QcThreshold.ThresholdStrategy condition,
                            Double errorThresholdLower, Double warningThresholdLower,
                            Double warningThresholdUpper, Double errorThresholdUpper, String property2) {
@@ -166,7 +166,7 @@ class QcThresholdService {
         return null
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#qcThreshold?.project, 'OTP_READ_ACCESS')")
     Errors deleteThreshold(QcThreshold qcThreshold) {
         assert qcThreshold
         try {
