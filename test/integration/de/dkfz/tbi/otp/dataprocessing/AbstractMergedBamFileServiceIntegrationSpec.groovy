@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.*
@@ -11,6 +11,25 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
     AbstractMergedBamFileService abstractMergedBamFileService
 
     final String MERGED_BAM_FILES_PATH = "merged-alignment"
+
+    static final List<String> processingSteps = [
+            "aceseq",
+            "indel",
+            "snv",
+            "sophia",
+            "runYapsa",
+    ].asImmutable()
+
+    def 'checkThatProcessingStepListIsComplete'() {
+        given:
+        List<Pipeline> analysisPipelines = Pipeline.Name.values().findAll {
+            it.type != Pipeline.Type.ALIGNMENT && it != Pipeline.Name.OTP_SNV
+        }
+
+        expect:
+        analysisPipelines.size() == processingSteps.size()
+    }
+
 
     def "destination directory of ProcessedMergedBamFile"() {
         given:
@@ -63,17 +82,13 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
         samplePair."${analysisName}ProcessingStatus" == ProcessingStatus.NEEDS_PROCESSING
 
         where:
-        analysisName << [
-                "aceseq",
-                "indel",
-                "snv",
-                "sophia",
-        ]
+        analysisName << processingSteps
     }
 
     @Unroll
     def "set #analysisName samplePairStatus to need processing while samplePair is in state no processing needed"() {
         given:
+        DomainFactory.createAllAnalysableSeqTypes()
         SamplePair samplePair = setSamplePairStatusToNeedProcessing_setup(ProcessingStatus.NO_PROCESSING_NEEDED, analysisName)
         AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(samplePair.mergingWorkPackage2)
 
@@ -84,12 +99,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
         samplePair."${analysisName}ProcessingStatus" == ProcessingStatus.NEEDS_PROCESSING
 
         where:
-        analysisName << [
-                "aceseq",
-                "indel",
-                "snv",
-                "sophia",
-        ]
+        analysisName << processingSteps
     }
 
     @Unroll
@@ -106,10 +116,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
         samplePair1."${analysisName}ProcessingStatus" == ProcessingStatus.NO_PROCESSING_NEEDED
 
         where:
-        analysisName << [
-                "indel",
-                "snv",
-        ]
+        analysisName << processingSteps
     }
 
     private SamplePair setSamplePairStatusToNeedProcessing_setup(ProcessingStatus processingStatus, String analysisName) {

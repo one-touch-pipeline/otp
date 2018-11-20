@@ -26,17 +26,21 @@ class AbstractMergedBamFileService {
                 eq('mergingWorkPackage2', finishedBamFile.workPackage)
             }
         }.each { SamplePair samplePair ->
-            if (samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED) {
+            SeqType seqType = samplePair.seqType
+            if (samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && SeqTypeService.snvPipelineSeqTypes.contains(seqType)) {
                 samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             }
-            if (samplePair.indelProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED) {
+            if (samplePair.indelProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && SeqTypeService.indelPipelineSeqTypes.contains(seqType)) {
                 samplePair.indelProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             }
-            if (samplePair.aceseqProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && samplePair.mergingWorkPackage1.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
+            if (samplePair.aceseqProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED  && SeqTypeService.aceseqPipelineSeqTypes.contains(seqType)) {
                 samplePair.aceseqProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             }
-            if (samplePair.sophiaProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && samplePair.mergingWorkPackage1.seqType.name == SeqTypeNames.WHOLE_GENOME.seqTypeName) {
+            if (samplePair.sophiaProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && SeqTypeService.sophiaPipelineSeqTypes.contains(seqType)) {
                 samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            }
+            if (samplePair.runYapsaProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && SeqTypeService.runYapsaPipelineSeqTypes.contains(seqType)) {
+                samplePair.runYapsaProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             }
             assert samplePair.save(flush: true)
         }
