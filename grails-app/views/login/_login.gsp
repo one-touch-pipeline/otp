@@ -2,16 +2,10 @@
     <div id="loginFormBox" style="position: absolute;">
         <form id="loginForm" method="POST" action="${createLink(controller: 'j_spring_security_check')}">
 
-            <label for="account">${g.message(code: "login.account")}</label>  <br/>
-            <input name="j_username" id="account" value="${account}" required><br/>
-            <label for="password">${g.message(code: "login.password")}</label><br/>
-            <input name="j_password" id="password" type="password" required><br/>
+            <input name="j_username" id="account" placeholder="${g.message(code: "login.account")}" value="${account}" required>
+            <input type="password" name="j_password" id="password" placeholder="${g.message(code: "login.password")}" required><br/>
 
-            <div id="message-box"></div>
-
-            <div class="loginButton isInvisible"><input type="submit" value="Login"/></div>
+            <input id="loginButton" type="submit" value="Login"/>
         </form>
     </div>
-
-    <div class="loginButtonBox" style="position: absolute; top: 250px; left: 0px;"></div>
 </div>

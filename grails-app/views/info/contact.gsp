@@ -14,7 +14,5 @@
     <p class="keep-whitespace">${contactDataPostalAddress}</p>
     <h3>${g.message(code: "info.contact.support")}</h3>
     <p class="keep-whitespace"><a href="mailto:${contactDataSupportEmail}">${contactDataSupportEmail}</a></p>
-    <h3>${g.message(code: "info.contact.picture")}</h3>
-    <p>Login button &copy; unizyne, istockphoto.com</p>
 </body>
 </html>
