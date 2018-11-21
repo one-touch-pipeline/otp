@@ -8,6 +8,7 @@ String workflowName = "RunYapsaWorkflow"
 plan(workflowName, ctx, true) {
     start("runYapsaStart", "runYapsaStartJob")
     job("executeRunYapsa", "executeRunYapsaJob")
+    job("notifyProcessFinished", "notifyProcessFinishedJob")
 }
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
