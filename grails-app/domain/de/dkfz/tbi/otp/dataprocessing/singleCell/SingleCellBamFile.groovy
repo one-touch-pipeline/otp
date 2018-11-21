@@ -14,11 +14,18 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier {
     ]
 
     static constraints = {
-        workDirectoryName unique: 'workPackage', validator: {
-            OtpPath.isValidRelativePath(it)
+        workDirectoryName  validator: { val, obj ->
+            OtpPath.isValidRelativePath(val) &&
+                    !SingleCellBamFile.findAllByWorkDirectoryName(val).any {
+                        it != obj && it.workPackage == obj.workPackage
+                    }
         }
         seqTracks minSize: 1
-        identifier unique: 'workPackage'
+        identifier validator: { val, obj ->
+            !SingleCellBamFile.findAllByIdentifier(val).any {
+                it != obj && it.workPackage == obj.workPackage
+            }
+        }
     }
 
     @Override

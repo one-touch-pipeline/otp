@@ -5,8 +5,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.*
 import org.junit.*
 
-import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
-
 class RoddyBamFileTest {
 
     @Test
@@ -51,7 +49,7 @@ class RoddyBamFileTest {
     void testConstraints_notUniqueIdentifierForWorkPackage_shouldFail() {
         RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
         bamFile.identifier = bamFile.baseBamFile.identifier
-        TestCase.assertValidateError(bamFile, 'identifier', 'unique', bamFile.identifier)
+        TestCase.assertValidateError(bamFile, 'identifier', 'validator.invalid', bamFile.identifier)
     }
 
     @Test
