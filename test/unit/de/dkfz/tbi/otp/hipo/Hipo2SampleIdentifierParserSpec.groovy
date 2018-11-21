@@ -22,9 +22,7 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
         parsed.fullSampleName == identifier
 
         where:
-
-        identifier            || sampleTypeDbName
-
+        identifier              || sampleTypeDbName
         'K12A-123ABC-N0-D1'     || 'CONTROL0'
 
         'K12A-123ABC-T0-D1'     || 'TUMOR0'
@@ -74,6 +72,11 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
         'K12A-123ABC-T3-0J01'   || 'TUMOR3-0J01'
         'K12A-123ABC-T3-1J02'   || 'TUMOR3-1J02'
         'K12A-123ABC-T3-1J20'   || 'TUMOR3-1J20'
+
+        'K12A-123ABC-T0-C1'     || 'TUMOR0-C1'
+        'K12A-123ABC-T0-G1'     || 'TUMOR0-G1'
+        'K12A-123ABC-T0-H1'     || 'TUMOR0-H1'
+        'K12A-123ABC-T0-12C3'   || 'TUMOR0-12C3'
     }
 
 
@@ -112,15 +115,12 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
                 'K12A-123ABC-T0-1W12',
                 'K12A-123ABC-T0-1Y12',
                 'K12A-123ABC-T0-1L12',
-                'K12A-123ABC-T0-C1',
-                'K12A-123ABC-T0-G1',
-                'K12A-123ABC-T0-H1',
                 'K12A-123ABC-T0-C123',
-                'K12A-123ABC-T0-12C3',
                 'K12A-123ABC-T0-123C',
                 'K12A-123ABC-T0-1C123',
                 'K12A-123ABC-T0-1C0X',
                 'K12A-123ABC-T0-XC01',
+                'K12A-123ABC-T0-1G',
         ]
     }
 

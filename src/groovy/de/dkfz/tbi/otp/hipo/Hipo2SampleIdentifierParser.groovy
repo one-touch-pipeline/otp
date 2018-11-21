@@ -8,8 +8,11 @@ import java.util.regex.*
 @Component
 class Hipo2SampleIdentifierParser implements SampleIdentifierParser {
 
-    static String REGEX = /^(?<pid>${PIDREGEX})-(?<tissueType>[${HipoTissueType.values()*.key.join('')}])(?<tissueNumber>[0-9]{1,2})-(?<analyte>[DRPAWYTBMLSE][0-9]|[0-9]*[CGHJ][0-9]{2})$/
-    private final static String PIDREGEX = "(?<project>[KST][0-9]{2}[A-Z])-[A-Z0-9]{4}([A-Z0-9]{2})?"
+    private final static String PID = "(?<pid>(?<project>[KST][0-9]{2}[A-Z])-[A-Z0-9]{4}([A-Z0-9]{2})?)"
+    private final static String TISSUE = "(?<tissueType>[${HipoTissueType.values()*.key.join('')}])(?<tissueNumber>[0-9]{1,2})"
+    private final static String ANALYTE = "(?<analyte>[DRPAWYTBMLSE][0-9]|[0-9]*[CGHJ][0-9]{1,2})"
+
+    static String REGEX = /^${PID}-${TISSUE}-${ANALYTE}$/
 
     @Override
     boolean isForProject(String projectName) {
@@ -18,7 +21,7 @@ class Hipo2SampleIdentifierParser implements SampleIdentifierParser {
 
     @Override
     boolean tryParsePid(String pid) {
-        return pid =~ "^" + PIDREGEX + /$/
+        return pid =~ "^" + PID + /$/
     }
 
     @Override
