@@ -18,7 +18,6 @@ beans = {
             executor = java.util.concurrent.Executors.newCachedThreadPool()
         }
         executorService(de.dkfz.tbi.otp.testing.SynchronousTestingExecutorService)
-        servletContext(de.dkfz.tbi.otp.testing.OTPServletContext)
         fileSystemService(de.dkfz.tbi.otp.job.processing.TestFileSystemService)
     } else {
         // proper thread pool
