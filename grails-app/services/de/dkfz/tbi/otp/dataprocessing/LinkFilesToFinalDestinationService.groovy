@@ -3,47 +3,26 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.notification.*
+import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
-import org.springframework.beans.factory.annotation.*
 
 import static de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus.*
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
 class LinkFilesToFinalDestinationService {
 
-    @Autowired
     ExecuteRoddyCommandService executeRoddyCommandService
 
-    @Autowired
     LinkFileUtils linkFileUtils
 
-    @Autowired
     LsdfFilesService lsdfFilesService
 
-    @Autowired
-    ExecutionHelperService executionHelperService
-
-    @Autowired
-    CreateClusterScriptService createClusterScriptService
-
-    @Autowired
     RemoteShellHelper remoteShellHelper
 
-    @Autowired
     AbstractMergedBamFileService abstractMergedBamFileService
 
-    @Autowired
-    MailHelperService mailHelperService
+    QcTrafficLightNotificationService qcTrafficLightNotificationService
 
-    @Autowired
-    CreateNotificationTextService createNotificationTextService
-
-    @Autowired
-    ProcessingOptionService processingOptionService
-
-    @Autowired
-    UserProjectRoleService userProjectRoleService
 
     void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
         assert roddyBamFile: "roddyBamFile must not be null"
@@ -51,7 +30,8 @@ class LinkFilesToFinalDestinationService {
             RoddyBamFile.withTransaction {
                 assert roddyBamFile.isMostRecentBamFile(): "The BamFile ${roddyBamFile} is not the most recent one. This must not happen!"
                 if (!roddyBamFile.config.adapterTrimmingNeeded) {
-                    assert roddyBamFile.numberOfReadsFromQa >= roddyBamFile.numberOfReadsFromFastQc: "bam file (${roddyBamFile.numberOfReadsFromQa}) has less number of reads than the sum of all fastqc (${roddyBamFile.numberOfReadsFromFastQc})"
+                    assert roddyBamFile.numberOfReadsFromQa >= roddyBamFile.numberOfReadsFromFastQc: "bam file (${roddyBamFile.numberOfReadsFromQa}) " +
+                            "has less number of reads than the sum of all fastqc (${roddyBamFile.numberOfReadsFromFastQc})"
                 }
                 assert [NEEDS_PROCESSING, INPROGRESS].contains(roddyBamFile.fileOperationStatus)
                 roddyBamFile.fileOperationStatus = INPROGRESS
@@ -89,9 +69,10 @@ class LinkFilesToFinalDestinationService {
         if (!roddyBamFile.qcTrafficLightStatus || roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED) {
             linkCall()
         } else if (roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) {
-            informResultsAreBlocked(roddyBamFile)
+            qcTrafficLightNotificationService.informResultsAreBlocked(roddyBamFile)
         } else {
-            throw new RuntimeException("${roddyBamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus here, only ${AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED} and ${AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED} is a valid status.")
+            throw new RuntimeException("${roddyBamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus here, only " +
+                    "${AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED} and ${AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED} is a valid status.")
         }
         setBamFileValues(roddyBamFile)
     }
@@ -130,10 +111,16 @@ class LinkFilesToFinalDestinationService {
         if (roddyBamFile.seqType.isWgbs()) {
             linkMapSourceLink.put(roddyBamFile.workMergedMethylationDirectory, roddyBamFile.finalMergedMethylationDirectory)
             if (roddyBamFile.getContainedSeqTracks()*.getLibraryDirectoryName().unique().size() > 1) {
-                [roddyBamFile.workLibraryQADirectories.values().asList().sort(), roddyBamFile.finalLibraryQADirectories.values().asList().sort()].transpose().each {
+                [
+                        roddyBamFile.workLibraryQADirectories.values().asList().sort(),
+                        roddyBamFile.finalLibraryQADirectories.values().asList().sort(),
+                ].transpose().each {
                     linkMapSourceLink.put(it[0], it[1])
                 }
-                [roddyBamFile.workLibraryMethylationDirectories.values().asList().sort(), roddyBamFile.finalLibraryMethylationDirectories.values().asList().sort()].transpose().each {
+                [
+                        roddyBamFile.workLibraryMethylationDirectories.values().asList().sort(),
+                        roddyBamFile.finalLibraryMethylationDirectories.values().asList().sort(),
+                ].transpose().each {
                     linkMapSourceLink.put(it[0], it[1])
                 }
             }
@@ -160,43 +147,6 @@ class LinkFilesToFinalDestinationService {
         //create the collected links
         linkFileUtils.createAndValidateLinks(linkMapSourceLink, realm)
     }
-
-    String createResultsAreBlockedSubject(RoddyBamFile roddyBamFile, boolean toBeSent) {
-        StringBuilder subject = new StringBuilder()
-        if (toBeSent) {
-            subject << 'TO BE SENT: '
-        }
-
-        subject << createNotificationTextService.createMessage(
-                "notification.template.alignment.qcTrafficBlockedSubject",
-                [
-                        roddyBamFile: roddyBamFile,
-                ]
-        )
-
-        return subject.toString()
-    }
-
-
-    String createResultsAreBlockedMessage(RoddyBamFile roddyBamFile) {
-        return createNotificationTextService.createMessage(
-                "notification.template.alignment.qcTrafficBlockedMessage",
-                [
-                        roddyBamFile         : roddyBamFile,
-                        link                 : createNotificationTextService.createOtpLinks([roddyBamFile.project], 'alignmentQualityOverview', 'index'),
-                        emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
-                ]
-        )
-    }
-
-    void informResultsAreBlocked(RoddyBamFile roddyBamFile) {
-        List<String> recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(roddyBamFile.project)
-        String subject = createResultsAreBlockedSubject(roddyBamFile, recipients.empty)
-        String content = createResultsAreBlockedMessage(roddyBamFile)
-        recipients << processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)
-        mailHelperService.sendEmail(subject, content, recipients)
-    }
-
 
     void linkNewRnaResults(RnaRoddyBamFile roddyBamFile, Realm realm) {
         File baseDirectory = roddyBamFile.getBaseDirectory()

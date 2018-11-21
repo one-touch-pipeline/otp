@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import asset.pipeline.grails.*
+
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
@@ -10,13 +10,13 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.*
+import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
 import org.codehaus.groovy.grails.context.support.*
 import org.junit.*
 import org.junit.rules.*
 import org.springframework.beans.factory.annotation.*
-import spock.lang.*
 
 class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec implements RoddyRnaFactory {
     LinkFilesToFinalDestinationService service
@@ -45,18 +45,6 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
         service.linkFileUtils.remoteShellHelper = remoteShellHelper
         service.executeRoddyCommandService = new ExecuteRoddyCommandService()
         service.executeRoddyCommandService.remoteShellHelper = service.remoteShellHelper
-        service.processingOptionService = new ProcessingOptionService()
-        service.userProjectRoleService = new UserProjectRoleService()
-        service.createNotificationTextService = new CreateNotificationTextService(
-                messageSource: Mock(PluginAwareResourceBundleMessageSource) {
-                    _ * getMessageInternal('notification.template.alignment.qcTrafficBlockedSubject', [], _) >> '''QC traffic alignment header ${roddyBamFile.sample} ${roddyBamFile.seqType}'''
-                    _ * getMessageInternal('notification.template.alignment.qcTrafficBlockedMessage', [], _) >> '''\
-QC traffic alignment body
-${roddyBamFile.sample} ${roddyBamFile.seqType} in project ${roddyBamFile.project}
-${link}
-'''
-                }
-        )
 
         roddyBamFile = createBamFile()
 
@@ -123,62 +111,8 @@ ${link}
         !roddyBamFile.finalMd5sumFile.exists()
     }
 
-    void "test createResultsAreBlockedMessage "() {
-        given:
-        DomainFactory.createProcessingOptionForEmailSenderSalutation()
-        service.createNotificationTextService.linkGenerator = Mock(LinkGenerator) {
-            1 * link(_) >> 'link'
-        }
-        String expected = """\
-QC traffic alignment body
-${roddyBamFile.sample} ${roddyBamFile.seqType} in project ${roddyBamFile.project}
-link
-"""
 
-        when:
-        String result = service.createResultsAreBlockedMessage(roddyBamFile)
 
-        then:
-        result == expected
-    }
-
-    @Unroll
-    void "test informResultsAreBlocked (#name)"() {
-        given:
-        DomainFactory.createProcessingOptionForEmailSenderSalutation()
-        service.createNotificationTextService.linkGenerator = Mock(LinkGenerator) {
-            1 * link(_) >> 'link'
-        }
-
-        service.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail(_, _, _) >> { String emailSubject, String content, List<String> recipients ->
-                assert emailSubject == subjectHeader + 'HEADER'
-                assert content == 'BODY'
-                assert recipients
-                assert recipients.size() == recipientsCount
-                assert !recipients.contains(null)
-            }
-        }
-
-        service.createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
-            1 * getMessageInternal('notification.template.alignment.qcTrafficBlockedSubject', [], _) >> '''HEADER'''
-            1 * getMessageInternal('notification.template.alignment.qcTrafficBlockedMessage', [], _) >> '''BODY'''
-            0 * _
-        }
-        DomainFactory.createProcessingOptionForNotificationRecipient()
-
-        if (createUserProjectRole) {
-            DomainFactory.createUserProjectRole(project: roddyBamFile.project)
-        }
-
-        expect:
-        service.informResultsAreBlocked(roddyBamFile)
-
-        where:
-        name                      | createUserProjectRole | subjectHeader  || recipientsCount
-        'without userProjectRole' | false                 | 'TO BE SENT: ' || 1
-        'with userProjectRole'    | true                  | ''             || 2
-    }
 
     private void assertBamFileIsFine() {
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
@@ -195,8 +129,10 @@ link
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy() {
             1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
-            0 * informResultsAreBlocked(_) >> { RoddyBamFile roddyBamFile -> }
             0 * cleanupWorkDirectory(_, _)
+        }
+        linkFilesToFinalDestinationService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {
+            0 * informResultsAreBlocked(_) >> { AbstractMergedBamFile bamFile -> }
         }
         linkFilesToFinalDestinationService.executeRoddyCommandService = Mock(ExecuteRoddyCommandService) {
             1 * correctPermissionsAndGroups(_, _) >> { RoddyResult roddyResult, Realm realm -> }
@@ -225,7 +161,9 @@ link
         LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy() {
             1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
             0 * cleanupWorkDirectory(_, _)
-            1 * informResultsAreBlocked(_) >> { RoddyBamFile roddyBamFile -> }
+        }
+        linkFilesToFinalDestinationService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {
+            1 * informResultsAreBlocked(_) >> { AbstractMergedBamFile bamFile -> }
         }
         linkFilesToFinalDestinationService.executeRoddyCommandService = Mock(ExecuteRoddyCommandService) {
             1 * correctPermissionsAndGroups(_, _) >> { RoddyResult roddyResult, Realm realm -> }

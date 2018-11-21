@@ -57,9 +57,8 @@ class LinkFilesToFinalDestinationServiceTests {
     void tearDown() {
         TestCase.removeMetaClass(LinkFilesToFinalDestinationService, linkFilesToFinalDestinationService)
         TestCase.removeMetaClass(RemoteShellHelper, linkFilesToFinalDestinationService.remoteShellHelper)
-        TestCase.removeMetaClass(ExecutionHelperService, linkFilesToFinalDestinationService.executionHelperService)
         TestCase.removeMetaClass(ExecuteRoddyCommandService, linkFilesToFinalDestinationService.executeRoddyCommandService)
-        TestCase.removeMetaClass(CreateClusterScriptService, linkFilesToFinalDestinationService.createClusterScriptService)
+        TestCase.removeMetaClass(CreateClusterScriptService, linkFilesToFinalDestinationService.lsdfFilesService.createClusterScriptService)
         TestCase.removeMetaClass(LinkFileUtils, linkFilesToFinalDestinationService.linkFileUtils)
         GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
         configService.clean()
@@ -134,7 +133,7 @@ class LinkFilesToFinalDestinationServiceTests {
         assert new File(roddyBamFile.workDirectory, HelperUtils.uniqueString).createNewFile()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
 
-        linkFilesToFinalDestinationService.createClusterScriptService.metaClass.removeDirs = { Collection<File> dirs, CreateClusterScriptService.RemoveOption option ->
+        linkFilesToFinalDestinationService.lsdfFilesService.createClusterScriptService.metaClass.removeDirs = { Collection<File> dirs, CreateClusterScriptService.RemoveOption option ->
             assert false: FAIL_MESSAGE
         }
 
@@ -481,7 +480,7 @@ class LinkFilesToFinalDestinationServiceTests {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
-        linkFilesToFinalDestinationService.createClusterScriptService.metaClass.removeDirs = { Collection<File> dirs, CreateClusterScriptService.RemoveOption option ->
+        linkFilesToFinalDestinationService.lsdfFilesService.createClusterScriptService.metaClass.removeDirs = { Collection<File> dirs, CreateClusterScriptService.RemoveOption option ->
             assert false: FAIL_MESSAGE
         }
 
@@ -583,6 +582,7 @@ class LinkFilesToFinalDestinationServiceTests {
         linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm ->
             assert false : "should not reach this part"
         }
+        DomainFactory.createProcessingOptionForNotificationRecipient()
 
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
 

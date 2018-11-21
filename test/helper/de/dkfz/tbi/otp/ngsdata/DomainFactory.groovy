@@ -412,7 +412,7 @@ class DomainFactory {
         )
     }
 
-    static void createProcessingOptionForNotificationRecipient(String recipientEmail = HelperUtils.randomEmail) {
+    static ProcessingOption createProcessingOptionForNotificationRecipient(String recipientEmail = HelperUtils.randomEmail) {
         createProcessingOptionLazy(
                 name: OptionName.EMAIL_RECIPIENT_NOTIFICATION,
                 type: null,
@@ -421,7 +421,7 @@ class DomainFactory {
         )
     }
 
-    static void createProcessingOptionForErrorRecipient(String recipientEmail = HelperUtils.randomEmail) {
+    static ProcessingOption createProcessingOptionForErrorRecipient(String recipientEmail = HelperUtils.randomEmail) {
         createProcessingOptionLazy(
                 name: OptionName.EMAIL_RECIPIENT_ERRORS,
                 type: null,
@@ -430,7 +430,7 @@ class DomainFactory {
         )
     }
 
-    static void createProcessingOptionForEmailSenderSalutation(String message = "the service team${counter++}") {
+    static ProcessingOption createProcessingOptionForEmailSenderSalutation(String message = "the service team${counter++}") {
         createProcessingOptionLazy(
                 name: OptionName.EMAIL_SENDER_SALUTATION,
                 type: null,
