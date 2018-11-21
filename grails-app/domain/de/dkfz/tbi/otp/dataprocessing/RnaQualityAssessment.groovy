@@ -174,14 +174,14 @@ class RnaQualityAssessment extends RoddyQualityAssessment implements QcTrafficLi
         noCovered5P nullable: true
         numGaps nullable: true
         threePNorm nullable: true
-        end2PercentageSense nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
-        end2MismatchRate nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
-        end1PercentageSense nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
-        end1MismatchRate nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
-        properlyPaired nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
-        properlyPairedPercentage nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
-        singletons nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
-        singletonsPercentage nullable: true, validator: nullIfAndOnlyIfLayoutIsSingle
+        end2PercentageSense nullable: true, validator: RnaQualityAssessment.nullIfAndOnlyIfLayoutIsSingle
+        end2MismatchRate nullable: true, validator: RnaQualityAssessment.nullIfAndOnlyIfLayoutIsSingle
+        end1PercentageSense nullable: true, validator: RnaQualityAssessment.nullIfAndOnlyIfLayoutIsSingle
+        end1MismatchRate nullable: true, validator: RnaQualityAssessment.nullIfAndOnlyIfLayoutIsSingle
+        properlyPaired nullable: true, validator: RnaQualityAssessment.nullIfAndOnlyIfLayoutIsSingle
+        properlyPairedPercentage nullable: true, validator: RnaQualityAssessment.nullIfAndOnlyIfLayoutIsSingle
+        singletons nullable: true, validator: RnaQualityAssessment.nullIfAndOnlyIfLayoutIsSingle
+        singletonsPercentage nullable: true, validator: RnaQualityAssessment.nullIfAndOnlyIfLayoutIsSingle
     }
 
     static def nullIfAndOnlyIfLayoutIsSingle = { val, RnaQualityAssessment obj ->

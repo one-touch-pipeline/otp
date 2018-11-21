@@ -44,23 +44,23 @@ abstract class RoddyQualityAssessment extends AbstractQualityAssessment {
 
         chromosome blank: false
 
-        insertSizeCV(nullable: true, validator: nullIfAndOnlyIfPerChromosomeQc)
-        percentageMatesOnDifferentChr(nullable: true, validator: nullIfAndOnlyIfPerChromosomeQc)
+        insertSizeCV(nullable: true, validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        percentageMatesOnDifferentChr(nullable: true, validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
 
-        totalReadCounter(validator: nullIfAndOnlyIfPerChromosomeQc)
-        qcFailedReads(validator: nullIfAndOnlyIfPerChromosomeQc)
-        duplicates(validator: nullIfAndOnlyIfPerChromosomeQc)
-        totalMappedReadCounter(validator: nullIfAndOnlyIfPerChromosomeQc)
-        pairedInSequencing(validator: nullIfAndOnlyIfPerChromosomeQc)
-        pairedRead2(validator: nullIfAndOnlyIfPerChromosomeQc)
-        pairedRead1(validator: nullIfAndOnlyIfPerChromosomeQc)
-        properlyPaired(validator: nullIfAndOnlyIfPerChromosomeQc)
-        withItselfAndMateMapped(validator: nullIfAndOnlyIfPerChromosomeQc)
-        withMateMappedToDifferentChr(validator: nullIfAndOnlyIfPerChromosomeQc)
-        withMateMappedToDifferentChrMaq(validator: nullIfAndOnlyIfPerChromosomeQc)
-        singletons(validator: nullIfAndOnlyIfPerChromosomeQc)
-        insertSizeMedian(validator: nullIfAndOnlyIfPerChromosomeQc)
-        insertSizeSD(validator: nullIfAndOnlyIfPerChromosomeQc)
+        totalReadCounter(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        qcFailedReads(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        duplicates(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        totalMappedReadCounter(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        pairedInSequencing(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        pairedRead2(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        pairedRead1(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        properlyPaired(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        withItselfAndMateMapped(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        withMateMappedToDifferentChr(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        withMateMappedToDifferentChrMaq(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        singletons(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        insertSizeMedian(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        insertSizeSD(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
         // not available for RNA
         genomeWithoutNCoverageQcBases nullable: true, validator: { it != null }
     }

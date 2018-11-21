@@ -71,4 +71,8 @@ databaseChangeLog = {
     changeSet(author: "gruenj", id: "remove-identifierInRunName-from-database-SQL") {
         sqlFile(path: 'changelogs/2018/remove-identifierInRunName-from-datadase.sql')
     }
+
+    changeSet(author: "strubelp", id: "remove-unique-constraint-SQL") {
+        sqlFile(path: 'changelogs/2018/remove-unique-constraint.sql')
+    }
 }
