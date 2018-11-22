@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.ngsdata.*
@@ -71,10 +72,9 @@ class ProcessingOptionController {
     def update(ProcessingOptionCommand cmd) {
         try {
             processingOptionService.createOrUpdate(cmd.optionName, cmd.value, cmd.type != "" ? cmd.type : null)
-            flash.message = g.message(code: "processingOption.store.success")
+            flash.message = new FlashMessage(g.message(code: "processingOption.store.success") as String)
         } catch (ValidationException e) {
-            flash.message = g.message(code: "processingOption.store.failure")
-            flash.errors = e.errors
+            flash.message = new FlashMessage(g.message(code: "processingOption.store.failure") as String, e.errors)
        }
         redirect(action: "index")
     }

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.administration
 
+import de.dkfz.tbi.otp.*
 import grails.compiler.*
 import groovy.transform.*
 import org.springframework.validation.*
@@ -28,13 +29,12 @@ class DocumentController {
         withForm {
             Errors errors = documentService.updateDocument(cmd.documentType, cmd.content, cmd.formatType)
             if (errors) {
-                flash.message = g.message(code: "document.store.fail")
-                flash.errors = errors
+                flash.message = new FlashMessage(g.message(code: "document.store.fail") as String, errors)
             } else {
-                flash.message = g.message(code: "document.store.succ")
+                flash.message = new FlashMessage(g.message(code: "document.store.succ") as String)
             }
         }.invalidToken {
-            flash.message = g.message(code: "document.store.fail")
+            flash.message = new FlashMessage(g.message(code: "document.store.fail") as String)
         }
         redirect(action: "manage")
     }
@@ -59,13 +59,12 @@ class DocumentController {
         withForm {
             Errors errors = documentService.createDocumentType(cmd.title, cmd.description)
             if (errors) {
-                flash.message = g.message(code: "document.store.fail")
-                flash.errors = errors
+                flash.message = new FlashMessage(g.message(code: "document.store.fail") as String, errors)
             } else {
-                flash.message = g.message(code: "document.store.succ")
+                flash.message = new FlashMessage(g.message(code: "document.store.succ") as String)
             }
         }.invalidToken {
-            flash.message = g.message(code: "document.store.fail")
+            flash.message = new FlashMessage(g.message(code: "document.store.fail") as String)
         }
         redirect(action: "manage")
     }
@@ -75,13 +74,12 @@ class DocumentController {
         withForm {
             Errors errors = documentService.deleteDocumentType(cmd.documentType)
             if (errors) {
-                flash.message = g.message(code: "document.store.fail")
-                flash.errors = errors
+                flash.message = new FlashMessage(g.message(code: "document.store.fail") as String, errors)
             } else {
-                flash.message = g.message(code: "document.store.succ")
+                flash.message = new FlashMessage(g.message(code: "document.store.succ") as String)
             }
         }.invalidToken {
-            flash.message = g.message(code: "document.store.fail")
+            flash.message = new FlashMessage(g.message(code: "document.store.fail") as String)
         }
         redirect(action: "manage")
     }

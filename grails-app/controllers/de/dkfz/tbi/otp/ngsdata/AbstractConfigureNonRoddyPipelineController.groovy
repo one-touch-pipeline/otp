@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import org.springframework.validation.*
 
@@ -25,11 +26,10 @@ abstract class AbstractConfigureNonRoddyPipelineController extends AbstractConfi
 
     void updatePipeline(Errors errors, Project project, SeqType seqType) {
         if (errors) {
-            flash.message = g.message(code: "configurePipeline.store.failure")
-            flash.errors = errors
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.failure") as String, errors)
             redirect action: "index", params: ['project.id': project.id, 'seqType.id': seqType.id]
         } else {
-            flash.message = g.message(code: "configurePipeline.store.success")
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.success") as String)
             redirect controller: "projectConfig"
         }
     }

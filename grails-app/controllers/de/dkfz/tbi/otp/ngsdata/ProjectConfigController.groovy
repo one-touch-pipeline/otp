@@ -5,11 +5,10 @@ import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
-import de.dkfz.tbi.otp.dataprocessing.singleCell.CellRangerConfig
+import de.dkfz.tbi.otp.dataprocessing.singleCell.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
-import org.springframework.validation.*
 import org.springframework.web.multipart.*
 
 import java.sql.*
@@ -206,14 +205,13 @@ class ProjectConfigController implements CheckAndCall {
     def addProjectInfo(AddProjectInfoCommand cmd) {
         withForm {
             if (cmd.hasErrors()) {
-                flash.message = g.message(code: "projectOverview.projectInfos.errorMessage")
-                flash.errors = cmd.errors
+                flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.errorMessage") as String, cmd.errors)
             } else {
                 projectService.createProjectInfoAndUploadFile(cmd.project, cmd.projectInfoFile)
             }
 
         }.invalidToken {
-            flash.message = g.message(code: "projectOverview.projectInfos.errorMessage")
+            flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.errorMessage") as String)
         }
         redirect(action: "index")
     }
@@ -350,7 +348,7 @@ class ProjectConfigController implements CheckAndCall {
         if (outputFile) {
             render(file: outputFile, contentType: "application/octet-stream", fileName: cmd.projectInfo.fileName)
         } else {
-            flash.message = "No file '${cmd.projectInfo.fileName}' found."
+            flash.message = new FlashMessage("No file '${cmd.projectInfo.fileName}' found.")
             redirect(action: "index")
         }
 

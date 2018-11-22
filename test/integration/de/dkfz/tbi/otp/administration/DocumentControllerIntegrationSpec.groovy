@@ -43,7 +43,7 @@ class DocumentControllerIntegrationSpec extends Specification implements UserAnd
         then:
         controller.response.status == SC_MOVED_TEMPORARILY
         controller.response.redirectedUrl == "/document/manage"
-        controller.flash.message == "The document was stored successfully"
+        controller.flash.message.message == "The document was stored successfully"
         Document d = exactlyOneElement(Document.all)
         d.documentType == documentType
         d.formatType == formatType
@@ -77,7 +77,7 @@ class DocumentControllerIntegrationSpec extends Specification implements UserAnd
         then:
         controller.response.status == SC_MOVED_TEMPORARILY
         controller.response.redirectedUrl == "/document/manage"
-        controller.flash.message == "The document could not be stored"
+        controller.flash.message.message == "The document could not be stored"
         Document.all.empty
 
         where:

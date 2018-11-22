@@ -1,13 +1,11 @@
 package de.dkfz.tbi.otp.egaSubmission
 
-import de.dkfz.tbi.otp.CheckAndCall
-import de.dkfz.tbi.otp.ProjectSelection
-import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.DataTableCommand
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
-import grails.converters.JSON
-import org.springframework.validation.FieldError
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.util.spreadsheet.*
+import grails.converters.*
+import org.springframework.validation.*
 
 class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
@@ -183,7 +181,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     flash.submission = cmd.submission
                     redirect(action: "sampleInformation")
                 } else {
-                    flash.message = "File was uploaded"
+                    flash.message = new FlashMessage("File was uploaded")
                     flash.egaSampleAliases = egaSubmissionService.readEgaSampleAliasesFromFile(spreadsheet)
                     flash.fastqs = egaSubmissionService.readBoxesFromFile(spreadsheet, EgaSubmissionService.FileType.FASTQ)
                     flash.bams = egaSubmissionService.readBoxesFromFile(spreadsheet, EgaSubmissionService.FileType.BAM)
@@ -212,8 +210,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             Map validateMap = egaSubmissionService.validateSampleInformationFormInput(cmd.sampleObjectId, cmd.egaSampleAlias, cmd.fileType)
 
             if (validateMap.hasErrors) {
-                flash.message = ERROR_TITLE
-                flash.errors = validateMap.errors
+                flash.message = new FlashMessage(ERROR_TITLE, validateMap.errors)
                 flash.egaSampleAliases = validateMap.sampleAliases
                 flash.fastqs = validateMap.fastqs
                 flash.bams = validateMap.bams
@@ -227,8 +224,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     private void pushError(String message) {
-        flash.message = ERROR_TITLE
-        flash.errors = message
+        flash.message = new FlashMessage(ERROR_TITLE, [message])
     }
 
     JSON updateSubmissionState(UpdateSubmissionStateCommand cmd) {

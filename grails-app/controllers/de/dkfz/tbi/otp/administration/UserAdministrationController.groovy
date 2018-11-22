@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
-import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.*
 import grails.plugin.springsecurity.annotation.*
-import org.springframework.validation.FieldError
+import org.springframework.validation.*
 
 /**
  * @short Controller for user management.
@@ -93,8 +94,7 @@ class UserAdministrationController {
 
     def show(SelectUserCommmand cmd) {
         if (cmd.hasErrors()) {
-            flash.message = "An error occurred"
-            flash.errors = cmd.errors.getFieldError().code
+            flash.message = new FlashMessage("An error occurred", [cmd.errors.getFieldError().code])
             redirect(action: "index")
             return
         }
@@ -115,11 +115,9 @@ class UserAdministrationController {
 
     def editUser(EditUserCommand cmd) {
         if (cmd.hasErrors()) {
-            flash.errors = cmd.errors.getFieldError().code
-            flash.message = "An error occurred"
+            flash.message = new FlashMessage("An error occurred", [cmd.errors.getFieldError().code])
         } else {
-            flash.errors = false
-            flash.message = "User ${cmd.user.username} successfully edited"
+            flash.message = new FlashMessage("User ${cmd.user.username} successfully edited")
             userService.editUser(cmd.user, cmd.email, cmd.realName, cmd.asperaAccount)
         }
         redirect(action: "show", params: ['user.id': cmd.user.id] )

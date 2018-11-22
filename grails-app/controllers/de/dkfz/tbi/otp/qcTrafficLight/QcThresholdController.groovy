@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.qcTrafficLight
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.qcTrafficLight.UpdateCommand
 import org.springframework.validation.*
 
 class QcThresholdController {
@@ -73,15 +74,13 @@ class QcThresholdController {
 
     private void checkErrorAndCallMethod(Object cmd, Closure<Errors> method) {
         if (cmd.hasErrors()) {
-            flash.message = g.message(code: "qcThreshold.store.fail")
-            flash.errors = cmd.getErrors()
+            flash.message = new FlashMessage(g.message(code: "qcThreshold.store.fail") as String, cmd.getErrors())
         } else {
             Errors errors = method()
             if (errors) {
-                flash.message = g.message(code: "qcThreshold.store.fail")
-                flash.errors = errors
+                flash.message = new FlashMessage(g.message(code: "qcThreshold.store.fail") as String, errors)
             } else {
-                flash.message = g.message(code: "qcThreshold.store.succ")
+                flash.message = new FlashMessage(g.message(code: "qcThreshold.store.succ") as String)
             }
         }
         if (cmd.project) {

@@ -1,3 +1,4 @@
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
 
@@ -35,8 +36,10 @@ class PrivacyPolicyController {
         if (cmd.accept) {
             userService.acceptPrivacyPolicy()
         } else {
-            flash.message = g.message(code: "privacyPolicy.message.fail")
-            flash.errors = g.message(code: "privacyPolicy.message.error")
+            flash.message = new FlashMessage(
+                    g.message(code: "privacyPolicy.message.fail") as String,
+                    [g.message(code: "privacyPolicy.message.error") as String],
+            )
         }
 
         redirect uri: cmd.redirect

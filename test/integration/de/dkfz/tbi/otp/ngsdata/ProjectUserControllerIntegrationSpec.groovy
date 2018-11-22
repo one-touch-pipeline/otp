@@ -84,7 +84,7 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         then:
         controller.response.status == SC_MOVED_TEMPORARILY
         controller.response.redirectedUrl == "/projectUser/index"
-        controller.flash.message == "Data stored successfully"
+        controller.flash.message.message == "Data stored successfully"
         intInvocations * controller.userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(_, _, _, _)
         extInvocations * controller.userProjectRoleService.addExternalUserToProject(_, _, _, _)
 
@@ -124,8 +124,8 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         then:
         controller.response.status == SC_MOVED_TEMPORARILY
         controller.response.redirectedUrl == "/projectUser/index"
-        controller.flash.message == "An error occurred"
-        controller.flash.errors == errorMessage
+        controller.flash.message.message == "An error occurred"
+        controller.flash.message.errorList == [errorMessage]
 
         where:
         addViaLdap | errorMessage

@@ -50,10 +50,9 @@ class MergingCriteriaController {
 
         Errors errors = mergingCriteriaService.createOrUpdateMergingCriteria(cmd.project, cmd.seqType, cmd.libPrepKit, cmd.seqPlatformGroup)
         if (errors) {
-            flash.message = "An error occurred"
-            flash.errors = errors
+            flash.message = new FlashMessage("An error occurred", errors)
         } else {
-            flash.message = "Data stored successfully"
+            flash.message = new FlashMessage("Data stored successfully")
         }
         redirect(action: "projectAndSeqTypeSpecific", params: ["project.id": cmd.project.id, "seqType.id": cmd.seqType.id])
     }

@@ -4,9 +4,9 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.security.*
 import grails.converters.*
-import groovy.json.JsonBuilder
+import groovy.json.*
 import groovy.transform.*
-import org.apache.commons.lang.WordUtils
+import org.apache.commons.lang.*
 import org.springframework.validation.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
@@ -82,11 +82,9 @@ class ProjectUserController implements CheckAndCall {
 
     def switchEnabledStatus(SwitchEnabledStatusCommand cmd) {
         if (cmd.hasErrors()) {
-            flash.errors = cmd.errors.getFieldError().code
-            flash.message = "An error occurred"
+            flash.message = new FlashMessage("An error occurred", [cmd.errors.getFieldError().code])
         } else {
-            flash.errors = false
-            flash.message = "User successfully ${cmd.enabled ? 'activated' : 'deactivated'}"
+            flash.message = new FlashMessage("User successfully ${cmd.enabled ? 'activated' : 'deactivated'}")
             userProjectRoleService.updateEnabledStatus(cmd.userProjectRole, cmd.enabled)
         }
         redirect(action: "index")
@@ -128,8 +126,7 @@ class ProjectUserController implements CheckAndCall {
                 errorMessage = e.message
             }
         }
-        flash.message = message
-        flash.errors = errorMessage
+        flash.message = new FlashMessage(message, [errorMessage])
         redirect(controller: "projectUser")
     }
 

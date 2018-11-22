@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.converters.*
 import groovy.transform.*
@@ -45,14 +44,14 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
             ])
             projectService.configurePanCanAlignmentDeciderProject(panCanAlignmentConfiguration)
 
-            flash.message = g.message(code: "configurePipeline.store.success")
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.store.success") as String)
             redirect(controller: "projectConfig")
             return
         }
 
         if (cmd.copy) {
             projectService.copyPanCanAlignmentXml(cmd.basedProject, cmd.seqType, cmd.project)
-            flash.message = g.message(code: "configurePipeline.copy.success")
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.copy.success") as String)
             redirect(controller: "projectConfig")
         }
 
@@ -296,12 +295,11 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         boolean hasErrors = cmd.hasErrors()
 
         if (hasErrors) {
-            flash.message = g.message(code: "configurePipeline.invalidate.failure")
-            flash.errors = errors
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.invalidate.failure") as String, errors)
             redirect(action: cmd.originAction)
         } else {
             projectService.invalidateProjectConfig(cmd.project, cmd.seqType, cmd.pipeline)
-            flash.message = g.message(code: "configurePipeline.invalidate.success")
+            flash.message = new FlashMessage(g.message(code: "configurePipeline.invalidate.success") as String)
             redirect(controller: "projectConfig")
         }
     }

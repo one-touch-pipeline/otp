@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.processing.*
@@ -64,8 +65,7 @@ class MetadataImportController {
     def validateOrImport(MetadataImportControllerSubmitCommand cmd) {
         List<MetadataValidationContext> metadataValidationContexts = []
         if (cmd.hasErrors()) {
-            flash.message = "Error"
-            flash.errors = cmd.errors
+            flash.message = new FlashMessage("Error", cmd.errors)
         } else if (cmd.submit == "Import") {
             FileSystem fs = fileSystemService.getFilesystemForFastqImport()
 

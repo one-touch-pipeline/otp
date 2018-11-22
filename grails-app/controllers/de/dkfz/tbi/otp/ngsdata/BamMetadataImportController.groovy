@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 
 class BamMetadataImportController {
@@ -30,8 +31,7 @@ class BamMetadataImportController {
     def validateOrImport(BamMetadataControllerSubmitCommand cmd) {
         BamMetadataValidationContext bamMetadataValidationContext
         if (cmd.hasErrors()) {
-            flash.message = "Error"
-            flash.errors = cmd.errors
+            flash.message = new FlashMessage("Error", cmd.errors)
         } else if (cmd.submit == "Import") {
             Map results = bamMetadataImportService.validateAndImport(cmd.path, cmd.ignoreWarnings, cmd.md5,
                     cmd.replaceWithLink, cmd.triggerAnalysis, cmd.furtherFilePaths)
