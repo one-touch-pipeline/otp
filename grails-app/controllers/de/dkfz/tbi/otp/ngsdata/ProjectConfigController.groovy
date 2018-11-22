@@ -42,7 +42,7 @@ class ProjectConfigController implements CheckAndCall {
         Map<String, String> dates = getDates(project)
 
         List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
-        Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqTypeService.roddyAlignableSeqTypes.collectEntries { SeqType seqType ->
+        Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqTypeService.allAlignableSeqTypes.collectEntries { SeqType seqType ->
             [(seqType): mergingCriteria.find { it.seqType == seqType }]
         }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
 

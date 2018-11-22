@@ -262,26 +262,29 @@
                     </ul>
                 </div>
             </sec:ifAllGranted>
-                <table>
+            <table>
+                <tr>
+                    <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.seqType')}</th>
+                    <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.version')}</th>
+                    <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.referenceGenomeIndex')}</th>
+                </tr>
+                <g:each in="${cellRangerOverview}" var="m">
                     <tr>
-                        <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.seqType')}</th>
-                        <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.version')}</th>
-                        <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.referenceGenomeIndex')}</th>
+                        <td>
+                            ${m.seqType?.getDisplayNameWithLibraryLayout()}
+                        </td>
+                        <td>
+                            ${m.config?.programVersion ?: "Not configured"}
+                        </td>
+                        <td>
+                            ${m.config?.referenceGenomeIndex ?: "Not configured"}
+                        </td>
                     </tr>
-                    <g:each in="${cellRangerOverview}" var="m">
-                        <tr>
-                            <td>
-                                ${m.seqType?.getDisplayNameWithLibraryLayout()}
-                            </td>
-                            <td>
-                                ${m.config?.programVersion ?: "Not configured"}
-                            </td>
-                            <td>
-                                ${m.config?.referenceGenomeIndex ?: "Not configured"}
-                            </td>
-                        </tr>
-                    </g:each>
-                </table>
+                </g:each>
+            </table>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <g:link controller="cellRanger">${g.message(code: 'projectOverview.alignmentInformation.cellRanger.link')}</g:link>
+            </sec:ifAllGranted>
         </div>
         <br>
         <div class="otpDataTables">

@@ -4,6 +4,10 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class Sample implements Entity {
 
+    static hasMany = [
+            seqTracks: SeqTrack
+    ]
+
     static belongsTo = [
         individual : Individual,
         sampleType : SampleType,

@@ -9,8 +9,8 @@ class MergingCriteria implements Entity {
 
     Project project
     SeqType seqType
-    boolean libPrepKit = true
-    SpecificSeqPlatformGroups seqPlatformGroup = SpecificSeqPlatformGroups.USE_OTP_DEFAULT
+    boolean libPrepKit = true //rename
+    SpecificSeqPlatformGroups seqPlatformGroup = SpecificSeqPlatformGroups.USE_OTP_DEFAULT //rename
 
     enum SpecificSeqPlatformGroups {
         USE_OTP_DEFAULT,

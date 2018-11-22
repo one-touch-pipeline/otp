@@ -62,7 +62,9 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
             }
         })
 
-        needsProcessing(validator: { val, obj -> !val || [Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Name.RODDY_RNA_ALIGNMENT].contains(obj?.pipeline?.name) })
+        needsProcessing(validator: {val, obj ->
+            !val || obj?.pipeline?.name in Pipeline.Name.getAlignmentPipelineNames()
+        })
         pipeline(validator: { pipeline ->
             pipeline.type == Pipeline.Type.ALIGNMENT &&
             pipeline.name != Pipeline.Name.EXTERNALLY_PROCESSED

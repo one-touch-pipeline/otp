@@ -12,7 +12,7 @@ class Pipeline implements Entity {
         PANCAN_ALIGNMENT       (Type.ALIGNMENT, true,  'bwa\u00A0mem', { SeqTypeService.panCanAlignableSeqTypes }),
         EXTERNALLY_PROCESSED   (Type.ALIGNMENT, false, 'external', { [] }),
         RODDY_RNA_ALIGNMENT    (Type.ALIGNMENT, true,  'STAR', { SeqTypeService.roddyAlignableSeqTypes }),
-        CELL_RANGER            (Type.ALIGNMENT, false, 'cell ranger', { [] }),
+        CELL_RANGER            (Type.ALIGNMENT, false, 'cell ranger', { SeqTypeService.singleCellAlignableSeqTypes }),
         @Deprecated OTP_SNV    (Type.SNV,       false, null, { SeqTypeService.snvPipelineSeqTypes }),
         RODDY_SNV              (Type.SNV,       true,  null, { SeqTypeService.snvPipelineSeqTypes }),
         RODDY_INDEL            (Type.INDEL,     true,  null, { SeqTypeService.indelPipelineSeqTypes }),
@@ -52,6 +52,16 @@ class Pipeline implements Entity {
 
         List<SeqType> getSeqTypes() {
             return seqTypes()
+        }
+
+        static List<Name> getAlignmentPipelineNames() {
+            return values().findAll {
+                it.type == Type.ALIGNMENT
+            }.findAll {
+                !it.class.getField(it.name()).isAnnotationPresent(Deprecated)
+            }.findAll {
+                it != EXTERNALLY_PROCESSED
+            }
         }
     }
     Name name
