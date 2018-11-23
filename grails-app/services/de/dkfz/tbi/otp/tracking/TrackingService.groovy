@@ -452,7 +452,6 @@ class TrackingService {
 
         boolean calledCreateMissingDiseaseControlSamplePairs = false
 
-        @SuppressWarnings('BuilderMethodWithSideEffects')
         void createMissingDiseaseControlSamplePairs() {
             if (!calledCreateMissingDiseaseControlSamplePairs) {
                 new SamplePairDiscoveryJob().createMissingDiseaseControlSamplePairs()

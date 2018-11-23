@@ -320,9 +320,7 @@ ruleset {
     BooleanMethodReturnsNull {
         priority = MIDDLE
     }
-    BuilderMethodWithSideEffects {
-        priority = MIDDLE
-    }
+    //BuilderMethodWithSideEffects //also finds non builder methods start with create
     CloneableWithoutClone {
         priority = DEFAULT
     }

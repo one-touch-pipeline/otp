@@ -13,6 +13,14 @@ import java.time.*
 class FileService {
 
     /**
+     * Time in milliseconds between checks.
+     *
+     * @see #waitUntilExists(Path)
+     * @see #waitUntilDoesNotExist(Path)
+     */
+    static final int MILLIS_BETWEEN_RETRIES = 50
+
+    /**
      * The default directory permissions (750)
      */
     static final Set<PosixFileAttributes> DEFAULT_DIRECTORY_PERMISSION = [
@@ -24,6 +32,15 @@ class FileService {
     ].toSet().asImmutable()
 
     /**
+     * The directory permissions only accessible for owner (700)
+     */
+    static final Set<PosixFileAttributes> OWNER_DIRECTORY_PERMISSION = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.OWNER_EXECUTE,
+    ].toSet().asImmutable()
+
+    /**
      * The default file permissions (440)
      */
     static final Set<PosixFileAttributes> DEFAULT_FILE_PERMISSION = [
@@ -32,10 +49,32 @@ class FileService {
     ].toSet().asImmutable()
 
     /**
+     * The default file permissions for bam/bai (444).
+     *
+     * Some tools require read access for others to work.
+     *
+     * The extension to use is defind in {@link #BAM_FILE_EXTENSIONS}
+     */
+    static final Set<PosixFileAttributes> DEFAULT_BAM_FILE_PERMISSION = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.GROUP_READ,
+            PosixFilePermission.OTHERS_READ,
+    ].toSet().asImmutable()
+
+    /**
+     * File extension for which {@link #DEFAULT_BAM_FILE_PERMISSION} should be used
+     */
+    static final Collection<String> BAM_FILE_EXTENSIONS = [
+            '.bam',
+            '.bam.bai',
+    ].asImmutable()
+
+    /**
      * Convert a Path to a File object
      * This method is necessary because the {@link Path#toFile} method is not supported on Paths not backed
      * by the default FileSystemProvider, such as {@link com.github.robtimus.filesystems.sftp.SFTPPath}s.
      */
+    @SuppressWarnings('JavaIoPackageAccess')
     File toFile(Path path) {
         assert path.isAbsolute()
         new File(File.separator + path.collect { Path part ->
@@ -43,6 +82,20 @@ class FileService {
         }.join(File.separator))
     }
 
+    /**
+     * Convert a File to a Path object using the given fileSystem
+     * This method is necessary because the {@link File#toPath} do not allow to define the file system but use always
+     * the default file system.
+     */
+    Path toPath(File file, FileSystem fileSystem) {
+        assert file
+        assert file.isAbsolute()
+        assert fileSystem
+
+        fileSystem.getPath(file.path)
+    }
+
+    @SuppressWarnings('EmptyCatchBlock')
     static boolean isFileReadableAndNotEmpty(final Path file) {
         assert file.isAbsolute()
         try {
@@ -90,7 +143,7 @@ class FileService {
             } catch (AccessDeniedException ignored) {
             }
             Files.exists(file)
-        }, timeout.toMillis(), 50): "${file} not found."
+        }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES): "${file} not found."
     }
 
     /**
@@ -105,11 +158,25 @@ class FileService {
                 return true
             }
             !Files.exists(file)
-        }, timeout.toMillis(), 50): "${file} still exists."
+        }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES): "${file} still exists."
     }
 
     private static Duration getTimeout() {
         (Environment.current == Environment.TEST) ? Duration.ZERO : Duration.ofMinutes(2)
+    }
+
+    /**
+     * Set the permission of the path to the given permission.
+     *
+     * The path have to be absolute and have to exist,
+     */
+    void setPermission(Path path, Set<PosixFileAttributes> permissions) {
+        assert path
+        assert Files.exists(path)
+
+        Files.setPosixFilePermissions(path, permissions)
+
+        assert Files.getPosixFilePermissions(path) == permissions
     }
 
     /**
@@ -131,7 +198,29 @@ class FileService {
             createDirectoryRecursivelyIntern(path.parent)
 
             Files.createDirectory(path)
-            Files.setPosixFilePermissions(path, DEFAULT_DIRECTORY_PERMISSION)
+            setPermission(path, DEFAULT_DIRECTORY_PERMISSION)
+        }
+    }
+
+    /**
+     * Delete the requested directory inclusive all entries recursively
+     *
+     * It won't fail if the directory does not exist.
+     */
+    void deleteDirectoryRecursively(Path path) {
+        assert path
+        assert path.isAbsolute()
+        deleteDirectoryRecursivelyInternal(path)
+    }
+
+    private void deleteDirectoryRecursivelyInternal(Path path) {
+        if (Files.exists(path)) {
+            if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+                Files.list(path).each {
+                    deleteDirectoryRecursivelyInternal(it)
+                }
+            }
+            Files.delete(path)
         }
     }
 
@@ -149,7 +238,7 @@ class FileService {
         createDirectoryRecursively(path.parent)
 
         path.text = content
-        Files.setPosixFilePermissions(path, filePermission)
+        setPermission(path, filePermission)
     }
 
     /**
@@ -166,6 +255,121 @@ class FileService {
         createDirectoryRecursively(path.parent)
 
         path.bytes = content
-        Files.setPosixFilePermissions(path, filePermission)
+        setPermission(path, filePermission)
     }
+
+    /**
+     * Create a link from linkPath to existingPath.
+     *
+     * The destination have to exist, the link may not exist. Both parameter have to be absolute.
+     * Missing parent directories are created automatically with the {@link #DEFAULT_DIRECTORY_PERMISSION}.
+     *
+     * @param linkPath the path of the link
+     * @param existingPath the exiting path the link point to
+     */
+    void createLink(Path linkPath, Path existingPath) {
+        assert linkPath
+        assert existingPath
+        assert linkPath.absolute
+        assert existingPath.absolute
+        assert Files.exists(existingPath)
+        assert !Files.exists(linkPath)
+
+        createLinkIntern(linkPath, existingPath)
+    }
+
+    /**
+     * Calculate and create a relative link from linkPath to existingPath.
+     *
+     * The destination have to exist, the link may not exist. Both parameter have to be absolute.
+     * Missing parent directories are created automatically with the {@link #DEFAULT_DIRECTORY_PERMISSION}.
+     *
+     * The relative path is calculated via {@link Path#relativize(Path)}
+     *
+     * @param linkPath the path of the link
+     * @param existingPath the exiting path the link point to
+     */
+    void createRelativeLink(Path linkPath, Path existingPath) {
+        assert linkPath
+        assert existingPath
+        assert linkPath.absolute
+        assert existingPath.absolute
+        assert Files.exists(existingPath)
+        assert !Files.exists(linkPath)
+
+        createLinkIntern(linkPath, linkPath.relativize(existingPath))
+    }
+
+    private void createLinkIntern(Path linkPath, Path existingPath) {
+        createDirectoryRecursively(linkPath.parent)
+
+        Files.createSymbolicLink(linkPath, existingPath)
+    }
+
+    /**
+     * Move the file from source to destination.
+     *
+     * Both have to be absolute, the source have to be exist, the destination may not be exist.
+     *
+     * Needed parent directories of the destination will be created automatically
+     */
+    void moveFile(Path source, Path destination) {
+        assert source
+        assert destination
+        assert source.absolute
+        assert destination.absolute
+
+        assert Files.exists(source)
+        assert !Files.exists(destination)
+
+        createDirectoryRecursively(destination.parent)
+        Files.move(source, destination)
+        assert Files.exists(destination)
+    }
+
+    /**
+     * Correct the permission recursive for the directory structure.
+     *
+     * The permissions are set:
+     * - directories are set to: {@link #DEFAULT_DIRECTORY_PERMISSION}
+     * - bam/bai files to: {@link #DEFAULT_BAM_FILE_PERMISSION}
+     * - other files to: {@link #DEFAULT_FILE_PERMISSION}
+     */
+    void correctPathPermissionRecursive(Path path) {
+        assert path
+        assert path.absolute
+        assert Files.exists(path)
+
+        correctPathPermissionRecursiveInternal(path)
+    }
+
+    @SuppressWarnings('ThrowRuntimeException')
+    private void correctPathPermissionRecursiveInternal(Path path) {
+        if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+            Files.list(path).each {
+                correctPathPermissionRecursiveInternal(it)
+            }
+            setPermission(path, DEFAULT_DIRECTORY_PERMISSION)
+        } else if (Files.isSymbolicLink(path)) {
+            //since a link itself has no permission, nothing is to do
+            return
+        } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+            if (useBamFilePermission(path)) {
+                setPermission(path, DEFAULT_BAM_FILE_PERMISSION)
+            } else {
+                setPermission(path, DEFAULT_FILE_PERMISSION)
+            }
+        } else {
+            throw new RuntimeException("'${path} is neither directory, nor file nor link")
+        }
+    }
+
+    @SuppressWarnings('UnnecessaryToString')
+    private boolean useBamFilePermission(Path path) {
+        String fileName = path.toString()
+        return BAM_FILE_EXTENSIONS.any {
+            fileName.endsWith(it)
+        }
+    }
+
 }
