@@ -64,7 +64,7 @@ def newDataFileNameClosure = { DataFile dataFile, String oldPatientName, String 
 
 
 def newSampleSwapScript = { StringBuilder script, Project newProject, Individual oldIndividual, String newIndividualName, Sample oldSample, String newSampleTypeName ->
-    String fileName = 'mv_${counter++}_${oldSample.individual.pid}_${oldSample.sampleType.name}__to__${newIndividualName}_${newSampleTypeName}'
+    String fileName = "mv_${counter++}_${oldSample.individual.pid}_${oldSample.sampleType.name}__to__${newIndividualName}_${newSampleTypeName}"
     script << "\ndataSwapService.moveSample('${oldIndividual.project.name}', '${newProject.name}', '${oldIndividual.pid}', '${newIndividualName}', '${oldSample.sampleType.name}', '${newSampleTypeName}', ["
     SeqTrack.findAllBySample(oldSample, [sort: 'id']).each { SeqTrack seqTrack ->
         DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile -> script << "\n        '${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}'," }
@@ -116,7 +116,7 @@ try {
 
         List<Sample> samples = Sample.findAllByIndividual(oldIndividual, [sort: 'id'])
         if (!newIndividual && newSampleTypeName == null && seqTypeFilterList.empty) {
-            String fileName = 'mv_${counter++}_${oldIndividualName}__to__${newIndividualName}'
+            String fileName = "mv_${counter++}_${oldIndividualName}__to__${newIndividualName}"
             script << "\ndataSwapService.moveIndividual('${oldIndividual.project.name}', '${newProject.name}', '${oldIndividualName}', '${newIndividualName}', ["
             samples.each { sample -> script << "'${sample.sampleType.name}': '${newSampleTypeClosure(sample.sampleType.name)}', " }
             script << "], ["
