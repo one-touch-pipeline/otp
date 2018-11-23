@@ -243,7 +243,7 @@ class ExecuteWgbsAlignmentJobTests {
     void testWorkflowSpecificValidation_MethylationLibraryDirDoesNotExist_ShouldFail() {
         roddyBamFile.seqTracks.add(DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage, [libraryName: "lib1", normalizedLibraryName: "1"]))
         roddyBamFile.numberOfMergedLanes = 2
-        MergingCriteria.list()*.libPrepKit = false
+        MergingCriteria.list()*.useLibPrepKit = false
         roddyBamFile.save(flush: true)
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)

@@ -34,11 +34,11 @@ class SeqPlatformIntegrationSpec extends IntegrationSpec {
 
 
         mergingCriteria_useProject = DomainFactory.createMergingCriteriaLazy(
-                seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC,
         )
 
         mergingCriteria_useDefault = DomainFactory.createMergingCriteriaLazy(
-                seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
         )
 
         spg_project1 = new SeqPlatformGroup()
@@ -117,7 +117,7 @@ class SeqPlatformIntegrationSpec extends IntegrationSpec {
 
     void "test add a SPG which belongs to a specific project and seqType to a SP which belongs to another SPG, succeeds"() {
         when:
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria([seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC])
+        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria([useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC])
         SeqPlatformGroup spg_project3 = DomainFactory.createSeqPlatformGroup(
                 mergingCriteria: mergingCriteria
         )

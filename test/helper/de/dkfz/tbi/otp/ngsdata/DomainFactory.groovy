@@ -1309,7 +1309,7 @@ class DomainFactory {
     static SeqPlatformGroup createSeqPlatformGroupWithMergingCriteria(Map properties = [:]) {
         return createDomainObject(SeqPlatformGroup, [
                 mergingCriteria: createMergingCriteriaLazy(
-                        seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                        useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
                 )
         ], properties)
 
@@ -2433,7 +2433,7 @@ class DomainFactory {
 
     static MergingCriteria createMergingCriteriaLazy(Map properties) {
         if ((properties.get("seqType") as SeqType)?.isWgbs()) {
-            properties.get("libPrepKit") ?: properties.put("libPrepKit", false)
+            properties.get("useLibPrepKit") ?: properties.put("useLibPrepKit", false)
         }
 
         return findOrCreateDomainObject(MergingCriteria, [

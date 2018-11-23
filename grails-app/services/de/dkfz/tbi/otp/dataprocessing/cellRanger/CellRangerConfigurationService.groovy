@@ -87,7 +87,7 @@ class CellRangerConfigurationService {
                 SeqPlatformGroup seqPlatformGroup
                 LibraryPreparationKit libraryPreparationKit
 
-                if (mergingCriteria.seqPlatformGroup != MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING) {
+                if (mergingCriteria.useSeqPlatformGroup != MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING) {
                     Map<SeqPlatformGroup, List<SeqTrack>> seqTracksByPlatformGroup = seqTracks.groupBy {
                         it.seqPlatformGroup
                     }
@@ -99,7 +99,7 @@ class CellRangerConfigurationService {
                     seqPlatformGroup = null
                 }
 
-                if (mergingCriteria.libPrepKit) {
+                if (mergingCriteria.useLibPrepKit) {
                     Map<LibraryPreparationKit, List<SeqTrack>> seqTracksByLibPrepKit = seqTracks.groupBy {
                         it.libraryPreparationKit
                     }

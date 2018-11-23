@@ -57,8 +57,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         mergingCriteria
         mergingCriteria.project == project
         mergingCriteria.seqType == seqType
-        !mergingCriteria.libPrepKit
-        mergingCriteria.seqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+        !mergingCriteria.useLibPrepKit
+        mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
     }
 
     def "test createOrUpdateMergingCriteria, MergingCriteria exists"() {
@@ -77,8 +77,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         mergingCriteria
         mergingCriteria.project == project
         mergingCriteria.seqType == seqType
-        !mergingCriteria.libPrepKit
-        mergingCriteria.seqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+        !mergingCriteria.useLibPrepKit
+        mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
     }
 
     def "test createOrUpdateMergingCriteria, no MergingCriteria exists, seqType Exome"() {
@@ -174,7 +174,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         given:
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
-                seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
 
         when:
@@ -232,7 +232,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         defaultGroup.addToSeqPlatforms(seqPlatform)
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
-                seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
 
         when:
@@ -254,7 +254,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         SeqPlatform seqPlatform1 = DomainFactory.createSeqPlatform()
         defaultGroup1.addToSeqPlatforms(seqPlatform1)
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
-                seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
 
         when:

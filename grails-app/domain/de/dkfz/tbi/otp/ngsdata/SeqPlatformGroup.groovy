@@ -7,7 +7,7 @@ import org.springframework.validation.*
 
 /**
  * {@link SeqTrack}s from {@link SeqPlatform}s in the same {@link SeqPlatformGroup} can be merged.
- * Depending on the value of {@link MergingCriteria#seqPlatformGroup}, a SeqPlatformGroup where {@link #mergingCriteria}
+ * Depending on the value of {@link MergingCriteria#useSeqPlatformGroup}, a SeqPlatformGroup where {@link #mergingCriteria}
  * is null or refers to the project and seqType is used
  */
 class SeqPlatformGroup implements Entity, CommentableWithHistory {
@@ -27,7 +27,7 @@ class SeqPlatformGroup implements Entity, CommentableWithHistory {
     static constraints = {
         mergingCriteria nullable: true, validator: { MergingCriteria mergingCriteria1 ->
             if (mergingCriteria1) {
-                return mergingCriteria1.seqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                return mergingCriteria1.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
             }
             return true
         }

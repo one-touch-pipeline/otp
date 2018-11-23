@@ -186,8 +186,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         workPackage.seqPlatformGroup.mergingCriteria = DomainFactory.createMergingCriteria(
                 project: workPackage.individual.project,
                 seqType: workPackage.seqType,
-                libPrepKit: !seqType.isWgbs(),
-                seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                useLibPrepKit: !seqType.isWgbs(),
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
         workPackage.seqPlatformGroup.save(flush: true)
 

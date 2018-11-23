@@ -153,8 +153,8 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         when:
         controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
-        controller.params.libPrepKit = "on"
-        controller.params.seqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+        controller.params.useLibPrepKit = "on"
+        controller.params.useSeqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.update()
         }
@@ -164,8 +164,8 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${project.id}&seqType.id=${seqType.id}"
         MergingCriteria mergingCriteria = MergingCriteria.findByProjectAndSeqType(project, seqType)
         mergingCriteria
-        mergingCriteria.libPrepKit
-        mergingCriteria.seqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+        mergingCriteria.useLibPrepKit
+        mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
     }
 
     void "test update, MergingCriteria exists"() {
@@ -177,7 +177,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         when:
         controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
-        controller.params.seqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+        controller.params.useSeqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.update()
         }
@@ -186,8 +186,8 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         controller.response.status == 302
         controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${project.id}&seqType.id=${seqType.id}"
         mergingCriteria
-        !mergingCriteria.libPrepKit
-        mergingCriteria.seqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+        !mergingCriteria.useLibPrepKit
+        mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
     }
 
     void "test update, fails with wrong authentication"() {
@@ -198,7 +198,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         when:
         controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
-        controller.params.seqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+        controller.params.useSeqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         SpringSecurityUtils.doWithAuth(USER) {
             controller.update()
         }
@@ -215,7 +215,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         when:
         controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
-        controller.params.seqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+        controller.params.useSeqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         doWithAnonymousAuth {
             controller.update()
         }
@@ -312,7 +312,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         given:
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
-                seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
 
         when:
@@ -394,7 +394,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         given:
         SeqPlatformGroup defaultGroup = DomainFactory.createSeqPlatformGroup()
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
-                seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
 
         when:
@@ -412,7 +412,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         defaultGroup.addToSeqPlatforms(seqPlatform)
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
-                seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
 
         when:
@@ -432,7 +432,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
     def "test copyAllDefaultToSpecific, not authorized"() {
         given:
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
-                seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
 
         when:
@@ -453,7 +453,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         SeqPlatform seqPlatform1 = DomainFactory.createSeqPlatform()
         defaultGroup1.addToSeqPlatforms(seqPlatform1)
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
-                seqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
         )
 
         when:

@@ -27,7 +27,7 @@
                 <td>
                     <g:if test="${seqType.isExome()}">
                         true
-                        <g:hiddenField name="libPrepKit" value="on"/>
+                        <g:hiddenField name="useLibPrepKit" value="on"/>
                     </g:if>
                     <g:elseif test="${seqType.isWgbs()}">
                         false
@@ -35,20 +35,20 @@
                     </g:elseif>
                     <g:else>
                         <sec:ifAllGranted roles="ROLE_OPERATOR">
-                            <g:checkBox name="libPrepKit" checked="${mergingCriteria.libPrepKit}" value="true" id="libPrepKit"/>
+                            <g:checkBox name="useLibPrepKit" checked="${mergingCriteria.useLibPrepKit}" value="true" id="libPrepKit"/>
                         </sec:ifAllGranted>
                         <sec:ifNotGranted roles="ROLE_OPERATOR">
-                            ${mergingCriteria.libPrepKit}
+                            ${mergingCriteria.useLibPrepKit}
                         </sec:ifNotGranted>
                     </g:else>
                 </td>
                 <td>
                     <sec:ifAllGranted roles="ROLE_OPERATOR">
-                        <g:select name="seqPlatformGroup" value="${mergingCriteria.seqPlatformGroup}"
+                        <g:select name="useSeqPlatformGroup" value="${mergingCriteria.useSeqPlatformGroup}"
                               from="${MergingCriteria.SpecificSeqPlatformGroups}"/>
                     </sec:ifAllGranted>
                     <sec:ifNotGranted roles="ROLE_OPERATOR">
-                        ${mergingCriteria.seqPlatformGroup}
+                        ${mergingCriteria.useSeqPlatformGroup}
                     </sec:ifNotGranted>
 
                 </td>
@@ -68,11 +68,11 @@
 
     <h3>${g.message(code: "mergingCriteria.seqPlatformDefinition")}</h3>
 
-    <g:if test="${mergingCriteria.seqPlatformGroup in [MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
-                                                       MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC]}">
+    <g:if test="${mergingCriteria.useSeqPlatformGroup in [MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
+                                                          MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC]}">
         <div style="float:left; width:50%;">
             <h4>${g.message(code: "mergingCriteria.seqPlatformDefinition.default")}</h4>
-            <g:if test="${mergingCriteria.seqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC}">
+            <g:if test="${mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC}">
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <g:form action="copyAllDefaultToSpecific">
                         <g:hiddenField name="mergingCriteria.id" value="${mergingCriteria.id}"/>
@@ -86,7 +86,7 @@
             <g:each in="${seqPlatformGroups}" var="seqPlatformGroup">
                 <div class="small-frame-box">
                     <sec:ifAllGranted roles="ROLE_OPERATOR">
-                        <g:if test="${mergingCriteria.seqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC}">
+                        <g:if test="${mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC}">
                             <g:form action="copyDefaultToSpecific">
                                 <g:hiddenField name="mergingCriteria.id" value="${mergingCriteria.id}"/>
                                 <g:hiddenField name="seqPlatformGroup.id" value="${seqPlatformGroup.id}"/>
@@ -108,7 +108,7 @@
         </div>
 
         <div style="float:right; width:50%;">
-            <g:if test="${mergingCriteria.seqPlatformGroup in [MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC]}">
+            <g:if test="${mergingCriteria.useSeqPlatformGroup in [MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC]}">
                 <h4>${g.message(code: "mergingCriteria.seqPlatformDefinition.specific")}</h4>
 
                 <sec:ifAllGranted roles="ROLE_OPERATOR">

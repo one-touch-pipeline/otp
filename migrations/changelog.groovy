@@ -88,4 +88,8 @@ databaseChangeLog = {
     changeSet(author: "wieset", id: "OTP-2968-SQL") {
         sqlFile(path: 'changelogs/2018/OTP-2968.sql')
     }
+
+    changeSet(author: "klinga", id: "rename-columns-in-merging_criteria-SQL") {
+        sqlFile(path: 'changelogs/2018/rename-columns-in-merging_criteria.sql')
+    }
 }

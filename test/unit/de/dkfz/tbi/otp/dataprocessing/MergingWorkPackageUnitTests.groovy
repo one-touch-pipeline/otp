@@ -151,7 +151,7 @@ class MergingWorkPackageUnitTests {
                 libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
                 kitInfoReliability: InformationReliability.KNOWN,
         )
-        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType, libPrepKit: false)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType, useLibPrepKit: false)
         MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(sample: seqTrack.sample, seqType: seqTrack.seqType, seqPlatformGroup: seqTrack.seqPlatformGroup, libraryPreparationKit: null)
         assert workPackage.satisfiesCriteria(seqTrack)
     }

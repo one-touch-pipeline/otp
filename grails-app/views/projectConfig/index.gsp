@@ -238,10 +238,10 @@
                             </g:link>
                         </td>
                         <td>
-                            ${m.value?.libPrepKit != null ? m.value.libPrepKit : "Not configured"}
+                            ${m.value?.useLibPrepKit != null ? m.value.useLibPrepKit : "Not configured"}
                         </td>
                         <td>
-                            ${m.value?.seqPlatformGroup ?: "Not configured"}
+                            ${m.value?.useSeqPlatformGroup ?: "Not configured"}
                         </td>
                     </tr>
                 </g:each>

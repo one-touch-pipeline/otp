@@ -42,7 +42,7 @@ class SeqPlatform implements Entity {
             seqPlatforms {
                 eq("id", this.id)
             }
-            if (mergingCriteria.seqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT) {
+            if (mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT) {
                 isNull("mergingCriteria")
             } else {
                 eq("mergingCriteria", mergingCriteria)
