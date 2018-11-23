@@ -7,7 +7,44 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, ProcessParameterObject {
 
+    static final String INPUT_DIRECTORY_NAME = 'cell-ranger-input'
+
+    static final String OUTPUT_DIRECTORY_NAME = 'out'
+
+    static final String ORIGINAL_BAM_FILE_NAME = 'possorted_genome_bam.bam'
+
+    static final String ORIGINAL_BAI_FILE_NAME = 'possorted_genome_bam.bam.bai'
+
+    //is created manually
+    static final String ORIGINAL_BAM_MD5SUM_FILE_NAME = 'possorted_genome_bam.md5sum'
+
     static final String METRICS_SUMMARY_CSV_FILE_NAME = "metrics_summary.csv"
+
+
+    static final List<String> CREATED_RESULT_FILES = [
+            'web_summary.html',
+            METRICS_SUMMARY_CSV_FILE_NAME,
+            ORIGINAL_BAM_FILE_NAME,
+            ORIGINAL_BAI_FILE_NAME,
+            ORIGINAL_BAM_MD5SUM_FILE_NAME,
+            'filtered_gene_bc_matrices_h5.h5',
+            'raw_gene_bc_matrices_h5.h5',
+            'molecule_info.h5',
+            'cloupe.cloupe',
+    ].asImmutable()
+
+    static final List<String> CREATED_RESULT_DIRS = [
+            'filtered_gene_bc_matrices',
+            'raw_gene_bc_matrices',
+            'analysis',
+    ].asImmutable()
+
+    static final List<String> CREATED_RESULT_FILES_AND_DIRS = [
+            CREATED_RESULT_FILES,
+            CREATED_RESULT_DIRS,
+    ].flatten().asImmutable()
+
+
 
     Set<SeqTrack> seqTracks
 
@@ -18,7 +55,7 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
     ]
 
     static constraints = {
-        workDirectoryName  validator: { val, obj ->
+        workDirectoryName validator: { val, obj ->
             OtpPath.isValidRelativePath(val) &&
                     !SingleCellBamFile.findAllByWorkDirectoryName(val).any {
                         it != obj && it.workPackage == obj.workPackage
@@ -53,6 +90,26 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
         return mergingWorkPackage.config
     }
 
+    File getWorkDirectory() {
+        return new File(baseDirectory, workDirectoryName)
+    }
+
+    String getSingleCellSampleName() {
+        return "${individual.pid}_${sampleType.dirName}"
+    }
+
+    File getSampleDirectory() {
+        return new File(new File(workDirectory, INPUT_DIRECTORY_NAME), singleCellSampleName)
+    }
+
+    File getOutputDirectory() {
+        return new File(workDirectory, singleCellSampleName)
+    }
+
+    File getResultDirectory() {
+        return new File(outputDirectory, OUTPUT_DIRECTORY_NAME)
+    }
+
     @Override
     File getFinalInsertSizeFile() {
         throw new MissingPropertyException("Final insert size file is not implemented for single cell BAM files")
@@ -63,17 +120,13 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
         throw new MissingPropertyException("Maximal read length is not implemented for single cell BAM files")
     }
 
-    File getWorkDirectory() {
-        return new File(baseDirectory, workDirectoryName)
-    }
-
     @Override
     protected File getPathForFurtherProcessingNoCheck() {
         return new File(workDirectory, bamFileName)
     }
 
     File getQualityAssessmentCsvFile() {
-        return new File(workDirectory, METRICS_SUMMARY_CSV_FILE_NAME)
+        return new File(resultDirectory, METRICS_SUMMARY_CSV_FILE_NAME)
     }
 
     @Override

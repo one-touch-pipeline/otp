@@ -174,6 +174,10 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
         return individual?.project
     }
 
+    Realm getRealm() {
+        return project?.realm
+    }
+
     protected abstract File getPathForFurtherProcessingNoCheck()
 
 }

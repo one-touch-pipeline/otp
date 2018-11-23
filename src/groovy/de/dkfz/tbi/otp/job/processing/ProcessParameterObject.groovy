@@ -1,9 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 
 trait ProcessParameterObject {
 
@@ -13,6 +10,10 @@ trait ProcessParameterObject {
 
     Project getProject() {
         return individual?.project
+    }
+
+    Realm getRealm() {
+        return project?.realm
     }
 
     abstract Set<SeqTrack> getContainedSeqTracks()

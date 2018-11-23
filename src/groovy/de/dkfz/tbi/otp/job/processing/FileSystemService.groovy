@@ -82,6 +82,11 @@ class FileSystemService {
         return fileSystem
     }
 
+    FileSystem getRemoteFileSystem(Realm realm) throws Throwable {
+        assert realm
+        return getFilesystem(realm)
+    }
+
     FileSystem getFilesystemForProcessingForRealm(Realm realm) throws Throwable {
         assert realm
         if (processingOptionService.findOptionAsBoolean(FILESYSTEM_PROCESSING_USE_REMOTE)) {

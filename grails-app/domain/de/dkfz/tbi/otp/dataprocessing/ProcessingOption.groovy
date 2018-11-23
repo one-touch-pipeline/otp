@@ -84,6 +84,14 @@ class ProcessingOption implements Entity {
                 "Cell Ranger versions, comma-separated",
                 Necessity.OPTIONAL, "cellranger/2.1.1", TypeValidators.SINGLE_LINE_TEXT
         ),
+        PIPELINE_CELLRANGER_CORE_COUNT(
+                "Count of cores to use by cell ranger, used for parameter '--localcores'",
+                Necessity.OPTIONAL, "15", TypeValidators.POSITIVE_NUMBER
+        ),
+        PIPELINE_CELLRANGER_CORE_MEM(
+                "Allowed memory in GB to use by Cell Ranger, used for parameter '--localmem', at least 16 is required",
+                Necessity.OPTIONAL, "60", TypeValidators.POSITIVE_NUMBER
+        ),
 
         PIPELINE_SOPHIA_DEFAULT_PLUGIN_NAME(
                 "Default name of the Sophia pipeline plugin, used when configuring the pipeline",
