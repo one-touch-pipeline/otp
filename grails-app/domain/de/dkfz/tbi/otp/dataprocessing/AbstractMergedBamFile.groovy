@@ -34,14 +34,18 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
     QcTrafficLightStatus qcTrafficLightStatus
 
     enum QcTrafficLightStatus {
-        // status is set by OTP when QC threshold passed
+        // status is set by OTP when QC thresholds were met
         QC_PASSED,
-        // status is set by bioinformaticians when they decide to keep the file although a QC threshold not passed
+        // status is set by bioinformaticians when they decide to keep the file although QC thresholds were not met
         ACCEPTED,
-        // status is set by OTP when a QC error threshold not passed
+        // status is set by OTP when QC error thresholds were not met
         BLOCKED,
         // status is set by bioinformaticians when they decide not to use a file for further analyses
-        REJECTED
+        REJECTED,
+        // status is set by OTP when QC thresholds were not met but the project is configured to allow failed files
+        AUTO_ACCEPTED,
+        // status is set by OTP when project is configured to not check QC thresholds
+        UNCHECKED,
     }
 
     abstract boolean isMostRecentBamFile()
@@ -84,9 +88,9 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
         workPackage lazy: false, index: "abstract_merged_bam_file_work_package_idx"
     }
 
-/**
- * This enum is used to specify the different transfer states of the {@link AbstractMergedBamFile} until it is copied to the project folder
- */
+    /**
+     * This enum is used to specify the different transfer states of the {@link AbstractMergedBamFile} until it is copied to the project folder
+     */
     enum FileOperationStatus {
         /**
          * default value -> state of the {@link AbstractMergedBamFile} when it is created (declared)
@@ -106,7 +110,6 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
          */
         PROCESSED
     }
-
 
     void updateFileOperationStatus(FileOperationStatus status) {
         notNull(status, "the input status for the method updateFileOperationStatus is null")
@@ -142,7 +145,6 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
             super.withdraw()
         }
     }
-
 
     File getBaseDirectory() {
         String antiBodyTarget = seqType.isChipSeq() ? "-${((MergingWorkPackage) mergingWorkPackage).antibodyTarget.name}" : ''

@@ -1217,6 +1217,7 @@ ${indOld.comment.comment}""" == indNew.comment.comment
                 dirName: name,
                 realm: DomainFactory.createRealm(),
                 alignmentDeciderBeanName: 'dummyNonExistentAlignmentDecider',
+                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
         )
     }
 }

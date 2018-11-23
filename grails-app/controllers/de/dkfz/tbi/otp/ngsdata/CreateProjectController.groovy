@@ -33,6 +33,7 @@ class CreateProjectController {
                         unixGroup: cmd.unixGroup,
                         projectGroup: cmd.projectGroup,
                         sampleIdentifierParserBeanName: cmd.sampleIdentifierParserBeanName,
+                        qcThresholdHandling: cmd.qcThresholdHandling,
                         nameInMetadataFiles: cmd.nameInMetadataFiles,
                         copyFiles: cmd.copyFiles,
                         fingerPrinting: cmd.fingerPrinting,
@@ -51,6 +52,8 @@ class CreateProjectController {
             projectGroups: ["No Group"] + projectGroupService.availableProjectGroups()*.name,
             tumorEntities: ["No tumor entity"] + TumorEntity.list().sort()*.name,
             sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values(),
+            qcThresholdHandlings: QcThresholdHandling.values(),
+            defaultQcThresholdHandling: QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
             processingPriorities: ProcessingPriority.displayPriorities,
             defaultProcessingPriority: ProcessingPriority.NORMAL,
             projectCategories: ProjectCategory.listOrderByName(),
@@ -71,6 +74,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     String costCenter
     String projectGroup
     SampleIdentifierParserBeanName sampleIdentifierParserBeanName
+    QcThresholdHandling qcThresholdHandling
     TumorEntity tumorEntity
     List<String> projectCategories = [].withLazyDefault { new String() }
     MultipartFile projectInfoFile

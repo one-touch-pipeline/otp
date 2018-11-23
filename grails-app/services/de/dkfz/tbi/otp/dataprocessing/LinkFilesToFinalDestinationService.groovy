@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 
-import static de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus.*
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
 class LinkFilesToFinalDestinationService {
@@ -33,8 +34,8 @@ class LinkFilesToFinalDestinationService {
                     assert roddyBamFile.numberOfReadsFromQa >= roddyBamFile.numberOfReadsFromFastQc: "bam file (${roddyBamFile.numberOfReadsFromQa}) " +
                             "has less number of reads than the sum of all fastqc (${roddyBamFile.numberOfReadsFromFastQc})"
                 }
-                assert [NEEDS_PROCESSING, INPROGRESS].contains(roddyBamFile.fileOperationStatus)
-                roddyBamFile.fileOperationStatus = INPROGRESS
+                assert [FileOperationStatus.NEEDS_PROCESSING, FileOperationStatus.INPROGRESS].contains(roddyBamFile.fileOperationStatus)
+                roddyBamFile.fileOperationStatus = FileOperationStatus.INPROGRESS
                 assert roddyBamFile.save(flush: true)
                 roddyBamFile.validateAndSetBamFileInProjectFolder()
             }
@@ -64,15 +65,20 @@ class LinkFilesToFinalDestinationService {
         }
     }
 
+    private String getInvalidQcTrafficLightStatusMessageForStatus(QcTrafficLightStatus status) {
+        List<QcTrafficLightStatus> validStatuses = [QcTrafficLightStatus.QC_PASSED, QcTrafficLightStatus.AUTO_ACCEPTED, QcTrafficLightStatus.UNCHECKED, QcTrafficLightStatus.BLOCKED]
+        return "Unhandled QcTrafficLightStatus: ${status}. Only the following values are valid: ${validStatuses.join(", ")}"
+    }
 
     private void handleQcCheck(RoddyBamFile roddyBamFile, Closure linkCall) {
-        if (!roddyBamFile.qcTrafficLightStatus || roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED) {
+        if (!roddyBamFile.qcTrafficLightStatus || roddyBamFile.qcTrafficLightStatus in [QcTrafficLightStatus.QC_PASSED, QcTrafficLightStatus.AUTO_ACCEPTED, QcTrafficLightStatus.UNCHECKED]) {
             linkCall()
-        } else if (roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) {
-            qcTrafficLightNotificationService.informResultsAreBlocked(roddyBamFile)
+        } else if (roddyBamFile.qcTrafficLightStatus == QcTrafficLightStatus.BLOCKED) {
+            if (roddyBamFile.project.qcThresholdHandling.notifiesUser) {
+                qcTrafficLightNotificationService.informResultsAreBlocked(roddyBamFile)
+            }
         } else {
-            throw new RuntimeException("${roddyBamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus here, only " +
-                    "${AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED} and ${AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED} is a valid status.")
+            throw new RuntimeException(getInvalidQcTrafficLightStatusMessageForStatus(roddyBamFile.qcTrafficLightStatus))
         }
         setBamFileValues(roddyBamFile)
     }
@@ -82,7 +88,7 @@ class LinkFilesToFinalDestinationService {
         assert md5sumFile.exists(): "The md5sum file of ${roddyBamFile} does not exist"
         assert md5sumFile.text: "The md5sum file of ${roddyBamFile} is empty"
         RoddyBamFile.withTransaction {
-            roddyBamFile.fileOperationStatus = PROCESSED
+            roddyBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
             roddyBamFile.fileSize = roddyBamFile.workBamFile.size()
             roddyBamFile.md5sum = md5sumFile.text.replaceAll("\n", "").toLowerCase(Locale.ENGLISH)
             roddyBamFile.fileExists = true

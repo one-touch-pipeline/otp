@@ -42,7 +42,7 @@ class ParseIndelQcJob extends AbstractEndStateAwareJobImpl implements AutoRestar
             assert sampleSwap.save(flush: true)
 
             [indelQc, sampleSwap].each { QcTrafficLightValue qc ->
-                qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(instance, qc)
+                qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance, qc)
             }
 
             instance.updateProcessingState(AnalysisProcessingStates.FINISHED)

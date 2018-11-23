@@ -131,6 +131,8 @@ class ProjectConfigController implements CheckAndCall {
                 checkAceseqReferenceGenome     : checkAceseqReferenceGenome,
                 projectInfos                   : project?.projectInfos,
                 cellRangerOverview             : cellRangerOverview,
+                qcThresholdHandling            : project?.qcThresholdHandling,
+                qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
         ]
     }
 
@@ -201,6 +203,11 @@ class ProjectConfigController implements CheckAndCall {
         })
     }
 
+    JSON updateQcThresholdHandling(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd, {
+            projectService.updateProjectField(QcThresholdHandling.valueOf(cmd.value), cmd.fieldName, cmd.project)
+        })
+    }
 
     def addProjectInfo(AddProjectInfoCommand cmd) {
         withForm {

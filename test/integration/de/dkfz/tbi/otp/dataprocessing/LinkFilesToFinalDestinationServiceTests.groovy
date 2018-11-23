@@ -4,6 +4,8 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
@@ -12,7 +14,7 @@ import org.junit.*
 import org.junit.rules.*
 import org.springframework.beans.factory.annotation.*
 
-class LinkFilesToFinalDestinationServiceTests {
+class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Autowired
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
@@ -20,8 +22,6 @@ class LinkFilesToFinalDestinationServiceTests {
     RoddyBamFile roddyBamFile
     Realm realm
     TestConfigService configService
-
-    final static String SOME_GROUP = "GROUP"
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -559,13 +559,12 @@ class LinkFilesToFinalDestinationServiceTests {
     @Test
     void testLinkToFinalDestinationAndCleanup_QcStatusEqualPassed() {
         setUp_allFine()
-        roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        roddyBamFile.qcTrafficLightStatus = QcTrafficLightStatus.QC_PASSED
         assert roddyBamFile.save(flush: true)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         linkFilesToFinalDestinationService.metaClass.informResultsAreBlocked = { RoddyBamFile roddyBamFile ->
             assert false : "should not reach this part"
         }
-
 
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
 
@@ -573,10 +572,11 @@ class LinkFilesToFinalDestinationServiceTests {
     }
 
     @Test
-    void testLinkToFinalDestinationAndCleanup_QcStatusEqualBlocked() {
+    void testLinkToFinalDestinationAndCleanup_QcStatusEqualBlockedDoNotifyUser() {
         setUp_allFine()
+        roddyBamFile.individual.project = createProject(qcThresholdHandling: QcThresholdHandling.CHECK_AND_NOTIFY)
         roddyBamFile.comment = DomainFactory.createComment()
-        roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        roddyBamFile.qcTrafficLightStatus = QcTrafficLightStatus.BLOCKED
         assert roddyBamFile.save(flush: true)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm ->
@@ -590,14 +590,74 @@ class LinkFilesToFinalDestinationServiceTests {
     }
 
     @Test
+    void testLinkToFinalDestinationAndCleanup_QcStatusEqualBlockedDoNotNotifyUser() {
+        setUp_allFine()
+        roddyBamFile.individual.project = createProject(qcThresholdHandling: QcThresholdHandling.NO_CHECK)
+        roddyBamFile.comment = DomainFactory.createComment()
+        roddyBamFile.qcTrafficLightStatus = QcTrafficLightStatus.BLOCKED
+        assert roddyBamFile.save(flush: true)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        linkFilesToFinalDestinationService.metaClass.informResultsAreBlocked = { RoddyBamFile roddyBamFile, Realm realm ->
+            assert false : "should not reach this part"
+        }
+
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+
+        assertBamFileIsFine()
+    }
+
+    @Test
+    void testLinkToFinalDestinationAndCleanup_QcStatusEqualUnchecked() {
+        setUp_allFine()
+        roddyBamFile.qcTrafficLightStatus = QcTrafficLightStatus.UNCHECKED
+        assert roddyBamFile.save(flush: true)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        linkFilesToFinalDestinationService.metaClass.informResultsAreBlocked = { RoddyBamFile roddyBamFile, Realm realm ->
+            assert false : "should not reach this part"
+        }
+
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+
+        assertBamFileIsFine()
+    }
+
+    @Test
+    void testLinkToFinalDestinationAndCleanup_QcStatusEqualAutoAccepted() {
+        setUp_allFine()
+        roddyBamFile.qcTrafficLightStatus = QcTrafficLightStatus.AUTO_ACCEPTED
+        assert roddyBamFile.save(flush: true)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        linkFilesToFinalDestinationService.metaClass.informResultsAreBlocked = { RoddyBamFile roddyBamFile, Realm realm ->
+            assert false : "should not reach this part"
+        }
+
+        linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+
+        assertBamFileIsFine()
+    }
+
+    @Test
     void testLinkToFinalDestinationAndCleanup_QcStatusEqualAccepted_ShouldFail() {
         setUp_allFine()
         roddyBamFile.comment = DomainFactory.createComment()
-        roddyBamFile.qcTrafficLightStatus = AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
+        roddyBamFile.qcTrafficLightStatus = QcTrafficLightStatus.ACCEPTED
         assert roddyBamFile.save(flush: true)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         TestCase.shouldFailWithMessageContaining(RuntimeException,
-                "${AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED} is not a valid qcTrafficLightStatus here, only ${AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED} and ${AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED} is a valid status") {
+                linkFilesToFinalDestinationService.getInvalidQcTrafficLightStatusMessageForStatus(QcTrafficLightStatus.ACCEPTED)) {
+            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
+        }
+    }
+
+    @Test
+    void testLinkToFinalDestinationAndCleanup_QcStatusEqualRejected_ShouldFail() {
+        setUp_allFine()
+        roddyBamFile.comment = DomainFactory.createComment()
+        roddyBamFile.qcTrafficLightStatus = QcTrafficLightStatus.REJECTED
+        assert roddyBamFile.save(flush: true)
+        CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
+        TestCase.shouldFailWithMessageContaining(RuntimeException,
+                linkFilesToFinalDestinationService.getInvalidQcTrafficLightStatusMessageForStatus(QcTrafficLightStatus.REJECTED)) {
             linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         }
     }
@@ -647,7 +707,7 @@ class LinkFilesToFinalDestinationServiceTests {
 
         assert shouldFail (AssertionError) {
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
-        }.contains('assert [NEEDS_PROCESSING, INPROGRESS].contains(roddyBamFile.fileOperationStatus)')
+        }.contains('assert [FileOperationStatus.NEEDS_PROCESSING, FileOperationStatus.INPROGRESS].contains(roddyBamFile.fileOperationStatus)')
     }
 
     @Test

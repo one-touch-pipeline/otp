@@ -59,6 +59,10 @@
                 <td><g:select class="criteria" id="group" name='sampleIdentifierParserBeanName' from='${sampleIdentifierParserBeanNames}' value="${cmd.sampleIdentifierParserBeanName}" optionValue="displayName"/></td>
             </tr>
             <tr>
+                <td class="myKey"><g:message code="createProject.qcThresholdHandling"/></td>
+                <td><g:select class="criteria" id="group" name='qcThresholdHandling' from='${qcThresholdHandlings}' value="${cmd.qcThresholdHandling ?: defaultQcThresholdHandling}"/></td>
+            </tr>
+            <tr>
                 <td class="myKey"><g:message code="createProject.tumorEntity"/></td>
                 <td><g:select class="criteria" name='tumorName' from='${tumorEntities}' value="${cmd.tumorEntity}"/></td>
             </tr>

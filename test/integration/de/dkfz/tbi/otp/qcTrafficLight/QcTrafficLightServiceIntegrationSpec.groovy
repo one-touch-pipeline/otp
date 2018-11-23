@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.qcTrafficLight
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.domainFactory.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
@@ -9,7 +10,7 @@ import spock.lang.*
 
 import static de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus.*
 
-class QcTrafficLightServiceIntegrationSpec extends Specification {
+class QcTrafficLightServiceIntegrationSpec extends Specification implements DomainFactoryCore {
 
     QcTrafficLightService qcTrafficLightService
 
@@ -40,13 +41,13 @@ class QcTrafficLightServiceIntegrationSpec extends Specification {
     }
 
     @Unroll
-    void "setQcTrafficLightStatusBasedOnThreshold (tcc = #tcc & ploidy = #ploidy --> #resultStatus)"() {
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling (tcc = #tcc & ploidy = #ploidy --> #resultStatus)"() {
         given:
         aceseqQc.tcc = tcc
         aceseqQc.ploidy = ploidy
 
         when:
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(instance.sampleType1BamFile, aceseqQc)
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance.sampleType1BamFile, aceseqQc)
 
         then:
         instance.sampleType1BamFile.qcTrafficLightStatus == resultStatus
@@ -61,7 +62,7 @@ class QcTrafficLightServiceIntegrationSpec extends Specification {
     }
 
     @Unroll
-    void "setQcTrafficLightStatusBasedOnThreshold, use project specific (tcc = #tcc --> #resultStatus)"() {
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, use project specific (tcc = #tcc --> #resultStatus)"() {
         given:
         aceseqQc.tcc = tcc
         aceseqQc.ploidy = 5
@@ -77,7 +78,7 @@ class QcTrafficLightServiceIntegrationSpec extends Specification {
                 project: instance.project,
         )
         when:
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(instance.sampleType1BamFile, aceseqQc)
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance.sampleType1BamFile, aceseqQc)
 
         then:
         instance.sampleType1BamFile.qcTrafficLightStatus == resultStatus
@@ -95,17 +96,17 @@ class QcTrafficLightServiceIntegrationSpec extends Specification {
     }
 
     @Unroll
-    void "setQcTrafficLightStatusBasedOnThreshold, do not use project specific of other project (tcc = #tcc --> #resultStatus)"() {
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, do not use project specific of other project (tcc = #tcc --> #resultStatus)"() {
         given:
         aceseqQc.tcc = tcc
         aceseqQc.ploidy = 5
 
         QcThreshold qcThreshold = QcThreshold.findByQcProperty1('tcc')
-        qcThreshold.project = DomainFactory.createProject()
+        qcThreshold.project = createProject()
         qcThreshold.save(flush: true)
 
         when:
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(instance.sampleType1BamFile, aceseqQc)
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance.sampleType1BamFile, aceseqQc)
 
         then:
         instance.sampleType1BamFile.qcTrafficLightStatus == resultStatus
@@ -118,7 +119,7 @@ class QcTrafficLightServiceIntegrationSpec extends Specification {
     }
 
     @Unroll
-    void "setQcTrafficLightStatusBasedOnThreshold, once blocked files do not get unblocked (tcc = #tcc & ploidy = #ploidy --> #resultStatus)"() {
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, once blocked files do not get unblocked (tcc = #tcc & ploidy = #ploidy --> #resultStatus)"() {
         given:
         aceseqQc.tcc = tcc
         aceseqQc.ploidy = ploidy
@@ -126,7 +127,7 @@ class QcTrafficLightServiceIntegrationSpec extends Specification {
 
         when:
         instance.sampleType1BamFile.qcTrafficLightStatus = BLOCKED
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(bamFile, aceseqQc)
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, aceseqQc)
         boolean thresholdExceeded = qcTrafficLightService.qcValuesExceedErrorThreshold(bamFile, aceseqQc)
 
         then:
@@ -139,7 +140,7 @@ class QcTrafficLightServiceIntegrationSpec extends Specification {
         9   | 9      || true
     }
 
-    void "setQcTrafficLightStatusBasedOnThreshold, checks and sets both bam files of a given instance"() {
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, checks and sets both bam files of a given instance"() {
         given:
         aceseqQc.tcc = 9
         aceseqQc.ploidy = 9
@@ -149,10 +150,52 @@ class QcTrafficLightServiceIntegrationSpec extends Specification {
         instance.sampleType2BamFile.qcTrafficLightStatus == null
 
         when:
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(instance, aceseqQc)
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance, aceseqQc)
 
         then:
         instance.sampleType1BamFile.qcTrafficLightStatus == BLOCKED
         instance.sampleType2BamFile.qcTrafficLightStatus == BLOCKED
+    }
+
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, NO_CHECK causes UNCHECKED regardless of thresholds"() {
+        given:
+        [instance.sampleType1BamFile, instance.sampleType2BamFile].each {
+            it.individual.project = createProject(qcThresholdHandling: QcThresholdHandling.NO_CHECK)
+        }
+        aceseqQc.tcc = tcc
+        aceseqQc.ploidy = 5
+
+        when:
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance.sampleType1BamFile, aceseqQc)
+
+        then:
+        instance.sampleType1BamFile.qcTrafficLightStatus == UNCHECKED
+
+        where:
+        tcc << [0, 2, 4, 5, 6, 8, 10]
+    }
+
+
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, CHECK_AND_NOTIFY only causes AUTO_ACCEPTED if the threshold would fail"() {
+        given:
+        [instance.sampleType1BamFile, instance.sampleType2BamFile].each {
+            it.individual.project = createProject(qcThresholdHandling: QcThresholdHandling.CHECK_AND_NOTIFY)
+        }
+        aceseqQc.tcc = tcc
+        aceseqQc.ploidy = 5
+
+        when:
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance.sampleType1BamFile, aceseqQc)
+
+        then:
+        instance.sampleType1BamFile.qcTrafficLightStatus == expectedStatus
+
+        where:
+        tcc || expectedStatus
+        0   || AUTO_ACCEPTED
+        3   || QC_PASSED
+        5   || QC_PASSED
+        7   || QC_PASSED
+        10  || AUTO_ACCEPTED
     }
 }

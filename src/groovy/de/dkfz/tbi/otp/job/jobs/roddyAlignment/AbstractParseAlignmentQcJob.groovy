@@ -33,7 +33,7 @@ abstract class AbstractParseAlignmentQcJob extends AbstractEndStateAwareJobImpl 
             // Set the coverage value in roddyBamFile
             abstractQualityAssessmentService.saveCoverageToRoddyBamFile(roddyBamFile)
             roddyBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
-            qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(roddyBamFile, (QcTrafficLightValue) qa)
+            qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(roddyBamFile, (QcTrafficLightValue) qa)
             assert roddyBamFile.save(flush: true)
             succeed()
         }

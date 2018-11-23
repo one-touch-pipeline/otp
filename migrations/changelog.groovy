@@ -99,4 +99,8 @@ databaseChangeLog = {
     changeSet(author: "wieset", id: "rename-submission-to-egaSubmissin") {
         sqlFile(path: 'changelogs/2018/rename-submission-to-egaSubmissin.sql')
     }
+
+    changeSet(author: "kosnac", id: "OTP-2984-SQL") {
+        sqlFile(path: 'changelogs/2018/OTP-2984.sql')
+    }
 }

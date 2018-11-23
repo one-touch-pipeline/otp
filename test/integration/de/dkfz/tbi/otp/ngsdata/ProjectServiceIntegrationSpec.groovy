@@ -98,7 +98,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProject valid input"() {
         given:
-        String group = configService.getTestingGroup()
+        String unixGroup = configService.getTestingGroup()
+        String alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT.beanName
 
         when:
         Project project
@@ -107,10 +108,11 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: dirName,
                 dirAnalysis: dirAnalysis,
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
+                alignmentDeciderBeanName: alignmentDeciderBeanName,
                 sampleIdentifierParserBeanName: sampleIdentifierParserBeanName,
-                categoryNames: category,
-                unixGroup: group,
+                qcThresholdHandling: qcThresholdHandling,
+                categoryNames: categoryNames,
+                unixGroup: unixGroup,
                 projectGroup: projectGroup,
                 nameInMetadataFiles: nameInMetadataFiles,
                 copyFiles: copyFiles,
@@ -125,21 +127,25 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         project.name == name
         project.dirName == dirName
         project.dirAnalysis == dirAnalysis
-        project.processingPriority == processingPriority.priority
+        project.alignmentDeciderBeanName == alignmentDeciderBeanName
+        project.sampleIdentifierParserBeanName == sampleIdentifierParserBeanName
+        project.qcThresholdHandling == qcThresholdHandling
+        project.projectCategories == categoryNames.collect { ProjectCategory.findByName(it) } as Set
+        project.unixGroup == unixGroup
         project.projectGroup == ProjectGroup.findByName(projectGroup)
         project.nameInMetadataFiles == nameInMetadataFiles
         project.hasToBeCopied == copyFiles
-        project.projectCategories == category.collect { ProjectCategory.findByName(it) } as Set
         project.description == description
+        project.processingPriority == processingPriority.priority
 
         where:
-        name      | dirName | dirAnalysis | projectGroup   | nameInMetadataFiles | copyFiles | description   | category     | processingPriority            | sampleIdentifierParserBeanName
-        'project' | 'dir'   | ''          | ''             | 'project'           | true      | 'description' | ["category"] | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.NO_PARSER
-        'project' | 'dir'   | ''          | ''             | null                | true      | ''            | ["category"] | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM
-        'project' | 'dir'   | ''          | 'projectGroup' | 'project'           | true      | 'description' | ["category"] | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO
-        'project' | 'dir'   | ''          | ''             | 'project'           | false     | ''            | ["category"] | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.HIPO2
-        'project' | 'dir'   | ''          | ''             | 'project'           | true      | 'description' | ["category"] | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP
-        'project' | 'dir'   | '/dirA'     | ''             | 'project'           | true      | 'description' | []           | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER
+        name      | dirName | dirAnalysis | projectGroup   | nameInMetadataFiles | copyFiles | description   | categoryNames | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
+        'project' | 'dir'   | ''          | ''             | 'project'           | true      | 'description' | ["category"]  | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
+        'project' | 'dir'   | ''          | ''             | null                | true      | ''            | ["category"]  | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM    | QcThresholdHandling.CHECK_AND_NOTIFY
+        'project' | 'dir'   | ''          | 'projectGroup' | 'project'           | true      | 'description' | ["category"]  | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO      | QcThresholdHandling.NO_CHECK
+        'project' | 'dir'   | ''          | ''             | 'project'           | false     | ''            | ["category"]  | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.HIPO2     | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
+        'project' | 'dir'   | ''          | ''             | 'project'           | true      | 'description' | ["category"]  | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP      | QcThresholdHandling.CHECK_AND_NOTIFY
+        'project' | 'dir'   | '/dirA'     | ''             | 'project'           | true      | 'description' | []            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.NO_CHECK
     }
 
     void "test createProject if directory is created"() {
@@ -162,6 +168,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
+                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -199,6 +206,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
+                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -236,6 +244,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
+                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -264,6 +273,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 copyFiles: false,
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
+                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -304,6 +314,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
+                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)

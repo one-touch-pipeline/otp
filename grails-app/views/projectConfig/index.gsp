@@ -98,6 +98,17 @@
                     </td>
                 </tr>
                 <tr>
+                    <td class="myKey"><g:message code="projectOverview.qcThresholdHandling"/></td>
+                    <td id="qcThresholdHandling">
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateQcThresholdHandling", params: ['project.id': project.id, 'fieldName': 'qcThresholdHandling'])}"
+                                values="${qcThresholdHandlingDropdown}"
+                                value="${qcThresholdHandling}"/>
+                    </td>
+                </tr>
+                <tr>
                     <td class="myKey"><g:message code="projectOverview.copyFiles"/></td>
                     <td id="copyFiles">${copyFiles}</td>
                 </tr>

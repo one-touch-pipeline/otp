@@ -15,7 +15,7 @@ class Project implements Commentable, Entity {
     enum Snv {
         YES,
         NO,
-        UNKNOWN
+        UNKNOWN,
     }
 
     Snv snv = Snv.UNKNOWN
@@ -68,6 +68,8 @@ class Project implements Commentable, Entity {
     TumorEntity tumorEntity
 
     SampleIdentifierParserBeanName sampleIdentifierParserBeanName = SampleIdentifierParserBeanName.NO_PARSER
+
+    QcThresholdHandling qcThresholdHandling
 
     static belongsTo = [
             ProjectGroup,

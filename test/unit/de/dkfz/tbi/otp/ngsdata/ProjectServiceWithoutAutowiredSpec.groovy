@@ -32,7 +32,8 @@ class ProjectServiceWithoutAutowiredSpec extends Specification {
                 dirName,
                 new Realm(),
                 AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
-                ['category']
+                ['category'],
+                QcThresholdHandling.CHECK_AND_NOTIFY
         )
 
         then:

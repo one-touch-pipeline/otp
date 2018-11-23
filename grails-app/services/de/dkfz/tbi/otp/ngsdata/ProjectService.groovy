@@ -101,7 +101,7 @@ class ProjectService {
      * @return The created project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Project createProject(String name, String dirName, Realm realm, String alignmentDeciderBeanName, List<String> categoryNames) {
+    Project createProject(String name, String dirName, Realm realm, String alignmentDeciderBeanName, List<String> categoryNames, QcThresholdHandling qcThresholdHandling) {
         // check that our dirName is relative to the configured data root.
         Path rootPath = configService.getRootPath().toPath()
         List<String> rootPathElements = rootPath.toList()*.toString()
@@ -114,6 +114,7 @@ class ProjectService {
                 realm: realm,
                 alignmentDeciderBeanName: alignmentDeciderBeanName,
                 projectCategories: categoryNames.collect { exactlyOneElement(ProjectCategory.findAllByName(it)) },
+                qcThresholdHandling: qcThresholdHandling,
         )
 
         project = project.save(flush: true)
@@ -125,7 +126,7 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Project createProject(ProjectParams projectParams) {
         assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
-        Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realm, projectParams.alignmentDeciderBeanName, projectParams.categoryNames)
+        Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realm, projectParams.alignmentDeciderBeanName, projectParams.categoryNames, projectParams.qcThresholdHandling)
         project.phabricatorAlias = projectParams.phabricatorAlias
         project.dirAnalysis = projectParams.dirAnalysis
         project.processingPriority = projectParams.processingPriority.priority
@@ -212,6 +213,7 @@ class ProjectService {
         String costCenter
         String description
         SampleIdentifierParserBeanName sampleIdentifierParserBeanName
+        QcThresholdHandling qcThresholdHandling
         ProcessingPriority processingPriority
         TumorEntity tumorEntity
         MultipartFile projectInfoFile
@@ -238,6 +240,7 @@ class ProjectService {
                 "snv",
                 "tumorEntity",
                 "sampleIdentifierParserBeanName",
+                "qcThresholdHandling",
         ].contains(fieldName)
 
         project."${fieldName}" = fieldValue

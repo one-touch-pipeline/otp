@@ -28,7 +28,7 @@ class ParseRnaAlignmentQcJob extends AbstractEndStateAwareJobImpl implements Aut
         RnaRoddyBamFile.withTransaction {
             RnaQualityAssessment rnaQa = abstractQualityAssessmentService.parseRnaRoddyBamFileQaStatistics(rnaRoddyBamFile)
             rnaRoddyBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
-            qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(rnaRoddyBamFile, rnaQa)
+            qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(rnaRoddyBamFile, rnaQa)
             assert rnaRoddyBamFile.save(flush: true)
             succeed()
         }

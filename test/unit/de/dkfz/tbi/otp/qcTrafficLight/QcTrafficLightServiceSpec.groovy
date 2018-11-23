@@ -48,7 +48,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
     TestConfigService testConfigService
 
     @Unroll
-    void "test changeQcTrafficLightStatusWithComment valid input (is rna: #rna, qcStatus: #qcStatus), succeeds"() {
+    void "test setQcTrafficLightStatusWithComment valid input (is rna: #rna, qcStatus: #qcStatus), succeeds"() {
         given:
         RoddyBamFile roddyBamFile = rna ? RoddyRnaFactory.super.createBamFile() : DomainFactory.createRoddyBamFile()
         DomainFactory.createDefaultRealmWithProcessingOption()
@@ -69,7 +69,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         qcTrafficLightService.configService.processingOptionService = new ProcessingOptionService()
 
         when:
-        qcTrafficLightService.changeQcTrafficLightStatusWithComment(roddyBamFile, qcStatus, "comment")
+        qcTrafficLightService.setQcTrafficLightStatusWithComment(roddyBamFile, qcStatus, "comment")
 
         then:
         roddyBamFile.qcTrafficLightStatus == qcStatus
@@ -84,12 +84,12 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         true  | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | 0         | 0            | 0
     }
 
-    void "test changeQcTrafficLightStatusWithComment invalid input, fails"() {
+    void "test setQcTrafficLightStatusWithComment invalid input, fails"() {
         given:
         qcTrafficLightService = new QcTrafficLightService()
 
         when:
-        qcTrafficLightService.changeQcTrafficLightStatusWithComment(useBamFile ? DomainFactory.createRoddyBamFile() : null, qcStatus, comment)
+        qcTrafficLightService.setQcTrafficLightStatusWithComment(useBamFile ? DomainFactory.createRoddyBamFile() : null, qcStatus, comment)
 
         then:
         thrown(AssertionError)
@@ -102,7 +102,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         false      | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED | "comment"
     }
 
-    void "test changeQcTrafficLightStatusWithComment set analysis of otrs to not sent"() {
+    void "test setQcTrafficLightStatusWithComment set analysis of otrs to not sent"() {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.REJECTED,
@@ -126,7 +126,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         qcTrafficLightService.configService.processingOptionService = new ProcessingOptionService()
 
         when:
-        qcTrafficLightService.changeQcTrafficLightStatusWithComment(
+        qcTrafficLightService.setQcTrafficLightStatusWithComment(
                 roddyBamFile,
                 AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED,
                 "comment")

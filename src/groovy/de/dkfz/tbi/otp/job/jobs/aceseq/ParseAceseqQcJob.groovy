@@ -36,7 +36,7 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
             }.find {
                  it.number == 1
             }
-            qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(aceseqInstance, qcOne)
+            qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(aceseqInstance, qcOne)
 
             List<File> files = aceseqInstance.getAllFiles()
             files.each {
