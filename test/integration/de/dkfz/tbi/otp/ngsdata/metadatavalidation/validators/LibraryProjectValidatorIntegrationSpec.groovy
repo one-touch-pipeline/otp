@@ -2,36 +2,34 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import spock.lang.*
 
-import java.util.regex.*
-
 import static de.dkfz.tbi.TestCase.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 
-class LibrarySampleValidatorIntegrationSpec extends Specification {
+class LibraryProjectValidatorIntegrationSpec extends Specification {
 
     void 'validate, adds expected warnings,succeeds'() {
         given:
         setUpSeqTracks()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${CUSTOMER_LIBRARY}\t${SAMPLE_ID}\n" +
-                        "lib1\tsample01\n" +
-                        "lib1\tsample04\n" +
-                        "library1\tsample05\n" +
-                        "lib5\tsample01\n" +
-                        "library5\tsample01\n" +
-                        "lib2\tsample01\n" +
-                        "lib2\tsample01\n" +
-                        "lib2\tsample02\n" +
-                        "lib1\tsample01\n" +
-                        "\tsample04\n"
+                "${CUSTOMER_LIBRARY}\t${PROJECT}\n" +
+                        "lib1\tproject01\n" +
+                        "lib1\tproject02\n" +
+                        "library1\tproject02\n" +
+                        "lib5\tproject01\n" +
+                        "library5\tproject01\n" +
+                        "lib2\tproject01\n" +
+                        "lib2\tproject01\n" +
+                        "lib2\tproject01\n" +
+                        "lib1\tproject01\n" +
+                        "\tproject02\n"
         )
 
         when:
-        createLibrarySampleValidator().validate(context)
+        new LibraryProjectValidator().validate(context)
 
         then:
         Collection<Problem> expectedProblems = [
@@ -47,7 +45,7 @@ class LibrarySampleValidatorIntegrationSpec extends Specification {
         assertContainSame(context.problems, expectedProblems)
     }
 
-    void 'validate, missing column SAMPLE_ID, succeeds'() {
+    void 'validate, missing column PROJECT, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${CUSTOMER_LIBRARY}\n" +
@@ -55,7 +53,7 @@ class LibrarySampleValidatorIntegrationSpec extends Specification {
         )
 
         when:
-        createLibrarySampleValidator().validate(context)
+        new LibraryProjectValidator().validate(context)
 
         then:
         context.problems.empty
@@ -64,23 +62,23 @@ class LibrarySampleValidatorIntegrationSpec extends Specification {
     void 'validate, missing column CUSTOMER_LIBRARY, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\n" +
-                        "sample01\n"
+                "${PROJECT}\n" +
+                        "project01\n"
         )
 
         when:
-        createLibrarySampleValidator().validate(context)
+        new LibraryProjectValidator().validate(context)
 
         then:
         context.problems.empty
     }
 
-    void 'validate, missing column CUSTOMER_LIBRARY and SAMPLE_ID, succeeds'() {
+    void 'validate, missing column CUSTOMER_LIBRARY and PROJECT, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 
         when:
-        createLibrarySampleValidator().validate(context)
+        new LibraryProjectValidator().validate(context)
 
         then:
         context.problems.empty
@@ -109,18 +107,5 @@ class LibrarySampleValidatorIntegrationSpec extends Specification {
         DomainFactory.createSeqTrack(libraryName: 'lib1', normalizedLibraryName: SeqTrack.normalizeLibraryName('lib1'), sample: sample04)
         DomainFactory.createSeqTrack(libraryName: null, normalizedLibraryName: SeqTrack.normalizeLibraryName(null), sample: sample04)
         DomainFactory.createSeqTrack(libraryName: '', normalizedLibraryName: SeqTrack.normalizeLibraryName(''), sample: sample04)
-    }
-
-    private LibrarySampleValidator createLibrarySampleValidator() {
-        return new LibrarySampleValidator(sampleIdentifierService: Stub(SampleIdentifierService) {
-            parseSampleIdentifier(_) >> { String sampleId ->
-                Matcher match = sampleId =~ /sample\d+/
-                if (match.matches()) {
-                    return new DefaultParsedSampleIdentifier("project02", sampleId, sampleId, sampleId)
-                } else {
-                    return null
-                }
-            }
-        })
     }
 }

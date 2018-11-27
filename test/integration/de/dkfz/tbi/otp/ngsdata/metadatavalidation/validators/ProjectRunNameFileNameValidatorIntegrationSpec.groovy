@@ -19,8 +19,8 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
     static DataFile dataFile
 
     static final String VALID_METADATA =
-            "${MetaDataColumn.FASTQ_FILE}\t${MetaDataColumn.RUN_ID}\t${MetaDataColumn.SAMPLE_ID}\n" +
-                    "${DATAFILE}\t${RUN_ID}\t${SAMPLE_ID}\t\n"
+            "${MetaDataColumn.FASTQ_FILE}\t${MetaDataColumn.RUN_ID}\t${MetaDataColumn.PROJECT}\n" +
+                    "${DATAFILE}\t${RUN_ID}\t${PROJECT}\t\n"
 
 
     void setup() {
@@ -32,29 +32,6 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
         dataFile = DomainFactory.createDataFile(["fileName": DATAFILE, "seqTrack": seq])
     }
 
-
-    void 'validate, when file name does not exist for specified run and project (using parseSampleIdentifier)'() {
-
-        given:
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.FASTQ_FILE}\t${MetaDataColumn.RUN_ID}\t${MetaDataColumn.SAMPLE_ID}\n" +
-                        "${DATAFILE_NEW}\t${RUN_ID}\t${SAMPLE_ID}\t\n"
-        )
-
-        when:
-        ProjectRunNameFileNameValidator validator = new ProjectRunNameFileNameValidator()
-        validator.sampleIdentifierService = Mock(SampleIdentifierService) {
-            1 * parseSampleIdentifier(_) >> {
-                return new DefaultParsedSampleIdentifier(dataFile.project.name, dataFile.individual.pid, dataFile.sampleType.name, SAMPLE_ID)
-            }
-        }
-
-        validator.validate(context)
-
-        then:
-        context.problems.empty
-    }
-
     void 'validate, when file name does not exist for specified run and project (not using parseSampleIdentifier)'() {
 
         given:
@@ -62,17 +39,12 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
 
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${MetaDataColumn.FASTQ_FILE}\t${MetaDataColumn.RUN_ID}\t${MetaDataColumn.SAMPLE_ID}\n" +
-                        "${DATAFILE_NEW}\t${RUN_ID}\t${SAMPLE_ID}\t\n"
+                "${MetaDataColumn.FASTQ_FILE}\t${MetaDataColumn.RUN_ID}\t${MetaDataColumn.PROJECT}\n" +
+                        "${DATAFILE_NEW}\t${RUN_ID}\t${PROJECT}\t\n"
         )
 
         when:
         ProjectRunNameFileNameValidator validator = new ProjectRunNameFileNameValidator()
-        validator.sampleIdentifierService = Mock(SampleIdentifierService) {
-            0 * parseSampleIdentifier(_) >> {
-                return null
-            }
-        }
 
         validator.validate(context)
 
@@ -89,11 +61,6 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
 
         when:
         ProjectRunNameFileNameValidator validator = new ProjectRunNameFileNameValidator()
-        validator.sampleIdentifierService = Mock(SampleIdentifierService) {
-            1 * parseSampleIdentifier(_) >> {
-                return new DefaultParsedSampleIdentifier(dataFile.project.name, dataFile.individual.pid, dataFile.sampleType.name, SAMPLE_ID)
-            }
-        }
 
         validator.validate(context)
 
@@ -108,7 +75,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
     void 'validate, when file name already exists for specified run and project (not using parseSampleIdentifier)'() {
 
         given:
-        DomainFactory.createSampleIdentifier(["name": SAMPLE_ID, "sample": dataFile.seqTrack.sample]).name
+        DomainFactory.createSampleIdentifier(["name": PROJECT, "sample": dataFile.seqTrack.sample]).name
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA
@@ -116,11 +83,6 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
 
         when:
         ProjectRunNameFileNameValidator validator = new ProjectRunNameFileNameValidator()
-        validator.sampleIdentifierService = Mock(SampleIdentifierService) {
-            0 * parseSampleIdentifier(_) >> {
-                return null
-            }
-        }
 
         validator.validate(context)
 

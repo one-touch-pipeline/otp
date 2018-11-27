@@ -144,4 +144,8 @@ class Project implements Commentable, Entity {
     Project getProject() {
         return this
     }
+
+    static Project getByNameOrNameInMetadataFiles(String name) {
+        return findByNameOrNameInMetadataFiles(name, name)
+    }
 }

@@ -23,11 +23,6 @@ class DeepSampleIdentifierParser implements SampleIdentifierParser {
     }
 
     @Override
-    boolean isForProject(String projectName) {
-        return projectName == 'DEEP'
-    }
-
-    @Override
     boolean tryParsePid(String pid) {
         return pid =~ "^" + getPidRegex() + /$/
     }

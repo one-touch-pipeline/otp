@@ -185,33 +185,8 @@ class SampleIdentifierServiceUnitTests {
     }
 
     @Test
-    void testParseSampleIdentifier_NoParserCanParse_ShouldReturnNull() {
-        assert null == service.parseSampleIdentifier(HelperUtils.uniqueString,
-                [new TestParser_CannotParse(), new TestParser_CannotParse()])
-    }
-
-    @Test
-    void testParseSampleIdentifier_OneParserCanParse_ShouldReturnParsedSampleIdentifier() {
-        String sampleIdentifier = HelperUtils.uniqueString
-
-        ParsedSampleIdentifier result = service.parseSampleIdentifier(sampleIdentifier,
-                [new TestParser_CannotParse(), new TestParser_CanParse()])
-
-        assert result.fullSampleName == sampleIdentifier
-    }
-
-    @Test
-    void testParseSampleIdentifier_TwoParsersCanParse_ShouldThrow() {
-        assert shouldFail {
-            service.parseSampleIdentifier(HelperUtils.uniqueString,
-                    [new TestParser_CanParse(), new TestParser_CannotParse(), new TestParser_CanParse()] as Set)
-        }.contains('ambiguous')
-    }
-
-    @Test
     void testParseAndFindOrSaveSampleIdentifier_NoParserCanParse_ShouldReturnNull() {
-        SampleIdentifier result = service.parseAndFindOrSaveSampleIdentifier(HelperUtils.uniqueString,
-                [new TestParser_CannotParse()])
+        SampleIdentifier result = service.parseAndFindOrSaveSampleIdentifier(HelperUtils.uniqueString, null)
 
         assert result == null
         assert SampleIdentifier.count() == 0
@@ -219,18 +194,6 @@ class SampleIdentifierServiceUnitTests {
         assert SampleType.count() == 0
         assert Individual.count() == 0
         assert Project.count() == 0
-    }
-
-    @Test
-    void testParseAndFindOrSaveSampleIdentifier_OneParserCanParse_ShouldReturnParsedSampleIdentifier() {
-        String someString = HelperUtils.uniqueString
-        DomainFactory.createProject(name: someString)
-
-        SampleIdentifier result = service.parseAndFindOrSaveSampleIdentifier(someString,
-                [new TestParser_CannotParse(), new TestParser_CanParse()])
-
-        assert result.name == someString
-        assert containSame(SampleIdentifier.list(), [result])
     }
 
     @Test
@@ -275,10 +238,6 @@ class TestParser_CanParse implements SampleIdentifierParser {
         return new DefaultParsedSampleIdentifier(someString, someString, someString, someString)
     }
 
-    boolean isForProject(String projectName) {
-        return true
-    }
-
     boolean tryParsePid(String pid) {
         return true
     }
@@ -289,10 +248,6 @@ class TestParser_CannotParse implements SampleIdentifierParser {
 
     ParsedSampleIdentifier tryParse(String sampleIdentifier) {
         return null
-    }
-
-    boolean isForProject(String projectName) {
-        return false
     }
 
     boolean tryParsePid(String pid) {

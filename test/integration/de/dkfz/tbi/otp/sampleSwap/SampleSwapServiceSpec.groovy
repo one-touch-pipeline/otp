@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.sampleSwap
 
+import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.sampleswap.*
 import de.dkfz.tbi.otp.testing.*
@@ -528,6 +529,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with project changed to deep and invalid pid, shows warnings"() {
         given:
+        DomainFactory.createProject(name: 'DEEP', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.DEEP)
         SampleSwapData sampleSwapData = createSampleSwapData(seqTrack1, [project: "DEEP"], 1)
         Map data = [
                 data      : [sampleSwapData],
@@ -551,7 +553,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with project deep and invalid pid, shows warnings"() {
         given:
-        seqTrack1.individual.project = DomainFactory.createProject(name: "DEEP")
+        seqTrack1.individual.project = DomainFactory.createProject(name: 'DEEP', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.DEEP)
         seqTrack1.individual.pid = "41_Hf01_BlAd_CD_WGBS_S_1"
         SampleSwapData sampleSwapData = createSampleSwapData(seqTrack1, [pid: "invalidPid"], 1)
         Map data = [

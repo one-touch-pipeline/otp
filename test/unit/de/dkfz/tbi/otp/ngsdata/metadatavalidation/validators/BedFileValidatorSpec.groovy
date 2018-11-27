@@ -30,7 +30,7 @@ import static de.dkfz.tbi.TestCase.*
 class BedFileValidatorSpec extends Specification {
 
     static
-    final List<String> HEADER = [MetaDataColumn.SEQUENCING_TYPE, MetaDataColumn.LIBRARY_LAYOUT, MetaDataColumn.LIB_PREP_KIT, MetaDataColumn.SAMPLE_ID, MetaDataColumn.TAGMENTATION_BASED_LIBRARY]*.name().asImmutable()
+    final List<String> HEADER = [MetaDataColumn.SEQUENCING_TYPE, MetaDataColumn.LIBRARY_LAYOUT, MetaDataColumn.LIB_PREP_KIT, MetaDataColumn.SAMPLE_ID, MetaDataColumn.TAGMENTATION_BASED_LIBRARY, MetaDataColumn.PROJECT]*.name().asImmutable()
 
     static final String PARSE_PREFIX = 'PARSE'
     static final String PARSE_PROJECT = 'PROJECT'
@@ -57,6 +57,8 @@ class BedFileValidatorSpec extends Specification {
             DomainFactory.createSampleType(name: PARSE_SAMPLE_TYPE)
         }
         project.alignmentDeciderBeanName = alignmentDeciderBeanName
+        project.sampleIdentifierParserBeanName = SampleIdentifierParserBeanName.DEEP
+        project.save(flush: true)
 
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
         if (connectProjectToReferenceGenome) {
@@ -74,8 +76,8 @@ class BedFileValidatorSpec extends Specification {
         }
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext([
-                [MetaDataColumn.SEQUENCING_TYPE.name(), MetaDataColumn.LIBRARY_LAYOUT.name(), MetaDataColumn.LIB_PREP_KIT.name(), MetaDataColumn.SAMPLE_ID.name(), MetaDataColumn.TAGMENTATION_BASED_LIBRARY.name()],
-                [seqTypeName, libraryLayout, libPrepKitName, sampleId, tagmentationBasedLibrary],
+                [MetaDataColumn.SEQUENCING_TYPE.name(), MetaDataColumn.LIBRARY_LAYOUT.name(), MetaDataColumn.LIB_PREP_KIT.name(), MetaDataColumn.SAMPLE_ID.name(), MetaDataColumn.TAGMENTATION_BASED_LIBRARY.name(), MetaDataColumn.PROJECT.name()],
+                [seqTypeName, libraryLayout, libPrepKitName, sampleId, tagmentationBasedLibrary, sampleId == PARSE_SAMPLE_ID_NEW_PROJECT ? 'noProject' : project.name],
         ].collect { row ->
             row.join('\t')
         }.join('\n'))
@@ -90,8 +92,8 @@ class BedFileValidatorSpec extends Specification {
         new BedFileValidator(
                 libraryPreparationKitService: new LibraryPreparationKitService(),
                 sampleIdentifierService: [
-                        getSampleIdentifierParsers: { ->
-                            [new SampleIdentifierParser() {
+                        getSampleIdentifierParser: { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
+                            new SampleIdentifierParser() {
 
                                 @Override
                                 ParsedSampleIdentifier tryParse(String sampleIdentifier) {
@@ -108,13 +110,7 @@ class BedFileValidatorSpec extends Specification {
                                 boolean tryParsePid(String pid) {
                                     return true
                                 }
-
-                                @SuppressWarnings("UnusedMethodParameter")
-                                @Override
-                                boolean isForProject(String projectName) {
-                                    return true
-                                }
-                            }]
+                            }
                         }
                 ] as SampleIdentifierService,
         ).validate(context)

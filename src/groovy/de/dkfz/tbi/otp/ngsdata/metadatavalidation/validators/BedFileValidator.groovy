@@ -28,7 +28,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
 
     @Override
     List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE.name(), LIBRARY_LAYOUT.name(), LIB_PREP_KIT.name(), SAMPLE_ID.name(), TAGMENTATION_BASED_LIBRARY.name(), BASE_MATERIAL.name()]
+        return [SEQUENCING_TYPE.name(), LIBRARY_LAYOUT.name(), LIB_PREP_KIT.name(), SAMPLE_ID.name(), TAGMENTATION_BASED_LIBRARY.name(), BASE_MATERIAL.name(), PROJECT.name()]
     }
 
     @Override
@@ -67,23 +67,22 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
         }
 
         String sampleId = valueTuple.getValue(SAMPLE_ID.name())
+        String projectName = valueTuple.getValue(PROJECT.name())
 
-        Project project
+        Project project = Project.findByName(projectName)
         SampleType sampleType
 
         SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
         if (sampleIdentifier) {
             project = sampleIdentifier.project
             sampleType = sampleIdentifier.sampleType
-
         } else {
-            ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId)
-            if (!parsedSampleIdentifier) {
+            if (!project) {
                 return
             }
 
-            project = CollectionUtils.atMostOneElement(Project.findAllByName(parsedSampleIdentifier.projectName))
-            if (!project) {
+            ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId, project)
+            if (!parsedSampleIdentifier) {
                 return
             }
 

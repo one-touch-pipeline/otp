@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.*
 import org.springframework.stereotype.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
 
 @Component
 class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator{
@@ -29,12 +27,12 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE.name(), LIB_PREP_KIT.name(), SAMPLE_ID.name(), LIBRARY_LAYOUT.name(), BASE_MATERIAL.name()]
+        return [SEQUENCING_TYPE.name(), LIB_PREP_KIT.name(), PROJECT.name(), LIBRARY_LAYOUT.name(), BASE_MATERIAL.name()]
     }
 
     @Override
     boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle in [SEQUENCING_TYPE, SAMPLE_ID, LIBRARY_LAYOUT]*.name()) {
+        if (columnTitle in [SEQUENCING_TYPE, PROJECT, LIBRARY_LAYOUT]*.name()) {
             return false
         }
         return true
@@ -62,23 +60,13 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
                 return
             }
             Pipeline pipeline = seqType.isRna() ? Pipeline.findByName(Pipeline.Name.RODDY_RNA_ALIGNMENT) : Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
-            String sampleId = valueTuple.getValue(SAMPLE_ID.name())
-            Individual individual
-            Project project
-            RoddyWorkflowConfig config
-            SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
-            if (sampleIdentifier) {
-                project = sampleIdentifier.project
-                individual = sampleIdentifier.individual
-                config = RoddyWorkflowConfig.getLatestForIndividual(individual, seqType, pipeline)
-            } else {
-                ParsedSampleIdentifier identifier = sampleIdentifierService.parseSampleIdentifier(sampleId)
-                project = Project.findByName(identifier?.projectName)
-                if (!project) {
-                    return
-                }
-                config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
+            String projectName = valueTuple.getValue(PROJECT.name())
+            Project project = Project.getByNameOrNameInMetadataFiles(projectName)
+            if (!project) {
+                return
             }
+            RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
+
             if (seqType in SeqTypeService.getRoddyAlignableSeqTypes() &&
                     project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName &&
                     config?.adapterTrimmingNeeded) {

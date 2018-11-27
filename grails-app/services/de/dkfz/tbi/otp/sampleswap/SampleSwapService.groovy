@@ -204,10 +204,11 @@ class SampleSwapService {
     private List validatePid(SampleSwapData data) {
         List output = []
         data.findByKey("pid").each { SampleSwapInfo it ->
+            Project project = Project.findByName(data.newValues.project)
             if (it.newValue == "") {
                 output << new SampleSwapInfo(it.oldValue, it.newValue, it.seqTrackId, 'pid', "Column 'pid' of '${data.rowNumber}' can't be empty.", SampleSwapLevel.ERROR)
-            } else if (
-            sampleIdentifierService.getSampleIdentifierParsers().any { parser -> parser.isForProject(data.newValues.project) && !parser.tryParsePid(it.newValue) }) {
+            } else if (project &&
+            project.sampleIdentifierParserBeanName != SampleIdentifierParserBeanName.NO_PARSER && !sampleIdentifierService.getSampleIdentifierParser(project.sampleIdentifierParserBeanName).tryParse(it.newValue)) {
                 if (it.oldValue == it.newValue) {
                     output << new SampleSwapInfo(it.oldValue, it.newValue, it.seqTrackId, 'pid', "Column 'pid' of '${data.rowNumber}' didn't change from '${it.oldValue}', but 'project' is '${data.newValues.project}' and the 'pid' doesn't conform to the naming scheme conventions.", SampleSwapLevel.WARNING)
                 } else {

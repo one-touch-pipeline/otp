@@ -303,6 +303,8 @@ class MetadataImportService {
         runRows.groupBy {
             MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
         }.each { String laneId, List<Row> rows ->
+            String projectName = uniqueColumnValue(rows, PROJECT)
+            Project project = Project.getByNameOrNameInMetadataFiles(projectName)
             String ilseNumber = uniqueColumnValue(rows, ILSE_NO)
             String seqTypeRaw = uniqueColumnValue(rows, SEQUENCING_TYPE)
             String tagmentationRaw = uniqueColumnValue(rows, TAGMENTATION_BASED_LIBRARY)?.toLowerCase()
@@ -339,7 +341,7 @@ class MetadataImportService {
                     insertSize: tryParseInt(uniqueColumnValue(rows, INSERT_SIZE), 0),
                     run: run,
                     sample: (atMostOneElement(SampleIdentifier.findAllWhere(name: sampleIdString)) ?:
-                            sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(sampleIdString)).sample,
+                            sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(sampleIdString, project)).sample,
                     seqType: seqType,
                     pipelineVersion: SoftwareToolService.getBaseCallingTool(pipelineVersionString).softwareTool,
                     kitInfoReliability: kitInfoReliability,

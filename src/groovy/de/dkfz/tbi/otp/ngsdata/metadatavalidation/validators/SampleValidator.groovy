@@ -39,11 +39,13 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
 
         Map<String, Collection<ValueTuple>> byProjectName = valueTuples.groupBy {
             String sampleId = it.getValue(SAMPLE_ID.name())
+            String projectName = it.getValue(PROJECT.name())
+            Project project = Project.getByNameOrNameInMetadataFiles(projectName)
             Matcher matcher = pattern.matcher(sampleId)
             if (!matcher.matches()) {
                 context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleId}' contains not allowed characters.", "Sample identifiers are only allowed with the characters [A-Za-z0-9_-]")
             }
-            ParsedSampleIdentifier parsedIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId)
+            ParsedSampleIdentifier parsedIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId, project)
             SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
             if (!parsedIdentifier && !sampleIdentifier) {
                 context.addProblem(it.cells, Level.ERROR, "Sample identifier '${sampleId}' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP.")

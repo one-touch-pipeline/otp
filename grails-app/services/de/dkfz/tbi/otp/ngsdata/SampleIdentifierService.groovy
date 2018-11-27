@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -15,13 +17,13 @@ class SampleIdentifierService {
     @Autowired
     ApplicationContext applicationContext
 
-    Collection<? extends SampleIdentifierParser> getSampleIdentifierParsers() {
-        return applicationContext.getBeansOfType(SampleIdentifierParser).values()
+    SampleIdentifierParser getSampleIdentifierParser(SampleIdentifierParserBeanName sampleIdentifierParserBeanName) {
+        return applicationContext.getBean(sampleIdentifierParserBeanName.beanName, SampleIdentifierParser)
     }
 
-    SampleIdentifier parseAndFindOrSaveSampleIdentifier(String sampleIdentifier,
-            Collection<? extends SampleIdentifierParser> sampleIdentifierParsers = getSampleIdentifierParsers()) {
-        ParsedSampleIdentifier identifier = parseSampleIdentifier(sampleIdentifier, sampleIdentifierParsers)
+    SampleIdentifier parseAndFindOrSaveSampleIdentifier(String sampleIdentifier, Project project) {
+        ParsedSampleIdentifier identifier = parseSampleIdentifier(sampleIdentifier, project)
+
         if (identifier) {
             return findOrSaveSampleIdentifier(identifier)
         } else {
@@ -29,21 +31,14 @@ class SampleIdentifierService {
         }
     }
 
-    ParsedSampleIdentifier parseSampleIdentifier(String sampleIdentifier,
-             Collection<? extends SampleIdentifierParser> sampleIdentifierParsers = getSampleIdentifierParsers()) {
-        Map<SampleIdentifierParser, ParsedSampleIdentifier> results = [:]
-        sampleIdentifierParsers.each {
-            ParsedSampleIdentifier identifier = it.tryParse(sampleIdentifier)
-            if (identifier != null) {
-                assert identifier.fullSampleName == sampleIdentifier
-                results.put(it, identifier)
-            }
+    ParsedSampleIdentifier parseSampleIdentifier(String sampleIdentifier, Project project) {
+        if (!project || project.sampleIdentifierParserBeanName == SampleIdentifierParserBeanName.NO_PARSER) {
+            return null
         }
-        if (results.size() <= 1) {
-            return atMostOneElement(results.values())
-        } else {
-            throw new RuntimeException("${sampleIdentifier} is ambiguous. It can be parsed by ${results.keySet()}.")
-        }
+
+        SampleIdentifierParser sampleIdentifierParser = getSampleIdentifierParser(project.sampleIdentifierParserBeanName)
+
+        return sampleIdentifierParser.tryParse(sampleIdentifier)
     }
 
     SampleIdentifier findOrSaveSampleIdentifier(ParsedSampleIdentifier identifier) {

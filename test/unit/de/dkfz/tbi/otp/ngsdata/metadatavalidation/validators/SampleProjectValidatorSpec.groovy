@@ -34,15 +34,18 @@ class SampleProjectValidatorSpec extends Specification {
                         "D project_D\n" +      // SampleIdentifier in DB, neither name nor nameInMetadataFiles matches
                         "E project_E\n" +      // SampleIdentifier not in DB, name matches
                         "F project_V\n" +      // SampleIdentifier not in DB, nameInMetadataFiles matches
-                        "G project_W\n"        // SampleIdentifier not in DB, neither name nor nameInMetadataFiles matches
+                        "G noProject_W\n"        // SampleIdentifier not in DB, neither name nor nameInMetadataFiles matches
         ).replace(' ', '\t'))
         createSampleIdentifier('project_B', 'B', 'X')
         createSampleIdentifier('project_C', 'Y', 'C')
         createSampleIdentifier('project_D', 'Z', 'Z')
-        DomainFactory.createProject(name: 'V', nameInMetadataFiles: 'F')
+        DomainFactory.createProject(name: 'D',)
+        DomainFactory.createProject(name: 'V', nameInMetadataFiles: 'F', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.HIPO)
+        DomainFactory.createProject(name: 'E', nameInMetadataFiles: 'E', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.HIPO)
+        DomainFactory.createProject(name: 'G', nameInMetadataFiles: 'W', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.HIPO)
         SampleProjectValidator validator = new SampleProjectValidator()
         validator.sampleIdentifierService = [
-                parseSampleIdentifier: { String sampleIdentifier ->
+                parseSampleIdentifier: { String sampleIdentifier, Project project ->
                     final String prefix = 'project_'
                     if (sampleIdentifier.startsWith(prefix)) {
                         return new DefaultParsedSampleIdentifier(sampleIdentifier.substring(prefix.length()), "don't care", "don't care", sampleIdentifier)
@@ -55,7 +58,7 @@ class SampleProjectValidatorSpec extends Specification {
                 new Problem(context.spreadsheet.dataRows[3].cells as Set<Cell>, Level.WARNING,
                         "Sample identifier 'project_D' is already registered in OTP with project 'Z', not with project 'D'. If you ignore this warning, OTP will keep the assignment of the sample identifier to project 'Z' and ignore the value 'D' in the '${PROJECT}' column.", "At least one sample identifier is already registered in OTP but with another project."),
                 new Problem(context.spreadsheet.dataRows[6].cells as Set<Cell>, Level.WARNING,
-                        "Sample identifier 'project_W' looks like it belongs to project 'W', not to project 'G'. If you ignore this warning, OTP will assign the sample to project 'W' and ignore the value 'G' in the '${PROJECT}' column.", "At least one sample identifier looks like is belongs to another project than in the 'PROJECT' column."),
+                        "Sample identifier 'noProject_W' can not be parsed with the sampleIdentifierParser '${SampleIdentifierParserBeanName.HIPO}' given by project 'G'.", "At least one sample identifier looks like it does not belong to the project in the '${PROJECT}' column."),
         ]
 
         when:

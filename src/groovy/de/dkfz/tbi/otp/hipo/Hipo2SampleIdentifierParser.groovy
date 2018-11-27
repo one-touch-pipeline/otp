@@ -15,11 +15,6 @@ class Hipo2SampleIdentifierParser implements SampleIdentifierParser {
     static String REGEX = /^${PID}-${TISSUE}-${ANALYTE}$/
 
     @Override
-    boolean isForProject(String projectName) {
-        return projectName.matches("hipo_[KST]")
-    }
-
-    @Override
     boolean tryParsePid(String pid) {
         return pid =~ "^" + PID + /$/
     }

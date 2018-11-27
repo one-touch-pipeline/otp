@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.stereotype.*
@@ -22,8 +21,18 @@ class ProjectRunNameFileNameValidator extends ValueTuplesValidator<MetadataValid
 
     @Override
     List<String> getColumnTitles(MetadataValidationContext context) {
-        return [FASTQ_FILE.name(), RUN_ID.name(), SAMPLE_ID.name()]
+        return [FASTQ_FILE.name(), RUN_ID.name(), PROJECT.name()]
     }
+
+
+    @Override
+    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
+        if (columnTitle == PROJECT.name()) {
+            return true
+        }
+        return false
+    }
+
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
@@ -33,22 +42,10 @@ class ProjectRunNameFileNameValidator extends ValueTuplesValidator<MetadataValid
     }
 
     void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
-        String sampleId = valueTuple.getValue(SAMPLE_ID.name())
         String runId = valueTuple.getValue(RUN_ID.name())
         String fileName = valueTuple.getValue(FASTQ_FILE.name())
-
-        Project project
-        SampleIdentifier sampleIdentifier = SampleIdentifier.findByName(sampleId)
-        ParsedSampleIdentifier parsedSampleIdentifier
-
-        if (sampleIdentifier?.project) {
-            project = sampleIdentifier.project
-        } else {
-            parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId)
-            if (parsedSampleIdentifier) {
-                project = CollectionUtils.atMostOneElement(Project.findAllByName(parsedSampleIdentifier.projectName))
-            }
-        }
+        String projectName = valueTuple.getValue(PROJECT.name())
+        Project project = Project.getByNameOrNameInMetadataFiles(projectName)
 
         if (!project) {
             return

@@ -23,11 +23,6 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
     }
 
     @Override
-    boolean isForProject(String projectName) {
-        return projectName == 'INFORM'
-    }
-
-    @Override
     boolean tryParsePid(String pid) {
         return pid =~ "^" + getPidRegex() + /$/
     }

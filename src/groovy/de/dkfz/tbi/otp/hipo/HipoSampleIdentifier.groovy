@@ -15,11 +15,6 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
     private final static String PIDREGEX = "([A-JL-RU-Z])(\\d\\d\\w)-(?:\\w\\w)?\\w\\w\\w(\\w)"
 
     @Override
-    boolean isForProject(String projectName) {
-        return projectName.matches("hipo_[A-JL-RU-Z]")
-    }
-
-    @Override
     boolean tryParsePid(String pid) {
         return pid =~ "^" + PIDREGEX + /$/
     }

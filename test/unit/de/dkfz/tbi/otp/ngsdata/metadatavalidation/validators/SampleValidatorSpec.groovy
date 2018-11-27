@@ -307,7 +307,7 @@ class SampleValidatorSpec extends Specification {
 
     private static SampleValidator withSampleIdentifierService(SampleValidator validator) {
         validator.sampleIdentifierService = [
-                parseSampleIdentifier: { String sampleIdentifier ->
+                parseSampleIdentifier: { String sampleIdentifier, Project project ->
                     Matcher matcher = PATTERN.matcher(sampleIdentifier)
                     if (matcher.matches()) {
                         return new DefaultParsedSampleIdentifier(matcher.group(1), matcher.group(2), matcher.group(3), sampleIdentifier)
