@@ -384,10 +384,8 @@ class MetadataImportService {
     private static void importDataFiles(MetadataValidationContext context, RunSegment runSegment, SeqTrack seqTrack, Collection<Row> seqTrackRows) {
         Map<Integer, Collection<Row>> seqTrackRowsByMateNumber =
                 seqTrackRows.groupBy { Integer.valueOf(extractMateNumber(it).value) }
-        assert seqTrackRows.size() == (
-                LibraryLayout.values().find { it.name() == seqTrack.seqType.libraryLayout }?.mateCount
-                        ?: seqTrackRowsByMateNumber.keySet().max()
-        )
+        assert seqTrackRows.size() == seqTrack.seqType.libraryLayout.mateCount
+
         seqTrackRowsByMateNumber.each { Integer mateNumber, List<Row> rows ->
             Row row = exactlyOneElement(rows)
             Path file = context.directoryStructure.getDataFilePath(context, row)

@@ -118,7 +118,7 @@ class DataFile implements Commentable, Entity {
         mateNumber nullable: true,  // Shall not be null, but legacy data exists
                 min: 1, validator: { val, obj ->
             if (val != null) {
-                Integer mateCount = LibraryLayout.values().find { it.name() == obj.seqTrack?.seqType?.libraryLayout }?.mateCount
+                Integer mateCount = obj.seqTrack?.seqType?.libraryLayout?.mateCount
                 if (mateCount != null && val > mateCount) {
                     return false
                 }
