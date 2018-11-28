@@ -1,5 +1,6 @@
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.qcTrafficLight.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -11,7 +12,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 // input area
 //----------------------
 
-String projectName
+String projectName = ""
 
 //script area
 //-----------------------------
@@ -20,6 +21,7 @@ assert projectName
 
 
 try {
+    // `flush: true` is intentionally left out at certain places to improve performance
     Project.withTransaction {
 
         Project project = exactlyOneElement(Project.findAllByName(projectName))
@@ -44,6 +46,8 @@ try {
         ConfigPerProjectAndSeqType.findAllByProject(project)*.delete(flush: true)
 
         UserProjectRole.findAllByProject(project)*.delete(flush: true)
+        QcThreshold.findAllByProject(project)*.delete(flush: true)
+        ProjectInfo.findAllByProject(project)*.delete(flush: true)
 
         /*
          * Finally delete the project

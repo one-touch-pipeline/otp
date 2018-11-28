@@ -12,14 +12,14 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 // input area
 //----------------------
 
-String projectName
+String projectName = ""
 
 //script area
 //-----------------------------
 
 assert projectName
 
-
+// `flush: true` is intentionally left out at certain places to improve performance
 Project.withTransaction {
 
     Project project = exactlyOneElement(Project.findAllByName(projectName))
