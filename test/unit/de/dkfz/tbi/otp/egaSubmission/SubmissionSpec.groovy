@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.domainfactory.SubmissionDomainFactory
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.domainFactory.submissions.ega.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import grails.test.mixin.Mock
-import spock.lang.Specification
+import de.dkfz.tbi.otp.utils.*
+import grails.test.mixin.*
+import spock.lang.*
 
 @Mock([
         AbstractMergedBamFile,
@@ -39,14 +39,14 @@ import spock.lang.Specification
         SoftwareTool,
         Submission,
 ])
-class SubmissionSpec extends Specification {
+class SubmissionSpec extends Specification implements EgaSubmissionFactory {
 
     void "test link Submission and files"() {
         given:
-        Submission submission = SubmissionDomainFactory.createSubmission()
-        BamFileSubmissionObject bamFileSubmissionObject = SubmissionDomainFactory.createBamFileSubmissionObject()
-        DataFileSubmissionObject dataFileSubmissionObject = SubmissionDomainFactory.createDataFileSubmissionObject()
-        SampleSubmissionObject sampleSubmissionObject = SubmissionDomainFactory.createSampleSubmissionObject()
+        Submission submission = createSubmission()
+        BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject()
+        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
 
         when:
         submission.addToBamFilesToSubmit(bamFileSubmissionObject)

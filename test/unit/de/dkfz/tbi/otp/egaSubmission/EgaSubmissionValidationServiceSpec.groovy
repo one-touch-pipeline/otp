@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.egaSubmission
 
-
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.domainfactory.*
+import de.dkfz.tbi.otp.domainFactory.submissions.ega.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.util.spreadsheet.*
 import grails.test.mixin.*
@@ -40,16 +39,16 @@ import spock.lang.*
         SoftwareTool,
         Submission,
 ])
-class EgaSubmissionValidationServiceSpec extends Specification {
+class EgaSubmissionValidationServiceSpec extends Specification implements EgaSubmissionFactory {
 
     private EgaSubmissionValidationService egaSubmissionValidationService = new EgaSubmissionValidationService()
 
     void "test validate rows"() {
         given:
-        Submission submission = SubmissionDomainFactory.createSubmission()
-        SampleSubmissionObject sampleSubmissionObject1 = SubmissionDomainFactory.createSampleSubmissionObject()
+        Submission submission = createSubmission()
+        SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject()
         submission.addToSamplesToSubmit(sampleSubmissionObject1)
-        SampleSubmissionObject sampleSubmissionObject2 = SubmissionDomainFactory.createSampleSubmissionObject()
+        SampleSubmissionObject sampleSubmissionObject2 = createSampleSubmissionObject()
         submission.addToSamplesToSubmit(sampleSubmissionObject2)
         List<String> sampleObjectId = [sampleSubmissionObject1.id as String, sampleSubmissionObject2.id as String]
         List<String> egaSampleAlias = ["abc", "dfg"]
@@ -64,10 +63,10 @@ class EgaSubmissionValidationServiceSpec extends Specification {
 
     void "test validate rows with less rows"() {
         given:
-        Submission submission = SubmissionDomainFactory.createSubmission()
-        SampleSubmissionObject sampleSubmissionObject1 = SubmissionDomainFactory.createSampleSubmissionObject()
+        Submission submission = createSubmission()
+        SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject()
         submission.addToSamplesToSubmit(sampleSubmissionObject1)
-        submission.addToSamplesToSubmit(SubmissionDomainFactory.createSampleSubmissionObject())
+        submission.addToSamplesToSubmit(createSampleSubmissionObject())
         List<String> sampleObjectId = [sampleSubmissionObject1.id as String]
         List<String> egaSampleAlias = ["abc"]
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ]
@@ -82,10 +81,10 @@ class EgaSubmissionValidationServiceSpec extends Specification {
 
     void "test validate rows with wrong samples"() {
         given:
-        Submission submission = SubmissionDomainFactory.createSubmission()
-        SampleSubmissionObject sampleSubmissionObject1 = SubmissionDomainFactory.createSampleSubmissionObject()
+        Submission submission = createSubmission()
+        SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject()
         submission.addToSamplesToSubmit(sampleSubmissionObject1)
-        List<String> sampleObjectId = [SubmissionDomainFactory.createSampleSubmissionObject().id as String]
+        List<String> sampleObjectId = [createSampleSubmissionObject().id as String]
         List<String> egaSampleAlias = ["abc"]
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
@@ -99,7 +98,7 @@ class EgaSubmissionValidationServiceSpec extends Specification {
 
     void "test getting identifier key from sample submission object"() {
         given:
-        SampleSubmissionObject sampleSubmissionObject = SubmissionDomainFactory.createSampleSubmissionObject()
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
         String string = sampleSubmissionObject.sample.individual.displayName +
                 sampleSubmissionObject.sample.sampleType.displayName +
                 sampleSubmissionObject.seqType.toString()
@@ -111,10 +110,10 @@ class EgaSubmissionValidationServiceSpec extends Specification {
     @Unroll
     void "test validate sample information form input"() {
         given:
-        SampleSubmissionObject sampleSubmissionObject1 = SubmissionDomainFactory.createSampleSubmissionObject(
+        SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject(
                 egaAliasName: "testAlias",
         )
-        SampleSubmissionObject sampleSubmissionObject2 = SubmissionDomainFactory.createSampleSubmissionObject()
+        SampleSubmissionObject sampleSubmissionObject2 = createSampleSubmissionObject()
         List<String> sampleObjectIds = ["${sampleSubmissionObject1.id}", "${sampleSubmissionObject2.id}"]
 
         when:
@@ -136,7 +135,7 @@ class EgaSubmissionValidationServiceSpec extends Specification {
     @Unroll
     void "test validate file type from input"() {
         given:
-        List<String> sampleObjectId = [SubmissionDomainFactory.createSampleSubmissionObject().id as String]
+        List<String> sampleObjectId = [createSampleSubmissionObject().id as String]
         List<String> egaSampleAlias = ["abc"]
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()

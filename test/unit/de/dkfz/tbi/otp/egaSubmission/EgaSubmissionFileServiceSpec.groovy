@@ -4,7 +4,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.domainfactory.*
+import de.dkfz.tbi.otp.domainFactory.submissions.ega.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -53,7 +53,7 @@ import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnNa
         SoftwareTool,
         Submission,
 ])
-class EgaSubmissionFileServiceSpec extends Specification {
+class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissionFactory {
 
     private EgaSubmissionFileService egaSubmissionFileService = new EgaSubmissionFileService()
 
@@ -63,8 +63,8 @@ class EgaSubmissionFileServiceSpec extends Specification {
 
     void "test generate csv content file"() {
         given:
-        SampleSubmissionObject sampleSubmissionObject1 = SubmissionDomainFactory.createSampleSubmissionObject()
-        SampleSubmissionObject sampleSubmissionObject2 = SubmissionDomainFactory.createSampleSubmissionObject()
+        SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject()
+        SampleSubmissionObject sampleSubmissionObject2 = createSampleSubmissionObject()
         List<String> sampleObjectId = [sampleSubmissionObject1.id as String, sampleSubmissionObject2.id as String]
         List<String> egaSampleAlias = [HelperUtils.uniqueString, HelperUtils.uniqueString]
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ, EgaSubmissionService.FileType.BAM]
@@ -92,8 +92,8 @@ class EgaSubmissionFileServiceSpec extends Specification {
 
     void "test read from file"() {
         given:
-        SampleSubmissionObject sampleSubmissionObject1 = SubmissionDomainFactory.createSampleSubmissionObject()
-        SampleSubmissionObject sampleSubmissionObject2 = SubmissionDomainFactory.createSampleSubmissionObject()
+        SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject()
+        SampleSubmissionObject sampleSubmissionObject2 = createSampleSubmissionObject()
         List<String> sampleObjectId = [sampleSubmissionObject1.id as String, sampleSubmissionObject2.id as String]
         List<String> egaSampleAlias = [HelperUtils.uniqueString, HelperUtils.uniqueString]
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ, EgaSubmissionService.FileType.BAM]
@@ -117,8 +117,8 @@ class EgaSubmissionFileServiceSpec extends Specification {
 
     void "test generate data files csv file"() {
         given:
-        Submission submission = SubmissionDomainFactory.createSubmission()
-        DataFileSubmissionObject dataFileSubmissionObject = SubmissionDomainFactory.createDataFileSubmissionObject()
+        Submission submission = createSubmission()
+        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
 
         when:
@@ -152,13 +152,13 @@ class EgaSubmissionFileServiceSpec extends Specification {
     void "test generate bam files csv file"() {
         given:
         egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
-        Submission submission = SubmissionDomainFactory.createSubmission()
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        SampleSubmissionObject sampleSubmissionObject = SubmissionDomainFactory.createSampleSubmissionObject(
+        Submission submission = createSubmission()
+        RoddyBamFile roddyBamFile = createBamFile()
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
                 sample: roddyBamFile.sample,
                 seqType: roddyBamFile.seqType,
         )
-        BamFileSubmissionObject bamFileSubmissionObject = SubmissionDomainFactory.createBamFileSubmissionObject(
+        BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject(
                 bamFile: roddyBamFile,
                 sampleSubmissionObject: sampleSubmissionObject,
         )
@@ -184,8 +184,8 @@ class EgaSubmissionFileServiceSpec extends Specification {
 
     void "test read ega file aliases from file with data file"() {
         given:
-        Submission submission = SubmissionDomainFactory.createSubmission()
-        DataFileSubmissionObject dataFileSubmissionObject = SubmissionDomainFactory.createDataFileSubmissionObject()
+        Submission submission = createSubmission()
+        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
         String content = egaSubmissionFileService.generateDataFilesCsvFile(submission)
         content = content.replace(",,", ",${dataFileSubmissionObject.egaAliasName},")
@@ -201,13 +201,13 @@ class EgaSubmissionFileServiceSpec extends Specification {
     void "test read ega file aliases from file with bam file"() {
         given:
         egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
-        Submission submission = SubmissionDomainFactory.createSubmission()
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
-        SampleSubmissionObject sampleSubmissionObject = SubmissionDomainFactory.createSampleSubmissionObject(
+        Submission submission = createSubmission()
+        RoddyBamFile roddyBamFile = createBamFile()
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
                 sample: roddyBamFile.sample,
                 seqType: roddyBamFile.seqType,
         )
-        BamFileSubmissionObject bamFileSubmissionObject = SubmissionDomainFactory.createBamFileSubmissionObject(
+        BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject(
                 bamFile: roddyBamFile,
                 sampleSubmissionObject: sampleSubmissionObject,
         )
@@ -228,11 +228,11 @@ class EgaSubmissionFileServiceSpec extends Specification {
         new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().absolutePath,
         ])
-        BamFileSubmissionObject bamFileSubmissionObject = SubmissionDomainFactory.createBamFileSubmissionObject()
-        Submission submission = SubmissionDomainFactory.createSubmission()
+        BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject()
+        Submission submission = createSubmission()
         bamFileSubmissionObject.bamFile.workPackage.bamFileInProjectFolder = bamFileSubmissionObject.bamFile
-        SampleSubmissionObject sampleSubmissionObject = SubmissionDomainFactory.createSampleSubmissionObject()
-        DataFileSubmissionObject dataFileSubmissionObject = SubmissionDomainFactory.createDataFileSubmissionObject()
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
+        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
         submission.addToSamplesToSubmit(sampleSubmissionObject)
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
         submission.addToBamFilesToSubmit(bamFileSubmissionObject)

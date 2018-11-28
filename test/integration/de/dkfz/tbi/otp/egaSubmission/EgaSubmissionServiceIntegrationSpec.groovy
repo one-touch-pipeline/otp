@@ -1,33 +1,32 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainfactory.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.domainFactory.submissions.ega.*
 import grails.test.spock.*
 import spock.lang.*
 
-class EgaSubmissionServiceIntegrationSpec extends IntegrationSpec {
+class EgaSubmissionServiceIntegrationSpec extends IntegrationSpec implements EgaSubmissionFactory {
 
     EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
 
     @Unroll
     void "test check file types with bam file"() {
         given:
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile(
+        RoddyBamFile roddyBamFile = createBamFile(
                 withdrawn: withdrawn,
                 fileOperationStatus: status,
         )
         SampleSubmissionObject sampleSubmissionObject
         if (withFile) {
-            sampleSubmissionObject = SubmissionDomainFactory.createSampleSubmissionObject(
+            sampleSubmissionObject = createSampleSubmissionObject(
                     sample: roddyBamFile.sample,
                     seqType: roddyBamFile.seqType,
             )
         } else {
-            sampleSubmissionObject = SubmissionDomainFactory.createSampleSubmissionObject()
+            sampleSubmissionObject = createSampleSubmissionObject()
         }
 
-        Submission submission = SubmissionDomainFactory.createSubmission(
+        Submission submission = createSubmission(
                 project: roddyBamFile.project
         )
         submission.addToSamplesToSubmit(sampleSubmissionObject)
