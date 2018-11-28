@@ -31,7 +31,6 @@ class ExecuteRoddyCommandServiceWithoutAutowireSpec extends Specification {
 
         when:
         String result = service.activateModulesForRoddyCommand()
-        println result
 
         then:
         expected == result
