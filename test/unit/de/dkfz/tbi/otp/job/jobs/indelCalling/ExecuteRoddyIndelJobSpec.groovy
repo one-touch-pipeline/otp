@@ -171,6 +171,8 @@ class ExecuteRoddyIndelJobSpec extends Specification {
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileDisease)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(bamFileControl)
 
+        DomainFactory.createMergingCriteriaLazy(project: bamFileDisease.mergingWorkPackage.project, seqType: bamFileDisease.mergingWorkPackage.seqType)
+
         bamFileDisease.mergingWorkPackage.bamFileInProjectFolder = bamFileDisease
         assert bamFileDisease.mergingWorkPackage.save(flush: true)
 

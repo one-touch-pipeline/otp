@@ -1323,6 +1323,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 []
         )
         // "existing" merge group
+        DomainFactory.createMergingCriteriaLazy(project: sharedSample.project, seqType: sharedSeqType)
         MergingWorkPackage mergePackageA = DomainFactory.createMergingWorkPackage([
                 libraryPreparationKit: null, // irrelevant for this test, don't even need to mock it
                 sample               : sharedSample,
@@ -1334,8 +1335,6 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         // "manually" add seqtrack with mismatching seqPlatformGroup
         mergePackageA.seqTracks.add(seqTrackB)
         mergePackageA.save()
-
-        DomainFactory.createMergingCriteriaLazy(project: sharedSample.project, seqType: sharedSeqType)
 
         when: "looking for B"
         List<MergingWorkPackageProcessingStatus> statuses = trackingService.fillInMergingWorkPackageProcessingStatuses([statusB])
@@ -1367,6 +1366,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 []
         )
         // "existing" merge group
+        DomainFactory.createMergingCriteriaLazy(project: sharedSample.project, seqType: sharedSeqType)
         MergingWorkPackage mergePackageA = DomainFactory.createMergingWorkPackage([
                 libraryPreparationKit: null, // irrelevant for this test, don't even need to mock it
                 sample               : sharedSample,
@@ -1378,8 +1378,6 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         // "manually" remove seqtrack with matching seqPlatformGroup
         mergePackageA.seqTracks.remove(seqTrackB)
         mergePackageA.save()
-
-        DomainFactory.createMergingCriteriaLazy(project: sharedSample.project, seqType: sharedSeqType)
 
         when: "looking for B"
         List<MergingWorkPackageProcessingStatus> statuses = trackingService.fillInMergingWorkPackageProcessingStatuses([statusB])

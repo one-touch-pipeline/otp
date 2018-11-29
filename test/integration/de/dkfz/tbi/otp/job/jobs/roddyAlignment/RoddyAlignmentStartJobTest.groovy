@@ -357,7 +357,9 @@ class RoddyAlignmentStartJobTest {
                 needsProcessing: true,
                 pipeline       : DomainFactory.createPanCanPipeline(),
         ])
-        mergingWorkPackage.seqTracks = [DomainFactory.createSeqTrack(mergingWorkPackage)]
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(mergingWorkPackage)
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
+        mergingWorkPackage.seqTracks = [seqTrack]
         mergingWorkPackage.save()
         return mergingWorkPackage
     }

@@ -1015,6 +1015,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with analysis, shows info"() {
         given:
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
         DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([:], [seqTracks: [seqTrack1, seqTrack11]])
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [seqType: DomainFactory.createSeqType().displayName], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [seqType: DomainFactory.createSeqType().displayName], 2)

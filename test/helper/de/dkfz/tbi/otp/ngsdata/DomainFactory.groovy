@@ -1722,10 +1722,10 @@ class DomainFactory {
             seqTrack = createSeqTrackWithOneDataFile(map, dataFileProperties)
         }
 
+        createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
+
         mergingWorkPackage.addToSeqTracks(seqTrack)
         mergingWorkPackage.save(flush: true, failOnError: true)
-
-        createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
         assert mergingWorkPackage.satisfiesCriteria(seqTrack)
         return seqTrack
