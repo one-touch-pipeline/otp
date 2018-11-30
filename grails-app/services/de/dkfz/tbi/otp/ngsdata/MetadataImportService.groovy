@@ -91,7 +91,13 @@ class MetadataImportService {
                 getDirectoryStructure(getDirectoryStructureBeanName(directoryStructureName)),
         )
         if (context.spreadsheet) {
-            metadataValidators*.validate(context)
+            Long hash = System.currentTimeMillis()
+            metadataValidators.each {
+                Long startTime = System.currentTimeMillis()
+                it.validate(context)
+                log.debug("finished ${it.getClass()} took ${System.currentTimeMillis() - startTime}ms validation started : ${hash}")
+
+            }
         }
         return context
     }
@@ -259,14 +265,17 @@ class MetadataImportService {
     }
 
     protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
+        log.debug('import started')
         RunSegment runSegment = new RunSegment(
                 align: align,
                 otrsTicket: ticketNumber ? trackingService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
                 importMode: importMode,
         )
         assert runSegment.save()
-
+        Long timeStarted = System.currentTimeMillis()
+        log.debug('runs stared')
         importRuns(context, runSegment, context.spreadsheet.dataRows)
+        log.debug("runs stopped took: ${System.currentTimeMillis() - timeStarted}")
 
         MetaDataFile metaDataFile = new MetaDataFile(
                 fileName: context.metadataFile.fileName.toString(),
@@ -278,7 +287,7 @@ class MetadataImportService {
 
         List<SamplePair> samplePairs = SamplePair.findMissingDiseaseControlSamplePairs()
         samplePairs*.save()
-
+        log.debug('import stopped')
         return metaDataFile
     }
 
@@ -295,14 +304,18 @@ class MetadataImportService {
                             RunDateParserService.parseDate('yyyy-MM-dd', uniqueColumnValue(rows, RUN_DATE))),
             )
 
+            Long timeStarted = System.currentTimeMillis()
+            log.debug('seqTracks started')
             importSeqTracks(context, runSegment, run, rows)
+            log.debug("seqTracks stopped took: ${System.currentTimeMillis() - timeStarted}")
         }
     }
 
     private void importSeqTracks(MetadataValidationContext context, RunSegment runSegment, Run run, Collection<Row> runRows) {
+        int amountOfRows = runRows.size()
         runRows.groupBy {
             MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
-        }.each { String laneId, List<Row> rows ->
+        }.eachWithIndex { String laneId, List<Row> rows, int index ->
             String projectName = uniqueColumnValue(rows, PROJECT)
             Project project = Project.getByNameOrNameInMetadataFiles(projectName)
             String ilseNumber = uniqueColumnValue(rows, ILSE_NO)
@@ -358,7 +371,10 @@ class MetadataImportService {
             SeqTrack seqTrack = (seqTypeName?.factory ?: SeqTrack.FACTORY).call(properties)
             assert seqTrack.save()
 
+            Long timeStarted = System.currentTimeMillis()
+            log.debug("dataFiles started ${index}/${amountOfRows}")
             importDataFiles(context, runSegment, seqTrack, rows)
+            log.debug("dataFiles stopped took: ${System.currentTimeMillis() - timeStarted}")
 
             boolean willBeAligned = seqTrackService.decideAndPrepareForAlignment(seqTrack)
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, willBeAligned)

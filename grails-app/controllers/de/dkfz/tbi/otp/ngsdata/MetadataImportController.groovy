@@ -81,12 +81,16 @@ class MetadataImportController {
                 it.metadataFile
             }
             if (allValid) {
+                log.debug("No problem")
                 if (validateAndImportResults.size() == 1) {
+                    log.debug("This should be the id to the details page: ${validateAndImportResults.first().metadataFile.runSegment.id}")
                     redirect(action: "details", id: validateAndImportResults.first().metadataFile.runSegment.id)
                 } else {
                     redirect(action: "multiDetails", params: [metaDataFiles: validateAndImportResults*.metadataFile*.id])
                 }
                 return
+            } else {
+                log.debug("There was a problem")
             }
         }
         flash.mvc = metadataValidationContexts
