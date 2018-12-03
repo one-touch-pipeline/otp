@@ -82,7 +82,6 @@ databaseChangeLog = {
 
     changeSet(author: "kosnac", id: "OTP-2899-SQL") {
         sqlFile(path: 'changelogs/2018/OTP-2899.sql')
-
     }
 
     changeSet(author: "wieset", id: "OTP-2968-SQL") {
@@ -91,5 +90,9 @@ databaseChangeLog = {
 
     changeSet(author: "klinga", id: "rename-columns-in-merging_criteria-SQL") {
         sqlFile(path: 'changelogs/2018/rename-columns-in-merging_criteria.sql')
+    }
+
+    changeSet(author: "strubelp", id: "index-on-datafile-md5sum") {
+        sqlFile(path: 'changelogs/2018/index-on-datafile-md5sum.sql')
     }
 }

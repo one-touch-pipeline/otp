@@ -165,6 +165,7 @@ class DataFile implements Commentable, Entity {
         runSegment index: "data_file_run_segment_idx"
         seqTrack index: "data_file_seq_track_idx"
         mergingLog index: "data_file_merging_log_idx"
+        md5sum index: 'data_file_md5sum_idx'
         alignmentLog index: "data_file_alignment_log_idx"
         fileType index: "data_file_file_type_idx"
         initialDirectory type: 'text'
