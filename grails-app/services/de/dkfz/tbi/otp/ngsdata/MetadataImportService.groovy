@@ -2,11 +2,13 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 import groovy.transform.*
@@ -48,6 +50,8 @@ class MetadataImportService {
     LibraryPreparationKitService libraryPreparationKitService
     SeqTypeService seqTypeService
     ConfigService configService
+    MailHelperService mailHelperService
+    ProcessingOptionService processingOptionService
 
     static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
@@ -157,6 +161,10 @@ class MetadataImportService {
 
                 assert targetFile.bytes == context.content
             } catch (Throwable t) {
+                String recipientsString = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
+                if (recipientsString) {
+                    mailHelperService.sendEmail("Error: Copying of metadatafile ${source} failed", "${t.getLocalizedMessage()}\n${t.getCause()}", recipientsString)
+                }
                 throw new RuntimeException("Copying of metadatafile ${source} failed", t)
             }
         }
