@@ -11,10 +11,8 @@ import de.dkfz.tbi.otp.utils.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 
-import java.nio.file.Files
-import java.nio.file.Path
+import java.nio.file.*
 
 @Component
 @Scope("prototype")
@@ -47,7 +45,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
 
 
     @Override
-    protected final NextAction maybeSubmit() throws Throwable {
+    protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
         final SeqTrack seqTrack = getProcessParameterObject()
         final Realm realm = fastqcDataFilesService.fastqcRealm(seqTrack)
         // create fastqc output directory
@@ -66,11 +64,11 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
                     assert dataFile.fileExists && dataFile.fileSize > 0L
                 }
                 createAndExecuteFastQcCommand(realm, dataFiles, directory)
-                return NextAction.WAIT_FOR_CLUSTER_JOBS
+                return AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
             } else {
                 createAndExecuteCopyCommand(realm, dataFiles, directory)
                 validateAndReadFastQcResult()
-                return NextAction.SUCCEED
+                return AbstractMultiJob.NextAction.SUCCEED
             }
         }
     }
@@ -114,14 +112,29 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
 
     private void createAndExecuteFastQcCommand(Realm realm, List<DataFile> dataFiles, File outDir) {
         dataFiles.each { dataFile ->
-            String rawSeq = lsdfFilesService.getFileFinalPath(dataFile)
+            String preWorkNonGZip = ""
+            String postWorkNonGZip = ""
+
+            String inputFileName = lsdfFilesService.getFileFinalPath(dataFile)
+
+            boolean isBz2 = inputFileName.endsWith('.bz2')
+            if (isBz2) {
+                String orgFileName = inputFileName
+                inputFileName = inputFileName[0..-5]
+                //bzip does not work for links, therefore pipes are used
+                preWorkNonGZip = "cat ${orgFileName} | bzip2 --decompress --keep --stdout > ${inputFileName}"
+                postWorkNonGZip = "rm -f ${inputFileName}"
+            }
+
             String fastqcCommand = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_FASTQC)
             String fastqcActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_FASTQC)
             String moduleLoader = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
             String command = """\
                     ${moduleLoader}
                     ${fastqcActivation}
-                    ${fastqcCommand} ${rawSeq} --noextract --nogroup -o ${outDir}
+                    ${preWorkNonGZip}
+                    ${fastqcCommand} ${inputFileName} --noextract --nogroup -o ${outDir}
+                    ${postWorkNonGZip}
                     chmod -R 440 ${outDir}/*.zip
                     """.stripIndent()
             clusterJobSchedulerService.executeJob(realm, command)

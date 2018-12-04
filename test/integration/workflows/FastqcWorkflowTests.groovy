@@ -21,9 +21,9 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     SeqCenter seqCenter
     SeqTrack seqTrack
 
-    @Before
-    void setUp() {
-        sourceFastq = new File(inputRootDirectory, "fastqFiles/fastqc/input_fastqc.fastq.gz")
+
+    void setUpWorkFlow(String fileExtension) {
+        sourceFastq = new File(inputRootDirectory, "fastqFiles/fastqc/input_fastqc.fastq.${fileExtension}")
         expectedFastqc = new File(inputRootDirectory, "fastqFiles/fastqc/asdf_fastqc.zip")
 
         Project project = Project.build(
@@ -51,8 +51,8 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         dataFile = DomainFactory.createSequenceDataFile(
                 fileExists: true,
                 fileSize: 1,
-                fileName: 'asdf.fastq.gz',
-                vbpFileName: 'asdf.fastq.gz',
+                fileName: "asdf.fastq.${fileExtension}",
+                vbpFileName: "asdf.fastq.${fileExtension}",
                 seqTrack: seqTrack,
                 run: run,
                 initialDirectory: "${ftpDir}/${run.name}",
@@ -64,6 +64,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
     @Test
     void testWorkflow_FastQcDataAvailable() {
+        setUpWorkFlow('gz')
         String initialPath = new File(lsdfFilesService.getFileInitialPath(dataFile)).parent
         String fastqcFileName = fastqcDataFilesService.fastqcFileName(dataFile)
 
@@ -78,6 +79,17 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
     @Test
     void testWorkflow_FastQcDataNotAvailable() {
+        setUpWorkFlow('gz')
+        execute()
+
+        checkExistenceOfResultsFiles()
+        validateFastqcProcessedFile()
+        validateFastQcFileContent()
+    }
+
+    @Test
+    void testWorkflow_FastQcDataNotAvailable_bzip2() {
+        setUpWorkFlow('bz2')
         execute()
 
         checkExistenceOfResultsFiles()

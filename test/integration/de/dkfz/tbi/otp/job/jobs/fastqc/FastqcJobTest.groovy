@@ -73,6 +73,8 @@ class FastqcJobTest {
     void testMaybeSubmit_FastQcResultsNotAvailable_executesFastQcCommand() {
         fastqcJob.clusterJobSchedulerService.metaClass.executeJob = { Realm inputRealm, String inputCommand ->
             assert inputCommand.contains("fastqc-0.10.1")
+            assert !inputCommand.contains("bzip2 --decompress --keep")
+            assert !inputCommand.contains("rm -f")
             return 'pbsJobId'
         }
 
@@ -85,6 +87,24 @@ class FastqcJobTest {
         fastqcJob.maybeSubmit()
     }
 
+    @Test
+    void testMaybeSubmit_FastQcResultsNotAvailableAndDatafileIsBzip_executesFastQcCommandForBzip() {
+        dataFile.vbpFileName = dataFile.fileName = 'file.bz2'
+        fastqcJob.clusterJobSchedulerService.metaClass.executeJob = { Realm inputRealm, String inputCommand ->
+            assert inputCommand.contains("fastqc-0.10.1")
+            assert inputCommand.contains("bzip2 --decompress --keep")
+            assert inputCommand.contains("rm -f")
+            return 'pbsJobId'
+        }
+
+        fastqcJob.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm inputRealm, String command ->
+            assert command.contains("umask 027; mkdir -p -m 2750")
+            assert !command.contains("cp ")
+            return new LocalShellHelper.ProcessOutput('','',0)
+        }
+
+        fastqcJob.maybeSubmit()
+    }
 
     @Test
     void testMaybeSubmit_FastQcResultsAvailable_executesCopyCommand() {
