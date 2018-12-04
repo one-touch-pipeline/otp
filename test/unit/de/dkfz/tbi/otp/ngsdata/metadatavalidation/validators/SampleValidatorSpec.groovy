@@ -88,9 +88,9 @@ class SampleValidatorSpec extends Specification {
                 "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
         Individual individual = DomainFactory.createIndividual(pid: 'Y')
         Collection<Problem> expectedProblems = [
-                new Problem([context.spreadsheet.dataRows[0].cells[0]] as Set, Level.ERROR,
+                new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, Level.ERROR,
                         "Sample identifier '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X', but no project with that name is registered in OTP.", "At least one sample identifier is not registered in OTP. It looks like it belongs to a project not registered in OTP."),
-                new Problem([context.spreadsheet.dataRows[0].cells[0]] as Set, Level.ERROR,
+                new Problem([context.spreadsheet.dataRows[0].cells[0], context.spreadsheet.dataRows[0].cells[1]] as Set, Level.ERROR,
                         "Sample identifier '${SAMPLE_Z}' is not registered in OTP. It looks like it belongs to project 'X' and individual 'Y', but individual 'Y' is already registered in OTP with project '${individual.project.name}'.", "At least one sample identifier is not registered in OTP. It looks like it belongs to a specific project and individual, but this individual is already registered in OTP with another project."),
         ]
 
@@ -98,7 +98,7 @@ class SampleValidatorSpec extends Specification {
         validator.validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        assertContainSame(context.problems, expectedProblems)
     }
 
     void 'validate, when identifier is not in DB but parseable and individual belongs to different project, adds error'() {
@@ -208,7 +208,7 @@ class SampleValidatorSpec extends Specification {
         validator.validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        assertContainSame(context.problems, expectedProblems)
     }
 
     void 'validate, when all known identifiers belong to the same project, adds no warning about different projects'() {
@@ -231,7 +231,7 @@ class SampleValidatorSpec extends Specification {
         validator.validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        assertContainSame(context.problems, expectedProblems)
     }
 
     void 'validate, when PROJECT column is missing and all identifiers are known and belong to the same project, adds info'() {

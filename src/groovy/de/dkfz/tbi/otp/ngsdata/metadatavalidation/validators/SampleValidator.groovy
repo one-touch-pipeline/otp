@@ -29,7 +29,16 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
 
     @Override
     List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SAMPLE_ID.name()]
+        return [SAMPLE_ID.name(), PROJECT.name()]
+    }
+
+    @Override
+    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
+        if (columnTitle == PROJECT.name()) {
+            return true
+        }
+        mandatoryColumnMissing(context, columnTitle)
+        return false
     }
 
     @Override
