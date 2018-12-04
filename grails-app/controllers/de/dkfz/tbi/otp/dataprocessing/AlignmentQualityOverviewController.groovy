@@ -82,6 +82,14 @@ class AlignmentQualityOverviewController {
             'alignment.quality.date',
     ].asImmutable()
 
+    private static final List<String> supportedSeqTypes = [
+            SeqTypeNames.WHOLE_GENOME.seqTypeName,
+            SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName,
+            SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName,
+            SeqTypeNames.CHIP_SEQ.seqTypeName,
+            SeqTypeNames.EXOME.seqTypeName,
+            SeqTypeNames.RNA.seqTypeName,
+    ].asImmutable()
 
     OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
 
@@ -114,7 +122,9 @@ class AlignmentQualityOverviewController {
 
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
-        List<SeqType> seqTypes = seqTypeService.alignableSeqTypesByProject(project)
+        List<SeqType> seqTypes = seqTypeService.alignableSeqTypesByProject(project).findAll {
+            it.name in supportedSeqTypes
+        }
 
         SeqType seqType = (cmd.seqType && seqTypes.contains(cmd.seqType)) ? cmd.seqType : seqTypes[0]
 
