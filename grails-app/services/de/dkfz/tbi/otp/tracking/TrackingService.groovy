@@ -11,6 +11,7 @@ import de.dkfz.tbi.otp.tracking.ProcessingStatus.Done
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import de.dkfz.tbi.otp.user.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import org.springframework.security.access.prepost.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
@@ -113,6 +114,7 @@ class TrackingService {
 
     void processFinished(Set<SeqTrack> seqTracks) {
         SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()
+        LogThreadLocal.getThreadLog()?.debug("SPD: ${samplePairDiscovery}; OtrsTickets: ${findAllOtrsTickets(seqTracks)}; SeqTracks: ${seqTracks*.id}")
         for (OtrsTicket ticket : findAllOtrsTickets(seqTracks)) {
             setFinishedTimestampsAndNotify(ticket, samplePairDiscovery)
         }
@@ -135,14 +137,17 @@ class TrackingService {
                 anythingJustCompleted = true
                 ticket."${step}Finished" = now
                 sendCustomerNotification(ticket, status, step)
+                LogThreadLocal.getThreadLog()?.info("OTRS Ticket: ${ticket.ticketNumber}: ${step}")
             }
             if (stepStatus.mightDoMore) {
                 mightDoMore = true
             }
         }
         if (anythingJustCompleted) {
+            LogThreadLocal.getThreadLog()?.debug("if anythingJustCompleted")
             sendOperatorNotification(ticket, seqTracks, status, !mightDoMore)
             if (!mightDoMore) {
+                LogThreadLocal.getThreadLog()?.debug("if !mightDoMore")
                 ticket.finalNotificationSent = true
             }
             assert ticket.save(flush: true)
