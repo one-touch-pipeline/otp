@@ -196,7 +196,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ].flatten()
     }
 
-    static List<SeqType> getSingleCellAlignableSeqTypes() {
+    static List<SeqType> getCellRangerAlignableSeqTypes() {
         return [
                 get10xSingleCellRnaSeqType(),
         ].flatten()
@@ -206,7 +206,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         return [
                 getDefaultOtpAlignableSeqTypes(),
                 getRoddyAlignableSeqTypes(),
-                getSingleCellAlignableSeqTypes(),
+                getCellRangerAlignableSeqTypes(),
         ].flatten().unique()
     }
 

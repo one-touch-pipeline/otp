@@ -252,7 +252,7 @@
                 <h3><g:message code="projectOverview.alignmentInformation.configureCellRanger"/></h3>
                 <div class="show_button">
                     <ul>
-                        <g:each in="${singleCellSeqTypes}" var="seqType">
+                        <g:each in="${cellRangerSeqTypes}" var="seqType">
                             <li>
                                 <g:link controller='configureCellRangerPipeline' action='index' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
                                     ${seqType.displayNameWithLibraryLayout}
