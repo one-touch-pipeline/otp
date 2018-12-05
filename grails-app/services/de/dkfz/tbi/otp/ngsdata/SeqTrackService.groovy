@@ -487,8 +487,8 @@ AND entry.value = :value
         }.unique().findAll()
     }
 
-    List<SeqTrack> seqTracksReadyToInstall(ProcessingPriority minPriority) {
-        return SeqTrack.createCriteria().list {
+    SeqTrack seqTrackReadyToInstall(ProcessingPriority minPriority) {
+        return SeqTrack.createCriteria().get {
             eq('dataInstallationState', SeqTrack.DataProcessingState.NOT_STARTED)
             sample {
                 individual {
@@ -499,6 +499,7 @@ AND entry.value = :value
                 }
             }
             order('id')
+            maxResults(1)
         }
     }
 }

@@ -15,7 +15,7 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
     DataSource dataSource
 
     @Unroll
-    void "test seqTracksReadyToInstall"() {
+    void "test seqTrackReadyToInstall"() {
         given:
         SeqTrackService seqTrackService = new SeqTrackService([dataSource: dataSource])
 
@@ -36,18 +36,17 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         seqTrack2.project.processingPriority = priority.priority
 
         when:
-        List<String> laneIds = seqTrackService.seqTracksReadyToInstall(inputPriority)*.laneId
+        String laneId = seqTrackService.seqTrackReadyToInstall(inputPriority)?.laneId
 
         then:
-        expectedLaneIds == laneIds
+        expectedLaneId == laneId
 
         where:
-        state       | priority                              | inputPriority                 || expectedLaneIds
-        UNKNOWN     | ProcessingPriority.NORMAL             | ProcessingPriority.NORMAL     || []
-        NOT_STARTED | ProcessingPriority.NORMAL             | ProcessingPriority.NORMAL     || ["1", "2"]
-        NOT_STARTED | ProcessingPriority.FAST_TRACK         | ProcessingPriority.NORMAL     || ["2", "1"]
-        NOT_STARTED | ProcessingPriority.FAST_TRACK         | ProcessingPriority.FAST_TRACK || ["2"]
-
+        state       | priority                              | inputPriority                 || expectedLaneId
+        UNKNOWN     | ProcessingPriority.NORMAL             | ProcessingPriority.NORMAL     || null
+        NOT_STARTED | ProcessingPriority.NORMAL             | ProcessingPriority.NORMAL     || "1"
+        NOT_STARTED | ProcessingPriority.FAST_TRACK         | ProcessingPriority.NORMAL     || "2"
+        NOT_STARTED | ProcessingPriority.FAST_TRACK         | ProcessingPriority.FAST_TRACK || "2"
     }
 
     void "getSeqTrackReadyForFastqcProcessing basic lookup"() {
