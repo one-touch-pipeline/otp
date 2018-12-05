@@ -51,7 +51,6 @@ trait CellRangerFactory implements IsAlignment {
                 [
                         workDirectoryName  : "singleCell_${nextId}",
                         identifier         : SingleCellBamFile.nextIdentifier(workPackage),
-                        type               : AbstractBamFile.BamType.MDUP,
                         fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
                         fileSize           : 10000,
                 ], properties)

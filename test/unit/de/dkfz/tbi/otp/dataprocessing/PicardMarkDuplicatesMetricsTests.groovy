@@ -13,9 +13,7 @@ class PicardMarkDuplicatesMetricsTests {
 
     @Test
     void testMetricsClassEmpty() {
-        AbstractBamFile bamFile = new MockAbstractBamFile(
-                        type: AbstractBamFile.BamType.SORTED
-                        )
+        AbstractBamFile bamFile = new MockAbstractBamFile()
         bamFile.save(flush: true)
 
         PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = new PicardMarkDuplicatesMetrics(
@@ -28,9 +26,7 @@ class PicardMarkDuplicatesMetricsTests {
 
     @Test
     void testLibraryEmpty() {
-        AbstractBamFile bamFile = new MockAbstractBamFile(
-                        type: AbstractBamFile.BamType.SORTED
-                        )
+        AbstractBamFile bamFile = new MockAbstractBamFile()
         bamFile.save(flush: true)
 
         PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = new PicardMarkDuplicatesMetrics(
@@ -53,9 +49,7 @@ class PicardMarkDuplicatesMetricsTests {
 
     @Test
     void testAllCorrect() {
-        AbstractBamFile bamFile = new MockAbstractBamFile(
-                        type: AbstractBamFile.BamType.SORTED
-                        )
+        AbstractBamFile bamFile = new MockAbstractBamFile()
         bamFile.save(flush: true)
 
         PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = new PicardMarkDuplicatesMetrics(

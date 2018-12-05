@@ -10,6 +10,7 @@ class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParam
     ]
 
     static constraints = {
+        type validator: { it == BamType.SORTED }
         alignmentPass nullable: false, unique: true, validator: { AlignmentPass alignmentPass ->
             return alignmentPass.referenceGenome != null
         }

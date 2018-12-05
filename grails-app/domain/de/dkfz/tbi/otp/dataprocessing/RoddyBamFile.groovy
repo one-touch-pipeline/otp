@@ -46,7 +46,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     String workDirectoryName
 
     static constraints = {
-        type validator: { true }
         seqTracks minSize: 1, validator: { val, obj, errors ->
             obj.isConsistentAndContainsNoWithdrawnData().each {
                 errors.reject(null, it)

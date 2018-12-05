@@ -16,6 +16,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
     ]
 
     static constraints = {
+        type validator: { it == BamType.MDUP }
         mergingPass nullable: false, unique: true
         workPackage validator: { val, obj ->
             val.id == obj.mergingSet.mergingWorkPackage.id &&

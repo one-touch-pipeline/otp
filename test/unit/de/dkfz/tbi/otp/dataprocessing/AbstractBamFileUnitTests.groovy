@@ -12,53 +12,14 @@ class AbstractBamFileUnitTests {
 
     @Test
     void testSave() {
-        AbstractBamFile bamFile = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
-        Assert.assertTrue(bamFile.validate())
-        bamFile.save(flush: true)
-    }
-
-    @Test
-    void testhasMetricsFileTrueBamTypeSorted() {
-        AbstractBamFile bamFile = new MockAbstractBamFile(
-                type: AbstractBamFile.BamType.SORTED,
-                hasMetricsFile: true
-                )
-        Assert.assertFalse(bamFile.validate())
-    }
-
-    @Test
-    void testhasMetricsFileFalseBamTypeSorted() {
-        AbstractBamFile bamFile = new MockAbstractBamFile(
-                type: AbstractBamFile.BamType.SORTED,
-                hasMetricsFile: false
-                )
-        Assert.assertTrue(bamFile.validate())
-        bamFile.save(flush: true)
-    }
-
-    @Test
-    void testhasMetricsFileTrueBamTypeRmdup() {
-        AbstractBamFile bamFile = new MockAbstractBamFile(
-                type: AbstractBamFile.BamType.RMDUP,
-                hasMetricsFile: true
-                )
-        Assert.assertTrue(bamFile.validate())
-        bamFile.save(flush: true)
-    }
-
-    @Test
-    void testhasMetricsFileFalseBamTypeRmdup() {
-        AbstractBamFile bamFile = new MockAbstractBamFile(
-                type: AbstractBamFile.BamType.RMDUP,
-                hasMetricsFile: false
-                )
+        AbstractBamFile bamFile = new MockAbstractBamFile()
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
     }
 
     @Test
     void testSaveCoverageNotNull() {
-        AbstractBamFile bamFile = new MockAbstractBamFile(type: AbstractBamFile.BamType.SORTED)
+        AbstractBamFile bamFile = new MockAbstractBamFile()
         bamFile.coverage = 30.0
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
@@ -68,7 +29,6 @@ class AbstractBamFileUnitTests {
     void testWithdraw_ChangeStatusFromNeedsProcessingToDeclared() {
         AbstractBamFile bamFile = new MockAbstractBamFile(
                 status: AbstractBamFile.State.NEEDS_PROCESSING,
-                type: AbstractBamFile.BamType.MDUP,
         )
         assert bamFile.status == AbstractBamFile.State.NEEDS_PROCESSING
 

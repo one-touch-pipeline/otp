@@ -11,8 +11,7 @@ class AbstractFileSystemBamFileTests {
 
     @Test
     void testSave() {
-        AbstractFileSystemBamFile bamFile = new MockAbstractFileSystemBamFile(
-                type: AbstractBamFile.BamType.SORTED)
+        AbstractFileSystemBamFile bamFile = new MockAbstractFileSystemBamFile()
         Assert.assertTrue(bamFile.validate())
         bamFile.save(flush: true)
     }
@@ -20,8 +19,7 @@ class AbstractFileSystemBamFileTests {
     @Test
     void testContraints() {
         // dateCreated is not null
-        AbstractFileSystemBamFile bamFile = new MockAbstractFileSystemBamFile(
-                type: AbstractBamFile.BamType.SORTED)
+        AbstractFileSystemBamFile bamFile = new MockAbstractFileSystemBamFile()
         bamFile.dateCreated = null
         // this check must fail but it does not:
         // probably grails sets value of this filed before the validation

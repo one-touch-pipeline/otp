@@ -143,14 +143,6 @@ class QualityAssessmentMergedPassServiceTests {
     }
 
     @Test
-    void testCreatePassBamTypeWrong() {
-        processedMergedBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
-        processedMergedBamFile.type = BamType.SORTED
-        assert processedMergedBamFile.save(flush: true)
-        assertNull(qualityAssessmentMergedPassService.createPass(ProcessingPriority.NORMAL))
-    }
-
-    @Test
     void testCreatePassWithdrawn() {
         processedMergedBamFile.qualityAssessmentStatus = QaProcessingStatus.NOT_STARTED
         processedMergedBamFile.withdrawn = true
