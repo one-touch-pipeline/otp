@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 @Component('PanCanStartJob')
 @Scope('singleton')
-class PanCanStartJob extends RoddyAlignmentStartJob {
+class PanCanStartJob extends AbstractRoddyAlignmentStartJob {
 
     @Override
     List<SeqType> getSeqTypes() {

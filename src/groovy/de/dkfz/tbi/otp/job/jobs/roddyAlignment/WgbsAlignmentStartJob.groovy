@@ -1,14 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
 
 @Component('WgbsAlignmentStartJob')
 @Scope('singleton')
-class WgbsAlignmentStartJob extends RoddyAlignmentStartJob {
+class WgbsAlignmentStartJob extends AbstractRoddyAlignmentStartJob {
 
     @Override
     List<SeqType> getSeqTypes() {

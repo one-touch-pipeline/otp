@@ -4,9 +4,10 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import org.junit.*
@@ -14,10 +15,10 @@ import org.springframework.beans.factory.annotation.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
-class RoddyAlignmentStartJobTest {
+class AbstractAlignmentStartJobTest {
 
     @Autowired
-    TestRoddyAlignmentStartJob testRoddyAlignmentStartJob
+    TestAbstractAlignmentStartJob testAbstractAlignmentStartJob
 
     SchedulerService schedulerService
 
@@ -54,7 +55,7 @@ class RoddyAlignmentStartJobTest {
         doesNotNeedProcessing.needsProcessing = false
         assert doesNotNeedProcessing.save(flush: true, failOnError: true)
 
-        assert [highPriority, lowPriority] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.NORMAL)
+        assert [highPriority, lowPriority] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.NORMAL)
     }
 
     @Test
@@ -63,7 +64,7 @@ class RoddyAlignmentStartJobTest {
         mwp.seqTracks = null
         mwp.save()
 
-        assert [] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
+        assert [] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
     }
 
     @Test
@@ -75,7 +76,7 @@ class RoddyAlignmentStartJobTest {
                 withdrawn: false,
         ])
 
-        assert [] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
+        assert [] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
     }
 
     @Test
@@ -87,7 +88,7 @@ class RoddyAlignmentStartJobTest {
                 withdrawn: true,
         ])
 
-        assert [roddyBamFile.workPackage] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
+        assert [roddyBamFile.workPackage] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
     }
 
     @Test
@@ -98,35 +99,35 @@ class RoddyAlignmentStartJobTest {
                 withdrawn: false,
         ])
 
-        assert [roddyBamFile.workPackage] == testRoddyAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
+        assert [roddyBamFile.workPackage] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
     }
 
     @Test
     void testIsDataInstallationWFInProgress_WhenSeqTrackInStateFinished_ShouldReturnFalse() {
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.FINISHED)
 
-        assert false == RoddyAlignmentStartJob.isDataInstallationWFInProgress(mwp)
+        assert false == AbstractAlignmentStartJob.isDataInstallationWFInProgress(mwp)
     }
 
     @Test
     void testIsDataInstallationWFInProgress_WhenSeqTrackInProgress_ShouldReturnTrue() {
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.IN_PROGRESS)
 
-        assert RoddyAlignmentStartJob.isDataInstallationWFInProgress(mwp)
+        assert AbstractAlignmentStartJob.isDataInstallationWFInProgress(mwp)
     }
 
     @Test
     void testIsDataInstallationWFInProgress_WhenSeqTrackInStateNotStarted_ShouldReturnTrue() {
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.NOT_STARTED)
 
-        assert RoddyAlignmentStartJob.isDataInstallationWFInProgress(mwp)
+        assert AbstractAlignmentStartJob.isDataInstallationWFInProgress(mwp)
     }
 
     @Test
     void testFindBamFileInProjectFolder_WhenNoRoddyBamFile_ShouldReturnNull() {
         MergingWorkPackage mwp = createMergingWorkPackage()
 
-        assert null == RoddyAlignmentStartJob.findBamFileInProjectFolder(mwp)
+        assert null == AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp)
     }
 
     @Test
@@ -146,7 +147,7 @@ class RoddyAlignmentStartJobTest {
                 config: roddyBamFile.config,
         ])
 
-        assert null == RoddyAlignmentStartJob.findBamFileInProjectFolder(mwp)
+        assert null == AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp)
     }
 
     @Test
@@ -166,7 +167,7 @@ class RoddyAlignmentStartJobTest {
 
         mwp.bamFileInProjectFolder = roddyBamFile
 
-        assert null == RoddyAlignmentStartJob.findBamFileInProjectFolder(mwp)
+        assert null == AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp)
     }
 
     @Test
@@ -186,12 +187,12 @@ class RoddyAlignmentStartJobTest {
 
         mwp.bamFileInProjectFolder = roddyBamFile
 
-        assert roddyBamFile == RoddyAlignmentStartJob.findBamFileInProjectFolder(mwp)
+        assert roddyBamFile == AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp)
     }
 
     @Test
     void testFindUsableBaseBamFile_WhenMergingWorkPackageHasNoBamFile_ShouldReturnNull() {
-        assert null == testRoddyAlignmentStartJob.findUsableBaseBamFile(DomainFactory.createMergingWorkPackage())
+        assert null == testAbstractAlignmentStartJob.findUsableBaseBamFile(DomainFactory.createMergingWorkPackage())
     }
 
     @Test
@@ -204,7 +205,7 @@ class RoddyAlignmentStartJobTest {
 
         mwp.bamFileInProjectFolder = bamFile
 
-        assert null == testRoddyAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage)
+        assert null == testAbstractAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage)
     }
 
     @Test
@@ -216,7 +217,7 @@ class RoddyAlignmentStartJobTest {
 
         mwp.bamFileInProjectFolder = bamFile
 
-        assert bamFile == testRoddyAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage)
+        assert bamFile == testAbstractAlignmentStartJob.findUsableBaseBamFile(bamFile.mergingWorkPackage)
     }
 
     @Test
@@ -242,7 +243,7 @@ class RoddyAlignmentStartJobTest {
         mwp.save(flush: true, failOnError: true)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
-        RoddyBamFile rbf = testRoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
+        RoddyBamFile rbf = testAbstractAlignmentStartJob.createBamFile(mwp, null)
 
         assertRoddyBamFileConsistencyWithMwp(rbf, mwp)
         assert null == rbf.baseBamFile
@@ -270,7 +271,7 @@ class RoddyAlignmentStartJobTest {
 
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
-        RoddyBamFile rbf = testRoddyAlignmentStartJob.createRoddyBamFile(mwp, baseBamFile)
+        RoddyBamFile rbf = testAbstractAlignmentStartJob.createBamFile(mwp, baseBamFile)
 
         assertRoddyBamFileConsistencyWithMwp(rbf, mwp)
         assert baseBamFile == rbf.baseBamFile
@@ -290,7 +291,7 @@ class RoddyAlignmentStartJobTest {
         assert 0 == RoddyWorkflowConfig.list().size()
 
         assert TestCase.shouldFail (AssertionError) {
-            testRoddyAlignmentStartJob.createRoddyBamFile(mwp, null)
+            testAbstractAlignmentStartJob.createBamFile(mwp, null)
         }.contains('RoddyWorkflowConfig')
     }
 
@@ -301,7 +302,7 @@ class RoddyAlignmentStartJobTest {
         assert mwp.save(flush: true, failOnError: true)
 
         withJobExecutionPlan {
-            testRoddyAlignmentStartJob.startRoddyAlignment()
+            testAbstractAlignmentStartJob.startAlignment()
         }
 
         assert mwp.needsProcessing == true
@@ -316,7 +317,7 @@ class RoddyAlignmentStartJobTest {
         DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
 
         withJobExecutionPlan {
-            testRoddyAlignmentStartJob.startRoddyAlignment()
+            testAbstractAlignmentStartJob.startAlignment()
         }
 
         assert mwp.needsProcessing == false
@@ -335,7 +336,7 @@ class RoddyAlignmentStartJobTest {
         DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
 
         withJobExecutionPlan {
-            testRoddyAlignmentStartJob.startRoddyAlignment()
+            testAbstractAlignmentStartJob.startAlignment()
         }
 
         assert otrsTicket.alignmentStarted != null
@@ -376,10 +377,10 @@ class RoddyAlignmentStartJobTest {
             JobExecutionPlan jep = JobExecutionPlan.build(enabled: true)
             jep.firstJob = JobDefinition.build(plan: jep)
             assert jep.save(failOnError: true)
-            testRoddyAlignmentStartJob.jep = jep
+            testAbstractAlignmentStartJob.jep = jep
             closure()
         } finally {
-            testRoddyAlignmentStartJob.jep = null
+            testAbstractAlignmentStartJob.jep = null
         }
     }
 }

@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.test.spock.*
 
-class RoddyAlignmentStartJobIntegrationSpec extends IntegrationSpec {
+class AbstractAlignmentStartJobIntegrationSpec extends IntegrationSpec {
 
     def "restart creates new Process on new RoddyBamFile"() {
         given:
@@ -21,7 +22,7 @@ class RoddyAlignmentStartJobIntegrationSpec extends IntegrationSpec {
         failedInstance.mergingWorkPackage.save(flush: true)
 
 
-        RoddyAlignmentStartJob roddyAlignmentStartJob = new PanCanStartJob()
+        AbstractAlignmentStartJob roddyAlignmentStartJob = new PanCanStartJob()
         roddyAlignmentStartJob.schedulerService = Mock(SchedulerService){
             1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, ProcessParameter processParameterSecond ->
                 Process processSecond = DomainFactory.createProcess(

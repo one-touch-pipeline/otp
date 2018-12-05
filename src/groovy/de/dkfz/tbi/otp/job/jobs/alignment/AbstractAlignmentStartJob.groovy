@@ -1,37 +1,36 @@
-package de.dkfz.tbi.otp.job.jobs.roddyAlignment
+package de.dkfz.tbi.otp.job.jobs.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import org.springframework.scheduling.annotation.*
 
-abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements RestartableStartJob {
+abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements RestartableStartJob {
 
     @Override
     @Scheduled(fixedDelay = 60000l)
     void execute() {
         doWithPersistenceInterceptor {
-            startRoddyAlignment()
+            startAlignment()
         }
     }
 
-    protected void startRoddyAlignment() {
+    protected void startAlignment() {
         ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
         if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
             return
         }
 
-        RoddyBamFile.withTransaction {
+        AbstractMergedBamFile.withTransaction {
             MergingWorkPackage mergingWorkPackage = findProcessableMergingWorkPackages(minPriority).find { !isDataInstallationWFInProgress(it) }
             if (mergingWorkPackage) {
                 mergingWorkPackage.needsProcessing = false
                 assert mergingWorkPackage.save(failOnError: true)
-                RoddyBamFile roddyBamFile = createRoddyBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
-                trackingService.setStartedForSeqTracks(roddyBamFile.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
-                createProcess(roddyBamFile)
+                AbstractMergedBamFile bamFile = createBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
+                trackingService.setStartedForSeqTracks(bamFile.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
+                createProcess(bamFile)
             }
         }
     }
@@ -40,16 +39,16 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
     Process restart(Process process) {
         assert process
 
-        RoddyBamFile failedInstance = (RoddyBamFile)process.getProcessParameterObject()
+        AbstractMergedBamFile failedInstance = (AbstractMergedBamFile)process.getProcessParameterObject()
 
-        RoddyBamFile.withTransaction {
+        AbstractMergedBamFile.withTransaction {
             failedInstance.withdraw()
             MergingWorkPackage mergingWorkPackage = failedInstance.workPackage
             mergingWorkPackage.needsProcessing = false
-            RoddyBamFile roddyBamFile = createRoddyBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
+            AbstractMergedBamFile bamFile = createBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
 
-            assert roddyBamFile.save()
-            return createProcess(roddyBamFile)
+            assert bamFile.save()
+            return createProcess(bamFile)
         }
     }
 
@@ -61,7 +60,7 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
                 'WHERE needsProcessing = true ' +
                 'AND seqType IN (:seqTypes)' +
                 'AND NOT EXISTS ( ' +
-                    'FROM RoddyBamFile ' +
+                    'FROM AbstractMergedBamFile ' +
                     'WHERE workPackage = mwp ' +
                     'AND fileOperationStatus <> :processed ' +
                     'AND withdrawn = false ' +
@@ -77,19 +76,19 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
         )
     }
 
-    static boolean isDataInstallationWFInProgress(MergingWorkPackage mergingWorkPackage) {
+    private static boolean isDataInstallationWFInProgress(MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
         mergingWorkPackage.seqTracks.find {
             it.dataInstallationState != SeqTrack.DataProcessingState.FINISHED
         }
     }
 
-    static RoddyBamFile findBamFileInProjectFolder(MergingWorkPackage mergingWorkPackage) {
+    private static AbstractMergedBamFile findBamFileInProjectFolder(MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
         // Find the latest BAM file which moving to the final destination has been initiated for, regardless of whether
         // the moving was successful or not.
-        RoddyBamFile bamFile = RoddyBamFile.find(
-                'FROM RoddyBamFile ' +
+        AbstractMergedBamFile bamFile = AbstractMergedBamFile.find(
+                'FROM AbstractMergedBamFile ' +
                 'WHERE fileOperationStatus IN (:inprogress, :processed) ' +
                 'AND workPackage = :mergingWorkPackage ' +
                 'ORDER BY identifier DESC',
@@ -109,16 +108,16 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
     }
 
     /**
-     * Returns the {@link RoddyBamFile} which
+     * Returns the {@link AbstractMergedBamFile} which
      * <ul>
      *     <li>is {@link AbstractMergedBamFile.FileOperationStatus#PROCESSED}</li>
-     *     <li>has not been overwritten by a later {@link RoddyBamFile}</li>
+     *     <li>has not been overwritten by a later {@link AbstractMergedBamFile}</li>
      *     <li>is not withdrawn</li>
      * </ul>
      */
-    RoddyBamFile findUsableBaseBamFile(MergingWorkPackage mergingWorkPackage) {
+    protected AbstractMergedBamFile findUsableBaseBamFile(MergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
-        RoddyBamFile bamFile = findBamFileInProjectFolder(mergingWorkPackage)
+        AbstractMergedBamFile bamFile = findBamFileInProjectFolder(mergingWorkPackage)
         if (!bamFile || bamFile.withdrawn) {
             return null
         } else {
@@ -126,36 +125,28 @@ abstract class RoddyAlignmentStartJob extends AbstractStartJobImpl implements Re
         }
     }
 
-    RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage, RoddyBamFile baseBamFile) {
+    AbstractMergedBamFile createBamFile(MergingWorkPackage mergingWorkPackage, AbstractMergedBamFile baseBamFile) {
         assert mergingWorkPackage
-        RoddyBamFile previousRoddyBamFile = mergingWorkPackage.bamFileInProjectFolder
-        List<Long> mergableSeqtracks =  mergingWorkPackage.seqTracks*.id
+        AbstractMergedBamFile previousBamFile = mergingWorkPackage.bamFileInProjectFolder
+        List<Long> mergableSeqTracks =  mergingWorkPackage.seqTracks*.id
         List<Long> containedSeqTracks = baseBamFile?.containedSeqTracks*.id
-        Set<SeqTrack> seqTracks = SeqTrack.getAll(mergableSeqtracks - containedSeqTracks) as Set
+        Set<SeqTrack> seqTracks = SeqTrack.getAll(mergableSeqTracks - containedSeqTracks) as Set
 
-        RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForIndividual(mergingWorkPackage.individual, mergingWorkPackage.seqType, mergingWorkPackage.pipeline)
-        assert config: "Could not find one RoddyWorkflowConfig for ${mergingWorkPackage.project}, ${mergingWorkPackage.seqType} and ${mergingWorkPackage.pipeline}"
+        ConfigPerProjectAndSeqType config = getConfig(mergingWorkPackage)
 
         int identifier = RoddyBamFile.nextIdentifier(mergingWorkPackage)
-        RoddyBamFile roddyBamFile = getInstanceClass().newInstance(
-                workPackage: mergingWorkPackage,
-                identifier: identifier,
-                workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
-                baseBamFile: baseBamFile,
-                seqTracks: seqTracks,
-                config: config,
-        )
+
+        AbstractMergedBamFile bamFile = reallyCreateBamFile(mergingWorkPackage, identifier, seqTracks, config, baseBamFile)
         // has to be set explicitly to old value due strange behavior of GORM (?)
-        mergingWorkPackage.bamFileInProjectFolder = previousRoddyBamFile
-        roddyBamFile.numberOfMergedLanes = roddyBamFile.containedSeqTracks.size()
-        assert roddyBamFile.save(flush: true, failOnError: true)
-        assert !roddyBamFile.isOldStructureUsed()
-        return roddyBamFile
+        mergingWorkPackage.bamFileInProjectFolder = previousBamFile
+        bamFile.numberOfMergedLanes = bamFile.containedSeqTracks.size()
+        assert bamFile.save(flush: true, failOnError: true)
+        return bamFile
     }
 
-    protected Class<? extends RoddyBamFile> getInstanceClass() {
-        return RoddyBamFile
-    }
+    abstract AbstractMergedBamFile reallyCreateBamFile(MergingWorkPackage mergingWorkPackage, int identifier, Set<SeqTrack> seqTracks, ConfigPerProjectAndSeqType config, AbstractMergedBamFile baseBamFile = null)
+
+    abstract ConfigPerProjectAndSeqType getConfig(MergingWorkPackage mergingWorkPackage)
 }
 
 

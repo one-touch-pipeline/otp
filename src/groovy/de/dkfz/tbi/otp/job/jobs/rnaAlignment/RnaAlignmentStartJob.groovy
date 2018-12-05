@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
 import de.dkfz.tbi.otp.ngsdata.*
 import org.springframework.context.annotation.*
@@ -9,7 +10,7 @@ import org.springframework.stereotype.*
 
 @Component('rnaAlignmentStartJob')
 @Scope('singleton')
-class RnaAlignmentStartJob extends RoddyAlignmentStartJob {
+class RnaAlignmentStartJob extends AbstractRoddyAlignmentStartJob {
     @Override
     List<SeqType> getSeqTypes() {
         return SeqTypeService.getRnaAlignableSeqTypes()
@@ -24,7 +25,13 @@ class RnaAlignmentStartJob extends RoddyAlignmentStartJob {
     }
 
     @Override
-    protected Class<RnaRoddyBamFile> getInstanceClass() {
-        return RnaRoddyBamFile
+    AbstractMergedBamFile reallyCreateBamFile(MergingWorkPackage mergingWorkPackage, int identifier, Set<SeqTrack> seqTracks, ConfigPerProjectAndSeqType config, AbstractMergedBamFile baseBamFile = null) {
+        new RnaRoddyBamFile (
+                workPackage: mergingWorkPackage,
+                identifier: identifier,
+                workDirectoryName: "${RoddyBamFile.WORK_DIR_PREFIX}_${identifier}",
+                seqTracks: seqTracks,
+                config: config,
+        )
     }
 }
