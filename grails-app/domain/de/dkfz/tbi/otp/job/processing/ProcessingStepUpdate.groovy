@@ -79,13 +79,16 @@ class ProcessingStepUpdate implements Serializable, Entity {
                 // this obj had already been validated, so no need to do it again
                 return true
             }
-            // only first update may be created
+            // the first ProcessingStepUpdate has to be CREATED, while all following can not be CREATED
             List<ProcessingStepUpdate> stepUpdates = ProcessingStepUpdate.findAllByProcessingStep(obj.processingStep)
-            if (stepUpdates.isEmpty() ||
-                    (stepUpdates.size() == 1 && stepUpdates.first() == obj)) {
-                return val == ExecutionState.CREATED
+            if (stepUpdates.isEmpty() || (stepUpdates.size() == 1 && stepUpdates.first() == obj)) {
+                if (val != ExecutionState.CREATED) {
+                    return "First ProcessingStepUpdate has to be ExecutionState.CREATED"
+                }
             } else {
-                return val != ExecutionState.CREATED
+                if (val == ExecutionState.CREATED) {
+                    return "Following ProcessingStepUpdates can not be ExecutionState.CREATED"
+                }
             }
         })
         error(nullable: true, validator: {val, obj ->
