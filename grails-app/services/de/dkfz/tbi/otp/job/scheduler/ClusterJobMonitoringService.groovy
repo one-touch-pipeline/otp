@@ -194,6 +194,9 @@ class ClusterJobMonitoringService {
                 if (jobEndState == ExecutionState.FAILURE) {
                     log.info("NOT notifying ${monitoringJob} that cluster job ${clusterJob.clusterJobId}" +
                             " has finished on realm ${clusterJob.realm}, because that job has already failed.")
+                } else if (jobEndState == ExecutionState.SUCCESS) {
+                    log.debug("Cluster Job finished successfully but is still monitoring" +
+                            " ${clusterJob.clusterJobId} on realm ${clusterJob.realm}.")
                 } else {
                     throw new RuntimeException("${monitoringJob} is still monitoring cluster job" +
                             " ${clusterJob.clusterJobId} on realm ${clusterJob.realm}, although it has" +
