@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 import de.dkfz.tbi.util.spreadsheet.*
+import groovy.json.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
 import org.springframework.security.access.prepost.*
@@ -63,6 +64,7 @@ class BamMetadataImportService {
                 String coverage = uniqueColumnValue(row, BamMetadataColumn.COVERAGE)
                 String md5sum = uniqueColumnValue(row, BamMetadataColumn.MD5)
                 String insertSizeFile = uniqueColumnValue(row, BamMetadataColumn.INSERT_SIZE_FILE)
+                String qualityControlFile = uniqueColumnValue(row, BamMetadataColumn.QUALITY_CONTROL_FILE)
                 String libraryPreparationKit = uniqueColumnValue(row, BamMetadataColumn.LIBRARY_PREPARATION_KIT)
 
                 Sample sample = Sample.createCriteria().get {
@@ -124,6 +126,29 @@ class BamMetadataImportService {
                         insertSizeFilePath.startsWith(furtherPath)
                     }) {
                         epmbf.furtherFiles.add(insertSizeFile)
+                    }
+                }
+
+                if (qualityControlFile) {
+                    Path qualityControlFilePath = bamFileParent.resolve(qualityControlFile)
+
+                    def qcValues = new JsonSlurper().parse(qualityControlFilePath.bytes)
+
+                    new ExternalProcessedMergedBamFileQualityAssessment(
+                            properlyPaired                  : qcValues.all.properlyPaired,
+                            pairedInSequencing              : qcValues.all.pairedInSequencing,
+                            insertSizeMedian                : qcValues.all.insertSizeMedian,
+                            insertSizeCV                    : qcValues.all.insertSizeCV,
+                            qualityAssessmentMergedPass     : new QualityAssessmentMergedPass([
+                                    abstractMergedBamFile   : epmbf,
+                            ]).save(),
+                    ).save()
+
+                    if (!epmbf.furtherFiles.find {
+                        Path furtherPath = bamFileParent.resolve(it)
+                        qualityControlFilePath.startsWith(furtherPath)
+                    }) {
+                        epmbf.furtherFiles.add(qualityControlFile)
                     }
                 }
 

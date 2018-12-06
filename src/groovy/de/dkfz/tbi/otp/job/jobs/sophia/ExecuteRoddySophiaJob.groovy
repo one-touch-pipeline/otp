@@ -6,10 +6,10 @@ import de.dkfz.tbi.otp.job.ast.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.hibernate.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
-import org.hibernate.*
 
 @Component
 @Scope("prototype")
@@ -41,17 +41,21 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
 
         List<String> cValues = []
 
-        if (([bamFileDisease, bamFileControl].every { RoddyBamFile.isAssignableFrom(Hibernate.getClass(it)) })) {
-            RoddyQualityAssessment bamFileDiseaseQualityAssessment = bamFileDisease.getOverallQualityAssessment() as RoddyQualityAssessment
-            RoddyQualityAssessment bamFileControlQualityAssessment = bamFileControl.getOverallQualityAssessment() as RoddyQualityAssessment
-
-            cValues.add("controlMedianIsize:${bamFileControlQualityAssessment.insertSizeMedian}")
-            cValues.add("tumorMedianIsize:${bamFileDiseaseQualityAssessment.insertSizeMedian}")
-            cValues.add("controlStdIsizePercentage:${bamFileControlQualityAssessment.insertSizeCV}")
-            cValues.add("tumorStdIsizePercentage:${bamFileDiseaseQualityAssessment.insertSizeCV}")
-            cValues.add("controlProperPairPercentage:${bamFileControlQualityAssessment.getPercentProperlyPaired()}")
-            cValues.add("tumorProperPairPercentage:${bamFileDiseaseQualityAssessment.getPercentProperlyPaired()}")
+        if (!([bamFileDisease, bamFileControl].every {
+            RoddyBamFile.isAssignableFrom(Hibernate.getClass(it)) || ExternallyProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(it))
+        })) {
+            throw new RuntimeException("Unsupported BAM-File type for '${bamFileDisease.class}' or '${bamFileControl.class}' ")
         }
+
+        SophiaWorkflowQualityAssessment bamFileDiseaseQualityAssessment = bamFileDisease.getOverallQualityAssessment() as SophiaWorkflowQualityAssessment
+        SophiaWorkflowQualityAssessment bamFileControlQualityAssessment = bamFileControl.getOverallQualityAssessment() as SophiaWorkflowQualityAssessment
+
+        cValues.add("controlMedianIsize:${bamFileControlQualityAssessment.insertSizeMedian}")
+        cValues.add("tumorMedianIsize:${bamFileDiseaseQualityAssessment.insertSizeMedian}")
+        cValues.add("controlStdIsizePercentage:${bamFileControlQualityAssessment.insertSizeCV}")
+        cValues.add("tumorStdIsizePercentage:${bamFileDiseaseQualityAssessment.insertSizeCV}")
+        cValues.add("controlProperPairPercentage:${bamFileControlQualityAssessment.getPercentProperlyPaired()}")
+        cValues.add("tumorProperPairPercentage:${bamFileDiseaseQualityAssessment.getPercentProperlyPaired()}")
 
         cValues.add("bamfile_list:${bamFileControlPath};${bamFileDiseasePath}")
         cValues.add("sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}")

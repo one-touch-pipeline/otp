@@ -962,6 +962,21 @@ class DomainFactory {
     }
 
     /**
+     * creates an instance of ExternalProcessedMergedBamFileQualityAssessment
+     * with the needed quality control values for sophia
+     */
+    static ExternalProcessedMergedBamFileQualityAssessment createExternalProcessedMergedBamFileQualityAssessment(Map properties = [:], AbstractMergedBamFile mbf){
+        return createDomainObject(ExternalProcessedMergedBamFileQualityAssessment,
+                [properlyPaired              : 1919,
+                 pairedInSequencing          : 2120,
+                 insertSizeMedian            : 406,
+                 insertSizeCV                : 23,
+                 qualityAssessmentMergedPass : {createDomainObject(QualityAssessmentMergedPass,[abstractMergedBamFile: mbf], [:])}]
+                ,properties)
+    }
+
+
+    /**
      * create necessary initialising for the analysis pipelines for the sample Pair.
      *
      * This contains <ul>

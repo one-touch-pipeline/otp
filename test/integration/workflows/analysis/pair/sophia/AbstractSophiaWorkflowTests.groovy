@@ -7,7 +7,6 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.plugin.springsecurity.*
 import org.joda.time.*
-import org.junit.*
 import workflows.analysis.pair.*
 
 abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<SophiaInstance> {
@@ -17,14 +16,6 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
     ProjectService projectService
 
     ProcessingOptionService processingOptionService
-
-    //Sophia do not work with external bam files, since the needed qa values are not available,
-    //TODO: OTP-2950: After solving OTP-2950 the test should be re-enable (remove this overriding of the superclass.
-    @Ignore
-    @Override
-    void testWholeWorkflowWithExternalBamFile() {
-
-    }
 
     @Override
     ConfigPerProjectAndSeqType createConfig() {
@@ -87,6 +78,13 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
         linkQualityControlFiles()
 
         super.executeTest()
+    }
+
+    @Override
+    void setupExternalBamFile(){
+        super.setupExternalBamFile()
+        DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(QCVALUES, bamFileControl)
+        DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(QCVALUES, bamFileTumor)
     }
 
 

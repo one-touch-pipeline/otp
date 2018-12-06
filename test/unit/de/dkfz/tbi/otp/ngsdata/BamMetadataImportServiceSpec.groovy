@@ -22,6 +22,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 @Mock([
         ExternalMergingWorkPackage,
         ExternallyProcessedMergedBamFile,
+        ExternalProcessedMergedBamFileQualityAssessment,
+        QualityAssessmentMergedPass,
         ImportProcess,
         Individual,
         Project,
@@ -110,6 +112,10 @@ class BamMetadataImportServiceSpec extends Specification {
         File qualityDirectory = temporaryFolder.newFolder("path-to-bam-files", "qualityDir")
         CreateFileHelper.createFile(new File(bamFilesDir, "qualityFile"))
         CreateFileHelper.createFile(new File(qualityDirectory, "file.qc"))
+        File qualityControl = CreateFileHelper.createFile(new File(bamFilesDir, "qualityControl.json"))
+        qualityControl.bytes = ("""\
+        { "all":{"insertSizeCV": 23, "insertSizeMedian": 425, "pairedInSequencing": 2134421157,  "properlyPaired": 2050531101 }}
+        """).getBytes(BamMetadataValidationContext.CHARSET)
 
         (1..4).each {
             DomainFactory.createReferenceGenome(name: "refGen${it}")
@@ -126,12 +132,12 @@ class BamMetadataImportServiceSpec extends Specification {
 
         Path metadataFile = temporaryFolder.newFile("bamMetadata.tsv").toPath()
         metadataFile.bytes = ("""\
-${REFERENCE_GENOME},${SEQUENCING_TYPE},${BAM_FILE_PATH},${SAMPLE_TYPE},${INDIVIDUAL},${LIBRARY_LAYOUT},${PROJECT},${COVERAGE},${INSERT_SIZE_FILE}
-refGen1,seqType1,${bamFilesDir}/bamfile1_merged.mdup.bam,sampleType1,individual1,${LibraryLayout.SINGLE},project_01,,insertSize.txt
-refGen2,seqType2,${bamFilesDir}/bamfile2_merged.mdup.bam,sampleType2,individual2,${LibraryLayout.SINGLE},project_01,,qualityDir/insertSize.txt
-refGen3,seqType3,${bamFilesDir}/bamfile3_merged.mdup.bam,sampleType3,individual3,${LibraryLayout.SINGLE},project_01,,qualityDirinsertSize.txt
-refGen4,seqType4,${bamFilesDir}/bamfile4_merged.mdup.bam,sampleType4,individual4,${LibraryLayout.SINGLE},project_01,,qualityFileinsertSize.txt
-""".replaceAll(',', '\t')).getBytes(BamMetadataValidationContext.CHARSET)
+${REFERENCE_GENOME}\t${SEQUENCING_TYPE}\t${BAM_FILE_PATH}\t${SAMPLE_TYPE}\t${INDIVIDUAL}\t${LIBRARY_LAYOUT}\t${PROJECT}\t${COVERAGE}\t${INSERT_SIZE_FILE}\t${QUALITY_CONTROL_FILE}
+refGen1\tseqType1\t${bamFilesDir}/bamfile1_merged.mdup.bam\tsampleType1\tindividual1\t${LibraryLayout.SINGLE}\tproject_01\t\tinsertSize.txt
+refGen2\tseqType2\t${bamFilesDir}/bamfile2_merged.mdup.bam\tsampleType2\tindividual2\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityDir/insertSize.txt
+refGen3\tseqType3\t${bamFilesDir}/bamfile3_merged.mdup.bam\tsampleType3\tindividual3\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityDirinsertSize.txt
+refGen4\tseqType4\t${bamFilesDir}/bamfile4_merged.mdup.bam\tsampleType4\tindividual4\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityFileinsertSize.txt\t${qualityControl.name}
+""").getBytes(BamMetadataValidationContext.CHARSET)
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(metadataFile: metadataFile)
 
@@ -185,7 +191,10 @@ refGen4,seqType4,${bamFilesDir}/bamfile4_merged.mdup.bam,sampleType4,individual4
                 case 4:
                     assert epmbf.insertSizeFile == "qualityFileinsertSize.txt"
                     assert epmbf.furtherFiles.contains('qualityFileinsertSize.txt')
-                    assert epmbf.furtherFiles.size() == 3
+                    assert epmbf.furtherFiles.contains(qualityControl.name)
+                    assert epmbf.furtherFiles.size() == 4
+                    assert ExternalProcessedMergedBamFileQualityAssessment.findAll().size() == 1
+                    assert ExternalProcessedMergedBamFileQualityAssessment.findAll().get(0).insertSizeCV == 23
                     break
             }
         }

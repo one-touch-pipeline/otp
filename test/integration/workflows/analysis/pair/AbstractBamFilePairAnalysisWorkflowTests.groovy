@@ -34,6 +34,14 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     abstract ReferenceGenome createReferenceGenome()
 
+    //The qa values are taken from the wgs alignment workflow with one lane
+    final static Map QCVALUES = [
+            insertSizeMedian  : 406,
+            insertSizeCV      : 23,
+            properlyPaired    : 1919,
+            pairedInSequencing: 2120,
+    ]
+
 
     final Map createProcessMergedBamFileProperties() {
         DomainFactory.randomProcessedBamFileProperties + [
@@ -55,16 +63,8 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 config     : bamFileTumor.config,
         ])
 
-        //The qa values are taken from the wgs alignment workflow with one lane
-        Map qaValues = [
-                insertSizeMedian  : 406,
-                insertSizeCV      : 23,
-                properlyPaired    : 1919,
-                pairedInSequencing: 2120,
-        ]
-
-        DomainFactory.createRoddyMergedBamQa(bamFileTumor, qaValues)
-        DomainFactory.createRoddyMergedBamQa(bamFileControl, qaValues)
+        DomainFactory.createRoddyMergedBamQa(bamFileTumor, QCVALUES)
+        DomainFactory.createRoddyMergedBamQa(bamFileControl, QCVALUES)
 
         commonBamFileSetup()
         createBedFileAndLibPrepKit()
@@ -106,12 +106,14 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 workPackage      : tumorMwp,
                 insertSizeFile   : 'tumor_insertsize_plot.png_qcValues.txt',
                 maximumReadLength: 101,
+                fileName         : "${tumorMwp.sampleType.dirName}_${tumorMwp.individual.pid}_merged.mdup.bam",
         ] + createProcessMergedBamFileProperties())
 
         bamFileControl = DomainFactory.createExternallyProcessedMergedBamFile(createProcessMergedBamFileProperties() + [
                 workPackage      : controlMwp,
                 insertSizeFile   : 'control_insertsize_plot.png_qcValues.txt',
                 maximumReadLength: 101,
+                fileName         : "${controlMwp.sampleType.dirName}_${controlMwp.individual.pid}_merged.mdup.bam",
         ])
         commonBamFileSetup()
         createBedFileAndLibPrepKit()

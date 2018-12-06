@@ -58,8 +58,6 @@ class SophiaServiceIntegrationSpec extends IntegrationSpec {
         'maximumReadLength'  | null
     }
 
-    //TODO: re-enable after OTP-2950
-    @Ignore
     @Unroll
     void "samplePairForProcessing, for Sophia pipeline, only EPMBF available with #property is #value, should return new instance"() {
         given:
@@ -68,6 +66,9 @@ class SophiaServiceIntegrationSpec extends IntegrationSpec {
             assert it.save(flush: true)
         }
         SamplePair samplePair = DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
+
+        assert DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(samplePair.mergingWorkPackage1.processableBamFileInProjectFolder)
+        assert DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(samplePair.mergingWorkPackage2.processableBamFileInProjectFolder)
 
         expect:
         samplePair == sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL)

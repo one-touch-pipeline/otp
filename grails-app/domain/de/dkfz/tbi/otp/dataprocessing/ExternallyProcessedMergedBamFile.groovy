@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.*
 import org.hibernate.*
 
 /**
@@ -76,7 +76,13 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
     @Override
     AbstractQualityAssessment getOverallQualityAssessment() {
-        throw new MissingPropertyException('Quality assessment is not implemented for externally imported BAM files')
+        return CollectionUtils.exactlyOneElement(ExternalProcessedMergedBamFileQualityAssessment.createCriteria().list {
+            qualityAssessmentMergedPass {
+                abstractMergedBamFile {
+                    eq 'id', this.id
+                }
+            }
+        })
     }
 
     @Override
