@@ -3,10 +3,9 @@ package workflows.analysis.pair
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
+import org.joda.time.*
 import workflows.*
 import workflows.analysis.pair.bamfiles.*
-
-import java.time.*
 
 abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase implements SeqTypeAndInputBamFiles {
 
@@ -36,7 +35,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
     abstract ReferenceGenome createReferenceGenome()
 
     //The qa values are taken from the wgs alignment workflow with one lane
-    final static Map QCVALUES = [
+    final static Map QC_VALUES = [
             insertSizeMedian  : 406,
             insertSizeCV      : 23,
             properlyPaired    : 1919,
@@ -64,8 +63,8 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 config     : bamFileTumor.config,
         ])
 
-        DomainFactory.createRoddyMergedBamQa(bamFileTumor, QCVALUES)
-        DomainFactory.createRoddyMergedBamQa(bamFileControl, QCVALUES)
+        DomainFactory.createRoddyMergedBamQa(bamFileTumor, QC_VALUES)
+        DomainFactory.createRoddyMergedBamQa(bamFileControl, QC_VALUES)
 
         commonBamFileSetup()
         createBedFileAndLibPrepKit()
@@ -232,6 +231,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     @Override
     Duration getTimeout() {
-        Duration.ofHours(90)
+        Duration.standardMinutes(90)
     }
 }

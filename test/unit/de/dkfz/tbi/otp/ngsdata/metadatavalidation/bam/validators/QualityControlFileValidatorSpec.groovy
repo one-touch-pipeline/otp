@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 import de.dkfz.tbi.otp.utils.*
@@ -10,6 +9,7 @@ import org.junit.rules.*
 import spock.lang.*
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class QualityControlFileValidatorSpec extends Specification {
 
@@ -19,7 +19,6 @@ class QualityControlFileValidatorSpec extends Specification {
 
     @Unroll
     void 'validate context with errors'() {
-
         given:
         File bamFile = temporaryFolder.newFile('abc')
         File dir = temporaryFolder.newFolder('folder')
@@ -43,7 +42,20 @@ class QualityControlFileValidatorSpec extends Specification {
         """).getBytes(BamMetadataValidationContext.CHARSET)
 
 
-        BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
+        BamMetadataValidationContext context = contextForTestValidateContextWithErrors(bamFile, dir, notReadAble, qualityControl, qualityControlInvalid, qualityControlInvalidJson)
+
+        Collection<Problem> expectedProblems = expectedProblemsForTestValidateContextWithErrors(context, dir, notReadAble, qualityControlInvalid, qualityControlInvalidJson)
+
+        when:
+        new QualityControlFileValidator().validate(context)
+
+        then:
+        containSame(expectedProblems, context.problems)
+    }
+
+    private BamMetadataValidationContext contextForTestValidateContextWithErrors(
+            File bamFile, File dir, File notReadAble, File qualityControl, File qualityControlInvalid, File qualityControlInvalidJson) {
+        return BamMetadataValidationContextFactory.createContext(
                 "${BAM_FILE_PATH}\t${QUALITY_CONTROL_FILE}\n" +
                         "${bamFile.absolutePath}\ttestFile\n" +
                         "\t/abc/testFile\n" +
@@ -56,8 +68,11 @@ class QualityControlFileValidatorSpec extends Specification {
                         "${bamFile.absolutePath}\t${qualityControlInvalidJson.name}\n" + // invalid
                         "${bamFile.absolutePath}\t${qualityControl.name}\n" // valid
         )
+    }
 
-        Collection<Problem> expectedProblems = [
+    private Collection<Problem> expectedProblemsForTestValidateContextWithErrors(
+            BamMetadataValidationContext context, File dir, File notReadAble, File qualityControlInvalid, File qualityControlInvalidJson) {
+        return [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
                         "'testFile' does not exist or cannot be accessed by OTP.",
                         "At least one file does not exist or cannot be accessed by OTP."),
@@ -76,53 +91,29 @@ class QualityControlFileValidatorSpec extends Specification {
                         "At least one value is missing or has no valid JSON structure."),
                 new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
                         "'${qualityControlInvalidJson.name}' has not all needed values or has no valid JSON structure.",
-                        "At least one value is missing or has no valid JSON structure.")
+                        "At least one value is missing or has no valid JSON structure."),
         ]
-
-        when:
-        new QualityControlFileValidator().validate(context)
-
-        then:
-        TestCase.assertContainSame(expectedProblems, context.problems)
-    }
-
-    void 'validate, when mandatory column BAM_FILE_PATH is missing, then expected error'() {
-
-        given:
-        BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
-                "${PROJECT}\t${QUALITY_CONTROL_FILE}\n\nproject\t/tmp/file\n"
-        )
-
-        Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.ERROR,
-                        "Mandatory column 'BAM_FILE_PATH' is missing.",
-                        "Mandatory column 'BAM_FILE_PATH' is missing.")
-        ]
-
-        when:
-        new QualityControlFileValidator().validate(context)
-
-        then:
-        TestCase.assertContainSame(context.problems, expectedProblems)
     }
 
     void 'validate, when optional column QUALITY_CONTROL_FILE is missing, then expected warning'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
-                "${PROJECT}\t${BAM_FILE_PATH}\nproject\t/tmp/file\n"
+                "${PROJECT}\t${INDIVIDUAL}\n"
         )
 
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.WARNING,
                         "'QUALITY_CONTROL_FILE' has to be set for Sophia",
                         "'QUALITY_CONTROL_FILE' has to be set for Sophia"),
+                new Problem(Collections.emptySet(), Level.ERROR,
+                        "Mandatory column 'BAM_FILE_PATH' is missing.",
+                        "Mandatory column 'BAM_FILE_PATH' is missing."),
         ]
 
         when:
         new QualityControlFileValidator().validate(context)
 
         then:
-        TestCase.assertContainSame(context.problems, expectedProblems)
+        containSame(context.problems, expectedProblems)
     }
 }

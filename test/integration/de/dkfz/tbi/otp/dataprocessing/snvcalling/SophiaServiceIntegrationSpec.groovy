@@ -67,8 +67,8 @@ class SophiaServiceIntegrationSpec extends IntegrationSpec {
         }
         SamplePair samplePair = DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
 
-        assert DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(samplePair.mergingWorkPackage1.processableBamFileInProjectFolder)
-        assert DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(samplePair.mergingWorkPackage2.processableBamFileInProjectFolder)
+        DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(samplePair.mergingWorkPackage1.processableBamFileInProjectFolder)
+        DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(samplePair.mergingWorkPackage2.processableBamFileInProjectFolder)
 
         expect:
         samplePair == sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL)

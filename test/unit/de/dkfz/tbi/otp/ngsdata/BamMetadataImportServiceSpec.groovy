@@ -33,7 +33,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
         Sample,
         SampleType,
         SeqType,
-        LibraryPreparationKit
+        LibraryPreparationKit,
 ])
 class BamMetadataImportServiceSpec extends Specification {
 
@@ -64,7 +64,7 @@ class BamMetadataImportServiceSpec extends Specification {
         File testDirectory = TestCase.createEmptyTestDirectory()
         Path metadataFile = Paths.get(testDirectory.path, 'bamMetadata.tsv')
         metadataFile.bytes = 'Header\nI am metadata!'.getBytes(BamMetadataValidationContext.CHARSET)
-        File qualityDirectory = new File(testDirectory,"quality")
+        File qualityDirectory = new File(testDirectory, "quality")
         assert qualityDirectory.mkdirs()
         new File(qualityDirectory, "file.qc")
         List<String> furtherFiles = ["/quality"]
@@ -127,14 +127,7 @@ class BamMetadataImportServiceSpec extends Specification {
                 "qualityFile",
         ]
 
-        Path metadataFile = temporaryFolder.newFile("bamMetadata.tsv").toPath()
-        metadataFile.bytes = ("""\
-${REFERENCE_GENOME}\t${SEQUENCING_TYPE}\t${BAM_FILE_PATH}\t${SAMPLE_TYPE}\t${INDIVIDUAL}\t${LIBRARY_LAYOUT}\t${PROJECT}\t${COVERAGE}\t${INSERT_SIZE_FILE}\t${QUALITY_CONTROL_FILE}
-refGen1\tseqType1\t${bamFilesDir}/bamfile1_merged.mdup.bam\tsampleType1\tindividual1\t${LibraryLayout.SINGLE}\tproject_01\t\tinsertSize.txt
-refGen2\tseqType2\t${bamFilesDir}/bamfile2_merged.mdup.bam\tsampleType2\tindividual2\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityDir/insertSize.txt
-refGen3\tseqType3\t${bamFilesDir}/bamfile3_merged.mdup.bam\tsampleType3\tindividual3\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityDirinsertSize.txt
-refGen4\tseqType4\t${bamFilesDir}/bamfile4_merged.mdup.bam\tsampleType4\tindividual4\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityFileinsertSize.txt\t${qualityControl.name}
-""").getBytes(BamMetadataValidationContext.CHARSET)
+        Path metadataFile = metaDataFileForTestValidateAndImport(bamFilesDir, qualityControl)
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(metadataFile: metadataFile)
 
@@ -158,42 +151,59 @@ refGen4\tseqType4\t${bamFilesDir}/bamfile4_merged.mdup.bam\tsampleType4\tindivid
 
         (1..4).each {
             String pid = "individual${it}"
-            ExternallyProcessedMergedBamFile epmbf = results.importProcess.externallyProcessedMergedBamFiles.find  {
+            ExternallyProcessedMergedBamFile epmbf = results.importProcess.externallyProcessedMergedBamFiles.find {
                 it.individual.mockPid == pid
             }
-            assert epmbf : "${pid} not found in the result"
-            assert epmbf.referenceGenome.name == "refGen${it}"
-            assert epmbf.project.name == "project_01"
-            assert epmbf.seqType.libraryLayout == LibraryLayout.SINGLE
-            assert epmbf.seqType.name == "seqType${it}"
-            assert epmbf.sampleType.name == "sampleType${it}"
-            assert epmbf.importedFrom == new File(bamFilesDir, "bamfile${it}_merged.mdup.bam").path
-            assert epmbf.furtherFiles.contains('qualityDir')
-            assert epmbf.furtherFiles.contains('qualityFile')
+            epmbf:
+            "${pid} not found in the result"
+            epmbf.referenceGenome.name == "refGen${it}"
+            epmbf.project.name == "project_01"
+            epmbf.seqType.libraryLayout == LibraryLayout.SINGLE
+            epmbf.seqType.name == "seqType${it}"
+            epmbf.sampleType.name == "sampleType${it}"
+            epmbf.importedFrom == new File(bamFilesDir, "bamfile${it}_merged.mdup.bam").path
+            epmbf.furtherFiles.contains('qualityDir')
+            epmbf.furtherFiles.contains('qualityFile')
             switch (it) {
                 case 1:
-                    assert epmbf.insertSizeFile == "insertSize.txt"
-                    assert epmbf.furtherFiles.contains('insertSize.txt')
-                    assert epmbf.furtherFiles.size() == 3
+                    epmbf.insertSizeFile == "insertSize.txt"
+                    epmbf.furtherFiles.contains('insertSize.txt')
+                    epmbf.furtherFiles.size() == 3
                     break
                 case 2:
-                    assert epmbf.insertSizeFile == "qualityDir/insertSize.txt"
-                    assert epmbf.furtherFiles.size() == 2
+                    epmbf.insertSizeFile == "qualityDir/insertSize.txt"
+                    epmbf.furtherFiles.size() == 2
                     break
                 case 3:
-                    assert epmbf.insertSizeFile == "qualityDirinsertSize.txt"
-                    assert epmbf.furtherFiles.contains('qualityDirinsertSize.txt')
-                    assert epmbf.furtherFiles.size() == 3
+                    epmbf.insertSizeFile == "qualityDirinsertSize.txt"
+                    epmbf.furtherFiles.contains('qualityDirinsertSize.txt')
+                    epmbf.furtherFiles.size() == 3
                     break
                 case 4:
-                    assert epmbf.insertSizeFile == "qualityFileinsertSize.txt"
-                    assert epmbf.furtherFiles.contains('qualityFileinsertSize.txt')
-                    assert epmbf.furtherFiles.contains(qualityControl.name)
-                    assert epmbf.furtherFiles.size() == 4
-                    assert ExternalProcessedMergedBamFileQualityAssessment.findAll().size() == 1
-                    assert ExternalProcessedMergedBamFileQualityAssessment.findAll().get(0).insertSizeCV == 23
+                    epmbf.insertSizeFile == "qualityFileinsertSize.txt"
+                    epmbf.furtherFiles.contains('qualityFileinsertSize.txt')
+                    epmbf.furtherFiles.contains(qualityControl.name)
+                    epmbf.furtherFiles.size() == 4
+                    ExternalProcessedMergedBamFileQualityAssessment.findAll().size() == 1
+                    ExternalProcessedMergedBamFileQualityAssessment.findAll().get(0).insertSizeCV == 23
                     break
             }
         }
+    }
+
+    private Path metaDataFileForTestValidateAndImport(File bamFilesDir, File qualityControl) {
+        Path metadataFile = temporaryFolder.newFile("bamMetadata.tsv").toPath()
+        metadataFile.bytes = ("""\
+${REFERENCE_GENOME}\t${SEQUENCING_TYPE}\t${BAM_FILE_PATH}\t${SAMPLE_TYPE}\t${INDIVIDUAL}\t${LIBRARY_LAYOUT}\t${
+            PROJECT
+        }\t${COVERAGE}\t${INSERT_SIZE_FILE}\t${QUALITY_CONTROL_FILE}
+refGen1\tseqType1\t${bamFilesDir}/bamfile1_merged.mdup.bam\tsampleType1\tindividual1\t${LibraryLayout.SINGLE}\tproject_01\t\tinsertSize.txt
+refGen2\tseqType2\t${bamFilesDir}/bamfile2_merged.mdup.bam\tsampleType2\tindividual2\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityDir/insertSize.txt
+refGen3\tseqType3\t${bamFilesDir}/bamfile3_merged.mdup.bam\tsampleType3\tindividual3\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityDirinsertSize.txt
+refGen4\tseqType4\t${bamFilesDir}/bamfile4_merged.mdup.bam\tsampleType4\tindividual4\t${
+            LibraryLayout.SINGLE
+        }\tproject_01\t\tqualityFileinsertSize.txt\t${qualityControl.name}
+""").getBytes(BamMetadataValidationContext.CHARSET)
+        return metadataFile
     }
 }

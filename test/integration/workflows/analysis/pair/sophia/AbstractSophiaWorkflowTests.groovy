@@ -6,9 +6,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.plugin.springsecurity.*
+import org.joda.time.*
 import workflows.analysis.pair.*
-
-import java.time.*
 
 abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<SophiaInstance> {
 
@@ -27,7 +26,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
                 project: project,
                 seqType: seqType,
         )
-        lsdfFilesService.createDirectory(project.projectSequencingDirectory, realm)
+        lsdfFilesService.createDirectory(configService.getProjectSequencePath(project), realm)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             config = projectService.configureSophiaPipelineProject(
@@ -60,8 +59,8 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
 
     void linkQualityControlFiles() {
-        File tumorInsertSizeFile = new File(workflowData, "tumor_HCC1187-div128_insertsize_plot.png_qcValues.txt")
-        File controlInsertSizeFile = new File(workflowData, "blood_HCC1187-div128_insertsize_plot.png_qcValues.txt")
+        File tumorInsertSizeFile = new File(workflowData, "tumor_insertsize_plot.png_qcValues.txt")
+        File controlInsertSizeFile = new File(workflowData, "control_insertsize_plot.png_qcValues.txt")
 
         File finalTumorInsertSizeFile = bamFileTumor.getFinalInsertSizeFile()
         File finalControlInsertSizeFile = bamFileControl.getFinalInsertSizeFile()
@@ -82,10 +81,10 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
     }
 
     @Override
-    void setupExternalBamFile(){
+    void setupExternalBamFile() {
         super.setupExternalBamFile()
-        DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(QCVALUES, bamFileControl)
-        DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(QCVALUES, bamFileTumor)
+        DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(QC_VALUES, bamFileControl)
+        DomainFactory.createExternalProcessedMergedBamFileQualityAssessment(QC_VALUES, bamFileTumor)
     }
 
 
@@ -117,7 +116,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     Duration getTimeout() {
-        Duration.ofHours(5)
+        Duration.standardHours(5)
     }
 
 }
