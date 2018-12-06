@@ -70,8 +70,8 @@ class FastqcDataFilesServiceUnitTests {
             "123.bam.gz": "123",
 
             //two extension, second is bz2
-            "123.gz.bz2": "123.gz",
-            "123.bz2.bz2": "123.bz2",
+            "123.gz.bz2": "123",
+            "123.bz2.bz2": "123",
             "123.txt.bz2": "123",
             "123.fastq.bz2": "123",
             "123.sam.bz2": "123",
@@ -114,8 +114,8 @@ class FastqcDataFilesServiceUnitTests {
             "123.456.bam.gz": "123.456",
 
             //dot in name, two extension, second is bz2
-            "123.456.gz.bz2": "123.456.gz",
-            "123.456.bz2.bz2": "123.456.bz2",
+            "123.456.gz.bz2": "123.456",
+            "123.456.bz2.bz2": "123.456",
             "123.456.txt.bz2": "123.456",
             "123.456.fastq.bz2": "123.456",
             "123.456.sam.bz2": "123.456",
@@ -136,11 +136,15 @@ class FastqcDataFilesServiceUnitTests {
             "123.456.other.fastq": "123.456.other",
             "123.456.other.sam": "123.456.other",
             "123.456.other.bam": "123.456.other",
+
+            //handle tar.bz2 (own adaption before)
+            "123.tar.bz2": "123",
+            "123.tar.gz": "123.tar",
         ]
 
         files.each { key, value ->
             dataFile.fileName = key
-            assertEquals(value + fastqcDataFilesService.FASTQC_FILE_SUFFIX + fastqcDataFilesService.FASTQC_ZIP_SUFFIX,
+            assertEquals("check for ${key} failed", value + fastqcDataFilesService.FASTQC_FILE_SUFFIX + fastqcDataFilesService.FASTQC_ZIP_SUFFIX,
                     fastqcDataFilesService.fastqcFileName(dataFile))
         }
     }

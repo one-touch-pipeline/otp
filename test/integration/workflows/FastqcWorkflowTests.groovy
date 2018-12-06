@@ -97,6 +97,16 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         validateFastQcFileContent()
     }
 
+    @Test
+    void testWorkflow_FastQcDataNotAvailable_tar_bzip2() {
+        setUpWorkFlow('tar.bz2')
+        execute()
+
+        checkExistenceOfResultsFiles()
+        validateFastqcProcessedFile()
+        validateFastQcFileContent()
+    }
+
     private validateFastQcFileContent() {
         dataFile.refresh()
         assert null != dataFile.sequenceLength

@@ -121,8 +121,15 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
             if (isBz2) {
                 String orgFileName = inputFileName
                 inputFileName = inputFileName[0..-5]
-                //bzip does not work for links, therefore pipes are used
-                preWorkNonGZip = "cat ${orgFileName} | bzip2 --decompress --keep --stdout > ${inputFileName}"
+
+                boolean isTar = inputFileName.endsWith('.tar')
+                String unTarCommand = ""
+                if (isTar) {
+                    unTarCommand = "| tar --extract --to-stdout"
+                    inputFileName = inputFileName[0..-5]
+                }
+                //bzip does not work for links without option '--stdout'
+                preWorkNonGZip = "bzip2 --decompress --keep --stdout ${orgFileName} ${unTarCommand}> ${inputFileName}"
                 postWorkNonGZip = "rm -f ${inputFileName}"
             }
 

@@ -48,7 +48,20 @@ class FastqcDataFilesService {
     }
 
     private String fastqcFileNameWithoutZipSuffix(DataFile dataFile) {
-        String fileName = dataFile.fileName
+        return fastqcFileNameWithoutZipSuffix(inputFileNameAdaption(dataFile.fileName))
+    }
+
+    private String inputFileNameAdaption(String fileName) {
+        /**
+         * Also the fastqc tool should work for bz2 files, we get often problems with this file type. Therefore we
+         * extract the files ourselves and call then the fastqc tool. Also we handle .tar.bz2 files using
+         * bzip2 and tar. This adaption of the input file are done here:
+         */
+        return fileName.replaceAll("(\\.tar)?\\.bz2\$", "")
+    }
+
+
+    private String fastqcFileNameWithoutZipSuffix(String fileName) {
         /*
          * The fastqc tool does not allow to specify the output file name, only the output directory.
          * To access the file we need code to create the same name for the output file as the fastqc tool.
