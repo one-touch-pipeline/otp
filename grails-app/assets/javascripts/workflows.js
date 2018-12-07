@@ -507,7 +507,6 @@ $.otp.workflows = {
                         controller: 'processes',
                         action: 'processingStep',
                         id: stepId,
-                        title: rowData[6].error,
                         text: rowData[6].state
                     });
                 } else {
@@ -630,7 +629,7 @@ $.otp.workflows = {
                     controller: 'processes',
                     action: 'processingStep',
                     id: stepId,
-                    text: stepId
+                    text: "<div style='padding: 17px 0px 17px 10px;'>"+stepId+"</div>"
                 });
                 rowData[1] = $.otp.workflows.statusImageHtml(rowData[1]);
                 if (rowData[3]) {
@@ -645,11 +644,7 @@ $.otp.workflows = {
                 } else {
                     rowData[6] = "-";
                 }
-                if (rowData[7].error) {
-                    rowData[7] = '<span title="' + rowData[7].error + '">' + rowData[7].state + '</span>';
-                } else {
-                    rowData[7] = rowData[7].state;
-                }
+                rowData[7] = rowData[7].state;
                 actions = rowData[8].actions;
                 rowData[8] = "";
                 for (j = 0; j < actions.length; j += 1) {
