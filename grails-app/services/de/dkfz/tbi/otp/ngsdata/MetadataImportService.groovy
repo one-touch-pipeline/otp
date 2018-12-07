@@ -112,13 +112,24 @@ class MetadataImportService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ValidateAndImportResult> validateAndImportWithAuth(List<PathWithMd5sum> metadataPaths, String directoryStructureName, boolean align, boolean ignoreWarnings, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
-        Map<MetadataValidationContext, String> contexts = metadataPaths.collectEntries { PathWithMd5sum pathWithMd5sum ->
-            return [(validate(pathWithMd5sum.path, directoryStructureName)) : pathWithMd5sum.md5sum]
+        try {
+            Map<MetadataValidationContext, String> contexts = metadataPaths.collectEntries { PathWithMd5sum pathWithMd5sum ->
+                return [(validate(pathWithMd5sum.path, directoryStructureName)): pathWithMd5sum.md5sum]
+            }
+            List<ValidateAndImportResult> results = contexts.collect { context, md5sum ->
+                return importHelperMethod(context, align, RunSegment.ImportMode.MANUAL, ignoreWarnings, md5sum, ticketNumber, seqCenterComment, automaticNotification)
+            }
+            return results
+        } catch (Exception e) {
+            if (!e.message.startsWith('Copying of metadata file')) {
+                String recipientsString = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
+                if (recipientsString) {
+                    mailHelperService.sendEmail("Error: while importing metadata file", "Metadata paths: ${metadataPaths*.path.join('\n')}" +
+                            "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)
+                }
+            }
+            throw new RuntimeException("Error while importing metadata file with paths: ${metadataPaths*.path.join('\n')}", e)
         }
-        List<ValidateAndImportResult> results = contexts.collect { context, md5sum ->
-            return importHelperMethod(context, align, RunSegment.ImportMode.MANUAL, ignoreWarnings, md5sum, ticketNumber, seqCenterComment, automaticNotification)
-        }
-        return results
     }
 
     private ValidateAndImportResult importHelperMethod(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
@@ -165,7 +176,7 @@ class MetadataImportService {
                 if (recipientsString) {
                     mailHelperService.sendEmail("Error: Copying of metadatafile ${source} failed", "${t.getLocalizedMessage()}\n${t.getCause()}", recipientsString)
                 }
-                throw new RuntimeException("Copying of metadatafile ${source} failed", t)
+                throw new RuntimeException("Copying of metadata file ${source} failed", t)
             }
         }
     }
@@ -320,7 +331,7 @@ class MetadataImportService {
     }
 
     private void importSeqTracks(MetadataValidationContext context, RunSegment runSegment, Run run, Collection<Row> runRows) {
-        int amountOfRows = runRows.size()
+        int amountOfRows = runRows.size() / 2
         runRows.groupBy {
             MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
         }.eachWithIndex { String laneId, List<Row> rows, int index ->
