@@ -36,6 +36,10 @@ class InfoController {
         ]
     }
 
+    def dicom() {
+        return [:]
+    }
+
     def faq() { }
 
     def contact() { }

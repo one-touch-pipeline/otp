@@ -150,6 +150,7 @@
                                             <li><g:link controller="info" action="partners"><g:message code="info.partners.link"/></g:link></li>
                                         </g:if>
                                         <li><g:link controller="info" action="templates"><g:message code="info.templates.link"/></g:link></li>
+                                        <li><g:link controller="info" action="dicom"><g:message code="dicom.info.title"/></g:link></li>
                                     </ul>
                                 </li>
                             </ul>
