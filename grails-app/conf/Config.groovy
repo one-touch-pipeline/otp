@@ -1,5 +1,12 @@
+import de.dkfz.odcf.audit.impl.*
+import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
 import de.dkfz.tbi.otp.config.*
 import grails.util.*
+import org.springframework.security.access.event.AuthorizationFailureEvent
+import org.springframework.security.web.authentication.switchuser.AuthenticationSwitchUserEvent
+import org.springframework.security.core.userdetails.UserDetails
+
+import static de.dkfz.tbi.otp.security.DicomAuditUtils.*
 
 Properties otpProperties = ConfigService.parsePropertiesFile()
 
@@ -88,10 +95,21 @@ log4j = {
     appenders {
         def jobHtmlLayout = new de.dkfz.tbi.otp.utils.logging.JobHtmlLayout()
         def jobAppender = new de.dkfz.tbi.otp.utils.logging.JobAppender(logDirectory: new File(jobLogDir), layout : jobHtmlLayout)
+        def syslogAppender = new org.apache.log4j.net.SyslogAppender(
+            syslogHost: "localhost",
+            facility: "USER",
+            header: true,
+        )
+
         appender name: "jobs", jobAppender
+        appender name: "dicom", syslogAppender
 
         console name: 'stdout', threshold: Environment.getCurrent() == Environment.TEST ? org.apache.log4j.Level.OFF : org.apache.log4j.Level.DEBUG
     }
+
+    info dicom: [
+        'de.dkfz.odcf.audit.impl'
+    ], additivity: false
 
     error stdout: [
             'org.codehaus.groovy.grails.web.servlet',           //  controllers
@@ -125,6 +143,41 @@ log4j = {
             'de.dkfz.tbi.otp.job.jobs',
     ], additivity: false
 }
+
+// Spring Security Authentification event listeners for logging login processes to the Dicom audit log
+grails.plugin.springsecurity.useSecurityEventListener = true
+// Login failure
+grails.plugin.springsecurity.onAbstractAuthenticationFailureEvent = { event, context ->
+    DicomAuditLogger.logUserLogin(EventOutcomeIndicator.MINOR_FAILURE, event.authentication.principal.hasProperty("username") ?
+        event.authentication.principal.username : event.authentication.principal)
+}
+// Login success, this event fires on any login, automated and interactive
+//grails.plugin.springsecurity.onAuthenticationSuccessEvent = { event, context ->
+//}
+// Login success, this event fires only on interactive (Non-automated) login
+grails.plugin.springsecurity.onInteractiveAuthenticationSuccessEvent = { event, context ->
+    DicomAuditLogger.logUserLogin(EventOutcomeIndicator.SUCCESS, event.authentication.principal.username)
+}
+// User switch
+grails.plugin.springsecurity.onAuthenticationSwitchUserEvent = { event, context ->
+    DicomAuditLogger.logUserSwitched(EventOutcomeIndicator.SUCCESS,
+        getRealUserName(event.authentication.principal.getUsername()), event.getTargetUser().getUsername())
+}
+grails.plugin.springsecurity.onAuthorizationEvent = { event, context ->
+    if (event instanceof AuthorizationFailureEvent) {
+        DicomAuditLogger.logRestrictedFunctionUsed(EventOutcomeIndicator.MINOR_FAILURE,
+            getRealUserName(event.authentication.principal.getUsername()),
+            event.source.hasProperty("request") ? event.source.request.getRequestURI() : "null")
+    }
+}
+
+// Injection of the Dicom logout handler
+// The way used above (Adding listeners to Spring Security) would be preferred,
+// but Spring doesn't offer an interface for logout, so we had to use a bean.
+// For the bean configuration please refer to conf/spring/resources.groovy
+grails.plugin.springsecurity.logout.handlerNames = [
+   'dicomAuditLogoutHandler',
+]
 
 // Added by the Spring Security Core plugin:
 grails.plugin.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
@@ -168,8 +221,11 @@ if (!Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.LDAP_ENABLED.key
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
         // restricted access to special pages
         "/adminSeed/**"                                        : ["denyAll"],
-        "/console/**"                                          : ["hasRole('ROLE_ADMIN')"],
-        "/plugins/console*/**"                                 : ["hasRole('ROLE_ADMIN')"],
+        // Hack: The dicomAuditConsolseHandler#log method is a pseudo condition
+        // that always returns true and logs the access to the console as side effect.
+        // There is sadly no other way to intercept the access to these URLs.
+        "/console/**"                                          : ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"],
+        "/plugins/console*/**"                                 : ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"],
         "/plugins/**"                                          : ["denyAll"],
         "/projectOverview/mmmlIdentifierMapping/**"            : ["hasRole('ROLE_MMML_MAPPING')"],
         "/j_spring_security_switch_user"                       : ["hasRole('ROLE_SWITCH_USER')"],

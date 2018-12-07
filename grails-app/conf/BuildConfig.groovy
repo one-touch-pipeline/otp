@@ -31,6 +31,15 @@ grails.project.dependency.resolution = {
         // JDBC
         runtime "org.postgresql:postgresql:42.1.4"
 
+        // Dicom Audit Logging
+        if (Environment.isDevelopmentMode()) {
+            compile "de.dkfz.odcf:DicomAuditImpl:1.1-nop"
+        } else {
+            compile "de.dkfz.odcf:DicomAuditImpl:1.1"
+        }
+        compile "de.dkfz.odcf:DicomAudit:1.2"
+        compile "org.slf4j:slf4j-api:1.7.25"
+
         // bioinformatics tools
         // ngstools
         compile "com.google.code.gson:gson:2.2.4"

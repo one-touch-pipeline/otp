@@ -49,6 +49,9 @@ enum OtpProperty {
     CONFIG_SERVER_URL('otp.server.url', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION)),
     CONFIG_ENVIRONMENT_NAME('otp.environment.name', TypeValidators.SINGLE_LINE_TEXT, EnumSet.of(UsedIn.PRODUCTION), Environment.getCurrent().name),
 
+    CONFIG_DICOM_INSTANCE_NAME('dicom.instance.name', TypeValidators.SINGLE_LINE_TEXT, EnumSet.of(UsedIn.PRODUCTION)),
+    CONFIG_DICOM_INSTANCE_ID('dicom.instance.id', TypeValidators.POSITIVE_NUMBER, EnumSet.of(UsedIn.PRODUCTION), "1"),
+
     DEVEL_USE_BACKDOOR('otp.security.useBackdoor', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.DEVELOPMENT), "false"),
     DEVEL_BACKDOOR_USER('otp.security.backdoorUser', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.DEVELOPMENT)),
 

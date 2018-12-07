@@ -4,6 +4,7 @@ import org.springframework.cache.ehcache.EhCacheManagerFactoryBean
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 import org.springframework.security.acls.AclPermissionEvaluator
 import de.dkfz.tbi.otp.security.CustomRequestDataValueProcessor
+import de.dkfz.tbi.otp.security.DicomAuditLogoutHandler
 
 beans = {
     // include Spring Beans with @Component annotation
@@ -57,4 +58,7 @@ beans = {
     }
 
     requestDataValueProcessor(CustomRequestDataValueProcessor)
+
+    // Bean for handling logouts with the Dicom audit logger
+    dicomAuditLogoutHandler(DicomAuditLogoutHandler)
 }

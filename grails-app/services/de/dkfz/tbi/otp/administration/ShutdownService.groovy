@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.administration
 
+import de.dkfz.odcf.audit.impl.*
+import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.security.*
@@ -9,6 +11,8 @@ import org.springframework.beans.factory.*
 import org.springframework.security.access.prepost.*
 
 import java.util.concurrent.locks.*
+
+import static de.dkfz.tbi.otp.security.DicomAuditUtils.*
 
 /**
  * Service to cleanly shutdown the running application.
@@ -49,13 +53,17 @@ class ShutdownService implements DisposableBean {
                 ShutdownInformation info = findShutdownInformationForPlannedShutdown()
                 if (!info) {
                     log.error("Shutdown Information is missing")
+                    DicomAuditLogger.logActorStop(EventOutcomeIndicator.MAJOR_FAILURE, getRealUserName(info.initiatedBy.username))
                     return
                 }
                 markPlannedShutdownAsSucceeded(info)
                 suspendResumeableJobs()
                 log.info("OTP is shutting down")
+                DicomAuditLogger.logActorStop(EventOutcomeIndicator.SUCCESS, info.initiatedBy.username)
             } else {
                 log.warn("OTP is shutting down without a planned shutdown")
+                DicomAuditLogger.logActorStop(EventOutcomeIndicator.SUCCESS,
+                    ConfigService.getInstance().getDicomInstanceName())
             }
         }
     }

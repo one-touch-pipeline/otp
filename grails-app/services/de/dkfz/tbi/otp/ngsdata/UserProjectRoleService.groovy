@@ -1,20 +1,28 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.odcf.audit.impl.*
+import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory.UniqueIdentifierType
+import de.dkfz.odcf.audit.impl.enums.DicomCode.OtpPermissionCode
+import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
+import grails.plugin.springsecurity.*
 import groovy.text.*
 import org.codehaus.groovy.grails.context.support.*
 import org.springframework.context.*
 import org.springframework.context.i18n.*
 import org.springframework.security.access.prepost.*
 
+import static de.dkfz.tbi.otp.security.DicomAuditUtils.*
+
 class UserProjectRoleService {
 
     final static String USER_PROJECT_ROLE_REQUIRED = "the input userProjectRole must not be null"
     final static String USERNAME_REQUIRED = "the input user needs a username"
 
+    SpringSecurityService springSecurityService
     AuditLogService auditLogService
     LdapService ldapService
     MailHelperService mailHelperService
@@ -26,6 +34,11 @@ class UserProjectRoleService {
         assert user: "the user must not be null"
         assert project: "the project must not be null"
 
+        def requestor = springSecurityService?.principal?.hasProperty("username") ? springSecurityService.principal.username : springSecurityService?.principal
+        UserProjectRole oldUPR = UserProjectRole.findByUserAndProject(user, project)
+        List grantedPermissions = getPermissionDiff(true, flags, oldUPR)
+        List revokedPermissions = getPermissionDiff(false, flags, oldUPR)
+
         UserProjectRole userProjectRole = new UserProjectRole([
                 user       : user,
                 project    : project,
@@ -33,6 +46,20 @@ class UserProjectRoleService {
         ] + flags
         )
         userProjectRole.save(flush: true, failOnError: true)
+
+        String studyUID = OtpDicomAuditFactory.generateUID(UniqueIdentifierType.STUDY, String.valueOf(project.id))
+        if (flags.enabled && !oldUPR?.enabled) {
+            DicomAuditLogger.logUserActivated(EventOutcomeIndicator.SUCCESS, getRealUserName(requestor), user.username, studyUID)
+        } else if (!flags.enabled && oldUPR?.enabled) {
+            DicomAuditLogger.logUserDeactivated(EventOutcomeIndicator.SUCCESS, getRealUserName(requestor), user.username, studyUID)
+        }
+
+        if (grantedPermissions) {
+            DicomAuditLogger.logPermissionGranted(EventOutcomeIndicator.SUCCESS, getRealUserName(requestor), user.username, studyUID, *grantedPermissions)
+        }
+        if (revokedPermissions) {
+            DicomAuditLogger.logPermissionRevoked(EventOutcomeIndicator.SUCCESS, getRealUserName(requestor), user.username, studyUID, *revokedPermissions)
+        }
         return userProjectRole
     }
 
@@ -262,5 +289,14 @@ class UserProjectRoleService {
                 }
             }
         } ?: []
+    }
+
+    List<OtpPermissionCode> getPermissionDiff(boolean added, Map flags, UserProjectRole oldUPR) {
+        return [
+            (added == flags.accessToOtp)             && (added == !oldUPR?.accessToOtp)            ? [OtpPermissionCode.OTP_ACCESS] : [],
+            (added == flags.accessToFiles)           && (added == !oldUPR?.accessToFiles)          ? [OtpPermissionCode.FILE_ACCESS] : [],
+            (added == flags.manageUsers)             && (added == !oldUPR?.manageUsers)            ? [OtpPermissionCode.MANAGE_USERS] : [],
+            (added == flags.manageUsersAndDelegate)  && (added == !oldUPR?.manageUsersAndDelegate) ? [OtpPermissionCode.DELEGATE_MANAGE_USERS] : [],
+        ].flatten()
     }
 }

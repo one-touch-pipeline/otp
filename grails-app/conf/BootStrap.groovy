@@ -1,3 +1,5 @@
+import de.dkfz.odcf.audit.impl.*
+import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.job.scheduler.*
@@ -36,6 +38,7 @@ class BootStrap {
         }
 
         JSON.registerObjectMarshaller(Enum, { Enum e -> e.name() })
+        DicomAuditLogger.logActorStart(EventOutcomeIndicator.SUCCESS, ConfigService.getInstance().getDicomInstanceName())
     }
 
     def destroy = {

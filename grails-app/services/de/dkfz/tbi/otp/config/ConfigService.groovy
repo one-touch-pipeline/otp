@@ -171,6 +171,13 @@ class ConfigService implements ApplicationContextAware {
         }
     }
 
+    String getDicomInstanceName() {
+        return otpProperties.get(OtpProperty.CONFIG_DICOM_INSTANCE_NAME)
+    }
+
+    int getDicomInstanceId() {
+        return otpProperties.get(OtpProperty.CONFIG_DICOM_INSTANCE_NAME, 1)
+    }
 
     private File getAndCheckPathFromProperty(OtpProperty property) {
         File file = new File(otpProperties.get(property) ?: property.defaultValue)
