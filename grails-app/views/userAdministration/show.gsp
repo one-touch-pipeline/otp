@@ -54,6 +54,7 @@
                     <th><g:message code="user.administration.projectOverview.manageUsers"/></th>
                     <th><g:message code="user.administration.projectOverview.manageUsersAndDelegate"/></th>
                     <th><g:message code="user.administration.projectOverview.receivesNotifications"/></th>
+                    <th><g:message code="user.administration.projectOverview.enabled"/></th>
                 </tr>
                 <g:if test="${!userProjectRolesSortedByProjectName}">
                     <tr>
@@ -71,6 +72,7 @@
                         <td><span class="icon-${userProjectRole.manageUsers}"></span></td>
                         <td><span class="icon-${userProjectRole.manageUsersAndDelegate}"></span></td>
                         <td><span class="icon-${userProjectRole.receivesNotifications}"></span></td>
+                        <td><span class="icon-${userProjectRole.enabled}"></span></td>
                     </tr>
                 </g:each>
             </table>
