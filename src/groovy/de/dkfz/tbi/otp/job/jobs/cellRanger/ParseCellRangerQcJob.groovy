@@ -26,10 +26,13 @@ class ParseCellRangerQcJob extends AbstractEndStateAwareJobImpl implements AutoR
     void execute() throws Exception {
         SingleCellBamFile singleCellBamFile = getProcessParameterObject() as SingleCellBamFile
 
-        CellRangerQualityAssessment qa = cellRangerService.parseCellRangerQaStatistics(singleCellBamFile)
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(singleCellBamFile, (QcTrafficLightValue) qa)
+        SingleCellBamFile.withTransaction {
+            CellRangerQualityAssessment qa = cellRangerService.parseCellRangerQaStatistics(singleCellBamFile)
+            qcTrafficLightService.setQcTrafficLightStatusBasedOnThreshold(singleCellBamFile, (QcTrafficLightValue) qa)
 
-        singleCellBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
-        singleCellBamFile.save(flush: true)
+            singleCellBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.FINISHED
+            singleCellBamFile.save(flush: true)
+            succeed()
+        }
     }
 }
