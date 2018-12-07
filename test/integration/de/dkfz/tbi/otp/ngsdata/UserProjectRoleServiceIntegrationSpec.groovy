@@ -582,6 +582,26 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         emails.sort() == expectedEmails.sort()
     }
 
+    void "getEmailsOfToBeNotifiedProjectUsers, do not return email of disabled user"() {
+        given:
+        Project project = DomainFactory.createProject()
+        DomainFactory.createUserProjectRole(
+                user: DomainFactory.createUser([
+                        enabled: false
+                ]),
+                project: project,
+                receivesNotifications: true,
+                enabled: true,
+        )
+
+        when:
+        List<String> emails = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project)
+
+        then:
+        emails.empty
+    }
+
+
     PluginAwareResourceBundleMessageSource getMessageSource() {
         return Mock(PluginAwareResourceBundleMessageSource) {
             _ * getMessageInternal("projectUser.notification.addToUnixGroup.subject", [], _) >>

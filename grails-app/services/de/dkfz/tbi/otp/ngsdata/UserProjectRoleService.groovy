@@ -282,6 +282,9 @@ class UserProjectRoleService {
                 'in'('project', projects)
                 eq('receivesNotifications', true)
                 eq('enabled', true)
+                user {
+                    eq('enabled', true)
+                }
             }
             projections {
                 user {
