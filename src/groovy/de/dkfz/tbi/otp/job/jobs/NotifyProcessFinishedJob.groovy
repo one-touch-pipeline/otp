@@ -17,10 +17,10 @@ class NotifyProcessFinishedJob extends AbstractEndStateAwareJobImpl implements A
 
     @Override
     void execute() throws Exception {
-        log.debug("try: processFinished")
+        log.trace("NotifyProcessFinishedJob: entering trackingService.processFinished")
         trackingService.processFinished(processParameterObject.containedSeqTracks)
-        log.debug("try: succeed")
+        log.trace("NotifyProcessFinishedJob: entering succeed")
         succeed()
-        log.debug("succeeded")
+        log.trace("NotifyProcessFinishedJob: succeeded")
     }
 }

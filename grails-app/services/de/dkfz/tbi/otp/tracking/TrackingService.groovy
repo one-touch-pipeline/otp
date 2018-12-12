@@ -114,8 +114,9 @@ class TrackingService {
 
     void processFinished(Set<SeqTrack> seqTracks) {
         SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()
-        LogThreadLocal.getThreadLog()?.debug("SPD: ${samplePairDiscovery}; OtrsTickets: ${findAllOtrsTickets(seqTracks)}; SeqTracks: ${seqTracks*.id}")
-        for (OtrsTicket ticket : findAllOtrsTickets(seqTracks)) {
+        Set<OtrsTicket> otrsTickets = findAllOtrsTickets(seqTracks)
+        LogThreadLocal.getThreadLog()?.trace("evaluating processFinished for SPD: ${samplePairDiscovery}; OtrsTickets: ${otrsTickets}; SeqTracks: ${seqTracks*.id}")
+        for (OtrsTicket ticket : otrsTickets) {
             setFinishedTimestampsAndNotify(ticket, samplePairDiscovery)
         }
     }
@@ -137,17 +138,17 @@ class TrackingService {
                 anythingJustCompleted = true
                 ticket."${step}Finished" = now
                 sendCustomerNotification(ticket, status, step)
-                LogThreadLocal.getThreadLog()?.info("OTRS Ticket: ${ticket.ticketNumber}: ${step}")
+                LogThreadLocal.getThreadLog()?.info("sent customer notification for OTRS Ticket ${ticket.ticketNumber}: ${step}")
             }
             if (stepStatus.mightDoMore) {
                 mightDoMore = true
             }
         }
         if (anythingJustCompleted) {
-            LogThreadLocal.getThreadLog()?.debug("if anythingJustCompleted")
+            LogThreadLocal.getThreadLog()?.trace("inside if anythingJustCompleted, sending operator notification")
             sendOperatorNotification(ticket, seqTracks, status, !mightDoMore)
             if (!mightDoMore) {
-                LogThreadLocal.getThreadLog()?.debug("if !mightDoMore")
+                LogThreadLocal.getThreadLog()?.trace("!mightDoMore: marking as finalNotificationSent")
                 ticket.finalNotificationSent = true
             }
             assert ticket.save(flush: true)
