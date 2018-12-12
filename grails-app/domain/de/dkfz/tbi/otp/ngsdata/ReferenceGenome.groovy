@@ -20,11 +20,7 @@ class ReferenceGenome implements Entity {
     /**
      * Reference genome specific directory
      *
-     * The complete path to the files containing reference genome information consists of 4 parts:
-     * ${realmSpecificPath}: depends on the realm and must be generated with some logic.
-     * ${allReferenceGenomes}: directory containing all reference genomes at this ${realmSpecificPath}.
-     * ${referenceGenomeSpecificPath}: directory, which is specific for the reference genome (is stored in this property).
-     * ${refGenomeFileNamePrefix}.*: prefix name of all files, which belong to one reference genome.
+     * This directory is in {@link de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName#BASE_PATH_REFERENCE_GENOME}.
      */
     String path
 
