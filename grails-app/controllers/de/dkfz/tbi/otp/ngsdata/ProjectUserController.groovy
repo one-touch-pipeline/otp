@@ -92,7 +92,7 @@ class ProjectUserController implements CheckAndCall {
 
     def addUserToProject(AddUserToProjectCommand cmd) {
         String message
-        String errorMessage = ""
+        String errorMessage = null
         if (cmd.hasErrors()) {
             FieldError cmdErrors = cmd.errors.getFieldError()
             errorMessage = "'" + cmdErrors.getRejectedValue() + "' is not a valid value for '" + cmdErrors.getField() + "'. Error code: '" + cmdErrors.code + "'"
@@ -126,7 +126,11 @@ class ProjectUserController implements CheckAndCall {
                 errorMessage = e.message
             }
         }
-        flash.message = new FlashMessage(message, [errorMessage])
+        FlashMessage flashMessage = new FlashMessage(message)
+        if (errorMessage) {
+            flashMessage = new FlashMessage(message, [errorMessage])
+        }
+        flash.message = flashMessage
         redirect(controller: "projectUser")
     }
 

@@ -67,12 +67,13 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
 
         switch (permission) {
             case "ADD_USER":
-                return UserProjectRole.createCriteria().get {
+                return UserProjectRole.createCriteria().list {
                     eq("user", activeUser)
                     or {
                         eq("manageUsers", true)
                         eq("manageUsersAndDelegate", true)
                     }
+                    eq("enabled", true)
                 }
             default:
                 return false

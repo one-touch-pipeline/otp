@@ -164,4 +164,31 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         false       | true                   || true
         true        | true                   || true
     }
+
+    @Unroll
+    void "hasPermission, ADD_USER only considers enabled UserProjectRole entries (enabled=#enabled)"() {
+        given:
+        userProjectRole.enabled = enabled
+        3.times {
+            DomainFactory.createUserProjectRole(user: userProjectRole.user, manageUsersAndDelegate: true, enabled: false)
+        }
+
+        expect:
+        expected == permissionEvaluator.hasPermission(authentication, null, "ADD_USER")
+
+        where:
+        enabled || expected
+        true    || true
+        false   || false
+    }
+
+    void "hasPermission, ADD_USER takes all enabled UserProjectRoles of the user into account"() {
+        given:
+        3.times {
+            DomainFactory.createUserProjectRole(user: userProjectRole.user, manageUsersAndDelegate: true, enabled: true)
+        }
+
+        expect:
+        permissionEvaluator.hasPermission(authentication, null, "ADD_USER")
+    }
 }
