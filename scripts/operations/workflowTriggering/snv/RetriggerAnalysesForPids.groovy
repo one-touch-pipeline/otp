@@ -2,7 +2,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.utils.logging.*
 
-println "\n\nretrigger snv for pids: "
+println "\n\nRetrigger analyses for pids: "
 def samplePairs = SamplePair.withCriteria {
     mergingWorkPackage1 {
         sample {
@@ -24,14 +24,22 @@ println samplePairs.size()
 LogThreadLocal.withThreadLog(System.out, {
     SamplePair.withTransaction {
         samplePairs.each { SamplePair samplePair ->
-            AbstractSnvCallingInstance.findAllBySamplePair(samplePair).each { AbstractSnvCallingInstance instance ->
+            BamFilePairAnalysis.findAllBySamplePair(samplePair).each { BamFilePairAnalysis instance ->
                 if (instance.processingState == AnalysisProcessingStates.IN_PROGRESS) {
                     instance.withdrawn = true
                     instance.save(flush: true, failOnError: true)
                 }
             }
 
-            samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            [
+                "snvProcessingStatus",
+                "indelProcessingStatus",
+                "sophiaProcessingStatus",
+                "aceseqProcessingStatus",
+                "runYapsaProcessingStatus",
+            ].each {
+                samplePair."$it" = SamplePair.ProcessingStatus.NEEDS_PROCESSING
+            }
             println samplePair.save(flush: true, failOnError: true)
         }
     }
