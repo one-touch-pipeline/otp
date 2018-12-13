@@ -7,25 +7,20 @@
 </head>
 <body>
     <div class="body">
+        <g:render template="/templates/messages"/>
         <h1><g:message code="serverShutdown.title"/></h1>
-        <p style="display: none" id="shutdownInfo"></p>
         <p>
-            <label for="shutdownReason">Reason for Shutdown:</label><input type="text" id="shutdownReason"/>
-            <button id="planShutdown">Plan Shutdown</button>
+            <g:if test="${shutdownSucceeded}">
+                <g:message code="serverShutdown.successful"/>
+            </g:if>
+            <g:else>
+                <g:form action="planShutdown">
+                    <label for="shutdownReason"><g:message code="serverShutdown.reason"/></label>
+                    <input type="text" name="reason" id="shutdownReason"/>
+                    <g:submitButton name="Plan Shutdown"/>
+                </g:form>
+            </g:else>
         </p>
     </div>
-    <asset:script>
-    $("#planShutdown").click(function () {
-        $.getJSON("${g.createLink(action: 'planShutdown')}", {reason: $("#shutdownReason").val()}, function (data) {
-            if (data.success === true) {
-                $("#shutdownInfo").text("Server shutdown planned");
-                $("#shutdownInfo").show();
-            } else {
-                $("#shutdownInfo").text("Server shutdown could not be scheduled!");
-                $("#shutdownInfo").show();
-            }
-        });
-    });
-    </asset:script>
 </body>
 </html>

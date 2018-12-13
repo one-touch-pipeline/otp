@@ -8,12 +8,12 @@
 <body>
     <div class="body">
     <!-- TODO: global info messages -->
-        <div style="display: none" id="shutdownInfo"></div>
+        <g:render template="/templates/messages"/>
         <h2>A Shutdown is currently in process.</h2>
         <table>
             <tbody>
                 <tr>
-                    <th>Initiated By:</th>
+                    <th>Initiated by:</th>
                     <td>${shutdown.initiatedBy.username}</td>
                 </tr>
                 <tr>
@@ -21,7 +21,7 @@
                     <td>${shutdown.initiated}</td>
                 </tr>
                 <tr>
-                    <th>Reason for Shutdown</th>
+                    <th>Reason for Shutdown:</th>
                     <td>${shutdown.reason}</td>
                 </tr>
             </tbody>
@@ -45,7 +45,7 @@
                     </tr>
                 </g:each>
             </tbody>
-        <table>
+        </table>
         <h2>List of running Jobs which can be resumed</h2>
         <table>
             <thead>
@@ -65,32 +65,16 @@
                     </tr>
                 </g:each>
             </tbody>
-        <table>
+        </table>
         <hr/>
         <div>
-        <button id="cancelShutdown">Cancel Shutdown</button><button id="shutdownApplication">Stop Application Context</button>
+            <g:form action="cancelShutdown" style="display: inline">
+                <g:submitButton name="Cancel Shutdown"/>
+            </g:form>
+            <g:form action="closeApplication" style="display: inline">
+                <g:submitButton name="Stop Application Context"/>
+            </g:form>
         </div>
-        <asset:script>
-        $("#cancelShutdown").click(function () {
-            $.getJSON("${g.createLink(action: 'cancelShutdown')}", function (data) {
-                if (data.success === true) {
-                    $("#shutdownInfo").text("Server shutdown canceled");
-                    $("#shutdownInfo").show();
-                } else {
-                    $("#shutdownInfo").text("Server shutdown could not be canceled!");
-                    $("#shutdownInfo").show();
-                }
-            });
-        });
-        $("#shutdownApplication").click(function () {
-            if(confirm("This will stop the running application. Are you sure?") === true) {
-                $.getJSON("${g.createLink(action: 'closeApplication')}", function () {
-                    $("#shutdownInfo").text("Server stopped");
-                    $("#shutdownInfo").show();
-                });
-            }
-        });
-        </asset:script>
     </div>
 </body>
 </html>

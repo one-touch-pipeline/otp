@@ -2,17 +2,18 @@ package de.dkfz.tbi.otp.administration
 
 import de.dkfz.odcf.audit.impl.*
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.security.*
 import grails.plugin.springsecurity.*
+import grails.validation.*
 import org.codehaus.groovy.grails.commons.*
 import org.springframework.beans.factory.*
 import org.springframework.security.access.prepost.*
-
+import org.springframework.validation.*
 import java.util.concurrent.locks.*
-
-import static de.dkfz.tbi.otp.security.DicomAuditUtils.*
 
 /**
  * Service to cleanly shutdown the running application.
@@ -25,51 +26,38 @@ import static de.dkfz.tbi.otp.security.DicomAuditUtils.*
 class ShutdownService implements DisposableBean {
     // service is not transactional as the database access has to be locked
     static transactional = false
-    /**
-     * Dependency Injection of GrailsApplication.
-     */
+
     GrailsApplication grailsApplication
-    /**
-     * Dependency Injection of SchedulerService.
-     * Required to suspend and resume the scheduler
-     */
     SchedulerService schedulerService
-    /**
-     * Dependency Injection of SpringSecurityService
-     */
     SpringSecurityService springSecurityService
-
     ProcessService processService
-
-    UserService userService
+    ConfigService configService
 
     // all methods in this service contain critical sections to not start two shutdowns
     private final ReentrantLock lock = new ReentrantLock()
+    private static boolean shutdownSuccessful = false
 
     @Override
     void destroy() {
-        ShutdownInformation.withNewSession { session ->
-            if (isShutdownPlanned()) {
-                ShutdownInformation info = findShutdownInformationForPlannedShutdown()
-                if (!info) {
-                    log.error("Shutdown Information is missing")
-                    DicomAuditLogger.logActorStop(EventOutcomeIndicator.MAJOR_FAILURE, getRealUserName(info.initiatedBy.username))
-                    return
-                }
-                markPlannedShutdownAsSucceeded(info)
+        ShutdownInformation info = getCurrentPlannedShutdown()
+        if (info) {
+            ShutdownInformation.withTransaction {
+                info.succeeded = new Date()
+                info.save(flush: true)
                 suspendResumeableJobs()
                 log.info("OTP is shutting down")
                 DicomAuditLogger.logActorStop(EventOutcomeIndicator.SUCCESS, info.initiatedBy.username)
-            } else {
-                log.warn("OTP is shutting down without a planned shutdown")
-                DicomAuditLogger.logActorStop(EventOutcomeIndicator.SUCCESS,
-                    ConfigService.getInstance().getDicomInstanceName())
+
             }
+        } else {
+            log.warn("OTP is shutting down without a planned shutdown")
+            DicomAuditLogger.logActorStop(EventOutcomeIndicator.SUCCESS,
+                    configService.getDicomInstanceName())
         }
+        shutdownSuccessful = true
     }
 
-    void suspendResumeableJobs() {
-        // TODO: check that all jobs have really stopped
+    private void suspendResumeableJobs() {
         List<ProcessingStep> runningJobs = schedulerService.retrieveRunningProcessingSteps()
         runningJobs.each { ProcessingStep step ->
             if (isJobResumable(step)) {
@@ -87,27 +75,17 @@ class ShutdownService implements DisposableBean {
      * @param reason The reason why the server is being shut down. This is logged in the database.
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    void planShutdown(String reason) {
+    Errors planShutdown(String reason) {
         lock.lock()
         try {
-            if (isShutdownPlanned()) {
-                // TODO: throw exception
-                return
-            }
-            ShutdownInformation.withTransaction { status ->
+            ShutdownInformation.withTransaction {
                 User user = User.findByUsername(springSecurityService.authentication.principal.username)
                 ShutdownInformation info = new ShutdownInformation(initiatedBy: user, initiated: new Date(), reason: reason)
-                if (!info.validate()) {
-                    println info.errors
-                    status.setRollbackOnly()
-                    // TODO: throw exception
-                }
-                if (!info.save(flush: true)) {
-                    status.setRollbackOnly()
-                    // TODO: throw exception
-                }
+                info.save(flush: true)
+                schedulerService.suspendScheduler()
             }
-            schedulerService.suspendScheduler()
+        } catch (ValidationException e) {
+            return e.errors
         } finally {
             lock.unlock()
         }
@@ -118,57 +96,24 @@ class ShutdownService implements DisposableBean {
      * The scheduler gets started again.
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    void cancelShutdown() {
-        lock.lock()
-        try {
-            if (!isShutdownPlanned()) {
-                // TODO: throw Exception
-            }
-            ShutdownInformation.withTransaction { status ->
-                ShutdownInformation info = findShutdownInformationForPlannedShutdown()
-                if (!info) {
-                    status.setRollbackOnly()
-                    // TODO: throw exception
-                }
-                info.canceledBy = User.findByUsername(springSecurityService.authentication.principal.username)
-                info.canceled = new Date()
-                if (!info.validate()) {
-                    println info.errors
-                    status.setRollbackOnly()
-                    // TODO: throw exception
-                }
-                if (!info.save(flush: true)) {
-                    status.setRollbackOnly()
-                    // TODO: throw exception
-                }
-            }
-            schedulerService.resumeScheduler()
-        } finally {
-            lock.unlock()
-        }
-    }
-
-    /**
-     * Checks whether a shutdown is currently planned.
-     * @return true if there is a running shutdown.
-     */
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    boolean isShutdownPlanned() {
-        boolean planned = false
+    Errors cancelShutdown() throws OtpException {
         lock.lock()
         try {
             ShutdownInformation.withTransaction {
-                ShutdownInformation info = findShutdownInformationForPlannedShutdown()
-                if (info) {
-                    planned = true
-                } else {
-                    planned = false
+                ShutdownInformation info = getCurrentPlannedShutdown()
+                if (!info) {
+                    throw new OtpException('Canceling Shutdown failed since there is no shutdown in progress')
                 }
+                info.canceledBy = User.findByUsername(springSecurityService.authentication.principal.username)
+                info.canceled = new Date()
+                info.save(flush: true)
+                schedulerService.resumeScheduler()
             }
+        } catch (ValidationException e) {
+            return e.errors
         } finally {
             lock.unlock()
         }
-        return planned
     }
 
     /**
@@ -177,7 +122,7 @@ class ShutdownService implements DisposableBean {
      */
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     ShutdownInformation getCurrentPlannedShutdown() {
-        return findShutdownInformationForPlannedShutdown()
+        return ShutdownInformation.findBySucceededIsNullAndCanceledIsNull()
     }
 
     /**
@@ -189,14 +134,8 @@ class ShutdownService implements DisposableBean {
         return schedulerService.retrieveRunningProcessingSteps()
     }
 
-    /**
-     * Finds the ShutdownInformation for the planned shutdown. A shutdown is planned if an entry exists that is
-     * neither marked as succeed nor cancelled.
-     *
-     * @return The ShutdownInformation for a requested shutdown, or {@code null} otherwise.
-     */
-    private static ShutdownInformation findShutdownInformationForPlannedShutdown() {
-        ShutdownInformation.findBySucceededIsNullAndCanceledIsNull()
+    boolean isShutdownSuccessful() {
+        return shutdownSuccessful
     }
 
     /**
@@ -211,18 +150,6 @@ class ShutdownService implements DisposableBean {
         }
     }
 
-    private static void markPlannedShutdownAsSucceeded(ShutdownInformation info) {
-        info.succeeded = new Date()
-        if (!info.validate()) {
-            // ???
-            info.error("Succeeded date for Shutdown Information could not be stored")
-        }
-        if (!info.save(flush: true)) {
-            // ???????????????
-            info.error("Succeeded date for Shutdown Information could not be stored")
-        }
-    }
-
     private void suspendProcessingStep(ProcessingStep step) {
         processService.setOperatorIsAwareOfFailure(step.process, false)
         ProcessingStepUpdate update = new ProcessingStepUpdate(
@@ -231,8 +158,6 @@ class ShutdownService implements DisposableBean {
                 previous: step.latestProcessingStepUpdate,
                 processingStep: step
         )
-        if (!update.save(flush: true)) {
-            log.error("ProcessingStep ${step.id} could not be suspended")
-        }
+        update.save(flush: true)
     }
 }

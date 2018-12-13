@@ -53,6 +53,9 @@ class ShutdownInformation implements Entity {
                 // initiated has to be before succeeded date
                 return false
             }
+            if (info.succeeded == null && info.canceled == null && ShutdownInformation.findBySucceededIsNullAndCanceledIsNull() != info) {
+                return false
+            }
             return true
         })
         canceledBy(nullable: true, validator: { User user, ShutdownInformation info ->

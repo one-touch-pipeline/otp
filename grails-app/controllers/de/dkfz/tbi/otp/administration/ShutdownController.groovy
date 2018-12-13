@@ -1,67 +1,87 @@
 package de.dkfz.tbi.otp.administration
 
-import grails.converters.JSON
-import grails.plugin.springsecurity.annotation.Secured
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.job.processing.*
+import grails.plugin.springsecurity.annotation.*
+import org.springframework.validation.Errors
 
 @Secured(['ROLE_ADMIN'])
 class ShutdownController {
     ShutdownService shutdownService
 
+    static allowedMethods = [
+            index: "GET",
+            planShutdown: "POST",
+            cancelShutdown: "POST",
+            closeApplication: "POST",
+    ]
+
     def index() {
-        if (shutdownService.shutdownPlanned) {
-            redirect action: "status"
-        }
-    }
-
-    def status() {
-        def shutdownInformation = shutdownService.currentPlannedShutdown
-        if (!shutdownInformation) {
-            redirect action: "index"
-        }
-        List runningJobs = shutdownService.runningJobs
-        List resumableJobs = []
-        List notResumableJobs = []
-        runningJobs.each {
-            if (shutdownService.isJobResumable(it)) {
-                resumableJobs << it
-            } else {
-                notResumableJobs << it
+        ShutdownInformation shutdownInformation = shutdownService.currentPlannedShutdown
+        if (shutdownInformation == null) {
+            return [
+                    shutdownSucceeded: shutdownService.shutdownSuccessful
+            ]
+        } else {
+            List<ProcessingStep> runningJobs = shutdownService.runningJobs
+            List<ProcessingStep> resumableJobs = []
+            List<ProcessingStep> notResumableJobs = []
+            runningJobs.each {
+                if (shutdownService.isJobResumable(it)) {
+                    resumableJobs << it
+                } else {
+                    notResumableJobs << it
+                }
             }
+            render(view: "status", model: [
+                    shutdown: shutdownInformation,
+                    resumableJobs: resumableJobs,
+                    notResumableJobs: notResumableJobs,
+            ])
         }
-        [shutdown: shutdownInformation, resumableJobs: resumableJobs, notResumableJobs: notResumableJobs]
     }
 
-    def planShutdown() {
-        boolean ok = false
+    def planShutdown(ShutdownCommand cmd) {
         try {
-            shutdownService.planShutdown(params.reason)
-            ok = true
-        } catch (RuntimeException e) {
-            println(e.message)
-            e.printStackTrace()
-            ok = false
+            Errors errors = shutdownService.planShutdown(cmd.reason)
+            if (errors) {
+                flash.message = new FlashMessage('Error while planning shutdown', errors)
+            } else {
+                flash.message = new FlashMessage("Server shutdown planned")
+            }
+        } catch (OtpException e) {
+            log.error(e.message, e)
+            flash.message = new FlashMessage("Server shutdown could not be scheduled", [e.message])
         }
-        Map data = [success: ok]
-        render data as JSON
+        redirect(action: "index")
     }
 
     def cancelShutdown() {
-        boolean ok = false
         try {
-            shutdownService.cancelShutdown()
-            ok = true
-        } catch (RuntimeException e) {
-            println(e.message)
-            e.printStackTrace()
-            ok = false
+            Errors errors = shutdownService.cancelShutdown()
+            if (errors) {
+                flash.message = new FlashMessage('Error while canceling shutdown', errors)
+            } else {
+                flash.message = new FlashMessage("Server shutdown canceled")
+            }
+        } catch (OtpException e) {
+            log.error(e.message, e)
+            flash.message = new FlashMessage("Server shutdown could not be canceled", [e.message])
         }
-        Map data = [success: ok]
-        render data as JSON
+        redirect(action: "index")
     }
 
     def closeApplication() {
-        shutdownService.destroy()
-        Map data = [shutdown: true]
-        render data as JSON
+        try {
+            shutdownService.destroy()
+        } catch (Throwable e) {
+            log.error(e.message, e)
+            flash.message = new FlashMessage("Server could not be stopped", [e.message])
+        }
+        redirect(action: "index")
     }
+}
+
+class ShutdownCommand {
+    String reason
 }
