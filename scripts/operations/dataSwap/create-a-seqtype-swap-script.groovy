@@ -2,7 +2,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 /**
  * Generation script for LaneSwaps
- *
  */
 
 
@@ -43,6 +42,7 @@ List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
 }
 
 /**
+ * This closure determines the new properties of each seqtrack. It is executed for each seqtrack individually.
  * Overwrite in the map the value you would like to change for each seqTrack
  */
 def adaptValues = { SeqTrack oldSeqTrack ->
@@ -60,9 +60,9 @@ def adaptValues = { SeqTrack oldSeqTrack ->
 //script area
 //------------------------------
 
-int counter =0
+int counter = 0
 StringBuilder script = new StringBuilder()
-List<String> files = []
+List<String> all_swaps = []
 
 script << """
 import de.dkfz.tbi.otp.ngsdata.*
@@ -74,7 +74,7 @@ import static org.springframework.util.Assert.*
 
 DataSwapService dataSwapService = ctx.dataSwapService
 
-StringBuilder outputStringBuilder = new StringBuilder()
+StringBuilder log = new StringBuilder()
 
 final String SCRIPT_OUTPUT_DIRECTORY = "\${ConfigService.getInstance().getScriptOutputPath()}/sample_swap/"
 
@@ -91,9 +91,9 @@ try {
 seqTracks.each { seqTrack ->
     Map newValues = adaptValues(seqTrack)
 
-    String name = "${seqTrack.individual.pid}__${seqTrack.run.name}__${seqTrack.laneId}__${seqTrack.seqType.name}__to__${newValues.newSeqTypeName}".replace('-', '_')
-    String fileName = "swap_${String.valueOf(counter++).padLeft(4, '0')}_${name}"
-    files << fileName
+    String swapName = "${seqTrack.individual.pid}__${seqTrack.run.name}__${seqTrack.laneId}__${seqTrack.seqType.name}__to__${newValues.newSeqTypeName}".replace('-', '_')
+    String swapOrderedName = "swap_${String.valueOf(counter++).padLeft(4, '0')}_${swapName}"
+    all_swaps << swapOrderedName
 
     script << """
     {
@@ -123,8 +123,8 @@ seqTracks.each { seqTrack ->
 
     script << """
             ],
-            '${fileName}',
-            outputStringBuilder,
+            '${swapOrderedName}',
+            log,
             failOnMissingFiles,
             SCRIPT_OUTPUT_DIRECTORY,
             linkedFilesVerified,
@@ -137,10 +137,10 @@ script << """
         ].each {
             it()
         }
-        assert false
+        assert false : "transaction intentionally failed to rollback transaction"
     }
 } finally {
-    println outputStringBuilder
+    println log
 }
 
 """
@@ -148,7 +148,7 @@ script << """
 script << """
 //scripts to execute
 /*
-${DataSwapService.bashHeader + files.collect {
+${DataSwapService.bashHeader + all_swaps.collect {
     "bash ${it}.sh"
 }.join('\n')}
 */
