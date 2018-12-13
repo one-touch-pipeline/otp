@@ -78,6 +78,8 @@
                 <th><g:message code="otp.blank"/></th>
                 <th><g:message code="workflow.paramater.table.headers.clusterJobName"/></th>
                 <th><g:message code="workflow.paramater.table.headers.clusterJob"/></th>
+                <th><g:message code="workflow.paramater.table.headers.jobResult"/></th>
+                <th><g:message code="workflow.paramater.table.headers.node"/></th>
                 <th><g:message code="otp.blank"/></th>
             </tr>
             </thead>
@@ -96,6 +98,10 @@
                             ${clusterJob.clusterJobId} (<g:message code="processes.processingStep.log.noFile"/>)
                         </g:else>
                     </td>
+                    <td>
+                        <span class="clusterJobExitStatus ${clusterJob.exitStatus}">${"${clusterJob.exitStatus}: ${clusterJob.exitCode}"}</span>
+                    </td>
+                    <td>${clusterJob.node ?: "-"}</td>
                     <td></td>
                 </tr>
             </g:each>
