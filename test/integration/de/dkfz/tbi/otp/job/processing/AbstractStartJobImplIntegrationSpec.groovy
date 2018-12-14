@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.spock.*
 import spock.lang.*
@@ -19,6 +20,10 @@ class AbstractStartJobImplIntegrationSpec extends IntegrationSpec {
         ] as AbstractStartJobImpl
         job.optionService = new ProcessingOptionService()
 
+        job.schedulerService = Mock(SchedulerService) {
+            _ * isActive() >> true
+        }
+
         3.times {
             DomainFactory.createProcess(jobExecutionPlan: jep, finished: true)
         }
@@ -29,10 +34,24 @@ class AbstractStartJobImplIntegrationSpec extends IntegrationSpec {
         job = [
                 getJobExecutionPlan : { -> null },
         ] as AbstractStartJobImpl
+        job.schedulerService = Mock(SchedulerService) {
+            _ * isActive() >> true
+        }
 
         expect:
         job.minimumProcessingPriorityForOccupyingASlot == ProcessingPriority.SUPREMUM
     }
+
+    void "test getMinimumProcessingPriorityForOccupyingASlot, job system is disabled"() {
+        given:
+        job.schedulerService = Mock(SchedulerService) {
+            _ * isActive() >> false
+        }
+
+        expect:
+        job.minimumProcessingPriorityForOccupyingASlot == ProcessingPriority.SUPREMUM
+    }
+
 
     @Unroll
     void "test getMinimumProcessingPriorityForOccupyingASlot, JobExecutionPlan obsoleted #obsoleted enabled #enabled"() {

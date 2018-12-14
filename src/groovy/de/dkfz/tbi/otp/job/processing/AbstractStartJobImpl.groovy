@@ -162,10 +162,14 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      * </ul>
      */
     protected ProcessingPriority getMinimumProcessingPriorityForOccupyingASlot() {
+        if (!schedulerService.active) {
+            return ProcessingPriority.SUPREMUM
+        }
         final JobExecutionPlan plan = getJobExecutionPlan()
         if (!plan || plan.obsoleted || !plan.enabled) {
             return ProcessingPriority.SUPREMUM
         }
+
         final int occupiedSlots = Process.countByFinishedAndJobExecutionPlan(false, plan)
         final int totalSlots = optionService.findOptionAsInteger(OptionName.MAXIMUM_NUMBER_OF_JOBS, plan.name)
         if (occupiedSlots >= totalSlots) {

@@ -24,6 +24,7 @@ class ImportExternallyMergedBamStartJobIntegrationSpec extends IntegrationSpec {
         ImportExternallyMergedBamStartJob importExternallyMergedBamStartJob = new ImportExternallyMergedBamStartJob()
         importExternallyMergedBamStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> null
+            _ * isActive() >> true
         }
         importExternallyMergedBamStartJob.optionService = new ProcessingOptionService()
         importExternallyMergedBamStartJob.setJobExecutionPlan(plan)

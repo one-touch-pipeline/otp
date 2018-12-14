@@ -22,6 +22,7 @@ class DataInstallationStartJobIntegrationSpec extends IntegrationSpec {
         DataInstallationStartJob dataInstallationStartJob = new DataInstallationStartJob()
         dataInstallationStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> null
+            _ * isActive() >> true
         }
         dataInstallationStartJob.optionService = new ProcessingOptionService()
 

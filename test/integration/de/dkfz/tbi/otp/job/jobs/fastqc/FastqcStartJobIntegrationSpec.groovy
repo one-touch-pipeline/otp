@@ -23,6 +23,7 @@ class FastqcStartJobIntegrationSpec extends IntegrationSpec {
         FastqcStartJob fastqcStartJob = new FastqcStartJob()
         fastqcStartJob.schedulerService = Stub(SchedulerService) {
             createProcess(_,_,_) >> null
+            isActive() >> true
         }
         fastqcStartJob.optionService = new ProcessingOptionService()
         fastqcStartJob.seqTrackService = Stub(SeqTrackService) {
