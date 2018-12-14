@@ -6,13 +6,21 @@ trait WithReferenceGenomeRestriction implements BamFileAnalysisServiceTrait {
 
     @Override
     String checkReferenceGenome() {
-        return 'AND sp.mergingWorkPackage1.referenceGenome in (:referenceGenomes)'
+        if (getReferenceGenomes()) {
+            return 'AND sp.mergingWorkPackage1.referenceGenome in (:referenceGenomes)'
+        } else {
+            return "AND 1=0" //to avoid SQL grammar exception for `x IN ()`
+        }
     }
 
     @Override
     Map<String, Object> checkReferenceGenomeMap() {
         List<String> referenceGenomeNames = getReferenceGenomes()
-        return [referenceGenomes: ReferenceGenome.findAllByNameInList(referenceGenomeNames)]
+        if (referenceGenomeNames) {
+            return [referenceGenomes: ReferenceGenome.findAllByNameInList(referenceGenomeNames)]
+        } else {
+            return [:]
+        }
     }
 
     abstract List<String> getReferenceGenomes()
