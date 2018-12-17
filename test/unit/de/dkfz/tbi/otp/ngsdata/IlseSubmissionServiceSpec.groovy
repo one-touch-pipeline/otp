@@ -1,11 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.utils.HelperUtils
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.mixin.Mock
 import grails.validation.ValidationException
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 @Mock([
         Comment,

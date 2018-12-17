@@ -1,6 +1,6 @@
 package de.dkfz.tbi.util.spreadsheet
 
-import spock.lang.*
+import spock.lang.Specification
 
 class FilteredSpreadsheetSpec extends Specification {
 

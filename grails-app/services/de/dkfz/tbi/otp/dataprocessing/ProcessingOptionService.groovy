@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.security.access.prepost.*
+import org.springframework.security.access.prepost.PreAuthorize
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.job.processing.ProcessingException
+import de.dkfz.tbi.otp.ngsdata.Project
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.singleElement
 
 class ProcessingOptionService {
 

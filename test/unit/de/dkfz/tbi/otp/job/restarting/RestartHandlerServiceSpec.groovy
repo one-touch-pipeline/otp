@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.job.restarting
 
+import grails.test.mixin.Mock
+import org.apache.commons.logging.Log
+import spock.lang.Specification
+import spock.lang.Unroll
+
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import org.apache.commons.logging.*
-import spock.lang.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 @Mock([
         JobErrorDefinition,

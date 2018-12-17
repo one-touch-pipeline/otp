@@ -1,9 +1,12 @@
 package de.dkfz.tbi.otp.config
 
-import de.dkfz.tbi.otp.job.plan.*
+import grails.test.mixin.Mock
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import spock.lang.*
 
 @Mock([
         JobExecutionPlan,

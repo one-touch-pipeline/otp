@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
+import de.dkfz.tbi.otp.job.plan.DecidingJobDefinition
 import de.dkfz.tbi.otp.job.plan.JobDecision
 
 /**

@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import groovy.transform.*
+import groovy.transform.TupleConstructor
 
 /**
  * Data with a higher processing priority value should be processed before data with a lower processing priority value.

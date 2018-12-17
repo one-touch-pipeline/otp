@@ -1,16 +1,18 @@
 package de.dkfz.tbi.otp.job.processing
 
+import grails.util.Environment
+import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
+import org.hibernate.Hibernate
+import org.springframework.beans.factory.BeanNameAware
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationListener
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.job.plan.*
-import de.dkfz.tbi.otp.job.scheduler.*
-import de.dkfz.tbi.otp.tracking.*
-import grails.util.*
-import org.codehaus.groovy.grails.support.*
-import org.hibernate.*
-import org.springframework.beans.factory.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.plan.StartJobDefinition
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.tracking.TrackingService
 
 
 /**

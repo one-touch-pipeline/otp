@@ -1,9 +1,12 @@
 package de.dkfz.tbi.otp.egaSubmission
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
+import org.springframework.security.access.prepost.PreAuthorize
+
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
-import groovy.transform.*
-import org.springframework.security.access.prepost.*
 
 @CompileStatic
 class EgaSubmissionService {

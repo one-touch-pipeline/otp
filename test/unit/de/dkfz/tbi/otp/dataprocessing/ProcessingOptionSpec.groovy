@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.test.mixin.Mock
+import spock.lang.Specification
+import spock.lang.Unroll
+
 import de.dkfz.tbi.TestCase
-import grails.test.mixin.*
-import spock.lang.*
 
 @Mock([
         ProcessingOption,

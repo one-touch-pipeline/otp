@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.util.spreadsheet.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
+import de.dkfz.tbi.util.spreadsheet.Row
+import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.util.spreadsheet.validation.Problems
 
-import java.nio.file.*
+import java.nio.file.Path
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
 
 class MetadataValidationContext extends AbstractMetadataValidationContext {
 

@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import groovy.transform.*
+import groovy.transform.Immutable
 
 @Immutable
 class DefaultParsedSampleIdentifier implements ParsedSampleIdentifier {

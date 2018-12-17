@@ -1,18 +1,23 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import com.jcraft.jsch.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.stereotype.*
+import com.jcraft.jsch.JSchException
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
-import java.nio.file.*
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.MetadataImportService
+import de.dkfz.tbi.otp.ngsdata.SeqCenter
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.util.spreadsheet.validation.Level
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
+import java.nio.file.Files
+import java.nio.file.Path
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CENTER_NAME
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ILSE_NO
 
 @Component
 class MetadataFileCopiedValidator implements MetadataValidator {

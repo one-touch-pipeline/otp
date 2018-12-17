@@ -1,6 +1,5 @@
 package workflows.analysis.pair.bamfiles
 
-
 @SuppressWarnings('JavaIoPackageAccess')
 class BamFileSet {
 

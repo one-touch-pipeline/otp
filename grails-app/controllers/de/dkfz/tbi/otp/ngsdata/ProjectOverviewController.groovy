@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.*
-import grails.converters.*
+import grails.converters.JSON
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.utils.DataTableCommand
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.getOrPut
 
 class ProjectOverviewController {
 

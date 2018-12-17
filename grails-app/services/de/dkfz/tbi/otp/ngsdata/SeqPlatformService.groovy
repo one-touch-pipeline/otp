@@ -2,9 +2,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 import org.springframework.context.annotation.Scope
 import org.springframework.security.access.prepost.PreAuthorize
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-import org.springframework.beans.factory.annotation.*
-import org.springframework.security.access.*
 
 @Scope("prototype")
 class SeqPlatformService {

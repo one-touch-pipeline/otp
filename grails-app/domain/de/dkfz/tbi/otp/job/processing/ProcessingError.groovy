@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.plan.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Domain class to store error information for a failure ProcessingStepUpdate.

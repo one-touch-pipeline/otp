@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.monitor.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
 class WgbsRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
 

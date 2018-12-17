@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.test.spock.IntegrationSpec
+import spock.lang.Unroll
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.spock.*
-import spock.lang.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class SophiaServiceIntegrationSpec extends IntegrationSpec {
 

@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.job.plan
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.test.mixin.*
-import grails.validation.*
-import spock.lang.*
+import grails.test.mixin.Mock
+import grails.validation.ValidationException
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Mock([
         JobDefinition,

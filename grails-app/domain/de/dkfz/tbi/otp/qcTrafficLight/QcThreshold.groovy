@@ -1,13 +1,17 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.util.*
-import groovy.transform.*
-import org.codehaus.groovy.grails.commons.*
-import org.springframework.validation.*
+import grails.util.Holders
+import groovy.transform.ToString
+import groovy.transform.TupleConstructor
+import org.codehaus.groovy.grails.commons.GrailsClass
+import org.springframework.validation.Errors
 
-import java.lang.reflect.*
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.Entity
+
+import java.lang.reflect.Member
 
 @ToString(includeNames = true, includePackage = false)
 class QcThreshold implements Entity {

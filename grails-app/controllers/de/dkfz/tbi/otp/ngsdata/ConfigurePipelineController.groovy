@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
+import grails.converters.JSON
+import groovy.transform.ToString
+import org.springframework.validation.FieldError
+
+import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.utils.*
-import grails.converters.*
-import groovy.transform.*
-import org.springframework.validation.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class ConfigurePipelineController implements ConfigurePipelineHelper {
 

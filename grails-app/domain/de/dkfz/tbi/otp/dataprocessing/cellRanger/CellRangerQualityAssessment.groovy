@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.qcTrafficLight.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
+import de.dkfz.tbi.otp.dataprocessing.QualityAssessmentMergedPass
+import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 
 class CellRangerQualityAssessment extends AbstractQualityAssessment implements QcTrafficLightValue {
 

@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.*
-import grails.compiler.*
-import groovy.transform.*
-import org.springframework.validation.*
+import grails.compiler.GrailsCompileStatic
+import groovy.transform.CompileDynamic
+import org.springframework.validation.Errors
+
+import de.dkfz.tbi.otp.FlashMessage
 
 @GrailsCompileStatic
 class DocumentController {

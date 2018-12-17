@@ -1,15 +1,16 @@
 package de.dkfz.tbi.otp.job.jobs.sophia
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
+import grails.test.spock.IntegrationSpec
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.sophia.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.*
-import grails.test.spock.*
-import org.junit.*
-import org.junit.rules.*
-import spock.lang.*
 
 class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
 

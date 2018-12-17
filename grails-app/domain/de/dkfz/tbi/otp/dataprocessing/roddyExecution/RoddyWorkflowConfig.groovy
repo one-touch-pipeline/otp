@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 /**
  * Each roddy call is configured by a config file. This config file can be different between the different pipelines,

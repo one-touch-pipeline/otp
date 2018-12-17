@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.security
 
-import org.springframework.security.web.csrf.*
-import org.springframework.web.servlet.support.*
+import org.springframework.security.web.csrf.CsrfToken
+import org.springframework.web.servlet.support.RequestDataValueProcessor
 
-import javax.servlet.http.*
-import java.util.regex.*
+import javax.servlet.http.HttpServletRequest
+import java.util.regex.Pattern
 
 /**
  * This is a copy of {@link org.springframework.security.web.servlet.support.csrf.CsrfRequestDataValueProcessor}

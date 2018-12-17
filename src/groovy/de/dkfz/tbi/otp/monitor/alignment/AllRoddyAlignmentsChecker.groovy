@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.monitor.alignment
 
-import de.dkfz.tbi.otp.monitor.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
+import de.dkfz.tbi.otp.monitor.PipelinesChecker
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 class AllRoddyAlignmentsChecker extends PipelinesChecker<SeqTrack> {
 

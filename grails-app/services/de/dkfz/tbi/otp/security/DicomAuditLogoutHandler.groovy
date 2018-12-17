@@ -1,12 +1,15 @@
 package de.dkfz.tbi.otp.security
 
-import de.dkfz.odcf.audit.impl.*
-import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
-import org.springframework.security.core.*
-import org.springframework.security.web.authentication.logout.*
-import javax.servlet.http.*
+import org.springframework.security.core.Authentication
+import org.springframework.security.web.authentication.logout.LogoutHandler
 
-import static de.dkfz.tbi.otp.security.DicomAuditUtils.*
+import de.dkfz.odcf.audit.impl.DicomAuditLogger
+import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
+
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
+
+import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
 
 /**
  * A handler class for Spring Security logout events,

@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 
-import static org.springframework.util.Assert.*
+import static org.springframework.util.Assert.notNull
 
 class AbstractBamFileService {
 

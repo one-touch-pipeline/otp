@@ -1,13 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.fastqc
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.plan.*
+import grails.test.spock.IntegrationSpec
+import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
+
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.*
-import grails.test.spock.*
-import org.codehaus.groovy.grails.support.*
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.TrackingService
 
 class FastqcStartJobIntegrationSpec extends IntegrationSpec {
 

@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.qcTrafficLight.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 
 abstract class QaJarQualityAssessment extends AbstractQualityAssessment {
 

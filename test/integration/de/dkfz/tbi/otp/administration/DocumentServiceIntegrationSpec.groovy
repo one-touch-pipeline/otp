@@ -1,13 +1,15 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import grails.test.spock.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.security.access.*
-import org.springframework.validation.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.test.spock.IntegrationSpec
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.validation.Errors
+
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 class DocumentServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 

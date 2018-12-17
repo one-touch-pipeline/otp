@@ -1,12 +1,15 @@
 package workflows
 
+import org.junit.Ignore
+import org.junit.Test
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.junit.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.time.*
-import java.util.zip.*
+import java.time.Duration
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 
 @Ignore
 class FastqcWorkflowTests extends WorkflowTestCase {

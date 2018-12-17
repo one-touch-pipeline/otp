@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
 @Component('PanCanStartJob')
 @Scope('singleton')

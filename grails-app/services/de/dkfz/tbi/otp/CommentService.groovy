@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp
 import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.security.access.prepost.PreAuthorize
 
-
 class CommentService {
 
     SpringSecurityService springSecurityService

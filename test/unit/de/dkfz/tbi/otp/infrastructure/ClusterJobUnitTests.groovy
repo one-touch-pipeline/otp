@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import static de.dkfz.tbi.otp.utils.HelperUtils.*
-
+import grails.buildtestdata.mixin.Build
 import org.junit.Test
 
 import de.dkfz.tbi.otp.ngsdata.Realm
-import grails.buildtestdata.mixin.Build
+
+import static de.dkfz.tbi.otp.utils.HelperUtils.getUniqueString
 
 @Build([
         ClusterJob,

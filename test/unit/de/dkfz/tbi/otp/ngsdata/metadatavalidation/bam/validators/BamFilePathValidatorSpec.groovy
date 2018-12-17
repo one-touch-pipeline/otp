@@ -1,18 +1,20 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import grails.test.mixin.*
-import org.junit.*
-import org.junit.rules.*
+import grails.test.mixin.Mock
+import org.junit.ClassRule
+import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.FileType
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.Problem
+
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 @Mock([FileType])
 class BamFilePathValidatorSpec extends Specification {

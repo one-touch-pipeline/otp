@@ -1,5 +1,8 @@
-import de.dkfz.tbi.otp.config.*
-import org.hibernate.dialect.*
+import org.hibernate.dialect.H2Dialect
+import org.hibernate.dialect.PostgreSQL9Dialect
+
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 
 import static java.util.concurrent.TimeUnit.*
 

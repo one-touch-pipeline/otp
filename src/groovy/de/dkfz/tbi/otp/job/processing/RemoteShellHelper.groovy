@@ -2,19 +2,23 @@ package de.dkfz.tbi.otp.job.processing
 
 import com.jcraft.jsch.*
 import com.jcraft.jsch.agentproxy.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
-import groovy.transform.*
-import org.apache.commons.logging.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.annotation.*
-import org.springframework.scheduling.annotation.*
-import org.springframework.stereotype.*
+import groovy.transform.Synchronized
+import org.apache.commons.logging.Log
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 
-import java.util.concurrent.*
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.SshAuthMethod
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+
+import java.util.concurrent.Semaphore
 
 /**
  * @short Helper class providing functionality for remote execution of jobs.

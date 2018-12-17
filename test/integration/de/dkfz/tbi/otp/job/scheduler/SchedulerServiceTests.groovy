@@ -1,16 +1,18 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.integration.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.junit.*
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.restarting.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.plugin.springsecurity.*
-import org.junit.*
+import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
-import java.util.concurrent.*
+import java.util.concurrent.ExecutionException
 
 import static org.junit.Assert.*
 

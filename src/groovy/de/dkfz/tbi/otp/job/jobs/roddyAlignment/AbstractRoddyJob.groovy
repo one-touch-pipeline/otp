@@ -1,21 +1,25 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddy.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.*
-import org.springframework.beans.factory.annotation.*
 
-import java.util.concurrent.*
-import java.util.regex.*
+import java.util.concurrent.Semaphore
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 
 /**
  * class for roddy jobs that handle failed or not finished cluster jobs, analyse them and provide

@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import groovy.transform.*
-import org.hibernate.*
+import groovy.transform.TupleConstructor
+import org.hibernate.Hibernate
 
-import static org.springframework.util.Assert.*
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import static org.springframework.util.Assert.notNull
 
 /**
  * Represents a single generation of one merged BAM file (whereas a {@link AbstractMergingWorkPackage} represents all

@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.security
 
-import grails.plugin.springsecurity.*
-import org.joda.time.*
-import spock.lang.*
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.joda.time.DateTime
+import spock.lang.Specification
 
 class AuditLogServiceIntegrationSpec extends Specification implements UserAndRoles {
 

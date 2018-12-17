@@ -1,16 +1,20 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.util.spreadsheet.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import grails.test.mixin.*
-import spock.lang.*
+import grails.test.mixin.Mock
+import spock.lang.Specification
 
-import static de.dkfz.tbi.TestCase.*
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.util.spreadsheet.Cell
+import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.Problem
+
+import static de.dkfz.tbi.TestCase.assertContainSame
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
 
 @Mock([
         Individual,

@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.spock.*
-import spock.lang.*
+import grails.test.spock.IntegrationSpec
+import spock.lang.Unroll
 
-import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+
+import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 
 class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
 

@@ -1,14 +1,16 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.roddy.execution.jobs.*
-import de.dkfz.roddy.execution.jobs.cluster.lsf.*
-import de.dkfz.roddy.execution.jobs.cluster.pbs.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.ngsdata.*
-import groovy.transform.*
-import org.springframework.beans.factory.annotation.*
+import groovy.transform.CompileStatic
+import org.springframework.beans.factory.annotation.Autowired
 
-import java.time.*
+import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
+import de.dkfz.roddy.execution.jobs.JobManagerOptions
+import de.dkfz.roddy.execution.jobs.cluster.lsf.LSFJobManager
+import de.dkfz.roddy.execution.jobs.cluster.pbs.PBSJobManager
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.ngsdata.Realm
+
+import java.time.Duration
 
 @CompileStatic
 class ClusterJobManagerFactoryService {

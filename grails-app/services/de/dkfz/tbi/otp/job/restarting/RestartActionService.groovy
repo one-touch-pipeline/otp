@@ -1,13 +1,17 @@
 package de.dkfz.tbi.otp.job.restarting
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.job.jobs.*
-import de.dkfz.tbi.otp.job.plan.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+import org.springframework.security.access.prepost.PreAuthorize
+
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
+import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
+import de.dkfz.tbi.otp.job.plan.JobErrorDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
-import org.springframework.security.access.prepost.*
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 
 class RestartActionService {
 

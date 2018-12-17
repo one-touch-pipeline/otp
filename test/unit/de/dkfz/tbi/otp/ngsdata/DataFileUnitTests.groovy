@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-
-import org.junit.*
+import grails.test.mixin.TestFor
+import org.junit.Test
 
 import de.dkfz.tbi.TestCase
 

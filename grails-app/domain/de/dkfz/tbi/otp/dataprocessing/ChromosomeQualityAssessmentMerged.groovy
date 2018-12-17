@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import org.hibernate.*
+import org.hibernate.Hibernate
+
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
 
 /**
  * Class to represent chromosomes that will be considered independently (1 to 22, X, Y and M)

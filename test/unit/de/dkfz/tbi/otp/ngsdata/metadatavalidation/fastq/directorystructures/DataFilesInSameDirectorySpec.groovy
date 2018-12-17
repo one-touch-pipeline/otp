@@ -1,17 +1,19 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.util.spreadsheet.*
+import spock.lang.Specification
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.DirectoryStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
-import spock.lang.*
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class DataFilesInSameDirectorySpec extends Specification {
 

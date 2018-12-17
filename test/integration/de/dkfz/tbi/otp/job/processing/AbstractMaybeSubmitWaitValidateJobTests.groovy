@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.config.*
+import org.junit.Before
+import org.junit.Test
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
 
 class AbstractMaybeSubmitWaitValidateJobTests extends TestCase {
 

@@ -1,15 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
+import org.junit.*
+import org.junit.rules.TemporaryFolder
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.junit.*
-import org.junit.rules.*
+import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 
 class AbstractExecutePanCanJobTests {
 

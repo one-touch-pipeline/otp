@@ -1,23 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
-import org.junit.After
-
-import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import org.junit.*
+import org.junit.rules.TemporaryFolder
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.ngsdata.TestData
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class AbstractQualityAssessmentServiceTests {
 
@@ -62,14 +54,14 @@ class AbstractQualityAssessmentServiceTests {
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         RoddyMergedBamQa mergedQa = new RoddyMergedBamQa(
-                ARBITRARY_QA_VALUES + [
-                        qualityAssessmentMergedPass  : QualityAssessmentMergedPass.build(abstractMergedBamFile: roddyBamFile),
-                        qcBasesMapped                : QC_BASES_MAPPED,
-                        genomeWithoutNCoverageQcBases: EXPECTED_COVERAGE,
-                        chromosome                   : RoddyQualityAssessment.ALL,
-                        insertSizeCV                 : 123,
-                        percentageMatesOnDifferentChr: 0.123,
-                ])
+                AbstractBamFileServiceTests.ARBITRARY_QA_VALUES + [
+                qualityAssessmentMergedPass : QualityAssessmentMergedPass.build(abstractMergedBamFile: roddyBamFile),
+                qcBasesMapped : QC_BASES_MAPPED,
+                genomeWithoutNCoverageQcBases: EXPECTED_COVERAGE,
+                chromosome: RoddyQualityAssessment.ALL,
+                insertSizeCV: 123,
+                percentageMatesOnDifferentChr: 0.123,
+        ])
         assert mergedQa.save(flush: true)
 
         roddyBamFile.referenceGenome.length = REFERENCE_GENOME_LENGTH_WITH_N

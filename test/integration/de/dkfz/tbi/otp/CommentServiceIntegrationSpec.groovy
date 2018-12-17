@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.*
-import grails.plugin.springsecurity.*
-import spock.lang.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 class CommentServiceIntegrationSpec extends Specification implements UserAndRoles {
 

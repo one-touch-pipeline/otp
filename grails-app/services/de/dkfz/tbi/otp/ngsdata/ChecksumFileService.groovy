@@ -2,9 +2,10 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 
-import static org.springframework.util.Assert.*
+import static org.springframework.util.Assert.notNull
 
 class ChecksumFileService {
 

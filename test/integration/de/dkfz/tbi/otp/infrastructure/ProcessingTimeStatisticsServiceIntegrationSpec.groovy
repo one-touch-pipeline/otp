@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.otp.*
+import grails.test.spock.IntegrationSpec
+import org.joda.time.LocalDate
+import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Ignore
+
+import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.*
-import grails.test.spock.*
-import org.joda.time.*
-import org.springframework.beans.factory.annotation.*
-import spock.lang.*
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
 
 class ProcessingTimeStatisticsServiceIntegrationSpec extends IntegrationSpec {
 

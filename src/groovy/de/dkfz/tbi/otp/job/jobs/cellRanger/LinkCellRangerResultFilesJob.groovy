@@ -1,15 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
-import de.dkfz.tbi.otp.dataprocessing.singleCell.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.ast.*
-import de.dkfz.tbi.otp.job.jobs.*
-import de.dkfz.tbi.otp.job.processing.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.ast.UseJobLog
+import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
+import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 
 @Component
 @Scope("prototype")

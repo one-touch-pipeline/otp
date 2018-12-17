@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 import static org.springframework.util.Assert.notNull
 
 class DataProcessingFilesService {

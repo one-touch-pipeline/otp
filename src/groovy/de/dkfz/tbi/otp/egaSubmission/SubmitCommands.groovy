@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.egaSubmission
 
-import de.dkfz.tbi.otp.ngsdata.Project
 import grails.validation.Validateable
 import org.springframework.web.multipart.MultipartFile
+
+import de.dkfz.tbi.otp.ngsdata.Project
 
 trait SubmitCommands { }
 

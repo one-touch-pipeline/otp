@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.*
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import org.junit.Test
+
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import org.junit.*
 
 // !! This class is only to test the abstract class ConfigPerProjectAndSeqType
 class ConfigPerProjectAndSeqTypeImpl extends ConfigPerProjectAndSeqType { }

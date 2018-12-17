@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.infrastructure.*
 import org.springframework.beans.factory.annotation.Autowired
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /**
  * Abstract Base class for all Job implementations.

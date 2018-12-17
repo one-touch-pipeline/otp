@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.CheckAndCall
-import de.dkfz.tbi.otp.dataprocessing.*
-import grails.converters.*
+import grails.converters.JSON
 
+import de.dkfz.tbi.otp.CheckAndCall
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 
 class MetaDataFieldsController implements CheckAndCall {
     LibraryPreparationKitService libraryPreparationKitService

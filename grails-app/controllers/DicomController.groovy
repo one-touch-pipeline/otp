@@ -1,4 +1,4 @@
-import grails.compiler.*
+import grails.compiler.GrailsCompileStatic
 
 @GrailsCompileStatic
 class DicomController {

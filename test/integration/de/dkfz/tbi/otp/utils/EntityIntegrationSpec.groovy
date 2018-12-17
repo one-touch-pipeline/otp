@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.ngsdata.*
 import grails.plugin.springsecurity.acl.*
-import org.codehaus.groovy.grails.commons.*
-import seedme.*
-import spock.lang.*
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import seedme.SeedMeChecksum
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.ngsdata.*
 
 @SuppressWarnings("ComparisonWithSelf")
 class EntityIntegrationSpec extends Specification {

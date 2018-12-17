@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.ngsdata.*
-import groovy.transform.*
+import groovy.transform.TupleConstructor
+
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.ngsdata.PanCanAlignmentConfiguration
 
 class RoddyPanCanConfigTemplate {
 

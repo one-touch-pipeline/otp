@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.job.processing.*
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.otp.dataprocessing.ChromosomeIdentifierSortingService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.springframework.beans.factory.annotation.*
+import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 
 abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractRoddyJob<R> {
 

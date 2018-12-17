@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.config
 
-import de.dkfz.tbi.otp.job.jobs.dataInstallation.*
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.job.jobs.dataInstallation.CopyFilesJob
 
 class TypeValidatorsIntegrationSpec extends Specification {
 

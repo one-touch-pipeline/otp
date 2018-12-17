@@ -1,26 +1,30 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.config.*
+import grails.validation.ValidationException
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.prepost.*
+import org.springframework.validation.Errors
+import org.springframework.web.multipart.MultipartFile
+
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
-import grails.validation.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.security.access.prepost.*
-import org.springframework.validation.*
-import org.springframework.web.multipart.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.nio.file.*
-import java.nio.file.attribute.*
+import java.nio.file.attribute.PosixFileAttributes
+import java.nio.file.attribute.PosixFilePermission
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class ProjectService {
 

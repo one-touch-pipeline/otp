@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
-
 class RoddySingleLaneQa extends RoddyQualityAssessment {
 
     SeqTrack seqTrack

@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.plan.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import spock.lang.*
+import grails.test.mixin.Mock
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 @Mock([
         JobDefinition,

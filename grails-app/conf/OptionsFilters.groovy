@@ -1,6 +1,6 @@
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.config.InstanceLogo
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 class OptionsFilters {
     ProcessingOptionService processingOptionService

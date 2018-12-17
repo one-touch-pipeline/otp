@@ -1,16 +1,17 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.*
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.*
+import org.junit.rules.TemporaryFolder
+
+import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService.OutputDirectories
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
-import grails.buildtestdata.mixin.*
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-import org.junit.*
-import org.junit.rules.*
+import de.dkfz.tbi.otp.utils.CheckedLogger
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 //In the test the semantic "null as Type" is used to get grails to use a specific overloaded method signutare.
 @TestMixin(GrailsUnitTestMixin)

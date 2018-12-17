@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.utils
 
+import org.junit.rules.TemporaryFolder
+
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
 import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile.LogFileEntry
-import org.junit.rules.TemporaryFolder
 
 class CreateJobStateLogFileHelper {
 

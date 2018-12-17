@@ -1,10 +1,9 @@
-import de.dkfz.tbi.otp.security.OtpPermissionEvaluator
 import grails.util.Environment
 import org.springframework.cache.ehcache.EhCacheManagerFactoryBean
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler
 import org.springframework.security.acls.AclPermissionEvaluator
-import de.dkfz.tbi.otp.security.CustomRequestDataValueProcessor
-import de.dkfz.tbi.otp.security.DicomAuditLogoutHandler
+
+import de.dkfz.tbi.otp.security.*
 
 beans = {
     // include Spring Beans with @Component annotation

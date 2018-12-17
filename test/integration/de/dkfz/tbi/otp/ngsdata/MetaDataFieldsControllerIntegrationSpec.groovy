@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.security.*
-import grails.plugin.springsecurity.*
-import org.junit.*
-import org.junit.rules.*
-import spock.lang.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 class MetaDataFieldsControllerIntegrationSpec extends Specification implements UserAndRoles {
 

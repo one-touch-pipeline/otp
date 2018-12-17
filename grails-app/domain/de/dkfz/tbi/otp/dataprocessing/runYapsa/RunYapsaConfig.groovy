@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
+import de.dkfz.tbi.otp.dataprocessing.WithProgramVersion
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 

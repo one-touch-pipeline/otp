@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import htsjdk.samtools.*
+import htsjdk.samtools.SamReaderFactory
 
-import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+
+import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.ensureFileIsReadableAndNotEmpty
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 abstract class AbstractRoddyAlignmentJob extends AbstractExecutePanCanJob<RoddyBamFile> {
 

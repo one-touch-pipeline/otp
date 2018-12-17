@@ -1,16 +1,19 @@
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
+import grails.test.mixin.Mock
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.test.mixin.*
-import org.junit.*
-import org.junit.rules.*
-import spock.lang.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 @Mock([
         DataFile,

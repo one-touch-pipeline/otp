@@ -1,16 +1,20 @@
 package de.dkfz.tbi.otp.job
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.*
-import org.codehaus.groovy.grails.commons.*
-import org.joda.time.*
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.joda.time.DateTime
 
-import java.text.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.utils.MailHelperService
+
+import java.text.SimpleDateFormat
 
 class JobMailService {
 

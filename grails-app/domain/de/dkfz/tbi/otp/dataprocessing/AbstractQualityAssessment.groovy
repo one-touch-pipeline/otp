@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.qcTrafficLight.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Be aware of semantic differences between the values produced by

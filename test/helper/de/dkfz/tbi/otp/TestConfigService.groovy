@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.util.*
-import org.springframework.context.*
+import grails.util.Environment
+import org.springframework.context.ApplicationContext
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.ngsdata.Realm
 
 @SuppressWarnings('JavaIoPackageAccess')
 class TestConfigService extends ConfigService {

@@ -1,8 +1,9 @@
 package workflows.analysis.pair.indel
 
+import org.junit.Ignore
+import workflows.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div128
+
 import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.*
-import workflows.analysis.pair.bamfiles.*
 
 @Ignore
 class WgsIndelWorkflowTests extends AbstractIndelWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div128 {

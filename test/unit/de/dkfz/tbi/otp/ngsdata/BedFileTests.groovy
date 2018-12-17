@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.*
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
 import org.junit.*
 
 @TestFor(BedFile)

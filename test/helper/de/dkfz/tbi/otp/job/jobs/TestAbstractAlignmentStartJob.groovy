@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs
 
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
-import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
 
 @Component('testAbstractAlignmentStartJob')
 @Scope('singleton')

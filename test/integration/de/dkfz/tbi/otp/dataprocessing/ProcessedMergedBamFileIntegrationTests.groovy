@@ -1,13 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
-import org.junit.*
+import org.junit.Test
 
-import static de.dkfz.tbi.otp.dataprocessing.AbstractBamFileServiceTests.*
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 class ProcessedMergedBamFileIntegrationTests {
 
@@ -145,7 +145,7 @@ class ProcessedMergedBamFileIntegrationTests {
         assert qualityAssessmentMergedPass.save([flush: true])
 
         OverallQualityAssessmentMerged overallQualityAssessmentMerged = new OverallQualityAssessmentMerged(
-                ARBITRARY_QA_VALUES + [
+                AbstractBamFileServiceTests.ARBITRARY_QA_VALUES + [
                 id                   : identifier,
                 qualityAssessmentMergedPass: qualityAssessmentMergedPass,
         ])

@@ -1,15 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import org.junit.*
+import org.junit.rules.TemporaryFolder
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestFor
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
 
 @TestFor(BedFileService)
 @Build([

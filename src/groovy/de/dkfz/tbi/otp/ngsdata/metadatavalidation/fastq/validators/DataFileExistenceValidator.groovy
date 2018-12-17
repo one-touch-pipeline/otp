@@ -1,14 +1,17 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.util.spreadsheet.*
+import groovyx.gpars.GParsPool
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
-import groovyx.gpars.*
-import org.springframework.stereotype.*
 
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 
-import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext.*
+import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext.pathForMessage
 
 @Component
 class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {

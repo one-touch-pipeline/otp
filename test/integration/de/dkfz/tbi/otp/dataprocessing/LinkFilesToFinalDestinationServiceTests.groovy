@@ -1,18 +1,20 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
+import org.apache.commons.logging.impl.NoOpLog
+import org.junit.*
+import org.junit.rules.TemporaryFolder
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import org.apache.commons.logging.impl.*
-import org.junit.*
-import org.junit.rules.*
-import org.springframework.beans.factory.annotation.*
 
 class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 

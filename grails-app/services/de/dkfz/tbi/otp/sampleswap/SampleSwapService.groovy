@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.sampleswap
 
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.plugin.springsecurity.*
+import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.security.access.prepost.PreAuthorize
+
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.Files
 

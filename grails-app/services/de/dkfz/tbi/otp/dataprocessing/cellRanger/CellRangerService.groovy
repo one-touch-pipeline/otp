@@ -1,14 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
+import groovy.transform.TupleConstructor
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.singleCell.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.qcTrafficLight.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.*
-import groovy.transform.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
+import de.dkfz.tbi.otp.utils.Md5SumService
+import de.dkfz.tbi.util.spreadsheet.Cell
+import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
 import java.nio.file.*
 

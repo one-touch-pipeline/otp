@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
 import org.junit.*
 
-import static org.junit.Assert.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SoftwareTool.Type
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 class MergingSetServiceTests {
 

@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.job.processing.*
-import grails.plugin.springsecurity.*
-import org.springframework.security.access.prepost.*
+import grails.plugin.springsecurity.SpringSecurityService
+import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.access.prepost.PreAuthorize
+
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
 
 /**
  * Service to retrieve information about Runs.

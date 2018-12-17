@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import grails.test.spock.*
-import org.springframework.beans.factory.annotation.*
+import grails.test.spock.IntegrationSpec
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
+import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class ProjectOverviewServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 

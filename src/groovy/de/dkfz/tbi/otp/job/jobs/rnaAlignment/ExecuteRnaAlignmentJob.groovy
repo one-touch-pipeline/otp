@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.ast.*
-import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.job.ast.UseJobLog
+import de.dkfz.tbi.otp.job.jobs.roddyAlignment.ExecutePanCanJob
+import de.dkfz.tbi.otp.ngsdata.LibraryLayout
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Component
 @Scope("prototype")

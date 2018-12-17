@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.junit.Assert.*
 import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
+import grails.test.mixin.TestFor
 import org.junit.*
+
 import de.dkfz.tbi.otp.ngsdata.*
+
+import static org.junit.Assert.assertTrue
 
 @TestFor(MergingSetAssignment)
 @Build([

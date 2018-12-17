@@ -1,10 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.MergingSet
-import de.dkfz.tbi.otp.dataprocessing.ProcessedBamFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import org.junit.Test
 
-import org.junit.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class MergingSetTests {
 

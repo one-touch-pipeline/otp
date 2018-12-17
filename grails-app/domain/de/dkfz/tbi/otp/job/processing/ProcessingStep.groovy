@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.plan.*
-import de.dkfz.tbi.otp.utils.*
-import grails.util.*
-import org.hibernate.*
+import grails.util.Environment
+import org.hibernate.Hibernate
+
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * A ProcessingStep represents one execution of a Job for a JobDefinition.

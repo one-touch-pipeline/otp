@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import org.joda.time.*
+import grails.plugin.springsecurity.SpringSecurityService
+import org.joda.time.DateTime
 import org.springframework.security.access.prepost.*
+
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.utils.ReferencedClass
 
 class IndividualService {
     SpringSecurityService springSecurityService

@@ -1,16 +1,20 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DataFilesWithAbsolutePath
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import spock.lang.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesOnGpcfMidTerm
+import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import java.nio.file.Paths
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class RunNameInMetadataPathValidatorSpec extends Specification {
 

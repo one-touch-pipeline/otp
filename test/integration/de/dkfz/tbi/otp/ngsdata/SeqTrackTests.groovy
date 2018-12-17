@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.TestCase
 import org.junit.Before
 import org.junit.Test
+
+import de.dkfz.tbi.TestCase
 
 class SeqTrackTests {
 

@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.utils.*
-import grails.test.mixin.*
-import spock.lang.*
+import grails.test.mixin.Mock
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 @Mock([
         Project,

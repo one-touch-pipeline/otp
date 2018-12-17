@@ -1,16 +1,17 @@
 package workflows.alignment
 
+import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.junit.Test
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.converters.*
-import grails.plugin.springsecurity.*
-import org.junit.*
 
-import java.nio.file.*
-import java.time.*
+import java.nio.file.Files
+import java.time.Duration
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
 

@@ -1,15 +1,17 @@
 package workflows
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
 import org.junit.*
-import org.springframework.beans.factory.annotation.*
+import org.springframework.beans.factory.annotation.Autowired
 
-import java.time.*
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.job.jobs.roddyAlignment.MovePanCanFilesToFinalDestinationJob
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.HelperUtils
+
+import java.time.Duration
 
 @Ignore
 class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestCase {

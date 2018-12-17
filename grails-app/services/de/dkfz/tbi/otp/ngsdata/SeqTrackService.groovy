@@ -1,21 +1,22 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.SpringSecurityService
-import groovy.sql.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
-import org.springframework.security.access.prepost.*
+import groovy.sql.GroovyRowResult
+import groovy.sql.Sql
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+import org.springframework.security.access.prepost.PostAuthorize
 
-import javax.sql.*
-import java.nio.file.*
+import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.job.processing.ProcessingException
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import static org.springframework.util.Assert.*
+import javax.sql.DataSource
+import java.nio.file.Paths
 
+import static org.springframework.util.Assert.notNull
 
 class SeqTrackService {
 

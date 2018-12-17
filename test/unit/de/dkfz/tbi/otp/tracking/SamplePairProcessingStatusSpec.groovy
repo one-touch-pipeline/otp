@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.tracking
 
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.Unroll
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
-
 
 class SamplePairProcessingStatusSpec extends Specification {
 

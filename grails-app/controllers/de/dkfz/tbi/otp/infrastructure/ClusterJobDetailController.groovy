@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.otp.ngsdata.Individual
 import grails.converters.JSON
 import org.joda.time.Period
 import org.joda.time.format.PeriodFormat
+
+import de.dkfz.tbi.otp.ngsdata.Individual
 
 class ClusterJobDetailController {
 

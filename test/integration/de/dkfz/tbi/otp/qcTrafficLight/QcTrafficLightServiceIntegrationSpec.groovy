@@ -1,12 +1,15 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import de.dkfz.tbi.otp.*
+import grails.plugin.springsecurity.SpringSecurityService
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainFactory.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import spock.lang.*
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.QcThresholdHandling
+import de.dkfz.tbi.otp.utils.Principal
 
 import static de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus.*
 

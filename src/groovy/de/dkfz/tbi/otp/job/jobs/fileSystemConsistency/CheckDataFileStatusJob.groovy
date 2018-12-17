@@ -1,13 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.fileSystemConsistency
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.fileSystemConsistency.*
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus.Status
-import de.dkfz.tbi.otp.job.ast.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
+import de.dkfz.tbi.otp.job.ast.UseJobLog
+import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
+import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
 /**
  * Job that verifies the consistency status of DataFiles and saves only the not consistent ones in the database.

@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import spock.lang.*
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
 
 class SampleTypeServiceIntegrationSpec extends Specification {
 

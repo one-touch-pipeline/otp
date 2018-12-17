@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
-import grails.converters.*
+import grails.converters.JSON
+
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaResultsService
 
 class RunYapsaController extends AbstractAnalysisController {
 

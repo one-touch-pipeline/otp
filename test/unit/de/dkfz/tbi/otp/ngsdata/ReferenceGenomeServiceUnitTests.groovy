@@ -1,15 +1,18 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
-import grails.test.mixin.support.*
-import org.apache.commons.io.*
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.apache.commons.io.FileUtils
 import org.junit.*
-import org.junit.rules.*
+import org.junit.rules.TemporaryFolder
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import static org.junit.Assert.*
 

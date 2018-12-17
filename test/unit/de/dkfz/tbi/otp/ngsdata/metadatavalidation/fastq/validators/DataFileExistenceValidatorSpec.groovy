@@ -1,20 +1,22 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.*
+import grails.test.mixin.Mock
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.DirectoryStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
-import grails.test.mixin.*
-import org.junit.*
-import org.junit.rules.*
-import spock.lang.*
 
-import java.nio.file.*
-import java.util.regex.*
+import java.nio.file.Paths
+import java.util.regex.Matcher
 
-import static de.dkfz.tbi.TestCase.*
-import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory.*
+import static de.dkfz.tbi.TestCase.assertContainSame
+import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory.createContext
 
 @Mock([
         Realm,

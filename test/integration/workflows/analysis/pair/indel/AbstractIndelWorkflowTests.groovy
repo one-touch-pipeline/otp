@@ -1,12 +1,13 @@
 package workflows.analysis.pair.indel
 
+import grails.plugin.springsecurity.SpringSecurityUtils
+import workflows.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import workflows.analysis.pair.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.time.*
+import java.time.Duration
 
 abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<IndelCallingInstance> {
 

@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.job.jobs.alignment.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 abstract class AbstractRoddyAlignmentStartJob extends AbstractAlignmentStartJob {
     @Override

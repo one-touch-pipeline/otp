@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.sampleswap
 
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.Entity
 
 class FileSystemChanges implements Entity {
 

@@ -1,15 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.*
+import org.junit.*
+import org.junit.rules.TemporaryFolder
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import org.junit.*
-import org.junit.rules.*
-import org.springframework.beans.factory.annotation.*
 
 class ExecuteWgbsAlignmentJobTests {
 

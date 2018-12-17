@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.*
-import org.springframework.beans.factory.annotation.*
-import spock.lang.*
+import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.Md5sumFormatValidator
 
 class BamMetadataImportServiceIntegrationSpec extends Specification {
 

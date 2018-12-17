@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.*
+import grails.test.mixin.Mock
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import spock.lang.*
 
 @Mock([
         AbstractMergedBamFile,

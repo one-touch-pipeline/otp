@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.job.jobs.fileSystemConsistency
 
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyCheck
-import org.springframework.stereotype.Component
 import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyCheck
+import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 
 @Component("dataFileStatusStartJob")
 @Scope("singleton")

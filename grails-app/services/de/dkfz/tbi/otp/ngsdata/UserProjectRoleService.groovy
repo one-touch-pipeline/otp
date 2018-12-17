@@ -1,21 +1,25 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.odcf.audit.impl.*
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityUtils
+import groovy.text.SimpleTemplateEngine
+import org.codehaus.groovy.grails.context.support.PluginAwareResourceBundleMessageSource
+import org.springframework.context.NoSuchMessageException
+import org.springframework.context.i18n.LocaleContextHolder
+import org.springframework.security.access.prepost.PreAuthorize
+
+import de.dkfz.odcf.audit.impl.DicomAuditLogger
+import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory
 import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory.UniqueIdentifierType
 import de.dkfz.odcf.audit.impl.enums.DicomCode.OtpPermissionCode
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
 import de.dkfz.tbi.otp.administration.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import groovy.text.*
-import org.codehaus.groovy.grails.context.support.*
-import org.springframework.context.*
-import org.springframework.context.i18n.*
-import org.springframework.security.access.prepost.*
+import de.dkfz.tbi.otp.utils.MailHelperService
 
-import static de.dkfz.tbi.otp.security.DicomAuditUtils.*
+import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
 
 class UserProjectRoleService {
 

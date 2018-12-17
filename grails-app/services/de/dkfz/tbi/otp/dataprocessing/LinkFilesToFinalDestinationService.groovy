@@ -1,15 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.qcTrafficLight.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
 import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.Path
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 
 class LinkFilesToFinalDestinationService {
 

@@ -1,14 +1,17 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
-import grails.test.mixin.*
-import grails.test.mixin.support.*
+import grails.test.mixin.Mock
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 import org.junit.*
-import org.junit.rules.*
+import org.junit.rules.TemporaryFolder
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 /**
  * Unit tests for the {@link ExecutionHelperService}.

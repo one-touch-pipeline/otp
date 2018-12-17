@@ -1,16 +1,18 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.roddy.execution.jobs.*
-import de.dkfz.roddy.tools.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import groovy.sql.*
+import groovy.sql.Sql
 import org.joda.time.*
 
-import javax.sql.*
+import de.dkfz.roddy.execution.jobs.GenericJobInfo
+import de.dkfz.roddy.tools.BufferUnit
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.ngsdata.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static java.util.concurrent.TimeUnit.*
+import javax.sql.DataSource
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static java.util.concurrent.TimeUnit.HOURS
 
 class ClusterJobService {
 

@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import org.springframework.validation.*
-import spock.lang.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.springframework.validation.Errors
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.OtpException
+import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class ShutdownServiceIntegrationSpec extends Specification implements UserAndRoles {
     ShutdownService shutdownService = new ShutdownService()

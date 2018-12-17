@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.utils.logging.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 /**
  * @see de.dkfz.tbi.otp.job.processing.RemoteShellHelper

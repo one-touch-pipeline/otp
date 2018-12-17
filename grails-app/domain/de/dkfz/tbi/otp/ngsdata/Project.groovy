@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.Entity
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class Project implements Commentable, Entity {
 

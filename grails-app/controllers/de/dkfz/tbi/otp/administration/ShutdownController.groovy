@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.job.processing.*
-import grails.plugin.springsecurity.annotation.*
+import grails.plugin.springsecurity.annotation.Secured
 import org.springframework.validation.Errors
+
+import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.OtpException
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
 
 @Secured(['ROLE_ADMIN'])
 class ShutdownController {

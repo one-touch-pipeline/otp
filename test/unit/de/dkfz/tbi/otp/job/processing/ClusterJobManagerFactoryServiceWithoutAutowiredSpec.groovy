@@ -1,13 +1,15 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.roddy.execution.jobs.*
-import de.dkfz.roddy.execution.jobs.cluster.lsf.*
-import de.dkfz.roddy.execution.jobs.cluster.pbs.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import spock.lang.*
+import grails.test.mixin.Mock
+import spock.lang.Specification
+
+import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
+import de.dkfz.roddy.execution.jobs.cluster.lsf.LSFJobManager
+import de.dkfz.roddy.execution.jobs.cluster.pbs.PBSJobManager
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
 
 @Mock([
         ProcessingOption,

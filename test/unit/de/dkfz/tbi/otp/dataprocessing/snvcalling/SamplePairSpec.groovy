@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.test.mixin.Mock
+import spock.lang.Specification
+import spock.lang.Unroll
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import spock.lang.*
 
 @Mock([
         ExternalMergingWorkPackage,

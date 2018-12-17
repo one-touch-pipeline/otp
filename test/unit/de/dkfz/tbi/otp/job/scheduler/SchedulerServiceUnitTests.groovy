@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import org.apache.commons.logging.Log
+import org.junit.Test
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.job.jobs.TestJob
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.utils.logging.JobLog
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import org.apache.commons.logging.Log
-import org.junit.*
 
 class SchedulerServiceUnitTests extends TestCase {
 

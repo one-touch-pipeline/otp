@@ -1,17 +1,20 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import org.junit.*
-import org.junit.rules.*
+import org.junit.ClassRule
+import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
-import java.nio.file.*
-import java.nio.file.attribute.*
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import java.nio.file.*
+import java.nio.file.attribute.PosixFilePermissions
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class AbstractMetadataValidationContextSpec extends Specification {
 

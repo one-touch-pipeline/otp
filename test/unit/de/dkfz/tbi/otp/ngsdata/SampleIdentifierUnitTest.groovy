@@ -1,14 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-import grails.test.mixin.support.*
+import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import org.junit.*
+import org.junit.Before
+import org.junit.Test
 
 import de.dkfz.tbi.TestCase
-
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 
 @TestMixin(ControllerUnitTestMixin) // Workaround for Grails bug GRAILS-11136
 @Build([ProcessingOption, SampleIdentifier])

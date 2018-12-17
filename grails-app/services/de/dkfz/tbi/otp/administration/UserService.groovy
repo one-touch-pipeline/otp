@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.config.*
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.security.access.prepost.PreAuthorize
+
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.mail.*
-import grails.plugin.springsecurity.*
-import org.codehaus.groovy.grails.commons.*
-import org.springframework.security.access.prepost.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * @short Service for User administration.

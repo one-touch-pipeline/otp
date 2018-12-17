@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.buildtestdata.mixin.*
-import grails.test.mixin.*
-import org.junit.*
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import org.junit.Before
+import org.junit.Test
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.ngsdata.*
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Build([
     DataFile,

@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.TimeStamped
-import de.dkfz.tbi.otp.utils.Entity
 import groovy.transform.ToString
+
+import de.dkfz.tbi.otp.TimeStamped
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * For some processes, e.g. SNV pipeline, it is only reasonable to be started when a defined threshold, e.g. coverage, is reached.

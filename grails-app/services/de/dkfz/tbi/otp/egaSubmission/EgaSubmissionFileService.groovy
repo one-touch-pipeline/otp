@@ -1,19 +1,23 @@
 package de.dkfz.tbi.otp.egaSubmission
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.notification.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.*
-import grails.plugin.springsecurity.*
-import groovy.transform.*
+import grails.plugin.springsecurity.SpringSecurityService
+import groovy.transform.CompileStatic
 
-import java.nio.file.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
+import de.dkfz.tbi.otp.notification.CreateNotificationTextService
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.util.spreadsheet.Row
+import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+import java.nio.file.FileSystem
+import java.nio.file.Path
+
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
 @CompileStatic

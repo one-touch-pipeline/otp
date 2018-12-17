@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.tracking
 
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.spock.*
+import grails.test.spock.IntegrationSpec
 
-import static de.dkfz.tbi.TestCase.*
+import de.dkfz.tbi.otp.ngsdata.*
+
+import static de.dkfz.tbi.TestCase.assertContainSame
 
 class OtrsTicketIntegrationSpec extends IntegrationSpec {
 

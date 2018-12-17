@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.processing.ProcessingException
 
 class FileNotReadableException extends ProcessingException {
 

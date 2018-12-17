@@ -1,20 +1,24 @@
 package de.dkfz.tbi.otp.job.jobs.bamImport
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
+import grails.test.mixin.Mock
+import org.apache.commons.logging.impl.NoOpLog
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.*
-import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.ImportExternallyMergedBamJob
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.test.mixin.*
-import org.apache.commons.logging.impl.*
-import org.junit.*
-import org.junit.rules.*
-import spock.lang.*
+import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 
-import java.nio.file.*
+import java.nio.file.Files
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 

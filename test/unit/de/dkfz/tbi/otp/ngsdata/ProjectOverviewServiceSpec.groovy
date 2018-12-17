@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.test.mixin.Mock
+import org.apache.commons.logging.impl.NoOpLog
+import spock.lang.Specification
+import spock.lang.Unroll
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.*
-import grails.test.mixin.*
-import org.apache.commons.logging.impl.*
-import spock.lang.*
 
 @Mock([
         Individual,

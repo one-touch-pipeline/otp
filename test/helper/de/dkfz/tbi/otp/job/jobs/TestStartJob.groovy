@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 
 /**
  * Very simple Test implementation of the StartJob interface, does nothing useful.

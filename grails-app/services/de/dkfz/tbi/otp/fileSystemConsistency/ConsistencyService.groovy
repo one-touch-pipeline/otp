@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.fileSystemConsistency
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus.Status
+import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
 /**

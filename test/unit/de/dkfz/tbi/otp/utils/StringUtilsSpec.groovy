@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
-import spock.lang.*
+import spock.lang.Specification
 
 class StringUtilsSpec extends Specification {
 

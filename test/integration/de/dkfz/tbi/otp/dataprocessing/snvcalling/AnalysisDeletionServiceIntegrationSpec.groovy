@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import spock.lang.Specification
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import spock.lang.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class AnalysisDeletionServiceIntegrationSpec extends Specification {
 

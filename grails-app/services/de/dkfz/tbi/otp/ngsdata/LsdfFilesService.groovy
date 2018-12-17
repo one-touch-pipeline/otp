@@ -1,16 +1,17 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.*
-import org.springframework.beans.factory.annotation.*
+import org.springframework.beans.factory.annotation.Autowired
 
-import java.util.regex.*
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+import java.util.regex.Pattern
+
+import static de.dkfz.tbi.otp.utils.WaitingFileUtils.waitUntilDoesNotExist
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 
 class LsdfFilesService {
     @Autowired

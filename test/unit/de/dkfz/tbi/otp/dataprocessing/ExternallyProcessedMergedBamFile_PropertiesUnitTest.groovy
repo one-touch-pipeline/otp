@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.test.mixin.Mock
+import org.junit.Before
+import org.junit.Test
+
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import org.junit.*
 
 @Mock([
         ExternalMergingWorkPackage,

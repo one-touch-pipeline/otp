@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.utils
 
-import spock.lang.*
+import spock.lang.Specification
 
-import static de.dkfz.tbi.otp.utils.HelperUtils.*
+import static de.dkfz.tbi.otp.utils.HelperUtils.byteArrayToHexString
 
 class HelperUtilsSpec extends Specification {
 

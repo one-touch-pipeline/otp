@@ -1,12 +1,15 @@
 package de.dkfz.tbi.otp.tracking
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.dataprocessing.sophia.*
-import groovy.transform.*
+import groovy.transform.TupleConstructor
 
-import static de.dkfz.tbi.otp.tracking.ProcessingStatus.*
+import de.dkfz.tbi.otp.dataprocessing.AceseqInstance
+import de.dkfz.tbi.otp.dataprocessing.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+
+import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 
 @TupleConstructor
 class SamplePairProcessingStatus {

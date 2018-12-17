@@ -4,9 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
-import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitoringService
-import de.dkfz.tbi.otp.job.scheduler.Scheduler
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.job.scheduler.*
 
 /**
  * Base class for jobs which submit cluster jobs and wait for them to finish and optionally do other

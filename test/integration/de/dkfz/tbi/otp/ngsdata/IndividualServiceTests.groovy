@@ -1,14 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.integration.*
-import de.dkfz.tbi.otp.security.*
-import grails.plugin.springsecurity.*
-import org.joda.time.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.joda.time.DateTime
+import org.joda.time.DateTimeUtils
 import org.junit.*
-import org.springframework.security.access.*
-import org.springframework.security.acls.domain.*
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.acls.domain.BasePermission
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
+import de.dkfz.tbi.otp.security.User
 
 import static org.junit.Assert.*
 

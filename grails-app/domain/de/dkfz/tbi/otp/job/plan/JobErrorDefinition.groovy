@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.job.plan
 
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.Entity
 
-import java.util.regex.*
+import java.util.regex.Pattern
+import java.util.regex.PatternSyntaxException
 
 class JobErrorDefinition implements Entity {
     String errorExpression

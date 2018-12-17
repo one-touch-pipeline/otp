@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import org.springframework.stereotype.*
+import org.springframework.stereotype.Component
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.util.spreadsheet.validation.*
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CUSTOMER_LIBRARY
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
 
 @Component
 class SampleLibraryValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {

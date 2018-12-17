@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-
-import org.junit.*
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.Test
 
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions

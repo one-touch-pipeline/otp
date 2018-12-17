@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import org.junit.Test
+
 import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.hipo.HipoSampleIdentifierParser
-import org.junit.Test
 
 class SampleIdentifierServiceTests {
 

@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.utils.logging
 
-import static org.springframework.util.Assert.*
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.impl.SimpleLog
+
+import static org.springframework.util.Assert.notNull
 
 /**
  * Holds a {@link Log} instance in a {@link Thread}

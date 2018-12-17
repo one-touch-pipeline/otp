@@ -1,16 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.ngsdata.Individual.Type
 import grails.buildtestdata.mixin.Build
-import grails.test.mixin.Mock
-import grails.test.mixin.TestFor
-import grails.test.mixin.TestMixin
+import grails.test.mixin.*
 import grails.test.mixin.support.GrailsUnitTestMixin
 import org.junit.Test
 
-import static org.junit.Assert.assertEquals
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.ngsdata.Individual.Type
 
+import static org.junit.Assert.assertEquals
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(Individual)

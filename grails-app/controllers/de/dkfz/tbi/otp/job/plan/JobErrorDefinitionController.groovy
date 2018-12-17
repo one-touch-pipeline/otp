@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.job.plan
 
+import grails.converters.JSON
+
 import de.dkfz.tbi.otp.CheckAndCall
-import grails.converters.*
 
 class JobErrorDefinitionController implements CheckAndCall {
 

@@ -1,11 +1,11 @@
-import grails.converters.*
-import grails.plugin.springsecurity.*
+import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.authentication.*
 import org.springframework.security.core.context.SecurityContextHolder as SCH
-import org.springframework.security.web.*
-import org.springframework.security.web.authentication.*
+import org.springframework.security.web.WebAttributes
 
-import javax.servlet.http.*
+import javax.servlet.http.HttpServletResponse
 
 class LoginController {
 

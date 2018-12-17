@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import org.hibernate.criterion.*
-import org.hibernate.sql.*
-import org.springframework.security.access.prepost.*
+import org.hibernate.criterion.CriteriaSpecification
+import org.hibernate.sql.JoinType
+import org.springframework.security.access.prepost.PreAuthorize
 
-import java.text.*
+import de.dkfz.tbi.otp.dataprocessing.*
+
+import java.text.SimpleDateFormat
 
 abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
 

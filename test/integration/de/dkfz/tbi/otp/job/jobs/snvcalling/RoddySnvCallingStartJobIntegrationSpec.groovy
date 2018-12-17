@@ -1,14 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.jobs.*
-import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis.*
-import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.*
-import grails.test.spock.*
-import org.springframework.beans.factory.annotation.*
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis.RoddyJobSpec
+import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysisStartJobIntegrationSpec
+import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.AbstractBamFilePairAnalysisStartJob
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.tracking.OtrsTicket
 
 class RoddySnvCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobIntegrationSpec implements RoddyJobSpec {
 

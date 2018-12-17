@@ -1,23 +1,26 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import grails.test.mixin.*
-import org.junit.*
-import org.junit.rules.*
-import org.springframework.context.*
-import spock.lang.*
+import grails.test.mixin.Mock
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import org.springframework.context.ApplicationContext
+import spock.lang.Specification
 
-import java.nio.file.*
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
+import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.util.spreadsheet.validation.Level
+
+import java.nio.file.Path
+import java.nio.file.Paths
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 @Mock([
         ExternalMergingWorkPackage,

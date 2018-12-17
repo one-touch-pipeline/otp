@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.JobExecutionPlanChangedEvent
-import de.dkfz.tbi.otp.job.processing.StartJob
-
 import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.processing.JobExecutionPlanChangedEvent
+import de.dkfz.tbi.otp.job.processing.StartJob
 
 /**
  * Very simple Test implementation of the StartJob interface.

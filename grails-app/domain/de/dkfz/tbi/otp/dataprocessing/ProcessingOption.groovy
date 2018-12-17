@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.config.TypeValidators
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.utils.Entity
 
 class ProcessingOption implements Entity {
 

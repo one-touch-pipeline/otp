@@ -1,14 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.scheduler.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import grails.test.spock.*
-import org.junit.*
-import org.junit.rules.*
+import grails.test.spock.IntegrationSpec
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 
-import java.nio.file.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.MailHelperService
+
+import java.nio.file.Files
 
 class DataFileConsistencyCheckerIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 

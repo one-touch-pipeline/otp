@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import groovy.transform.TupleConstructor
+
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import groovy.transform.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.Entity
 
 class Pipeline implements Entity {
 

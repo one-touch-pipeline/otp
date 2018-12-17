@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import de.dkfz.tbi.otp.*
+import grails.test.mixin.Mock
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import spock.lang.*
 
 @Mock([
         AbstractMergedBamFile,

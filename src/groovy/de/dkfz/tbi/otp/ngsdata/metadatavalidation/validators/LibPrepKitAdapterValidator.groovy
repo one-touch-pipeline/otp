@@ -1,12 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.stereotype.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 

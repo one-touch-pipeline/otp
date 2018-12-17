@@ -6,7 +6,8 @@ import de.dkfz.tbi.otp.job.processing.ParameterType
 import de.dkfz.tbi.otp.job.processing.ParameterUsage
 import de.dkfz.tbi.otp.security.UserAndRoles
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.fail
 
 /**
  * Abstract base class for all tests to have some shared functionality.

@@ -2,10 +2,10 @@ package de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
-import de.dkfz.tbi.otp.dataprocessing.singleCell.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 trait CellRangerFactory implements IsAlignment {
 

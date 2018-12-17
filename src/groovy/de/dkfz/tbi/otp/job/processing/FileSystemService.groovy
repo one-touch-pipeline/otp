@@ -1,23 +1,26 @@
 package de.dkfz.tbi.otp.job.processing
 
-import com.github.robtimus.filesystems.sftp.*
-import com.jcraft.jsch.*
+import com.github.robtimus.filesystems.sftp.SFTPEnvironment
+import com.github.robtimus.filesystems.sftp.SFTPFileSystemProvider
+import com.jcraft.jsch.IdentityRepository
 import com.jcraft.jsch.agentproxy.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.codehaus.groovy.grails.commons.*
-import org.springframework.scheduling.annotation.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
-import grails.transaction.*
+import grails.transaction.Transactional
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
 
-import java.nio.file.*
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.SshAuthMethod
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.ngsdata.Realm
 
-import static com.github.robtimus.filesystems.sftp.Identity.*
+import java.nio.file.FileSystem
+import java.nio.file.FileSystems
+
+import static com.github.robtimus.filesystems.sftp.Identity.fromFiles
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
-
 
 @Scope("singleton")
 @Component

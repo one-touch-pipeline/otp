@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.*
-import grails.converters.*
+import grails.converters.JSON
+
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelResultsService
 
 class IndelController extends AbstractAnalysisController {
 

@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.domainFactory.pipelines
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 
 trait IsBamFilePairAnalysis implements IsPipeline {
 

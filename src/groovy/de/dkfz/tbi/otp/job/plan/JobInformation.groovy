@@ -1,10 +1,6 @@
 package de.dkfz.tbi.otp.job.plan
 
-import de.dkfz.tbi.otp.job.processing.EndStateAwareJob
-import de.dkfz.tbi.otp.job.processing.ParameterMapping
-import de.dkfz.tbi.otp.job.processing.ParameterType
-import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import de.dkfz.tbi.otp.job.processing.StartJob
+import de.dkfz.tbi.otp.job.processing.*
 
 /**
  * Class representing a serialized form of a JobDefinition and a

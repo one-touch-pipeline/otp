@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.test.spock.IntegrationSpec
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.spock.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class AceSeqServiceIntegrationSpec extends IntegrationSpec {
 

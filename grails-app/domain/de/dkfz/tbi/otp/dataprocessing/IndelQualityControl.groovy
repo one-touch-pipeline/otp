@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.qcTrafficLight.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
+import de.dkfz.tbi.otp.utils.Entity
 
 class IndelQualityControl implements Entity, QcTrafficLightValue {
 

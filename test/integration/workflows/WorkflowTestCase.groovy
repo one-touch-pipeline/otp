@@ -1,34 +1,36 @@
 package workflows
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
+import grails.util.Environment
+import grails.util.Holders
+import groovy.json.JsonOutput
+import groovy.sql.Sql
+import groovy.util.logging.Log4j
+import org.hibernate.SessionFactory
+import org.junit.*
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.scriptTests.GroovyScriptAwareTestCase
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
-import grails.plugin.springsecurity.*
-import grails.test.mixin.*
-import grails.test.mixin.integration.*
-import grails.util.*
-import groovy.json.*
-import groovy.sql.*
-import groovy.util.logging.*
-import org.hibernate.*
-import org.junit.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-import javax.sql.*
-import java.time.*
+import javax.sql.DataSource
+import java.time.Duration
 import java.util.concurrent.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static de.dkfz.tbi.otp.utils.LocalShellHelper.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout
 
 /**
  * Base class for work-flow integration test cases.

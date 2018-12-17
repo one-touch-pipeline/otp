@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import grails.test.spock.*
-import grails.validation.*
+import grails.test.spock.IntegrationSpec
+import grails.validation.ValidationException
+
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 
 
 class SeqPlatformIntegrationSpec extends IntegrationSpec {

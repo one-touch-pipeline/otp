@@ -1,8 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.prepost.PostAuthorize
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.access.prepost.PreFilter
+import org.springframework.security.access.prepost.*
+
 import de.dkfz.tbi.otp.utils.ReferencedClass
 import de.dkfz.tbi.otp.utils.StringUtils
 

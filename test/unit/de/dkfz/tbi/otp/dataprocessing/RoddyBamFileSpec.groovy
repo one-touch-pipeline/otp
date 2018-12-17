@@ -1,12 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import grails.test.mixin.Mock
+import grails.validation.ValidationException
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import grails.validation.*
-import spock.lang.*
 
 @Mock([
         AbstractMergedBamFile,

@@ -1,14 +1,12 @@
 package de.dkfz.tbi.otp.utils.logging
 
-import java.util.regex.Matcher
+import org.apache.log4j.*
+import org.apache.log4j.spi.LoggingEvent
 
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 
-import org.apache.log4j.Appender
-import org.apache.log4j.AppenderSkeleton
-import org.apache.log4j.FileAppender
-import org.apache.log4j.spi.LoggingEvent
+import java.util.regex.Matcher
 
 /**
  * Appender for Log messages of the Jobs.

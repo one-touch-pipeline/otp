@@ -1,16 +1,18 @@
 package de.dkfz.tbi.otp.sampleSwap
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
+import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.sampleswap.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import org.junit.*
-import org.junit.rules.*
-import spock.lang.*
+import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.nio.file.*
+import java.nio.file.Files
 
 class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 

@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.infrastructure.*
-import grails.orm.*
+import grails.orm.HibernateCriteriaBuilder
+
+import de.dkfz.tbi.otp.ProjectSelection
+import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 
 class StatisticsController {
     ProjectService projectService

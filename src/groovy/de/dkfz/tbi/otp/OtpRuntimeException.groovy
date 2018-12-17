@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp
 
-import groovy.transform.*
+import groovy.transform.InheritConstructors
 
 @InheritConstructors
 class OtpRuntimeException extends RuntimeException {

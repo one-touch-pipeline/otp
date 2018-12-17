@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.job.jobs.utils.*
+import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 

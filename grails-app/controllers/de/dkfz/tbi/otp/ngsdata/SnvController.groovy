@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import grails.converters.*
+import grails.converters.JSON
+
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvResultsService
 
 class SnvController extends AbstractAnalysisController {
 

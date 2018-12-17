@@ -1,12 +1,13 @@
 package workflows
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import grails.test.mixin.integration.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 import org.junit.*
 
-import java.time.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.ngsdata.*
+
+import java.time.Duration
 
 @Ignore
 @TestMixin(IntegrationTestMixin)

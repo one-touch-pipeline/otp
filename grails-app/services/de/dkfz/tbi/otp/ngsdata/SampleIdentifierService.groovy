@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+
+import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class SampleIdentifierService {
 

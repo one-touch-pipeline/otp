@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.hibernate.*
+import org.hibernate.Hibernate
+
+import de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFileService
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * Represents a merged bam file stored on the file system

@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.junit.Assert.*
-import grails.test.mixin.*
-import org.junit.*
-
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import org.junit.Assert
+import org.junit.Test
 
 @TestFor(PicardMarkDuplicatesMetrics)
 @Mock([MockAbstractBamFile])

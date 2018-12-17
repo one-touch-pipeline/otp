@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.job.plan
 
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class JobErrorDefinitionServiceSpec extends Specification {
 

@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.domainFactory
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 trait DomainFactoryCore implements DomainFactoryHelper {
 

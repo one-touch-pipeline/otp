@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import org.junit.Test
+import org.springframework.beans.factory.annotation.Autowired
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.junit.*
-import org.springframework.beans.factory.annotation.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 class RoddyAlignmentDeciderTest {
     @Autowired

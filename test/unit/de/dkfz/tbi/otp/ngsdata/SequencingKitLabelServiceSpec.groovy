@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.*
+import grails.test.mixin.Mock
 
 @Mock([
         SequencingKitLabel,

@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.integration.*
-import de.dkfz.tbi.otp.job.plan.*
-import de.dkfz.tbi.otp.job.processing.*
-import org.junit.*
+import org.junit.Test
 
-import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
+import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.processing.PlanValidatorService
+
+import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.plan
 import static org.junit.Assert.*
 
 class JobExecutionPlanDSLTests extends AbstractIntegrationTest {

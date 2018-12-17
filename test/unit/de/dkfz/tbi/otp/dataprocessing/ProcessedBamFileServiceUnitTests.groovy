@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.buildtestdata.mixin.*
-import grails.test.mixin.*
-import org.junit.*
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import org.junit.Before
+import org.junit.Test
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
 @TestFor(ProcessedBamFileService)
 @Build([

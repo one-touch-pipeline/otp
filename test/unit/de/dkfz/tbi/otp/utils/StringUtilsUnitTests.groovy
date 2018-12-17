@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.utils
 
+import org.junit.Test
+
 import de.dkfz.tbi.TestCase
 
 import static de.dkfz.tbi.otp.utils.StringUtils.commonPrefixLength
 import static de.dkfz.tbi.otp.utils.StringUtils.longestCommonPrefix
-
-import org.junit.Test
 
 class StringUtilsUnitTests {
 

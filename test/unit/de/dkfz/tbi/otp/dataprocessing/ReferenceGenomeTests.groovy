@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import org.junit.Test
+
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
 import static de.dkfz.tbi.otp.ngsdata.TestData.createReferenceGenome
 

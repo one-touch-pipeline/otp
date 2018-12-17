@@ -1,20 +1,19 @@
 package de.dkfz.tbi.otp.job.processing
 
-import org.codehaus.groovy.grails.web.mapping.LinkGenerator
-import org.springframework.beans.factory.annotation.Autowired
-
-import static org.junit.Assert.*
-
-import org.apache.commons.io.FileUtils
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.acl.AclUtilService
+import org.apache.commons.io.FileUtils
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.junit.*
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.acls.domain.BasePermission
 
+import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
-import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
+
+import static org.junit.Assert.*
 
 class ProcessServiceTests extends AbstractIntegrationTest {
     AclUtilService aclUtilService

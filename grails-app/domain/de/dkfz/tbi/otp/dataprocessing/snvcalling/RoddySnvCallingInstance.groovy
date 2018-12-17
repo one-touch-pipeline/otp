@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.hibernate.*
+import org.hibernate.Hibernate
+
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyAnalysisResult
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
 class RoddySnvCallingInstance extends AbstractSnvCallingInstance implements RoddyAnalysisResult {
 

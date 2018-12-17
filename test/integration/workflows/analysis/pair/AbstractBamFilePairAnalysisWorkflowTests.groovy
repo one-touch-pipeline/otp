@@ -1,10 +1,12 @@
 package workflows.analysis.pair
 
+import workflows.WorkflowTestCase
+import workflows.analysis.pair.bamfiles.BamFileSet
+import workflows.analysis.pair.bamfiles.SeqTypeAndInputBamFiles
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
-import workflows.*
-import workflows.analysis.pair.bamfiles.*
 
 import java.time.Duration
 

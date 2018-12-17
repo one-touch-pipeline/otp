@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.config.*
-import org.apache.commons.io.*
+import org.apache.commons.io.FileUtils
 import org.junit.*
-import org.junit.rules.*
+import org.junit.rules.TemporaryFolder
 
-import static org.junit.Assert.*
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertTrue
 
 class ErrorLogServiceTests {
 

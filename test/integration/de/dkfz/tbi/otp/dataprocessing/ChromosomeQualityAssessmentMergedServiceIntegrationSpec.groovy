@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.spock.*
+import grails.test.spock.IntegrationSpec
+
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends IntegrationSpec {
 

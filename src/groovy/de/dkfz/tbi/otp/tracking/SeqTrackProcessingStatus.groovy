@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.tracking
 
-import de.dkfz.tbi.otp.ngsdata.*
-import groovy.transform.*
+import groovy.transform.TupleConstructor
 
-import static de.dkfz.tbi.otp.tracking.ProcessingStatus.*
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+
+import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 
 @TupleConstructor
 class SeqTrackProcessingStatus {

@@ -1,12 +1,12 @@
-import de.dkfz.odcf.audit.impl.*
-import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
-import de.dkfz.tbi.otp.config.*
-import grails.util.*
+import grails.util.Environment
 import org.springframework.security.access.event.AuthorizationFailureEvent
-import org.springframework.security.web.authentication.switchuser.AuthenticationSwitchUserEvent
-import org.springframework.security.core.userdetails.UserDetails
 
-import static de.dkfz.tbi.otp.security.DicomAuditUtils.*
+import de.dkfz.odcf.audit.impl.DicomAuditLogger
+import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
+
+import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
 
 Properties otpProperties = ConfigService.parsePropertiesFile()
 

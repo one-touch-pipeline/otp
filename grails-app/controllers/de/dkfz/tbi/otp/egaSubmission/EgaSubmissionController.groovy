@@ -1,14 +1,15 @@
 package de.dkfz.tbi.otp.egaSubmission
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.*
-import grails.converters.*
-import org.springframework.validation.*
+import grails.converters.JSON
+import org.springframework.validation.FieldError
 
-import static de.dkfz.tbi.otp.administration.Document.FormatType.*
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.DataTableCommand
+import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+
+import static de.dkfz.tbi.otp.administration.Document.FormatType.CSV
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
 class EgaSubmissionController implements CheckAndCall, SubmitCommands {

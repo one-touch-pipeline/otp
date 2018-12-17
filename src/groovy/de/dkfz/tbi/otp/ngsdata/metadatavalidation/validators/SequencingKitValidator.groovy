@@ -1,11 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.util.spreadsheet.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.stereotype.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
+import de.dkfz.tbi.otp.ngsdata.SequencingKitLabelService
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.util.spreadsheet.Cell
+import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
 class SequencingKitValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {

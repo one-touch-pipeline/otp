@@ -1,8 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.*
-
+import de.dkfz.tbi.otp.job.processing.ClusterJobSubmissionOptionsService
+import de.dkfz.tbi.otp.utils.Entity
 
 class Realm implements Entity, Serializable {
 

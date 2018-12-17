@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
-import de.dkfz.tbi.otp.ngsdata.*
-import spock.lang.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
 

@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.hipo
 
-import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.stereotype.*
+import org.springframework.stereotype.Component
 
-import java.util.regex.*
+import de.dkfz.tbi.otp.ngsdata.DefaultParsedSampleIdentifier
+import de.dkfz.tbi.otp.ngsdata.SampleIdentifierParser
+
+import java.util.regex.Matcher
 
 @Component
 class Hipo2SampleIdentifierParser implements SampleIdentifierParser {

@@ -1,18 +1,20 @@
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
+import grails.test.mixin.Mock
+import spock.lang.Specification
 
-import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
-import de.dkfz.tbi.otp.dataprocessing.singleCell.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import spock.lang.*
 
-import java.nio.file.*
+import java.nio.file.FileSystems
+import java.nio.file.Path
 
 @Mock([
         AbstractMergedBamFile,

@@ -1,11 +1,14 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import grails.converters.JSON
+import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
+import org.codehaus.groovy.grails.web.json.JSONElement
+import org.codehaus.groovy.grails.web.json.JSONObject
+
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.converters.*
-import org.codehaus.groovy.grails.web.converters.exceptions.*
-import org.codehaus.groovy.grails.web.json.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 
 class ClusterJobSubmissionOptionsService {

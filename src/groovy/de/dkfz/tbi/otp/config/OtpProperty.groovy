@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.config
 
-import grails.util.*
+import grails.util.Environment
 
 enum OtpProperty {
 

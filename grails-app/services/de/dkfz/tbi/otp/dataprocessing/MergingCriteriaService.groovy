@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.*
+import grails.validation.ValidationException
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.validation.Errors
+
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.validation.*
-import org.springframework.security.access.prepost.*
-import org.springframework.validation.*
 
 class MergingCriteriaService {
 

@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.security
 
-import de.dkfz.odcf.audit.impl.*
-import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
-import org.springframework.security.core.context.*
 
-import static de.dkfz.tbi.otp.security.DicomAuditUtils.*
+import de.dkfz.odcf.audit.impl.DicomAuditLogger
+import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
+
+import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
 
 @Component("dicomAuditConsoleHandler")
 class DicomAuditConsoleHandler {

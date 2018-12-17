@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.monitor
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 
 class MonitorOutputCollector {

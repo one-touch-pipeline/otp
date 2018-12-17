@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.domainFactory.submissions.ega
 
-import de.dkfz.tbi.otp.domainFactory.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.*
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.egaSubmission.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 trait EgaSubmissionFactory implements IsRoddy, DomainFactoryCore {
 

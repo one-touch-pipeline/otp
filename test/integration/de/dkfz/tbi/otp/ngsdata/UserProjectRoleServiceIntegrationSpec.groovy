@@ -1,13 +1,17 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.administration.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainFactory.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import org.codehaus.groovy.grails.context.support.*
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.codehaus.groovy.grails.context.support.PluginAwareResourceBundleMessageSource
 import spock.lang.*
+
+import de.dkfz.tbi.otp.administration.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.MailHelperService
 
 class UserProjectRoleServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
     final static String UNIX_GROUP = "UNIX_GROUP"

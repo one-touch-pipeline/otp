@@ -1,30 +1,36 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import com.jcraft.jsch.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import com.jcraft.jsch.JSchException
+import groovy.transform.ToString
+import groovy.transform.TupleConstructor
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+import org.springframework.security.access.prepost.PreAuthorize
+
+import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.util.spreadsheet.*
+import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
-import groovy.transform.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
-import org.springframework.security.access.prepost.*
 
 import java.nio.file.*
-import java.util.logging.*
-import java.util.regex.*
+import java.util.regex.Matcher
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static de.dkfz.tbi.otp.utils.StringUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.StringUtils.escapeForSqlLike
 
 /**
  * Metadata import 2.0 (OTP-34)
@@ -273,7 +279,7 @@ class MetadataImportService {
     }
 
     static boolean mayImport(AbstractMetadataValidationContext context, boolean ignoreWarnings, String previousValidationMd5sum) {
-        Level maxLevel = context.maximumProblemLevel
+        java.util.logging.Level maxLevel = context.maximumProblemLevel
         if (maxLevel.intValue() < Level.WARNING.intValue()) {
             return true
         } else if (maxLevel == Level.WARNING && ignoreWarnings) {

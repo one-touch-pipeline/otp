@@ -1,11 +1,14 @@
 package workflows.alignment
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.*
+import org.junit.Ignore
+import org.junit.Test
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.*
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Ignore
 class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {

@@ -1,14 +1,15 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.ngsdata.*
-import groovy.transform.*
+import groovy.transform.CompileStatic
 
-import java.util.regex.*
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.ngsdata.Realm
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
-import static org.springframework.util.Assert.*
+import java.util.regex.Pattern
+
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
+import static org.springframework.util.Assert.notNull
 
 /**
  * A service to construct paths and messages for logging the status of cluster jobs.

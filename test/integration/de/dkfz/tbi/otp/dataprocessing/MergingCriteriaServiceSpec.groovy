@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.plugin.springsecurity.SpringSecurityUtils
+import spock.lang.Specification
+
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import spock.lang.*
+import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
     MergingCriteriaService mergingCriteriaService = new MergingCriteriaService()

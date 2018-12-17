@@ -1,19 +1,21 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.odcf.audit.impl.*
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.validation.ValidationException
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.beans.factory.DisposableBean
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.validation.Errors
+
+import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.OtpException
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.*
-import de.dkfz.tbi.otp.security.*
-import grails.plugin.springsecurity.*
-import grails.validation.*
-import org.codehaus.groovy.grails.commons.*
-import org.springframework.beans.factory.*
-import org.springframework.security.access.prepost.*
-import org.springframework.validation.*
-import java.util.concurrent.locks.*
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.security.User
+
+import java.util.concurrent.locks.ReentrantLock
 
 /**
  * Service to cleanly shutdown the running application.

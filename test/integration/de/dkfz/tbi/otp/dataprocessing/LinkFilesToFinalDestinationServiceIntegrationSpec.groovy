@@ -1,19 +1,22 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.*
-import de.dkfz.tbi.otp.job.processing.*
+import grails.test.spock.IntegrationSpec
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
+import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.qcTrafficLight.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightNotificationService
 import de.dkfz.tbi.otp.utils.*
-import grails.test.spock.*
-import org.junit.*
-import org.junit.rules.*
-import org.springframework.beans.factory.annotation.*
 
 class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec implements RoddyRnaFactory {
     LinkFilesToFinalDestinationService service

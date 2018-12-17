@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp
 
-import groovy.transform.*
-import org.springframework.validation.*
+import groovy.transform.Canonical
+import org.springframework.validation.Errors
 
 @Canonical
 class FlashMessage {

@@ -1,11 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
 import spock.lang.Specification
 
-
+import de.dkfz.tbi.otp.ngsdata.*
 
 class OverallQualityAssessmentMergedServiceIntegrationSpec extends Specification {
 

@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.security
 
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityUtils
+
 import de.dkfz.tbi.otp.security.AuditLog.Action
-import grails.plugin.springsecurity.*
 
 class AuditLogService {
 

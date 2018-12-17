@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.egaSubmission
 
-import de.dkfz.tbi.util.spreadsheet.*
-import groovy.transform.*
+import groovy.transform.CompileDynamic
+import groovy.transform.CompileStatic
 
-import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
+import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+
+import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.FILE_TYPE
 
 @CompileStatic
 class EgaSubmissionValidationService {

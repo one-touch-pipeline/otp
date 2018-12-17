@@ -1,26 +1,31 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.test.spock.IntegrationSpec
+import grails.validation.ValidationException
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import org.springframework.mock.web.MockMultipartFile
+import spock.lang.Unroll
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import grails.test.spock.*
-import grails.validation.*
-import org.junit.*
-import org.junit.rules.*
-import org.springframework.mock.web.*
-import spock.lang.*
 
 import java.nio.file.*
-import java.nio.file.attribute.*
+import java.nio.file.attribute.PosixFileAttributes
+import java.nio.file.attribute.PosixFilePermission
 
 class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 

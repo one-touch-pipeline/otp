@@ -1,18 +1,20 @@
 package de.dkfz.tbi.otp.notification
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import grails.test.spock.IntegrationSpec
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.context.support.PluginAwareResourceBundleMessageSource
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.ProcessingStatus
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import grails.test.spock.*
-import org.codehaus.groovy.grails.commons.*
-import org.codehaus.groovy.grails.web.mapping.*
-import org.springframework.beans.factory.annotation.*
-import spock.lang.*
-import org.codehaus.groovy.grails.context.support.*
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
-
 
 class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
 

@@ -1,8 +1,11 @@
 package workflows.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
 import org.junit.Ignore
+
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackageAlignmentProperty
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 @Ignore
 class RnaPairedAlignmentWorkflowTests extends AbstractRnaAlignmentWorkflowTests {

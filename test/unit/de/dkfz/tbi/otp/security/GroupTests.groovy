@@ -1,14 +1,14 @@
 package de.dkfz.tbi.otp.security
 
 import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-
-import static org.junit.Assert.*
-
-import grails.test.mixin.*
-import org.junit.*
+import org.junit.Test
 
 import de.dkfz.tbi.otp.administration.GroupCommand
+
+import static org.junit.Assert.*
 
 @TestFor(Group)
 @TestMixin(ControllerUnitTestMixin)

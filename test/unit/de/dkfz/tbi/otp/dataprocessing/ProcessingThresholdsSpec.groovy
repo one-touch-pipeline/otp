@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.Unroll
 
 class ProcessingThresholdsSpec extends Specification {
 

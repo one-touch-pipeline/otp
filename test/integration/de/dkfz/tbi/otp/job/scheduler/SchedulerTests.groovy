@@ -1,19 +1,21 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.integration.*
-import de.dkfz.tbi.otp.job.*
-import de.dkfz.tbi.otp.job.jobs.*
+import org.apache.commons.logging.impl.NoOpLog
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.junit.After
+import org.junit.Test
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
+import de.dkfz.tbi.otp.job.JobMailService
+import de.dkfz.tbi.otp.job.jobs.FailingTestJob
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.restarting.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.apache.commons.logging.impl.*
-import org.codehaus.groovy.grails.commons.*
-import org.junit.*
+import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-import java.util.concurrent.*
-import java.util.regex.*
+import java.util.concurrent.ExecutorService
+import java.util.regex.Pattern
 
 import static org.junit.Assert.*
 

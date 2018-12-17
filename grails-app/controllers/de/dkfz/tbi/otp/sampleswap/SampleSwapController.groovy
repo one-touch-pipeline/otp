@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp.sampleswap
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.converters.*
-import org.springframework.validation.*
 
 class SampleSwapController {
 

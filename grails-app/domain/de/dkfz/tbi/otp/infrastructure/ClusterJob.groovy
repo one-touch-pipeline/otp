@@ -1,14 +1,17 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.gorm.mapper.*
+import org.joda.time.*
+import org.joda.time.format.PeriodFormat
+
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.gorm.mapper.PersistentDateTimeAsMillis
+import de.dkfz.tbi.otp.gorm.mapper.PersistentDurationAsMillis
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.joda.time.*
-import org.joda.time.format.*
+import de.dkfz.tbi.otp.utils.Entity
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /**
  * A ClusterJob represents a single submitted or finished job on the cluster.

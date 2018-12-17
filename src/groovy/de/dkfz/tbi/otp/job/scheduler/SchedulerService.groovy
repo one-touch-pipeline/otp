@@ -1,26 +1,31 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.apache.log4j.Logger
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+import org.springframework.context.annotation.Scope
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.config.OptionProblem
 import de.dkfz.tbi.otp.config.PropertiesValidationService
-import de.dkfz.tbi.otp.job.*
+import de.dkfz.tbi.otp.job.JobMailService
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.ExceptionUtils
 import de.dkfz.tbi.otp.utils.logging.*
-import org.apache.commons.logging.*
-import org.apache.log4j.*
-import org.codehaus.groovy.grails.commons.*
-import org.codehaus.groovy.grails.support.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
-import org.springframework.scheduling.annotation.*
-import org.springframework.security.access.prepost.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
-import static org.springframework.util.Assert.*
 
-import java.util.concurrent.*
-import java.util.concurrent.locks.*
+import java.util.concurrent.Callable
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.locks.Lock
+import java.util.concurrent.locks.ReentrantLock
+
+import static org.springframework.util.Assert.notNull
 
 @Scope("singleton")
 @Component

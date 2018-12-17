@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.utils.*
-import org.junit.*
-import org.junit.rules.*
-import spock.lang.*
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 class AbstractMergedBamFileServiceSpec extends Specification {
 

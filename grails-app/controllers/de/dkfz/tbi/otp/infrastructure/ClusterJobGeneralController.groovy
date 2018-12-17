@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.otp.utils.DataTableCommand
 import grails.converters.JSON
 import org.joda.time.LocalDate
+
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class ClusterJobGeneralController {
 

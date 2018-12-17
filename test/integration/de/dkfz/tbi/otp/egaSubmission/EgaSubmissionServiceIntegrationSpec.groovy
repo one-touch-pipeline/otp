@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.egaSubmission
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainFactory.submissions.ega.*
-import grails.test.spock.*
-import spock.lang.*
+import grails.test.spock.IntegrationSpec
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 
 class EgaSubmissionServiceIntegrationSpec extends IntegrationSpec implements EgaSubmissionFactory {
 

@@ -1,10 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.Entity
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class SeqPlatform implements Entity {
 

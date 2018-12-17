@@ -1,9 +1,11 @@
-import groovy.transform.*
-import org.codehaus.groovy.ast.*
-import org.codehaus.groovy.transform.trait.*
-import org.codenarc.rule.*
+import groovy.transform.CompileStatic
+import org.codehaus.groovy.ast.AnnotationNode
+import org.codehaus.groovy.ast.ClassNode
+import org.codehaus.groovy.transform.trait.Traits
+import org.codenarc.rule.AbstractAstVisitor
+import org.codenarc.rule.AbstractAstVisitorRule
 
-import java.lang.reflect.*
+import java.lang.reflect.Modifier
 
 @CompileStatic
 class AnnotationsForStartJobsRule extends AbstractAstVisitorRule {

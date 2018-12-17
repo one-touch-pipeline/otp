@@ -1,14 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing.singlecell
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.test.spock.IntegrationSpec
+import org.springframework.validation.Errors
+
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
+import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import grails.test.spock.*
-import org.springframework.validation.*
+import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class CellRangerConfigurationServiceIntegrationSpec extends IntegrationSpec implements CellRangerFactory, UserAndRoles {
 

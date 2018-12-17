@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.job.plan
 
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import org.junit.Test
+
+import de.dkfz.tbi.otp.job.processing.ProcessParameter
 
 import static org.junit.Assert.*
 

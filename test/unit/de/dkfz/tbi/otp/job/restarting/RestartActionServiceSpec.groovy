@@ -1,16 +1,18 @@
 package de.dkfz.tbi.otp.job.restarting
 
+import grails.test.mixin.Mock
+import org.apache.commons.logging.Log
+import org.springframework.context.ApplicationContext
+import spock.lang.Specification
+
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
+import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.test.mixin.*
-import org.apache.commons.logging.*
-import org.springframework.context.*
-import spock.lang.*
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 @Mock([
         Process,

@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-
 class ReferenceGenomeIndexService {
     ReferenceGenomeService referenceGenomeService
 

@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.converters.*
-import grails.orm.*
-import grails.plugin.springsecurity.*
+import grails.converters.JSON
+import grails.orm.HibernateCriteriaBuilder
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.SpringSecurityUtils
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.ngsdata.*
 
 class RootController {
     ProjectService projectService

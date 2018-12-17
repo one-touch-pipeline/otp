@@ -1,8 +1,9 @@
-import de.dkfz.tbi.*
+import de.dkfz.tbi.* //must be Star otherwise compile will fail, can be fixed once we dont use TestCase anymore
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.processing.ExecutionState
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.HelperUtils
+
 /**
  * A counter used to handle unique constraints. You can use it in a closure to produce a unique value for a property.
  * The class Individual show therefore an example.

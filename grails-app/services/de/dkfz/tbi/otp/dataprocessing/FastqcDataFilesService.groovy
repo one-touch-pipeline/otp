@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.nio.file.*
-import java.util.zip.*
+import java.nio.file.Path
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 
 /**
  * This service is used by jobs running "fastqc" program.

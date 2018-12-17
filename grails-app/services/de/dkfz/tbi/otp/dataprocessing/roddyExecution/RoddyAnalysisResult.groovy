@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
-import de.dkfz.tbi.otp.dataprocessing.*
-
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 
 trait RoddyAnalysisResult extends RoddyResult {
 

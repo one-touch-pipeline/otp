@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
 import grails.test.mixin.*
-import grails.test.mixin.support.*
-import org.junit.*
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.Test
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.dataprocessing.*
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(SeqTrack)

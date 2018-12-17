@@ -1,15 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing.sophia
 
+import grails.test.mixin.Mock
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import org.junit.*
-import org.junit.rules.*
-import spock.lang.*
 
 @Mock([
         AbstractMergedBamFile,

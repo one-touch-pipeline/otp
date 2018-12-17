@@ -1,16 +1,19 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
-import de.dkfz.tbi.otp.utils.*
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.util.spreadsheet.validation.*
-import org.junit.*
-import org.junit.rules.*
-import spock.lang.*
 
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class BamMetadataValidationContextSpec extends Specification {
 

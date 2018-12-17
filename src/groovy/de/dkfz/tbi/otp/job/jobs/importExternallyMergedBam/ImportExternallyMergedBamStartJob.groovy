@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.*
-import org.springframework.context.annotation.*
-import org.springframework.scheduling.annotation.*
-import org.springframework.stereotype.*
+import org.springframework.context.annotation.Scope
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.dataprocessing.ImportProcess
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 
 @Component("importExternallyMergedBamStartJob")
 @Scope("singleton")

@@ -1,19 +1,23 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.config.*
-import grails.util.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.annotation.*
-import org.springframework.security.authentication.*
-import org.springframework.security.core.*
-import org.springframework.security.core.authority.*
-import org.springframework.security.core.context.*
-import org.springframework.security.web.context.*
-import org.springframework.stereotype.*
-import org.springframework.web.filter.*
+import grails.util.Environment
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.context.HttpRequestResponseHolder
+import org.springframework.stereotype.Component
+import org.springframework.web.filter.GenericFilterBean
+
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 
 import javax.servlet.*
-import javax.servlet.http.*
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 /**
  * Filter to give a configured user access to the web application in development mode.

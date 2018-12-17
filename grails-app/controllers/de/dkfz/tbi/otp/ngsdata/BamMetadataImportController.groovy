@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
+import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 
 class BamMetadataImportController {
 

@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.Entity
 
 class MergingWorkPackageAlignmentProperty implements Entity {
 

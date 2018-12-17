@@ -1,24 +1,32 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.plan.*
-import de.dkfz.tbi.otp.job.restarting.*
-import de.dkfz.tbi.otp.job.scheduler.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.*
-import org.apache.commons.logging.impl.*
+import org.apache.commons.logging.impl.NoOpLog
 import org.junit.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 
-import java.util.concurrent.*
-import java.util.concurrent.atomic.*
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
+import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitoringService
+import de.dkfz.tbi.otp.job.scheduler.Scheduler
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.security.UserAndRoles
 
-import static de.dkfz.tbi.TestConstants.*
-import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.*
+import java.util.concurrent.Semaphore
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+
+import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertFailed
+import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertSucceeded
 import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
-import static junit.framework.TestCase.*
+import static junit.framework.TestCase.assertEquals
+import static junit.framework.TestCase.assertTrue
 
 class AbstractMultiJobTests implements UserAndRoles {
 
@@ -217,12 +225,12 @@ class AbstractMultiJobTests implements UserAndRoles {
     void testFailingJobInPhase1() {
         job = createJob { final int phase, final Collection<? extends ClusterJobIdentifier> finishedClusterJobs ->
             assert phase == 1
-            throw new NumberFormatException(ARBITRARY_MESSAGE)
+            throw new NumberFormatException(TestConstants.ARBITRARY_MESSAGE)
         }
         shouldFail NumberFormatException, { scheduler.executeJob(job) }
         assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
         assert atomicPhase.get() == 1
-        assertFailed(job, ARBITRARY_MESSAGE)
+        assertFailed(job, TestConstants.ARBITRARY_MESSAGE)
     }
 
     @Test
@@ -235,7 +243,7 @@ class AbstractMultiJobTests implements UserAndRoles {
                     }
                     return NextAction.WAIT_FOR_CLUSTER_JOBS
                 case 2:
-                    throw new NumberFormatException(ARBITRARY_MESSAGE)
+                    throw new NumberFormatException(TestConstants.ARBITRARY_MESSAGE)
                 default:
                     throw new UnsupportedOperationException("Phase ${phase} is not implemented.")
             }
@@ -256,7 +264,7 @@ class AbstractMultiJobTests implements UserAndRoles {
         assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
         assert atomicPhase.get() == 2
 
-        assertFailed(job, ARBITRARY_MESSAGE)
+        assertFailed(job, TestConstants.ARBITRARY_MESSAGE)
     }
 }
 

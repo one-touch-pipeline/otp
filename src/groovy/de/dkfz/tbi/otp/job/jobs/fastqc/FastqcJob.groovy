@@ -1,18 +1,21 @@
 package de.dkfz.tbi.otp.job.jobs.fastqc
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.ast.*
-import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.ast.UseJobLog
+import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsqc.*
-import de.dkfz.tbi.otp.utils.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
+import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
+import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 
 @Component
 @Scope("prototype")

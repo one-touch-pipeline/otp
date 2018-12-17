@@ -1,10 +1,11 @@
 package workflows.alignment
 
+import org.junit.Ignore
+import org.junit.Test
+
 import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
 
 @Ignore
 class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {

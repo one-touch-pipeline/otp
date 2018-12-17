@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.security.*
-import grails.plugin.springsecurity.*
-import spock.lang.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
     UserService userService = new UserService()

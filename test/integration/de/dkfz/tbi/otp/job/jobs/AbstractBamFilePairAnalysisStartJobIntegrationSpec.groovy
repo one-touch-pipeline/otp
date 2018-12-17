@@ -1,15 +1,16 @@
 package de.dkfz.tbi.otp.job.jobs
 
+import grails.test.spock.IntegrationSpec
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis.*
-import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.job.jobs.AbstractBamFilePairAnalysis.StartJobIntegrationSpec
+import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.AbstractBamFilePairAnalysisStartJob
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.logging.*
-import grails.test.spock.*
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends IntegrationSpec implements StartJobIntegrationSpec {
 

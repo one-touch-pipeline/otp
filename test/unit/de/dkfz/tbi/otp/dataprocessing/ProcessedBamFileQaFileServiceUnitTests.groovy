@@ -1,12 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.buildtestdata.mixin.Build
+import org.junit.*
+
 import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.buildtestdata.mixin.Build
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
 
 @Build([
         MergingCriteria,

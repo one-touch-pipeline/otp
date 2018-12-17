@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.job.plan
 
 import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.Test
 
 import static org.junit.Assert.*
-
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-import org.junit.*
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(DecisionMapping)

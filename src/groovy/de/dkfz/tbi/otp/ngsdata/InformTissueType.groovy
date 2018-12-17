@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.ngsdata
 
-
 enum InformTissueType {
     TUMOR                     ('T'),
     METASTASIS                ('M'),

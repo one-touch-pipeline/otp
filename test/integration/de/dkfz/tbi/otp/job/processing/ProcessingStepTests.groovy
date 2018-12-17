@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.job.processing
 
+import org.junit.Test
+
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import org.junit.Test
 
 class ProcessingStepTests  {
 

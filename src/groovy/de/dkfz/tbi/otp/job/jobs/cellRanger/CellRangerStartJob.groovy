@@ -1,14 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
-import de.dkfz.tbi.otp.dataprocessing.singleCell.*
-import de.dkfz.tbi.otp.job.jobs.*
-import de.dkfz.tbi.otp.job.jobs.alignment.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
+import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Component('cellRangerAlignmentStartJob')
 @Scope('singleton')

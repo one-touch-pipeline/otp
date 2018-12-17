@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.utils
 
-
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 
 class Md5SumService {
 

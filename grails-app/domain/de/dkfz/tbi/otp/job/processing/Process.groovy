@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.job.plan.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.utils.Entity
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 /**
  * The Process represents one execution of a {@link JobExecutionPlan}.

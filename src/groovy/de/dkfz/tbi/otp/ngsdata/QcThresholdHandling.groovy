@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-
-import groovy.transform.*
+import groovy.transform.TupleConstructor
 
 @TupleConstructor
 enum QcThresholdHandling {

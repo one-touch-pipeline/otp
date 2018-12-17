@@ -1,19 +1,21 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.integration.*
-import de.dkfz.tbi.otp.job.jobs.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.restarting.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.*
-import org.apache.commons.logging.impl.*
+import org.apache.commons.logging.impl.NoOpLog
 import org.junit.*
 
-import static de.dkfz.tbi.TestConstants.*
-import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.*
-import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
+import de.dkfz.tbi.otp.job.jobs.MonitoringTestJob
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+
+import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertFailed
+import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertSucceeded
+import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createAndSaveProcessingStep
 
 class ClusterJobMonitoringServiceTests extends AbstractIntegrationTest {
 
@@ -40,12 +42,12 @@ class ClusterJobMonitoringServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testNotifyJobAboutFinishedClusterJob_failure() {
-        assertFailed(notifyJobAboutFinishedClusterJob(true), ARBITRARY_MESSAGE)
+        assertFailed(notifyJobAboutFinishedClusterJob(true), TestConstants.ARBITRARY_MESSAGE)
     }
 
     private MonitoringJob notifyJobAboutFinishedClusterJob(final boolean fail) {
         Realm realm = new Realm()
-        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, ARBITRARY_CLUSTER_JOB_ID, "user name")
+        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, TestConstants.ARBITRARY_CLUSTER_JOB_ID, "user name")
         final Job testJob = new MonitoringTestJob(createAndSaveProcessingStep(), null, schedulerService, jobIdentifier, fail)
 
         testJob.log = new NoOpLog()

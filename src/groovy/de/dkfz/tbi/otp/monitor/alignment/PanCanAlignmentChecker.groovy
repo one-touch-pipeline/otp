@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.monitor.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.monitor.*
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
 
 class PanCanAlignmentChecker extends AbstractRoddyAlignmentChecker {

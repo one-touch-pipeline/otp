@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.*
+import org.junit.Test
+
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.*
-import org.junit.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 class RoddyBamFileTest {
 

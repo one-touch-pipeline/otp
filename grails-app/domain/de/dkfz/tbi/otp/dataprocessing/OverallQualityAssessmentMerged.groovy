@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import org.hibernate.Hibernate
+
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.qcTrafficLight.*
-import org.hibernate.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 
 /**
  * To be extended later on

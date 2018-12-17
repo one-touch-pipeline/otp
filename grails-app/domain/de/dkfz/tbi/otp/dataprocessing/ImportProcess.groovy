@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.Entity
 
-import static org.springframework.util.Assert.*
+import static org.springframework.util.Assert.notNull
 
 /**
  * Represents the state of the import process of the externally processed merged BAM files

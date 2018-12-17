@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.springframework.beans.factory.annotation.*
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.ProcessOutput
 
 /**
  * This service provides file operations

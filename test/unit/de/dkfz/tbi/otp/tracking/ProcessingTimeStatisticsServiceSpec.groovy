@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.tracking
 
-import spock.lang.*
+import spock.lang.Specification
 
 class ProcessingTimeStatisticsServiceSpec extends Specification {
 

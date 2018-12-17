@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.*
-import org.springframework.beans.factory.annotation.*
+import org.junit.Test
+import org.springframework.beans.factory.annotation.Autowired
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 class WgbsAlignmentStartJobTests {
 

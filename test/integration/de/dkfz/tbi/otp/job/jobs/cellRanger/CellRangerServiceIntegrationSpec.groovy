@@ -1,14 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
-import de.dkfz.tbi.otp.dataprocessing.singleCell.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.*
-import grails.test.spock.*
-import org.junit.*
-import org.junit.rules.*
-import spock.lang.*
+import grails.test.spock.IntegrationSpec
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 class CellRangerServiceIntegrationSpec extends IntegrationSpec implements CellRangerFactory {
 

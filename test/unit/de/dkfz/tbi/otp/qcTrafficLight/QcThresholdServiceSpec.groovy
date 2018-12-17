@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import de.dkfz.tbi.otp.dataprocessing.sophia.*
+import grails.test.mixin.Mock
+import org.grails.datastore.mapping.validation.ValidationErrors
+import org.springframework.validation.Errors
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import org.grails.datastore.mapping.validation.*
-import org.springframework.validation.*
-import spock.lang.*
 
 import static de.dkfz.tbi.otp.qcTrafficLight.TableCellValue.WarnColor.*
 

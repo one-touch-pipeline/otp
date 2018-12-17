@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.*
-import grails.test.mixin.*
+import grails.test.mixin.Mock
 import spock.lang.Specification
+
+import de.dkfz.tbi.TestCase
 
 @Mock([
         SeqType,

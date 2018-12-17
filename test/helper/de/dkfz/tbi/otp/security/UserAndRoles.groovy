@@ -1,15 +1,21 @@
 package de.dkfz.tbi.otp.security
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.acl.*
-import org.springframework.security.authentication.*
-import org.springframework.security.core.*
-import org.springframework.security.core.authority.*
-import org.springframework.security.core.context.*
-import org.springframework.security.web.authentication.switchuser.*
+import grails.plugin.springsecurity.acl.AclSid
+import grails.plugin.springsecurity.acl.AclUtilService
+import org.springframework.security.authentication.AnonymousAuthenticationToken
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.web.authentication.switchuser.SwitchUserFilter
+import org.springframework.security.web.authentication.switchuser.SwitchUserGrantedAuthority
 
-import static org.junit.Assert.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.utils.Principal
+
+import static org.junit.Assert.assertNotNull
 
 trait UserAndRoles {
 

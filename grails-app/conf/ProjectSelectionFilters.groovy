@@ -1,9 +1,10 @@
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.plugin.springsecurity.*
-import org.codehaus.groovy.grails.context.support.*
-import org.springframework.context.i18n.*
+import grails.plugin.springsecurity.SpringSecurityService
+import org.codehaus.groovy.grails.context.support.PluginAwareResourceBundleMessageSource
+import org.springframework.context.i18n.LocaleContextHolder
 
+import de.dkfz.tbi.otp.ProjectSelectionCommand
+import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.ngsdata.*
 
 class ProjectSelectionFilters {
     PluginAwareResourceBundleMessageSource messageSource

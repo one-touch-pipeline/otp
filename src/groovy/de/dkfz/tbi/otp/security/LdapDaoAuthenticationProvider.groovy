@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.security
 
-import groovy.transform.*
-import org.springframework.beans.factory.annotation.*
+import groovy.transform.CompileStatic
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.authentication.*
-import org.springframework.security.core.*
-import org.springframework.security.core.userdetails.*
-import org.springframework.security.ldap.authentication.*
-import org.springframework.stereotype.*
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.AuthenticationException
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.ldap.authentication.LdapAuthenticationProvider
+import org.springframework.stereotype.Component
 
 /**
  * This provider checks whether the user exists in the database and can be authenticated by LDAP.

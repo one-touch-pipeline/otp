@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParameterObject {
 
@@ -10,7 +10,7 @@ class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParam
     ]
 
     static constraints = {
-        type validator: { it == BamType.SORTED }
+        type validator: { it == AbstractBamFile.BamType.SORTED }
         alignmentPass nullable: false, unique: true, validator: { AlignmentPass alignmentPass ->
             return alignmentPass.referenceGenome != null
         }

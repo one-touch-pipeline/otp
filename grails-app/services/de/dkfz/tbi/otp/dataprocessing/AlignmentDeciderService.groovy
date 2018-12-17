@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+
+import de.dkfz.tbi.otp.ngsdata.Project
 
 class AlignmentDeciderService {
 

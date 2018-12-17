@@ -1,9 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.util.spreadsheet.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import org.springframework.stereotype.*
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.util.spreadsheet.Cell
+import de.dkfz.tbi.util.spreadsheet.validation.AllCellsValidator
+import de.dkfz.tbi.util.spreadsheet.validation.Level
 
 @Component
 class SpaceValidator extends AllCellsValidator<MetadataValidationContext> implements MetadataValidator {

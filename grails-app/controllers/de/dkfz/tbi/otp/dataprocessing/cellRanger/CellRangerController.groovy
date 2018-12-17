@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
+import org.springframework.validation.Errors
+
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.validation.*
 
 class CellRangerController {
     CellRangerConfigurationService cellRangerConfigurationService

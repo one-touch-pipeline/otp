@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
+import org.springframework.validation.Errors
+
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.UpdateCommand
-import org.springframework.validation.*
 
 class QcThresholdController {
     QcThresholdService qcThresholdService

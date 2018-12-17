@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.ast.*
-import de.dkfz.tbi.otp.job.processing.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.job.ast.UseJobLog
+import de.dkfz.tbi.otp.job.processing.AbstractMultiJob
+import de.dkfz.tbi.otp.job.processing.NextAction
 
 @Component
 @Scope("prototype")

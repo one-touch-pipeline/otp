@@ -1,11 +1,10 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
-
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.notification.*
-import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
+import de.dkfz.tbi.otp.notification.CreateNotificationTextService
+import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.utils.MailHelperService
 
 class QcTrafficLightNotificationService {
 

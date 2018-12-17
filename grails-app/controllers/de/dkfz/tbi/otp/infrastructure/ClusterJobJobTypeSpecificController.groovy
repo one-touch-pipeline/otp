@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.otp.ngsdata.SeqType
 import grails.converters.JSON
-
 import org.joda.time.LocalDate
 import org.joda.time.Period
 import org.joda.time.format.PeriodFormat
+
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 class ClusterJobJobTypeSpecificController {
 

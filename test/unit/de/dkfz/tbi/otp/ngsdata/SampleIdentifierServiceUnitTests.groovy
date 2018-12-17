@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import org.junit.Test
+
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.utils.HelperUtils
-import grails.test.mixin.TestFor
-import org.junit.*
-import grails.buildtestdata.mixin.Build
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 @Build([
         ProcessingOption,

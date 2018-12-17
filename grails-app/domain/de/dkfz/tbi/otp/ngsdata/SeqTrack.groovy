@@ -1,15 +1,19 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.*
-import groovy.transform.*
+import groovy.transform.TupleConstructor
 
-import java.text.*
+import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.LogMessage
+import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.StringUtils
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+import java.text.MessageFormat
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 
 /*
  * In the GUI and e-mails sent by OTP this shall be called "Lane", even if it is only part of a multiplexed physical

@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.hipo
 
-import org.junit.*
+import org.junit.Test
 
 import static junit.framework.TestCase.*
-import static org.junit.Assert.*
 
 class HipoSampleIdentifierParserUnitTest {
 

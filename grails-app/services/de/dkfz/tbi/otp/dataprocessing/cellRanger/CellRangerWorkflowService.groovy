@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
-import de.dkfz.tbi.otp.dataprocessing.singleCell.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 
 import java.nio.file.*
-import java.util.stream.*
+import java.util.stream.Collectors
 
 class CellRangerWorkflowService {
 

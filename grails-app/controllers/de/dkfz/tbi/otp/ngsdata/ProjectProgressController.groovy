@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.utils.*
-import grails.converters.*
-import grails.plugin.springsecurity.annotation.*
-import org.grails.databinding.*
+import grails.converters.JSON
+import grails.plugin.springsecurity.annotation.Secured
+import org.grails.databinding.BindingFormat
+
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class ProjectProgressDataTableCommand extends DataTableCommand {
 

@@ -1,6 +1,6 @@
 package workflows.analysis.pair.bamfiles
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 interface SeqTypeAndInputBamFiles {
 

@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import grails.test.spock.IntegrationSpec
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import grails.test.spock.*
 
 class SampleIdentifierIntegrationSpec extends IntegrationSpec {
 

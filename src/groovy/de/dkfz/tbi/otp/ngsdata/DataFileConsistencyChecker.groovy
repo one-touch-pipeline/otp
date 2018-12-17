@@ -1,16 +1,18 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.scheduler.*
+import grails.validation.ValidationException
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
-import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.*
-import grails.validation.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.annotation.*
-import org.springframework.scheduling.annotation.*
-import org.springframework.stereotype.*
+import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
+import de.dkfz.tbi.otp.utils.MailHelperService
 
 @Scope("singleton")
 @Component

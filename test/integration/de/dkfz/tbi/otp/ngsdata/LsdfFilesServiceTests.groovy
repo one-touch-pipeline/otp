@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import org.junit.Before
+import org.junit.Test
+
 import de.dkfz.tbi.TestCase
-
-import static org.junit.Assert.*
-
-import org.junit.*
-
 import de.dkfz.tbi.otp.utils.HelperUtils
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 class LsdfFilesServiceTests {
     LsdfFilesService lsdfFilesService

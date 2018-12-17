@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.spock.*
-import spock.lang.*
+import grails.test.spock.IntegrationSpec
+import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
 

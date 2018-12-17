@@ -1,17 +1,19 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.config.*
-import groovy.transform.*
-import org.springframework.beans.factory.*
-import org.springframework.ldap.core.*
-import org.springframework.ldap.core.support.*
-import org.springframework.ldap.query.*
+import groovy.transform.Immutable
+import org.springframework.beans.factory.InitializingBean
+import org.springframework.ldap.core.AttributesMapper
+import org.springframework.ldap.core.LdapTemplate
+import org.springframework.ldap.core.support.LdapContextSource
+import org.springframework.ldap.query.ContainerCriteria
 
-import javax.naming.*
-import javax.naming.directory.*
-import java.util.regex.*
+import de.dkfz.tbi.otp.config.ConfigService
 
-import static org.springframework.ldap.query.LdapQueryBuilder.*
+import javax.naming.NamingException
+import javax.naming.directory.Attributes
+import java.util.regex.Matcher
+
+import static org.springframework.ldap.query.LdapQueryBuilder.query
 
 @SuppressWarnings(["ExplicitCallToAndMethod", "ExplicitCallToOrMethod"])
 class LdapService implements InitializingBean {

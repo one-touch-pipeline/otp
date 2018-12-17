@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.security
 
-import org.springframework.security.access.prepost.*
-import org.springframework.security.acls.domain.*
+import org.springframework.security.access.prepost.PreAuthorize
 
 class RolesService {
 

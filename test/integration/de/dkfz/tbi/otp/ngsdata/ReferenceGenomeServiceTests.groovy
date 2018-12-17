@@ -1,16 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import org.junit.*
+import org.junit.rules.TemporaryFolder
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.utils.CreateFileHelper
-import org.junit.After
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertEquals
 
 class ReferenceGenomeServiceTests {
 

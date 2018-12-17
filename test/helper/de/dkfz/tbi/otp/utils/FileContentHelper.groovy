@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
 
-
 class FileContentHelper {
 
     static String createXmlContentForRoddyWorkflowConfig(String label) {

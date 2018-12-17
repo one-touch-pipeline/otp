@@ -1,9 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
-
-import static org.springframework.util.Assert.*
 import org.springframework.security.access.prepost.PreAuthorize
+
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparationKit> {
 

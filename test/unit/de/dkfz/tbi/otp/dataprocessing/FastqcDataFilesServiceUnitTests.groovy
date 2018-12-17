@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
 import org.junit.*
 
-import static org.junit.Assert.*
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.ngsdata.*
+
+import static org.junit.Assert.assertEquals
 
 @Mock([DataFile, FastqcProcessedFile, FileType, Individual, Project, ProjectCategory, Realm, Run, RunSegment, Sample, SampleType, SeqCenter, SeqPlatform, SeqPlatformGroup, SeqPlatformModelLabel, SeqTrack, SeqType, SoftwareTool])
 @TestFor(FastqcDataFilesService)

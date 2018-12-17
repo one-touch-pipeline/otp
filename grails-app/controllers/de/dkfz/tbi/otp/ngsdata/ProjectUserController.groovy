@@ -1,15 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.converters.JSON
+import groovy.json.JsonBuilder
+import groovy.transform.TupleConstructor
+import org.apache.commons.lang.WordUtils
+import org.springframework.validation.FieldError
+
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.administration.*
-import de.dkfz.tbi.otp.security.*
-import grails.converters.*
-import groovy.json.*
-import groovy.transform.*
-import org.apache.commons.lang.*
-import org.springframework.validation.*
+import de.dkfz.tbi.otp.security.User
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class ProjectUserController implements CheckAndCall {
 

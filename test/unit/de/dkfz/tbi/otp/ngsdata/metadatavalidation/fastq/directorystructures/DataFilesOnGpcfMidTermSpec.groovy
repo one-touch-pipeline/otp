@@ -1,17 +1,20 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.util.spreadsheet.*
+import spock.lang.Specification
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.DirectoryStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
-import spock.lang.*
 
 import java.nio.file.Path
 import java.nio.file.Paths
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class DataFilesOnGpcfMidTermSpec extends Specification {
 

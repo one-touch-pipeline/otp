@@ -1,11 +1,15 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.jobs.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
-import spock.lang.*
+import grails.test.mixin.Mock
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.infrastructure.ClusterJobService
+import de.dkfz.tbi.otp.job.jobs.TestMultiJob
+import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
+import de.dkfz.tbi.otp.job.processing.MonitoringJob
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
 
 
 @Mock([Realm])

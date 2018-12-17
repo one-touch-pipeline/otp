@@ -1,11 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.junit.Assert.*
 import org.junit.*
-import de.dkfz.tbi.otp.InformationReliability;
+
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
+
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNotNull
 
 class AbstractBamFileServiceTests {
 

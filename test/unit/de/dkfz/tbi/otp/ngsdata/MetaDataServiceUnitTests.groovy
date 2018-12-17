@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataService.*
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.Test
 
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-import org.junit.*
+import static de.dkfz.tbi.otp.ngsdata.MetaDataService.ensurePairedSequenceFileNameConsistency
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(MetaDataService)

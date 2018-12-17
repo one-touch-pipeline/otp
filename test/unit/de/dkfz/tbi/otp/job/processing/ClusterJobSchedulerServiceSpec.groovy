@@ -1,16 +1,21 @@
 package de.dkfz.tbi.otp.job.processing
 
+import grails.test.mixin.Mock
+import spock.lang.Specification
+import spock.lang.Unroll
+
 import de.dkfz.roddy.execution.jobs.*
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.plan.*
-import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitoringService
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.test.mixin.*
-import spock.lang.*
+import de.dkfz.tbi.otp.utils.ProcessOutput
 
 @Mock([
         ClusterJob,

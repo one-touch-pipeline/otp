@@ -1,14 +1,18 @@
 package de.dkfz.tbi.otp.job.jobs.fastqc
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.jobs.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.tracking.*
-import org.springframework.scheduling.annotation.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
-import org.springframework.beans.factory.annotation.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Scope
+import org.springframework.scheduling.annotation.Scheduled
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
+import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
+import de.dkfz.tbi.otp.tracking.OtrsTicket
 
 @Component("fastqcStartJob")
 @Scope("singleton")

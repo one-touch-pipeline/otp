@@ -1,18 +1,20 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import de.dkfz.tbi.otp.job.*
-import de.dkfz.tbi.otp.job.plan.*
+import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.job.JobMailService
+import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.restarting.*
-import de.dkfz.tbi.otp.utils.*
-import org.apache.commons.logging.*
-import org.codehaus.groovy.grails.commons.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.stereotype.*
+import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
+import de.dkfz.tbi.otp.utils.ExceptionUtils
 
-import java.util.concurrent.*
+import java.util.concurrent.ExecutorService
 
-import static org.springframework.util.Assert.*
+import static org.springframework.util.Assert.notNull
 
 /**
  * Class handling the scheduling of Jobs.

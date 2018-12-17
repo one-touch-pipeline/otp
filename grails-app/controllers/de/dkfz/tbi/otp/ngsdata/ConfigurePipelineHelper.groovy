@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.*
-import org.springframework.validation.*
+import org.springframework.validation.FieldError
 
-import java.nio.file.*
+import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.nio.file.FileSystem
 
 trait ConfigurePipelineHelper {
 

@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import java.util.regex.Matcher
 import org.springframework.stereotype.Component
+
+import java.util.regex.Matcher
 
 @Component
 class InformSampleIdentifierParser implements SampleIdentifierParser {

@@ -1,8 +1,7 @@
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.administration.*
-import de.dkfz.tbi.otp.dataprocessing.*
-
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 class PrivacyPolicyController {
     static allowedMethods = [
@@ -15,7 +14,7 @@ class PrivacyPolicyController {
 
 
     def index() {
-        String contactDataDataPrivacyOfficer = processingOptionService.findOptionAsString(GUI_CONTACT_DATA_POSTAL_ADDRESS_DATA_PROTECTION_OFFICER)
+        String contactDataDataPrivacyOfficer = processingOptionService.findOptionAsString(OptionName.GUI_CONTACT_DATA_POSTAL_ADDRESS_DATA_PROTECTION_OFFICER)
 
         boolean disableMenu = true
         boolean disableAccept = true

@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.infrastructure
 
-
-import org.joda.time.*
-import org.junit.*
+import org.joda.time.DateTime
+import org.joda.time.LocalDate
+import org.junit.Test
 
 class ClusterJobServiceUnitTests extends GroovyTestCase {
 

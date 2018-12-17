@@ -2,9 +2,9 @@ package de.dkfz.tbi.otp.utils.logging
 
 import org.apache.log4j.HTMLLayout
 import org.apache.log4j.Level
-import org.apache.log4j.spi.LoggingEvent
-import org.apache.log4j.spi.LocationInfo
 import org.apache.log4j.helpers.Transform
+import org.apache.log4j.spi.LocationInfo
+import org.apache.log4j.spi.LoggingEvent
 
 /**
  * This class is provides a groovy re-implementation of log4j's {@link HTMLLayout#format(LoggingEvent)}.

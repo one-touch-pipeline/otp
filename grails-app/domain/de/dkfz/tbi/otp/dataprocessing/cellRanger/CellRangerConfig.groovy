@@ -3,7 +3,7 @@ package de.dkfz.tbi.otp.dataprocessing.cellRanger
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class CellRangerConfig extends ConfigPerProjectAndSeqType implements WithProgramVersion, AlignmentConfig {
 

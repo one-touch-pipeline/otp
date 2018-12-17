@@ -721,7 +721,10 @@ ruleset {
     ImportFromSunPackages {
         priority = MIDDLE
     }
-    //MisorderedStaticImports //we do the opposite
+    MisorderedStaticImports {
+        priority = CRITICAL
+        comesBefore = false //to change to: Normal imports should appear before static imports
+    }
     //NoWildcardImports //does not fit with OTP-Convention of using only WildcardImports
     UnnecessaryGroovyImport {
         priority = MIDDLE

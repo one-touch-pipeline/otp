@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import org.springframework.security.access.prepost.*
+import org.springframework.security.access.prepost.PreAuthorize
+
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 
 
 class SampleTypeService {

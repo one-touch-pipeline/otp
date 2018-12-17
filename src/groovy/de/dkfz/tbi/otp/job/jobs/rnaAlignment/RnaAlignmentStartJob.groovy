@@ -1,12 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.job.jobs.roddyAlignment.AbstractRoddyAlignmentStartJob
 import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
 
 @Component('rnaAlignmentStartJob')
 @Scope('singleton')

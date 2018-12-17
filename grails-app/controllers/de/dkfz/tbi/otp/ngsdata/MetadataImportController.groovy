@@ -1,18 +1,22 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.user.*
-import grails.converters.*
-import grails.validation.*
-import groovy.transform.*
+import grails.converters.JSON
+import grails.validation.Validateable
+import groovy.transform.Immutable
+import groovy.transform.TupleConstructor
 
-import java.nio.file.*
-import java.util.regex.*
+import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.user.UserException
+
+import java.nio.file.FileSystem
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 class MetadataImportController {
 

@@ -1,12 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
-
 
 /**
  * This interface must be implemented by all result objects which are created with a Roddy workflow.

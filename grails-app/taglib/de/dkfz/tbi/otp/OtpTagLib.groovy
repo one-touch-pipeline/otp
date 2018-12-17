@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp
 
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.qcTrafficLight.*
-import grails.plugin.springsecurity.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 
 class OtpTagLib {
     static namespace = "otp"

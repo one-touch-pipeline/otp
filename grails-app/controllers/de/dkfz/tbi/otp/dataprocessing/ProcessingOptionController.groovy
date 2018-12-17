@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
+import grails.validation.ValidationException
+import groovy.transform.Canonical
+
+import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.config.OptionProblem
+import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.qcTrafficLight.*
-import grails.validation.*
-import groovy.transform.*
+import de.dkfz.tbi.otp.ngsdata.ProjectService
+import de.dkfz.tbi.otp.qcTrafficLight.TableCellValue
 
 class ProcessingOptionController {
 

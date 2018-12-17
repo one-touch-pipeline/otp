@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.otp.ngsdata.Realm
 import groovy.transform.EqualsAndHashCode
+
+import de.dkfz.tbi.otp.ngsdata.Realm
 
 @EqualsAndHashCode(includes = ["clusterJobId", "userName", "realmId"])
 class ClusterJobIdentifier {

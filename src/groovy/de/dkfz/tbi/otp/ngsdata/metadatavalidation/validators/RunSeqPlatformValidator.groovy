@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.validation.*
-import org.springframework.stereotype.*
-import org.springframework.beans.factory.annotation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 

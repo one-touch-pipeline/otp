@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import spock.lang.*
+import spock.lang.Specification
 
 abstract class MetadataFieldsServiceSpec<T> extends Specification {
 

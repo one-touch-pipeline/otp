@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.hibernate.*
+import org.hibernate.Hibernate
+
+import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 /**
  * Represents a merged bam file stored on the file system

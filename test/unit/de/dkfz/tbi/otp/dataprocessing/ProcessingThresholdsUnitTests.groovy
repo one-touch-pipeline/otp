@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.*
-import org.junit.*
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
+import org.junit.Test
+
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**

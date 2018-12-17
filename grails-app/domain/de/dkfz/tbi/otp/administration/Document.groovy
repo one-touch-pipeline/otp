@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.utils.*
-import groovy.transform.*
+import groovy.transform.TupleConstructor
+
+import de.dkfz.tbi.otp.utils.Entity
 
 class Document implements Entity {
 

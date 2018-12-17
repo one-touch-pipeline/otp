@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.ngsdata.*
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
 import org.junit.*
 import org.junit.rules.ErrorCollector
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(MergingWorkPackage)
 @Build([

@@ -1,25 +1,31 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.roddy.config.*
+import grails.compiler.GrailsCompileStatic
+import grails.util.Environment
+import groovy.transform.EqualsAndHashCode
+import org.apache.commons.logging.impl.SimpleLog
+
+import de.dkfz.roddy.config.JobLog
+import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.execution.jobs.*
-import de.dkfz.roddy.tools.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.roddy.tools.BufferValue
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.scheduler.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.*
-import grails.compiler.*
-import grails.util.*
-import groovy.transform.*
-import org.apache.commons.logging.impl.*
+import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitoringService
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-import java.nio.file.*
-import java.time.*
-import java.time.format.*
+import java.nio.file.Path
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 
 /**
  * This class contains methods to communicate with the cluster job scheduler.

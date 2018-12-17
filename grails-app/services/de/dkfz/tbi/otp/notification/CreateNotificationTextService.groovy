@@ -1,24 +1,24 @@
 package de.dkfz.tbi.otp.notification
 
+import groovy.text.SimpleTemplateEngine
+import org.codehaus.groovy.grails.context.support.PluginAwareResourceBundleMessageSource
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.NoSuchMessageException
+import org.springframework.context.i18n.LocaleContextHolder
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep
-import groovy.text.*
-import org.codehaus.groovy.grails.context.support.*
-import org.codehaus.groovy.grails.web.mapping.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
-import org.springframework.context.i18n.*
 
-import static de.dkfz.tbi.otp.ngsdata.ProjectOverviewService.*
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
-import static de.dkfz.tbi.otp.tracking.ProcessingStatus.*
-import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
+import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
+import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class CreateNotificationTextService {
 
@@ -341,7 +341,7 @@ class CreateNotificationTextService {
     String getSampleIdentifiers(Collection<SeqTrack> seqTracks) {
         assert seqTracks
 
-        if (PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(
+        if (ProjectOverviewService.PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(
                 exactlyOneElement(
                         seqTracks*.project.unique(), 'seqtracks must be of the same project'
                 ).name)

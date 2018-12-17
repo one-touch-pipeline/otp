@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.monitor.alignment
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.monitor.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
+import de.dkfz.tbi.otp.monitor.PipelinesChecker
 import de.dkfz.tbi.otp.ngsdata.*
 
 abstract class AbstractRoddyAlignmentChecker extends PipelinesChecker<SeqTrack> {

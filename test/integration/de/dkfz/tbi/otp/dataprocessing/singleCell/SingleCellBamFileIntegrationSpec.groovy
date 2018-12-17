@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing.singleCell
 
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.*
-import spock.lang.*
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
+import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 
 class SingleCellBamFileIntegrationSpec extends Specification implements CellRangerFactory {
 

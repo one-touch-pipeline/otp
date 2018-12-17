@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import grails.buildtestdata.mixin.*
-import spock.lang.*
+import grails.buildtestdata.mixin.Build
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.LogMessage
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 
 @Build([
         Individual,

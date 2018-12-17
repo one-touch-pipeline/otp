@@ -1,11 +1,12 @@
 package workflows.analysis.pair.snv
 
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.junit.Test
+import workflows.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.plugin.springsecurity.*
-import org.junit.*
-import workflows.analysis.pair.*
 
 abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<RoddySnvCallingInstance> {
 

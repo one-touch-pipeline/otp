@@ -1,19 +1,21 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.roddy.config.*
-import de.dkfz.roddy.execution.jobs.*
-import de.dkfz.roddy.tools.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.*
+import org.joda.time.DateTimeZone
+import spock.lang.Specification
+
+import de.dkfz.roddy.config.ResourceSet
+import de.dkfz.roddy.execution.jobs.GenericJobInfo
+import de.dkfz.roddy.tools.BufferValue
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.joda.time.*
-import spock.lang.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-import java.time.*
+import java.time.ZoneId
 
-import static java.util.concurrent.TimeUnit.*
+import static java.util.concurrent.TimeUnit.HOURS
+import static java.util.concurrent.TimeUnit.MINUTES
 
 class ClusterJobServiceSpec extends Specification {
 

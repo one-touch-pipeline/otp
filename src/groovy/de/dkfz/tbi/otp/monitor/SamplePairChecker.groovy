@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.monitor
 
+import groovy.transform.TupleConstructor
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.ngsdata.*
-import groovy.transform.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.ngsdata.*
 
 class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
 

@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.tracking
 
-import groovy.transform.*
+import groovy.transform.TupleConstructor
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.*
 

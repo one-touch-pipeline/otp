@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.security.User
 import grails.validation.Validateable
+
+import de.dkfz.tbi.otp.security.User
 
 @Validateable
 class EditUserCommand implements Serializable {

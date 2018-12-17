@@ -1,13 +1,15 @@
 package workflows.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.jobs.roddyAlignment.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.*
-import org.springframework.beans.factory.annotation.*
+import org.junit.Test
+import org.springframework.beans.factory.annotation.Autowired
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.job.jobs.roddyAlignment.PanCanStartJob
+import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /**
  * test for PanCanAlignment workflow

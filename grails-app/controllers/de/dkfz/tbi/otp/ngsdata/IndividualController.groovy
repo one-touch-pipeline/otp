@@ -1,13 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.*
-import grails.converters.*
-import groovy.json.*
-import groovy.transform.*
-import org.springframework.validation.*
-import org.springframework.web.multipart.*
+import grails.converters.JSON
+import groovy.json.JsonSlurper
+import groovy.transform.ToString
+import org.springframework.validation.FieldError
+import org.springframework.web.multipart.MultipartFile
+
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.utils.CommentCommand
+import de.dkfz.tbi.otp.utils.DataTableCommand
+import de.dkfz.tbi.util.spreadsheet.Row
+import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
 class IndividualController {
 

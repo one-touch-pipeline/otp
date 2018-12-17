@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.compiler.GrailsCompileStatic
+import org.springframework.security.access.prepost.PreAuthorize
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.compiler.*
-import org.springframework.security.access.prepost.*
+import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @GrailsCompileStatic
 class SamplePairDeciderService {

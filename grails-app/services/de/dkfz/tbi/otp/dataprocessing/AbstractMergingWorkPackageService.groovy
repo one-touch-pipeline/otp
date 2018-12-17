@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.compiler.GrailsCompileStatic
+import grails.compiler.GrailsTypeChecked
+import groovy.transform.TypeCheckingMode
+import org.springframework.security.access.prepost.PreAuthorize
+
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.compiler.*
-import groovy.transform.*
-import org.springframework.security.access.prepost.*
 
 @GrailsCompileStatic
 class AbstractMergingWorkPackageService {

@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.infrastructure.FileService
 
 /**
  * It looks like exists() is cached (in NFS?). The cache can be cleared by calling canRead() for files and

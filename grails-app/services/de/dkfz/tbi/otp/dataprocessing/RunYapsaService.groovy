@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 
 class RunYapsaService extends BamFileAnalysisService implements WithReferenceGenomeRestriction {
 

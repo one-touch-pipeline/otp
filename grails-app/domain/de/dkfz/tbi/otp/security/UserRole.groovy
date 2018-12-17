@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.security
 
-import de.dkfz.tbi.otp.utils.Entity
 import org.apache.commons.lang.builder.HashCodeBuilder
+
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Auto generated class by spring security plugin.

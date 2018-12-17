@@ -1,15 +1,19 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.test.spock.IntegrationSpec
+import spock.lang.Unroll
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.aceseq.*
-import de.dkfz.tbi.otp.dataprocessing.indelcalling.*
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.dataprocessing.sophia.*
-import de.dkfz.tbi.otp.security.*
-import grails.plugin.springsecurity.*
-import grails.test.spock.*
-import spock.lang.*
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqResultsService
+import de.dkfz.tbi.otp.dataprocessing.indelcalling.IndelResultsService
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaResultsService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvResultsService
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaResultsService
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 class AbstractAnalysisResultsServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
 

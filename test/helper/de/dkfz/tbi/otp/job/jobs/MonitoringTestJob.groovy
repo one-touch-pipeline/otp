@@ -1,14 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.ast.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.*
-import de.dkfz.tbi.otp.utils.logging.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
+import org.springframework.context.annotation.Scope
+import org.springframework.stereotype.Component
 
-import static de.dkfz.tbi.TestConstants.*
+import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.job.ast.UseJobLog
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @Component
 @Scope("prototype")
@@ -32,10 +32,10 @@ class MonitoringTestJob extends AbstractEndStateAwareJobImpl implements Monitori
     void finished(ClusterJobIdentifier finishedClusterJob) {
         assert schedulerService.jobExecutedByCurrentThread == this
         assert LogThreadLocal.threadLog == this.log
-        assert finishedClusterJob.clusterJobId == ARBITRARY_CLUSTER_JOB_ID && finishedClusterJob.realm.is(jobIdentifier.realm)
+        assert finishedClusterJob.clusterJobId == TestConstants.ARBITRARY_CLUSTER_JOB_ID && finishedClusterJob.realm.is(jobIdentifier.realm)
         executed = true
         if (fail) {
-            throw new NumberFormatException(ARBITRARY_MESSAGE)
+            throw new NumberFormatException(TestConstants.ARBITRARY_MESSAGE)
         }
         succeed()
         schedulerService.doEndCheck(this)

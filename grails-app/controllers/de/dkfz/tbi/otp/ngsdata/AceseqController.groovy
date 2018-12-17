@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.aceseq.*
-import grails.converters.*
+import grails.converters.JSON
+
+import de.dkfz.tbi.otp.dataprocessing.aceseq.AceseqResultsService
 
 class AceseqController extends AbstractAnalysisController {
 

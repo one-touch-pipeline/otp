@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.*
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import spock.lang.*
 
 class AbstractMergingWorkPackageServiceSpec extends Specification {
 

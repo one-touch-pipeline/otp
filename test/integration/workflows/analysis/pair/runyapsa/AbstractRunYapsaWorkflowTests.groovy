@@ -1,14 +1,16 @@
 package workflows.analysis.pair.runyapsa
 
+import grails.plugin.springsecurity.SpringSecurityUtils
+import workflows.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.plugin.springsecurity.*
-import workflows.analysis.pair.*
 
-import java.time.*
+import java.time.Duration
 
 abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<RunYapsaInstance> {
 

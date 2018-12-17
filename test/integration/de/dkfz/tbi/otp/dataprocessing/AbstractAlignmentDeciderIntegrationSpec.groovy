@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.test.spock.IntegrationSpec
+
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.spock.*
 
 class AbstractAlignmentDeciderIntegrationSpec extends IntegrationSpec {
 

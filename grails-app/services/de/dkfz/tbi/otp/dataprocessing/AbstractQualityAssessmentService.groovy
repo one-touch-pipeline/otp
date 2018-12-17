@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.converters.*
-import org.codehaus.groovy.grails.web.json.*
+import grails.converters.JSON
+import org.codehaus.groovy.grails.web.json.JSONObject
 
-import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.*
+
+import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.CONTIG
+import static de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification.UNDEFINED
 
 class AbstractQualityAssessmentService {
 

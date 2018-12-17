@@ -1,6 +1,8 @@
-import groovy.transform.*
-import org.codehaus.groovy.ast.*
-import org.codenarc.rule.*
+import groovy.transform.CompileStatic
+import org.codehaus.groovy.ast.AnnotatedNode
+import org.codehaus.groovy.ast.AnnotationNode
+import org.codenarc.rule.AbstractAstVisitor
+import org.codenarc.rule.AbstractAstVisitorRule
 
 @CompileStatic
 class ScheduledServiceBugRule extends AbstractAstVisitorRule {

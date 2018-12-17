@@ -1,20 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.test.mixin.Mock
+import org.junit.*
+import org.junit.rules.TemporaryFolder
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
-import grails.test.mixin.Mock
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
 
 import static de.dkfz.tbi.TestCase.shouldFail
-import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.RODDY_EXECUTION_STORE_DIR
-import static de.dkfz.tbi.otp.dataprocessing.RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME
 
 @Mock([
         AbstractMergedBamFile,
@@ -113,13 +109,13 @@ class RoddyBamFileUnitTests {
 
     @Test
     void testGetWorkExecutionStoreDirectory_AllFine() {
-        assert "${testDir}/${roddyBamFile.workDirectoryName}/${RODDY_EXECUTION_STORE_DIR}" ==
+        assert "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
                 roddyBamFile.workExecutionStoreDirectory.path
     }
 
     @Test
     void testGetFinalRoddyExecutionStoreDirectory_AllFine() {
-        assert "${testDir}/${RODDY_EXECUTION_STORE_DIR}" ==
+        assert "${testDir}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}" ==
                 roddyBamFile.finalExecutionStoreDirectory.path
     }
 
@@ -167,7 +163,7 @@ class RoddyBamFileUnitTests {
 
     @Test
     void testGetWorkMergedQAJsonFile_AllFine() {
-        assert "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}/${QUALITY_CONTROL_JSON_FILE_NAME}" ==
+        assert "${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}/${RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME}" ==
                 roddyBamFile.workMergedQAJsonFile.path
     }
 
@@ -179,7 +175,7 @@ class RoddyBamFileUnitTests {
 
     @Test
     void testGetFinalRoddyMergedQAJsonFile_AllFine() {
-        assert "${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}/${QUALITY_CONTROL_JSON_FILE_NAME}" ==
+        assert "${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/${RoddyBamFile.MERGED_DIR}/${RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME}" ==
                 roddyBamFile.finalMergedQAJsonFile.path
     }
 
@@ -217,7 +213,7 @@ class RoddyBamFileUnitTests {
     void testGetWorkSingleLaneQAJsonFiles_OneSeqTrack() {
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         updateDataFileNames(seqTrack)
-        File file = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}/${QUALITY_CONTROL_JSON_FILE_NAME}")
+        File file = new File("${testDir}/${roddyBamFile.workDirectoryName}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}/${RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME}")
         assert [(seqTrack): file] == roddyBamFile.workSingleLaneQAJsonFiles
     }
 
@@ -255,7 +251,7 @@ class RoddyBamFileUnitTests {
     void testGetFinalRoddySingleLaneQAJsonFiles_OneSeqTrack() {
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         updateDataFileNames(seqTrack)
-        File file = new File("${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}/${QUALITY_CONTROL_JSON_FILE_NAME}")
+        File file = new File("${testDir}/${RoddyBamFile.QUALITY_CONTROL_DIR}/run${seqTrack.run.name}_${COMMON_PREFIX}/${RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME}")
         assert [(seqTrack): file] == roddyBamFile.finalSingleLaneQAJsonFiles
     }
 
@@ -403,7 +399,7 @@ class RoddyBamFileUnitTests {
     void helperTestFinalRoddyExecutionDirectories(List<String> roddyExecutionDirectoryNames) {
         roddyBamFile.roddyExecutionDirectoryNames.addAll(roddyExecutionDirectoryNames)
         List<String> expectedResult = roddyExecutionDirectoryNames.collect {
-            "${testDir}/${RODDY_EXECUTION_STORE_DIR}/${it}"
+            "${testDir}/${RoddyBamFile.RODDY_EXECUTION_STORE_DIR}/${it}"
         }
         assert expectedResult == roddyBamFile.finalExecutionDirectories*.path
     }

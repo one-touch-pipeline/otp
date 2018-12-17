@@ -1,13 +1,15 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.*
-import grails.plugin.springsecurity.*
-import org.codehaus.groovy.grails.web.servlet.mvc.*
-import org.springframework.security.access.*
-import spock.lang.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.codehaus.groovy.grails.web.servlet.mvc.SynchronizerTokensHolder
+import org.springframework.security.access.AccessDeniedException
+import spock.lang.Specification
+import spock.lang.Unroll
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.security.UserAndRoles
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static javax.servlet.http.HttpServletResponse.*
 
 class DocumentControllerIntegrationSpec extends Specification implements UserAndRoles {

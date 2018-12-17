@@ -1,14 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.fileSystemConsistency.*
-import de.dkfz.tbi.otp.utils.*
-import groovy.sql.*
+import groovy.sql.Sql
 
-import javax.sql.*
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
+import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import javax.sql.DataSource
 
 import static org.springframework.util.Assert.*
 

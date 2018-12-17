@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import grails.compiler.*
+import grails.compiler.GrailsCompileStatic
 import grails.validation.ValidationException
-import org.springframework.security.access.prepost.*
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
+
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @GrailsCompileStatic
 class DocumentService {

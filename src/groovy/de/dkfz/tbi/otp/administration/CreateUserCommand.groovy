@@ -2,11 +2,7 @@ package de.dkfz.tbi.otp.administration
 
 import grails.validation.Validateable
 
-import java.io.Serializable
-
-import de.dkfz.tbi.otp.security.Group
-import de.dkfz.tbi.otp.security.Role
-import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.*
 
 @Validateable
 class CreateUserCommand implements Serializable {

@@ -1,14 +1,15 @@
-import de.dkfz.tbi.otp.administration.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import grails.compiler.GrailsCompileStatic
+import grails.converters.JSON
+
+import de.dkfz.tbi.otp.administration.DocumentService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.compiler.*
-import grails.converters.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.ngsdata.ProjectService
+import de.dkfz.tbi.otp.ngsdata.StatisticService
 
 /*
  * show information about OTP
  */
-
 @GrailsCompileStatic
 class InfoController {
     DocumentService documentService

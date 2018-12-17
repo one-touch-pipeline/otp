@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.config
 
+import grails.util.Environment
+import groovy.transform.Canonical
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import grails.util.*
-import groovy.transform.*
 
 class PropertiesValidationService {
     ConfigService configService
@@ -77,7 +78,7 @@ class PropertyProblem {
 class OptionProblem {
     final String message
     ProblemType type
-    
+
     enum ProblemType {
         MISSING, TYPE_INVALID, VALUE_INVALID
     }

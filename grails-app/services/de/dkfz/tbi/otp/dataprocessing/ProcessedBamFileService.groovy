@@ -1,10 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.*
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-import static org.springframework.util.Assert.*
+import static org.springframework.util.Assert.notNull
 
 class ProcessedBamFileService {
 

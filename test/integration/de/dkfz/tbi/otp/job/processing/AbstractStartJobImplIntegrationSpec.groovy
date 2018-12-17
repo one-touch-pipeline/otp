@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.job.processing
 
+import grails.test.spock.IntegrationSpec
+import spock.lang.Unroll
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.spock.*
-import spock.lang.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class AbstractStartJobImplIntegrationSpec extends IntegrationSpec {
 

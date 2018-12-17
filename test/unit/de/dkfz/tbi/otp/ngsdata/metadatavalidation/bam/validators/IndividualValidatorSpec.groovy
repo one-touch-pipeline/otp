@@ -1,14 +1,17 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import grails.test.mixin.*
-import spock.lang.*
+import grails.test.mixin.Mock
+import spock.lang.Specification
 
-import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.Problem
+
+import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.INDIVIDUAL
+import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Mock([Individual, Realm, Project])
 class IndividualValidatorSpec extends Specification {

@@ -1,16 +1,20 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import groovy.transform.TupleConstructor
+import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import groovy.transform.*
-import org.springframework.stereotype.*
+import de.dkfz.tbi.util.spreadsheet.validation.ColumnSetValidator
+import de.dkfz.tbi.util.spreadsheet.validation.Level
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
-import static de.dkfz.tbi.otp.ngsdata.MultiplexingService.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static de.dkfz.tbi.otp.utils.StringUtils.*
+import static de.dkfz.tbi.otp.ngsdata.MultiplexingService.combineLaneNumberAndBarcode
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.StringUtils.escapeForSqlLike
+import static de.dkfz.tbi.otp.utils.StringUtils.extractDistinguishingCharacter
 
 @Component
 class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> implements MetadataValidator {
@@ -100,7 +104,7 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
                 run {
                     eq 'name', anyLaneRow.runName.value
                 }
-                like 'laneId', "${escapeForSqlLike("${anyLaneRow.laneNumber.value}${BARCODE_DELIMITER}")}%"
+                like 'laneId', "${escapeForSqlLike("${anyLaneRow.laneNumber.value}${MultiplexingService.BARCODE_DELIMITER}")}%"
                 maxResults 1
             }) {
                 List<RowWithExtractedValues> laneRowsWithoutBarcode = laneRowsByBarcode.get(null)

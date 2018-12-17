@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
+import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 
 class ConfigureAnalysisController {
 

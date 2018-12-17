@@ -1,11 +1,14 @@
 package de.dkfz.tbi.otp.job.restarting
 
-import de.dkfz.tbi.otp.job.jobs.*
-import de.dkfz.tbi.otp.job.plan.*
+import org.springframework.context.ApplicationContext
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
+import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.utils.*
-import org.springframework.context.*
-import spock.lang.*
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 class RestartCheckerServiceSpec extends Specification {
 

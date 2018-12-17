@@ -1,15 +1,17 @@
 package de.dkfz.tbi.otp.tracking
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
 import org.joda.time.*
-import org.joda.time.format.*
-import org.springframework.security.access.prepost.*
+import org.joda.time.format.PeriodFormatter
+import org.joda.time.format.PeriodFormatterBuilder
+import org.springframework.security.access.prepost.PreAuthorize
 
-import javax.sql.*
-import java.sql.*
-import java.text.*
-import java.util.Date
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.StringUtils
+
+import javax.sql.DataSource
+import java.sql.Timestamp
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 
 class ProcessingTimeStatisticsService {
 

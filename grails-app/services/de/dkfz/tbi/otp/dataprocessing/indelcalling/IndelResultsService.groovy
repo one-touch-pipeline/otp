@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing.indelcalling
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
+import de.dkfz.tbi.otp.utils.FormatHelper
 
 class IndelResultsService extends AbstractAnalysisResultsService<IndelCallingInstance> {
 

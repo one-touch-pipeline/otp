@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.integration.*
-import de.dkfz.tbi.otp.job.jobs.*
-import de.dkfz.tbi.otp.job.plan.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.plugin.springsecurity.*
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.*
-import org.springframework.security.access.*
+import org.springframework.security.access.AccessDeniedException
+
+import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
+import de.dkfz.tbi.otp.job.jobs.TestSingletonStartJob
+import de.dkfz.tbi.otp.job.plan.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 import static org.junit.Assert.*
 

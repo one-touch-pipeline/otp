@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Realm
 
-import java.nio.file.*
+import java.nio.file.FileSystem
+import java.nio.file.FileSystems
 
 class TestFileSystemService extends FileSystemService {
     @Override

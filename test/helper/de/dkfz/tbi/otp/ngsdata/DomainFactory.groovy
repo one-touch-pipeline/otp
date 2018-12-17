@@ -1,30 +1,39 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.administration.*
+import grails.plugin.springsecurity.acl.*
+import org.joda.time.DateTime
+import org.joda.time.Duration
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.administration.Document
+import de.dkfz.tbi.otp.administration.DocumentType
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.dataprocessing.sophia.*
-import de.dkfz.tbi.otp.domainFactory.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.*
-import de.dkfz.tbi.otp.infrastructure.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
-import de.dkfz.tbi.otp.qcTrafficLight.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.acl.*
-import org.joda.time.*
+import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
+import de.dkfz.tbi.otp.security.Role
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.HelperUtils
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @SuppressWarnings('EmptyClass')
 class DomainFactoryProxyCore implements DomainFactoryCore { }

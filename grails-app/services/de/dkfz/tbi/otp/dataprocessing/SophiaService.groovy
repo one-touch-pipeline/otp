@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.sophia.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 
 class SophiaService extends BamFileAnalysisService implements RoddyBamFileAnalysis, WithReferenceGenomeRestriction {
 

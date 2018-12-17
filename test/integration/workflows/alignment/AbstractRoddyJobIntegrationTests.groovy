@@ -1,13 +1,17 @@
 package workflows.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import org.junit.Ignore
+import org.junit.Test
+
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.junit.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.HelperUtils
 
-import static de.dkfz.tbi.TestCase.*
+import static de.dkfz.tbi.TestCase.shouldFail
 
 /**
  * tests for AbstractRoddyJob using PanCanAlignmentWorkflow

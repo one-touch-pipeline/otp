@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.OtpRuntimeException
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 
 class QcTrafficLightCheckService {
 

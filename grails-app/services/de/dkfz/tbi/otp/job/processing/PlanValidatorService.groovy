@@ -1,9 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.plan.StartJobDefinition
-import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
+import de.dkfz.tbi.otp.job.plan.*
 
 /**
  * Service to test whether a given Job Execution Plan is valid.

@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.TestCase
 import org.junit.Test
+
+import de.dkfz.tbi.TestCase
 
 class LocalShellHelperUnitTests {
 

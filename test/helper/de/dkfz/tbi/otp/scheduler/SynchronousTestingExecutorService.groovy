@@ -1,8 +1,6 @@
 package de.dkfz.tbi.otp.scheduler
 
-import java.util.concurrent.Callable
-import java.util.concurrent.Future
-import java.util.concurrent.FutureTask
+import java.util.concurrent.*
 
 /**
  * Simple Wrapper to provide an executor service which executes synchronously <strong>on

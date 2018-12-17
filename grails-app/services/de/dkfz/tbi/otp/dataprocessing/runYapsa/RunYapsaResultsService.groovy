@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
 
 class RunYapsaResultsService extends AbstractAnalysisResultsService<RunYapsaInstance> {
 

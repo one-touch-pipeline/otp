@@ -1,11 +1,14 @@
 package de.dkfz.tbi.otp.monitor.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
-import de.dkfz.tbi.otp.monitor.*
-import de.dkfz.tbi.otp.ngsdata.*
-import spock.lang.*
+import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 class AllRoddyAlignmentsCheckerIntegrationSpec extends Specification implements RoddyRnaFactory {
 

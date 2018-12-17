@@ -1,15 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.*
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import org.junit.*
+import org.springframework.context.ApplicationContext
+
+import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.dataprocessing.DataProcessingFilesService.OutputDirectories
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
-import grails.buildtestdata.mixin.*
-import grails.test.mixin.*
-import org.junit.*
-import org.springframework.context.*
+import de.dkfz.tbi.otp.utils.CheckedLogger
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @Build([
         AlignmentPass,

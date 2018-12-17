@@ -1,14 +1,15 @@
 package de.dkfz.tbi.otp.security
 
+import grails.compiler.GrailsCompileStatic
+import groovy.transform.CompileDynamic
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.PermissionEvaluator
+import org.springframework.security.acls.AclPermissionEvaluator
+import org.springframework.security.core.Authentication
+import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.UserProjectRole
-import grails.compiler.*
-import groovy.transform.CompileDynamic
-import org.springframework.beans.factory.annotation.*
-import org.springframework.security.access.*
-import org.springframework.security.acls.*
-import org.springframework.security.core.*
-import org.springframework.stereotype.*
 
 @Component
 @GrailsCompileStatic

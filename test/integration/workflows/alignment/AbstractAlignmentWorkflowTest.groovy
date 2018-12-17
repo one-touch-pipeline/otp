@@ -1,8 +1,9 @@
 package workflows.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import workflows.WorkflowTestCase
+
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.*
-import workflows.*
 
 abstract class AbstractAlignmentWorkflowTest extends WorkflowTestCase {
     LsdfFilesService lsdfFilesService

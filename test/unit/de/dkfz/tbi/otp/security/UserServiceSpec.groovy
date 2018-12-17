@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.security
 
+import grails.test.mixin.Mock
+import spock.lang.Specification
+
 import de.dkfz.tbi.otp.administration.UserService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import grails.test.mixin.Mock
-import spock.lang.*
 
 @Mock([
         Role,

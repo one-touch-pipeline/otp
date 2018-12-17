@@ -1,4 +1,4 @@
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.FileType
 
 seed = {
     [

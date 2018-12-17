@@ -1,11 +1,10 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.roddy.execution.*
-import de.dkfz.roddy.execution.io.*
-import de.dkfz.roddy.execution.jobs.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-
+import de.dkfz.roddy.execution.BEExecutionService
+import de.dkfz.roddy.execution.io.ExecutionResult
+import de.dkfz.roddy.execution.jobs.Command
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.ProcessOutput
 
 class BEExecutionServiceAdapter implements BEExecutionService {
 

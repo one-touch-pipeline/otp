@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.junit.Assert.*
-import grails.test.mixin.*
-import grails.test.mixin.support.*
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
 import org.junit.*
+
+import static org.junit.Assert.assertEquals
 
 @TestMixin(GrailsUnitTestMixin)
 class ChromosomesTests {

@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.job.jobs.createSeqScans
 
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.context.annotation.Scope
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 @Component("seqScanStartJob")
 @Scope("singleton")

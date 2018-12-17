@@ -1,12 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import grails.validation.ValidationException
+import org.junit.After
+import org.junit.Test
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.IndelCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
-import de.dkfz.tbi.otp.dataprocessing.sophia.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.validation.*
-import org.junit.*
 
 class SamplePairTests {
 

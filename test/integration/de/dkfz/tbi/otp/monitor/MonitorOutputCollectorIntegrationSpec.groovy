@@ -1,9 +1,12 @@
 package de.dkfz.tbi.otp.monitor
 
-import de.dkfz.tbi.otp.job.plan.*
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import spock.lang.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 class MonitorOutputCollectorIntegrationSpec extends Specification {
 

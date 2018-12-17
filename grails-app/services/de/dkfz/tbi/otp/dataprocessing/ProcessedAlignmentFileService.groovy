@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass.AlignmentState
 import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
-import static org.springframework.util.Assert.*
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
+import static org.springframework.util.Assert.notNull
 
 /**
  * This service implements alignment files organization convention

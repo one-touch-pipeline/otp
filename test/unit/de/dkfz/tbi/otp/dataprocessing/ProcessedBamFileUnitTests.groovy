@@ -1,14 +1,15 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.*
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import org.junit.*
+
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.Individual.Type
-import de.dkfz.tbi.otp.utils.logging.*
-import grails.buildtestdata.mixin.*
-import grails.test.mixin.*
-import org.junit.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import static org.junit.Assert.*
 

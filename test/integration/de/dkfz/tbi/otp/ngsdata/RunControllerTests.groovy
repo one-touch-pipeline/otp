@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.security.*
-import grails.plugin.springsecurity.*
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.*
+
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 import static org.junit.Assert.*
 

@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.tracking
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import groovy.transform.*
+import groovy.transform.TupleConstructor
 
-import static de.dkfz.tbi.otp.tracking.ProcessingStatus.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+
+import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 
 @TupleConstructor
 class MergingWorkPackageProcessingStatus {

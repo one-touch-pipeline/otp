@@ -1,14 +1,16 @@
 package workflows.analysis.pair.sophia
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.sophia.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
-import grails.plugin.springsecurity.*
-import workflows.analysis.pair.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import workflows.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
 
-import java.time.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+
+import java.time.Duration
 
 abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<SophiaInstance> {
 

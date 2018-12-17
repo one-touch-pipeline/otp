@@ -1,11 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-
 import grails.test.mixin.Mock
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
+
+import de.dkfz.tbi.otp.ngsdata.*
 
 @Mock([
         LibraryPreparationKit,

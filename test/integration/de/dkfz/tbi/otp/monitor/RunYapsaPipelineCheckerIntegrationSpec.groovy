@@ -3,8 +3,7 @@ package de.dkfz.tbi.otp.monitor
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.ngsdata.*
-
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class RunYapsaPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipelineCheckerIntegrationSpec {
 

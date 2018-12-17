@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 
-import java.nio.file.*
-import java.util.regex.*
+import java.nio.file.FileSystem
+import java.nio.file.Path
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
 class RoddyWorkflowConfigService {
 

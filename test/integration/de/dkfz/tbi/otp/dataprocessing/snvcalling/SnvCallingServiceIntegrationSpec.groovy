@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import de.dkfz.tbi.*
+import grails.test.spock.IntegrationSpec
+import spock.lang.Unroll
+
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.spock.*
-import spock.lang.*
 
 class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
 

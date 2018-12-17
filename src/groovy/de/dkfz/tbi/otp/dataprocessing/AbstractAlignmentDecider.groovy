@@ -1,13 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.*
-import de.dkfz.tbi.otp.utils.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.utils.MailHelperService
+
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 abstract class AbstractAlignmentDecider implements AlignmentDecider {
 

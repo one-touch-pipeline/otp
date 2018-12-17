@@ -1,14 +1,18 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
+import groovy.json.JsonSlurper
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
-import groovy.json.*
-import org.springframework.stereotype.*
 
-import java.nio.file.*
+import java.nio.file.Files
+import java.nio.file.Path
 
-import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
+import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.BAM_FILE_PATH
+import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.QUALITY_CONTROL_FILE
 
 @Component
 class QualityControlFileValidator extends ValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {

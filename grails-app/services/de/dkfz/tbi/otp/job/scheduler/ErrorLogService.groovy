@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import de.dkfz.tbi.otp.config.*
-import groovy.xml.*
-import org.apache.commons.io.*
+import groovy.xml.MarkupBuilder
+import org.apache.commons.io.FileUtils
 
-import static org.springframework.util.Assert.*
+import de.dkfz.tbi.otp.config.ConfigService
+
+import static org.springframework.util.Assert.notNull
 
 /**
  * Service for logging exceptions to files

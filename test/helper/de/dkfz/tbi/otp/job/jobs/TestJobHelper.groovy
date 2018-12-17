@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.job.jobs
 
-import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
+import de.dkfz.tbi.otp.job.processing.*
+
+import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createAndSaveProcessingStep
+import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createProcessParameter
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 /**

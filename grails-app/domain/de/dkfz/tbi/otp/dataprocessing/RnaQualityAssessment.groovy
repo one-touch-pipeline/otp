@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.qcTrafficLight.*
+import de.dkfz.tbi.otp.ngsdata.LibraryLayout
+import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 
 class RnaQualityAssessment extends RoddyQualityAssessment implements QcTrafficLightValue {
 

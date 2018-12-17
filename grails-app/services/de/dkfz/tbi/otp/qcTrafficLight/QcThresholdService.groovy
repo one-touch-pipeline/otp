@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.validation.*
-import groovy.transform.*
-import org.springframework.security.access.prepost.*
-import org.springframework.validation.*
+import grails.validation.ValidationException
+import groovy.transform.Canonical
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.validation.Errors
+
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.FormatHelper
 
 class QcThresholdService {
 

@@ -1,10 +1,11 @@
 package de.dkfz.tbi.otp.monitor
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.ngsdata.*
 import org.codehaus.groovy.runtime.MethodClosure
-import spock.lang.*
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.ngsdata.*
 
 class VariantCallingPipelinesCheckerSpec extends Specification {
 

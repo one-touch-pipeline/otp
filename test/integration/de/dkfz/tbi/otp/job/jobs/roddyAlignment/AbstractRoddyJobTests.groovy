@@ -1,21 +1,23 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import org.codehaus.groovy.control.io.NullWriter
+import org.junit.*
+import org.junit.rules.TemporaryFolder
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.TestConstants
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
-import org.codehaus.groovy.control.io.*
-import org.junit.*
-import org.junit.rules.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-import static de.dkfz.tbi.TestConstants.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class AbstractRoddyJobTests {
 
@@ -174,7 +176,7 @@ newLine"""
         mockProcessOutput_noClusterJobsSubmitted()
         roddyJob.metaClass.validate = { ->
             validateCounter++
-            throw new RuntimeException(ARBITRARY_MESSAGE)
+            throw new RuntimeException(TestConstants.ARBITRARY_MESSAGE)
         }
 
         try {
@@ -183,7 +185,7 @@ newLine"""
             }
             assert false : 'Should have thrown an exception.'
         } catch (Throwable t) {
-            if (t.message != 'validate() failed after Roddy has not submitted any cluster jobs.' || t.cause?.message != ARBITRARY_MESSAGE) {
+            if (t.message != 'validate() failed after Roddy has not submitted any cluster jobs.' || t.cause?.message != TestConstants.ARBITRARY_MESSAGE) {
                 throw t
             }
         }

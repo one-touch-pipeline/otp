@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import org.springframework.validation.Errors
+
 import de.dkfz.tbi.otp.TimeStamped
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.sophia.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import org.springframework.validation.*
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * For each individual disease/control pairs are compared in the analysis pipelines. These pairs are defined in the GUI and stored in this domain.

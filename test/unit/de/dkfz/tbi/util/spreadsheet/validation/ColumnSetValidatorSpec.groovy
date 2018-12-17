@@ -1,10 +1,11 @@
 package de.dkfz.tbi.util.spreadsheet.validation
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import spock.lang.Specification
 
 import de.dkfz.tbi.util.spreadsheet.Column
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
-import spock.lang.Specification
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class ColumnSetValidatorSpec extends Specification {
 

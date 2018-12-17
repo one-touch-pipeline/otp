@@ -1,7 +1,5 @@
 package de.dkfz.tbi.util.spreadsheet.validation
 
-import java.util.logging.Level
-
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
@@ -18,11 +16,11 @@ class ValidationContext {
         this.problemsObject = problems
     }
 
-    Problem addProblem(Set<Cell> affectedCells, Level level, String message, String type = message) {
+    Problem addProblem(Set<Cell> affectedCells, java.util.logging.Level level, String message, String type = message) {
         return problemsObject.addProblem(affectedCells, level, message, type)
     }
 
-    Level getMaximumProblemLevel() {
+    java.util.logging.Level getMaximumProblemLevel() {
         return problemsObject.maximumProblemLevel
     }
 

@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
+import org.springframework.stereotype.Component
+
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
-import org.springframework.stereotype.*
 
 import java.nio.file.Files
 import java.nio.file.Path

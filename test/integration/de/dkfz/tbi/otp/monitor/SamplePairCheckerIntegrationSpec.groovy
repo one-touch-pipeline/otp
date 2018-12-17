@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.monitor
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.HelperUtils
 
 class SamplePairCheckerIntegrationSpec extends Specification {
 

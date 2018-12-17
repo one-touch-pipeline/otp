@@ -1,23 +1,24 @@
 package workflows.alignment
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
+import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.codehaus.groovy.grails.web.json.JSONObject
+import org.junit.Before
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
-import grails.converters.*
-import grails.plugin.springsecurity.*
-import org.codehaus.groovy.grails.web.json.*
-import org.junit.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-import java.time.*
+import java.time.Duration
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-import static de.dkfz.tbi.otp.utils.LocalShellHelper.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndWait
 
 abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest {
 

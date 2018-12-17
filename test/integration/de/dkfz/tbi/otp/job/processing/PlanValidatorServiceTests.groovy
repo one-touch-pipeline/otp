@@ -1,13 +1,11 @@
 package de.dkfz.tbi.otp.job.processing
 
-import static org.junit.Assert.*
-import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
+import org.junit.Test
 
-import de.dkfz.tbi.otp.job.plan.JobDefinition
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.plan.StartJobDefinition
-import de.dkfz.tbi.otp.job.plan.ValidatingJobDefinition
-import org.junit.*
+import de.dkfz.tbi.otp.job.plan.*
+
+import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.plan
+import static org.junit.Assert.*
 
 class PlanValidatorServiceTests {
 

@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.*
-import org.springframework.validation.*
+import org.springframework.validation.Errors
+
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.CommentableWithHistory
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * {@link SeqTrack}s from {@link SeqPlatform}s in the same {@link SeqPlatformGroup} can be merged.

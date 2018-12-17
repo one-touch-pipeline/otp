@@ -1,13 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.*
+import grails.converters.JSON
+import org.springframework.validation.FieldError
+
+import de.dkfz.tbi.otp.ProjectSelection
+import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
-import de.dkfz.tbi.otp.utils.*
-import grails.converters.*
-import org.springframework.validation.*
+import de.dkfz.tbi.otp.utils.DataTableCommand
+import de.dkfz.tbi.otp.utils.FormatHelper
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 
 class AlignmentQualityOverviewController {

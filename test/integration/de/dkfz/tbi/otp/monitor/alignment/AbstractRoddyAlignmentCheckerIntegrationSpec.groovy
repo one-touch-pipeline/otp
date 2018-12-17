@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.monitor.alignment
 
-import de.dkfz.tbi.*
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.monitor.*
+import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
-import spock.lang.*
 
 abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specification {
 

@@ -1,6 +1,7 @@
-import groovy.transform.*
-import org.codehaus.groovy.ast.expr.*
-import org.codenarc.rule.*
+import groovy.transform.CompileStatic
+import org.codehaus.groovy.ast.expr.ConstructorCallExpression
+import org.codenarc.rule.AbstractAstVisitor
+import org.codenarc.rule.AbstractAstVisitorRule
 
 @CompileStatic
 class DoNotCreateServicesWithNewRule extends AbstractAstVisitorRule {

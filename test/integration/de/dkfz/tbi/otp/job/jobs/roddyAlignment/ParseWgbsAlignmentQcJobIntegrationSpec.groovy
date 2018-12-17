@@ -1,19 +1,23 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.qcTrafficLight.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import grails.test.spock.*
-import org.codehaus.groovy.grails.commons.spring.*
-import org.junit.*
-import org.junit.rules.*
-import org.springframework.beans.factory.annotation.*
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.test.spock.IntegrationSpec
+import org.codehaus.groovy.grails.commons.spring.GrailsApplicationContext
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.Principal
 
 class ParseWgbsAlignmentQcJobIntegrationSpec extends IntegrationSpec {
 

@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.domainFactory.pipelines
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 trait AlignmentPipelineFactory {
 

@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.hipo
 
-import de.dkfz.tbi.otp.ngsdata.ParsedSampleIdentifier
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifierParser
 import groovy.transform.TupleConstructor
-import java.util.regex.Matcher
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.ngsdata.ParsedSampleIdentifier
+import de.dkfz.tbi.otp.ngsdata.SampleIdentifierParser
+
+import java.util.regex.Matcher
 
 @Component
 @Scope("singleton")

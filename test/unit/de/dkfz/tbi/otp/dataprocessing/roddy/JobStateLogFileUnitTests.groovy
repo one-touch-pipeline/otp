@@ -1,24 +1,20 @@
 package de.dkfz.tbi.otp.dataprocessing.roddy
 
-import de.dkfz.tbi.TestCase
+import grails.test.mixin.Mock
+import org.junit.*
+import org.junit.rules.TemporaryFolder
 
-import static de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile.JOB_STATE_LOG_FILE_NAME
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
+
 import static de.dkfz.tbi.TestCase.shouldFailWithMessage
-
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.rules.TemporaryFolder
-
+import static de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile.JOB_STATE_LOG_FILE_NAME
 import static junit.framework.Assert.assertFalse
-
-import grails.test.mixin.Mock
+import static junit.framework.Assert.assertTrue
 
 @Mock([
         Realm,

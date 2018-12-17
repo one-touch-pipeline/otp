@@ -1,8 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
 
 class ProjectProgressServiceTests {
 

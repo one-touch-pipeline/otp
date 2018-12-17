@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.*
+import grails.test.mixin.Mock
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Mock([
         LibraryPreparationKit,

@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.domainFactory
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 trait DomainFactoryHelper {
 

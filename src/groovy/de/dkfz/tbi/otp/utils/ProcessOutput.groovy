@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
-import groovy.transform.*
+import groovy.transform.Immutable
 
 @Immutable
 class ProcessOutput {

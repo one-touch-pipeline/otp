@@ -1,11 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
-import org.springframework.stereotype.*
+import org.springframework.stereotype.Component
 
-import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
+import de.dkfz.tbi.util.spreadsheet.validation.*
+
+import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.INDIVIDUAL
+import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SAMPLE_TYPE
 
 @Component
 class SampleTypeIndividualValidator extends ValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {

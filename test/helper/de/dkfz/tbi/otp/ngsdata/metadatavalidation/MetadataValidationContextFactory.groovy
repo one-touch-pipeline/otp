@@ -1,12 +1,13 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.DirectoryStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.util.spreadsheet.validation.Problems
 
-import java.nio.file.*
+import java.nio.file.Paths
 
 class MetadataValidationContextFactory {
 

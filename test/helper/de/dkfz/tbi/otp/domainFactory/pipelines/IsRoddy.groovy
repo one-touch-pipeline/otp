@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.domainFactory.pipelines
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 
 trait IsRoddy implements IsPipeline {

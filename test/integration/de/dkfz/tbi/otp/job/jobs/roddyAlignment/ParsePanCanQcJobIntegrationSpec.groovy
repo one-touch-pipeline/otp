@@ -1,13 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import grails.test.spock.IntegrationSpec
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+import org.springframework.beans.factory.annotation.Autowired
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import org.junit.*
-import org.junit.rules.*
-import org.springframework.beans.factory.annotation.*
-import grails.test.spock.*
 
 class ParsePanCanQcJobIntegrationSpec extends IntegrationSpec {
 

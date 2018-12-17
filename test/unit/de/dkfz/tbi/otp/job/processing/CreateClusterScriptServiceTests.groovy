@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
-import grails.test.mixin.*
-import org.junit.*
+import grails.test.mixin.TestFor
+import org.junit.Test
 
 
 @TestFor(CreateClusterScriptService)

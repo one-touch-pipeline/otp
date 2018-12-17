@@ -1,4 +1,4 @@
-import de.dkfz.tbi.otp.administration.*
+import de.dkfz.tbi.otp.administration.UserService
 
 class PrivacyPolicyFilters {
     UserService userService

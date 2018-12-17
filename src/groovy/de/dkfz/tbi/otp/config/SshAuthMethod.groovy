@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.config
 
-import groovy.transform.*
+import groovy.transform.TupleConstructor
 
 @TupleConstructor
 enum SshAuthMethod {

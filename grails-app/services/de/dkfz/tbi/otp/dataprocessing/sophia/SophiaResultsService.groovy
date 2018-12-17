@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing.sophia
 
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.AbstractAnalysisResultsService
 
 class SophiaResultsService extends AbstractAnalysisResultsService<SophiaInstance> {
 

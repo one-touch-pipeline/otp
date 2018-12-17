@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.egaSubmission
 
+import grails.test.mixin.Mock
+import spock.lang.Specification
+import spock.lang.Unroll
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.domainFactory.submissions.ega.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.util.spreadsheet.*
-import grails.test.mixin.*
-import spock.lang.*
+import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
 @Mock([
         AbstractMergedBamFile,

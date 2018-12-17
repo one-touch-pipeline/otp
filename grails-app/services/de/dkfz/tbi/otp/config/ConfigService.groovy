@@ -1,14 +1,17 @@
 package de.dkfz.tbi.otp.config
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import grails.util.Environment
+import org.springframework.beans.BeansException
+import org.springframework.context.ApplicationContext
+import org.springframework.context.ApplicationContextAware
+
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.Realm
-import grails.util.*
-import org.springframework.beans.*
-import org.springframework.context.*
 
-import java.time.*
+import java.time.ZoneId
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class ConfigService implements ApplicationContextAware {
 

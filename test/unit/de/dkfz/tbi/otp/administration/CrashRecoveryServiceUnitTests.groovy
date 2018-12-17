@@ -1,13 +1,16 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.job.plan.*
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
+import org.junit.After
+import org.junit.Test
+
+import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.*
-import grails.buildtestdata.mixin.*
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-import org.codehaus.groovy.runtime.powerassert.*
-import org.junit.*
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 
 @TestFor(CrashRecoveryService)
 @TestMixin(GrailsUnitTestMixin)

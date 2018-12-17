@@ -1,16 +1,18 @@
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddy.*
-import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.buildtestdata.mixin.*
+import grails.buildtestdata.mixin.Build
 import org.junit.*
-import org.junit.rules.*
+import org.junit.rules.TemporaryFolder
 
-import static de.dkfz.tbi.TestCase.*
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddy.JobStateLogFile
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
+
+import static de.dkfz.tbi.TestCase.shouldFail
 
 @Build([
         ClusterJob,

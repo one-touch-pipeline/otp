@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.job.plan
 
-import grails.plugin.springsecurity.acl.*
-import org.springframework.security.access.prepost.*
+import grails.plugin.springsecurity.acl.AclUtilService
+import org.springframework.security.access.prepost.PreAuthorize
 
 class JobErrorDefinitionService {
 

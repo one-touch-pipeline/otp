@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.utils
 
-import static org.hibernate.proxy.HibernateProxyHelper.*
+import static org.hibernate.proxy.HibernateProxyHelper.getClassWithoutInitializingProxy
 
 trait Entity {
 

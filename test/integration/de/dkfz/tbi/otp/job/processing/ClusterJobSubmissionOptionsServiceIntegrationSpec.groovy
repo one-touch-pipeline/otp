@@ -1,11 +1,12 @@
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.jobs.dataInstallation.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.spock.*
+import grails.test.spock.IntegrationSpec
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.job.jobs.dataInstallation.CopyFilesJob
+import de.dkfz.tbi.otp.ngsdata.*
 
 class ClusterJobSubmissionOptionsServiceIntegrationSpec extends IntegrationSpec {
 

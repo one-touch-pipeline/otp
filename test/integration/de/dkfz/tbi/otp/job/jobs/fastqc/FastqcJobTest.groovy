@@ -1,15 +1,17 @@
 package de.dkfz.tbi.otp.job.jobs.fastqc
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsqc.*
-import de.dkfz.tbi.otp.utils.*
-import org.apache.commons.logging.impl.*
+import org.apache.commons.logging.impl.NoOpLog
 import org.junit.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.processing.ClusterJobSchedulerService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
+import de.dkfz.tbi.otp.utils.*
 
 class FastqcJobTest {
 

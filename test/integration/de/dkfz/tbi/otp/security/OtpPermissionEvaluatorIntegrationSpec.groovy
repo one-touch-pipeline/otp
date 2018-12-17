@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.security
 
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import spock.lang.Specification
+import spock.lang.Unroll
+
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import org.springframework.security.authentication.*
-import org.springframework.security.core.*
-import spock.lang.*
+import de.dkfz.tbi.otp.utils.Principal
 
 class OtpPermissionEvaluatorIntegrationSpec extends Specification implements UserAndRoles {
 

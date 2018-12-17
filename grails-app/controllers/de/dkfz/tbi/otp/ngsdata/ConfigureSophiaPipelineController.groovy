@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 
 class ConfigureSophiaPipelineController extends AbstractConfigureRoddyPipelineController {
 

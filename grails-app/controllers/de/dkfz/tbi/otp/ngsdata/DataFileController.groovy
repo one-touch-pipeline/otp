@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.converters.JSON
+
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.CommentCommand
-import grails.converters.JSON
 
 class DataFileController {
 

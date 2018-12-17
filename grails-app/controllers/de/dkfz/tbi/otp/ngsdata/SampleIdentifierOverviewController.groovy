@@ -1,8 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.utils.*
-import grails.converters.*
+import grails.converters.JSON
+
+import de.dkfz.tbi.otp.ProjectSelection
+import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 
 class SampleIdentifierOverviewController {

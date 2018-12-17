@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import org.hibernate.*
+import org.hibernate.Hibernate
 
 /**
  * To be extended later on

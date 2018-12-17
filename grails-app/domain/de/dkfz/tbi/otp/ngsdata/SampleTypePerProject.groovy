@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.TimeStamped
-import de.dkfz.tbi.otp.utils.Entity
 import groovy.transform.ToString
 
+import de.dkfz.tbi.otp.TimeStamped
+import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * To receive more structure in the sample types it was decided to ask for the samples types which are expected to occur within a project.

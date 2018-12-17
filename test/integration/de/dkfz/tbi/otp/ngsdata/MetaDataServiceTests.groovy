@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.integration.*
-import de.dkfz.tbi.otp.security.*
-import grails.plugin.springsecurity.*
-import grails.plugin.springsecurity.acl.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.acl.AclUtilService
 import org.junit.*
-import org.junit.rules.*
-import org.springframework.security.access.*
+import org.junit.rules.TemporaryFolder
+import org.springframework.security.access.AccessDeniedException
+
+import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 import static org.junit.Assert.*
 

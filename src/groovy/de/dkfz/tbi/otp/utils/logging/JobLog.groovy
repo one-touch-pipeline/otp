@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.utils.logging
 
-import de.dkfz.tbi.otp.job.processing.ProcessingStep
-
 import org.apache.commons.logging.Log
+
+import de.dkfz.tbi.otp.job.processing.ProcessingStep
 
 /**
  * {@link Log} implementation which wraps each log message in a

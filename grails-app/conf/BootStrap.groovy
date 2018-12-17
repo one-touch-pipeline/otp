@@ -1,12 +1,15 @@
-import de.dkfz.odcf.audit.impl.*
+import grails.converters.JSON
+import grails.plugin.springsecurity.SecurityFilterPosition
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.util.Environment
+import org.codehaus.groovy.grails.commons.GrailsApplication
+
+import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
-import de.dkfz.tbi.otp.administration.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.job.scheduler.*
-import grails.converters.*
-import grails.plugin.springsecurity.*
-import grails.util.*
-import org.codehaus.groovy.grails.commons.*
+import de.dkfz.tbi.otp.administration.UserService
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.PropertiesValidationService
+import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 
 class BootStrap {
     ConfigService configService

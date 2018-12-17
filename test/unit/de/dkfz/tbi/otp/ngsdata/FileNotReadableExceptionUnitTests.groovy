@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.*
+import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.*
+import org.junit.Test
 
 @TestMixin(GrailsUnitTestMixin)
 class FileNotReadableExceptionUnitTests {

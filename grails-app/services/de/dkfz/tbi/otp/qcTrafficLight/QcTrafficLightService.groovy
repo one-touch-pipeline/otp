@@ -1,14 +1,15 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.*
-import org.springframework.security.access.prepost.*
+import org.springframework.security.access.prepost.PreAuthorize
 
-import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdLevel.*
+import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.tracking.TrackingService
+
+import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdLevel.ERROR
 
 class QcTrafficLightService {
 

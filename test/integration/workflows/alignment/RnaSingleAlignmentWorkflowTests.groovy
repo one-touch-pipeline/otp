@@ -1,10 +1,11 @@
 package workflows.alignment
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.*
+import org.junit.Ignore
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.ngsdata.*
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Ignore
 class RnaSingleAlignmentWorkflowTests extends AbstractRnaAlignmentWorkflowTests {

@@ -1,11 +1,13 @@
 package de.dkfz.tbi.otp.seed
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import seedme.*
-import spock.lang.*
+import seedme.SeedService
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.ngsdata.FileType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.security.Role
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SeedSpec extends Specification {
 

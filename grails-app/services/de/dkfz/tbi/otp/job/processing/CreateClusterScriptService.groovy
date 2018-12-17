@@ -1,6 +1,5 @@
 package de.dkfz.tbi.otp.job.processing
 
-
 /**
  * This Service provides helper-methods to create short cluster scripts.
  * These methods should be written in a generic way so that it is easy to reuse them.

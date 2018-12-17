@@ -1,16 +1,14 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-
-import static groovy.util.GroovyTestCase.assertEquals
-
+import grails.buildtestdata.mixin.Build
 import org.junit.Before
 import org.junit.Test
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.Realm
-import grails.buildtestdata.mixin.Build
+
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.ngsdata.*
+
+import static groovy.util.GroovyTestCase.assertEquals
 
 @Build([
         Project,

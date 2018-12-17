@@ -1,8 +1,9 @@
 package de.dkfz.tbi.util.spreadsheet.validation
 
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.util.spreadsheet.*
 import groovy.transform.*
+
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.util.spreadsheet.*
 
 /**
  * Fetches the values in specified columns of all data rows, uniquifies these value tuples and validates the set

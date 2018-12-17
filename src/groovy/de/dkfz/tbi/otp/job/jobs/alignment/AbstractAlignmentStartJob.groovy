@@ -1,11 +1,14 @@
 package de.dkfz.tbi.otp.job.jobs.alignment
 
+import org.springframework.scheduling.annotation.Scheduled
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.jobs.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.tracking.*
-import org.springframework.scheduling.annotation.*
+import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
+import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.tracking.OtrsTicket
 
 abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements RestartableStartJob {
 

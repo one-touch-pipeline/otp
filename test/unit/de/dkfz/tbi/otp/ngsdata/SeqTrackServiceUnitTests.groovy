@@ -1,12 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import grails.buildtestdata.mixin.*
-import grails.test.mixin.*
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.Mock
 import org.junit.*
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.LogMessage
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 
 @Mock([SeqTypeService])
 @Build([

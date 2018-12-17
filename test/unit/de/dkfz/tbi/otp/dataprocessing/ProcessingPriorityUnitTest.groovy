@@ -1,9 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.Mock
+import org.junit.Test
+
 import de.dkfz.tbi.otp.ngsdata.*
-import grails.buildtestdata.mixin.*
-import grails.test.mixin.*
-import org.junit.*
 
 @Build([
         DataFile,

@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.utils
 
+import grails.plugin.mail.MailService
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.springframework.beans.factory.annotation.Autowired
+
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.*
-import grails.plugin.mail.*
-import org.codehaus.groovy.grails.commons.*
-import org.springframework.beans.factory.annotation.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 class MailHelperService {
 

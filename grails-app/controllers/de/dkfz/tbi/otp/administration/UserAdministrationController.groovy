@@ -1,13 +1,15 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.*
-import grails.converters.*
-import grails.plugin.springsecurity.*
-import grails.plugin.springsecurity.annotation.*
-import org.springframework.validation.*
+import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityService
+import grails.plugin.springsecurity.annotation.Secured
+import org.springframework.validation.FieldError
+
+import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.ngsdata.UserProjectRole
+import de.dkfz.tbi.otp.security.Role
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 /**
  * @short Controller for user management.

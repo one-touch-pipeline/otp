@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.processing
 
-import spock.lang.*
+import spock.lang.Specification
 
 
 class ClusterJobSubmissionOptionsServiceSpec extends Specification {

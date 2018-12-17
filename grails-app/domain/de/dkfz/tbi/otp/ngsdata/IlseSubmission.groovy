@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.utils.Entity
 
 class IlseSubmission implements Entity, Commentable {
 

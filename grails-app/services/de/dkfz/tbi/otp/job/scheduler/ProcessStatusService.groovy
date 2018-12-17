@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import static org.springframework.util.Assert.*
+import static org.springframework.util.Assert.isTrue
+import static org.springframework.util.Assert.notNull
 
 /**
  * This methods in this class are part of a solution to check, if the jobs on the cluster are finished successfully or not.

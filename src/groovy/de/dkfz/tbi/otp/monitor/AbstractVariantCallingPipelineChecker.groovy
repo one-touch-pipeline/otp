@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.monitor
 
+import groovy.transform.EqualsAndHashCode
+import groovy.transform.TupleConstructor
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import groovy.transform.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<SamplePair> {
 

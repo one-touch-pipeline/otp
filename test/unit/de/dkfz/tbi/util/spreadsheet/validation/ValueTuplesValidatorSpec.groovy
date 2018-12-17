@@ -1,10 +1,12 @@
 package de.dkfz.tbi.util.spreadsheet.validation
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import spock.lang.Specification
 
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
-import spock.lang.Specification
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class ValueTuplesValidatorSpec extends Specification {
 

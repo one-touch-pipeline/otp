@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.buildtestdata.mixin.Build
+import grails.test.mixin.TestFor
+import org.junit.Assert
+import org.junit.Test
+
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.*
-import grails.buildtestdata.mixin.*
-import grails.test.mixin.*
-import org.junit.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @TestFor(MockAbstractBamFile)
 @Build([FileType, DataFile, ProcessedBamFile])

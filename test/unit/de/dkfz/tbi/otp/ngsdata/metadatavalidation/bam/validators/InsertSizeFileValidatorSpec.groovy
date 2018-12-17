@@ -1,16 +1,18 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
-import de.dkfz.tbi.otp.utils.LocalShellHelper
-import de.dkfz.tbi.util.spreadsheet.validation.*
 import org.junit.ClassRule
 import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.Problem
+
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class InsertSizeFileValidatorSpec extends Specification {
 

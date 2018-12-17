@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.validation.*
-import spock.lang.*
+import grails.validation.ValidationException
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class ImportProcessIntegrationSpec extends Specification {
 

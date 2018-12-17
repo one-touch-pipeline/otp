@@ -1,14 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import groovy.json.JsonSlurper
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+import org.springframework.security.access.prepost.PreAuthorize
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
-import de.dkfz.tbi.util.spreadsheet.*
-import groovy.json.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
-import org.springframework.security.access.prepost.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
+import de.dkfz.tbi.util.spreadsheet.Row
 
 import java.nio.file.*
 

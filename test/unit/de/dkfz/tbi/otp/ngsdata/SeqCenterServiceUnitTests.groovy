@@ -2,9 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.buildtestdata.mixin.Build
 import grails.test.mixin.TestFor
-import org.junit.After
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
 
 @TestFor(SeqCenterService)
 @Build([

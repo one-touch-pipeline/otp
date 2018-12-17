@@ -1,12 +1,14 @@
 package de.dkfz.tbi.otp.administration
 
-import static org.junit.Assert.*
-
-import grails.test.mixin.*
+import grails.test.mixin.Mock
+import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import org.junit.*
+import org.junit.Before
+import org.junit.Test
 
 import de.dkfz.tbi.otp.security.Role
+
+import static org.junit.Assert.*
 
 @TestMixin(ControllerUnitTestMixin)
 @Mock([Role])

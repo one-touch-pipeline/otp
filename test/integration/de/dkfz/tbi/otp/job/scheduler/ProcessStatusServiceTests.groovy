@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.job.scheduler
 
-import static org.junit.Assert.*
 import org.junit.*
+
+import static org.junit.Assert.*
 
 class ProcessStatusServiceTests {
 

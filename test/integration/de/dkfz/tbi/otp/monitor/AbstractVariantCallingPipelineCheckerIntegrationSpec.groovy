@@ -1,10 +1,12 @@
 package de.dkfz.tbi.otp.monitor
 
-import de.dkfz.tbi.*
+import spock.lang.Specification
+
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.ngsdata.*
-import spock.lang.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
 abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Specification {
 

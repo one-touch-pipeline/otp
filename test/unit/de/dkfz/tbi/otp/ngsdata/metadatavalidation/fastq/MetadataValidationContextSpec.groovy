@@ -1,15 +1,17 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.*
-import de.dkfz.tbi.otp.utils.*
-import grails.test.mixin.*
-import org.junit.*
-import org.junit.rules.*
-import spock.lang.*
+import grails.test.mixin.Mock
+import org.junit.ClassRule
+import org.junit.rules.TemporaryFolder
+import spock.lang.Shared
+import spock.lang.Specification
 
-import java.nio.file.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.SampleLibraryValidator
+import de.dkfz.tbi.otp.utils.HelperUtils
+
+import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 

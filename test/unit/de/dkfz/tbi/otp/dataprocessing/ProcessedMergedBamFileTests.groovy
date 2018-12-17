@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.ngsdata.*
-import grails.test.mixin.*
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
 import org.junit.*
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.ngsdata.*
 
 @TestFor(ProcessedMergedBamFile)
 @Mock([

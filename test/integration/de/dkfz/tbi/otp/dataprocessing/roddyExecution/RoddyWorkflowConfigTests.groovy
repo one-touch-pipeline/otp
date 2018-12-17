@@ -1,10 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.processing.*
+import org.junit.Before
+import org.junit.Test
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
+import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
-import org.junit.*
 
 class RoddyWorkflowConfigTests {
 

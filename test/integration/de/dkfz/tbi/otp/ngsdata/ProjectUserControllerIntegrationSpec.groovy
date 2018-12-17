@@ -1,12 +1,18 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.administration.*
-import de.dkfz.tbi.otp.security.*
-import grails.plugin.springsecurity.*
-import spock.lang.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import spock.lang.Specification
+import spock.lang.Unroll
 
-import static javax.servlet.http.HttpServletResponse.*
+import de.dkfz.tbi.otp.ProjectSelection
+import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.administration.LdapService
+import de.dkfz.tbi.otp.administration.LdapUserDetails
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
+
+import static javax.servlet.http.HttpServletResponse.SC_MOVED_TEMPORARILY
+import static javax.servlet.http.HttpServletResponse.SC_OK
 
 class ProjectUserControllerIntegrationSpec extends Specification implements UserAndRoles {
 

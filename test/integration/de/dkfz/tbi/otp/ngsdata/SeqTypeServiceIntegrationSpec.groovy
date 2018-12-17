@@ -1,9 +1,12 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.security.*
-import grails.plugin.springsecurity.*
-import org.springframework.security.access.*
-import spock.lang.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.springframework.security.access.AccessDeniedException
+import spock.lang.Shared
+import spock.lang.Specification
+
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRoles {
 

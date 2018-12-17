@@ -1,13 +1,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import grails.test.spock.*
-import org.springframework.beans.factory.annotation.*
-import spock.lang.*
+import grails.test.spock.IntegrationSpec
+import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 
 import javax.sql.DataSource
 
-import static de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState.*
+import static de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState.NOT_STARTED
+import static de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState.UNKNOWN
 
 class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
 

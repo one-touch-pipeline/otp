@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import grails.converters.JSON
 import groovy.json.JsonSlurper
+
+import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class RunController {

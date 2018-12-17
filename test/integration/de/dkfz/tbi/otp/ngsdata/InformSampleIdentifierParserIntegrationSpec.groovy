@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.Unroll
 
 class InformSampleIdentifierParserIntegrationSpec extends Specification {
     InformSampleIdentifierParser informSampleIdentifierParser = new InformSampleIdentifierParser()

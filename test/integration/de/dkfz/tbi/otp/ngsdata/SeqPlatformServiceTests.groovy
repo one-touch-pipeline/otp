@@ -6,7 +6,6 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.utils.CheckedLogger
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-
 class SeqPlatformServiceTests {
 
     static final String PLATFORM_NAME = 'Some platform name'

@@ -1,21 +1,24 @@
 package de.dkfz.tbi.otp.notification
 
-import de.dkfz.tbi.otp.*
+import grails.test.mixin.Mock
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.codehaus.groovy.grails.context.support.PluginAwareResourceBundleMessageSource
+import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
-import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.dataprocessing.singleCell.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
-import grails.test.mixin.*
-import grails.test.mixin.support.*
-import org.codehaus.groovy.grails.context.support.*
-import org.codehaus.groovy.grails.web.mapping.*
-import spock.lang.*
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 

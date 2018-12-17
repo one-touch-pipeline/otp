@@ -1,7 +1,9 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.*
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class ProcessingOptionServiceSpec extends Specification {
 

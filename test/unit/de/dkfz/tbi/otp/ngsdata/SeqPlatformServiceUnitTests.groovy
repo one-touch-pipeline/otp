@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.*
-import grails.buildtestdata.mixin.*
-import org.junit.*
+import grails.buildtestdata.mixin.Build
+import org.junit.Test
+
+import de.dkfz.tbi.TestCase
 
 @Build([SeqPlatform, SeqPlatformGroup, SeqPlatformModelLabel, SequencingKitLabel])
 class SeqPlatformServiceUnitTests {

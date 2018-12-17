@@ -1,12 +1,16 @@
 package de.dkfz.tbi.otp.tracking
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
+import groovy.transform.TupleConstructor
+import org.joda.time.IllegalFieldValueException
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.DateTimeFormatter
+
+import de.dkfz.tbi.otp.Comment
+import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import groovy.transform.*
-import org.joda.time.*
-import org.joda.time.format.*
+import de.dkfz.tbi.otp.utils.Entity
 
 class OtrsTicket implements Commentable, Entity {
 

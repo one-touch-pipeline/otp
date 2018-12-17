@@ -1,14 +1,15 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import com.github.robtimus.filesystems.sftp.*
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import grails.util.*
+import com.github.robtimus.filesystems.sftp.SFTPFileSystemProvider
+import grails.util.Environment
+
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.ThreadUtils
 
 import java.nio.file.*
 import java.nio.file.attribute.*
-import java.time.*
+import java.time.Duration
 
 /**
  * Helper methods to work with file paths

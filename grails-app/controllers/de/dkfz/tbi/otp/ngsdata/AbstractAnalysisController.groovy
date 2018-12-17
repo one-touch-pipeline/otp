@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.*
-import groovy.transform.*
+import groovy.transform.ToString
+
+import de.dkfz.tbi.otp.ProjectSelection
+import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
+import de.dkfz.tbi.otp.utils.DataTableCommand
 
 abstract class AbstractAnalysisController {
 

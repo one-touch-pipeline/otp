@@ -1,13 +1,13 @@
 package de.dkfz.tbi.otp.job.processing
 
-import static org.junit.Assert.*
+import grails.test.mixin.TestFor
+import grails.test.mixin.TestMixin
+import grails.test.mixin.support.GrailsUnitTestMixin
+import org.junit.Test
 
-import grails.test.mixin.*
-import org.junit.*
-import grails.test.mixin.support.*
-import de.dkfz.tbi.otp.job.plan.DecidingJobDefinition
-import de.dkfz.tbi.otp.job.plan.JobDecision
-import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.*
+
+import static org.junit.Assert.*
 
 @TestMixin(GrailsUnitTestMixin)
 @TestFor(DecisionProcessingStep)

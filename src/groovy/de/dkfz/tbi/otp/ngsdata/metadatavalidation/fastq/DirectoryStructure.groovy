@@ -1,7 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
-import de.dkfz.tbi.util.spreadsheet.*
-import de.dkfz.tbi.util.spreadsheet.validation.*
+import de.dkfz.tbi.util.spreadsheet.Cell
+import de.dkfz.tbi.util.spreadsheet.Row
+import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 
 import java.nio.file.*
 
