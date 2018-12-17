@@ -50,11 +50,11 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
         LibraryPreparationKit kitWithoutAdapterFile = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_file', reverseComplementAdapterSequence: "ACGTC")
         LibraryPreparationKit kitWithoutAdapterSequence = DomainFactory.createLibraryPreparationKit(name: 'lib_prep_kit_without_adapter_sequence', adapterFile: "/asdf")
 
-        Project project1 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName)
-        Project project2 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName)
-        Project project3 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName)
-        Project project4 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName)
-        Project project5 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.OTP_ALIGNMENT.beanName)
+        Project project1 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT)
+        Project project2 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT)
+        Project project3 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT)
+        Project project4 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT)
+        Project project5 = DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.OTP_ALIGNMENT)
 
         DomainFactory.createRoddyWorkflowConfig([
                 individual: DomainFactory.createIndividual(project: project2),
@@ -78,7 +78,7 @@ class LibPrepKitAdapterValidatorSpec extends Specification {
         ])
 
         DomainFactory.createRoddyWorkflowConfig([
-                project: DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName),
+                project: DomainFactory.createProject(alignmentDeciderBeanName: AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT),
                 seqType: DomainFactory.createWholeGenomeBisulfiteSeqType(),
                 pipeline: DomainFactory.createPanCanPipeline(),
                 adapterTrimmingNeeded: true,

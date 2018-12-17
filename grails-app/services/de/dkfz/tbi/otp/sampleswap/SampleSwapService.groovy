@@ -127,7 +127,7 @@ class SampleSwapService {
                         Pipeline pipeline = Pipeline.Name.forSeqType(seqType)?.getPipeline()
                         if (seqType && project && pipeline) {
                             RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
-                            if (SeqTypeService.getAllAlignableSeqTypes().contains(seqType) && project.alignmentDeciderBeanName != "" && project.alignmentDeciderBeanName != "noAlignmentDecider" && config) {
+                            if (SeqTypeService.getAllAlignableSeqTypes().contains(seqType) && project.alignmentDeciderBeanName != AlignmentDeciderBeanName.NO_ALIGNMENT && config) {
                                 output << new SampleSwapInfo(data.oldValues.files.get(k), v, data.seqTrackId, 'files', "'datafile ${index + 1}' with value '${v}' will be realigned and is linked and not copied, therefore make sure that it is not deleted by the GPCF.", SampleSwapLevel.WARNING, index + 1)
                             } else {
                                 output << new SampleSwapInfo(data.oldValues.files.get(k), v, data.seqTrackId, 'files', "'datafile ${index + 1}' with value '${v}' will not be realigned and is linked and not copied, therefore the file has to be copied manually.", SampleSwapLevel.ERROR, index + 1)

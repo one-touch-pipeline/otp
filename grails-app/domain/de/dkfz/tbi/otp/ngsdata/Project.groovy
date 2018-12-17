@@ -27,7 +27,6 @@ class Project implements Commentable, Entity {
     String dirAnalysis
 
     short processingPriority = ProcessingPriority.NORMAL.priority
-    String alignmentDeciderBeanName
 
     /**
      * The name which is used in the {@link MetaDataColumn#PROJECT} column of metadata files.
@@ -67,6 +66,8 @@ class Project implements Commentable, Entity {
 
     TumorEntity tumorEntity
 
+    AlignmentDeciderBeanName alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT
+
     SampleIdentifierParserBeanName sampleIdentifierParserBeanName = SampleIdentifierParserBeanName.NO_PARSER
 
     QcThresholdHandling qcThresholdHandling
@@ -99,8 +100,6 @@ class Project implements Commentable, Entity {
         projectGroup(nullable: true)
 
         processingPriority max: ProcessingPriority.MAXIMUM.priority
-
-        alignmentDeciderBeanName(blank: false)  // If no alignment is desired, set to noAlignmentDecider instead of leaving blank
 
         nameInMetadataFiles(nullable: true, blank: false,  validator: { val, obj ->
             if (val) {

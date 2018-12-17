@@ -68,7 +68,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
             RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
 
             if (seqType in SeqTypeService.getRoddyAlignableSeqTypes() &&
-                    project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName &&
+                    project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT &&
                     config?.adapterTrimmingNeeded) {
                 if (!seqType.isRna() && !kit.adapterFile) {
                     context.addProblem(valueTuple.cells, Level.WARNING, "Adapter trimming is requested but adapter file for library preparation kit '${kit}' is missing.", "Adapter trimming is requested but the adapter file for at least one library preparation kit is missing.")

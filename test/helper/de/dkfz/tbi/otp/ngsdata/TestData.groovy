@@ -136,7 +136,6 @@ class TestData {
         return new Project([
             name: "project",
             dirName: "dirName",
-            alignmentDeciderBeanName: 'dummyNonExistentAlignmentDecider',
             qcThresholdHandling: QcThresholdHandling.NO_CHECK,
         ] + properties)
     }

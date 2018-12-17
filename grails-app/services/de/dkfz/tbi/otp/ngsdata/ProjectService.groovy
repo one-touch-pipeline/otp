@@ -101,7 +101,7 @@ class ProjectService {
      * @return The created project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Project createProject(String name, String dirName, Realm realm, String alignmentDeciderBeanName, List<String> categoryNames, QcThresholdHandling qcThresholdHandling) {
+    Project createProject(String name, String dirName, Realm realm, List<String> categoryNames, QcThresholdHandling qcThresholdHandling) {
         // check that our dirName is relative to the configured data root.
         Path rootPath = configService.getRootPath().toPath()
         List<String> rootPathElements = rootPath.toList()*.toString()
@@ -112,7 +112,6 @@ class ProjectService {
                 name: name,
                 dirName: dirName,
                 realm: realm,
-                alignmentDeciderBeanName: alignmentDeciderBeanName,
                 projectCategories: categoryNames.collect { exactlyOneElement(ProjectCategory.findAllByName(it)) },
                 qcThresholdHandling: qcThresholdHandling,
         )
@@ -126,7 +125,7 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Project createProject(ProjectParams projectParams) {
         assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
-        Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realm, projectParams.alignmentDeciderBeanName, projectParams.categoryNames, projectParams.qcThresholdHandling)
+        Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realm, projectParams.categoryNames, projectParams.qcThresholdHandling)
         project.phabricatorAlias = projectParams.phabricatorAlias
         project.dirAnalysis = projectParams.dirAnalysis
         project.processingPriority = projectParams.processingPriority.priority
@@ -207,7 +206,6 @@ class ProjectService {
         String dirName
         String dirAnalysis
         Realm realm
-        String alignmentDeciderBeanName
         List<String> categoryNames
         String unixGroup
         String projectGroup
@@ -260,14 +258,14 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureNoAlignmentDeciderProject(Project project) {
         deprecateAllReferenceGenomesByProject(project)
-        project.alignmentDeciderBeanName = "noAlignmentDecider"
+        project.alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT
         project.save(flush: true, failOnError: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureDefaultOtpAlignmentDecider(Project project, String referenceGenomeName) {
         deprecateAllReferenceGenomesByProject(project)
-        project.alignmentDeciderBeanName = "defaultOtpAlignmentDecider"
+        project.alignmentDeciderBeanName = AlignmentDeciderBeanName.OTP_ALIGNMENT
         project.save(flush: true, failOnError: true)
         ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(referenceGenomeName))
         SeqType seqType_wgp = SeqTypeService.getWholeGenomePairedSeqType()
@@ -428,7 +426,7 @@ class ProjectService {
         } else {
             deprecateReferenceGenomeByProjectAndSeqTypeAndNoSampleType(rnaAlignmentConfiguration.project, rnaAlignmentConfiguration.seqType)
         }
-        rnaAlignmentConfiguration.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
+        rnaAlignmentConfiguration.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
 
         Map alignmentProperties = [:]
 
@@ -472,12 +470,12 @@ class ProjectService {
     }
 
     private void deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(ProjectSeqTypeReferenceGenomeConfiguration config) {
-        if (config.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.OTP_ALIGNMENT.beanName) {
+        if (config.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.OTP_ALIGNMENT) {
             deprecateAllReferenceGenomesByProject(config.project)
         } else {
             deprecateAllReferenceGenomesByProjectAndSeqType(config.project, config.seqType)
         }
-        config.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
+        config.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
         config.project.save(flush: true, failOnError: true)
     }
 
@@ -555,7 +553,7 @@ class ProjectService {
                 roddyWorkflowConfigBasedProject.configVersion,
                 roddyWorkflowConfigBasedProject.adapterTrimmingNeeded,
         )
-        project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
+        project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
         project.save(flush: true)
     }
 

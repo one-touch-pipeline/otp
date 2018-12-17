@@ -31,7 +31,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testDecideAndPrepareForAlignment_noAlignmentDecider_shouldReturnEmptyList() {
-        SeqTrack seqTrack = setupSeqTrackProjectAndDataFile("noAlignmentDecider")
+        SeqTrack seqTrack = setupSeqTrackProjectAndDataFile()
 
         Collection<MergingWorkPackage> workPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
 
@@ -72,24 +72,8 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         assert [bamFile] == seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack])
     }
 
-    @Test
-    void testGetAlignmentDecider_WhenNoAlignmentDeciderBeanName_ShouldFail() {
-        Project project = Project.build()
 
-        TestCase.shouldFail (RuntimeException) {
-            seqTrackService.getAlignmentDecider(project)
-        }
-    }
-
-    @Test
-    void testGetAlignmentDecider_WhenAllFine_ShouldReturnAlignmentDecider() {
-        Project project = Project.build(alignmentDeciderBeanName: "noAlignmentDecider")
-
-        assert "NoAlignmentDecider" == seqTrackService.getAlignmentDecider(project).class.simpleName
-    }
-
-
-    private static SeqTrack setupSeqTrackProjectAndDataFile(String decider) {
+    private static SeqTrack setupSeqTrackProjectAndDataFile() {
         SeqTrack seqTrack = DomainFactory.createSeqTrack(
                 seqType: DomainFactory.createDefaultOtpAlignableSeqTypes().first(),
         )
@@ -115,7 +99,6 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
         ).save(flush: true)
 
         Project project = seqTrack.project
-        project.alignmentDeciderBeanName = decider
         project.save(failOnError: true)
         return seqTrack
     }

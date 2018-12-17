@@ -159,7 +159,7 @@ class CreateNotificationTextService {
             projectBamFiles.groupBy { it.seqType }.sort { it.key.displayNameWithLibraryLayout }.
                     each { SeqType seqType, List<AbstractMergedBamFile> seqTypeBamFiles ->
                         Map<AlignmentConfig, List<AbstractMergedBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy { it.alignmentConfig }
-                        boolean multipleConfigs = bamFilePerConfig.size() > 1 && project.alignmentDeciderBeanName == "panCanAlignmentDecider"
+                        boolean multipleConfigs = bamFilePerConfig.size() > 1 && project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
                         bamFilePerConfig.each { AlignmentConfig config, List<AbstractMergedBamFile> configBamFiles ->
                             AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
                             String individuals = multipleConfigs ? (config.individual ?: "default") : ""

@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.sampleSwap
 
+import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.sampleswap.*
@@ -889,6 +890,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
     void "test validateInput when datafile is linked and will be realigned, shows warning"() {
         given:
         seqTrack1.seqType = SeqTypeService.getExomePairedSeqType()
+        seqTrack1.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.OTP_ALIGNMENT
+        seqTrack1.project.save(flush: true)
         DomainFactory.createRoddyWorkflowConfig(seqType: seqTrack1.seqType, project: seqTrack1.individual.project, individual: null, pipeline: DomainFactory.createPanCanPipeline())
         File initialFile = temporaryFolder.newFile("test/initial/linkedFileName")
         DataFile dataFile1 = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: initialFile.name, initialDirectory: "${testFolder.absolutePath}/initial")

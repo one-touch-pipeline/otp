@@ -58,7 +58,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         ])
         configService.processingOptionService = new ProcessingOptionService()
 
-        DomainFactory.createProject(name: 'testProjectAlignment', realm: realm, alignmentDeciderBeanName: 'test')
+        DomainFactory.createProject(name: 'testProjectAlignment', realm: realm)
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome')
         DomainFactory.createReferenceGenome(name: 'testReferenceGenome2')
         DomainFactory.createAllAlignableSeqTypes()
@@ -102,7 +102,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test createProject valid input"() {
         given:
         String unixGroup = configService.getTestingGroup()
-        String alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT.beanName
 
         when:
         Project project
@@ -111,7 +110,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: dirName,
                 dirAnalysis: dirAnalysis,
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: alignmentDeciderBeanName,
                 sampleIdentifierParserBeanName: sampleIdentifierParserBeanName,
                 qcThresholdHandling: qcThresholdHandling,
                 categoryNames: categoryNames,
@@ -130,7 +128,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         project.name == name
         project.dirName == dirName
         project.dirAnalysis == dirAnalysis
-        project.alignmentDeciderBeanName == alignmentDeciderBeanName
         project.sampleIdentifierParserBeanName == sampleIdentifierParserBeanName
         project.qcThresholdHandling == qcThresholdHandling
         project.projectCategories == categoryNames.collect { ProjectCategory.findByName(it) } as Set
@@ -162,7 +159,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
@@ -200,7 +196,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: dirName,
                 dirAnalysis: '/dirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
@@ -238,7 +233,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['category'],
                 unixGroup: 'invalidValue',
                 projectGroup: '',
@@ -268,7 +262,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: 'dir',
                 dirAnalysis: 'invalidDirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
@@ -308,7 +301,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
@@ -354,7 +346,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['category'],
                 unixGroup: group,
                 projectGroup: '',
@@ -420,7 +411,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 dirName: 'dir',
                 dirAnalysis: '/dirA',
                 realm: configService.getDefaultRealm(),
-                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
                 categoryNames: ['invalid category'],
                 unixGroup: group,
                 projectGroup: '',
@@ -558,7 +548,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        project.alignmentDeciderBeanName == "noAlignmentDecider"
+        project.alignmentDeciderBeanName == AlignmentDeciderBeanName.NO_ALIGNMENT
         ReferenceGenomeProjectSeqType.findAllByProject(project).size == 0
     }
 
@@ -573,7 +563,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        project.alignmentDeciderBeanName == AlignmentDeciderBeanName.OTP_ALIGNMENT.beanName
+        project.alignmentDeciderBeanName == AlignmentDeciderBeanName.OTP_ALIGNMENT
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
         referenceGenomeProjectSeqTypes.every { it.referenceGenome == referenceGenome }
         referenceGenomeProjectSeqTypes.size() == 2
@@ -592,7 +582,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        project.alignmentDeciderBeanName == AlignmentDeciderBeanName.OTP_ALIGNMENT.beanName
+        project.alignmentDeciderBeanName == AlignmentDeciderBeanName.OTP_ALIGNMENT
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
         referenceGenomeProjectSeqTypes.every { it.referenceGenome == referenceGenome2 }
         referenceGenomeProjectSeqTypes.size() == 2
@@ -623,7 +613,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
         List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
                 configuration.project,
                 configuration.seqType,
@@ -653,7 +643,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
         Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersion(
                 configuration.project,
                 Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT),
@@ -867,7 +857,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.OTP_ALIGNMENT.beanName
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.OTP_ALIGNMENT
         Collection<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull()
         referenceGenomeProjectSeqTypes.every {
             it.referenceGenome.name == configuration.referenceGenome && it.statSizeFileName == null
@@ -886,7 +876,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.NO_ALIGNMENT.beanName
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.NO_ALIGNMENT
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 0
     }
 
@@ -937,7 +927,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = CollectionUtils.exactlyOneElement(
                 ReferenceGenomeProjectSeqType.list()
         )
@@ -991,7 +981,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
         List<ReferenceGenomeProjectSeqType> leftOverConfigurations = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
         leftOverConfigurations.size() == (deprecateConfigurations ? 1 : configuredSampleTypes + 1)
         ReferenceGenomeProjectSeqType generalRefGenConfig = leftOverConfigurations.find { it.sampleType == null }
@@ -1014,7 +1004,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
+        configuration.project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
         RoddyWorkflowConfig.findAllByProjectAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
                 configuration.project,
                 Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT),
@@ -1066,7 +1056,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         Project project = Project.findByName("testProjectAlignment")
 
         Realm realm = project.realm
-        Project basedProject = DomainFactory.createProject(name: 'basedTestProjectAlignment', realm: realm, alignmentDeciderBeanName: 'basedTest')
+        Project basedProject = DomainFactory.createProject(name: 'basedTestProjectAlignment', realm: realm)
 
         File tempFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_PAIRED_1.1.51_v1_0.xml")
         CreateFileHelper.createRoddyWorkflowConfig(tempFile, "PANCAN_ALIGNMENT_WES_PAIRED_pluginVersion:1.1.51_v1_0")
@@ -1109,7 +1099,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         assert roddyWorkflowConfigs.size() == 1
         File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
         assert roddyWorkflowConfig.exists()
-        assert project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
+        assert project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
     }
 
 
@@ -1126,7 +1116,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
 
         then:
-        project.alignmentDeciderBeanName == AlignmentDeciderBeanName.NO_ALIGNMENT.beanName
+        project.alignmentDeciderBeanName == AlignmentDeciderBeanName.NO_ALIGNMENT
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 0
     }
 

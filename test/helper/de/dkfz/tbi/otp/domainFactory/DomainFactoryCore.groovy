@@ -12,7 +12,6 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 phabricatorAlias              : "phabricatorAlias_${nextId}",
                 dirName                       : "projectDirName_${nextId}",
                 realm                         : { DomainFactory.createRealm() },
-                alignmentDeciderBeanName      : "DUMMY_BEAN_NAME",
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling           : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
         ], properties, saveAndValidate)

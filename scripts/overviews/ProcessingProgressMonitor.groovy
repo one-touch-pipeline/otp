@@ -306,18 +306,19 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
 
     output << "\n"
 
-    Map<String, Collection<SeqTrack>> seqTracksByAlignmentDeciderBeanName = seqTracksToAlign.groupBy { it.project.alignmentDeciderBeanName }
+    Map<AlignmentDeciderBeanName, Collection<SeqTrack>> seqTracksByAlignmentDeciderBeanName = seqTracksToAlign.groupBy { it.project.alignmentDeciderBeanName }
 
     seqTracksByAlignmentDeciderBeanName.keySet().sort().each {
+        int amount = seqTracksByAlignmentDeciderBeanName[it].size()
         switch(it) {
-            case 'defaultOtpAlignmentDecider':
-                output << "${seqTracksByAlignmentDeciderBeanName['defaultOtpAlignmentDecider'].size()} SeqTracks use the default OTP alignment"
+            case AlignmentDeciderBeanName.OTP_ALIGNMENT:
+                output << "${amount} SeqTracks use the default OTP alignment"
                 break
-            case 'panCanAlignmentDecider':
-                output << "${seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider'].size()} SeqTracks use the Pan-Cancer alignment"
+            case AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT:
+                output << "${amount} SeqTracks use the Pan-Cancer alignment"
                 break
-            case 'noAlignmentDecider':
-                output << "${seqTracksByAlignmentDeciderBeanName['noAlignmentDecider'].size()} SeqTracks are not configured to be aligned by OTP"
+            case AlignmentDeciderBeanName.NO_ALIGNMENT:
+                output << "${amount} SeqTracks are not configured to be aligned by OTP"
                 break
             default:
                 throw new RuntimeException("Unknown alignment decider: ${it}. Please inform maintainer (Stefan or Jan)")
@@ -325,7 +326,7 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
     }
 
     Collection<RoddyBamFile> bamFilesFinishedAlignment =
-            new AllRoddyAlignmentsChecker().handle(seqTracksByAlignmentDeciderBeanName['panCanAlignmentDecider'], output)
+            new AllRoddyAlignmentsChecker().handle(seqTracksByAlignmentDeciderBeanName[AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT], output)
 
     if (!bamFilesFinishedAlignment) {
         return

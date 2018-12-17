@@ -50,7 +50,6 @@ boolean adapterTrimmingNeeded = false
 
 //-----------------------
 RoddyWorkflowConfigService roddyWorkflowConfigService = ctx.roddyWorkflowConfigService
-String panCanAlignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT.beanName
 
 LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
     assert projectName
@@ -95,8 +94,7 @@ LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
         )
     }
 
-    assert ctx[panCanAlignmentDeciderBeanName]
-    project.alignmentDeciderBeanName = panCanAlignmentDeciderBeanName
+    project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
     assert project.save(flush: true, failOnError: true)
 
     println "Config file loaded."

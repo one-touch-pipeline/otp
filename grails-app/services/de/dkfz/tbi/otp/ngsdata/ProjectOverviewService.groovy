@@ -17,6 +17,7 @@ class ProjectOverviewService {
 
     ExecuteRoddyCommandService executeRoddyCommandService
     ProcessingOptionService processingOptionService
+    AlignmentDeciderService alignmentDeciderService
     DataSource dataSource
 
     @Autowired
@@ -224,8 +225,8 @@ class ProjectOverviewService {
 
     Map<String, AlignmentInfo> getAlignmentInformation(Project project) throws Exception {
         try {
-            switch (applicationContext.getBean(project.alignmentDeciderBeanName).class) {
-                case PanCanAlignmentDecider:
+            switch (project.alignmentDeciderBeanName) {
+                case AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT:
                     List<ReferenceGenomeProjectSeqType> rgpst = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
                     Map<String, AlignmentInfo> result = [:]
                     rgpst*.seqType.unique().sort { it.displayNameWithLibraryLayout }.each { SeqType seqType ->
@@ -236,7 +237,7 @@ class ProjectOverviewService {
                         result.put(seqType.displayNameWithLibraryLayout, getRoddyAlignmentInformation(workflowConfig))
                     }
                     return result
-                case NoAlignmentDecider:
+                case AlignmentDeciderBeanName.NO_ALIGNMENT:
                     return null
                 default:
                     throw new Exception("Unknown Alignment configured.")

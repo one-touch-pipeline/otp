@@ -28,7 +28,6 @@ class CreateProjectController {
                         dirName: cmd.directory,
                         dirAnalysis: cmd.analysisDirectory,
                         realm: configService.getDefaultRealm(),
-                        alignmentDeciderBeanName: 'noAlignmentDecider',
                         categoryNames: cmd.projectCategories,
                         unixGroup: cmd.unixGroup,
                         projectGroup: cmd.projectGroup,
