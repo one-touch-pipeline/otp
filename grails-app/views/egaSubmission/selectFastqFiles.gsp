@@ -73,7 +73,7 @@
                 <p>
                     <g:submitButton name="saveSelection" value="Confirm with file selection" disabled="${hasDataFiles}"/>
                     <g:submitButton name="download" value="Download" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
-                    <g:submitButton name="saveAliases" value="Save aliases" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
+                    <g:submitButton name="saveAliases" value="Confirm with aliases" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
                 </p>
             </g:form>
         </div>

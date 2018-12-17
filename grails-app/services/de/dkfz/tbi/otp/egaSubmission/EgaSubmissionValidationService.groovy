@@ -24,7 +24,7 @@ class EgaSubmissionValidationService {
         ]
     }
 
-    Map validateRows(Spreadsheet spreadsheet, Submission submission) {
+    Map validateRows(Spreadsheet spreadsheet, EgaSubmission submission) {
         boolean valid = false
         String error = ""
 

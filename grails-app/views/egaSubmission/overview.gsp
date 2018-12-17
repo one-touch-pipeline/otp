@@ -1,3 +1,4 @@
+<%@ page import="de.dkfz.tbi.otp.administration.DocumentController; de.dkfz.tbi.otp.administration.Document" %>
 <%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
@@ -11,7 +12,7 @@
         <g:if test="${projects}">
             <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
         </g:if>
-
+        <g:link style="float: right" action="helpPage" target="_blank"><g:message code="egaSubmission.userDocumentation"/></g:link>
         <div class="buttons">
             <g:link action="newSubmission" params="[id: project.id]"><g:message code="egaSubmission.newSubmission"/></g:link>
         </div>
@@ -34,7 +35,7 @@
                             values="${submissionStates}"
                             value="${it.state}"/></td>
                     <td>
-                        <g:if test="${it.state == de.dkfz.tbi.otp.egaSubmission.Submission.State.SELECTION}">
+                        <g:if test="${it.state == de.dkfz.tbi.otp.egaSubmission.EgaSubmission.State.SELECTION}">
                             <g:link action="editSubmission" params="['id': it.id]"><g:message code="egaSubmission.submissionEdit"/></g:link>
                         </g:if>
                     </td>

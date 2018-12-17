@@ -14,10 +14,10 @@ class EgaSubmissionService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(params.project, 'OTP_READ_ACCESS')")
-    Submission createSubmission(Map params) {
-        Submission submission = new Submission( params + [
-                state: Submission.State.SELECTION,
-                selectionState: Submission.SelectionState.SELECT_SAMPLES,
+    EgaSubmission createSubmission(Map params) {
+        EgaSubmission submission = new EgaSubmission( params + [
+                state: EgaSubmission.State.SELECTION,
+                selectionState: EgaSubmission.SelectionState.SELECT_SAMPLES,
         ])
         assert submission.save(flush: true, failOnError: true)
 
@@ -25,7 +25,7 @@ class EgaSubmissionService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateSubmissionState (Submission submission, Submission.State state) {
+    void updateSubmissionState (EgaSubmission submission, EgaSubmission.State state) {
         submission.state = state
         submission.save(flush: true)
     }
@@ -48,17 +48,17 @@ class EgaSubmissionService {
         return seqTypes
     }
 
-    void saveSampleSubmissionObject(Submission submission, Sample sample, SeqType seqType) {
+    void saveSampleSubmissionObject(EgaSubmission submission, Sample sample, SeqType seqType) {
         SampleSubmissionObject sampleSubmissionObject = new SampleSubmissionObject(
                 sample: sample,
                 seqType: seqType
         ).save(flush: true)
         submission.addToSamplesToSubmit(sampleSubmissionObject)
-        submission.selectionState = Submission.SelectionState.SAMPLE_INFORMATION
+        submission.selectionState = EgaSubmission.SelectionState.SAMPLE_INFORMATION
         submission.save(flush: true)
     }
 
-    Map<SampleSubmissionObject, Boolean> checkFastqFiles(Submission submission) {
+    Map<SampleSubmissionObject, Boolean> checkFastqFiles(EgaSubmission submission) {
         Map<SampleSubmissionObject, Boolean> map = [:]
 
         submission.samplesToSubmit.each {
@@ -75,7 +75,7 @@ class EgaSubmissionService {
         return map
     }
 
-    Map<SampleSubmissionObject, Boolean> checkBamFiles(Submission submission) {
+    Map<SampleSubmissionObject, Boolean> checkBamFiles(EgaSubmission submission) {
         Map<SampleSubmissionObject, Boolean> map = [:]
 
         submission.samplesToSubmit.each {
@@ -85,7 +85,7 @@ class EgaSubmissionService {
         return map
     }
 
-    void updateSampleSubmissionObjects(Submission submission, List<String> sampleObjectId, List<String> alias, List<FileType> fileType) {
+    void updateSampleSubmissionObjects(EgaSubmission submission, List<String> sampleObjectId, List<String> alias, List<FileType> fileType) {
         if (sampleObjectId.size() == alias.size() && sampleObjectId.size() == fileType.size()) {
             sampleObjectId.eachWithIndex { it, i ->
                 SampleSubmissionObject sampleSubmissionObject = SampleSubmissionObject.findById(it as Long)
@@ -95,27 +95,29 @@ class EgaSubmissionService {
                 sampleSubmissionObject.save(flush: true)
             }
             if (submission.samplesToSubmit.any { it.useFastqFile } ) {
-                submission.selectionState = Submission.SelectionState.SELECT_FASTQ_FILES
+                submission.selectionState = EgaSubmission.SelectionState.SELECT_FASTQ_FILES
             } else {
-                submission.selectionState = Submission.SelectionState.SELECT_BAM_FILES
+                submission.selectionState = EgaSubmission.SelectionState.SELECT_BAM_FILES
             }
             submission.save(flush: true)
         }
     }
 
-    void updateDataFileSubmissionObjects(List<String> filename, List<String> egaFileAlias, Submission submission) {
-        filename.eachWithIndex { it, i ->
-            DataFileSubmissionObject dataFileSubmissionObject = DataFileSubmissionObject.findByDataFile(DataFile.findByFileName(it))
+    void updateDataFileSubmissionObjects(List<String> filenames, List<String> egaFileAlias, EgaSubmission submission) {
+        filenames.eachWithIndex { filename, i ->
+            DataFileSubmissionObject dataFileSubmissionObject = submission.dataFilesToSubmit.find {
+                it.dataFile.fileName == filename
+            }
             dataFileSubmissionObject.egaAliasName = egaFileAlias[i]
             dataFileSubmissionObject.save(flush: true)
         }
         if (submission.samplesToSubmit.any { it.useBamFile } ) {
-            submission.selectionState = Submission.SelectionState.SELECT_BAM_FILES
+            submission.selectionState = EgaSubmission.SelectionState.SELECT_BAM_FILES
             submission.save(flush: true)
         }
     }
 
-    List getDataFilesAndAlias(Submission submission) {
+    List getDataFilesAndAlias(EgaSubmission submission) {
         if (submission.dataFilesToSubmit) {
             return submission.dataFilesToSubmit.collect {
                 [it.dataFile, SampleSubmissionObject.findBySampleAndSeqType(it.dataFile.seqTrack.sample, it.dataFile.seqType).egaAliasName]
@@ -129,7 +131,7 @@ class EgaSubmissionService {
         }
     }
 
-    List getBamFilesAndAlias(Submission submission) {
+    List getBamFilesAndAlias(EgaSubmission submission) {
         if (submission.bamFilesToSubmit) {
             return submission.bamFilesToSubmit.collect {
                 [it.bamFile, SampleSubmissionObject.findBySampleAndSeqType(it.bamFile.sample, it.bamFile.seqType).egaAliasName]
@@ -156,7 +158,7 @@ class EgaSubmissionService {
         }
     }
 
-    void createDataFileSubmissionObjects(Submission submission, List<Boolean> selectBox, List<String> filename, List<String> egaSampleAlias) {
+    void createDataFileSubmissionObjects(EgaSubmission submission, List<Boolean> selectBox, List<String> filename, List<String> egaSampleAlias) {
         selectBox.eachWithIndex { it, i ->
             if (it) {
                 DataFileSubmissionObject dataFileSubmissionObject = new DataFileSubmissionObject(
@@ -168,7 +170,7 @@ class EgaSubmissionService {
         }
     }
 
-    void createBamFileSubmissionObjects(Submission submission, List<String> fileId, List<String> egaFileAliases, List<String> egaSampleAliases) {
+    void createBamFileSubmissionObjects(EgaSubmission submission, List<String> fileId, List<String> egaFileAliases, List<String> egaSampleAliases) {
         egaFileAliases.eachWithIndex { it, i ->
             if (it) {
                 BamFileSubmissionObject bamFileSubmissionObject = new BamFileSubmissionObject(

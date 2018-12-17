@@ -12,7 +12,7 @@ class NewSubmissionControllerSubmitCommand implements Serializable {
     String egaBox
     String submissionName
     String studyName
-    Submission.StudyType studyType
+    EgaSubmission.StudyType studyType
     String studyAbstract
     String pubMedId
     String submit
@@ -27,12 +27,12 @@ class NewSubmissionControllerSubmitCommand implements Serializable {
 
 @Validateable
 class UpdateSubmissionStateSubmitCommand implements Serializable {
-    Submission submission
-    Submission.State state
+    EgaSubmission submission
+    EgaSubmission.State state
 
     static constraints = {
         state(validator: { val, obj ->
-            if (val != Submission.State.SELECTION) {
+            if (val != EgaSubmission.State.SELECTION) {
                 if (!obj.submission.samplesToSubmit) {
                     return 'No samples to submit are selected yet'
                 }
@@ -44,31 +44,31 @@ class UpdateSubmissionStateSubmitCommand implements Serializable {
     }
 
     void setValue(String value) {
-        this.state = value as Submission.State
+        this.state = value as EgaSubmission.State
     }
 }
 
 @Validateable
 class SelectSamplesControllerSubmitCommand implements Serializable {
-    Submission submission
+    EgaSubmission submission
     String next
     List<String> sampleAndSeqType
 }
 
 @Validateable
 class UploadFormSubmitCommand implements Serializable {
-    Submission submission
+    EgaSubmission submission
     String upload
     MultipartFile file
 
     static constraints = {
-        upload matches: "Upload [A-Z]+ meta file"
+        upload matches: "Upload.*"
     }
 }
 
 @Validateable
 class SampleInformationFormsSubmitCommand implements Serializable {
-    Submission submission
+    EgaSubmission submission
     String csv
     String next
     List<String> sampleObjectId
@@ -83,7 +83,7 @@ class SampleInformationFormsSubmitCommand implements Serializable {
 
 @Validateable
 class SelectFilesDataFilesFormSubmitCommand implements Serializable {
-    Submission submission
+    EgaSubmission submission
     String saveSelection
     String download
     String saveAliases
@@ -103,7 +103,7 @@ class SelectFilesDataFilesFormSubmitCommand implements Serializable {
 
 @Validateable
 class SelectFilesBamFilesFormSubmitCommand implements Serializable {
-    Submission submission
+    EgaSubmission submission
     String save
     String download
     List<String> fileId
@@ -118,6 +118,6 @@ class SelectFilesBamFilesFormSubmitCommand implements Serializable {
 
 @Validateable
 class GenerateFilesToUploadFileSubmitCommand implements Serializable {
-    Submission submission
+    EgaSubmission submission
     String save
 }

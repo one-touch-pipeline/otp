@@ -7,17 +7,17 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 trait EgaSubmissionFactory implements IsRoddy, DomainFactoryCore {
 
-    Submission createSubmission(Map properties = [:]) {
-        return createDomainObject(Submission, [
+    EgaSubmission createSubmission(Map properties = [:]) {
+        return createDomainObject(EgaSubmission, [
                 project       : { createProject() },
                 egaBox        : "egaBox",
                 submissionName: "submissionName",
                 studyName     : "studyName",
-                studyType     : Submission.StudyType.CANCER_GENOMICS,
+                studyType     : EgaSubmission.StudyType.CANCER_GENOMICS,
                 studyAbstract : "studyAbstract",
                 pubMedId      : "pubMedId",
-                state         : Submission.State.SELECTION,
-                selectionState: Submission.SelectionState.SELECT_SAMPLES,
+                state         : EgaSubmission.State.SELECTION,
+                selectionState: EgaSubmission.SelectionState.SELECT_SAMPLES,
         ], properties)
     }
 

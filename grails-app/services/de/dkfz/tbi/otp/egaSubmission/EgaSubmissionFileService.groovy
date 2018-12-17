@@ -30,14 +30,14 @@ class EgaSubmissionFileService {
         INDIVIDUAL("Individual"),
         SAMPLE_TYPE("Sample Type"),
         SEQ_TYPE("Sequence Type"),
-        EGA_SAMPLE_ALIAS("EGA Sample Alias"),
+        EGA_SAMPLE_ALIAS("Sample Name at EGA"),
         FILE_TYPE("File Type"),
         SEQ_CENTER("Seq Center"),
         RUN("Run"),
         LANE("Lane"),
         LIBRARY("Library"),
         ILSE("Ilse"),
-        EGA_FILE_ALIAS("EGA Filename Alias"),
+        EGA_FILE_ALIAS("Filename at EGA"),
         FILENAME("Filename in OTP")
 
         final String value
@@ -112,7 +112,7 @@ class EgaSubmissionFileService {
         return "${contentHeader}\n${contentBody}"
     }
 
-    String generateDataFilesCsvFile(Submission submission) {
+    String generateDataFilesCsvFile(EgaSubmission submission) {
         StringBuilder contentBody = new StringBuilder()
 
         submission.dataFilesToSubmit.sort { it.sampleSubmissionObject.egaAliasName }.each {
@@ -124,8 +124,8 @@ class EgaSubmissionFileService {
                     it.dataFile.run.seqCenter,
                     it.dataFile.run,
                     it.dataFile.seqTrack.laneId,
-                    it.dataFile.seqTrack.normalizedLibraryName,
-                    it.dataFile.seqTrack.ilseId,
+                    it.dataFile.seqTrack.normalizedLibraryName ?: "N/A",
+                    it.dataFile.seqTrack.ilseId ?: "N/A",
                     "",
                     it.dataFile.fileName,
             ].join(",") + "\n")
@@ -148,7 +148,7 @@ class EgaSubmissionFileService {
         return "${contentHeader}\n${contentBody}"
     }
 
-    String generateBamFilesCsvFile(Submission submission) {
+    String generateBamFilesCsvFile(EgaSubmission submission) {
         StringBuilder contentBody = new StringBuilder()
 
         egaSubmissionService.getBamFilesAndAlias(submission).sort { it[1] }.each {
@@ -174,7 +174,7 @@ class EgaSubmissionFileService {
         return "${contentHeader}\n${contentBody}"
     }
 
-    void generateFilesToUploadFile(Submission submission) {
+    void generateFilesToUploadFile(EgaSubmission submission) {
         FileSystem fileSystem = fileSystemService.getFilesystemForProcessingForRealm(submission.project.realm)
         Path path = fileSystem.getPath("${submission.project.projectDirectory}/submission/${submission.id}/filesToUpload.tsv")
         StringBuilder out = new StringBuilder()
@@ -201,7 +201,7 @@ class EgaSubmissionFileService {
                 path: path,
         ])
         mailHelperService.sendEmail(subject, content, [processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)], user.email)
-        submission.state = Submission.State.FILE_UPLOAD_STARTED
+        submission.state = EgaSubmission.State.FILE_UPLOAD_STARTED
         submission.save(flush: true)
     }
 

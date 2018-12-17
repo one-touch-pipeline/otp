@@ -37,13 +37,13 @@ import spock.lang.*
         SeqTrack,
         SeqType,
         SoftwareTool,
-        Submission,
+        EgaSubmission,
 ])
-class SubmissionSpec extends Specification implements EgaSubmissionFactory {
+class EgaSubmissionSpec extends Specification implements EgaSubmissionFactory {
 
     void "test link Submission and files"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject()
         DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()

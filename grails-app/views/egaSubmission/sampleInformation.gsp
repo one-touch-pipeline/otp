@@ -53,7 +53,7 @@
                     </g:each>
                 </tbody>
             </table>
-            <p><g:submitButton name="csv" value="Download CSV"/>&nbsp;<g:submitButton name="next" value="Next"/></p>
+            <p><g:submitButton name="csv" value="Download CSV"/>&nbsp;<g:submitButton name="next" value="Confirm"/></p>
         </g:form>
         </div>
     </div>

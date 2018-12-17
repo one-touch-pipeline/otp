@@ -8,12 +8,13 @@
 </head>
 <body>
     <div class="body">
+        <h3><g:message code="egaSubmission.selectSamples.title"/></h3>
         <div class="searchCriteriaTableSequences">
             <table id="searchCriteriaTable" style="display: inline-block">
                 <tr>
                     <td id="projectName">${project.name}</td>
                     <td>
-                        <span class="blue_label"><g:message code="egaSubmission.seqType"/>:</span>
+                        <span class="blue_label">Filter by <g:message code="egaSubmission.seqType"/>:</span>
                     </td>
                     <td>
                         <table id="searchCriteriaTableSeqType">
@@ -45,7 +46,7 @@
                     id="selectSamplesTable" />
             </div>
             <g:hiddenField name="submission.id" value="${submissionId}" />
-            <g:submitButton name="next" value="Next"/>
+            <g:submitButton name="next" value="Confirm"/>
         </g:form>
         <asset:script>
             $(function() {

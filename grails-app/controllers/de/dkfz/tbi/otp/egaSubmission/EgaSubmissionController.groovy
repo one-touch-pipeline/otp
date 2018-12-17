@@ -12,6 +12,23 @@ import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnNa
 
 class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
+    static allowedMethods = [
+            overview          : "GET",
+            newSubmission     : "GET",
+            selectSamples     : "GET",
+            sampleInformation : "GET",
+            selectFastqFiles  : "GET",
+            selectBamFiles    : "GET",
+
+            newSubmissionForm           : "POST",
+            selectSamplesForm           : "POST",
+            sampleInformationUploadForm : "POST",
+            sampleInformationForms      : "POST",
+            selectFilesDataFilesForm    : "POST",
+            dataFilesListFileUploadForm : "POST",
+            selectFilesBamFilesForm     : "POST",
+    ]
+
     EgaSubmissionService egaSubmissionService
     EgaSubmissionValidationService egaSubmissionValidationService
     EgaSubmissionFileService egaSubmissionFileService
@@ -25,33 +42,33 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         ProjectSelection selection = projectSelectionService.selectedProject
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
-        List<Submission> submissions = Submission.findAllByProject(project).sort { it.submissionName.toLowerCase() }
+        List<EgaSubmission> submissions = EgaSubmission.findAllByProject(project).sort { it.submissionName.toLowerCase() }
 
         return [
                 projects         : projects,
                 project          : project,
                 submissions      : submissions,
-                submissionStates : Submission.State,
+                submissionStates : EgaSubmission.State,
         ]
     }
 
     def editSubmission() {
-        Submission submission = Submission.get(params.id)
-        if (submission.state != Submission.State.SELECTION) {
+        EgaSubmission submission = EgaSubmission.get(params.id)
+        if (submission.state != EgaSubmission.State.SELECTION) {
             redirect(action: "overview")
             return
         }
         switch (submission.selectionState) {
-            case Submission.SelectionState.SELECT_SAMPLES:
+            case EgaSubmission.SelectionState.SELECT_SAMPLES:
                 render(view: "selectSamples", model: selectSamples(submission))
                 break
-            case Submission.SelectionState.SAMPLE_INFORMATION:
+            case EgaSubmission.SelectionState.SAMPLE_INFORMATION:
                 render(view: "sampleInformation", model: sampleInformation(submission))
                 break
-            case Submission.SelectionState.SELECT_FASTQ_FILES:
+            case EgaSubmission.SelectionState.SELECT_FASTQ_FILES:
                 render(view: "selectFastqFiles", model: selectFastqFiles(submission))
                 break
-            case Submission.SelectionState.SELECT_BAM_FILES:
+            case EgaSubmission.SelectionState.SELECT_BAM_FILES:
                 render(view: "selectBamFiles", model: selectBamFiles(submission))
                 break
             default:
@@ -64,13 +81,13 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
         return [
                 selectedProject : project,
-                studyTypes      : Submission.StudyType,
-                defaultStudyType: Submission.StudyType.CANCER_GENOMICS,
+                studyTypes      : EgaSubmission.StudyType,
+                defaultStudyType: EgaSubmission.StudyType.CANCER_GENOMICS,
                 cmd             : flash.cmd,
         ]
     }
 
-    Map selectSamples(Submission submission) {
+    Map selectSamples(EgaSubmission submission) {
         return [
                 submissionId: submission.id,
                 project: submission.project,
@@ -78,7 +95,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         ]
     }
 
-    Map sampleInformation(Submission submission) {
+    Map sampleInformation(EgaSubmission submission) {
         Map<String, String> egaSampleAliases = flash.egaSampleAliases ?: [:]
         Map<String, Boolean> selectedFastqs = [:]
         Map<String, Boolean> selectedBams = [:]
@@ -114,7 +131,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         ]
     }
 
-    Map selectFastqFiles(Submission submission) {
+    Map selectFastqFiles(EgaSubmission submission) {
         return [
                 submission: submission,
                 dataFileList: egaSubmissionService.getDataFilesAndAlias(submission),
@@ -125,7 +142,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         ]
     }
 
-    Map selectBamFiles(Submission submission) {
+    Map selectBamFiles(EgaSubmission submission) {
         return [
                 submission: submission,
                 bamFileList: egaSubmissionService.getBamFilesAndAlias(submission),
@@ -135,6 +152,8 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         ]
     }
 
+    def helpPage() { }
+
     def newSubmissionForm(NewSubmissionControllerSubmitCommand cmd) {
         if (cmd.submit == "Submit") {
             if (cmd.hasErrors()) {
@@ -143,7 +162,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 redirect(action: "newSubmission", params: ['id': cmd.project.id])
                 return
             }
-            Submission submission = egaSubmissionService.createSubmission([
+            EgaSubmission submission = egaSubmissionService.createSubmission([
                     project       : cmd.project,
                     egaBox        : cmd.egaBox,
                     submissionName: cmd.submissionName,
@@ -157,7 +176,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     def selectSamplesForm(SelectSamplesControllerSubmitCommand cmd) {
-        if (cmd.next == "Next") {
+        if (cmd.next == "Confirm") {
             cmd.sampleAndSeqType.findAll().each {
                 String[] sampleAndSeqType = it.split("-")
 
@@ -213,7 +232,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
 
-        if (cmd.next == "Next") {
+        if (cmd.next == "Confirm") {
             Map validateMap = egaSubmissionValidationService.validateSampleInformationFormInput(cmd.sampleObjectId, cmd.egaSampleAlias, cmd.fileType)
 
             if (validateMap.hasErrors) {
@@ -247,7 +266,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
 
-        if (cmd.saveAliases == "Save aliases") {
+        if (cmd.saveAliases == "Confirm with aliases") {
             if (cmd.egaFileAlias.isEmpty()) {
                 pushError("No file aliases are configured.", cmd.submission, true)
             } else {
@@ -256,7 +275,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     pushErrors(errors.errors, cmd.submission)
                 } else {
                     egaSubmissionService.updateDataFileSubmissionObjects(cmd.filename, cmd.egaFileAlias, cmd.submission)
-                    if (cmd.submission.selectionState != Submission.SelectionState.SELECT_BAM_FILES) {
+                    if (cmd.submission.selectionState != EgaSubmission.SelectionState.SELECT_BAM_FILES) {
                         egaSubmissionFileService.generateFilesToUploadFile(cmd.submission)
                     }
                     flash.message = new FlashMessage("SAVED")
@@ -268,7 +287,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     def saveSelection(SelectFilesDataFilesFormSubmitCommand cmd) {
         if (cmd.selectBox) {
-            Submission submission = cmd.submission
+            EgaSubmission submission = cmd.submission
             Set<SampleSubmissionObject> fastqSamples = submission.samplesToSubmit.findAll { it.useFastqFile }
             List selection = cmd.selectBox.withIndex().collect { it, i ->
                 it ? cmd.egaSampleAlias[i] : null
@@ -277,7 +296,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             if (selection.size() != fastqSamples.size()) {
                 fastqSamples.each {
                     if (!selection.contains(it.egaAliasName)) {
-                        pushError("For ${it.sample.displayName} no file is selected", cmd.submission)
+                        pushError("For previously selected sample ${it.sample.displayName} no file is selected", cmd.submission)
                     }
                 }
                 redirect(action: "editSubmission", params: ['id': cmd.submission.id])
@@ -386,19 +405,19 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
     }
 
-    private void pushError(String message, Submission submission, boolean redirectFlag = false) {
+    private void pushError(String message, EgaSubmission submission, boolean redirectFlag = false) {
         flash.message = new FlashMessage(ERROR_TITLE, [message])
         if (redirectFlag) {
             redirect(action: "editSubmission", params: ['id': submission.id])
         }
     }
 
-    private void pushError(FieldError errors, Submission submission) {
+    private void pushError(FieldError errors, EgaSubmission submission) {
         pushError("'${errors.rejectedValue}' is not a valid value for '${errors.field}'. Error code: '${errors.code}'",
                     submission, true)
     }
 
-    private void pushErrors(List errors, Submission submission) {
+    private void pushErrors(List errors, EgaSubmission submission) {
         flash.message = new FlashMessage(ERROR_TITLE, errors)
         redirect(action: "editSubmission", params: ['id': submission.id])
     }

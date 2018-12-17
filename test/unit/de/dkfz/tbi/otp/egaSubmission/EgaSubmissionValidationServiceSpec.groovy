@@ -37,7 +37,7 @@ import spock.lang.*
         SeqTrack,
         SeqType,
         SoftwareTool,
-        Submission,
+        EgaSubmission,
 ])
 class EgaSubmissionValidationServiceSpec extends Specification implements EgaSubmissionFactory {
 
@@ -45,7 +45,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
 
     void "test validate rows"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject()
         submission.addToSamplesToSubmit(sampleSubmissionObject1)
         SampleSubmissionObject sampleSubmissionObject2 = createSampleSubmissionObject()
@@ -63,7 +63,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
 
     void "test validate rows with less rows"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject()
         submission.addToSamplesToSubmit(sampleSubmissionObject1)
         submission.addToSamplesToSubmit(createSampleSubmissionObject())
@@ -81,7 +81,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
 
     void "test validate rows with wrong samples"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject()
         submission.addToSamplesToSubmit(sampleSubmissionObject1)
         List<String> sampleObjectId = [createSampleSubmissionObject().id as String]

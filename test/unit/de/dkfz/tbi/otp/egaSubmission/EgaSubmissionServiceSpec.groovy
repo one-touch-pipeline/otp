@@ -38,7 +38,7 @@ import spock.lang.*
         SeqTrack,
         SeqType,
         SoftwareTool,
-        Submission,
+        EgaSubmission,
 ])
 class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFactory {
 
@@ -52,14 +52,14 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
                 egaBox        : egaBox,
                 submissionName: submissionName,
                 studyName     : studyName,
-                studyType     : Submission.StudyType.CANCER_GENOMICS,
+                studyType     : EgaSubmission.StudyType.CANCER_GENOMICS,
                 studyAbstract : studyAbstract,
                 pubMedId      : pubMedId,
         ]
 
         when:
         egaSubmissionService.createSubmission(params)
-        Submission submission = CollectionUtils.exactlyOneElement(Submission.list())
+        EgaSubmission submission = CollectionUtils.exactlyOneElement(EgaSubmission.list())
 
         then:
         submission.egaBox == egaBox
@@ -67,12 +67,12 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         submission.studyType == studyType
         submission.studyAbstract == studyAbstract
         submission.pubMedId == pubMedId
-        submission.state == Submission.State.SELECTION
+        submission.state == EgaSubmission.State.SELECTION
 
         where:
-        egaBox   | submissionName   | studyName   | studyType                            | studyAbstract   | pubMedId
-        "egaBox" | "submissionName" | "studyName" | Submission.StudyType.CANCER_GENOMICS | "studyAbstract" | "pubMedId"
-        "egaBox" | "submissionName" | "studyName" | Submission.StudyType.CANCER_GENOMICS | "studyAbstract" | null
+        egaBox   | submissionName   | studyName   | studyType                               | studyAbstract   | pubMedId
+        "egaBox" | "submissionName" | "studyName" | EgaSubmission.StudyType.CANCER_GENOMICS | "studyAbstract" | "pubMedId"
+        "egaBox" | "submissionName" | "studyName" | EgaSubmission.StudyType.CANCER_GENOMICS | "studyAbstract" | null
     }
 
     @Unroll
@@ -95,17 +95,17 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         exception.message.contains(exceptionMessage)
 
         where:
-        egaBox   | submissionName   | studyName   | studyType                            | studyAbstract   || exceptionMessage
-        null     | "submissionName" | "studyName" | Submission.StudyType.CANCER_GENOMICS | "studyAbstract" || "'egaBox': rejected value [null]"
-        "egaBox" | null             | "studyName" | Submission.StudyType.CANCER_GENOMICS | "studyAbstract" || "'submissionName': rejected value [null]"
-        "egaBox" | "submissionName" | null        | Submission.StudyType.CANCER_GENOMICS | "studyAbstract" || "'studyName': rejected value [null]"
-        "egaBox" | "submissionName" | "studyName" | null                                 | "studyAbstract" || "'studyType': rejected value [null]"
-        "egaBox" | "submissionName" | "studyName" | Submission.StudyType.CANCER_GENOMICS | null            || "'studyAbstract': rejected value [null]"
+        egaBox   | submissionName   | studyName   | studyType                               | studyAbstract   || exceptionMessage
+        null     | "submissionName" | "studyName" | EgaSubmission.StudyType.CANCER_GENOMICS | "studyAbstract" || "'egaBox': rejected value [null]"
+        "egaBox" | null             | "studyName" | EgaSubmission.StudyType.CANCER_GENOMICS | "studyAbstract" || "'submissionName': rejected value [null]"
+        "egaBox" | "submissionName" | null        | EgaSubmission.StudyType.CANCER_GENOMICS | "studyAbstract" || "'studyName': rejected value [null]"
+        "egaBox" | "submissionName" | "studyName" | null                                    | "studyAbstract" || "'studyType': rejected value [null]"
+        "egaBox" | "submissionName" | "studyName" | EgaSubmission.StudyType.CANCER_GENOMICS | null            || "'studyAbstract': rejected value [null]"
     }
 
     void "test update state all fine"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
         BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject(
                 sampleSubmissionObject: sampleSubmissionObject,
@@ -119,18 +119,18 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         submission.save(flush: true)
 
         when:
-        egaSubmissionService.updateSubmissionState(submission, Submission.State.FILE_UPLOAD_STARTED)
+        egaSubmissionService.updateSubmissionState(submission, EgaSubmission.State.FILE_UPLOAD_STARTED)
 
         then:
-        Submission.State.FILE_UPLOAD_STARTED == submission.state
+        EgaSubmission.State.FILE_UPLOAD_STARTED == submission.state
     }
 
     void "test update state without files"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
 
         when:
-        egaSubmissionService.updateSubmissionState(submission, Submission.State.FILE_UPLOAD_STARTED)
+        egaSubmissionService.updateSubmissionState(submission, EgaSubmission.State.FILE_UPLOAD_STARTED)
 
         then:
         ValidationException exception = thrown()
@@ -139,7 +139,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test save submission object all fine"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         Sample sample = createSample()
         SeqType seqType = createSeqType()
 
@@ -155,7 +155,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
     @Unroll
     void "test save submission object"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
 
         when:
         egaSubmissionService.saveSampleSubmissionObject(submission, sample(), seqType())
@@ -172,7 +172,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test update submission object all fine"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
 
         when:
@@ -202,7 +202,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
                 seqType: seqTrack.seqType,
         )
 
-        Submission submission = createSubmission(
+        EgaSubmission submission = createSubmission(
                 project: seqTrack.project
         )
         submission.addToSamplesToSubmit(sampleSubmissionObject)
@@ -223,7 +223,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test get bam files and alias"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         RoddyBamFile bamFile = createBamFile()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
                 sample: bamFile.sample,
@@ -245,7 +245,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test create data file submission objects"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         List<Boolean> selectBox = [true, null]
         List<String> filenames = [DomainFactory.createDataFile().fileName, DomainFactory.createDataFile().fileName]
         List<String> egaSampleAliases = [
@@ -262,7 +262,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test update data file submission objects"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         List<String> egaFileAliases = ["someMagicAlias"]
         DataFile dataFile = DomainFactory.createDataFile()
         List<String> fileNames = [dataFile.fileName]
@@ -280,7 +280,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test create bam file submission objects"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         List<String> filenames = [createBamFile().id.toString(), createBamFile().id.toString()]
         List<String> egaSampleAliases = [
                 createSampleSubmissionObject().egaAliasName,

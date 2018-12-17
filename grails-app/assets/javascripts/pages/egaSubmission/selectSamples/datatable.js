@@ -19,7 +19,7 @@ $.otp.selectSamplesTable = {
                 action: 'dataTableSelectSamples'
             }),
             bScrollCollapse: true,
-            sScrollY: ($(window).height() - 440),
+            sScrollY: ($(window).height() - 480),
             bPaginate: false,
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {

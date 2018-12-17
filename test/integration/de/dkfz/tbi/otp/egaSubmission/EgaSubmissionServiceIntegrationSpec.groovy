@@ -26,7 +26,7 @@ class EgaSubmissionServiceIntegrationSpec extends IntegrationSpec implements Ega
             sampleSubmissionObject = createSampleSubmissionObject()
         }
 
-        Submission submission = createSubmission(
+        EgaSubmission submission = createSubmission(
                 project: roddyBamFile.project
         )
         submission.addToSamplesToSubmit(sampleSubmissionObject)

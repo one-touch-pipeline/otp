@@ -51,7 +51,7 @@ import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnNa
         SeqTrack,
         SeqType,
         SoftwareTool,
-        Submission,
+        EgaSubmission,
 ])
 class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissionFactory {
 
@@ -117,7 +117,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
     void "test generate data files csv file"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
 
@@ -143,8 +143,8 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 "${dataFileSubmissionObject.dataFile.run.seqCenter}," +
                 "${dataFileSubmissionObject.dataFile.run}," +
                 "${dataFileSubmissionObject.dataFile.seqTrack.laneId}," +
-                "${dataFileSubmissionObject.dataFile.seqTrack.normalizedLibraryName}," +
-                "${dataFileSubmissionObject.dataFile.seqTrack.ilseId}," +
+                "${dataFileSubmissionObject.dataFile.seqTrack.normalizedLibraryName ?: "N/A"}," +
+                "${dataFileSubmissionObject.dataFile.seqTrack.ilseId ?: "N/A"}," +
                 "," +
                 "${dataFileSubmissionObject.dataFile.fileName}\n"
     }
@@ -152,7 +152,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
     void "test generate bam files csv file"() {
         given:
         egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         RoddyBamFile roddyBamFile = createBamFile()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
                 sample: roddyBamFile.sample,
@@ -184,7 +184,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
     void "test read ega file aliases from file with data file"() {
         given:
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
         String content = egaSubmissionFileService.generateDataFilesCsvFile(submission)
@@ -201,7 +201,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
     void "test read ega file aliases from file with bam file"() {
         given:
         egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         RoddyBamFile roddyBamFile = createBamFile()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
                 sample: roddyBamFile.sample,
@@ -229,7 +229,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 (OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().absolutePath,
         ])
         BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject()
-        Submission submission = createSubmission()
+        EgaSubmission submission = createSubmission()
         bamFileSubmissionObject.bamFile.workPackage.bamFileInProjectFolder = bamFileSubmissionObject.bamFile
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
         DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()

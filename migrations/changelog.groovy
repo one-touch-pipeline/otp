@@ -95,4 +95,8 @@ databaseChangeLog = {
     changeSet(author: "strubelp", id: "index-on-datafile-md5sum") {
         sqlFile(path: 'changelogs/2018/index-on-datafile-md5sum.sql')
     }
+
+    changeSet(author: "wieset", id: "rename-submission-to-egaSubmissin") {
+        sqlFile(path: 'changelogs/2018/rename-submission-to-egaSubmissin.sql')
+    }
 }
