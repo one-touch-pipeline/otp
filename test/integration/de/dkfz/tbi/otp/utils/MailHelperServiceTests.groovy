@@ -2,8 +2,6 @@ package de.dkfz.tbi.otp.utils
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.ngsdata.*
 import grails.plugin.mail.*
 import org.junit.*
 

@@ -1,13 +1,8 @@
 package de.dkfz.tbi.otp.administration
 
+import de.dkfz.tbi.otp.job.scheduler.*
 import grails.test.mixin.*
-import grails.test.mixin.support.*
-
 import org.junit.*
-
-import de.dkfz.tbi.otp.job.processing.ParameterType
-import de.dkfz.tbi.otp.job.processing.ParameterUsage
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 
 @TestFor(CrashRecoveryController)
 class CrashRecoveryControllerUnitTests {

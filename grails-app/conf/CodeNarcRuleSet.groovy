@@ -713,7 +713,7 @@ ruleset {
 
     // rulesets/imports.xml
     DuplicateImport {
-        priority = HIGH
+        priority = CRITICAL
     }
     ImportFromSamePackage {
         priority = HIGH
@@ -727,7 +727,7 @@ ruleset {
         priority = MIDDLE
     }
     UnusedImport {
-        priority = HIGH
+        priority = CRITICAL
     }
 
     // rulesets/jdbc.xml

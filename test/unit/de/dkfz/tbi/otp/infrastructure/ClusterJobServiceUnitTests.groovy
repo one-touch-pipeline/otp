@@ -1,12 +1,8 @@
 package de.dkfz.tbi.otp.infrastructure
 
-import org.apache.tools.ant.types.resources.selectors.InstanceOf
-import org.joda.time.DateTime
-import org.joda.time.LocalDate
-import org.junit.Test
 
-import static org.junit.Assert.assertNotNull
-import static org.junit.Assert.assertNotNull
+import org.joda.time.*
+import org.junit.*
 
 class ClusterJobServiceUnitTests extends GroovyTestCase {
 

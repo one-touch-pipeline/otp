@@ -1,15 +1,13 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.springframework.util.Assert.isTrue
-import static org.springframework.util.Assert.notNull
-import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
-import de.dkfz.tbi.otp.job.processing.ProcessingException
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.utils.logging.*
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
 class ProcessedMergedBamFileService {
 
@@ -37,7 +35,7 @@ class ProcessedMergedBamFileService {
      * @return the directory of the processedMergedBamFile
      */
     String directory(MergingPass mergingPass) {
-        notNull(mergingPass, "The parameter mergingPass is not allowed to be null")
+        assert mergingPass: "The parameter mergingPass is not allowed to be null"
         ProcessedMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.findByMergingPass(mergingPass)
         if (processedMergedBamFile?.md5sum) {
             return AbstractMergedBamFileService.destinationDirectory(processedMergedBamFile)
@@ -47,7 +45,7 @@ class ProcessedMergedBamFileService {
     }
 
     String processingDirectory(MergingPass mergingPass) {
-        notNull mergingPass
+        assert mergingPass
         MergingSet mergingSet = mergingPass.mergingSet
         MergingWorkPackage mergingWorkPackage = mergingSet.mergingWorkPackage
         Sample sample = mergingWorkPackage.sample
@@ -62,7 +60,7 @@ class ProcessedMergedBamFileService {
     }
 
     String directory(ProcessedMergedBamFile mergedBamFile) {
-        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
+        assert mergedBamFile: "The parameter mergedBamFile is not allowed to be null"
         return directory(mergedBamFile.mergingPass)
     }
 
@@ -76,7 +74,7 @@ class ProcessedMergedBamFileService {
      * the name of the md5sum file of the baiFile
      */
     Map<String, String> locationsForFileCopying(ProcessedMergedBamFile file) {
-        notNull(file, "the input for the method locationsForFileCopying is null")
+        assert file: "the input for the method locationsForFileCopying is null"
         Map<String, String> locations = [:]
 
         locations.put("sourceDirectory", directory(file))
@@ -94,19 +92,19 @@ class ProcessedMergedBamFileService {
     }
 
     String filePath(ProcessedMergedBamFile mergedBamFile) {
-        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
+        assert mergedBamFile: "The parameter mergedBamFile is not allowed to be null"
         String dir = directory(mergedBamFile)
         String filename = mergedBamFile.getBamFileName()
         return "${dir}/${filename}"
     }
 
     String fileNameForMetrics(ProcessedMergedBamFile mergedBamFile) {
-        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
+        assert mergedBamFile: "The parameter mergedBamFile is not allowed to be null"
         return mergedBamFile.fileNameNoSuffix() + "_metrics.txt"
     }
 
     String filePathForBai(ProcessedMergedBamFile mergedBamFile) {
-        notNull(mergedBamFile, "The parameter mergedBamFile is not allowed to be null")
+        assert mergedBamFile: "The parameter mergedBamFile is not allowed to be null"
         String dir = directory(mergedBamFile)
         String filename = mergedBamFile.baiFileName
         return "${dir}/${filename}"
@@ -135,17 +133,17 @@ class ProcessedMergedBamFileService {
     }
 
     Project project(ProcessedMergedBamFile mergedBamFile) {
-        notNull(mergedBamFile, 'The parameter mergedBamFile are not allowed to be null')
+        assert mergedBamFile: 'The parameter mergedBamFile are not allowed to be null'
         return mergedBamFile.project
     }
 
     Sample sample(ProcessedMergedBamFile processedMergedBamFile) {
-        notNull(processedMergedBamFile, "the processedMergedBamFile of the method sample is null")
+        assert processedMergedBamFile: "the processedMergedBamFile of the method sample is null"
         return processedMergedBamFile.sample
     }
 
     SeqType seqType(ProcessedMergedBamFile mergedBamFile) {
-        notNull(mergedBamFile, 'The parameter mergedBamFile are not allowed to be null')
+        assert mergedBamFile: 'The parameter mergedBamFile are not allowed to be null'
         return mergedBamFile.seqType
     }
 
@@ -216,8 +214,8 @@ class ProcessedMergedBamFileService {
      * @param md5, the md5 checksum for the copied file
      */
     boolean storeMD5Digest(ProcessedMergedBamFile file, String md5) {
-        notNull(file, "the input 'file' for the method storeMD5Digest is null")
-        notNull(md5, "the input 'md5' for the method storeMD5Digest is null")
+        assert file: "the input 'file' for the method storeMD5Digest is null"
+        assert md5: "the input 'md5' for the method storeMD5Digest is null"
         file.updateFileOperationStatus(FileOperationStatus.PROCESSED)
         file.md5sum = md5.toLowerCase(Locale.ENGLISH)
         return (file.save(flush: true) != null)
@@ -231,7 +229,7 @@ class ProcessedMergedBamFileService {
      * @return the path to the temporary directory
      */
     String destinationTempDirectory(ProcessedMergedBamFile file) {
-        notNull(file, "the input of the method destinationTempDirectory is null")
+        assert file: "the input of the method destinationTempDirectory is null"
         return AbstractMergedBamFileService.destinationDirectory(file) + ".tmp"
     }
 
@@ -240,7 +238,7 @@ class ProcessedMergedBamFileService {
      * @return path to the directory where the qa results for the merged and single lane bam files will be stored
      */
     String qaResultDestinationDirectory(ProcessedMergedBamFile file) {
-        notNull(file, "the input of the method qaResultDestinationDirectory is null")
+        assert file: "the input of the method qaResultDestinationDirectory is null"
         return AbstractMergedBamFileService.destinationDirectory(file) + '/' + QUALITY_ASSESSMENT_DIR
     }
 
@@ -249,27 +247,27 @@ class ProcessedMergedBamFileService {
      * @return path to the directory where the qa results for the merged and single lane bam files will be stored temporarily (during the transfer workflow)
      */
     String qaResultTempDestinationDirectory(ProcessedMergedBamFile file) {
-        notNull(file, "the input of the method qaResultTempDestinationDirectory is null")
+        assert file: "the input of the method qaResultTempDestinationDirectory is null"
         return destinationTempDirectory(file) + '/' + QUALITY_ASSESSMENT_DIR
     }
 
     LibraryPreparationKit libraryPreparationKit(ProcessedMergedBamFile bamFile) {
-        notNull(bamFile, 'bam file must not be null')
-        isTrue(seqType(bamFile).name == SeqTypeNames.EXOME.seqTypeName, 'This method must be called only on exon data')
+        assert bamFile: 'bam file must not be null'
+        assert seqType(bamFile).name == SeqTypeNames.EXOME.seqTypeName: 'This method must be called only on exon data'
 
         List<ProcessedBamFile> singleLaneBamFiles = abstractBamFileService.findAllByProcessedMergedBamFile(bamFile)
         boolean hasSingleLaneBamFiles = singleLaneBamFiles
-        isTrue(hasSingleLaneBamFiles, "there are no singleLaneBamFiles corresponding to the given $bamFile")
+        assert hasSingleLaneBamFiles: "there are no singleLaneBamFiles corresponding to the given $bamFile"
 
         List<SeqTrack> seqTracks = singleLaneBamFiles*.alignmentPass*.seqTrack
         // The domain ExomeSeqTrack is new, therefore it is possible that there are many bamFiles,
         // which do not have the connection to the LibraryPreparationKit.
         List wrongSeqTracks = seqTracks.findAll { it.class != ExomeSeqTrack }
-        isTrue(wrongSeqTracks.empty, "The following seqTracks used to create the given $bamFile have not the type ExomeSeqTrack: $wrongSeqTracks.")
+        assert wrongSeqTracks.empty: "The following seqTracks used to create the given $bamFile have not the type ExomeSeqTrack: $wrongSeqTracks."
 
         LibraryPreparationKit firstKit = seqTracks.first().libraryPreparationKit
         wrongSeqTracks = seqTracks.findAll { it.libraryPreparationKit != firstKit }
-        isTrue(wrongSeqTracks.empty, "Different kits were used in the following seqTracks: $wrongSeqTracks, which were used to create $bamFile.")
+        assert wrongSeqTracks.empty, "Different kits were used in the following seqTracks: $wrongSeqTracks: which were used to create $bamFile."
 
         return firstKit
     }
@@ -278,7 +276,7 @@ class ProcessedMergedBamFileService {
      * returns all fastq files, which are combined in the mergedBamFile
      */
     List<DataFile> fastqFilesPerMergedBamFile(ProcessedMergedBamFile processedMergedBamFile) {
-        notNull(processedMergedBamFile, "The input of the method fastqFilesPerMergedBamFile is null")
+        assert processedMergedBamFile: "The input of the method fastqFilesPerMergedBamFile is null"
         Set<SeqTrack> seqTracks = processedMergedBamFile.getContainedSeqTracks()
         if (seqTracks) {
             return DataFile.createCriteria().list {
@@ -297,7 +295,7 @@ class ProcessedMergedBamFileService {
      * This only has to be checked for seqType = Exome
      */
     LibraryPreparationKit getInferredKit(ProcessedMergedBamFile processedMergedBamFile) {
-        notNull(processedMergedBamFile, "The input of method getInferredKit is null")
+        assert processedMergedBamFile: "The input of method getInferredKit is null"
         SeqType seqType = seqType(processedMergedBamFile)
         // Only in case of seqtype = exome a library preparation kit can be available, for all other seqTypes null has to be returned
         if(seqType.name == SeqTypeNames.EXOME.seqTypeName) {
@@ -318,7 +316,7 @@ class ProcessedMergedBamFileService {
      * @return true if there is no serious inconsistency.
      */
     boolean checkConsistencyForProcessingFilesDeletion(final ProcessedMergedBamFile bamFile) {
-        notNull bamFile
+        assert bamFile
         final File directory = new File(processingDirectory(bamFile.mergingPass))
         final String fileName = bamFile.getBamFileName()
         final File fsBamFile = new File(directory, fileName)
@@ -359,7 +357,7 @@ class ProcessedMergedBamFileService {
      * @return The number of bytes that have been freed on the file system.
      */
     long deleteProcessingFiles(final ProcessedMergedBamFile bamFile) {
-        notNull bamFile
+        assert bamFile
         if (!checkConsistencyForProcessingFilesDeletion(bamFile)) {
             return 0L
         }

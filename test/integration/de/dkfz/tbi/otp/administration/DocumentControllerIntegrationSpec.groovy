@@ -1,8 +1,7 @@
 package de.dkfz.tbi.otp.administration
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.testing.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
 import grails.plugin.springsecurity.*
 import org.codehaus.groovy.grails.web.servlet.mvc.*
 import org.springframework.security.access.*

@@ -1,12 +1,10 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import grails.test.mixin.*
 import grails.test.mixin.support.*
 import org.junit.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-
 
 @TestFor(ChromosomeIdentifierMappingService)
 @TestMixin(GrailsUnitTestMixin)

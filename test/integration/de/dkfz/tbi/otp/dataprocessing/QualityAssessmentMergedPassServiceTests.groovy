@@ -1,12 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import static org.junit.Assert.*
-import org.junit.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.ngsdata.*
+import org.junit.*
+
+import static org.junit.Assert.*
 
 class QualityAssessmentMergedPassServiceTests {
 

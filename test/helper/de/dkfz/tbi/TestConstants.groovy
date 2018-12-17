@@ -1,7 +1,5 @@
 package de.dkfz.tbi
 
-import org.junit.rules.TemporaryFolder
-
 /**
  * A class for collecting constants used in different tests.
  */

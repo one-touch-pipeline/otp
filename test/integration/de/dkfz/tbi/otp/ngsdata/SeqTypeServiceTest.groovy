@@ -1,14 +1,11 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.security.User
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.plugin.springsecurity.acl.AclUtilService
+import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.testing.*
+import grails.plugin.springsecurity.*
+import grails.plugin.springsecurity.acl.*
 import org.junit.*
-import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.acls.domain.BasePermission
-
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-
+import org.springframework.security.access.*
 
 class SeqTypeServiceTest extends AbstractIntegrationTest {
 

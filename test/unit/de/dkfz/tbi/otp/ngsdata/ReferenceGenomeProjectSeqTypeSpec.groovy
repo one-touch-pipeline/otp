@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+
 import grails.test.mixin.*
 import spock.lang.*
 

@@ -74,7 +74,7 @@ class ProcessedMergedBamFileServiceTests {
     }
 
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testFilePathForBaiBamFileIsNull() {
         ProcessedMergedBamFile processedMergedBamFile = null
         processedMergedBamFileService.filePathForBai(processedMergedBamFile)
@@ -88,7 +88,7 @@ class ProcessedMergedBamFileServiceTests {
         assertEquals(pathExp, pathAct)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testFileNameForMetricsBamFileIsNull() {
         ProcessedMergedBamFile processedMergedBamFile = null
         processedMergedBamFileService.fileNameForMetrics(processedMergedBamFile)
@@ -102,7 +102,7 @@ class ProcessedMergedBamFileServiceTests {
         assertEquals(nameExp, nameAct)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testFilePathBamFileIsNull() {
         ProcessedMergedBamFile processedMergedBamFile = null
         processedMergedBamFileService.filePath(processedMergedBamFile)
@@ -115,7 +115,7 @@ class ProcessedMergedBamFileServiceTests {
         assertEquals(pathExp, processedMergedBamFileService.filePath(processedMergedBamFile))
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testDirectoryByProcessedMergedBamFileBamFileIsNull() {
         ProcessedMergedBamFile processedMergedBamFile = null
         processedMergedBamFileService.directory(processedMergedBamFile)
@@ -129,7 +129,7 @@ class ProcessedMergedBamFileServiceTests {
         assertEquals(pathExp, pathAct)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testDirectoryByMergingPassMergingPassIsNull() {
         MergingPass mergingPass = null
         processedMergedBamFileService.directory(mergingPass)
@@ -316,7 +316,7 @@ class ProcessedMergedBamFileServiceTests {
     }
 
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testDestinationTempDirectoryBamFileNull() {
         processedMergedBamFileService.destinationTempDirectory(null)
     }
@@ -329,7 +329,7 @@ class ProcessedMergedBamFileServiceTests {
         assertEquals(destinationExp, destinationAct)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testQaResultTempDestinationDirectoryBamFileNull() {
         processedMergedBamFileService.qaResultTempDestinationDirectory(null)
     }
@@ -342,7 +342,7 @@ class ProcessedMergedBamFileServiceTests {
         assertEquals(destinationExp, destinationAct)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testSampleFileIsNull() {
         processedMergedBamFileService.sample(null)
     }
@@ -354,7 +354,7 @@ class ProcessedMergedBamFileServiceTests {
         processedMergedBamFileService.sample(mergedBamFile)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testFastqFilesPerMergedBamFileInputNull() {
         processedMergedBamFileService.fastqFilesPerMergedBamFile(null)
     }
@@ -375,7 +375,7 @@ class ProcessedMergedBamFileServiceTests {
     }
 
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testGetInferredKitBamFileIsNull() {
         processedMergedBamFileService.getInferredKit(null)
     }

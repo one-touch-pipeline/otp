@@ -1,13 +1,10 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.testing.UserAndRoles
+import de.dkfz.tbi.otp.testing.*
+import grails.plugin.springsecurity.*
+import org.junit.*
 
 import static org.junit.Assert.*
-
-import org.junit.*
-import org.springframework.security.acls.domain.BasePermission
-import grails.plugin.springsecurity.SpringSecurityUtils
-
 
 class RunControllerTests implements UserAndRoles{
 

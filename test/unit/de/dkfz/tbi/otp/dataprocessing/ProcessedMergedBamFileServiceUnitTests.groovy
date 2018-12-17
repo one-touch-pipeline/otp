@@ -49,12 +49,12 @@ class ProcessedMergedBamFileServiceUnitTests {
         assertEquals(input.kit, service.libraryPreparationKit(mergedBamFile))
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testLibraryPreparationKitNullInput() {
         service.libraryPreparationKit(null)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testLibraryPreparationKitNotExomSeqType() {
         ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile()
         Map input = createKitAndSingleLaneBamFiles(SeqTypeNames.WHOLE_GENOME.seqTypeName, ExomeSeqTrack, mergedBamFile)
@@ -65,7 +65,7 @@ class ProcessedMergedBamFileServiceUnitTests {
         service.libraryPreparationKit(mergedBamFile)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testLibraryPreparationKitNoSingleLaneBamFiles() {
         ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile()
         createKitAndSingleLaneBamFiles(SeqTypeNames.EXOME.seqTypeName, ExomeSeqTrack, mergedBamFile)
@@ -76,7 +76,7 @@ class ProcessedMergedBamFileServiceUnitTests {
         service.libraryPreparationKit(mergedBamFile)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testLibraryPreparationKitDiffSeqTrackTypes() {
         ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile()
         Map input = createKitAndSingleLaneBamFiles(SeqTypeNames.EXOME.seqTypeName, ExomeSeqTrack, mergedBamFile)
@@ -93,7 +93,7 @@ class ProcessedMergedBamFileServiceUnitTests {
         service.libraryPreparationKit(mergedBamFile)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testLibraryPreparationKitDiffKits() {
         ProcessedMergedBamFile mergedBamFile = new ProcessedMergedBamFile()
         LibraryPreparationKit kit = new LibraryPreparationKit(name: 'kit2')
@@ -254,15 +254,12 @@ class ProcessedMergedBamFileServiceUnitTests {
         assert processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(processedMergedBamFile)
     }
 
-    @Test
+    @Test(expected = AssertionError)
     void testCheckConsistencyForProcessingFilesDeletion_NoProcessedMergedBamFile() {
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
         (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking()
-
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
-            processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(null) //
-        }
+        processedMergedBamFileService.checkConsistencyForProcessingFilesDeletion(null)
     }
 
     @Test
@@ -333,15 +330,12 @@ class ProcessedMergedBamFileServiceUnitTests {
         assert SOME_FILE_LENGTH == processedMergedBamFileService.deleteProcessingFiles(processedMergedBamFile)
     }
 
-    @Test
+    @Test(expected = AssertionError)
     void testDeleteProcessingFiles_NoProcessedMergedBamFile() {
         ProcessedMergedBamFile processedMergedBamFile
         ProcessedMergedBamFileService processedMergedBamFileService
         (processedMergedBamFile, processedMergedBamFileService) = createDataForDeleteChecking(true, true)
-
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
-            processedMergedBamFileService.deleteProcessingFiles(null) //
-        }
+        processedMergedBamFileService.deleteProcessingFiles(null)
     }
 
     @Test

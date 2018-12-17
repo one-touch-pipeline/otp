@@ -1,12 +1,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
-
 import org.junit.*
-
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 
 /**
  * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
