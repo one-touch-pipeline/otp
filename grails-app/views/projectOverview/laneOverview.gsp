@@ -14,7 +14,7 @@
             <table id="searchCriteriaTable2" style="display: inline-block">
                 <tr>
                     <td>
-                        <span class="blue_label"><g:message code="projectOverview.filter.sampletype"/> :</span>
+                        <span class="blue_label"><g:message code="projectOverview.filter.sampleType"/> :</span>
                     </td>
                     <td>
                         <div class="searchCriteriaTableSampleTypes">
@@ -29,7 +29,7 @@
                         </div>
                     </td>
                     <td>
-                        <span class="blue_label"><g:message code="projectOverview.filter.seqtype"/> :</span>
+                        <span class="blue_label"><g:message code="projectOverview.filter.seqType"/> :</span>
                     </td>
                     <td>
                         <table id="searchCriteriaTable">
@@ -40,10 +40,10 @@
                                 <td class="value">
                                 </td>
                                 <td class="remove">
-                                    <input class="blue_labelForPlus" type="button" value="${g.message(code: "projectOverview.filter.seqtype.remove")}" style="display: none"/>
+                                    <input class="blue_labelForPlus" type="button" value="${g.message(code: "projectOverview.filter.seqType.remove")}" style="display: none"/>
                                 </td>
                                 <td class="add">
-                                    <input class="blue_labelForPlus" type="button" value="${g.message(code: "projectOverview.filter.seqtype.add")}" style="display: none"/>
+                                    <input class="blue_labelForPlus" type="button" value="${g.message(code: "projectOverview.filter.seqType.add")}" style="display: none"/>
                                 </td>
                             </tr>
                         </table>

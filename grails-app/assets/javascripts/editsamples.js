@@ -107,7 +107,7 @@ $(function() {
                 data: {samples: samples},
                 success: function (data) {
                     if (data.success) {
-                        $.otp.infoMessage($L("editorswitch.notification.success"));
+                        $.otp.infoMessage($L("editorSwitch.notification.success"));
                         $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                     } else {
                         $.otp.warningMessage(data.error);
@@ -115,7 +115,7 @@ $(function() {
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                    $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
                     $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
                 }
             });

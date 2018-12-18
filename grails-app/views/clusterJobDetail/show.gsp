@@ -139,19 +139,19 @@ on the general cluster job page
                 <tr>
                     <td></td>
                     <td></td>
-                    <td><g:message code="jobstats.jobSpecific.detail.table.attribute.requestedWalltime"/></td>
+                    <td><g:message code="jobstats.jobSpecific.detail.table.attribute.requestedWallTime"/></td>
                     <td>${job.getRequestedWalltimeAsISO()}</td>
                 </tr>
                 <tr>
                     <td></td>
                     <td></td>
-                    <td><g:message code="jobstats.jobSpecific.detail.table.attribute.elapsedWalltime"/></td>
+                    <td><g:message code="jobstats.jobSpecific.detail.table.attribute.elapsedWallTime"/></td>
                     <td>${job.getElapsedWalltimeAsISO()}</td>
                 </tr>
                 <tr>
                     <td></td>
                     <td></td>
-                    <td><g:message code="jobstats.jobSpecific.detail.table.attribute.walltimeDifference"/></td>
+                    <td><g:message code="jobstats.jobSpecific.detail.table.attribute.wallTimeDifference"/></td>
                     <td>${job.getWalltimeDiffAsISO()}</td>
                 </tr>
             </table>

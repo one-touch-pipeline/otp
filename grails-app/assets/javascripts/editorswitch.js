@@ -64,7 +64,7 @@ $(function() {
             data: {value: $("input:text[name=value]", container).val()},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorSwitch.notification.success"));
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
                     $.otp.warningMessage(data.error);
@@ -72,7 +72,7 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
                 $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -92,7 +92,7 @@ $(function() {
             data: {value: $("textarea", container).val()},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorSwitch.notification.success"));
                     $("p.edit-switch-label span", outerContainer).text($("textarea", container).val());
                 } else {
                     $.otp.warningMessage(data.error);
@@ -100,7 +100,7 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
                 $("textarea", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -120,7 +120,7 @@ $(function() {
             data: {value: $("input:text[name=value]", container).val()},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorSwitch.notification.success"));
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
                     $.otp.warningMessage(data.error);
@@ -143,14 +143,14 @@ $(function() {
             data: {value: $("select option:selected", container).text()},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorSwitch.notification.success"));
                     $("p.edit-switch-label span", outerContainer).text($("select option:selected", container).text());
                 } else {
                     $.otp.warningMessage(data.error);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
             }
         });
         $("p.edit-switch-editor", outerContainer).hide();
@@ -173,7 +173,7 @@ $(function() {
             data: value,
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorSwitch.notification.success"));
                     var names = [];
                     $("input:checkbox", container).each(function () {
                         if (this.checked) {
@@ -183,14 +183,14 @@ $(function() {
                             $(this).data("checked", false)
                         }
                     });
-                    $("p.edit-switch-label span", outerContainer).text(names.join(", ") || $L("editorswitch.noneSelected"));
+                    $("p.edit-switch-label span", outerContainer).text(names.join(", ") || $L("editorSwitch.noneSelected"));
                 } else {
                     $.otp.warningMessage(data.error);
                     resetCheckboxes(container);
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
                 resetCheckboxes(container);
             }
         });
@@ -216,7 +216,7 @@ $(function() {
             data: {value: $("select option:selected", container).text()},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorSwitch.notification.success"));
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
                     $.otp.warningMessage(data.error);
@@ -224,7 +224,7 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
                 $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -245,7 +245,7 @@ $(function() {
             data: {value: $("input:text[name=value]", container).val()},
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorSwitch.notification.success"));
                     $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                 } else {
                     $.otp.warningMessage(data.error);
@@ -253,7 +253,7 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
                 $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
             }
         });
@@ -283,14 +283,14 @@ $(function() {
             data: data,
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorSwitch.notification.success"));
                     window.setTimeout(function() { location.reload() }, 300);
                 } else {
                     $.otp.warningMessage(data.error);
                     }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
             }
         });
         $("span.edit-switch-editor", outerContainer).hide();
@@ -309,7 +309,7 @@ $(function() {
             dataType: 'json',
             success: function (data) {
                 if (data.success) {
-                    $.otp.infoMessage($L("editorswitch.notification.success"));
+                    $.otp.infoMessage($L("editorSwitch.notification.success"));
                     $.each(["label", "editor"], function () {
                         $("p.edit-switch-"+this+" span", outerContainer).removeClass("icon-"+orgVal).addClass("icon-"+invVal);
                     });
@@ -319,7 +319,7 @@ $(function() {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
             }
         });
         $("p.edit-switch-editor", outerContainer).hide();

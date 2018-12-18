@@ -40,7 +40,7 @@ $.otp.configureAlignment = {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
             }
         });
     },
@@ -67,7 +67,7 @@ $.otp.configureAlignment = {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
             }
         });
     },
@@ -102,7 +102,7 @@ $.otp.configureAlignment = {
                 });
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
             }
         });
     },

@@ -34,7 +34,7 @@
         <div style="width: 10px; height: 5px;"></div>
         <h3><g:message code="home.pageTitle.graph"/></h3>
         <form class="blue_label" id="projectsGroupbox">
-            <span class="blue_label"><g:message code="home.projectGroupfilter"/> :</span>
+            <span class="blue_label"><g:message code="home.projectGroupFilter"/> :</span>
             <g:select class="criteria" id="projectGroup_select" name='projectGroup_select'
                     from='${projectGroups}' value='${projectGroup}'></g:select>
         </form>

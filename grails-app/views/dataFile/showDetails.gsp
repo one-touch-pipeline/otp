@@ -63,7 +63,7 @@
                 <td class="myValue"><span class="wordBreak">${values.get(0)}</span></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="datafile.showDetails.viewByPidfullPath"/></td>
+                <td class="myKey"><g:message code="datafile.showDetails.viewByPidFullPath"/></td>
                 <td class="myValue"><span class="wordBreak">${values.get(1)}</span></td>
             </tr>
             <tr>

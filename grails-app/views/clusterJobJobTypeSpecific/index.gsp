@@ -125,9 +125,9 @@
         </div>
         <div id="scatterGraphicContainer">
             <div class="scatterGraphContainer">
-                <div class="graphDescription"><g:message code="jobstats.jobTypeSpecific.graphs.walltimes"/></div>
+                <div class="graphDescription"><g:message code="jobstats.jobTypeSpecific.graphs.wallTimes"/></div>
                 <div class="toolTipContainer">
-                    <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.graphs.toolTip.walltimes"/></span>
+                    <span class="toolTip"><g:message code="jobstats.jobTypeSpecific.graphs.toolTip.wallTimes"/></span>
                 </div>
                 <br>
                 <canvas id="jobTypeSpecificGraphWalltimes" class="scatterChart" width=1000px height=500px></canvas>

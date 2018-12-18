@@ -91,8 +91,6 @@ otp.welcome.administration.crashRecovery
 otp.welcome.administration.shutdown
 otp.welcome.administration.notification
 otp.welcome.administration.switchUser
-otp.welcome.administration.processingOptions
-otp.welcome.administration.softwareToolIdentifier
 
 # main page menu
 otp.title
@@ -136,7 +134,6 @@ otp.refresh.disable
 
 #project statistic
 projectStatistic.title
-projectStatistic.pageTitle
 
 # User Administration
 user.administration.header
@@ -147,8 +144,6 @@ user.administration.list.email
 user.administration.list.enabled
 user.administration.list.accountExpired
 user.administration.list.accountLocked
-user.administration.userRole.error.roleNotFound
-user.administration.userRole.error.userNotFound
 user.administration.userRole.error.general
 user.administration.userRole.success
 user.administration.userRole.ui.addRole
@@ -183,27 +178,6 @@ user.administration.role.addRole
 user.administration.role.removeRole
 user.administration.role.addGroup
 user.administration.role.removeGroup
-
-# Group administration
-group.create.ui.dialog.title
-group.create.ui.name
-group.create.ui.description
-group.create.ui.permission.read
-group.create.ui.permission.write
-group.create.ui.project
-group.create.ui.jobSystem
-group.create.ui.seqeuenceCenter
-user.administration.userGroup.ui.heading
-user.administration.userGroup.ui.heading.userGroups
-user.administration.userGroup.ui.heading.availableGroups
-user.administration.userGroup.ui.removeGroup
-user.administration.userGroup.ui.addGroup
-user.administration.userGroup.ui.heading.newGroup
-de.dkfz.tbi.otp.administration.GroupCommand.name.blank
-de.dkfz.tbi.otp.administration.GroupCommand.name.validator.invalid
-de.dkfz.tbi.otp.administration.GroupCommand.writeProject.validator.invalid
-de.dkfz.tbi.otp.administration.GroupCommand.writeJobSystem.validator.invalid
-de.dkfz.tbi.otp.administration.GroupCommand.writeSequenceCenter.validator.invalid
 
 #error messages
 error.unknown
@@ -267,8 +241,6 @@ individual.show.sequencingScans.numberOfBases
 individual.show.sequencingScans.insertSize
 individual.show.sequencingScans.merging
 individual.show.sequencingScans.details
-individual.show.analysisResults
-individual.show.dataAccess
 individual.snv.detail
 
 #Search
@@ -321,10 +293,6 @@ search.from.date
 search.to.date
 #SNV
 snv.index.individual
-snv.index.availableRequestedCoverage2
-snv.index.availableRequestedLaneCount2
-snv.index.availableRequestedLaneCount1
-snv.index.availableRequestedCoverage1
 snv.index.sampleTypes
 snv.index.typ
 snv.index.laneCount
@@ -332,21 +300,7 @@ snv.index.coverage
 snv.sampleType1
 snv.sampleType2
 snv.seqType
-snv.samplePairPath
-snv.lastUpdated
 snv.dateCreated
-
-#SNV tables titles
-snv.individual.table
-snv.samplePairsInMultipleLists
-snv.inProgressSamples
-snv.finishedSamples
-snv.notstartedSamples
-snv.diasablesSample
-snv.title.configuration
-snv.title.detailPages
-snv.processing.status
-snv.individual.details.pid
 
 #Workflow list
 workflow.list.title
@@ -395,7 +349,6 @@ sequence.list.headers.seqCenter
 sequence.list.headers.run
 sequence.list.headers.lane
 sequence.list.headers.fastqc
-sequence.list.headers.origAlignment
 sequence.list.headers.date
 sequence.list.export.csv
 sequence.list.numberedFastQCFile
@@ -418,7 +371,6 @@ datafile.showDetails.runName
 datafile.showDetails.fileName
 datafile.showDetails.filePath
 datafile.showDetails.viewByPidName
-datafile.showDetails.viewByPidPath
 datafile.showDetails.checkSum
 datafile.showDetails.fullPath
 datafile.showDetails.viewByPidfullPath
@@ -443,7 +395,6 @@ dataFields.libraryPreparationKit
 dataFields.listAntibodyTarget
 dataFields.listSeqCenterName
 dataFields.listSeqCenterDirName
-dataFields.listPlatformGroup
 dataFields.listPlatformName
 dataFields.listPlatformModelLabel
 dataFields.listPlatformModelLabelImportAlias
@@ -534,7 +485,6 @@ seqScan.mergedAlignmentFiles.indexed
 
 # Progress
 projectProgress.progress.title
-projectProgress.progress.runsFrom
 projectProgress.progress.center
 projectProgress.progress.name
 projectProgress.progress.samples
@@ -646,7 +596,6 @@ projectOverview.index.referenceGenome.sampleTypeName
 projectOverview.index.statSizeFile
 projectOverview.index.alignmentConfiguration
 projectOverview.index.alignmentInformation.title
-projectOverview.index.lanesAndCoverage
 
 projectOverview.table.seqtype.title
 projectOverview.seqtype.seqName
@@ -737,9 +686,7 @@ jobstats.jobSpecific.detail.table.attribute.requestedWalltime
 jobstats.jobSpecific.detail.table.attribute.elapsedWalltime
 jobstats.jobSpecific.detail.table.attribute.walltimeDifference
 jobstats.jobSpecific.detail.table.attribute.requestedCores
-jobstats.jobSpecific.detail.table.attribute.usedCores
 jobstats.jobSpecific.detail.table.attribute.cpuTime
-jobstats.jobSpecific.detail.table.attribute.cpuTimePerCore
 jobstats.jobSpecific.detail.table.attribute.cpuAvgUtilised
 jobstats.jobSpecific.detail.table.attribute.requestedMemory
 jobstats.jobSpecific.detail.table.attribute.usedMemory
@@ -748,7 +695,6 @@ jobstats.jobSpecific.detail.table.attribute.jobClass
 jobstats.jobSpecific.detail.table.attribute.seqType
 jobstats.jobSpecific.detail.table.attribute.project
 jobstats.jobSpecific.detail.table.attribute.individual
-jobstats.jobTypeSpecific.averageTable.averageDelay
 jobstats.jobTypeSpecific.averageTable.averageProcessingTime
 jobstats.jobTypeSpecific.averageTable.averageCpuUsedInCores
 jobstats.jobTypeSpecific.averageTable.averageMemoryUsedInKiB
@@ -760,12 +706,10 @@ jobstats.jobTypeSpecific.graphs.exitCodes
 jobstats.jobTypeSpecific.graphs.exitStatuses
 jobstats.jobTypeSpecific.graphs.queuedStartedEnded
 jobstats.jobTypeSpecific.graphs.walltimes
-jobstats.jobTypeSpecific.graphs.memoryUsage
 jobstats.jobTypeSpecific.graphs.toolTip.exitCodes
 jobstats.jobTypeSpecific.graphs.toolTip.exitStatuses
 jobstats.jobTypeSpecific.graphs.toolTip.queuedStartedEnded
 jobstats.jobTypeSpecific.graphs.toolTip.walltimes
-jobstats.jobTypeSpecific.graphs.toolTip.memoryUsage
 jobstats.jobSpecific.detail.table.toolTip.general
 jobstats.jobSpecific.detail.table.toolTip.state
 jobstats.jobSpecific.detail.table.toolTip.time

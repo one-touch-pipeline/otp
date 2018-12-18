@@ -20,7 +20,7 @@
         <div class="table">
             <div style="width: 20px; height: 20px;"></div>
             <h3 class="statisticTableTitle">
-                <g:message code="projectOverview.table.sampletype.title" />
+                <g:message code="projectOverview.table.sampleType.title" />
             </h3>
             <div class="otpDataTables">
                 <otp:dataTable
@@ -63,17 +63,17 @@
             </div>
             <div style="width: 20px; height: 40px;"></div>
             <h3 class="statisticTableTitle">
-                <g:message code="projectOverview.table.seqtype.title" />
+                <g:message code="projectOverview.table.seqType.title" />
             </h3>
             <div class="otpDataTables">
                 <otp:dataTable
                     codes="${[
-                        'projectOverview.seqtype.seqName',
-                        'projectOverview.seqtype.labreryLayout',
-                        'projectOverview.seqtype.singleCell',
-                        'projectOverview.seqtype.individualCount',
-                        'projectOverview.seqtype.sampleCount',
-                        'projectOverview.seqtype.gb'
+                            'projectOverview.seqType.seqName',
+                            'projectOverview.seqType.libraryLayout',
+                            'projectOverview.seqType.singleCell',
+                            'projectOverview.seqType.individualCount',
+                            'projectOverview.seqType.sampleCount',
+                            'projectOverview.seqType.gb'
                     ]}"
                     id="patientsAndSamplesGBCountPerProject" />
             </div>

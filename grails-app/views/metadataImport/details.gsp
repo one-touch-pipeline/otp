@@ -56,7 +56,7 @@
             </tr>
             <tr>
                 <td>
-                    <g:message code="metadataImport.details.otrsTicket.seqcenter.comment"/>
+                    <g:message code="metadataImport.details.otrsTicket.seqCenter.comment"/>
                 </td>
                 <td>
                     <otp:editorSwitch

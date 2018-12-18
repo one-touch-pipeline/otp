@@ -179,8 +179,8 @@
                         <th><g:message code="dataFields.listPlatformModelLabel"/></th>
                         <th><g:message code="dataFields.listPlatformModelLabelImportAlias"/></th>
                         <th></th>
-                        <th><g:message code="dataFields.listSequeningKitLabel"/></th>
-                        <th><g:message code="dataFields.listSequeningKitLabelImportAlias"/></th>
+                        <th><g:message code="dataFields.listSequencingKitLabel"/></th>
+                        <th><g:message code="dataFields.listSequencingKitLabelImportAlias"/></th>
                         <th></th>
                     </tr>
             </thead>
@@ -236,7 +236,7 @@
         </table>
         <div style="width: 20px; height: 40px;"></div>
         <h3>
-            <g:message code="dataFields.titlelistSeqTypeTable" />
+            <g:message code="dataFields.title.listSeqTypeTable" />
         </h3>
         <table>
             <thead>

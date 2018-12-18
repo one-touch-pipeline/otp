@@ -7,5 +7,5 @@
         <button class="save"><g:message code="default.button.update.label"/></button>
         <button class="cancel"><g:message code="default.button.cancel.label"/></button>
     </p>
-    <p class="edit-switch-label"><span class="wordBreak">${value ?: g.message(code: "editorswitch.noneSelected")}</span><button class="edit js-edit">&nbsp;</button></p>
+    <p class="edit-switch-label"><span class="wordBreak">${value ?: g.message(code: "editorSwitch.noneSelected")}</span><button class="edit js-edit">&nbsp;</button></p>
 </div>

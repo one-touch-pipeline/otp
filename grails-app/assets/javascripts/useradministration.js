@@ -12,13 +12,13 @@ $.otp.userAdministration.changeUser = function (userId, field, target) {
             // redraw the dataTable to reset all changes
             $('#userTable').dataTable().fnDraw();
             if (data.success) {
-                $.otp.infoMessage($L("editorswitch.notification.success"));
+                $.otp.infoMessage($L("editorSwitch.notification.success"));
             } else {
                 $.otp.warningMessage(data.error);
             }
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+            $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
         }
     });
 };
@@ -164,7 +164,7 @@ $.otp.userAdministration.editUser = {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorswitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
             }
         });
     },

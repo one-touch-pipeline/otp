@@ -103,7 +103,7 @@
                         <g:message code="metadataImport.otrs.automaticNotificationFlag"/></td>
                 </tr>
                 <tr>
-                    <td><g:message code="metadataImport.otrs.seqcenter.comment"/></td>
+                    <td><g:message code="metadataImport.otrs.seqCenter.comment"/></td>
                     <td>
                         <g:textArea name="seqCenterComment" rows="5" style="width: 1000px" value="${cmd.seqCenterComment}"/>
                     </td>
