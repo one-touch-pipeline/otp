@@ -16,7 +16,11 @@ class MailHelperService {
     ProcessingOptionService processingOptionService
 
     void sendEmail(String emailSubject, String content, String recipient) {
-       sendEmail(emailSubject, content, Arrays.asList(recipient))
+        sendEmail(emailSubject, content, Arrays.asList(recipient))
+    }
+
+    void sendEmail(String emailSubject, String content, String recipient, String sender) {
+        sendEmail(emailSubject, content, Arrays.asList(recipient), sender)
     }
 
     void sendEmail(String emailSubject, String content, List<String> recipients) {

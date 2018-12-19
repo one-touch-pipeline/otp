@@ -43,8 +43,7 @@ class UserProjectRoleService {
                 user       : user,
                 project    : project,
                 projectRole: projectRole,
-        ] + flags
-        )
+        ] + flags)
         userProjectRole.save(flush: true, failOnError: true)
 
         String studyUID = OtpDicomAuditFactory.generateUID(UniqueIdentifierType.STUDY, String.valueOf(project.id))
@@ -79,8 +78,8 @@ class UserProjectRoleService {
         assert !userProjectRole: "User '${user.username}' is already part of project '${project.name}'"
         userProjectRole = createUserProjectRole(user, project, projectRole, flags)
 
-        if (flags.accessToFiles ?: false) {
-            requestToAddUserToUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
+        if (userProjectRole.accessToFiles) {
+            requestToAddUserToUnixGroupIfRequired(userProjectRole)
         }
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
         notifyProjectAuthoritiesAndUser(project, user)
@@ -101,46 +100,68 @@ class UserProjectRoleService {
         notifyProjectAuthoritiesAndUser(project, user)
     }
 
-    private void requestToAddUserToUnixGroupIfRequired(User user, Project project) {
-        String[] groupNames = ldapService.getGroupsOfUserByUsername(user.username)
-        if (!(project.unixGroup in groupNames)) {
-            notifyAdministration(user, project, AdtoolAction.ADD)
+    private void requestToAddUserToUnixGroupIfRequired(UserProjectRole userProjectRole) {
+        String[] groupNames = ldapService.getGroupsOfUserByUsername(userProjectRole.user.username)
+        if (!(userProjectRole.project.unixGroup in groupNames)) {
+            notifyAdministration(userProjectRole, OperatorAction.ADD)
         }
     }
 
-    private void requestToRemoveUserFromUnixGroupIfRequired(User user, Project project) {
-        String[] groupNames = ldapService.getGroupsOfUserByUsername(user.username)
-        if (project.unixGroup in groupNames &&
+    private void requestToRemoveUserFromUnixGroupIfRequired(UserProjectRole userProjectRole) {
+        String[] groupNames = ldapService.getGroupsOfUserByUsername(userProjectRole.user.username)
+        if (userProjectRole.project.unixGroup in groupNames &&
                 !UserProjectRole.findAllByUserAndProjectInListAndAccessToFilesAndEnabled(
-                        user,
-                        Project.findAllByUnixGroupAndIdNotEqual(project.unixGroup, project.id),
+                        userProjectRole.user,
+                        Project.findAllByUnixGroupAndIdNotEqual(userProjectRole.project.unixGroup, userProjectRole.project.id),
                         true,
                         true
                 )
         ) {
-            notifyAdministration(user, project, AdtoolAction.REMOVE)
+            notifyAdministration(userProjectRole, OperatorAction.REMOVE)
         }
     }
 
-    private void notifyAdministration(User user, Project project, AdtoolAction adtool) {
-        String formattedAction = adtool.toString().toLowerCase()
+    private void notifyAdministration(UserProjectRole userProjectRole, OperatorAction action) {
+        User requester = User.findByUsername(springSecurityService.authentication.principal.username as String)
+        UserProjectRole requesterUserProjectRole = UserProjectRole.findByUserAndProject(requester, userProjectRole.project)
+        String switchedUserAnnotation = SpringSecurityUtils.isSwitched() ? " (switched from ${SpringSecurityUtils.getSwitchedUserOriginalUsername()})" : ""
+
+        String formattedAction = action.toString().toLowerCase()
+        String conjunction = action == OperatorAction.ADD ? 'to' : 'from'
         String subject = createMessage("projectUser.notification.addToUnixGroup.subject", [
+                requester  : requester.username,
                 action     : formattedAction,
-                conjunction: adtool == AdtoolAction.ADD ? 'to' : 'from',
-                username   : user.username,
-                projectName: project.name,
+                conjunction: conjunction,
+                username   : userProjectRole.user.username,
+                projectName: userProjectRole.project.name,
         ])
+
+        String affectedUserUserDetail = createMessage("projectUser.notification.addToUnixGroup.userDetail", [
+                realName: userProjectRole.user.realName,
+                username: userProjectRole.user.username,
+                email   : userProjectRole.user.email,
+                role    : userProjectRole.projectRole.name,
+        ])
+        String requesterUserDetail = createMessage("projectUser.notification.addToUnixGroup.userDetail", [
+                realName: requester.realName,
+                username: requester.username + switchedUserAnnotation,
+                email   : requester.email,
+                role    : requesterUserProjectRole ? requesterUserProjectRole.projectRole.name : "Non-Project-User",
+        ])
+
         String body = createMessage("projectUser.notification.addToUnixGroup.body", [
-                action          : formattedAction,
-                projectUnixGroup: project.unixGroup,
-                username        : user.username,
+                projectName           : userProjectRole.project,
+                projectUnixGroup      : userProjectRole.project.unixGroup,
+                requestedAction       : action,
+                affectedUserUserDetail: affectedUserUserDetail,
+                requesterUserDetail   : requesterUserDetail,
         ])
         String email = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION)
-        mailHelperService.sendEmail(subject, body, email)
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL, "Sent mail to ${email} to ${formattedAction} ${user.username} ${adtool == AdtoolAction.ADD ? 'to' : 'from'} ${project.name}")
+        mailHelperService.sendEmail(subject, body, email, requester.email)
+        auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL, "Sent mail to ${email} to ${formattedAction} ${userProjectRole.user.username} ${conjunction} ${userProjectRole.project.name} at the request of ${requester.username + switchedUserAnnotation}")
     }
 
-    private enum AdtoolAction {
+    private enum OperatorAction {
         ADD, REMOVE
     }
 
@@ -182,9 +203,9 @@ class UserProjectRoleService {
         upr.accessToFiles = !upr.accessToFiles
         assert upr.save(flush: true)
         if (upr.accessToFiles) {
-            requestToAddUserToUnixGroupIfRequired(upr.user, upr.project)
+            requestToAddUserToUnixGroupIfRequired(upr)
         } else {
-            requestToRemoveUserFromUnixGroupIfRequired(upr.user, upr.project)
+            requestToRemoveUserFromUnixGroupIfRequired(upr)
         }
         String message = getFlagChangeLogMessage("Access to Files", upr.accessToFiles, upr.user.username, upr.project.name)
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_FILES, message)
@@ -233,9 +254,9 @@ class UserProjectRoleService {
         }
         if (userProjectRole.accessToFiles) {
             if (enabled) {
-                requestToAddUserToUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
+                requestToAddUserToUnixGroupIfRequired(userProjectRole)
             } else {
-                requestToRemoveUserFromUnixGroupIfRequired(userProjectRole.user, userProjectRole.project)
+                requestToRemoveUserFromUnixGroupIfRequired(userProjectRole)
             }
         }
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "${enabled ? "En" : "Dis"}abled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
