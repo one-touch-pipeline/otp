@@ -59,7 +59,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
     File baseTestDataDir
 
     // test fastq files grouped by lane
-    Map testFastqFiles
+    Map<String, List<File>> testFastqFiles
 
     // test bam file used for further merging with new lanes
     File firstBamFile
@@ -104,7 +104,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
         MergingWorkPackage workPackage = createWorkPackage()
 
-        setUpRefGenomeDir(workPackage)
+        setUpRefGenomeDir(workPackage, refGenDir)
 
         createProjectConfig(workPackage)
 
@@ -137,8 +137,8 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
                 ].asImmutable(),
         ].asImmutable()
         firstBamFile = new File(inputRootDirectory, 'bamFiles/wgs/first-bam-file/control_merged.mdup.bam')
-        refGenDir = new File(inputRootDirectory, 'reference-genomes/bwa06_1KGRef')
-        fingerPrintingFile = new File(inputRootDirectory, 'reference-genomes/bwa06_1KGRef/fingerPrinting/snp138Common.n1000.vh20140318.bed')
+        refGenDir = new File(referenceGenomeDirectory, 'bwa06_1KGRef')
+        fingerPrintingFile = new File(referenceGenomeDirectory, 'bwa06_1KGRef/fingerPrinting/snp138Common.n1000.vh20140318.bed')
     }
 
     abstract SeqType findSeqType()
@@ -237,7 +237,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
             dataFile.save(flush: true)
         }
 
-        linkFastqFiles(seqTrack, readGroupNum)
+        linkFastqFiles(seqTrack, testFastqFiles.get(readGroupNum))
 
         workPackage.needsProcessing = true
         workPackage.save(flush: true)
@@ -342,13 +342,13 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         return firstBamFile
     }
 
-    void linkFastqFiles(SeqTrack seqTrack, String readGroupNum) {
+    void linkFastqFiles(SeqTrack seqTrack, List<File> testFastqFiles) {
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
         assert seqTrack.seqType.libraryLayout.mateCount == dataFiles.size()
 
-        Map sourceLinkMap = [:]
+        Map<File, File> sourceLinkMap = [:]
         dataFiles.eachWithIndex { dataFile, index ->
-            File sourceFastqFile = testFastqFiles."${readGroupNum}"[index]
+            File sourceFastqFile = testFastqFiles[index]
             assert sourceFastqFile.exists()
             dataFile.fileSize = sourceFastqFile.length()
             File linkFastqFile = new File(lsdfFilesService.getFileFinalPath(dataFile))
@@ -360,7 +360,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         linkFileUtils.createAndValidateLinks(sourceLinkMap, realm)
     }
 
-    void setUpRefGenomeDir(MergingWorkPackage workPackage) {
+    void setUpRefGenomeDir(MergingWorkPackage workPackage, File refGenDir) {
         File linkRefGenDir = referenceGenomeService.referenceGenomeDirectory(workPackage.referenceGenome, false)
         linkFileUtils.createAndValidateLinks([(refGenDir): linkRefGenDir], realm)
     }

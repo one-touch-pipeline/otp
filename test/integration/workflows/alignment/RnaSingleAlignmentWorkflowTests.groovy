@@ -32,7 +32,7 @@ class RnaSingleAlignmentWorkflowTests extends AbstractRnaAlignmentWorkflowTests 
             dataFile.save(flush: true)
         }
 
-        linkFastqFiles(seqTrack1, readGroupNum)
+        linkFastqFiles(seqTrack1, testFastqFiles.get(readGroupNum))
 
         workPackage.needsProcessing = true
         workPackage.save(flush: true)

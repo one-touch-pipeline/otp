@@ -42,8 +42,8 @@ class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTes
                         new File(baseTestDataDirWGBS, 'normal/paired/lib2/run1/sequence/gerald_D1VCPACXX_7_R2.fastq.bz2'),
                 ].asImmutable(),
         ].asImmutable()
-        refGenDir = new File(inputRootDirectory, 'reference-genomes/bwa06_methylCtools_hs37d5_PhiX_Lambda')
-        chromosomeNamesFile = new File(inputRootDirectory, 'reference-genomes/chromosome-names.txt')
+        refGenDir = new File(referenceGenomeDirectory, 'bwa06_methylCtools_hs37d5_PhiX_Lambda')
+        chromosomeNamesFile = new File(referenceGenomeDirectory, 'chromosome-names.txt')
     }
 
     @Override

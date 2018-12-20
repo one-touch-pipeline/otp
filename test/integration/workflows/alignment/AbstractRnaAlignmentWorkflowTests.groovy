@@ -226,8 +226,8 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
                 ].asImmutable(),
         ].asImmutable()
         firstBamFile = null
-        refGenDir = new File(inputRootDirectory, 'reference-genomes/bwa06_1KGRef_PhiX')
-        fingerPrintingFile = new File(inputRootDirectory, 'reference-genomes/bwa06_1KGRef_PhiX/fingerPrinting/snp138Common.n1000.vh20140318.bed')
+        refGenDir = new File(referenceGenomeDirectory, 'bwa06_1KGRef_PhiX')
+        fingerPrintingFile = new File(referenceGenomeDirectory, 'bwa06_1KGRef_PhiX/fingerPrinting/snp138Common.n1000.vh20140318.bed')
     }
 
     @Override

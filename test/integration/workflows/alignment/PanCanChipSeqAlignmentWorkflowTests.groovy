@@ -45,7 +45,7 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
                         new File(baseTestDataDirChipSeq, 'normal/paired/run2/sequence/gerald_D1VCPACXX_7_R2.fastq.bz2'),
                 ].asImmutable(),
         ].asImmutable()
-        refGenDir = new File(inputRootDirectory, 'reference-genomes/bwa_hg38')
+        refGenDir = new File(referenceGenomeDirectory, 'bwa_hg38')
     }
 
     @Test
@@ -93,7 +93,7 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
             dataFile.nReads = AbstractRoddyAlignmentWorkflowTests.NUMBER_OF_READS
             dataFile.save(flush: true)
         }
-        linkFastqFiles(secondSeqTrack, secondSeqTrack.laneId)
+        linkFastqFiles(secondSeqTrack, testFastqFiles.get(secondSeqTrack.laneId))
 
         secondMergingWorkPackage.needsProcessing = true
         secondMergingWorkPackage.save(flush: true)
