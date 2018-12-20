@@ -416,7 +416,7 @@ class FileServiceSpec extends Specification {
         file.text = 'text'
 
         when:
-        new FileService().createLink(link, file)
+        new FileService().createLink(link, file, null, CreateLinkOption.ABSOLUTE)
 
         then:
         Files.isSymbolicLink(link)
@@ -431,7 +431,7 @@ class FileServiceSpec extends Specification {
         Path link = linkName ? Paths.get(linkName) : null
 
         when:
-        new FileService().createLink(link, file)
+        new FileService().createLink(link, file, null, CreateLinkOption.ABSOLUTE)
 
         then:
         AssertionError e = thrown()
@@ -447,10 +447,6 @@ class FileServiceSpec extends Specification {
         'link does exist'      | '/tmp'            | '/tmp'      || '!Files.exists(linkPath)'
     }
 
-    //----------------------------------------------------------------------------------------------------
-    // test for createRelativeLink
-
-
     void "createRelativeLink, if input is valid, then create link"() {
         given:
         Path basePath = temporaryFolder.newFolder().toPath()
@@ -460,7 +456,7 @@ class FileServiceSpec extends Specification {
         file.text = 'text'
 
         when:
-        new FileService().createRelativeLink(link, file)
+        new FileService().createLink(link, file, null)
 
         then:
         Files.isSymbolicLink(link)
@@ -476,7 +472,7 @@ class FileServiceSpec extends Specification {
         Path link = linkName ? Paths.get(linkName) : null
 
         when:
-        new FileService().createRelativeLink(link, file)
+        new FileService().createLink(link, file, null)
 
         then:
         AssertionError e = thrown()

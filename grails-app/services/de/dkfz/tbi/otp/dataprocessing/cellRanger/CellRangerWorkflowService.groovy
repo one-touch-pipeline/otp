@@ -23,7 +23,7 @@ class CellRangerWorkflowService {
             Path link = workDirectory.resolve(linkName)
             Path target = resultDirectory.resolve(resultPathName)
             if (!Files.exists(link, LinkOption.NOFOLLOW_LINKS)) {
-                fileService.createRelativeLink(link, target)
+                fileService.createLink(link, target, singleCellBamFile.realm)
             }
         }
     }

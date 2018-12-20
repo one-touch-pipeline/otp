@@ -1,5 +1,8 @@
 package de.dkfz.tbi.otp.infrastructure
 
+import com.github.robtimus.filesystems.sftp.*
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.util.*
 
@@ -11,6 +14,7 @@ import java.time.*
  * Helper methods to work with file paths
  */
 class FileService {
+    RemoteShellHelper remoteShellHelper
 
     /**
      * Time in milliseconds between checks.
@@ -188,14 +192,14 @@ class FileService {
         assert path
         assert path.isAbsolute()
 
-        createDirectoryRecursivelyIntern(path)
+        createDirectoryRecursivelyInternal(path)
     }
 
-    private void createDirectoryRecursivelyIntern(Path path) {
+    private void createDirectoryRecursivelyInternal(Path path) {
         if (Files.exists(path)) {
             assert Files.isDirectory(path): "The path ${path} already exist, but is not a directory"
         } else {
-            createDirectoryRecursivelyIntern(path.parent)
+            createDirectoryRecursivelyInternal(path.parent)
 
             Files.createDirectory(path)
             setPermission(path, DEFAULT_DIRECTORY_PERMISSION)
@@ -269,49 +273,46 @@ class FileService {
     /**
      * Create a link from linkPath to existingPath.
      *
-     * The destination have to exist, the link may not exist. Both parameter have to be absolute.
+     * The destination has to exist, the link may not exist. Both parameters have to be absolute.
      * Missing parent directories are created automatically with the {@link #DEFAULT_DIRECTORY_PERMISSION}.
+     *
+     * By default a relative link is created, by passing {@link CreateLinkOption#ABSOLUTE} an absolute link is created.
+     *
+     * If the existingPath is a directory, linkPath will be a link to that directory,
+     * if the existingPath is a regular file, linkPath will a link to that file,
+     * it is NOT possible to use this method like {code ln -s /dir1/file.txt /dir2/}.
      *
      * @param linkPath the path of the link
      * @param existingPath the exiting path the link point to
      */
-    void createLink(Path linkPath, Path existingPath) {
+    void createLink(Path linkPath, Path existingPath, Realm realm, CreateLinkOption... options) {
         assert linkPath
         assert existingPath
         assert linkPath.absolute
         assert existingPath.absolute
         assert Files.exists(existingPath)
         assert !Files.exists(linkPath)
+        assert linkPath.fileSystem == existingPath.fileSystem
+        //SimpleAbstractPath doesn't take special meaning of "." and ".." into consideration
+        assert linkPath.every { it.toString() != ".." && it.toString() != "." }
 
-        createLinkIntern(linkPath, existingPath)
-    }
+        if (linkPath == existingPath) {
+            return
+        }
 
-    /**
-     * Calculate and create a relative link from linkPath to existingPath.
-     *
-     * The destination have to exist, the link may not exist. Both parameter have to be absolute.
-     * Missing parent directories are created automatically with the {@link #DEFAULT_DIRECTORY_PERMISSION}.
-     *
-     * The relative path is calculated via {@link Path#relativize(Path)}
-     *
-     * @param linkPath the path of the link
-     * @param existingPath the exiting path the link point to
-     */
-    void createRelativeLink(Path linkPath, Path existingPath) {
-        assert linkPath
-        assert existingPath
-        assert linkPath.absolute
-        assert existingPath.absolute
-        assert Files.exists(existingPath)
-        assert !Files.exists(linkPath)
+        Path existing = (options.contains(CreateLinkOption.ABSOLUTE)) ?
+                existingPath :
+                linkPath.parent.relativize(existingPath)
 
-        createLinkIntern(linkPath, linkPath.parent.relativize(existingPath))
-    }
-
-    private void createLinkIntern(Path linkPath, Path existingPath) {
         createDirectoryRecursively(linkPath.parent)
 
-        Files.createSymbolicLink(linkPath, existingPath)
+        // SFTP does not support creating symbolic links
+        if (linkPath.fileSystem.provider() instanceof SFTPFileSystemProvider) {
+            // use -T option so behaviour is the same as createSymbolicLink()
+            remoteShellHelper.executeCommandReturnProcessOutput(realm, "ln -Ts '${existing}' '${linkPath}'")
+        } else {
+            Files.createSymbolicLink(linkPath, existing)
+        }
     }
 
     /**
@@ -379,4 +380,11 @@ class FileService {
             fileName.endsWith(it)
         }
     }
+}
+
+enum CreateLinkOption {
+    /** Create an absolute link instead of a relative link */
+    ABSOLUTE,
+
+    private CreateLinkOption() {}
 }

@@ -79,7 +79,7 @@ class CellRangerService {
                 String fileName = "${sampleName}_S1_L${formattedLaneNumber}_R${dataFile.mateNumber}_${formattedLaneNumber}.fastq.gz"
                 Path link = sampleDirectory.resolve(fileName)
                 Path target = fileSystem.getPath(lsdfFilesService.getFileViewByPidPath(dataFile))
-                fileService.createRelativeLink(link, target)
+                fileService.createLink(link, target, realm)
             }
         }
     }

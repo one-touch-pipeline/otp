@@ -91,8 +91,8 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory {
                 file1,
                 file2,
         ]
-        1 * cellRangerService.fileService.createRelativeLink(mate1, filePath1)
-        1 * cellRangerService.fileService.createRelativeLink(mate2, filePath2)
+        1 * cellRangerService.fileService.createLink(mate1, filePath1, singleCellBamFile.realm)
+        1 * cellRangerService.fileService.createLink(mate2, filePath2, singleCellBamFile.realm)
         0 * cellRangerService.fileService._
     }
 
