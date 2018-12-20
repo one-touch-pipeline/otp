@@ -294,7 +294,11 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
             }
         }
         if (!failureProcessingStepUpdates.empty) {
-            throw new RuntimeException("There were ${failureProcessingStepUpdates.size()} failures:\n${combinedErrorMessage.join("\n")}\nDetails have been written to standard output. See the test report or run grails test-app -echoOut.")
+            throw new RuntimeException("""\
+                |There were ${failureProcessingStepUpdates.size()} failures:
+                |${combinedErrorMessage.join("\n")}
+                |Details have been written to standard output. See the test report or run grails test-app -echoOut.
+                |""".stripMargin())
         }
     }
 
