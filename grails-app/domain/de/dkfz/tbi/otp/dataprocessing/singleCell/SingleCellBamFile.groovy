@@ -10,7 +10,7 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
 
     static final String INPUT_DIRECTORY_NAME = 'cell-ranger-input'
 
-    static final String OUTPUT_DIRECTORY_NAME = 'out'
+    static final String OUTPUT_DIRECTORY_NAME = 'outs'
 
     static final String ORIGINAL_BAM_FILE_NAME = 'possorted_genome_bam.bam'
 

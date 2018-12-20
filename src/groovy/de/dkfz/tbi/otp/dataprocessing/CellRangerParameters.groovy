@@ -5,7 +5,7 @@ import groovy.transform.*
 @TupleConstructor
 enum CellRangerParameters {
     ID('--id', true),
-    FASTQ('--fasts', true),
+    FASTQ('--fastqs', true),
     TRANSCRIPTOME('--transcriptome', true),
     SAMPLE('--sample', true),
     EXPECT_CELLS('--expect-cells', true),
