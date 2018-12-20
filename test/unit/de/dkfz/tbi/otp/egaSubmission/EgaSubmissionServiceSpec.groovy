@@ -184,6 +184,20 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         !sampleSubmissionObject.useFastqFile
     }
 
+    void "test remove sample submission objects"() {
+        given:
+        EgaSubmission submission = createSubmission()
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
+        submission.addToSamplesToSubmit(sampleSubmissionObject)
+
+        when:
+        List l = egaSubmissionService.deleteSampleSubmissionObjects(submission)
+
+        then:
+        submission.samplesToSubmit.isEmpty()
+        l == [sampleSubmissionObject.sample.id]
+    }
+
     @Unroll
     void "test check file types with data file"() {
         given:
@@ -229,6 +243,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
                 sample: bamFile.sample,
                 seqType: bamFile.seqType,
         )
+        submission.addToSamplesToSubmit(sampleSubmissionObject)
         BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject(
                 bamFile: bamFile,
                 sampleSubmissionObject: sampleSubmissionObject,
@@ -278,23 +293,85 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         dataFileSubmissionObject.egaAliasName == egaFileAliases.first()
     }
 
-    void "test create bam file submission objects"() {
+    void "test update bam file submission objects"() {
         given:
         EgaSubmission submission = createSubmission()
-        List<String> filenames = [createBamFile().id.toString(), createBamFile().id.toString()]
-        List<String> egaSampleAliases = [
-                createSampleSubmissionObject().egaAliasName,
-                createSampleSubmissionObject().egaAliasName,
-        ]
-        List<String> egaFileAliases = [
-                "alias1",
-                "alias2",
+        List<String> egaFileAliases = ["someMagicAlias"]
+        RoddyBamFile roddyBamFile = createBamFile()
+        List<String> fileIds = [roddyBamFile.id.toString()]
+        BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject(
+                bamFile: roddyBamFile,
+        )
+        submission.addToBamFilesToSubmit(bamFileSubmissionObject)
+
+        when:
+        egaSubmissionService.updateBamFileSubmissionObjects(fileIds, egaFileAliases, submission)
+
+        then:
+        bamFileSubmissionObject.egaAliasName == egaFileAliases.first()
+    }
+
+    @Unroll
+    void "test generate default ega aliases for data files"() {
+        given:
+        Run run = DomainFactory.createRun(
+                name: runName
+        )
+        DataFile dataFile = DomainFactory.createDataFile(
+                run: run
+        )
+
+        String alias = "someAlias"
+        List dataFilesAndAliases = [[dataFile, alias]]
+        List aliasNameHelper = [
+                dataFile.seqType.displayName,
+                dataFile.seqType.libraryLayout,
+                alias,
+                runNameWithoutDate,
+                dataFile.seqTrack.laneId,
+                "R${dataFile.mateNumber}",
         ]
 
         when:
-        egaSubmissionService.createBamFileSubmissionObjects(submission, filenames, egaFileAliases, egaSampleAliases)
+        Map defaultEgaAliasesForDataFiles = egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndAliases)
 
         then:
-        submission.bamFilesToSubmit.size() == BamFileSubmissionObject.findAll().size()
+        defaultEgaAliasesForDataFiles.get(dataFile.fileName + dataFile.run) == "${aliasNameHelper.join("_")}.fastq.gz"
+
+        where:
+        runName                            | runNameWithoutDate
+        "120111_SN509_0137_BD0CWYACXX"     | "SN509_0137_BD0CWYACXX"
+        "solid0719_20100818_PE_MB3_a"      | "solid0719_PE_MB3_a"
+        "NB501263_25_HVTWTBGXX"            | "NB501263_25_HVTWTBGXX"
+        "SN678_373_C7RM5ACXX"              | "SN678_373_C7RM5ACXX"
+        "Wgbs-oakes-run9"                  | "Wgbs-oakes-run9"
+        "run170629_D00392_0173_BCB26BANXX" | "runD00392_0173_BCB26BANXX"
+        "Rna-oakes-run4"                   | "Rna-oakes-run4"
+        "C6B02ACXX"                        | "C6B02ACXX"
+        "ega_rnaseq_62JP4AAXX"             | "ega_rnaseq_62JP4AAXX"
+        "NB501263_92_HCG7FBGX3"            | "NB501263_92_HCG7FBGX3"
+        "NB501764_HVJ5JBGX5"               | "NB501764_HVJ5JBGX5"
+        "2011-09-10-C05PPACXX"             | "C05PPACXX"
+        "2011-010-10-C05PPACXX"            | "2011-010-10-C05PPACXX"
+    }
+
+    void "test generate default ega aliases for bam files"() {
+        given:
+        RoddyBamFile bamFile = createBamFile()
+
+        String alias = "someAlias"
+        List bamFilesAndAliases = [[bamFile, alias]]
+        List aliasNameHelper = [
+                bamFile.seqType.displayName,
+                bamFile.seqType.libraryLayout,
+                alias,
+                bamFile.md5sum,
+        ]
+
+        when:
+        Map defaultEgaAliasesForDataFiles = egaSubmissionService.generateDefaultEgaAliasesForBamFiles(bamFilesAndAliases)
+
+        then:
+        defaultEgaAliasesForDataFiles.get(bamFile.bamFileName + alias) == "${aliasNameHelper.join("_")}.bam"
     }
 }

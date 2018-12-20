@@ -9,6 +9,9 @@
 </head>
 <body>
 <div class="body">
+    <g:link style="float: right" action="helpPage" fragment="selectFastq" target="_blank">
+        <g:img file="info.png"/>
+    </g:link>
     <g:render template="/templates/messages"/>
     <div>
         <h3><g:message code="egaSubmission.selectFastqFiles.title"/></h3>
@@ -17,7 +20,7 @@
                 <div class="dialog">
                     <input type="file" name="file" id="file"/>
                     <g:hiddenField name="submission.id" value="${submission.id}"/>
-                    <g:submitButton name="upload" value="Upload FASTQ meta file"/>
+                    <g:submitButton name="upload" value="Upload FASTQ meta file" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
                 </div>
             </g:uploadForm>
         </p>
@@ -54,7 +57,7 @@
                                 <td>${it[0].seqType.toString()}</td>
                                 <td>${it[1]}<g:hiddenField name="egaSampleAlias[${i}]" value="${it[1]}"/></td>
                                 <td>${it[0].run.seqCenter}</td>
-                                <td>${it[0].run}</td>
+                                <td>${it[0].run}<g:hiddenField name="runName[${i}]" value="${it[0].run.name}"/></td>
                                 <td>${it[0].seqTrack.laneId}</td>
                                 <td>${it[0].seqTrack.normalizedLibraryName}</td>
                                 <td>${it[0].seqTrack.ilseId}</td>

@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.*
@@ -26,6 +27,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             sampleInformationForms      : "POST",
             selectFilesDataFilesForm    : "POST",
             dataFilesListFileUploadForm : "POST",
+            bamFilesListFileUploadForm  : "POST",
             selectFilesBamFilesForm     : "POST",
     ]
 
@@ -92,6 +94,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 submissionId: submission.id,
                 project: submission.project,
                 seqTypes : egaSubmissionService.seqTypeByProject(submission.project),
+                sampleIds : flash.sampleIds ?: [],
         ]
     }
 
@@ -113,10 +116,10 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 selectedBams.put(newKey, flash.bams.get(newKey) && value)
             }
         } else {
-            existingFastqs.each { key, value ->
+            existingBams.each { key, value ->
                 String newKey = egaSubmissionValidationService.getIdentifierKeyFromSampleSubmissionObject(key)
-                selectedFastqs.put(newKey, value)
-                selectedBams.put(newKey, !value)
+                selectedFastqs.put(newKey, !value)
+                selectedBams.put(newKey, value)
             }
         }
 
@@ -132,23 +135,30 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     Map selectFastqFiles(EgaSubmission submission) {
+        List dataFilesAndAliasList = egaSubmissionService.getDataFilesAndAlias(submission)
+        Map egaFileAliases = flash.egaFileAliases ?: egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndAliasList)
+
         return [
                 submission: submission,
-                dataFileList: egaSubmissionService.getDataFilesAndAlias(submission),
+                dataFileList: dataFilesAndAliasList,
                 dataFileSubmissionObject: submission.dataFilesToSubmit,
-                egaFileAliases: flash.egaFileAliases,
+                egaFileAliases: egaFileAliases,
                 hasDataFiles: !submission.dataFilesToSubmit.empty,
                 dataFilesHasFileAliases: !submission.dataFilesToSubmit*.egaAliasName.findAll().isEmpty(),
         ]
     }
 
     Map selectBamFiles(EgaSubmission submission) {
+        List bamFilesAndAliasList = egaSubmissionService.getBamFilesAndAlias(submission)
+        Map egaFileAliases = flash.egaFileAliases ?: egaSubmissionService.generateDefaultEgaAliasesForBamFiles(bamFilesAndAliasList)
+
         return [
                 submission: submission,
-                bamFileList: egaSubmissionService.getBamFilesAndAlias(submission),
+                bamFileList: bamFilesAndAliasList,
                 bamFileSubmissionObject: submission.bamFilesToSubmit,
-                egaFileAliases: flash.egaFileAliases,
+                egaFileAliases: egaFileAliases,
                 bamFilesHasFileAliases: !submission.bamFilesToSubmit*.egaAliasName.findAll().isEmpty(),
+                hasFiles: !submission.bamFilesToSubmit.empty,
         ]
     }
 
@@ -196,25 +206,27 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
         Spreadsheet spreadsheet = readFile(cmd)
-        Map validateRows = egaSubmissionValidationService.validateRows(spreadsheet, cmd.submission)
-        Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
-                INDIVIDUAL,
-                SAMPLE_TYPE,
-                SEQ_TYPE,
-        ])
-        if (!validateRows.valid) {
-            pushError(validateRows.error, cmd.submission, true)
-        } else if (validateColumns.hasError) {
-            pushError(validateColumns.error, cmd.submission, true)
-        } else if (!egaSubmissionValidationService.validateFileTypeFromInput(spreadsheet)) {
-            pushError("Wrong file type detected. Please use only ${EgaSubmissionService.FileType.collect().join(", ")}",
-                    cmd.submission, true)
-        } else {
-            flash.message = new FlashMessage("File was uploaded")
-            flash.egaSampleAliases = egaSubmissionFileService.readEgaSampleAliasesFromFile(spreadsheet)
-            flash.fastqs = egaSubmissionFileService.readBoxesFromFile(spreadsheet, EgaSubmissionService.FileType.FASTQ)
-            flash.bams = egaSubmissionFileService.readBoxesFromFile(spreadsheet, EgaSubmissionService.FileType.BAM)
-            redirect(action: "editSubmission", params: ['id': cmd.submission.id])
+        if (spreadsheet) {
+            Map validateRows = egaSubmissionValidationService.validateRows(spreadsheet, cmd.submission)
+            Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
+                    INDIVIDUAL,
+                    SAMPLE_TYPE,
+                    SEQ_TYPE,
+            ])
+            if (!validateRows.valid) {
+                pushError(validateRows.error, cmd.submission, true)
+            } else if (validateColumns.hasError) {
+                pushError(validateColumns.error, cmd.submission, true)
+            } else if (!egaSubmissionValidationService.validateFileTypeFromInput(spreadsheet)) {
+                pushError("Wrong file type detected. Please use only ${EgaSubmissionService.FileType.collect().join(", ")}",
+                        cmd.submission, true)
+            } else {
+                flash.message = new FlashMessage("File was uploaded")
+                flash.egaSampleAliases = egaSubmissionFileService.readEgaSampleAliasesFromFile(spreadsheet)
+                flash.fastqs = egaSubmissionFileService.readBoxesFromFile(spreadsheet, EgaSubmissionService.FileType.FASTQ)
+                flash.bams = egaSubmissionFileService.readBoxesFromFile(spreadsheet, EgaSubmissionService.FileType.BAM)
+                redirect(action: "editSubmission", params: ['id': cmd.submission.id])
+            }
         }
     }
 
@@ -245,6 +257,11 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 redirect(action: "editSubmission", params: ['id': cmd.submission.id])
             }
         }
+
+        if (cmd.back == "Back to selection") {
+            flash.sampleIds = egaSubmissionService.deleteSampleSubmissionObjects(cmd.submission)
+            redirect(action: "editSubmission", params: ['id': cmd.submission.id])
+        }
     }
 
     def selectFilesDataFilesForm(SelectFilesDataFilesFormSubmitCommand cmd) {
@@ -254,7 +271,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
 
         if (cmd.saveSelection == "Confirm with file selection") {
-            saveSelection(cmd)
+            saveDataFileSelection(cmd)
             return
         }
 
@@ -273,6 +290,15 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 Map errors = egaSubmissionValidationService.validateAliases(cmd.egaFileAlias)
                 if (errors.hasErrors) {
                     pushErrors(errors.errors, cmd.submission)
+                    Map egaFileAliases = [:]
+                    cmd.egaFileAlias.eachWithIndex { it, i ->
+                        DataFile dataFile = cmd.submission.dataFilesToSubmit.find {
+                            it.dataFile.fileName == cmd.filename[i] &&
+                            it.dataFile.run.name == cmd.runName[i]
+                        }.dataFile
+                        egaFileAliases.put(dataFile.fileName + dataFile.run, it)
+                    }
+                    flash.egaFileAliases = egaFileAliases
                 } else {
                     egaSubmissionService.updateDataFileSubmissionObjects(cmd.filename, cmd.egaFileAlias, cmd.submission)
                     if (cmd.submission.selectionState != EgaSubmission.SelectionState.SELECT_BAM_FILES) {
@@ -285,7 +311,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
     }
 
-    def saveSelection(SelectFilesDataFilesFormSubmitCommand cmd) {
+    def saveDataFileSelection(SelectFilesDataFilesFormSubmitCommand cmd) {
         if (cmd.selectBox) {
             EgaSubmission submission = cmd.submission
             Set<SampleSubmissionObject> fastqSamples = submission.samplesToSubmit.findAll { it.useFastqFile }
@@ -317,38 +343,48 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
         if (cmd.upload == "Upload FASTQ meta file") {
             Spreadsheet spreadsheet = readFile(cmd)
-            Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
-                    RUN,
-                    FILENAME,
-                    EGA_FILE_ALIAS,
-            ])
-            if (spreadsheet.dataRows.size() != cmd.submission.dataFilesToSubmit.size()) {
-                pushError("Found and expected number of files are different", cmd.submission, true)
-            } else if (validateColumns.hasError) {
-                pushError(validateColumns.error, cmd.submission, true)
-            } else {
-                flash.message = new FlashMessage("File was uploaded")
-                flash.egaFileAliases = egaSubmissionFileService.readEgaFileAliasesFromFile(spreadsheet, false)
-                redirect(action: "editSubmission", params: ['id': cmd.submission.id])
+            if (spreadsheet) {
+                Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
+                        RUN,
+                        FILENAME,
+                        EGA_FILE_ALIAS,
+                ])
+                if (spreadsheet.dataRows.size() != cmd.submission.dataFilesToSubmit.size()) {
+                    pushError("Found and expected number of files are different", cmd.submission, true)
+                } else if (validateColumns.hasError) {
+                    pushError(validateColumns.error, cmd.submission, true)
+                } else {
+                    flash.message = new FlashMessage("File was uploaded")
+                    flash.egaFileAliases = egaSubmissionFileService.readEgaFileAliasesFromFile(spreadsheet, false)
+                    redirect(action: "editSubmission", params: ['id': cmd.submission.id])
+                }
             }
+        }
+    }
+
+    def bamFilesListFileUploadForm(UploadFormSubmitCommand cmd) {
+        if (cmd.hasErrors()) {
+            pushError(cmd.errors.fieldError, cmd.submission)
             return
         }
 
         if (cmd.upload == "Upload BAM meta file") {
             Spreadsheet spreadsheet = readFile(cmd)
-            Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
-                    EGA_SAMPLE_ALIAS,
-                    FILENAME,
-                    EGA_FILE_ALIAS,
-            ])
-            if (spreadsheet.dataRows.size() != egaSubmissionService.getBamFilesAndAlias(cmd.submission).size()) {
-                pushError("Found and expected number of files are different", cmd.submission, true)
-            } else if (validateColumns.hasError) {
-                pushError(validateColumns.error, cmd.submission, true)
-            } else {
-                flash.message = new FlashMessage("File was uploaded")
-                flash.egaFileAliases = egaSubmissionFileService.readEgaFileAliasesFromFile(spreadsheet, true)
-                redirect(action: "editSubmission", params: ['id': cmd.submission.id])
+            if (spreadsheet) {
+                Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
+                        EGA_SAMPLE_ALIAS,
+                        FILENAME,
+                        EGA_FILE_ALIAS,
+                ])
+                if (spreadsheet.dataRows.size() != egaSubmissionService.getBamFilesAndAlias(cmd.submission).size()) {
+                    pushError("Found and expected number of files are different", cmd.submission, true)
+                } else if (validateColumns.hasError) {
+                    pushError(validateColumns.error, cmd.submission, true)
+                } else {
+                    flash.message = new FlashMessage("File was uploaded")
+                    flash.egaFileAliases = egaSubmissionFileService.readEgaFileAliasesFromFile(spreadsheet, true)
+                    redirect(action: "editSubmission", params: ['id': cmd.submission.id])
+                }
             }
         }
     }
@@ -370,13 +406,24 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
 
-        if (cmd.save == "Save aliases") {
+        if (cmd.saveSelection == "Confirm with file selection") {
+            egaSubmissionService.createBamFileSubmissionObjects(cmd.submission)
+            redirect(action: "editSubmission", params: ['id': cmd.submission.id])
+            return
+        }
+
+        if (cmd.saveAliases == "Confirm with aliases") {
             if (cmd.egaFileAlias) {
                 Map errors = egaSubmissionValidationService.validateAliases(cmd.egaFileAlias)
                 if (errors.hasErrors) {
                     pushErrors(errors.errors, cmd.submission)
+                    Map egaFileAliases = [:]
+                    cmd.egaFileAlias.eachWithIndex { it, i ->
+                        egaFileAliases.put(AbstractMergedBamFile.findById(cmd.fileId[i] as long).bamFileName + cmd.egaSampleAlias[i], it)
+                    }
+                    flash.egaFileAliases = egaFileAliases
                 } else {
-                    egaSubmissionService.createBamFileSubmissionObjects(cmd.submission, cmd.fileId, cmd.egaFileAlias, cmd.egaSampleAlias)
+                    egaSubmissionService.updateBamFileSubmissionObjects(cmd.fileId, cmd.egaFileAlias, cmd.submission)
                     egaSubmissionFileService.generateFilesToUploadFile(cmd.submission)
                     redirect(action: "editSubmission", params: ['id': cmd.submission.id])
                 }

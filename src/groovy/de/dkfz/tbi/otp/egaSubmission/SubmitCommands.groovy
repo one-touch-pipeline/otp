@@ -71,6 +71,7 @@ class SampleInformationFormsSubmitCommand implements Serializable {
     EgaSubmission submission
     String csv
     String next
+    String back
     List<String> sampleObjectId
     List<EgaSubmissionService.FileType> fileType
     List<String> egaSampleAlias
@@ -78,6 +79,7 @@ class SampleInformationFormsSubmitCommand implements Serializable {
     static constraints = {
         next nullable: true
         csv nullable: true
+        back nullable: true
     }
 }
 
@@ -89,6 +91,7 @@ class SelectFilesDataFilesFormSubmitCommand implements Serializable {
     String saveAliases
     List<Boolean> selectBox
     List<String> filename
+    List<String> runName
     List<String> egaFileAlias
     List<String> egaSampleAlias
 
@@ -104,7 +107,8 @@ class SelectFilesDataFilesFormSubmitCommand implements Serializable {
 @Validateable
 class SelectFilesBamFilesFormSubmitCommand implements Serializable {
     EgaSubmission submission
-    String save
+    String saveSelection
+    String saveAliases
     String download
     List<String> fileId
     List<String> egaFileAlias
@@ -112,7 +116,9 @@ class SelectFilesBamFilesFormSubmitCommand implements Serializable {
 
     static constraints = {
         download nullable: true
-        save nullable: true
+        saveAliases nullable: true
+        saveSelection nullable: true
+        egaFileAlias nullable: true
     }
 }
 

@@ -8,6 +8,9 @@
 </head>
 <body>
 <div class="body">
+    <g:link style="float: right" action="helpPage" fragment="sampleInformation" target="_blank">
+        <g:img file="info.png"/>
+    </g:link>
     <g:render template="/templates/messages"/>
     <div>
         <h3><g:message code="egaSubmission.sampleInformation.title"/></h3>
@@ -53,7 +56,11 @@
                     </g:each>
                 </tbody>
             </table>
-            <p><g:submitButton name="csv" value="Download CSV"/>&nbsp;<g:submitButton name="next" value="Confirm"/></p>
+            <p>
+                <g:submitButton name="back" value="Back to selection"/>&nbsp;
+                <g:submitButton name="csv" value="Download CSV"/>&nbsp;
+                <g:submitButton name="next" value="Confirm"/>
+            </p>
         </g:form>
         </div>
     </div>

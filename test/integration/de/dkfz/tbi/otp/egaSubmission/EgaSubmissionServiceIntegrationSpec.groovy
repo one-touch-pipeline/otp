@@ -45,4 +45,22 @@ class EgaSubmissionServiceIntegrationSpec extends IntegrationSpec implements Ega
         true         | true      | false  | AbstractMergedBamFile.FileOperationStatus.PROCESSED
         true         | false     | false  | AbstractMergedBamFile.FileOperationStatus.INPROGRESS
     }
+
+    void "test create bam file submission objects"() {
+        given:
+        EgaSubmission submission = createSubmission()
+        RoddyBamFile bamFile = createBamFile()
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
+                sample: bamFile.sample,
+                seqType: bamFile.seqType,
+                useBamFile: true,
+        )
+        submission.addToSamplesToSubmit(sampleSubmissionObject)
+
+        when:
+        egaSubmissionService.createBamFileSubmissionObjects(submission)
+
+        then:
+        submission.bamFilesToSubmit.size() == BamFileSubmissionObject.findAll().size()
+    }
 }

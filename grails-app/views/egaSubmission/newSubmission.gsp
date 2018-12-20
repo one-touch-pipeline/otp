@@ -7,6 +7,9 @@
 </head>
 <body>
     <div class="body">
+        <g:link style="float: right" action="helpPage" fragment="new" target="_blank">
+            <g:img file="info.png"/>
+        </g:link>
         <g:render template="/templates/messages"/>
         <g:uploadForm controller="egaSubmission" action="newSubmissionForm">
             <table>

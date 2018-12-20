@@ -115,6 +115,9 @@ class EgaSubmissionFileService {
     String generateDataFilesCsvFile(EgaSubmission submission) {
         StringBuilder contentBody = new StringBuilder()
 
+        List dataFilesAndAlias = egaSubmissionService.getDataFilesAndAlias(submission).sort { it[1] }
+        Map dataFileAliases = egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndAlias)
+
         submission.dataFilesToSubmit.sort { it.sampleSubmissionObject.egaAliasName }.each {
             contentBody.append([
                     it.dataFile.individual.displayName,
@@ -126,7 +129,7 @@ class EgaSubmissionFileService {
                     it.dataFile.seqTrack.laneId,
                     it.dataFile.seqTrack.normalizedLibraryName ?: "N/A",
                     it.dataFile.seqTrack.ilseId ?: "N/A",
-                    "",
+                    dataFileAliases.get(it.dataFile.fileName + it.dataFile.run),
                     it.dataFile.fileName,
             ].join(",") + "\n")
         }
@@ -151,14 +154,18 @@ class EgaSubmissionFileService {
     String generateBamFilesCsvFile(EgaSubmission submission) {
         StringBuilder contentBody = new StringBuilder()
 
-        egaSubmissionService.getBamFilesAndAlias(submission).sort { it[1] }.each {
+        List bamFilesAndAlias = egaSubmissionService.getBamFilesAndAlias(submission).sort { it[1] }
+        Map bamFileAliases = egaSubmissionService.generateDefaultEgaAliasesForBamFiles(bamFilesAndAlias)
+
+        bamFilesAndAlias.each {
+            AbstractMergedBamFile bamFile = it[0]
             contentBody.append([
-                    it[0].individual.displayName,
-                    it[0].sampleType.displayName,
-                    it[0].seqType.toString(),
+                    bamFile.individual.displayName,
+                    bamFile.sampleType.displayName,
+                    bamFile.seqType.toString(),
                     it[1],
-                    "",
-                    it[0].bamFileName,
+                    bamFileAliases.get(bamFile.bamFileName + it[1]),
+                    bamFile.bamFileName,
             ].join(",") + "\n")
         }
 
@@ -175,7 +182,7 @@ class EgaSubmissionFileService {
     }
 
     void generateFilesToUploadFile(EgaSubmission submission) {
-        FileSystem fileSystem = fileSystemService.getFilesystemForProcessingForRealm(submission.project.realm)
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(submission.project.realm)
         Path path = fileSystem.getPath("${submission.project.projectDirectory}/submission/${submission.id}/filesToUpload.tsv")
         StringBuilder out = new StringBuilder()
         User user = springSecurityService.getCurrentUser()

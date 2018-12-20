@@ -8,6 +8,9 @@
 </head>
 <body>
     <div class="body">
+        <g:link style="float: right" action="helpPage" fragment="selectSamples" target="_blank">
+            <g:img file="info.png"/>
+        </g:link>
         <h3><g:message code="egaSubmission.selectSamples.title"/></h3>
         <div class="searchCriteriaTableSequences">
             <table id="searchCriteriaTable" style="display: inline-block">
@@ -50,7 +53,7 @@
         </g:form>
         <asset:script>
             $(function() {
-                $.otp.selectSamplesTable.selectSamples();
+                $.otp.selectSamplesTable.selectSamples(${sampleIds});
             });
         </asset:script>
     </div>

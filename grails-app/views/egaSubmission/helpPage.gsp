@@ -11,13 +11,14 @@
             <h2>User documentation</h2>
             <p>
                 To start a new submission click on the menu item "EGA".
+                If you would like to create one submission for several projects, please create them individually for each project with the same name.
                 After that you will be taken to the overview page with all existing submissions for your chosen project.
-                This documentation explanes the OTP part of a submission.
+                This documentation explains the OTP part of a submission.
                 For more information on EGA see their <a href="https://ega-archive.org/submission/quickguide" target="_blank">Submission Quick Guide</a>
                 or <a href="https://ega-archive.org/submission/FAQ" target="_blank">FAQ</a>.
             </p>
 
-            <h3>Overview page</h3>
+            <h3 id="overview">Overview page</h3>
             <p>
                 You can choose three actions:
                 <ul>
@@ -33,7 +34,7 @@
                 If you create a new submission you will be taken to the following page.
             </p>
 
-            <h3>New submission page</h3>
+            <h3 id="new">New submission page</h3>
             <p>
                 Please enter the following information on this page:
                 <ul>
@@ -51,7 +52,7 @@
                 If you click the Submit button the submission will be created and you will be taken to the next page.
             </p>
 
-            <h3>Select samples page</h3>
+            <h3 id="selectSamples">Select samples page</h3>
             <p>
                 On this page all samples assigned to the selected project are displayed.
                 By clicking on the checkboxes you can select samples.
@@ -63,7 +64,7 @@
                 If you click the Next button, all samples will be linked to the submission and you will be taken to the next page.
             </p>
 
-            <h3>Sample information page</h3>
+            <h3 id="sampleInformation">Sample information page</h3>
             <p>
                 On this page you should complete the following information for each sample:
                 <ul>
@@ -81,7 +82,7 @@
                 If you click the Next button, all information will be stored and you will be taken to the next page.
             </p>
 
-            <h3>Select FASTQ Files page</h3>
+            <h3 id="selectFastq">Select FASTQ Files page</h3>
             <p>
                 If you choose FASTQ in the previous step, you will enter this page.
                 First, you have to choose what data you want to submit.
@@ -98,11 +99,13 @@
                 If you have not selected any BAM files, your submission processing is finished and we can start with the upload now.
             </p>
 
-            <h3>Select BAM Files page</h3>
+            <h3 id="selectBam">Select BAM Files page</h3>
             <p>
                 If you choose BAM on the sample information page, you will enter this page.
-                Here you can configure filenames similar to those on the FASTQ Files page.
-                You can sse the web interface or the CSV file.
+                At the moment there is the restriction that only internally processed BAM files can be uploaded.
+                Therefore there is a deactivated preselection.
+                First click on "Confirm with file selection" and than you can configure filenames similar to those on the FASTQ files page.
+                You can use the web interface or the CSV file.
             </p>
             <p>
                 If you click the Save aliased button, all information will be stored and you will be redirected to the overview page.

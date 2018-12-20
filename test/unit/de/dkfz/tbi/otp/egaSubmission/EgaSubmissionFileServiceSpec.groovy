@@ -111,15 +111,25 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         bams*.value  == [false, true]
     }
 
-
-
-
-
     void "test generate data files csv file"() {
         given:
+        egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
         EgaSubmission submission = createSubmission()
-        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
+        DataFile dataFile = DomainFactory.createDataFile()
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
+                sample: dataFile.seqTrack.sample,
+                seqType: dataFile.seqType,
+        )
+        submission.addToSamplesToSubmit(sampleSubmissionObject)
+        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject(
+                dataFile: dataFile,
+                sampleSubmissionObject: sampleSubmissionObject
+        )
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
+        String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([[
+                dataFile,
+                sampleSubmissionObject.egaAliasName
+        ]]).get(dataFile.fileName + dataFile.run)
 
         when:
         String content = egaSubmissionFileService.generateDataFilesCsvFile(submission)
@@ -145,7 +155,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 "${dataFileSubmissionObject.dataFile.seqTrack.laneId}," +
                 "${dataFileSubmissionObject.dataFile.seqTrack.normalizedLibraryName ?: "N/A"}," +
                 "${dataFileSubmissionObject.dataFile.seqTrack.ilseId ?: "N/A"}," +
-                "," +
+                "${dataFileAlias}," +
                 "${dataFileSubmissionObject.dataFile.fileName}\n"
     }
 
@@ -158,11 +168,16 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 sample: roddyBamFile.sample,
                 seqType: roddyBamFile.seqType,
         )
+        submission.addToSamplesToSubmit(sampleSubmissionObject)
         BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject(
                 bamFile: roddyBamFile,
                 sampleSubmissionObject: sampleSubmissionObject,
         )
         submission.addToBamFilesToSubmit(bamFileSubmissionObject)
+        String bamFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForBamFiles([[
+                roddyBamFile,
+                sampleSubmissionObject.egaAliasName
+        ]]).get(roddyBamFile.bamFileName + sampleSubmissionObject.egaAliasName)
 
         when:
         String content = egaSubmissionFileService.generateBamFilesCsvFile(submission)
@@ -178,24 +193,37 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 "${bamFileSubmissionObject.bamFile.sampleType}," +
                 "${bamFileSubmissionObject.bamFile.seqType}," +
                 "${bamFileSubmissionObject.sampleSubmissionObject.egaAliasName}," +
-                "," +
+                "${bamFileAlias}," +
                 "${bamFileSubmissionObject.bamFile.bamFileName}\n"
     }
 
     void "test read ega file aliases from file with data file"() {
         given:
+        egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
         EgaSubmission submission = createSubmission()
-        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
+        DataFile dataFile = DomainFactory.createDataFile()
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
+                sample: dataFile.seqTrack.sample,
+                seqType: dataFile.seqType,
+        )
+        submission.addToSamplesToSubmit(sampleSubmissionObject)
+        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject(
+                dataFile: dataFile,
+                sampleSubmissionObject: sampleSubmissionObject,
+        )
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
         String content = egaSubmissionFileService.generateDataFilesCsvFile(submission)
-        content = content.replace(",,", ",${dataFileSubmissionObject.egaAliasName},")
         Spreadsheet spreadsheet = new Spreadsheet(content, ",")
+        String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([[
+                dataFile,
+                sampleSubmissionObject.egaAliasName
+        ]]).get(dataFile.fileName + dataFile.run)
 
         when:
         Map fileAliases = egaSubmissionFileService.readEgaFileAliasesFromFile(spreadsheet, false)
 
         then:
-        fileAliases.get(dataFileSubmissionObject.dataFile.fileName + dataFileSubmissionObject.dataFile.run) == dataFileSubmissionObject.egaAliasName
+        fileAliases.get(dataFileSubmissionObject.dataFile.fileName + dataFileSubmissionObject.dataFile.run) == dataFileAlias
     }
 
     void "test read ega file aliases from file with bam file"() {
@@ -207,20 +235,24 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 sample: roddyBamFile.sample,
                 seqType: roddyBamFile.seqType,
         )
+        submission.addToSamplesToSubmit(sampleSubmissionObject)
         BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject(
                 bamFile: roddyBamFile,
                 sampleSubmissionObject: sampleSubmissionObject,
         )
         submission.addToBamFilesToSubmit(bamFileSubmissionObject)
         String content = egaSubmissionFileService.generateBamFilesCsvFile(submission)
-        content = content.replace(",,", ",${bamFileSubmissionObject.egaAliasName},")
         Spreadsheet spreadsheet = new Spreadsheet(content, ",")
+        String bamFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForBamFiles([[
+                roddyBamFile,
+                sampleSubmissionObject.egaAliasName
+        ]]).get(roddyBamFile.bamFileName + sampleSubmissionObject.egaAliasName)
 
         when:
         Map fileAliases = egaSubmissionFileService.readEgaFileAliasesFromFile(spreadsheet, true)
 
         then:
-        fileAliases.get(bamFileSubmissionObject.bamFile.bamFileName + bamFileSubmissionObject.sampleSubmissionObject.egaAliasName) == bamFileSubmissionObject.egaAliasName
+        fileAliases.get(bamFileSubmissionObject.bamFile.bamFileName + bamFileSubmissionObject.sampleSubmissionObject.egaAliasName) == bamFileAlias
     }
 
     void "test generate filesToUpload file"() {
@@ -254,7 +286,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         }
 
         egaSubmissionFileService.fileSystemService = Mock (FileSystemService) {
-            1 * getFilesystemForProcessingForRealm(_) >> FileSystems.default
+            1 * getRemoteFileSystem(_) >> FileSystems.default
         }
 
         egaSubmissionFileService.springSecurityService = Mock (SpringSecurityService) {

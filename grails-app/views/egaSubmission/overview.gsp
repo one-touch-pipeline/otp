@@ -12,7 +12,9 @@
         <g:if test="${projects}">
             <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
         </g:if>
-        <g:link style="float: right" action="helpPage" target="_blank"><g:message code="egaSubmission.userDocumentation"/></g:link>
+        <g:link style="float: right" action="helpPage" fragment="overview" target="_blank">
+            <g:img file="info.png"/>
+        </g:link>
         <div class="buttons">
             <g:link action="newSubmission" params="[id: project.id]"><g:message code="egaSubmission.newSubmission"/></g:link>
         </div>
