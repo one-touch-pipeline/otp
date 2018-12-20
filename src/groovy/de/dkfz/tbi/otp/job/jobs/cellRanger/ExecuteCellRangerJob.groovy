@@ -96,7 +96,7 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
         parameters.each { String key, String value ->
             builder << " " << key << "=" << value
         }
-
+        builder << " --disable-ui"
         return builder.toString()
     }
 
