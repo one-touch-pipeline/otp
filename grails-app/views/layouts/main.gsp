@@ -121,6 +121,7 @@
                                             <li><g:link controller="crashRecovery"><g:message code="otp.menu.crashRecovery"/></g:link></li>
                                             <li><g:link controller="processingOption"><g:message code="otp.menu.processingOptions"/></g:link></li>
                                             <li><g:link controller="jobErrorDefinition"><g:message code="otp.menu.jobErrorDefinition"/></g:link></li>
+                                            <li><g:link controller="dicom"><g:message code="dicom.info.title"/></g:link></li>
                                             <li><g:link controller="shutdown"><g:message code="otp.menu.planServerShutdown"/></g:link></li>
                                         </ul>
                                     </li>
@@ -150,7 +151,6 @@
                                             <li><g:link controller="info" action="partners"><g:message code="info.partners.link"/></g:link></li>
                                         </g:if>
                                         <li><g:link controller="info" action="templates"><g:message code="info.templates.link"/></g:link></li>
-                                        <li><g:link controller="info" action="dicom"><g:message code="dicom.info.title"/></g:link></li>
                                     </ul>
                                 </li>
                             </ul>

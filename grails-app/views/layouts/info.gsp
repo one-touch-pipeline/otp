@@ -42,11 +42,6 @@
                     <div class="infoMenuButtonText"><g:message code="info.templates.link" /></div>
                 </div>
             </a>
-            <a href="${g.createLink(action: "dicom")}">
-                <div class="infoMenuButton ${(actionName == "dicom") ? "infoMenuButtonActive" : ""}">
-                    <div class="infoMenuButtonText"><g:message code="dicom.info.title" /></div>
-                </div>
-            </a>
         </div>
 
         <sec:ifNotLoggedIn>
