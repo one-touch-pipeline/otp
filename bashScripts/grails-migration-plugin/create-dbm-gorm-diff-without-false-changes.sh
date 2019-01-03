@@ -16,7 +16,8 @@ fi
 # $1 is the filename
 # $2 additional parameter --add, to add directly to changelog.groovy
 year=`date +'%Y'`
-mkdir -p changelogs/${year}
+#dbm-gorm-diff adds automatically the directory 'migrations', but mkdir not
+mkdir -p migrations/changelogs/${year}
 grails dbm-gorm-diff changelogs/${year}/${1}.groovy $2
 
 
