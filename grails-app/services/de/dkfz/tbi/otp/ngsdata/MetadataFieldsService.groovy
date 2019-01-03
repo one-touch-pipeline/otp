@@ -12,13 +12,17 @@ abstract class MetadataFieldsService<T> {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void addNewAlias(String name, String importAlias) {
-        assert name: "the input name must not be null"
+    void addNewAlias(Long id, String importAlias) {
+        assert id: "the input ID must not be null"
         assert importAlias: "the input importAlias must not be null"
+
+        T instance = clazz.get(id)
+        assert instance: "could not get an instance of type ${clazz} with ID ${id}"
+
         T tFromImportAlias = findByNameOrImportAlias(importAlias)
         assert !tFromImportAlias: "importAlias ${importAlias} already exists for ${tFromImportAlias.name}"
 
-        getTAndAddAlias(name, importAlias)
+        getTAndAddAlias(instance.name, importAlias)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

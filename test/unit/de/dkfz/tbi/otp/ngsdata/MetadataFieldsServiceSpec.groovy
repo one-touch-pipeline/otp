@@ -97,16 +97,16 @@ abstract class MetadataFieldsServiceSpec<T> extends Specification {
         ""   | _
     }
 
-    void "test addNewAlias with name and importAlias, succeeds"() {
+    void "test addNewAlias with ID and importAlias, succeeds"() {
         when:
         T t = DomainFactory.<T> createDomainWithImportAlias(service.clazz, [name: NAME] + properties)
-        service.addNewAlias(NAME, IMPORT_ALIAS,)
+        service.addNewAlias(t.id as Long, IMPORT_ALIAS)
 
         then:
         t.importAlias.contains(IMPORT_ALIAS)
     }
 
-    void "test addNewAlias when name is null, fails"() {
+    void "test addNewAlias when ID is null, fails"() {
         when:
         createObjectsForImportAliasTests()
         service.addNewAlias(null, IMPORT_ALIAS)
@@ -115,9 +115,9 @@ abstract class MetadataFieldsServiceSpec<T> extends Specification {
         thrown(AssertionError)
     }
 
-    void "test addNewAlias when name does not exist, fails"() {
+    void "test addNewAlias when ID does not exist, fails"() {
         when:
-        service.addNewAlias(NAME, IMPORT_ALIAS)
+        service.addNewAlias(0, IMPORT_ALIAS)
 
         then:
         thrown(AssertionError)
@@ -125,8 +125,8 @@ abstract class MetadataFieldsServiceSpec<T> extends Specification {
 
     void "test addNewAlias when importAlias is null, fails"() {
         when:
-        createObjectsForImportAliasTests()
-        service.addNewAlias(NAME, null)
+        Map<String, Long> ids = createObjectsForImportAliasTests()
+        service.addNewAlias(ids[NAME], null)
 
         then:
         thrown(AssertionError)
@@ -134,8 +134,8 @@ abstract class MetadataFieldsServiceSpec<T> extends Specification {
 
     void "test addNewAlias when name already exists, fails"() {
         when:
-        createObjectsForImportAliasTests()
-        service.addNewAlias(NAME, OTHER_NAME)
+        Map<String, Long> ids = createObjectsForImportAliasTests()
+        service.addNewAlias(ids[NAME], OTHER_NAME)
 
         then:
         thrown(AssertionError)
@@ -143,8 +143,8 @@ abstract class MetadataFieldsServiceSpec<T> extends Specification {
 
     void "test addNewAlias when name in same T already exists, fails"() {
         when:
-        createObjectsForImportAliasTests()
-        service.addNewAlias(NAME, NAME)
+        Map<String, Long> ids = createObjectsForImportAliasTests()
+        service.addNewAlias(ids[NAME], NAME)
 
         then:
         thrown(AssertionError)
@@ -152,8 +152,8 @@ abstract class MetadataFieldsServiceSpec<T> extends Specification {
 
     void "test addNewAlias when importAlias already exists, fails"() {
         when:
-        createObjectsForImportAliasTests()
-        service.addNewAlias(NAME, IMPORT_ALIAS)
+        Map<String, Long> ids = createObjectsForImportAliasTests()
+        service.addNewAlias(ids[NAME], IMPORT_ALIAS)
 
         then:
         thrown(AssertionError)
@@ -161,16 +161,19 @@ abstract class MetadataFieldsServiceSpec<T> extends Specification {
 
     void "test addNewAlias when importAlias in same T already exists, fails"() {
         when:
-        createObjectsForImportAliasTests()
-        service.addNewAlias(OTHER_NAME, IMPORT_ALIAS)
+        Map<String, Long> ids = createObjectsForImportAliasTests()
+        service.addNewAlias(ids[OTHER_NAME], IMPORT_ALIAS)
 
         then:
         thrown(AssertionError)
     }
 
-    void createObjectsForImportAliasTests() {
-        DomainFactory.<T> createDomainWithImportAlias(service.clazz, [name: NAME] + properties)
-        DomainFactory.<T> createDomainWithImportAlias(service.clazz, [name: OTHER_NAME, importAlias: [IMPORT_ALIAS]] + otherProperties)
-
+    Map<String, Long> createObjectsForImportAliasTests() {
+        return [
+            DomainFactory.<T> createDomainWithImportAlias(service.clazz, [name: NAME] + properties),
+            DomainFactory.<T> createDomainWithImportAlias(service.clazz, [name: OTHER_NAME, importAlias: [IMPORT_ALIAS]] + otherProperties)
+        ].collectEntries {
+            [(it.name as String): it.id as Long]
+        }
     }
 }

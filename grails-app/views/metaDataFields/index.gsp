@@ -46,7 +46,7 @@
                                 roles="ROLE_OPERATOR"
                                 labels="${[g.message(code: "dataFields.libraryPreparationKit.importAlias")]}"
                                 textFields="${["importAlias"]}"
-                                link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKitImportAlias', id: libraryPreparationKit.name)}"
+                                link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKitImportAlias', id: libraryPreparationKit.id)}"
                             />
                         </td>
                         <td>
@@ -121,7 +121,7 @@
                                 roles="ROLE_OPERATOR"
                                 labels="${["Import Alias"]}"
                                 textFields="${["importAlias"]}"
-                                link="${g.createLink(controller: 'metaDataFields', action: 'createAntibodyTargetImportAlias', id: antibodyTarget.name)}"
+                                link="${g.createLink(controller: 'metaDataFields', action: 'createAntibodyTargetImportAlias', id: antibodyTarget.id)}"
                             />
                         </td>
                     </tr>
@@ -202,7 +202,7 @@
                                 roles="ROLE_OPERATOR"
                                 labels="${["Import Alias"]}"
                                 textFields="${["importAlias"]}"
-                                link="${g.createLink(controller: 'metaDataFields', action: 'createModelImportAlias', id: seqPlatform.model)}"
+                                link="${g.createLink(controller: 'metaDataFields', action: 'createSeqPlatformModelLabelImportAlias', id: seqPlatform.modelId)}"
                             />
                         </g:if>
                         </td>
@@ -218,7 +218,7 @@
                                 roles="ROLE_OPERATOR"
                                 labels="${["Import Alias"]}"
                                 textFields="${["importAlias"]}"
-                                link="${g.createLink(controller: 'metaDataFields', action: 'createSequencingKitImportAlias', id: seqPlatform.seqKit)}"
+                                link="${g.createLink(controller: 'metaDataFields', action: 'createSequencingKitLabelImportAlias', id: seqPlatform.seqKitId)}"
                             />
                         </g:if>
                         </td>
@@ -252,7 +252,7 @@
                     </tr>
             </thead>
             <tbody>
-                    <g:each var="seqType" in="${seqTypes}" >
+                <g:each var="seqType" in="${seqTypes}" >
                     <tr>
                         <td>
                             ${seqType.name}
@@ -287,7 +287,7 @@
                                 roles="ROLE_OPERATOR"
                                 labels="${["Import Alias"]}"
                                 textFields="${["importAlias"]}"
-                                link="${g.createLink(controller: 'metaDataFields', action: 'createSeqTypeImportAlias', id: seqType.name)}"
+                                link="${g.createLink(controller: 'metaDataFields', action: 'createSeqTypeImportAlias', id: seqType.id)}"
                             />
                         </td>
                     </tr>
@@ -340,7 +340,7 @@
                                     </tr>
                                     <tr class="prop">
                                         <td colspan="1" valign="top" class="name">
-                                            <label for="singleCellYes">
+                                            <label for="singleCell">
                                                 <g:message code="dataFields.seqType.singleCell"/>
                                             </label>
                                         </td>

@@ -10,11 +10,11 @@ class SeqPlatformModelLabel implements Entity {
 
     String name
 
+    static hasMany = [importAlias : String]
+
     static constraints = {
         name unique: true, blank: false
     }
-
-    static hasMany = [importAlias : String]
 
     @Override
     String toString() {

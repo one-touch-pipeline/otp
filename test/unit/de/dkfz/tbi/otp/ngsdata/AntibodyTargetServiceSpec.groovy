@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import spock.lang.*
+import grails.test.mixin.*
 
 @Mock([
         AntibodyTarget,

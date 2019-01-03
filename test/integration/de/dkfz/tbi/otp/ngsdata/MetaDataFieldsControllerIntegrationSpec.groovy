@@ -65,9 +65,9 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     void "test JSON createLibraryPreparationKitImportAlias valid input"() {
         given:
         LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit(name: 'LibraryPreparationKit', shortDisplayName: 'LPK')
-        controller.params.name = libraryPreparationKit.name
 
         when:
+        controller.params.id = libraryPreparationKit.id
         controller.params.importAlias = 'LibraryPreparationKitImportAlias'
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createLibraryPreparationKitImportAlias()
@@ -83,9 +83,9 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     void "test JSON createLibraryPreparationKitImportAlias invalid input"() {
         given:
         LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit(name: 'LibraryPreparationKit', shortDisplayName: 'LPK', importAlias: ['LibraryPreparationKitImportAlias'])
-        controller.params.name = libraryPreparationKit.name
 
         when:
+        controller.params.id = libraryPreparationKit.id
         controller.params.importAlias = importAlias
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createLibraryPreparationKitImportAlias()
@@ -269,15 +269,15 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         'SeqPlatform' | 'SeqPlatformModelLabel' | 'SequencingKitLabel'
     }
 
-    void "test JSON createModelAlias valid input"() {
+    void "test JSON createSeqPlatformModelLabelImportAlias valid input"() {
         given:
-        DomainFactory.createSeqPlatformModelLabel(name: "SeqPlatformModelLabel")
-        controller.params.name = "SeqPlatformModelLabel"
+        SeqPlatformModelLabel seqPlatformModelLabel = DomainFactory.createSeqPlatformModelLabel(name: "SeqPlatformModelLabel")
+        controller.params.id = seqPlatformModelLabel.id
 
         when:
         controller.params.importAlias = 'SeqPlatformModelLabelAlias'
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.createModelImportAlias()
+            controller.createSeqPlatformModelLabelImportAlias()
         }
 
         then:
@@ -287,7 +287,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     }
 
     @Unroll
-    void "test JSON createModelAlias invalid input"() {
+    void "test JSON createSeqPlatformModelLabelImportAlias invalid input"() {
         given:
         DomainFactory.createSeqPlatformModelLabel(name: "SeqPlatformModelLabel", importAlias: ["SeqPlatformModelLabelAlias"])
         controller.params.name = "SeqPlatformModelLabel"
@@ -295,7 +295,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         when:
         controller.params.importAlias = importAlias
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.createModelImportAlias()
+            controller.createSeqPlatformModelLabelImportAlias()
         }
 
         then:
@@ -306,15 +306,15 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         importAlias << ['', 'SeqPlatformModelLabel', 'SeqPlatformModelLabelAlias']
     }
 
-    void "test JSON createSequencingKitAlias valid input"() {
+    void "test JSON createSequencingKitLabelImportAlias valid input"() {
         given:
-        DomainFactory.createSequencingKitLabel(name: "SequencingKitLabel")
-        controller.params.name = "SequencingKitLabel"
+        SequencingKitLabel sequencingKitLabel = DomainFactory.createSequencingKitLabel(name: "SequencingKitLabel")
+        controller.params.id = sequencingKitLabel.id
 
         when:
         controller.params.importAlias = 'SequencingKitLabelAlias'
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.createSequencingKitImportAlias()
+            controller.createSequencingKitLabelImportAlias()
         }
 
         then:
@@ -324,7 +324,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
     }
 
     @Unroll
-    void "test JSON createSequencingKitAlias invalid input"() {
+    void "test JSON createSequencingKitLabelImportAlias invalid input"() {
         given:
         DomainFactory.createSequencingKitLabel(name: "SequencingKitLabel", importAlias: ["SequencingKitLabelAlias"])
         controller.params.name = "SequencingKitLabel"
@@ -332,7 +332,7 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         when:
         controller.params.importAlias = importAlias
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.createSequencingKitImportAlias()
+            controller.createSequencingKitLabelImportAlias()
         }
 
         then:
@@ -500,38 +500,38 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         'SEQTYPE3' | true   | true   | true      | false
     }
 
-    void "test JSON createSeqTypeAlias valid input"() {
+    void "test JSON createSeqTypeAlias adds the same alias to all SeqTypes of the given name"() {
         given:
         SeqType seqTypeSingle = DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: LibraryLayout.SINGLE)
         SeqType seqTypePaired = DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'SEQTYPE', libraryLayout: LibraryLayout.PAIRED)
 
         when:
-        controller.params.name = name
+        controller.params.id = seqTypeSingle.id
         controller.params.importAlias = importAlias
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSeqTypeImportAlias()
         }
 
         then:
-        controller.response.status == 200
-        controller.response.json.success
         seqTypeSingle.importAlias.contains(importAlias)
         seqTypePaired.importAlias.contains(importAlias)
 
         where:
-        name      | importAlias
-        'SEQTYPE' | 'importAlias1'
-        'SEQTYPE' | 'importAlias2'
+        importAlias << ['importAlias1', 'importAlias2']
     }
 
     @Unroll
-    void "test JSON createSeqTypeAlias invalid input"() {
+    void "test JSON createSeqTypeAlias invalid input (importAlias=#importAlias)"() {
         given:
-        DomainFactory.createSeqType(name: 'SEQTYPE1', dirName: 'SEQTYPE1', libraryLayout: LibraryLayout.SINGLE)
-        DomainFactory.createSeqType(name: 'SEQTYPE2', dirName: 'SEQTYPE2', importAlias: ['importAlias2'], libraryLayout: LibraryLayout.SINGLE)
+        List<SeqType> seqTypes = [
+                DomainFactory.createSeqType(name: "SEQTYPE0", dirName: "SEQTYPE0", libraryLayout: LibraryLayout.SINGLE),
+                DomainFactory.createSeqType(name: "SEQTYPE1", dirName: "SEQTYPE1", importAlias: ['importAlias1'], libraryLayout: LibraryLayout.SINGLE),
+        ]
+
+        SeqType seqType = seqTypes[suffix]
 
         when:
-        controller.params.name = name
+        controller.params.id = seqType.id
         controller.params.importAlias = importAlias
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createSeqTypeImportAlias()
@@ -542,19 +542,19 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         !controller.response.json.success
 
         where:
-        name       | importAlias
-        'SEQTYPE1' | null
-        'SEQTYPE1' | ''
-        'SEQTYPE1' | 'importAlias2'
-        'SEQTYPE2' | 'importAlias2'
+        suffix | importAlias
+        0      | null
+        0      | ''
+        0      | 'importAlias1'
+        1      | 'importAlias1'
     }
 
     void "test JSON createAntibodyTargetAlias valid input"() {
         given:
-        DomainFactory.createAntibodyTarget(name: 'ANTIBODYTARGET')
+        AntibodyTarget antibodyTarget = DomainFactory.createAntibodyTarget()
 
         when:
-        controller.params.name = name
+        controller.params.id = antibodyTarget.id
         controller.params.importAlias = importAlias
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createAntibodyTargetImportAlias()
@@ -565,20 +565,17 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         controller.response.json.success
 
         where:
-        name             | importAlias
-        'ANTIBODYTARGET' | 'importAlias1'
-        'ANTIBODYTARGET' | 'importAlias2'
+        importAlias << ['importAlias1', 'importAlias2']
     }
 
     @Unroll
-    void "test JSON createAntibodyTargetAlias invalid input"() {
+    void "test JSON createAntibodyTargetAlias invalid input (newAlias=#newAlias)"() {
         given:
-        DomainFactory.createAntibodyTarget(name: 'ANTIBODYTARGET1')
-        DomainFactory.createAntibodyTarget(name: 'ANTIBODYTARGET2', importAlias: ['importAlias2'])
+        AntibodyTarget antibodyTarget = DomainFactory.createAntibodyTarget(name: 'ANTIBODYTARGET', importAlias: importAliases)
 
         when:
-        controller.params.name = name
-        controller.params.importAlias = importAlias
+        controller.params.id = antibodyTarget.id
+        controller.params.importAlias = newAlias
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             controller.createAntibodyTargetImportAlias()
         }
@@ -588,10 +585,10 @@ class MetaDataFieldsControllerIntegrationSpec extends Specification implements U
         !controller.response.json.success
 
         where:
-        name              | importAlias
-        'ANTIBODYTARGET1' | null
-        'ANTIBODYTARGET1' | ''
-        'ANTIBODYTARGET1' | 'importAlias2'
-        'ANTIBODYTARGET2' | 'importAlias2'
+        importAliases                    | newAlias
+        []                               | null
+        ['']                             | ''
+        ['importAlias']                  | 'importAlias'
+        ['importAlias1', 'importAlias2'] | 'importAlias2'
     }
 }

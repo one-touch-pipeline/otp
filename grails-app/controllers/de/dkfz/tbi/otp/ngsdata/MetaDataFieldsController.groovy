@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.dataprocessing.*
 import grails.converters.*
-import org.springframework.validation.*
 
 
 class MetaDataFieldsController implements CheckAndCall {
@@ -30,6 +29,7 @@ class MetaDataFieldsController implements CheckAndCall {
 
         List antibodyTargets = AntibodyTarget.list(sort: "name", order: "asc").collect {
             [
+                    id           : it.id,
                     name         : it.name,
                     importAliases: it.importAlias?.sort()?.join(' | '),
             ]
@@ -37,6 +37,7 @@ class MetaDataFieldsController implements CheckAndCall {
 
         List seqCenters = SeqCenter.list(sort: "name", order: "asc").collect {
             [
+                    id     : it.id,
                     name   : it.name,
                     dirName: it.dirName,
             ]
@@ -45,9 +46,11 @@ class MetaDataFieldsController implements CheckAndCall {
         List seqPlatforms = SeqPlatform.list().collect {
             [
                     name               : it.name,
+                    modelId            : it.seqPlatformModelLabel?.id,
                     model              : it.seqPlatformModelLabel?.name,
                     modelImportAliases : it.seqPlatformModelLabel?.importAlias?.sort()?.join(' | '),
                     hasModel           : it.seqPlatformModelLabel ? true : false,
+                    seqKitId           : it.sequencingKitLabel?.id,
                     seqKit             : it.sequencingKitLabel?.name,
                     seqKitImportAliases: it.sequencingKitLabel?.importAlias?.sort()?.join(' | '),
                     hasSeqKit          : it.sequencingKitLabel?.name ? true : false,
@@ -56,6 +59,7 @@ class MetaDataFieldsController implements CheckAndCall {
 
         List seqTypes = SeqType.list(sort: "name", order: "asc").collect {
             [
+                    id            : SeqType.findAllByName(it.name)*.id?.sort()?.first(),
                     name          : it.name,
                     dirName       : it.dirName,
                     singleCell    : it.singleCell,
@@ -115,24 +119,24 @@ class MetaDataFieldsController implements CheckAndCall {
         checkErrorAndCallMethod(cmd, { seqPlatformService.createNewSeqPlatform(cmd.platform, cmd.model, cmd.kit) })
     }
 
-    JSON createModelImportAlias(CreateModelImportAliasCommand cmd) {
-        createImportAlias(cmd);
+    JSON createSeqPlatformModelLabelImportAlias(CreateSeqPlatformModelLabelImportAliasCommand cmd) {
+        createImportAlias(cmd)
     }
 
-    JSON createSequencingKitImportAlias(CreateSequencingKitImportAliasCommand cmd) {
-        createImportAlias(cmd);
+    JSON createSequencingKitLabelImportAlias(CreateSequencingKitLabelImportAliasCommand cmd) {
+        createImportAlias(cmd)
     }
 
     JSON createSeqTypeImportAlias(CreateSeqTypeImportAliasCommand cmd) {
-        createImportAlias(cmd);
+        createImportAlias(cmd)
     }
 
     JSON createAntibodyTargetImportAlias(CreateAntibodyTargetImportAliasCommand cmd) {
-        createImportAlias(cmd);
+        createImportAlias(cmd)
     }
 
     JSON createLibraryPreparationKitImportAlias(CreateLibraryPreparationKitImportAliasCommand cmd) {
-        createImportAlias(cmd);
+        createImportAlias(cmd)
     }
 
     JSON createSeqType(CreateSeqTypeCommand cmd) {
@@ -149,7 +153,7 @@ class MetaDataFieldsController implements CheckAndCall {
     }
 
     void createImportAlias(CreateImportAliasCommand cmd){
-        checkErrorAndCallMethod(cmd, { cmd.service.addNewAlias(cmd.name, cmd.importAlias) })
+        checkErrorAndCallMethod(cmd, { cmd.service.addNewAlias(cmd.id, cmd.importAlias) })
     }
 }
 
@@ -303,11 +307,11 @@ class CreateSeqPlatformCommand implements Serializable {
 
 abstract class CreateImportAliasCommand implements Serializable {
     abstract MetadataFieldsService getService()
-    String name
+    Long id
     String importAlias
 
     static constraints = {
-        name(blank: false)
+        id(blank: false)
         importAlias(blank: false, validator: { val, obj ->
             if (obj.service.findByNameOrImportAlias(val)) {
                 return 'Duplicate'
@@ -318,13 +322,9 @@ abstract class CreateImportAliasCommand implements Serializable {
     void setImportAlias(String importAlias) {
         this.importAlias = importAlias?.trim()?.replaceAll(" +", " ")
     }
-
-    void setId(String id) {
-        this.name = id
-    }
 }
 
-class CreateModelImportAliasCommand extends CreateImportAliasCommand {
+class CreateSeqPlatformModelLabelImportAliasCommand extends CreateImportAliasCommand {
     SeqPlatformModelLabelService seqPlatformModelLabelService
 
     @Override
@@ -333,7 +333,7 @@ class CreateModelImportAliasCommand extends CreateImportAliasCommand {
     }
 }
 
-class CreateSequencingKitImportAliasCommand extends CreateImportAliasCommand {
+class CreateSequencingKitLabelImportAliasCommand extends CreateImportAliasCommand {
     SequencingKitLabelService sequencingKitLabelService
 
     @Override

@@ -1,10 +1,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.test.mixin.*
-import spock.lang.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
 
 @Mock([
         LibraryPreparationKit,
