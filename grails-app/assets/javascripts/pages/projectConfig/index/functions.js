@@ -128,10 +128,10 @@ $.otp.projectConfig = {
         $.each(data.alignmentInfo, function (key, value) {
             $('#alignment_info_table tr:last').after(
                 '<tr><td colspan="3"><strong>' + key + '</strong></td></tr>' +
-                '<tr><td style=\' padding: 5px;\'>' + aligning + '<td>' + value.bwaCommand + '</td><td>' + value.bwaOptions + '</td></tr>' +
-                '<tr><td style=\' padding: 5px;\'>' + merging + '</td><td>' + value.mergeCommand + '</td><td>' + value.mergeOptions + '</td></tr>' +
-                '<tr><td style=\' padding: 5px;\'>' + samtools + '</td><td>' + value.samToolsCommand + '</td><td></td></tr>' +
-                '<tr><td style=\' padding: 5px;\'>' + roddyPipelineVersion + '</td><td>' + value.pluginVersion + '</td><td></td></tr>');
+                '<tr><td style=\' padding: 5px; white-space: nowrap;\'>' + aligning + '<td>' + value.alignmentProgram + '</td><td>' + value.alignmentParameter + '</td></tr>' +
+                '<tr><td style=\' padding: 5px; white-space: nowrap;\'>' + merging + '</td><td>' + value.mergeCommand + '</td><td>' + value.mergeOptions + '</td></tr>' +
+                '<tr><td style=\' padding: 5px; white-space: nowrap;\'>' + samtools + '</td><td>' + value.samToolsCommand + '</td><td></td></tr>' +
+                '<tr><td style=\' padding: 5px; white-space: nowrap;\'>' + roddyPipelineVersion + '</td><td>' + value.pluginVersion + '</td><td></td></tr>');
         });
     }
 };
