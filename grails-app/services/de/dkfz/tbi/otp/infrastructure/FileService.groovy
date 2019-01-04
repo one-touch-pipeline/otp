@@ -297,7 +297,7 @@ class FileService {
         assert Files.exists(existingPath)
         assert !Files.exists(linkPath)
 
-        createLinkIntern(linkPath, linkPath.relativize(existingPath))
+        createLinkIntern(linkPath, linkPath.parent.relativize(existingPath))
     }
 
     private void createLinkIntern(Path linkPath, Path existingPath) {

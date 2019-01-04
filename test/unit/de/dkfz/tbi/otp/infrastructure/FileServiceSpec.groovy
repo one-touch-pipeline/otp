@@ -465,7 +465,7 @@ class FileServiceSpec extends Specification {
         then:
         Files.isSymbolicLink(link)
         !Files.readSymbolicLink(link).isAbsolute()
-        link.resolve(Files.readSymbolicLink(link)).normalize() == file
+        link.parent.resolve(Files.readSymbolicLink(link)).normalize() == file
     }
 
 
