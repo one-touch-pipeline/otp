@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
+@SuppressWarnings('JavaIoPackageAccess')
 class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, ProcessParameterObject {
 
     static final String INPUT_DIRECTORY_NAME = 'cell-ranger-input'
@@ -43,7 +44,6 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
             CREATED_RESULT_FILES,
             CREATED_RESULT_DIRS,
     ].flatten().asImmutable()
-
 
 
     Set<SeqTrack> seqTracks

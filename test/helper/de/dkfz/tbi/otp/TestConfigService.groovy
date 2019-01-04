@@ -6,10 +6,12 @@ import de.dkfz.tbi.otp.ngsdata.*
 import grails.util.*
 import org.springframework.context.*
 
+@SuppressWarnings('JavaIoPackageAccess')
 class TestConfigService extends ConfigService {
 
     static Map cleanProperties
 
+    @SuppressWarnings('UnsafeImplementationAsMap')
     TestConfigService(Map<OtpProperty, String> properties = [:]) {
         super()
         if (Environment.current.name == "WORKFLOW_TEST") {

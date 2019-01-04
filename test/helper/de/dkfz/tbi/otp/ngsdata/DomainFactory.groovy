@@ -33,6 +33,7 @@ class DomainFactoryProxyRoddy implements IsRoddy { }
 @SuppressWarnings('EmptyClass')
 class DomainFactoryProxyCellRanger implements CellRangerFactory { }
 
+@SuppressWarnings('NoJavaUtilDate')
 class DomainFactory {
 
     private DomainFactory() {
@@ -2108,7 +2109,6 @@ class DomainFactory {
     }
 
     static void createRoddyProcessingOptions(File basePath = TestCase.uniqueNonExistentPath) {
-
         ProcessingOption processingOptionPath = new ProcessingOption(
                 name: OptionName.RODDY_PATH,
                 type: null,
@@ -2266,7 +2266,6 @@ class DomainFactory {
     }
 
     static void changeSeqType(RoddyBamFile bamFile, SeqType seqType, LibraryLayout libraryName = null) {
-
         bamFile.mergingWorkPackage.seqType = seqType
         if (seqType.isWgbs()) {
             bamFile.mergingWorkPackage.libraryPreparationKit = null
