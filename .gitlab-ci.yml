@@ -227,10 +227,13 @@ generate_changelog:
     - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> $ARTIFACTS_BASE_DIRECTORY/CHANGELOG.txt
     - git config gitchangelog.rc-path scripts/gitchangelog/release_notes_gitchangelog.rc.reference
     - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> $ARTIFACTS_BASE_DIRECTORY/RELEASE_NOTES.txt
+    - cat $ARTIFACTS_BASE_DIRECTORY/CHANGELOG.txt
+    - cat $ARTIFACTS_BASE_DIRECTORY/RELEASE_NOTES.txt
   artifacts:
     paths:
       - $ARTIFACTS_BASE_DIRECTORY
     expire_in: 4 weeks
+    when: on_success
 
 
 

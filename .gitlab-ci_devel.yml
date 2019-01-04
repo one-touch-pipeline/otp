@@ -59,7 +59,7 @@ stages:
   after_script:
     - head -1 target/test-reports/cobertura/coverage.xml
   coverage: /line-rate="\d.(\d\d)\d+"/
-  artifacts: &artifacts_template
+  artifacts:
     <<: *artifacts_template
     paths:
       - target/test-reports/*.xml
@@ -166,15 +166,17 @@ generate_changelog:
     - branches
   image: otp-generate-changelog
   script:
+    - mkdir -p $ARTIFACTS_BASE_DIRECTORY
     - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
     - echo $LATEST_TAG
     - git config gitchangelog.rc-path scripts/gitchangelog/gitchangelog.rc.reference
-    - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> CHANGELOG.txt
+    - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> $ARTIFACTS_BASE_DIRECTORY/CHANGELOG.txt
     - git config gitchangelog.rc-path scripts/gitchangelog/release_notes_gitchangelog.rc.reference
-    - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> RELEASE_NOTES.txt
+    - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> $ARTIFACTS_BASE_DIRECTORY/RELEASE_NOTES.txt
+    - cat $ARTIFACTS_BASE_DIRECTORY/CHANGELOG.txt
+    - cat $ARTIFACTS_BASE_DIRECTORY/RELEASE_NOTES.txt
   artifacts:
     <<: *artifacts_template
     paths:
-      - CHANGELOG.txt
-      - RELEASE_NOTES.txt
+    - $ARTIFACTS_BASE_DIRECTORY
     when: on_success
