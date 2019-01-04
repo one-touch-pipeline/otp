@@ -131,6 +131,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
             1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
             0 * cleanupWorkDirectory(_, _)
         }
+        linkFilesToFinalDestinationService.md5SumService = new Md5SumService()
         linkFilesToFinalDestinationService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {
             0 * informResultsAreBlocked(_) >> { AbstractMergedBamFile bamFile -> }
         }
@@ -162,6 +163,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
             1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
             0 * cleanupWorkDirectory(_, _)
         }
+        linkFilesToFinalDestinationService.md5SumService = new Md5SumService()
         linkFilesToFinalDestinationService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {
             1 * informResultsAreBlocked(_) >> { AbstractMergedBamFile bamFile -> }
         }

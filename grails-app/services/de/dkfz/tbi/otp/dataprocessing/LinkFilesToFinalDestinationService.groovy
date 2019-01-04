@@ -8,6 +8,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 
+import java.nio.file.Path
+
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
 class LinkFilesToFinalDestinationService {
@@ -23,6 +25,8 @@ class LinkFilesToFinalDestinationService {
     AbstractMergedBamFileService abstractMergedBamFileService
 
     QcTrafficLightNotificationService qcTrafficLightNotificationService
+
+    Md5SumService md5SumService
 
 
     void prepareRoddyBamFile(RoddyBamFile roddyBamFile) {
@@ -84,13 +88,13 @@ class LinkFilesToFinalDestinationService {
     }
 
     void setBamFileValues(RoddyBamFile roddyBamFile) {
-        File md5sumFile = roddyBamFile.workMd5sumFile
-        assert md5sumFile.exists(): "The md5sum file of ${roddyBamFile} does not exist"
-        assert md5sumFile.text: "The md5sum file of ${roddyBamFile} is empty"
+        Path md5sumFile = roddyBamFile.workMd5sumFile.toPath()
+        String md5sum = md5SumService.extractMd5Sum(md5sumFile)
+
         RoddyBamFile.withTransaction {
             roddyBamFile.fileOperationStatus = FileOperationStatus.PROCESSED
             roddyBamFile.fileSize = roddyBamFile.workBamFile.size()
-            roddyBamFile.md5sum = md5sumFile.text.replaceAll("\n", "").toLowerCase(Locale.ENGLISH)
+            roddyBamFile.md5sum = md5sum
             roddyBamFile.fileExists = true
             roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.workBamFile.lastModified())
             assert roddyBamFile.save(flush: true)

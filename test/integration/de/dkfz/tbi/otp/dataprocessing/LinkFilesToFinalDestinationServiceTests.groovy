@@ -763,26 +763,6 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
     }
 
     @Test
-    void testExecute_Md5sumFileDoesNotExist_ShouldFail() {
-        setUp_allFine()
-
-        assert shouldFail (AssertionError) {
-            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
-        } ==~ /The md5sum file of .* does not exist.*/
-    }
-
-    @Test
-    void testExecute_Md5sumFileIsEmpty_ShouldFail() {
-        setUp_allFine()
-        assert roddyBamFile.workDirectory.mkdirs()
-        roddyBamFile.workMd5sumFile.setText("")
-
-        assert shouldFail(AssertionError) {
-            linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
-        } ==~ /.*The md5sum file of .* is empty.*/
-    }
-
-    @Test
     void testExecute_RoddyBamFileIsWithdrawn_ShouldNotBeCopied() {
         setUp_allFine()
         roddyBamFile.withdrawn = true
