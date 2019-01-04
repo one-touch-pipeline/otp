@@ -3,9 +3,11 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+import groovy.transform.*
 import org.hibernate.*
 
 import static org.springframework.util.Assert.*
+
 /**
  * Represents a single generation of one merged BAM file (whereas a {@link AbstractMergingWorkPackage} represents all
  * generations).
@@ -33,19 +35,45 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
 
     QcTrafficLightStatus qcTrafficLightStatus
 
+    @TupleConstructor
     enum QcTrafficLightStatus {
         // status is set by OTP when QC thresholds were met
-        QC_PASSED,
+        QC_PASSED(JobLinkCase.CREATE_LINKS),
         // status is set by bioinformaticians when they decide to keep the file although QC thresholds were not met
-        ACCEPTED,
+        ACCEPTED(JobLinkCase.SHOULD_NOT_OCCUR),
         // status is set by OTP when QC error thresholds were not met
-        BLOCKED,
+        BLOCKED(JobLinkCase.CREATE_NO_LINK),
         // status is set by bioinformaticians when they decide not to use a file for further analyses
-        REJECTED,
+        REJECTED(JobLinkCase.SHOULD_NOT_OCCUR),
         // status is set by OTP when QC thresholds were not met but the project is configured to allow failed files
-        AUTO_ACCEPTED,
+        AUTO_ACCEPTED(JobLinkCase.CREATE_LINKS),
         // status is set by OTP when project is configured to not check QC thresholds
-        UNCHECKED,
+        UNCHECKED(JobLinkCase.CREATE_LINKS),
+
+
+        final JobLinkCase jobLinkCase
+
+        /**
+         * Category of {@link QcTrafficLightStatus}. It defines, if links should be created or nor should not
+         * should not occur automatically in job system, but only set manually in the gui.
+         */
+        @TupleConstructor
+        enum JobLinkCase {
+            /**
+             * For that cases, links should be created
+             */
+            CREATE_LINKS(true),
+            /**
+             * For that cases, no links should be created
+             */
+            CREATE_NO_LINK(true),
+            /**
+             * Cases set manually and should therefor not occur during workflow
+             */
+            SHOULD_NOT_OCCUR(false),
+
+            final boolean allowedInWorkflow
+        }
     }
 
     abstract boolean isMostRecentBamFile()
@@ -167,7 +195,8 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
         if (this.id == processableBamFileInProjectFolder?.id) {
             return getPathForFurtherProcessingNoCheck()
         } else {
-            throw new IllegalStateException("This BAM file is not in the project folder or not processable.\nthis: ${this}\nprocessableBamFileInProjectFolder: ${processableBamFileInProjectFolder}")
+            throw new IllegalStateException("This BAM file is not in the project folder or not processable.\n" +
+                    "this: ${this}\nprocessableBamFileInProjectFolder: ${processableBamFileInProjectFolder}")
         }
     }
 

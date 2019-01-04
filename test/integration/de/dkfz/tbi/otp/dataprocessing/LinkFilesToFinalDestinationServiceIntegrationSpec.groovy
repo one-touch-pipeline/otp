@@ -1,19 +1,16 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.notification.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
-import org.codehaus.groovy.grails.context.support.*
 import org.junit.*
 import org.junit.rules.*
 import org.springframework.beans.factory.annotation.*
@@ -132,7 +129,8 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
             0 * cleanupWorkDirectory(_, _)
         }
         linkFilesToFinalDestinationService.md5SumService = new Md5SumService()
-        linkFilesToFinalDestinationService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {
+        linkFilesToFinalDestinationService.qcTrafficLightCheckService = new QcTrafficLightCheckService()
+        linkFilesToFinalDestinationService.qcTrafficLightCheckService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {
             0 * informResultsAreBlocked(_) >> { AbstractMergedBamFile bamFile -> }
         }
         linkFilesToFinalDestinationService.executeRoddyCommandService = Mock(ExecuteRoddyCommandService) {
@@ -164,7 +162,8 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec 
             0 * cleanupWorkDirectory(_, _)
         }
         linkFilesToFinalDestinationService.md5SumService = new Md5SumService()
-        linkFilesToFinalDestinationService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {
+        linkFilesToFinalDestinationService.qcTrafficLightCheckService = new QcTrafficLightCheckService()
+        linkFilesToFinalDestinationService.qcTrafficLightCheckService.qcTrafficLightNotificationService = Mock(QcTrafficLightNotificationService) {
             1 * informResultsAreBlocked(_) >> { AbstractMergedBamFile bamFile -> }
         }
         linkFilesToFinalDestinationService.executeRoddyCommandService = Mock(ExecuteRoddyCommandService) {

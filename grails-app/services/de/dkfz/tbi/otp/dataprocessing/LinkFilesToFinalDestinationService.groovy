@@ -1,8 +1,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
@@ -24,7 +23,7 @@ class LinkFilesToFinalDestinationService {
 
     AbstractMergedBamFileService abstractMergedBamFileService
 
-    QcTrafficLightNotificationService qcTrafficLightNotificationService
+    QcTrafficLightCheckService qcTrafficLightCheckService
 
     Md5SumService md5SumService
 
@@ -53,7 +52,7 @@ class LinkFilesToFinalDestinationService {
             cleanupWorkDirectory(roddyBamFile, realm)
             executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
             cleanupOldResults(roddyBamFile, realm)
-            handleQcCheck(roddyBamFile) {
+            handleQcCheckAndSetBamFile(roddyBamFile) {
                 linkNewResults(roddyBamFile, realm)
             }
         } else {
@@ -64,26 +63,13 @@ class LinkFilesToFinalDestinationService {
     void linkToFinalDestinationAndCleanupRna(RnaRoddyBamFile roddyBamFile, Realm realm) {
         executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
         cleanupOldRnaResults(roddyBamFile, realm)
-        handleQcCheck(roddyBamFile) {
+        handleQcCheckAndSetBamFile(roddyBamFile) {
             linkNewRnaResults(roddyBamFile, realm)
         }
     }
 
-    private String getInvalidQcTrafficLightStatusMessageForStatus(QcTrafficLightStatus status) {
-        List<QcTrafficLightStatus> validStatuses = [QcTrafficLightStatus.QC_PASSED, QcTrafficLightStatus.AUTO_ACCEPTED, QcTrafficLightStatus.UNCHECKED, QcTrafficLightStatus.BLOCKED]
-        return "Unhandled QcTrafficLightStatus: ${status}. Only the following values are valid: ${validStatuses.join(", ")}"
-    }
-
-    private void handleQcCheck(RoddyBamFile roddyBamFile, Closure linkCall) {
-        if (!roddyBamFile.qcTrafficLightStatus || roddyBamFile.qcTrafficLightStatus in [QcTrafficLightStatus.QC_PASSED, QcTrafficLightStatus.AUTO_ACCEPTED, QcTrafficLightStatus.UNCHECKED]) {
-            linkCall()
-        } else if (roddyBamFile.qcTrafficLightStatus == QcTrafficLightStatus.BLOCKED) {
-            if (roddyBamFile.project.qcThresholdHandling.notifiesUser) {
-                qcTrafficLightNotificationService.informResultsAreBlocked(roddyBamFile)
-            }
-        } else {
-            throw new RuntimeException(getInvalidQcTrafficLightStatusMessageForStatus(roddyBamFile.qcTrafficLightStatus))
-        }
+    private void handleQcCheckAndSetBamFile(RoddyBamFile roddyBamFile, Closure linkCall) {
+        qcTrafficLightCheckService.handleQcCheck(roddyBamFile, linkCall)
         setBamFileValues(roddyBamFile)
     }
 

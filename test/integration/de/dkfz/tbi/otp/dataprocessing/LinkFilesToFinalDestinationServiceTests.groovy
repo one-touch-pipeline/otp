@@ -643,8 +643,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
         roddyBamFile.qcTrafficLightStatus = QcTrafficLightStatus.ACCEPTED
         assert roddyBamFile.save(flush: true)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        TestCase.shouldFailWithMessageContaining(RuntimeException,
-                linkFilesToFinalDestinationService.getInvalidQcTrafficLightStatusMessageForStatus(QcTrafficLightStatus.ACCEPTED)) {
+        TestCase.shouldFailWithMessageContaining(RuntimeException, QcTrafficLightStatus.ACCEPTED.toString()) {
             linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         }
     }
@@ -656,8 +655,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
         roddyBamFile.qcTrafficLightStatus = QcTrafficLightStatus.REJECTED
         assert roddyBamFile.save(flush: true)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        TestCase.shouldFailWithMessageContaining(RuntimeException,
-                linkFilesToFinalDestinationService.getInvalidQcTrafficLightStatusMessageForStatus(QcTrafficLightStatus.REJECTED)) {
+        TestCase.shouldFailWithMessageContaining(RuntimeException, QcTrafficLightStatus.REJECTED.toString()) {
             linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         }
     }
