@@ -9,11 +9,11 @@ class AbstractMergedBamFileService {
 
     /**
      * @deprecated Use bamFile.baseDirectory instead, which can also handle chipseq directories
-     * @param bamFile, the mergedBamFile which has to be copied
+     * @param bamFile , the mergedBamFile which has to be copied
      * @return the final directory of the mergedBamFile after copying
      */
     @Deprecated
-    static String destinationDirectory (AbstractMergedBamFile bamFile) {
+    static String destinationDirectory(AbstractMergedBamFile bamFile) {
         notNull(bamFile, "the input of the method destinationDirectory is null")
         return bamFile.baseDirectory.absolutePath + '/'
     }

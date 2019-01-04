@@ -85,6 +85,10 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
         return "${bamFileName}.bai"
     }
 
+    String getMd5SumFileName() {
+        return "${bamFileName}.md5"
+    }
+
     @Override
     AlignmentConfig getAlignmentConfig() {
         return mergingWorkPackage.config
@@ -109,6 +113,42 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
     File getResultDirectory() {
         return new File(outputDirectory, OUTPUT_DIRECTORY_NAME)
     }
+
+    /**
+     * Map of names to use for link and name used by CellRanger
+     */
+    Map<String, String> getFileMappingForLinks() {
+        CREATED_RESULT_FILES_AND_DIRS.collectEntries {
+            [(getLinkNameForFile(it)): it]
+        }
+    }
+
+    /**
+     * list of linked files
+     */
+    List<File> getLinkedResultFiles() {
+        File result = workDirectory
+        return CREATED_RESULT_FILES_AND_DIRS.collect {
+            new File(result, getLinkNameForFile(it))
+        }
+    }
+
+    /**
+     * return the name to use for the links of the result file, because the bam file should be named differently
+     */
+    private String getLinkNameForFile(String name) {
+        switch (name) {
+            case ORIGINAL_BAM_FILE_NAME:
+                return bamFileName
+            case ORIGINAL_BAI_FILE_NAME:
+                return baiFileName
+            case ORIGINAL_BAM_MD5SUM_FILE_NAME:
+                return md5SumFileName
+            default:
+                return name
+        }
+    }
+
 
     @Override
     File getFinalInsertSizeFile() {

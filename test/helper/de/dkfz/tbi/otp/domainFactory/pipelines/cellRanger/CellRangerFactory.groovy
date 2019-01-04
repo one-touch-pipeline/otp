@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.*
 
 trait CellRangerFactory implements IsAlignment {
 
@@ -38,9 +39,9 @@ trait CellRangerFactory implements IsAlignment {
         if (!workPackage) {
             workPackage = createMergingWorkPackage()
             DomainFactory.createReferenceGenomeProjectSeqType(
-                    referenceGenome : workPackage.referenceGenome,
-                    project         : workPackage.project,
-                    seqType         : workPackage.seqType,
+                    referenceGenome: workPackage.referenceGenome,
+                    project: workPackage.project,
+                    seqType: workPackage.seqType,
                     statSizeFileName: workPackage.statSizeFileName,
             )
         }
@@ -91,8 +92,8 @@ trait CellRangerFactory implements IsAlignment {
         createDomainObject(CellRangerQualityAssessment, getDefaultValuesForAbstractQualityAssessment() + [
                 qualityAssessmentMergedPass: DomainFactory.createQualityAssessmentMergedPass(
                         abstractMergedBamFile: abstractMergedBamFile
-                )
-            ] + getQaValuesProperties(), properties
+                ),
+        ] + getQaValuesProperties(), properties
         )
     }
 
@@ -150,4 +151,18 @@ trait CellRangerFactory implements IsAlignment {
         ] + properties
         return [csvData.keySet().join(","), csvData.values().join(",")].join("\n")
     }
+
+
+    @SuppressWarnings('JavaIoPackageAccess')
+    void createResultFiles(SingleCellBamFile singleCellBamFile) {
+        File resultDir = singleCellBamFile.resultDirectory
+
+        SingleCellBamFile.CREATED_RESULT_FILES.each {
+            CreateFileHelper.createFile(new File(resultDir, it))
+        }
+        SingleCellBamFile.CREATED_RESULT_DIRS.each {
+            CreateFileHelper.createFile(new File(new File(resultDir, it), 'dummyFile'))
+        }
+    }
+
 }

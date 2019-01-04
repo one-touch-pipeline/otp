@@ -9,6 +9,7 @@ plan(workflow, ctx, true) {
     start("start", "cellRangerAlignmentStartJob")
     job("executeCellRanger", "executeCellRangerJob")
     job("parseCellRangerQc", "parseCellRangerQcJob")
+    job("linkCellRangerResult", "linkCellRangerResultFilesJob")
     job("notifyProcessFinished", "notifyProcessFinishedJob")
 }
 

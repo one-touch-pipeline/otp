@@ -2,13 +2,13 @@ package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import org.junit.*
@@ -120,9 +120,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory {
 
     void "validateFilesExistsInResultDirectory, if singleCellBamFile given and all files exist, then throw no exception"() {
         given:
-        new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().absolutePath,
-        ])
+        new TestConfigService(temporaryFolder.newFolder())
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         File result = singleCellBamFile.resultDirectory
@@ -153,9 +151,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory {
     @Unroll
     void "validateFilesExistsInResultDirectory, if singleCellBamFile given and file/directory '#missingFile' does not exist, then throw an assert"() {
         given:
-        new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().absolutePath,
-        ])
+        new TestConfigService(temporaryFolder.newFolder())
 
         SingleCellBamFile singleCellBamFile = createBamFile()
         File result = singleCellBamFile.resultDirectory
@@ -197,7 +193,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory {
                 referenceGenomeIndexService: Mock(ReferenceGenomeIndexService) {
                     1 * getFile(_) >> indexFile
                 },
-                processingOptionService: Mock(ProcessingOptionService) {
+                processingOptionService    : Mock(ProcessingOptionService) {
                     1 * findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_COUNT) >> '15'
                     1 * findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_MEM) >> '60'
                 },
@@ -230,7 +226,7 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory {
                 referenceGenomeIndexService: Mock(ReferenceGenomeIndexService) {
                     1 * getFile(_) >> indexFile
                 },
-                processingOptionService: Mock(ProcessingOptionService) {
+                processingOptionService    : Mock(ProcessingOptionService) {
                     1 * findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_COUNT) >> '15'
                     1 * findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_MEM) >> '60'
                 },
@@ -240,6 +236,113 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory {
         Map<String, String> map = cellRangerService.createCellRangerParameters(singleCellBamFile)
 
         then:
-        map[CellRangerParameters.FORCE_CELLS.parameterName]  == singleCellBamFile.mergingWorkPackage.enforcedCells.toString()
+        map[CellRangerParameters.FORCE_CELLS.parameterName] == singleCellBamFile.mergingWorkPackage.enforcedCells.toString()
+    }
+
+
+    @Unroll
+    void "finishCellRangerWorkflow, if bam state is #state, then do necessary work and update database"() {
+        given:
+        new TestConfigService(temporaryFolder.newFolder())
+
+        String md5sum = HelperUtils.randomMd5sum
+        SingleCellBamFile singleCellBamFile = createBamFile([
+                fileOperationStatus: state,
+        ])
+        singleCellBamFile.metaClass.isMostRecentBamFile = { -> true } //use criteria which do not work in unit tests
+
+        createResultFiles(singleCellBamFile)
+
+        CellRangerService cellRangerService = new CellRangerService([
+                cellRangerWorkflowService   : Mock(CellRangerWorkflowService) {
+                    1 * cleanupOutputDirectory(singleCellBamFile)
+                    1 * correctFilePermissions(singleCellBamFile)
+                    1 * linkResultFiles(singleCellBamFile)
+                },
+                abstractMergedBamFileService: Mock(AbstractMergedBamFileService) {
+                    1 * setSamplePairStatusToNeedProcessing(singleCellBamFile)
+                },
+                md5SumService               : Mock(Md5SumService) {
+                    1 * extractMd5Sum(_) >> md5sum
+                },
+                qcTrafficLightCheckService  : Mock(QcTrafficLightCheckService) {
+                    1 * handleQcCheck(singleCellBamFile, _) >> { AbstractMergedBamFile bam, Closure closure ->
+                        closure()
+                    }
+                },
+                fileSystemService           : Mock(FileSystemService) {
+                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    0 * _
+                },
+        ])
+
+        when:
+        cellRangerService.finishCellRangerWorkflow(singleCellBamFile)
+
+        then:
+        singleCellBamFile.refresh()
+        singleCellBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        singleCellBamFile.fileSize > 0
+        singleCellBamFile.md5sum == md5sum
+        singleCellBamFile.fileExists
+        singleCellBamFile.dateFromFileSystem != null
+        singleCellBamFile.mergingWorkPackage.bamFileInProjectFolder == singleCellBamFile
+
+        where:
+        state << [
+                AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+        ]
+    }
+
+    void "finishCellRangerWorkflow, if bam state is DECLARED, then throw assertion and do not change database"() {
+        given:
+        new TestConfigService(temporaryFolder.newFolder())
+
+        String md5sum = HelperUtils.randomMd5sum
+        SingleCellBamFile singleCellBamFile = createBamFile([
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+        ])
+        singleCellBamFile.metaClass.isMostRecentBamFile = { -> true } //use criteria which do not work in unit tests
+
+        createResultFiles(singleCellBamFile)
+
+        CellRangerService cellRangerService = new CellRangerService([
+                cellRangerWorkflowService   : Mock(CellRangerWorkflowService) {
+                    _ * cleanupOutputDirectory(singleCellBamFile)
+                    _ * correctFilePermissions(singleCellBamFile)
+                    _ * linkResultFiles(singleCellBamFile)
+                },
+                abstractMergedBamFileService: Mock(AbstractMergedBamFileService) {
+                    0 * setSamplePairStatusToNeedProcessing(singleCellBamFile)
+                },
+                md5SumService               : Mock(Md5SumService) {
+                    _ * extractMd5Sum(_) >> md5sum
+                },
+                qcTrafficLightCheckService  : Mock(QcTrafficLightCheckService) {
+                    0 * handleQcCheck(singleCellBamFile, _) >> { AbstractMergedBamFile bam, Closure closure ->
+                        closure()
+                    }
+                },
+                fileSystemService           : Mock(FileSystemService) {
+                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    0 * _
+                },
+        ])
+
+        when:
+        cellRangerService.finishCellRangerWorkflow(singleCellBamFile)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('contains(singleCellBamFile.fileOperationStatus)')
+
+        singleCellBamFile.refresh()
+        singleCellBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.DECLARED
+        singleCellBamFile.md5sum == null
+        !singleCellBamFile.fileExists
+        singleCellBamFile.dateFromFileSystem == null
+        singleCellBamFile.mergingWorkPackage.bamFileInProjectFolder == null
     }
 }

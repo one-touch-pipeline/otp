@@ -57,8 +57,15 @@ class TestConfigService extends ConfigService {
                     } else {
                         assert false
                     }
-                }
+                },
         ] as ApplicationContext
+    }
+
+    TestConfigService(File baseFolder, Map<OtpProperty, String> properties = [:]) {
+        this([
+                (OtpProperty.PATH_PROJECT_ROOT)   : new File(baseFolder, 'root').path,
+                (OtpProperty.PATH_PROCESSING_ROOT): new File(baseFolder, 'processing').path,
+        ] + properties)
     }
 
     void setOtpProperty(OtpProperty key, String value) {

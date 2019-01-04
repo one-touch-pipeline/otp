@@ -5,6 +5,8 @@ import de.dkfz.tbi.otp.dataprocessing.singleCell.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.qcTrafficLight.*
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.*
 import groovy.transform.*
 
@@ -45,9 +47,17 @@ class CellRangerService {
 
     LsdfFilesService lsdfFilesService
 
+    AbstractMergedBamFileService abstractMergedBamFileService
+
     ReferenceGenomeIndexService referenceGenomeIndexService
 
     ProcessingOptionService processingOptionService
+
+    QcTrafficLightCheckService qcTrafficLightCheckService
+
+    Md5SumService md5SumService
+
+    CellRangerWorkflowService cellRangerWorkflowService
 
 
     void createInputDirectoryStructure(SingleCellBamFile singleCellBamFile) {
@@ -139,4 +149,49 @@ class CellRangerService {
         return qa
     }
 
+
+    void finishCellRangerWorkflow(SingleCellBamFile singleCellBamFile) {
+        cellRangerWorkflowService.cleanupOutputDirectory(singleCellBamFile)
+        cellRangerWorkflowService.correctFilePermissions(singleCellBamFile)
+
+        completeBamFile(singleCellBamFile)
+
+        qcTrafficLightCheckService.handleQcCheck(singleCellBamFile) {
+            cellRangerWorkflowService.linkResultFiles(singleCellBamFile)
+        }
+
+    }
+
+    private void completeBamFile(SingleCellBamFile singleCellBamFile) {
+        assert singleCellBamFile.isMostRecentBamFile(): "The BamFile ${singleCellBamFile} is not the most recent one. This must not happen!"
+        assert [
+                AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
+                AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
+                AbstractMergedBamFile.FileOperationStatus.PROCESSED,
+        ].contains(singleCellBamFile.fileOperationStatus)
+
+        updateBamFile(singleCellBamFile)
+
+        singleCellBamFile.workPackage.bamFileInProjectFolder = singleCellBamFile
+        assert singleCellBamFile.workPackage.save(flush: true)
+
+        abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(singleCellBamFile)
+    }
+
+    private void updateBamFile(SingleCellBamFile singleCellBamFile) {
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
+        Path resultDirectory = fileSystem.getPath(singleCellBamFile.resultDirectory.path)
+
+        Path bamFile = resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)
+        Path md5SumFileName = resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_MD5SUM_FILE_NAME)
+
+        String md5SumFile = md5SumService.extractMd5Sum(md5SumFileName)
+
+        singleCellBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        singleCellBamFile.fileSize = Files.size(bamFile)
+        singleCellBamFile.md5sum = md5SumFile
+        singleCellBamFile.fileExists = true
+        singleCellBamFile.dateFromFileSystem = new Date(Files.getLastModifiedTime(bamFile).toMillis())
+        assert singleCellBamFile.save(flush: true)
+    }
 }
