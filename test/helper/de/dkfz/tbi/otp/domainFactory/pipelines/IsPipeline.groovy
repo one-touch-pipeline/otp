@@ -63,9 +63,10 @@ trait IsPipeline implements DomainFactoryCore {
                 comment            : {
                     [
                             AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
+                            AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED,
                             AbstractMergedBamFile.QcTrafficLightStatus.REJECTED,
                     ].contains(properties.qcTrafficLightStatus) ? DomainFactory.createComment() : null
-                }
+                },
         ]
     }
 

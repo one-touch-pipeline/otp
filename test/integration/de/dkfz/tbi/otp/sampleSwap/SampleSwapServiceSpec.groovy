@@ -48,7 +48,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
         Sample sample3 = DomainFactory.createSample(individual: individual3, sampleType: sampleType)
 
         seqTrack1 = DomainFactory.createSeqTrack(sample: sample1)
-        seqTrack11 = DomainFactory.createSeqTrack(sample: sample1)
+        seqTrack11 = DomainFactory.createSeqTrack(sample: sample1, seqType: seqTrack1.seqType)
         seqTrack12 = DomainFactory.createSeqTrack(sample: sample1)
         seqTrack13 = DomainFactory.createSeqTrack(sample: sample13)
         seqTrack2 = DomainFactory.createSeqTrack(sample: sample2)

@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.domainFactory.pipelines
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
 
 trait IsRoddy implements IsPipeline {
 
@@ -41,12 +40,10 @@ trait IsRoddy implements IsPipeline {
     private <T> T createRoddyBamFile(Map properties = [:], MergingWorkPackage workPackage, Class<T> clazz) {
         Collection<SeqTrack> seqTracks = properties.seqTracks ?: [DomainFactory.createSeqTrackWithDataFiles(workPackage)]
         workPackage.seqTracks = seqTracks
-        seqTracks*.seqType.each {
-            DomainFactory.createMergingCriteriaLazy(
-                    project: CollectionUtils.exactlyOneElement(seqTracks*.project.unique()),
-                    seqType: it
-            )
-        }
+        DomainFactory.createMergingCriteriaLazy(
+                project: workPackage.project,
+                seqType: workPackage.seqType
+        )
         workPackage.save(flush: true, failOnError: true)
         T bamFile = createDomainObject(clazz, bamFileDefaultProperties(properties, seqTracks, workPackage) +
                 [
@@ -73,7 +70,7 @@ trait IsRoddy implements IsPipeline {
                 dirName      : 'whole_genome_sequencing',
                 roddyName    : 'WGS',
                 libraryLayout: LibraryLayout.PAIRED,
-                singleCell   : false
+                singleCell   : false,
         ]
     }
 
