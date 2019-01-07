@@ -161,7 +161,7 @@ grails.plugin.springsecurity.onInteractiveAuthenticationSuccessEvent = { event, 
 // User switch
 grails.plugin.springsecurity.onAuthenticationSwitchUserEvent = { event, context ->
     DicomAuditLogger.logUserSwitched(EventOutcomeIndicator.SUCCESS,
-        getRealUserName(event.authentication.principal.getUsername()), event.getTargetUser().getUsername())
+        getRealUserName(event.authentication.principal.getUsername()), event.getTargetUser()?.getUsername())
 }
 grails.plugin.springsecurity.onAuthorizationEvent = { event, context ->
     if (event instanceof AuthorizationFailureEvent) {
