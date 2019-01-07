@@ -141,22 +141,26 @@ class ProjectService {
         project.tumorEntity = projectParams.tumorEntity
         assert project.save(flush: true, failOnError: true)
 
-        File projectDirectory = project.getProjectDirectory()
-        if (projectDirectory.exists()) {
-            PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
-            if (attrs.group().toString() == projectParams.unixGroup) {
-                return project
-            }
-        }
-        executeScript(buildCreateProjectDirectory(projectParams.unixGroup, projectDirectory), project)
-        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
-        FileService.waitUntilExists(fs.getPath(projectDirectory.absolutePath))
+        createProjectDirectoryIfNeeded(project, projectParams)
 
         if (projectParams.projectInfoFile) {
             createProjectInfoAndUploadFile(project, projectParams.projectInfoFile)
         }
 
         return project
+    }
+
+    private void createProjectDirectoryIfNeeded(Project project, ProjectParams projectParams) {
+        File projectDirectory = project.getProjectDirectory()
+        if (projectDirectory.exists()) {
+            PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+            if (attrs.group().toString() == projectParams.unixGroup) {
+                return
+            }
+        }
+        executeScript(buildCreateProjectDirectory(projectParams.unixGroup, projectDirectory), project)
+        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
+        FileService.waitUntilExists(fs.getPath(projectDirectory.absolutePath))
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

@@ -7,6 +7,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.testing.*
@@ -27,6 +28,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     RemoteShellHelper remoteShellHelper
     ProcessingOptionService processingOptionService
     ProjectService projectService
+    FileService fileService
     ReferenceGenomeService referenceGenomeService
     RoddyWorkflowConfigService roddyWorkflowConfigService
     TestConfigService configService
@@ -93,6 +95,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     def cleanup() {
         projectService.remoteShellHelper = remoteShellHelper
         projectService.roddyWorkflowConfigService = roddyWorkflowConfigService
+        projectService.fileService = fileService
         configService.clean()
     }
 
@@ -315,6 +318,52 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
+        )
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.createProject(projectParams)
+        }
+        then:
+        Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() == group
+    }
+
+    void "test createProject valid input, when directory with correct unix group already exists and project file, then do not create the directory and upload file"() {
+        given:
+        File projectDirectory = LsdfFilesService.getPath(
+                configService.getRootPath().absolutePath,
+                "/dir",
+        )
+        projectService.remoteShellHelper = Mock(RemoteShellHelper) {
+            0 * executeCommand(_, _)
+        }
+        projectService.fileService = Mock(FileService) {
+            1 * createFileWithContent(_, _, _)
+        }
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
+        mockMultipartFile.originalFilename = FILE_NAME
+
+        when:
+        new File("${projectDirectory}").mkdirs()
+        String group = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString()
+
+        then:
+        projectDirectory.exists()
+
+        when:
+        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+                name: 'project',
+                dirName: 'dir',
+                dirAnalysis: '/dirA',
+                realm: configService.getDefaultRealm(),
+                alignmentDeciderBeanName: AlignmentDeciderBeanName.NO_ALIGNMENT.beanName,
+                categoryNames: ['category'],
+                unixGroup: group,
+                projectGroup: '',
+                nameInMetadataFiles: null,
+                copyFiles: false,
+                description: '',
+                processingPriority: ProcessingPriority.NORMAL,
+                projectInfoFile: mockMultipartFile,
+                sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)

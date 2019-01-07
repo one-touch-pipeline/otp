@@ -371,5 +371,4 @@ class FileService {
             fileName.endsWith(it)
         }
     }
-
 }
