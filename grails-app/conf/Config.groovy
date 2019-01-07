@@ -160,6 +160,7 @@ grails.plugin.springsecurity.onInteractiveAuthenticationSuccessEvent = { event, 
 }
 // User switch
 grails.plugin.springsecurity.onAuthenticationSwitchUserEvent = { event, context ->
+    context.projectSelectionService.setSelectedProject([], 'none') //clear cache if user switched
     DicomAuditLogger.logUserSwitched(EventOutcomeIndicator.SUCCESS,
         getRealUserName(event.authentication.principal.getUsername()), event.getTargetUser()?.getUsername())
 }
