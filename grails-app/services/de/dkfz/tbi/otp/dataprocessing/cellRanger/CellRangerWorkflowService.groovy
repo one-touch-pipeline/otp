@@ -1,11 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
-
 import de.dkfz.tbi.otp.dataprocessing.singleCell.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 
 import java.nio.file.*
+import java.util.stream.*
 
 class CellRangerWorkflowService {
 
@@ -33,7 +33,7 @@ class CellRangerWorkflowService {
         Path outputDirectory = fileSystem.getPath(singleCellBamFile.outputDirectory.absolutePath)
         Path resultDirectory = fileSystem.getPath(singleCellBamFile.resultDirectory.absolutePath)
 
-        List<Path> pathToDelete = Files.list(outputDirectory).toArray().toList()
+        List<Path> pathToDelete = Files.list(outputDirectory).collect(Collectors.toList())
         assert pathToDelete.remove(resultDirectory)
 
         pathToDelete.each {
