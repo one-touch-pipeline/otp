@@ -56,7 +56,7 @@ grails.project.dependency.resolution = {
         compile "org.jadira.usertype:usertype.jodatime:2.0.1"
 
         // library for interacting with cluster job schedulers
-        compile('com.github.TheRoddyWMS:BatchEuphoria:c94736eeb145cfe493e573fff5de904c8f07f2b5') {
+        compile('com.github.theroddywms:BatchEuphoria:0.0.3-30-g5bfe847') {
             excludes "commons-io"
         }
 
