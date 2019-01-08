@@ -210,17 +210,25 @@ class FileService {
     void deleteDirectoryRecursively(Path path) {
         assert path
         assert path.isAbsolute()
-        deleteDirectoryRecursivelyInternal(path)
-    }
 
-    private void deleteDirectoryRecursivelyInternal(Path path) {
         if (Files.exists(path)) {
-            if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-                Files.list(path).each {
-                    deleteDirectoryRecursivelyInternal(it)
+            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+                @Override
+                FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    Files.delete(file)
+                    return FileVisitResult.CONTINUE
                 }
-            }
-            Files.delete(path)
+
+                @Override
+                FileVisitResult postVisitDirectory(Path directory, IOException exception) throws IOException {
+                    if (exception == null) {
+                        Files.delete(directory)
+                        return FileVisitResult.CONTINUE
+                    } else {
+                        throw exception
+                    }
+                }
+            })
         }
     }
 
