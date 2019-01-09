@@ -25,7 +25,7 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
                 project: project,
                 seqType: seqType,
         )
-        lsdfFilesService.createDirectory(new File(configService.getProjectSequencePath(project).path), realm)
+        lsdfFilesService.createDirectory(project.projectSequencingDirectory, realm)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             config = projectService.configureIndelPipelineProject(

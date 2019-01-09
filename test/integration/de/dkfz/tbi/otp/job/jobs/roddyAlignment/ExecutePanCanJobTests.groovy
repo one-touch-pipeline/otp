@@ -41,8 +41,6 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
 
-        executePanCanJob.lsdfFilesService.configService = configService
-
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tmpDir.root, "reference_genomes").path)
 
         prepareDataFilesOnFileSystem(roddyBamFile)

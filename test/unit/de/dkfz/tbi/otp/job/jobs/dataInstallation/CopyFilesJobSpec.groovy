@@ -57,7 +57,6 @@ class CopyFilesJobSpec extends Specification {
         copyFilesJob.lsdfFilesService = new LsdfFilesService()
         copyFilesJob.checksumFileService = new ChecksumFileService()
         copyFilesJob.checksumFileService.lsdfFilesService = copyFilesJob.lsdfFilesService
-        copyFilesJob.lsdfFilesService.configService =  copyFilesJob.configService
         copyFilesJob.fileService = new FileService()
         copyFilesJob.fileSystemService = new TestFileSystemService()
     }

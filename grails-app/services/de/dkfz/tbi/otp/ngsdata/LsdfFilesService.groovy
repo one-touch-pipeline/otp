@@ -13,8 +13,6 @@ import static de.dkfz.tbi.otp.utils.WaitingFileUtils.*
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.*
 
 class LsdfFilesService {
-
-    ConfigService configService
     @Autowired
     RemoteShellHelper remoteShellHelper
     CreateClusterScriptService createClusterScriptService
@@ -70,7 +68,7 @@ class LsdfFilesService {
             return null
         }
         String centerDir = file.run.seqCenter.dirName
-        String basePath = configService.getProjectSequencePath(file.project)
+        String basePath = file.project.projectSequencingDirectory
         String path = "${basePath}/${seqTypeDir}/${centerDir}/${file.run.dirName}/${file.pathName}/${file?.fileName}"
         return path
     }
@@ -115,7 +113,7 @@ class LsdfFilesService {
         if (!checkFinalPathDefined(file)) {
             return null
         }
-        String basePath = configService.getProjectSequencePath(file.project).path
+        String basePath = file.project.projectSequencingDirectory.path
         String relativePath = getFileViewByPidRelativePath(file, sequence)
         return "${basePath}/${relativePath}"
     }
@@ -238,7 +236,7 @@ class LsdfFilesService {
         if (!checkFinalPathDefined(file)) {
             return null
         }
-        String basePath = configService.getProjectSequencePath(file.project)
+        String basePath = file.project.projectSequencingDirectory
         String seqTypeDir = seqTypeDirectory(file)
         String centerDir = file.run.seqCenter.dirName
         String path = "${basePath}/${seqTypeDir}/${centerDir}/"

@@ -1,7 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.TestConfigService
 
 import static org.junit.Assert.*
 
@@ -10,9 +9,7 @@ import org.junit.*
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 class LsdfFilesServiceTests {
-
     LsdfFilesService lsdfFilesService
-    TestConfigService configService
 
     String ftpDir = "/tmp"
     String fastqR1Filename = "example_fileR1.fastq.gz"
@@ -49,9 +46,6 @@ class LsdfFilesServiceTests {
 
     @Before
     void setUp() {
-        configService = new TestConfigService()
-        lsdfFilesService.configService = configService
-
         fileType = new FileType()
         fileType.type = FileType.Type.SEQUENCE
         fileType.subType = "fastq"
@@ -228,7 +222,7 @@ class LsdfFilesServiceTests {
         SeqType seqType = DomainFactory.createSeqType()
         SeqTrack seqTrack = createSeqTrack(seqType: seqType)
         createDataFile(seqTrack, fastqR1Filename)
-        String viewByPidPath = "${configService.getRootPath()}/${seqTrack.project.dirName}/sequencing/${seqType.dirName}/view-by-pid"
+        String viewByPidPath = "${seqTrack.project.projectSequencingDirectory}/${seqType.dirName}/view-by-pid"
         String expectedPath = "${viewByPidPath}/${seqTrack.individual.pid}/${seqTrack.sampleType.dirName}/${seqTrack.seqType.libraryLayoutDirName}/run${seqTrack.run.name}"
         String actualPath = lsdfFilesService.getFileViewByPidDirectory(seqTrack)
 

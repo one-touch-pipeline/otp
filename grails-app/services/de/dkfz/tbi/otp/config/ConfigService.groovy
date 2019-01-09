@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.config
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Realm
 import grails.util.*
 import org.springframework.beans.*
 import org.springframework.context.*
@@ -90,11 +90,6 @@ class ConfigService implements ApplicationContextAware {
     File getSeqCenterInboxPath() {
         return new File(otpProperties.get(OtpProperty.PATH_SEQ_CENTER_INBOX) ?: "")
     }
-
-    File getProjectSequencePath(Project project) {
-        return new File("${getRootPath().path}/${project.dirName}/sequencing/")
-    }
-
 
     String getSshUser() {
         return otpProperties.get(OtpProperty.SSH_USER) ?: ""

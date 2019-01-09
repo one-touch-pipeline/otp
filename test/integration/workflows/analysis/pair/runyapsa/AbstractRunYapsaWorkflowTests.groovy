@@ -49,7 +49,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
                 project: project,
                 seqType: seqType,
         )
-        lsdfFilesService.createDirectory(configService.getProjectSequencePath(project), realm)
+        lsdfFilesService.createDirectory(project.projectSequencingDirectory, realm)
 
         config = DomainFactory.createRunYapsaConfig([
                 programVersion: "yapsa-devel/80f748e",

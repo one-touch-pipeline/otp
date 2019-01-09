@@ -32,7 +32,6 @@ class DataSwapServiceTests extends GroovyScriptAwareTestCase {
                 (OtpProperty.PATH_PROJECT_ROOT)   : outputFolder.path,
                 (OtpProperty.PATH_PROCESSING_ROOT): outputFolder.path,
         ])
-        lsdfFilesService.configService = configService
     }
 
     @After

@@ -78,9 +78,8 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec implements R
     private RnaRoddyBamFile setUpForPrepareAndReturnWorkflowSpecificCValues() {
         executeRnaAlignmentJob = new ExecuteRnaAlignmentJob()
         executeRnaAlignmentJob.lsdfFilesService = new LsdfFilesService()
-        executeRnaAlignmentJob.lsdfFilesService.configService = configService
         executeRnaAlignmentJob.referenceGenomeService = new ReferenceGenomeService()
-        executeRnaAlignmentJob.referenceGenomeService.configService = executeRnaAlignmentJob.lsdfFilesService.configService
+        executeRnaAlignmentJob.referenceGenomeService.configService = configService
         executeRnaAlignmentJob.referenceGenomeService.processingOptionService = new ProcessingOptionService()
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(tmpDir.root.absolutePath)

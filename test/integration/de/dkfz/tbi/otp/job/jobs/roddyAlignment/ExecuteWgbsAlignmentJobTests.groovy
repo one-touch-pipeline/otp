@@ -58,8 +58,6 @@ class ExecuteWgbsAlignmentJobTests {
                 (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path,
         ])
 
-        executeWgbsAlignmentJob.lsdfFilesService.configService = configService
-
         prepareDataFilesOnFileSystem(roddyBamFile)
 
         CreateFileHelper.createFile(executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome, false))

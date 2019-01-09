@@ -479,7 +479,7 @@ chmod 440 ${newDirectFileName}
         }
 
         bashScriptToMoveFiles << "\n\n\n ################ delete old Individual ################ \n"
-        bashScriptToMoveFiles << "# rm -rf '${configService.getRootPath()}/sequencing/*/view-by-pid/${oldPid}/' \n"
+        bashScriptToMoveFiles << "# rm -rf '${oldProject.projectSequencingDirectory}/*/view-by-pid/${oldPid}/' \n"
         bashScriptToMoveFiles << "# rm -rf '${processingPathToOldIndividual}'\n"
 
         individualService.createComment("Individual swap", [individual: oldIndividual, project: oldProjectName, pid: oldPid], [individual: oldIndividual, project: newProjectName, pid: newPid])
@@ -1598,7 +1598,7 @@ chmod 440 ${newDirectFileName}
 
         if (SeqTrack.findAllBySampleAndSeqType(oldSample, oldSeqType).empty) {
             bashScriptToMoveFiles << "\n #There are no seqTracks belonging to the sample ${oldSample} -> delete it on the filesystem\n\n"
-            String basePath = configService.getProjectSequencePath(oldProject)
+            String basePath = oldProject.getProjectSequencingDirectory()
             bashScriptToMoveFiles << "#rm -rf '${basePath}${oldSeqType.dirName}/view-by-pid/${oldIndividual.pid}/${oldSampleType.dirName}/${oldSeqType.libraryLayoutDirName}'\n"
         }
     }

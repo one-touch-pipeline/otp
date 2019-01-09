@@ -28,8 +28,6 @@ class CreateNotificationTextService {
     @Autowired
     PluginAwareResourceBundleMessageSource messageSource
 
-    ConfigService configService
-
     LsdfFilesService lsdfFilesService
 
     ProjectOverviewService projectOverviewService
@@ -335,7 +333,7 @@ class CreateNotificationTextService {
         assert seqTracks
 
         return DataFile.findAllBySeqTrackInList(seqTracks).collect { DataFile file ->
-            String basePath = configService.getProjectSequencePath(file.project)
+            String basePath = file.project.projectSequencingDirectory
             String seqTypeDir = lsdfFilesService.seqTypeDirectory(file)
             new File("${basePath}/${seqTypeDir}/")
         }.unique().sort()*.path.join('\n')

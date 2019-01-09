@@ -142,6 +142,10 @@ class Project implements Commentable, Entity {
         new OtpPath(this, dirName).absoluteDataManagementPath
     }
 
+    File getProjectSequencingDirectory() {
+        new File(getProjectDirectory(), 'sequencing')
+    }
+
     @Override
     Project getProject() {
         return this

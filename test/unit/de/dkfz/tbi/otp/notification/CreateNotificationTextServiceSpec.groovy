@@ -290,7 +290,6 @@ class CreateNotificationTextServiceSpec extends Specification {
 
         when:
         String fileNameString = new CreateNotificationTextService(
-                configService: configService,
                 lsdfFilesService: new LsdfFilesService(),
         ).getSeqTypeDirectories([seqTrack1, seqTrack2])
         String expected = [
@@ -464,7 +463,6 @@ class CreateNotificationTextServiceSpec extends Specification {
                 linkGenerator: Mock(LinkGenerator) {
                     projectCount * link(_) >> 'link'
                 },
-                configService: new TestConfigService(),
                 lsdfFilesService: new LsdfFilesService(),
                 messageSource: getMessageSource(),
         )

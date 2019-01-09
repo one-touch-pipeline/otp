@@ -47,7 +47,6 @@ class CreateViewByPidJobSpec extends Specification {
 
         createViewByPidJob.lsdfFilesService = new LsdfFilesService()
         createViewByPidJob.configService = new TestConfigService()
-        createViewByPidJob.lsdfFilesService.configService = createViewByPidJob.configService
     }
 
 

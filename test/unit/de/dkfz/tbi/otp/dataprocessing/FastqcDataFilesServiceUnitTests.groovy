@@ -24,7 +24,6 @@ class FastqcDataFilesServiceUnitTests {
         configService = new TestConfigService()
         fastqcDataFilesService = new FastqcDataFilesService()
         fastqcDataFilesService.lsdfFilesService = new LsdfFilesService()
-        fastqcDataFilesService.lsdfFilesService.configService = configService
         fastqcDataFilesService.fileSystemService = new TestFileSystemService()
 
         realm = DomainFactory.createRealm()
