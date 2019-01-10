@@ -105,11 +105,6 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
         File bamFile = new File(resultDirectory, SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)
         File md5sum = new File(resultDirectory, SingleCellBamFile.ORIGINAL_BAM_MD5SUM_FILE_NAME)
 
-        return [
-                'md5sum',
-                bamFile.path,
-                '>',
-                md5sum.path,
-        ].join(' ')
+        return "md5sum ${bamFile.path} | sed -e 's#  ${bamFile.path}##' > ${md5sum.path}"
     }
 }

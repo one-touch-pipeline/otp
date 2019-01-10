@@ -78,12 +78,12 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
             return singleCellBamFile
         }
 
-        String expectedSimplefiedScript = [
+        String expectedSimplifiedScript = [
                 loadModul,
                 "${enableModul} ${singleCellBamFile.mergingWorkPackage.config.programVersion}",
                 "cd ${singleCellBamFile.workDirectory}",
                 "cellranger count ${parameterKey}=${parameterValue} --disable-ui",
-                "md5sum ${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)} > ${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_MD5SUM_FILE_NAME)}",
+                "md5sum ${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)} | sed -e 's#  ${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)}##' > ${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_MD5SUM_FILE_NAME)}",
         ].join('\n')
 
         when:
@@ -106,7 +106,7 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
         1 * job.cellRangerService.createCellRangerParameters(singleCellBamFile) >> [(parameterKey): parameterValue]
         1 * job.clusterJobSchedulerService.executeJob(singleCellBamFile.realm, _) >> { Realm realm, String script ->
             String simplifiedScript = script.split('\n')*.trim().findAll().join('\n')
-            assert expectedSimplefiedScript == simplifiedScript
+            assert expectedSimplifiedScript == simplifiedScript
         }
     }
 
