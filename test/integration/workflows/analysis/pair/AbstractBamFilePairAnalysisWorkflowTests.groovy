@@ -3,9 +3,10 @@ package workflows.analysis.pair
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
-import org.joda.time.*
 import workflows.*
 import workflows.analysis.pair.bamfiles.*
+
+import java.time.*
 
 abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase implements SeqTypeAndInputBamFiles {
 
@@ -231,6 +232,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     @Override
     Duration getTimeout() {
-        Duration.standardMinutes(90)
+        Duration.ofHours(90)
     }
 }

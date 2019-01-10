@@ -21,7 +21,6 @@ import groovy.json.*
 import groovy.sql.*
 import groovy.util.logging.*
 import org.hibernate.*
-import org.joda.time.format.*
 import org.junit.*
 
 import javax.sql.*
@@ -60,12 +59,6 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     // The scheduler needs to access the created objects while the test is being executed
     boolean transactional = false
 
-    // fast queue, here we come!
-    static final String jobSubmissionOptions = JsonOutput.toJson([
-            (JobSubmissionOption.WALLTIME): Duration.ofMinutes(20).toString(),
-            (JobSubmissionOption.MEMORY)  : "5g",
-    ])
-
     // permissions to be applied to the source test data
     protected final static String TEST_DATA_MODE_DIR = "2750"
     protected final static String TEST_DATA_MODE_FILE = "640"
@@ -97,7 +90,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
      * A timeout for the workflow execution,
      * if the workflow doesn't finish within the given duration the execute() method fails.
      */
-    abstract org.joda.time.Duration getTimeout()
+    abstract Duration getTimeout()
 
     /**
      * This method can be overridden if a workflow script needs some additional setup
@@ -107,6 +100,15 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         // do nothing by default
     }
 
+    /**
+     * This method can be overridden if other job submission options are needed.
+     */
+    protected String getJobSubmissionOptions() {
+        JsonOutput.toJson([
+                (JobSubmissionOption.WALLTIME): Duration.ofMinutes(20).toString(),
+                (JobSubmissionOption.MEMORY)  : "5g",
+        ])
+    }
 
     @Before
     void setUpWorkflowTests() {
@@ -260,7 +262,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }
     }
 
-    private waitUntilWorkflowFinishes(org.joda.time.Duration timeout, int numberOfProcesses = 1) {
+    private waitUntilWorkflowFinishes(Duration timeout, int numberOfProcesses = 1) {
         println "Started to wait (until workflow is finished or timeout)"
         long lastPrintln = 0L
         int counter = 0
@@ -270,8 +272,8 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                 lastPrintln = System.currentTimeMillis()
             }
             return areAllProcessesFinished(numberOfProcesses)
-        }, timeout.millis, 1000L)) {
-            throw new TimeoutException("Workflow did not finish within ${PeriodFormat.default.print(timeout.toPeriod())}.")
+        }, timeout.toMillis(), 1000L)) {
+            throw new TimeoutException("Workflow did not finish within ${timeout.toString().substring(2)}.")
         }
     }
 

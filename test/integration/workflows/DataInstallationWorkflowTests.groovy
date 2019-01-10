@@ -4,9 +4,9 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.test.mixin.*
 import grails.test.mixin.integration.*
-import org.joda.time.*
 import org.junit.*
 
+import java.time.*
 
 @Ignore
 @TestMixin(IntegrationTestMixin)
@@ -145,6 +145,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
 
     @Override
     Duration getTimeout() {
-        Duration.standardMinutes(30)
+        Duration.ofMinutes(30)
     }
 }

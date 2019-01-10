@@ -6,8 +6,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.plugin.springsecurity.*
-import org.joda.time.*
 import workflows.analysis.pair.*
+
+import java.time.*
 
 abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<SophiaInstance> {
 
@@ -116,7 +117,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     Duration getTimeout() {
-        Duration.standardHours(5)
+        Duration.ofHours(5)
     }
 
 }

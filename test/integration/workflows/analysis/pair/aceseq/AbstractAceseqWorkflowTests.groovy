@@ -6,8 +6,9 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.plugin.springsecurity.*
-import org.joda.time.*
 import workflows.analysis.pair.*
+
+import java.time.*
 
 abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<AceseqInstance> {
 
@@ -122,6 +123,6 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     Duration getTimeout() {
-        Duration.standardHours(24)
+        Duration.ofHours(24)
     }
 }

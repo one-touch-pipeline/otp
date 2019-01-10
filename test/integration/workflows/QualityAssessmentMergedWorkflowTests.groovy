@@ -4,11 +4,11 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import org.joda.time.*
 import org.junit.*
 
-import static org.junit.Assert.*
+import java.time.*
 
+import static org.junit.Assert.*
 
 @Ignore
 class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
@@ -391,6 +391,6 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
 
     @Override
     Duration getTimeout() {
-        Duration.standardMinutes(200)
+        Duration.ofMinutes(200)
     }
 }

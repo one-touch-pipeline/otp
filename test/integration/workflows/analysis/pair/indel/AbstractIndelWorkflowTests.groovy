@@ -4,8 +4,9 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
-import org.joda.time.*
 import workflows.analysis.pair.*
+
+import java.time.*
 
 abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<IndelCallingInstance> {
 
@@ -73,6 +74,6 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
 
     @Override
     Duration getTimeout() {
-        Duration.standardHours(5)
+        Duration.ofHours(5)
     }
 }

@@ -6,8 +6,9 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.plugin.springsecurity.*
-import org.joda.time.*
 import workflows.analysis.pair.*
+
+import java.time.*
 
 abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<RunYapsaInstance> {
 
@@ -109,6 +110,6 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
 
     @Override
     Duration getTimeout() {
-        Duration.standardHours(24)
+        Duration.ofHours(24)
     }
 }

@@ -9,8 +9,9 @@ import de.dkfz.tbi.otp.filehandling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
-import org.joda.time.*
 import org.junit.*
+
+import java.time.*
 
 import static org.junit.Assert.*
 
@@ -612,6 +613,6 @@ class TransferMergedBamFileWorkflowSeqTypeExomeTests extends WorkflowTestCase {
 
     @Override
     Duration getTimeout() {
-        Duration.standardMinutes(40)
+        Duration.ofMinutes(40)
     }
 }

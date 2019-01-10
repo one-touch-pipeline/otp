@@ -4,11 +4,11 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import org.joda.time.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.*
 
 import java.nio.file.*
+import java.time.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
@@ -251,6 +251,6 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
 
     @Override
     Duration getTimeout() {
-        return Duration.standardMinutes(20)
+        return Duration.ofMinutes(20)
     }
 }

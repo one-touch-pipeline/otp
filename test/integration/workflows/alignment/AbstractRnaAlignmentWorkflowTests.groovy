@@ -5,10 +5,10 @@ import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.ngsdata.*
 import grails.converters.*
 import grails.plugin.springsecurity.*
-import org.joda.time.*
 import org.junit.*
 
 import java.nio.file.*
+import java.time.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
@@ -255,6 +255,6 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
     @Override
     Duration getTimeout() {
-        Duration.standardHours(5)
+        Duration.ofHours(5)
     }
 }

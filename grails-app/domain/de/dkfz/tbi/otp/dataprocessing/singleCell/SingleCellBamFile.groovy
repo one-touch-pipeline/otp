@@ -28,15 +28,15 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
             ORIGINAL_BAM_FILE_NAME,
             ORIGINAL_BAI_FILE_NAME,
             ORIGINAL_BAM_MD5SUM_FILE_NAME,
-            'filtered_gene_bc_matrices_h5.h5',
-            'raw_gene_bc_matrices_h5.h5',
+            'filtered_feature_bc_matrix.h5',
+            'raw_feature_bc_matrix.h5',
             'molecule_info.h5',
             'cloupe.cloupe',
     ].asImmutable()
 
     static final List<String> CREATED_RESULT_DIRS = [
-            'filtered_gene_bc_matrices',
-            'raw_gene_bc_matrices',
+            'filtered_feature_bc_matrix',
+            'raw_feature_bc_matrix',
             'analysis',
     ].asImmutable()
 

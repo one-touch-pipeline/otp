@@ -1,4 +1,5 @@
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.jobs.cellRanger.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
@@ -17,3 +18,9 @@ ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 processingOptionService.createOrUpdate(MAXIMUM_NUMBER_OF_JOBS, '5', workflow)
 processingOptionService.createOrUpdate(MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, '0', workflow)
+
+processingOptionService.createOrUpdate(
+        CLUSTER_SUBMISSIONS_OPTION,
+        '{"WALLTIME":"PT100H","MEMORY":"60g","CORES":"16"}',
+        ExecuteCellRangerJob.simpleName,
+)

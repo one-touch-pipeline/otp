@@ -3,9 +3,9 @@ package workflows
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import org.joda.time.*
 import org.junit.*
 
+import java.time.*
 import java.util.zip.*
 
 @Ignore
@@ -149,6 +149,6 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
     @Override
     Duration getTimeout() {
-        Duration.standardMinutes(20)
+        Duration.ofMinutes(20)
     }
 }

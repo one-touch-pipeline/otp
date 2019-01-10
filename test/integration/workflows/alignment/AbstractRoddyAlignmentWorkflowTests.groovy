@@ -3,24 +3,23 @@ package workflows.alignment
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.converters.*
-import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.*
 import org.codehaus.groovy.grails.web.json.*
-import org.joda.time.*
 import org.junit.*
-import org.junit.rules.*
-import workflows.WorkflowTestCase
+
+import java.time.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import static de.dkfz.tbi.otp.utils.LocalShellHelper.*
 
-abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
+abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest {
 
     //The number of reads of the example fastqc files
     static final int NUMBER_OF_READS = 1000
@@ -74,8 +73,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
     File fingerPrintingFile
 
 
-    LsdfFilesService lsdfFilesService
-
     ProcessingOptionService processingOptionService
 
     AbstractBamFileService abstractBamFileService
@@ -92,7 +89,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
 
     @Override
     Duration getTimeout() {
-        return Duration.standardHours(60)
+        return Duration.ofHours(60)
     }
 
     @Before
@@ -340,29 +337,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends WorkflowTestCase {
         assert workPackage.save(flush: true, failOnError: true)
 
         return firstBamFile
-    }
-
-    void linkFastqFiles(SeqTrack seqTrack, List<File> testFastqFiles) {
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
-        assert seqTrack.seqType.libraryLayout.mateCount == dataFiles.size()
-
-        Map<File, File> sourceLinkMap = [:]
-        dataFiles.eachWithIndex { dataFile, index ->
-            File sourceFastqFile = testFastqFiles[index]
-            assert sourceFastqFile.exists()
-            dataFile.fileSize = sourceFastqFile.length()
-            File linkFastqFile = new File(lsdfFilesService.getFileFinalPath(dataFile))
-            sourceLinkMap.put(sourceFastqFile, linkFastqFile)
-            File linkViewByPidFastqFile = new File(lsdfFilesService.getFileViewByPidPath(dataFile))
-            sourceLinkMap.put(linkFastqFile, linkViewByPidFastqFile)
-        }
-        createDirectories(sourceLinkMap.values()*.parentFile.unique(), TEST_DATA_MODE_DIR)
-        linkFileUtils.createAndValidateLinks(sourceLinkMap, realm)
-    }
-
-    void setUpRefGenomeDir(MergingWorkPackage workPackage, File refGenDir) {
-        File linkRefGenDir = referenceGenomeService.referenceGenomeDirectory(workPackage.referenceGenome, false)
-        linkFileUtils.createAndValidateLinks([(refGenDir): linkRefGenDir], realm)
     }
 
     static void setUpFingerPrintingFile() {

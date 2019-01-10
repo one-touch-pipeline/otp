@@ -12,9 +12,10 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 import de.dkfz.tbi.otp.utils.*
-import org.joda.time.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.*
+
+import java.time.*
 
 import static org.junit.Assert.*
 
@@ -629,6 +630,6 @@ class TransferMergedBamFileWorkflowTests extends WorkflowTestCase {
 
     @Override
     Duration getTimeout() {
-        Duration.standardMinutes(40)
+        Duration.ofMinutes(40)
     }
 }
