@@ -130,9 +130,9 @@ trait CellRangerFactory implements IsAlignment {
     String getQaFileContent(Map properties = [:]) {
         Map<String, Object> csvData = [
                 "Estimated Number of Cells"                     : "1234",
-                "Mean Reads per Cell"                           : "123456",
+                "Mean Reads per Cell"                           : "123,456",
                 "Median Genes per Cell"                         : "1234",
-                "Number of Reads"                               : "123456789",
+                "Number of Reads"                               : "123,456,789",
                 "Valid Barcodes"                                : "12.3%",
                 "Sequencing Saturation"                         : "45.6%",
                 "Q30 Bases in Barcode"                          : "78.9%",

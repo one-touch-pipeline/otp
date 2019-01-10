@@ -140,7 +140,7 @@ class CellRangerService {
             Cell cell = spreadsheet.dataRows.first().getCellByColumnTitle(it.columnName)
             assert cell: "${it.columnName} can not be found in ${singleCellBamFile.qualityAssessmentCsvFile.absolutePath}"
             try {
-                qa."${it.attributeName}" = cell.text.replaceAll("%\$", "") as Double
+                qa."${it.attributeName}" = cell.text.replaceAll("%\$", "").replaceAll(/,/, "") as Double
             } catch (NumberFormatException e) {
                 throw new NumberFormatException("Failed to parse '${cell.text}'\n")
             }
