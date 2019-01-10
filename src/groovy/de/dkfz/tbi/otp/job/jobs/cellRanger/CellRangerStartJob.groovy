@@ -36,6 +36,7 @@ class CellRangerStartJob extends AbstractAlignmentStartJob implements Restartabl
                         "programVersion_${mergingWorkPackage.config.programVersion}",
                 ].join('_'),
                 seqTracks: seqTracks,
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
         )
     }
 
