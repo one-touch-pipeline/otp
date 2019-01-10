@@ -1060,7 +1060,7 @@ class DomainFactory {
                 controlWorkPackage?.seqType,
                 diseaseSeqTracks*.seqType,
                 controlSeqTracks*.seqType,
-        ].findAll().flatten().unique(), "All source have to contain the same seqType") ?: createWholeGenomeSeqType()
+        ].findAll().flatten().unique(), "All sources have to contain the same seqType") ?: createWholeGenomeSeqType()
 
         Sample diseaseSample = CollectionUtils.atMostOneElement([
                 samplePair?.mergingWorkPackage1?.sample,
