@@ -149,7 +149,7 @@ trait CellRangerFactory implements IsAlignment {
                 "Total Genes Detected"                          : "54321",
                 "Median UMI Counts per Cell"                    : "12345",
         ] + properties
-        return [csvData.keySet().join(","), csvData.values().join(",")].join("\n")
+        return [csvData.keySet().join(","), csvData.values().collect { "\"${it}\"" }.join(",")].join("\n")
     }
 
 

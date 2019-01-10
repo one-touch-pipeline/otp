@@ -98,7 +98,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         List<String> egaSampleAlias = [HelperUtils.uniqueString, HelperUtils.uniqueString]
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ, EgaSubmissionService.FileType.BAM]
         String content = egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
-        Spreadsheet spreadsheet = new Spreadsheet(content, ",")
+        Spreadsheet spreadsheet = new Spreadsheet(content, "," as char)
 
         when:
         Map egaSampleAliases = egaSubmissionFileService.readEgaSampleAliasesFromFile(spreadsheet)
@@ -213,7 +213,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         )
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
         String content = egaSubmissionFileService.generateDataFilesCsvFile(submission)
-        Spreadsheet spreadsheet = new Spreadsheet(content, ",")
+        Spreadsheet spreadsheet = new Spreadsheet(content, "," as char)
         String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([[
                 dataFile,
                 sampleSubmissionObject.egaAliasName
@@ -242,7 +242,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         )
         submission.addToBamFilesToSubmit(bamFileSubmissionObject)
         String content = egaSubmissionFileService.generateBamFilesCsvFile(submission)
-        Spreadsheet spreadsheet = new Spreadsheet(content, ",")
+        Spreadsheet spreadsheet = new Spreadsheet(content, "," as char)
         String bamFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForBamFiles([[
                 roddyBamFile,
                 sampleSubmissionObject.egaAliasName

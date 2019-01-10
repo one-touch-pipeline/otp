@@ -390,7 +390,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     Spreadsheet readFile(UploadFormSubmitCommand cmd) {
-        final String DELIMITER = ","
+        final char DELIMITER = ","
         if (cmd.file.empty) {
             pushError("No file selected", cmd.submission, true)
             return

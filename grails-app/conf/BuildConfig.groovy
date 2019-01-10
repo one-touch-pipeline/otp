@@ -54,6 +54,7 @@ grails.project.dependency.resolution = {
                                                        // if you update commons-logging here, also update it in tools/ast/build.gradle
         compile "joda-time:joda-time:2.3"
         compile "org.jadira.usertype:usertype.jodatime:2.0.1"
+        compile "com.opencsv:opencsv:4.4"
 
         // library for interacting with cluster job schedulers
         compile('com.github.theroddywms:BatchEuphoria:0.0.3-30-g5bfe847') {

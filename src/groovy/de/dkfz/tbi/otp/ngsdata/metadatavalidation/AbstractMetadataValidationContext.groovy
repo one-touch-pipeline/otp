@@ -56,9 +56,6 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
                 if (document.getBytes(CHARSET) != bytes) {
                     problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of ${pathForMessage(metadataFile)} is not properly encoded with ${CHARSET.name()}. Characters might be corrupted.")
                 }
-                if (document.contains('"')) {
-                    problems.addProblem(Collections.emptySet(), Level.WARNING, "The content of ${pathForMessage(metadataFile)} contains one or more quotation marks. OTP might not parse the file as expected.")
-                }
                 spreadsheet = new FilteredSpreadsheet(document.replaceFirst(/[\t\r\n]+$/, ''), dataRowFilter)
                 if (spreadsheet.dataRows.size() < 1) {
                     spreadsheet = null

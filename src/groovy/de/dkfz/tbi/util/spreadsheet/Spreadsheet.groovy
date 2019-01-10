@@ -1,5 +1,7 @@
 package de.dkfz.tbi.util.spreadsheet
 
+import com.opencsv.*
+
 /**
  * An immutable in-memory representation of a tab-separated spreadsheet file
  *
@@ -14,13 +16,15 @@ class Spreadsheet {
     private final Map<String, Column> columnsByTitle
     private final List<Row> dataRows
 
-    Spreadsheet(String document, String delimiter = '\t') {
+    Spreadsheet(String document, char delimiter = '\t') {
         this.delimiter = delimiter
         Map<String, Column> columnsByTitle = [:]
         List<Row> dataRows = []
         int rowIndex = 0
-        List<String> lines = document.readLines()
-        for (String line : lines) {
+        CSVReader reader = new CSVReaderBuilder(new StringReader(document)).
+                withCSVParser(new RFC4180ParserBuilder().withSeparator(delimiter).build()).build()
+        String [] line
+        while ((line = reader.readNext()) != null) {
             Row row = new Row(this, rowIndex++, line)
             if (!header) {
                 header = row
@@ -60,11 +64,11 @@ class Row {
     final int rowIndex
     final List<Cell> cells
 
-    protected Row(Spreadsheet spreadsheet, int rowIndex, String line) {
+    protected Row(Spreadsheet spreadsheet, int rowIndex, String[] line) {
         this.spreadsheet = spreadsheet
         this.rowIndex = rowIndex
         int columnIndex = 0
-        List<Cell> cells = line.split(spreadsheet.delimiter).collect { new Cell(this, columnIndex++, it) }
+        List<Cell> cells = line.collect { new Cell(this, columnIndex++, it) }
         if (spreadsheet.header) {
             // Make sure that this row has at least as many cells as the header
             while (columnIndex < spreadsheet.header.cells.size()) {

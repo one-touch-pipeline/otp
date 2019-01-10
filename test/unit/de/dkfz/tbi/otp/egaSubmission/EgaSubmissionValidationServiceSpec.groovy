@@ -55,7 +55,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ, EgaSubmissionService.FileType.BAM]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
         String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
-        Spreadsheet spreadsheet = new Spreadsheet(content, ",")
+        Spreadsheet spreadsheet = new Spreadsheet(content, ',' as char)
 
         expect:
         egaSubmissionValidationService.validateRows(spreadsheet, submission).valid
@@ -72,7 +72,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
         String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
-        Spreadsheet spreadsheet = new Spreadsheet(content, ",")
+        Spreadsheet spreadsheet = new Spreadsheet(content, "," as char)
 
         expect:
         !egaSubmissionValidationService.validateRows(spreadsheet, submission).valid
@@ -89,7 +89,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
         String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes)
-        Spreadsheet spreadsheet = new Spreadsheet(content, ",")
+        Spreadsheet spreadsheet = new Spreadsheet(content, "," as char)
 
         expect:
         !egaSubmissionValidationService.validateRows(spreadsheet, submission).valid
@@ -140,7 +140,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         List<EgaSubmissionService.FileType> fileTypes = [EgaSubmissionService.FileType.FASTQ]
         egaSubmissionValidationService.egaSubmissionFileService = new EgaSubmissionFileService()
         String content = egaSubmissionValidationService.egaSubmissionFileService.generateCsvFile(sampleObjectId, egaSampleAlias, fileTypes).replace("FASTQ", fileType)
-        Spreadsheet spreadsheet = new Spreadsheet(content, ",")
+        Spreadsheet spreadsheet = new Spreadsheet(content, "," as char)
 
         expect:
         egaSubmissionValidationService.validateFileTypeFromInput(spreadsheet) == result

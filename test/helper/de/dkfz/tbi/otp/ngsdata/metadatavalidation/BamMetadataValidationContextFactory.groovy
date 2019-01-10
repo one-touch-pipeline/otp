@@ -19,7 +19,7 @@ class BamMetadataValidationContextFactory {
         return new BamMetadataValidationContext(
                 properties.metadataFile ?: Paths.get(properties.testDirectory ?: TestCase.uniqueNonExistentPath.path, "run${HelperUtils.uniqueString}" as String, 'metadata_fastq.tsv'),
                 properties.metadataFileMd5sum ?: HelperUtils.randomMd5sum,
-                properties.spreadsheet ?: new Spreadsheet(properties.document ?: 'I am header!\nI am data!', properties.delimiter ?: '\t'),
+                properties.spreadsheet ?: new Spreadsheet(properties.document ?: 'I am header!\nI am data!', properties.delimiter ?: '\t' as char),
                 properties.problems ?: new Problems(),
                 properties.content ?: ''.bytes,
                 properties.fileSystem ?: FileSystems.default,

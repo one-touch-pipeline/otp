@@ -8,6 +8,7 @@ import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
 import org.junit.*
 import org.junit.rules.*
+import spock.lang.*
 
 class CellRangerServiceIntegrationSpec extends IntegrationSpec implements CellRangerFactory {
 
@@ -40,7 +41,8 @@ class CellRangerServiceIntegrationSpec extends IntegrationSpec implements CellRa
         }
     }
 
-    void "parseCellRangerQaStatistics, unparsable values cause an exception"() {
+    @Unroll
+    void "parseCellRangerQaStatistics, unparsable value #value cause an exception"() {
         given:
         createQaFileOnFileSystem(file, [(key): value])
 

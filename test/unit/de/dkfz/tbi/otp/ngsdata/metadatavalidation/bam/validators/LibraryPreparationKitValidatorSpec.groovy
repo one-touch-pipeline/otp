@@ -18,7 +18,7 @@ class LibraryPreparationKitValidatorSpec extends Specification {
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE}\t${LIBRARY_PREPARATION_KIT}
-EXON\tIndividual1\t
+EXON\tIndividual1
 """)
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,

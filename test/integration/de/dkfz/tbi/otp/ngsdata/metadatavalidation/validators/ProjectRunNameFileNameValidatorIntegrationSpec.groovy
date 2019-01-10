@@ -20,7 +20,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
 
     static final String VALID_METADATA =
             "${MetaDataColumn.FASTQ_FILE}\t${MetaDataColumn.RUN_ID}\t${MetaDataColumn.PROJECT}\n" +
-                    "${DATAFILE}\t${RUN_ID}\t${PROJECT}\t\n"
+                    "${DATAFILE}\t${RUN_ID}\t${PROJECT}\n"
 
 
     void setup() {

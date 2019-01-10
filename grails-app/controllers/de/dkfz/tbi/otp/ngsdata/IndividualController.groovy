@@ -91,7 +91,7 @@ class IndividualController {
                     } else {
                         content = cmd.sampleText
                     }
-                    String delimiter = cmd.delimiter == "space" ? ' ' : cmd.delimiter == "tab" ? '\t' : cmd.delimiter
+                    char delimiter = cmd.delimiter == "space" ? ' ' : cmd.delimiter == "tab" ? '\t' : cmd.delimiter as char
                     content = content.replaceAll(" *${delimiter} *", delimiter)
 
                     Spreadsheet spreadsheet = new Spreadsheet(content, delimiter)

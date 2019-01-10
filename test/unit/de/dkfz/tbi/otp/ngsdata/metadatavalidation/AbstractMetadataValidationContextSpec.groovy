@@ -43,7 +43,6 @@ class AbstractMetadataValidationContextSpec extends Specification {
         createTooLargeMetadataFile()                                                         || 'is larger than'
     }
 
-    @Unroll
     void 'readAndCheckFile, when there is a parsing problem, adds a warning'() {
         given:
         Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
@@ -61,14 +60,15 @@ class AbstractMetadataValidationContextSpec extends Specification {
         infoMetadata.spreadsheet.dataRows[0].cells[0].text ==~ firstCellRegex
 
         where:
-        bytes || md5sum | firstCellRegex | problemMessage
+        bytes                                  || md5sum                             | firstCellRegex | problemMessage
         'x\nM\u00e4use'.getBytes('ISO-8859-1') || '577c31bc9f9d49ef016288cf94605c2a' | '^M.{0,2}use$' | 'not properly encoded with UTF-8'
-        'x\na"b'.getBytes(MetadataValidationContext.CHARSET) || '01a73fb20c4582eb9668dc39431c4748' | '^a.{0,2}b$' | 'contains one or more quotation marks'
     }
 
-    void 'readAndCheckFile, when there are multiple columns with the same title, adds an error'() {
+    @Unroll
+    void 'readAndCheckFile, when there is a parsing problem, adds an error'() {
         given:
-        Path file = CreateFileHelper.createFile(temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv"), 'a\tb\ta').toPath()
+        Path file = temporaryFolder.newFile("${HelperUtils.uniqueString}.tsv").toPath()
+        file.bytes = bytes
 
         when:
         Map infoMetadata = AbstractMetadataValidationContext.readAndCheckFile(file)
@@ -77,9 +77,14 @@ class AbstractMetadataValidationContextSpec extends Specification {
         Problem problem = exactlyOneElement(infoMetadata.problems.getProblems())
         problem.affectedCells.isEmpty()
         problem.level == Level.ERROR
-        problem.message.contains("Duplicate column 'a'")
-        infoMetadata.metadataFileMd5sum == '51cfcea2dc88d9baff201d447d2316df'
+        problem.message.contains(problemMessage)
+        infoMetadata.metadataFileMd5sum == md5sum
         infoMetadata.spreadsheet == null
+
+        where:
+        bytes                                                 || md5sum                             | problemMessage
+        'a\tb\ta'.getBytes(MetadataValidationContext.CHARSET) || '51cfcea2dc88d9baff201d447d2316df' | "Duplicate column 'a'"
+        'x\na"b'.getBytes(MetadataValidationContext.CHARSET)  || '01a73fb20c4582eb9668dc39431c4748' | "Unterminated quoted field at end of CSV line"
     }
 
     void 'readAndCheckFile, when file can be parsed successfully, does not add problems'() {
