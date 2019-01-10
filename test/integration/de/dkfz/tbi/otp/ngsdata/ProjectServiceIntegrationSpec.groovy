@@ -364,6 +364,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 processingPriority: ProcessingPriority.NORMAL,
                 projectInfoFile: mockMultipartFile,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
+                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
