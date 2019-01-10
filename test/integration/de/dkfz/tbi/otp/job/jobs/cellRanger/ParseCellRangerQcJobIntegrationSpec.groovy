@@ -5,17 +5,14 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import grails.test.spock.*
 import org.junit.*
 import org.junit.rules.*
-import org.springframework.beans.factory.annotation.*
 
 class ParseCellRangerQcJobIntegrationSpec extends IntegrationSpec implements CellRangerFactory {
-
-    @Autowired
-    CellRangerService cellRangerService
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -32,7 +29,8 @@ class ParseCellRangerQcJobIntegrationSpec extends IntegrationSpec implements Cel
         job = [
                 getProcessParameterObject: { -> singleCellBamFile },
         ] as ParseCellRangerQcJob
-        job.cellRangerService = cellRangerService
+        job.cellRangerService = new CellRangerService()
+        job.cellRangerService.fileSystemService = new TestFileSystemService()
         job.qcTrafficLightService = new QcTrafficLightService()
         job.qcTrafficLightService.commentService = new CommentService()
     }

@@ -3,6 +3,7 @@ package de.dkfz.tbi.otp.job.jobs.cellRanger
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.spock.*
 import org.junit.*
@@ -20,6 +21,7 @@ class CellRangerServiceIntegrationSpec extends IntegrationSpec implements CellRa
 
     void setup() {
         cellRangerService = new CellRangerService()
+        cellRangerService.fileSystemService = new TestFileSystemService()
         singleCellBamFile = createBamFile()
         file = new File(temporaryFolder.newFolder(), "${HelperUtils.uniqueString}_metrics_summary.csv")
         singleCellBamFile.metaClass.getQualityAssessmentCsvFile = { return file }

@@ -133,7 +133,8 @@ class CellRangerService {
     }
 
     CellRangerQualityAssessment parseCellRangerQaStatistics(SingleCellBamFile singleCellBamFile) {
-        Spreadsheet spreadsheet = new Spreadsheet(singleCellBamFile.qualityAssessmentCsvFile.text, ",")
+        Path path = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm).getPath(singleCellBamFile.qualityAssessmentCsvFile.absolutePath)
+        Spreadsheet spreadsheet = new Spreadsheet(path.text, ",")
         CellRangerQualityAssessment qa = new CellRangerQualityAssessment()
         MetricsSummaryCsvColumn.values().each {
             Cell cell = spreadsheet.dataRows.first().getCellByColumnTitle(it.columnName)

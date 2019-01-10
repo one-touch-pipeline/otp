@@ -6,6 +6,11 @@ import java.nio.file.*
 
 class TestFileSystemService extends FileSystemService {
     @Override
+    FileSystem getRemoteFileSystem(Realm realm) throws Throwable {
+        return FileSystems.default
+    }
+
+    @Override
     FileSystem getFilesystemForProcessingForRealm(Realm realm) throws Throwable {
         return FileSystems.default
     }
