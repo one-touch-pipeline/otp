@@ -33,7 +33,7 @@ class CellRangerStartJob extends AbstractAlignmentStartJob implements Restartabl
                         "${mergingWorkPackage.referenceGenome.name}",
                         "expectedCells_${mergingWorkPackage.expectedCells}",
                         "forcedCells_${mergingWorkPackage.enforcedCells ?: '-'}",
-                        "programVersion_${mergingWorkPackage.config.programVersion}",
+                        "programVersion_${mergingWorkPackage.config.programVersion.replace("/", "-")}",
                 ].join('_'),
                 seqTracks: seqTracks,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
