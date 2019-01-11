@@ -69,7 +69,6 @@ trait CellRangerFactory implements IsAlignment {
         ]
     }
 
-    @SuppressWarnings('NoJavaUtilDate')
     @Override
     Map getConfigProperties(Map properties) {
         return [

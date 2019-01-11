@@ -102,7 +102,6 @@ class TrackingService {
         return OtrsTicket.findAllByIdInList(otrsIds, [lock: true]) as Set
     }
 
-    @SuppressWarnings('NoJavaUtilDate')
     void setStarted(Collection<OtrsTicket> otrsTickets, OtrsTicket.ProcessingStep step) {
         otrsTickets.unique().each {
             if (it."${step}Started" == null) {
@@ -121,7 +120,6 @@ class TrackingService {
         }
     }
 
-    @SuppressWarnings('NoJavaUtilDate')
     void setFinishedTimestampsAndNotify(OtrsTicket ticket, SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()) {
         if (ticket.finalNotificationSent) {
             return

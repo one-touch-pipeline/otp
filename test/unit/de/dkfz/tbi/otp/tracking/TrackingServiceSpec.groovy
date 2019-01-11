@@ -75,7 +75,6 @@ class TrackingServiceSpec extends Specification {
         ]
     }
 
-    @SuppressWarnings('NoJavaUtilDate')
     void 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, resets it'() {
         given:
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket([

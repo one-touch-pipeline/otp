@@ -281,9 +281,10 @@ ruleset {
         priority = MIDDLE
         doNotApplyToFileNames = CONTROLLER
     }
+    /* Since our code use the Date class a lot, it is not possible to avoid it in new code.
     NoJavaUtilDate {
         priority = MIDDLE
-    }
+    }*/
     NoTabCharacter {
         priority = HIGH
     }

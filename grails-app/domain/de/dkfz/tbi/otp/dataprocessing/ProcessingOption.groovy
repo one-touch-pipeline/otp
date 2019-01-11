@@ -500,7 +500,6 @@ class ProcessingOption implements Entity {
     @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String value
     Project project
-    @SuppressWarnings("NoJavaUtilDate")
     Date dateCreated = new Date()
     Date dateObsoleted
 

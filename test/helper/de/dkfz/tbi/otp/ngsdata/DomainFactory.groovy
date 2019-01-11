@@ -33,7 +33,6 @@ class DomainFactoryProxyRoddy implements IsRoddy { }
 @SuppressWarnings('EmptyClass')
 class DomainFactoryProxyCellRanger implements CellRangerFactory { }
 
-@SuppressWarnings('NoJavaUtilDate')
 class DomainFactory {
 
     private DomainFactory() {
