@@ -176,7 +176,7 @@ grails.plugin.springsecurity.onAuthorizationEvent = { event, context ->
 // The way used above (Adding listeners to Spring Security) would be preferred,
 // but Spring doesn't offer an interface for logout, so we had to use a bean.
 // For the bean configuration please refer to conf/spring/resources.groovy
-grails.plugin.springsecurity.logout.handlerNames = [
+grails.plugin.springsecurity.logout.additionalHandlerNames = [
    'dicomAuditLogoutHandler',
 ]
 
