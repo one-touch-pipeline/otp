@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import com.jcraft.jsch.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -204,7 +205,7 @@ class MetadataImportService {
     /**
      * Returns the absolute path to an ILSe Folder inside the sequencing center inbox
      */
-    Path getIlseFolder(String ilseId, SeqCenter seqCenter) {
+    Path getIlseFolder(String ilseId, SeqCenter seqCenter) throws JSchException {
         assert seqCenter
         if (!(ilseId =~ /^\d{4,6}$/)) {
             return null
