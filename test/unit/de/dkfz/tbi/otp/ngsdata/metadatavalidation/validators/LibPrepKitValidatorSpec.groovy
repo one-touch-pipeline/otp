@@ -20,9 +20,7 @@ class LibPrepKitValidatorSpec extends Specification {
     static final String VALID_METADATA =
             "${MetaDataColumn.LIB_PREP_KIT}\n" +
                     "lib_prep_kit\n" +
-                    "\n" +
-                    "lib_prep_kit_import_alias\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\n"
+                    "lib_prep_kit_import_alias\n"
 
     void setup() {
         validator = new LibPrepKitValidator()
@@ -60,17 +58,18 @@ class LibPrepKitValidatorSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
-        containSame(problem.affectedCells*.cellAddress, ['A6'])
+        containSame(problem.affectedCells*.cellAddress, ['A4'])
         problem.message.contains("The library preparation kit '${invalid}' is neither registered in the OTP database nor '${InformationReliability.UNKNOWN_VERIFIED.rawValue}' nor empty.")
     }
 
-    void 'validate, when metadata file contains no LibPrepKit, succeeds without problems'() {
+    @Unroll
+    void 'validate, when metadata file column LibPrepKit is #message, adds warning'() {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.LIB_PREP_KIT}\tother
-\tabc
-\tdef
+${libPrepKit}\tabc
+${libPrepKit}\tdef
 """
         )
 
@@ -78,10 +77,18 @@ ${MetaDataColumn.LIB_PREP_KIT}\tother
         validator.validate(context)
 
         then:
-        context.problems.empty
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.WARNING
+        containSame(problem.affectedCells*.cellAddress, ['A2', 'A3'])
+        problem.message.contains("The library preparation kit column is ${message}")
+
+        where:
+        libPrepKit                                       | message
+        ''                                               | 'empty'
+        InformationReliability.UNKNOWN_VERIFIED.rawValue | InformationReliability.UNKNOWN_VERIFIED.rawValue
     }
 
-    void 'validate, when metadata file contains no LibPrepKit column, adds one error'() {
+    void 'validate, when metadata file contains no LibPrepKit column, adds one warning'() {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()

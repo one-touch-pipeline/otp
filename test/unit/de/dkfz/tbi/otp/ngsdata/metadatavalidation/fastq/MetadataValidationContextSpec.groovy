@@ -64,22 +64,10 @@ ${SeqTypeNames.RNA.seqTypeName}\ttest2SampleLib\t\t${LibraryLayout.SINGLE}
 ${SeqTypeNames.CHIP_SEQ.seqTypeName}\ttest3SampleLib\t\t${LibraryLayout.PAIRED}
 """)
         new SampleLibraryValidator().validate(context)
-        LibPrepKitSeqTypeValidator libPrepKitSeqTypeValidator = new LibPrepKitSeqTypeValidator()
-        libPrepKitSeqTypeValidator.seqTypeService = Mock(SeqTypeService) {
-            1 * findByNameOrImportAlias(SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.wholeGenomeBisulfitePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.EXOME.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.exomePairedSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.RNA.seqTypeName, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> SeqTypeService.rnaSingleSeqType
-            1 * findByNameOrImportAlias(SeqTypeNames.CHIP_SEQ.seqTypeName, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> SeqTypeService.chipSeqPairedSeqType
-        }
-        libPrepKitSeqTypeValidator.validate(context)
 
         expect:
         context.getSummary() == [
                 "For samples which contain 'lib', there should be a value in the CUSTOMER_LIBRARY column.",
-                "If the sequencing type is 'WHOLE_GENOME_BISULFITE ${LibraryLayout.PAIRED}', the library preparation kit must be given.",
-                "If the sequencing type is 'EXON ${LibraryLayout.PAIRED}', the library preparation kit must be given.",
-                "If the sequencing type is 'RNA ${LibraryLayout.SINGLE}', the library preparation kit must be given.",
-                "If the sequencing type is 'ChIP Seq ${LibraryLayout.PAIRED}', the library preparation kit must be given."
         ]
     }
 

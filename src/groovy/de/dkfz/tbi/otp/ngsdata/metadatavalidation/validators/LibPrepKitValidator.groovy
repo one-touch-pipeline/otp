@@ -33,9 +33,9 @@ class LibPrepKitValidator extends SingleValueValidator<MetadataValidationContext
 
     @Override
     void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {
-        if (!(value == "" ||
-                value == InformationReliability.UNKNOWN_VERIFIED.rawValue ||
-                libraryPreparationKitService.findByNameOrImportAlias(value))) {
+        if (value == "" || value == InformationReliability.UNKNOWN_VERIFIED.rawValue) {
+            context.addProblem(cells, Level.WARNING, "The library preparation kit column is ${value ?: 'empty'}", "At least one library preparation kit is ${value ?: 'empty'}")
+        } else if (!libraryPreparationKitService.findByNameOrImportAlias(value)) {
             context.addProblem(cells, Level.ERROR, "The library preparation kit '${value}' is neither registered in the OTP database nor '${InformationReliability.UNKNOWN_VERIFIED.rawValue}' nor empty.", "At least one library preparation kit is neither registered in the OTP database nor '${InformationReliability.UNKNOWN_VERIFIED.rawValue}' nor empty.")
         }
     }
