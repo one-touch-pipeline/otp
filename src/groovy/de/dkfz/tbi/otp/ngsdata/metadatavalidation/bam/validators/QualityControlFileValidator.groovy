@@ -35,12 +35,11 @@ class QualityControlFileValidator extends ValueTuplesValidator<BamMetadataValida
     boolean columnMissing(BamMetadataValidationContext context, String columnTitle) {
         if (columnTitle == BAM_FILE_PATH.name()) {
             mandatoryColumnMissing(context, columnTitle)
-            return false
         }
         if (columnTitle == QUALITY_CONTROL_FILE.name()) {
             optionalColumnMissing(context, columnTitle)
         }
-        return true
+        return false
     }
 
     @Override
@@ -50,7 +49,7 @@ class QualityControlFileValidator extends ValueTuplesValidator<BamMetadataValida
             String bamFile = it.getValue(BAM_FILE_PATH.name())
             String qualityControlFile = it.getValue(QUALITY_CONTROL_FILE.name())
 
-            if (!qualityControlFile.isEmpty()) {
+            if (qualityControlFile) {
                 if (!OtpPath.isValidRelativePath(qualityControlFile)) {
                     context.addProblem(it.cells, Level.ERROR, "The path '${qualityControlFile}' is not a relative path.",
                             "At least one path is not a relative path.")

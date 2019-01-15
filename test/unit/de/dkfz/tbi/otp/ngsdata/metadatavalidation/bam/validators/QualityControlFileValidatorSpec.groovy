@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
+import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 import de.dkfz.tbi.otp.utils.*
@@ -9,7 +10,6 @@ import org.junit.rules.*
 import spock.lang.*
 
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 
 class QualityControlFileValidatorSpec extends Specification {
 
@@ -83,20 +83,17 @@ class QualityControlFileValidatorSpec extends Specification {
         new QualityControlFileValidator().validate(context)
 
         then:
-        containSame(expectedProblems, context.problems)
+        TestCase.assertContainSame(expectedProblems, context.problems)
     }
 
-    void 'validate, when optional column QUALITY_CONTROL_FILE is missing, then expected warning'() {
+    void 'validate, when mandatory column BAM_FILE_PATH is missing, then expected warning'() {
 
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
-                "${PROJECT}\t${INDIVIDUAL}\n"
+                "${PROJECT}\t${QUALITY_CONTROL_FILE}\n\nproject\t/tmp/file\n"
         )
 
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.WARNING,
-                        "'QUALITY_CONTROL_FILE' has to be set for Sophia",
-                        "'QUALITY_CONTROL_FILE' has to be set for Sophia"),
                 new Problem(Collections.emptySet(), Level.ERROR,
                         "Mandatory column 'BAM_FILE_PATH' is missing.",
                         "Mandatory column 'BAM_FILE_PATH' is missing.")
@@ -106,6 +103,26 @@ class QualityControlFileValidatorSpec extends Specification {
         new QualityControlFileValidator().validate(context)
 
         then:
-        containSame(context.problems, expectedProblems)
+        TestCase.assertContainSame(context.problems, expectedProblems)
+    }
+
+    void 'validate, when optional column QUALITY_CONTROL_FILE is missing, then expected warning'() {
+
+        given:
+        BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
+                "${PROJECT}\t${BAM_FILE_PATH}\nproject\t/tmp/file\n"
+        )
+
+        Collection<Problem> expectedProblems = [
+                new Problem(Collections.emptySet(), Level.WARNING,
+                        "'QUALITY_CONTROL_FILE' has to be set for Sophia",
+                        "'QUALITY_CONTROL_FILE' has to be set for Sophia"),
+        ]
+
+        when:
+        new QualityControlFileValidator().validate(context)
+
+        then:
+        TestCase.assertContainSame(context.problems, expectedProblems)
     }
 }
