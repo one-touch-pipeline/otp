@@ -22,7 +22,7 @@
                                 <tr>
                                     <td class="attribute">
                                         <g:select class="criteria" name="criteria2"
-                                        from='${sampleTypes}' noSelection="${["none": message(code:"otp.filter.sampleType")]}" ></g:select>
+                                        from='${sampleTypes}' noSelection="${["none": message(code:"otp.filter.sampleType")]}" />
                                     </td>
                                 </tr>
                             </table>
@@ -83,7 +83,10 @@
                                 </g:each>
                             </g:if><g:else>
                                 <g:each var="workflow" in="${pipelines}">
-                                    <th>${workflow.displayName}<br><g:message code="projectOverview.index.${workflow.displayName != 'external' ? 'lanesAndCoverage' : 'existsAndCoverage'}"/></th>
+                                    <th>${workflow.displayName}
+                                        <g:if test="${workflow.displayName == 'external'}"><g:message code="projectOverview.index.existsAndCoverage"/></g:if>
+                                        <g:else><g:message code="projectOverview.index.lanesAndCoverage"/></g:else>
+                                    </th>
                                 </g:each>
                             </g:else>
                         </g:each>
