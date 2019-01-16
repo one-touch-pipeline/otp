@@ -27,6 +27,11 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
         return pid =~ "^" + getPidRegex() + /$/
     }
 
+    @Override
+    String tryParseCellPosition(String sampleIdentifier) {
+        return null
+    }
+
     private Collection<SampleIdentifier> findSampleIdentifiersByPidAndTissueTypeKey(String pid, String tissueTypeKey) {
         Collection<SampleIdentifier> result = SampleIdentifier.createCriteria().list {
             sample {

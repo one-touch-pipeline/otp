@@ -107,4 +107,10 @@ databaseChangeLog = {
     changeSet(author: "strubelp", id: "OTP-3036-SQL") {
         sqlFile(path: 'changelogs/2019/OTP-3036.sql')
     }
+
+    changeSet(author: "kosnac", id: "OTP-3060-SQL") {
+        sqlFile(path: 'changelogs/2019/OTP-3060.sql')
+    }
+
+    include file: 'changelogs/2019/OTP-3060-migrate-data.groovy'
 }

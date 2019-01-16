@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.hipo
 
 import spock.lang.*
 
-class HipoSampleIdentifierSpec extends Specification {
+class HipoSampleIdentifierParserSpec extends Specification {
 
     HipoSampleIdentifierParser parser = new HipoSampleIdentifierParser()
 
@@ -54,5 +54,24 @@ class HipoSampleIdentifierSpec extends Specification {
         null                | _
         and: 'Input with invalid pid'
         'INVALID_PID'          | _
+    }
+
+    @Unroll
+    void "test tryParseCellPosition is not implemented and always returns null"() {
+        given:
+        String cellPosition
+
+        when:
+        cellPosition = parser.tryParseCellPosition(identifier)
+
+        then:
+        cellPosition == null
+
+        where:
+        identifier << [
+                'H059-ABCDEF-T0-D1',
+                'H059-ABCDEF-T01-D1',
+                'INVALID_PID',
+        ]
     }
 }

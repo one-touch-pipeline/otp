@@ -142,4 +142,42 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
         and: 'Input with invalid pid'
         'INVALID_PID'          | _
     }
+
+    @Unroll
+    void "test tryParseCellPosition valid input #identifier"() {
+        given:
+        String cellPosition
+
+        when:
+        cellPosition = parser.tryParseCellPosition(identifier)
+
+        then:
+        cellPosition == expectedCellPosition
+
+        where:
+        identifier            | expectedCellPosition
+        "K12A-123ABC-T0-G1"   | "G1"
+        "K12A-123ABC-T0-12C3" | "12C3"
+        "K12A-123ABC-T3-1J02" | "1J02"
+    }
+
+    @Unroll
+    void "test tryParseCellPosition invalid input #identifier"() {
+        given:
+        String cellPosition
+
+        when:
+        cellPosition = parser.tryParseCellPosition(identifier)
+
+        then:
+        cellPosition == null
+
+        where:
+        identifier << [
+                null,
+                "",
+                'K12A-123ABC-T0-123C',
+                'K12A-123ABC-T0-1C123',
+        ]
+    }
 }

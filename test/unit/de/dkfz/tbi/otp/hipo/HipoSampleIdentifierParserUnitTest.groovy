@@ -5,7 +5,7 @@ import org.junit.*
 import static junit.framework.TestCase.*
 import static org.junit.Assert.*
 
-class HipoSampleIdentifierUnitTest {
+class HipoSampleIdentifierParserUnitTest {
 
     HipoSampleIdentifierParser parser = new HipoSampleIdentifierParser()
 

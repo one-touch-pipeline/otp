@@ -112,6 +112,12 @@ class SeqTrack implements ProcessParameterObject, Entity {
     String libraryName
     String normalizedLibraryName
 
+    /**
+     * For SingleCell data this contains a value we parse out of the analyte part of the Hipo2 identifier.
+     * It is unclear if there is an actual name for this value.
+     */
+    String cellPosition
+
     List<LogMessage> logMessages = []
 
     static belongsTo = [
@@ -149,6 +155,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
         normalizedLibraryName(nullable: true, validator: { String val, SeqTrack obj ->
             (val == null) ? (obj.libraryName == null) : (val == normalizeLibraryName(obj.libraryName))
         })
+        cellPosition nullable: true, unique: ['run', 'laneId']
         problem nullable: true
     }
 

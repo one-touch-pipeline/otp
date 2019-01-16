@@ -27,6 +27,11 @@ class DeepSampleIdentifierParser implements SampleIdentifierParser {
         return pid =~ "^" + getPidRegex() + /$/
     }
 
+    @Override
+    String tryParseCellPosition(String sampleIdentifier) {
+        return null
+    }
+
     private static getPidRegex() {
         String subproject = "(4[1-4]|5[1-3]|0[012])"
         String species = "(H|M)"

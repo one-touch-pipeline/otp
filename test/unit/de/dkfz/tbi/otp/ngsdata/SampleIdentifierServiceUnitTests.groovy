@@ -230,27 +230,3 @@ class SampleIdentifierServiceUnitTests {
         assert result.sampleType.name=="sampleTypeName_3"
     }
 }
-
-@SuppressWarnings("UnusedMethodParameter")
-class TestParser_CanParse implements SampleIdentifierParser {
-
-    ParsedSampleIdentifier tryParse(String someString) {
-        return new DefaultParsedSampleIdentifier(someString, someString, someString, someString)
-    }
-
-    boolean tryParsePid(String pid) {
-        return true
-    }
-}
-
-@SuppressWarnings("UnusedMethodParameter")
-class TestParser_CannotParse implements SampleIdentifierParser {
-
-    ParsedSampleIdentifier tryParse(String sampleIdentifier) {
-        return null
-    }
-
-    boolean tryParsePid(String pid) {
-        return false
-    }
-}

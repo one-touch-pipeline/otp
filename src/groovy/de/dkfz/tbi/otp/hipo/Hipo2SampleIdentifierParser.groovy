@@ -40,4 +40,13 @@ class Hipo2SampleIdentifierParser implements SampleIdentifierParser {
         }
         return null
     }
+
+    @Override
+    String tryParseCellPosition(String sampleIdentifier) {
+        Matcher matcher = sampleIdentifier =~ /^.*-${ANALYTE}$/
+        if (matcher.matches()) {
+            return matcher.group('analyte')
+        }
+        return null
+    }
 }

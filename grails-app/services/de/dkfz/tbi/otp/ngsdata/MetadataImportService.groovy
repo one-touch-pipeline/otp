@@ -387,6 +387,10 @@ class MetadataImportService {
                 properties['antibody'] = uniqueColumnValue(rows, ANTIBODY) ?: null
             }
 
+            if (isSingleCell) {
+                properties['cellPosition'] = sampleIdentifierService.parseCellPosition(sampleIdString, project)
+            }
+
             SeqTrack seqTrack = (seqTypeName?.factory ?: SeqTrack.FACTORY).call(properties)
             assert seqTrack.save()
 

@@ -41,6 +41,16 @@ class SampleIdentifierService {
         return sampleIdentifierParser.tryParse(sampleIdentifier)
     }
 
+    String parseCellPosition(String sampleIdentifier, Project project) {
+        if (!project || project.sampleIdentifierParserBeanName == SampleIdentifierParserBeanName.NO_PARSER) {
+            return null
+        }
+
+        SampleIdentifierParser sampleIdentifierParser = getSampleIdentifierParser(project.sampleIdentifierParserBeanName)
+
+        return sampleIdentifierParser.tryParseCellPosition(sampleIdentifier)
+    }
+
     SampleIdentifier findOrSaveSampleIdentifier(ParsedSampleIdentifier identifier) {
         SampleIdentifier result = atMostOneElement(SampleIdentifier.findAllByName(identifier.fullSampleName))
         if (result) {

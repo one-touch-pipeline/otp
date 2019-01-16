@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import spock.lang.*
 
-class InformSampleIdentifierParserIntegrationSpec extends Specification{
+class InformSampleIdentifierParserIntegrationSpec extends Specification {
     InformSampleIdentifierParser informSampleIdentifierParser = new InformSampleIdentifierParser()
 
 
@@ -109,5 +109,25 @@ class InformSampleIdentifierParserIntegrationSpec extends Specification{
         null                | _
         and: 'Input with invalid pid'
         'Z123_456'          | _
+    }
+
+    @Unroll
+    void "test tryParseCellPosition is not implemented and always returns null"() {
+        given:
+        String cellPosition
+
+        when:
+        cellPosition = informSampleIdentifierParser.tryParseCellPosition(identifier)
+
+        then:
+        cellPosition == null
+
+        where:
+        identifier << [
+                'I123_456_2T1_D1',
+                'I123_456_0F1_D1',
+                'Z123_456_1T1_D1',
+                'I124_456_2T0_D1',
+        ]
     }
 }

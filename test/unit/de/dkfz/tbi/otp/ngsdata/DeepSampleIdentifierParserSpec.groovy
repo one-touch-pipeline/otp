@@ -91,4 +91,24 @@ class DeepSampleIdentifierParserSpec extends Specification {
         '02_Hf3T3L1_NNAs_T1_CTCF_R_1'   || '02_Hf3T3L1_NNAs_T1'  | 'Replicate1'      | '02_Hf3T3L1_NNAs_T1_CTCF_R_1'
         '02_Hf3T3L1_NNAl_T1_CTCF_R_1'   || '02_Hf3T3L1_NNAl_T1'  | 'Replicate1'      | '02_Hf3T3L1_NNAl_T1_CTCF_R_1'
     }
+
+    @Unroll
+    void "test tryParseCellPosition is not implemented and always returns null"() {
+        given:
+        String cellPosition
+
+        when:
+        cellPosition = deepSampleIdentifierParser.tryParseCellPosition(identifier)
+
+        then:
+        cellPosition == null
+
+        where:
+        identifier << [
+                '41_Hf01_BlAd_CD_XXXX_S_1',
+                '02_Mm003T3L1_NNAd_T1_CTCF_R_1',
+                '41_Hf01_BlAd_CD_WGBS_S_1',
+                '02_Hf3T3L1_NNAd_T1_CTCF_R_1',
+        ]
+    }
 }

@@ -67,6 +67,11 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
                 /* experiment: */ matcher.group(7),
         )
     }
+
+    @Override
+    String tryParseCellPosition(String sampleIdentifier) {
+        return null
+    }
 }
 
 @TupleConstructor  // see http://jeffastorey.blogspot.de/2011/10/final-variables-in-groovy-with-dynamic.html

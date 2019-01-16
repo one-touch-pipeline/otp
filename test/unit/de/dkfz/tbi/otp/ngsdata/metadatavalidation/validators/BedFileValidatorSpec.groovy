@@ -30,9 +30,14 @@ import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.*
         ])
 class BedFileValidatorSpec extends Specification {
 
-
-    static
-    final List<String> HEADER = [MetaDataColumn.SEQUENCING_TYPE, MetaDataColumn.LIBRARY_LAYOUT, MetaDataColumn.LIB_PREP_KIT, MetaDataColumn.SAMPLE_ID, MetaDataColumn.TAGMENTATION_BASED_LIBRARY, MetaDataColumn.PROJECT]*.name().asImmutable()
+    static final List<String> HEADER = [
+            MetaDataColumn.SEQUENCING_TYPE,
+            MetaDataColumn.LIBRARY_LAYOUT,
+            MetaDataColumn.LIB_PREP_KIT,
+            MetaDataColumn.SAMPLE_ID,
+            MetaDataColumn.TAGMENTATION_BASED_LIBRARY,
+            MetaDataColumn.PROJECT,
+    ]*.name().asImmutable()
 
     static final String PARSE_PREFIX = 'PARSE'
     static final String PARSE_PROJECT = 'PROJECT'
@@ -110,6 +115,11 @@ class BedFileValidatorSpec extends Specification {
                                 @Override
                                 boolean tryParsePid(String pid) {
                                     return true
+                                }
+
+                                @Override
+                                String tryParseCellPosition(String sampleIdentifier) {
+                                    return null
                                 }
                             }
                         }

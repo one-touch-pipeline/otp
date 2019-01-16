@@ -5,6 +5,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
@@ -59,7 +60,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
         SoftwareToolIdentifier,
 ])
 @TestMixin(ControllerUnitTestMixin)
-class MetadataImportServiceSpec extends Specification {
+class MetadataImportServiceSpec extends Specification implements DomainFactoryCore {
 
     final static String TICKET_NUMBER = "2000010112345678"
 
@@ -395,9 +396,10 @@ class MetadataImportServiceSpec extends Specification {
         final String WG = SeqTypeNames.WHOLE_GENOME.seqTypeName
         final String EXON = SeqTypeNames.EXOME.seqTypeName
         final String CHIP_SEQ = SeqTypeNames.CHIP_SEQ.seqTypeName
+        final String SC_EXON = "SC_" + SeqTypeNames.EXOME.seqTypeName
 
-        def (fastq1, fastq2, fastq3, fastq4, fastq5, fastq6, fastq7, fastq8) =
-            ["fastq_a", "s_1_1_", "s_1_2_", "s_2_1_", "s_2_2_", "s_3_1_", "fastq_g", "fastq_b"]
+        def (fastq1, fastq2, fastq3, fastq4, fastq5, fastq6, fastq7, fastq8, fastq9) =
+            ["fastq_a", "s_1_1_", "s_1_2_", "s_2_1_", "s_2_2_", "s_3_1_", "fastq_g", "fastq_b", "fastq_sc"]
 
         def (String runName1, String runName2) = ["run1", "run2"]
         def (String center1, String center2) = ["center1", "center2"]
@@ -406,12 +408,14 @@ class MetadataImportServiceSpec extends Specification {
         def (String kit1, String kit2) = ["kit1", "kit2"]
         def (String target1, String target2) = ["target1", "target2"]
         def (String single, String paired) = [LibraryLayout.SINGLE, LibraryLayout.PAIRED]
+        def (String parse, String scParse, String get) = ["parse_me", "sc_parse_me", "in_db"]
 
-        def (Date runDate, Date run2Date) = [[2016, 4, 13], [2016, 6, 6]].collect { new LocalDate(it[0], it[1], it[2]).toDate() }
-        def (String date1, String date2) = [runDate, run2Date].collect { it.format("yyyy-MM-dd") }
+        def (Date run1Date, Date run2Date) = [[2016, 4, 13], [2016, 6, 6]].collect { new LocalDate(it[0], it[1], it[2]).toDate() }
+        def (String date1, String date2) = [run1Date, run2Date].collect { it.format("yyyy-MM-dd") }
 
-        def (md5a, md5b, md5c, md5d, md5e, md5f, md5g, md5h) = (1..8).collect { HelperUtils.getRandomMd5sum() }
+        def (md5a, md5b, md5c, md5d, md5e, md5f, md5g, md5h, md5i) = (1..9).collect { HelperUtils.getRandomMd5sum() }
 
+        String scMaterial = SeqType.SINGLE_CELL_DNA
 
         SeqCenter seqCenter = DomainFactory.createSeqCenter(name: center1)
         SeqCenter seqCenter2 = DomainFactory.createSeqCenter(name: center2)
@@ -427,7 +431,7 @@ class MetadataImportServiceSpec extends Specification {
         if (runExists) {
             DomainFactory.createRun(
                     name: runName1,
-                    dateExecuted: runDate,
+                    dateExecuted: run1Date,
                     seqCenter: seqCenter,
                     seqPlatform: seqPlatform,
             )
@@ -439,6 +443,7 @@ class MetadataImportServiceSpec extends Specification {
         SeqType exomePaired = DomainFactory.createExomeSeqType(LibraryLayout.PAIRED)
         SeqType chipSeqSingle = DomainFactory.createChipSeqType(LibraryLayout.SINGLE)
         SeqType chipSeqPaired = DomainFactory.createChipSeqType(LibraryLayout.PAIRED)
+        SeqType scExomeSingle = DomainFactory.createExomeSeqType(LibraryLayout.SINGLE)
         Sample sample1 = DomainFactory.createSampleIdentifier(name: 'in_db').sample
         Sample sample2
         def (SoftwareTool pipeline1, SoftwareTool pipeline2, SoftwareTool unknownPipeline) =
@@ -459,13 +464,19 @@ class MetadataImportServiceSpec extends Specification {
                 signature: '_',
         )
 
+        Closure<SampleIdentifier> createSampleIdentifierForSample2 = { String identifierName ->
+            if (sample2 == null) {
+                sample2 = createSample()
+            }
+            SampleIdentifier identifier = DomainFactory.createSampleIdentifier(name: identifierName, sample: sample2)
+            return identifier
+        }
+
         MetadataImportService service = new MetadataImportService()
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
-            parseAndFindOrSaveSampleIdentifier('parse_me', _) >> {
-                SampleIdentifier identifier = DomainFactory.createSampleIdentifier(name: 'parse_me')
-                sample2 = identifier.sample
-                return identifier
-            }
+            parseAndFindOrSaveSampleIdentifier(parse, _) >> createSampleIdentifierForSample2(parse)
+            parseAndFindOrSaveSampleIdentifier(scParse, _) >> createSampleIdentifierForSample2(scParse)
+            parseCellPosition(scParse, _) >> { return scParse }
         }
         SamplePair samplePair = Mock(SamplePair)
 
@@ -488,6 +499,7 @@ class MetadataImportServiceSpec extends Specification {
             findByNameOrImportAlias(EXON, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> exomePaired
             findByNameOrImportAlias(CHIP_SEQ, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> chipSeqSingle
             findByNameOrImportAlias(CHIP_SEQ, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> chipSeqPaired
+            findByNameOrImportAlias(SC_EXON, [libraryLayout: LibraryLayout.SINGLE, singleCell: true]) >> scExomeSingle
         }
         GroovyMock(SamplePair, global: true)
         1 * SamplePair.findMissingDiseaseControlSamplePairs() >> [samplePair]
@@ -502,29 +514,30 @@ class MetadataImportServiceSpec extends Specification {
         ] as DirectoryStructure
 
         String metadata = """
-${FASTQ_FILE}                   ${fastq1}     ${fastq2}     ${fastq3}     ${fastq4}     ${fastq5}     ${fastq6}     ${fastq7}     ${fastq8}
-${MD5}                          ${md5a}       ${md5b}       ${md5c}       ${md5d}       ${md5e}       ${md5f}       ${md5g}       ${md5h}
-${RUN_ID}                       ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName2}
-${CENTER_NAME}                  ${center1}    ${center1}    ${center1}    ${center1}    ${center1}    ${center1}    ${center1}    ${center2}
-${INSTRUMENT_PLATFORM}          ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform2}
-${INSTRUMENT_MODEL}             ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model2}
-${RUN_DATE}                     ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date2}
-${LANE_NO}                      4             1             1             2             2             2             3             5
-${BARCODE}                      -             barcode8      barcode8      barcode7      barcode7      barcode6      -             -
-${SEQUENCING_TYPE}              ${WG}         ${EXON}       ${EXON}       ${CHIP_SEQ}   ${CHIP_SEQ}   ${CHIP_SEQ}   ${EXON}       ${WGBS_T}
-${LIBRARY_LAYOUT}               ${single}     ${paired}     ${paired}     ${paired}     ${paired}     ${single}     ${single}     ${single}
-${MATE}                         1             1             2             1             2             1             1             1
-${SAMPLE_ID}                    parse_me      in_db         in_db         parse_me      parse_me      in_db         parse_me      parse_me
-${TAGMENTATION_BASED_LIBRARY}   -             -             -             -             -             -             -             true
+${FASTQ_FILE}                   ${fastq1}     ${fastq2}     ${fastq3}     ${fastq4}     ${fastq5}     ${fastq6}     ${fastq7}     ${fastq8}     ${fastq9}
+${MD5}                          ${md5a}       ${md5b}       ${md5c}       ${md5d}       ${md5e}       ${md5f}       ${md5g}       ${md5h}       ${md5i}
+${RUN_ID}                       ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName2}   ${runName1}
+${CENTER_NAME}                  ${center1}    ${center1}    ${center1}    ${center1}    ${center1}    ${center1}    ${center1}    ${center2}    ${center1}
+${INSTRUMENT_PLATFORM}          ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform2}  ${platform1}
+${INSTRUMENT_MODEL}             ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model2}     ${model1}
+${RUN_DATE}                     ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date2}      ${date1}
+${LANE_NO}                      4             1             1             2             2             2             3             5             1
+${BARCODE}                      -             barcode8      barcode8      barcode7      barcode7      barcode6      -             -             -
+${SEQUENCING_TYPE}              ${WG}         ${EXON}       ${EXON}       ${CHIP_SEQ}   ${CHIP_SEQ}   ${CHIP_SEQ}   ${EXON}       ${WGBS_T}     ${SC_EXON}
+${LIBRARY_LAYOUT}               ${single}     ${paired}     ${paired}     ${paired}     ${paired}     ${single}     ${single}     ${single}     ${single}
+${MATE}                         1             1             2             1             2             1             1             1             1
+${SAMPLE_ID}                    ${parse}      ${get}        ${get}        ${parse}      ${parse}      ${get}        ${parse}      ${parse}      ${scParse}
+${TAGMENTATION_BASED_LIBRARY}   -             -             -             -             -             -             -             true          -
+${BASE_MATERIAL}                -             -             -             -             -             -             -             -             ${scMaterial}
 """
         if (includeOptional) {
             metadata += """
-${INSERT_SIZE}                  -             -             -             234           234           -             456           -
-${PIPELINE_VERSION}             -             pipeline1     pipeline1     -             -             -             pipeline2     -
-${LIB_PREP_KIT}                 -             ${kit1}       ${kit1}       ${kit2}       ${kit2}       UNKNOWN       UNKNOWN       -
-${ANTIBODY_TARGET}              -             -             -             target1       target1       target2       -             -
-${ANTIBODY}                     -             -             -             antibody1     antibody1     -             -             -
-${ILSE_NO}                      -             1234          1234          -             -             2345          -             -
+${INSERT_SIZE}                  -             -             -             234           234           -             456           -             -
+${PIPELINE_VERSION}             -             pipeline1     pipeline1     -             -             -             pipeline2     -             -
+${LIB_PREP_KIT}                 -             ${kit1}       ${kit1}       ${kit2}       ${kit2}       UNKNOWN       UNKNOWN       -             ${kit2}
+${ANTIBODY_TARGET}              -             -             -             target1       target1       target2       -             -             -
+${ANTIBODY}                     -             -             -             antibody1     antibody1     -             -             -             -
+${ILSE_NO}                      -             1234          1234          -             -             2345          -             -             -
 """
         }
         List<List<String>> lines = metadata.readLines().findAll()*.split(/ {2,}/).transpose()
@@ -535,8 +548,8 @@ ${ILSE_NO}                      -             1234          1234          -     
                 lines.collect { it*.replaceFirst(/^-$/, '').join('\t') }.join('\n'),
                 [metadataFile: file.toPath(), directoryStructure: directoryStructure]
         )
-        int seqTrackCount = includeOptional ? 6 : 1
-        int dataFileCount = includeOptional ? 8 : 1
+        int seqTrackCount = includeOptional ? 7 : 1
+        int dataFileCount = includeOptional ? 9 : 1
 
         when:
         MetaDataFile result = service.importMetadataFile(context, align, importMode, otrsTicket.ticketNumber, null, otrsTicket.automaticNotification)
@@ -545,13 +558,13 @@ ${ILSE_NO}                      -             1234          1234          -     
 
         // runs
         Run.count == (includeOptional ? 2 : 1)
-        Run run = Run.findWhere(
+        Run run1 = Run.findWhere(
                 name: runName1,
-                dateExecuted: runDate,
+                dateExecuted: run1Date,
                 seqCenter: seqCenter,
                 seqPlatform: seqPlatform,
         )
-        run != null
+        run1 != null
         Run run2 = Run.findWhere(
                 name: runName2,
                 dateExecuted: run2Date,
@@ -591,8 +604,8 @@ ${ILSE_NO}                      -             1234          1234          -     
                 fileType  : fileType,
         ]
         Map commonRun1DataFileProperties = commonDataFileProperties + [
-                dateExecuted: runDate,
-                run         : run,
+                dateExecuted: run1Date,
+                run         : run1,
         ]
         Map commonRun2DataFileProperties = commonDataFileProperties + [
                 dateExecuted: run2Date,
@@ -603,7 +616,7 @@ ${ILSE_NO}                      -             1234          1234          -     
         SeqTrack seqTrack1 = SeqTrack.findWhere(
                 laneId: '4',
                 insertSize: 0,
-                run: run,
+                run: run1,
                 sample: sample2,
                 seqType: mySeqType,
                 pipelineVersion: unknownPipeline,
@@ -635,7 +648,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             SeqTrack seqTrack2 = ExomeSeqTrack.findWhere(
                     laneId: '1_barcode8',
                     insertSize: 0,
-                    run: run,
+                    run: run1,
                     sample: sample1,
                     seqType: exomePaired,
                     pipelineVersion: pipeline1,
@@ -664,7 +677,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             SeqTrack seqTrack3 = ChipSeqSeqTrack.findWhere(
                     laneId: '2_barcode7',
                     insertSize: 234,
-                    run: run,
+                    run: run1,
                     sample: sample2,
                     seqType: chipSeqPaired,
                     pipelineVersion: unknownPipeline,
@@ -695,7 +708,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             SeqTrack seqTrack4 = ChipSeqSeqTrack.findWhere(
                     laneId: '2_barcode6',
                     insertSize: 0,
-                    run: run,
+                    run: run1,
                     sample: sample1,
                     seqType: chipSeqSingle,
                     pipelineVersion: unknownPipeline,
@@ -718,7 +731,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             SeqTrack seqTrack5 = ExomeSeqTrack.findWhere(
                     laneId: '3',
                     insertSize: 456,
-                    run: run,
+                    run: run1,
                     sample: sample2,
                     seqType: exomeSingle,
                     pipelineVersion: pipeline2,
@@ -754,6 +767,27 @@ ${ILSE_NO}                      -             1234          1234          -     
                     project    : sample2.project,
                     mateNumber : 1,
                     seqTrack   : seqTrack6,
+            ])
+
+            // seqTrack7
+            SeqTrack seqTrack7 = SeqTrack.findWhere(
+                    laneId: '1',
+                    insertSize: 0,
+                    run: run1,
+                    sample: sample2,
+                    seqType: scExomeSingle,
+                    pipelineVersion: unknownPipeline,
+                    kitInfoReliability: InformationReliability.KNOWN,
+                    libraryPreparationKit: libraryPreparationKit2,
+            )
+            assert seqTrack7.ilseId == null
+            assert DataFile.findWhere(commonRun1DataFileProperties + [
+                    fileName   : fastq9,
+                    vbpFileName: fastq9,
+                    md5sum     : md5i,
+                    project    : sample2.project,
+                    mateNumber : 1,
+                    seqTrack   : seqTrack7,
             ])
         }
 
