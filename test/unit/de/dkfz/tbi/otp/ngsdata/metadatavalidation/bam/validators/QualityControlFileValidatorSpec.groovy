@@ -86,7 +86,7 @@ class QualityControlFileValidatorSpec extends Specification {
         TestCase.assertContainSame(expectedProblems, context.problems)
     }
 
-    void 'validate, when mandatory column BAM_FILE_PATH is missing, then expected warning'() {
+    void 'validate, when mandatory column BAM_FILE_PATH is missing, then expected error'() {
 
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
