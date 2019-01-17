@@ -6,6 +6,7 @@ interface SeqTypeAndInputBamFiles {
 
     SeqType seqTypeToUse()
 
+    @SuppressWarnings('JavaIoPackageAccess')
     File getBamFilePairBaseDirectory()
 
     BamFileSet getBamFileSet()

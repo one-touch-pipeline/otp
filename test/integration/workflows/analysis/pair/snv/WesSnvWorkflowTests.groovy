@@ -5,7 +5,7 @@ import org.junit.*
 import workflows.analysis.pair.bamfiles.*
 
 @Ignore
-class WesSnvWorkflowTests extends AbstractSnvWorkflowTests implements SeqTypeAndInputBigBamFiles {
+class WesSnvWorkflowTests extends AbstractSnvWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div32 {
 
     @Override
     SeqType seqTypeToUse() {

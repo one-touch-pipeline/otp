@@ -5,7 +5,7 @@ import org.junit.*
 import workflows.analysis.pair.bamfiles.*
 
 @Ignore
-class WesRunYapsaWorkflowTests extends AbstractRunYapsaWorkflowTests implements SeqTypeAndInputBigBamFiles {
+class WesRunYapsaWorkflowTests extends AbstractRunYapsaWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div128 {
 
     @Override
     SeqType seqTypeToUse() {

@@ -1,6 +1,7 @@
 package workflows.analysis.pair.bamfiles
 
 
+@SuppressWarnings('JavaIoPackageAccess')
 class BamFileSet {
 
     final File diseaseBamFile

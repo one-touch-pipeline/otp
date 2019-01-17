@@ -59,8 +59,8 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
 
     void linkQualityControlFiles() {
-        File tumorInsertSizeFile = new File(workflowData, "tumor_insertsize_plot.png_qcValues.txt")
-        File controlInsertSizeFile = new File(workflowData, "control_insertsize_plot.png_qcValues.txt")
+        File tumorInsertSizeFile = new File(workflowData, "tumor_HCC1187-div128_insertsize_plot.png_qcValues.txt")
+        File controlInsertSizeFile = new File(workflowData, "blood_HCC1187-div128_insertsize_plot.png_qcValues.txt")
 
         File finalTumorInsertSizeFile = bamFileTumor.getFinalInsertSizeFile()
         File finalControlInsertSizeFile = bamFileControl.getFinalInsertSizeFile()

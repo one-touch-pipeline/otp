@@ -5,7 +5,7 @@ import org.junit.*
 import workflows.analysis.pair.bamfiles.*
 
 @Ignore
-class WesIndelWorkflowTests extends AbstractIndelWorkflowTests implements SeqTypeAndInputBigBamFiles {
+class WesIndelWorkflowTests extends AbstractIndelWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div64 {
 
     @Override
     SeqType seqTypeToUse() {
