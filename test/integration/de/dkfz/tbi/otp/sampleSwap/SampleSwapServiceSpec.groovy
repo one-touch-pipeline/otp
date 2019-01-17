@@ -1,14 +1,13 @@
 package de.dkfz.tbi.otp.sampleSwap
 
-import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
-import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.sampleswap.*
-import de.dkfz.tbi.otp.testing.*
+import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
+import org.junit.*
+import org.junit.rules.*
 import spock.lang.*
 
 import java.nio.file.*

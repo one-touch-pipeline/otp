@@ -17,7 +17,7 @@ beans = {
             persistenceInterceptor = ref("persistenceInterceptor")
             executor = java.util.concurrent.Executors.newCachedThreadPool()
         }
-        executorService(de.dkfz.tbi.otp.testing.SynchronousTestingExecutorService)
+        executorService(de.dkfz.tbi.otp.scheduler.SynchronousTestingExecutorService)
         fileSystemService(de.dkfz.tbi.otp.job.processing.TestFileSystemService)
     } else {
         // proper thread pool

@@ -1,13 +1,13 @@
 package de.dkfz.tbi.otp.job.scheduler
 
 import de.dkfz.tbi.*
+import de.dkfz.tbi.otp.integration.*
 import de.dkfz.tbi.otp.job.*
 import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.testing.*
 import org.apache.commons.logging.impl.*
 import org.codehaus.groovy.grails.commons.*
 import org.junit.*

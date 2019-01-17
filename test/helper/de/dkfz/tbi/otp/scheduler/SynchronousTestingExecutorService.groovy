@@ -1,4 +1,4 @@
-package de.dkfz.tbi.otp.testing
+package de.dkfz.tbi.otp.scheduler
 
 import java.util.concurrent.Callable
 import java.util.concurrent.Future

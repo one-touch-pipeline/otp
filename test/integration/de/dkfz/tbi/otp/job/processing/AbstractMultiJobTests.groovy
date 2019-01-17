@@ -7,7 +7,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.restarting.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.testing.UserAndRoles
+import de.dkfz.tbi.otp.security.*
 import org.apache.commons.logging.impl.*
 import org.junit.*
 import org.springframework.beans.factory.annotation.*

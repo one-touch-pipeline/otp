@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.integration.*
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.testing.*
 import grails.plugin.springsecurity.*
 import grails.plugin.springsecurity.acl.*
 import org.junit.*

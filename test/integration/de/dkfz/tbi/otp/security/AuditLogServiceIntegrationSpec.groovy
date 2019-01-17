@@ -1,10 +1,8 @@
 package de.dkfz.tbi.otp.security
 
-import de.dkfz.tbi.otp.testing.UserAndRoles
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.joda.time.DateTime
-import spock.lang.Specification
+import grails.plugin.springsecurity.*
+import org.joda.time.*
+import spock.lang.*
 
 class AuditLogServiceIntegrationSpec extends Specification implements UserAndRoles {
 
@@ -25,7 +23,6 @@ class AuditLogServiceIntegrationSpec extends Specification implements UserAndRol
         when:
         SpringSecurityUtils.doWithAuth(USER) {
             actionLog = auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Test")
-
         }
         DateTime stamp = new DateTime(actionLog.timestamp)
 

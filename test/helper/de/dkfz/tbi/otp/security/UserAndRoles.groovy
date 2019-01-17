@@ -1,8 +1,7 @@
-package de.dkfz.tbi.otp.testing
+package de.dkfz.tbi.otp.security
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.Principal
+import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.acl.*
 import org.springframework.security.authentication.*
 import org.springframework.security.core.*

@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.testing.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
 import spock.lang.*
 

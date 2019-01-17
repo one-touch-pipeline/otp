@@ -6,7 +6,7 @@ import de.dkfz.tbi.otp.dataprocessing.indelcalling.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
-import de.dkfz.tbi.otp.testing.*
+import de.dkfz.tbi.otp.security.*
 import grails.plugin.springsecurity.*
 import grails.test.spock.*
 import spock.lang.*

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.job.jobs.TestJobHelper
 import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.testing.GroovyScriptAwareTestCase
+import de.dkfz.tbi.otp.scriptTests.GroovyScriptAwareTestCase
 
 class SamplePairDiscoveryStartJobTests extends GroovyScriptAwareTestCase {
 

@@ -1,8 +1,8 @@
 package de.dkfz.tbi.otp.utils
 
+import de.dkfz.tbi.otp.integration.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.testing.*
 import org.junit.*
 
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*

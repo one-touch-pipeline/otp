@@ -14,7 +14,7 @@ import org.springframework.security.acls.domain.BasePermission
 
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
+import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
 
 class ProcessServiceTests extends AbstractIntegrationTest {
     AclUtilService aclUtilService

@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.*
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.testing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
 import org.codehaus.groovy.grails.context.support.*

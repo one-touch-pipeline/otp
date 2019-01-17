@@ -1,15 +1,11 @@
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.testing.AbstractIntegrationTest
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.junit.Before
-import org.junit.Test
-import org.springframework.security.access.AccessDeniedException
+import de.dkfz.tbi.otp.integration.*
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.security.*
+import grails.plugin.springsecurity.*
+import org.junit.*
+import org.springframework.security.access.*
 
 class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest {
 

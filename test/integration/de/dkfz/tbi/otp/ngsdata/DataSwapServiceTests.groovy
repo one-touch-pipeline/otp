@@ -4,9 +4,10 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.fileSystemConsistency.*
-import de.dkfz.tbi.otp.testing.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
+import de.dkfz.tbi.otp.scriptTests.GroovyScriptAwareTestCase
 import de.dkfz.tbi.otp.utils.*
 import grails.plugin.springsecurity.*
 import org.junit.*

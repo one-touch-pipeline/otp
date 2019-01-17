@@ -2,13 +2,13 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.testing.*
+import de.dkfz.tbi.otp.integration.*
+import de.dkfz.tbi.otp.security.*
 import grails.plugin.springsecurity.*
+import org.joda.time.*
 import org.junit.*
 import org.springframework.security.access.*
 import org.springframework.security.acls.domain.*
-import org.joda.time.*
 
 import static org.junit.Assert.*
 

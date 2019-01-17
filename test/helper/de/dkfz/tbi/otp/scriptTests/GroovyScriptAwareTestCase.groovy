@@ -1,10 +1,12 @@
-package de.dkfz.tbi.otp.testing
+package de.dkfz.tbi.otp.scriptTests
 
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.runtime.InvokerHelper
+
+import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
 
 /**
  * This is a first version of a class helping to call groovy scripts

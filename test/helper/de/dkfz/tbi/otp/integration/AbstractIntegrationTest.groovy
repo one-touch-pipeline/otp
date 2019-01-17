@@ -1,9 +1,13 @@
-package de.dkfz.tbi.otp.testing
+package de.dkfz.tbi.otp.integration
 
-import de.dkfz.tbi.otp.job.plan.*
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.processing.ParameterType
+import de.dkfz.tbi.otp.job.processing.ParameterUsage
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 import static org.junit.Assert.*
+
 /**
  * Abstract base class for all tests to have some shared functionality.
  */
