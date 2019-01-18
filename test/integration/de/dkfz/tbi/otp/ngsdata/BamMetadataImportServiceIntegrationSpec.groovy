@@ -10,7 +10,6 @@ class BamMetadataImportServiceIntegrationSpec extends Specification {
     BamMetadataImportService bamMetadataImportService
 
     void 'getBamMetadataValidators returns BamMetadataValidators'() {
-
         expect:
         bamMetadataImportService.bamMetadataValidators.find { it instanceof Md5sumFormatValidator }
     }

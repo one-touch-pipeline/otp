@@ -41,7 +41,6 @@ class BamMetadataImportServiceSpec extends Specification {
     TemporaryFolder temporaryFolder
 
     void "getImplementedValidations returns descriptions of validations"() {
-
         given:
         BamMetadataImportService service = new BamMetadataImportService()
         service.applicationContext = Mock(ApplicationContext) {
@@ -61,7 +60,6 @@ class BamMetadataImportServiceSpec extends Specification {
     }
 
     void "validate creates context and calls validators"() {
-
         given:
         File testDirectory = TestCase.createEmptyTestDirectory()
         Path metadataFile = Paths.get(testDirectory.path, 'bamMetadata.tsv')
@@ -104,7 +102,6 @@ class BamMetadataImportServiceSpec extends Specification {
     }
 
     void "validateAndImport, when there are no problems, returns an importProcess object"() {
-
         given:
         Project project = DomainFactory.createProject(name: "project_01")
         DomainFactory.createExternallyProcessedPipelineLazy()

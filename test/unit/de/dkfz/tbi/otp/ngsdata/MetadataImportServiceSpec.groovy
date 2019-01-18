@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -66,8 +66,7 @@ class MetadataImportServiceSpec extends Specification {
     @Rule
     TemporaryFolder temporaryFolder
 
-    void 'getImplementedValidations returns descriptions of validations'() {
-
+    void "getImplementedValidations returns descriptions of validations"() {
         given:
         MetadataImportService service = new MetadataImportService()
         service.applicationContext = Mock(ApplicationContext) {
@@ -86,8 +85,7 @@ class MetadataImportServiceSpec extends Specification {
         containSame(service.getImplementedValidations(), ['description1', 'description2', 'description3'])
     }
 
-    void 'validate creates context and calls validators'() {
-
+    void "validate creates context and calls validators"() {
         given:
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
         String directoryStructureName = HelperUtils.uniqueString
@@ -129,21 +127,18 @@ class MetadataImportServiceSpec extends Specification {
         testDirectory.deleteDir()
     }
 
-    void 'getDirectoryStructureBeanName, when called with AUTO_DETECT_DIRECTORY_STRUCTURE_NAME, returns DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME'() {
-
+    void "getDirectoryStructureBeanName, when called with AUTO_DETECT_DIRECTORY_STRUCTURE_NAME, returns DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME"() {
         expect:
-        MetadataImportService.getDirectoryStructureBeanName(MetadataImportService.AUTO_DETECT_DIRECTORY_STRUCTURE_NAME,
-                null) == MetadataImportService.DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME
+        MetadataImportService.getDirectoryStructureBeanName(MetadataImportService.AUTO_DETECT_DIRECTORY_STRUCTURE_NAME) == MetadataImportService.DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME
     }
 
-    void 'getDirectoryStructureBeanName, when called with a string != AUTO_DETECT_DIRECTORY_STRUCTURE_NAME, returns that string'() {
-
+    void "getDirectoryStructureBeanName, when called with a string != AUTO_DETECT_DIRECTORY_STRUCTURE_NAME, returns that string"() {
         expect:
-        MetadataImportService.getDirectoryStructureBeanName('abcdef', null) == 'abcdef'
+        MetadataImportService.getDirectoryStructureBeanName('abcdef') == 'abcdef'
     }
 
     @Unroll
-    void 'validateAndImportWithAuth, when there are no problems, calls importMetadataFile and returns created MetaDataFile'() {
+    void "validateAndImportWithAuth, when there are no problems, calls importMetadataFile and returns created MetaDataFile"() {
         given:
         SeqCenter seqCenter = DomainFactory.createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
@@ -184,7 +179,7 @@ class MetadataImportServiceSpec extends Specification {
         automaticNotification << [true, false]
     }
 
-    void 'validateAndImportWithAuth, when there are errors, returns null as metadataFile'() {
+    void "validateAndImportWithAuth, when there are errors, returns null as metadataFile"() {
         given:
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
         String directoryStructureName = HelperUtils.uniqueString
@@ -205,11 +200,11 @@ class MetadataImportServiceSpec extends Specification {
         results[0].metadataFile == null
     }
 
-    void 'validateAndImportWithAuth, validate all before import the first'() {
+    void "validateAndImportWithAuth, validate all before import the first"() {
         given:
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
         String directoryStructureName = HelperUtils.uniqueString
-        SeqCenter seqCenter = DomainFactory.createSeqCenter(autoImportable: false)
+        DomainFactory.createSeqCenter(autoImportable: false)
         MetadataValidationContext context1 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("import1_meta.tsv")])
         MetaDataFile metadataFile1 = DomainFactory.createMetaDataFile()
         MetadataValidationContext context2 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("import2_meta.tsv")])
@@ -249,8 +244,7 @@ class MetadataImportServiceSpec extends Specification {
         imported == 2
     }
 
-    void 'validateAndImportMultiple when all are valid, returns import results'() {
-
+    void "validateAndImportMultiple when all are valid, returns import results"() {
         given:
         SeqCenter seqCenter = DomainFactory.createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
         MetadataValidationContext context1 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${seqCenter.autoImportDir}/001111/data/1111_meta.tsv")])
@@ -273,8 +267,7 @@ class MetadataImportServiceSpec extends Specification {
         validateAndImportResults*.metadataFile == [metadataFile1, metadataFile2]
     }
 
-    void 'validateAndImportMultiple when some are invalid, throws AutoImportFailedException'() {
-
+    void "validateAndImportMultiple when some are invalid, throws AutoImportFailedException"() {
         given:
         SeqCenter seqCenter = DomainFactory.createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
         Problems problems = new Problems()
@@ -303,8 +296,7 @@ class MetadataImportServiceSpec extends Specification {
     }
 
     @Unroll
-    void 'parseIlseNumbers returns correct collection of ILSe numbers'(String string, List<Integer> numbers) {
-
+    void "parseIlseNumbers returns correct collection of ILSe numbers"(String string, List<Integer> numbers) {
         expect:
         MetadataImportService.parseIlseNumbers(string) == numbers
 
@@ -323,8 +315,7 @@ class MetadataImportServiceSpec extends Specification {
     }
 
     @Unroll
-    void 'parseIlseNumbers throws exception when input is invalid'(String string, String exceptionMessage) {
-
+    void "parseIlseNumbers throws exception when input is invalid"(String string, String exceptionMessage) {
         when:
         MetadataImportService.parseIlseNumbers(string)
 
@@ -339,8 +330,7 @@ class MetadataImportServiceSpec extends Specification {
         '1111-2222' || "Range of ILSe numbers is too large: '1111-2222'"
     }
 
-    void 'mayImport, when maximumProblemLevel is less than WARNING, returns true'() {
-
+    void "mayImport, when maximumProblemLevel is less than WARNING, returns true"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
         assert context.maximumProblemLevel.intValue() < Level.WARNING.intValue()
@@ -349,8 +339,7 @@ class MetadataImportServiceSpec extends Specification {
         MetadataImportService.mayImport(context, false, HelperUtils.randomMd5sum)
     }
 
-    void 'mayImport, when maximumProblemLevel is greater than WARNING, returns false'() {
-
+    void "mayImport, when maximumProblemLevel is greater than WARNING, returns false"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
         context.addProblem(Collections.emptySet(), Level.ERROR, 'my message')
@@ -361,8 +350,7 @@ class MetadataImportServiceSpec extends Specification {
     }
 
     @Unroll
-    void 'mayImport, when maximumProblemLevel is WARNING and MD5 sum matches, returns ignoreWarnings'() {
-
+    void "mayImport, when maximumProblemLevel is WARNING and MD5 sum matches, returns ignoreWarnings"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
         context.addProblem(Collections.emptySet(), Level.WARNING, 'my message')
@@ -375,8 +363,7 @@ class MetadataImportServiceSpec extends Specification {
         ignoreWarnings << [true, false]
     }
 
-    void 'mayImport, when maximumProblemLevel is WARNING and ignoreWarnings is false and MD5 sum does not match, returns false'() {
-
+    void "mayImport, when maximumProblemLevel is WARNING and ignoreWarnings is false and MD5 sum does not match, returns false"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
         context.addProblem(Collections.emptySet(), Level.WARNING, 'my message')
@@ -387,8 +374,7 @@ class MetadataImportServiceSpec extends Specification {
         exactlyOneElement(context.problems).message == 'my message'
     }
 
-    void 'mayImport, when maximumProblemLevel is WARNING and ignoreWarnings is true and MD5 sum does not match, adds problem and returns false'() {
-
+    void "mayImport, when maximumProblemLevel is WARNING and ignoreWarnings is true and MD5 sum does not match, adds problem and returns false"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
         context.addProblem(Collections.emptySet(), Level.WARNING, HelperUtils.uniqueString)
@@ -403,36 +389,56 @@ class MetadataImportServiceSpec extends Specification {
 
 
     @Unroll
-    void 'importMetadataFile imports correctly'(boolean runExists, boolean includeOptional, boolean align, RunSegment.ImportMode importMode) {
-
+    void "importMetadataFile imports correctly"(boolean runExists, boolean includeOptional, boolean align, RunSegment.ImportMode importMode) {
         given:
-        SeqCenter seqCenter = DomainFactory.createSeqCenter(name: 'center1')
-        SeqCenter seqCenter2 = DomainFactory.createSeqCenter(name: 'center2')
+        final String WGBS_T = SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName
+        final String WG = SeqTypeNames.WHOLE_GENOME.seqTypeName
+        final String EXON = SeqTypeNames.EXOME.seqTypeName
+        final String CHIP_SEQ = SeqTypeNames.CHIP_SEQ.seqTypeName
+
+        def (fastq1, fastq2, fastq3, fastq4, fastq5, fastq6, fastq7, fastq8) =
+            ["fastq_a", "s_1_1_", "s_1_2_", "s_2_1_", "s_2_2_", "s_3_1_", "fastq_g", "fastq_b"]
+
+        def (String runName1, String runName2) = ["run1", "run2"]
+        def (String center1, String center2) = ["center1", "center2"]
+        def (String platform1, String platform2) = ["platform1", "platform2"]
+        def (String model1, String model2) = ["model1", "model2"]
+        def (String kit1, String kit2) = ["kit1", "kit2"]
+        def (String target1, String target2) = ["target1", "target2"]
+        def (String single, String paired) = [LibraryLayout.SINGLE, LibraryLayout.PAIRED]
+
+        def (Date runDate, Date run2Date) = [[2016, 4, 13], [2016, 6, 6]].collect { new LocalDate(it[0], it[1], it[2]).toDate() }
+        def (String date1, String date2) = [runDate, run2Date].collect { it.format("yyyy-MM-dd") }
+
+        def (md5a, md5b, md5c, md5d, md5e, md5f, md5g, md5h) = (1..8).collect { HelperUtils.getRandomMd5sum() }
+
+
+        SeqCenter seqCenter = DomainFactory.createSeqCenter(name: center1)
+        SeqCenter seqCenter2 = DomainFactory.createSeqCenter(name: center2)
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
-                name: 'platform1',
-                seqPlatformModelLabel: DomainFactory.createSeqPlatformModelLabel(name: 'model1'),
+                name: platform1,
+                seqPlatformModelLabel: DomainFactory.createSeqPlatformModelLabel(name: model1),
         )
         SeqPlatform seqPlatform2 = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
-                name: 'platform2',
-                seqPlatformModelLabel: DomainFactory.createSeqPlatformModelLabel(name: 'model2'),
+                name: platform2,
+                seqPlatformModelLabel: DomainFactory.createSeqPlatformModelLabel(name: model2),
         )
-        Date runDate = new LocalDate(2016, 4, 13).toDate()
-        Date run2Date = new LocalDate(2016, 6, 6).toDate()
+
         if (runExists) {
             DomainFactory.createRun(
-                    name: 'run1',
+                    name: runName1,
                     dateExecuted: runDate,
                     seqCenter: seqCenter,
                     seqPlatform: seqPlatform,
             )
         }
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket(automaticNotification: true)
-        SeqType mySeqType = DomainFactory.createSeqType(name: 'MY_SEQ_TYP', libraryLayout: 'SINGLE')
-        SeqType mySeqTypeTag = DomainFactory.createSeqType(name: 'MY_SEQ_TYP_TAGMENTATION', libraryLayout: 'SINGLE')
-        SeqType exomeSingle = DomainFactory.createExomeSeqType(SeqType.LIBRARYLAYOUT_SINGLE)
-        SeqType exomePaired = DomainFactory.createExomeSeqType(SeqType.LIBRARYLAYOUT_PAIRED)
-        SeqType chipSeqMyPaired = DomainFactory.createChipSeqType('MY_PAIRED')
-        SeqType chipSeqMySingle = DomainFactory.createChipSeqType('MY_SINGLE')
+        SeqType mySeqType = DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME, libraryLayout: LibraryLayout.SINGLE)
+        SeqType mySeqTypeTag = DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION, libraryLayout: LibraryLayout.SINGLE)
+        SeqType exomeSingle = DomainFactory.createExomeSeqType(LibraryLayout.SINGLE)
+        SeqType exomePaired = DomainFactory.createExomeSeqType(LibraryLayout.PAIRED)
+        SeqType chipSeqSingle = DomainFactory.createChipSeqType(LibraryLayout.SINGLE)
+        SeqType chipSeqPaired = DomainFactory.createChipSeqType(LibraryLayout.PAIRED)
         Sample sample1 = DomainFactory.createSampleIdentifier(name: 'in_db').sample
         Sample sample2
         def (SoftwareTool pipeline1, SoftwareTool pipeline2, SoftwareTool unknownPipeline) =
@@ -444,10 +450,10 @@ class MetadataImportServiceSpec extends Specification {
                     ),
             ).softwareTool
         }
-        LibraryPreparationKit kit1 = DomainFactory.createLibraryPreparationKit(name: 'kit1')
-        LibraryPreparationKit kit2 = DomainFactory.createLibraryPreparationKit(name: 'kit2')
-        AntibodyTarget target1 = DomainFactory.createAntibodyTarget(name: 'target1')
-        AntibodyTarget target2 = DomainFactory.createAntibodyTarget(name: 'target2')
+        LibraryPreparationKit libraryPreparationKit1 = DomainFactory.createLibraryPreparationKit(name: kit1)
+        LibraryPreparationKit libraryPreparationKit2 = DomainFactory.createLibraryPreparationKit(name: kit2)
+        AntibodyTarget antibodyTarget1 = DomainFactory.createAntibodyTarget(name: target1)
+        AntibodyTarget antibodyTarget2 = DomainFactory.createAntibodyTarget(name: target2)
         FileType fileType = DomainFactory.createFileType(
                 type: FileType.Type.SEQUENCE,
                 signature: '_',
@@ -455,7 +461,7 @@ class MetadataImportServiceSpec extends Specification {
 
         MetadataImportService service = new MetadataImportService()
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
-            parseAndFindOrSaveSampleIdentifier('parse_me') >> {
+            parseAndFindOrSaveSampleIdentifier('parse_me', _) >> {
                 SampleIdentifier identifier = DomainFactory.createSampleIdentifier(name: 'parse_me')
                 sample2 = identifier.sample
                 return identifier
@@ -472,22 +478,22 @@ class MetadataImportServiceSpec extends Specification {
             createOrResetOtrsTicket(otrsTicket.ticketNumber, null, true) >> otrsTicket
         }
         service.libraryPreparationKitService = Mock(LibraryPreparationKitService) {
-            findByNameOrImportAlias(kit1.name) >> kit1
-            findByNameOrImportAlias(kit2.name) >> kit2
+            findByNameOrImportAlias(libraryPreparationKit1.name) >> libraryPreparationKit1
+            findByNameOrImportAlias(libraryPreparationKit2.name) >> libraryPreparationKit2
         }
         service.seqTypeService = Mock(SeqTypeService) {
-            findByNameOrImportAlias("MY_SEQ_TYP", [libraryLayout: "SINGLE", singleCell: false]) >> mySeqType
-            findByNameOrImportAlias("MY_SEQ_TYP_TAGMENTATION", [libraryLayout: "SINGLE", singleCell: false]) >> mySeqTypeTag
-            findByNameOrImportAlias("EXON", [libraryLayout: "SINGLE", singleCell: false]) >> exomeSingle
-            findByNameOrImportAlias("EXON", [libraryLayout: "PAIRED", singleCell: false]) >> exomePaired
-            findByNameOrImportAlias("ChIP Seq", [libraryLayout: "MY_PAIRED", singleCell: false]) >> chipSeqMyPaired
-            findByNameOrImportAlias("ChIP Seq", [libraryLayout: "MY_SINGLE", singleCell: false]) >> chipSeqMySingle
+            findByNameOrImportAlias(WG, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> mySeqType
+            findByNameOrImportAlias(WGBS_T, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> mySeqTypeTag
+            findByNameOrImportAlias(EXON, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> exomeSingle
+            findByNameOrImportAlias(EXON, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> exomePaired
+            findByNameOrImportAlias(CHIP_SEQ, [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> chipSeqSingle
+            findByNameOrImportAlias(CHIP_SEQ, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> chipSeqPaired
         }
         GroovyMock(SamplePair, global: true)
         1 * SamplePair.findMissingDiseaseControlSamplePairs() >> [samplePair]
         1 * samplePair.save()
 
-        File file = new File(new File(TestCase.getUniqueNonExistentPath(), 'run1'), 'metadata.tsv')
+        File file = new File(new File(TestCase.getUniqueNonExistentPath(), runName1), 'metadata.tsv')
         DirectoryStructure directoryStructure = [
                 getColumnTitles: { [FASTQ_FILE.name()] },
                 getDataFilePath: { MetadataValidationContext context, ValueTuple valueTuple ->
@@ -495,37 +501,30 @@ class MetadataImportServiceSpec extends Specification {
                 },
         ] as DirectoryStructure
 
-        String md5a = HelperUtils.getRandomMd5sum()
-        String md5b = HelperUtils.getRandomMd5sum()
-        String md5c = HelperUtils.getRandomMd5sum()
-        String md5d = HelperUtils.getRandomMd5sum()
-        String md5e = HelperUtils.getRandomMd5sum()
-        String md5f = HelperUtils.getRandomMd5sum()
-        String md5g = HelperUtils.getRandomMd5sum()
-        String md5h = HelperUtils.getRandomMd5sum()
         String metadata = """
-${FASTQ_FILE}                   fastq_a     s_1_1_      s_1_2_      s_2_1_      s_2_2_      s_3_1_      fastq_g     fastq_b
-${MD5}                          ${md5a}     ${md5b}     ${md5c}     ${md5d}     ${md5e}     ${md5f}     ${md5g}     ${md5h}
-${RUN_ID}                       run1        run1        run1        run1        run1        run1        run1        run2
-${CENTER_NAME}                  center1     center1     center1     center1     center1     center1     center1     center2
-${INSTRUMENT_PLATFORM}          platform1   platform1   platform1   platform1   platform1   platform1   platform1   platform2
-${INSTRUMENT_MODEL}             model1      model1      model1      model1      model1      model1      model1      model2
-${RUN_DATE}                     2016-04-13  2016-04-13  2016-04-13  2016-04-13  2016-04-13  2016-04-13  2016-04-13  2016-06-06
-${LANE_NO}                      4           1           1           2           2           2           3           5
-${BARCODE}                      -           barcode8    barcode8    barcode7    barcode7    barcode6    -           -
-${SEQUENCING_TYPE}              MY_SEQ_TYP  EXON        EXON        ChIP Seq    ChIP Seq    ChIP Seq    EXON        MY_SEQ_TYP
-${LIBRARY_LAYOUT}               SINGLE      PAIRED      PAIRED      MY_PAIRED   MY_PAIRED   MY_SINGLE   SINGLE      SINGLE
-${SAMPLE_ID}                    parse_me    in_db       in_db       parse_me    parse_me    in_db       parse_me    parse_me
-${TAGMENTATION_BASED_LIBRARY}   -           -           -           -           -           -           -           true
+${FASTQ_FILE}                   ${fastq1}     ${fastq2}     ${fastq3}     ${fastq4}     ${fastq5}     ${fastq6}     ${fastq7}     ${fastq8}
+${MD5}                          ${md5a}       ${md5b}       ${md5c}       ${md5d}       ${md5e}       ${md5f}       ${md5g}       ${md5h}
+${RUN_ID}                       ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName1}   ${runName2}
+${CENTER_NAME}                  ${center1}    ${center1}    ${center1}    ${center1}    ${center1}    ${center1}    ${center1}    ${center2}
+${INSTRUMENT_PLATFORM}          ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform1}  ${platform2}
+${INSTRUMENT_MODEL}             ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model1}     ${model2}
+${RUN_DATE}                     ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date1}      ${date2}
+${LANE_NO}                      4             1             1             2             2             2             3             5
+${BARCODE}                      -             barcode8      barcode8      barcode7      barcode7      barcode6      -             -
+${SEQUENCING_TYPE}              ${WG}         ${EXON}       ${EXON}       ${CHIP_SEQ}   ${CHIP_SEQ}   ${CHIP_SEQ}   ${EXON}       ${WGBS_T}
+${LIBRARY_LAYOUT}               ${single}     ${paired}     ${paired}     ${paired}     ${paired}     ${single}     ${single}     ${single}
+${MATE}                         1             1             2             1             2             1             1             1
+${SAMPLE_ID}                    parse_me      in_db         in_db         parse_me      parse_me      in_db         parse_me      parse_me
+${TAGMENTATION_BASED_LIBRARY}   -             -             -             -             -             -             -             true
 """
         if (includeOptional) {
             metadata += """
-${INSERT_SIZE}                  -           -           -           234         234         -           456         -
-${PIPELINE_VERSION}             -           pipeline1   pipeline1   -           -           -           pipeline2   -
-${LIB_PREP_KIT}                 -           kit1        kit1        kit2        kit2        UNKNOWN     UNKNOWN     -
-${ANTIBODY_TARGET}              -           -           -           target1     target1     target2     -           -
-${ANTIBODY}                     -           -           -           antibody1   antibody1   -           -           -
-${ILSE_NO}                      -           1234        1234        -           -           2345        -           -
+${INSERT_SIZE}                  -             -             -             234           234           -             456           -
+${PIPELINE_VERSION}             -             pipeline1     pipeline1     -             -             -             pipeline2     -
+${LIB_PREP_KIT}                 -             ${kit1}       ${kit1}       ${kit2}       ${kit2}       UNKNOWN       UNKNOWN       -
+${ANTIBODY_TARGET}              -             -             -             target1       target1       target2       -             -
+${ANTIBODY}                     -             -             -             antibody1     antibody1     -             -             -
+${ILSE_NO}                      -             1234          1234          -             -             2345          -             -
 """
         }
         List<List<String>> lines = metadata.readLines().findAll()*.split(/ {2,}/).transpose()
@@ -547,14 +546,14 @@ ${ILSE_NO}                      -           1234        1234        -           
         // runs
         Run.count == (includeOptional ? 2 : 1)
         Run run = Run.findWhere(
-                name: 'run1',
+                name: runName1,
                 dateExecuted: runDate,
                 seqCenter: seqCenter,
                 seqPlatform: seqPlatform,
         )
         run != null
         Run run2 = Run.findWhere(
-                name: 'run2',
+                name: runName2,
                 dateExecuted: run2Date,
                 seqCenter: seqCenter2,
                 seqPlatform: seqPlatform2,
@@ -613,8 +612,8 @@ ${ILSE_NO}                      -           1234        1234        -           
         )
         seqTrack1.ilseId == null
         DataFile dataFile1 = DataFile.findWhere(commonRun1DataFileProperties + [
-                fileName   : 'fastq_a',
-                vbpFileName: 'fastq_a',
+                fileName   : fastq1,
+                vbpFileName: fastq1,
                 md5sum     : md5a,
                 project    : sample2.project,
                 mateNumber : 1,
@@ -641,20 +640,20 @@ ${ILSE_NO}                      -           1234        1234        -           
                     seqType: exomePaired,
                     pipelineVersion: pipeline1,
                     kitInfoReliability: InformationReliability.KNOWN,
-                    libraryPreparationKit: kit1,
+                    libraryPreparationKit: libraryPreparationKit1,
             )
             assert seqTrack2.ilseId == 1234
             assert DataFile.findWhere(commonRun1DataFileProperties + [
-                    fileName   : 's_1_1_',
-                    vbpFileName: 's_1_1_',
+                    fileName   : fastq2,
+                    vbpFileName: fastq2,
                     md5sum     : md5b,
                     project    : sample1.project,
                     mateNumber : 1,
                     seqTrack   : seqTrack2,
             ])
             assert DataFile.findWhere(commonRun1DataFileProperties + [
-                    fileName   : 's_1_2_',
-                    vbpFileName: 's_1_2_',
+                    fileName   : fastq3,
+                    vbpFileName: fastq3,
                     md5sum     : md5c,
                     project    : sample1.project,
                     mateNumber : 2,
@@ -667,25 +666,25 @@ ${ILSE_NO}                      -           1234        1234        -           
                     insertSize: 234,
                     run: run,
                     sample: sample2,
-                    seqType: chipSeqMyPaired,
+                    seqType: chipSeqPaired,
                     pipelineVersion: unknownPipeline,
                     kitInfoReliability: InformationReliability.KNOWN,
-                    libraryPreparationKit: kit2,
-                    antibodyTarget: target1,
+                    libraryPreparationKit: libraryPreparationKit2,
+                    antibodyTarget: antibodyTarget1,
                     antibody: 'antibody1',
             )
             assert seqTrack3.ilseId == null
             assert DataFile.findWhere(commonRun1DataFileProperties + [
-                    fileName   : 's_2_1_',
-                    vbpFileName: 's_2_1_',
+                    fileName   : fastq4,
+                    vbpFileName: fastq4,
                     md5sum     : md5d,
                     project    : sample2.project,
                     mateNumber : 1,
                     seqTrack   : seqTrack3,
             ])
             assert DataFile.findWhere(commonRun1DataFileProperties + [
-                    fileName   : 's_2_2_',
-                    vbpFileName: 's_2_2_',
+                    fileName   : fastq5,
+                    vbpFileName: fastq5,
                     md5sum     : md5e,
                     project    : sample2.project,
                     mateNumber : 2,
@@ -698,17 +697,17 @@ ${ILSE_NO}                      -           1234        1234        -           
                     insertSize: 0,
                     run: run,
                     sample: sample1,
-                    seqType: chipSeqMySingle,
+                    seqType: chipSeqSingle,
                     pipelineVersion: unknownPipeline,
                     kitInfoReliability: InformationReliability.UNKNOWN_VERIFIED,
                     libraryPreparationKit: null,
-                    antibodyTarget: target2,
+                    antibodyTarget: antibodyTarget2,
                     antibody: null,
             )
             assert seqTrack4.ilseId == 2345
             assert DataFile.findWhere(commonRun1DataFileProperties + [
-                    fileName   : 's_3_1_',
-                    vbpFileName: 's_3_1_',
+                    fileName   : fastq6,
+                    vbpFileName: fastq6,
                     md5sum     : md5f,
                     project    : sample1.project,
                     mateNumber : 1,
@@ -728,8 +727,8 @@ ${ILSE_NO}                      -           1234        1234        -           
             )
             assert seqTrack5.ilseId == null
             assert DataFile.findWhere(commonRun1DataFileProperties + [
-                    fileName   : 'fastq_g',
-                    vbpFileName: 'fastq_g',
+                    fileName   : fastq7,
+                    vbpFileName: fastq7,
                     md5sum     : md5g,
                     project    : sample2.project,
                     mateNumber : 1,
@@ -749,8 +748,8 @@ ${ILSE_NO}                      -           1234        1234        -           
             )
             assert seqTrack6.ilseId == null
             assert DataFile.findWhere(commonRun2DataFileProperties + [
-                    fileName   : 'fastq_b',
-                    vbpFileName: 'fastq_b',
+                    fileName   : fastq8,
+                    vbpFileName: fastq8,
                     md5sum     : md5h,
                     project    : sample2.project,
                     mateNumber : 1,
@@ -771,7 +770,7 @@ ${ILSE_NO}                      -           1234        1234        -           
     }
 
 
-    void 'extractBarcode, when both BARCODE and FASTQ_FILE columns are missing, returns null'() {
+    void "extractBarcode, when both BARCODE and FASTQ_FILE columns are missing, returns null"() {
         given:
         Row row = MetadataValidationContextFactory.createContext().spreadsheet.dataRows[0]
 
@@ -782,7 +781,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result == null
     }
 
-    void 'extractBarcode, when BARCODE column is missing and filename contains no barcode, returns null extracted from FASTQ_FILE cell'() {
+    void "extractBarcode, when BARCODE column is missing and filename contains no barcode, returns null extracted from FASTQ_FILE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\nfile.fastq.gz").spreadsheet.dataRows[0]
 
@@ -794,7 +793,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result.cells == [row.getCellByColumnTitle(FASTQ_FILE.name())] as Set
     }
 
-    void 'extractBarcode, when BARCODE column is missing and filename contains barcode, returns barcode extracted from FASTQ_FILE cell'() {
+    void "extractBarcode, when BARCODE column is missing and filename contains barcode, returns barcode extracted from FASTQ_FILE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE.name()}\nfile_ACGTACGT_.fastq.gz").spreadsheet.dataRows[0]
 
@@ -806,7 +805,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result.cells == [row.getCellByColumnTitle(FASTQ_FILE.name())] as Set
     }
 
-    void 'extractBarcode, when no entry in BARCODE column and FASTQ_FILE column is missing, returns null extracted from BARCODE cell'() {
+    void "extractBarcode, when no entry in BARCODE column and FASTQ_FILE column is missing, returns null extracted from BARCODE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("SOME_COLUMN\t${BARCODE}\nsome_value").spreadsheet.dataRows[0]
 
@@ -818,7 +817,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
     }
 
-    void 'extractBarcode, when no entry in BARCODE column and filename contains no barcode, returns null extracted from BARCODE cell'() {
+    void "extractBarcode, when no entry in BARCODE column and filename contains no barcode, returns null extracted from BARCODE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile.fastq.gz").spreadsheet.dataRows[0]
 
@@ -830,7 +829,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
     }
 
-    void 'extractBarcode, when no entry in BARCODE column and filename contains barcode, returns null extracted from BARCODE cell'() {
+    void "extractBarcode, when no entry in BARCODE column and filename contains barcode, returns null extracted from BARCODE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile_ACGTACGT_.fastq.gz").spreadsheet.dataRows[0]
 
@@ -842,7 +841,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
     }
 
-    void 'extractBarcode, when BARCODE column contains entry and FASTQ_FILE column is missing, returns barcode extracted from BARCODE cell'() {
+    void "extractBarcode, when BARCODE column contains entry and FASTQ_FILE column is missing, returns barcode extracted from BARCODE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${BARCODE}\nACGTACGT").spreadsheet.dataRows[0]
 
@@ -854,7 +853,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
     }
 
-    void 'extractBarcode, when BARCODE column contains entry and filename contains no barcode, returns barcode extracted from BARCODE cell'() {
+    void "extractBarcode, when BARCODE column contains entry and filename contains no barcode, returns barcode extracted from BARCODE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]
 
@@ -866,7 +865,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
     }
 
-    void 'extractBarcode, when BARCODE column contains entry and filename contains same barcode, returns barcode extracted from BARCODE cell'() {
+    void "extractBarcode, when BARCODE column contains entry and filename contains same barcode, returns barcode extracted from BARCODE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile_ACGTACGT_.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]
 
@@ -878,7 +877,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
     }
 
-    void 'extractBarcode, when BARCODE column contains entry and filename contains barcode which is substring, returns barcode extracted from BARCODE cell'() {
+    void "extractBarcode, when BARCODE column contains entry and filename contains barcode which is substring, returns barcode extracted from BARCODE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile_CGTACG_.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]
 
@@ -890,7 +889,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
     }
 
-    void 'extractBarcode, when BARCODE column contains entry and filename contains different barcode, returns barcode extracted from BARCODE cell'() {
+    void "extractBarcode, when BARCODE column contains entry and filename contains different barcode, returns barcode extracted from BARCODE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile_TGCATGCA_.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]
 
@@ -903,7 +902,7 @@ ${ILSE_NO}                      -           1234        1234        -           
     }
 
 
-    void 'extractMateNumber, when LIBRARY_LAYOUT and FASTQ_FILE columns are missing, returns null'() {
+    void "extractMateNumber, when LIBRARY_LAYOUT and FASTQ_FILE columns are missing, returns null"() {
         given:
         Row row = MetadataValidationContextFactory.createContext().spreadsheet.dataRows[0]
 
@@ -914,7 +913,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result == null
     }
 
-    void 'extractMateNumber, when LIBRARY_LAYOUT column is missing and mate number cannot be extracted from filename, returns null'() {
+    void "extractMateNumber, when LIBRARY_LAYOUT column is missing and mate number cannot be extracted from filename, returns null"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\nfile.fastq.gz").spreadsheet.dataRows[0]
 
@@ -925,60 +924,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result == null
     }
 
-    void 'extractMateNumber, when LIBRARY_LAYOUT column is missing and mate number can be extracted from filename, returns mate number extracted from FASTQ_FILE cell'() {
-        given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\ns_101202_7_2.fastq.gz").spreadsheet.dataRows[0]
-
-        when:
-        ExtractedValue result = MetadataImportService.extractMateNumber(row)
-
-        then:
-        result.value == '2'
-        result.cells == [row.getCellByColumnTitle(FASTQ_FILE.name())] as Set
-    }
-
-    void 'extractMateNumber, when library layout is SINGLE and FASTQ_FILE column is missing, returns 1 extracted from LIBRARY_LAYOUT cell'() {
-        given:
-        Row row = MetadataValidationContextFactory.createContext("${LIBRARY_LAYOUT}\nSINGLE").spreadsheet.dataRows[0]
-
-        when:
-        ExtractedValue result = MetadataImportService.extractMateNumber(row)
-
-        then:
-        result.value == '1'
-        result.cells == [row.getCellByColumnTitle(LIBRARY_LAYOUT.name())] as Set
-    }
-
-    void 'extractMateNumber, when library layout is SINGLE and mate number cannot be extracted from filename, returns 1 extracted from LIBRARY_LAYOUT cell'() {
-        given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${LIBRARY_LAYOUT}\nfile.fastq.gz\tSINGLE").spreadsheet.dataRows[0]
-
-        when:
-        ExtractedValue result = MetadataImportService.extractMateNumber(row)
-
-        then:
-        result.value == '1'
-        result.cells == [row.getCellByColumnTitle(LIBRARY_LAYOUT.name())] as Set
-    }
-
-    void 'extractMateNumber, when library layout is SINGLE and mate number can be extracted from filename, returns 1 extracted from LIBRARY_LAYOUT cell'(String filename) {
-        given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${LIBRARY_LAYOUT}\n${filename}\tSINGLE").spreadsheet.dataRows[0]
-
-        when:
-        ExtractedValue result = MetadataImportService.extractMateNumber(row)
-
-        then:
-        result.value == '1'
-        result.cells == [row.getCellByColumnTitle(LIBRARY_LAYOUT.name())] as Set
-
-        where:
-        filename                | _
-        's_101202_7_1.fastq.gz' | _
-        's_101202_7_2.fastq.gz' | _
-    }
-
-    void 'extractMateNumber, when library layout is not SINGLE and FASTQ_FILE column is missing, returns null'() {
+    void "extractMateNumber, when library layout is not SINGLE and FASTQ_FILE column is missing, returns null"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${LIBRARY_LAYOUT}\nTRIPLE").spreadsheet.dataRows[0]
 
@@ -989,7 +935,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result == null
     }
 
-    void 'extractMateNumber, when library layout is not SINGLE and mate number cannot be extracted from filename, returns null'() {
+    void "extractMateNumber, when library layout is not SINGLE and mate number cannot be extracted from filename, returns null"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${LIBRARY_LAYOUT}\nfile.fastq.gz\tTRIPLE").spreadsheet.dataRows[0]
 
@@ -1000,24 +946,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         result == null
     }
 
-    void 'extractMateNumber, when library layout is not SINGLE and mate number N can be extracted from filename, returns N extracted from FASTQ_FILE cell'(String filename, String mateNumber) {
-        given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${LIBRARY_LAYOUT}\n${filename}\tTRIPLE").spreadsheet.dataRows[0]
-
-        when:
-        ExtractedValue result = MetadataImportService.extractMateNumber(row)
-
-        then:
-        result.value == mateNumber
-        result.cells == [row.getCellByColumnTitle(FASTQ_FILE.name())] as Set
-
-        where:
-        filename                || mateNumber
-        's_101202_7_1.fastq.gz' || '1'
-        's_101202_7_2.fastq.gz' || '2'
-    }
-
-    void 'extractMateNumber, when the mate number in the filename does not match the number in the mate cell, return the number from the mate cell'(String filename, String mateNumber) {
+    void "extractMateNumber, when the mate number in the filename does not match the number in the mate cell, return the number from the mate cell"(String filename, String mateNumber) {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${MATE}\n${filename}\t${mateNumber}").spreadsheet.dataRows[0]
 
@@ -1034,7 +963,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         's_101202_7_1.fastq.gz' || '2'
     }
 
-    void 'extractMateNumber, when mateNumber can not be parsed to int, return null'(String mateNumber) {
+    void "extractMateNumber, when mateNumber can not be parsed to int, return null"(String mateNumber) {
         given:
         Row row = MetadataValidationContextFactory.createContext("${MATE}\t\n${mateNumber}\t").spreadsheet.dataRows[0]
 
@@ -1050,7 +979,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         'abc'      | _
     }
 
-    void 'copyMetaDataFileIfRequested, if data not on midterm, do nothing'() {
+    void "copyMetaDataFileIfRequested, if data not on midterm, do nothing"() {
         given:
         MetadataImportService service = new MetadataImportService(
                 lsdfFilesService: Mock(LsdfFilesService) {
@@ -1075,6 +1004,7 @@ ${ILSE_NO}                      -           1234        1234        -           
         file.text = content
         File target = new File(temporaryFolder.newFolder(), 'target')
         File targetFile = new File(target, file.name)
+        ProcessingOptionService processingOptionService = new ProcessingOptionService()
         DomainFactory.createDefaultRealmWithProcessingOption()
 
         MetadataImportService service = Spy(MetadataImportService) {
@@ -1090,6 +1020,11 @@ ${ILSE_NO}                      -           1234        1234        -           
                 return LocalShellHelper.executeAndWait(cmd)
             }
         }
+        service.configService = new ConfigService()
+        service.configService.processingOptionService = processingOptionService
+        service.processingOptionService = processingOptionService
+
+        service.processingOptionService.createOrUpdate(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS, "error@recipient.com")
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 content,
@@ -1108,21 +1043,25 @@ ${ILSE_NO}                      -           1234        1234        -           
     }
 
     @ConfineMetaClassChanges([LocalShellHelper])
-    void 'copyMetaDataFileIfRequested, if metadata does not exist and copying failed, should fail'() {
+    void "copyMetaDataFileIfRequested, if metadata does not exist and copying failed, should fail"() {
         given:
         Map data = setupForcopyMetaDataFileIfRequested('something')
+
+        data.service.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmail(_, _, _)
+        }
 
         when:
         data.service.copyMetaDataFileIfRequested(data.context)
 
         then:
         RuntimeException e = thrown()
-        e.message.contains('Copying of metadatafile')
+        e.message.contains('Copying of metadata file')
         e.cause.message.contains('targetFile.bytes == context.content')
     }
 
     @ConfineMetaClassChanges([LocalShellHelper])
-    void 'copyMetaDataFileIfRequested, if metadata does not exist and copying fine, all fine'() {
+    void "copyMetaDataFileIfRequested, if metadata does not exist and copying fine, all fine"() {
         given:
         Map data = setupForcopyMetaDataFileIfRequested(null)
 
@@ -1134,23 +1073,27 @@ ${ILSE_NO}                      -           1234        1234        -           
     }
 
     @ConfineMetaClassChanges([LocalShellHelper])
-    void 'copyMetaDataFileIfRequested, if metadata already exist and content differ, should fail'() {
+    void "copyMetaDataFileIfRequested, if metadata already exist and content differ, should fail"() {
         given:
         Map data = setupForcopyMetaDataFileIfRequested(null, 0)
         assert data.target.mkdirs()
         data.targetFile.text = 'something'
+
+        data.service.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmail(_, _, _)
+        }
 
         when:
         data.service.copyMetaDataFileIfRequested(data.context)
 
         then:
         RuntimeException e = thrown()
-        e.message.contains('Copying of metadatafile')
+        e.message.contains('Copying of metadata file')
         e.cause.message.contains('targetFile.bytes == context.content')
     }
 
     @ConfineMetaClassChanges([LocalShellHelper])
-    void 'copyMetaDataFileIfRequested, if metadata already exist and content is the same, do nothing'() {
+    void "copyMetaDataFileIfRequested, if metadata already exist and content is the same, do nothing"() {
         given:
         Map data = setupForcopyMetaDataFileIfRequested(null, 0)
         assert data.target.mkdirs()
@@ -1162,7 +1105,6 @@ ${ILSE_NO}                      -           1234        1234        -           
         then:
         data.targetFile.exists()
     }
-
 
     void "test getIlseFolder, invalid input, should fail"() {
         given:

@@ -401,8 +401,7 @@ class MetadataImportService {
     }
 
     private static void importDataFiles(MetadataValidationContext context, RunSegment runSegment, SeqTrack seqTrack, Collection<Row> seqTrackRows) {
-        Map<Integer, Collection<Row>> seqTrackRowsByMateNumber =
-                seqTrackRows.groupBy { Integer.valueOf(extractMateNumber(it).value) }
+        Map<Integer, Collection<Row>> seqTrackRowsByMateNumber = seqTrackRows.groupBy { Integer.valueOf(extractMateNumber(it).value) }
         assert seqTrackRows.size() == seqTrack.seqType.libraryLayout.mateCount
 
         seqTrackRowsByMateNumber.each { Integer mateNumber, List<Row> rows ->
@@ -517,7 +516,7 @@ class MetadataImportService {
     /** small helper to parse seqtypes and boolean-like uservalues into a proper OTP name */
     static String seqTypeMaybeTagmentationName(String seqType, String tagmentationRawValue) {
         boolean isTagmentation = tagmentationRawValue in ["1", "true"]
-        return seqType + (isTagmentation ? SeqType.TAGMENTATION_SUFFIX : '')
+        return seqType + (isTagmentation && !seqType.endsWith(SeqType.TAGMENTATION_SUFFIX) ? SeqType.TAGMENTATION_SUFFIX : '')
     }
 }
 

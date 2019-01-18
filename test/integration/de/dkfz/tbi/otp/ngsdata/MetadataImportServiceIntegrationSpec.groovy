@@ -14,7 +14,6 @@ class MetadataImportServiceIntegrationSpec extends IntegrationSpec {
     MetadataImportService metadataImportService
 
     void 'getSupportedDirectoryStructures returns map of directory structures'() {
-
         when:
         Map<String, String> directoryStructures = metadataImportService.supportedDirectoryStructures
 
@@ -24,13 +23,11 @@ class MetadataImportServiceIntegrationSpec extends IntegrationSpec {
     }
 
     void 'getMetadataValidators returns MetadataValidators'() {
-
         expect:
         metadataImportService.metadataValidators.find { it instanceof Md5sumFormatValidator }
     }
 
     void 'getDirectoryStructure, when called with bean name, returns bean'() {
-
         expect:
         metadataImportService.getDirectoryStructure(DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME) instanceof DataFilesInSameDirectory
     }

@@ -83,11 +83,11 @@ class LibrarySeqTypeValidatorSpec extends Specification {
         assertContainSame(context.problems, expectedProblems)
 
         where:
-        seqTypeName                             | tagmentation | library || message1                                                                                                                                                                || message2
-        'seqtype'                               | ''           | '5'     || "The library '5' in column ${CUSTOMER_LIBRARY} indicates tagmentation, but the seqtype 'seqtype' is without tagmentation"                                               || LibrarySeqTypeValidator.LIBRARY_WITHOUT_TAGMENTATION
-        'seqtype'                               | 'true'       | ''      || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${CUSTOMER_LIBRARY} column."                               || LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
-        "seqtype${SeqType.TAGMENTATION_SUFFIX}" | ''           | ''      || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${CUSTOMER_LIBRARY} column."                               || LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
-        "seqtype${SeqType.TAGMENTATION_SUFFIX}" | 'true'       | ''      || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${CUSTOMER_LIBRARY} column." || LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
+        seqTypeName                             | tagmentation | library || message1                                                                                                                                  || message2
+        "seqtype"                               | ""           | "5"     || "The library '5' in column ${CUSTOMER_LIBRARY} indicates tagmentation, but the seqtype 'seqtype' is without tagmentation"                 || LibrarySeqTypeValidator.LIBRARY_WITHOUT_TAGMENTATION
+        "seqtype"                               | "true"       | ""      || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${CUSTOMER_LIBRARY} column." || LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
+        "seqtype${SeqType.TAGMENTATION_SUFFIX}" | ""           | ""      || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${CUSTOMER_LIBRARY} column." || LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
+        "seqtype${SeqType.TAGMENTATION_SUFFIX}" | "true"       | ""      || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${CUSTOMER_LIBRARY} column." || LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
 
     }
 
