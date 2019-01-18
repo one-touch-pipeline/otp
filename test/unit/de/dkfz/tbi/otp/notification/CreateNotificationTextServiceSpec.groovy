@@ -1,22 +1,29 @@
 package de.dkfz.tbi.otp.notification
 
-import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.*
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.*
+import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import grails.test.mixin.*
 import grails.test.mixin.support.*
+import org.codehaus.groovy.grails.context.support.*
 import org.codehaus.groovy.grails.web.mapping.*
 import spock.lang.*
-import org.codehaus.groovy.grails.context.support.*
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
 @Mock([
         AbstractMergedBamFile,
         AntibodyTarget,
+        CellRangerConfig,
+        CellRangerMergingWorkPackage,
         ChipSeqSeqTrack,
         DataFile,
         ExomeSeqTrack,
@@ -34,7 +41,9 @@ import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
         ProjectCategory,
         Realm,
         ReferenceGenome,
+        ReferenceGenomeIndex,
         ReferenceGenomeProjectSeqType,
+        RnaRoddyBamFile,
         RoddyBamFile,
         RoddyWorkflowConfig,
         Run,
@@ -49,12 +58,15 @@ import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
         SeqPlatformModelLabel,
         SeqTrack,
         SeqType,
+        SingleCellBamFile,
         SoftwareTool,
         SoftwareToolIdentifier,
+        ToolName,
 ])
 //TODO refactor classes SNV INDEL ACESEQSpec abstract from BamFilePairAnalyses abstract
 @TestMixin(GrailsUnitTestMixin)
-class CreateNotificationTextServiceSpec extends Specification {
+@SuppressWarnings(["ClassSize", "MethodCount"])
+class CreateNotificationTextServiceSpec extends Specification implements AlignmentPipelineFactory {
 
     TestConfigService configService
 
@@ -112,6 +124,7 @@ class CreateNotificationTextServiceSpec extends Specification {
      * Permutation of the listPairAnalyses and the processingStatusMultipleProjects
      * to have any combination in a List of Maps for later Testing
      */
+    @SuppressWarnings('AssignmentToStaticFieldFromInstanceMethod')
     void setupSpec() {
         List result = []
         listPairAnalyses.each { var1 ->
@@ -121,6 +134,10 @@ class CreateNotificationTextServiceSpec extends Specification {
             }
         }
         pairAnalysisContentsPermutation = result.asImmutable()
+    }
+
+    void setup() {
+        configService = new TestConfigService()
     }
 
 
@@ -133,6 +150,7 @@ class CreateNotificationTextServiceSpec extends Specification {
         e.message.contains('assert templateName')
     }
 
+    @SuppressWarnings("GStringExpressionWithinString")
     void "createMessage, when template exist, return notification text"() {
         given:
         String templateName = "notification.template.base"
@@ -286,8 +304,6 @@ class CreateNotificationTextServiceSpec extends Specification {
         SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithTwoDataFiles()
         SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithTwoDataFiles()
 
-        configService = new TestConfigService()
-
         when:
         String fileNameString = new CreateNotificationTextService(
                 lsdfFilesService: new LsdfFilesService(),
@@ -328,13 +344,14 @@ class CreateNotificationTextServiceSpec extends Specification {
                         pipeline: roddyBamFile1.pipeline,
                 ])
         ])
-        configService = new TestConfigService()
 
         when:
         String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile1, roddyBamFile2, roddyBamFile3])
         String expected = [
-                new File("${configService.getRootPath()}/${roddyBamFile1.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile1.seqType.libraryLayoutDirName}/merged-alignment"),
-                new File("${configService.getRootPath()}/${roddyBamFile2.project.dirName}/sequencing/${roddyBamFile2.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile2.seqType.libraryLayoutDirName}/merged-alignment"),
+                new File("${configService.getRootPath()}/${roddyBamFile1.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/" +
+                        "view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile1.seqType.libraryLayoutDirName}/merged-alignment"),
+                new File("${configService.getRootPath()}/${roddyBamFile2.project.dirName}/sequencing/${roddyBamFile1.seqType.dirName}/" +
+                        "view-by-pid/\${PID}/\${SAMPLE_TYPE}/${roddyBamFile2.seqType.libraryLayoutDirName}/merged-alignment"),
         ].sort().join('\n')
 
         then:
@@ -350,11 +367,12 @@ class CreateNotificationTextServiceSpec extends Specification {
                         pipeline: DomainFactory.createPanCanPipeline(),
                 ])
         ])
-        configService = new TestConfigService()
 
         when:
         String fileNameString = new CreateNotificationTextService().getMergingDirectories([roddyBamFile])
-        String expected = new File("${configService.getRootPath()}/${roddyBamFile.project.dirName}/sequencing/${roddyBamFile.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}-\${ANTI_BODY_TARGET}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment").path
+        String expected = new File("${configService.getRootPath()}/${roddyBamFile.project.dirName}/sequencing/" +
+                "${roddyBamFile.seqType.dirName}/view-by-pid/\${PID}/\${SAMPLE_TYPE}-\${ANTI_BODY_TARGET}/" +
+                "${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment").path
 
         then:
         expected == fileNameString
@@ -375,13 +393,16 @@ class CreateNotificationTextServiceSpec extends Specification {
         SamplePair samplePair1 = DomainFactory.createSamplePair()
         SamplePair samplePair2 = DomainFactory.createSamplePair()
 
-        configService = new TestConfigService()
-
         when:
         String fileNameString = new CreateNotificationTextService().variantCallingDirectories([samplePair1, samplePair2], analysis)
+
         String expected = [
-                new File("${configService.getRootPath()}/${samplePair1.project.dirName}/sequencing/${samplePair1.seqType.dirName}/view-by-pid/${samplePair1.individual.pid}/${pathSegment}/${samplePair1.seqType.libraryLayoutDirName}/${samplePair1.sampleType1.dirName}_${samplePair1.sampleType2.dirName}"),
-                new File("${configService.getRootPath()}/${samplePair2.project.dirName}/sequencing/${samplePair2.seqType.dirName}/view-by-pid/${samplePair2.individual.pid}/${pathSegment}/${samplePair2.seqType.libraryLayoutDirName}/${samplePair2.sampleType1.dirName}_${samplePair2.sampleType2.dirName}"),
+                new File("${configService.getRootPath()}/${samplePair1.project.dirName}/sequencing/${samplePair1.seqType.dirName}/" +
+                        "view-by-pid/${samplePair1.individual.pid}/${pathSegment}/${samplePair1.seqType.libraryLayoutDirName}/" +
+                        "${samplePair1.sampleType1.dirName}_${samplePair1.sampleType2.dirName}"),
+                new File("${configService.getRootPath()}/${samplePair2.project.dirName}/sequencing/${samplePair2.seqType.dirName}/" +
+                        "view-by-pid/${samplePair2.individual.pid}/${pathSegment}/${samplePair2.seqType.libraryLayoutDirName}/" +
+                        "${samplePair2.sampleType1.dirName}_${samplePair2.sampleType2.dirName}"),
         ].sort().join('\n')
 
         then:
@@ -413,8 +434,10 @@ class CreateNotificationTextServiceSpec extends Specification {
         when:
         String samplePairs = new CreateNotificationTextService().getSamplePairRepresentation([samplePair1, samplePair2])
         String expectedSamplePair = [
-                "${samplePair1.individual.displayName} ${samplePair1.sampleType1.displayName} ${samplePair1.sampleType2.displayName} ${samplePair1.seqType.displayNameWithLibraryLayout}",
-                "${samplePair2.individual.displayName} ${samplePair2.sampleType1.displayName} ${samplePair2.sampleType2.displayName} ${samplePair2.seqType.displayNameWithLibraryLayout}",
+                "${samplePair1.individual.displayName} ${samplePair1.sampleType1.displayName} " +
+                        "${samplePair1.sampleType2.displayName} ${samplePair1.seqType.displayNameWithLibraryLayout}",
+                "${samplePair2.individual.displayName} ${samplePair2.sampleType1.displayName} " +
+                        "${samplePair2.sampleType2.displayName} ${samplePair2.seqType.displayNameWithLibraryLayout}",
         ].sort().join('\n')
 
         then:
@@ -449,7 +472,9 @@ class CreateNotificationTextServiceSpec extends Specification {
                 seqType                     : multipleSeqTypes ? DomainFactory.createSeqTypePaired() : data1.seqTrack.seqType,
                 run                         : multipleRuns ? DomainFactory.createRun() : data1.seqTrack.run,
                 installationProcessingStatus: installationProcessingStatus,
-                alignmentProcessingStatus   : align ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                alignmentProcessingStatus   : align ?
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
         ])
 
         ProcessingStatus processingStatus = new ProcessingStatus([
@@ -514,7 +539,7 @@ ${expectedAlign}"""
     }
 
     @Unroll
-    void "alignmentNotification, return message"() {
+    void "alignmentNotification, return message (#name)"() {
         given:
         DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createProcessingOptionForNotificationRecipient()
@@ -530,12 +555,18 @@ ${expectedAlign}"""
                 project: multipleProjects ? DomainFactory.createProject() : data1.seqTrack.project,
                 seqType: multipleSeqTypes ? DomainFactory.createSeqTypePaired() : data1.seqTrack.seqType,
                 run: data1.seqTrack.run,
-                alignmentProcessingStatus: secondSampleAligned ? ProcessingStatus.WorkflowProcessingStatus.ALL_DONE : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
-                snvProcessingStatus: snv ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
-                indelProcessingStatus: indel ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
-                sophiaProcessingStatus: sophia ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
-                aceseqProcessingStatus: aceseq ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
-                runYapsaProcessingStatus: runYapsa ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO : ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                alignmentProcessingStatus: secondSampleAligned ? ProcessingStatus.WorkflowProcessingStatus.ALL_DONE :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                snvProcessingStatus: snv ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                indelProcessingStatus: indel ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                sophiaProcessingStatus: sophia ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                aceseqProcessingStatus: aceseq ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
+                runYapsaProcessingStatus: runYapsa ? ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_MIGHT_DO :
+                        ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO,
         )
 
         ProcessingStatus processingStatus = new ProcessingStatus([
@@ -623,7 +654,9 @@ samples: ${expectedSamples.sort().join('\n')}
 links: ${expectedLinks}
 processingValues: ${expectedAlignment}
 paths: ${expectedPaths}
-${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
+${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}
+pancan alignment infos
+"""
 
         when:
         String message = createNotificationTextService.alignmentNotification(processingStatus)
@@ -644,12 +677,23 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         false            | false            | true                | true  | true  | true   | true   | true
         false            | false            | true                | false | false | true   | true   | false
         true             | true             | true                | true  | true  | true   | true   | true
+
+        name = [
+                multipleProjects ? 'two projects' : '',
+                multipleSeqTypes ? 'two seq types' : '',
+                secondSampleAligned ? 'two alignments' : '',
+                snv ? 'snv' : '',
+                indel ? 'indel' : '',
+                sophia ? 'sophia' : '',
+                aceseq ? 'aceseq' : '',
+                runYapsa ? 'runYapsa' : '',
+        ].findAll().join(', ')
     }
 
     @Unroll
-    void "alignmentNotification, test difference between Single Cell and Roddy"() {
+    void "alignmentNotification, test difference between Cell Ranger and Roddy (#name)"() {
         given:
-        DomainFactory.createRoddyAlignableSeqTypes()
+        DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createProcessingOptionForNotificationRecipient()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
 
@@ -679,6 +723,7 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
             1 * getMessageInternal("notification.template.alignment.noFurtherProcessing", [], _) >> ""
             (singleCell ? 0 : 1) * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
             (singleCell ? 1 : 0) * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
+            (singleCell ? 0 : 1) * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
         }
 
         when:
@@ -688,9 +733,125 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         true
 
         where:
-        singleCell | _
-        true       | _
-        false      | _
+        singleCell || name
+        true       || 'Cell Ranger'
+        false      || 'Roddy'
+    }
+
+    @Unroll
+    void "alignmentNotification, test for pipeline #pipeline"() {
+        given:
+        DomainFactory.createAllAlignableSeqTypes()
+        DomainFactory.createProcessingOptionForNotificationRecipient()
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
+
+        AbstractMergedBamFile abstractMergedBamFile = createBamFileForPipelineName(pipeline)
+
+        ProcessingStatus processingStatus = new ProcessingStatus([
+                new SeqTrackProcessingStatus(
+                        abstractMergedBamFile.getContainedSeqTracks().first(),
+                        ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+                        ProcessingStatus.WorkflowProcessingStatus.ALL_DONE, [
+                        new MergingWorkPackageProcessingStatus(
+                                abstractMergedBamFile.mergingWorkPackage,
+                                ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+                                abstractMergedBamFile,
+                                []
+                        ),
+                ]
+                ),
+        ])
+
+        int countPanCan = pipeline == Pipeline.Name.PANCAN_ALIGNMENT ? 1 : 0
+        int countRoddyRna = pipeline == Pipeline.Name.RODDY_RNA_ALIGNMENT ? 1 : 0
+        int countCellRanger = pipeline == Pipeline.Name.CELL_RANGER ? 1 : 0
+        int countRoddy = countPanCan + countRoddyRna
+
+        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
+                projectOverviewService: Mock(ProjectOverviewService) {
+                    countRoddy * getAlignmentInformationFromConfig(_ as RoddyWorkflowConfig) >> new RoddyAlignmentInfo()
+                    countCellRanger * getAlignmentInformationFromConfig(_ as CellRangerConfig) >> new SingleCellAlignmentInfo()
+                    0 * _
+                },
+                linkGenerator: Mock(LinkGenerator) {
+                    1 * link(_) >> "link"
+                },
+                processingOptionService: new ProcessingOptionService(),
+        )
+
+        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
+            1 * getMessageInternal("notification.template.alignment.base", [], _) >> ""
+            1 * getMessageInternal("notification.template.alignment.processing", [], _) >> ""
+
+            countCellRanger * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
+            countRoddy * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
+            countPanCan * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
+            countCellRanger * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
+            0 * _
+        }
+
+        when:
+        createNotificationTextService.alignmentNotification(processingStatus)
+
+        then:
+        true
+
+        where:
+        pipeline << Pipeline.Name.getAlignmentPipelineNames()
+    }
+
+    void "alignmentNotification, test for multiple pipelines"() {
+        given:
+        DomainFactory.createAllAlignableSeqTypes()
+        DomainFactory.createProcessingOptionForNotificationRecipient()
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
+
+        List<AbstractMergedBamFile> abstractMergedBamFiles = Pipeline.Name.getAlignmentPipelineNames().collect {
+            createBamFileForPipelineName(it)
+        }
+
+        ProcessingStatus processingStatus = new ProcessingStatus(abstractMergedBamFiles.collect {
+            new SeqTrackProcessingStatus(
+                    it.getContainedSeqTracks().first(),
+                    ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+                    ProcessingStatus.WorkflowProcessingStatus.ALL_DONE, [
+                    new MergingWorkPackageProcessingStatus(
+                            it.mergingWorkPackage,
+                            ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+                            it,
+                            []
+                    ),
+            ]
+            )
+        })
+
+        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
+                projectOverviewService: Mock(ProjectOverviewService) {
+                    2 * getAlignmentInformationFromConfig(_ as RoddyWorkflowConfig) >> new RoddyAlignmentInfo()
+                    1 * getAlignmentInformationFromConfig(_ as CellRangerConfig) >> new SingleCellAlignmentInfo()
+                    0 * _
+                },
+                linkGenerator: Mock(LinkGenerator) {
+                    3 * link(_) >> "link"
+                },
+                processingOptionService: new ProcessingOptionService(),
+        )
+
+        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
+            1 * getMessageInternal("notification.template.alignment.base", [], _) >> ""
+            3 * getMessageInternal("notification.template.alignment.processing", [], _) >> ""
+            1 * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
+            2 * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
+            1 * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
+            1 * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
+            0 * _
+        }
+
+        when:
+        createNotificationTextService.alignmentNotification(processingStatus)
+
+        then:
+        true
     }
 
     @Unroll("#pairAnalysisList.type, when ProcessingStatus is null, throw assert")
@@ -706,26 +867,26 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         pairAnalysisList << listPairAnalyses
     }
 
-    @Unroll("#pairAnalysisContentsPermutationList.type, return message")
+    @Unroll("instanceNotification for #dataList.type and multi projects=#dataList.multipleProjects and status=#dataList.processingStatus, return message")
     void "instanceNotification, return message"() {
         given:
         DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createProcessingOptionForEmailSenderSalutation()
 
         Map data1 = createData([
-                (pairAnalysisContentsPermutationList.customProcessingStatus): ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
-                seqType: SeqTypeService."${pairAnalysisContentsPermutationList.type}PipelineSeqTypes".first(),
+                (dataList.customProcessingStatus): ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
+                seqType                          : SeqTypeService."${dataList.type}PipelineSeqTypes".first(),
         ])
 
         Map data2 = createData(
-                project: pairAnalysisContentsPermutationList.multipleProjects ? DomainFactory.createProject() : data1.seqTrack.project,
-                (pairAnalysisContentsPermutationList.customProcessingStatus): pairAnalysisContentsPermutationList.processingStatus,
-                seqType: SeqTypeService."${pairAnalysisContentsPermutationList.type}PipelineSeqTypes".first(),
+                project: dataList.multipleProjects ? DomainFactory.createProject() : data1.seqTrack.project,
+                (dataList.customProcessingStatus): dataList.processingStatus,
+                seqType: SeqTypeService."${dataList.type}PipelineSeqTypes".first(),
         )
 
         Map data3 = createData(
-                project: pairAnalysisContentsPermutationList.multipleProjects ? DomainFactory.createProject() : data1.seqTrack.project,
-                (pairAnalysisContentsPermutationList.customProcessingStatus): pairAnalysisContentsPermutationList.processingStatus,
+                project: dataList.multipleProjects ? DomainFactory.createProject() : data1.seqTrack.project,
+                (dataList.customProcessingStatus): dataList.processingStatus,
         )
 
         ProcessingStatus processingStatus = new ProcessingStatus([
@@ -734,12 +895,12 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
                 data3.seqTrackProcessingStatus,
         ])
 
-        OtrsTicket.ProcessingStep processingStep = (OtrsTicket.ProcessingStep) pairAnalysisContentsPermutationList.processingStep
+        OtrsTicket.ProcessingStep processingStep = (OtrsTicket.ProcessingStep) dataList.processingStep
         boolean expectsLinks = processingStep.controllerName && processingStep.actionName
 
         int projectCount = 0
         if (expectsLinks) {
-            projectCount = pairAnalysisContentsPermutationList.multipleProjects && pairAnalysisContentsPermutationList.processingStatus == ProcessingStatus.WorkflowProcessingStatus.ALL_DONE ? 2 : 1
+            projectCount = dataList.multipleProjects && dataList.processingStatus == ProcessingStatus.WorkflowProcessingStatus.ALL_DONE ? 2 : 1
         }
 
         CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
@@ -754,7 +915,7 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         List<SamplePair> samplePairWithoutAnalysis = []
 
 
-        switch (pairAnalysisContentsPermutationList.processingStatus) {
+        switch (dataList.processingStatus) {
             case ProcessingStatus.WorkflowProcessingStatus.ALL_DONE:
                 samplePairWithAnalysis.add(data2.samplePair)
                 break
@@ -769,7 +930,9 @@ ${expectedVariantCallingRunning}${expectedVariantCallingNotRunning}"""
         String expectedSamplePairsFinished = createNotificationTextService.getSamplePairRepresentation(samplePairWithAnalysis)
         String expectedSamplePairsNotProcessed = createNotificationTextService.getSamplePairRepresentation(samplePairWithoutAnalysis)
         String expectedDirectories = createNotificationTextService.variantCallingDirectories(samplePairWithAnalysis, processingStep)
-        String expectedLinks = expectsLinks ? samplePairWithAnalysis*.project.unique().collect { 'link' }.join('\n') : ""
+        String expectedLinks = expectsLinks ? samplePairWithAnalysis*.project.unique().collect {
+            'link'
+        }.join('\n') : ""
 
         String expected = """
 ${processingStep.displayName} finished
@@ -787,14 +950,16 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
 """
         }
 
+        expected += "\n${dataList.type} analysis infos\n"
+
         when:
-        String message = createNotificationTextService."${pairAnalysisContentsPermutationList.notification}"(processingStatus)
+        String message = createNotificationTextService."${dataList.notification}"(processingStatus)
 
         then:
         expected == message
 
         where:
-        pairAnalysisContentsPermutationList << pairAnalysisContentsPermutation
+        dataList << pairAnalysisContentsPermutation
 
     }
 
@@ -829,14 +994,22 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
     private Map createData(Map properties = [:]) {
         Project project = properties.project ?: DomainFactory.createProject()
         String pid = properties.pid ?: "pid_${DomainFactory.counter++}"
-        SeqType seqType = properties.seqType ?: DomainFactory.createSeqTypePaired()
-        ProcessingStatus.WorkflowProcessingStatus installationProcessingStatus = properties.installationProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
-        ProcessingStatus.WorkflowProcessingStatus alignmentProcessingStatus = properties.alignmentProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
-        ProcessingStatus.WorkflowProcessingStatus snvProcessingStatus = properties.snvProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
-        ProcessingStatus.WorkflowProcessingStatus indelProcessingStatus = properties.indelProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
-        ProcessingStatus.WorkflowProcessingStatus sophiaProcessingStatus = properties.sophiaProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
-        ProcessingStatus.WorkflowProcessingStatus aceseqProcessingStatus = properties.aceseqProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
-        ProcessingStatus.WorkflowProcessingStatus runYapsaProcessingStatus = properties.runYapsaProcessingStatus ?: ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+        boolean singeCell = properties.singleCell
+        SeqType seqType = properties.seqType ?: DomainFactory.createSeqTypePaired([singleCell: singeCell])
+        ProcessingStatus.WorkflowProcessingStatus installationProcessingStatus = properties.installationProcessingStatus ?:
+                ProcessingStatus.WorkflowProcessingStatus.ALL_DONE
+        ProcessingStatus.WorkflowProcessingStatus alignmentProcessingStatus = properties.alignmentProcessingStatus ?:
+                ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+        ProcessingStatus.WorkflowProcessingStatus snvProcessingStatus = properties.snvProcessingStatus ?:
+                ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+        ProcessingStatus.WorkflowProcessingStatus indelProcessingStatus = properties.indelProcessingStatus ?:
+                ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+        ProcessingStatus.WorkflowProcessingStatus sophiaProcessingStatus = properties.sophiaProcessingStatus ?:
+                ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+        ProcessingStatus.WorkflowProcessingStatus aceseqProcessingStatus = properties.aceseqProcessingStatus ?:
+                ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
+        ProcessingStatus.WorkflowProcessingStatus runYapsaProcessingStatus = properties.runYapsaProcessingStatus ?:
+                ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
         Run run = properties.run ?: DomainFactory.createRun()
         String sampleId1 = properties.sampleId1 ?: "sampleId_${DomainFactory.counter++}"
         String sampleId2 = properties.sampleId2
@@ -864,24 +1037,29 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                 seqType: seqTrack.seqType,
         ]).referenceGenome
 
-        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
-                sample          : seqTrack.sample,
-                seqType         : seqType,
-                referenceGenome : referenceGenome,
-                statSizeFileName: "statSizeFileName_${DomainFactory.counter++}.tab",
-                pipeline        : DomainFactory.createPanCanPipeline(),
-        ])
-
-        RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([workPackage: mergingWorkPackage])
-
-        SamplePair samplePair = DomainFactory.createDisease(mergingWorkPackage)
+        Map mergingWorkPackageProperties = [
+                sample         : seqTrack.sample,
+                seqType        : seqType,
+                referenceGenome: referenceGenome,
+        ]
 
         AlignmentInfo alignmentInfo
+        MergingWorkPackage mergingWorkPackage
+        AbstractMergedBamFile abstractMergedBamFile
         if (properties.singleCell == true) {
             alignmentInfo = createSingleCellAlignmentInfo(seqTrack)
+            mergingWorkPackage = CellRangerFactoryInstance.INSTANCE.createMergingWorkPackage(mergingWorkPackageProperties)
+            abstractMergedBamFile = CellRangerFactoryInstance.INSTANCE.createBamFile([workPackage: mergingWorkPackage])
         } else {
             alignmentInfo = createRoddyAlignmentInfo(seqTrack)
+            mergingWorkPackage = DomainFactory.createMergingWorkPackage(mergingWorkPackageProperties + [
+                    statSizeFileName: "statSizeFileName_${DomainFactory.counter++}.tab",
+                    pipeline        : DomainFactory.createPanCanPipeline(),
+            ])
+            abstractMergedBamFile = DomainFactory.createRoddyBamFile([workPackage: mergingWorkPackage])
         }
+
+        SamplePair samplePair = DomainFactory.createDisease(mergingWorkPackage)
 
         SeqTrackProcessingStatus seqTrackProcessingStatus = new SeqTrackProcessingStatus(
                 seqTrack,
@@ -891,7 +1069,7 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                         new MergingWorkPackageProcessingStatus(
                                 mergingWorkPackage,
                                 alignmentProcessingStatus,
-                                roddyBamFile,
+                                abstractMergedBamFile,
                                 [
                                         new SamplePairProcessingStatus(
                                                 samplePair,
@@ -905,9 +1083,9 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
                                                 null,
                                                 runYapsaProcessingStatus,
                                                 null,
-                                        )
+                                        ),
                                 ]
-                        )
+                        ),
                 ]
         )
 
@@ -957,6 +1135,7 @@ mergingParameter: ${data.alignmentInfo.mergeOptions}
 samtoolsProgram: ${data.alignmentInfo.samToolsCommand}"""
     }
 
+    @SuppressWarnings("GStringExpressionWithinString")
     PluginAwareResourceBundleMessageSource getMessageSource() {
         return Mock(PluginAwareResourceBundleMessageSource) {
             _ * getMessageInternal("notification.template.installation.base", [], _) >> '''
@@ -1007,6 +1186,16 @@ samplePairsFinished: ${samplePairsFinished}
 ${notificationSubject} not processed
 samplePairsNotProcessed: ${samplePairsNotProcessed}
 '''
+
+            _ * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> '''pancan alignment infos\n'''
+            _ * getMessageInternal("notification.template.references.snv", [], _) >> '''snv analysis infos\n'''
+            _ * getMessageInternal("notification.template.references.indel", [], _) >> '''indel analysis infos\n'''
+            _ * getMessageInternal("notification.template.references.sophia", [], _) >> '''sophia analysis infos\n'''
+            _ * getMessageInternal("notification.template.references.aceseq", [], _) >> '''aceseq analysis infos\n'''
+            _ * getMessageInternal("notification.template.references.runyapsa", [], _) >> '''runYapsa analysis infos\n'''
+
+            0 * _
+
         }
     }
 }

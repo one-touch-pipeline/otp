@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.notification
 
-import de.dkfz.tbi.otp.config.*
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
@@ -151,29 +151,36 @@ class CreateNotificationTextService {
         boolean multipleProject = bamFilesByProject.size() > 1
         StringBuilder builder = new StringBuilder()
 
-        bamFilesByProject.sort { it.key.name }.each { Project project, List<AbstractMergedBamFile> projectBamFiles ->
+        bamFilesByProject.sort {
+            it.key.name
+        }.each { Project project, List<AbstractMergedBamFile> projectBamFiles ->
             if (multipleProject) {
                 builder << "\n***********************\n"
                 builder << project
             }
-            projectBamFiles.groupBy { it.seqType }.sort { it.key.displayNameWithLibraryLayout }.
-                    each { SeqType seqType, List<AbstractMergedBamFile> seqTypeBamFiles ->
-                        Map<AlignmentConfig, List<AbstractMergedBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy { it.alignmentConfig }
-                        boolean multipleConfigs = bamFilePerConfig.size() > 1 && project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
-                        bamFilePerConfig.each { AlignmentConfig config, List<AbstractMergedBamFile> configBamFiles ->
-                            AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
-                            String individuals = multipleConfigs ? (config.individual ?: "default") : ""
-                            builder << createMessage("notification.template.alignment.processing", [
-                                    seqType           : seqType.displayNameWithLibraryLayout,
-                                    individuals       : individuals,
-                                    referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
-                                    alignmentProgram  : alignmentInfo.alignmentProgram,
-                                    alignmentParameter: alignmentInfo.alignmentParameter,
-                            ])
-                            Map<String, Object> codeAndParams = alignmentInfo.getAlignmentSpecificMessageAttributes()
-                            builder << createMessage(codeAndParams.code as String, codeAndParams.params as Map)
-                        }
-                    }
+            projectBamFiles.groupBy {
+                it.seqType
+            }.sort {
+                it.key.displayNameWithLibraryLayout
+            }.each { SeqType seqType, List<AbstractMergedBamFile> seqTypeBamFiles ->
+                Map<AlignmentConfig, List<AbstractMergedBamFile>> bamFilePerConfig = seqTypeBamFiles.groupBy {
+                    it.alignmentConfig
+                }
+                boolean multipleConfigs = bamFilePerConfig.size() > 1 && project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
+                bamFilePerConfig.each { AlignmentConfig config, List<AbstractMergedBamFile> configBamFiles ->
+                    AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
+                    String individuals = multipleConfigs ? (config.individual ?: "default") : ""
+                    builder << createMessage("notification.template.alignment.processing", [
+                            seqType           : seqType.displayNameWithLibraryLayout,
+                            individuals       : individuals,
+                            referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
+                            alignmentProgram  : alignmentInfo.alignmentProgram,
+                            alignmentParameter: alignmentInfo.alignmentParameter,
+                    ])
+                    Map<String, Object> codeAndParams = alignmentInfo.getAlignmentSpecificMessageAttributes()
+                    builder << createMessage(codeAndParams.code as String, codeAndParams.params as Map)
+                }
+            }
         }
 
         String message = createMessage("notification.template.alignment.base", [
@@ -203,31 +210,48 @@ class CreateNotificationTextService {
                     ])
         }
 
+        alignmentInfoByConfig.keySet()*.pipeline*.name.sort().unique().each {
+            switch (it) {
+                case Pipeline.Name.PANCAN_ALIGNMENT:
+                    message += '\n' + createMessage("notification.template.references.alignment.pancan")
+                    break
+                case Pipeline.Name.RODDY_RNA_ALIGNMENT: //no documentation/code available
+                case Pipeline.Name.EXTERNALLY_PROCESSED: //alignment was done externally
+                    break
+                case Pipeline.Name.CELL_RANGER:
+                    message += '\n' + createMessage("notification.template.references.alignment.cellRanger")
+                    break
+                default:
+                    log.error("Alignment pipeline ${it} is unknown for notification")
+                    break
+            }
+        }
+
         return message
     }
 
 
     String snvNotification(ProcessingStatus status) {
-        return variantCallingNotification(status, SNV)
+        return variantCallingNotification(status, SNV, 'notification.template.references.snv')
     }
 
     String indelNotification(ProcessingStatus status) {
-        return variantCallingNotification(status, INDEL)
+        return variantCallingNotification(status, INDEL, 'notification.template.references.indel')
     }
 
     String sophiaNotification(ProcessingStatus status) {
-        return variantCallingNotification(status, SOPHIA)
+        return variantCallingNotification(status, SOPHIA, 'notification.template.references.sophia')
     }
 
     String aceseqNotification(ProcessingStatus status) {
-        return variantCallingNotification(status, ACESEQ)
+        return variantCallingNotification(status, ACESEQ, 'notification.template.references.aceseq')
     }
 
     String runYapsaNotification(ProcessingStatus status) {
-        return variantCallingNotification(status, RUN_YAPSA)
+        return variantCallingNotification(status, RUN_YAPSA, 'notification.template.references.runyapsa')
     }
 
-    String variantCallingNotification(ProcessingStatus status, ProcessingStep notificationStep) {
+    String variantCallingNotification(ProcessingStatus status, ProcessingStep notificationStep, String additionalInfo = null) {
         assert status
 
         List<SeqType> seqTypes = SeqTypeService."${notificationStep}PipelineSeqTypes"
@@ -242,17 +266,17 @@ class CreateNotificationTextService {
             throw new RuntimeException("No ${notificationStep.displayName} finished yet.")
         }
         String directories = variantCallingDirectories(samplePairsFinished, notificationStep)
-        String message = createMessage ("notification.template.step.processed", [
+        String message = createMessage("notification.template.step.processed", [
                 displayName        : notificationStep.displayName,
                 samplePairsFinished: getSamplePairRepresentation(samplePairsFinished),
         ])
         if (notificationStep.controllerName && notificationStep.actionName) {
-            message += createMessage ("notification.template.step.processed.results.links", [
-                    displayName     : notificationStep.displayName,
-                    otpLinks: createOtpLinks(samplePairsFinished*.project, notificationStep.controllerName, notificationStep.actionName),
+            message += createMessage("notification.template.step.processed.results.links", [
+                    displayName: notificationStep.displayName,
+                    otpLinks   : createOtpLinks(samplePairsFinished*.project, notificationStep.controllerName, notificationStep.actionName),
             ])
         }
-        message += createMessage ("notification.template.step.processed.results.directories", [
+        message += createMessage("notification.template.step.processed.results.directories", [
                 directories: directories,
         ])
 
@@ -267,7 +291,16 @@ class CreateNotificationTextService {
             ])
         }
 
+        if (additionalInfo) {
+            message += '\n' + createMessage(additionalInfo)
+        }
+
         return message
+    }
+
+    String references(String referencesKey) {
+        assert referencesKey
+        return createMessage(referencesKey)
     }
 
     String createMessage(String templateName, Map properties = [:]) {
@@ -308,11 +341,13 @@ class CreateNotificationTextService {
     String getSampleIdentifiers(Collection<SeqTrack> seqTracks) {
         assert seqTracks
 
-        if (!PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(
+        if (PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(
                 exactlyOneElement(
-                        seqTracks*.project.unique(),'seqtracks must be of the same project'
+                        seqTracks*.project.unique(), 'seqtracks must be of the same project'
                 ).name)
         ) {
+            return ''
+        } else {
             return ' (' + MetaDataEntry.createCriteria().list {
                 projections {
                     dataFile {
@@ -324,11 +359,10 @@ class CreateNotificationTextService {
                     distinct('value')
                 }
             }.sort().join(', ') + ')'
-        } else {
-            return ''
         }
     }
 
+    @SuppressWarnings('JavaIoPackageAccess')
     String getSeqTypeDirectories(List<SeqTrack> seqTracks) {
         assert seqTracks
 
@@ -339,6 +373,7 @@ class CreateNotificationTextService {
         }.unique().sort()*.path.join('\n')
     }
 
+    @SuppressWarnings('GStringExpressionWithinString')
     String getMergingDirectories(List<AbstractBamFile> bamFiles) {
         assert bamFiles
         String pid = '${PID}'
@@ -366,7 +401,8 @@ class CreateNotificationTextService {
 
     String getSamplePairRepresentation(List<SamplePair> samplePairs) {
         return samplePairs.collect { SamplePair samplePair ->
-            "${samplePair.individual.displayName} ${samplePair.sampleType1.displayName} ${samplePair.sampleType2.displayName} ${samplePair.seqType.displayNameWithLibraryLayout}"
+            "${samplePair.individual.displayName} ${samplePair.sampleType1.displayName} ${samplePair.sampleType2.displayName} " +
+                    "${samplePair.seqType.displayNameWithLibraryLayout}"
         }.sort().unique().join('\n')
     }
 }
