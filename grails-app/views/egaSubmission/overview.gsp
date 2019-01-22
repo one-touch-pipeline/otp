@@ -39,7 +39,9 @@
                     <td>
                         <g:if test="${it.state == de.dkfz.tbi.otp.egaSubmission.EgaSubmission.State.SELECTION}">
                             <g:link action="editSubmission" params="['id': it.id]"><g:message code="egaSubmission.submissionEdit"/></g:link>
-                        </g:if>
+                        </g:if><g:else>
+                            <g:link action="sampleMetadata" params="['id': it.id]"><g:message code="egaSubmission.sampleMetadata"/></g:link>
+                        </g:else>
                     </td>
                 </tr>
             </g:each>

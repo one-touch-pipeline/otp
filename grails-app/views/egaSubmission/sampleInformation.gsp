@@ -33,7 +33,7 @@
                         <th><g:message code="egaSubmission.individual"/></th>
                         <th><g:message code="egaSubmission.sampleType"/></th>
                         <th><g:message code="egaSubmission.seqType"/></th>
-                        <th><g:message code="egaSubmission.sampleInformation.alias"/></th>
+                        <th><g:message code="egaSubmission.alias"/></th>
                         <th title="<g:message code="egaSubmission.sampleInformation.fastqInfo"/>"><g:message code="egaSubmission.fastq"/></th>
                         <th title="<g:message code="egaSubmission.sampleInformation.bamInfo"/>"><g:message code="egaSubmission.bam"/></th>
                     </tr>

@@ -10,5 +10,14 @@ $.otp.egaTable = {
             bSort: false,
             paging: false
         });
+    },
+
+    makeDownloadableDataTable: function () {
+        "use strict";
+        $('#dataTable').dataTable({
+            sDom: '<i> B rt<"clear">',
+            buttons: $.otp.tableButtons,
+            paging: false,
+        });
     }
 };

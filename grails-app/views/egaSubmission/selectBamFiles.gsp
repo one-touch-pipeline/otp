@@ -35,7 +35,7 @@
                         <th><g:message code="egaSubmission.individual"/></th>
                         <th><g:message code="egaSubmission.sampleType"/></th>
                         <th><g:message code="egaSubmission.seqType"/></th>
-                        <th><g:message code="egaSubmission.sampleInformation.alias"/></th>
+                        <th><g:message code="egaSubmission.alias"/></th>
                         <th><g:message code="egaSubmission.selectFiles.filenameAlias"/></th>
                         <th><g:message code="egaSubmission.selectFiles.filename"/></th>
                         <th><g:message code="egaSubmission.selectFiles.intern"/></th>

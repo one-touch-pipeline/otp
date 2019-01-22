@@ -36,7 +36,7 @@ class UpdateSubmissionStateSubmitCommand implements Serializable {
                 if (!obj.submission.samplesToSubmit) {
                     return 'No samples to submit are selected yet'
                 }
-                if (!obj.submission.bamFilesToSubmit || !obj.submission.dataFilesToSubmit) {
+                if (!obj.submission.bamFilesToSubmit && !obj.submission.dataFilesToSubmit) {
                     return 'No files to submit are selected yet'
                 }
             }
@@ -126,4 +126,10 @@ class SelectFilesBamFilesFormSubmitCommand implements Serializable {
 class GenerateFilesToUploadFileSubmitCommand implements Serializable {
     EgaSubmission submission
     String save
+}
+
+@Validateable
+class SampleMetadataFormSubmitCommand implements Serializable {
+    EgaSubmission submission
+    String download
 }

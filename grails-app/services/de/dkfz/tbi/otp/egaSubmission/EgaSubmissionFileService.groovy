@@ -38,7 +38,20 @@ class EgaSubmissionFileService {
         LIBRARY("Library"),
         ILSE("Ilse"),
         EGA_FILE_ALIAS("Filename at EGA"),
-        FILENAME("Filename in OTP")
+        FILENAME("Filename in OTP"),
+
+        TITLE("title"),
+        ALIAS("alias"),
+        DESCRIPTION("description"),
+        SUBJECT_ID("subjectId"),
+        BIO_SAMPLE_ID("bioSampleId"),
+        CASE_OR_CONTROL("caseOrControl"),
+        GENDER("gender"),
+        ORGANISM_PART("organismPart"),
+        ORGANISM("organism"),
+        CELL_LINE("cellLine"),
+        REGION("region"),
+        PHENOTYPE("phenotype"),
 
         final String value
 
@@ -210,6 +223,45 @@ class EgaSubmissionFileService {
         mailHelperService.sendEmail(subject, content, [processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)], user.email)
         submission.state = EgaSubmission.State.FILE_UPLOAD_STARTED
         submission.save(flush: true)
+    }
+
+    String generateSampleMetadataCsvFile(EgaSubmission submission) {
+        StringBuilder contentBody = new StringBuilder()
+        String unknown = "unknown"
+
+        submission.samplesToSubmit.each {
+            contentBody.append([
+                    unknown,
+                    it.egaAliasName,
+                    unknown,
+                    unknown,
+                    unknown,
+                    it.sample.sampleTypeCategory ?: unknown,
+                    unknown,
+                    unknown,
+                    unknown,
+                    unknown,
+                    unknown,
+                    unknown,
+            ].join(",") + "\n")
+        }
+
+        String contentHeader = [
+                TITLE,
+                ALIAS,
+                DESCRIPTION,
+                SUBJECT_ID,
+                BIO_SAMPLE_ID,
+                CASE_OR_CONTROL,
+                GENDER,
+                ORGANISM_PART,
+                ORGANISM,
+                CELL_LINE,
+                REGION,
+                PHENOTYPE,
+        ]*.value.join(",")
+
+        return "${contentHeader}\n${contentBody}"
     }
 
     static String getIdentifierKey(Row row) {

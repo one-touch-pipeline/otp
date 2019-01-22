@@ -20,6 +20,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             sampleInformation : "GET",
             selectFastqFiles  : "GET",
             selectBamFiles    : "GET",
+            sampleMetadata    : "GET",
 
             newSubmissionForm           : "POST",
             selectSamplesForm           : "POST",
@@ -29,6 +30,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             dataFilesListFileUploadForm : "POST",
             bamFilesListFileUploadForm  : "POST",
             selectFilesBamFilesForm     : "POST",
+            sampleMetadataForm          : "POST",
     ]
 
     EgaSubmissionService egaSubmissionService
@@ -159,6 +161,12 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 egaFileAliases: egaFileAliases,
                 bamFilesHasFileAliases: !submission.bamFilesToSubmit*.egaAliasName.findAll().isEmpty(),
                 hasFiles: !submission.bamFilesToSubmit.empty,
+        ]
+    }
+
+    Map sampleMetadata() {
+        return [
+                submission: EgaSubmission.get(params.id)
         ]
     }
 
@@ -441,14 +449,17 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
     }
 
-    def generateFilesToUploadFile(GenerateFilesToUploadFileSubmitCommand cmd) {
+    def sampleMetadataForm(SampleMetadataFormSubmitCommand cmd) {
         if (cmd.hasErrors()) {
             pushError(cmd.errors.fieldError, cmd.submission)
+            return
         }
 
-        if (cmd.save == "Save FASTQ and BAM") {
-            egaSubmissionFileService.generateFilesToUploadFile(cmd.submission)
-            redirect(action: "overview")
+        if (cmd.download == "Download") {
+            String content = egaSubmissionFileService.generateSampleMetadataCsvFile(cmd.submission)
+            response.contentType = CSV.mimeType
+            response.setHeader("Content-disposition", "filename=sample_metadata.csv")
+            response.outputStream << content.bytes
         }
     }
 
