@@ -14,6 +14,10 @@ class EgaSubmission implements Entity {
     State state
     SelectionState selectionState
 
+    Set<SampleSubmissionObject> samplesToSubmit = [] as Set<SampleSubmissionObject>
+    Set<BamFileSubmissionObject> bamFilesToSubmit = [] as Set<BamFileSubmissionObject>
+    Set<DataFileSubmissionObject> dataFilesToSubmit = [] as Set<DataFileSubmissionObject>
+
     static belongsTo = [
             project: Project,
     ]

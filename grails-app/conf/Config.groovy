@@ -292,6 +292,10 @@ grails.doc.authors = 'The OTP Development Team'
 grails.databinding.convertEmptyStringsToNull = false
 grails.databinding.trimStrings = false
 
+//For ega submissions lists can be very large. Default the limit is 256.
+//See https://grails.github.io/grails2-doc/2.5.1/guide/single.html#dataBinding
+grails.databinding.autoGrowCollectionLimit = Integer.MAX_VALUE
+
 
 environments {
     //disable mail sending for tests

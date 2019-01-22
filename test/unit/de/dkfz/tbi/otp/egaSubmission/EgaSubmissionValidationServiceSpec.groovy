@@ -99,12 +99,12 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
     void "test getting identifier key from sample submission object"() {
         given:
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
-        String string = sampleSubmissionObject.sample.individual.displayName +
-                sampleSubmissionObject.sample.sampleType.displayName +
-                sampleSubmissionObject.seqType.toString()
+        List<String> identifier = [sampleSubmissionObject.sample.individual.displayName,
+                sampleSubmissionObject.sample.sampleType.displayName,
+                sampleSubmissionObject.seqType.toString()]
 
         expect:
-        string == egaSubmissionValidationService.getIdentifierKeyFromSampleSubmissionObject(sampleSubmissionObject)
+        identifier == egaSubmissionValidationService.getIdentifierKeyFromSampleSubmissionObject(sampleSubmissionObject)
     }
 
     @Unroll

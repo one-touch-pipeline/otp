@@ -9,12 +9,14 @@ import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.*
 import grails.plugin.springsecurity.*
+import groovy.transform.*
 
 import java.nio.file.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
+@CompileStatic
 class EgaSubmissionFileService {
 
     CreateNotificationTextService createNotificationTextService
@@ -60,8 +62,8 @@ class EgaSubmissionFileService {
         }
     }
 
-    Map<String, String> readEgaSampleAliasesFromFile(Spreadsheet spreadsheet) {
-        Map<String, String> egaSampleAliases = [:]
+    Map<List<String>, String> readEgaSampleAliasesFromFile(Spreadsheet spreadsheet) {
+        Map<List<String>, String> egaSampleAliases = [:]
 
         spreadsheet.dataRows.each {
             egaSampleAliases.put(getIdentifierKey(it), it.getCellByColumnTitle(EGA_SAMPLE_ALIAS.value).text)
@@ -70,8 +72,8 @@ class EgaSubmissionFileService {
         return egaSampleAliases
     }
 
-    Map<String, Boolean> readBoxesFromFile(Spreadsheet spreadsheet, EgaSubmissionService.FileType fileType) {
-        Map<String, Boolean> map = [:]
+    Map<List<String>, Boolean> readBoxesFromFile(Spreadsheet spreadsheet, EgaSubmissionService.FileType fileType) {
+        Map<List<String>, Boolean> map = [:]
 
         spreadsheet.dataRows.each {
             map.put(getIdentifierKey(it), it.getCellByColumnTitle(FILE_TYPE.value).text.toUpperCase() as EgaSubmissionService.FileType == fileType)
@@ -103,7 +105,7 @@ class EgaSubmissionFileService {
         StringBuilder contentBody = new StringBuilder()
 
         sampleObjectId.eachWithIndex { it, i ->
-            SampleSubmissionObject sampleSubmissionObject = SampleSubmissionObject.findById(it as Long)
+            SampleSubmissionObject sampleSubmissionObject = SampleSubmissionObject.get(it as Long)
 
             contentBody.append([
                     sampleSubmissionObject.sample.individual.displayName,
@@ -128,7 +130,7 @@ class EgaSubmissionFileService {
     String generateDataFilesCsvFile(EgaSubmission submission) {
         StringBuilder contentBody = new StringBuilder()
 
-        List dataFilesAndAlias = egaSubmissionService.getDataFilesAndAlias(submission).sort { it[1] }
+        List<List> dataFilesAndAlias = egaSubmissionService.getDataFilesAndAlias(submission)
         Map dataFileAliases = egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndAlias)
 
         submission.dataFilesToSubmit.sort { it.sampleSubmissionObject.egaAliasName }.each {
@@ -167,11 +169,12 @@ class EgaSubmissionFileService {
     String generateBamFilesCsvFile(EgaSubmission submission) {
         StringBuilder contentBody = new StringBuilder()
 
-        List bamFilesAndAlias = egaSubmissionService.getBamFilesAndAlias(submission).sort { it[1] }
+        List<List> bamFilesAndAlias = egaSubmissionService.getBamFilesAndAlias(submission)
+        bamFilesAndAlias.sort { it[1] as String }
         Map bamFileAliases = egaSubmissionService.generateDefaultEgaAliasesForBamFiles(bamFilesAndAlias)
 
         bamFilesAndAlias.each {
-            AbstractMergedBamFile bamFile = it[0]
+            AbstractMergedBamFile bamFile = it[0] as AbstractMergedBamFile
             contentBody.append([
                     bamFile.individual.displayName,
                     bamFile.sampleType.displayName,
@@ -198,7 +201,7 @@ class EgaSubmissionFileService {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(submission.project.realm)
         Path path = fileSystem.getPath("${submission.project.projectDirectory}/submission/${submission.id}/filesToUpload.tsv")
         StringBuilder out = new StringBuilder()
-        User user = springSecurityService.getCurrentUser()
+        User user = springSecurityService.getCurrentUser() as User
 
         submission.dataFilesToSubmit.each {
             out.append("${lsdfFilesService.getFileFinalPath(it.dataFile)}\t")
@@ -264,9 +267,9 @@ class EgaSubmissionFileService {
         return "${contentHeader}\n${contentBody}"
     }
 
-    static String getIdentifierKey(Row row) {
-        return  row.getCellByColumnTitle(INDIVIDUAL.value).text +
-                row.getCellByColumnTitle(SAMPLE_TYPE.value).text +
-                row.getCellByColumnTitle(SEQ_TYPE.value).text
+    static List<String> getIdentifierKey(Row row) {
+        return  [row.getCellByColumnTitle(INDIVIDUAL.value).text,
+                 row.getCellByColumnTitle(SAMPLE_TYPE.value).text,
+                 row.getCellByColumnTitle(SEQ_TYPE.value).text]
     }
 }

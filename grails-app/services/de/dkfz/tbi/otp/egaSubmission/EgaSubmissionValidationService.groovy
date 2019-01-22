@@ -1,9 +1,11 @@
 package de.dkfz.tbi.otp.egaSubmission
 
-import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.util.spreadsheet.*
+import groovy.transform.*
 
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
+@CompileStatic
 class EgaSubmissionValidationService {
 
     EgaSubmissionFileService egaSubmissionFileService
@@ -52,12 +54,13 @@ class EgaSubmissionValidationService {
         ]
     }
 
+    @CompileDynamic
     Map validateSampleInformationFormInput(List<String> sampleObjectId, List<String> alias, List<EgaSubmissionService.FileType> fileType) {
         List<String> errors = []
         boolean hasErrors = false
-        Map<String, String> sampleAliases =  [:]
-        Map<String, Boolean> fastqs = [:]
-        Map<String, Boolean> bams = [:]
+        Map<List<String>, String> sampleAliases =  [:]
+        Map<List<String>, Boolean> fastqs = [:]
+        Map<List<String>, Boolean> bams = [:]
 
         if (fileType.findAll().size() != sampleObjectId.size()) {
             hasErrors = true
@@ -79,11 +82,11 @@ class EgaSubmissionValidationService {
         }
 
         alias.eachWithIndex { it, i ->
-            sampleAliases.put(getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject.findById(sampleObjectId[i] as Long)), it)
+            sampleAliases.put(getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject.get(sampleObjectId[i] as Long)), it)
         }
         sampleObjectId.eachWithIndex { it, i ->
-            fastqs.put(getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject.findById(it as Long)), fileType[i] == EgaSubmissionService.FileType.FASTQ)
-            bams.put(getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject.findById(it as Long)), fileType[i] == EgaSubmissionService.FileType.BAM)
+            fastqs.put(getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject.get(it as Long)), fileType[i] == EgaSubmissionService.FileType.FASTQ)
+            bams.put(getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject.get(it as Long)), fileType[i] == EgaSubmissionService.FileType.BAM)
         }
 
         return [
@@ -95,6 +98,7 @@ class EgaSubmissionValidationService {
         ]
     }
 
+    @CompileDynamic
     Map validateAliases (List<String> alias) {
         List<String> errors = []
         boolean hasErrors = false
@@ -132,9 +136,9 @@ class EgaSubmissionValidationService {
         return false
     }
 
-    String getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
-        return sampleSubmissionObject.sample.individual.displayName +
-                sampleSubmissionObject.sample.sampleType.displayName +
-                sampleSubmissionObject.seqType.toString()
+    List<String> getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
+        return [sampleSubmissionObject.sample.individual.displayName,
+                sampleSubmissionObject.sample.sampleType.displayName,
+                sampleSubmissionObject.seqType.toString()]
     }
 }

@@ -134,7 +134,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
         then:
         ValidationException exception = thrown()
-        exception.message.contains("rejected value [null]")
+        exception.message.contains("rejected value [[]]")
     }
 
     void "test save submission object all fine"() {

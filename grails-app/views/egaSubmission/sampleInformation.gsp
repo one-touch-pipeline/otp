@@ -43,7 +43,7 @@
                         <g:set var="individual" value="${it.sample.individual.displayName}" />
                         <g:set var="sampleType" value="${it.sample.sampleType.displayName}" />
                         <g:set var="seqType" value="${it.seqType.toString()}" />
-                        <g:set var="key" value="${individual + sampleType + seqType}" />
+                        <g:set var="key" value="${[individual, sampleType, seqType]}" />
                         <tr>
                             <g:hiddenField name="sampleObjectId[${i}]" value="${it.id}"/>
                             <td>${individual}</td>

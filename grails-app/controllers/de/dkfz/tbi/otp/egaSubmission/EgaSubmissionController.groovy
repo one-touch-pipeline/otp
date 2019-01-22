@@ -102,24 +102,23 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     Map sampleInformation(EgaSubmission submission) {
         Map<String, String> egaSampleAliases = flash.egaSampleAliases ?: [:]
-        Map<String, Boolean> selectedFastqs = [:]
-        Map<String, Boolean> selectedBams = [:]
-
         Map<SampleSubmissionObject, Boolean> existingFastqs = egaSubmissionService.checkFastqFiles(submission)
         Map<SampleSubmissionObject, Boolean> existingBams = egaSubmissionService.checkBamFiles(submission)
+        Map<List<String>, Boolean> selectedFastqs = new HashMap<>(existingBams.size())
+        Map<List<String>, Boolean> selectedBams = new HashMap<>(existingBams.size())
 
         if (flash.fastqs && flash.bams) {
             existingFastqs.each { key, value ->
-                String newKey = egaSubmissionValidationService.getIdentifierKeyFromSampleSubmissionObject(key)
+                List<String> newKey = getIdentifierKeyFromSampleSubmissionObject(key)
                 selectedFastqs.put(newKey, flash.fastqs.get(newKey) && value)
             }
             existingBams.each { key, value ->
-                String newKey = egaSubmissionValidationService.getIdentifierKeyFromSampleSubmissionObject(key)
+                List<String> newKey = getIdentifierKeyFromSampleSubmissionObject(key)
                 selectedBams.put(newKey, flash.bams.get(newKey) && value)
             }
         } else {
             existingBams.each { key, value ->
-                String newKey = egaSubmissionValidationService.getIdentifierKeyFromSampleSubmissionObject(key)
+                List<String> newKey = getIdentifierKeyFromSampleSubmissionObject(key)
                 selectedFastqs.put(newKey, !value)
                 selectedBams.put(newKey, value)
             }
@@ -127,7 +126,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
         return [
                 submissionId           : submission.id,
-                sampleSubmissionObjects: submission.samplesToSubmit.sort { egaSubmissionValidationService.getIdentifierKeyFromSampleSubmissionObject(it) },
+                sampleSubmissionObjects: submission.samplesToSubmit.sort { getIdentifierKeyFromSampleSubmissionObject(it) },
                 egaSampleAliases       : egaSampleAliases,
                 existingFastqs         : existingFastqs,
                 existingBams           : existingBams,
@@ -511,5 +510,13 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = data
         render dataToRender as JSON
+    }
+
+    List<String> getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
+        return [
+                sampleSubmissionObject.sample.individual.displayName,
+                sampleSubmissionObject.sample.sampleType.displayName,
+                sampleSubmissionObject.seqType.toString(),
+        ]
     }
 }

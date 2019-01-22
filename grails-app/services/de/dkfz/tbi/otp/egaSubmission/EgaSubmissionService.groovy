@@ -2,8 +2,10 @@ package de.dkfz.tbi.otp.egaSubmission
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
+import groovy.transform.*
 import org.springframework.security.access.prepost.*
 
+@CompileStatic
 class EgaSubmissionService {
 
     SeqTrackService seqTrackService
@@ -30,6 +32,7 @@ class EgaSubmissionService {
         submission.save(flush: true)
     }
 
+    @CompileDynamic
     List<SeqType> seqTypeByProject(Project project) {
         List<Long> seqTypeIds = AggregateSequences.withCriteria {
             eq("projectId", project?.id)
@@ -53,11 +56,12 @@ class EgaSubmissionService {
                 sample: sample,
                 seqType: seqType
         ).save(flush: true)
-        submission.addToSamplesToSubmit(sampleSubmissionObject)
+        submission.samplesToSubmit.add(sampleSubmissionObject)
         submission.selectionState = EgaSubmission.SelectionState.SAMPLE_INFORMATION
         submission.save(flush: true)
     }
 
+    @CompileDynamic
     Map<SampleSubmissionObject, Boolean> checkFastqFiles(EgaSubmission submission) {
         Map<SampleSubmissionObject, Boolean> map = [:]
 
@@ -76,10 +80,11 @@ class EgaSubmissionService {
     }
 
     Map<SampleSubmissionObject, Boolean> checkBamFiles(EgaSubmission submission) {
-        Map<SampleSubmissionObject, Boolean> map = [:]
+        Map<SampleSubmissionObject, Boolean> map = new HashMap<>(submission.samplesToSubmit.size())
 
         submission.samplesToSubmit.each {
-           map.put(it, !getAbstractMergedBamFiles(it).empty)
+            SampleSubmissionObject sampleSubmissionObject = it as SampleSubmissionObject
+            map.put(sampleSubmissionObject, !getAbstractMergedBamFiles(sampleSubmissionObject).empty)
         }
 
         return map
@@ -88,7 +93,7 @@ class EgaSubmissionService {
     void updateSampleSubmissionObjects(EgaSubmission submission, List<String> sampleObjectId, List<String> alias, List<FileType> fileType) {
         if (sampleObjectId.size() == alias.size() && sampleObjectId.size() == fileType.size()) {
             sampleObjectId.eachWithIndex { it, i ->
-                SampleSubmissionObject sampleSubmissionObject = SampleSubmissionObject.findById(it as Long)
+                SampleSubmissionObject sampleSubmissionObject = SampleSubmissionObject.get(it as Long)
                 sampleSubmissionObject.egaAliasName = alias[i]
                 sampleSubmissionObject.useBamFile = fileType[i] == FileType.BAM
                 sampleSubmissionObject.useFastqFile = fileType[i] == FileType.FASTQ
@@ -103,10 +108,10 @@ class EgaSubmissionService {
         }
     }
 
-    List<String> deleteSampleSubmissionObjects(EgaSubmission submission) {
-        List<Sample> sampleIds = []
-        submission.samplesToSubmit.toArray().each {
-            submission.removeFromSamplesToSubmit(it)
+    List<Long> deleteSampleSubmissionObjects(EgaSubmission submission) {
+        List<Long> sampleIds = []
+        submission.samplesToSubmit.toArray().each { SampleSubmissionObject it ->
+            submission.samplesToSubmit.remove(it)
             sampleIds.add(it.sample.id)
             it.delete()
         }
@@ -130,32 +135,34 @@ class EgaSubmissionService {
         }
     }
 
-    List getDataFilesAndAlias(EgaSubmission submission) {
+     @CompileDynamic
+    List<List> getDataFilesAndAlias(EgaSubmission submission) {
         if (submission.dataFilesToSubmit) {
             return submission.dataFilesToSubmit.collect {
                 DataFile file = it.dataFile
-                [file, submission.samplesToSubmit.find { it.sample == file.seqTrack.sample && it.seqType == file.seqType}.egaAliasName]
+                [file, submission.samplesToSubmit.find { it.sample == file.seqTrack.sample && it.seqType == file.seqType }.egaAliasName]
             }.sort { it[1] }
         } else {
             return submission.samplesToSubmit.findAll { it.useFastqFile }.collectMany {
                 seqTrackService.getSequenceFilesForSeqTrack(SeqTrack.findBySampleAndSeqType(it.sample, it.seqType))
-            }.collect { file ->
-                [file, submission.samplesToSubmit.find { it.sample == file.seqTrack.sample && it.seqType == file.seqType}.egaAliasName]
+            }.collect { DataFile file ->
+                [file, submission.samplesToSubmit.find { it.sample == file.seqTrack.sample && it.seqType == file.getSeqType() }.egaAliasName]
             }.sort { it[1] }
         }
     }
 
-    List getBamFilesAndAlias(EgaSubmission submission) {
+    @CompileDynamic
+    List<List> getBamFilesAndAlias(EgaSubmission submission) {
         if (submission.bamFilesToSubmit) {
             return submission.bamFilesToSubmit.collect {
                 AbstractMergedBamFile file = it.bamFile
-                [file, submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType}.egaAliasName]
+                [file, submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType }.egaAliasName]
             }.sort { it[1] }
         } else {
             return submission.samplesToSubmit.findAll { it.useBamFile }.collectMany {
                 getAbstractMergedBamFiles(it)
-            }.collect { file ->
-                [file, submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType}.egaAliasName]
+            }.collect { AbstractMergedBamFile file ->
+                [file, submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType }.egaAliasName]
             }.sort { it[1] }
         }
     }
@@ -170,6 +177,7 @@ class EgaSubmissionService {
         }
     }
 
+    @CompileDynamic
     private List<AbstractMergedBamFile> getAbstractMergedBamFiles(SampleSubmissionObject sampleSubmissionObject) {
         return AbstractMergedBamFile.createCriteria().list {
             workPackage {
@@ -183,6 +191,7 @@ class EgaSubmissionService {
         }
     }
 
+    @CompileDynamic
     void createDataFileSubmissionObjects(EgaSubmission submission, List<Boolean> selectBox, List<String> filename, List<String> egaSampleAlias) {
         selectBox.eachWithIndex { it, i ->
             if (it) {
@@ -195,10 +204,11 @@ class EgaSubmissionService {
         }
     }
 
+    @CompileDynamic
     void createBamFileSubmissionObjects(EgaSubmission submission) {
         getBamFilesAndAlias(submission).each {
-            AbstractMergedBamFile bamFile = it[0]
-            String egaSampleAlias = it[1]
+            AbstractMergedBamFile bamFile = it[0] as AbstractMergedBamFile
+            String egaSampleAlias = it[1] as String
             if (!(bamFile instanceof ExternallyProcessedMergedBamFile)) {
                 BamFileSubmissionObject bamFileSubmissionObject = new BamFileSubmissionObject(
                         bamFile: bamFile,
@@ -209,6 +219,7 @@ class EgaSubmissionService {
         }
     }
 
+    @CompileDynamic
     List<List> getSampleAndSeqType(Project project) {
         return SeqTrack.createCriteria().list {
             projections {
@@ -228,11 +239,11 @@ class EgaSubmissionService {
         }.unique()
     }
 
-    Map generateDefaultEgaAliasesForDataFiles(List dataFilesAndAliases) {
+    Map generateDefaultEgaAliasesForDataFiles(List<List> dataFilesAndAliases) {
         Map<String, String> aliasNames = [:]
 
         dataFilesAndAliases.each {
-            DataFile dataFile = it[0]
+            DataFile dataFile = it[0] as DataFile
             String runNameWithoutDate = dataFile.run.name.replaceAll("(?<!\\d)((?:20)?[0-2]\\d)-?(0\\d|1[012])-?([0-2]\\d|3[01])[-_]", "")
             List aliasNameHelper = [
                     dataFile.seqType.displayName,
@@ -250,11 +261,11 @@ class EgaSubmissionService {
         return aliasNames
     }
 
-    Map generateDefaultEgaAliasesForBamFiles(List bamFilesAndAliases) {
+    Map generateDefaultEgaAliasesForBamFiles(List<List> bamFilesAndAliases) {
         Map<String, String> aliasNames = [:]
 
         bamFilesAndAliases.each {
-            AbstractMergedBamFile bamFile = it[0]
+            AbstractMergedBamFile bamFile = it[0] as AbstractMergedBamFile
             List aliasNameHelper = [
                     bamFile.seqType.displayName,
                     bamFile.seqType.libraryLayout,
