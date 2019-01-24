@@ -3,7 +3,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 /**
- * Show all used roddy plugins per pipeline and project.
+ * Show all used roddy analysis plugins per pipeline and project.
  *
  * Only the last calling for a sample is taken into account.
  */
@@ -15,7 +15,7 @@ from
     BamFilePairAnalysis analysis
 where
     analysis.withdrawn = false
-    and analysis.config.pipeline.name != 'OTP_SNV'
+    and analysis.config.class = 'de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig'
 and
     analysis.id = (
         select
