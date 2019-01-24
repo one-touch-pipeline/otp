@@ -1,12 +1,16 @@
 /*
-  Show all currently used roddy plugins.
-  Plugins not used anymore are not shown.
- */
+Show all currently used roddy plugins inclusive count of using.
+Plugins not used anymore are not shown.
+*/
 SELECT DISTINCT
-  config_per_project.plugin_version
+    c.plugin_version,
+    COUNT(id)
 FROM
-  config_per_project
+     config_per_project_and_seq_type c
 WHERE
-  config_per_project.obsolete_date IS NULL
+    c.obsolete_date IS NULL
+    AND c.individual_id is null
+GROUP BY
+    c.plugin_version
 ORDER BY
-  config_per_project.plugin_version
+    c.plugin_version
