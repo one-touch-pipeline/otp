@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import org.apache.commons.logging.impl.*
@@ -42,29 +43,30 @@ class ProjectOverviewServiceSpec extends Specification {
                 },
         ])
 
-        GroovyMock(LocalShellHelper, global: true)
-        1 * LocalShellHelper.executeAndWait(_) >> {
-            new LocalShellHelper.ProcessOutput("""
-                useAcceleratedHardware=${useConvey}
-                markDuplicatesVariant=${mergeTool}
+        service.remoteShellHelper = Mock(RemoteShellHelper) {
+            1 * executeCommandReturnProcessOutput(_, _) >> {
+                new LocalShellHelper.ProcessOutput("""
+                    useAcceleratedHardware=${useConvey}
+                    markDuplicatesVariant=${mergeTool}
 
-                BWA_VERSION=1.0
-                BWA_MEM_OPTIONS=alnOpt
+                    BWA_VERSION=1.0
+                    BWA_MEM_OPTIONS=alnOpt
 
-                BWA_ACCELERATED_VERSION=2.0
-                BWA_MEM_CONVEY_ADDITIONAL_OPTIONS=conveyOpt
+                    BWA_ACCELERATED_VERSION=2.0
+                    BWA_MEM_CONVEY_ADDITIONAL_OPTIONS=conveyOpt
 
-                BIOBAMBAM_VERSION=3.0
-                mergeAndRemoveDuplicates_argumentList=bioBamBamOpt
+                    BIOBAMBAM_VERSION=3.0
+                    mergeAndRemoveDuplicates_argumentList=bioBamBamOpt
 
-                PICARD_VERSION=4.0
+                    PICARD_VERSION=4.0
 
-                SAMBAMBA_MARKDUP_VERSION=5.0
-                SAMBAMBA_MARKDUP_OPTS=sambambaOpt
+                    SAMBAMBA_MARKDUP_VERSION=5.0
+                    SAMBAMBA_MARKDUP_OPTS=sambambaOpt
 
-                SAMTOOLS_VERSION=6.0
+                    SAMTOOLS_VERSION=6.0
 
-                """.stripIndent(), '', 0)
+                    """.stripIndent(), '', 0)
+            }
         }
 
         when:
@@ -104,19 +106,20 @@ class ProjectOverviewServiceSpec extends Specification {
                 },
         ])
 
-        GroovyMock(LocalShellHelper, global: true)
-        1 * LocalShellHelper.executeAndWait(_) >> {
-            new LocalShellHelper.ProcessOutput("""
-                |SAMTOOLS_VERSION=1.0
-                |SAMBAMBA_VERSION=3.0
-                |STAR_VERSION=2.0
+        service.remoteShellHelper = Mock(RemoteShellHelper) {
+            1 * executeCommandReturnProcessOutput(_, _) >> {
+                new LocalShellHelper.ProcessOutput("""
+                    |SAMTOOLS_VERSION=1.0
+                    |SAMBAMBA_VERSION=3.0
+                    |STAR_VERSION=2.0
 
-                |${
-                ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
-                    "STAR_PARAMS_${name}=${name}"
-                }.join('\n')
+                    |${
+                        ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
+                            "STAR_PARAMS_${name}=${name}"
+                        }.join('\n')
+                    }
+                """.stripMargin(), '', 0)
             }
-            """.stripMargin(), '', 0)
         }
 
         when:
@@ -146,10 +149,11 @@ class ProjectOverviewServiceSpec extends Specification {
                 log                       : new NoOpLog(),
         ])
 
-        GroovyMock(LocalShellHelper, global: true)
-        1 * LocalShellHelper.executeAndWait(_) >> {
+        service.remoteShellHelper = Mock(RemoteShellHelper) {
+            1 * executeCommandReturnProcessOutput(_, _) >> {
             new LocalShellHelper.ProcessOutput(stdout, stderr.replaceFirst('roddyWorkflowConfig', roddyWorkflowConfig.nameUsedInConfig), exitcode)
         }
+            }
         String expectedError = expectedErrorTemplate.replaceFirst('roddyWorkflowConfig', roddyWorkflowConfig.nameUsedInConfig)
 
         when:

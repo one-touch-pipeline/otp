@@ -61,4 +61,17 @@ class LogThreadLocal {
             removeThreadLog()
         }
     }
+
+    static void withThreadLog(Log log, Closure code) {
+        assert log != null
+        assert code != null
+        assert threadLog == null
+
+        setThreadLog(log)
+        try {
+            code()
+        } finally {
+            removeThreadLog()
+        }
+    }
 }

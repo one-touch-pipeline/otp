@@ -2,7 +2,9 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.logging.*
 import org.springframework.beans.factory.*
 import org.springframework.beans.factory.annotation.*
 import org.springframework.context.*
@@ -20,8 +22,11 @@ class ProjectOverviewService {
     AlignmentDeciderService alignmentDeciderService
     DataSource dataSource
 
+    RemoteShellHelper remoteShellHelper
+
     @Autowired
     ApplicationContext applicationContext
+
 
     static final Collection PROJECT_TO_HIDE_SAMPLE_IDENTIFIER = [
             "MMML",
@@ -48,12 +53,14 @@ class ProjectOverviewService {
      * @param workflowConfig
      */
     protected ProcessOutput getRoddyProcessOutput(RoddyWorkflowConfig workflowConfig) {
-
+        Realm realm = workflowConfig.project.realm
         String nameInConfigFile = workflowConfig.getNameUsedInConfig()
+        String cmd = executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, workflowConfig.seqType.roddyName)
 
-        ProcessOutput output = executeAndWait(
-                executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, workflowConfig.seqType.roddyName)
-        )
+       ProcessOutput output
+        LogThreadLocal.withThreadLog(log) {
+            output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd)
+        }
 
         if (output.exitCode != 0) {
             log?.debug("Alignment information can't be detected:\n${output}")
