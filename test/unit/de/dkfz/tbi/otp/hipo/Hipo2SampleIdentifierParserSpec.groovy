@@ -9,7 +9,6 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
 
     @Unroll
     void 'tryParse, when identifier is #identifier, parses correctly'() {
-
         when:
         ParsedSampleIdentifier parsed = parser.tryParse(identifier)
         boolean validPid = parser.tryParsePid(identifier.split("-")[0,1].join("-"))
@@ -77,12 +76,15 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
         'K12A-123ABC-T0-G1'     || 'TUMOR0-G1'
         'K12A-123ABC-T0-H1'     || 'TUMOR0-H1'
         'K12A-123ABC-T0-12C3'   || 'TUMOR0-12C3'
+
+        'K12A-123ABC-T0-L1'     || 'TUMOR0-L1'
+        'K12A-123ABC-T0-L12'    || 'TUMOR0-L12'
+        'K12A-123ABC-T0-1L12'   || 'TUMOR0-1L12'
     }
 
 
     @Unroll
     void 'tryParse, when identifier is #identifier, returns null'() {
-
         expect:
         parser.tryParse(identifier) == null
 
@@ -114,7 +116,6 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
                 'K12A-123ABC-T0-1A12',
                 'K12A-123ABC-T0-1W12',
                 'K12A-123ABC-T0-1Y12',
-                'K12A-123ABC-T0-1L12',
                 'K12A-123ABC-T0-C123',
                 'K12A-123ABC-T0-123C',
                 'K12A-123ABC-T0-1C123',
