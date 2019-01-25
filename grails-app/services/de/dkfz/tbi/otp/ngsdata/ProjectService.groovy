@@ -243,6 +243,7 @@ class ProjectService {
                 "tumorEntity",
                 "sampleIdentifierParserBeanName",
                 "qcThresholdHandling",
+                "unixGroup",
         ].contains(fieldName)
 
         project."${fieldName}" = fieldValue

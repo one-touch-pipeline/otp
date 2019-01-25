@@ -34,6 +34,7 @@ class ProjectConfigController implements CheckAndCall {
                     projects: projects,
             ]
         }
+
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
@@ -55,8 +56,6 @@ class ProjectConfigController implements CheckAndCall {
                     config: config,
             ]
         }
-
-
 
         List<List> thresholdsTable = createThresholdTable(project)
 
@@ -152,6 +151,10 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     JSON updateDescription(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
+    }
+
+    JSON updateUnixGroup(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
     }
 
