@@ -71,9 +71,9 @@ typeMismatch.java.math.BigDecimal
 typeMismatch.java.math.BigInteger
 
 # generic messages
-editorswitch.notification.success
-editorswitch.notification.error
-editorswitch.noneSelected
+editorSwitch.notification.success
+editorSwitch.notification.error
+editorSwitch.noneSelected
 showChangeLog.button.title
 showChangeLog.dialog.title
 showChangeLog.table.head.timestamp
