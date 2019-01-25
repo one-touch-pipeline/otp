@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import org.joda.time.*
-import org.joda.time.format.PeriodFormat
+import org.joda.time.format.*
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -25,6 +25,22 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
  * all timestamps using joda-time, e.g. DateTime queued, get saved as UTC-timezone
  */
 class ClusterJob implements Entity {
+
+    static final String NOT_AVAILABLE = "N/A"
+
+    static final PeriodFormatter HH_MM_SS = new PeriodFormatterBuilder()
+            .printZeroAlways()
+            .minimumPrintedDigits(2)
+            .appendHours()
+            .appendLiteral(":")
+            .printZeroAlways()
+            .minimumPrintedDigits(2)
+            .appendMinutes()
+            .appendLiteral(":")
+            .printZeroAlways()
+            .minimumPrintedDigits(2)
+            .appendSeconds()
+            .toFormatter()
 
     ProcessingStep processingStep
     static belongsTo = [processingStep: ProcessingStep]
@@ -297,27 +313,35 @@ class ClusterJob implements Entity {
     }
 
     String getRequestedWalltimeAsISO () {
-        return formatPeriodAsISOString(requestedWalltime.getMillis())
+        return formatPeriodAsISOString(requestedWalltime)
     }
 
     String getElapsedWalltimeAsISO () {
-        return formatPeriodAsISOString(elapsedWalltime.getMillis())
+        return formatPeriodAsISOString(elapsedWalltime)
+    }
+
+    String getElapsedWalltimeAsHhMmSs () {
+        return formatPeriodAsHhMmSs(elapsedWalltime)
     }
 
     String getWalltimeDiffAsISO () {
-        return formatPeriodAsISOString(walltimeDiff.getMillis())
+        return formatPeriodAsISOString(walltimeDiff)
     }
 
     String getCpuTimeAsISO () {
-        return formatPeriodAsISOString(cpuTime.getMillis())
+        return formatPeriodAsISOString(cpuTime)
     }
 
     String getCpuTimePerCoreAsISO () {
         return formatPeriodAsISOString(new Duration(Math.round(cpuTimePerCore)))
     }
 
-    private String formatPeriodAsISOString (value) {
-        return PeriodFormat.getDefault().print(new Period(value))
+    private String formatPeriodAsISOString (Duration value) {
+        return value ? PeriodFormat.getDefault().print(new Period(value.getMillis())) : NOT_AVAILABLE
+    }
+
+    private String formatPeriodAsHhMmSs (Duration value) {
+        return value ? HH_MM_SS.print(new Period(value.getMillis())) : NOT_AVAILABLE
     }
 
     static ClusterJob findByClusterJobIdentifier(ClusterJobIdentifier identifier) {

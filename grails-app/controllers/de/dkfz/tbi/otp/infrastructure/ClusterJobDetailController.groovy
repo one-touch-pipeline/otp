@@ -10,21 +10,34 @@ class ClusterJobDetailController {
 
     ClusterJobService clusterJobService
 
-    def show () {
-        ClusterJob job = ClusterJob.get(params.id)
-        Individual individual = clusterJobService.findProcessParameterObjectByClusterJob(job)?.individual
+    def show() {
+        ClusterJob clusterJob = ClusterJob.get(params.id)
+        Individual individual = clusterJob ? clusterJobService.findProcessParameterObjectByClusterJob(clusterJob)?.individual : null
 
-        ['job': job, 'individual': individual]
+        return [
+                'job'       : clusterJob,
+                'individual': individual,
+                'NA'        : ClusterJob.NOT_AVAILABLE
+        ]
     }
 
-    def getStatesTimeDistribution () {
+    def getStatesTimeDistribution() {
         Map dataToRender = [:]
 
-        def data = clusterJobService.findJobSpecificStatesTimeDistributionByJobId(Integer.parseInt(params.id))
+        Map<String, Map<String, Long>> data = clusterJobService.findJobSpecificStatesTimeDistributionByJobId(params.id as Long)
 
-        dataToRender.data = [queue: [data.queue.first(), PeriodFormat.getDefault().print(new Period(data.queue.last()))],
-                             process: [data.process.first(), PeriodFormat.getDefault().print(new Period(data.process.last()))]]
+        dataToRender.data = ["queue", "process"].collectEntries {
+            return [it, [
+                    percentage: data."${it}".percentage,
+                    time:       applyPeriodFormat(data."${it}".ms as Long)
+                ]
+            ]
+        }
 
         render dataToRender as JSON
+    }
+
+    private String applyPeriodFormat(Long ms) {
+        return PeriodFormat.getDefault().print(new Period(ms))
     }
 }

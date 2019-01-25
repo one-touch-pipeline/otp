@@ -18,10 +18,13 @@ $.otp.clusterJobDetailProgress = {
     },
 
     generateProgress : function (id, data) {
+        var PERCENT = "percentage";
+        var TIME = "time";
         $("#" + id).multiprogressbar ({
-            parts: [{value: data['queue'][0], text: data['queue'][0] + "% (" + data['queue'][1] + ")", barClass: "progressBarQueue", textClass: "progressTextQueue"},
-                    {value: data['process'][0], text: data['process'][0] + "% (" + data['process'][1] + ")", barClass: "progressBarProcess", textClass: "progressTextProcess"}]
+            parts: [
+                {value: data['queue'][PERCENT],   text: data['queue'][PERCENT] + "% (" + data['queue'][TIME] + ")",     barClass: "progressBarQueue",   textClass: "progressTextQueue"},
+                {value: data['process'][PERCENT], text: data['process'][PERCENT] + "% (" + data['process'][TIME] + ")", barClass: "progressBarProcess", textClass: "progressTextProcess"}
+            ]
         });
     }
-}
-
+};

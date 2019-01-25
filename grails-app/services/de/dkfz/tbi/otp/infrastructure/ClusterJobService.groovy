@@ -897,10 +897,11 @@ WHERE
     }
 
     /**
-     * returns the time in queue and the processing time of a specific job
-     * @return map ["queue": [percentQueue, queueInMillis], "process": [percentProcess, processInMillis]]
+     * returns the time a job has spent queueing and processing in milliseconds and as a percentage of the total time as
+     * a map
+     * @return map ["queue": [percentage: q_p, ms: q_ms], "process": [percentage: p_p, ms: p_ms]]
      */
-    Map findJobSpecificStatesTimeDistributionByJobId(Long id) {
+    Map<String, Map<String, Long>> findJobSpecificStatesTimeDistributionByJobId(Long id) {
         ClusterJob job = ClusterJob.get(id)
         if (!job) {
             return null
@@ -909,15 +910,23 @@ WHERE
         Duration queue = new Duration(job.queued, job.started)
         Duration process = new Duration(job.started, job.ended)
 
-        def queueMillis = Math.max(0, queue.getMillis())
-        def processMillis = Math.max(0, process.getMillis())
+        Long processMillis = Math.max(0, process.getMillis())
+        Long queueMillis = Math.max(0, queue.getMillis())
 
-        long total = queueMillis + processMillis
+        Long total = queueMillis + processMillis
+        Long percentageProcess = Math.round(100 / total * processMillis)
+        Long percentageQueue = 100 - percentageProcess
 
-        int pProcess = Math.round(100 / total * processMillis)
-        int pQueue = 100 - pProcess
-
-        return ["queue": [pQueue, queue.millis], "process": [pProcess, process.millis]]
+        return [
+                "process": [
+                        percentage: percentageProcess,
+                        ms: process.millis,
+                ],
+                "queue": [
+                        percentage: percentageQueue,
+                        ms: queue.millis,
+                ],
+        ]
     }
 
     /**

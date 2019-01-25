@@ -1232,7 +1232,16 @@ class ClusterJobServiceSpec extends Specification {
                                             ended: EDATE_DATETIME])
 
         expect:
-        ['queue': [75, 18 * HOURS_TO_MILLIS], 'process': [25, 6 * HOURS_TO_MILLIS]] == clusterJobService.findJobSpecificStatesTimeDistributionByJobId(job1.id)
+        [
+                'queue': [
+                        'percentage': 75,
+                        'ms': 18 * HOURS_TO_MILLIS,
+                ],
+                'process': [
+                        'percentage': 25,
+                        'ms': 6 * HOURS_TO_MILLIS,
+                ]
+        ] == clusterJobService.findJobSpecificStatesTimeDistributionByJobId(job1.id)
     }
 
     void test_getLatestJobDate_WhenNoJobsFound_ShouldReturnNull() {

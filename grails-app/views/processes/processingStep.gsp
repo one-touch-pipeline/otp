@@ -78,7 +78,10 @@
                 <th><g:message code="otp.blank"/></th>
                 <th><g:message code="workflow.paramater.table.headers.clusterJobName"/></th>
                 <th><g:message code="workflow.paramater.table.headers.clusterJob"/></th>
+                <th><g:message code="workflow.paramater.table.headers.clusterJobLogFile"/></th>
+                <th><g:message code="workflow.paramater.table.headers.clusterJobDetails"/></th>
                 <th><g:message code="workflow.paramater.table.headers.jobResult"/></th>
+                <th><g:message code="workflow.paramater.table.headers.runTime"/></th>
                 <th><g:message code="workflow.paramater.table.headers.node"/></th>
                 <th><g:message code="otp.blank"/></th>
             </tr>
@@ -87,20 +90,26 @@
             <g:each var="clusterJob" in="${clusterJobs}" >
                 <tr>
                     <td></td>
-                    <td>
-                        ${clusterJob.clusterJobName}
-                    </td>
+                    <td>${clusterJob.clusterJobName}</td>
+                    <td>${clusterJob.clusterJobId}</td>
                     <td>
                         <g:if test="${clusterJob.jobLog && new File(clusterJob.jobLog).exists()}">
-                            <g:link action="processingStepClusterJobLog" id="${clusterJob.id}">${clusterJob.clusterJobId}</g:link>
-                        </g:if>
-                        <g:else>
-                            ${clusterJob.clusterJobId} (<g:message code="processes.processingStep.log.noFile"/>)
+                            <g:link action="processingStepClusterJobLog" id="${clusterJob.id}">
+                                <g:message code="workflow.paramater.table.inline.log"/>
+                            </g:link>
+                        </g:if><g:else>
+                            <g:message code="workflow.paramater.table.inline.log"/> (<g:message code="processes.processingStep.log.notAvailable"/>)
                         </g:else>
+                    </td>
+                    <td>
+                        <g:link controller="clusterJobDetail" action="show" id="${clusterJob.id}">
+                            <g:message code="workflow.paramater.table.inline.jobDetails"/>
+                        </g:link>
                     </td>
                     <td>
                         <span class="clusterJobExitStatus ${clusterJob.exitStatus}">${"${clusterJob.exitStatus}: ${clusterJob.exitCode}"}</span>
                     </td>
+                    <td>${clusterJob.getElapsedWalltimeAsHhMmSs()}</td>
                     <td>${clusterJob.node ?: "-"}</td>
                     <td></td>
                 </tr>
