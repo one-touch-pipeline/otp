@@ -4,6 +4,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
@@ -52,6 +53,7 @@ class MetadataImportService {
     ConfigService configService
     MailHelperService mailHelperService
     ProcessingOptionService processingOptionService
+    FileService fileService
 
     static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
@@ -136,7 +138,7 @@ class MetadataImportService {
         MetaDataFile metadataFileObject = null
         if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
             metadataFileObject = importMetadataFile(context, align, importMode, ticketNumber, seqCenterComment, automaticNotification)
-            copyMetaDataFileIfRequested(context)
+            copyMetadataFileIfRequested(context)
         }
         return new ValidateAndImportResult(context, metadataFileObject)
     }
@@ -153,24 +155,19 @@ class MetadataImportService {
         assert otrsTicket.save(flush: true)
     }
 
-    protected void copyMetaDataFileIfRequested(MetadataValidationContext context) {
+    protected void copyMetadataFileIfRequested(MetadataValidationContext context) {
         List<SeqCenter> seqCenters = SeqCenter.findAllByNameInList(context.spreadsheet.dataRows*.getCellByColumnTitle(CENTER_NAME.name())?.text)
         seqCenters.findAll { it?.copyMetadataFile }.unique().each { SeqCenter seqCenter ->
             Path source = context.metadataFile
             try {
                 String ilse = context.spreadsheet.dataRows[0].getCellByColumnTitle(ILSE_NO.name()).text
-                File targetDirectory = getIlseFolder(ilse, seqCenter)
-                File targetFile = new File(targetDirectory, source.fileName.toString())
-                if (!targetFile.exists()) {
-                    Realm realm = configService.getDefaultRealm()
-                    assert realm
-
-                    lsdfFilesService.createDirectory(targetDirectory, realm)
-                    remoteShellHelper.executeCommandReturnProcessOutput(realm, "cp ${source} ${targetDirectory}").assertExitCodeZeroAndStderrEmpty()
-                    LsdfFilesService.ensureFileIsReadableAndNotEmpty(targetFile)
+                Path targetDirectory = getIlseFolder(ilse, seqCenter)
+                Path targetFile = targetDirectory.resolve(source.fileName.toString())
+                if (!FileService.isFileReadableAndNotEmpty(targetFile)) {
+                    fileService.createFileWithContent(targetFile, context.content)
                 }
 
-                assert targetFile.bytes == context.content
+                assert Files.readAllBytes(targetFile) == context.content
             } catch (Throwable t) {
                 String recipientsString = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
                 if (recipientsString) {
@@ -179,16 +176,6 @@ class MetadataImportService {
                 throw new RuntimeException("Copying of metadata file ${source} failed", t)
             }
         }
-    }
-
-    /**
-     * Returns the absolute path to an ILSe Folder inside the sequencing center inbox
-     */
-    protected File getIlseFolder(String ilseId, SeqCenter seqCenter) {
-        assert ilseId =~ /^\d{4,6}$/
-        assert seqCenter
-        String ilse = ilseId.padLeft(6, '0')
-        return new File("${configService.getSeqCenterInboxPath()}/${seqCenter.dirName}/${ilse[0..2]}/${ilse}")
     }
 
     List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, String ilseNumbers) {
@@ -212,6 +199,21 @@ class MetadataImportService {
         } else {
             throw new MultiImportFailedException(failedValidations, metadataFiles)
         }
+    }
+
+    /**
+     * Returns the absolute path to an ILSe Folder inside the sequencing center inbox
+     */
+    Path getIlseFolder(String ilseId, SeqCenter seqCenter) {
+        assert seqCenter
+        if (!(ilseId =~ /^\d{4,6}$/)) {
+            return null
+        }
+        String ilse = ilseId.padLeft(6, '0')
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(configService.getDefaultRealm())
+
+        return fileSystem.getPath("${configService.getSeqCenterInboxPath()}/${seqCenter.dirName}/${ilse[0..2]}/${ilse}")
+
     }
 
     protected static Path getMetadataFilePathForIlseNumber(int ilseNumber, FileSystem fileSystem) {
