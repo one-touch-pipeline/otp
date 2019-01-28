@@ -91,9 +91,7 @@ codenarc:
     - grails compile --non-interactive
     - grails codenarc --non-interactive
   after_script:
-    - echo "Thresholds:"
-    - 'cat  grails-app/conf/BuildConfig.groovy  | grep -e "maxPriority.Violations"'
-    - 'head target/CodeNarc-Report.txt | grep -e "^Summary: TotalFiles="'
+    - bashScripts/gitlab-ci/codenarc-informations.sh
   artifacts:
     <<: *artifacts_template
     paths:
