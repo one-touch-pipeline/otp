@@ -1054,7 +1054,7 @@ ruleset {
         priority = DEFAULT
     }
     UnnecessarySelfAssignment {
-        priority = HIGH
+        priority = CRITICAL
     }
     UnnecessarySemicolon {
         priority = HIGH
