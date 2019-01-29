@@ -31,7 +31,7 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
      * Using of FixedDelay fix that problem, because the next execution is
      * always after the previous execution has finished.
      */
-    @Scheduled(fixedDelay=30000l)
+    @Scheduled(fixedDelay=30000L)
     @Override
     void execute() {
         doWithPersistenceInterceptor {

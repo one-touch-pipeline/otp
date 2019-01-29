@@ -1,19 +1,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
-import de.dkfz.tbi.otp.utils.MailHelperService
-import org.springframework.beans.factory.annotation.*
-import org.springframework.scheduling.annotation.*
-import org.springframework.context.annotation.*
-import org.springframework.stereotype.*
-import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.FileType.Type
-import grails.validation.ValidationException
-import org.joda.time.*
-
+import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
+import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.utils.*
+import grails.validation.*
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.scheduling.annotation.*
+import org.springframework.stereotype.*
 
 @Scope("singleton")
 @Component
@@ -34,7 +31,7 @@ class DataFileConsistencyChecker {
     ProcessingOptionService processingOptionService
 
     //12h
-    @Scheduled(fixedDelay = 43200000l, initialDelay = 60000L)
+    @Scheduled(fixedDelay = 43200000L, initialDelay = 60000L)
     void setFileExistsForAllDataFiles() {
         if (schedulerService.isActive()) {
             Date startDate = new Date()

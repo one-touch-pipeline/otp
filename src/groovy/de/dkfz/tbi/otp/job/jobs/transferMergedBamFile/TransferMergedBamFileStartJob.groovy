@@ -18,7 +18,7 @@ class TransferMergedBamFileStartJob extends AbstractStartJobImpl implements Rest
     @Autowired
     ProcessedMergedBamFileService processedMergedBamFileService
 
-    @Scheduled(fixedDelay = 10000l)
+    @Scheduled(fixedDelay = 10000L)
     @Override
     void execute() {
         doWithPersistenceInterceptor {

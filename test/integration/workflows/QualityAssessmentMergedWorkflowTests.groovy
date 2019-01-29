@@ -37,7 +37,7 @@ class QualityAssessmentMergedWorkflowTests extends WorkflowTestCase {
     // (for qa.jar it is not important if the given bam is merged or not,
     // the OTP meta data is important)
     String orgFileName = "seq.bam.bam"
-    long totalSequences = 600000l // number of reads in $orgFileName which is taken from qa results for the this bam file
+    long totalSequences = 600000L // number of reads in $orgFileName which is taken from qa results for the this bam file
     String baiOrgFileName = "${orgFileName}.bai"
     String bedFileName = "Agilent5withUTRs_chr.bed"
 

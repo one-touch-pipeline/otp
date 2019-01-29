@@ -276,7 +276,7 @@ class SchedulerService {
     /**
      * Invokes the primitive scheduler to determine which job is to execute next if any at all.
      */
-    @Scheduled(fixedRate = 5000l)
+    @Scheduled(fixedRate = 5000L)
     void schedule() throws Exception {
         if (!schedulerActive) {
             return
@@ -305,7 +305,7 @@ class SchedulerService {
      *
      * Do not invoke this method manually.
      */
-    @Scheduled(fixedDelay = 30000l)
+    @Scheduled(fixedDelay = 30000L)
     void clusterJobCheck() {
         if (!schedulerActive) {
             return

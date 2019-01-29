@@ -16,7 +16,7 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
     @Autowired
     SeqTrackService seqTrackService
 
-    @Scheduled(fixedDelay=5000l)
+    @Scheduled(fixedDelay=5000L)
     @Override
     void execute() {
         doWithPersistenceInterceptor {

@@ -215,7 +215,7 @@ class RemoteShellHelper {
         )
     }
 
-    @Scheduled(fixedDelay = 60000l)
+    @Scheduled(fixedDelay = 60000L)
     void keepAlive() {
         sessionPerRealm.each { Realm realm, Session session ->
             log.debug("Send keep alive for ${realm}")

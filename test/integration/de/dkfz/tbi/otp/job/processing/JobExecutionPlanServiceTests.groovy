@@ -759,7 +759,7 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         }
 
         then:
-        assert result == [a: 2l]
+        assert result == [a: 2L]
     }
 
     ProcessingStep createProcessingStepHelper(JobExecutionPlan plan, ExecutionState state) {

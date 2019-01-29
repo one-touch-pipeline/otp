@@ -20,7 +20,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     @Autowired
     ConfigService configService
 
-    @Scheduled(fixedDelay = 60000l)
+    @Scheduled(fixedDelay = 60000L)
     @Override
     void execute() {
         doWithPersistenceInterceptor {

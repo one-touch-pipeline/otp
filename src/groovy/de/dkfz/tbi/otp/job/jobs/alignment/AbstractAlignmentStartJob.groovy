@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.*
 abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements RestartableStartJob {
 
     @Override
-    @Scheduled(fixedDelay = 60000l)
+    @Scheduled(fixedDelay = 60000L)
     void execute() {
         doWithPersistenceInterceptor {
             startAlignment()

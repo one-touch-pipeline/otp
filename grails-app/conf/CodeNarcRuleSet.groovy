@@ -268,7 +268,7 @@ ruleset {
         priority = MIDDLE
     }
     LongLiteralWithLowerCaseL {
-        priority = HIGH
+        priority = CRITICAL
     }
     MethodParameterTypeRequired {
         priority = HIGH

@@ -17,7 +17,7 @@ class FastqcStartJob extends AbstractStartJobImpl implements RestartableStartJob
     @Autowired
     SeqTrackService seqTrackService
 
-    @Scheduled(fixedDelay=10000l)
+    @Scheduled(fixedDelay=10000L)
     @Override
     void execute() {
         doWithPersistenceInterceptor {

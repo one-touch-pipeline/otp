@@ -18,7 +18,7 @@ class QualityAssessmentMergedStartJob extends AbstractStartJobImpl implements Re
     @Autowired
     ProcessingOptionService optionService
 
-    @Scheduled(fixedDelay = 10000l)
+    @Scheduled(fixedDelay = 10000L)
     @Override
     void execute() {
         doWithPersistenceInterceptor {
