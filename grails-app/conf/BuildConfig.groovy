@@ -122,6 +122,7 @@ grails.project.dependency.resolution = {
     }
 }
 
+
 codenarc {
     ruleSetFiles = ['file:grails-app/conf/CodeNarcRuleSet.groovy', 'file:grails-app/conf/OtpRuleSet.groovy']
     extraIncludeDirs = ['test/helper', 'grails-app/codenarcRules']
@@ -129,21 +130,15 @@ codenarc {
     maxPriority2Violations = 1800
     maxPriority3Violations = 3700
     reports = {
-        CodeNarcXmlReport('xml') {
-            outputFile = 'target/CodeNarc-Report.xml'
-            title = "OTP CodeNarc Report"
-        }
         CodeNarcHtmlReport('html') {
             outputFile = 'target/CodeNarc-Report.html'
             title = "OTP CodeNarc Report"
-        }
-        CodeNarcSortableHtmlReport('sortable') {
-            outputFile = 'target/CodeNarc-Report-Sortable.html'
-            title = "OTP CodeNarc Report"
+            maxPriority = 4
         }
         CodeNarcTextReport('text') {
             outputFile = 'target/CodeNarc-Report.txt'
             title = "OTP CodeNarc Report"
+            maxPriority = 4
         }
     }
 }
