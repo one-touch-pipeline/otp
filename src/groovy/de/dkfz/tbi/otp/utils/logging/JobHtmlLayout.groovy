@@ -21,10 +21,6 @@ class JobHtmlLayout extends HTMLLayout {
 
     private StringBuffer msgBuffer = new StringBuffer(BUF_SIZE);
 
-    JobHtmlLayout() {
-        super()
-    }
-
     /**
      * LICENSE_ISSUE
      *

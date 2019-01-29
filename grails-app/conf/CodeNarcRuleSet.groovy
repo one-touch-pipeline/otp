@@ -986,7 +986,7 @@ ruleset {
         priority = CRITICAL
     }
     UnnecessaryConstructor {
-        priority = HIGH
+        priority = CRITICAL
     }
     //UnnecessaryDefInFieldDeclaration
     //UnnecessaryDefInMethodDeclaration
