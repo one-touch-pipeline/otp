@@ -37,9 +37,9 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
 
 
     @Override
-    protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
+    protected final NextAction maybeSubmit() throws Throwable {
         final ImportProcess importProcess = getProcessParameterObject()
-        AbstractMultiJob.NextAction action = AbstractMultiJob.NextAction.SUCCEED
+        NextAction action = NextAction.SUCCEED
 
         String moduleLoader = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER)
         String samtoolsActivation = processingOptionService.findOptionAsString(ProcessingOption.OptionName.COMMAND_ACTIVATION_SAMTOOLS)
@@ -64,7 +64,7 @@ class ImportExternallyMergedBamJob extends AbstractOtpJob {
             if (checkpoint.exists()) {
                 log.debug("Checkpoint found for ${sourceBam}, skip copying")
             } else {
-                action = AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
+                action = NextAction.WAIT_FOR_CLUSTER_JOBS
                 String md5sumBam
                 if (epmbf.md5sum) {
                     md5sumBam = "echo ${epmbf.md5sum}  ${targetBam} > ${targetBam}.md5sum"
@@ -125,7 +125,7 @@ touch ${checkpoint}
                 clusterJobSchedulerService.executeJob(realm, cmd)
             }
         }
-        if (action == AbstractMultiJob.NextAction.SUCCEED) {
+        if (action == NextAction.SUCCEED) {
             validate()
         }
         return action

@@ -132,7 +132,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         }
 
         expect:
-        AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == importExternallyMergedBamJob.maybeSubmit()
+        NextAction.WAIT_FOR_CLUSTER_JOBS == importExternallyMergedBamJob.maybeSubmit()
     }
 
     void "test maybe submit, when files have to be copied, not have a md5Sum and not exist already, then create copy job using calculate md5sum and wait for job"() {
@@ -149,7 +149,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         }
 
         expect:
-        AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == importExternallyMergedBamJob.maybeSubmit()
+        NextAction.WAIT_FOR_CLUSTER_JOBS == importExternallyMergedBamJob.maybeSubmit()
     }
 
     void "test maybe submit, when files have to be copied and exist already but no checkpoint file exist, then create normal copy job and wait for job"() {
@@ -168,7 +168,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         }
 
         expect:
-        AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == importExternallyMergedBamJob.maybeSubmit()
+        NextAction.WAIT_FOR_CLUSTER_JOBS == importExternallyMergedBamJob.maybeSubmit()
     }
 
     void "test maybe submit, when files already copied and a checkpoint file exists already, then create no copy job and return success"() {
@@ -189,7 +189,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         }
 
         expect:
-        AbstractMultiJob.NextAction.SUCCEED == importExternallyMergedBamJob.maybeSubmit()
+        NextAction.SUCCEED == importExternallyMergedBamJob.maybeSubmit()
     }
 
     void "test maybe submit, when files have to be copied and a checkpoint file exists already but not the files, then fail"() {
@@ -246,7 +246,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         }
 
         when:
-        AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == importExternallyMergedBamJob.maybeSubmit()
+        NextAction.WAIT_FOR_CLUSTER_JOBS == importExternallyMergedBamJob.maybeSubmit()
 
         then:
         finalCopiedFile.exists()
@@ -308,7 +308,7 @@ class ImportExternallyMergedBamJobSpec extends Specification {
         }
 
         when:
-        AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == importExternallyMergedBamJob.maybeSubmit()
+        NextAction.WAIT_FOR_CLUSTER_JOBS == importExternallyMergedBamJob.maybeSubmit()
 
         then:
         finalCopiedFile.exists()

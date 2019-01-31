@@ -127,7 +127,7 @@ chmod 440 .* .*
         }
 
         expect:
-        AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == copyFilesJob.maybeSubmit()
+        NextAction.WAIT_FOR_CLUSTER_JOBS == copyFilesJob.maybeSubmit()
     }
 
 
@@ -157,7 +157,7 @@ ln -s .* .*
         }
 
         expect:
-        AbstractMultiJob.NextAction.SUCCEED == copyFilesJob.maybeSubmit()
+        NextAction.SUCCEED == copyFilesJob.maybeSubmit()
     }
 
 
@@ -187,7 +187,7 @@ ln -s .* .*
         }
 
         expect:
-        AbstractMultiJob.NextAction.SUCCEED == copyFilesJob.maybeSubmit()
+        NextAction.SUCCEED == copyFilesJob.maybeSubmit()
     }
 
 

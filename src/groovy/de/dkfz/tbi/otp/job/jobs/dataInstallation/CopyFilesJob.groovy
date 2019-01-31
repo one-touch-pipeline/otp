@@ -40,7 +40,7 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
     FileService fileService
 
     @Override
-    protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
+    protected final NextAction maybeSubmit() throws Throwable {
         SeqTrack seqTrack = SeqTrack.get(Long.parseLong(getProcessParameterValue()))
         assert seqTrack : "No seqTrack found for id ${Long.parseLong(getProcessParameterValue())}."
 
@@ -48,7 +48,7 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
 
         checkInitialSequenceFiles(seqTrack)
 
-        AbstractMultiJob.NextAction returnValue
+        NextAction returnValue
 
         seqTrack.dataFiles.each { DataFile dataFile ->
             File sourceFile = new File(lsdfFilesService.getFileInitialPath(dataFile))
@@ -58,14 +58,14 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
             if (seqTrack.linkedExternally) {
                 String cmd = getScript(sourceFile, targetFile,"ln -s")
                 remoteShellHelper.executeCommand(realm, cmd)
-                returnValue = AbstractMultiJob.NextAction.SUCCEED
+                returnValue = NextAction.SUCCEED
             } else {
                 String cmd = getScript(sourceFile, targetFile,"cp", "md5sum ${targetFile.name} > ${md5SumFileName}", "chmod 440 ${targetFile} ${md5SumFileName}")
                 clusterJobSchedulerService.executeJob(realm, cmd)
-                returnValue = AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
+                returnValue = NextAction.WAIT_FOR_CLUSTER_JOBS
             }
         }
-        if (returnValue == AbstractMultiJob.NextAction.SUCCEED) {
+        if (returnValue == NextAction.SUCCEED) {
             validate()
         }
         return returnValue

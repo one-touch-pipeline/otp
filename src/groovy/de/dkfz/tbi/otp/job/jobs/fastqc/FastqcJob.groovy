@@ -45,7 +45,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
 
 
     @Override
-    protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
+    protected final NextAction maybeSubmit() throws Throwable {
         final SeqTrack seqTrack = getProcessParameterObject()
         final Realm realm = fastqcDataFilesService.fastqcRealm(seqTrack)
         // create fastqc output directory
@@ -64,11 +64,11 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
                     assert dataFile.fileExists && dataFile.fileSize > 0L
                 }
                 createAndExecuteFastQcCommand(realm, dataFiles, directory)
-                return AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
+                return NextAction.WAIT_FOR_CLUSTER_JOBS
             } else {
                 createAndExecuteCopyCommand(realm, dataFiles, directory)
                 validateAndReadFastQcResult()
-                return AbstractMultiJob.NextAction.SUCCEED
+                return NextAction.SUCCEED
             }
         }
     }

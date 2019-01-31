@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.job.jobs.runYapsa
 
-import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
 import de.dkfz.tbi.otp.job.ast.*
@@ -12,7 +12,6 @@ import org.springframework.context.annotation.*
 import org.springframework.stereotype.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
-import static de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction.*
 
 @Component
 @Scope("prototype")
@@ -26,7 +25,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
     @Autowired ProcessingOptionService processingOptionService
 
     @Override
-    protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
+    protected final NextAction maybeSubmit() throws Throwable {
         final RunYapsaInstance instance = getProcessParameterObject()
         final Realm realm = instance.project.realm
 
@@ -34,7 +33,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
 
         clusterJobSchedulerService.executeJob(realm, jobScript)
 
-        return WAIT_FOR_CLUSTER_JOBS
+        return NextAction.WAIT_FOR_CLUSTER_JOBS
     }
 
 

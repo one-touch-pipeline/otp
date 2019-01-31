@@ -14,17 +14,6 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
  */
 abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements SometimesResumableJob, MonitoringJob {
 
-    enum NextAction {
-        /**
-         * Finish the execution of this job and mark it as succeeded.
-         */
-        SUCCEED,
-        /**
-         * Wait for the submitted cluster jobs to finish and then notify this job.
-         */
-        WAIT_FOR_CLUSTER_JOBS,
-    }
-
     @Autowired
     ClusterJobMonitoringService clusterJobMonitoringService
     @Autowired

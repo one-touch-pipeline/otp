@@ -37,7 +37,7 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
 
 
     @Override
-    protected AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
+    protected NextAction maybeSubmit() throws Throwable {
         final SingleCellBamFile singleCellBamFile = getProcessParameterObject()
         final Realm realm = singleCellBamFile.project.realm
 
@@ -47,7 +47,7 @@ class ExecuteCellRangerJob extends AbstractOtpJob implements AutoRestartableJob 
 
         clusterJobSchedulerService.executeJob(realm, jobScript)
 
-        return AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
+        return NextAction.WAIT_FOR_CLUSTER_JOBS
     }
 
     private void prepareInputStructure(SingleCellBamFile singleCellBamFile) {

@@ -3,7 +3,6 @@ package de.dkfz.tbi.otp.job.processing
 import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.*
-import de.dkfz.tbi.otp.job.processing.AbstractMultiJob.NextAction
 import de.dkfz.tbi.otp.job.restarting.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*

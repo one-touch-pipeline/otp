@@ -48,7 +48,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     private static final Semaphore roddyMemoryUsage = new Semaphore((int)ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_EXECUTED_RODDY_PROCESSES, null, null), true)
 
     @Override
-    protected final AbstractMultiJob.NextAction maybeSubmit() throws Throwable {
+    protected final NextAction maybeSubmit() throws Throwable {
         Realm.withTransaction {
             final RoddyResult roddyResult = getRefreshedProcessParameterObject()
             final Realm realm = roddyResult.project.realm
@@ -73,7 +73,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
                     clusterJobSchedulerService.retrieveAndSaveJobInformationAfterJobStarted(it)
                     threadLog?.info("Log file: ${it.jobLog}" )
                 }
-                return AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
+                return NextAction.WAIT_FOR_CLUSTER_JOBS
             } else {
                 threadLog?.info 'Roddy has not submitted any cluster jobs. Running validate().'
                 try {
@@ -81,7 +81,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
                 } catch (Throwable t) {
                     throw new RuntimeException('validate() failed after Roddy has not submitted any cluster jobs.', t)
                 }
-                return AbstractMultiJob.NextAction.SUCCEED
+                return NextAction.SUCCEED
             }
         }
     }
