@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.*
 import de.dkfz.tbi.otp.utils.*
@@ -28,7 +29,7 @@ class QualityControlFileValidatorSpec extends Specification {
 
         File qualityControl = temporaryFolder.newFile("qualityControl.json")
         qualityControl.toPath().bytes = ("""\
-        { "all":{"insertSizeCV": 23, "insertSizeMedian": 425, "pairedInSequencing": 2134421157,  "properlyPaired": 2050531101 }}
+        { "all":{"insertSizeCV": 23, "insertSizeMedian": 425, "pairedInSequencing": 2134421157, "properlyPaired": 2050531101 }}
         """).getBytes(BamMetadataValidationContext.CHARSET)
 
         File qualityControlInvalid = temporaryFolder.newFile("qualityControlInvalid.json")
@@ -38,7 +39,7 @@ class QualityControlFileValidatorSpec extends Specification {
 
         File qualityControlInvalidJson = temporaryFolder.newFile("qualityControlInvalidJson")
         qualityControlInvalidJson.toPath().bytes = ("""\
-        "insertSizeCV": 23, "insertSizeMedian": 425, "pairedInSequencing": 2134421157
+        {{"insertSizeCV": 23, "insertSizeMedian": 425, "pairedInSequencing": 2134421157, 12:34
         """).getBytes(BamMetadataValidationContext.CHARSET)
 
 
@@ -50,7 +51,7 @@ class QualityControlFileValidatorSpec extends Specification {
         new QualityControlFileValidator().validate(context)
 
         then:
-        containSame(expectedProblems, context.problems)
+        TestCase.assertContainSame(expectedProblems, context.problems)
     }
 
     private BamMetadataValidationContext contextForTestValidateContextWithErrors(
@@ -87,11 +88,11 @@ class QualityControlFileValidatorSpec extends Specification {
                 new Problem(context.spreadsheet.dataRows[5].cells as Set, Level.ERROR,
                         "'${notReadAble.name}' is not readable.", "At least one file is not readable."),
                 new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
-                        "'${qualityControlInvalid.name}' has not all needed values or has no valid JSON structure.",
-                        "At least one value is missing or has no valid JSON structure."),
+                        "'${qualityControlInvalid.name}' has not all needed values.",
+                        "At least one value is missing."),
                 new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
-                        "'${qualityControlInvalidJson.name}' has not all needed values or has no valid JSON structure.",
-                        "At least one value is missing or has no valid JSON structure."),
+                        "'${qualityControlInvalidJson.name}' has no valid JSON structure.",
+                        "At least one file has no valid JSON structure."),
         ]
     }
 

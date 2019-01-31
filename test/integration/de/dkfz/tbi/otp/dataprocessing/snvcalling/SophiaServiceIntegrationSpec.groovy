@@ -7,21 +7,9 @@ import spock.lang.*
 
 class SophiaServiceIntegrationSpec extends IntegrationSpec {
 
-    SamplePair samplePair1
-    ConfigPerProjectAndSeqType roddyConfig1
-    AbstractMergedBamFile bamFile1_1
-    AbstractMergedBamFile bamFile2_1
-
     SophiaService sophiaService
 
     def setup() {
-        def map = DomainFactory.createProcessableSamplePair()
-
-        samplePair1 = map.samplePair
-        bamFile1_1 = map.bamFile1
-        bamFile2_1 = map.bamFile2
-        roddyConfig1 = map.roddyConfig
-
         DomainFactory.createAllAnalysableSeqTypes()
     }
 

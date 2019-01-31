@@ -6,8 +6,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.*
 import grails.plugin.springsecurity.*
-import org.joda.time.*
 import workflows.analysis.pair.*
+
+import java.time.*
 
 abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<SophiaInstance> {
 
@@ -26,7 +27,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
                 project: project,
                 seqType: seqType,
         )
-        lsdfFilesService.createDirectory(configService.getProjectSequencePath(project), realm)
+        lsdfFilesService.createDirectory(project.projectSequencingDirectory, realm)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             config = projectService.configureSophiaPipelineProject(
@@ -59,8 +60,8 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
 
     void linkQualityControlFiles() {
-        File tumorInsertSizeFile = new File(workflowData, "tumor_insertsize_plot.png_qcValues.txt")
-        File controlInsertSizeFile = new File(workflowData, "control_insertsize_plot.png_qcValues.txt")
+        File tumorInsertSizeFile = new File(workflowData, "tumor_HCC1187-div128_insertsize_plot.png_qcValues.txt")
+        File controlInsertSizeFile = new File(workflowData, "blood_HCC1187-div128_insertsize_plot.png_qcValues.txt")
 
         File finalTumorInsertSizeFile = bamFileTumor.getFinalInsertSizeFile()
         File finalControlInsertSizeFile = bamFileControl.getFinalInsertSizeFile()
@@ -116,7 +117,7 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     @Override
     Duration getTimeout() {
-        Duration.standardHours(5)
+        Duration.ofHours(5)
     }
 
 }

@@ -966,15 +966,17 @@ class DomainFactory {
      * with the needed quality control values for sophia
      */
     static ExternalProcessedMergedBamFileQualityAssessment createExternalProcessedMergedBamFileQualityAssessment(Map properties = [:], AbstractMergedBamFile mbf) {
-        return createDomainObject(ExternalProcessedMergedBamFileQualityAssessment,
-                [properlyPaired             : 1919,
-                 pairedInSequencing         : 2120,
-                 insertSizeMedian           : 406,
-                 insertSizeCV               : 23,
-                 qualityAssessmentMergedPass: {
-                     createDomainObject(QualityAssessmentMergedPass, [abstractMergedBamFile: mbf], [:])
-                 }]
-                , properties)
+        return createDomainObject(ExternalProcessedMergedBamFileQualityAssessment, [
+                properlyPaired             : 1919,
+                pairedInSequencing         : 2120,
+                insertSizeMedian           : 406,
+                insertSizeCV               : 23,
+                qualityAssessmentMergedPass: {
+                    createDomainObject(QualityAssessmentMergedPass, [
+                            abstractMergedBamFile: mbf,
+                    ], [:])
+                },
+        ], properties)
     }
 
 
@@ -1053,6 +1055,29 @@ class DomainFactory {
         AbstractMergingWorkPackage diseaseWorkPackage = diseaseBamFile?.mergingWorkPackage
         AbstractMergingWorkPackage controlWorkPackage = controlBamFile?.mergingWorkPackage
 
+        Collection<SeqTrack> diseaseSeqTracks = bamFile1Properties.seqTracks ?: []
+        Collection<SeqTrack> controlSeqTracks = bamFile2Properties.seqTracks ?: []
+
+        SeqType seqType = CollectionUtils.atMostOneElement([
+                samplePair?.seqType,
+                diseaseWorkPackage?.seqType,
+                controlWorkPackage?.seqType,
+                diseaseSeqTracks*.seqType,
+                controlSeqTracks*.seqType,
+        ].findAll().flatten().unique(), "All sources have to contain the same seqType") ?: createWholeGenomeSeqType()
+
+        Sample diseaseSample = CollectionUtils.atMostOneElement([
+                samplePair?.mergingWorkPackage1?.sample,
+                diseaseWorkPackage?.sample,
+                diseaseSeqTracks*.sample,
+        ].findAll().flatten().unique(), "All disease sources have to contain the same sample")
+
+        Sample controlSample = CollectionUtils.atMostOneElement([
+                samplePair?.mergingWorkPackage2?.sample,
+                controlWorkPackage?.sample,
+                controlSeqTracks*.sample,
+        ].findAll().flatten().unique(), "All control sources have to contain the same sample")
+
         if (samplePair) {
             if (diseaseWorkPackage) {
                 assert samplePair.mergingWorkPackage1 == diseaseWorkPackage
@@ -1066,23 +1091,27 @@ class DomainFactory {
             }
         } else {
             if (!controlWorkPackage) {
+                Sample sample = controlSample ?:
+                        createSample([
+                                individual: diseaseWorkPackage?.individual ?: diseaseSample?.individual ?: createIndividual(),
+                        ])
                 controlWorkPackage = createMergingWorkPackage([
                         pipeline        : pipeline,
                         statSizeFileName: DEFAULT_TAB_FILE_NAME,
-                        seqType         : diseaseWorkPackage?.seqType ?: createWholeGenomeSeqType(),
-                        sample          : createSample([
-                                individual: diseaseWorkPackage?.sample?.individual ?: createIndividual(),
-                        ])
+                        seqType         : seqType,
+                        sample          : sample,
                 ])
             }
             if (!diseaseWorkPackage) {
+                Sample sample = diseaseSample ?:
+                        createSample([
+                                individual: controlWorkPackage.individual,
+                        ])
                 diseaseWorkPackage = createMergingWorkPackage(
                         pipeline: pipeline,
                         statSizeFileName: DEFAULT_TAB_FILE_NAME,
-                        seqType: controlWorkPackage.seqType,
-                        sample: createSample([
-                                individual: controlWorkPackage.sample.individual,
-                        ])
+                        seqType: seqType,
+                        sample: sample,
                 )
             }
             createSampleTypePerProjectLazy([
