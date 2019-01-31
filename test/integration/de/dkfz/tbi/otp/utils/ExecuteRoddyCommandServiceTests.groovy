@@ -11,8 +11,6 @@ import de.dkfz.tbi.otp.utils.logging.*
 import org.junit.*
 import org.junit.rules.*
 
-import static de.dkfz.tbi.otp.utils.LocalShellHelper.*
-
 class ExecuteRoddyCommandServiceTests {
 
     static final private String LOAD_MODULE = "LOAD MODULE"
@@ -325,7 +323,7 @@ class ExecuteRoddyCommandServiceTests {
         //then
         assert tmpOutputDir.exists()
 
-        String permissionAndGroup = executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+        String permissionAndGroup = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
             stat -c %a ${tmpOutputDir}
             stat -c %G ${tmpOutputDir}
             """.stripIndent())
@@ -350,7 +348,7 @@ class ExecuteRoddyCommandServiceTests {
         executeRoddyCommandService.createWorkOutputDirectory(realm, tmpOutputDir)
 
         //then:
-        String permissionAndGroup = executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+        String permissionAndGroup = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
             stat -c %a ${tmpOutputDir}
             stat -c %G ${tmpOutputDir}
             """.stripIndent())
@@ -368,7 +366,7 @@ class ExecuteRoddyCommandServiceTests {
         executeRoddyCommandService.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
                     assert realm1 == realm
-                    ProcessOutput out = executeAndWait(cmd)
+                    ProcessOutput out = LocalShellHelper.executeAndWait(cmd)
                     out.assertExitCodeZeroAndStderrEmpty()
                     assert out.stdout == """\
 
@@ -390,7 +388,7 @@ class ExecuteRoddyCommandServiceTests {
         CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, roddyBamFile.bamFileName))
         assert new File(roddyBamFile.workDirectory, "dir").mkdirs()
 
-        assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+        assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
             chmod 777 ${roddyBamFile.workDirectory}/dir
             chmod 777 ${roddyBamFile.workDirectory}/file
             chmod 777 ${roddyBamFile.workDirectory}/${roddyBamFile.baiFileName}
@@ -408,7 +406,7 @@ class ExecuteRoddyCommandServiceTests {
             444
             """.stripIndent()
 
-        assert expected == executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+        assert expected == LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
             stat -c %a ${roddyBamFile.workDirectory}/dir
             stat -c %a ${roddyBamFile.workDirectory}/file
             stat -c %a ${roddyBamFile.workDirectory}/${roddyBamFile.baiFileName}
@@ -429,7 +427,7 @@ class ExecuteRoddyCommandServiceTests {
         executeRoddyCommandService.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
                     assert realm1 == realm
-                    ProcessOutput out = executeAndWait(cmd)
+                    ProcessOutput out = LocalShellHelper.executeAndWait(cmd)
                     out.assertExitCodeZeroAndStderrEmpty()
                     assert out.stdout == """\
 
@@ -443,12 +441,12 @@ class ExecuteRoddyCommandServiceTests {
         String testingGroup = configService.getTestingGroup()
 
         CreateFileHelper.createFile(new File(roddyBamFile.workDirectory, "file"))
-        assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("chgrp ${testingGroup} ${roddyBamFile.workDirectory}/file").empty
+        assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("chgrp ${testingGroup} ${roddyBamFile.workDirectory}/file").empty
 
         executeRoddyCommandService.correctGroups(roddyBamFile, realm)
 
 
-        assert "${primaryGroup}\n" as String == executeAndAssertExitCodeAndErrorOutAndReturnStdout(
+        assert "${primaryGroup}\n" as String == LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(
                 "stat -c %G ${roddyBamFile.workDirectory}/file"
         )
     }
@@ -467,19 +465,19 @@ class ExecuteRoddyCommandServiceTests {
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
-        assert executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+        assert LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
             chmod -R 777 ${roddyBamFile.workDirectory}
             chgrp -R ${group} ${roddyBamFile.workDirectory}
             chgrp ${primaryGroup} ${roddyBamFile.baseDirectory}
             """.stripIndent()).empty
 
         executeRoddyCommandService.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm realm1, String cmd, String user ->
-            ProcessOutput out = executeAndWait(cmd)
+            ProcessOutput out = LocalShellHelper.executeAndWait(cmd)
             out.assertExitCodeZeroAndStderrEmpty()
             return out
         }
         executeRoddyCommandService.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm realm1, String cmd ->
-            ProcessOutput out = executeAndWait(cmd)
+            ProcessOutput out = LocalShellHelper.executeAndWait(cmd)
             out.assertExitCodeZeroAndStderrEmpty()
             return out
         }
@@ -487,7 +485,7 @@ class ExecuteRoddyCommandServiceTests {
         executeRoddyCommandService.correctPermissionsAndGroups(roddyBamFile, realm)
 
 
-        String value = executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
+        String value = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout("""\
             stat -c %a ${roddyBamFile.workDirectory.path}
             stat -c %a ${roddyBamFile.workMergedQADirectory.path}
             stat -c %a ${roddyBamFile.workBamFile.path}

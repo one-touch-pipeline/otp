@@ -33,7 +33,7 @@ class LocalShellHelperUnitTests {
     @Test
     void testWaitForProcess_AllFine() {
         Process process = [ 'bash', '-c', COMMAND ].execute()
-        LocalShellHelper.ProcessOutput actual = LocalShellHelper.waitForProcess(process)
+        ProcessOutput actual = LocalShellHelper.waitForProcess(process)
 
         assert actual.stdout.trim() == STDOUT_TEXT
         assert actual.stderr.trim() == STDERR_TEXT
@@ -49,7 +49,7 @@ class LocalShellHelperUnitTests {
 
     @Test
     void testExecuteAndWait_AllFine() {
-        LocalShellHelper.ProcessOutput actual = LocalShellHelper.executeAndWait(COMMAND)
+        ProcessOutput actual = LocalShellHelper.executeAndWait(COMMAND)
 
         assert actual.stdout.trim() == STDOUT_TEXT
         assert actual.stderr.trim() == STDERR_TEXT

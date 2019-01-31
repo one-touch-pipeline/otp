@@ -1,7 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.*
 import org.springframework.beans.factory.annotation.*
 
 /**
@@ -23,7 +23,7 @@ class ExecutionHelperService {
         assert realm: 'realm may not be null'
         assert directory: 'directory may not be null'
         assert group: 'group may not be null'
-        LocalShellHelper.ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp ${group} ${directory}")
+        ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp ${group} ${directory}")
         if (result.exitCode != 0 ) {
             throw new RuntimeException("Setting group failed: ${result.stderr}; exit code: ${result.exitCode}")
         }
@@ -34,7 +34,7 @@ class ExecutionHelperService {
         assert realm: 'realm may not be null'
         assert directory: 'directory may not be null'
         assert permission: 'permission may not be null'
-        LocalShellHelper.ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod  ${permission} ${directory}")
+        ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod  ${permission} ${directory}")
         if (result.exitCode != 0 ) {
             throw new RuntimeException("Setting permission failed: ${result.stderr}; exit code: ${result.exitCode}")
         }

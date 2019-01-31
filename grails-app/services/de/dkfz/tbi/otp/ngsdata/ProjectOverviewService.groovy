@@ -13,8 +13,6 @@ import org.springframework.security.access.prepost.*
 import javax.sql.*
 import java.util.regex.*
 
-import static de.dkfz.tbi.otp.utils.LocalShellHelper.*
-
 class ProjectOverviewService {
 
     ExecuteRoddyCommandService executeRoddyCommandService

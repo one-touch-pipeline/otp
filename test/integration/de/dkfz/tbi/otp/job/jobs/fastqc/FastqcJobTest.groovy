@@ -81,7 +81,7 @@ class FastqcJobTest {
         fastqcJob.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm inputRealm, String command ->
             assert command.contains("umask 027; mkdir -p -m 2750")
             assert !command.contains("cp ")
-            return new LocalShellHelper.ProcessOutput('','',0)
+            return new ProcessOutput('','',0)
         }
 
         fastqcJob.maybeSubmit()
@@ -100,7 +100,7 @@ class FastqcJobTest {
         fastqcJob.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm inputRealm, String command ->
             assert command.contains("umask 027; mkdir -p -m 2750")
             assert !command.contains("cp ")
-            return new LocalShellHelper.ProcessOutput('','',0)
+            return new ProcessOutput('','',0)
         }
 
         fastqcJob.maybeSubmit()
@@ -125,7 +125,7 @@ class FastqcJobTest {
 
         fastqcJob.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm inputRealm, String command ->
             assert command.contains("umask 027; mkdir -p -m 2750") || command.contains("cp ")
-            return new LocalShellHelper.ProcessOutput('','',0)
+            return new ProcessOutput('','',0)
         }
 
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }

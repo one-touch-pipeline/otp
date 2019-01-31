@@ -8,7 +8,7 @@ import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
+import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import spock.lang.*
 

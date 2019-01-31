@@ -10,7 +10,6 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
 import org.springframework.beans.factory.annotation.*
 
 import java.util.concurrent.*

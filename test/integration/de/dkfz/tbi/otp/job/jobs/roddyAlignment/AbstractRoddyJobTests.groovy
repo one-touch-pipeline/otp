@@ -9,7 +9,6 @@ import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
 import de.dkfz.tbi.otp.utils.logging.*
 import org.codehaus.groovy.control.io.*
 import org.junit.*
@@ -134,7 +133,7 @@ newLine"""
         roddyJob.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm, String cmd ->
                     executeCommandCounter++
-                    return new LocalShellHelper.ProcessOutput(stdout: output, stderr: error, exitCode: 0)
+                    return new ProcessOutput(stdout: output, stderr: error, exitCode: 0)
                 }
         ] as RemoteShellHelper
     }
@@ -152,7 +151,7 @@ newLine"""
     void testMaybeSubmit_clusterJobsSubmitted() {
         setUpWorkDirAndMockProcessOutput()
         LogThreadLocal.withThreadLog(System.out) {
-            assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.maybeSubmit()
+            assert NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.maybeSubmit()
         }
         assert executeCommandCounter == 1
         assert validateCounter == 0
@@ -163,7 +162,7 @@ newLine"""
         mockProcessOutput_noClusterJobsSubmitted()
 
         LogThreadLocal.withThreadLog(new NullWriter()) {
-            assert AbstractMultiJob.NextAction.SUCCEED == roddyJob.maybeSubmit()
+            assert NextAction.SUCCEED == roddyJob.maybeSubmit()
         }
 
         assert executeCommandCounter == 1
@@ -203,13 +202,13 @@ newLine"""
     void testExecute_finishedClusterJobsIsNull_MaybeSubmit() {
         setUpWorkDirAndMockProcessOutput()
         roddyJob.metaClass.maybeSubmit = {
-            return AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS
+            return NextAction.WAIT_FOR_CLUSTER_JOBS
         }
         roddyJob.metaClass.validate = {
             throw new RuntimeException("should not come here")
         }
         LogThreadLocal.withThreadLog(System.out) {
-            assert AbstractMultiJob.NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.execute(null)
+            assert NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.execute(null)
         }
     }
 
@@ -248,7 +247,7 @@ newLine"""
             throw new RuntimeException("should not come here")
         }
 
-        assert AbstractMultiJob.NextAction.SUCCEED == roddyJob.execute([jobIdentifier])
+        assert NextAction.SUCCEED == roddyJob.execute([jobIdentifier])
         assert executeCommandCounter == 0
         assert validateCounter == 1
     }

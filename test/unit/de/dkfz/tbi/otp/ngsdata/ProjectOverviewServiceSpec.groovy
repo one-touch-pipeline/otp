@@ -2,7 +2,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.*
-import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
 import grails.test.mixin.*
 import org.apache.commons.logging.impl.*
@@ -45,7 +45,7 @@ class ProjectOverviewServiceSpec extends Specification {
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_, _) >> {
-                new LocalShellHelper.ProcessOutput("""
+                new ProcessOutput("""
                     useAcceleratedHardware=${useConvey}
                     markDuplicatesVariant=${mergeTool}
 
@@ -108,7 +108,7 @@ class ProjectOverviewServiceSpec extends Specification {
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_, _) >> {
-                new LocalShellHelper.ProcessOutput("""
+                new ProcessOutput("""
                     |SAMTOOLS_VERSION=1.0
                     |SAMBAMBA_VERSION=3.0
                     |STAR_VERSION=2.0
@@ -151,7 +151,7 @@ class ProjectOverviewServiceSpec extends Specification {
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_, _) >> {
-            new LocalShellHelper.ProcessOutput(stdout, stderr.replaceFirst('roddyWorkflowConfig', roddyWorkflowConfig.nameUsedInConfig), exitcode)
+            new ProcessOutput(stdout, stderr.replaceFirst('roddyWorkflowConfig', roddyWorkflowConfig.nameUsedInConfig), exitcode)
         }
             }
         String expectedError = expectedErrorTemplate.replaceFirst('roddyWorkflowConfig', roddyWorkflowConfig.nameUsedInConfig)

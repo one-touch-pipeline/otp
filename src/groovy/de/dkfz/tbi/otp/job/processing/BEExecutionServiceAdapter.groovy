@@ -19,7 +19,7 @@ class BEExecutionServiceAdapter implements BEExecutionService {
 
     @Override
     ExecutionResult execute(String command) {
-        LocalShellHelper.ProcessOutput p = remoteShellHelper.executeCommandReturnProcessOutput(realm, command)
+        ProcessOutput p = remoteShellHelper.executeCommandReturnProcessOutput(realm, command)
         new ExecutionResult((p.exitCode == 0), p.exitCode, p.stdout.split("\n") as List, null)
     }
 
