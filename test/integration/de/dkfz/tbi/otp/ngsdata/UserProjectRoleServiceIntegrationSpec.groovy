@@ -16,7 +16,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     final static ProjectRole PI_PROJECT_ROLE = DomainFactory.createProjectRole(name: "PI")
 
     UserProjectRoleService userProjectRoleService
-    String email = HelperUtils.randomEmail
+
+    @Shared
+    static String email = HelperUtils.randomEmail
 
     def setup() {
         SpringSecurityService springSecurityService = new SpringSecurityService()
@@ -667,6 +669,41 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         emails.empty
+    }
+
+    @Unroll
+    void "test getEmailsForNotification with receivesNotifications #receivesNotifications roleEnabled #roleEnabled userEnabled #userEnabled result #result"() {
+        given:
+        String output
+        Project project = createProject()
+        DomainFactory.createUserProjectRole(
+                user: DomainFactory.createUser([
+                        enabled: userEnabled,
+                        email: email
+                ]),
+                project: project,
+                receivesNotifications: receivesNotifications,
+                enabled: roleEnabled,
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            output = userProjectRoleService.getEmailsForNotification(project)
+        }
+
+        then:
+        output == result
+
+        where:
+        receivesNotifications | roleEnabled | userEnabled || result
+        true                  | true        | true        || email
+        true                  | true        | false       || ''
+        true                  | false       | true        || ''
+        true                  | false       | false       || ''
+        false                 | true        | true        || ''
+        false                 | true        | false       || ''
+        false                 | false       | true        || ''
+        false                 | false       | false       || ''
     }
 
 

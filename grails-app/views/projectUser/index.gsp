@@ -165,7 +165,10 @@
                 </g:each>
             </table>
         </div>
-
+        <sec:access expression="hasRole('ROLE_OPERATOR')">
+            <button onclick='getEmails("${project}", "${emails}")' title = "${g.message(code: 'projectUser.table.tooltip.copyEmail')}">
+                <g:message code="projectUser.table.copyEmail" /></button>
+        </sec:access>
         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
         <div class="otpDataTables projectUserTable disabled">
             <h3>
@@ -359,5 +362,10 @@
         <h3><g:message code="default.no.project"/></h3>
     </g:else>
     </div>
+    <script>
+        function getEmails(project, emails) {
+            prompt("Emails for ${project}", emails);
+        }
+    </script>
 </body>
 </html>

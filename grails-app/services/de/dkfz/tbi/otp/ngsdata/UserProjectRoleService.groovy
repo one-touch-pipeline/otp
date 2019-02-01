@@ -272,6 +272,21 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
+    String getEmailsForNotification(Project project) {
+        assert project: 'No project given'
+
+        Set<String> emails = UserProjectRole.findAllByProjectAndReceivesNotificationsAndEnabled(
+                project,
+                true,
+                true
+        )*.user.findAll { it.enabled }*.email
+
+        if (emails) {
+            return emails.unique().sort().join(',')
+        }
+        return ''
+    }
+
     int getNumberOfValidUsersForProjects(List<Project> projects) {
         return UserProjectRole.createCriteria().get {
             'in'("project", projects)

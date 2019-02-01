@@ -77,6 +77,7 @@ class ProjectUserController implements CheckAndCall {
                 availableRoles: ProjectRole.findAll(),
                 hasErrors: params.hasErrors,
                 message: params.message,
+                emails: userProjectRoleService.getEmailsForNotification(project),
         ]
     }
 
@@ -319,8 +320,12 @@ class UpdateProjectRoleCommand implements Serializable {
     }
 }
 
-class AddUserToProjectCommand implements Serializable {
+class CopyEmailsToClipboard implements Serializable {
     Project project
+}
+
+class AddUserToProjectCommand implements Serializable {
+        Project project
     boolean addViaLdap = true
 
     String searchString
