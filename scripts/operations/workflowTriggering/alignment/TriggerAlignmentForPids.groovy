@@ -48,16 +48,41 @@ LogThreadLocal.withThreadLog(System.out, {
         }
 
         //show seqtracks
+        // Header
+        println([
+                "seqtrack_id",
+                "project",
+                "mockPid",
+                "sampleType",
+                "seqType",
+                "laneId",
+                "run",
+                "ilse",
+                "libraryPreparationKit",
+                "seqPlatform",
+                "seqPlatformGroup_id"
+        ].join("\t"))
+        // Data
         seqTracks.each {
-            println "${it.id}    ${it.project.name}    ${it.individual.mockPid}     ${it.sampleType.name}    ${it.seqType}    ${it.laneId}    ${it.run.name}    ${it.ilseId}    ${it.libraryPreparationKit}  ${it.seqPlatform}  (${it.seqPlatformGroup?.id})"
+            println([
+                    it.id,
+                    it.project.name,
+                    it.individual.mockPid,
+                    it.sampleType.name,
+                    it.seqType,
+                    it.laneId,
+                    it.run.name,
+                    it.ilseId,
+                    it.libraryPreparationKit,
+                    it.seqPlatform,
+                    it.seqPlatformGroup?.id,
+            ].join("\t"))
         }
-        println seqTracks.size()
-        println seqTracks*.sample.unique().size()
+        println "--> ${seqTracks.size()} seqtracks in ${seqTracks*.sample.unique().size()} samples"
 
         /*
         //make all used run segments alignable
         DataFile.findAllBySeqTrackInList(seqTracks)*.runSegment.unique()*.align = true
-
         //trigger alignment
         seqTracks.each {
             ctx.seqTrackService.decideAndPrepareForAlignment(it)
@@ -65,4 +90,4 @@ LogThreadLocal.withThreadLog(System.out, {
         //*/
     }
 })
-println ''
+null // suppress output spam
