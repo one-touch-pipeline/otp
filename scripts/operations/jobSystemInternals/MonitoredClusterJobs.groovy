@@ -21,19 +21,20 @@
  */
 
 /**
- * Lists the cluster jobs which are currently being monitored by the {@link ClusterJobMonitoringService}.
+ * Lists the cluster jobs which are currently being monitored by the {@link ClusterJobMonitor}.
  */
 
+
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.*
+import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitor
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 
-ClusterJobMonitoringService clusterJobMonitoringService = ctx.clusterJobMonitoringService
-
-clusterJobMonitoringService.queuedJobs.each { Job otpJob, clusterJobs ->
-    ProcessingStep processingStep = otpJob.processingStep
+ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING).groupBy {
+    it.processingStep
+}.each { ProcessingStep processingStep, List<ClusterJob> clusterJobs ->
     Process process = processingStep.process
     println "ProcessingStep ${processingStep.id}: ${processingStep.jobDefinition.name} on ${atMostOneElement(ProcessParameter.findAllByProcess(process))?.toObject()}"
     clusterJobs.each {

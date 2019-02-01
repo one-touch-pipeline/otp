@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.job.processing
 
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.scheduler.*
@@ -35,15 +36,15 @@ import de.dkfz.tbi.otp.job.scheduler.*
 abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements SometimesResumableJob, MonitoringJob {
 
     @Autowired
-    ClusterJobMonitoringService clusterJobMonitoringService
+    ClusterJobMonitor clusterJobMonitor
+
     @Autowired
     Scheduler scheduler
+
     @Autowired
     SchedulerService schedulerService
 
     final Object lockForJobCollections = new Object()
-    Collection<ClusterJobIdentifier> monitoredClusterJobs = null
-    Collection<ClusterJobIdentifier> finishedClusterJobs = null
 
     private final Object lockForResumable = new Object()
     private boolean suspendPlanned = false
@@ -52,50 +53,38 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
     @Override
     final void execute() throws Exception {
         synchronized (lockForJobCollections) {
-            assert monitoredClusterJobs == null
-            assert finishedClusterJobs == null
-            monitoredClusterJobs = ClusterJobIdentifier.asClusterJobIdentifierList(ClusterJob.findAllByProcessingStepAndValidated(processingStep, false))
-            final List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(
+            Collection<ClusterJob> monitoredClusterJobs = ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
+            final List<ProcessingStepUpdate> UPDATES = ProcessingStepUpdate.findAllByProcessingStep(
                     processingStep, [sort: "id", order: "desc", max: 2])
-            assert updates[0].state == ExecutionState.STARTED
+            assert UPDATES[0].state == ExecutionState.STARTED
             if (monitoredClusterJobs.empty) {
-                assert updates[1].state == ExecutionState.CREATED
+                assert UPDATES[1].state == ExecutionState.CREATED
                 assert ClusterJob.findAllByProcessingStep(processingStep).empty
                 callExecute()
             } else {
-                assert updates[1].state == ExecutionState.RESUMED
+                assert UPDATES[1].state == ExecutionState.RESUMED
                 log.info "The job has been resumed."
-                finishedClusterJobs = []
-                startMonitoring()
             }
         }
     }
 
     private void startMonitoring() {
         synchronized (lockForJobCollections) {
-            log.info "Waiting for ${monitoredClusterJobs.size()} cluster jobs to finish: ${monitoredClusterJobs}"
-            clusterJobMonitoringService.monitor(monitoredClusterJobs.collect {
-                new ClusterJobIdentifier(it.realm, it.clusterJobId, it.userName)
-            }, this)
+            Collection<ClusterJob> monitoredClusterJobs =  ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
+            log.info "Waiting for ${monitoredClusterJobs.size()} cluster jobs to finish: ${monitoredClusterJobs*.clusterJobId.sort()}"
+            ClusterJob.withTransaction {
+                monitoredClusterJobs*.checkStatus = ClusterJob.CheckStatus.CHECKING
+            }
         }
     }
 
     @Override
-    void finished(final ClusterJobIdentifier finishedClusterJob) {
-        final boolean allFinished
-        final int finishedCount
-        synchronized (lockForJobCollections) {
-            if (monitoredClusterJobs.remove(finishedClusterJob)) {
-                finishedClusterJobs << finishedClusterJob
-            } else {
-                throw new RuntimeException("Received a notification that cluster job ${finishedClusterJob} " +
-                        "has finished although we are not monitoring that cluster job.")
-            }
-            allFinished = monitoredClusterJobs.empty
-            finishedCount = finishedClusterJobs.size()
-        }
-        if (allFinished) {
-            log.info "All ${finishedCount} cluster jobs have finished."
+    void finished(final ClusterJob finishedClusterJob) {
+        final boolean ALL_FINISHED = ClusterJob.countByProcessingStepAndCheckStatus(processingStep, ClusterJob.CheckStatus.CHECKING) == 0
+
+        if (ALL_FINISHED) {
+            final int FINISHED_COUNT = ClusterJob.countByProcessingStepAndCheckStatus(processingStep, ClusterJob.CheckStatus.FINISHED)
+            log.info "All ${FINISHED_COUNT} cluster jobs have finished."
             /* The specification of {@link MonitoringJob#finished(String, Realm)} says that this
              * finished() method shall return quickly. So call callExecute() asynchronously.
              */
@@ -125,27 +114,21 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
             executing = true
         }
         try {
-            synchronized (lockForJobCollections) {
-                assert monitoredClusterJobs.empty
-                assert finishedClusterJobs == null || !finishedClusterJobs.empty
-                finishedClusterJobs = finishedClusterJobs?.asImmutable()
-            }
-            final NextAction action = execute(finishedClusterJobs)
+            assert ClusterJob.findAllByProcessingStepAndCheckStatus(processingStep, ClusterJob.CheckStatus.CHECKING).empty
+            Collection<ClusterJob> clusterJobs =  ClusterJob.findAllByProcessingStepAndCheckStatusAndValidated(
+                    processingStep,
+                    ClusterJob.CheckStatus.FINISHED,
+                    false)
+
+            final NextAction ACTION = execute(ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs))
             ClusterJob.withTransaction {
-                finishedClusterJobs.each {
-                    final ClusterJob finishedClusterJob = ClusterJob.findByClusterJobIdentifier(it)
-                    finishedClusterJob.refresh()  //reload object from database
+                clusterJobs*.refresh().each { ClusterJob finishedClusterJob ->
                     assert finishedClusterJob.processingStep.id == processingStep.id
                     assert !finishedClusterJob.validated
                     finishedClusterJob.validated = true
                     assert finishedClusterJob.save(flush: true)
                 }
-                final Collection<ClusterJob> submittedClusterJobs = ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
-                synchronized (lockForJobCollections) {
-                    monitoredClusterJobs = ClusterJobIdentifier.asClusterJobIdentifierList(submittedClusterJobs)
-                    finishedClusterJobs = []
-                }
-                performAction(action)
+                performAction(ACTION)
             }
         } finally {
             synchronized (lockForResumable) {
@@ -156,16 +139,17 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
     }
 
     private void performAction(final NextAction action) {
+        Collection<ClusterJob> clusterJobs = ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
         switch (action) {
             case NextAction.WAIT_FOR_CLUSTER_JOBS:
-                if (monitoredClusterJobs.empty) {
-                    throw new RuntimeException("The job requested to wait for cluster jobs, but did not submit any.")
+                if (clusterJobs.empty) {
+                    throw new OtpRuntimeException("The job requested to wait for cluster jobs, but did not submit any.")
                 }
                 startMonitoring()
                 break
             case NextAction.SUCCEED:
-                if (!monitoredClusterJobs.empty) {
-                    throw new RuntimeException("The job submitted cluster jobs, but requested to succeed instead of waiting for them.")
+                if (!clusterJobs.empty) {
+                    throw new OtpRuntimeException("The job submitted cluster jobs, but requested to succeed instead of waiting for them.")
                 }
                 succeed()
                 schedulerService.doEndCheck(this)
@@ -177,7 +161,7 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
 
     @Override
     void planSuspend() {
-        log.info "Suspension of this job is planned."
+        log.info "Suspension of job for ${processingStep?.processParameterObject} is planned."
         synchronized (lockForResumable) {
             suspendPlanned = true
         }
@@ -185,7 +169,7 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
 
     @Override
     void cancelSuspend() {
-        log.info "Suspension of this job is cancelled."
+        log.info "Suspension of job for ${processingStep?.processParameterObject} is cancelled."
         synchronized (lockForResumable) {
             suspendPlanned = false
             lockForResumable.notifyAll()

@@ -27,7 +27,6 @@ import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.log4j.Logger
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
@@ -42,6 +41,7 @@ import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExceptionUtils
+import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 import de.dkfz.tbi.otp.utils.logging.*
 
 import java.util.concurrent.locks.Lock
@@ -65,7 +65,7 @@ class SchedulerService {
     JobMailService jobMailService
 
     @Autowired
-    PersistenceContextInterceptor persistenceInterceptor
+    PersistenceContextUtils persistenceContextUtils
 
     @Autowired
     ProcessService processService
@@ -80,7 +80,7 @@ class SchedulerService {
     /**
      * List of currently running Jobs.
      */
-    private final List<Job> running = []
+    private final List<Job> running = [].asSynchronized()
     /**
      * Lock to protect the internal data from Multi Threading issues
      */
@@ -119,16 +119,19 @@ class SchedulerService {
         }
         boolean valid = true
         List<ProcessingStep> processesToRestart = []
+        List<ProcessingStep> processesToResume = []
 
         List<OptionProblem> validationResult = propertiesValidationService.validateProcessingOptions()
         if (!validationResult.isEmpty()) {
             log.error(validationResult.join("\n"))
             valid = false
+            return
         }
 
         try {
             ProcessingStep.withTransaction { status ->
                 List<Process> processes = Process.findAllByFinished(false)
+                log.info("Found ${processes.size()} running processes")
                 List<ProcessingStep> lastProcessingSteps = processes ? ProcessingStep.findAllByProcessInListAndNextIsNull(processes) : []
                 lastProcessingSteps.each { ProcessingStep step ->
                     List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
@@ -154,7 +157,7 @@ class SchedulerService {
                             status.setRollbackOnly()
                             log.error("ProcessingStep ${step.id} could not be resumed")
                         }
-                        processesToRestart << step
+                        processesToResume << step
                     } else if (last.state == ExecutionState.RESTARTED) {
                         // look whether there is a RestartedProcessingStep which has a link to step
                         RestartedProcessingStep restarted = RestartedProcessingStep.findByOriginal(step)
@@ -176,16 +179,25 @@ class SchedulerService {
             e.printStackTrace()
         }
         if (valid) {
-            startupOk = true
-            schedulerActive = true
             lock.lock()
             try {
                 Set<ProcessingStep> toReQueueJobs = new HashSet<ProcessingStep>(processesToRestart)
                 toReQueueJobs.removeAll(queue)
                 queue.addAll(toReQueueJobs)
+
+                processesToResume.each {
+                    Job job = createJob(it)
+                    running.add(job)
+                    executeInNewThread {
+                        grailsApplication.mainContext.scheduler.executeJob(job)
+                    }
+                }
+                Thread.sleep(10000)
             } finally {
                 lock.unlock()
             }
+            startupOk = true
+            schedulerActive = true
         }
         log.info("Scheduler started after server startup: ${schedulerActive}")
     }
@@ -310,12 +322,8 @@ class SchedulerService {
             return
         }
         Job job = null
-        persistenceInterceptor.init()
-        try {
-            ProcessingStep.withTransaction { job = doSchedule() }
-        } finally {
-            persistenceInterceptor.flush()
-            persistenceInterceptor.destroy()
+        persistenceContextUtils.doWithPersistenceContext {
+            job = doSchedule()
         }
 
         if (job) {
@@ -330,27 +338,6 @@ class SchedulerService {
             Realm.withNewSession  {
                 job()
             }
-        }
-    }
-
-    /**
-     * Scheduled method to check the cluster for finished jobs.
-     * Execution is wrapped in a persistence interceptor.
-     *
-     * Do not invoke this method manually.
-     */
-    @Scheduled(fixedDelay = 30000L)
-    void clusterJobCheck() {
-        if (!schedulerActive) {
-            return
-        }
-        // method to proxy the invocation of ClusterJobMonitoringService::check() to workaround strange behavior of Spring
-        persistenceInterceptor.init()
-        try {
-            applicationContext.clusterJobMonitoringService.check()
-        } finally {
-            persistenceInterceptor.flush()
-            persistenceInterceptor.destroy()
         }
     }
 
@@ -923,6 +910,12 @@ class SchedulerService {
      */
     Job getJobExecutedByCurrentThread() {
         return jobByThread.get()
+    }
+
+    Job getJobForProcessingStep(ProcessingStep processingStep) {
+        running.find {
+            it.processingStep == processingStep
+        }
     }
 
     /**

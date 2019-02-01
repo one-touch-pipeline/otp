@@ -26,7 +26,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.TestConstants
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.ast.UseJobLog
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
@@ -39,22 +39,22 @@ class MonitoringTestJob extends AbstractEndStateAwareJobImpl implements Monitori
 
     SchedulerService schedulerService
 
-    ClusterJobIdentifier jobIdentifier
+    ClusterJob clusterJob
     boolean fail
     boolean executed = false
 
-    MonitoringTestJob(ProcessingStep processingStep, Collection<Parameter> inputParameters, SchedulerService schedulerService, ClusterJobIdentifier jobIdentifier, boolean fail) {
+    MonitoringTestJob(ProcessingStep processingStep, SchedulerService schedulerService, ClusterJob clusterJob, boolean fail) {
         this.processingStep = processingStep
         this.schedulerService = schedulerService
-        this.jobIdentifier = jobIdentifier
+        this.clusterJob = clusterJob
         this.fail = fail
     }
 
     @Override
-    void finished(ClusterJobIdentifier finishedClusterJob) {
+    void finished(ClusterJob finishedClusterJob) {
         assert schedulerService.jobExecutedByCurrentThread == this
         assert LogThreadLocal.threadLog == this.log
-        assert finishedClusterJob.clusterJobId == TestConstants.ARBITRARY_CLUSTER_JOB_ID && finishedClusterJob.realm.is(jobIdentifier.realm)
+        assert finishedClusterJob == clusterJob
         executed = true
         if (fail) {
             throw new NumberFormatException(TestConstants.ARBITRARY_MESSAGE)

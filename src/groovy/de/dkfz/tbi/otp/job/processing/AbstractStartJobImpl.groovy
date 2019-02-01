@@ -23,7 +23,6 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.util.Environment
-import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 import org.hibernate.Hibernate
 import org.springframework.beans.factory.BeanNameAware
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,7 +34,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.tracking.TrackingService
-
+import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 
 /**
  * Abstract base class for {@link StartJob}s.
@@ -57,7 +56,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
     TrackingService trackingService
 
     @Autowired
-    PersistenceContextInterceptor persistenceInterceptor
+    PersistenceContextUtils persistenceContextUtils
 
     private JobExecutionPlan plan
     private String beanName
@@ -67,14 +66,13 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
         this.beanName = beanName
     }
 
+    /**
+     * @Deprecated Use directly {@link PersistenceContextUtils#doWithPersistenceContext(Closure)}
+     */
+    @Deprecated
     Object doWithPersistenceInterceptor(final Closure closure) {
-        try {
-            persistenceInterceptor.init()
-            return closure.call();
-        }
-        finally {
-            persistenceInterceptor.flush()
-            persistenceInterceptor.destroy()
+        persistenceContextUtils.doWithPersistenceContext {
+            return closure.call()
         }
     }
 

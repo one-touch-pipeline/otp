@@ -116,11 +116,10 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
         given:
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
 
-        ClusterJob job = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
+        ClusterJob clusterJob = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
 
         ClusterJob c2 = createClusterJob(seqType: seqType)
 
-        ClusterJobIdentifier clusterJobIdentifier = new ClusterJobIdentifier(job.realm, job.clusterJobId, job.userName)
         GenericJobInfo jobInfo = new GenericJobInfo(null, null, null, null, [c2.id as String])
 
         jobInfo.submitTime = java.time.ZonedDateTime.of(2017, 8, 8, 1, 0, 0, 0, configService.timeZoneId)
@@ -140,65 +139,68 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
         jobInfo.startCount = 361
 
         when:
-        clusterJobService.completeClusterJob(clusterJobIdentifier, ClusterJob.Status.COMPLETED, jobInfo)
+        clusterJobService.completeClusterJob(clusterJob, ClusterJob.Status.COMPLETED, jobInfo)
 
         then:
-        job.exitStatus == ClusterJob.Status.COMPLETED
-        job.exitCode == jobInfo.exitCode
+        clusterJob.exitStatus == ClusterJob.Status.COMPLETED
+        clusterJob.exitCode == jobInfo.exitCode
 
-        job.queued == clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 8, 1, 0, 0, 0, configService.timeZoneId))
-        job.eligible ==clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 9, 2, 0, 0, 0, configService.timeZoneId))
-        job.started ==clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 10, 3, 0, 0, 0, configService.timeZoneId))
-        job.ended ==clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(java.time.ZonedDateTime.of(2017, 8, 11, 4, 0, 0, 0, configService.timeZoneId))
+        clusterJob.queued == clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(
+                java.time.ZonedDateTime.of(2017, 8, 8, 1, 0, 0, 0, configService.timeZoneId))
+        clusterJob.eligible == clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(
+                java.time.ZonedDateTime.of(2017, 8, 9, 2, 0, 0, 0, configService.timeZoneId))
+        clusterJob.started == clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(
+                java.time.ZonedDateTime.of(2017, 8, 10, 3, 0, 0, 0, configService.timeZoneId))
+        clusterJob.ended == clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(
+                java.time.ZonedDateTime.of(2017, 8, 11, 4, 0, 0, 0, configService.timeZoneId))
 
-        job.systemSuspendStateDuration == org.joda.time.Duration.standardSeconds(123)
-        job.userSuspendStateDuration == org.joda.time.Duration.standardSeconds(456)
+        clusterJob.systemSuspendStateDuration == org.joda.time.Duration.standardSeconds(123)
+        clusterJob.userSuspendStateDuration == org.joda.time.Duration.standardSeconds(456)
 
-        job.cpuTime == org.joda.time.Duration.standardSeconds(789)
-        job.usedCores == 3
-        job.usedMemory == 2*1024*1024
-        job.usedSwap == 12*1024*1024
+        clusterJob.cpuTime == org.joda.time.Duration.standardSeconds(789)
+        clusterJob.usedCores == 3
+        clusterJob.usedMemory == 2 * 1024 * 1024
+        clusterJob.usedSwap == 12 * 1024 * 1024
 
-        job.node == "host"
-        job.startCount == 361
+        clusterJob.node == "host"
+        clusterJob.startCount == 361
     }
 
     void "test completeClusterJob empty"() {
         given:
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Canada/Saskatchewan")
 
-        ClusterJob job = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
-        org.joda.time.DateTime queued = job.queued
+        ClusterJob clusterJob = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
+        org.joda.time.DateTime queued = clusterJob.queued
 
-        ClusterJobIdentifier clusterJobIdentifier = new ClusterJobIdentifier(job.realm, job.clusterJobId, job.userName)
         GenericJobInfo jobInfo = new GenericJobInfo(null, null, null, null, null)
 
         when:
-        clusterJobService.completeClusterJob(clusterJobIdentifier, ClusterJob.Status.FAILED, jobInfo)
+        clusterJobService.completeClusterJob(clusterJob, ClusterJob.Status.FAILED, jobInfo)
 
         then:
-        job.exitStatus == ClusterJob.Status.FAILED
-        job.exitCode == null
+        clusterJob.exitStatus == ClusterJob.Status.FAILED
+        clusterJob.exitCode == null
 
-        job.queued == queued
-        job.eligible == null
-        job.started == null
-        job.ended == null
-        job.systemSuspendStateDuration == null
-        job.userSuspendStateDuration == null
+        clusterJob.queued == queued
+        clusterJob.eligible == null
+        clusterJob.started == null
+        clusterJob.ended == null
+        clusterJob.systemSuspendStateDuration == null
+        clusterJob.userSuspendStateDuration == null
 
-        job.cpuTime == null
-        job.usedCores == null
-        job.usedMemory == null
-        job.requestedCores == null
-        job.requestedWalltime == null
-        job.requestedMemory == null
-        job.usedSwap == null
+        clusterJob.cpuTime == null
+        clusterJob.usedCores == null
+        clusterJob.usedMemory == null
+        clusterJob.requestedCores == null
+        clusterJob.requestedWalltime == null
+        clusterJob.requestedMemory == null
+        clusterJob.usedSwap == null
 
-        job.node == null
-        job.accountName == null
-        job.startCount == null
-        job.dependencies == null
+        clusterJob.node == null
+        clusterJob.accountName == null
+        clusterJob.startCount == null
+        clusterJob.dependencies == null
     }
 
     void "test convertFromJava8DurationToJodaDuration"() {

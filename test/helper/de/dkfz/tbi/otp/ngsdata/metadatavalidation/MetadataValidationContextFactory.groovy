@@ -38,6 +38,7 @@ class MetadataValidationContextFactory {
         return createContext(properties + [document: document])
     }
 
+    @SuppressWarnings('UnsafeImplementationAsMap')
     static MetadataValidationContext createContext(Map properties = [:]) {
         return new MetadataValidationContext(
                 properties.metadataFile ?: Paths.get(properties.testDirectory ?: TestCase.uniqueNonExistentPath.path, "run${HelperUtils.uniqueString}" as String, 'metadata_fastq.tsv'),

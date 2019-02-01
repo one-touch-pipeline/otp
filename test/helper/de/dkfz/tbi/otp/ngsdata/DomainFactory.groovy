@@ -1956,7 +1956,7 @@ class DomainFactory {
                 processingStep: processingStep,
                 realm         : clusterJobIdentifier.realm,
                 clusterJobId  : clusterJobIdentifier.clusterJobId,
-                userName      : clusterJobIdentifier.userName,
+                userName      : "userName_${counter++}",
         ], myProps)
     }
 

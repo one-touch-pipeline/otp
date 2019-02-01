@@ -33,7 +33,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 import javax.sql.DataSource
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static java.util.concurrent.TimeUnit.HOURS
 
 class ClusterJobService {
@@ -107,18 +106,7 @@ class ClusterJobService {
     /**
      * Stores values for statistics after the job has finished
      */
-    void completeClusterJob(
-            ClusterJobIdentifier jobIdentifier,
-            ClusterJob.Status status,
-            GenericJobInfo jobInfo
-    ) {
-        ClusterJob job
-        if (jobIdentifier.realm != null) {
-            job = ClusterJob.findByClusterJobIdentifier(jobIdentifier)
-        } else {
-            job = exactlyOneElement(ClusterJob.findAllByClusterJobId(jobIdentifier.clusterJobId))
-        }
-
+    void completeClusterJob(ClusterJob job, ClusterJob.Status status, GenericJobInfo jobInfo) {
         job.exitStatus = status
         job.exitCode = jobInfo.exitCode
 

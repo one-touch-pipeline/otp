@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitoringService
+import de.dkfz.tbi.otp.job.scheduler.ClusterJobStatus
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessOutput
@@ -63,7 +63,7 @@ class ClusterJobSchedulerServiceSpec extends Specification {
         }
 
         when:
-        service.retrieveKnownJobsWithState(realm, SSHUSER)
+        service.retrieveKnownJobsWithState(realm)
 
         then:
         thrown(Exception)
@@ -101,14 +101,14 @@ class ClusterJobSchedulerServiceSpec extends Specification {
         }
 
         when:
-        Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status> result = service.retrieveKnownJobsWithState(realm, SSHUSER)
+        Map<ClusterJobIdentifier, ClusterJobStatus> result = service.retrieveKnownJobsWithState(realm)
 
         then:
         result.isEmpty()
     }
 
     @Unroll
-    void "retrieveKnownJobsWithState, when status #pbsStatus appears in qstat, returns correct status #status"(String pbsStatus, ClusterJobMonitoringService.Status status) {
+    void "retrieveKnownJobsWithState, when status #pbsStatus appears in qstat, returns correct status #status"(String pbsStatus, ClusterJobStatus status) {
         given:
         Realm realm = DomainFactory.createRealm()
         File logFolder = TestCase.uniqueNonExistentPath
@@ -135,23 +135,23 @@ class ClusterJobSchedulerServiceSpec extends Specification {
         }
 
         when:
-        Map<ClusterJobIdentifier, ClusterJobMonitoringService.Status> result = service.retrieveKnownJobsWithState(realm, SSHUSER)
+        Map<ClusterJobIdentifier, ClusterJobStatus> result = service.retrieveKnownJobsWithState(realm)
 
         then:
-        def job = new ClusterJobIdentifier(realm, jobId, SSHUSER)
+        def job = new ClusterJobIdentifier(realm, jobId)
         result.containsKey(job)
         result.get(job) == status
 
         where:
         pbsStatus | status
-        "C"       | ClusterJobMonitoringService.Status.COMPLETED
-        "E"       | ClusterJobMonitoringService.Status.COMPLETED
-        "H"       | ClusterJobMonitoringService.Status.NOT_COMPLETED
-        "Q"       | ClusterJobMonitoringService.Status.NOT_COMPLETED
-        "R"       | ClusterJobMonitoringService.Status.NOT_COMPLETED
-        "T"       | ClusterJobMonitoringService.Status.NOT_COMPLETED
-        "W"       | ClusterJobMonitoringService.Status.NOT_COMPLETED
-        "S"       | ClusterJobMonitoringService.Status.NOT_COMPLETED
+        "C"       | ClusterJobStatus.COMPLETED
+        "E"       | ClusterJobStatus.COMPLETED
+        "H"       | ClusterJobStatus.NOT_COMPLETED
+        "Q"       | ClusterJobStatus.NOT_COMPLETED
+        "R"       | ClusterJobStatus.NOT_COMPLETED
+        "T"       | ClusterJobStatus.NOT_COMPLETED
+        "W"       | ClusterJobStatus.NOT_COMPLETED
+        "S"       | ClusterJobStatus.NOT_COMPLETED
     }
 
 

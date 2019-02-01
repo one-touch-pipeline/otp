@@ -70,10 +70,38 @@ class ClusterJob implements Entity {
     enum Status {
         FAILED, COMPLETED
     }
+
+    /**
+     * The different states for checking.
+     */
+    enum CheckStatus {
+        /**
+         * The job was created, but not started to check.
+         * This is necessary, because jobs are created one by one, but should first start to check if all are created.
+         */
+        CREATED,
+        /**
+         * The job should currently be checked
+         */
+        CHECKING,
+        /**
+         * The job has finished on the cluster.
+         */
+        FINISHED,
+    }
+
     /**
      * Used for {@link AbstractMultiJob}s. Is set to true after {@link AbstractMultiJob#execute(Collection)} returns.
      */
     boolean validated = false
+
+    /**
+     * The state of checking
+     *
+     * @see CheckStatus
+     */
+    CheckStatus checkStatus = CheckStatus.CREATED
+
     /**
      * Reference to the used realm
      */

@@ -55,6 +55,8 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
             SamplePair.withTransaction {
                 SamplePair samplePair = findSamplePairToProcess(minPriority)
                 if (samplePair) {
+                    samplePair.lock()
+                    samplePair.refresh()
 
                     ConfigPerProjectAndSeqType config = getConfig(samplePair)
 

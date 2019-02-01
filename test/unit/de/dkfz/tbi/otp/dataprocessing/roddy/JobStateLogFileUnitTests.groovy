@@ -53,7 +53,7 @@ class JobStateLogFileUnitTests {
 
     @Before
     void setUp() {
-        clusterJobIdentifier = new ClusterJobIdentifier(DomainFactory.createRealm(), "clusterJobId", "userName")
+        clusterJobIdentifier = new ClusterJobIdentifier(DomainFactory.createRealm(), "clusterJobId")
     }
 
     @After

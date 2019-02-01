@@ -32,7 +32,7 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
 
     @Override
     protected final NextAction execute(final Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable {
-        if (finishedClusterJobs == null) {
+        if (!finishedClusterJobs) {
             return maybeSubmit()
         } else {
             Map<ClusterJobIdentifier, String> failedClusterJobs = failedOrNotFinishedClusterJobs(finishedClusterJobs)

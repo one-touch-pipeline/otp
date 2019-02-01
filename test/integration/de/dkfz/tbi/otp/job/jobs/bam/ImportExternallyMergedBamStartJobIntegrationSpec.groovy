@@ -23,7 +23,6 @@
 package de.dkfz.tbi.otp.job.jobs.bam
 
 import grails.test.spock.IntegrationSpec
-import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 
 import de.dkfz.tbi.otp.dataprocessing.ImportProcess
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -31,10 +30,11 @@ import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.ImportExternallyMerged
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 
 class ImportExternallyMergedBamStartJobIntegrationSpec extends IntegrationSpec {
 
-    PersistenceContextInterceptor persistenceInterceptor
+    PersistenceContextUtils persistenceContextUtils
 
     def "execute sets state of importProcess on STARTED"() {
         given:
@@ -52,7 +52,7 @@ class ImportExternallyMergedBamStartJobIntegrationSpec extends IntegrationSpec {
         }
         importExternallyMergedBamStartJob.optionService = new ProcessingOptionService()
         importExternallyMergedBamStartJob.setJobExecutionPlan(plan)
-        importExternallyMergedBamStartJob.persistenceInterceptor = persistenceInterceptor
+        importExternallyMergedBamStartJob.persistenceContextUtils = persistenceContextUtils
 
         when:
         importExternallyMergedBamStartJob.execute()

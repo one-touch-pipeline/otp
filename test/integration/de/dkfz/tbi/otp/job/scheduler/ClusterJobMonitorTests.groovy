@@ -27,21 +27,21 @@ import org.junit.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.TestConstants
-import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
 import de.dkfz.tbi.otp.job.jobs.MonitoringTestJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertFailed
 import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertSucceeded
 import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createAndSaveProcessingStep
 
-class ClusterJobMonitoringServiceTests extends AbstractIntegrationTest {
+class ClusterJobMonitorTests extends AbstractIntegrationTest {
 
-    ClusterJobMonitoringService clusterJobMonitoringService
+    ClusterJobMonitor clusterJobMonitor
     RestartCheckerService restartCheckerService
     Scheduler scheduler
     SchedulerService schedulerService
@@ -54,8 +54,8 @@ class ClusterJobMonitoringServiceTests extends AbstractIntegrationTest {
     @After
     void tearDown() {
         TestCase.removeMetaClass(RestartCheckerService, restartCheckerService)
+        schedulerService.running.clear()
     }
-
 
     @Test
     void testNotifyJobAboutFinishedClusterJob_success() {
@@ -68,15 +68,17 @@ class ClusterJobMonitoringServiceTests extends AbstractIntegrationTest {
     }
 
     private MonitoringJob notifyJobAboutFinishedClusterJob(final boolean fail) {
-        Realm realm = new Realm()
-        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, TestConstants.ARBITRARY_CLUSTER_JOB_ID, "user name")
-        final Job testJob = new MonitoringTestJob(createAndSaveProcessingStep(), null, schedulerService, jobIdentifier, fail)
+        ProcessingStep processingStep = createAndSaveProcessingStep()
+        ClusterJob clusterJob = DomainFactory.createClusterJob(processingStep: processingStep)
+        Job testJob = new MonitoringTestJob(processingStep, schedulerService, clusterJob, fail)
 
         testJob.log = new NoOpLog()
         scheduler.executeJob(testJob)
         assert schedulerService.jobExecutedByCurrentThread == null
+        schedulerService.running.add(testJob)
         assert LogThreadLocal.threadLog == null
-        clusterJobMonitoringService.notifyJobAboutFinishedClusterJob(testJob, jobIdentifier)
+
+        clusterJobMonitor.notifyJobAboutFinishedClusterJob(clusterJob)
         assert schedulerService.jobExecutedByCurrentThread == null
         assert LogThreadLocal.threadLog == null
         assert testJob.executed

@@ -23,7 +23,6 @@
 package de.dkfz.tbi.otp.job.jobs.fastqc
 
 import grails.test.spock.IntegrationSpec
-import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -32,10 +31,11 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 
 class FastqcStartJobIntegrationSpec extends IntegrationSpec {
 
-    PersistenceContextInterceptor persistenceInterceptor
+    PersistenceContextUtils persistenceContextUtils
 
     def "execute calls setStartedForSeqTracks"() {
         given:
@@ -55,7 +55,7 @@ class FastqcStartJobIntegrationSpec extends IntegrationSpec {
         }
         fastqcStartJob.trackingService = new TrackingService()
         fastqcStartJob.setJobExecutionPlan(plan)
-        fastqcStartJob.persistenceInterceptor = persistenceInterceptor
+        fastqcStartJob.persistenceContextUtils = persistenceContextUtils
 
         when:
         fastqcStartJob.execute()

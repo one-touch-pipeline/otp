@@ -20,16 +20,33 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi
+package de.dkfz.tbi.otp.utils
+
+import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
 /**
- * A class for collecting constants used in different tests.
+ * Utility class for a persistence layer
  */
-class TestConstants {
-    /**
-     * The default error message a Assert.notNull of spring produced.
-     */
-    final static String ERROR_MESSAGE_SPRING_NOT_NULL = "[Assertion failed] - this argument is required; it must not be null"
+@Component
+class PersistenceContextUtils {
 
-    static final String ARBITRARY_MESSAGE = 'The job hit its toe on a comma-shaped stone.'
+    @Autowired
+    PersistenceContextInterceptor persistenceContextInterceptor
+
+    /**
+     * Surround the call of the given Closure with an persistence context. It returns the value returned by the closure
+     *
+     * The persistence context is needed for access of the database.
+     */
+    public <T> T doWithPersistenceContext(Closure<T> closure) {
+        try {
+            persistenceContextInterceptor.init()
+            return closure.call()
+        } finally {
+            persistenceContextInterceptor.flush()
+            persistenceContextInterceptor.destroy()
+        }
+    }
 }

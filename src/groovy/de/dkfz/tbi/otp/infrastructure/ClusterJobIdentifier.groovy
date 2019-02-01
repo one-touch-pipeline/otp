@@ -26,43 +26,40 @@ import groovy.transform.EqualsAndHashCode
 
 import de.dkfz.tbi.otp.ngsdata.Realm
 
-@EqualsAndHashCode(includes = ["clusterJobId", "userName", "realmId"])
+@EqualsAndHashCode(includes = ["clusterJobId", "realmId"])
 class ClusterJobIdentifier {
 
     final Realm realm
 
     final String clusterJobId
 
-    final String userName
-
-    def getRealmId() {
+    long getRealmId() {
         realm.id
     }
 
-    ClusterJobIdentifier(final Realm realm, final String clusterJobId, final String userName) {
+    ClusterJobIdentifier(final Realm realm, final String clusterJobId) {
         assert realm : "Realm not specified"
         assert clusterJobId : "Cluster job ID not specified"
-        assert userName : "User name not specified"
         this.realm = realm
         this.clusterJobId = clusterJobId
-        this.userName = userName
     }
 
     ClusterJobIdentifier(final ClusterJobIdentifier identifier) {
-        this(identifier.realm, identifier.clusterJobId, identifier.userName)
+        this(identifier.realm, identifier.clusterJobId)
     }
 
     ClusterJobIdentifier(final ClusterJob identifier) {
-        this(identifier.realm, identifier.clusterJobId, identifier.userName)
+        this(identifier.realm, identifier.clusterJobId)
     }
-
 
     @Override
     String toString() {
-        return "Cluster job ${clusterJobId} on ${realm} with user ${userName}"
+        return "Cluster job ${clusterJobId} on ${realm}"
     }
 
     static List<ClusterJobIdentifier> asClusterJobIdentifierList(final Collection<? extends ClusterJob> c) {
-        return c.collect( { new ClusterJobIdentifier(it) } )
+        return c.collect {
+            new ClusterJobIdentifier(it)
+        }
     }
 }

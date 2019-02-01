@@ -32,10 +32,10 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
 import java.util.concurrent.Semaphore
 import java.util.regex.Matcher
@@ -53,16 +53,11 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     static final Pattern roddyExecutionStoreDirectoryPattern = Pattern.compile(/(?:^|\n)Creating\sthe\sfollowing\sexecution\sdirectory\sto\sstore\sinformation\sabout\sthis\sprocess:\s*\n\s*(\/.*\/${RoddySnvCallingInstance.RODDY_EXECUTION_DIR_PATTERN})(?:\n|$)/)
 
     @Autowired
-    ExecuteRoddyCommandService executeRoddyCommandService
-
-    @Autowired
     ConfigService configService
     @Autowired
     ClusterJobService clusterJobService
     @Autowired
     ClusterJobSchedulerService clusterJobSchedulerService
-    @Autowired
-    SchedulerService schedulerService
 
     @Autowired
     RemoteShellHelper remoteShellHelper

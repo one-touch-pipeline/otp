@@ -28,23 +28,22 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
-import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitoringService
-import de.dkfz.tbi.otp.job.scheduler.Scheduler
+import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
-import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertFailed
 import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertSucceeded
 import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
 import static junit.framework.TestCase.assertEquals
@@ -52,23 +51,28 @@ import static junit.framework.TestCase.assertTrue
 
 class AbstractMultiJobTests implements UserAndRoles {
 
+    static boolean transactional = false
+
     static final String CLUSTER_JOB_1_ID = '123'
     static final String CLUSTER_JOB_2_ID = '456'
     static final String CLUSTER_JOB_3_ID = '789'
 
     @Autowired
     ApplicationContext applicationContext
-    ClusterJobMonitoringService clusterJobMonitoringService
+    ClusterJobMonitor clusterJobMonitor
     RestartCheckerService restartCheckerService
     Scheduler scheduler
 
-    final ProcessingStep step = createAndSaveProcessingStep()
-    final Realm realm = createRealm()
-    final ClusterJobIdentifier clusterJob1 = new ClusterJobIdentifier(realm, CLUSTER_JOB_1_ID, USER)
-    final ClusterJobIdentifier clusterJob2 = new ClusterJobIdentifier(realm, CLUSTER_JOB_2_ID, USER)
-    final ClusterJobIdentifier clusterJob3 = new ClusterJobIdentifier(realm, CLUSTER_JOB_3_ID, USER)
-    final Collection<ClusterJobIdentifier> clusterJobs1 = [clusterJob1, clusterJob2]
-    final Collection<ClusterJobIdentifier> clusterJobs2 = [clusterJob3]
+    @Autowired
+    PersistenceContextUtils persistenceContextUtils
+
+    ProcessingStep step
+    Realm realm
+    ClusterJobIdentifier clusterJob1
+    ClusterJobIdentifier clusterJob2
+    ClusterJobIdentifier clusterJob3
+    Collection<ClusterJobIdentifier> clusterJobs1
+    Collection<ClusterJobIdentifier> clusterJobs2
 
     final Semaphore semaphore = new Semaphore(0)
     final AtomicInteger atomicPhase = new AtomicInteger(0)
@@ -79,47 +83,86 @@ class AbstractMultiJobTests implements UserAndRoles {
 
     @Before
     void before() {
-        assert realm.save(flush: true)
-        clusterJobMonitoringService.queuedJobs = [:]
+        step = createAndSaveProcessingStep()
+        realm = createRealm()
+        clusterJob1 = new ClusterJobIdentifier(realm, CLUSTER_JOB_1_ID)
+        clusterJob2 = new ClusterJobIdentifier(realm, CLUSTER_JOB_2_ID)
+        clusterJob3 = new ClusterJobIdentifier(realm, CLUSTER_JOB_3_ID)
+        clusterJobs1 = [clusterJob1, clusterJob2]
+        clusterJobs2 = [clusterJob3]
+
         restartCheckerService.metaClass.canWorkflowBeRestarted = { ProcessingStep step -> false }
+
+        assert scheduler.schedulerService.running.empty
     }
 
     @After
     void tearDown() {
         TestCase.removeMetaClass(RestartCheckerService, restartCheckerService)
-    }
+        scheduler.schedulerService.running.clear()
 
-    @AfterClass
-    static void afterClass() {
         // Without cleaning the database, tests in other test classes fail.
         JobDefinition.withTransaction {
-            ClusterJob          .list(sort: "id", order: "desc").each { it.delete(flush: true) }
-            Realm               .list(sort: "id", order: "desc").each { it.delete(flush: true) }
-            ProcessingError     .list(sort: "id", order: "desc").each { it.delete(flush: true) }
-            ProcessingStepUpdate.list(sort: "id", order: "desc").each { it.delete(flush: true) }
-            ProcessingStep      .list(sort: "id", order: "desc").each { it.delete(flush: true) }
-            Process             .list(sort: "id", order: "desc").each { it.delete(flush: true) }
-            JobExecutionPlan    .list().each { it.firstJob = null; it.save(flush: true) }
-            JobDefinition       .list(sort: "id", order: "desc").each { it.delete(flush: true) }
-            JobExecutionPlan    .list(sort: "id", order: "desc").each { it.delete(flush: true) }
+            ProcessingStepUpdate.list().each {
+                it.error = null
+                it.save(flush: true)
+            }
+            JobExecutionPlan.list().each {
+                it.firstJob = null
+                it.save(flush: true)
+            }
+            [
+                    ClusterJob,
+                    Realm,
+                    ProcessingError,
+                    ProcessingStepUpdate,
+                    ProcessingStep,
+                    Process,
+                    JobDefinition,
+                    JobExecutionPlan,
+            ].each {
+                it.list(sort: "id", order: "desc").each {
+                    it.delete(flush: true)
+                }
+            }
         }
     }
 
+    /***
+     * Check that a multi job work correctly.
+     *
+     * The test use a job following steps:
+     * - sending two cluster jobs
+     * - wait for cluster jobs
+     * - validate finished cluster jobs plus send one additional cluster job
+     * - wait for cluster jobs
+     * - validate cluster job and finished successful
+     */
     @Test
     void testSucceedingJobWithoutResuming() {
         succeedingJob(false)
     }
 
+    /**
+     * Check that a multi job work correctly together with suspending and resuming.
+     *
+     * The test extend the test {link #testSucceedingJobWithoutResuming} with suspending/resuming.
+     */
     @Test
     void testSucceedingJobWithResuming() {
         succeedingJob(true)
     }
 
+    /**
+     * create a test job using given closure as execute method
+     */
     private AbstractMultiJob createJob(final Closure mainLogic) {
         final AbstractMultiJob jobBean = applicationContext.getBean("testMultiJob")
         jobBean.processingStep = step
         jobBean.log = new NoOpLog()
-        jobBean.metaClass.executeImpl = { final Collection<? extends ClusterJobIdentifier> finishedClusterJobs ->
+
+        //update the execute method of the test job for this test
+        jobBean.metaClass.executeImpl = { final Collection<? extends ClusterJob> finishedClusterJobs ->
             try {
                 assert delegate.is(job)
                 final int phase = atomicPhase.incrementAndGet()
@@ -132,10 +175,11 @@ class AbstractMultiJobTests implements UserAndRoles {
     }
 
     void succeedingJob(final boolean withResuming) {
-        final Closure mainLogic = { final int phase, final Collection<? extends ClusterJobIdentifier> finishedClusterJobs ->
+        final Closure mainLogic = { final int phase, final Collection<? extends ClusterJob> finishedClusterJobs ->
+            List<ClusterJobIdentifier> clusterJobIdentifiers = ClusterJobIdentifier.asClusterJobIdentifierList(finishedClusterJobs)
             switch (phase) {
                 case 1:
-                    assert finishedClusterJobs == null
+                    assert clusterJobIdentifiers == []
                     assert !job.resumable
                     clusterJobs1.each {
                         createClusterJob(step, it)
@@ -145,14 +189,14 @@ class AbstractMultiJobTests implements UserAndRoles {
                     if (withResuming) {
                         assert suspendCancelled.get()
                     }
-                    TestCase.assertContainSame(finishedClusterJobs, clusterJobs1)
+                    TestCase.assertContainSame(clusterJobIdentifiers, clusterJobs1)
                     assert !job.resumable
                     clusterJobs2.each {
                         createClusterJob(step, it)
                     }
                     return NextAction.WAIT_FOR_CLUSTER_JOBS
                 case 3:
-                    TestCase.assertContainSame(finishedClusterJobs, clusterJobs2)
+                    TestCase.assertContainSame(clusterJobIdentifiers, clusterJobs2)
                     assert !job.resumable
                     return NextAction.SUCCEED
                 default:
@@ -161,72 +205,118 @@ class AbstractMultiJobTests implements UserAndRoles {
         }
         job = createJob(mainLogic)
 
+        //start the job
+        scheduler.schedulerService.running.add(job)
         scheduler.executeJob(job)
+
+        //check that job is in phase 1
         assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
         assert atomicPhase.get() == 1
         assert job.state == AbstractJobImpl.State.STARTED
         assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
         assert job.resumable
-        monitoredJobs = clusterJobMonitoringService.queuedJobs[job]
+
+        monitoredJobs = ClusterJobIdentifier.asClusterJobIdentifierList(ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING))
         TestCase.assertContainSame(monitoredJobs, clusterJobs1)
-        clusterJobMonitoringService.queuedJobs = [:]
 
         if (withResuming) {
+            //plan otp shutdown
             job.planSuspend()
             assert job.resumable
+            //cancel otp shutdown, no otp restart, use same job instance
             job.cancelSuspend()
         }
 
-        clusterJobMonitoringService.notifyJobAboutFinishedClusterJob(job, clusterJob2)
+        //first cluster job of phase 1 finished
+        ClusterJob clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_2_ID)
+        clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
+        clusterJob.save(flush: true)
+
+        //check that the expected cluster jobs are in checking
+        assert ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING)*.clusterJobId == [CLUSTER_JOB_1_ID]
+
+        clusterJobMonitor.notifyJobAboutFinishedClusterJob(clusterJob)
+
+        //still in phase 1, since cluster 2 two of phase 1 still run
         assert atomicPhase.get() == 1
         assert job.state == AbstractJobImpl.State.STARTED
         assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
         assert job.resumable
-        assert clusterJobMonitoringService.queuedJobs.isEmpty()
 
+        //handling of suspending/resuming
         if (withResuming) {
+            //plan otp shutdown
             job.planSuspend()
             assert job.resumable
-            new TestThread(suspendCancelled, job).start()
+            //cancel otp shutdown from another thread, no otp restart, use same job instance
+            new TestThread(suspendCancelled, job, persistenceContextUtils).start()
         }
 
-        clusterJobMonitoringService.notifyJobAboutFinishedClusterJob(job, clusterJob1)
+        //second cluster job of phase 1 finished
+        clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_1_ID)
+        clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
+        clusterJob.save(flush: true)
+
+        //check that no further jobs are in checking
+        assert ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING).empty
+
+        clusterJobMonitor.notifyJobAboutFinishedClusterJob(clusterJob)
+
+        //check that job is in phase 2, since all cluster jobs of phase 1 finished
         assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
         assert atomicPhase.get() == 2
         assert job.state == AbstractJobImpl.State.STARTED
         assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
         assert job.resumable
-        monitoredJobs = clusterJobMonitoringService.queuedJobs[job]
-        TestCase.assertContainSame(monitoredJobs, clusterJobs2)
-        clusterJobMonitoringService.queuedJobs = [:]
 
+        //check that the expected cluster job is in checking
+        monitoredJobs = ClusterJobIdentifier.asClusterJobIdentifierList(ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING))
+        TestCase.assertContainSame(monitoredJobs, clusterJobs2)
+
+        //handling of suspending/resuming
         if (withResuming) {
+            //plan otp shutdown
             job.planSuspend()
             assert job.resumable
             assert createProcessingStepUpdate(step, ExecutionState.SUSPENDED).save(flush: true)
 
+            //simulate OTP restart, so new job instance are used
             final AbstractMultiJob newJobInstance = createJob(mainLogic)
             assert !newJobInstance.is(job)
+            scheduler.schedulerService.running.remove(job)
+            scheduler.schedulerService.running.add(newJobInstance)
             job = newJobInstance
 
+            //init new job instance with state
             assert createProcessingStepUpdate(step, ExecutionState.RESUMED).save(flush: true)
             scheduler.executeJob(job)
             assert atomicPhase.get() == 2
             assert job.state == AbstractJobImpl.State.STARTED
             assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
             assert job.resumable
-            monitoredJobs = clusterJobMonitoringService.queuedJobs[job]
+            monitoredJobs = ClusterJobIdentifier.asClusterJobIdentifierList(ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING))
             TestCase.assertContainSame(monitoredJobs, clusterJobs2)
-            clusterJobMonitoringService.queuedJobs = [:]
         }
 
-        clusterJobMonitoringService.notifyJobAboutFinishedClusterJob(job, clusterJob3)
+        //cluster job of phase 2 finished
+        clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_3_ID)
+        clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
+        clusterJob.save(flush: true)
+
+        //check that no further cluster job is in checking
+        assert ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING).empty
+
+        clusterJobMonitor.notifyJobAboutFinishedClusterJob(clusterJob)
+
+        //check that job is in phase 3, since all cluster jobs of phase 1 finished
         assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
         assert atomicPhase.get() == 3
         assert job.state == AbstractJobImpl.State.FINISHED
         assert step.latestProcessingStepUpdate.state == ExecutionState.SUCCESS
-        assert clusterJobMonitoringService.queuedJobs.isEmpty()
+
+        //test for handling of suspending/resuming
         if (withResuming) {
+            //check that all expected state updates were created
             assertEquals(ExecutionState.SUCCESS, job.endState)
             List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
             assert updates.size() == 7
@@ -241,23 +331,29 @@ class AbstractMultiJobTests implements UserAndRoles {
         } else {
             assertSucceeded(job)
         }
+        scheduler.schedulerService.running.remove(job)
     }
 
     @Test
     void testFailingJobInPhase1() {
-        job = createJob { final int phase, final Collection<? extends ClusterJobIdentifier> finishedClusterJobs ->
+        String message = HelperUtils.uniqueString
+        job = createJob { final int phase, final Collection<? extends ClusterJob> finishedClusterJobs ->
             assert phase == 1
-            throw new NumberFormatException(TestConstants.ARBITRARY_MESSAGE)
+            throw new NumberFormatException(message)
         }
-        shouldFail NumberFormatException, { scheduler.executeJob(job) }
+        scheduler.schedulerService.running.add(job)
+        shouldFail(NumberFormatException) {
+            scheduler.executeJob(job)
+        }
         assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
         assert atomicPhase.get() == 1
-        assertFailed(job, TestConstants.ARBITRARY_MESSAGE)
+        SchedulerTests.assertFailed(job, message)
     }
 
     @Test
     void testFailingJobInPhase2() {
-        job = createJob { final int phase, final Collection<? extends ClusterJobIdentifier> finishedClusterJobs ->
+        String message = HelperUtils.uniqueString
+        job = createJob { final int phase, final Collection<? extends ClusterJob> finishedClusterJobs ->
             switch (phase) {
                 case 1:
                     clusterJobs1.each {
@@ -265,11 +361,12 @@ class AbstractMultiJobTests implements UserAndRoles {
                     }
                     return NextAction.WAIT_FOR_CLUSTER_JOBS
                 case 2:
-                    throw new NumberFormatException(TestConstants.ARBITRARY_MESSAGE)
+                    throw new NumberFormatException(message)
                 default:
                     throw new UnsupportedOperationException("Phase ${phase} is not implemented.")
             }
         }
+        scheduler.schedulerService.running.add(job)
 
         scheduler.executeJob(job)
         assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
@@ -277,33 +374,48 @@ class AbstractMultiJobTests implements UserAndRoles {
         assert job.state == AbstractJobImpl.State.STARTED
         assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
 
-        clusterJobMonitoringService.notifyJobAboutFinishedClusterJob(job, clusterJob1)
+        //first cluster job of phase 1 finished
+        ClusterJob clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_1_ID)
+        clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
+        clusterJob.save(flush: true)
+
+        clusterJobMonitor.notifyJobAboutFinishedClusterJob(clusterJob)
         assert atomicPhase.get() == 1
         assert job.state == AbstractJobImpl.State.STARTED
         assert step.latestProcessingStepUpdate.state == ExecutionState.STARTED
 
-        clusterJobMonitoringService.notifyJobAboutFinishedClusterJob(job, clusterJob2)
+        //second cluster job of phase 1 finished
+        clusterJob = ClusterJob.findByClusterJobId(CLUSTER_JOB_2_ID)
+        clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
+        clusterJob.save(flush: true)
+
+        clusterJobMonitor.notifyJobAboutFinishedClusterJob(clusterJob)
         assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
         assert atomicPhase.get() == 2
 
-        assertFailed(job, TestConstants.ARBITRARY_MESSAGE)
+        SchedulerTests.assertFailed(job, message)
     }
 }
 
 class TestThread extends Thread {
 
+    PersistenceContextUtils persistenceContextUtils
+
     AtomicBoolean suspendCancelled
     AbstractMultiJob job
 
-    TestThread(AtomicBoolean suspendCancelled, AbstractMultiJob job) {
+    TestThread(AtomicBoolean suspendCancelled, AbstractMultiJob job, PersistenceContextUtils persistenceContextUtils) {
         this.suspendCancelled = suspendCancelled
         this.job = job
+        this.persistenceContextUtils = persistenceContextUtils
     }
 
     @Override
     void run() {
         Thread.sleep(200)
         suspendCancelled.set(true)
-        job.cancelSuspend()
+        persistenceContextUtils.doWithPersistenceContext {
+            job.cancelSuspend()
+        }
     }
 }

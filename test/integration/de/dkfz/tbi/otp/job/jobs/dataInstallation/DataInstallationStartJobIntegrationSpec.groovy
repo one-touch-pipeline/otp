@@ -23,7 +23,6 @@
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
 import grails.test.spock.IntegrationSpec
-import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -31,12 +30,13 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 
 class DataInstallationStartJobIntegrationSpec extends IntegrationSpec {
 
-    PersistenceContextInterceptor persistenceInterceptor
+    PersistenceContextUtils persistenceContextUtils
 
-    def "execute calls setStartedForSeqTracks"() {
+    void "execute calls setStartedForSeqTracks"() {
         given:
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
@@ -52,7 +52,7 @@ class DataInstallationStartJobIntegrationSpec extends IntegrationSpec {
 
         dataInstallationStartJob.trackingService = new TrackingService()
         dataInstallationStartJob.setJobExecutionPlan(plan)
-        dataInstallationStartJob.persistenceInterceptor = persistenceInterceptor
+        dataInstallationStartJob.persistenceContextUtils = persistenceContextUtils
         dataInstallationStartJob.seqTrackService = new SeqTrackService()
 
         when:

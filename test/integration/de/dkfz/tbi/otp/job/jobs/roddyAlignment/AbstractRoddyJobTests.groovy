@@ -36,7 +36,8 @@ import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.utils.LocalShellHelper
+import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
@@ -103,7 +104,6 @@ class AbstractRoddyJobTests {
                 getProcessingStep : { -> return DomainFactory.createAndSaveProcessingStep() },
         ] as AbstractRoddyJob
 
-        roddyJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
         roddyJob.configService = configService
         roddyJob.clusterJobService = new ClusterJobService()
         roddyJob.clusterJobSchedulerService = [
@@ -113,7 +113,6 @@ class AbstractRoddyJobTests {
 
     @After
     void tearDown() {
-        TestCase.removeMetaClass(ExecuteRoddyCommandService, roddyJob.executeRoddyCommandService)
         TestCase.removeMetaClass(AbstractRoddyJob, roddyJob)
         roddyBamFile = null
         GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
@@ -254,7 +253,6 @@ newLine"""
                 validate: { -> validateCounter++ },
                 failedOrNotFinishedClusterJobs: { Collection<? extends ClusterJobIdentifier> finishedClusterJobs -> [:] },
         ] as AbstractRoddyJob
-        roddyJob.executeRoddyCommandService = new ExecuteRoddyCommandService()
 
         Realm realm = DomainFactory.createRealm()
         assert realm.save([flush: true, failOnError: true])
@@ -265,7 +263,7 @@ newLine"""
         ClusterJob clusterJob = clusterJobService.createClusterJob(realm, "0000", configService.getSshUser(), processingStep)
         assert clusterJob
 
-        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId, configService.getSshUser())
+        final ClusterJobIdentifier jobIdentifier = new ClusterJobIdentifier(realm, clusterJob.clusterJobId)
 
         roddyJob.metaClass.maybeSubmit = {
             throw new RuntimeException("should not come here")

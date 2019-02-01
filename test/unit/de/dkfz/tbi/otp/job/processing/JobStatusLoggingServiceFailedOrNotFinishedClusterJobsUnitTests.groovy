@@ -106,17 +106,17 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
         final String suffixOfId3 = '34'
         final String id3 = prefixOfId3 + suffixOfId3
         final String id5 = '1005'
-        successfulJobOnRealm1 = new ClusterJobIdentifier(realm1, id1, configService.getSshUser())
-        failedJobOnRealm1 = new ClusterJobIdentifier(realm1, id2, configService.getSshUser())
+        successfulJobOnRealm1 = new ClusterJobIdentifier(realm1, id1)
+        failedJobOnRealm1 = new ClusterJobIdentifier(realm1, id2)
         jobIdsOnRealm1 = [
                 successfulJobOnRealm1.clusterJobId,
                 failedJobOnRealm1.clusterJobId,
         ]
-        successfulJobOnRealm2 = new ClusterJobIdentifier(realm2, id3, configService.getSshUser())
-        failedJob1OnRealm2 = new ClusterJobIdentifier(realm2, prefixOfId3, configService.getSshUser())
-        failedJob2OnRealm2 = new ClusterJobIdentifier(realm2, suffixOfId3, configService.getSshUser())
-        mixedUpJob1 = new ClusterJobIdentifier(realm2, successfulJobOnRealm1.clusterJobId, configService.getSshUser())
-        mixedUpJob2 = new ClusterJobIdentifier(realm2, failedJobOnRealm1.clusterJobId, configService.getSshUser())
+        successfulJobOnRealm2 = new ClusterJobIdentifier(realm2, id3)
+        failedJob1OnRealm2 = new ClusterJobIdentifier(realm2, prefixOfId3)
+        failedJob2OnRealm2 = new ClusterJobIdentifier(realm2, suffixOfId3)
+        mixedUpJob1 = new ClusterJobIdentifier(realm2, successfulJobOnRealm1.clusterJobId)
+        mixedUpJob2 = new ClusterJobIdentifier(realm2, failedJobOnRealm1.clusterJobId)
         jobIdsOnRealm2 = [
                 successfulJobOnRealm2.clusterJobId,
                 failedJob1OnRealm2.clusterJobId,
@@ -130,11 +130,11 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
                 mixedUpJob1,
                 mixedUpJob2,
         ]
-        jobOnRealmWithEmptyLogFile = new ClusterJobIdentifier(realmWithEmptyLogFile, id5, configService.getSshUser())
-        jobOnRealmWithoutLogFile = new ClusterJobIdentifier(realmWithoutLogFile, id5, configService.getSshUser())
-        jobOnRealmWithoutLogDir = new ClusterJobIdentifier(realmWithoutLogDir, id5, configService.getSshUser())
-        successfulJobOnRealmWithSameLogDirAs1 = new ClusterJobIdentifier(realmWithSameLogDirAs1, failedJobOnRealm1.clusterJobId, configService.getSshUser())
-        failedJobOnRealmWithSameLogDirAs1 = new ClusterJobIdentifier(realmWithSameLogDirAs1, successfulJobOnRealm1.clusterJobId, configService.getSshUser())
+        jobOnRealmWithEmptyLogFile = new ClusterJobIdentifier(realmWithEmptyLogFile, id5)
+        jobOnRealmWithoutLogFile = new ClusterJobIdentifier(realmWithoutLogFile, id5)
+        jobOnRealmWithoutLogDir = new ClusterJobIdentifier(realmWithoutLogDir, id5)
+        successfulJobOnRealmWithSameLogDirAs1 = new ClusterJobIdentifier(realmWithSameLogDirAs1, failedJobOnRealm1.clusterJobId)
+        failedJobOnRealmWithSameLogDirAs1 = new ClusterJobIdentifier(realmWithSameLogDirAs1, successfulJobOnRealm1.clusterJobId)
         jobIdsOnRealmWithSameLogDirAs1 = [
                 successfulJobOnRealmWithSameLogDirAs1.clusterJobId,
                 failedJobOnRealmWithSameLogDirAs1.clusterJobId,
@@ -167,7 +167,7 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
     void testFailedOrNotFinishedClusterJobsWithArgumentsRealmAndCollectionOfIds_Realm1() {
         final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs
         unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, [(realm1): jobIdsOnRealm1.collect {
-            new ClusterJobIdentifier(realm1, it, configService.getSshUser())
+            new ClusterJobIdentifier(realm1, it)
         }])
         assert unsuccessfulClusterJobs == [failedJobOnRealm1]
     }
@@ -176,7 +176,7 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
     void testFailedOrNotFinishedClusterJobsWithArgumentsRealmAndCollectionOfIds_Realm2() {
         final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs
         unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, [(realm2): jobIdsOnRealm2.collect {
-            new ClusterJobIdentifier(realm2, it, configService.getSshUser())
+            new ClusterJobIdentifier(realm2, it)
         }])
         assertAndContinue { assert unsuccessfulClusterJobs.size() == unsuccessfulJobsOnRealm2.size() }
         assertAndContinue { assert unsuccessfulClusterJobs.containsAll(unsuccessfulJobsOnRealm2) }
@@ -195,7 +195,7 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
     void testFailedOrNotFinishedClusterJobsWithArgumentsRealmAndCollectionOfIds_RealmWithSameLogDirAs1() {
         final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs
         unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, [(realmWithSameLogDirAs1): jobIdsOnRealmWithSameLogDirAs1.collect {
-            new ClusterJobIdentifier(realmWithSameLogDirAs1, it, configService.getSshUser())
+            new ClusterJobIdentifier(realmWithSameLogDirAs1, it)
         }])
         assert unsuccessfulClusterJobs == [failedJobOnRealmWithSameLogDirAs1]
     }
@@ -226,16 +226,16 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsUnitTests extends Tes
         final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs
         unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, [
                 (realm1)                : jobIdsOnRealm1.collect {
-                    new ClusterJobIdentifier(realm1, it, configService.getSshUser())
+                    new ClusterJobIdentifier(realm1, it)
                 },
                 (realm2)                : jobIdsOnRealm2.collect {
-                    new ClusterJobIdentifier(realm2, it, configService.getSshUser())
+                    new ClusterJobIdentifier(realm2, it)
                 },
-                (realmWithEmptyLogFile) : [new ClusterJobIdentifier(realmWithEmptyLogFile, jobOnRealmWithEmptyLogFile.clusterJobId, configService.getSshUser())],
-                (realmWithoutLogFile)   : [new ClusterJobIdentifier(realmWithoutLogFile, jobOnRealmWithoutLogFile.clusterJobId, configService.getSshUser())],
-                (realmWithoutLogDir)    : [new ClusterJobIdentifier(realmWithoutLogDir, jobOnRealmWithoutLogDir.clusterJobId, configService.getSshUser())],
+                (realmWithEmptyLogFile) : [new ClusterJobIdentifier(realmWithEmptyLogFile, jobOnRealmWithEmptyLogFile.clusterJobId)],
+                (realmWithoutLogFile)   : [new ClusterJobIdentifier(realmWithoutLogFile, jobOnRealmWithoutLogFile.clusterJobId)],
+                (realmWithoutLogDir)    : [new ClusterJobIdentifier(realmWithoutLogDir, jobOnRealmWithoutLogDir.clusterJobId)],
                 (realmWithSameLogDirAs1): jobIdsOnRealmWithSameLogDirAs1.collect {
-                    new ClusterJobIdentifier(realmWithSameLogDirAs1, it, configService.getSshUser())
+                    new ClusterJobIdentifier(realmWithSameLogDirAs1, it)
                 },
         ])
         assertAndContinue { assert unsuccessfulClusterJobs.size() == allUnsuccessfulJobs.size() }
