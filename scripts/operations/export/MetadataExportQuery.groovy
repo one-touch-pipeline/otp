@@ -1,0 +1,132 @@
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.ngsdata.*
+import org.hibernate.sql.JoinType
+
+/**
+ * This script exports the Fastq metadata entries for a selection of fastq files.
+ * output is written to ${ScriptOutputPath}/export/
+ */
+
+
+////////////////////////////////////////////////////////////
+// CONFIG
+
+// output label (no extension, is used to make a .csv and a .done file)
+String output_name = "ticketnumber-something-metadata"
+
+// query for which fastq files to export the metadata
+List<DataFile> fastq_to_export = DataFile.createCriteria().listDistinct {
+    seqTrack {
+        or {
+            sample {
+                individual {
+                    or {
+                        'in'('mockPid', [
+                                '',
+                        ])
+                        project {
+                            'in'('name', [
+                                    '',
+                            ])
+                        }
+                    }
+                }
+            }
+            ilseSubmission(JoinType.LEFT_OUTER_JOIN.getJoinTypeValue()) {
+                'in'('ilseNumber', [
+                        -1
+                ])
+            }
+        }
+    }
+}
+
+// END CONFIG
+////////////////////////////////////////////////////////////
+// (but see DEBUG limit below)
+
+
+// where to put output
+File output_dir = new File(ConfigService.getInstance().getScriptOutputPath(), "export")
+File output =    new File(output_dir, "${output_name}.csv")
+File done_flag = new File(output_dir, "${output_name}.done")
+
+
+
+// metadata columns of interest: everything normally in a metadata file we receive.
+List<String> wanted_columns = MetaDataColumn.values()
+List<MetaDataKey> keys = MetaDataKey.findAllByNameInList(wanted_columns)
+
+// get metadata columns for our datafiles
+List<MetaDataEntry> metaDataEntries = MetaDataEntry.createCriteria().list {
+    'in'('dataFile', fastq_to_export)
+    'in'('key', keys)
+    order('dataFile') // Caveat: ordering clause is vitally important for output-logic below to be correct
+}
+
+
+// output our data ============================================================
+// Note: the OTP Console will probably time out with a proxy/gateway error while doing this, but the script remains
+// running. Look for the ".done" file to see when we are truly finished.
+output.withPrintWriter { w ->
+    // before we forget: the header
+    w.write(wanted_columns.join("\t"))
+    w.write("\n")
+
+    // combine entries per datafile into a single line.
+    Map<String, String> line_buffer = new HashMap<String, String>()
+    DataFile previous_fastq
+
+    for (MetaDataEntry mde : metaDataEntries) {
+        current_fastq = mde.dataFile
+        // They're sorted by datafile, so if it "changes", we've just iterated into a new data-file
+        // and our line_buffer should hold the complete selection for the "old" one
+        if (current_fastq != previous_fastq && previous_fastq != null) { // "!= null" skip outputting almost-empty ...
+            // .. record on first line, which ruins the alignment otherwise.
+
+            // write everything for the old one to file.
+            writeln(line_buffer, previous_fastq, w, wanted_columns)
+            // don't keep any values, in case they are not overwritten by the next fastq
+            line_buffer.clear()
+        }
+
+        // store this metadata property for this file in our buffer
+        line_buffer[mde.key.name] = mde.value
+        previous_fastq = current_fastq
+    }
+
+    // write the final buffer. The final file doesn't have a "different" one following it to trigger it otherwise.
+    //   (This line was absolutely, honestly part of the first iteration of this script, and wasn't accidentally
+    //   forgotten before someone else pointed it out! Honest!)
+    writeln(line_buffer, previous_fastq, w, wanted_columns)
+} // END printwriter
+
+
+
+private void writeln(Map<String, String> line_buffer, DataFile the_file, PrintWriter w, List<String> wanted_columns) {
+    line = []
+
+    // emit the column values in header-order
+    wanted_columns.each { String header ->
+        // full path instead of filename for FastQ; other properties as-is
+        if (header == "FASTQ_FILE") {
+            line << ctx.lsdfFilesService.getFileViewByPidPath(the_file)
+        } else {
+            line << line_buffer.getOrDefault(header, "")
+        }
+    }
+
+    w.write(line.join("\t"))
+    w.write("\n")
+}
+
+// joyously announce our success!
+String done_message = "Done, at ${new Date()}\n"
+println(done_message)
+// In case the console timed out, so we can't see other messages: write a marker file to filesystem
+done_flag.withPrintWriter { Writer w ->
+    w.write(done_message)
+}
+
+
+null // suppress (potentially huge) console result output.
