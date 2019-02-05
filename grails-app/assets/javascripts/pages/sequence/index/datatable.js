@@ -1,3 +1,25 @@
+/*
+ * Copyright 2011-2019 The OTP authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
 /*jslint browser: true */
 /*global $ */
 
@@ -6,18 +28,21 @@ $.otp.sequence = {
     register: function () {
         "use strict";
         var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), $("#sequenceTable"), true);
-
+console.log("sssssssssssssssssssssssssss")
         var link = $.otp.createLink({
             controller: 'sequence',
             action: 'exportAll',
         });
-
+console.log("dddddd")
+console.log($("#sequenceTable"))
         $("#sequenceTable").dataTable({
             dom: '<i> B rt<"clear">S',
             buttons: [ {
                 extend: 'csv',
                 titleAttr: 'Attention: Download can take a while',
                 action: function ( e, dt, node, config ) {
+                    console.log("jjjjjjjjjjjjjj")
+
                     var iframe = document.createElement('iframe');
                     iframe.style.height = "0px";
                     iframe.style.width = "0px";
@@ -43,6 +68,8 @@ $.otp.sequence = {
             iDisplayLength: 100,
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
+              console.log("hhhhhhh")
+
                 aoData.push({
                     name: "filtering",
                     value: JSON.stringify(searchCriteria())
@@ -57,8 +84,11 @@ $.otp.sequence = {
                     },
                     "error": function () {
                         fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
-                    },
+                                console.log("444444444444")
+  },
                     "success": function (json) {
+                                      console.log("666666666666")
+
                         $("#withdrawn_description").hide();
                         var i, j, rowData, row, fastQC;
                         for (i = 0; i < json.aaData.length; i += 1) {
@@ -136,7 +166,8 @@ $.otp.sequence = {
                 });
             },
             fnRowCallback: function (nRow) {
-                var fastqc;
+                 console.log("ccccccccccccccc")
+       var fastqc;
                 fastqc = $("td:eq(11)", nRow);
                 if ($("a", fastqc).length > 0) {
                     fastqc.addClass("true");
@@ -162,5 +193,6 @@ $.otp.sequence = {
                 fileExists.text('');
             }
         });
+        console.log("dddddddddddddddddddddddddddddddddddd")
     }
 };

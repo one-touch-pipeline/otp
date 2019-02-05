@@ -45,6 +45,7 @@ target-eclipse
 ## IntelliJ
 .idea/*
 !.idea/codeStyles/
+!.idea/copyright/
 *.iml
 *.ipr
 *.iws
