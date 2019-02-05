@@ -143,7 +143,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         setupBamFilesInFileSystem()
     }
 
-    void adaptSampleTypes() {}
+    void adaptSampleTypes() { }
 
 
     void createSampleTypeCategories() {

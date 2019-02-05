@@ -65,7 +65,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
             }
         }
         roddyExecutionDirectoryNames nullable: true
-        workDirectoryName nullable: true,  validator: { val, obj ->
+        workDirectoryName nullable: true, validator: { val, obj ->
             (val == null || (OtpPath.isValidPathComponent(val) &&
                     !RoddyBamFile.findAllByWorkDirectoryName(val).any {
                         it != obj && it.workPackage == obj.workPackage

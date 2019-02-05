@@ -117,7 +117,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
     }
 
     @Override
-    void createProjectConfig(MergingWorkPackage workPackage, Map options = [:]) {}
+    void createProjectConfig(MergingWorkPackage workPackage, Map options = [:]) { }
 
     void createProjectConfigRna(MergingWorkPackage workPackage, Map configOptions = [:], Map referenceGenomeConfig = [:]) {
 
@@ -195,10 +195,10 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
                     resources        : "t",
             ] + configOptions))
             projectService.configureRnaAlignmentReferenceGenome(new RnaAlignmentReferenceGenomeConfiguration([
-                    project          : workPackage.project,
-                    seqType          : workPackage.seqType,
-                    referenceGenome  : workPackage.referenceGenome,
-                    geneModel        : geneModel,
+                    project             : workPackage.project,
+                    seqType             : workPackage.seqType,
+                    referenceGenome     : workPackage.referenceGenome,
+                    geneModel           : geneModel,
                     referenceGenomeIndex: [
                             referenceGenomeIndexGatk,
                             referenceGenomeIndexStar200,

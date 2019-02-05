@@ -60,8 +60,8 @@ class RoddyWorkflowConfigTests {
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqType,
+                project : project,
+                seqType : seqType,
                 pipeline: pipeline,
         ])
         assert RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline) == roddyWorkflowConfig
@@ -96,15 +96,15 @@ class RoddyWorkflowConfigTests {
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
         Individual individual = DomainFactory.createIndividual(project: project)
         DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqType,
+                project : project,
+                seqType : seqType,
                 pipeline: pipeline,
         ])
 
         RoddyWorkflowConfig roddyWorkflowConfigIndividual = DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqType,
-                pipeline: pipeline,
+                project   : project,
+                seqType   : seqType,
+                pipeline  : pipeline,
                 individual: individual,
         ])
 
@@ -118,16 +118,16 @@ class RoddyWorkflowConfigTests {
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
         Individual individual = DomainFactory.createIndividual(project: project)
         DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqType,
-                pipeline: pipeline,
+                project   : project,
+                seqType   : seqType,
+                pipeline  : pipeline,
                 individual: DomainFactory.createIndividual(project: project),
         ])
 
         RoddyWorkflowConfig roddyWorkflowConfigIndividual = DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqType,
-                pipeline: pipeline,
+                project   : project,
+                seqType   : seqType,
+                pipeline  : pipeline,
                 individual: individual,
         ])
 
@@ -141,17 +141,17 @@ class RoddyWorkflowConfigTests {
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
         Individual individual = DomainFactory.createIndividual(project: project)
         DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqType,
-                pipeline: pipeline,
-                individual: individual,
+                project     : project,
+                seqType     : seqType,
+                pipeline    : pipeline,
+                individual  : individual,
                 obsoleteDate: new Date(),
         ])
 
         RoddyWorkflowConfig roddyWorkflowConfigIndividual = DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqType,
-                pipeline: pipeline,
+                project   : project,
+                seqType   : seqType,
+                pipeline  : pipeline,
                 individual: individual,
         ])
 
@@ -167,9 +167,9 @@ class RoddyWorkflowConfigTests {
         Individual individual = DomainFactory.createIndividual(project: project)
 
         RoddyWorkflowConfig roddyWorkflowConfigIndividual = DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqType,
-                pipeline: pipeline,
+                project   : project,
+                seqType   : seqType,
+                pipeline  : pipeline,
                 individual: individual,
         ])
 
@@ -183,15 +183,15 @@ class RoddyWorkflowConfigTests {
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
         Individual individual = DomainFactory.createIndividual(project: project)
         DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqType,
+                project : project,
+                seqType : seqType,
                 pipeline: pipeline,
         ])
 
         RoddyWorkflowConfig roddyWorkflowConfigIndividual = DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqType,
-                pipeline: pipeline,
+                project   : project,
+                seqType   : seqType,
+                pipeline  : pipeline,
                 individual: individual,
         ])
 
@@ -205,8 +205,8 @@ class RoddyWorkflowConfigTests {
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
         Individual individual = DomainFactory.createIndividual(project: project)
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                seqType: seqType,
+                project : project,
+                seqType : seqType,
                 pipeline: pipeline,
         ])
 
@@ -226,9 +226,9 @@ class RoddyWorkflowConfigTests {
         )
 
         ConfigPerProjectAndSeqType newConfigPerProject = DomainFactory.createRoddyWorkflowConfig([
-                project: project,
-                pipeline: pipeline,
-                seqType: seqType,
+                project       : project,
+                pipeline      : pipeline,
+                seqType       : seqType,
                 previousConfig: firstConfigPerProject,
         ], false)
 
@@ -242,7 +242,7 @@ class RoddyWorkflowConfigTests {
 
 
     @Test
-    void testCreateConfigPerProject_PreviousConfigDoesNotExist(){
+    void testCreateConfigPerProject_PreviousConfigDoesNotExist() {
         Project project = DomainFactory.createProject()
         ConfigPerProjectAndSeqType configPerProject = DomainFactory.createRoddyWorkflowConfig(
                 project: project,

@@ -11,7 +11,7 @@ class SeqPlatformServiceUnitTests {
 
     @Test
     void testCreateNewSeqPlatform_SeqPlatformNameIsNull_shouldFail() {
-        TestCase.shouldFail(AssertionError){
+        TestCase.shouldFail(AssertionError) {
             SeqPlatformService.createNewSeqPlatform(null)
         }
     }

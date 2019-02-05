@@ -63,13 +63,13 @@ class AbstractQualityAssessmentServiceTests {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         RoddyMergedBamQa mergedQa = new RoddyMergedBamQa(
                 ARBITRARY_QA_VALUES + [
-                qualityAssessmentMergedPass : QualityAssessmentMergedPass.build(abstractMergedBamFile: roddyBamFile),
-                qcBasesMapped : QC_BASES_MAPPED,
-                genomeWithoutNCoverageQcBases: EXPECTED_COVERAGE,
-                chromosome: RoddyQualityAssessment.ALL,
-                insertSizeCV: 123,
-                percentageMatesOnDifferentChr: 0.123,
-        ])
+                        qualityAssessmentMergedPass  : QualityAssessmentMergedPass.build(abstractMergedBamFile: roddyBamFile),
+                        qcBasesMapped                : QC_BASES_MAPPED,
+                        genomeWithoutNCoverageQcBases: EXPECTED_COVERAGE,
+                        chromosome                   : RoddyQualityAssessment.ALL,
+                        insertSizeCV                 : 123,
+                        percentageMatesOnDifferentChr: 0.123,
+                ])
         assert mergedQa.save(flush: true)
 
         roddyBamFile.referenceGenome.length = REFERENCE_GENOME_LENGTH_WITH_N
@@ -108,9 +108,9 @@ class AbstractQualityAssessmentServiceTests {
         Collection<RoddyQualityAssessment> qas = RoddyQualityAssessment.list()
         assert TestCase.containSame(qas*.class*.simpleName.unique(), ["Roddy${mergedBamOrSingleLane}Qa"])
         assert TestCase.containSame(qas*.chromosome, ["8", "all", "7"])
-        assert qas.find{ it.chromosome == '8' }.qcBasesMapped == qcBasesMappedExpected
-        assert qas.find{ it.chromosome == '8' }.allBasesMapped == allBasesMappedExpected
-        assert qas.find{ it.chromosome == '8' }.onTargetMappedBases == onTargetMappedBasesExpected
+        assert qas.find { it.chromosome == '8' }.qcBasesMapped == qcBasesMappedExpected
+        assert qas.find { it.chromosome == '8' }.allBasesMapped == allBasesMappedExpected
+        assert qas.find { it.chromosome == '8' }.onTargetMappedBases == onTargetMappedBasesExpected
     }
 
     @Test
@@ -194,5 +194,4 @@ class AbstractQualityAssessmentServiceTests {
             )
         }
     }
-
 }

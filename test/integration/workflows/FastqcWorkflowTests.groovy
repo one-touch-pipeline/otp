@@ -10,6 +10,7 @@ import java.util.zip.*
 
 @Ignore
 class FastqcWorkflowTests extends WorkflowTestCase {
+
     ProcessingOptionService processingOptionService
     LsdfFilesService lsdfFilesService
     FastqcDataFilesService fastqcDataFilesService
@@ -115,7 +116,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         assert seqTrack.nBasePairs
     }
 
-    private void checkExistenceOfResultsFiles(){
+    private void checkExistenceOfResultsFiles() {
         ZipFile expectedResult = new ZipFile(expectedFastqc)
         ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputFile(dataFile))
 

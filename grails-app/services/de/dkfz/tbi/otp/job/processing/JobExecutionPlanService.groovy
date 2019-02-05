@@ -152,7 +152,7 @@ AND u.id IN (
         List<Long> ids = processes.collect { it[1] }
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByIdInList(ids)
         processes.each {
-            results.put(it[0] as Process, updates.find { update -> update.id == it[1] } )
+            results.put(it[0] as Process, updates.find { update -> update.id == it[1] })
         }
 
         return results
@@ -299,7 +299,7 @@ AND u.id IN (
      * return Map of job execution plan names -> all processes count
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map<String, Long> processCount(){
+    Map<String, Long> processCount() {
         Process.createCriteria().list {
             createAlias("jobExecutionPlan", "jep")
             projections {

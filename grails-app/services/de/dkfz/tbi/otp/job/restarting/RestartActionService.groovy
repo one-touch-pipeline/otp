@@ -114,7 +114,7 @@ class RestartActionService {
         commentService.saveComment(process, commentMessage(process, message))
     }
 
-    String commentMessage(Process process, String message){
+    String commentMessage(Process process, String message) {
         Comment comment = process.comment ?: new Comment()
         if (comment.comment) {
             return "${comment.comment}\n\n${message}"

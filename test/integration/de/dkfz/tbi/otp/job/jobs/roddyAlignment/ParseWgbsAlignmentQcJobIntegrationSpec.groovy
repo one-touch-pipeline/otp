@@ -65,7 +65,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends IntegrationSpec {
         MergingWorkPackage workPackage = roddyBamFile.mergingWorkPackage
         while (roddyBamFile.getContainedSeqTracks().size() < seqTrackNumber) {
             SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, [
-                    libraryName: LIBRARY_NAME,
+                    libraryName          : LIBRARY_NAME,
                     normalizedLibraryName: NORMALIZED_LIBRARY_NAME,
             ])
 
@@ -96,7 +96,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends IntegrationSpec {
         String libraryName = "library14"
         MergingWorkPackage workPackage = roddyBamFile.mergingWorkPackage
         SeqTrack secondSeqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, [
-                libraryName: libraryName,
+                libraryName          : libraryName,
                 normalizedLibraryName: SeqTrack.normalizeLibraryName(libraryName),
         ])
 
@@ -145,7 +145,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends IntegrationSpec {
         libraryName << [null, ""]
     }
 
-    private void validateCommonExecutionResults(RoddyBamFile roddyBamFile){
+    private void validateCommonExecutionResults(RoddyBamFile roddyBamFile) {
         assert RoddySingleLaneQa.list()
         assert RoddyMergedBamQa.list()
 

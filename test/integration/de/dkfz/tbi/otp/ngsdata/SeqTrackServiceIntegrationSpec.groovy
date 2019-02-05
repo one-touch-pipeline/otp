@@ -42,13 +42,14 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         expectedLaneId == laneId
 
         where:
-        state       | priority                              | inputPriority                 || expectedLaneId
-        UNKNOWN     | ProcessingPriority.NORMAL             | ProcessingPriority.NORMAL     || null
-        NOT_STARTED | ProcessingPriority.NORMAL             | ProcessingPriority.NORMAL     || "1"
-        NOT_STARTED | ProcessingPriority.FAST_TRACK         | ProcessingPriority.NORMAL     || "2"
-        NOT_STARTED | ProcessingPriority.FAST_TRACK         | ProcessingPriority.FAST_TRACK || "2"
+        state       | priority                      | inputPriority                 || expectedLaneId
+        UNKNOWN     | ProcessingPriority.NORMAL     | ProcessingPriority.NORMAL     || null
+        NOT_STARTED | ProcessingPriority.NORMAL     | ProcessingPriority.NORMAL     || "1"
+        NOT_STARTED | ProcessingPriority.FAST_TRACK | ProcessingPriority.NORMAL     || "2"
+        NOT_STARTED | ProcessingPriority.FAST_TRACK | ProcessingPriority.FAST_TRACK || "2"
     }
 
+    @SuppressWarnings('SeqTrackServiceIntegrationSpec')
     void "getSeqTrackReadyForFastqcProcessing basic lookup"() {
         given:
         SeqTrackService seqTrackService = new SeqTrackService([dataSource: dataSource])
@@ -59,14 +60,14 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         SeqTrack result = seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL)
 
         then:
-        shouldFind? result : !result
+        shouldFind ? result : !result
 
         where:
         shouldFind | params
-        false | {[ fastqcState: UNKNOWN ]}
-        false | {[ fastqcState: UNKNOWN,     seqType: SeqTypeService.getExomePairedSeqType()]}
-        true  | {[ fastqcState: NOT_STARTED ]}
-        true  | {[ fastqcState: NOT_STARTED, seqType: SeqTypeService.getExomePairedSeqType()]}
+        false      | { [fastqcState: UNKNOWN] }
+        false      | { [fastqcState: UNKNOWN, seqType: SeqTypeService.getExomePairedSeqType()] }
+        true       | { [fastqcState: NOT_STARTED] }
+        true       | { [fastqcState: NOT_STARTED, seqType: SeqTypeService.getExomePairedSeqType()] }
 
     }
 
@@ -75,10 +76,10 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         SeqTrackService service = new SeqTrackService([dataSource: dataSource])
         SeqType alignableSeqType = DomainFactory.createAllAlignableSeqTypes().first()
 
-        DomainFactory.createSeqTrack ([ fastqcState: NOT_STARTED ])
-        SeqTrack alignableSeqTrack = DomainFactory.createSeqTrack ([
+        DomainFactory.createSeqTrack([fastqcState: NOT_STARTED])
+        SeqTrack alignableSeqTrack = DomainFactory.createSeqTrack([
                 fastqcState: NOT_STARTED,
-                seqType: alignableSeqType,
+                seqType    : alignableSeqType,
         ])
 
         when:
@@ -93,8 +94,8 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         SeqTrackService service = new SeqTrackService([dataSource: dataSource])
         DomainFactory.createAllAlignableSeqTypes()
 
-        SeqTrack oldestSeqTrack = DomainFactory.createSeqTrack ([fastqcState: NOT_STARTED])
-        DomainFactory.createSeqTrack ([fastqcState: NOT_STARTED])
+        SeqTrack oldestSeqTrack = DomainFactory.createSeqTrack([fastqcState: NOT_STARTED])
+        DomainFactory.createSeqTrack([fastqcState: NOT_STARTED])
 
         when:
         SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL)
@@ -103,13 +104,13 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         result == oldestSeqTrack
     }
 
-    void  "getSeqTrackReadyForFastqcProcessing should prioritise FastTrack"() {
+    void "getSeqTrackReadyForFastqcProcessing should prioritise FastTrack"() {
         given:
         SeqTrackService service = new SeqTrackService([dataSource: dataSource])
         DomainFactory.createAllAlignableSeqTypes()
 
-        DomainFactory.createSeqTrack ([fastqcState: NOT_STARTED])
-        SeqTrack importantSeqTrack = DomainFactory.createSeqTrack ([fastqcState: NOT_STARTED])
+        DomainFactory.createSeqTrack([fastqcState: NOT_STARTED])
+        SeqTrack importantSeqTrack = DomainFactory.createSeqTrack([fastqcState: NOT_STARTED])
         Project importantProject = importantSeqTrack.project
         importantProject.processingPriority = ProcessingPriority.FAST_TRACK.priority
         importantProject.save(flush: true)
@@ -125,11 +126,11 @@ class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
         result == importantSeqTrack
     }
 
-    void  "getSeqTrackReadyForFastqcProcessing should ignore normal priority when asked for fastTrack"() {
+    void "getSeqTrackReadyForFastqcProcessing should ignore normal priority when asked for fastTrack"() {
         given:
         SeqTrackService service = new SeqTrackService([dataSource: dataSource])
         DomainFactory.createAllAlignableSeqTypes()
-        DomainFactory.createSeqTrack ([fastqcState: NOT_STARTED])
+        DomainFactory.createSeqTrack([fastqcState: NOT_STARTED])
 
         when:
         SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.FAST_TRACK)

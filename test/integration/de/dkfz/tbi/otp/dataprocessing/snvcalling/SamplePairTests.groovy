@@ -60,7 +60,7 @@ class SamplePairTests {
         mergingWorkPackage1.sample.individual = DomainFactory.createIndividual()
         assert mergingWorkPackage1.sample.save(flush: true)
 
-        SamplePair.metaClass.getIndividual = { -> return mergingWorkPackage1.individual}
+        SamplePair.metaClass.getIndividual = { -> return mergingWorkPackage1.individual }
 
         TestCase.shouldFailWithMessageContaining(ValidationException, "individual", { samplePair.save() })
     }

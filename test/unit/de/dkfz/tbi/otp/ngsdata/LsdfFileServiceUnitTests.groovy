@@ -33,8 +33,10 @@ class LsdfFileServiceUnitTests {
     @Test
     void testFileReadableAndNotEmptyMethods_IsNotAbsolute() {
         File file = new File("testFile.txt")
-        assert shouldFail(AssertionError, {LsdfFilesService.isFileReadableAndNotEmpty(file)}) =~ /(?i)isAbsolute/
-        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)isAbsolute/
+        assert shouldFail(AssertionError, { LsdfFilesService.isFileReadableAndNotEmpty(file) }) =~ /(?i)isAbsolute/
+        assert shouldFail(AssertionError, {
+            LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
+        }) =~ /(?i)isAbsolute/
     }
 
     @Test
@@ -42,14 +44,18 @@ class LsdfFileServiceUnitTests {
         //file must be absolute to make sure that the test fails the 'exists?' assertion
         File file = new File(tempFolder.newFolder(), "testFile.txt")
         assert !LsdfFilesService.isFileReadableAndNotEmpty(file)
-        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)not found\./
+        assert shouldFail(AssertionError, {
+            LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
+        }) =~ /(?i)not found\./
     }
 
     @Test
     void testFileReadableAndNotEmptyMethods_IsNotAFile() {
         File file = tempFolder.newFolder()
         assert !LsdfFilesService.isFileReadableAndNotEmpty(file)
-        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)isRegularFile/
+        assert shouldFail(AssertionError, {
+            LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
+        }) =~ /(?i)isRegularFile/
     }
 
     @Test
@@ -59,7 +65,9 @@ class LsdfFileServiceUnitTests {
         try {
             file.setReadable(false)
             assert !LsdfFilesService.isFileReadableAndNotEmpty(file)
-            assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)isReadable/
+            assert shouldFail(AssertionError, {
+                LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
+            }) =~ /(?i)isReadable/
         } finally {
             file.setReadable(true)
         }
@@ -69,7 +77,7 @@ class LsdfFileServiceUnitTests {
     void testFileReadableAndNotEmptyMethods_IsEmpty() {
         File file = tempFolder.newFile()
         assert !LsdfFilesService.isFileReadableAndNotEmpty(file)
-        assert shouldFail(AssertionError, {LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)}) =~ /(?i)size/
+        assert shouldFail(AssertionError, { LsdfFilesService.ensureFileIsReadableAndNotEmpty(file) }) =~ /(?i)size/
     }
 
     @Test
@@ -90,10 +98,10 @@ class LsdfFileServiceUnitTests {
     void test_deleteFilesRecursive_shouldBeFine() {
         Realm realm = DomainFactory.createRealm()
         service.remoteShellHelper = [
-                executeCommand: {Realm realm2, String command ->
+                executeCommand: { Realm realm2, String command ->
                     LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
                 }
-                ] as RemoteShellHelper
+        ] as RemoteShellHelper
         service.createClusterScriptService = new CreateClusterScriptService()
 
         List<File> files = [
@@ -112,7 +120,7 @@ class LsdfFileServiceUnitTests {
     void test_deleteFilesRecursive_FilesOrDirectoriesIsEmpty_shouldDoNothing() {
         Realm realm = DomainFactory.createRealm()
         service.remoteShellHelper = [
-                executeCommand: {Realm realm2, String command ->
+                executeCommand: { Realm realm2, String command ->
                     assert false: 'Should not be called'
                 }
         ] as RemoteShellHelper
@@ -137,13 +145,12 @@ class LsdfFileServiceUnitTests {
     }
 
 
-
     @Test
     void test_deleteFilesRecursive_deletionFail_shouldThrowException() {
         final String MESSAGE = HelperUtils.uniqueString
         Realm realm = DomainFactory.createRealm()
         service.remoteShellHelper = [
-                executeCommand: {Realm realm2, String command ->
+                executeCommand: { Realm realm2, String command ->
                     assert false: MESSAGE
                 }
         ] as RemoteShellHelper

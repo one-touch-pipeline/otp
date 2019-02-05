@@ -39,7 +39,7 @@ class QualityAssessmentPass implements ProcessParameterObject, Entity {
         assert processedBamFile
         return QualityAssessmentPass.createCriteria().get {
             eq("processedBamFile", processedBamFile)
-            projections{
+            projections {
                 max("identifier")
             }
         }
@@ -56,7 +56,7 @@ class QualityAssessmentPass implements ProcessParameterObject, Entity {
     }
 
     static belongsTo = [
-        processedBamFile: ProcessedBamFile,
+            processedBamFile: ProcessedBamFile,
     ]
 
     AlignmentPass getAlignmentPass() {

@@ -14,6 +14,7 @@ import java.time.*
  * Helper methods to work with file paths
  */
 class FileService {
+
     RemoteShellHelper remoteShellHelper
 
     /**
@@ -386,5 +387,5 @@ enum CreateLinkOption {
     /** Create an absolute link instead of a relative link */
     ABSOLUTE,
 
-    private CreateLinkOption() {}
+    private CreateLinkOption() { }
 }

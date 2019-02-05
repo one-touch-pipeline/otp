@@ -79,10 +79,10 @@ class JobStatusLoggingService {
     String constructMessage(Realm realm, ProcessingStep processingStep, String clusterJobId = null) {
         notNull processingStep, 'No processing step specified.'
         String message = [
-            processingStep.jobDefinition.plan.name,
-            processingStep.getNonQualifiedJobClass(),
-            processingStep.id,
-            clusterJobId ?: shellSnippetForClusterJobId(realm),
+                processingStep.jobDefinition.plan.name,
+                processingStep.getNonQualifiedJobClass(),
+                processingStep.id,
+                clusterJobId ?: shellSnippetForClusterJobId(realm),
         ].join(',')
         return "${message}" as String
     }
@@ -101,9 +101,11 @@ class JobStatusLoggingService {
             final ProcessingStep processingStep, final Collection<ClusterJobIdentifier> clusterJobs) {
         notNull processingStep
         notNull clusterJobs
-        def invalidInput = clusterJobs.findAll( { it == null || it.realm == null || it.clusterJobId == null } )
+        def invalidInput = clusterJobs.findAll({ it == null || it.realm == null || it.clusterJobId == null })
         assert invalidInput == []: "clusterJobs argument contains null values: ${invalidInput}"
-        final Map<Realm, Collection<ClusterJobIdentifier>> clusterJobMap = (clusterJobs.groupBy( {it.realm} ).collectEntries { realm, clusterJob ->
+        final Map<Realm, Collection<ClusterJobIdentifier>> clusterJobMap = (clusterJobs.groupBy({
+            it.realm
+        }).collectEntries { realm, clusterJob ->
             [(realm): clusterJob]
         } as Map<Realm, Collection<ClusterJobIdentifier>>)
         assert clusterJobMap.values().flatten().size() == clusterJobs.size()

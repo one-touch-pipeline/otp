@@ -8,7 +8,7 @@ class Result<T, U> {
     private T result
     private U error
 
-    private Result() {}
+    private Result() { }
 
     static Result<T, U> success(T value) {
         Result<T, U> r = new Result<T, U>()

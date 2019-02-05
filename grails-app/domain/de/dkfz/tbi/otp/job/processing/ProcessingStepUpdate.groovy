@@ -49,7 +49,7 @@ class ProcessingStepUpdate implements Serializable, Entity {
             // or if it has one element which is this one
             List<ProcessingStepUpdate> stepUpdates = ProcessingStepUpdate.findAllByProcessingStep(obj.processingStep)
             return stepUpdates.isEmpty() ||
-                (stepUpdates.size() == 1 && stepUpdates.first() == obj)
+                    (stepUpdates.size() == 1 && stepUpdates.first() == obj)
         })
         date(nullable: false, validator: { val, obj ->
             if (obj.id) {
@@ -91,7 +91,7 @@ class ProcessingStepUpdate implements Serializable, Entity {
                 }
             }
         })
-        error(nullable: true, validator: {val, obj ->
+        error(nullable: true, validator: { val, obj ->
             if (!val) {
                 return true
             }

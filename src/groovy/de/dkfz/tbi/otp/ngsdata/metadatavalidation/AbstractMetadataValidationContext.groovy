@@ -27,7 +27,7 @@ abstract class AbstractMetadataValidationContext extends ValidationContext {
         this.metadataFileMd5sum = metadataFileMd5sum
     }
 
-    static Map readAndCheckFile(Path metadataFile, Closure<Boolean> dataRowFilter = {true}) {
+    static Map readAndCheckFile(Path metadataFile, Closure<Boolean> dataRowFilter = { true }) {
         Problems problems = new Problems()
         String metadataFileMd5sum = null
         Spreadsheet spreadsheet = null

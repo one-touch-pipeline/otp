@@ -49,7 +49,7 @@ class TestCase {
         try {
             if (closure() != null) {
                 throw new Error('The closure passed to assertAndContinue returned a value. ' +
-                    'Did you forget the assert keyword in the closure?')
+                        'Did you forget the assert keyword in the closure?')
             }
         } catch (final AssertionError error) {
             failures << error
@@ -197,7 +197,9 @@ class TestCase {
             assert it.exists() && Files.isSymbolicLink(it.toPath()) && it.canRead()
         }
 
-        Set<File> expectedEntries = (expectedDirs + expectedFiles + expectedLinks).findAll {it.parentFile == baseDir} as Set
+        Set<File> expectedEntries = (expectedDirs + expectedFiles + expectedLinks).findAll {
+            it.parentFile == baseDir
+        } as Set
         Set<File> foundEntries = baseDir.listFiles() as Set
         assert expectedEntries == foundEntries
     }

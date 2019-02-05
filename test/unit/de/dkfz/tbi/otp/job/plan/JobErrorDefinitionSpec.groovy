@@ -35,7 +35,7 @@ class JobErrorDefinitionSpec extends Specification {
 
         then:
         jobErrorDefinition.jobDefinitions.contains(jobDefinition)
-        jobErrorDefinition.jobDefinitions.size()==1
+        jobErrorDefinition.jobDefinitions.size() == 1
     }
 
     void 'tries to add JobErrorDefinition, when action = furtherCheck, succeeds'() {
@@ -51,7 +51,7 @@ class JobErrorDefinitionSpec extends Specification {
         jobErrorDefinition1.checkFurtherJobErrors.contains(jobErrorDefinition)
     }
 
-    void 'create JobErrorDefinition with invalid errorExpression, should fail'(){
+    void 'create JobErrorDefinition with invalid errorExpression, should fail'() {
         given:
         JobErrorDefinition jobErrorDefinition = new JobErrorDefinition(errorExpression: "*", type: JobErrorDefinition.Type.MESSAGE, action: JobErrorDefinition.Action.STOP)
 

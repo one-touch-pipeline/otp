@@ -20,10 +20,10 @@ class JobErrorDefinitionService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    List getJobDefinition(Map jobErrorDefinitionMap){
+    List getJobDefinition(Map jobErrorDefinitionMap) {
         List jobErrorDefinitions = []
         jobErrorDefinitionMap.each { key, value ->
-            JobErrorDefinition jobErrorDefinitionObject = (JobErrorDefinition)key
+            JobErrorDefinition jobErrorDefinitionObject = (JobErrorDefinition) key
             jobErrorDefinitionObject.jobDefinitions.each { JobDefinition jobDefinition ->
                 jobErrorDefinitions << jobDefinition
             }
@@ -47,14 +47,14 @@ class JobErrorDefinitionService {
 
     Map<Object, Object> findDuplicates(Map jobErrorDefinition) {
         List list = []
-        jobErrorDefinition.each{ key, value ->
+        jobErrorDefinition.each { key, value ->
             if (value instanceof Map) {
                 value.each { k, v ->
                     list.add(k)
                 }
             }
         }
-        list.each {JobErrorDefinition listObject ->
+        list.each { JobErrorDefinition listObject ->
             jobErrorDefinition.remove(listObject)
         }
         return jobErrorDefinition

@@ -525,7 +525,7 @@ ruleset {
         priority = HIGH
     }
     SpaceAfterOpeningBrace {
-        priority = HIGH
+        priority = CRITICAL
     }
     SpaceAfterSemicolon {
         priority = CRITICAL
@@ -548,10 +548,10 @@ ruleset {
         priority = HIGH
     }
     SpaceBeforeClosingBrace {
-        priority = HIGH
+        priority = CRITICAL
     }
     SpaceBeforeOpeningBrace {
-        priority = HIGH
+        priority = CRITICAL
     }
     TrailingWhitespace {
         priority = HIGH

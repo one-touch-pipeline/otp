@@ -36,7 +36,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         return 'hs37d5.fa.chrLenOnlyACGT_realChromosomes.tab'
     }
 
-    protected String getCytosinePositionsIndex() {}
+    protected String getCytosinePositionsIndex() { }
 
     // some text to be used to fill in files created on the fly
     protected final static String TEST_CONTENT = 'dummy file, created by OTP'
@@ -411,7 +411,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         List<SeqTrack> seqTrackOfFirstBamFile = SeqTrack.findAllByLaneIdInList(["readGroup1"])
 
         checkFirstBamFileState(firstBamFile, false, [
-                seqTracks: seqTrackOfFirstBamFile,
+                seqTracks         : seqTrackOfFirstBamFile,
                 containedSeqTracks: seqTrackOfFirstBamFile,
         ])
         assertBamFileFileSystemPropertiesSet(firstBamFile)

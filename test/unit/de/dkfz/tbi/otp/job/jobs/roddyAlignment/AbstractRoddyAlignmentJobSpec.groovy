@@ -150,7 +150,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         String errorMessage = HelperUtils.uniqueString
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
-                1 * correctPermissions(_, _) >> {}
+                1 * correctPermissions(_, _) >> { }
             }
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {
                 throw new AssertionError(errorMessage)
@@ -175,12 +175,12 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
-                1 * correctPermissions(_, _) >> {}
+                1 * correctPermissions(_, _) >> { }
             }
             getConfigService() >> configService
-            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {}
-            validateReadGroups(_) >> {}
-            workflowSpecificValidation(_) >> {}
+            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
+            validateReadGroups(_) >> { }
+            workflowSpecificValidation(_) >> { }
 
         }
 
@@ -225,12 +225,12 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
-                1 * correctPermissions(_, _) >> {}
+                1 * correctPermissions(_, _) >> { }
             }
             getConfigService() >> configService
-            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {}
-            validateReadGroups(_) >> {}
-            workflowSpecificValidation(_) >> {}
+            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
+            validateReadGroups(_) >> { }
+            workflowSpecificValidation(_) >> { }
 
         }
 
@@ -257,12 +257,12 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
-                1 * correctPermissions(_, _) >> {}
+                1 * correctPermissions(_, _) >> { }
             }
             getConfigService() >> configService
-            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {}
-            1 * validateReadGroups(_) >> {}
-            1 * workflowSpecificValidation(_) >> {}
+            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
+            1 * validateReadGroups(_) >> { }
+            1 * workflowSpecificValidation(_) >> { }
 
         }
 
@@ -288,12 +288,12 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getExecuteRoddyCommandService() >> Mock(ExecuteRoddyCommandService) {
-                1 * correctPermissions(_, _) >> {}
+                1 * correctPermissions(_, _) >> { }
             }
             getConfigService() >> configService
-            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {}
-            1 * validateReadGroups(_) >> {}
-            1 * workflowSpecificValidation(_) >> {}
+            1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
+            1 * validateReadGroups(_) >> { }
+            1 * workflowSpecificValidation(_) >> { }
 
         }
 
@@ -319,7 +319,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         """\
         |@HD\tVN:1.5\tSO:coordinate
         |@SQ\tSN:ref\tLN:45
-        |${readGroup.collect {"@RG\tID:${it}\tLB:2_TTAGGC\tSM:sample_tumor_123"}.join('\n')}
+        |${readGroup.collect { "@RG\tID:${it}\tLB:2_TTAGGC\tSM:sample_tumor_123" }.join('\n')}
         |r001\t99\tref\t7\t30\t8M2I4M1D3M\t=\t37\t39\tTTAGATAAAGGATACTG\t*
         |r002\t0\tref\t9\t30\t3S6M1P1I4M\t*\t0\t0\tAAAAGATAAGGATA\t*
         |r003\t0\tref\t9\t30\t5S6M\t*\t0\t0\tGCCTAAGCTAA\t*\tSA:Z:ref,29,-,6H5M,17,0;
@@ -349,9 +349,9 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         String expectedErrorMessage = """\
             |Read groups in BAM file are not as expected.
             |Read groups in ${roddyBamFile.workBamFile}:
-            |${(roddyBamFile.containedSeqTracks - seqTrack).collect { it.getReadGroupName() }.sort().join('\n') }
+            |${(roddyBamFile.containedSeqTracks - seqTrack).collect { it.getReadGroupName() }.sort().join('\n')}
             |Expected read groups:
-            |${roddyBamFile.containedSeqTracks.collect { it.getReadGroupName() }.sort().join('\n') }
+            |${roddyBamFile.containedSeqTracks.collect { it.getReadGroupName() }.sort().join('\n')}
             |""".stripMargin()
 
         when:

@@ -36,30 +36,30 @@ class SeqPlatformServiceTests {
         SequencingKitLabel sequencingKitLabel = DomainFactory.createSequencingKitLabel()
         SequencingKitLabel sequencingKitLabel2 = DomainFactory.createSequencingKitLabel()
         [
-            PLATFORM_NAME,
-            OTHER_PLATFORM_NAME,
+                PLATFORM_NAME,
+                OTHER_PLATFORM_NAME,
         ].each { name ->
             [
-                seqPlatformModelLabel,
-                seqPlatformModelLabel2,
-                null,
-            ].each {model ->
-                [
-                    sequencingKitLabel,
-                    sequencingKitLabel2,
+                    seqPlatformModelLabel,
+                    seqPlatformModelLabel2,
                     null,
+            ].each { model ->
+                [
+                        sequencingKitLabel,
+                        sequencingKitLabel2,
+                        null,
                 ].each { kit ->
                     DomainFactory.createSeqPlatformWithSeqPlatformGroup([
-                        name: name,
-                        seqPlatformModelLabel: model,
-                        sequencingKitLabel: kit,
+                            name                 : name,
+                            seqPlatformModelLabel: model,
+                            sequencingKitLabel   : kit,
                     ])
                 }
             }
         }
         return [
-            seqPlatformModelLabel,
-            sequencingKitLabel,
+                seqPlatformModelLabel,
+                sequencingKitLabel,
         ]
     }
 

@@ -36,7 +36,9 @@ class AbstractAlignmentDeciderTest {
     private AbstractAlignmentDecider newDecider(Map methods = [:]) {
         AbstractAlignmentDecider decider = ([
                 prepareForAlignment: { MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign -> },
-                getPipeline: { return Pipeline.findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT) },
+                getPipeline        : {
+                    return Pipeline.findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT)
+                },
         ] + methods) as AbstractAlignmentDecider
         decider.applicationContext = applicationContext
         decider.mailHelperService = applicationContext.mailHelperService
@@ -62,7 +64,7 @@ class AbstractAlignmentDeciderTest {
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
         DomainFactory.createReferenceGenomeProjectSeqType(project: seqTrack.project, referenceGenome: referenceGenome, seqType: seqTrack.seqType, statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME)
 
-        Collection<MergingWorkPackage> workPackages =  decider.findOrSaveWorkPackages(seqTrack, seqTrack.configuredReferenceGenomeProjectSeqType, decider.getPipeline(seqTrack))
+        Collection<MergingWorkPackage> workPackages = decider.findOrSaveWorkPackages(seqTrack, seqTrack.configuredReferenceGenomeProjectSeqType, decider.getPipeline(seqTrack))
         decider.findOrSaveWorkPackages(seqTrack2, seqTrack2.configuredReferenceGenomeProjectSeqType, decider.getPipeline(seqTrack2))
 
         assert exactlyOneElement(workPackages).seqTracks == [seqTrack, seqTrack2] as Set<SeqTrack>
@@ -144,7 +146,7 @@ class AbstractAlignmentDeciderTest {
                 statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
         )
 
-        decider.mailHelperService.metaClass.sendEmail = {String subject, String content, String recipient ->
+        decider.mailHelperService.metaClass.sendEmail = { String subject, String content, String recipient ->
             assert content.contains(prefix)
             assert content.contains(ticket.ticketNumber)
             assert subject.contains(seqTrack.sample.toString())
@@ -189,7 +191,7 @@ class AbstractAlignmentDeciderTest {
 
         boolean emailIsSent = false
 
-        decider.mailHelperService.metaClass.sendEmail = {String subject, String content, String recipient ->
+        decider.mailHelperService.metaClass.sendEmail = { String subject, String content, String recipient ->
             assert content.contains(prefix)
             assert content.contains(ticket.ticketNumber)
             assert subject.contains(seqTrack.sample.toString())
@@ -211,7 +213,7 @@ class AbstractAlignmentDeciderTest {
 
         boolean emailIsSent = false
 
-        decider.mailHelperService.metaClass.sendEmail = {String subject, String content, String recipient ->
+        decider.mailHelperService.metaClass.sendEmail = { String subject, String content, String recipient ->
             assert subject.contains(seqTrack.sample.toString())
             assert content.contains(seqTrack.libraryPreparationKit.name)
             assert content.contains(workPackage.libraryPreparationKit.name)

@@ -15,11 +15,11 @@ class ProcessStatusServiceTests {
     @Before
     void setUp() {
         dir = new File(LOG_FILE_DIRECTORY)
-        if (!dir.exists()){
+        if (!dir.exists()) {
             assertTrue(dir.mkdirs())
         }
         file = new File(LOG_FILE)
-        if (!file.exists()){
+        if (!file.exists()) {
             assertTrue(file.createNewFile())
         }
     }

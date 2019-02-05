@@ -12,8 +12,8 @@ import de.dkfz.tbi.otp.utils.Entity
 abstract class ConfigPerProjectAndSeqType implements TimeStamped, Entity {
 
     static belongsTo = [
-        project: Project,
-        seqType: SeqType,
+            project: Project,
+            seqType: SeqType,
     ]
 
     Pipeline pipeline
@@ -34,7 +34,7 @@ abstract class ConfigPerProjectAndSeqType implements TimeStamped, Entity {
         }
         obsoleteDate nullable: true
         seqType nullable: true, //needs to be nullable because of old data, should never be null for new data
-                validator: {val, obj ->
+                validator: { val, obj ->
                     obj.obsoleteDate ? true : val != null
                 }
     }
@@ -47,7 +47,7 @@ abstract class ConfigPerProjectAndSeqType implements TimeStamped, Entity {
     }
 
     void createConfigPerProjectAndSeqType() {
-         Project.withTransaction {
+        Project.withTransaction {
             this.previousConfig?.makeObsolete()
             assert this.save(flush: true)
         }

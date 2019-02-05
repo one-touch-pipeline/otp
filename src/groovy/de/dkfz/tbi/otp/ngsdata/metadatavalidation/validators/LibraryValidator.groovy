@@ -25,7 +25,7 @@ class LibraryValidator extends SingleValueValidator<MetadataValidationContext> i
     }
 
     @Override
-    void columnMissing(MetadataValidationContext context) {}
+    void columnMissing(MetadataValidationContext context) { }
 
     @Override
     void validateValue(MetadataValidationContext context, String library, Set<Cell> cells) {

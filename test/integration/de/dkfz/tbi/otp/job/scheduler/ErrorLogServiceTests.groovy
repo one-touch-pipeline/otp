@@ -48,7 +48,7 @@ class ErrorLogServiceTests {
         assertTrue(exceptionStoringFile.isFile())
         //Test if the content of the file is correct
         def contentOfFile = new XmlParser().parse(exceptionStoringFile)
-        def timestamps = contentOfFile.timestamp.findAll{ it }
+        def timestamps = contentOfFile.timestamp.findAll { it }
         assertEquals(1, timestamps.size())
         assertTrue(contentOfFile.@exceptionMessage == ERROR_MESSAGE)
         TestCase.removeMetaClass(ConfigService, configService)
@@ -73,8 +73,7 @@ class ErrorLogServiceTests {
 
     @Test
     void testLoggedErrorWithContent() {
-        stacktraceFile <<
-                        """
+        stacktraceFile << """
 <stacktraceElement exceptionMessage='Testing'>
   <stacktrace>${ERROR_MESSAGE}</stacktrace>
   <timestamp>

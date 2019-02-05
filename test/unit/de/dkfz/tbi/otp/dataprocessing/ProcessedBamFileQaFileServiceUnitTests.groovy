@@ -9,17 +9,17 @@ import org.junit.Before
 import org.junit.Test
 
 @Build([
-    MergingCriteria,
-    QualityAssessmentPass,
-    ReferenceGenome,
+        MergingCriteria,
+        QualityAssessmentPass,
+        ReferenceGenome,
 ])
 class ProcessedBamFileQaFileServiceUnitTests {
 
     @Before
     void setUp() throws Exception {
         //these domain methods are mocked, since the contained critera makes problems
-        QualityAssessmentPass.metaClass.isLatestPass = {true}
-        AlignmentPass.metaClass.isLatestPass = {true}
+        QualityAssessmentPass.metaClass.isLatestPass = { true }
+        AlignmentPass.metaClass.isLatestPass = { true }
     }
 
     @After
@@ -33,14 +33,14 @@ class ProcessedBamFileQaFileServiceUnitTests {
         ProcessedBamFileQaFileService processedBamFileQaFileService = new ProcessedBamFileQaFileService()
         processedBamFileQaFileService.configService = [] as TestConfigService
         processedBamFileQaFileService.mergedAlignmentDataFileService = [
-            buildRelativePath: { SeqType type, Sample sample -> return "RelativeDirectory"},
+                buildRelativePath: { SeqType type, Sample sample -> return "RelativeDirectory" },
         ] as MergedAlignmentDataFileService
         processedBamFileQaFileService.processedAlignmentFileService = [
-            getDirectory: { AlignmentPass alignmentPass -> return "AlignmentDirectory"},
-            getRunLaneDirectory: { SeqTrack seqTrack -> return "RunLaneDirectory"},
+                getDirectory       : { AlignmentPass alignmentPass -> return "AlignmentDirectory" },
+                getRunLaneDirectory: { SeqTrack seqTrack -> return "RunLaneDirectory" },
         ] as ProcessedAlignmentFileService
         processedBamFileQaFileService.processedBamFileService = [
-            getFileNameNoSuffix: { ProcessedBamFile bamFile -> return "BamFileName"},
+                getFileNameNoSuffix: { ProcessedBamFile bamFile -> return "BamFileName" },
         ] as ProcessedBamFileService
         return processedBamFileQaFileService
     }
@@ -51,15 +51,15 @@ class ProcessedBamFileQaFileServiceUnitTests {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
-            checkConsistencyWithFinalDestinationForDeletion: {final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
-                File expectedProcessingDirectory = processedBamFileQaFileService.directoryPath(qualityAssessmentPass) as File
-                File expectedFinalDestinationDirectory = processedBamFileQaFileService.finalDestinationDirectory(qualityAssessmentPass)
-                Collection<String> expectedAdditionalFiles = processedBamFileQaFileService.allFileNames(qualityAssessmentPass.processedBamFile)
-                assert expectedProcessingDirectory == processingDirectory
-                assert expectedFinalDestinationDirectory == finalDestinationDirectory
-                assert expectedAdditionalFiles == fileNames
-                return true
-            }
+                checkConsistencyWithFinalDestinationForDeletion: { final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
+                    File expectedProcessingDirectory = processedBamFileQaFileService.directoryPath(qualityAssessmentPass) as File
+                    File expectedFinalDestinationDirectory = processedBamFileQaFileService.finalDestinationDirectory(qualityAssessmentPass)
+                    Collection<String> expectedAdditionalFiles = processedBamFileQaFileService.allFileNames(qualityAssessmentPass.processedBamFile)
+                    assert expectedProcessingDirectory == processingDirectory
+                    assert expectedFinalDestinationDirectory == finalDestinationDirectory
+                    assert expectedAdditionalFiles == fileNames
+                    return true
+                }
         ] as DataProcessingFilesService
 
         assert processedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(qualityAssessmentPass)
@@ -69,12 +69,12 @@ class ProcessedBamFileQaFileServiceUnitTests {
     void testCheckConsistencyForProcessingFilesDeletion_QualityAssessmentPassIsNull() {
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
-            checkConsistencyWithFinalDestinationForDeletion: {final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
-                fail "checkConsistencyWithFinalDestinationForDeletion was called when it shouldn't be. Method under test should have failed earlier."
-            }
+                checkConsistencyWithFinalDestinationForDeletion: { final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
+                    fail "checkConsistencyWithFinalDestinationForDeletion was called when it shouldn't be. Method under test should have failed earlier."
+                }
         ] as DataProcessingFilesService
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             processedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(null) //
         }
     }
@@ -84,11 +84,11 @@ class ProcessedBamFileQaFileServiceUnitTests {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
-            checkConsistencyWithFinalDestinationForDeletion: {final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
-                fail "checkConsistencyWithFinalDestinationForDeletion was called when it shouldn't be. Method under test should have failed earlier."
-            }
+                checkConsistencyWithFinalDestinationForDeletion: { final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
+                    fail "checkConsistencyWithFinalDestinationForDeletion was called when it shouldn't be. Method under test should have failed earlier."
+                }
         ] as DataProcessingFilesService
-        QualityAssessmentPass.metaClass.isLatestPass = {false}
+        QualityAssessmentPass.metaClass.isLatestPass = { false }
 
         assert processedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(qualityAssessmentPass)
     }
@@ -98,11 +98,11 @@ class ProcessedBamFileQaFileServiceUnitTests {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
-            checkConsistencyWithFinalDestinationForDeletion: {final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
-                fail "checkConsistencyWithFinalDestinationForDeletion was called when it shouldn't be. Method under test should have failed earlier."
-            }
+                checkConsistencyWithFinalDestinationForDeletion: { final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
+                    fail "checkConsistencyWithFinalDestinationForDeletion was called when it shouldn't be. Method under test should have failed earlier."
+                }
         ] as DataProcessingFilesService
-        AlignmentPass.metaClass.isLatestPass = {false}
+        AlignmentPass.metaClass.isLatestPass = { false }
 
         assert processedBamFileQaFileService.checkConsistencyForProcessingFilesDeletion(qualityAssessmentPass)
     }
@@ -113,14 +113,14 @@ class ProcessedBamFileQaFileServiceUnitTests {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
-            deleteProcessingFilesAndDirectory: { final Project project, final File processingDirectory, final Collection<String> fileNames ->
-                File filePath = processedBamFileQaFileService.directoryPath(qualityAssessmentPass) as File
-                Set<String> expectedAdditionFiles = processedBamFileQaFileService.allFileNames(qualityAssessmentPass.processedBamFile) as Set
-                assert qualityAssessmentPass.project == project
-                assert filePath == processingDirectory
-                assert expectedAdditionFiles == fileNames as Set
-                return FILE_LENGTH
-            },
+                deleteProcessingFilesAndDirectory: { final Project project, final File processingDirectory, final Collection<String> fileNames ->
+                    File filePath = processedBamFileQaFileService.directoryPath(qualityAssessmentPass) as File
+                    Set<String> expectedAdditionFiles = processedBamFileQaFileService.allFileNames(qualityAssessmentPass.processedBamFile) as Set
+                    assert qualityAssessmentPass.project == project
+                    assert filePath == processingDirectory
+                    assert expectedAdditionFiles == fileNames as Set
+                    return FILE_LENGTH
+                },
         ] as DataProcessingFilesService
 
         assert FILE_LENGTH == processedBamFileQaFileService.deleteProcessingFiles(qualityAssessmentPass)
@@ -130,12 +130,12 @@ class ProcessedBamFileQaFileServiceUnitTests {
     void testDeleteProcessingFiles_QualityAssessmentPassIsNull() {
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
-            deleteProcessingFilesAndDirectory: { final Project project, final File processingDirectory, final Collection<String> fileNames ->
-                fail "checkConsistencyWithFinalDestinationForDeletion was called when it shouldn't be. Method under test should have failed earlier."
-            },
+                deleteProcessingFilesAndDirectory: { final Project project, final File processingDirectory, final Collection<String> fileNames ->
+                    fail "checkConsistencyWithFinalDestinationForDeletion was called when it shouldn't be. Method under test should have failed earlier."
+                },
         ] as DataProcessingFilesService
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             processedBamFileQaFileService.deleteProcessingFiles(null) //
         }
     }
@@ -145,12 +145,12 @@ class ProcessedBamFileQaFileServiceUnitTests {
         QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build()
         ProcessedBamFileQaFileService processedBamFileQaFileService = createProcessedBamFileQaFileService()
         processedBamFileQaFileService.dataProcessingFilesService = [
-            checkConsistencyWithFinalDestinationForDeletion: {final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
-                return false
-            },
-            deleteProcessingFilesAndDirectory: { final Project project, final File processingDirectory, final Collection<String> fileNames ->
-                fail "checkConsistencyWithFinalDestinationForDeletion was called when it shouldn't be. Method under test should have failed earlier."
-            },
+                checkConsistencyWithFinalDestinationForDeletion: { final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames ->
+                    return false
+                },
+                deleteProcessingFilesAndDirectory              : { final Project project, final File processingDirectory, final Collection<String> fileNames ->
+                    fail "checkConsistencyWithFinalDestinationForDeletion was called when it shouldn't be. Method under test should have failed earlier."
+                },
         ] as DataProcessingFilesService
 
         assert 0 == processedBamFileQaFileService.deleteProcessingFiles(qualityAssessmentPass)

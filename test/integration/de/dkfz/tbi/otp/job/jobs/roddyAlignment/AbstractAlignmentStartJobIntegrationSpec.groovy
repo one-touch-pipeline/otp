@@ -23,7 +23,7 @@ class AbstractAlignmentStartJobIntegrationSpec extends IntegrationSpec {
 
 
         AbstractAlignmentStartJob roddyAlignmentStartJob = new PanCanStartJob()
-        roddyAlignmentStartJob.schedulerService = Mock(SchedulerService){
+        roddyAlignmentStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> { StartJob startJob, List<Parameter> input, ProcessParameter processParameterSecond ->
                 Process processSecond = DomainFactory.createProcess(
                         jobExecutionPlan: failedProcess.jobExecutionPlan
@@ -39,7 +39,7 @@ class AbstractAlignmentStartJobIntegrationSpec extends IntegrationSpec {
         LogThreadLocal.withThreadLog(System.out) {
             process = roddyAlignmentStartJob.restart(failedProcess)
         }
-        RoddyBamFile restartedInstance = (RoddyBamFile)process.getProcessParameterObject()
+        RoddyBamFile restartedInstance = (RoddyBamFile) process.getProcessParameterObject()
 
         then:
         RoddyBamFile.list().size() == 2

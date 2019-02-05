@@ -42,7 +42,7 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
         assert abstractMergedBamFile
         return QualityAssessmentMergedPass.createCriteria().get {
             eq("abstractMergedBamFile", abstractMergedBamFile)
-            projections{
+            projections {
                 max("identifier")
             }
         }

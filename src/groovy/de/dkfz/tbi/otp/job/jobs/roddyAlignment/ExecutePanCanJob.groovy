@@ -25,7 +25,7 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
 
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(RoddyBamFile roddyBamFile) {
-        assert roddyBamFile : "roddyBamFile must not be null"
+        assert roddyBamFile: "roddyBamFile must not be null"
 
         List<String> filesToMerge = getFilesToMerge(roddyBamFile)
 
@@ -56,13 +56,13 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
 
 
     protected List<File> getFilesToMerge(RoddyBamFile roddyBamFile) {
-        assert roddyBamFile : "roddyBamFile must not be null"
+        assert roddyBamFile: "roddyBamFile must not be null"
         List<File> vbpDataFiles = []
 
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
             List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
             assert seqTrack.seqType.libraryLayout.mateCount == dataFiles.size()
-            dataFiles.sort {it.mateNumber}.each { DataFile dataFile ->
+            dataFiles.sort { it.mateNumber }.each { DataFile dataFile ->
                 String pathName = lsdfFilesService.getFileViewByPidPath(dataFile)
                 FileSystem fs = dataFile.fileLinked ?
                         fileSystemService.getFilesystemForFastqImport() :

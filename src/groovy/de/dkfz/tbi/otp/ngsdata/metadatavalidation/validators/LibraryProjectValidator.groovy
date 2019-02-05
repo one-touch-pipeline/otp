@@ -10,7 +10,7 @@ import org.springframework.stereotype.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class LibraryProjectValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {//rename
+class LibraryProjectValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     SampleIdentifierService sampleIdentifierService
@@ -46,7 +46,9 @@ class LibraryProjectValidator extends ValueTuplesValidator<MetadataValidationCon
             extractedValuesList.add(new ExtractedValues(project: project, libraryName: libraryName, normalizedLibraryName: normalizedLibraryName, cells: valueTuple.cells))
         }
         extractedValuesList.groupBy { it.project }.each { Project currentProject, List<ExtractedValues> rowsById ->
-            rowsById.groupBy { it.normalizedLibraryName }.each { String normalizedLibraryName, List<ExtractedValues> rows ->
+            rowsById.groupBy {
+                it.normalizedLibraryName
+            }.each { String normalizedLibraryName, List<ExtractedValues> rows ->
                 Set<Cell> cells = rows*.cells.sum() as Set<Cell>
 
                 if (rows*.libraryName.unique().size() > 1) {
@@ -57,7 +59,7 @@ class LibraryProjectValidator extends ValueTuplesValidator<MetadataValidationCon
                     eq('normalizedLibraryName', normalizedLibraryName)
                     sample {
                         individual {
-                            eq ('project', currentProject)
+                            eq('project', currentProject)
                         }
                     }
                     projections {
@@ -67,7 +69,7 @@ class LibraryProjectValidator extends ValueTuplesValidator<MetadataValidationCon
                 if (result) {
                     //This is done, to remove correct rows from cells. Correct rows are rows where result.size is 1 and equal to the library name.
                     if (result.size() == 1) {
-                        cells = rows.findAll{it.libraryName != result[0]}*.cells.sum() as Set<Cell>
+                        cells = rows.findAll { it.libraryName != result[0] }*.cells.sum() as Set<Cell>
                     }
                     if (cells) {
                         context.addProblem(cells, Level.WARNING, "In project '${currentProject.name}' the following library names which look similar to '${normalizedLibraryName}' are already registered: '${result.join("', '")}'.", "For at least one project library names which look similar to entries in the metadata file are already registered.")

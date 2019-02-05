@@ -229,7 +229,7 @@ class TypeValidatorsSpec extends Specification {
         TypeValidators.WORKFLOW_NAME                 | 'OtherWorkflowName'               | initJobExecutionPlans       || false
     }
 
-    private static Closure emptyInit = {}
+    private static Closure emptyInit = { }
 
     private static Closure initSeqCenter = { ->
         [

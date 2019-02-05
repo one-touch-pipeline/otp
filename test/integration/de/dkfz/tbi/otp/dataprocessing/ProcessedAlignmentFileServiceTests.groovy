@@ -16,12 +16,11 @@ class ProcessedAlignmentFileServiceTests {
     ProcessedAlignmentFileService processedAlignmentFileService
 
 
-
     private void changeDateForBamFile(ProcessedBamFile processedBamFile, Date date) {
         //The dateCreated is changed via hibernate update, since grails handle this property itself and do not allow to set the value.
         processedBamFile.executeUpdate("update ProcessedBamFile set dateCreated = :dateCreated where id = :id", [
-            dateCreated: date,
-            id: processedBamFile.id,
+                dateCreated: date,
+                id         : processedBamFile.id,
         ])
         processedBamFile.refresh()
     }
@@ -29,9 +28,9 @@ class ProcessedAlignmentFileServiceTests {
     private ProcessedAlignmentFileService createServiceForMayProcessingFilesBeDeleted() {
         ProcessedAlignmentFileService processedAlignmentFileService = new ProcessedAlignmentFileService()
         processedAlignmentFileService.abstractBamFileService = [
-            hasBeenQualityAssessedAndMerged: {final AbstractBamFile bamFile, final Date before ->
-                return false
-            }
+                hasBeenQualityAssessedAndMerged: { final AbstractBamFile bamFile, final Date before ->
+                    return false
+                }
         ] as AbstractBamFileService
         return processedAlignmentFileService
     }
@@ -40,29 +39,28 @@ class ProcessedAlignmentFileServiceTests {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
 
         AlignmentPass alignmentPass = DomainFactory.createAlignmentPass([
-            seqTrack: seqTrack,
-            identifier: 1,
+                seqTrack  : seqTrack,
+                identifier: 1,
         ])
 
         ProcessedBamFile.build([
-            alignmentPass: alignmentPass,
+                alignmentPass: alignmentPass,
         ])
 
         AlignmentPass alignmentPass2 = DomainFactory.createAlignmentPass([
-            alignmentState: AlignmentState.FINISHED,
-            seqTrack: seqTrack,
-            identifier: 2,
+                alignmentState: AlignmentState.FINISHED,
+                seqTrack      : seqTrack,
+                identifier    : 2,
         ] + secondAlignmentPassMap)
 
         ProcessedBamFile.build([
-            alignmentPass: alignmentPass2,
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            withdrawn: false,
+                alignmentPass          : alignmentPass2,
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                withdrawn              : false,
         ] + secondProcessedMergedBamFileMap)
 
         return alignmentPass
     }
-
 
 
     //many test for mayProcessingFilesBeDeleted are written as unit test
@@ -91,7 +89,7 @@ class ProcessedAlignmentFileServiceTests {
     void testMayProcessingFilesBeDeleted_SecondPass_WrongQualityAssessmentStatus() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted([
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS,
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS,
         ])
         Date createdBefore = new Date().plus(1)
 
@@ -113,7 +111,7 @@ class ProcessedAlignmentFileServiceTests {
     void testMayProcessingFilesBeDeleted_SecondPass_Withdrawn() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted([
-            withdrawn: true,
+                withdrawn: true,
         ])
         Date createdBefore = new Date().plus(1)
 
@@ -124,7 +122,7 @@ class ProcessedAlignmentFileServiceTests {
     void testMayProcessingFilesBeDeleted_SecondPass_OtherSeqTrack() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted([:], [
-            seqTrack: DomainFactory.createSeqTrack(),
+                seqTrack: DomainFactory.createSeqTrack(),
         ])
         Date createdBefore = new Date().plus(1)
 
@@ -135,7 +133,7 @@ class ProcessedAlignmentFileServiceTests {
     void testMayProcessingFilesBeDeleted_SecondPass_SmallerAlignmentPassIdentifier() {
         ProcessedAlignmentFileService processedAlignmentFileService = createServiceForMayProcessingFilesBeDeleted()
         AlignmentPass alignmentPass = createTestDataForMayProcessingFilesBeDeleted([:], [
-            identifier: 0,
+                identifier: 0,
         ])
         Date createdBefore = new Date().plus(1)
 
@@ -143,23 +141,22 @@ class ProcessedAlignmentFileServiceTests {
     }
 
 
-
     private void createProcessedAlignmentFileService(List<ProcessedBamFile> processedBamFile = null) {
         processedAlignmentFileService = new ProcessedAlignmentFileService()
         processedAlignmentFileService.dataProcessingFilesService = [
-            deleteOldProcessingFiles: {final Object passService, final String passTypeName, final Date createdBefore, final long millisMaxRuntime, final Closure<Collection> passesFunc ->
-                assert processedAlignmentFileService == passService
-                assert 'alignment' == passTypeName
-                def data = passesFunc()
-                if (!processedBamFile) {
-                    assert []== data
-                    return LENGTH_NO_FILE
-                } else {
-                    def expected = processedBamFile.alignmentPass
-                    assert CollectionUtils.containSame(expected, data)
-                    return LENGTH_ONE_FILE
+                deleteOldProcessingFiles: { final Object passService, final String passTypeName, final Date createdBefore, final long millisMaxRuntime, final Closure<Collection> passesFunc ->
+                    assert processedAlignmentFileService == passService
+                    assert 'alignment' == passTypeName
+                    def data = passesFunc()
+                    if (!processedBamFile) {
+                        assert [] == data
+                        return LENGTH_NO_FILE
+                    } else {
+                        def expected = processedBamFile.alignmentPass
+                        assert CollectionUtils.containSame(expected, data)
+                        return LENGTH_ONE_FILE
+                    }
                 }
-            }
         ] as DataProcessingFilesService
     }
 
@@ -183,19 +180,19 @@ class ProcessedAlignmentFileServiceTests {
         SeqTrack seqTrack = DomainFactory.createSeqTrack(seqTrackMap)
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
-            alignmentPass: DomainFactory.createAlignmentPass([
-                seqTrack: seqTrack,
-                identifier: 2,
-                alignmentState: AlignmentState.FINISHED,
-            ] + alignmentPassMap)
+                alignmentPass: DomainFactory.createAlignmentPass([
+                        seqTrack      : seqTrack,
+                        identifier    : 2,
+                        alignmentState: AlignmentState.FINISHED,
+                ] + alignmentPassMap)
         ] + bamFileMap)
 
         ProcessedBamFile processedBamFileLaterPass = ProcessedBamFile.build([
-            alignmentPass: DomainFactory.createAlignmentPass([
-                seqTrack: seqTrack,
-                identifier: 3,
-            ] + passOfLaterBamFileMap),
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                alignmentPass          : DomainFactory.createAlignmentPass([
+                        seqTrack  : seqTrack,
+                        identifier: 3,
+                ] + passOfLaterBamFileMap),
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
         ] + laterBamFileMap).save(flush: true)
 
         return [processedBamFile, processedBamFileLaterPass]
@@ -214,42 +211,42 @@ class ProcessedAlignmentFileServiceTests {
      * The values are a map to pass to the build method to override defaults.
      */
     private ProcessedBamFile createProcessedBamFileWhichIsMerged(Map map = [:]) {
-        Map seqTrackMap = map['seqTrackMap']?:[:]
-        Map bamFileMap = map['bamFileMap']?:[:]
-        Map mergingSetMap = map['mergingSetMap']?:[:]
-        Map mergingSetAssignmentMap = map['mergingSetAssignmentMap']?:[:]
-        Map mergingPassMap = map['mergingPassMap']?:[:]
-        Map mergingBamFileMap = map['mergingBamFileMap']?:[:]
+        Map seqTrackMap = map['seqTrackMap'] ?: [:]
+        Map bamFileMap = map['bamFileMap'] ?: [:]
+        Map mergingSetMap = map['mergingSetMap'] ?: [:]
+        Map mergingSetAssignmentMap = map['mergingSetAssignmentMap'] ?: [:]
+        Map mergingPassMap = map['mergingPassMap'] ?: [:]
+        Map mergingBamFileMap = map['mergingBamFileMap'] ?: [:]
 
         SeqTrack seqTrack = DomainFactory.createSeqTrack(seqTrackMap).save(flush: true)
 
         ProcessedBamFile processedBamFile = ProcessedBamFile.build([
-            alignmentPass: DomainFactory.createAlignmentPass([
-                seqTrack: seqTrack,
-                identifier: 2,
-                alignmentState: AlignmentState.FINISHED,
-            ]),
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            status: AbstractBamFile.State.PROCESSED,
+                alignmentPass          : DomainFactory.createAlignmentPass([
+                        seqTrack      : seqTrack,
+                        identifier    : 2,
+                        alignmentState: AlignmentState.FINISHED,
+                ]),
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                status                 : AbstractBamFile.State.PROCESSED,
         ] + bamFileMap).save(flush: true)
 
         MergingSet mergedSet = MergingSet.build([
-            mergingWorkPackage: processedBamFile.mergingWorkPackage,
-            status: MergingSet.State.PROCESSED,
+                mergingWorkPackage: processedBamFile.mergingWorkPackage,
+                status            : MergingSet.State.PROCESSED,
         ] + mergingSetMap).save(flush: true)
 
         MergingSetAssignment.build([
-            mergingSet: mergedSet,
-            bamFile: processedBamFile,
+                mergingSet: mergedSet,
+                bamFile   : processedBamFile,
         ] + mergingSetAssignmentMap).save(flush: true)
 
         ProcessedMergedBamFile.build([
-            mergingPass: MergingPass.build([
-                mergingSet: mergedSet,
-            ] + mergingPassMap),
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            status: AbstractBamFile.State.PROCESSED,
-            workPackage: mergedSet.mergingWorkPackage,
+                mergingPass            : MergingPass.build([
+                        mergingSet: mergedSet,
+                ] + mergingPassMap),
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                status                 : AbstractBamFile.State.PROCESSED,
+                workPackage            : mergedSet.mergingWorkPackage,
         ] + mergingBamFileMap).save(flush: true)
 
         return processedBamFile
@@ -275,7 +272,7 @@ class ProcessedAlignmentFileServiceTests {
         processedBamFiles[0].save(flush: true)
 
         ProcessedSaiFile.build([
-            alignmentPass: processedBamFiles[0].alignmentPass,
+                alignmentPass: processedBamFiles[0].alignmentPass,
         ] + processedSaiFileMap)
 
         return processedBamFiles
@@ -303,12 +300,11 @@ class ProcessedAlignmentFileServiceTests {
         processedBamFile.save(flush: true)
 
         ProcessedSaiFile.build([
-            alignmentPass: processedBamFile.alignmentPass,
+                alignmentPass: processedBamFile.alignmentPass,
         ] + processedSaiFileMap).save(flush: true)
 
         return processedBamFile
     }
-
 
 
     @Test
@@ -332,9 +328,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_ConditionLaterPassHasProcessed_WrongAlignmentState() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithLaterProcessedPass(
-                        alignmentPassMap: [
-                            alignmentState: AlignmentState.NOT_STARTED,
-                        ])
+                alignmentPassMap: [
+                        alignmentState: AlignmentState.NOT_STARTED,
+                ])
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -344,9 +340,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_ConditionLaterPassHasProcessed_WrongQAState() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithLaterProcessedPass(
-                        laterBamFileMap: [
-                            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
-                        ])
+                laterBamFileMap: [
+                        qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
+                ])
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -366,9 +362,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_ConditionLaterPassHasProcessed_LaterBamFileIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithLaterProcessedPass(
-                        laterBamFileMap: [
-                            withdrawn: true,
-                        ])
+                laterBamFileMap: [
+                        withdrawn: true,
+                ])
         createProcessedAlignmentFileService([processedBamFiles[1]])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -378,9 +374,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_ConditionLaterPassHasProcessed_CurrentBamFileIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithLaterProcessedPass(
-                        bamFileMap: [
-                            withdrawn: true,
-                        ])
+                bamFileMap: [
+                        withdrawn: true,
+                ])
         createProcessedAlignmentFileService([processedBamFiles[0]])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -390,12 +386,12 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_ConditionLaterPassHasProcessed_BothBamFilesIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithLaterProcessedPass(
-                        laterBamFileMap: [
-                            withdrawn: true,
-                        ],
-                        bamFileMap: [
-                            withdrawn: true,
-                        ])
+                laterBamFileMap: [
+                        withdrawn: true,
+                ],
+                bamFileMap: [
+                        withdrawn: true,
+                ])
         createProcessedAlignmentFileService(processedBamFiles)
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -405,9 +401,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_ConditionLaterPassHasProcessed_OtherSeqTrack() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithLaterProcessedPass(
-                        passOfLaterBamFileMap: [
-                            seqTrack: DomainFactory.createSeqTrack()
-                        ])
+                passOfLaterBamFileMap: [
+                        seqTrack: DomainFactory.createSeqTrack()
+                ])
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -417,14 +413,13 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_ConditionLaterPassHasProcessed_SmallerPassIdentifier() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithLaterProcessedPass(
-                        passOfLaterBamFileMap: [
-                            identifier: 0,
-                        ])
+                passOfLaterBamFileMap: [
+                        identifier: 0,
+                ])
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
     }
-
 
 
     @Test
@@ -440,8 +435,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldMergingProcessingFiles_ConditionMerged_BamFileHasWrongQAStatus() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWhichIsMerged(
-                        bamFileMap: [qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS]
-                        )
+                bamFileMap: [qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS]
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -451,8 +446,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldMergingProcessingFiles_ConditionMerged_BamFileHasWrongStatus() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWhichIsMerged(
-                        bamFileMap: [status: AbstractBamFile.State.INPROGRESS]
-                        )
+                bamFileMap: [status: AbstractBamFile.State.INPROGRESS]
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -462,8 +457,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldMergingProcessingFiles_ConditionMerged_MergingSetHasWrongStatus() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWhichIsMerged(
-                        mergingSetMap: [status: MergingSet.State.INPROGRESS]
-                        )
+                mergingSetMap: [status: MergingSet.State.INPROGRESS]
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -498,8 +493,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldMergingProcessingFiles_ConditionMerged_ProcessedMergedBamFileHasWrongQaStats() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged(
-                        mergingBamFileMap: [qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS]
-                        )
+                mergingBamFileMap: [qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS]
+        )
         createProcessedAlignmentFileService([processedBamFile])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -509,8 +504,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldMergingProcessingFiles_ConditionMerged_ProcessedMergedBamFileIsTooYoung() {
         Date createdBeforeDate = new Date().minus(1)
         ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged(
-                        mergingBamFileMap: [status: AbstractBamFile.State.INPROGRESS]
-                        )
+                mergingBamFileMap: [status: AbstractBamFile.State.INPROGRESS]
+        )
         changeDateForBamFile(processedBamFile, new Date().minus(2))
         createProcessedAlignmentFileService()
 
@@ -521,8 +516,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldMergingProcessingFiles_ConditionMerged_ProcessedMergedBamFileIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWhichIsMerged(
-                        mergingBamFileMap: [withdrawn: true]
-                        )
+                mergingBamFileMap: [withdrawn: true]
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -532,8 +527,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldMergingProcessingFiles_ConditionMerged_ProcessedBamFileIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged(
-                        bamFileMap: [withdrawn: true]
-                        )
+                bamFileMap: [withdrawn: true]
+        )
         createProcessedAlignmentFileService([processedBamFile])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -543,9 +538,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldMergingProcessingFiles_ConditionMerged_BothFileAreWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedBamFile processedBamFile = createProcessedBamFileWhichIsMerged(
-                        mergingBamFileMap: [withdrawn: true],
-                        bamFileMap: [withdrawn: true],
-                        )
+                mergingBamFileMap: [withdrawn: true],
+                bamFileMap: [withdrawn: true],
+        )
         createProcessedAlignmentFileService([processedBamFile])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -556,8 +551,8 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         MergingPass mergingPass = DomainFactory.createMergingPass()
         createProcessedBamFileWhichIsMerged(
-                        mergingBamFileMap: [mergingPass: mergingPass, workPackage: mergingPass.mergingWorkPackage]
-                        )
+                mergingBamFileMap: [mergingPass: mergingPass, workPackage: mergingPass.mergingWorkPackage]
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -568,23 +563,22 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         MergingSet mergingSet = DomainFactory.createMergingSet()
         createProcessedBamFileWhichIsMerged(
-                        mergingPassMap: [mergingSet: mergingSet],
-                        mergingBamFileMap: [workPackage: mergingSet.mergingWorkPackage],
-                        )
+                mergingPassMap: [mergingSet: mergingSet],
+                mergingBamFileMap: [workPackage: mergingSet.mergingWorkPackage],
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
     }
 
 
-
     @Test
     void testDeleteOldAlignmentProcessingFiles_GeneralCondition_FileExistIsTrue() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithLaterProcessedPass(
-                        bamFileMap: [
-                            fileExists: true,
-                        ])
+                bamFileMap: [
+                        fileExists: true,
+                ])
         createProcessedAlignmentFileService([processedBamFiles[0]])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -594,9 +588,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_GeneralCondition_DeletionDateIsNotNull() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithLaterProcessedPass(
-                        bamFileMap: [
-                            deletionDate: new Date()
-                        ])
+                bamFileMap: [
+                        deletionDate: new Date()
+                ])
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -606,10 +600,10 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_GeneralCondition_FileExistIsFalseAndDeletionDateIsNotNull() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithLaterProcessedPass(
-                        bamFileMap: [
-                            fileExists: true,
-                            deletionDate: new Date(),
-                        ])
+                bamFileMap: [
+                        fileExists  : true,
+                        deletionDate: new Date(),
+                ])
         createProcessedAlignmentFileService([processedBamFiles[0]])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -626,7 +620,6 @@ class ProcessedAlignmentFileServiceTests {
     }
 
 
-
     @Test
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionLaterPassHasProcessed_Ok() {
         Date createdBeforeDate = new Date().plus(1)
@@ -640,9 +633,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionLaterPassHasProcessed_WrongAlignmentState() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
-                        alignmentPassMap: [
-                            alignmentState: AlignmentState.NOT_STARTED,
-                        ])
+                alignmentPassMap: [
+                        alignmentState: AlignmentState.NOT_STARTED,
+                ])
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -652,9 +645,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionLaterPassHasProcessed_WrongQAState() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
-                        laterBamFileMap: [
-                            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
-                        ])
+                laterBamFileMap: [
+                        qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
+                ])
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -674,9 +667,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionLaterPassHasProcessed_LaterBamFileIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
-                        laterBamFileMap: [
-                            withdrawn: true,
-                        ])
+                laterBamFileMap: [
+                        withdrawn: true,
+                ])
         createProcessedAlignmentFileService([processedBamFiles[1]])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -686,9 +679,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionLaterPassHasProcessed_CurrentBamFileIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
-                        bamFileMap: [
-                            withdrawn: true,
-                        ])
+                bamFileMap: [
+                        withdrawn: true,
+                ])
         createProcessedAlignmentFileService([processedBamFiles[0]])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -698,12 +691,12 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionLaterPassHasProcessed_BothBamFilesIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
-                        laterBamFileMap: [
-                            withdrawn: true,
-                        ],
-                        bamFileMap: [
-                            withdrawn: true,
-                        ])
+                laterBamFileMap: [
+                        withdrawn: true,
+                ],
+                bamFileMap: [
+                        withdrawn: true,
+                ])
         createProcessedAlignmentFileService(processedBamFiles)
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -713,9 +706,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionLaterPassHasProcessed_OtherSeqTrack() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
-                        passOfLaterBamFileMap: [
-                            seqTrack: DomainFactory.createSeqTrack()
-                        ])
+                passOfLaterBamFileMap: [
+                        seqTrack: DomainFactory.createSeqTrack()
+                ])
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -725,14 +718,13 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionLaterPassHasProcessed_SmallerPassIdentifier() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
-                        passOfLaterBamFileMap: [
-                            identifier: 0,
-                        ])
+                passOfLaterBamFileMap: [
+                        identifier: 0,
+                ])
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
     }
-
 
 
     @Test
@@ -748,8 +740,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_BamFileHasWrongQAStatus() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithSaiFileWhichIsMerged(
-                        bamFileMap: [qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS]
-                        )
+                bamFileMap: [qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS]
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -759,8 +751,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_BamFileHasWrongStatus() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithSaiFileWhichIsMerged(
-                        bamFileMap: [status: AbstractBamFile.State.INPROGRESS]
-                        )
+                bamFileMap: [status: AbstractBamFile.State.INPROGRESS]
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -770,8 +762,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_MergingSetHasWrongStatus() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithSaiFileWhichIsMerged(
-                        mergingSetMap: [status: MergingSet.State.INPROGRESS]
-                        )
+                mergingSetMap: [status: MergingSet.State.INPROGRESS]
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -805,8 +797,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_ProcessedMergedBamFileHasWrongQaStats() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
-                        mergingBamFileMap: [qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS]
-                        )
+                mergingBamFileMap: [qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS]
+        )
         createProcessedAlignmentFileService([processedBamFile])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -816,8 +808,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_ProcessedMergedBamFileIsTooYoung() {
         Date createdBeforeDate = new Date().minus(1)
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
-                        mergingBamFileMap: [status: AbstractBamFile.State.INPROGRESS]
-                        )
+                mergingBamFileMap: [status: AbstractBamFile.State.INPROGRESS]
+        )
         changeDateForBamFile(processedBamFile, new Date().minus(2))
         createProcessedAlignmentFileService()
 
@@ -828,8 +820,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_ProcessedMergedBamFileIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithSaiFileWhichIsMerged(
-                        mergingBamFileMap: [withdrawn: true]
-                        )
+                mergingBamFileMap: [withdrawn: true]
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -839,8 +831,8 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_ProcessedBamFileIsWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
-                        bamFileMap: [withdrawn: true]
-                        )
+                bamFileMap: [withdrawn: true]
+        )
         createProcessedAlignmentFileService([processedBamFile])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -850,9 +842,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_ConditionMerged_BothFileAreWithdrawn() {
         Date createdBeforeDate = new Date().plus(1)
         ProcessedBamFile processedBamFile = createProcessedBamFileWithSaiFileWhichIsMerged(
-                        mergingBamFileMap: [withdrawn: true],
-                        bamFileMap: [withdrawn: true],
-                        )
+                mergingBamFileMap: [withdrawn: true],
+                bamFileMap: [withdrawn: true],
+        )
         createProcessedAlignmentFileService([processedBamFile])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -863,8 +855,8 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         MergingPass mergingPass = DomainFactory.createMergingPass()
         createProcessedBamFileWithSaiFileWhichIsMerged(
-                        mergingBamFileMap: [mergingPass: mergingPass, workPackage: mergingPass.mergingWorkPackage],
-                        )
+                mergingBamFileMap: [mergingPass: mergingPass, workPackage: mergingPass.mergingWorkPackage],
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -875,22 +867,21 @@ class ProcessedAlignmentFileServiceTests {
         Date createdBeforeDate = new Date().plus(1)
         MergingSet mergingSet = DomainFactory.createMergingSet()
         createProcessedBamFileWithSaiFileWhichIsMerged(
-                        mergingPassMap: [mergingSet: mergingSet],
-                        mergingBamFileMap: [workPackage: mergingSet.mergingWorkPackage],
-                        )
+                mergingPassMap: [mergingSet: mergingSet],
+                mergingBamFileMap: [workPackage: mergingSet.mergingWorkPackage],
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
     }
 
 
-
     @Test
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_GeneralCondition_WrongAlignmentPass() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithSaiFileWhichIsMerged(
-                        processedSaiFileMap: [alignmentPass: DomainFactory.createAlignmentPass()]
-                        )
+                processedSaiFileMap: [alignmentPass: DomainFactory.createAlignmentPass()]
+        )
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -900,9 +891,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_GeneralCondition_FileExistIsTrue() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
-                        processedSaiFileMap: [
-                            fileExists: true,
-                        ])
+                processedSaiFileMap: [
+                        fileExists: true,
+                ])
         createProcessedAlignmentFileService([processedBamFiles[0]])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -912,9 +903,9 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_GeneralCondition_DeletionDateIsNotNull() {
         Date createdBeforeDate = new Date().plus(1)
         createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
-                        processedSaiFileMap: [
-                            deletionDate: new Date()
-                        ])
+                processedSaiFileMap: [
+                        deletionDate: new Date()
+                ])
         createProcessedAlignmentFileService()
 
         assert LENGTH_NO_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -924,10 +915,10 @@ class ProcessedAlignmentFileServiceTests {
     void testDeleteOldAlignmentProcessingFiles_WithSaiFile_GeneralCondition__FileExistIsFalseAndDeletionDateIsNotNull() {
         Date createdBeforeDate = new Date().plus(1)
         List<ProcessedBamFile> processedBamFiles = createProcessedBamFileWithSaiFileAndWithLaterProcessedPass(
-                        processedSaiFileMap: [
-                            fileExists: true,
-                            deletionDate: new Date(),
-                        ])
+                processedSaiFileMap: [
+                        fileExists  : true,
+                        deletionDate: new Date(),
+                ])
         createProcessedAlignmentFileService([processedBamFiles[0]])
 
         assert LENGTH_ONE_FILE == processedAlignmentFileService.deleteOldAlignmentProcessingFiles(createdBeforeDate)
@@ -940,8 +931,8 @@ class ProcessedAlignmentFileServiceTests {
         ProcessedSaiFile processedSaiFile = ProcessedSaiFile.findByAlignmentPass(processedBamFiles[0].alignmentPass)
         //The dateCreated is changed via hibernate update, since grails handle this property itself and do not allow to set the value.
         processedSaiFile.executeUpdate("update ProcessedSaiFile set dateCreated = :dateCreated where id = :id", [
-            dateCreated: new Date().plus(2),
-            id: processedSaiFile.id,
+                dateCreated: new Date().plus(2),
+                id         : processedSaiFile.id,
         ])
         createProcessedAlignmentFileService()
 

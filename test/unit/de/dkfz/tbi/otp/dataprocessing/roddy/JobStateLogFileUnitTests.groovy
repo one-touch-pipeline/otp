@@ -50,7 +50,7 @@ class JobStateLogFileUnitTests {
     }
 
     @Test
-    void testValidateFile_WhenFileDoesNotExist_ShouldThrowException(){
+    void testValidateFile_WhenFileDoesNotExist_ShouldThrowException() {
         JobStateLogFile.metaClass.parseJobStateLogFile = { -> [:] }
         shouldFailWithMessage(RuntimeException, /${JOB_STATE_LOG_FILE_NAME}\sis\snot\sfound.*/) {
             JobStateLogFile.getInstance(TestCase.uniqueNonExistentPath)
@@ -171,8 +171,8 @@ class JobStateLogFileUnitTests {
     void testContainsClusterJobId_WhenJobStateLogFileContainsClusterJobId_ShouldReturnTrue() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
-                ]
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
+        ]
         )
 
         assertTrue(JobStateLogFile.containsClusterJobId(clusterJobIdentifier.clusterJobId))
@@ -182,8 +182,8 @@ class JobStateLogFileUnitTests {
     void testContainsClusterJobId_WhenJobStateLogFileDoesNotContainClusterJobId_ShouldReturnFalse() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
-                ]
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
+        ]
         )
 
         assertFalse(JobStateLogFile.containsClusterJobId("UNKNOWN"))
@@ -193,8 +193,8 @@ class JobStateLogFileUnitTests {
     void testIsClusterJobFinishedSuccessfully_WhenStatusCodeIsNull_ReturnTrue() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
-                ]
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
+        ]
         )
 
         assertTrue(JobStateLogFile.isClusterJobFinishedSuccessfully(clusterJobIdentifier.clusterJobId))
@@ -204,8 +204,8 @@ class JobStateLogFileUnitTests {
     void testIsClusterJobFinishedSuccessfully_WhenStatusCodeIsNotNull_ReturnFalse() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FAILED])
-                ]
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FAILED])
+        ]
         )
 
         assertFalse(JobStateLogFile.isClusterJobFinishedSuccessfully(clusterJobIdentifier.clusterJobId))
@@ -215,8 +215,8 @@ class JobStateLogFileUnitTests {
     void testGetPropertyFromLatestLogFileEntry_WhenClusterJobIdNotFound_ShouldReturnNull() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
-                ]
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
+        ]
         )
 
         assert null == JobStateLogFile.getPropertyFromLatestLogFileEntry("UNKNOWN", "statusCode")
@@ -226,9 +226,9 @@ class JobStateLogFileUnitTests {
     void testGetPropertyFromLatestLogFileEntry_WhenSeveralLogFileEntriesWithSameClusterJobId_ShouldReturnLatest() {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: "10"]),
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FINISHED, timeStamp: 10L])
-                ]
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: "10"]),
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FINISHED, timeStamp: 10L])
+        ]
         )
 
         assert STATUS_CODE_FINISHED == JobStateLogFile.getPropertyFromLatestLogFileEntry(clusterJobIdentifier.clusterJobId, "statusCode")
@@ -245,8 +245,8 @@ class JobStateLogFileUnitTests {
     void testIsEmpty_WhenFileIsNotEmpty_ShouldReturnFalse() {
         JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
-                    CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
-                ]
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId])
+        ]
         )
 
         assertFalse(jobStateLogFile.isEmpty())

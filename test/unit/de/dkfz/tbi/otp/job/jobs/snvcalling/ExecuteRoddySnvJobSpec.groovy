@@ -74,7 +74,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService         : configService,
                 snvCallingService     : Mock(SnvCallingService) {
-                    1 * validateInputBamFiles(_) >> {}
+                    1 * validateInputBamFiles(_) >> { }
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
                     1 * fastaFilePath(_) >> fasta
@@ -151,10 +151,10 @@ class ExecuteRoddySnvJobSpec extends Specification {
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> {}
+                    1 * correctPermissionsAndGroups(_, _) >> { }
                 },
                 snvCallingService         : Mock(SnvCallingService) {
-                    1 * validateInputBamFiles(_) >> {}
+                    1 * validateInputBamFiles(_) >> { }
                 }
         ])
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
@@ -218,7 +218,7 @@ class ExecuteRoddySnvJobSpec extends Specification {
         ExecuteRoddySnvJob job = new ExecuteRoddySnvJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> {}
+                    1 * correctPermissionsAndGroups(_, _) >> { }
                 },
         ])
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()

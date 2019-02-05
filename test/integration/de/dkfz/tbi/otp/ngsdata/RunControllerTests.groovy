@@ -6,7 +6,7 @@ import org.junit.*
 
 import static org.junit.Assert.*
 
-class RunControllerTests implements UserAndRoles{
+class RunControllerTests implements UserAndRoles {
 
     RunController controller
 

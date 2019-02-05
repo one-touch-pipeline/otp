@@ -38,8 +38,8 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         assert 0 == Process.list().size()
         assert 1 == RoddyBamFile.findAll().size()
         checkFirstBamFileState(firstBamFile, true, [
-                seqTracks: seqTracks,
-                containedSeqTracks : seqTracks,
+                seqTracks         : seqTracks,
+                containedSeqTracks: seqTracks,
         ])
         assertBamFileFileSystemPropertiesSet(firstBamFile)
     }
@@ -84,9 +84,9 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
 
         createProjectConfig(mergingWorkPackage, [
-                bwaMemVersion    : "0.7.8",
-                sambambaVersion  : "0.5.9",
-                configVersion    : "v2_0",
+                bwaMemVersion  : "0.7.8",
+                sambambaVersion: "0.5.9",
+                configVersion  : "v2_0",
         ])
         executeAndVerify_AlignLanesOnly_AllFine()
     }
@@ -165,7 +165,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         assert !roddyBamFile.workDirectory.exists()
         checkWorkPackageState()
 
-        List<RoddyBamFile> bamFiles = RoddyBamFile.findAll().sort {it.id}
+        List<RoddyBamFile> bamFiles = RoddyBamFile.findAll().sort { it.id }
         assert 2 == bamFiles.size()
         assert roddyBamFile == bamFiles.first()
         assert !bamFiles[1].baseBamFile

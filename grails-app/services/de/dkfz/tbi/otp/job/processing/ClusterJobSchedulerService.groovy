@@ -132,7 +132,8 @@ class ClusterJobSchedulerService {
         if (!jobResult.isSuccessful()) {
             try {
                 jobManager.killJobs([job])
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
 
             throw new RuntimeException("An error occurred when submitting the job")
         }

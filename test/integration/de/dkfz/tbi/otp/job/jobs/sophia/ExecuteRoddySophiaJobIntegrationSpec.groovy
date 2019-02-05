@@ -1,17 +1,15 @@
 package de.dkfz.tbi.otp.job.jobs.sophia
 
-import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import grails.test.mixin.*
+import grails.test.spock.*
 import org.junit.*
 import org.junit.rules.*
 import spock.lang.*
-import grails.test.spock.*
-
 
 class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
 
@@ -31,8 +29,8 @@ class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
-                sophiaService     : Mock(SophiaService) {
-                    1 * validateInputBamFiles(_) >> {}
+                sophiaService: Mock(SophiaService) {
+                    1 * validateInputBamFiles(_) >> { }
                 },
         ])
 
@@ -104,10 +102,10 @@ class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> {}
+                    1 * correctPermissionsAndGroups(_, _) >> { }
                 },
-                sophiaService         : Mock(SophiaService) {
-                    1 * validateInputBamFiles(_) >> {}
+                sophiaService             : Mock(SophiaService) {
+                    1 * validateInputBamFiles(_) >> { }
                 }
         ])
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
@@ -171,7 +169,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> {}
+                    1 * correctPermissionsAndGroups(_, _) >> { }
                 },
         ])
 

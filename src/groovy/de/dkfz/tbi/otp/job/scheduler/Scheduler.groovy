@@ -136,8 +136,8 @@ class Scheduler {
                 log.fatal("Job of type ${job.class} executed before entering the CREATED state")
                 throw new ProcessingException("Job executed before entering the CREATED state")
             } else if (existingUpdates.size() > 1) {
-                if (existingUpdates.sort{ it.id }.last().state == ExecutionState.FAILURE ||
-                existingUpdates.sort{ it.id }.last().state == ExecutionState.RESTARTED) {
+                if (existingUpdates.sort { it.id }.last().state == ExecutionState.FAILURE ||
+                        existingUpdates.sort { it.id }.last().state == ExecutionState.RESTARTED) {
                     // scheduler is already in failed state - no reason to process
                     throw new ProcessingException("Job already in failed condition before execution")
                 }
@@ -154,7 +154,7 @@ class Scheduler {
                     state: ExecutionState.STARTED,
                     previous: existingUpdates.sort { it.date }.last(),
                     processingStep: step
-                    )
+            )
             if (!update.save(flush: true)) {
                 log.fatal("Could not create a STARTED Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a STARTED Update for Job")
@@ -205,8 +205,8 @@ class Scheduler {
                     "And the exception which was thrown during exception handling is:\n" +
                     "${ExceptionUtils.getStackTrace(exceptionDuringExceptionHandling)}"
             throw new RuntimeException(
-            "An exception was thrown during exception handling. See the log for the original exception (ID ${identifier}).",
-            exceptionDuringExceptionHandling)
+                    "An exception was thrown during exception handling. See the log for the original exception (ID ${identifier}).",
+                    exceptionDuringExceptionHandling)
         }
     }
 

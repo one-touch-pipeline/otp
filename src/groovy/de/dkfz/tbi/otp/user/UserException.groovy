@@ -1,6 +1,6 @@
 package de.dkfz.tbi.otp.user
 
-class UserException extends RuntimeException{
+class UserException extends RuntimeException {
     UserException() {
         super()
     }

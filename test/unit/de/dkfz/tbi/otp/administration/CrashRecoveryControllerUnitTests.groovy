@@ -19,7 +19,6 @@ class CrashRecoveryControllerUnitTests {
     static final String PARAMETERS_FOR_FIRST_PART_IS_NOT_A_LONG = '{"noLong!key1":"some value 1"}'
 
 
-
     static final String SUCCESS_MESSAGE = '{"success":true,"error":null}'
 
     static final String ERROR_MESSAGE_FOR_MISSING_IDS = '{"success":false,"error":"No ids given. Expression: params.ids"}'
@@ -37,7 +36,6 @@ class CrashRecoveryControllerUnitTests {
     static final String ERROR_MESSAGE_EXCEPTION_THROWN = '{"success":false,"error":"' + EXCEPTION_MESSAGE + '"}'
 
 
-
     @Before
     void setUp() {
         params.ids = IDS_SINGLE
@@ -45,13 +43,12 @@ class CrashRecoveryControllerUnitTests {
         params.parameters = '{}'
 
         controller.crashRecoveryService = [
-            markJobsAsFailed: { List<Long> ids, String reason -> },
-            restartJobs: { List<Long> ids, String reason -> },
-            markJobsAsSucceeded: { List<Long> ids, Map parameters -> },
-            markJobsAsFinished: { List<Long> ids, Map parameters -> },
+                markJobsAsFailed   : { List<Long> ids, String reason -> },
+                restartJobs        : { List<Long> ids, String reason -> },
+                markJobsAsSucceeded: { List<Long> ids, Map parameters -> },
+                markJobsAsFinished : { List<Long> ids, Map parameters -> },
         ] as CrashRecoveryService
     }
-
 
 
     @Test
@@ -103,13 +100,12 @@ class CrashRecoveryControllerUnitTests {
     @Test
     void test_markFailed_ShouldReturnErrorMessageForServiceThrownException() {
         controller.crashRecoveryService = [
-            markJobsAsFailed: { List<Long> ids, String reason -> throw new RuntimeException(EXCEPTION_MESSAGE)},
+                markJobsAsFailed: { List<Long> ids, String reason -> throw new RuntimeException(EXCEPTION_MESSAGE) },
         ] as CrashRecoveryService
 
         controller.markFailed()
         assert ERROR_MESSAGE_EXCEPTION_THROWN == response.text
     }
-
 
 
     @Test
@@ -161,13 +157,12 @@ class CrashRecoveryControllerUnitTests {
     @Test
     void test_restart_ShouldReturnErrorMessageForServiceThrownException() {
         controller.crashRecoveryService = [
-            restartJobs: { List<Long> ids, String reason -> throw new RuntimeException(EXCEPTION_MESSAGE)},
+                restartJobs: { List<Long> ids, String reason -> throw new RuntimeException(EXCEPTION_MESSAGE) },
         ] as CrashRecoveryService
 
         controller.restart()
         assert ERROR_MESSAGE_EXCEPTION_THROWN == response.text
     }
-
 
 
     @Test
@@ -228,7 +223,7 @@ class CrashRecoveryControllerUnitTests {
     @Test
     void test_markFinished_ShouldReturnErrorMessageForServiceThrownException_NoParameters() {
         controller.crashRecoveryService = [
-            markJobsAsFinished: { List<Long> ids, Map parameters -> throw new RuntimeException(EXCEPTION_MESSAGE)},
+                markJobsAsFinished: { List<Long> ids, Map parameters -> throw new RuntimeException(EXCEPTION_MESSAGE) },
         ] as CrashRecoveryService
 
         controller.markFinished()
@@ -274,7 +269,6 @@ class CrashRecoveryControllerUnitTests {
         controller.markFinished()
         assert ERROR_MESSAGE_FOR_PARAMETERS_WITH_FIRST_PART_IS_NOT_A_LONG == response.text
     }
-
 
 
     @Test
@@ -335,7 +329,7 @@ class CrashRecoveryControllerUnitTests {
     @Test
     void test_markSucceeded_ShouldReturnErrorMessageForServiceThrownException_NoParameters() {
         controller.crashRecoveryService = [
-            markJobsAsSucceeded: { List<Long> ids, Map parameters -> throw new RuntimeException(EXCEPTION_MESSAGE)},
+                markJobsAsSucceeded: { List<Long> ids, Map parameters -> throw new RuntimeException(EXCEPTION_MESSAGE) },
         ] as CrashRecoveryService
 
         controller.markSucceeded()
@@ -383,16 +377,15 @@ class CrashRecoveryControllerUnitTests {
     }
 
 
-
     @Test
     void test_startScheduler_ShouldReturnOk() {
         final String SUCCESS_MESSAGE = '{"success":true}'
         boolean crashRecovery = true
         controller.crashRecoveryService = [
-            isCrashRecovery: {-> return crashRecovery},
+                isCrashRecovery: { -> return crashRecovery },
         ] as CrashRecoveryService
         controller.schedulerService = [
-            startup: {-> crashRecovery = false}
+                startup: { -> crashRecovery = false }
         ] as SchedulerService
 
         controller.startScheduler()
@@ -403,7 +396,7 @@ class CrashRecoveryControllerUnitTests {
     void test_startScheduler_ShouldReturnFailure() {
         final String ERROR_MESSAGE = '{"success":false,"error":"Not in Crash Recovery"}'
         controller.crashRecoveryService = [
-            isCrashRecovery: {-> return false},
+                isCrashRecovery: { -> return false },
         ] as CrashRecoveryService
 
         controller.startScheduler()
@@ -411,21 +404,20 @@ class CrashRecoveryControllerUnitTests {
     }
 
 
-
     @Test
     void test_parametersOfJob_ShouldReturnModel() {
         List modelDefiniation = [
-            [
-                id: 1,
-                jobName: 'jobName1',
-                parameter: [],
-            ],
+                [
+                        id       : 1,
+                        jobName  : 'jobName1',
+                        parameter: [],
+                ],
         ]
         controller.crashRecoveryService = [
-            getOutputParametersOfJobs: {List<Long> ids ->
-                assert [1]== ids
-                return modelDefiniation
-            },
+                getOutputParametersOfJobs: { List<Long> ids ->
+                    assert [1] == ids
+                    return modelDefiniation
+                },
         ] as CrashRecoveryService
 
         def model = controller.parametersOfJob()
@@ -436,20 +428,20 @@ class CrashRecoveryControllerUnitTests {
     void test_parametersOfJob_ShouldFailForIdsIsNull() {
         params.ids = null
 
-        shouldFail (NullPointerException) { controller.parametersOfJob() }
+        shouldFail(NullPointerException) { controller.parametersOfJob() }
     }
 
     @Test
     void test_parametersOfJob_ShouldFailForIdsIsEmpty() {
         params.ids = ''
 
-        shouldFail (NumberFormatException) { controller.parametersOfJob() }
+        shouldFail(NumberFormatException) { controller.parametersOfJob() }
     }
 
     @Test
     void test_parametersOfJob_ShouldFailForIdsIsNotALong() {
         params.ids = IDS_WRONG_FORMAT
 
-        shouldFail (java.lang.NumberFormatException) { controller.parametersOfJob() }
+        shouldFail(java.lang.NumberFormatException) { controller.parametersOfJob() }
     }
 }

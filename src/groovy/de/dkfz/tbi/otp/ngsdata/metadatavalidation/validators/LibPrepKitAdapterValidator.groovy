@@ -11,7 +11,7 @@ import org.springframework.stereotype.*
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 @Component
-class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator{
+class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     LibraryPreparationKitService libraryPreparationKitService
@@ -56,7 +56,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
             if (valueTuple.getValue(LIB_PREP_KIT.name())) {
                 kit = libraryPreparationKitService.findByNameOrImportAlias(valueTuple.getValue(LIB_PREP_KIT.name()))
             }
-            if (!seqType || ! kit) {
+            if (!seqType || !kit) {
                 return
             }
             Pipeline pipeline = seqType.isRna() ? Pipeline.findByName(Pipeline.Name.RODDY_RNA_ALIGNMENT) : Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
@@ -74,7 +74,7 @@ class LibPrepKitAdapterValidator extends ValueTuplesValidator<MetadataValidation
                     context.addProblem(valueTuple.cells, Level.WARNING, "Adapter trimming is requested but adapter file for library preparation kit '${kit}' is missing.", "Adapter trimming is requested but the adapter file for at least one library preparation kit is missing.")
                 }
                 if (seqType.isRna() && !kit.reverseComplementAdapterSequence) {
-                    context.addProblem(valueTuple.cells, Level.WARNING, "Adapter trimming is requested but reverse complement adapter sequence for library preparation kit '${kit}' is missing.","Adapter trimming is requested but the reverse complement adapter sequence for at least one library preparation kit is missing.")
+                    context.addProblem(valueTuple.cells, Level.WARNING, "Adapter trimming is requested but reverse complement adapter sequence for library preparation kit '${kit}' is missing.", "Adapter trimming is requested but the reverse complement adapter sequence for at least one library preparation kit is missing.")
                 }
             }
         }

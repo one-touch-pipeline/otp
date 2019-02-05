@@ -25,7 +25,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
 
     Pipeline getPipeline(SeqTrack seqTrack) {
         Pipeline pipeline = atMostOneElement(Pipeline.findAllByNameAndType(pipelineName(seqTrack), Pipeline.Type.ALIGNMENT))
-        if(!pipeline) {
+        if (!pipeline) {
             pipeline = new Pipeline(
                     name: pipelineName(seqTrack),
                     type: Pipeline.Type.ALIGNMENT
@@ -75,7 +75,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         assert seqTrack: "The input seqTrack of method hasLibraryPreparationKitAndBedFile is null"
 
         if (seqTrack instanceof ExomeSeqTrack) {
-            return seqTrack.libraryPreparationKit && seqTrack.configuredReferenceGenome  &&
+            return seqTrack.libraryPreparationKit && seqTrack.configuredReferenceGenome &&
                     BedFile.findWhere(
                             libraryPreparationKit: seqTrack.libraryPreparationKit,
                             referenceGenome: seqTrack.configuredReferenceGenome,
@@ -106,7 +106,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                 List<String> body = []
                 body << "A SeqTrack can not be aligned, because it is not compatible with the existing MergingWorkPackage."
                 body << "\nInfos:"
-                MergingWorkPackage.getMergingProperties(seqTrack).each {key, value ->
+                MergingWorkPackage.getMergingProperties(seqTrack).each { key, value ->
                     body << "- ${key}: ${value}"
                     if (value != workPackage[key]) {
                         body << "    MergingWorkPackage uses the value: ${workPackage[key]}"
@@ -129,10 +129,10 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         } else {
             workPackage = new MergingWorkPackage(
                     MergingWorkPackage.getMergingProperties(seqTrack) + [
-                    referenceGenome: referenceGenomeProjectSeqType.referenceGenome,
-                    statSizeFileName: referenceGenomeProjectSeqType.statSizeFileName,
-                    pipeline: pipeline,
-            ])
+                            referenceGenome : referenceGenomeProjectSeqType.referenceGenome,
+                            statSizeFileName: referenceGenomeProjectSeqType.statSizeFileName,
+                            pipeline        : pipeline,
+                    ])
             workPackage.alignmentProperties = referenceGenomeProjectSeqType.alignmentProperties?.collect { ReferenceGenomeProjectSeqTypeAlignmentProperty alignmentProperty ->
                 new MergingWorkPackageAlignmentProperty(name: alignmentProperty.name, value: alignmentProperty.value, mergingWorkPackage: workPackage)
             } as Set

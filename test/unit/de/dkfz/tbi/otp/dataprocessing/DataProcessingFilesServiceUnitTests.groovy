@@ -15,12 +15,12 @@ import org.junit.rules.*
 //In the test the semantic "null as Type" is used to get grails to use a specific overloaded method signutare.
 @TestMixin(GrailsUnitTestMixin)
 @Build([
-    Individual,
-    MergingCriteria,
-    ProcessedBamFile,
-    Project,
-    Realm,
-    ReferenceGenome,
+        Individual,
+        MergingCriteria,
+        ProcessedBamFile,
+        Project,
+        Realm,
+        ReferenceGenome,
 ])
 class DataProcessingFilesServiceUnitTests {
 
@@ -29,7 +29,6 @@ class DataProcessingFilesServiceUnitTests {
     private final static int TEST_FILE_CONTENT_LENGTH = TEST_FILE_CONTENT.length()
     private final static String PASS_TYPE_NAME = "passTypeName"
     private final static long TIME = 60 * 60 * 1000
-
 
 
     TestConfigService configService
@@ -62,14 +61,14 @@ class DataProcessingFilesServiceUnitTests {
 
         dataProcessingFilesService = new DataProcessingFilesService()
         dataProcessingFilesService.lsdfFilesService = [
-            deleteDirectory: {final Realm realm, final File directory ->
-                assert directory.directory
-                assert directory.delete()
-            },
-            deleteFile: {final Realm realm, final File file ->
-                assert file.file
-                assert file.delete()
-            },
+                deleteDirectory: { final Realm realm, final File directory ->
+                    assert directory.directory
+                    assert directory.delete()
+                },
+                deleteFile     : { final Realm realm, final File file ->
+                    assert file.file
+                    assert file.delete()
+                },
         ] as LsdfFilesService
         dataProcessingFilesService.configService = configService
 
@@ -80,7 +79,7 @@ class DataProcessingFilesServiceUnitTests {
     @After
     void tearDown() {
         dataProcessingFilesService = null
-        if (dir && dir.exists()){
+        if (dir && dir.exists()) {
             assert dir.deleteDir()
             assert !dir.exists()
         }
@@ -102,7 +101,6 @@ class DataProcessingFilesServiceUnitTests {
         checkedLogger.assertAllMessagesConsumed()
         checkedLogger = null
     }
-
 
 
     void createTestDirectory() {
@@ -132,20 +130,22 @@ class DataProcessingFilesServiceUnitTests {
     private void prepareCheckConsistencyWithDatabaseForDeletion() {
         createTestFile()
         processedBamFile = ProcessedBamFile.build([
-            fileExists: true,
-            fileSize: TEST_FILE_CONTENT_LENGTH,
-            dateFromFileSystem: new Date(file.lastModified()),
+                fileExists        : true,
+                fileSize          : TEST_FILE_CONTENT_LENGTH,
+                dateFromFileSystem: new Date(file.lastModified()),
         ])
-        processedBamFile.alignmentPass.metaClass.isLatestPass = {true} //mock method because createCritera make problems
+        processedBamFile.alignmentPass.metaClass.isLatestPass = { true }
+        //mock method because createCritera make problems
     }
 
     private File[] prepareDeleteProcessingFiles(int additionalFiles = 0) {
         prepareCheckConsistencyWithDatabaseForDeletion()
         List<File> files = []
-        for (int i = 0 ; i < additionalFiles ; i++) {
+        for (int i = 0; i < additionalFiles; i++) {
             files << createTestFile(dir, "additionalTest${i}.txt")
         }
-        dataProcessingFilesService.metaClass.checkConsistencyWithDatabaseForDeletion = {final def dbFile, final File fsFile -> true} //mock method
+        dataProcessingFilesService.metaClass.checkConsistencyWithDatabaseForDeletion = { final def dbFile, final File fsFile -> true }
+        //mock method
         return files as File[]
     }
 
@@ -161,15 +161,14 @@ class DataProcessingFilesServiceUnitTests {
 
     private void prepareDeleteOldProcessingFiles(boolean mayFileDelete = true) {
         passService = [
-            mayProcessingFilesBeDeleted: {a, b -> return mayFileDelete},
-            deleteProcessingFiles:  {a -> return TEST_FILE_CONTENT_LENGTH},
+                mayProcessingFilesBeDeleted: { a, b -> return mayFileDelete },
+                deleteProcessingFiles      : { a -> return TEST_FILE_CONTENT_LENGTH },
         ] as Object
         createdBefore = new Date()
         passes = ["pass 1", "pass 2", "pass 3"]
         freedBytes = passes.size() * TEST_FILE_CONTENT_LENGTH
-        passClosure = {return passes}
+        passClosure = { return passes }
     }
-
 
 
     @Test
@@ -185,7 +184,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingDirectory_directoryAsFile_projectIsNull() {
         createTestDirectory()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingDirectory(null as Project, dir)
         }
     }
@@ -194,7 +193,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingDirectory_directoryAsFile_directoryIsNull() {
         project = Project.build()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingDirectory(project, null as File)
         }
     }
@@ -220,7 +219,6 @@ class DataProcessingFilesServiceUnitTests {
     }
 
 
-
     @Test
     void testDeleteProcessingDirectory_directoryAsString() {
         project = Project.build()
@@ -234,7 +232,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingDirectory_directoryAsString_projectIsNull() {
         createTestDirectory()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingDirectory(null as Project, dir as String)
         }
     }
@@ -243,11 +241,10 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingDirectory_directoryAsString_directoryIsNull() {
         project = Project.build()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingDirectory(project, null as String)
         }
     }
-
 
 
     @Test
@@ -263,7 +260,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingFile_projectIsNull() {
         createTestFile()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFile(null as Project, file)
         }
         assert file.exists()
@@ -273,7 +270,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingFile_fileIsNull() {
         project = Project.build()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFile(project, null as File)
         }
     }
@@ -289,7 +286,6 @@ class DataProcessingFilesServiceUnitTests {
     }
 
 
-
     @Test
     void testDeleteProcessingFile_fileAsString() {
         project = Project.build()
@@ -303,7 +299,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingFile_fileAsStringAndProjectIsNull() {
         createTestFile()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFile(null as Project, file as String)
         }
         assert file.exists()
@@ -313,11 +309,10 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingFile_fileAsStringAndFileIsNull() {
         project = Project.build()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFile(project, null as String)
         }
     }
-
 
 
     @Test
@@ -333,7 +328,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingFiles_NoProject() {
         createTestFile()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFiles(null, dir, [file.name])
         }
         assert file.exists()
@@ -344,7 +339,7 @@ class DataProcessingFilesServiceUnitTests {
         project = Project.build()
         createTestFile()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFiles(project, null, [file.name])
         }
         assert file.exists()
@@ -355,7 +350,7 @@ class DataProcessingFilesServiceUnitTests {
         project = Project.build()
         createTestDirectory()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFiles(project, dir, null)
         }
     }
@@ -376,15 +371,14 @@ class DataProcessingFilesServiceUnitTests {
         File file3 = createTestFile(dir, "test2")
 
         assert TEST_FILE_CONTENT_LENGTH * 3 == dataProcessingFilesService.deleteProcessingFiles(project, dir, [
-            file.name,
-            file2.name,
-            file3.name,
+                file.name,
+                file2.name,
+                file3.name,
         ])
         assert !file.exists()
         assert !file2.exists()
         assert !file3.exists()
     }
-
 
 
     @Test
@@ -401,7 +395,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingFilesAndDirectory_NoProject() {
         createTestFile()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFilesAndDirectory(null, dir, [file.name])
         }
         assert file.exists()
@@ -412,7 +406,7 @@ class DataProcessingFilesServiceUnitTests {
         project = Project.build()
         createTestFile()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFilesAndDirectory(project, null, [file.name])
         }
         assert file.exists()
@@ -422,7 +416,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingFilesAndDirectory_FileNamesIsNull() {
         project = Project.build()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFilesAndDirectory(project, dir, null)
         }
     }
@@ -444,9 +438,9 @@ class DataProcessingFilesServiceUnitTests {
         File file3 = createTestFile(dir, "test2")
 
         assert TEST_FILE_CONTENT_LENGTH * 3 == dataProcessingFilesService.deleteProcessingFilesAndDirectory(project, dir, [
-            file.name,
-            file2.name,
-            file3.name,
+                file.name,
+                file2.name,
+                file3.name,
         ])
         assert !file.exists()
         assert !file2.exists()
@@ -483,7 +477,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingFiles_dbFileIsNull() {
         prepareDeleteProcessingFiles()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFiles(null, file)
         }
         assert processedBamFile.fileExists
@@ -495,7 +489,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingFiles_fsFileIsNull() {
         prepareDeleteProcessingFiles()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFiles(processedBamFile, null)
         }
         assert processedBamFile.fileExists
@@ -507,7 +501,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingFiles_additionalFilesIsNull() {
         prepareDeleteProcessingFiles()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteProcessingFiles(processedBamFile, file, null)
         }
         assert processedBamFile.fileExists
@@ -519,16 +513,16 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteProcessingFiles_checkConsistencyWithDatabaseForDeletionIsFalse() {
         createTestFile()
         processedBamFile = ProcessedBamFile.build([
-            fileExists: true,
+                fileExists: true,
         ])
-        dataProcessingFilesService.metaClass.checkConsistencyWithDatabaseForDeletion = {final def dbFile, final File fsFile -> false} //mock method
+        dataProcessingFilesService.metaClass.checkConsistencyWithDatabaseForDeletion = { final def dbFile, final File fsFile -> false }
+        //mock method
 
         assert 0 == dataProcessingFilesService.deleteProcessingFiles(processedBamFile, file)
         assert processedBamFile.fileExists
         assert null == processedBamFile.deletionDate
         assert file.exists()
     }
-
 
 
     @Test
@@ -554,7 +548,7 @@ class DataProcessingFilesServiceUnitTests {
     void testCheckConsistencyWithFinalDestinationForDeletion_NoProcessingDirectory() {
         createCheckConsistencyData()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(null, finalDir, [TEST_FILE_NAME])
         }
     }
@@ -563,7 +557,7 @@ class DataProcessingFilesServiceUnitTests {
     void testCheckConsistencyWithFinalDestinationForDeletion_NoFinalDestinationDirectory() {
         createCheckConsistencyData()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(processingDir, null, [TEST_FILE_NAME])
         }
     }
@@ -572,8 +566,8 @@ class DataProcessingFilesServiceUnitTests {
     void testCheckConsistencyWithFinalDestinationForDeletion_NoFileNames() {
         createCheckConsistencyData()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
-            dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(processingDir, finalDir,null)
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
+            dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(processingDir, finalDir, null)
         }
     }
 
@@ -590,8 +584,8 @@ class DataProcessingFilesServiceUnitTests {
         createCheckConsistencyData()
         finalFile.delete()
         checkedLogger.addError("File does not exist: ${finalFile}. " +
-                        "Expected it to be the same as ${processingFile} (${processingFile.size()} bytes, " +
-                        "last modified ${new Date(processingFile.lastModified())})")
+                "Expected it to be the same as ${processingFile} (${processingFile.size()} bytes, " +
+                "last modified ${new Date(processingFile.lastModified())})")
 
         assert !dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(processingDir, finalDir, [TEST_FILE_NAME])
     }
@@ -601,12 +595,11 @@ class DataProcessingFilesServiceUnitTests {
         createCheckConsistencyData()
         processingFile << "More content"
         checkedLogger.addError("Files are different: " +
-                        "${processingFile} (${processingFile.size()} bytes, last modified ${new Date(processingFile.lastModified())}) and " +
-                        "${finalFile} (${finalFile.size()} bytes, last modified ${new Date(finalFile.lastModified())})")
+                "${processingFile} (${processingFile.size()} bytes, last modified ${new Date(processingFile.lastModified())}) and " +
+                "${finalFile} (${finalFile.size()} bytes, last modified ${new Date(finalFile.lastModified())})")
 
         assert !dataProcessingFilesService.checkConsistencyWithFinalDestinationForDeletion(processingDir, finalDir, [TEST_FILE_NAME])
     }
-
 
 
     @Test
@@ -620,7 +613,7 @@ class DataProcessingFilesServiceUnitTests {
     void testCheckConsistencyWithDatabaseForDeletion_NoDBFile() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(null, file)
         }
     }
@@ -629,7 +622,7 @@ class DataProcessingFilesServiceUnitTests {
     void testCheckConsistencyWithDatabaseForDeletion_NoFsFile() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(processedBamFile, null)
         }
     }
@@ -680,7 +673,6 @@ class DataProcessingFilesServiceUnitTests {
     }
 
 
-
     @Test
     void testDeleteOldProcessingFiles() {
         prepareDeleteOldProcessingFiles()
@@ -696,7 +688,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteOldProcessingFiles_NoPassService() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteOldProcessingFiles(null, PASS_TYPE_NAME, createdBefore, TIME, passClosure)
         }
     }
@@ -705,7 +697,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteOldProcessingFiles_NoPassTypeName() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteOldProcessingFiles(passService, null, createdBefore, TIME, passClosure)
         }
     }
@@ -714,7 +706,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteOldProcessingFiles_NoCreatedBefore() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteOldProcessingFiles(passService, PASS_TYPE_NAME, null, TIME, passClosure)
         }
     }
@@ -723,7 +715,7 @@ class DataProcessingFilesServiceUnitTests {
     void testDeleteOldProcessingFiles_NoPassFunc() {
         prepareCheckConsistencyWithDatabaseForDeletion()
 
-        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail (IllegalArgumentException) {
+        assert TestConstants.ERROR_MESSAGE_SPRING_NOT_NULL == shouldFail(IllegalArgumentException) {
             dataProcessingFilesService.deleteOldProcessingFiles(passService, PASS_TYPE_NAME, createdBefore, TIME, null)
         }
     }
@@ -760,12 +752,12 @@ class DataProcessingFilesServiceUnitTests {
         Realm realm = DomainFactory.createRealm()
 
         Project project = Project.build([
-            name: "projectName",
-            realm: realm,
+                name : "projectName",
+                realm: realm,
         ])
 
         Individual individual = Individual.build([
-            project: project,
+                project: project,
         ])
 
         String pid = individual.pid

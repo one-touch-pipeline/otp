@@ -12,28 +12,36 @@ class JobErrorDefinitionController implements CheckAndCall {
         List<JobDefinition> jobDefinitions = jobErrorDefinitionService.getJobDefinition(jobErrorDefinitions)
         JobDefinition jobDefinition = JobDefinition.findByName(params.job) ?: null
         [
-                jobErrorDefinition: jobErrorDefinitions.findAll { ((JobErrorDefinition)it.key).jobDefinitions*.name.contains(jobDefinition?.name) } ?: jobErrorDefinitions,
-                jobDefinitions: ["No filter"] + jobDefinitions*.name.unique().sort(),
-                jobDefinition: jobDefinition?.name,
-                typeDropDown: JobErrorDefinition.Type,
-                actionDropDown: JobErrorDefinition.Action,
-                allJobDefinition: getAllJobDefinitions(),
+                jobErrorDefinition: jobErrorDefinitions.findAll {
+                    ((JobErrorDefinition) it.key).jobDefinitions*.name.contains(jobDefinition?.name)
+                } ?: jobErrorDefinitions,
+                jobDefinitions    : ["No filter"] + jobDefinitions*.name.unique().sort(),
+                jobDefinition     : jobDefinition?.name,
+                typeDropDown      : JobErrorDefinition.Type,
+                actionDropDown    : JobErrorDefinition.Action,
+                allJobDefinition  : getAllJobDefinitions(),
         ]
     }
 
-    JSON addJobErrorDefinition(UpdateJobErrorDefinitionCommand cmd){
-        checkErrorAndCallMethod(cmd, { jobErrorDefinitionService.addErrorExpression(cmd.typeSelect, cmd.actionSelect, cmd.errorExpression, cmd.basedJobErrorDefinition) })
+    JSON addJobErrorDefinition(UpdateJobErrorDefinitionCommand cmd) {
+        checkErrorAndCallMethod(cmd, {
+            jobErrorDefinitionService.addErrorExpression(cmd.typeSelect, cmd.actionSelect, cmd.errorExpression, cmd.basedJobErrorDefinition)
+        })
     }
 
-    JSON addNewJobErrorDefinition(UpdateNewJobErrorDefinitionCommand cmd){
-        checkErrorAndCallMethod(cmd, { jobErrorDefinitionService.addErrorExpressionFirstLevel(JobErrorDefinition.Type.MESSAGE, cmd.actionSelect, cmd.errorExpression) })
+    JSON addNewJobErrorDefinition(UpdateNewJobErrorDefinitionCommand cmd) {
+        checkErrorAndCallMethod(cmd, {
+            jobErrorDefinitionService.addErrorExpressionFirstLevel(JobErrorDefinition.Type.MESSAGE, cmd.actionSelect, cmd.errorExpression)
+        })
     }
 
-    JSON updateErrorExpression(UpdateErrorExpressionCommand cmd){
-        checkErrorAndCallMethod(cmd, { jobErrorDefinitionService.updateErrorExpression(cmd.jobErrorDefinition, cmd.errorExpression) })
+    JSON updateErrorExpression(UpdateErrorExpressionCommand cmd) {
+        checkErrorAndCallMethod(cmd, {
+            jobErrorDefinitionService.updateErrorExpression(cmd.jobErrorDefinition, cmd.errorExpression)
+        })
     }
 
-    JSON addNewJob(UpdateAddNewJobCommand cmd){
+    JSON addNewJob(UpdateAddNewJobCommand cmd) {
         checkErrorAndCallMethod(cmd, { jobErrorDefinitionService.addNewJob(cmd.jobErrorDefinition, cmd.jobDefinition) })
     }
 
@@ -77,8 +85,8 @@ class UpdateAddNewJobCommand implements Serializable {
     JobDefinition jobDefinition
 
     void setJobDefinitionString(String jobDefinitionString) {
-        String jobDefinitionName = jobDefinitionString.substring(0, jobDefinitionString.indexOf('-')-1)
-        String jobExecutionPlanName = jobDefinitionString.substring(jobDefinitionString.indexOf('-')+2)
+        String jobDefinitionName = jobDefinitionString.substring(0, jobDefinitionString.indexOf('-') - 1)
+        String jobExecutionPlanName = jobDefinitionString.substring(jobDefinitionString.indexOf('-') + 2)
 
         this.jobDefinition = JobDefinition.findByNameAndPlan(jobDefinitionName, JobExecutionPlan.findByNameAndObsoleted(jobExecutionPlanName, false))
     }

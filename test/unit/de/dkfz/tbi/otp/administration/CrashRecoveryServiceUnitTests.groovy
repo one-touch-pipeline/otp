@@ -12,9 +12,9 @@ import org.junit.*
 @TestFor(CrashRecoveryService)
 @TestMixin(GrailsUnitTestMixin)
 @Build([
-    Parameter,
-    ProcessingError,
-    ProcessingStepUpdate,
+        Parameter,
+        ProcessingError,
+        ProcessingStepUpdate,
 ])
 class CrashRecoveryServiceUnitTests {
 
@@ -34,13 +34,11 @@ class CrashRecoveryServiceUnitTests {
     int callRestartProcessingStepCount = 0
 
 
-
     List<ParameterType> parameterTypeList = []
 
     List<ProcessingStep> processingSteps = []
 
     Map<Long, Map<Long, String>> parameters = [:]
-
 
 
     @After
@@ -51,18 +49,17 @@ class CrashRecoveryServiceUnitTests {
     }
 
 
-
     void createServices(boolean startUpOk = false, boolean allowCallOfCreateNextProcessingStep = false, boolean allowCallOfRestartProcessingStep = false) {
         service.schedulerService = [
-            isStartupOk: { -> startUpOk },
-            createNextProcessingStep: { ProcessingStep previous ->
-                assert allowCallOfCreateNextProcessingStep
-                callCreateNextProcessingStepCount++
-            },
-            restartProcessingStep: { ProcessingStep previous, boolean schedule, boolean resume3in1job ->
-                assert allowCallOfRestartProcessingStep
-                callRestartProcessingStepCount++
-            },
+                isStartupOk             : { -> startUpOk },
+                createNextProcessingStep: { ProcessingStep previous ->
+                    assert allowCallOfCreateNextProcessingStep
+                    callCreateNextProcessingStepCount++
+                },
+                restartProcessingStep   : { ProcessingStep previous, boolean schedule, boolean resume3in1job ->
+                    assert allowCallOfRestartProcessingStep
+                    callRestartProcessingStepCount++
+                },
         ] as SchedulerService
         service.processService = new ProcessService()
     }
@@ -72,14 +69,14 @@ class CrashRecoveryServiceUnitTests {
 
         processingSteps = (1..COUNT_OF_ELEMENTS).collect {
             ProcessingStep processingStep = ProcessingStep.build([
-                jobDefinition: jobDefinition,
-                process: Process.build([
-                    jobExecutionPlan: jobDefinition.plan,
-                ])
+                    jobDefinition: jobDefinition,
+                    process      : Process.build([
+                            jobExecutionPlan: jobDefinition.plan,
+                    ])
             ])
             ProcessingStepUpdate.build([
-                processingStep: processingStep,
-                state: ExecutionState.CREATED,
+                    processingStep: processingStep,
+                    state         : ExecutionState.CREATED,
             ])
             return processingStep
         }
@@ -87,25 +84,24 @@ class CrashRecoveryServiceUnitTests {
         if (createparameterTypes) {
             parameterTypeList = (1..COUNT_OF_ELEMENTS).collect {
                 ParameterType.build([
-                    parameterUsage: ParameterUsage.OUTPUT,
-                    jobDefinition: jobDefinition,
+                        parameterUsage: ParameterUsage.OUTPUT,
+                        jobDefinition : jobDefinition,
                 ])
             }
 
             parameters = processingSteps.collectEntries { processingStep ->
                 [
-                    processingStep.id,
-                    parameterTypeList.collectEntries { parameterType ->
-                        [
-                            parameterType.id,
-                            "value: ${processingStep.id} ${parameterType.name}",
-                        ]
-                    }
+                        processingStep.id,
+                        parameterTypeList.collectEntries { parameterType ->
+                            [
+                                    parameterType.id,
+                                    "value: ${processingStep.id} ${parameterType.name}",
+                            ]
+                        }
                 ]
             }
         }
     }
-
 
 
     @Test
@@ -123,7 +119,6 @@ class CrashRecoveryServiceUnitTests {
     }
 
 
-
     @Test
     void test_markJobsAsFinished_processingStepsGivenByIdShouldBeMarkedAsFinishedAndHaveNoParameters() {
         createServices(false, true)
@@ -133,8 +128,8 @@ class CrashRecoveryServiceUnitTests {
         service.markJobsAsFinished(processingSteps*.id, parameters)
         processingSteps.each {
             assertExecutionState(it, [
-                ExecutionState.CREATED,
-                ExecutionState.FINISHED,
+                    ExecutionState.CREATED,
+                    ExecutionState.FINISHED,
             ])
         }
         assert COUNT_OF_ELEMENTS == callCreateNextProcessingStepCount
@@ -148,14 +143,14 @@ class CrashRecoveryServiceUnitTests {
         service.markJobsAsFinished(processingSteps*.id, parameters)
         processingSteps.each { processingStep ->
             assertExecutionState(processingStep, [
-                ExecutionState.CREATED,
-                ExecutionState.FINISHED,
+                    ExecutionState.CREATED,
+                    ExecutionState.FINISHED,
             ])
             parameterTypeList.each { ParameterType parameterType ->
                 Parameter parameter = processingStep.output.find { Parameter parameter ->
                     parameter.type == parameterType
                 }
-                assert parameter : 'Could not found any parameter for ${parameterType} in ${step}'
+                assert parameter: 'Could not found any parameter for ${parameterType} in ${step}'
                 assert parameter.value == "value: ${processingStep.id} ${parameterType.name}"
             }
         }
@@ -209,15 +204,15 @@ class CrashRecoveryServiceUnitTests {
         createServices()
         ProcessingStep step1 = ProcessingStep.build()
         ProcessingStep step2 = ProcessingStep.build([
-            process: step1.process,
-            jobDefinition: JobDefinition.build([
-                plan: step1.jobDefinition.plan,
-            ])
+                process      : step1.process,
+                jobDefinition: JobDefinition.build([
+                        plan: step1.jobDefinition.plan,
+                ])
         ])
         step1.next = step2
         step2.previous = step1
         assert step1.save()
-        List ids = [ step1.id ]
+        List ids = [step1.id]
 
         assert shouldFail(RuntimeException) {
             service.markJobsAsFinished(ids, parameters)
@@ -292,7 +287,6 @@ class CrashRecoveryServiceUnitTests {
     }
 
 
-
     @Test
     void test_markJobsAsSucceeded_ProcessingStepsGivenByIdShouldBeMarkedAsFinishedAndHaveNoParameters() {
         createServices(false, true)
@@ -301,9 +295,9 @@ class CrashRecoveryServiceUnitTests {
         service.markJobsAsSucceeded(processingSteps*.id, parameters)
         processingSteps.each {
             assertExecutionState(it, [
-                ExecutionState.CREATED,
-                ExecutionState.FINISHED,
-                ExecutionState.SUCCESS,
+                    ExecutionState.CREATED,
+                    ExecutionState.FINISHED,
+                    ExecutionState.SUCCESS,
             ])
         }
         assert COUNT_OF_ELEMENTS == callCreateNextProcessingStepCount
@@ -317,15 +311,15 @@ class CrashRecoveryServiceUnitTests {
         service.markJobsAsSucceeded(processingSteps*.id, parameters)
         processingSteps.each { processingStep ->
             assertExecutionState(processingStep, [
-                ExecutionState.CREATED,
-                ExecutionState.FINISHED,
-                ExecutionState.SUCCESS,
+                    ExecutionState.CREATED,
+                    ExecutionState.FINISHED,
+                    ExecutionState.SUCCESS,
             ])
             parameterTypeList.each { ParameterType parameterType ->
                 Parameter parameter = processingStep.output.find { Parameter parameter ->
                     parameter.type == parameterType
                 }
-                assert parameter : 'Could not found any parameter for ${parameterType} in ${step}'
+                assert parameter: 'Could not found any parameter for ${parameterType} in ${step}'
                 assert parameter.value == "value: ${processingStep.id} ${parameterType.name}"
             }
         }
@@ -379,15 +373,15 @@ class CrashRecoveryServiceUnitTests {
         createServices()
         ProcessingStep step1 = ProcessingStep.build()
         ProcessingStep step2 = ProcessingStep.build([
-            process: step1.process,
-            jobDefinition: JobDefinition.build([
-                plan: step1.jobDefinition.plan,
-            ])
+                process      : step1.process,
+                jobDefinition: JobDefinition.build([
+                        plan: step1.jobDefinition.plan,
+                ])
         ])
         step1.next = step2
         step2.previous = step1
         assert step1.save()
-        List ids = [ step1.id ]
+        List ids = [step1.id]
 
         assert shouldFail(RuntimeException) {
             service.markJobsAsSucceeded(ids, parameters)
@@ -462,7 +456,6 @@ class CrashRecoveryServiceUnitTests {
     }
 
 
-
     @Test
     void test_markJobsAsFailed_processingStepsGivenByIdShouldBeMarkedAsFailed() {
         createServices(false, false, true)
@@ -471,9 +464,9 @@ class CrashRecoveryServiceUnitTests {
         service.markJobsAsFailed(processingSteps*.id, ERROR_MESSAGE)
         processingSteps.each {
             assertExecutionState(it, [
-                ExecutionState.CREATED,
-                ExecutionState.FINISHED,
-                ExecutionState.FAILURE,
+                    ExecutionState.CREATED,
+                    ExecutionState.FINISHED,
+                    ExecutionState.FAILURE,
             ], ERROR_MESSAGE)
         }
     }
@@ -523,15 +516,15 @@ class CrashRecoveryServiceUnitTests {
         createServices()
         ProcessingStep step1 = ProcessingStep.build()
         ProcessingStep step2 = ProcessingStep.build([
-            process: step1.process,
-            jobDefinition: JobDefinition.build([
-                plan: step1.jobDefinition.plan,
-            ])
+                process      : step1.process,
+                jobDefinition: JobDefinition.build([
+                        plan: step1.jobDefinition.plan,
+                ])
         ])
         step1.next = step2
         step2.previous = step1
         assert step1.save()
-        List ids = [ step1.id ]
+        List ids = [step1.id]
 
         assert shouldFail(RuntimeException) {
             service.markJobsAsFailed(ids, ERROR_MESSAGE)
@@ -549,7 +542,6 @@ class CrashRecoveryServiceUnitTests {
     }
 
 
-
     @Test
     void test_restartJobs_processingStepsGivenByIdShouldBeMarkedAsFailed() {
         createServices(false, false, true)
@@ -558,9 +550,9 @@ class CrashRecoveryServiceUnitTests {
         service.restartJobs(processingSteps*.id, ERROR_MESSAGE)
         processingSteps.each {
             assertExecutionState(it, [
-                ExecutionState.CREATED,
-                ExecutionState.FINISHED,
-                ExecutionState.FAILURE,
+                    ExecutionState.CREATED,
+                    ExecutionState.FINISHED,
+                    ExecutionState.FAILURE,
             ], ERROR_MESSAGE)
         }
         assert 0 == callCreateNextProcessingStepCount
@@ -612,15 +604,15 @@ class CrashRecoveryServiceUnitTests {
         createServices()
         ProcessingStep step1 = ProcessingStep.build()
         ProcessingStep step2 = ProcessingStep.build([
-            process: step1.process,
-            jobDefinition: JobDefinition.build([
-                plan: step1.jobDefinition.plan,
-            ])
+                process      : step1.process,
+                jobDefinition: JobDefinition.build([
+                        plan: step1.jobDefinition.plan,
+                ])
         ])
         step1.next = step2
         step2.previous = step1
         assert step1.save()
-        List ids = [ step1.id ]
+        List ids = [step1.id]
 
         assert shouldFail(RuntimeException) {
             service.restartJobs(ids, ERROR_MESSAGE)
@@ -638,13 +630,12 @@ class CrashRecoveryServiceUnitTests {
     }
 
 
-
     @Test
     void test_crashJobs_shouldReturnProcessingSteps() {
         createProcessingSteps()
         service.schedulerService = [
-            isStartupOk: { -> false },
-            retrieveRunningProcessingSteps: { -> processingSteps },
+                isStartupOk                   : { -> false },
+                retrieveRunningProcessingSteps: { -> processingSteps },
         ] as SchedulerService
 
         assert processingSteps == service.crashedJobs()
@@ -657,7 +648,6 @@ class CrashRecoveryServiceUnitTests {
 
         assert shouldFail(RuntimeException) { service.crashedJobs() } == "Not in Crash Recovery"
     }
-
 
 
     @Test
@@ -704,14 +694,14 @@ class CrashRecoveryServiceUnitTests {
         createServices(true)
         List ids = [ProcessingStep.build().id]
 
-        assert shouldFail(RuntimeException) { service.getOutputParametersOfJobs(ids) } == "The system is not in Crash Recovery"
+        assert shouldFail(RuntimeException) {
+            service.getOutputParametersOfJobs(ids)
+        } == "The system is not in Crash Recovery"
     }
 
 
-
-
     private assertExecutionState(ProcessingStep step, List<ExecutionState> states, String errorMessage = null) {
-        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort{ it.id }
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
         Process process = Process.get(step.process.id)
 
         assert states == updates*.state

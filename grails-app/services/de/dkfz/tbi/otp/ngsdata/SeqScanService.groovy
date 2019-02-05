@@ -93,11 +93,11 @@ class SeqScanService {
         log.debug("invalidating ${oldSeqScans.size()} seq scans")
         // create new seqScan
         SeqScan seqScan = new SeqScan(
-                alignmentParams : null,
+                alignmentParams: null,
                 sample: sample,
                 seqPlatform: seqPlatform,
                 seqType: seqType
-                )
+        )
         seqScan.save(flush: true)
         seqTracksToMerge.each { SeqTrack iTrack ->
             MergingAssignment mergingAssignment = new MergingAssignment(seqTrack: iTrack, seqScan: seqScan)
@@ -142,11 +142,11 @@ class SeqScanService {
         SeqType seqType = getSeqType(tracks)
         // create new seqScan
         SeqScan seqScan = new SeqScan(
-                alignmentParams : alignParams,
+                alignmentParams: alignParams,
                 sample: sample,
                 seqPlatform: seqPlatform,
                 seqType: seqType
-                )
+        )
         seqScan.save(flush: true)
         tracks.each { SeqTrack iTrack ->
             MergingAssignment mergingAssignment = new MergingAssignment(seqTrack: iTrack, seqScan: seqScan)
@@ -252,7 +252,7 @@ class SeqScanService {
         boolean defined = false
         int iSize = 0
         String insertSize = ""
-        MergingAssignment.findAllBySeqScan(seqScan).each {MergingAssignment mergingAssignment ->
+        MergingAssignment.findAllBySeqScan(seqScan).each { MergingAssignment mergingAssignment ->
             if (!defined) {
                 iSize = mergingAssignment.seqTrack.insertSize
                 defined = true

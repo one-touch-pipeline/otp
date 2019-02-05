@@ -195,7 +195,10 @@ class AlignmentQualityOverviewController {
         List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
         List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, dataOverall*.qualityAssessmentMergedPass)
         Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY
-        chromosomeMapXY = dataChromosomeXY.groupBy([{it.qualityAssessmentMergedPass.id}, {it.chromosomeName}])
+        chromosomeMapXY = dataChromosomeXY.groupBy([
+                { it.qualityAssessmentMergedPass.id },
+                { it.chromosomeName },
+        ])
 
         QcThresholdService.ThresholdColorizer thresholdColorizer
         if (dataOverall) {
@@ -230,35 +233,35 @@ class AlignmentQualityOverviewController {
 
             Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique() //findAll removes null values
             TableCellValue.Icon icon = [
-                    (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED)  : TableCellValue.Icon.WARNING,
-                    (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED) : TableCellValue.Icon.ERROR,
+                    (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) : TableCellValue.Icon.WARNING,
+                    (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED): TableCellValue.Icon.ERROR,
             ].getOrDefault(abstractMergedBamFile.qcTrafficLightStatus, TableCellValue.Icon.OKAY)
-            String comment = abstractMergedBamFile.comment ? "\n${abstractMergedBamFile.comment?.comment}\n${abstractMergedBamFile.comment?.author}":""
+            String comment = abstractMergedBamFile.comment ? "\n${abstractMergedBamFile.comment?.comment}\n${abstractMergedBamFile.comment?.author}" : ""
             Map<String, TableCellValue> map = [
-                    pid                   : new TableCellValue(
-                                                abstractMergedBamFile.individual.displayName, null,
-                                                g.createLink(
-                                                        controller: 'individual',
-                                                        action: 'show',
-                                                        id: abstractMergedBamFile.individual.id,
-                                                ).toString()
-                                            ),
-                    sampleType            : abstractMergedBamFile.sampleType.name,
-                    dateFromFileSystem    : abstractMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
-                    withdrawn             : abstractMergedBamFile.withdrawn,
-                    pipeline              : abstractMergedBamFile.workPackage.pipeline.displayName,
-                    qcStatus              : new TableCellValue(
-                                                abstractMergedBamFile.comment ?
-                                                        "${abstractMergedBamFile.comment?.comment?.take(10)}" :
-                                                        "",
-                                                null, null,
-                                                "Status: ${(abstractMergedBamFile.qcTrafficLightStatus ?: "").toString()} ${comment}",
-                                                icon, (abstractMergedBamFile.qcTrafficLightStatus ?: "").toString(), abstractMergedBamFile.id
-                                            ),
-                    kit                   : new TableCellValue(
-                                                kit*.shortDisplayName.join(", ") ?: "-", null, null,
-                                                kit*.name.join(", ") ?: ""
-                                            ),
+                    pid               : new TableCellValue(
+                            abstractMergedBamFile.individual.displayName, null,
+                            g.createLink(
+                                    controller: 'individual',
+                                    action: 'show',
+                                    id: abstractMergedBamFile.individual.id,
+                            ).toString()
+                    ),
+                    sampleType        : abstractMergedBamFile.sampleType.name,
+                    dateFromFileSystem: abstractMergedBamFile.dateFromFileSystem?.format("yyyy-MM-dd"),
+                    withdrawn         : abstractMergedBamFile.withdrawn,
+                    pipeline          : abstractMergedBamFile.workPackage.pipeline.displayName,
+                    qcStatus          : new TableCellValue(
+                            abstractMergedBamFile.comment ?
+                                    "${abstractMergedBamFile.comment?.comment?.take(10)}" :
+                                    "",
+                            null, null,
+                            "Status: ${(abstractMergedBamFile.qcTrafficLightStatus ?: "").toString()} ${comment}",
+                            icon, (abstractMergedBamFile.qcTrafficLightStatus ?: "").toString(), abstractMergedBamFile.id
+                    ),
+                    kit               : new TableCellValue(
+                            kit*.shortDisplayName.join(", ") ?: "-", null, null,
+                            kit*.name.join(", ") ?: ""
+                    ),
             ]
 
             Map<String, Double> qcKeysMap = [
@@ -300,7 +303,7 @@ class AlignmentQualityOverviewController {
 
                 case SeqTypeNames.EXOME.seqTypeName:
                     map << [
-                            targetCoverage     : FormatHelper.formatNumber(abstractMergedBamFile.coverage),
+                            targetCoverage: FormatHelper.formatNumber(abstractMergedBamFile.coverage),
                     ]
                     qcKeys += [
                             "onTargetRatio",
@@ -360,17 +363,17 @@ class QcStatusCommand implements Serializable {
     String newValue
 
     static constraints = {
-        comment(blank: false, nullable: false, validator: {val, obj ->
+        comment(blank: false, nullable: false, validator: { val, obj ->
             if (val == obj.abstractBamFile?.comment?.comment) {
                 return "Comment has to change from ${val}"
             }
         })
-        abstractBamFile(nullable: false, validator: {val, obj ->
+        abstractBamFile(nullable: false, validator: { val, obj ->
             if (!(val instanceof RoddyBamFile)) {
                 return "${val} is an invalid Value."
             }
         })
-        newValue(blank: false, nullable: false, validator: {val, obj ->
+        newValue(blank: false, nullable: false, validator: { val, obj ->
             if (!(val in AbstractMergedBamFile.QcTrafficLightStatus.values()*.toString())) {
                 return "The qcTrafficLightStatus must be one of ${AbstractMergedBamFile.QcTrafficLightStatus.values().join(", ")} and not ${val}"
             }

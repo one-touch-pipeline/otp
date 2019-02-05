@@ -19,6 +19,7 @@ class ProjectOverviewServiceIntegrationSpec extends IntegrationSpec implements U
         projectOverviewService.abstractMergedBamFilesInProjectFolder(project) == []
     }
 
+    @SuppressWarnings("SpaceAfterOpeningBrace")
     void "test abstractMergedBamFilesInProjectFolder with abstractMergedBamFile in Project"() {
         given:
         AbstractMergedBamFile mergedBamFile = abstractMergedBamFile()
@@ -35,6 +36,7 @@ class ProjectOverviewServiceIntegrationSpec extends IntegrationSpec implements U
         ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | _
     }
 
+    @SuppressWarnings("SpaceAfterOpeningBrace")
     void "test abstractMergedBamFilesInProjectFolder with abstractMergedBamFile in different Project"() {
         given:
         Project project = DomainFactory.createProject()
@@ -52,6 +54,7 @@ class ProjectOverviewServiceIntegrationSpec extends IntegrationSpec implements U
         ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | _
     }
 
+    @SuppressWarnings("SpaceAfterOpeningBrace")
     void "test abstractMergedBamFilesInProjectFolder with MergedBamFiles in Project but without MergingWorkPackage"() {
         given:
         AbstractMergedBamFile mergedBamFile = abstractMergedBamFile()
@@ -71,6 +74,7 @@ class ProjectOverviewServiceIntegrationSpec extends IntegrationSpec implements U
         ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | _
     }
 
+    @SuppressWarnings("SpaceAfterOpeningBrace")
     void "test abstractMergedBamFilesInProjectFolder with two MergedBamFiles in Project but one not Finished yet"() {
         given:
         AbstractMergedBamFile mergedBamFile1 = finishedAbstractMergedBamFile()
@@ -84,12 +88,8 @@ class ProjectOverviewServiceIntegrationSpec extends IntegrationSpec implements U
 
         where:
         finishedAbstractMergedBamFile                                        | unfisihedAbstractMergedBamFile
-        ({ DomainFactory.createFinishedProcessedMergedBamFile() })           | ({
-            DomainFactory.createProcessedMergedBamFile(workPackage: it)
-        })
-        ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | ({
-            DomainFactory.createExternallyProcessedMergedBamFile(workPackage: it)
-        })
+        ({ DomainFactory.createFinishedProcessedMergedBamFile() })           | ({ DomainFactory.createProcessedMergedBamFile(workPackage: it) })
+        ({ DomainFactory.createFinishedExternallyProcessedMergedBamFile() }) | ({ DomainFactory.createExternallyProcessedMergedBamFile(workPackage: it) })
     }
 
     void "test sampleTypeByProject without SampleTypes in Project"() {

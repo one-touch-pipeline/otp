@@ -4,8 +4,7 @@ import de.dkfz.tbi.*
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import org.junit.*
@@ -36,8 +35,8 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
         ])
 
         roddyBamFile = DomainFactory.createRoddyBamFile([
-                md5sum: null,
-                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                md5sum                      : null,
+                fileOperationStatus         : AbstractMergedBamFile.FileOperationStatus.DECLARED,
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
 
@@ -80,9 +79,9 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         prepareDataFilesOnFileSystem(roddyBamFile2)
 
-       assert TestCase.shouldFail(AssertionError) {
+        assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile2)
-       }.contains(roddyBamFile.workBamFile.path)
+        }.contains(roddyBamFile.workBamFile.path)
     }
 
 
@@ -96,7 +95,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
         roddyBamFile.mergingWorkPackage.seqType = exomeSeqType
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
-        List<String>  expectedCommand = [
+        List<String> expectedCommand = [
                 "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
                 "GENOME_FA:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
                 "CHROM_SIZES_FILE:${executePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage).absolutePath}",
@@ -206,7 +205,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testGetFilesToMerge_WrongCountOfDataFileForSeqTrack_ShouldFail() {
-        DataFile dataFile = DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks).first()
+        DataFile dataFile = DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks as List).first()
         dataFile.delete(flush: true)
 
         assert TestCase.shouldFail(AssertionError) {
@@ -230,7 +229,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testGetFilesToMerge_DataFileHasWrongFileSizeInDatabase_ShouldFail() {
-        DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks).each {
+        DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks as List).each {
             it.fileSize = 12345
             assert it.save(flush: true)
         }
@@ -243,7 +242,9 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testGetFilesToMerge_AllFine() {
-        List<File> expectedDataFileList = DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks).sort { it.fileName }.collect { new File(lsdfFilesService.getFileViewByPidPath(it)) }
+        List<File> expectedDataFileList = DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks as List).sort {
+            it.fileName
+        }.collect { new File(lsdfFilesService.getFileViewByPidPath(it)) }
         List<File> actualDataFileList = executePanCanJob.getFilesToMerge(roddyBamFile)
 
         assert expectedDataFileList == actualDataFileList
@@ -316,7 +317,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
 
     private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {
-        return roddyBamFileToUse.seqTracks.collect {SeqTrack seqTrack ->
+        return roddyBamFileToUse.seqTracks.collect { SeqTrack seqTrack ->
             DataFile.findAllBySeqTrack(seqTrack).collect { DataFile dataFile ->
                 lsdfFilesService.getFileViewByPidPath(dataFile) as File
             }

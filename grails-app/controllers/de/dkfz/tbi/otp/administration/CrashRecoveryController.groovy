@@ -20,7 +20,7 @@ class CrashRecoveryController {
         boolean crashRecovery = crashRecoveryService.crashRecovery
         boolean processingOptionsValid = propertiesValidationService.validateProcessingOptions().isEmpty()
         return [
-                crashRecovery: crashRecovery,
+                crashRecovery         : crashRecovery,
                 processingOptionsValid: processingOptionsValid,
         ]
     }
@@ -36,12 +36,12 @@ class CrashRecoveryController {
         crashedJobs.each { ProcessingStep step ->
             boolean resumable = isJobResumable(step)
             dataToRender.aaData << [
-                step.id,
-                [id: step.process.jobExecutionPlan.id, name: step.process.jobExecutionPlan.name],
-                step.process.id,
-                [id: step.id, name: step.jobDefinition.name],
-                ["class": step.jobClass],
-                resumable,
+                    step.id,
+                    [id: step.process.jobExecutionPlan.id, name: step.process.jobExecutionPlan.name],
+                    step.process.id,
+                    [id: step.id, name: step.jobDefinition.name],
+                    ["class": step.jobClass],
+                    resumable,
             ]
         }
         render dataToRender as JSON
@@ -56,8 +56,8 @@ class CrashRecoveryController {
         boolean success = true
         String error = null
         try {
-            assert params.ids : 'No ids given'
-            assert params.message : 'No message given'
+            assert params.ids: 'No ids given'
+            assert params.message: 'No message given'
             List<Long> ids = params.ids.split(',').collect { it as long }
             crashRecoveryService.markJobsAsFailed(ids, params.message)
         } catch (Throwable e) {
@@ -72,8 +72,8 @@ class CrashRecoveryController {
         boolean success = true
         String error = null
         try {
-            assert params.ids : 'No ids given'
-            assert params.message : 'No message given'
+            assert params.ids: 'No ids given'
+            assert params.message: 'No message given'
             List<Long> ids = params.ids.split(',').collect { it as long }
             crashRecoveryService.restartJobs(ids, params.message)
         } catch (Throwable e) {
@@ -114,14 +114,14 @@ class CrashRecoveryController {
         boolean success = true
         String error = null
         try {
-            assert params.ids : 'No ids given'
-            assert params.parameters : 'No parameters given'
+            assert params.ids: 'No ids given'
+            assert params.parameters: 'No parameters given'
             List<Long> ids = params.ids.split(',').collect { it as long }
             def jsonParameters = JSON.parse(params["parameters"])
-            Map parameters = ids.collectEntries{[(it): [:]]}
+            Map parameters = ids.collectEntries { [(it): [:]] }
             jsonParameters.each {
                 String[] keys = it.key.split('!')
-                assert keys.length == 2 : "Expect 2 parts, found ${keys.length} parts, value: ${keys}"
+                assert keys.length == 2: "Expect 2 parts, found ${keys.length} parts, value: ${keys}"
                 parameters.get(keys[0] as long).put(keys[1], it.value)
             }
 

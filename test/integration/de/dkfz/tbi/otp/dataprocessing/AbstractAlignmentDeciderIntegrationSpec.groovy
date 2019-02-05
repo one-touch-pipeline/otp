@@ -1,8 +1,6 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
-import org.springframework.beans.factory.annotation.*
-import org.springframework.context.*
 import grails.test.spock.*
 
 class AbstractAlignmentDeciderIntegrationSpec extends IntegrationSpec {
@@ -24,6 +22,7 @@ class AbstractAlignmentDeciderIntegrationSpec extends IntegrationSpec {
         AbstractAlignmentDecider.hasLibraryPreparationKitAndBedFile(seqTrack)
     }
 
+    @SuppressWarnings('SpaceAfterOpeningBrace')
     void "isLibraryPreparationKitOrBedFileMissing, with exome seqTrack"() {
         given:
         LibraryPreparationKit libraryPreparationKit = libraryPreparationKitMethod()

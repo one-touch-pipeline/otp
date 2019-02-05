@@ -31,7 +31,7 @@ class CreateViewByPidJob extends AbstractEndStateAwareJobImpl implements AutoRes
         SeqTrack seqTrack = SeqTrack.get(Long.parseLong(getProcessParameterValue()))
         Realm realm = seqTrack.project.realm
 
-        Map map = seqTrack.dataFiles.collectEntries{ DataFile dataFile ->
+        Map map = seqTrack.dataFiles.collectEntries { DataFile dataFile ->
             linkDataFile(dataFile)
         }
         linkFileUtils.createAndValidateLinks(map, realm)
@@ -41,7 +41,7 @@ class CreateViewByPidJob extends AbstractEndStateAwareJobImpl implements AutoRes
         seqTrack.dataFiles*.save(flush: true)
         seqTrack.dataInstallationState = SeqTrack.DataProcessingState.FINISHED
         seqTrack.fastqcState = SeqTrack.DataProcessingState.NOT_STARTED
-        assert(seqTrack.save(flush: true))
+        assert (seqTrack.save(flush: true))
         succeed()
     }
 
@@ -49,8 +49,8 @@ class CreateViewByPidJob extends AbstractEndStateAwareJobImpl implements AutoRes
         String source = lsdfFilesService.getFileFinalPath(file)
         String link = lsdfFilesService.getFileViewByPidPath(file)
 
-        assert source : "No source file could be found"
-        assert link : "No link file could be found"
+        assert source: "No source file could be found"
+        assert link: "No link file could be found"
 
         return [(new File(source)): new File(link)]
     }

@@ -12,7 +12,6 @@ import static de.dkfz.tbi.otp.utils.StringUtils.*
 @Component
 class AntibodyTargetValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
-
     @Override
     Collection<String> getDescriptions() {
         return ["The antibody target is registered in the OTP database (case-insensitive) or empty."]
@@ -24,13 +23,13 @@ class AntibodyTargetValidator extends SingleValueValidator<MetadataValidationCon
     }
 
     @Override
-    void columnMissing(MetadataValidationContext context) {}
+    void columnMissing(MetadataValidationContext context) { }
 
     @Override
     void validateValue(MetadataValidationContext context, String antibodyTarget, Set<Cell> cells) {
-
         if (antibodyTarget && !AntibodyTarget.findByNameIlike(escapeForSqlLike(antibodyTarget))) {
-            context.addProblem(cells, Level.ERROR, "The antibody target '${antibodyTarget}' is not registered in OTP.", "At least one antibody target is not registered in OTP.")
+            context.addProblem(cells, Level.ERROR, "The antibody target '${antibodyTarget}' is not registered in OTP.",
+                    "At least one antibody target is not registered in OTP.")
         }
     }
 }

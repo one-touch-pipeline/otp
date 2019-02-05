@@ -50,7 +50,7 @@ class MergingSet implements Entity {
     State status = State.DECLARED
 
     static belongsTo = [
-        mergingWorkPackage: MergingWorkPackage,
+            mergingWorkPackage: MergingWorkPackage,
     ]
 
     Project getProject() {
@@ -108,7 +108,7 @@ class MergingSet implements Entity {
         assert mergingWorkPackage
         return MergingSet.createCriteria().get {
             eq("mergingWorkPackage", mergingWorkPackage)
-            projections{
+            projections {
                 max("identifier")
             }
         }
@@ -126,7 +126,7 @@ class MergingSet implements Entity {
 
     static constraints = {
         identifier(unique: 'mergingWorkPackage')
-        mergingWorkPackage(validator: {mergingWorkPackage -> mergingWorkPackage.pipeline.name == Pipeline.Name.DEFAULT_OTP})
+        mergingWorkPackage(validator: { mergingWorkPackage -> mergingWorkPackage.pipeline.name == Pipeline.Name.DEFAULT_OTP })
     }
 
     static mapping = {

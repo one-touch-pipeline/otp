@@ -76,7 +76,7 @@ class IndividualUnitTests {
 
         Individual individual2 = createIndividual()
 
-        shouldFail (AssertionError, {assert individual2.validate()})
+        shouldFail(AssertionError, { assert individual2.validate() })
     }
 
     @Test
@@ -88,7 +88,7 @@ class IndividualUnitTests {
         Sample sample1 = new Sample(
                 individual: individual,
                 sampleType: SampleType.build(name: "name1")
-                )
+        )
         assert sample1.save()
 
         assertEquals([sample1], individual.getSamples())
@@ -96,7 +96,7 @@ class IndividualUnitTests {
         Sample sample2 = new Sample(
                 individual: individual,
                 sampleType: SampleType.build(name: "name2")
-                )
+        )
         assert sample2.save()
 
         assertEquals([sample1, sample2], individual.getSamples())
@@ -128,14 +128,14 @@ class IndividualUnitTests {
 
 
     @Test
-    void testGetResultsPerPidPath(){
+    void testGetResultsPerPidPath() {
         Realm realm = DomainFactory.createRealm()
         assert realm.save()
 
         Project project = DomainFactory.createProject(
                 dirName: "projectDirName",
                 realm: realm
-                )
+        )
 
         Individual individual = createIndividual()
         individual.project = project
@@ -151,12 +151,12 @@ class IndividualUnitTests {
 
     private Individual createIndividual() {
         return new Individual(
-        pid: "pid",
-        mockPid: "mockPid",
-        mockFullName: "mockFullName",
-        internIdentifier: "internIdentifier",
-        type: Type.REAL,
-        project: DomainFactory.createProject()
+                pid: "pid",
+                mockPid: "mockPid",
+                mockFullName: "mockFullName",
+                internIdentifier: "internIdentifier",
+                type: Type.REAL,
+                project: DomainFactory.createProject()
         )
     }
 }

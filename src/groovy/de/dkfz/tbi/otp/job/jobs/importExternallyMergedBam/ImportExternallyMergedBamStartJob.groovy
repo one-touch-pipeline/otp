@@ -8,9 +8,9 @@ import org.springframework.stereotype.*
 
 @Component("importExternallyMergedBamStartJob")
 @Scope("singleton")
-class ImportExternallyMergedBamStartJob extends AbstractStartJobImpl{
+class ImportExternallyMergedBamStartJob extends AbstractStartJobImpl {
 
-    @Scheduled(fixedDelay=60000L)
+    @Scheduled(fixedDelay = 60000L)
     @Override
     void execute() {
         doWithPersistenceInterceptor {

@@ -152,7 +152,7 @@ class MetaDataFieldsController implements CheckAndCall {
         })
     }
 
-    void createImportAlias(CreateImportAliasCommand cmd){
+    void createImportAlias(CreateImportAliasCommand cmd) {
         checkErrorAndCallMethod(cmd, { cmd.service.addNewAlias(cmd.id, cmd.importAlias) })
     }
 }
@@ -174,12 +174,12 @@ class CreateLibraryPreparationKitCommand implements Serializable {
                 return 'Duplicate'
             }
         })
-        adapterFile (nullable: true, blank:false, validator: { val, obj ->
+        adapterFile(nullable: true, blank: false, validator: { val, obj ->
             if (val && !OtpPath.isValidAbsolutePath(val)) {
                 return 'Not a valid file name'
             }
         })
-        reverseComplementAdapterSequence (nullable: true, blank:false)
+        reverseComplementAdapterSequence(nullable: true, blank: false)
     }
 
     void setName(String name) {

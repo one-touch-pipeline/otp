@@ -93,17 +93,17 @@ class ExecuteRoddyAceseqJobSpec extends Specification {
         CreateRoddyFileHelper.createSophiaResultFiles(sophiaInstance)
 
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
-                configService             : configService,
-                linkFileUtils             : Mock(LinkFileUtils) {
+                configService         : configService,
+                linkFileUtils         : Mock(LinkFileUtils) {
                     1 * createAndValidateLinks(_, _) >> { Map<File, File> sourceLinkMap, Realm realm ->
                         CreateFileHelper.createFile(aceseqInstance.instancePath.absoluteDataManagementPath, sophiaInstance.finalAceseqInputFile.name)
                     }
                 },
-                aceseqService     : Mock(AceseqService) {
-                    1 * validateInputBamFiles(_) >> {}
+                aceseqService         : Mock(AceseqService) {
+                    1 * validateInputBamFiles(_) >> { }
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
-                    1 * checkReferenceGenomeFilesAvailability(_) >> {}
+                    1 * checkReferenceGenomeFilesAvailability(_) >> { }
                     1 * fastaFilePath(_) >> fasta
                     1 * chromosomeLengthFile(_) >> chromosomeLength
                     1 * gcContentFile(_) >> gcContent
@@ -180,10 +180,10 @@ class ExecuteRoddyAceseqJobSpec extends Specification {
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> {}
+                    1 * correctPermissionsAndGroups(_, _) >> { }
                 },
-                aceseqService         : Mock(AceseqService) {
-                    1 * validateInputBamFiles(_) >> {}
+                aceseqService             : Mock(AceseqService) {
+                    1 * validateInputBamFiles(_) >> { }
                 }
         ])
 
@@ -241,7 +241,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification {
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> {}
+                    1 * correctPermissionsAndGroups(_, _) >> { }
                 },
         ])
 

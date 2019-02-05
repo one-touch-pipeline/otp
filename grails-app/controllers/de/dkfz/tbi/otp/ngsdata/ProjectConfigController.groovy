@@ -48,12 +48,14 @@ class ProjectConfigController implements CheckAndCall {
         }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
 
 
-        List<Map> cellRangerOverview = SeqTypeService.cellRangerAlignableSeqTypes.sort{ it.name }.collect { SeqType seqType ->
+        List<Map> cellRangerOverview = SeqTypeService.cellRangerAlignableSeqTypes.sort {
+            it.name
+        }.collect { SeqType seqType ->
             CellRangerConfig config = projectService.getLatestCellRangerConfig(project, seqType)
             ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(project, seqType)
             return [
                     seqType: seqType,
-                    config: config,
+                    config : config,
             ]
         }
 
@@ -95,8 +97,12 @@ class ProjectConfigController implements CheckAndCall {
                 comment                        : project?.comment,
                 nameInMetadata                 : project?.nameInMetadataFiles ?: '',
                 seqTypeMergingCriteria         : seqTypeMergingCriteria,
-                roddySeqTypes                  : SeqTypeService.getRoddyAlignableSeqTypes().sort { it.displayNameWithLibraryLayout },
-                cellRangerSeqTypes             : SeqTypeService.getCellRangerAlignableSeqTypes().sort { it.displayNameWithLibraryLayout },
+                roddySeqTypes                  : SeqTypeService.getRoddyAlignableSeqTypes().sort {
+                    it.displayNameWithLibraryLayout
+                },
+                cellRangerSeqTypes             : SeqTypeService.getCellRangerAlignableSeqTypes().sort {
+                    it.displayNameWithLibraryLayout
+                },
                 snvSeqTypes                    : snv.getSeqTypes(),
                 indelSeqTypes                  : indel.getSeqTypes(),
                 sophiaSeqTypes                 : sophia.getSeqTypes(),

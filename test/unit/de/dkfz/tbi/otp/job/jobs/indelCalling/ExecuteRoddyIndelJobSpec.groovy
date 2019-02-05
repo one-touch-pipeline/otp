@@ -69,8 +69,8 @@ class ExecuteRoddyIndelJobSpec extends Specification {
         File fasta = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "fasta.fa"))
 
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                indelCallingService     : Mock(IndelCallingService) {
-                    1 * validateInputBamFiles(_) >> {}
+                indelCallingService   : Mock(IndelCallingService) {
+                    1 * validateInputBamFiles(_) >> { }
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
                     1 * fastaFilePath(_) >> fasta
@@ -130,15 +130,15 @@ class ExecuteRoddyIndelJobSpec extends Specification {
         File bedFile = CreateFileHelper.createFile(new File(temporaryFolder.newFolder(), "bed.txt"))
 
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
-                indelCallingService     : Mock(IndelCallingService) {
-                    1 * validateInputBamFiles(_) >> {}
+                indelCallingService   : Mock(IndelCallingService) {
+                    1 * validateInputBamFiles(_) >> { }
                 },
                 referenceGenomeService: Mock(ReferenceGenomeService) {
                     1 * fastaFilePath(_) >> fasta
                     0 * _
                 },
-                bedFileService : Mock(BedFileService) {
-                    1* filePath(_) >> bedFile
+                bedFileService        : Mock(BedFileService) {
+                    1 * filePath(_) >> bedFile
                 },
         ])
         new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
@@ -208,8 +208,6 @@ class ExecuteRoddyIndelJobSpec extends Specification {
     }
 
 
-
-
     @Unroll
     void "prepareAndReturnWorkflowSpecificParameter, return always empty String"() {
         expect:
@@ -228,10 +226,10 @@ class ExecuteRoddyIndelJobSpec extends Specification {
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
                 configService             : new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path]),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> {}
+                    1 * correctPermissionsAndGroups(_, _) >> { }
                 },
-                indelCallingService         : Mock(IndelCallingService) {
-                    1 * validateInputBamFiles(_) >> {}
+                indelCallingService       : Mock(IndelCallingService) {
+                    1 * validateInputBamFiles(_) >> { }
                 }
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
@@ -284,7 +282,7 @@ class ExecuteRoddyIndelJobSpec extends Specification {
         ExecuteRoddyIndelJob job = new ExecuteRoddyIndelJob([
                 configService             : new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path]),
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {
-                    1 * correctPermissionsAndGroups(_, _) >> {}
+                    1 * correctPermissionsAndGroups(_, _) >> { }
                 },
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()

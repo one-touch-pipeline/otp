@@ -9,7 +9,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 
 @Component
-class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator{
+class LibPrepKitSeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Autowired
     SeqTypeService seqTypeService

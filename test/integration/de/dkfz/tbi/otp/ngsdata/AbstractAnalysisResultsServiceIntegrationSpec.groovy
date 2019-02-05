@@ -20,7 +20,7 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends IntegrationSpec impl
     }
 
     @Unroll
-    void "getCallingInstancesForProject with #analysis Instance"(){
+    void "getCallingInstancesForProject with #analysis Instance"() {
         given:
         BamFilePairAnalysis analysisInstance = DomainFactory."create${analysis}InstanceWithRoddyBamFiles"()
         abstractAnalysisResultsService = service.newInstance()
@@ -48,8 +48,8 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends IntegrationSpec impl
 
     void "checkFile with no callingInstance"() {
         when:
-         abstractAnalysisResultsService = Mock(AbstractAnalysisResultsService)
-       File result
+        abstractAnalysisResultsService = Mock(AbstractAnalysisResultsService)
+        File result
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             result = abstractAnalysisResultsService.getFiles(null, null)
         }
@@ -59,7 +59,7 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends IntegrationSpec impl
     }
 
     @Unroll
-    void "checkFile with #instance and no File"(){
+    void "checkFile with #instance and no File"() {
         given:
         abstractAnalysisResultsService = Mock(AbstractAnalysisResultsService)
         BamFilePairAnalysis analysisInstance = DomainFactory."create${analysis}InstanceWithRoddyBamFiles"()
@@ -75,12 +75,12 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends IntegrationSpec impl
         !file
 
         where:
-        analysis       | instance               | plotType
-        "RoddySnv"     | RoddySnvCallingInstance| PlotType.SNV
-        "IndelCalling" | IndelCallingInstance   | PlotType.INDEL
-        "IndelCalling" | IndelCallingInstance   | PlotType.INDEL_TINDA
-        "Aceseq"       | AceseqInstance         | PlotType.ACESEQ_ALL
-        "Aceseq"       | AceseqInstance         | PlotType.ACESEQ_WG_COVERAGE
-        "Sophia"       | SophiaInstance         | PlotType.SOPHIA
+        analysis       | instance                | plotType
+        "RoddySnv"     | RoddySnvCallingInstance | PlotType.SNV
+        "IndelCalling" | IndelCallingInstance    | PlotType.INDEL
+        "IndelCalling" | IndelCallingInstance    | PlotType.INDEL_TINDA
+        "Aceseq"       | AceseqInstance          | PlotType.ACESEQ_ALL
+        "Aceseq"       | AceseqInstance          | PlotType.ACESEQ_WG_COVERAGE
+        "Sophia"       | SophiaInstance          | PlotType.SOPHIA
     }
 }

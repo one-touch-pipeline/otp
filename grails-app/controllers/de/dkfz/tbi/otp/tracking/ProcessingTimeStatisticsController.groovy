@@ -10,7 +10,7 @@ class ProcessingTimeStatisticsController {
     ProcessingTimeStatisticsService processingTimeStatisticsService
     CommentService commentService
 
-    def index() {}
+    def index() { }
 
     def dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
@@ -30,7 +30,7 @@ class ProcessingTimeStatisticsController {
     }
 
     def editValue() {
-        Map data =  [:]
+        Map data = [:]
 
         OtrsTicket ticket = OtrsTicket.get(params.id as long)
         assert ticket

@@ -111,6 +111,7 @@ class QcThresholdSpec extends Specification {
         DIFFERENCE_WITH_OTHER_PROPERTY | null                                 || false
     }
 
+    @SuppressWarnings('SpaceAfterOpeningBrace')
     void "test saving QcThreshold duplicated"() {
         given:
         SeqType seqType = DomainFactory.createSeqType()

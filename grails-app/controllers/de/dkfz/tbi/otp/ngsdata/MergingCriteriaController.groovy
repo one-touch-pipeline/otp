@@ -6,6 +6,7 @@ import org.springframework.validation.*
 
 
 class MergingCriteriaController {
+
     ProjectService projectService
     ProjectSelectionService projectSelectionService
     MergingCriteriaService mergingCriteriaService
@@ -17,9 +18,13 @@ class MergingCriteriaController {
         }
         MergingCriteria mergingCriteria = mergingCriteriaService.findMergingCriteria(cmd.project, cmd.seqType)
         List<SeqPlatformGroup> seqPlatformGroups = mergingCriteriaService.findDefaultSeqPlatformGroups()
-        List<SeqPlatformGroup> seqPlatformGroupsPerProjectAndSeqType = mergingCriteriaService.findSeqPlatformGroupsForProjectAndSeqType(cmd.project, cmd.seqType).sort{it.id}.reverse()
+        List<SeqPlatformGroup> seqPlatformGroupsPerProjectAndSeqType = mergingCriteriaService.findSeqPlatformGroupsForProjectAndSeqType(cmd.project, cmd.seqType).sort {
+            it.id
+        }.reverse()
         List<SeqPlatform> allUsedSpecificSeqPlatforms = seqPlatformGroupsPerProjectAndSeqType*.seqPlatforms.flatten()
-        List<SeqPlatform> allSeqPlatformsWithoutGroup = SeqPlatform.all.sort{it.toString()} - allUsedSpecificSeqPlatforms
+        List<SeqPlatform> allSeqPlatformsWithoutGroup = SeqPlatform.all.sort {
+            it.toString()
+        } - allUsedSpecificSeqPlatforms
         [
                 mergingCriteria                      : mergingCriteria,
                 project                              : cmd.project,
@@ -34,7 +39,9 @@ class MergingCriteriaController {
 
     def defaultSeqPlatformGroupConfiguration() {
         List<SeqPlatformGroup> seqPlatformGroups = mergingCriteriaService.findDefaultSeqPlatformGroupsOperator()
-        List<SeqPlatform> allSeqPlatformsWithoutGroup = SeqPlatform.all.sort{it.toString()} - seqPlatformGroups*.seqPlatforms.flatten()
+        List<SeqPlatform> allSeqPlatformsWithoutGroup = SeqPlatform.all.sort {
+            it.toString()
+        } - seqPlatformGroups*.seqPlatforms.flatten()
 
         [
                 seqPlatformGroups          : seqPlatformGroups,
@@ -68,12 +75,12 @@ class MergingCriteriaController {
     def removePlatformFromSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
         mergingCriteriaService.removePlatformFromSeqPlatformGroup(group, platform)
         redirectHelper(group.mergingCriteria)
-   }
+    }
 
     def addPlatformToExistingSeqPlatformGroup(SeqPlatformGroup group, SeqPlatform platform) {
         mergingCriteriaService.addPlatformToExistingSeqPlatformGroup(group, platform)
         redirectHelper(group.mergingCriteria)
-   }
+    }
 
     def createNewSpecificGroupAndAddPlatform(SeqPlatform platform, MergingCriteria mergingCriteria) {
         mergingCriteriaService.createNewGroupAndAddPlatform(platform, mergingCriteria)
@@ -105,7 +112,8 @@ class ProjectAndSeqTypeCommand {
     Project project
     SeqType seqType
 }
- class UpdateMergingCriteriaCommand {
+
+class UpdateMergingCriteriaCommand {
     Project project
     SeqType seqType
     boolean useLibPrepKit

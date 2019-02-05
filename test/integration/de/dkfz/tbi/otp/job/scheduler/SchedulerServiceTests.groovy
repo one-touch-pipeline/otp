@@ -62,11 +62,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
 
         // there is no further Job in the Job Execution Plan. Executing should finish the Process
@@ -98,11 +98,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
         // first Job should be run
         assertFalse(process.finished)
@@ -179,11 +179,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
 
         // running the JobExecutionPlan
@@ -211,7 +211,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertSame(step2, step3.previous)
         assertSame(step3, step2.next)
         assertNull(step3.next)
-        List<Parameter> parameters = step3.input.toList().sort{ it.value }
+        List<Parameter> parameters = step3.input.toList().sort { it.value }
         assertEquals(2, parameters.size())
         assertSame(constantParameterType, parameters[0].type)
         assertSame(constantParameterType2, parameters[1].type)
@@ -236,11 +236,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
         // running the JobExecutionPlan
         assertQueueAndRunningToBeEmpty()
@@ -260,8 +260,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStep failedStep = ProcessingStep.findAllByJobDefinition(jobDefinition3).toList().sort { it.id }.last()
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(failedStep)
         assertEquals(2, updates.size())
-        assertEquals(ExecutionState.CREATED, updates.sort { it.id }.first().state )
-        assertEquals(ExecutionState.FAILURE, updates.sort { it.id }.last().state )
+        assertEquals(ExecutionState.CREATED, updates.sort { it.id }.first().state)
+        assertEquals(ExecutionState.FAILURE, updates.sort { it.id }.last().state)
     }
 
     @Test
@@ -305,11 +305,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
 
         // running the JobExecutionPlan
@@ -335,7 +335,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertSame(step2, step3.previous)
         // constant parameters and passed parameters
         assertNotNull(step3.input)
-        List<Parameter> params = step3.input.toList().sort{ it.value }
+        List<Parameter> params = step3.input.toList().sort { it.value }
         assertEquals(4, params.size())
         assertEquals("1234", params[0].value)
         assertEquals("4321", params[1].value)
@@ -371,11 +371,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
 
         // running the JobExecutionPlan
@@ -400,7 +400,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertQueueAndRunningToBeEmpty()
         // there should be three output parameters
         assertNotNull(step2.output)
-        List<Parameter> params = step2.output.toList().sort{ it.value }
+        List<Parameter> params = step2.output.toList().sort { it.value }
         assertEquals(3, params.size())
         assertEquals("1234", params[0].value)
         assertEquals("1234", params[1].value)
@@ -436,10 +436,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         jobDefinition2.addToParameterMappings(mapping2)
         // pass the output parameter test also to both input parameters
         ParameterMapping mapping3 = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"),
-            to: ParameterType.findByJobDefinitionAndName(jobDefinition2, "input"))
+                to: ParameterType.findByJobDefinitionAndName(jobDefinition2, "input"))
         jobDefinition2.addToParameterMappings(mapping3)
         ParameterMapping mapping4 = new ParameterMapping(job: jobDefinition2, from: ParameterType.findByJobDefinitionAndName(jobDefinition, "test"),
-            to: ParameterType.findByJobDefinitionAndName(jobDefinition2, "input2"))
+                to: ParameterType.findByJobDefinitionAndName(jobDefinition2, "input2"))
         jobDefinition2.addToParameterMappings(mapping4)
         jobDefinition.next = jobDefinition2
         assertNotNull(jobDefinition.save())
@@ -451,11 +451,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
         // running the JobExecutionPlan
         assertQueueAndRunningToBeEmpty()
@@ -482,7 +482,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertQueueAndRunningToBeEmpty()
         // there should be three output parameters
         assertNotNull(step2.output)
-        List<Parameter> params = step2.output.toList().sort{ it.value }
+        List<Parameter> params = step2.output.toList().sort { it.value }
         assertEquals(4, params.size())
         assertEquals("1234", params[0].value)
         assertEquals("1234", params[1].value)
@@ -553,7 +553,9 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
             SpringSecurityUtils.doWithAuth(ADMIN) {
                 schedulerService.suspendScheduler()
             }
-            TestCase.shouldFailWithMessage(RuntimeException, "Scheduler is disabled", { schedulerService.createProcess(job, []) })
+            TestCase.shouldFailWithMessage(RuntimeException, "Scheduler is disabled", {
+                schedulerService.createProcess(job, [])
+            })
         } finally {
             SpringSecurityUtils.doWithAuth(ADMIN) {
                 schedulerService.resumeScheduler()
@@ -807,11 +809,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
         assertTrue(schedulerService.queue.add(step))
         schedulerService.schedule()
@@ -869,11 +871,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(step.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
         assertTrue(schedulerService.queue.add(step))
         schedulerService.schedule()
@@ -934,11 +936,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         step.metaClass.belongsToMultiJob = { -> return false }
         assertNotNull(step.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
         // with a created event it should fail
         shouldFail(IncorrectProcessingException) {
@@ -946,10 +948,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         }
         // with a started event it should fail
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.STARTED,
-            previous: update,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.STARTED,
+                previous: update,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         shouldFail(IncorrectProcessingException) {
@@ -957,10 +959,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         }
         // with a finished event it should fail
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.FINISHED,
-            previous: update,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.FINISHED,
+                previous: update,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         shouldFail(IncorrectProcessingException) {
@@ -968,10 +970,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         }
         // with a success event it should fail
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.SUCCESS,
-            previous: update,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.SUCCESS,
+                previous: update,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         shouldFail(IncorrectProcessingException) {
@@ -979,10 +981,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         }
         // with a restarted event it should fail
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.RESTARTED,
-            previous: update,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.RESTARTED,
+                previous: update,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         shouldFail(IncorrectProcessingException) {
@@ -990,10 +992,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         }
         // with a suspended event it should fail
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.SUSPENDED,
-            previous: update,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.SUSPENDED,
+                previous: update,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         shouldFail(IncorrectProcessingException) {
@@ -1001,10 +1003,10 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         }
         // with a resumed event it should fail
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.RESUMED,
-            previous: update,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.RESUMED,
+                previous: update,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         shouldFail(IncorrectProcessingException) {
@@ -1013,17 +1015,17 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
         // set to failed
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.FINISHED,
-            previous: update,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.FINISHED,
+                previous: update,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.FAILURE,
-            previous: update,
-            processingStep: step
+                date: new Date(),
+                state: ExecutionState.FAILURE,
+                previous: update,
+                processingStep: step
         )
         assertNotNull(update.save(flush: true))
         assertEquals(9, ProcessingStepUpdate.countByProcessingStep(step))
@@ -1129,18 +1131,18 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         // now the same with schedule
         ProcessingStepUpdate update = ProcessingStepUpdate.findAllByProcessingStep(step).last()
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.FINISHED,
-            previous: update,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.FINISHED,
+                previous: update,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.FAILURE,
-            previous: update,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.FAILURE,
+                previous: update,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
         assertEquals(7, ProcessingStepUpdate.countByProcessingStep(step))
         process.finished = true
@@ -1260,11 +1262,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         ProcessingStep firstStep = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         assertNotNull(firstStep.save())
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: firstStep
-            )
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: firstStep
+        )
         assertNotNull(update.save(flush: true))
         schedulerService.queue << firstStep
         schedulerService.schedule()
@@ -1282,11 +1284,11 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(fourthStep)
         // lets fail the second job
         ProcessingStepUpdate failureUpdate = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.FAILURE,
-            previous: ProcessingStepUpdate.findAllByProcessingStep(secondStep).last(),
-            processingStep: secondStep
-            )
+                date: new Date(),
+                state: ExecutionState.FAILURE,
+                previous: ProcessingStepUpdate.findAllByProcessingStep(secondStep).last(),
+                processingStep: secondStep
+        )
         assertNotNull(failureUpdate.save())
         schedulerService.restartProcessingStep(secondStep)
         schedulerService.schedule()
@@ -1489,25 +1491,25 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     private ProcessingStepUpdate mockProcessingStepAsFinished(ProcessingStep step) {
         ProcessingStepUpdate update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.CREATED,
-            previous: null,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.CREATED,
+                previous: null,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.STARTED,
-            previous: update,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.STARTED,
+                previous: update,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.FINISHED,
-            previous: update,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.FINISHED,
+                previous: update,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
         return update
     }
@@ -1515,22 +1517,22 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
     private void mockProcessingStepAsFailed(ProcessingStep step) {
         ProcessingStepUpdate update = mockProcessingStepAsFinished(step)
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.FAILURE,
-            previous: update,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.FAILURE,
+                previous: update,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
     }
 
     private void mockProcessingStepAsSucceeded(ProcessingStep step) {
         ProcessingStepUpdate update = mockProcessingStepAsFinished(step)
         update = new ProcessingStepUpdate(
-            date: new Date(),
-            state: ExecutionState.SUCCESS,
-            previous: update,
-            processingStep: step
-            )
+                date: new Date(),
+                state: ExecutionState.SUCCESS,
+                previous: update,
+                processingStep: step
+        )
         assertNotNull(update.save(flush: true))
     }
 }

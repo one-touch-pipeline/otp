@@ -46,7 +46,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
 
     static hasMany = [
             alignmentProperties: MergingWorkPackageAlignmentProperty,
-            seqTracks: SeqTrack,
+            seqTracks          : SeqTrack,
     ]
 
     static constraints = {
@@ -62,12 +62,12 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
             }
         })
 
-        needsProcessing(validator: {val, obj ->
+        needsProcessing(validator: { val, obj ->
             !val || obj?.pipeline?.name in Pipeline.Name.getAlignmentPipelineNames()
         })
         pipeline(validator: { pipeline ->
             pipeline.type == Pipeline.Type.ALIGNMENT &&
-            pipeline.name != Pipeline.Name.EXTERNALLY_PROCESSED
+                    pipeline.name != Pipeline.Name.EXTERNALLY_PROCESSED
         })
 
         libraryPreparationKit validator: { val, obj ->
@@ -81,7 +81,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
             }
         }
 
-        statSizeFileName nullable: true, blank: false, matches: ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN, validator : { val, obj ->
+        statSizeFileName nullable: true, blank: false, matches: ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN, validator: { val, obj ->
             switch (obj.pipeline?.name) {
                 case Pipeline.Name.CELL_RANGER:
                 case Pipeline.Name.DEFAULT_OTP:
@@ -116,7 +116,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
             properties += [libraryPreparationKit: seqTrack.libraryPreparationKit]
         }
         if (seqTrack.seqType.isChipSeq()) {
-            properties += [antibodyTarget: ((ChipSeqSeqTrack)seqTrack).antibodyTarget]
+            properties += [antibodyTarget: ((ChipSeqSeqTrack) seqTrack).antibodyTarget]
         }
         return properties
     }
@@ -140,7 +140,8 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
     }
 
     static mapping = {
-        needsProcessing index: "merging_work_package_needs_processing_idx"  // partial index: WHERE needs_processing = true
+        needsProcessing index: "merging_work_package_needs_processing_idx"
+        // partial index: WHERE needs_processing = true
         alignmentProperties cascade: "all-delete-orphan"
     }
 
