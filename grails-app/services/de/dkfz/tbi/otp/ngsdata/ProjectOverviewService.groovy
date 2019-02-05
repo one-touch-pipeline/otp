@@ -55,10 +55,7 @@ class ProjectOverviewService {
         String nameInConfigFile = workflowConfig.getNameUsedInConfig()
         String cmd = executeRoddyCommandService.roddyGetRuntimeConfigCommand(workflowConfig, nameInConfigFile, workflowConfig.seqType.roddyName)
 
-       ProcessOutput output
-        LogThreadLocal.withThreadLog(log) {
-            output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd)
-        }
+       ProcessOutput output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmd)
 
         if (output.exitCode != 0) {
             log?.debug("Alignment information can't be detected:\n${output}")
