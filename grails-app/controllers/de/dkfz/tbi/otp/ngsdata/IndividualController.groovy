@@ -91,10 +91,10 @@ class IndividualController {
                     } else {
                         content = cmd.sampleText
                     }
-                    char delimiter = cmd.delimiter == "space" ? ' ' : cmd.delimiter == "tab" ? '\t' : cmd.delimiter as char
-                    content = content.replaceAll(" *${delimiter} *", delimiter)
+                    String delimiter = cmd.delimiter == "space" ? ' ' : cmd.delimiter == "tab" ? '\t' : cmd.delimiter
+                    content = content.replaceAll(/ *${delimiter} */, delimiter)
 
-                    Spreadsheet spreadsheet = new Spreadsheet(content, delimiter)
+                    Spreadsheet spreadsheet = new Spreadsheet(content, delimiter as char)
                     if (!spreadsheet.getColumn(PID)) {
                         message = "Error: The column ${PID} does not exist"
                         messageType = 'error'
