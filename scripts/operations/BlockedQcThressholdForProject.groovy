@@ -26,7 +26,7 @@ String projectName = ""
 //----------------------------------------------------
 //processing
 
-assert projectName: 'No Project nam given'
+assert projectName: 'No Project name given'
 
 Project project = Project.findByName(projectName)
 assert project: "Project ${projectName} not found"
@@ -74,7 +74,7 @@ bamFiles.each { AbstractBamFile bamFile ->
     }.findAll { QcThreshold qcThreshold ->
         return qcThreshold?.qcPassed(qc) == QcThreshold.ThresholdLevel.ERROR
     }
-    println "    Found thressholds (${qcThresholds.size()}:"
+    println "    Found thressholds (${qcThresholds.size()}):"
     qcThresholds.each {
         println "        ${it.qcProperty1}: ${qc[it.qcProperty1]}"
     }
