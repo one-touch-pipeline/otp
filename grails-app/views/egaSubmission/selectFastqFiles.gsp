@@ -50,7 +50,7 @@
                         <g:each status="i" in="${dataFileList}" var="it">
                             <tr>
                                 <g:if test="${!hasDataFiles}">
-                                    <td><g:checkBox name="selectBox[${i}]" value="${true}" data-group="group${it[0].run }${it[0].seqTrack.laneId}"/></td>
+                                    <td><g:checkBox name="selectBox[${i}]" checked="true" value="${true}" data-group="group${it[0].run }${it[0].seqTrack.laneId}"/></td>
                                 </g:if>
                                 <td>${it[0].individual.displayName}</td>
                                 <td>${it[0].sampleType.displayName}</td>

@@ -82,7 +82,7 @@
             </tr>
             <tr>
                 <td valign="top" class="myKey"><g:message code="configurePipeline.mouse.data"/></td>
-                <td><g:checkBox name="mouseData" value="true"/></td>
+                <td><g:checkBox name="mouseData" checked="false" value="true"/></td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
             </tr>
@@ -95,7 +95,7 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="configurePipeline.rnaAlignment.deprecateConfigurations"/></td>
-                <td><g:checkBox name="deprecateConfigurations" value="true"/></td>
+                <td><g:checkBox name="deprecateConfigurations" checked="true" value="true"/></td>
                 <td>&nbsp;</td>
                 <td><g:message code="configurePipeline.rnaAlignment.deprecateConfigurations.info"/></td>
             </tr>
