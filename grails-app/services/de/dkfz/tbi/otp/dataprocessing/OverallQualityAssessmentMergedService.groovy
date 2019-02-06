@@ -56,7 +56,8 @@ where
         return qas
     }
 
-    List<ReferenceGenomeEntry> findChromosomeLengthForQualityAssessmentMerged(List<String> chromosomeAliases, List<AbstractQualityAssessment> abstractQualityAssessments) {
+    List<ReferenceGenomeEntry> findChromosomeLengthForQualityAssessmentMerged(
+            List<String> chromosomeAliases, List<AbstractQualityAssessment> abstractQualityAssessments) {
         if (!abstractQualityAssessments) {
             return []
         }

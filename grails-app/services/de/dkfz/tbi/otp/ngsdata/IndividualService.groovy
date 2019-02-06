@@ -282,7 +282,14 @@ class IndividualService {
         if (!individual.getDomainClass().getFieldName(key)) {
             throw new IndividualUpdateException(individual)
         }
-        ChangeLog changelog = new ChangeLog(rowId: individual.id, referencedClass: clazz, columnName: key, fromValue: "${individual[key]}", toValue: value, comment: "-", source: ChangeLog.Source.MANUAL)
+        ChangeLog changelog = new ChangeLog(
+                rowId: individual.id,
+                referencedClass: clazz,
+                columnName: key,
+                fromValue: "${individual[key]}",
+                toValue: value,
+                comment: "-",
+                source: ChangeLog.Source.MANUAL)
         if (!changelog.save()) {
             throw new ChangelogException("Creation of changelog failed, errors: " + changelog.errors.toString())
         }
@@ -383,7 +390,8 @@ class IndividualService {
     }
 
     /**
-     * Checks for missing values, as well as input maps with different key-sets and calls {@link IndividualService#saveComment(de.dkfz.tbi.otp.ngsdata.Individual, java.lang.String, java.util.Date)}}
+     * Checks for missing values, as well as input maps with different key-sets and calls
+     * {@link IndividualService#saveComment(de.dkfz.tbi.otp.ngsdata.Individual, java.lang.String, java.util.Date)}}
      * to finally store the comment for the specific individual in the DB
      * Both input-maps have to contain an {@link Individual}, e.g. Map[individual: individual, ...]
      * @param operation a String that describes the specific operation, e.g. "sample-swap"
@@ -401,7 +409,8 @@ class IndividualService {
         Date date = new DateTime().toDate()
 
         String output = createCommentString(operation, oldProperties, newProperties, date, additionalInformation)
-        commentService.saveComment(newProperties.individual, oldProperties.individual.comment?.comment ? "${output}\n${oldProperties.individual.comment.comment}" : "${output}")
+        commentService.saveComment(newProperties.individual, oldProperties.individual.comment?.comment ? "${output}\n" +
+                "${oldProperties.individual.comment.comment}" : "${output}")
     }
 
     /**

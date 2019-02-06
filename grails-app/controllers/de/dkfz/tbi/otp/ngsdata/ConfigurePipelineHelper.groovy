@@ -58,7 +58,8 @@ trait ConfigurePipelineHelper {
 
     Map getValues(Project project, SeqType seqType, Pipeline pipeline) {
         String configVersion = CollectionUtils.atMostOneElement(
-                RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1]))?.configVersion
+                RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(
+                        project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1]))?.configVersion
         if (configVersion) {
             Set<String> versions = configVersion.split("_")
             final int MAIN_CONFIG_VERSION_INDEX = 0

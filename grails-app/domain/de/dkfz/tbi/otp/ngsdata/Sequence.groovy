@@ -121,7 +121,18 @@ class Sequence implements Serializable {
         ilseId column: 'ilse_id'
         libraryPreparationKit column: 'library_preparation_kit'
         realmId column: 'realm_id'
-        id composite: ['seqTrackId', 'seqTypeId', 'seqPlatformId', 'sampleId', 'runId', 'pipelineVersionId', 'seqCenterId', 'sampleTypeId', 'individualId', 'projectId']
+        id composite: [
+                'seqTrackId',
+                'seqTypeId',
+                'seqPlatformId',
+                'sampleId',
+                'runId',
+                'pipelineVersionId',
+                'seqCenterId',
+                'sampleTypeId',
+                'individualId',
+                'projectId',
+        ]
         dayCreated formula: 'DATE(date_created)'
     }
 

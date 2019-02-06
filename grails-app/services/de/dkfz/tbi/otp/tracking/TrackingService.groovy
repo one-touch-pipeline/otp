@@ -117,7 +117,8 @@ class TrackingService {
     void processFinished(Set<SeqTrack> seqTracks) {
         SamplePairCreation samplePairCreation = new SamplePairCreation()
         Set<OtrsTicket> otrsTickets = findAllOtrsTickets(seqTracks)
-        LogThreadLocal.getThreadLog()?.trace("evaluating processFinished for SPD: ${samplePairCreation}; OtrsTickets: ${otrsTickets}; SeqTracks: ${seqTracks*.id}")
+        LogThreadLocal.getThreadLog()?.trace("evaluating processFinished for SPD: ${samplePairCreation}; OtrsTickets: ${otrsTickets}; " +
+                "SeqTracks: ${seqTracks*.id}")
         for (OtrsTicket ticket : otrsTickets) {
             setFinishedTimestampsAndNotify(ticket, samplePairCreation)
         }

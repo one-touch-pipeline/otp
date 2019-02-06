@@ -33,7 +33,8 @@ class IndelResultsService extends AbstractAnalysisResultsService<IndelCallingIns
                 somaticSmallVarsInTumorPass: sampleSwap?.somaticSmallVarsInTumorPass ?: "",
                 somaticSmallVarsInControlPass: sampleSwap?.somaticSmallVarsInControlPass ?: "",
                 tindaSomaticAfterRescue: sampleSwap?.tindaSomaticAfterRescue ?: "",
-                tindaSomaticAfterRescueMedianAlleleFreqInControl: sampleSwap ? FormatHelper.formatNumber(sampleSwap.tindaSomaticAfterRescueMedianAlleleFreqInControl) : "",
+                tindaSomaticAfterRescueMedianAlleleFreqInControl: sampleSwap ?
+                        FormatHelper.formatNumber(sampleSwap.tindaSomaticAfterRescueMedianAlleleFreqInControl) : "",
         ]
     }
 }

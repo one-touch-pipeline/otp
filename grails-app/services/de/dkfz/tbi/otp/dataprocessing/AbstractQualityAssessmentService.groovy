@@ -37,7 +37,8 @@ class AbstractQualityAssessmentService {
         if (isExome && qualityControlTargetExtractJsonFile != null) {
             qualityControlTargetExtractJson = JSON.parse(qualityControlTargetExtractJsonFile().text)
         }
-        List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(roddyBamFile.referenceGenome, [CONTIG, UNDEFINED])*.name
+        List<String> chromosomeNames = ReferenceGenomeEntry.findAllByReferenceGenomeAndClassificationInList(
+                roddyBamFile.referenceGenome, [CONTIG, UNDEFINED])*.name
         Iterator chromosomes = qualityControlJson.keys()
         Collection<String> allChromosomeNames = []
         chromosomes.findAll { !chromosomeNames.contains(it) } .each { String chromosome ->

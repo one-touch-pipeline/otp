@@ -21,13 +21,10 @@ class MergingCriteriaController {
         }
         MergingCriteria mergingCriteria = mergingCriteriaService.findMergingCriteria(cmd.project, cmd.seqType)
         List<SeqPlatformGroup> seqPlatformGroups = mergingCriteriaService.findDefaultSeqPlatformGroups()
-        List<SeqPlatformGroup> seqPlatformGroupsPerProjectAndSeqType = mergingCriteriaService.findSeqPlatformGroupsForProjectAndSeqType(cmd.project, cmd.seqType).sort {
-            it.id
-        }.reverse()
+        List<SeqPlatformGroup> seqPlatformGroupsPerProjectAndSeqType = mergingCriteriaService.findSeqPlatformGroupsForProjectAndSeqType(
+                cmd.project, cmd.seqType, false)
         List<SeqPlatform> allUsedSpecificSeqPlatforms = seqPlatformGroupsPerProjectAndSeqType*.seqPlatforms.flatten()
-        List<SeqPlatform> allSeqPlatformsWithoutGroup = SeqPlatform.all.sort {
-            it.toString()
-        } - allUsedSpecificSeqPlatforms
+        List<SeqPlatform> allSeqPlatformsWithoutGroup = SeqPlatform.all.sort { it.toString() } - allUsedSpecificSeqPlatforms
         [
                 mergingCriteria                      : mergingCriteria,
                 project                              : cmd.project,

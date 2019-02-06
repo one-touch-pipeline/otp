@@ -144,7 +144,8 @@ class ClusterJobMonitoringService {
             }
         }
 
-        log.debug("Remove ${removal.values().flatten().size()} cluster jobs from ${removal.size()} monitor jobs: ${removal.values().flatten()*.clusterJobId.sort().join(' ')}")
+        log.debug("Remove ${removal.values().flatten().size()} cluster jobs from ${removal.size()} monitor jobs: " +
+                "${removal.values().flatten()*.clusterJobId.sort().join(' ')}")
 
         if (!removal.empty) {
             // in case that some Jobs finished we need to remove them from our queue

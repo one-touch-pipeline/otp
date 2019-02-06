@@ -33,62 +33,87 @@ class QcThreshold implements Entity {
 
     static constraints = {
         qcProperty1(validator: { val, obj, Errors errors ->
-            QcThreshold qcThreshold = CollectionUtils.atMostOneElement(QcThreshold.findAllByProjectAndSeqTypeAndQcClassAndQcProperty1(obj.project, obj.seqType, obj.qcClass, val))
+            QcThreshold qcThreshold = CollectionUtils.atMostOneElement(QcThreshold.findAllByProjectAndSeqTypeAndQcClassAndQcProperty1(
+                    obj.project, obj.seqType, obj.qcClass, val))
             if (qcThreshold && qcThreshold != obj) {
-                errors.rejectValue('qcProperty1', "default.invalid.validator.message", [QcThreshold.simpleName, "qcProperty1", val].toArray(), "QcThreshold for '${obj.qcClass}.${val}' with sequencing type '${obj.seqType}' in project '${obj.project}' already exists")
+                errors.rejectValue('qcProperty1', "default.invalid.validator.message",
+                        [QcThreshold.simpleName, "qcProperty1", val].toArray(),
+                        "QcThreshold for '${obj.qcClass}.${val}' with sequencing type '${obj.seqType}' in project '${obj.project}' already exists")
             }
             validateProperty(val, obj.qcClass, errors, "qcProperty1")
         })
         project nullable: true
         qcProperty2 nullable: true, validator: { val, obj, Errors errors ->
             if (val != null && val == obj.qcProperty1) {
-                errors.rejectValue 'qcProperty2', "default.invalid.validator.message", [QcThreshold.simpleName, "qcProperty2", val].toArray(), "property 1 must not be the same as property 2"
+                errors.rejectValue 'qcProperty2', "default.invalid.validator.message",
+                        [QcThreshold.simpleName, "qcProperty2", val].toArray(),
+                        "property 1 must not be the same as property 2"
             }
             if (obj.compare == ThresholdStrategy.DIFFERENCE_WITH_OTHER_PROPERTY) {
                 if (val == null) {
-                    errors.rejectValue 'qcProperty2', "default.invalid.validator.message", [QcThreshold.simpleName, "qcProperty2", val].toArray(), "Specify which property to compare to (property 2 not set)"
+                    errors.rejectValue 'qcProperty2', "default.invalid.validator.message",
+                            [QcThreshold.simpleName, "qcProperty2", val].toArray(),
+                            "Specify which property to compare to (property 2 not set)"
                 } else {
                     validateProperty(val, obj.qcClass, errors, "qcProperty2")
                 }
             }
             if (obj.compare != ThresholdStrategy.DIFFERENCE_WITH_OTHER_PROPERTY && val) {
-                errors.rejectValue 'qcProperty2', "default.invalid.validator.message", [QcThreshold.simpleName, "qcProperty2", val].toArray(), "Property 2 must not be set when not using it"
+                errors.rejectValue 'qcProperty2', "default.invalid.validator.message",
+                        [QcThreshold.simpleName, "qcProperty2", val].toArray(),
+                        "Property 2 must not be set when not using it"
             }
         }
         warningThresholdLower(nullable: true, validator: { val, obj, Errors errors ->
-            if (obj.compare in [ThresholdStrategy.ABSOLUTE_LIMITS, ThresholdStrategy.RATIO_TO_EXTERNAL_VALUE] ) {
+            if (obj.compare in [ThresholdStrategy.ABSOLUTE_LIMITS, ThresholdStrategy.RATIO_TO_EXTERNAL_VALUE]) {
                 if (val == null) {
                     if (obj.errorThresholdLower != null) {
-                        errors.rejectValue('warningThresholdLower', "default.invalid.validator.message", [QcThreshold.simpleName, "warningThresholdLower", val].toArray(), 'Please also set a lower WARNING threshold when defining a lower ERROR threshold')
+                        errors.rejectValue('warningThresholdLower', "default.invalid.validator.message",
+                                [QcThreshold.simpleName, "warningThresholdLower", val].toArray(),
+                                'Please also set a lower WARNING threshold when defining a lower ERROR threshold')
                     }
                     if (obj.warningThresholdUpper == null || obj.errorThresholdUpper == null) {
-                        errors.rejectValue('warningThresholdLower', "default.invalid.validator.message", [QcThreshold.simpleName, "warningThresholdLower", val].toArray(), 'When leaving the lower thresholds empty, please define BOTH upper warning and upper error thresholds.')
+                        errors.rejectValue('warningThresholdLower', "default.invalid.validator.message",
+                                [QcThreshold.simpleName, "warningThresholdLower", val].toArray(),
+                                'When leaving the lower thresholds empty, please define BOTH upper warning and upper error thresholds.')
                     }
                 } else {
                     if (obj.errorThresholdLower == null) {
-                        errors.rejectValue('warningThresholdLower', "default.invalid.validator.message", [QcThreshold.simpleName, "warningThresholdLower", val].toArray(), 'When setting a lower WARNING threshold, please also define the lower ERROR threshold')
+                        errors.rejectValue('warningThresholdLower', "default.invalid.validator.message",
+                                [QcThreshold.simpleName, "warningThresholdLower", val].toArray(),
+                                'When setting a lower WARNING threshold, please also define the lower ERROR threshold')
                     }
                     if (obj.warningThresholdUpper != null && val >= obj.warningThresholdUpper) {
-                        errors.rejectValue('warningThresholdLower', "default.invalid.validator.message", [QcThreshold.simpleName, "warningThresholdLower", val].toArray(), 'LOWER warning threshold must be smaller than UPPER warning threshold')
+                        errors.rejectValue('warningThresholdLower', "default.invalid.validator.message",
+                                [QcThreshold.simpleName, "warningThresholdLower", val].toArray(),
+                                'LOWER warning threshold must be smaller than UPPER warning threshold')
                     }
                     if (val <= obj.errorThresholdLower) {
-                        errors.rejectValue('warningThresholdLower', "default.invalid.validator.message", [QcThreshold.simpleName, "warningThresholdLower", val].toArray(), 'Lower WARNING threshold must be bigger than lower ERROR threshold')
+                        errors.rejectValue('warningThresholdLower', "default.invalid.validator.message",
+                                [QcThreshold.simpleName, "warningThresholdLower", val].toArray(),
+                                'Lower WARNING threshold must be bigger than lower ERROR threshold')
                     }
                 }
             }
         })
         warningThresholdUpper(nullable: true, validator: { val, obj, Errors errors ->
-            if (obj.compare in [ThresholdStrategy.ABSOLUTE_LIMITS, ThresholdStrategy.RATIO_TO_EXTERNAL_VALUE] ) {
+            if (obj.compare in [ThresholdStrategy.ABSOLUTE_LIMITS, ThresholdStrategy.RATIO_TO_EXTERNAL_VALUE]) {
                 if (val == null) {
                     if (obj.errorThresholdUpper != null) {
-                        errors.rejectValue('warningThresholdUpper', "default.invalid.validator.message", [QcThreshold.simpleName, "warningThresholdUpper", val].toArray(), 'Please also set a upper WARNING threshold when defining a upper ERROR threshold')
+                        errors.rejectValue('warningThresholdUpper', "default.invalid.validator.message",
+                                [QcThreshold.simpleName, "warningThresholdUpper", val].toArray(),
+                                'Please also set a upper WARNING threshold when defining a upper ERROR threshold')
                     }
                 } else {
                     if (obj.errorThresholdUpper == null) {
-                        errors.rejectValue('warningThresholdUpper', "default.invalid.validator.message", [QcThreshold.simpleName, "warningThresholdUpper", val].toArray(), 'When setting an upper WARNING threshold, please also define an upper ERROR threshold')
+                        errors.rejectValue('warningThresholdUpper', "default.invalid.validator.message",
+                                [QcThreshold.simpleName, "warningThresholdUpper", val].toArray(),
+                                'When setting an upper WARNING threshold, please also define an upper ERROR threshold')
                     }
                     if (val >= obj.errorThresholdUpper) {
-                        errors.rejectValue('warningThresholdUpper', "default.invalid.validator.message", [QcThreshold.simpleName, "warningThresholdUpper", val].toArray(), 'Upper WARNING threshold must be smaller than upper ERROR threshold')
+                        errors.rejectValue('warningThresholdUpper', "default.invalid.validator.message",
+                                [QcThreshold.simpleName, "warningThresholdUpper", val].toArray(),
+                                'Upper WARNING threshold must be smaller than upper ERROR threshold')
                     }
                 }
             }
@@ -99,7 +124,6 @@ class QcThreshold implements Entity {
             validateClass(val, errors, "qcClass")
         }
     }
-
 
 
     @TupleConstructor
@@ -120,13 +144,17 @@ class QcThreshold implements Entity {
 
     static void validateProperty(String val, String cls, Errors errors, String propertyName) {
         if (!(val in getValidQcPropertyForQcClass(cls))) {
-            errors.rejectValue(propertyName, "default.invalid.validator.message", [QcThreshold.simpleName, propertyName, val].toArray(), "'${val}' is not a valid property for ${cls}")
+            errors.rejectValue(propertyName, "default.invalid.validator.message",
+                    [QcThreshold.simpleName, propertyName, val].toArray(),
+                    "'${val}' is not a valid property for ${cls}")
         }
     }
 
     static void validateClass(String val, Errors errors, String propertyName) {
         if (!(val in getValidQcClass()*.name)) {
-            errors.rejectValue(propertyName, "default.invalid.validator.message", [QcThreshold.simpleName, propertyName, val].toArray(), "'${val}' is not a valid qc class")
+            errors.rejectValue(propertyName, "default.invalid.validator.message",
+                    [QcThreshold.simpleName, propertyName, val].toArray(),
+                    "'${val}' is not a valid qc class")
         }
     }
 
@@ -206,8 +234,10 @@ class QcThreshold implements Entity {
 
     private ThresholdLevel getWarningLevel(double value) {
         return warningLevel(
-                ((value < (warningThresholdLower != null ? warningThresholdLower : Double.MIN_VALUE)) || ((warningThresholdUpper != null ? warningThresholdUpper : Double.MAX_VALUE) < value)),
-                ((value < (errorThresholdLower != null ? errorThresholdLower : Double.MIN_VALUE)) || ((errorThresholdUpper != null ? errorThresholdUpper : Double.MAX_VALUE) < value))
+                ((value < (warningThresholdLower != null ? warningThresholdLower : Double.MIN_VALUE)) ||
+                        ((warningThresholdUpper != null ? warningThresholdUpper : Double.MAX_VALUE) < value)),
+                ((value < (errorThresholdLower != null ? errorThresholdLower : Double.MIN_VALUE)) ||
+                        ((errorThresholdUpper != null ? errorThresholdUpper : Double.MAX_VALUE) < value))
         )
     }
 

@@ -16,7 +16,8 @@ class AnalysisDeletionService {
             indelQualityControl.each {
                 it.delete(flush: true)
             }
-            List<IndelSampleSwapDetection> indelSampleSwapDetections = IndelSampleSwapDetection.findAllByIndelCallingInstance(analysisInstance, [sort: 'id', order: 'desc'])
+            List<IndelSampleSwapDetection> indelSampleSwapDetections = IndelSampleSwapDetection.findAllByIndelCallingInstance(
+                    analysisInstance, [sort: 'id', order: 'desc'])
             indelSampleSwapDetections.each {
                 it.delete(flush: true)
             }

@@ -1140,7 +1140,7 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenNoJobsFound_ShouldReturnNullValues() {
         expect:
-        ['avgQueue': 0, 'avgProcess': 0] == clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
+        ['avgQueue': 0, 'avgProcess': 0] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnNullValues() {
@@ -1148,7 +1148,7 @@ class ClusterJobServiceSpec extends Specification {
         createClusterJob([queued: SDATE_DATETIME.minusDays(1), started: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), jobClass: 'jobClass1', seqType: seqType, exitStatus: ClusterJob.Status.COMPLETED])
 
         expect:
-        ['avgQueue': 0, 'avgProcess': 0] == clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
+        ['avgQueue': 0, 'avgProcess': 0] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenSeveralJobsAreFound_ShouldReturnAverageStatesTimeDistribution() {
@@ -1170,7 +1170,7 @@ class ClusterJobServiceSpec extends Specification {
                           nBases: 1])
 
         expect:
-        ['avgQueue': 15 * HOURS_TO_MILLIS, 'avgProcess': 9 * HOURS_TO_MILLIS] == clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
+        ['avgQueue': 15 * HOURS_TO_MILLIS, 'avgProcess': 9 * HOURS_TO_MILLIS] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenBasesToBeNormalized_ShouldReturnAverageStatesTimeDistributionNormalizedToBases() {
@@ -1187,7 +1187,7 @@ class ClusterJobServiceSpec extends Specification {
                           nBases: bases])
 
         expect:
-        ['avgQueue': 12 * HOURS_TO_MILLIS, 'avgProcess': 12 * HOURS_TO_MILLIS / bases * basesToBeNormalized] == clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, basesToBeNormalized)
+        ['avgQueue': 12 * HOURS_TO_MILLIS, 'avgProcess': 12 * HOURS_TO_MILLIS / bases * basesToBeNormalized] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, basesToBeNormalized)
     }
 
     void test_findJobClassAndSeqTypeSpecificCoverages_WhenNoJobsFound_ShouldReturnNullValues() {

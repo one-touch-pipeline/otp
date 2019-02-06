@@ -93,7 +93,8 @@ class ProcessedAlignmentFileService {
                 dataProcessingFilesService.deleteProcessingDirectory(project, getDirectory(alignmentPass))
                 threadLog.debug "${freedBytes} bytes have been freed for alignment pass ${alignmentPass}."
             } else {
-                threadLog.error "There was at least one inconsistency (see earlier log message(s)) for alignment pass ${alignmentPass}. Skipping that alignment pass."
+                threadLog.error "There was at least one inconsistency (see earlier log message(s)) for alignment pass ${alignmentPass}. " +
+                        "Skipping that alignment pass."
             }
         } else {
             threadLog.error "Found ${bamFiles.size()} ProcessedBamFiles for AlignmentPass ${alignmentPass}. That's weird. Skipping that alignment pass."

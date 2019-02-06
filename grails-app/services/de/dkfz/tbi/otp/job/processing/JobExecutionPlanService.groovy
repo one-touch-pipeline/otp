@@ -116,7 +116,8 @@ class JobExecutionPlanService {
      * @return Map of Processes with latest ProcessingStepUpdate
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, ExecutionState state = null) {
+    Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(
+            JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, ExecutionState state = null) {
         final List<Long> plans = withParents(plan).collect { it.id }
         String query = '''
 SELECT p, max(u.id)

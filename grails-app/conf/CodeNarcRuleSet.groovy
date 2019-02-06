@@ -3,6 +3,7 @@ final String SPEC = "*Spec.groovy"
 final String INTEGRATION_SPEC = "*IntegrationSpec.groovy"
 final String CONTROLLER = "*Controller.groovy"
 final String SERVICE = "*Service.groovy"
+final String VALIDATOR = "*Validator*"
 final int DEFAULT = 1 //Value for rules that we have no explicitly discussed yet
 final int CRITICAL = 1
 final int HIGH = 2
@@ -500,8 +501,16 @@ ruleset {
         priority = MIDDLE
     }
     LineLength {
-        priority = MIDDLE
+        priority = HIGH
         length = 160
+        doNotApplyToFileNames = TEST
+        doNotApplyToFileNames = VALIDATOR
+    }
+    LineLength {
+        priority = LOW
+        length = 242
+        applyToFileNames = TEST
+        doNotApplyToFileNames = VALIDATOR
     }
     MissingBlankLineAfterImports {
         priority = CRITICAL

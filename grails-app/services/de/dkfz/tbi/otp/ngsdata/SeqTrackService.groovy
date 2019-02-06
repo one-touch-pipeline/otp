@@ -71,7 +71,12 @@ class SeqTrackService {
                 order(column.columnName, sortOrder ? "asc" : "desc")
             }
         } else {
-            return Sequence.findAllByProjectIdInList(projectService.getAllProjects().collect { it.id }, [offset: offset, max: max, sort: column.columnName, order: sortOrder ? "asc" : "desc"])
+            return Sequence.findAllByProjectIdInList(projectService.getAllProjects().collect { it.id }, [
+                    offset: offset,
+                    max: max,
+                    sort: column.columnName,
+                    order: sortOrder ? "asc" : "desc",
+            ])
         }
     }
 
@@ -444,7 +449,8 @@ AND entry.value = :value
         boolean projectAllowsLinking = !seqTrack.project.hasToBeCopied
         boolean seqTypeAllowsLinking = seqTrack.seqType.seqTypeAllowsLinking()
         boolean adapterTrimming = RoddyWorkflowConfig.getLatestForIndividual(seqTrack.individual, seqTrack.seqType,
-                Pipeline.findByName(seqTrack.seqType.isRna() ? Pipeline.Name.RODDY_RNA_ALIGNMENT : Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded ?: false
+                Pipeline.findByName(seqTrack.seqType.isRna() ?
+                        Pipeline.Name.RODDY_RNA_ALIGNMENT : Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded ?: false
         boolean link = willBeAligned  && importDirAllowsLinking && projectAllowsLinking && seqTypeAllowsLinking && !adapterTrimming
         seqTrack.log("Fastq files{0} will be ${link ? "linked" : "copied"}, because " +
                 "willBeAligned=${willBeAligned}, importDirAllowsLinking=${importDirAllowsLinking}, projectAllowsLinking=${projectAllowsLinking}, " +

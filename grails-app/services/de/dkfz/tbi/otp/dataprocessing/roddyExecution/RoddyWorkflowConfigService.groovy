@@ -14,7 +14,8 @@ class RoddyWorkflowConfigService {
 
     FileSystemService fileSystemService
 
-    void loadPanCanConfigAndTriggerAlignment(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath, String configVersion, boolean adapterTrimmingNeeded, Individual individual) {
+    void loadPanCanConfigAndTriggerAlignment(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath,
+                                             String configVersion, boolean adapterTrimmingNeeded, Individual individual) {
         assert individual : "The individual is not allowed to be null"
 
         RoddyBamFile.withTransaction {
@@ -39,7 +40,8 @@ class RoddyWorkflowConfigService {
         }
     }
 
-    RoddyWorkflowConfig importProjectConfigFile(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath, String configVersion, boolean adapterTrimmingNeeded = false, Individual individual = null) {
+    RoddyWorkflowConfig importProjectConfigFile(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath,
+                                                String configVersion, boolean adapterTrimmingNeeded = false, Individual individual = null) {
         assert project : "The project is not allowed to be null"
         assert seqType : "The seqType is not allowed to be null"
         assert pipeline : "The pipeline is not allowed to be null"
@@ -73,7 +75,14 @@ class RoddyWorkflowConfigService {
         Path configFile = fs.getPath(config.configFilePath)
 
         FileService.ensureFileIsReadableAndNotEmpty(configFile)
-        String pattern = /^${Pattern.quote(config.pipeline.name.name())}_${Pattern.quote(config.seqType.roddyName)}_${Pattern.quote(config.seqType.libraryLayout.name())}_${config.seqType.singleCell ? 'SingleCell_' : ''}(.+)_${Pattern.quote(config.configVersion)}\.xml$/
+        List<String> patternHelper = [
+                "${Pattern.quote(config.pipeline.name.name())}",
+                "${Pattern.quote(config.seqType.roddyName)}",
+                "${Pattern.quote(config.seqType.libraryLayout.name())}",
+                "${config.seqType.singleCell ? 'SingleCell_' : ''}(.+)",
+                "${Pattern.quote(config.configVersion)}",
+        ]
+        String pattern = /^${patternHelper.join("_")}\.xml$/
         Matcher matcher = configFile.fileName.toString() =~ pattern
         assert matcher.matches(): "The file name '${configFile.toString()}' does not match the pattern '${pattern}'"
         assert config.pluginVersion.endsWith(":${matcher.group(1)}")

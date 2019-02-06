@@ -24,7 +24,8 @@ class PlanValidatorService {
     static final String CIRCULAR_JOBS = "The Job Execution Plan contains a circular Job dependency"
     static final String NOT_ALL_JOBS_LINKED = "Not all Job Definitions defined for this Job Execution Plan are linked through the next relationship"
     static final String VALIDATOR_LOOP = "Validator is specified before the job it should validate"
-    static final String VALIDATOR_BEAN_NOT_IMPLEMENTING_INTERFACE = "The bean specified as a ValidatingJob does not implement the ValidatingJob interface (JobDefinition, Bean name): "
+    static final String VALIDATOR_BEAN_NOT_IMPLEMENTING_INTERFACE = "The bean specified as a ValidatingJob does not implement the ValidatingJob interface" +
+            " (JobDefinition, Bean name): "
     static final String VALIDATOR_ON_ENDSTATE = "The to be validated job is endstate aware (JobDefinition, Bean name): "
 
     /**

@@ -14,6 +14,7 @@ class MetaDataService {
      * @param id The id of the MetaDataEntry to retrieve
      * @return The MetaDataEntry if present, otherwise null
      */
+    @SuppressWarnings('LineLength')
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or ((returnObject.dataFile.project != null) and hasPermission(returnObject.dataFile.project, 'OTP_READ_ACCESS'))")
     MetaDataEntry getMetaDataEntryById(Long id) {
         return MetaDataEntry.get(id)
@@ -30,7 +31,15 @@ class MetaDataService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     boolean updateMetaDataEntry(MetaDataEntry entry, String value) throws ChangelogException, MetaDataEntryUpdateException {
         ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(MetaDataEntry.class.getName())
-        ChangeLog changelog = new ChangeLog(rowId: entry.id, referencedClass: clazz, columnName: "value", fromValue: entry.value, toValue: value, comment: "-", source: ChangeLog.Source.MANUAL)
+        ChangeLog changelog = new ChangeLog(
+                rowId: entry.id,
+                referencedClass: clazz,
+                columnName: "value",
+                fromValue: entry.value,
+                toValue: value,
+                comment: "-",
+                source: ChangeLog.Source.MANUAL,
+        )
         if (!changelog.save()) {
             throw new ChangelogException("Creation of changelog failed, errors: " + changelog.errors.toString())
         }
@@ -87,6 +96,7 @@ class MetaDataService {
      * @param id The Id of the DataFile.
      * @return DataFile if it exists, otherwise null
      */
+    @SuppressWarnings('LineLength')
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or ((returnObject.project != null) and hasPermission(returnObject.project, 'OTP_READ_ACCESS'))")
     DataFile getDataFile(Long id) {
         return DataFile.get(id)

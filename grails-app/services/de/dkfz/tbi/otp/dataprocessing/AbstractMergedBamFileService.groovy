@@ -27,19 +27,24 @@ class AbstractMergedBamFileService {
             }
         }.each { SamplePair samplePair ->
             SeqType seqType = samplePair.seqType
-            if (samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && SeqTypeService.snvPipelineSeqTypes.contains(seqType)) {
+            if (samplePair.snvProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED &&
+                    SeqTypeService.snvPipelineSeqTypes.contains(seqType)) {
                 samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             }
-            if (samplePair.indelProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && SeqTypeService.indelPipelineSeqTypes.contains(seqType)) {
+            if (samplePair.indelProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED &&
+                    SeqTypeService.indelPipelineSeqTypes.contains(seqType)) {
                 samplePair.indelProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             }
-            if (samplePair.aceseqProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED  && SeqTypeService.aceseqPipelineSeqTypes.contains(seqType)) {
+            if (samplePair.aceseqProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED &&
+                    SeqTypeService.aceseqPipelineSeqTypes.contains(seqType)) {
                 samplePair.aceseqProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             }
-            if (samplePair.sophiaProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && SeqTypeService.sophiaPipelineSeqTypes.contains(seqType)) {
+            if (samplePair.sophiaProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED &&
+                    SeqTypeService.sophiaPipelineSeqTypes.contains(seqType)) {
                 samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             }
-            if (samplePair.runYapsaProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED && SeqTypeService.runYapsaPipelineSeqTypes.contains(seqType)) {
+            if (samplePair.runYapsaProcessingStatus == SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED &&
+                    SeqTypeService.runYapsaPipelineSeqTypes.contains(seqType)) {
                 samplePair.runYapsaProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
             }
             assert samplePair.save(flush: true)

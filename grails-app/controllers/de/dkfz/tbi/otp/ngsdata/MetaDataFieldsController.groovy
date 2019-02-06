@@ -15,7 +15,7 @@ class MetaDataFieldsController implements CheckAndCall {
 
     def index() {
 
-        List libraryPreparationKits = LibraryPreparationKit.list(sort: "name", order: "asc").collect {
+        List libraryPreparationKits = LibraryPreparationKit.list(sort: "name", order: "asc").collect { LibraryPreparationKit it ->
             [
                     id                              : it.id,
                     name                            : it.name,
@@ -23,7 +23,8 @@ class MetaDataFieldsController implements CheckAndCall {
                     adapterFile                     : it.adapterFile,
                     reverseComplementAdapterSequence: it.reverseComplementAdapterSequence,
                     importAliases                   : it.importAlias?.sort()?.join(' | '),
-                    referenceGenomesWithBedFiles    : BedFile.findAllByLibraryPreparationKit(it, [sort: "referenceGenome.name", order: "asc"])*.referenceGenome*.name.join(' | '),
+                    referenceGenomesWithBedFiles    : BedFile.findAllByLibraryPreparationKit(
+                            it, [sort: "referenceGenome.name", order: "asc"])*.referenceGenome*.name.join(' | '),
             ]
         }
 
@@ -148,7 +149,11 @@ class MetaDataFieldsController implements CheckAndCall {
     JSON createLayout(CreateLayoutCommand cmd) {
         SeqType seqType = seqTypeService.findByNameOrImportAlias(cmd.name, [singleCell: cmd.singleCell])
         checkErrorAndCallMethod(cmd, {
-            seqTypeService.createMultiple(seqType.name, cmd.getLibraryLayouts(), [dirName: seqType.dirName, displayName: seqType.displayName, singleCell: cmd.singleCell], seqType.importAlias.toList())
+            seqTypeService.createMultiple(seqType.name, cmd.getLibraryLayouts(), [
+                    dirName: seqType.dirName,
+                    displayName: seqType.displayName,
+                    singleCell: cmd.singleCell,
+            ], seqType.importAlias.toList())
         })
     }
 

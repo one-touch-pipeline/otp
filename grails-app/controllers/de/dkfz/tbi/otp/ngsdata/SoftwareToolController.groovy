@@ -17,8 +17,8 @@ class SoftwareToolController {
             List versions = []
             softwareToolService.findSoftwareToolsByProgramNameSortedAfterVersion(programName).each { SoftwareTool softwareTool ->
                 List aliases = []
-                softwareToolService.findSoftwareToolIdentifiersBySoftwareToolSortedAfterName(softwareTool).each { SoftwareToolIdentifier softwareToolIdentifier ->
-                    aliases << [id: softwareToolIdentifier.id, name: softwareToolIdentifier.name]
+                softwareToolService.findSoftwareToolIdentifiersBySoftwareToolSortedAfterName(softwareTool).each { SoftwareToolIdentifier it ->
+                    aliases << [id: it.id, name: it.name]
                 }
                 versions << [
                     id: softwareTool.id,

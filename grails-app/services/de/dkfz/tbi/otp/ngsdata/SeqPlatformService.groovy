@@ -12,7 +12,8 @@ class SeqPlatformService {
 
     SequencingKitLabelService sequencingKitLabelService
 
-    static SeqPlatform findForNameAndModelAndSequencingKit(String platformName, SeqPlatformModelLabel seqPlatformModelLabel, SequencingKitLabel sequencingKitLabel) {
+    static SeqPlatform findForNameAndModelAndSequencingKit(
+            String platformName, SeqPlatformModelLabel seqPlatformModelLabel, SequencingKitLabel sequencingKitLabel) {
         assert platformName
         return SeqPlatform.findByNameIlikeAndSeqPlatformModelLabelAndSequencingKitLabel(platformName, seqPlatformModelLabel, sequencingKitLabel)
     }
@@ -41,10 +42,12 @@ class SeqPlatformService {
         SequencingKitLabel sequencingKitLabel = null
 
         if (seqPlatformModelLabelName) {
-            seqPlatformModelLabel = seqPlatformModelLabelService.findByNameOrImportAlias(seqPlatformModelLabelName) ?: seqPlatformModelLabelService.create(seqPlatformModelLabelName)
+            seqPlatformModelLabel = seqPlatformModelLabelService.findByNameOrImportAlias(seqPlatformModelLabelName) ?:
+                    seqPlatformModelLabelService.create(seqPlatformModelLabelName)
         }
         if (sequencingKitLabelName) {
-            sequencingKitLabel = sequencingKitLabelService.findByNameOrImportAlias(sequencingKitLabelName) ?: sequencingKitLabelService.create(sequencingKitLabelName)
+            sequencingKitLabel = sequencingKitLabelService.findByNameOrImportAlias(sequencingKitLabelName) ?:
+                    sequencingKitLabelService.create(sequencingKitLabelName)
         }
         SeqPlatform seqPlatform = createNewSeqPlatform(seqPlatformName, seqPlatformModelLabel, sequencingKitLabel)
         return seqPlatform

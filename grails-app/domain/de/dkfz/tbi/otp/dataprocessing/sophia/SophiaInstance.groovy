@@ -57,6 +57,7 @@ class SophiaInstance extends BamFilePairAnalysis implements ProcessParameterObje
     }
 
     static SophiaInstance getLatestValidSophiaInstanceForSamplePair(SamplePair samplePair) {
-        return SophiaInstance.findBySamplePairAndWithdrawnAndProcessingState(samplePair, false, AnalysisProcessingStates.FINISHED, [max:1, sort: "id", order: "desc"])
+        return SophiaInstance.findBySamplePairAndWithdrawnAndProcessingState(
+                samplePair, false, AnalysisProcessingStates.FINISHED, [max:1, sort: "id", order: "desc"])
     }
 }

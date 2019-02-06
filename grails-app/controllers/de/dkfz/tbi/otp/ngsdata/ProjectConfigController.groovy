@@ -271,7 +271,10 @@ class ProjectConfigController implements CheckAndCall {
             }
         }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
-        return [creationDate: timestamps[0] ? simpleDateFormat.format(timestamps[0]) : null, lastReceivedDate: timestamps[0] ? simpleDateFormat.format(timestamps[1]) : null]
+        return [
+                creationDate    : timestamps[0] ? simpleDateFormat.format(timestamps[0]) : null,
+                lastReceivedDate: timestamps[0] ? simpleDateFormat.format(timestamps[1]) : null,
+        ]
     }
 
     private
@@ -283,7 +286,8 @@ class ProjectConfigController implements CheckAndCall {
             row.add(seqType.displayNameWithLibraryLayout)
             SnvConfig snvConfig = atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
             RunYapsaConfig runYapsaConfig = atMostOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
-            RoddyWorkflowConfig roddyWorkflowConfig = atMostOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(project, seqType, pipeline))
+            RoddyWorkflowConfig roddyWorkflowConfig = atMostOneElement(
+                    RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateIsNull(project, seqType, pipeline))
             if (pipeline.type == Pipeline.Type.SNV && snvConfig) {
                 row.add("Yes")
                 row.add(snvConfig.externalScriptVersion)
@@ -347,7 +351,8 @@ class ProjectConfigController implements CheckAndCall {
         List data = projectOverviewService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it ->
             String adapterTrimming = it.sampleType ? "" :
                     it.seqType.isWgbs() || it.seqType.isWgbs() ?:
-                            RoddyWorkflowConfig.getLatestForProject(project, it.seqType, Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded
+                            RoddyWorkflowConfig.getLatestForProject(project, it.seqType, Pipeline.findByName(
+                                    Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded
             [it.seqType.displayNameWithLibraryLayout, it.sampleType?.name, it.referenceGenome.name, it.statSizeFileName ?: "", adapterTrimming]
         }
         dataToRender.iTotalRecords = data.size()

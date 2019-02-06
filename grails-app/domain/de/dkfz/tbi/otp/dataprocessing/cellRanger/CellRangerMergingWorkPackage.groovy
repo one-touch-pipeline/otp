@@ -12,8 +12,11 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
     static constraints = {
         sample(validator: { val, obj ->
             CellRangerMergingWorkPackage cellRangerMergingWorkPackage = CollectionUtils.atMostOneElement(
-                    CellRangerMergingWorkPackage.findAllBySampleAndSeqTypeAndExpectedCellsAndEnforcedCells(val, obj.seqType, obj.expectedCells, obj.enforcedCells),
-                    "More than one MWP exists for sample ${val}, seqType ${obj.seqType}, expectedCells ${obj.expectedCells} and enforcedCells ${obj.enforcedCells}")
+                    CellRangerMergingWorkPackage.findAllBySampleAndSeqTypeAndExpectedCellsAndEnforcedCells(
+                            val, obj.seqType, obj.expectedCells, obj.enforcedCells),
+                    "More than one MWP exists for sample ${val}, " +
+                            "seqType ${obj.seqType}, " +
+                            "expectedCells ${obj.expectedCells} and enforcedCells ${obj.enforcedCells}")
             if (cellRangerMergingWorkPackage && cellRangerMergingWorkPackage.id != obj.id) {
                 return "The CellRangerMergingWorkPackage must be unique for one sample and seqType, expectedCells and enforcedCells"
             }

@@ -32,7 +32,9 @@ abstract class AbstractMergingWorkPackage implements Entity {
     static constraints = {
         bamFileInProjectFolder nullable: true, validator: { val, obj ->
             if (val) {
-                val.workPackage == obj && [AbstractMergedBamFile.FileOperationStatus.INPROGRESS, AbstractMergedBamFile.FileOperationStatus.PROCESSED].contains(val.fileOperationStatus)
+                val.workPackage == obj &&
+                        [AbstractMergedBamFile.FileOperationStatus.INPROGRESS, AbstractMergedBamFile.FileOperationStatus.PROCESSED].contains(
+                                val.fileOperationStatus)
             } else {
                 return true
             }

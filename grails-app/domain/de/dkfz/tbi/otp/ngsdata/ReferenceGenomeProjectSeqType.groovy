@@ -76,7 +76,9 @@ class ReferenceGenomeProjectSeqType implements Entity {
 
     @Override
     String toString() {
-        return "RGPST ${id}: [${deprecatedDate ? "deprecated ${deprecatedDate}" : "not deprecated"}] (${project.name} ${seqType.name} ${seqType.libraryLayout} sampleType ${sampleType?.name}) -> ${referenceGenome.name} statSizeFileName ${statSizeFileName}"
+        return "RGPST ${id}: [${deprecatedDate ? "deprecated ${deprecatedDate}" : "not deprecated"}] " +
+                "(${project.name} ${seqType.name} ${seqType.libraryLayout} sampleType ${sampleType?.name}) -> " +
+                "${referenceGenome.name} statSizeFileName ${statSizeFileName}"
     }
 
     static mapping = {
@@ -115,7 +117,8 @@ class ReferenceGenomeProjectSeqType implements Entity {
         }
     }
 
-    static private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingProjectDefault(Project project, SeqType seqType, SampleType sampleType) {
+    static private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingProjectDefault(
+            Project project, SeqType seqType, SampleType sampleType) {
         assert SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT == sampleType.specificReferenceGenome
         try {
             return CollectionUtils.atMostOneElement(
@@ -126,7 +129,8 @@ class ReferenceGenomeProjectSeqType implements Entity {
         }
     }
 
-    static private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingSampleTypeSpecific(Project project, SeqType seqType, SampleType sampleType) {
+    static private ReferenceGenomeProjectSeqType getConfiguredReferenceGenomeProjectSeqTypeUsingSampleTypeSpecific(
+            Project project, SeqType seqType, SampleType sampleType) {
         assert SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC == sampleType.specificReferenceGenome
         try {
             return CollectionUtils.atMostOneElement(

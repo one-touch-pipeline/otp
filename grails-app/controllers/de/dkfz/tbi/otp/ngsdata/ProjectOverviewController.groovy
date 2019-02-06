@@ -40,7 +40,8 @@ class ProjectOverviewController {
     }
 
     /**
-     * the basic data for the page projectOverview/laneOverview. The table content are retrieved asynchrony from {@link #dataTableSourceLaneOverview} via JavaScript.
+     * The basic data for the page projectOverview/laneOverview.
+     * The table content are retrieved asynchrony from {@link #dataTableSourceLaneOverview} via JavaScript.
      */
     Map laneOverview() {
         String projectName = params.project

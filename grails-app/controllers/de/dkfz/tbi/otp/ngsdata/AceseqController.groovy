@@ -39,7 +39,12 @@ class AceseqController extends AbstractAnalysisController {
 
         return [
                 bamFilePairAnalysis: cmd.bamFilePairAnalysis,
-                plotType: [PlotType.ACESEQ_WG_COVERAGE, PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR, PlotType.ACESEQ_QC_GC_CORRECTED, PlotType.ACESEQ_GC_CORRECTED],
+                plotType: [
+                        PlotType.ACESEQ_WG_COVERAGE,
+                        PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR,
+                        PlotType.ACESEQ_QC_GC_CORRECTED,
+                        PlotType.ACESEQ_GC_CORRECTED,
+                ],
                 plotNumber: plotNumber,
                 error: null,
         ]

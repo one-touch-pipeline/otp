@@ -37,7 +37,8 @@ class AbstractMergingWorkPackageService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<AbstractMergingWorkPackage> filterBySequencingPlatformGroupIfAvailable(List<AbstractMergingWorkPackage> mergingWorkPackages, SeqPlatformGroup seqPlatformGroup) {
+    List<AbstractMergingWorkPackage> filterBySequencingPlatformGroupIfAvailable(
+            List<AbstractMergingWorkPackage> mergingWorkPackages, SeqPlatformGroup seqPlatformGroup) {
         assert seqPlatformGroup
         return mergingWorkPackages.findAll {
             if (it instanceof MergingWorkPackage) {

@@ -78,14 +78,16 @@ class ReferenceGenome implements Entity {
 
 
     /*
-     * The following two files belong to ENCODE (https://genome.ucsc.edu/ENCODE/) and will therefore be stored under the ENCODE folder in each reference genome
+     * The following two files belong to ENCODE (https://genome.ucsc.edu/ENCODE/)
+     * and will therefore be stored under the ENCODE folder in each reference genome
      */
     String mappabilityFile
 
     String replicationTimeFile
 
     /*
-     * The following six files belong to IMPUTE (https://mathgen.stats.ox.ac.uk/impute/impute_v2.html) and will therefore be stored under the IMPUTE folder in each reference genome
+     * The following six files belong to IMPUTE (https://mathgen.stats.ox.ac.uk/impute/impute_v2.html)
+     * and will therefore be stored under the IMPUTE folder in each reference genome
      */
 
     String geneticMapFile

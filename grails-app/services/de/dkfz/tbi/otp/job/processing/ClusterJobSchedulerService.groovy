@@ -62,7 +62,8 @@ class ClusterJobSchedulerService {
      * @param jobSubmissionOptions additional options for the job
      * @return the cluster job ID
      */
-    String executeJob(Realm realm, String script, Map<String, String> environmentVariables = [:], Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) throws Throwable {
+    String executeJob(Realm realm, String script, Map<String, String> environmentVariables = [:],
+                      Map<JobSubmissionOption, String> jobSubmissionOptions = [:]) throws Throwable {
         if (!script) {
             throw new ProcessingException("No job script specified.")
         }

@@ -98,14 +98,16 @@ class ReferenceGenomeService {
     File chromosomeLengthFile(AbstractMergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
         assert mergingWorkPackage, "The mergingWorkPackage is not specified"
         assert mergingWorkPackage.referenceGenome.chromosomeLengthFilePath : "No chromosome length file path is defined for ${mergingWorkPackage}"
-        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence), mergingWorkPackage.referenceGenome.chromosomeLengthFilePath)
+        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence),
+                mergingWorkPackage.referenceGenome.chromosomeLengthFilePath)
         return checkFileExistence(file, checkExistence)
     }
 
     File gcContentFile(AbstractMergingWorkPackage mergingWorkPackage, boolean checkExistence = true) {
         assert mergingWorkPackage, "The mergingWorkPackage is not specified"
         assert mergingWorkPackage.referenceGenome.gcContentFile : "No gc content file path is defined for ${mergingWorkPackage}"
-        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence), mergingWorkPackage.referenceGenome.gcContentFile)
+        File file = new File(pathToChromosomeSizeFilesPerReference(mergingWorkPackage.referenceGenome, checkExistence),
+                mergingWorkPackage.referenceGenome.gcContentFile)
         return checkFileExistence(file, checkExistence)
     }
 

@@ -36,7 +36,7 @@ class DataProcessingFilesService {
         return "${individual.resultsPerPidPath.absoluteDataProcessingPath}/${postfix}"
     }
 
-    long deleteOldProcessingFiles(final Object passService, final String passTypeName, final Date createdBefore, final long millisMaxRuntime, final Closure<Collection> passesFunc) {
+    long deleteOldProcessingFiles(Object passService, String passTypeName, Date createdBefore, long millisMaxRuntime, Closure<Collection> passesFunc) {
         notNull passService
         notNull passTypeName
         notNull createdBefore
@@ -61,7 +61,8 @@ class DataProcessingFilesService {
                 }
             }
         } finally {
-            threadLog.info "${freedBytes} bytes have been freed by deleting the processing files of ${processedPasses} ${passTypeName} passes created before ${createdBefore}."
+            threadLog.info "${freedBytes} bytes have been freed by deleting the processing files of ${processedPasses} ${passTypeName} " +
+                    "passes created before ${createdBefore}."
         }
         return freedBytes
     }
@@ -85,12 +86,14 @@ class DataProcessingFilesService {
             boolean consistent = true
             final long fsSize = fsFile.length()
             if (fsSize != dbFile.fileSize) {
-                threadLog.error "File size in database (${dbFile.fileSize}) and on the file system (${fsSize}) are different for ${dbFile} (${fsFile}). Will not delete the file."
+                threadLog.error "File size in database (${dbFile.fileSize}) and on the file system (${fsSize}) are different for " +
+                        "${dbFile} (${fsFile}). Will not delete the file."
                 consistent = false
             }
             final Date fsDate = new Date(fsFile.lastModified())
             if (fsDate != dbFile.dateFromFileSystem) {
-                threadLog.error "File date in database (${dbFile.dateFromFileSystem}) and on the file system (${fsDate}) are different for ${dbFile} (${fsFile}). Will not delete the file."
+                threadLog.error "File date in database (${dbFile.dateFromFileSystem}) and on the file system (${fsDate}) are different for " +
+                        "${dbFile} (${fsFile}). Will not delete the file."
                 consistent = false
             }
             return consistent
@@ -108,7 +111,7 @@ class DataProcessingFilesService {
      *
      * @return true if there is no serious inconsistency.
      */
-    boolean checkConsistencyWithFinalDestinationForDeletion(final File processingDirectory, final File finalDestinationDirectory, final Collection<String> fileNames) {
+    boolean checkConsistencyWithFinalDestinationForDeletion(File processingDirectory, File finalDestinationDirectory, Collection<String> fileNames) {
         notNull processingDirectory
         notNull finalDestinationDirectory
         notNull fileNames

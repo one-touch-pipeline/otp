@@ -152,7 +152,10 @@ class IndividualController {
     def save(IndividualCommand cmd) {
         if (cmd.hasErrors()) {
             FieldError errors = cmd.errors.getFieldError()
-            Map data = [success: false, error: "'${errors.getRejectedValue()}' is not a valid value for '${errors.getField()}'. Error code: '${errors.getField()}' already exists."]
+            Map data = [
+                    success: false,
+                    error  : "'${errors.rejectedValue}' is not a valid value for '${errors.field}'. Error code: '${errors.field}' already exists.",
+            ]
             render data as JSON
             return
         }

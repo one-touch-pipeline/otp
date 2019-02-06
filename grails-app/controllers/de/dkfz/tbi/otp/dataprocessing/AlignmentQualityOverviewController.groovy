@@ -196,7 +196,8 @@ class AlignmentQualityOverviewController {
 
 
         List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
-        List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, dataOverall*.qualityAssessmentMergedPass)
+        List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes,
+                dataOverall*.qualityAssessmentMergedPass)
         Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY
         chromosomeMapXY = dataChromosomeXY.groupBy([
                 { it.qualityAssessmentMergedPass.id },
@@ -234,7 +235,7 @@ class AlignmentQualityOverviewController {
                 }
             }
 
-            Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique() //findAll removes null values
+            Set<LibraryPreparationKit> kit = qualityAssessmentMergedPass.containedSeqTracks*.libraryPreparationKit.findAll().unique()
             TableCellValue.Icon icon = [
                     (AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) : TableCellValue.Icon.WARNING,
                     (AbstractMergedBamFile.QcTrafficLightStatus.REJECTED): TableCellValue.Icon.ERROR,

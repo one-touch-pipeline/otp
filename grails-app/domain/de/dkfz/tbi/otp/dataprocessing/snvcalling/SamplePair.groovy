@@ -211,7 +211,13 @@ class SamplePair implements TimeStamped, Entity {
      * The names of the properties of {@link #mergingWorkPackage1} and {@link #mergingWorkPackage2} which must be equal.
      * Like {@link MergingWorkPackage#getMergingProperties}, except libraryPreparationKit which is not relevant for sample pairs.
      */
-    static final Collection<String> mergingWorkPackageEqualProperties = ['sample.individual', 'seqType', 'seqPlatformGroup', 'pipeline', 'antibodyTarget'].asImmutable()
+    static final Collection<String> mergingWorkPackageEqualProperties = [
+            'sample.individual',
+            'seqType',
+            'seqPlatformGroup',
+            'pipeline',
+            'antibodyTarget',
+    ].asImmutable()
 
     /**
      * Finds distinct combinations of [mergingWorkPackage1, mergingWorkPackage2] with these criteria:

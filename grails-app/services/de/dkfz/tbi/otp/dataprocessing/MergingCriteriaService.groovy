@@ -17,7 +17,8 @@ class MergingCriteriaService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Errors createOrUpdateMergingCriteria(Project project, SeqType seqType, boolean useLibPrepKit, MergingCriteria.SpecificSeqPlatformGroups useSeqPlatformGroups) {
+    Errors createOrUpdateMergingCriteria(
+            Project project, SeqType seqType, boolean useLibPrepKit, MergingCriteria.SpecificSeqPlatformGroups useSeqPlatformGroups) {
         MergingCriteria mergingCriteria = MergingCriteria.findOrCreateWhere(project: project, seqType: seqType)
         mergingCriteria.useLibPrepKit = useLibPrepKit
         mergingCriteria.useSeqPlatformGroup = useSeqPlatformGroups
@@ -42,13 +43,14 @@ class MergingCriteriaService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    List<SeqPlatformGroup> findSeqPlatformGroupsForProjectAndSeqType(Project project, SeqType seqType) {
+    List<SeqPlatformGroup> findSeqPlatformGroupsForProjectAndSeqType(Project project, SeqType seqType, boolean sortOrder = true) {
         return SeqPlatformGroup.createCriteria().list {
             mergingCriteria {
                 eq("project", project)
                 eq("seqType", seqType)
             }
             isNotEmpty("seqPlatforms")
+            order("id", sortOrder ? "asc" : "desc")
         }
     }
 

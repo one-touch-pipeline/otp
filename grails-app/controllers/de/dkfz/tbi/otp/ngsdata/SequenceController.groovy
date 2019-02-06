@@ -32,7 +32,8 @@ class SequenceController {
         dataToRender.iTotalRecords = seqTrackService.countSequences(filtering)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        List<Sequence> sequences = seqTrackService.listSequences(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder, SequenceSortColumn.fromDataTable(cmd.iSortCol_0), filtering)
+        List<Sequence> sequences = seqTrackService.listSequences(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder,
+                SequenceSortColumn.fromDataTable(cmd.iSortCol_0), filtering)
         List<DataFile> dataFiles = sequences ? fastqcResultsService.fastQCFiles(sequences) : []
         // need to add an additional field to the sequences
         // if added as dynamic property, it is not included during the JSON conversion

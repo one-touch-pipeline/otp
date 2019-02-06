@@ -144,9 +144,12 @@ class ExecuteRoddyCommandService {
         assert realm: "Realm must not be null"
         assert file: "File must not be null"
         if (file.exists()) {
-            remoteShellHelper.executeCommand(realm, "umask 027; chgrp ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file} ; chmod 2770 ${file}")
+            remoteShellHelper.executeCommand(realm,
+                    "umask 027; chgrp ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file} ; chmod 2770 ${file}")
         } else {
-            remoteShellHelper.executeCommand(realm, "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && chgrp ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file};")
+            remoteShellHelper.executeCommand(realm,
+                    "umask 027; mkdir -m 2750 -p ${file.parent} && mkdir -m 2770 -p ${file} && " +
+                            "chgrp ${processingOptionService.findOptionAsString(OptionName.OTP_USER_LINUX_GROUP)} ${file};")
             WaitingFileUtils.waitUntilExists(file)
         }
     }
@@ -159,6 +162,7 @@ class ExecuteRoddyCommandService {
         correctGroups(roddyResult, realm)
     }
 
+    @SuppressWarnings('LineLength')
     void correctPermissions(RoddyResult roddyResult, Realm realm) {
         assert roddyResult: "roddyResult should not be null"
         String cmd = """\

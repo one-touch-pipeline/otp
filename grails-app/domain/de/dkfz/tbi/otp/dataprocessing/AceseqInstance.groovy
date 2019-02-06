@@ -17,7 +17,8 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
     ]
 
     /**
-     * Example: ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/$whole_genome_sequencing/view-by-pid/$PID/cnv_results/paired/tumor_control/2014-08-25_15h32
+     * Example:
+     * ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/$whole_genome_sequencing/view-by-pid/$PID/cnv_results/paired/tumor_control/2014-08-25_15h32
      */
     @Override
     OtpPath getInstancePath() {
@@ -25,7 +26,8 @@ class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObje
     }
 
     /**
-     * Example:  ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/$whole_genome_sequencing/view-by-pid/$PID/cnv_results/paired/tumor_control/2014-08-25_15h32/plots
+     * Example
+     * ${OtpProperty#PATH_PROJECT_ROOT}/${project}/sequencing/$whole_genome_sequencing/view-by-pid/$PID/cnv_results/paired/tumor_control/2014-08-25_15h32/plots
      */
     File getInstancePlotPath() {
         return new File(getWorkDirectory(), "plots")

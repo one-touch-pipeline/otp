@@ -12,12 +12,14 @@ enum OtpProperty {
     LDAP_SEARCH_SUBTREE('otp.security.ldap.search.subTree', TypeValidators.BOOLEAN, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT), 'true'),
     LDAP_SEARCH_FILTER('otp.security.ldap.search.filter', TypeValidators.SINGLE_LINE_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
 
-    SSH_AUTH_METHOD('otp.ssh.authMethod', TypeValidators.SSH_AUTH_METHOD, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST), SshAuthMethod.SSH_AGENT.name()),
+    SSH_AUTH_METHOD('otp.ssh.authMethod', TypeValidators.SSH_AUTH_METHOD, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST),
+            SshAuthMethod.SSH_AGENT.name()),
     SSH_USER('otp.ssh.user', TypeValidators.SINGLE_WORD_TEXT, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT)),
     /**
      * Used for {@link SshAuthMethod#KEY_FILE}
      */
-    SSH_KEY_FILE('otp.ssh.keyFile', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST), System.getProperty("user.home") + "/.ssh/id_rsa"),
+    SSH_KEY_FILE('otp.ssh.keyFile', TypeValidators.ABSOLUTE_PATH, EnumSet.of(UsedIn.PRODUCTION, UsedIn.DEVELOPMENT, UsedIn.WORKFLOW_TEST),
+            System.getProperty("user.home") + "/.ssh/id_rsa"),
     /**
      * Used for {@link SshAuthMethod#PASSWORD}
      */

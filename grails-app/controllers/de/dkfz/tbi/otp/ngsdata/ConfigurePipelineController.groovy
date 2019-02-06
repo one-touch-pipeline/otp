@@ -16,9 +16,9 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
     static allowedMethods = [
             // TODO: incomplete (OTP-2887)
-            runYapsa                   : "GET",
-            updateRunYapsa             : "POST",
-            invalidateConfig           : "POST",
+            runYapsa        : "GET",
+            updateRunYapsa  : "POST",
+            invalidateConfig: "POST",
     ]
 
 
@@ -56,16 +56,16 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
             redirect(controller: "projectConfig")
         }
 
-        String defaultPluginName = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName)
-        String defaultPluginVersion = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName)
-        String defaultBaseProjectConfig = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName)
-        String defaultReferenceGenome = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_REFERENCE_GENOME_NAME, cmd.seqType.roddyName)
-        String defaultMergeTool = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_MERGE_TOOL, cmd.seqType.roddyName)
+        String defaultPluginName = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName)
+        String defaultPluginVersion = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName)
+        String defaultBaseProjectConfig = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName)
+        String defaultReferenceGenome = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_REFERENCE_GENOME_NAME, cmd.seqType.roddyName)
+        String defaultMergeTool = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_MERGE_TOOL, cmd.seqType.roddyName)
         List<String> allMergeTools = processingOptionService.findOptionAsList(OptionName.PIPELINE_RODDY_ALIGNMENT_ALL_MERGE_TOOLS, cmd.seqType.roddyName)
         List<String> allSambambaVersions = processingOptionService.findOptionAsList(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE)
-        String defaultSambambaVersion = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_DEFAULT)
+        String defaultSambambaVersion = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_DEFAULT)
         List<String> allBwaMemVersions = processingOptionService.findOptionAsList(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE)
-        String defaultBwaMemVersion = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_DEFAULT)
+        String defaultBwaMemVersion = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_DEFAULT)
 
 
         assert allSambambaVersions.contains(defaultSambambaVersion)
@@ -77,7 +77,8 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         result << params
         result << getValues(cmd.project, cmd.seqType, pipeline)
 
-        String referenceGenome = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(cmd.project, cmd.seqType)?.referenceGenome?.name ?: defaultReferenceGenome
+        String referenceGenome = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
+                cmd.project, cmd.seqType)?.referenceGenome?.name ?: defaultReferenceGenome
         List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc")*.name
 
         assert cmd.project.getProjectDirectory().exists()
@@ -133,22 +134,22 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
         Map result = [:]
 
-        String defaultPluginName = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName)
-        String defaultPluginVersion = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName)
-        String defaultBaseProjectConfig = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName)
-        String defaultReferenceGenome = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_REFERENCE_GENOME_NAME, cmd.seqType.roddyName)
-        String defaultGenomeStarIndex = processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX)
+        String defaultPluginName = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, cmd.seqType.roddyName)
+        String defaultPluginVersion = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, cmd.seqType.roddyName)
+        String defaultBaseProjectConfig = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, cmd.seqType.roddyName)
+        String defaultReferenceGenome = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_REFERENCE_GENOME_NAME, cmd.seqType.roddyName)
+        String defaultGenomeStarIndex = getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX)
 
         assert ReferenceGenome.findByName(defaultReferenceGenome)
 
-        String referenceGenome = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(cmd.project, cmd.seqType)?.referenceGenome?.name ?: defaultReferenceGenome
+        String referenceGenome = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
+                cmd.project, cmd.seqType)?.referenceGenome?.name ?: defaultReferenceGenome
         List<String> referenceGenomes = ReferenceGenome.list(sort: "name", order: "asc").findAll {
             ReferenceGenomeIndex.findByReferenceGenome(it) && GeneModel.findByReferenceGenome(it)
         }*.name
 
-        List<SampleType> configuredSampleTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNotNullAndDeprecatedDateIsNull(cmd.project, cmd.seqType)*.sampleType.unique().sort {
-            it.name
-        }
+        List<SampleType> configuredSampleTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNotNullAndDeprecatedDateIsNull(
+                cmd.project, cmd.seqType)*.sampleType.unique().sort { it.name }
         List<SampleType> additionalUsedSampleTypes = (SeqTrack.createCriteria().list {
             projections {
                 sample {
@@ -167,9 +168,8 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         }.unique() - configuredSampleTypes).sort {
             it.name
         }
-        List<SampleType> additionalPossibleSampleTypes = (SampleType.findAllBySpecificReferenceGenome(SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC) - configuredSampleTypes - additionalUsedSampleTypes).sort {
-            it.name
-        }
+        List<SampleType> additionalPossibleSampleTypes = (SampleType.findAllBySpecificReferenceGenome(
+                SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC) - configuredSampleTypes - additionalUsedSampleTypes).sort { it.name }
 
         assert cmd.project.getProjectDirectory().exists()
 
@@ -287,7 +287,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                     (it.name): ReferenceGenomeIndex.findAllByReferenceGenomeAndToolName(refGenome, it)
             ]
         }
-        data << ["defaultGenomeStarIndex": processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX)]
+        data << ["defaultGenomeStarIndex": getOption(OptionName.PIPELINE_RODDY_ALIGNMENT_RNA_DEFAULT_GENOME_STAR_INDEX)]
         data << ["data": toolNamesData]
         render data as JSON
     }
@@ -309,6 +309,11 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         List<String> toolNames = ToolName.findAllByTypeAndNameNotIlike(ToolName.Type.RNA, "GENOME_STAR_INDEX%")*.name
         toolNames.add(ProjectService.GENOME_STAR_INDEX)
         return toolNames.sort()
+    }
+
+
+    private String getOption(OptionName name, String type = null) {
+        processingOptionService.findOptionAsString(name, type)
     }
 }
 

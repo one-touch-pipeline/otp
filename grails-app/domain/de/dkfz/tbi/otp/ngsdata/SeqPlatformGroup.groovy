@@ -49,7 +49,8 @@ class SeqPlatformGroup implements Entity, CommentableWithHistory {
                     }
                 }
                 if (l.size() > 0) {
-                    errors.rejectValue('seqPlatforms', "seqPlatform '${seqPlatform}' must not be part of multiple groups for mergingCriteria '${seqPlatformGroup.mergingCriteria}'")
+                    errors.rejectValue('seqPlatforms',
+                            "seqPlatform '${seqPlatform}' must not be part of multiple groups for mergingCriteria '${seqPlatformGroup.mergingCriteria}'")
                 }
             }
             return

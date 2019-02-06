@@ -120,13 +120,16 @@ class MetadataImportService {
      * @param previousValidationMd5sum May be {@code null}
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<ValidateAndImportResult> validateAndImportWithAuth(List<PathWithMd5sum> metadataPaths, String directoryStructureName, boolean align, boolean ignoreWarnings, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
+    List<ValidateAndImportResult> validateAndImportWithAuth(List<PathWithMd5sum> metadataPaths, String directoryStructureName, boolean align,
+                                                            boolean ignoreWarnings, String ticketNumber, String seqCenterComment,
+                                                            boolean automaticNotification) {
         try {
             Map<MetadataValidationContext, String> contexts = metadataPaths.collectEntries { PathWithMd5sum pathWithMd5sum ->
                 return [(validate(pathWithMd5sum.path, directoryStructureName)): pathWithMd5sum.md5sum]
             }
             List<ValidateAndImportResult> results = contexts.collect { context, md5sum ->
-                return importHelperMethod(context, align, RunSegment.ImportMode.MANUAL, ignoreWarnings, md5sum, ticketNumber, seqCenterComment, automaticNotification)
+                return importHelperMethod(context, align, RunSegment.ImportMode.MANUAL, ignoreWarnings, md5sum, ticketNumber, seqCenterComment,
+                        automaticNotification)
             }
             return results
         } catch (Exception e) {
@@ -141,7 +144,9 @@ class MetadataImportService {
         }
     }
 
-    private ValidateAndImportResult importHelperMethod(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode, boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
+    private ValidateAndImportResult importHelperMethod(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode,
+                                                       boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment,
+                                                       boolean automaticNotification) {
         MetaDataFile metadataFileObject = null
         if (mayImport(context, ignoreWarnings, previousValidationMd5sum)) {
             metadataFileObject = importMetadataFile(context, align, importMode, ticketNumber, seqCenterComment, automaticNotification)
@@ -178,7 +183,8 @@ class MetadataImportService {
             } catch (Throwable t) {
                 String recipientsString = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
                 if (recipientsString) {
-                    mailHelperService.sendEmail("Error: Copying of metadatafile ${source} failed", "${t.getLocalizedMessage()}\n${t.getCause()}", recipientsString)
+                    mailHelperService.sendEmail("Error: Copying of metadatafile ${source} failed",
+                            "${t.getLocalizedMessage()}\n${t.getCause()}", recipientsString)
                 }
                 throw new RuntimeException("Copying of metadata file ${source} failed", t)
             }
@@ -198,7 +204,8 @@ class MetadataImportService {
             return validate(it, directoryStructureName)
         }
         List<ValidateAndImportResult> results = contexts.collect {
-            return importHelperMethod(it, true, RunSegment.ImportMode.AUTOMATIC, false, null, otrsTicketNumber, null, true)
+            return importHelperMethod(it, true, RunSegment.ImportMode.AUTOMATIC, false, null, otrsTicketNumber,
+                    null, true)
         }
         List<MetadataValidationContext> failedValidations = results.findAll { it.metadataFile == null }*.context
         if (failedValidations.isEmpty()) {
@@ -286,13 +293,15 @@ class MetadataImportService {
             if (context.metadataFileMd5sum.equalsIgnoreCase(previousValidationMd5sum)) {
                 return true
             } else {
-                context.addProblem(Collections.emptySet(), Level.INFO, 'Not ignoring warnings, because the metadata file has changed since the previous validation.')
+                context.addProblem(Collections.emptySet(), Level.INFO,
+                        'Not ignoring warnings, because the metadata file has changed since the previous validation.')
             }
         }
         return false
     }
 
-    protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode, String ticketNumber, String seqCenterComment, boolean automaticNotification) {
+    protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode, String ticketNumber,
+                                              String seqCenterComment, boolean automaticNotification) {
         log.debug('import started')
         RunSegment runSegment = new RunSegment(
                 align: align,

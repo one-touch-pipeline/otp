@@ -129,7 +129,8 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Project createProject(ProjectParams projectParams) {
         assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
-        Project project = createProject(projectParams.name, projectParams.dirName, projectParams.realm, projectParams.categoryNames, projectParams.qcThresholdHandling)
+        Project project = createProject(
+                projectParams.name, projectParams.dirName, projectParams.realm, projectParams.categoryNames, projectParams.qcThresholdHandling)
         project.phabricatorAlias = projectParams.phabricatorAlias
         project.dirAnalysis = projectParams.dirAnalysis
         project.processingPriority = projectParams.processingPriority.priority
@@ -291,16 +292,22 @@ class ProjectService {
 
         ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(panCanAlignmentConfiguration.referenceGenome))
 
-        assert panCanAlignmentConfiguration.mergeTool in MergeConstants.ALL_MERGE_TOOLS: "Invalid merge tool: '${panCanAlignmentConfiguration.mergeTool}', possible values: ${MergeConstants.ALL_MERGE_TOOLS}"
+        assert panCanAlignmentConfiguration.mergeTool in MergeConstants.ALL_MERGE_TOOLS:
+                "Invalid merge tool: '${panCanAlignmentConfiguration.mergeTool}', possible values: ${MergeConstants.ALL_MERGE_TOOLS}"
 
-        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.pluginName): "pluginName '${panCanAlignmentConfiguration.pluginName}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.pluginVersion): "pluginVersion '${panCanAlignmentConfiguration.pluginVersion}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.baseProjectConfig): "baseProjectConfig '${panCanAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
-        assert panCanAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${panCanAlignmentConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
+        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.pluginName):
+                "pluginName '${panCanAlignmentConfiguration.pluginName}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.pluginVersion):
+                "pluginVersion '${panCanAlignmentConfiguration.pluginVersion}' is an invalid path component"
+        assert OtpPath.isValidPathComponent(panCanAlignmentConfiguration.baseProjectConfig):
+                "baseProjectConfig '${panCanAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
+        assert panCanAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN:
+                "configVersion '${panCanAlignmentConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
 
         if (!panCanAlignmentConfiguration.seqType.isWgbs()) {
             List<String> allBwaMemVersions = processingOptionService.findOptionAsList(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE)
-            assert panCanAlignmentConfiguration.bwaMemVersion in allBwaMemVersions: "Invalid bwa_mem version: '${panCanAlignmentConfiguration.bwaMemVersion}', possible values: ${allBwaMemVersions}"
+            assert panCanAlignmentConfiguration.bwaMemVersion in allBwaMemVersions:
+                    "Invalid bwa_mem version: '${panCanAlignmentConfiguration.bwaMemVersion}', possible values: ${allBwaMemVersions}"
         } else {
             panCanAlignmentConfiguration.adapterTrimmingNeeded = true
         }
@@ -309,7 +316,8 @@ class ProjectService {
         }
         if (panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA) {
             List<String> allSambambaVersions = processingOptionService.findOptionAsList(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE)
-            assert panCanAlignmentConfiguration.sambambaVersion in allSambambaVersions: "Invalid sambamba version: '${panCanAlignmentConfiguration.sambambaVersion}', possible values: ${allSambambaVersions}"
+            assert panCanAlignmentConfiguration.sambambaVersion in allSambambaVersions:
+                    "Invalid sambamba version: '${panCanAlignmentConfiguration.sambambaVersion}', possible values: ${allSambambaVersions}"
         }
 
         //Reference genomes with PHIX_INFIX only works with sambamba
@@ -330,27 +338,34 @@ class ProjectService {
         refSeqType.statSizeFileName = panCanAlignmentConfiguration.statSizeFileName
         refSeqType.save(flush: true, failOnError: true)
 
-        alignmentHelper(panCanAlignmentConfiguration, pipeline, RoddyPanCanConfigTemplate.createConfig(panCanAlignmentConfiguration), panCanAlignmentConfiguration.adapterTrimmingNeeded)
+        alignmentHelper(panCanAlignmentConfiguration, pipeline, RoddyPanCanConfigTemplate.createConfig(panCanAlignmentConfiguration),
+                panCanAlignmentConfiguration.adapterTrimmingNeeded)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureRnaAlignmentConfig(RoddyConfiguration rnaAlignmentConfiguration) {
-        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginName): "pluginName '${rnaAlignmentConfiguration.pluginName}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginVersion): "pluginVersion '${rnaAlignmentConfiguration.pluginVersion}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.baseProjectConfig): "baseProjectConfig '${rnaAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
-        assert rnaAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${rnaAlignmentConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
+        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginName): "pluginName '${rnaAlignmentConfiguration.pluginName}' " +
+                "is an invalid path component"
+        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.pluginVersion): "pluginVersion '${rnaAlignmentConfiguration.pluginVersion}' " +
+                "is an invalid path component"
+        assert OtpPath.isValidPathComponent(rnaAlignmentConfiguration.baseProjectConfig): "baseProjectConfig " +
+                "'${rnaAlignmentConfiguration.baseProjectConfig}' is an invalid path component"
+        assert rnaAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion " +
+                "'${rnaAlignmentConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
 
         Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
                 Pipeline.Type.ALIGNMENT,
                 Pipeline.Name.RODDY_RNA_ALIGNMENT,
         ))
 
-        alignmentHelper(rnaAlignmentConfiguration, pipeline, RoddyRnaConfigTemplate.createConfig(rnaAlignmentConfiguration, pipeline.name), true)
+        alignmentHelper(rnaAlignmentConfiguration, pipeline, RoddyRnaConfigTemplate.createConfig(
+                rnaAlignmentConfiguration, pipeline.name), true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void invalidateProjectConfig(Project project, SeqType seqType, Pipeline pipeline) {
-        ConfigPerProjectAndSeqType config = atMostOneElement(ConfigPerProjectAndSeqType.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDate(project, seqType, pipeline, null))
+        ConfigPerProjectAndSeqType config = atMostOneElement(ConfigPerProjectAndSeqType.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDate(
+                project, seqType, pipeline, null))
         if (config) {
             config.makeObsolete()
         }
@@ -425,7 +440,8 @@ class ProjectService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureRnaAlignmentReferenceGenome(RnaAlignmentReferenceGenomeConfiguration rnaAlignmentConfiguration) {
         if (rnaAlignmentConfiguration.sampleTypes) {
-            deprecateAllReferenceGenomesByProjectAndSeqTypeAndSampleTypes(rnaAlignmentConfiguration.project, rnaAlignmentConfiguration.seqType, rnaAlignmentConfiguration.sampleTypes)
+            deprecateAllReferenceGenomesByProjectAndSeqTypeAndSampleTypes(
+                    rnaAlignmentConfiguration.project, rnaAlignmentConfiguration.seqType, rnaAlignmentConfiguration.sampleTypes)
         } else if (rnaAlignmentConfiguration.deprecateConfigurations) {
             deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(rnaAlignmentConfiguration)
         } else {
@@ -445,7 +461,8 @@ class ProjectService {
         }
         rnaAlignmentConfiguration.referenceGenomeIndex.each {
             if (!(mouseData && [ARRIBA_KNOWN_FUSIONS, ARRIBA_BLACKLIST].contains(it.toolName.name))) {
-                alignmentProperties[it.toolName.name.contains(GENOME_STAR_INDEX) ? GENOME_STAR_INDEX : it.toolName.name] = referenceGenomeIndexService.getFile(it).absolutePath
+                alignmentProperties[it.toolName.name.contains(GENOME_STAR_INDEX) ? GENOME_STAR_INDEX : it.toolName.name] =
+                        referenceGenomeIndexService.getFile(it).absolutePath
             }
         }
         alignmentProperties[GeneModel.GENE_MODELS] = geneModelService.getFile(geneModel).absolutePath
@@ -598,8 +615,10 @@ class ProjectService {
     private RoddyWorkflowConfig configurePipelineProject(RoddyConfiguration configuration, Pipeline pipeline, Class roddyConfigTemplate) {
         assert OtpPath.isValidPathComponent(configuration.pluginName): "pluginName '${configuration.pluginName}' is an invalid path component"
         assert OtpPath.isValidPathComponent(configuration.pluginVersion): "pluginVersion '${configuration.pluginVersion}' is an invalid path component"
-        assert OtpPath.isValidPathComponent(configuration.baseProjectConfig): "baseProjectConfig '${configuration.baseProjectConfig}' is an invalid path component"
-        assert configuration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${configuration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
+        assert OtpPath.isValidPathComponent(configuration.baseProjectConfig): "baseProjectConfig '${configuration.baseProjectConfig}' " +
+                "is an invalid path component"
+        assert configuration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN: "configVersion '${configuration.configVersion}' " +
+                "has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
 
         String xmlConfig
         if (pipeline.name == Pipeline.Name.RODDY_ACESEQ) {
@@ -649,7 +668,8 @@ class ProjectService {
         }
         .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
                 .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }
-                .ensure({ ReferenceGenome referenceGenome -> referenceGenome in aceseqService.checkReferenceGenomeMap()['referenceGenomes'] }, "Reference genome is not compatible with ACESeq.")
+                .ensure({ ReferenceGenome referenceGenome -> referenceGenome in aceseqService.checkReferenceGenomeMap()['referenceGenomes'] },
+                "Reference genome is not compatible with ACESeq.")
                 .ensure({ ReferenceGenome referenceGenome ->
             referenceGenome.knownHaplotypesLegendFileX &&
                     referenceGenome.knownHaplotypesLegendFile &&
@@ -672,7 +692,8 @@ class ProjectService {
         }
         .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
                 .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }
-                .ensure({ ReferenceGenome referenceGenome -> referenceGenome in sophiaService.checkReferenceGenomeMap()['referenceGenomes'] }, "Reference genome is not compatible with SOPHIA.")
+                .ensure({ ReferenceGenome referenceGenome -> referenceGenome in sophiaService.checkReferenceGenomeMap()['referenceGenomes'] },
+                "Reference genome is not compatible with SOPHIA.")
     }
 
     private String getScriptBash(File configDirectory, String xmlConfig, File configFilePath) {
@@ -751,19 +772,22 @@ echo 'OK'
     }
 
     private void deprecateAllReferenceGenomesByProjectAndSeqType(Project project, SeqType seqType) {
-        Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(project, seqType)
+        Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(
+                project, seqType)
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
         referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
     }
 
     private void deprecateReferenceGenomeByProjectAndSeqTypeAndNoSampleType(Project project, SeqType seqType) {
-        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
+        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType =
+                ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
         referenceGenomeProjectSeqType?.deprecatedDate = new Date()
         referenceGenomeProjectSeqType?.save(flush: true, failOnError: true)
     }
 
     private void deprecateAllReferenceGenomesByProjectAndSeqTypeAndSampleTypes(Project project, SeqType seqType, List<SampleType> sampleTypes) {
-        Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeInListAndDeprecatedDateIsNull(project, seqType, sampleTypes)
+        Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes =
+                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeInListAndDeprecatedDateIsNull(project, seqType, sampleTypes)
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
         referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
     }

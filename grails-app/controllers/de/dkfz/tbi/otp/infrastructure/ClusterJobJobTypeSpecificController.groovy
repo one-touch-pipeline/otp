@@ -30,14 +30,17 @@ class ClusterJobJobTypeSpecificController {
     def getJobTypeSpecificStatesTimeDistribution() {
         Map dataToRender = [:]
 
-        def (startDate, endDate, seqType) = parseParams()
+        def (LocalDate startDate, LocalDate endDate, SeqType seqType) = parseParams()
 
         Float referenceSize = Float.parseFloat(params.bases)
         Integer coverage = Integer.parseInt(params.coverage)
         Long basesToBeNormalized = Math.round(referenceSize * coverage * GIGABASES_TO_BASES)
 
-        def data = clusterJobService.findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween(params.jobClass, seqType, startDate, endDate, basesToBeNormalized)
-        dataToRender.data = ['avgQueue': PeriodFormat.getDefault().print(new Period(data.avgQueue)), 'avgProcess': PeriodFormat.getDefault().print(new Period(data.avgProcess))]
+        def data = clusterJobService.findSpecificAvgStatesTimeDistribution(params.jobClass, seqType, startDate, endDate, basesToBeNormalized)
+        dataToRender.data = [
+                'avgQueue'  : PeriodFormat.getDefault().print(new Period(data.avgQueue)),
+                'avgProcess': PeriodFormat.getDefault().print(new Period(data.avgProcess)),
+        ]
 
         render dataToRender as JSON
     }
@@ -45,7 +48,7 @@ class ClusterJobJobTypeSpecificController {
     def getJobTypeSpecificCoverageStatistics() {
         Map dataToRender = [:]
 
-        def (startDate, endDate, seqType) = parseParams()
+        def (LocalDate startDate, LocalDate endDate, SeqType seqType) = parseParams()
 
         Float referenceSize = Float.parseFloat(params.bases)
 

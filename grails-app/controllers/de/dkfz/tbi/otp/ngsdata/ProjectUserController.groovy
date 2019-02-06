@@ -97,7 +97,7 @@ class ProjectUserController implements CheckAndCall {
         String errorMessage = null
         if (cmd.hasErrors()) {
             FieldError cmdErrors = cmd.errors.getFieldError()
-            errorMessage = "'" + cmdErrors.getRejectedValue() + "' is not a valid value for '" + cmdErrors.getField() + "'. Error code: '" + cmdErrors.code + "'"
+            errorMessage = "'${cmdErrors.rejectedValue}' is not a valid value for '${cmdErrors.field}'. Error code: '${cmdErrors.code}'"
             message = "An error occurred"
         } else {
             try {

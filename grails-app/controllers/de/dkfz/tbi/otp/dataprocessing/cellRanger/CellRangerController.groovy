@@ -69,7 +69,13 @@ class CellRangerController {
             return
         }
 
-        Errors errors = cellRangerConfigurationService.createMergingWorkPackage(cmd.expectedCells, cmd.enforcedCells, cmd.project, cmd.individual, cmd.sampleType)
+        Errors errors = cellRangerConfigurationService.createMergingWorkPackage(
+                cmd.expectedCells,
+                cmd.enforcedCells,
+                cmd.project,
+                cmd.individual,
+                cmd.sampleType
+        )
         if (errors) {
             flash.message = new FlashMessage(g.message(code: "cellRanger.store.failure") as String, errors)
         } else {

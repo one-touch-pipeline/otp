@@ -85,7 +85,8 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
             pipeline?.usesRoddy()
         }
         adapterTrimmingNeeded validator: { adapterTrimmingNeeded, config ->
-            if (config.pipeline?.type == Pipeline.Type.ALIGNMENT && (config.seqType?.isRna() || config.seqType?.isWgbs() || config.seqType?.isChipSeq()) && !adapterTrimmingNeeded) {
+            if (config.pipeline?.type == Pipeline.Type.ALIGNMENT &&
+                    (config.seqType?.isRna() || config.seqType?.isWgbs() || config.seqType?.isChipSeq()) && !adapterTrimmingNeeded) {
                 return "adapterTrimmingNeeded must be set for WGBS, ChipSeq and RNA alignment"
             }
             if (config.pipeline?.type != Pipeline.Type.ALIGNMENT && adapterTrimmingNeeded) {
@@ -106,9 +107,12 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
         assert pipeline : "The pipeline is not allowed to be null"
         assert individual == null || individual.project == project
         try {
-            return (RoddyWorkflowConfig) atMostOneElement(findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateAndIndividual(project, seqType, pipeline, null, individual))
+            return (RoddyWorkflowConfig) atMostOneElement(findAllByProjectAndSeqTypeAndPipelineAndObsoleteDateAndIndividual(
+                    project, seqType, pipeline, null, individual))
         } catch (final Throwable t) {
-            throw new RuntimeException("Found more than one RoddyWorkflowConfig for Project ${project}, SeqType ${seqType}, Individual ${individual} and Pipeline ${pipeline}. ${t.message ?: ''}", t)
+            throw new RuntimeException("Found more than one RoddyWorkflowConfig for Project ${project}, " +
+                    "SeqType ${seqType}, " +
+                    "Individual ${individual} and Pipeline ${pipeline}. ${t.message ?: ''}", t)
         }
     }
 
@@ -127,7 +131,13 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
         assert pluginNameAndVersion
         assert configVersion
 
-        return "${pipelineName.name()}_${seqType.roddyName}_${seqType.libraryLayout}_${seqType.singleCell ? 'SingleCell_' : ''}${pluginNameAndVersion}_${configVersion}"
+        return [
+                "${pipelineName.name()}",
+                "${seqType.roddyName}",
+                "${seqType.libraryLayout}",
+                "${seqType.singleCell ? 'SingleCell_' : ''}${pluginNameAndVersion}",
+                "${configVersion}",
+        ].join("_")
     }
 
     static String getNameUsedInConfig(Pipeline.Name pipelineName, SeqType seqType, String pluginName, String pluginVersion, String configVersion) {

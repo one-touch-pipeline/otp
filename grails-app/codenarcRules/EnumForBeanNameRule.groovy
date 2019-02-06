@@ -15,7 +15,8 @@ class EnumForBeanNameRule extends AbstractAstVisitorRule {
     String doNotApplyToFileNames = "*/*test*/*"
     int priority = 1
     String name = 'EnumForBeanName'
-    String description = 'Ensures, that for a given Interface there exists a Enum that represents all the beanName names for all the Classes that inherit from this interface '
+    String description = 'Ensures, that for a given Interface there exists a Enum that represents all the beanName names ' +
+            'for all the Classes that inherit from this interface'
     Class astVisitorClass = EnumForBeanNameVisitor
 }
 
@@ -25,7 +26,7 @@ class EnumForBeanNameVisitor extends AbstractAstVisitor {
     // [InterfaceName: AllAvailableBeanNames]
     Map<String, List<String>> properties = [
             'SampleIdentifierParser': SampleIdentifierParserBeanName.values()*.beanName as List,
-            'AlignmentDecider': AlignmentDeciderBeanName.values()*.beanName as List,
+            'AlignmentDecider'      : AlignmentDeciderBeanName.values()*.beanName as List,
     ]
 
     @Override

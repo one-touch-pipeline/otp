@@ -17,6 +17,6 @@ trait CheckAndCall {
     }
 
     private Map getErrorData(FieldError errors) {
-        return [success: false, error: "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"]
+        return [success: false, error: "'${errors.rejectedValue}' is not a valid value for '${errors.field}'. Error code: '${errors.code}'"]
     }
 }

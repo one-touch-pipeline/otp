@@ -373,8 +373,8 @@ class ProcessService {
         if (!error.stackTraceIdentifier) {
             throw new RuntimeException("No stackTrace could be found for the processing error: " + id)
         }
-        if (aclUtilService.hasPermission(SecurityContextHolder.context.authentication, error.processingStepUpdate.processingStep.process.jobExecutionPlan, BasePermission.READ) ||
-        (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR"))) {
+        if (aclUtilService.hasPermission(SecurityContextHolder.context.authentication, error.processingStepUpdate.processingStep.process.jobExecutionPlan,
+                BasePermission.READ) || (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR"))) {
             return errorLogService.loggedError(error.stackTraceIdentifier)
         }
         throw new RuntimeException("The authentication was not granted for the processing error: " + id)

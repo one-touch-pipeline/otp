@@ -49,9 +49,9 @@ class ClusterJobService {
      * creates a cluster job object with at this time known attributes
      */
     ClusterJob createClusterJob(Realm realm, String clusterJobId, String userName,
-                                       ProcessingStep processingStep, SeqType seqType = null,
-                                       String clusterJobName = processingStep.getClusterJobName(),
-                                       String jobClass = processingStep.nonQualifiedJobClass) {
+                                ProcessingStep processingStep, SeqType seqType = null,
+                                String clusterJobName = processingStep.getClusterJobName(),
+                                String jobClass = processingStep.nonQualifiedJobClass) {
         ClusterJob job = new ClusterJob(
                 processingStep: processingStep,
                 individual: processingStep.processParameterObject?.individual,
@@ -227,7 +227,8 @@ class ClusterJobService {
      * returns a List of Cluster Jobs in a specific time span
      * @return List [clusterJob1, clusterJob2, ...]
      */
-    List findAllClusterJobsByDateBetween(LocalDate sDate, LocalDate eDate, String filter, int offset, int displayedLines, String sortedColumn, String sortOrder) {
+    List findAllClusterJobsByDateBetween(
+            LocalDate sDate, LocalDate eDate, String filter, int offset, int displayedLines, String sortedColumn, String sortOrder) {
         def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
 
         return ClusterJob.createCriteria().list {
@@ -447,7 +448,11 @@ SELECT
         List results = []
 
         sql.eachRow(query, [startDate.millis, endDate.millis]) {
-            results << [startDate: new DateTime(it.hourStarted * HOURS_TO_MILLIS), endDate: new DateTime(it.hourEnded * HOURS_TO_MILLIS), cpuAvgUsed: it.sumAvgCpuTime]
+            results << [
+                    startDate : new DateTime(it.hourStarted * HOURS_TO_MILLIS),
+                    endDate   : new DateTime(it.hourEnded * HOURS_TO_MILLIS),
+                    cpuAvgUsed: it.sumAvgCpuTime,
+            ]
         }
 
         def data = hourBuckets.collect { currentHour ->
@@ -489,7 +494,11 @@ SELECT
         List results = []
 
         sql.eachRow(query, [startDate.millis, endDate.millis]) {
-            results << [startDate: new DateTime(it.hourStarted * HOURS_TO_MILLIS), endDate: new DateTime(it.hourEnded * HOURS_TO_MILLIS), memoryAvgUsed: it.sumAvgMemoryUsed / (1024 ** 2)]
+            results << [
+                    startDate    : new DateTime(it.hourStarted * HOURS_TO_MILLIS),
+                    endDate      : new DateTime(it.hourEnded * HOURS_TO_MILLIS),
+                    memoryAvgUsed: it.sumAvgMemoryUsed / (1024**2),
+            ]
         }
 
         def data = hourBuckets.collect { currentHour ->
@@ -769,8 +778,8 @@ SELECT
      * returns the average time in queue and average processing time for a specific jobclass and seqtype
      * @return map ["avgQueue": avgQueue, "avgProcess": avgProcess]
      */
-    Map findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween(String jobClass, SeqType seqType, LocalDate sDate, LocalDate eDate, Long basesToBeNormalized = null) {
-        def (DateTime startDate, DateTime endDate) = parseDateArgs(sDate, eDate)
+    Map findSpecificAvgStatesTimeDistribution(String jobClass, SeqType seqType, LocalDate startDate, LocalDate endDate, Long basesToBeNormalized = null) {
+        def (DateTime startDateTime, DateTime endDateTime) = parseDateArgs(startDate, endDate)
 
         def sql = new Sql(dataSource)
 
@@ -789,7 +798,12 @@ SELECT
 
         // prevents negative values that could appear cause of rounding errors with milliseconds values
         // OTP-1304, queued gets set through OTP, started & ended gets set by the cluster
-        sql.query(query, [startDate.millis, endDate.millis, jobClass, seqType?.id], {
+        sql.query(query, [
+                startDateTime.millis,
+                endDateTime.millis,
+                jobClass,
+                seqType?.id,
+        ], {
             it.next()
             avgBases = it.getLong('basesCount')
             avgQueue = Math.max(0, it.getLong('avgQueue') ?: 0)

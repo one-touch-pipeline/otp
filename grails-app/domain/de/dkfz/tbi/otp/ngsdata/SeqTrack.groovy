@@ -166,7 +166,10 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     static String normalizeLibraryName(String libraryName) {
         if (libraryName != null) {
-            return libraryName.trim().replaceAll(/(?<!\d)0+/, '0').replaceAll(/(?<!\d)0([1-9])/, '$1').toLowerCase(Locale.ENGLISH).replaceAll(/(?:^lib(?:rary)?)|[_-]/, '')
+            return libraryName.trim()
+                    .replaceAll(/(?<!\d)0+/, '0')
+                    .replaceAll(/(?<!\d)0([1-9])/, '$1').toLowerCase(Locale.ENGLISH)
+                    .replaceAll(/(?:^lib(?:rary)?)|[_-]/, '')
         } else {
             return null
         }

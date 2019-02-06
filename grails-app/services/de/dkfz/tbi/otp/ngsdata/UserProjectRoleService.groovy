@@ -162,7 +162,9 @@ class UserProjectRoleService {
         ])
         String email = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION)
         mailHelperService.sendEmail(subject, body, email, requester.email)
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL, "Sent mail to ${email} to ${formattedAction} ${userProjectRole.user.username} ${conjunction} ${userProjectRole.project.name} at the request of ${requester.username + switchedUserAnnotation}")
+        auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
+                "Sent mail to ${email} to ${formattedAction} ${userProjectRole.user.username} ${conjunction} ${userProjectRole.project.name} " +
+                        "at the request of ${requester.username + switchedUserAnnotation}")
     }
 
     private enum OperatorAction {
@@ -182,7 +184,8 @@ class UserProjectRoleService {
                 userIdentifier: user.realName ?: user.username,
         ])
         mailHelperService.sendEmail(subject, body, allMails)
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL, "Notified project authorities (${projectAuthorities*.realName.join(", ")}) and user (${user.username})")
+        auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
+                "Notified project authorities (${projectAuthorities*.realName.join(", ")}) and user (${user.username})")
     }
 
     private String getFlagChangeLogMessage(String flagName, boolean newStatus, String username, String projectName) {
@@ -263,7 +266,8 @@ class UserProjectRoleService {
                 requestToRemoveUserFromUnixGroupIfRequired(userProjectRole)
             }
         }
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "${enabled ? "En" : "Dis"}abled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
+        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED,
+                "${enabled ? "En" : "Dis"}abled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
         return userProjectRole
     }
 

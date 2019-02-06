@@ -75,7 +75,8 @@ class SampleIdentifierService {
         String sampleTypeWithoutUnderscore = identifier.sampleTypeDbName.replace('_', '-')
         return Sample.findOrSaveWhere(
                 individual: findOrSaveIndividual(identifier),
-                sampleType: SampleType.findWhere(name: identifier.sampleTypeDbName) ?: SampleType.findWhere(name: sampleTypeWithoutUnderscore) ?: createSampleTypeXenograftDepending(sampleTypeWithoutUnderscore),
+                sampleType: SampleType.findWhere(name: identifier.sampleTypeDbName) ?: SampleType.findWhere(
+                        name: sampleTypeWithoutUnderscore) ?: createSampleTypeXenograftDepending(sampleTypeWithoutUnderscore),
         )
     }
 
@@ -84,7 +85,8 @@ class SampleIdentifierService {
         boolean xenograft = sampleTypeName.toUpperCase(Locale.ENGLISH).startsWith(XENOGRAFT) ||
                 sampleTypeName.toUpperCase(Locale.ENGLISH).startsWith(CULTURE) ||
                 sampleTypeName.toUpperCase(Locale.ENGLISH).startsWith(ORGANOID)
-        SampleType.SpecificReferenceGenome  specificReferenceGenome = xenograft ?  SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC : SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        SampleType.SpecificReferenceGenome specificReferenceGenome =
+                xenograft ? SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC : SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         SampleType sampleType = new SampleType(
                 name: sampleTypeName,
                 specificReferenceGenome: specificReferenceGenome,

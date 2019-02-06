@@ -28,10 +28,10 @@ class QcThresholdService {
                     eq("project", project)
                     isNull("project")
                 }
-            } .groupBy { it.qcProperty1 }.collect {
+            }.groupBy { it.qcProperty1 }.collect {
                 it.value.find { it.project == project && it.seqType == seqType } ?:
-                                it.value.find { it.project == null && it.seqType == seqType }
-            } .collectEntries { QcThreshold threshold ->
+                        it.value.find { it.project == null && it.seqType == seqType }
+            }.collectEntries { QcThreshold threshold ->
                 [(threshold.qcProperty1): threshold]
             }
             this.qcClass = qcClass
@@ -112,8 +112,11 @@ class QcThresholdService {
                     }
 
                     if (projectThreshold || defaultThreshold) {
-                        cl.existingThresholds.add(new BothQcThresholds(defaultExistingThresholds: defaultThreshold, projectExistingThresholds: projectThreshold,
-                                seqType: projectThreshold?.seqType ?: defaultThreshold?.seqType, property: projectThreshold?.qcProperty1 ?: defaultThreshold.qcProperty1
+                        cl.existingThresholds.add(new BothQcThresholds(
+                                defaultExistingThresholds: defaultThreshold,
+                                projectExistingThresholds: projectThreshold,
+                                seqType: projectThreshold?.seqType ?: defaultThreshold?.seqType,
+                                property: projectThreshold?.qcProperty1 ?: defaultThreshold.qcProperty1,
                         ))
                     }
                 }

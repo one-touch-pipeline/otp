@@ -103,7 +103,8 @@ ${search ? """
             previousProcessingStep = it
         }
 
-        data << getFormattedPeriod(ticket.installationStarted, ticket.snvFinished ?: ticket.alignmentFinished ?: ticket.fastqcFinished ?: ticket.installationFinished)
+        data << getFormattedPeriod(ticket.installationStarted, ticket.snvFinished ?: ticket.alignmentFinished ?: ticket.fastqcFinished ?:
+                ticket.installationFinished)
 
         if (ticket.comment?.comment) {
             data << ticket.comment.comment
@@ -119,7 +120,8 @@ ${search ? """
     }
 
     private static List selectDistinctAndOrderByFromSeqTrack(List seqTracks, String property) {
-        return SeqTrack.executeQuery("SELECT DISTINCT ${property} FROM SeqTrack AS st WHERE st IN (:seqTracks) ORDER BY ${property}", [seqTracks: seqTracks]) as List<String>
+        return SeqTrack.executeQuery("SELECT DISTINCT ${property} FROM SeqTrack AS st WHERE st IN (:seqTracks) ORDER BY ${property}",
+                [seqTracks: seqTracks]) as List<String>
     }
 
     static String getFormattedPeriod(Date d1, Date d2) {
