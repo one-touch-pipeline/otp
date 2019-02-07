@@ -1,19 +1,22 @@
 package de.dkfz.tbi.otp.tracking
 
-import de.dkfz.tbi.*
+import grails.test.spock.IntegrationSpec
+import spock.lang.Unroll
+
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.notification.*
+import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
-import de.dkfz.tbi.otp.tracking.TrackingService.SamplePairDiscovery
-import de.dkfz.tbi.otp.user.*
-import de.dkfz.tbi.otp.utils.*
-import grails.test.spock.*
-import spock.lang.*
+import de.dkfz.tbi.otp.tracking.TrackingService.SamplePairCreation
+import de.dkfz.tbi.otp.user.UserException
+import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.MailHelperService
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
@@ -214,7 +217,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         }
 
         when:
-        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
+        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
 
         then:
         ticket.installationFinished == installationFinished
@@ -247,7 +250,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         }
 
         when:
-        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
+        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
 
         then:
         ticket.installationFinished == installationFinished
@@ -302,7 +305,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         }
 
         when:
-        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
+        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
 
         then:
         ticket.installationFinished != null
@@ -387,7 +390,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         }
 
         when:
-        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
+        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
 
         then:
         ticket.installationFinished != null
@@ -451,7 +454,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         }
 
         when:
-        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairDiscovery())
+        trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
 
         then:
         ticket.installationFinished == null
@@ -816,7 +819,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
     void "fillInSamplePairStatuses, no MWP, does not crash"() {
         expect:
-        trackingService.fillInSamplePairStatuses([], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([], new SamplePairCreation())
     }
 
     void "fillInSamplePairStatuses, no SP, returns NOTHING_DONE_WONT_DO"() {
@@ -825,7 +828,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
 
         when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
 
         then:
         mwpStatus.samplePairProcessingStatuses.isEmpty()
@@ -851,7 +854,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         when:
         analysisInstance.withdrawn = true
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
 
         then:
         assert analysisInstance.withdrawn
@@ -879,7 +882,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         analysisInstance.delete(flush: true)
 
         when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
@@ -926,7 +929,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         analysisInstance.delete(flush: true)
 
         when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
@@ -959,7 +962,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         analysisInstance.delete(flush: true)
 
         when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
@@ -981,7 +984,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         analysisInstance.delete(flush: true)
 
         when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
@@ -1008,7 +1011,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 analysisInstance.sampleType1BamFile)
 
         when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
@@ -1031,7 +1034,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 analysisInstance.sampleType1BamFile.mergingWorkPackage, NOTHING_DONE_MIGHT_DO)
 
         when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
@@ -1059,7 +1062,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 analysisInstance.sampleType1BamFile)
 
         when:
-        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
@@ -1089,7 +1092,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
 
         when:
-        trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairCreation())
 
         then:
         SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
@@ -1118,7 +1121,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 analysisInstance.sampleType1BamFile)
 
         when:
-        trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairCreation())
 
         then:
         mwp1Status.samplePairProcessingStatuses.isEmpty()
@@ -1154,7 +1157,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
                 createMergingWorkPackageProcessingStatus(analysisInstance2.sampleType1BamFile)
 
         when:
-        trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairDiscovery())
+        trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairCreation())
 
         then:
         SamplePairProcessingStatus samplePair1Status = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)

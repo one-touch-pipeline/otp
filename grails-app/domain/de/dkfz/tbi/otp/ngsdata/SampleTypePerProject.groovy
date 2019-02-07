@@ -27,24 +27,4 @@ class SampleTypePerProject implements TimeStamped, Entity {
     static constraints = {
         sampleType unique: 'project'
     }
-
-    /**
-     * Finds distinct pairs of [project, sampleType] with this criteria:
-     * <ul>
-     *     <li>At least one non-withdrawn SeqTrack exists for that combination with a sequencing type which OTP can process.</li>
-     *     <li>The category of the sample type is unknown (but not {@link SampleType.Category#IGNORED}) for the project,
-     *         i.e. no SampleTypePerProject instance exists for that combination.</li>
-     * </ul>
-     */
-    static Collection findMissingCombinations() {
-        return SampleTypePerProject.executeQuery(
-            "SELECT DISTINCT project as project, sampleType as sampleType " +
-            "FROM SeqTrack st " +
-            "    join st.sample.individual.project project " +
-            "    join st.sample.sampleType sampleType " +
-            "WHERE st.seqType IN (:seqTypes) " +
-            "AND NOT EXISTS (FROM DataFile WHERE seqTrack = st AND fileType.type = :fileType AND fileWithdrawn = true) " +
-            "AND NOT EXISTS (FROM SampleTypePerProject stpp WHERE stpp.project = st.sample.individual.project AND stpp.sampleType = st.sample.sampleType)",
-            [seqTypes: SeqTypeService.getAllAnalysableSeqTypes(), fileType: FileType.Type.SEQUENCE], [readOnly: true])
-    }
 }

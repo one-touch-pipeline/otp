@@ -1,21 +1,24 @@
 package de.dkfz.tbi.otp.tracking
 
+import org.springframework.security.access.prepost.PreAuthorize
+
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.runYapsa.*
+import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
-import de.dkfz.tbi.otp.dataprocessing.sophia.*
-import de.dkfz.tbi.otp.job.jobs.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.notification.*
+import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.Done
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
-import de.dkfz.tbi.otp.user.*
-import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.user.UserException
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
-import org.springframework.security.access.prepost.*
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
-import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.*
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX
+import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.NOTHING
+import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.PARTLY
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
 class TrackingService {
@@ -112,21 +115,21 @@ class TrackingService {
     }
 
     void processFinished(Set<SeqTrack> seqTracks) {
-        SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()
+        SamplePairCreation samplePairCreation = new SamplePairCreation()
         Set<OtrsTicket> otrsTickets = findAllOtrsTickets(seqTracks)
-        LogThreadLocal.getThreadLog()?.trace("evaluating processFinished for SPD: ${samplePairDiscovery}; OtrsTickets: ${otrsTickets}; SeqTracks: ${seqTracks*.id}")
+        LogThreadLocal.getThreadLog()?.trace("evaluating processFinished for SPD: ${samplePairCreation}; OtrsTickets: ${otrsTickets}; SeqTracks: ${seqTracks*.id}")
         for (OtrsTicket ticket : otrsTickets) {
-            setFinishedTimestampsAndNotify(ticket, samplePairDiscovery)
+            setFinishedTimestampsAndNotify(ticket, samplePairCreation)
         }
     }
 
-    void setFinishedTimestampsAndNotify(OtrsTicket ticket, SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()) {
+    void setFinishedTimestampsAndNotify(OtrsTicket ticket, SamplePairCreation samplePairCreation = new SamplePairCreation()) {
         if (ticket.finalNotificationSent) {
             return
         }
         Date now = new Date()
         Set<SeqTrack> seqTracks = ticket.findAllSeqTracks()
-        ProcessingStatus status = getProcessingStatus(seqTracks, samplePairDiscovery)
+        ProcessingStatus status = getProcessingStatus(seqTracks, samplePairCreation)
         boolean anythingJustCompleted = false
         boolean mightDoMore = false
         for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
@@ -283,14 +286,14 @@ class TrackingService {
         assert newOtrsTicket.save(flush: true, failOnError: true)
     }
 
-    ProcessingStatus getProcessingStatus(Collection<SeqTrack> seqTracks, SamplePairDiscovery samplePairDiscovery = new SamplePairDiscovery()) {
+    ProcessingStatus getProcessingStatus(Collection<SeqTrack> seqTracks, SamplePairCreation samplePairCreation = new SamplePairCreation()) {
         ProcessingStatus status = new ProcessingStatus(seqTracks.collect {
             new SeqTrackProcessingStatus(it,
                     it.dataInstallationState == SeqTrack.DataProcessingState.FINISHED ? ALL_DONE : NOTHING_DONE_MIGHT_DO,
                     it.fastqcState == SeqTrack.DataProcessingState.FINISHED ? ALL_DONE : NOTHING_DONE_MIGHT_DO, [])
         })
         List<MergingWorkPackageProcessingStatus> allMwpStatuses = fillInMergingWorkPackageProcessingStatuses(status.seqTrackProcessingStatuses)
-        fillInSamplePairStatuses(allMwpStatuses, samplePairDiscovery)
+        fillInSamplePairStatuses(allMwpStatuses, samplePairCreation)
 
         return status
     }
@@ -355,12 +358,12 @@ class TrackingService {
     }
 
 
-    void fillInSamplePairStatuses(Collection<MergingWorkPackageProcessingStatus> mwpStatuses, SamplePairDiscovery samplePairDiscovery) {
+    void fillInSamplePairStatuses(Collection<MergingWorkPackageProcessingStatus> mwpStatuses, SamplePairCreation samplePairCreation) {
         if (mwpStatuses.isEmpty()) {
             return
         }
 
-        samplePairDiscovery.createMissingDiseaseControlSamplePairs()
+        samplePairCreation.createMissingDiseaseControlSamplePairs()
 
         Map<MergingWorkPackage, MergingWorkPackageProcessingStatus> mwpStatusByMwp =
                 mwpStatuses.collectEntries { [it.mergingWorkPackage, it] }
@@ -452,13 +455,14 @@ class TrackingService {
         return WorkflowProcessingStatus.values().find { it.done == done && it.mightDoMore == mightDoMore }
     }
 
-    static class SamplePairDiscovery {
+    static class SamplePairCreation {
 
         boolean calledCreateMissingDiseaseControlSamplePairs = false
 
         void createMissingDiseaseControlSamplePairs() {
             if (!calledCreateMissingDiseaseControlSamplePairs) {
-                new SamplePairDiscoveryJob().createMissingDiseaseControlSamplePairs()
+                final Collection<SamplePair> samplePairs = SamplePair.findMissingDiseaseControlSamplePairs()
+                samplePairs*.save(flush: true)
                 calledCreateMissingDiseaseControlSamplePairs = true
             }
         }
