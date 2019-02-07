@@ -13,29 +13,7 @@ class AbstractQualityAssessmentService {
 
     ProcessedBamFileQaFileService processedBamFileQaFileService
 
-    ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
-
     ReferenceGenomeService referenceGenomeService
-
-    void parseQaStatistics(QualityAssessmentMergedPass qualityAssessmentPass) {
-        String qualityAssessmentDataFilePath = processedMergedBamFileQaFileService.qualityAssessmentDataFilePath(qualityAssessmentPass)
-        File file = new File(qualityAssessmentDataFilePath)
-        JSONObject json = JSON.parse(file.text)
-        Iterator chromosomes = json.keys()
-        AbstractQualityAssessment qualityAssessmentStatistics
-        chromosomes.each { String chromosome ->
-            if (chromosome == Chromosomes.overallChromosomesLabel()) {
-                qualityAssessmentStatistics = new OverallQualityAssessmentMerged(json.get(chromosome))
-            } else {
-                qualityAssessmentStatistics = new ChromosomeQualityAssessmentMerged(json.get(chromosome))
-                assert qualityAssessmentStatistics.chromosomeName == chromosome
-            }
-            qualityAssessmentStatistics.percentIncorrectPEorientation = safePercentCalculation(qualityAssessmentStatistics.referenceAgreementStrandConflict, qualityAssessmentStatistics.referenceAgreement)
-            qualityAssessmentStatistics.percentReadPairsMapToDiffChrom = safePercentCalculation(qualityAssessmentStatistics.endReadAberration, qualityAssessmentStatistics.totalMappedReadCounter)
-            qualityAssessmentStatistics.qualityAssessmentMergedPass = qualityAssessmentPass
-            assertSave(qualityAssessmentStatistics)
-        }
-    }
 
     void assertListContainsAllChromosomeNamesInReferenceGenome(Collection<String> chromosomeNames, ReferenceGenome referenceGenome) {
         Collection<String> expectedChromosomeNames = [RoddyQualityAssessment.ALL] +
@@ -148,26 +126,5 @@ class AbstractQualityAssessmentService {
         roddyBamFile.coverage = mergedQa.genomeWithoutNCoverageQcBases
         roddyBamFile.coverageWithN = abstractBamFileService.calculateCoverageWithN(roddyBamFile)
         assert roddyBamFile.save(flush: true)
-    }
-
-    void saveCoverageToAbstractMergedBamFile(QualityAssessmentMergedPass qualityAssessmentMergedPass) {
-        AbstractMergedBamFile abstractMergedBamFile = qualityAssessmentMergedPass.abstractMergedBamFile
-        abstractMergedBamFile.coverage = abstractBamFileService.calculateCoverageWithoutN(abstractMergedBamFile)
-        abstractMergedBamFile.coverageWithN = abstractBamFileService.calculateCoverageWithN(abstractMergedBamFile)
-        assertSave(abstractMergedBamFile)
-    }
-
-    private double safePercentCalculation(double numerator, double denominator) {
-        if (denominator == 0) {
-            return Double.NaN
-        } else {
-            return ((numerator / denominator) * 100)
-        }
-    }
-
-    private void assertSave(def obj) {
-        if (!obj.save(flush: true)) {
-            throw new SavingException(this.class.name)
-        }
     }
 }

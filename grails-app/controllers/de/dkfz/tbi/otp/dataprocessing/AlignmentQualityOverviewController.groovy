@@ -95,8 +95,6 @@ class AlignmentQualityOverviewController {
 
     ChromosomeQualityAssessmentMergedService chromosomeQualityAssessmentMergedService
 
-    ProcessedMergedBamFileQaFileService processedMergedBamFileQaFileService
-
     ReferenceGenomeService referenceGenomeService
 
     SeqTypeService seqTypeService
