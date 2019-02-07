@@ -14,11 +14,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     final String PID = 'stds' //name have to be the same as in the reference data for OTP snv
 
-
-    ProcessedMergedBamFileService processedMergedBamFileService
-    BedFileService bedFileService
-
-
     AbstractMergedBamFile bamFileControl
     AbstractMergedBamFile bamFileTumor
     ConfigPerProjectAndSeqType config

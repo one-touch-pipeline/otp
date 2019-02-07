@@ -20,7 +20,6 @@ class DataSwapService {
     LsdfFilesService lsdfFilesService
     DataProcessingFilesService dataProcessingFilesService
     ProcessedAlignmentFileService processedAlignmentFileService
-    ProcessedMergedBamFileService processedMergedBamFileService
     ConfigService configService
     SeqTrackService seqTrackService
     AnalysisDeletionService analysisDeletionService

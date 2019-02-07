@@ -93,17 +93,6 @@ class AbstractBamFileService {
         } != null
     }
 
-    Double calculateCoverageWithoutN(AbstractBamFile bamFile) {
-        assert bamFile : 'Parameter bamFile must not be null'
-
-        if (SeqTypeService.getAllAlignableSeqTypes().contains(bamFile.seqType)) {
-            calculateCoverage(bamFile, 'lengthWithoutN')
-        } else {
-            throw new RuntimeException("The 'without N' coverage calculation for seq Type ${bamFile.seqType.name} is not possible yet.")
-        }
-    }
-
-
     Double calculateCoverageWithN(AbstractBamFile bamFile) {
         assert bamFile : 'Parameter bamFile must not be null'
 

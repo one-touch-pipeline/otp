@@ -1,22 +1,22 @@
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.*
-import de.dkfz.tbi.otp.*
-import de.dkfz.tbi.otp.config.*
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.junit.*
+import org.junit.rules.TemporaryFolder
+
+import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.scriptTests.GroovyScriptAwareTestCase
 import de.dkfz.tbi.otp.utils.*
-import grails.plugin.springsecurity.*
-import org.junit.*
-import org.junit.rules.*
 
 class DataSwapServiceTests extends GroovyScriptAwareTestCase {
     DataSwapService dataSwapService
     LsdfFilesService lsdfFilesService
-    ProcessedMergedBamFileService processedMergedBamFileService
     DataProcessingFilesService dataProcessingFilesService
     TestConfigService configService
 
