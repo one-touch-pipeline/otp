@@ -38,43 +38,64 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
     QcTrafficLightStatus qcTrafficLightStatus
 
     @TupleConstructor
-    enum QcTrafficLightStatus {
+    static enum QcTrafficLightStatus {
         // status is set by OTP when QC thresholds were met
-        QC_PASSED(JobLinkCase.CREATE_LINKS),
+        QC_PASSED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NO_NOTIFY),
         // status is set by bioinformaticians when they decide to keep the file although QC thresholds were not met
-        ACCEPTED(JobLinkCase.SHOULD_NOT_OCCUR),
+        ACCEPTED(JobLinkCase.SHOULD_NOT_OCCUR, JobNotifyCase.SHOULD_NOT_OCCUR),
         // status is set by OTP when QC error thresholds were not met
-        BLOCKED(JobLinkCase.CREATE_NO_LINK),
+        BLOCKED(JobLinkCase.CREATE_NO_LINK, JobNotifyCase.NOTIFY),
         // status is set by bioinformaticians when they decide not to use a file for further analyses
-        REJECTED(JobLinkCase.SHOULD_NOT_OCCUR),
+        REJECTED(JobLinkCase.SHOULD_NOT_OCCUR, JobNotifyCase.SHOULD_NOT_OCCUR),
         // status is set by OTP when QC thresholds were not met but the project is configured to allow failed files
-        AUTO_ACCEPTED(JobLinkCase.CREATE_LINKS),
+        AUTO_ACCEPTED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NOTIFY),
         // status is set by OTP when project is configured to not check QC thresholds
-        UNCHECKED(JobLinkCase.CREATE_LINKS),
+        UNCHECKED(JobLinkCase.CREATE_LINKS, JobNotifyCase.NO_NOTIFY),
 
 
         final JobLinkCase jobLinkCase
 
+        final JobNotifyCase jobNotifyCase
+
         /**
-         * Category of {@link QcTrafficLightStatus}. It defines, if links should be created or nor should not
+         * Link category of {@link QcTrafficLightStatus}. It defines, if links should be created or should not be create or the status
          * should not occur automatically in job system, but only set manually in the gui.
          */
         @TupleConstructor
-        enum JobLinkCase {
+        static enum JobLinkCase {
             /**
              * For that cases, links should be created
              */
-            CREATE_LINKS(true),
+            CREATE_LINKS,
             /**
              * For that cases, no links should be created
              */
-            CREATE_NO_LINK(true),
+            CREATE_NO_LINK,
             /**
              * Cases set manually and should therefor not occur during workflow
              */
-            SHOULD_NOT_OCCUR(false),
+            SHOULD_NOT_OCCUR,
 
-            final boolean allowedInWorkflow
+        }
+
+        /**
+         * Notify category of {@link QcTrafficLightStatus}. It defines, if notify emails should be send or should not be sent or that the status
+         * should not occur automatically in job system, but only set manually in the gui.
+         */
+        @TupleConstructor
+        static enum JobNotifyCase {
+            /**
+             * For that cases, emails should be send
+             */
+            NOTIFY,
+            /**
+             * For that cases, no emails should be send
+             */
+            NO_NOTIFY,
+            /**
+             * Cases set manually and should therefore not occur during workflow
+             */
+            SHOULD_NOT_OCCUR,
         }
     }
 

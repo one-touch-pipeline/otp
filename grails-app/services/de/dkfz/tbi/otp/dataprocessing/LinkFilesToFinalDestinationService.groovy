@@ -83,6 +83,7 @@ class LinkFilesToFinalDestinationService {
             roddyBamFile.md5sum = md5sum
             roddyBamFile.fileExists = true
             roddyBamFile.dateFromFileSystem = new Date(roddyBamFile.workBamFile.lastModified())
+
             assert roddyBamFile.save(flush: true)
             abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(roddyBamFile)
         }

@@ -43,15 +43,17 @@ import de.dkfz.tbi.otp.ngsdata.*
 class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy {
 
     @Unroll
-    void "handleQcCheck, if status is #status, then call callback and do not call informResultsAreBlocked"() {
+    void "handleQcCheck, if status is #status, then #text"() {
         given:
+        int notifyCount = callNotify ? 1 : 0
+
         RoddyBamFile bamFile = createBamFile([
                 qcTrafficLightStatus: status,
         ])
 
         QcTrafficLightCheckService service = new QcTrafficLightCheckService([
                 qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService) {
-                    0 * informResultsAreBlocked(_)
+                    notifyCount * informResultsAreBlocked(_)
                 },
         ])
 
@@ -64,54 +66,21 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy {
         service.handleQcCheck(bamFile, closure)
 
         then:
-        called
+        called == callCallback
 
         where:
-        status << AbstractMergedBamFile.QcTrafficLightStatus.values().findAll {
-            it.jobLinkCase == AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.CREATE_LINKS
-        } + [null]
+        status                                                   || callCallback | callNotify
+        null                                                     || true         | false
+        AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED     || true         | false
+        AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED       || false        | true
+        AbstractMergedBamFile.QcTrafficLightStatus.AUTO_ACCEPTED || true         | true
+        AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED     || true         | false
+
+        text = "${callCallback ? '' : 'do not '}call the callback and ${callNotify ? '' : 'do not '} call the notify"
     }
 
     @Unroll
-    void "handleQcCheck, if status is #status and qcThresholdHandling is #qcThresholdHandling, then do not call the callback, but call informResultsAreBlocked"() {
-        given:
-        int count = qcThresholdHandling.notifiesUser?1:0
-        RoddyBamFile bamFile = createBamFile([
-                qcTrafficLightStatus: status,
-        ])
-        bamFile.project.qcThresholdHandling = qcThresholdHandling
-
-        QcTrafficLightCheckService service = new QcTrafficLightCheckService([
-                qcTrafficLightNotificationService: Mock(QcTrafficLightNotificationService) {
-                    count * informResultsAreBlocked(_)
-                },
-        ])
-
-        Closure closure = {
-            assert false: 'should not be called'
-        }
-
-
-        when:
-        service.handleQcCheck(bamFile, closure)
-
-        then:
-        noExceptionThrown()
-
-        where:
-        values <<
-                [
-                        AbstractMergedBamFile.QcTrafficLightStatus.values().findAll {
-                            it.jobLinkCase == AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.CREATE_NO_LINK
-                        },
-                        QcThresholdHandling.values(),
-                ].combinations()
-        status = (AbstractMergedBamFile.QcTrafficLightStatus)values[0]
-        qcThresholdHandling = (QcThresholdHandling )values[1]
-    }
-
-    @Unroll
-    void "handleQcCheck, if status is #status, then do not call the callback but throw exception"() {
+    void "handleQcCheck, if status is #status, then do not call the callback nor call the notification, but throw an exception"() {
         given:
         RoddyBamFile bamFile = createBamFile([
                 qcTrafficLightStatus: status,
@@ -124,7 +93,7 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy {
         ])
 
         Closure closure = {
-            assert false: 'should not be called'
+            throw new AssertionError('should not be called')
         }
 
         when:
@@ -136,7 +105,8 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy {
 
         where:
         status << AbstractMergedBamFile.QcTrafficLightStatus.values().findAll {
-            it.jobLinkCase == AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR
+            it.jobLinkCase == AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR ||
+                    it.jobNotifyCase == AbstractMergedBamFile.QcTrafficLightStatus.JobNotifyCase.SHOULD_NOT_OCCUR
         }
     }
 }

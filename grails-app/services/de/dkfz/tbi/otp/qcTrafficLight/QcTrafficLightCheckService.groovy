@@ -14,15 +14,28 @@ class QcTrafficLightCheckService {
                 callbackIfAllFine()
                 break
             case AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.CREATE_NO_LINK:
-                if (bamFile.project.qcThresholdHandling.notifiesUser) {
-                    qcTrafficLightNotificationService.informResultsAreBlocked(bamFile)
-                }
+                //no links creating, so nothing to do
                 break
             case AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR:
                 throw new OtpRuntimeException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
                         "during workflow processing, it should only occur after the workflow has finished")
             default:
-                assert false: "Unknown value: ${bamFile.qcTrafficLightStatus?.jobLinkCase}"
+                throw new AssertionError("Unknown value: ${bamFile.qcTrafficLightStatus?.jobLinkCase}")
+        }
+
+        switch (bamFile.qcTrafficLightStatus?.jobNotifyCase) {
+            case null:
+            case AbstractMergedBamFile.QcTrafficLightStatus.JobNotifyCase.NO_NOTIFY:
+                //no email sending, so nothing to do
+                break
+            case AbstractMergedBamFile.QcTrafficLightStatus.JobNotifyCase.NOTIFY:
+                qcTrafficLightNotificationService.informResultsAreBlocked(bamFile)
+                break
+            case AbstractMergedBamFile.QcTrafficLightStatus.JobLinkCase.SHOULD_NOT_OCCUR:
+                throw new OtpRuntimeException("${bamFile.qcTrafficLightStatus} is not a valid qcTrafficLightStatus " +
+                        "during workflow processing, it should only occur after the workflow has finished")
+            default:
+                throw new AssertionError("Unknown value: ${bamFile.qcTrafficLightStatus?.jobNotifyCase}")
         }
     }
 }
