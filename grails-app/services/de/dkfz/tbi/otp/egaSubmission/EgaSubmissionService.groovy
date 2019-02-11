@@ -2,6 +2,7 @@ package de.dkfz.tbi.otp.egaSubmission
 
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
+import org.hibernate.criterion.CriteriaSpecification
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
@@ -138,7 +139,7 @@ class EgaSubmissionService {
         }
     }
 
-     @CompileDynamic
+    @CompileDynamic
     List<List> getDataFilesAndAlias(EgaSubmission submission) {
         if (submission.dataFilesToSubmit) {
             return submission.dataFilesToSubmit.collect {
@@ -280,5 +281,20 @@ class EgaSubmissionService {
         }
 
         return aliasNames
+    }
+
+    @CompileDynamic
+    List getExperimentalMetadata(EgaSubmission submission) {
+        return SeqTrack.createCriteria().list {
+            resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)
+            projections {
+                'in'('sample', submission.samplesToSubmit*.sample)
+                seqType {
+                    property('libraryLayout', 'libraryLayout')
+                    property('displayName', 'displayName')
+                }
+                property('libraryPreparationKit','libraryPreparationKit')
+            }
+        }.unique()
     }
 }

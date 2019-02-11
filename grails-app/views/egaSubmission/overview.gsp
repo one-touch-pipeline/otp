@@ -41,6 +41,8 @@
                             <g:link action="editSubmission" params="['id': it.id]"><g:message code="egaSubmission.submissionEdit"/></g:link>
                         </g:if><g:else>
                             <g:link action="sampleMetadata" params="['id': it.id]"><g:message code="egaSubmission.sampleMetadata"/></g:link>
+                            |
+                            <g:link action="experimentalMetadata" params="['id': it.id]"><g:message code="egaSubmission.experimentalMetadata"/></g:link>
                         </g:else>
                     </td>
                 </tr>

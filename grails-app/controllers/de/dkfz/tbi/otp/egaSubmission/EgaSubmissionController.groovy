@@ -170,6 +170,15 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         ]
     }
 
+    Map experimentalMetadata() {
+        EgaSubmission submission = EgaSubmission.get(params.id)
+
+        return [
+                submission: submission,
+                metadata  : egaSubmissionService.getExperimentalMetadata(submission),
+        ]
+    }
+
     def helpPage() { }
 
     def newSubmissionForm(NewSubmissionControllerSubmitCommand cmd) {

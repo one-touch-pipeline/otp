@@ -6,6 +6,8 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
 class EgaSubmissionServiceIntegrationSpec extends IntegrationSpec implements EgaSubmissionFactory {
 
@@ -64,5 +66,27 @@ class EgaSubmissionServiceIntegrationSpec extends IntegrationSpec implements Ega
 
         then:
         submission.bamFilesToSubmit.size() == BamFileSubmissionObject.findAll().size()
+    }
+
+    void "test get experimental metadata"() {
+        given:
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
+        SeqType seqType = createSeqType()
+        DomainFactory.createSeqTrack(
+                sample: sampleSubmissionObject.sample,
+                seqType: seqType
+        )
+        sampleSubmissionObject.sample.refresh()
+        EgaSubmission submission = createSubmission(
+                samplesToSubmit: [sampleSubmissionObject]
+        )
+
+        when:
+        Map experimentalMetadata = egaSubmissionService.getExperimentalMetadata(submission)[0] as Map
+
+        then:
+        experimentalMetadata.libraryPreparationKit == sampleSubmissionObject.sample.seqTracks[0].libraryPreparationKit
+        experimentalMetadata.libraryLayout == seqType.libraryLayout
+        experimentalMetadata.displayName == seqType.displayName
     }
 }
