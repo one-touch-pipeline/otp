@@ -1104,7 +1104,8 @@ ${ILSE_NO}                      -             1234          1234          -     
         data.service.copyMetadataFileIfRequested(data.context)
 
         then:
-        FileService.isFileReadableAndNotEmpty(data.targetFile)
+        Files.exists(data.targetFile)
+        Files.size(data.targetFile)
     }
 
     void "copyMetaDataFileIfRequested, if metadata does not exist and IlseNumber is wrong, should fail"() {

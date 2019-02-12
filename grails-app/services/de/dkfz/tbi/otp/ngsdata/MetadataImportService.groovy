@@ -175,7 +175,7 @@ class MetadataImportService {
                 String ilse = context.spreadsheet.dataRows[0].getCellByColumnTitle(ILSE_NO.name()).text
                 Path targetDirectory = getIlseFolder(ilse, seqCenter)
                 Path targetFile = targetDirectory.resolve(source.fileName.toString())
-                if (!FileService.isFileReadableAndNotEmpty(targetFile)) {
+                if (!Files.exists(targetFile)) {
                     fileService.createFileWithContent(targetFile, context.content)
                 }
 
