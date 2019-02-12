@@ -23,6 +23,8 @@
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.ngsdata.*
 
+import java.nio.file.Path
+
 /**
  * Template to move/rename a patient call. It can also change the SampleTypes of the patient and rename the file names.
  *
@@ -51,8 +53,7 @@ DataSwapService dataSwapService = ctx.dataSwapService
 
 StringBuilder outputStringBuilder = new StringBuilder()
 
-final String scriptOutputDirectory = "${ConfigService.getInstance().getScriptOutputPath()}/sample_swap/"
-
+final Path scriptOutputDirectory = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('/sample_swap/')
 boolean linkedFilesVerified = false
 
 boolean failOnMissingFiles = true

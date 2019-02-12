@@ -20,8 +20,11 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.ngsdata.DataSwapService
+import de.dkfz.tbi.otp.ngsdata.Individual
+
+import java.nio.file.Path
 
 /**
  * Template to move sample or change the sample type. It can also rename the file names.
@@ -45,7 +48,7 @@ DataSwapService dataSwapService = ctx.dataSwapService
 
 StringBuilder outputStringBuilder = new StringBuilder()
 
-final String scriptOutputDirectory = "${ConfigService.getInstance().getScriptOutputPath()}/sample_swap/"
+final Path scriptOutputDirectory = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')
 
 boolean linkedFilesVerified = false
 

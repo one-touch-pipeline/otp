@@ -20,17 +20,20 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.config.*
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.ngsdata.DataSwapService
+import de.dkfz.tbi.otp.ngsdata.Individual
+
+import java.nio.file.Path
 
 /**
  * Template to move/rename a patient call. It can also change the SampleTypes of the patient and rename the file names.
  *
  * Therefore the following input are needed:
  * - OldProject: The name of the project the patient is in currently
- * - NewProject: The new project name, may the same
+ * - NewProject: The new project name, can be the same if no change is necessary
  * - OldPid: The patient to move or rename
- * - NewPid: the new patient pid, may the same if the project is differ
+ * - NewPid: the new patient pid, can be the same if the new project is different
  * - Map of all SampleTypes names for the patient.
  *   - OldSampleTypeName: The old sample type name
  *   - NewSampleTypeName: The new sample type name or the same as the old. It may not another existing sampleType Name (Creates an Conflict)
@@ -44,9 +47,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 DataSwapService dataSwapService = ctx.dataSwapService
 
-StringBuilder outputStringBuilder = new StringBuilder()
+StringBuilder log = new StringBuilder()
 
-final String scriptOutputDirectory = "${ConfigService.getInstance().getScriptOutputPath()}/sample_swap/"
+final Path scriptOutputDirectory = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')
 
 boolean linkedFilesVerified = false
 
@@ -69,13 +72,13 @@ try {
                         'OldFileName4': '',
                 ],
                 'uniqueScriptName',
-                outputStringBuilder,
+                log,
                 failOnMissingFiles,
                 scriptOutputDirectory
         )
 
-        assert false
+        assert false: "DEBUG: intentionally failed transaction"
     }
 } finally {
-    println outputStringBuilder
+    println log
 }

@@ -23,6 +23,8 @@
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.ngsdata.*
 
+import java.nio.file.Path
+
 // input area
 //----------------------
 
@@ -33,7 +35,7 @@ String projectName
 
 assert projectName
 
-String baseOutputDir = "${ConfigService.getInstance().getScriptOutputPath()}/sample_swap/"
+Path baseOutputDir = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')
 
 DataSwapService dataSwapService = ctx.dataSwapService
 

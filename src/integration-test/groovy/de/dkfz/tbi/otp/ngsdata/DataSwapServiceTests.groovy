@@ -38,6 +38,8 @@ import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
 
+import java.nio.file.Path
+
 @Rollback
 @Integration
 class DataSwapServiceTests implements UserAndRoles {
@@ -49,14 +51,14 @@ class DataSwapServiceTests implements UserAndRoles {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
-    File outputFolder
+    Path outputFolder
 
     void setupData() {
         createUserAndRoles()
-        outputFolder = temporaryFolder.newFolder("outputFolder")
+        outputFolder = temporaryFolder.newFolder("outputFolder").toPath()
         configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT)   : outputFolder.path,
-                (OtpProperty.PATH_PROCESSING_ROOT): outputFolder.path,
+                (OtpProperty.PATH_PROJECT_ROOT)   : outputFolder.toString(),
+                (OtpProperty.PATH_PROCESSING_ROOT): outputFolder.toString(),
         ])
     }
 
@@ -91,7 +93,7 @@ class DataSwapServiceTests implements UserAndRoles {
         List<File> roddyFilesToDelete = createRoddyFileListToDelete(bamFile)
         File destinationDirectory = bamFile.baseDirectory
 
-        File scriptFolder = temporaryFolder.newFolder("files")
+        Path scriptFolder = temporaryFolder.newFolder("files").toPath()
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
             dataSwapService.moveSample(
@@ -105,32 +107,32 @@ class DataSwapServiceTests implements UserAndRoles {
                     script,
                     new StringBuilder(),
                     false,
-                    scriptFolder.absolutePath,
+                    scriptFolder,
                     false,
             )
         }
 
-        assert scriptFolder.listFiles().length != 0
+        assert scriptFolder.toFile().listFiles().length != 0
 
-        File alignmentScript = new File(scriptFolder, "restartAli_${script}.groovy")
+        File alignmentScript = scriptFolder.resolve("restartAli_${script}.groovy").toFile()
         assert alignmentScript.exists()
         assert alignmentScript.text.contains("ctx.seqTrackService.decideAndPrepareForAlignment(SeqTrack.get(${bamFile.seqTracks.iterator().next().id}))")
 
-        File copyScriptOtherUser = new File(scriptFolder, "${script}-otherUser.sh")
+        File copyScriptOtherUser = scriptFolder.resolve("${script}-otherUser.sh").toFile()
         assert copyScriptOtherUser.exists()
         String copyScriptOtherUserContent = copyScriptOtherUser.text
         roddyFilesToDelete.each {
             assert copyScriptOtherUserContent.contains("#rm -rf ${it}")
         }
 
-        File copyScript = new File(scriptFolder, "${script}.sh")
+        File copyScript = scriptFolder.resolve("${script}.sh").toFile()
         assert copyScript.exists()
         String copyScriptContent = copyScript.text
         assert copyScriptContent.contains("#rm -rf ${destinationDirectory}")
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
             assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
             assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).getParent()}'")
-            assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' '${lsdfFilesService.getFileViewByPidPath(it)}'")
+            assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
             assert it.getComment().comment == "Attention: Datafile swapped!"
         }
     }
@@ -143,7 +145,7 @@ class DataSwapServiceTests implements UserAndRoles {
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
         Project newProject = DomainFactory.createProject(realm: bamFile.project.realm)
-        String script = "TEST-MOVE-INDIVIDUAL"
+        String scriptName = "TEST-MOVE-INDIVIDUAL"
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         List<String> dataFileLinks = []
         List<String> dataFilePaths = []
@@ -164,9 +166,9 @@ class DataSwapServiceTests implements UserAndRoles {
         List<File> roddyFilesToDelete = createRoddyFileListToDelete(bamFile)
         File destinationDirectory = bamFile.baseDirectory
 
-        File scriptFolder = temporaryFolder.newFolder("files")
+        Path scriptFolder = temporaryFolder.newFolder("files").toPath()
 
-        StringBuilder outputStringBuilder = new StringBuilder()
+        StringBuilder outputLog = new StringBuilder()
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
             dataSwapService.moveIndividual(
@@ -176,38 +178,39 @@ class DataSwapServiceTests implements UserAndRoles {
                     bamFile.individual.pid,
                     [(bamFile.sampleType.name): ""],
                     ['DataFileFileName_R1.gz': '', 'DataFileFileName_R2.gz': ''],
-                    script,
-                    outputStringBuilder,
+                    scriptName,
+                    outputLog,
                     false,
-                    scriptFolder.absolutePath,
+                    scriptFolder,
             )
         }
-        String output = outputStringBuilder.toString()
+        String output = outputLog.toString()
         assert output.contains("${DataSwapService.MISSING_FILES_TEXT}\n    ${missedFile}")
         assert output.contains("${DataSwapService.EXCESS_FILES_TEXT}\n    ${unexpectedFile}")
 
-        assert scriptFolder.listFiles().length != 0
+        assert scriptFolder.toFile().listFiles().length != 0
 
-        File alignmentScript = new File(scriptFolder, "restartAli_${script}.groovy")
+        File alignmentScript = scriptFolder.resolve("restartAli_${scriptName}.groovy").toFile()
         assert alignmentScript.exists()
 
-        File copyScriptOtherUser = new File(scriptFolder, "${script}-otherUser.sh")
+        File copyScriptOtherUser = scriptFolder.resolve("${scriptName}-otherUser.sh").toFile()
         assert copyScriptOtherUser.exists()
         String copyScriptOtherUserContent = copyScriptOtherUser.text
         roddyFilesToDelete.each {
             assert copyScriptOtherUserContent.contains("#rm -rf ${it}")
         }
 
-        File copyScript = new File(scriptFolder, "${script}.sh")
+        File copyScript = scriptFolder.resolve("${scriptName}.sh").toFile()
         assert copyScript.exists()
         String copyScriptContent = copyScript.text
         assert copyScriptContent.contains("#rm -rf ${destinationDirectory}")
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile it, int i ->
             assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileFinalPath(it)).getParent()}'")
-            assert copyScriptContent.contains("mv '${dataFilePaths[i]}' '${lsdfFilesService.getFileFinalPath(it)}'")
+            assert copyScriptContent.contains("mv '${dataFilePaths[i]}' \\\n   '${lsdfFilesService.getFileFinalPath(it)}'")
+            assert copyScriptContent.contains("mv '${dataFilePaths[i]}.md5sum' \\\n     '${lsdfFilesService.getFileFinalPath(it)}.md5sum'")
             assert copyScriptContent.contains("rm -f '${dataFileLinks[i]}'")
             assert copyScriptContent.contains("mkdir -p -m 2750 '${new File(lsdfFilesService.getFileViewByPidPath(it)).getParent()}'")
-            assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' '${lsdfFilesService.getFileViewByPidPath(it)}'")
+            assert copyScriptContent.contains("ln -s '${lsdfFilesService.getFileFinalPath(it)}' \\\n      '${lsdfFilesService.getFileViewByPidPath(it)}'")
             assert it.getComment().comment == "Attention: Datafile swapped!"
         }
     }
@@ -620,7 +623,7 @@ class DataSwapServiceTests implements UserAndRoles {
         Project project = DomainFactory.createProject()
 
         TestCase.shouldFail(AssertionError) {
-            dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
+            dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder)
         }
     }
 
@@ -631,7 +634,7 @@ class DataSwapServiceTests implements UserAndRoles {
         Project project = seqTrack.project
 
         TestCase.shouldFail(FileNotFoundException) {
-            dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
+            dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder)
         }
     }
 
@@ -640,7 +643,7 @@ class DataSwapServiceTests implements UserAndRoles {
         setupData()
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
 
-        dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
+        dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder)
     }
 
     @Test
@@ -650,7 +653,7 @@ class DataSwapServiceTests implements UserAndRoles {
         markFilesAsLinked(SeqTrack.list())
 
         TestCase.shouldFail(FileNotFoundException) {
-            dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
+            dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder)
         }
 
     }
@@ -661,7 +664,7 @@ class DataSwapServiceTests implements UserAndRoles {
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
         markFilesAsLinked(SeqTrack.list())
 
-        dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true)
+        dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder, true)
     }
 
     @Test
@@ -672,7 +675,7 @@ class DataSwapServiceTests implements UserAndRoles {
         markFilesAsWithdrawn([seqTrack])
 
         TestCase.shouldFail(FileNotFoundException) {
-            dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true)
+            dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder, true)
         }
     }
 
@@ -683,7 +686,7 @@ class DataSwapServiceTests implements UserAndRoles {
         Project project = seqTrack.project
         markFilesAsWithdrawn([seqTrack])
 
-        dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true, true)
+        dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder, true, true)
     }
 
     @Test
@@ -692,7 +695,7 @@ class DataSwapServiceTests implements UserAndRoles {
         SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         createFastqFiles([st])
 
-        assert [st] == dataSwapService.deleteProcessingFilesOfProject(st.project.name, outputFolder.path, true, true, [st])
+        assert [st] == dataSwapService.deleteProcessingFilesOfProject(st.project.name, outputFolder, true, true, [st])
     }
 
     @Test
@@ -704,7 +707,7 @@ class DataSwapServiceTests implements UserAndRoles {
         Project project = DomainFactory.createProject()
 
         TestCase.shouldFail(AssertionError) {
-            assert [st] == dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true, true, [st])
+            assert [st] == dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder, true, true, [st])
         }
     }
 
@@ -788,9 +791,9 @@ class DataSwapServiceTests implements UserAndRoles {
 
         File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
         File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
-        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
+        Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
 
-        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)
+        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
 
         assert outputFile.text.contains(processingBamFile.path) && outputFile.text.contains(finalBamFile.path)
 
@@ -804,9 +807,9 @@ class DataSwapServiceTests implements UserAndRoles {
 
         File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
         File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
-        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
+        Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
 
-        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path)
+        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder)
 
         assert outputFile.text.contains(processingBamFile.path) && outputFile.text.contains(finalBamFile.path)
 
@@ -836,9 +839,9 @@ class DataSwapServiceTests implements UserAndRoles {
         RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
 
         File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
-        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
+        Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
 
-        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)
+        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
 
         assert outputFile.text.contains(finalBamFile.path)
 
@@ -851,9 +854,9 @@ class DataSwapServiceTests implements UserAndRoles {
         RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
 
         File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
-        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
+        Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
 
-        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path)
+        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder)
 
         assert outputFile.text.contains(finalBamFile.path)
 
@@ -880,7 +883,7 @@ class DataSwapServiceTests implements UserAndRoles {
     private void deleteProcessingFilesOfProject_RBF_SNV_Validation(AbstractSnvCallingInstance snvCallingInstance) {
         File snvFolder = snvCallingInstance.samplePair.getSnvSamplePairPath().getAbsoluteDataManagementPath()
 
-        File outputFile = new File(outputFolder.absoluteFile, "Delete_${snvCallingInstance.project.name}.sh")
+        Path outputFile = outputFolder.resolve("Delete_${snvCallingInstance.project.name}.sh")
         assert outputFile.text.contains(snvFolder.path) && outputFile.text.contains(snvFolder.parent)
 
         assert AbstractSnvCallingInstance.list().empty
@@ -892,7 +895,7 @@ class DataSwapServiceTests implements UserAndRoles {
         setupData()
         AbstractSnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
 
-        dataSwapService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder.path, true)
+        dataSwapService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder, true)
 
         deleteProcessingFilesOfProject_RBF_SNV_Validation(snvCallingInstance)
     }
@@ -902,7 +905,7 @@ class DataSwapServiceTests implements UserAndRoles {
         setupData()
         AbstractSnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
 
-        dataSwapService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder.path)
+        dataSwapService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder)
 
         deleteProcessingFilesOfProject_RBF_SNV_Validation(snvCallingInstance)
     }
@@ -930,7 +933,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     private void deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(ExternallyProcessedMergedBamFile bamFile) {
         File nonOtpFolder = bamFile.getNonOtpFolder()
-        File outputFile = new File(outputFolder.absoluteFile, "Delete_${bamFile.project.name}.sh")
+        Path outputFile = outputFolder.resolve("Delete_${bamFile.project.name}.sh")
 
         assert !outputFile.text.contains(nonOtpFolder.path)
         assert ExternallyProcessedMergedBamFile.list().contains(bamFile)
@@ -942,7 +945,7 @@ class DataSwapServiceTests implements UserAndRoles {
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "external merged bam files", {
-            dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path)
+            dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder)
         })
     }
 
@@ -951,7 +954,7 @@ class DataSwapServiceTests implements UserAndRoles {
         setupData()
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
-        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)
+        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
 
         deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(bamFile)
     }
@@ -964,7 +967,7 @@ class DataSwapServiceTests implements UserAndRoles {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles([sample: bamFile.sample, seqType: bamFile.seqType])
         createFastqFiles([seqTrack])
 
-        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)
+        dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder, true)
 
         deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(bamFile)
     }

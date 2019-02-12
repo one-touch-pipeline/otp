@@ -41,8 +41,14 @@ import de.dkfz.tbi.otp.utils.*
  */
 
 
-//Input area
-//------------------------------
+/*********************************************************************************
+ * Input area
+ *
+ * This block should be all that needs to be changed to generate the swap.
+ ********************************************************************************/
+
+
+swapLabel = 'OTRS-_________________-something-descriptive'
 
 def swapMap = [
         ('oldPid')              : 'newPid',
@@ -59,50 +65,70 @@ String newProjectName = ''
  *
  * For example: SeqTypeService.wholeGenomePairedSeqType
  */
-def seqTypeFilterList = [
+List<SeqType> seqTypeFilterList = [
 ]
 
-//script area
-//------------------------------
-
-int counter = 0
-
-List<String> files = []
-
-def newSampleTypeClosure = { String sampleType ->
+/**
+ * User-defined function to map old SampleType name into a new SampleType name
+ *
+ * This closure is passed into the swapping-logic to handle more complicated swaps
+ * default: identity pass-through.
+ */
+Closure<SampleType> newSampleTypeClosure = { SampleType sampleType ->
     return sampleType
 }
 
-def newDataFileNameClosure = { DataFile dataFile, String oldPatientName, String newPatientName ->
+/**
+ * User-defined function to map old DataFile names into new DataFile names.
+ *
+ * This closure is passed into the swapping-logic to handle more complicated swaps
+ * default: replace old-pid with new-pid, keep rest unchanged.
+ */
+Closure<String> newDataFileNameClosure = { DataFile dataFile, String oldPatientName, String newPatientName ->
     String oldFileName = dataFile.fileName
     String newFileName = oldFileName.replace(oldPatientName, newPatientName)
+
     if (oldFileName == newFileName) {
         println "\t- data file name remains unchanged: ${newFileName}"
         return ''
+    } else {
+        println "\t- data file name changing from ${dataFile.fileName} to ${newFileName}"
+        return newFileName
     }
-    println "\t- data file name changing from ${dataFile.fileName} to ${newFileName}"
-    return newFileName
 }
 
+/*********************************************************************************
+ * Script area
+ *
+ * Here follows logic that really should be in a service.
+ * It should not change depending on the swap-details.
+ ********************************************************************************/
 
-def newSampleSwapScript = { StringBuilder script, Project newProject, Individual oldIndividual, String newIndividualName, Sample oldSample, String newSampleTypeName ->
-    String fileName = "mv_${counter++}_${oldSample.individual.pid}_${oldSample.sampleType.name}__to__${newIndividualName}_${newSampleTypeName}"
+int counter = 1
+List<String> files = []
 
-    script << "\n\t\tdataSwapService.moveSample('${oldIndividual.project.name}', '${newProject.name}',\n" +
-            "\t\t\t'${oldIndividual.pid}', '${newIndividualName}',\n" +
-            "\t\t\t'${oldSample.sampleType.name}', '${newSampleTypeName}',\n" +
-            "["
+Closure<Integer> newSampleSwapScript = { StringBuilder script, Project newProject,
+                                         Individual oldIndividual, String newIndividualName,
+                                         Sample oldSample, SampleType newSampleType ->
+    String fileName = "mv_${counter++}_${oldSample.individual.pid}_${oldSample.sampleType.name}__to__${newIndividualName}_${newSampleType.displayName}"
+
+    script << "\n\tdataSwapService.moveSample('${oldIndividual.project.name}', '${newProject.name}',\n" +
+            "\t\t'${oldIndividual.pid}', '${newIndividualName}',\n" +
+            "\t\t'${oldSample.sampleType.name}', '${newSampleType.name}',\n" +
+            "\t\t["
     SeqTrack.findAllBySample(oldSample, [sort: 'id']).each { SeqTrack seqTrack ->
         DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-            script << "\n\t\t\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}',"
+            script << "\n\t\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}',"
         }
     }
-    script << "\n],\n\t\t'${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY, verifiedLinkedFiles)\n"
+    script << "\n\t\t],\n\t\t'${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY, verifiedLinkedFiles\n\t)\n"
 
     files << fileName
+
+    return counter
 }
 
-def createScript = { ->
+Closure<String> createScript = { String swapLabel ->
     // buffers for all the changes we are preparing
     StringBuilder script = new StringBuilder()
     Set<String> createdPids = [] as Set
@@ -116,149 +142,50 @@ def createScript = { ->
  * What will change?
  ****************************************************************/"""
 
-    script << """
-/****************************************************************
- * DATABASE FIXING
- *
- * OTP console script to move the database-side of things
- ****************************************************************/
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.config.*
+    script << Snippets.databaseFixingHeader(swapLabel)
 
-import static org.springframework.util.Assert.*
-
-DataSwapService dataSwapService = ctx.dataSwapService
-StringBuilder log = new StringBuilder()
-final String SCRIPT_OUTPUT_DIRECTORY = "\${ConfigService.getInstance().getScriptOutputPath()}/sample_swap/"
-
-/** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */
-boolean verifiedLinkedFiles = false
-
-/** are missing fastq files an error? (usually yes, since we must redo most analyses after a swap) */
-boolean failOnMissingFiles = true
-
-try {
-    Individual.withTransaction {
-"""
     swapMap.each { String key, String value ->
         println "swap of '${key}' to '${value}'"
-        script << "\n\t\t//swap '${key}' to '${value}'"
-        String oldIndividualName, oldSampleTypeName, newIndividualName, newSampleTypeName
+        script << "\n\t//swap '${key}' to '${value}'"
+        def (Individual oldIndividual, String newIndividualName, SampleType oldSampleType, SampleType newSampleType) = parseSwapMapEntry(key, value)
 
-        // figure out who/what we're swapping (decode the swapMap inputs into database objects)
-        if (key.contains(' ')) {
-            (oldIndividualName, oldSampleTypeName) = key.split(' +')
-            (newIndividualName, newSampleTypeName) = value.split(' +')
-        } else {
-            oldIndividualName = key
-            newIndividualName = value
-        }
-        Individual oldIndividual = Individual.findByPid(oldIndividualName)
-        assert oldIndividual
         Individual newIndividual = Individual.findByPid(newIndividualName)
+
         Project newProject = newProjectName ? CollectionUtils.exactlyOneElement(Project.findAllByName(newProjectName)) : oldIndividual.project
 
         List<Sample> samples = Sample.findAllByIndividual(oldIndividual, [sort: 'id'])
-        // simplest case: entire patient should be renamed
-        if (!newIndividual && newSampleTypeName == null && seqTypeFilterList.empty) {
-            String fileName = "mv_${counter++}_${oldIndividualName}__to__${newIndividualName}"
-            script << "\ndataSwapService.moveIndividual('${oldIndividual.project.name}', '${newProject.name}', '${oldIndividualName}', '${newIndividualName}', ["
-            samples.each { sample -> script << "'${sample.sampleType.name}': '${newSampleTypeClosure(sample.sampleType.name)}', " }
-            script << "], ["
-            samples.each { sample ->
-                SeqTrack.findAllBySample(sample, [sort: 'id']).each { SeqTrack seqTrack ->
-                    DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-                        script << "\n\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividualName, newIndividualName)}',"
-                    }
-                }
-            }
-            script << "\n], '${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY)\n"
-            files << fileName
-        } else {
+
+        // simplest case: move entire patient
+        if (newSampleType == null && seqTypeFilterList.empty && // only if we're moving entire, unfiltered patients...
+                (!newIndividual || newProject != oldIndividual.project ) // .. either into a shiny new patient, or into another project entirely
+        ) {
+            counter = renamePatient(newIndividualName, oldIndividual, newProject, samples, counter, script, newSampleTypeClosure, newDataFileNameClosure, files)
+        } else { // more complex case: moving partial source, or into non-empty destination
             // moving one single sample in its entirety
-            if (oldSampleTypeName || seqTypeFilterList) {
-                SampleType oldSampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByName(oldSampleTypeName))
-                Sample oldSample = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(oldIndividual, oldSampleType))
-
-                // create our recipient patient, if needed
-                boolean individualExists = newIndividual || createdPids.contains(newIndividualName)
-                if (!individualExists) {
-                    script << """
-assert new Individual(
-\tpid: '${newIndividualName}',
-\tmockPid: '${newIndividualName}',
-\tmockFullName: '${newIndividualName}',
-\ttype: Individual.Type.REAL,
-\tproject: Project.findByName('${newProject.name}'),
-).save(flush: true) : "Error creating new Individual '${newIndividualName}'"
-"""
-                    createdPids << newIndividualName
+            if (oldSampleType || seqTypeFilterList) {
+                counter = moveOneSample(newProject,
+                        oldIndividual, newIndividual, newIndividualName,
+                        oldSampleType, newSampleType,
+                        seqTypeFilterList,
+                        newDataFileNameClosure,
+                        newSampleSwapScript,
+                        counter, script, files,
+                        createdPids, createdSamples
+                )
+            } else { // moving ALL the samples for a patient (e.g. into another existing patient)
+                counter = moveAllSamples(samples,
+                        newProject,
+                        oldIndividual, newIndividualName,
+                        newSampleTypeClosure,
+                        newSampleSwapScript,
+                        counter, script,
+                        createdSamples
+                )
+                if (seqTypeFilterList.empty) {
+                    // if we moved _everything_ out of a patient, delete the leftover empty patient
+                    script << "\n\tIndividual.findByPid('${oldIndividual.pid}').delete(flush: true)\n"
                 }
-
-
-                SampleType newSampleType = CollectionUtils.exactlyOneElement(SampleType.findAllByName(newSampleTypeName))
-                Sample newSample = CollectionUtils.atMostOneElement(Sample.findAllByIndividualAndSampleType(newIndividual, newSampleType))
-                // create recipient Sample if needed
-                boolean sampleExists = newSample || createdSamples.contains("${newIndividualName} ${newSampleType.name}".toString())
-                if (!sampleExists && seqTypeFilterList) {
-                    script << """
-assert new Sample(
-\tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${newIndividualName}')),
-\tsampleType: CollectionUtils.exactlyOneElement(SampleType.findAllByName('${newSampleTypeName}'))
-).save(flush: true) : "Error creating new Sample '${newIndividualName} ${newSampleTypeName}'"
-"""
-                    createdSamples << "${newIndividualName} ${newSampleTypeName}".toString()
-                    sampleExists = true
-                }
-                if (sampleExists) {
-                    List<SeqTrack> oldSeqTracks = SeqTrack.findAllBySample(oldSample, [sort: 'id'])
-                    if (seqTypeFilterList) {
-                        oldSeqTracks = oldSeqTracks.findAll {
-                            seqTypeFilterList.contains(it.seqType)
-                        }
-                    }
-                    oldSeqTracks.each { SeqTrack seqTrack ->
-                        String fileName = "mv_${counter++}_${oldIndividual.pid}_${oldSampleType.name}_${seqTrack.run.name}_${seqTrack.laneId}__to__${newIndividualName}_${newSampleTypeName}"
-                        script << """
-dataSwapService.swapLane([
-\t\t'oldProjectName'   : '${oldIndividual.project.name}',
-\t\t'newProjectName'   : '${newProject.name}',
-\t\t'oldPid'           : '${oldIndividual.pid}',
-\t\t'newPid'           : '${newIndividual.pid}',
-\t\t'oldSampleTypeName': '${oldSampleType.name}',
-\t\t'newSampleTypeName': '${newSampleType.name}',
-\t\t'oldSeqTypeName'   : '${seqTrack.seqType.name}',
-\t\t'newSeqTypeName'   : '${seqTrack.seqType.name}',
-\t\t'oldSingleCell'    : '${seqTrack.seqType.singleCell}',
-\t\t'newSingleCell'    : '${seqTrack.seqType.singleCell}',
-\t\t'oldLibraryLayout' : '${seqTrack.seqType.libraryLayout}',
-\t\t'newLibraryLayout' : '${seqTrack.seqType.libraryLayout}',
-\t\t'runName'          : '${seqTrack.run.name}',
-\t\t'lane'             : ['${seqTrack.laneId}'],
-], ["""
-                        DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-                            script << "\n\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividualName, newIndividualName)}',"
-                        }
-                        script << "\n], '${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY)\n"
-                        files << fileName
-                    }
-                } else {
-                    newSampleSwapScript(script, newProject, oldIndividual, newIndividualName, oldSample, newSampleTypeName)
-                    createdSamples << "${newIndividualName} ${newSampleTypeName}".toString()
-                }
-            } else { // moving ALL the samples for a patient
-                samples.each { Sample sample ->
-                    newSampleSwapScript(script, newProject, oldIndividual, newIndividualName, sample, newSampleTypeClosure(sample.sampleType.name))
-                    createdSamples << "${newIndividualName} ${newSampleTypeName}".toString()
-                }
-            }
-
-            // if we moved _everything_ out of a patient, delete the leftover empty patient
-            if (!oldSampleTypeName && seqTypeFilterList.empty) {
-                script << "\nIndividual.findByPid('${oldIndividualName}').delete(flush: true)\n"
             }
         }
     }
@@ -293,4 +220,236 @@ ${
     return script as String
 }
 
-println createScript()
+println createScript(swapLabel)
+
+
+/****************************************************************
+ * refactoring milestone:
+ * END chaotic closures mixed with in-line script
+ * BEGIN organised helper methods
+ ****************************************************************/
+
+private Tuple parseSwapMapEntry(String from, String to) {
+    String oldIndividualName, newIndividualName, oldSampleTypeName, newSampleTypeName
+
+    // figure out who/what we're swapping (decode the swapMap inputs into database objects)
+    if (from.contains(' ')) {
+        (oldIndividualName, oldSampleTypeName) = from.split(' +')
+        (newIndividualName, newSampleTypeName) = to.split(' +')
+    } else {
+        oldIndividualName = from
+        newIndividualName = to
+    }
+
+    Individual oldIndividual = Individual.findByPid(oldIndividualName)
+    assert oldIndividual: "probable error in input: couldn't find Individual \"${oldIndividual.pid}\" in database"
+
+    SampleType oldSampleType
+    if (oldSampleTypeName) {
+        oldSampleType = SampleType.findByName(oldSampleTypeName)
+        assert oldSampleType: "probable error in input: couldn't find old SampleType \"${oldSampleTypeName}\" in database"
+    }
+    SampleType newSampleType
+    if (newSampleTypeName) {
+        newSampleType = SampleType.findByName(newSampleTypeName)
+        assert newSampleType: "probable error in input: couldn't find new SampleType \"${newSampleTypeName}\" in database"
+    }
+
+    return new Tuple(oldIndividual, newIndividualName, oldSampleType, newSampleType)
+}
+
+private int moveAllSamples(List<Sample> samples,
+                           Project newProject,
+                           Individual oldIndividual, String newIndividualName,
+                           Closure<SampleType> newSampleTypeClosure,
+                           Closure newSampleSwapScript,
+                           int counter,
+                           StringBuilder script,
+                           Set<String> createdSamples) {
+    samples.each { Sample sample ->
+        counter = newSampleSwapScript(script, newProject, oldIndividual, newIndividualName, sample, newSampleTypeClosure(sample.sampleType))
+        createdSamples << "${newIndividualName} ${newSampleTypeClosure(sample.sampleType)}".toString()
+    }
+
+    return counter
+}
+
+private int moveOneSample(Project newProject,
+                          Individual oldIndividual, Individual newIndividual, String newIndividualName,
+                          SampleType oldSampleType, SampleType newSampleType,
+                          List<SeqType> seqTypeFilterList,
+                          Closure<String> newDataFileNameClosure,
+                          Closure newSampleSwapScript,
+                          int counter,
+                          StringBuilder script, List<String> files,
+                          Set<String> createdPids, Set<String> createdSamples
+) {
+    Sample oldSample = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(oldIndividual, oldSampleType),
+            "couldn't find old sample for \"${oldIndividual.displayName} ${oldSampleType.displayName}\"")
+
+    // create our recipient patient, if needed
+    boolean individualExists = newIndividual || createdPids.contains(newIndividualName)
+    if (!individualExists) {
+        script << Snippets.createIndividual(newIndividualName, newProject.name)
+        createdPids << newIndividualName
+    }
+
+    Sample newSample = CollectionUtils.atMostOneElement(Sample.findAllByIndividualAndSampleType(newIndividual, newSampleType),
+            "couldn't find new sample \"${newIndividualName} ${newSampleType.displayName}\"")
+    // create recipient Sample if needed
+    boolean sampleExists = newSample || createdSamples.contains("${newIndividualName} ${newSampleType.displayName}".toString())
+    if (!sampleExists && seqTypeFilterList) {
+        script << Snippets.createSample(newIndividualName, newSampleType.displayName)
+        createdSamples << "${newIndividualName} ${newSampleType.displayName}".toString()
+        sampleExists = true
+    }
+    if (sampleExists) {
+        List<SeqTrack> oldSeqTracks = SeqTrack.findAllBySample(oldSample, [sort: 'id'])
+        if (seqTypeFilterList) {
+            oldSeqTracks = oldSeqTracks.findAll {
+                seqTypeFilterList.contains(it.seqType)
+            }
+        }
+        oldSeqTracks.each { SeqTrack seqTrack ->
+            String fileName = "mv_${counter++}_${oldIndividual.pid}_${oldSampleType.name}_${seqTrack.run.name}_${seqTrack.laneId}__to__${newIndividualName}_${newSampleType.displayName}"
+            script << Snippets.swapLane(seqTrack, fileName, newDataFileNameClosure,
+                    newProject,
+                    oldIndividual, newIndividual,
+                    oldSampleType, newSampleType)
+            files << fileName
+        }
+    } else {
+        counter = newSampleSwapScript(script, newProject, oldIndividual, newIndividualName, oldSample, newSampleType)
+        createdSamples << "${newIndividualName} ${newSampleType.displayName}".toString()
+    }
+
+    return counter
+}
+
+
+private int renamePatient(String newIndividualName, Individual oldIndividual,
+                          Project newProject,
+                          List<Sample> samples, int counter, StringBuilder script,
+                          Closure<SampleType> newSampleTypeClosure, Closure<String> newDataFileNameClosure,
+                          List<String> files
+) {
+    String fileName = "mv_${counter++}_${oldIndividual.pid}__to__${newIndividualName}"
+
+    script << "\n\tdataSwapService.moveIndividual('${oldIndividual.project.name}', '${newProject.name}', '${oldIndividual.pid}', '${newIndividualName}',\n\t\t["
+    samples.each { sample ->
+        script << "'${sample.sampleType.name}': '${newSampleTypeClosure(sample.sampleType).name}', "
+    }
+    script << "],"
+
+    script << "\n\t\t[\n"
+    samples.each { sample ->
+        SeqTrack.findAllBySample(sample, [sort: 'id']).each { SeqTrack seqTrack ->
+            DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
+                script << "\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividualName)}',\n"
+            }
+        }
+    }
+    script << "\t\t],\n"
+    script << "\t\t'${fileName}', log, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY)\n"
+    files << fileName
+
+    return counter
+}
+
+
+
+class Snippets {
+    static String databaseFixingHeader(String swapLabel) {
+        return """
+/****************************************************************
+ * DATABASE FIXING
+ *
+ * OTP console script to move the database-side of things
+ ****************************************************************/
+
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.utils.*
+import de.dkfz.tbi.otp.config.*
+import java.nio.file.*
+import java.nio.file.attribute.PosixFilePermission
+import java.nio.file.attribute.PosixFilePermissions
+
+import static org.springframework.util.Assert.*
+
+DataSwapService dataSwapService = ctx.dataSwapService
+StringBuilder log = new StringBuilder()
+
+// create a container dir for all output of this swap;
+// group-editable so non-server users can also work with it
+String swapLabel = "${swapLabel}"
+final Path SCRIPT_OUTPUT_DIRECTORY = ctx.configService.getScriptOutputPath().toPath().resolve('sample_swap').resolve(swapLabel)
+ctx.fileService.createDirectoryRecursively(SCRIPT_OUTPUT_DIRECTORY)
+ctx.fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, ctx.fileService.GROUP_WRITABLE_EXECUTABLE_PERMISSION)
+
+/** did we manually check yet if all (potentially symlinked) fastq datafiles still exist on the filesystem? */
+boolean verifiedLinkedFiles = false
+
+/** are missing fastq files an error? (usually yes, since we must redo most analyses after a swap) */
+boolean failOnMissingFiles = true
+
+try {
+    Individual.withTransaction {
+"""
+    }
+
+    static String createIndividual(String newIndividualName, String newProjectName) {
+        return """
+assert new Individual(
+\tpid: '${newIndividualName}',
+\tmockPid: '${newIndividualName}',
+\tmockFullName: '${newIndividualName}',
+\ttype: Individual.Type.REAL,
+\tproject: Project.findByName('${newProjectName}'),
+).save(flush: true, failOnError: true) : "Error creating new Individual '${newIndividualName}'"
+"""
+    }
+
+    static String createSample(String newIndividualName, String newSampleTypeName) {
+        return """
+assert new Sample(
+\tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${newIndividualName}')),
+\tsampleType: CollectionUtils.exactlyOneElement(SampleType.findAllByName('${newSampleTypeName}'))
+).save(flush: true, failOnError: true) : "Error creating new Sample '${newIndividualName} ${newSampleTypeName}'"
+"""
+    }
+
+
+    static String swapLane(SeqTrack seqTrack, String fileName, Closure<String> newDataFileNameClosure,
+                           Project newProject,
+                           Individual oldIndividual, Individual newIndividual,
+                           SampleType oldSampleType, SampleType newSampleType) {
+        StringBuilder snippet = new StringBuilder()
+        snippet << """
+\tdataSwapService.swapLane([
+\t\t'oldProjectName'   : '${oldIndividual.project.name}',
+\t\t'newProjectName'   : '${newProject.name}',
+\t\t'oldPid'           : '${oldIndividual.pid}',
+\t\t'newPid'           : '${newIndividual.pid}',
+\t\t'oldSampleTypeName': '${oldSampleType.name}',
+\t\t'newSampleTypeName': '${newSampleType.name}',
+\t\t'oldSeqTypeName'   : '${seqTrack.seqType.name}',
+\t\t'newSeqTypeName'   : '${seqTrack.seqType.name}',
+\t\t'oldSingleCell'    : '${seqTrack.seqType.singleCell}',
+\t\t'newSingleCell'    : '${seqTrack.seqType.singleCell}',
+\t\t'oldLibraryLayout' : '${seqTrack.seqType.libraryLayout}',
+\t\t'newLibraryLayout' : '${seqTrack.seqType.libraryLayout}',
+\t\t'runName'          : '${seqTrack.run.name}',
+\t\t'lane'             : ['${seqTrack.laneId}'],
+\t\t], [
+"""
+        DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
+            snippet << "\t\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividual.pid)}',\n"
+        }
+        snippet << "\t\t],\n\t\t'${fileName}',\n" +
+                "\t\tlog, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY\n\t)\n"
+
+        return snippet.toString()
+    }
+
+}

@@ -30,6 +30,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 //Input area
 //------------------------------
 
+swapLabel = 'OTRS-_________________-something-descriptive'
+
 /***
  * The query to get the seqtracks for the swap.
  * Please adapt as needed.
@@ -82,7 +84,7 @@ def adaptValues = { SeqTrack oldSeqTrack ->
 //script area
 //------------------------------
 
-int counter = 0
+int counter = 1
 StringBuilder script = new StringBuilder()
 List<String> all_swaps = []
 
@@ -92,13 +94,22 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.config.*
 
+import java.nio.file.*
+import java.nio.file.attribute.PosixFilePermission
+import java.nio.file.attribute.PosixFilePermissions
+
 import static org.springframework.util.Assert.*
 
 DataSwapService dataSwapService = ctx.dataSwapService
 
 StringBuilder log = new StringBuilder()
 
-final String SCRIPT_OUTPUT_DIRECTORY = "\${ConfigService.getInstance().getScriptOutputPath()}/sample_swap/"
+// create a container dir for all output of this swap;
+// group-editable so non-server users can also work with it
+String swapLabel = "${swapLabel}"
+final Path SCRIPT_OUTPUT_DIRECTORY = ctx.configService.getScriptOutputPath().toPath().resolve('sample_swap').resolve(swapLabel)
+ctx.fileService.createDirectoryRecursively(SCRIPT_OUTPUT_DIRECTORY)
+ctx.fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, ctx.fileService.GROUP_WRITABLE_EXECUTABLE_PERMISSION)
 
 boolean linkedFilesVerified = false
 
@@ -106,8 +117,7 @@ boolean failOnMissingFiles = true
 
 
 try {
-    Individual.withTransaction {
-        [
+    Individual.withTransaction {[
 """
 
 seqTracks.each { seqTrack ->
@@ -119,8 +129,7 @@ seqTracks.each { seqTrack ->
 
     script << """
     {
-        dataSwapService.swapLane(
-            [
+        dataSwapService.swapLane([
                 "oldProjectName"   : "${seqTrack.project.name}",
                 "newProjectName"   : "${newValues.newProjectName}",
                 "oldPid"           : "${seqTrack.individual.pid}",
@@ -134,13 +143,11 @@ seqTracks.each { seqTrack ->
                 "oldLibraryLayout" : "${seqTrack.seqType.libraryLayout}",
                 "newLibraryLayout" : "${newValues.newLibraryLayout}",
                 "runName"          : "${seqTrack.run.name}",
-                "lane"             : [
-                        "${seqTrack.laneId}",
-                ]
+                "lane"             : [ "${seqTrack.laneId}", ],
             ],
             ["""
     seqTrack.dataFiles.each { dataFile ->
-        script << "\n'${dataFile.fileName}':'',"
+        script << "\n                '${dataFile.fileName}':'',"
     }
 
     script << """
@@ -150,16 +157,14 @@ seqTracks.each { seqTrack ->
             failOnMissingFiles,
             SCRIPT_OUTPUT_DIRECTORY,
             linkedFilesVerified,
-            )
+        )
     },
 """
 }
 
 script << """
-        ].each {
-            it()
-        }
-        assert false : "transaction intentionally failed to rollback transaction"
+    ].each { it() }
+    assert false : "transaction intentionally failed to rollback transaction"
     }
 } finally {
     println log

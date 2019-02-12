@@ -54,7 +54,7 @@ class FileService {
     /**
      * The default directory permissions (750)
      */
-    static final Set<PosixFileAttributes> DEFAULT_DIRECTORY_PERMISSION = [
+    static final Set<PosixFilePermission> DEFAULT_DIRECTORY_PERMISSION = [
             PosixFilePermission.OWNER_READ,
             PosixFilePermission.OWNER_WRITE,
             PosixFilePermission.OWNER_EXECUTE,
@@ -63,9 +63,21 @@ class FileService {
     ].toSet().asImmutable()
 
     /**
+     * Owner and Group read/write (750)
+     */
+    static final Set<PosixFilePermission> GROUP_WRITABLE_EXECUTABLE_PERMISSION = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.OWNER_EXECUTE,
+            PosixFilePermission.GROUP_READ,
+            PosixFilePermission.GROUP_WRITE,
+            PosixFilePermission.GROUP_EXECUTE,
+    ].toSet().asImmutable()
+
+    /**
      * The directory permissions only accessible for owner (700)
      */
-    static final Set<PosixFileAttributes> OWNER_DIRECTORY_PERMISSION = [
+    static final Set<PosixFilePermission> OWNER_DIRECTORY_PERMISSION = [
             PosixFilePermission.OWNER_READ,
             PosixFilePermission.OWNER_WRITE,
             PosixFilePermission.OWNER_EXECUTE,
@@ -74,7 +86,7 @@ class FileService {
     /**
      * The default file permissions (440)
      */
-    static final Set<PosixFileAttributes> DEFAULT_FILE_PERMISSION = [
+    static final Set<PosixFilePermission> DEFAULT_FILE_PERMISSION = [
             PosixFilePermission.OWNER_READ,
             PosixFilePermission.GROUP_READ,
     ].toSet().asImmutable()
@@ -86,7 +98,7 @@ class FileService {
      *
      * The extension to use is defind in {@link #BAM_FILE_EXTENSIONS}
      */
-    static final Set<PosixFileAttributes> DEFAULT_BAM_FILE_PERMISSION = [
+    static final Set<PosixFilePermission> DEFAULT_BAM_FILE_PERMISSION = [
             PosixFilePermission.OWNER_READ,
             PosixFilePermission.GROUP_READ,
             PosixFilePermission.OTHERS_READ,
@@ -224,7 +236,7 @@ class FileService {
      *
      * The path have to be absolute and have to exist,
      */
-    void setPermission(Path path, Set<PosixFileAttributes> permissions) {
+    void setPermission(Path path, Set<PosixFilePermission> permissions) {
         assert path
         assert Files.exists(path)
 
@@ -318,6 +330,25 @@ class FileService {
 
         path.bytes = content
         setPermission(path, filePermission)
+    }
+
+    /**
+     * Creates a new, group-writable, group-executable file to hold generated console and/or bash scripts.
+     *
+     * pre-existing files of the same name will be overwritten without asking.
+     */
+    Path createOrOverwriteScriptOutputFile(Path outputFolder, String fileName) {
+        Path p = outputFolder.resolve(fileName)
+
+        if (Files.exists(p)) {
+            Files.delete(p)
+        }
+
+        Files.createFile(p, PosixFilePermissions.asFileAttribute(FileService.GROUP_WRITABLE_EXECUTABLE_PERMISSION))
+        // system default umasks prevent 'dangerous' group permissions like group-writable directly upon file creation,
+        // set permissions AGAIN to teach 'umask' a lesson who is boss!
+        Files.setPosixFilePermissions(p, FileService.GROUP_WRITABLE_EXECUTABLE_PERMISSION)
+        return p
     }
 
     /**

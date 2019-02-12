@@ -25,6 +25,7 @@ package de.dkfz.tbi.otp.infrastructure
 import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -38,6 +39,9 @@ class FileServiceSpec extends Specification implements DataTest {
 
     static final byte[] SOME_BYTE_CONTENT = "SomeByteContent".bytes
 
+    @Shared
+    FileService fileService = new FileService()
+
     @Rule
     TemporaryFolder temporaryFolder
 
@@ -45,7 +49,6 @@ class FileServiceSpec extends Specification implements DataTest {
     void "setPermission, if directory does not exist, but the parent directory exists, then create directory"() {
         given:
         Path basePath = temporaryFolder.newFolder().toPath()
-        FileService fileService = new FileService()
 
         when:
         fileService.setPermission(basePath, FileService.OWNER_DIRECTORY_PERMISSION)
@@ -70,7 +73,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newPath = basePath.resolve('newFolder')
 
         when:
-        new FileService().createDirectoryRecursively(newPath)
+        fileService.createDirectoryRecursively(newPath)
 
         then:
         assertDirectory(newPath)
@@ -82,7 +85,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newPath = basePath.resolve('newFolder/newSubFolder')
 
         when:
-        new FileService().createDirectoryRecursively(newPath)
+        fileService.createDirectoryRecursively(newPath)
 
         then:
         assertDirectory(newPath.parent)
@@ -95,7 +98,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert Files.exists(path)
 
         when:
-        new FileService().createDirectoryRecursively(path)
+        fileService.createDirectoryRecursively(path)
 
         then:
         noExceptionThrown()
@@ -104,7 +107,7 @@ class FileServiceSpec extends Specification implements DataTest {
     @Unroll
     void "createDirectoryRecursively, if parameter is #cases, throw assertion"() {
         when:
-        new FileService().createDirectoryRecursively(path)
+        fileService.createDirectoryRecursively(path)
 
         then:
         thrown(AssertionError)
@@ -123,7 +126,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert Files.isRegularFile(filePath)
 
         when:
-        new FileService().createDirectoryRecursively(filePath)
+        fileService.createDirectoryRecursively(filePath)
 
         then:
         thrown(AssertionError)
@@ -137,7 +140,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newDirectory = filePath.resolve('newDirectory')
 
         when:
-        new FileService().createDirectoryRecursively(newDirectory)
+        fileService.createDirectoryRecursively(newDirectory)
 
         then:
         thrown(AssertionError)
@@ -172,7 +175,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path file = filePath.resolve('file')
 
         when:
-        new FileService().deleteDirectoryRecursively(file)
+        fileService.deleteDirectoryRecursively(file)
 
         then:
         notThrown()
@@ -183,7 +186,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path filePath = temporaryFolder.newFolder().toPath()
 
         when:
-        new FileService().deleteDirectoryRecursively(filePath)
+        fileService.deleteDirectoryRecursively(filePath)
 
         then:
         !Files.exists(filePath)
@@ -194,7 +197,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path filePath = temporaryFolder.newFile().toPath()
 
         when:
-        new FileService().deleteDirectoryRecursively(filePath)
+        fileService.deleteDirectoryRecursively(filePath)
 
         then:
         !Files.exists(filePath)
@@ -208,7 +211,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.createSymbolicLink(link, file)
 
         when:
-        new FileService().deleteDirectoryRecursively(link)
+        fileService.deleteDirectoryRecursively(link)
 
         then:
         !Files.exists(link)
@@ -241,7 +244,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.createSymbolicLink(linkToFile, linkedFile)
 
         when:
-        new FileService().deleteDirectoryRecursively(basePath)
+        fileService.deleteDirectoryRecursively(basePath)
 
         then:
         !Files.exists(basePath)
@@ -254,7 +257,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path file = Paths.get('abc')
 
         when:
-        new FileService().deleteDirectoryRecursively(file)
+        fileService.deleteDirectoryRecursively(file)
 
         then:
         thrown(AssertionError)
@@ -270,7 +273,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = basePath.resolve('newFile')
 
         when:
-        new FileService().createFileWithContent(newFile, SOME_CONTENT)
+        fileService.createFileWithContent(newFile, SOME_CONTENT)
 
         then:
         assertFile(newFile)
@@ -283,7 +286,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = basePath.resolve('newFolder/newFile')
 
         when:
-        new FileService().createFileWithContent(newFile, SOME_CONTENT)
+        fileService.createFileWithContent(newFile, SOME_CONTENT)
 
         then:
         assertDirectory(newFile.parent)
@@ -294,7 +297,7 @@ class FileServiceSpec extends Specification implements DataTest {
     @Unroll
     void "createFileWithContent, if parameter is #cases, throw assertion"() {
         when:
-        new FileService().createFileWithContent(path, SOME_CONTENT)
+        fileService.createFileWithContent(path, SOME_CONTENT)
 
         then:
         thrown(AssertionError)
@@ -314,7 +317,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert Files.isRegularFile(path)
 
         when:
-        new FileService().createFileWithContent(path, SOME_CONTENT)
+        fileService.createFileWithContent(path, SOME_CONTENT)
 
         then:
         thrown(AssertionError)
@@ -328,7 +331,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = filePath.resolve('newDirectory')
 
         when:
-        new FileService().createFileWithContent(newFile, SOME_CONTENT)
+        fileService.createFileWithContent(newFile, SOME_CONTENT)
 
         then:
         thrown(AssertionError)
@@ -364,7 +367,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = basePath.resolve('newFile')
 
         when:
-        new FileService().createFileWithContent(newFile, SOME_BYTE_CONTENT)
+        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT)
 
         then:
         assertFile(newFile)
@@ -377,7 +380,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = basePath.resolve('newFolder/newFile')
 
         when:
-        new FileService().createFileWithContent(newFile, SOME_BYTE_CONTENT)
+        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT)
 
         then:
         assertDirectory(newFile.parent)
@@ -388,7 +391,7 @@ class FileServiceSpec extends Specification implements DataTest {
     @Unroll
     void "createFileWithContent (byte), if parameter is #cases, throw assertion"() {
         when:
-        new FileService().createFileWithContent(path, SOME_BYTE_CONTENT)
+        fileService.createFileWithContent(path, SOME_BYTE_CONTENT)
 
         then:
         thrown(AssertionError)
@@ -407,7 +410,7 @@ class FileServiceSpec extends Specification implements DataTest {
         assert Files.isRegularFile(path)
 
         when:
-        new FileService().createFileWithContent(path, SOME_BYTE_CONTENT)
+        fileService.createFileWithContent(path, SOME_BYTE_CONTENT)
 
         then:
         thrown(AssertionError)
@@ -421,7 +424,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = filePath.resolve('newDirectory')
 
         when:
-        new FileService().createFileWithContent(newFile, SOME_BYTE_CONTENT)
+        fileService.createFileWithContent(newFile, SOME_BYTE_CONTENT)
 
         then:
         thrown(AssertionError)
@@ -440,7 +443,7 @@ class FileServiceSpec extends Specification implements DataTest {
         file.text = 'text'
 
         when:
-        new FileService().createLink(link, file, null, CreateLinkOption.ABSOLUTE)
+        fileService.createLink(link, file, null, CreateLinkOption.ABSOLUTE)
 
         then:
         Files.isSymbolicLink(link)
@@ -455,7 +458,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path link = linkName ? Paths.get(linkName) : null
 
         when:
-        new FileService().createLink(link, file, null, CreateLinkOption.ABSOLUTE)
+        fileService.createLink(link, file, null, CreateLinkOption.ABSOLUTE)
 
         then:
         AssertionError e = thrown()
@@ -480,7 +483,7 @@ class FileServiceSpec extends Specification implements DataTest {
         file.text = 'text'
 
         when:
-        new FileService().createLink(link, file, null)
+        fileService.createLink(link, file, null)
 
         then:
         Files.isSymbolicLink(link)
@@ -496,7 +499,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path link = linkName ? Paths.get(linkName) : null
 
         when:
-        new FileService().createLink(link, file, null)
+        fileService.createLink(link, file, null)
 
         then:
         AssertionError e = thrown()
@@ -525,7 +528,7 @@ class FileServiceSpec extends Specification implements DataTest {
         oldFile.text = 'text'
 
         when:
-        new FileService().moveFile(oldFile, newFile)
+        fileService.moveFile(oldFile, newFile)
 
         then:
         Files.exists(newFile)
@@ -539,7 +542,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Path newFile = newFileName ? Paths.get(newFileName) : null
 
         when:
-        new FileService().moveFile(oldFile, newFile)
+        fileService.moveFile(oldFile, newFile)
 
         then:
         AssertionError e = thrown()
@@ -592,7 +595,7 @@ class FileServiceSpec extends Specification implements DataTest {
         Files.createSymbolicLink(link, file)
 
         when:
-        new FileService().correctPathPermissionRecursive(filePath)
+        fileService.correctPathPermissionRecursive(filePath)
 
         then:
         Files.getPosixFilePermissions(filePath) == FileService.DEFAULT_DIRECTORY_PERMISSION
@@ -607,42 +610,41 @@ class FileServiceSpec extends Specification implements DataTest {
     //----------------------------------------------------------------------------------------------------
     // test for isFileReadableAndNotEmpty
 
-
     void "isFileReadableAndNotEmpty, if file exists and has content, then return true"() {
         given:
-        Path path = temporaryFolder.newFile().toPath()
-        path.text = SOME_CONTENT
+        Path file = temporaryFolder.newFile().toPath()
+        file.text = SOME_CONTENT
 
         expect:
-        FileService.isFileReadableAndNotEmpty(path)
+        FileService.isFileReadableAndNotEmpty(file)
     }
 
     void "isFileReadableAndNotEmpty, if file exists but is empty, then return false"() {
         given:
-        Path path = temporaryFolder.newFile().toPath()
-        path.text = ''
+        Path file = temporaryFolder.newFile().toPath()
+        file.text = ''
 
         expect:
-        !FileService.isFileReadableAndNotEmpty(path)
+        !FileService.isFileReadableAndNotEmpty(file)
     }
 
     void "isFileReadableAndNotEmpty, if file exists and has content, but is not readable, then return false"() {
         given:
-        Path path = temporaryFolder.newFile().toPath()
-        path.text = SOME_CONTENT
-        Files.setPosixFilePermissions(path, [] as Set)
+        Path file = temporaryFolder.newFile().toPath()
+        file.text = SOME_CONTENT
+        Files.setPosixFilePermissions(file, [] as Set)
 
         expect:
-        !FileService.isFileReadableAndNotEmpty(path)
+        !FileService.isFileReadableAndNotEmpty(file)
     }
 
     void "isFileReadableAndNotEmpty, if file does not exist, then return false"() {
         given:
         Path path = temporaryFolder.newFolder().toPath()
-        Path file = path.resolve('file')
+        Path nonExistingFile = path.resolve('i-shouldnt-exist.tmp')
 
         expect:
-        !FileService.isFileReadableAndNotEmpty(file)
+        !FileService.isFileReadableAndNotEmpty(nonExistingFile)
     }
 
     void "isFileReadableAndNotEmpty, if path is a directory, then return false"() {
@@ -927,4 +929,55 @@ class FileServiceSpec extends Specification implements DataTest {
         thrown(AssertionError)
     }
 
+    //----------------------------------------------------------------------------------------------------
+    // test for createOrOverwriteScriptOutputFile
+
+    void "createOrOverwriteScriptOutputFile, creates file if not already there"() {
+        given:
+        String newName = "new-script-file"
+        Path newFolder = temporaryFolder.newFolder().toPath()
+        Path newFile = newFolder.resolve(newName)
+        assert !Files.exists(newFile)
+
+        when:
+        fileService.createOrOverwriteScriptOutputFile(newFolder, newName)
+
+        then:
+        Files.exists(newFile)
+    }
+
+    void "createOrOverwriteScriptOutputFile, replaces pre-existing files"() {
+        given:
+        String newName = "new-script-file"
+        Path newFolder = temporaryFolder.newFolder().toPath()
+        Path newFile = newFolder.resolve(newName)
+        newFile << SOME_CONTENT
+        assert newFile.text == SOME_CONTENT
+
+        when:
+        fileService.createOrOverwriteScriptOutputFile(newFolder, newName)
+
+        then:
+        newFile.text.isEmpty()
+    }
+
+    void "createOrOverwriteScriptOutputFile, new script is editable+executable for both user and group"() {
+        given:
+        String newName = "new-script-file"
+        Path newFolder = temporaryFolder.newFolder().toPath()
+        Path newFile = newFolder.resolve(newName)
+
+        when:
+        fileService.createOrOverwriteScriptOutputFile(newFolder, newName)
+
+        then:
+        Files.getPosixFilePermissions(newFile).containsAll([
+                PosixFilePermission.OWNER_READ,
+                PosixFilePermission.OWNER_WRITE,
+                PosixFilePermission.OWNER_EXECUTE,
+                PosixFilePermission.GROUP_READ,
+                PosixFilePermission.GROUP_WRITE,
+                PosixFilePermission.GROUP_EXECUTE,
+        ])
+    }
 }
