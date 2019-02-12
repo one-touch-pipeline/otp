@@ -143,23 +143,6 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
         9   | 9      || true
     }
 
-    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, checks and sets both bam files of a given instance"() {
-        given:
-        aceseqQc.tcc = 9
-        aceseqQc.ploidy = 9
-
-        expect:
-        instance.sampleType1BamFile.qcTrafficLightStatus == null
-        instance.sampleType2BamFile.qcTrafficLightStatus == null
-
-        when:
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance, aceseqQc)
-
-        then:
-        instance.sampleType1BamFile.qcTrafficLightStatus == BLOCKED
-        instance.sampleType2BamFile.qcTrafficLightStatus == BLOCKED
-    }
-
     void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, NO_CHECK causes UNCHECKED regardless of thresholds"() {
         given:
         [instance.sampleType1BamFile, instance.sampleType2BamFile].each {
@@ -177,7 +160,6 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
         where:
         tcc << [0, 2, 4, 5, 6, 8, 10]
     }
-
 
     void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, CHECK_AND_NOTIFY only causes AUTO_ACCEPTED if the threshold would fail"() {
         given:

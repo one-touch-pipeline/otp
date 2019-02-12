@@ -4,7 +4,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.tracking.TrackingService
@@ -45,11 +46,7 @@ class QcTrafficLightService {
         assert bamFile.save(flush: true)
     }
 
-    void setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(BamFilePairAnalysis bamFilePairAnalysis, QcTrafficLightValue qc) {
-        [bamFilePairAnalysis.sampleType1BamFile, bamFilePairAnalysis.sampleType2BamFile].each {
-            setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(it, qc)
-        }
-    }
+    //TODO OTP-3097: provide method for handling qc in analsys
 
     void setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(AbstractMergedBamFile bamFile, QcTrafficLightValue qc) {
         if (bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED) {

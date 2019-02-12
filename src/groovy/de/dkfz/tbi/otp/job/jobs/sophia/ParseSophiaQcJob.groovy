@@ -31,7 +31,8 @@ class ParseSophiaQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
             SophiaQc sophiaQc = qcJson.values()
             sophiaQc.sophiaInstance = sophiaInstance
             assert sophiaQc.save(flush: true)
-            qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(sophiaInstance, sophiaQc)
+
+            //TODO OTP-3097: triger qc handling here
 
             sophiaInstance.processingState = AnalysisProcessingStates.FINISHED
             assert sophiaInstance.save(flush: true)

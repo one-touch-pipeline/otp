@@ -12,7 +12,6 @@ import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
-import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 
 @Component
 @Scope("prototype")
@@ -22,6 +21,7 @@ class ParseIndelQcJob extends AbstractEndStateAwareJobImpl implements AutoRestar
     @Autowired
     QcTrafficLightService qcTrafficLightService
 
+    @SuppressWarnings('JavaIoPackageAccess')
     @Override
     void execute() throws Exception {
         final IndelCallingInstance instance = getProcessParameterObject()
@@ -33,7 +33,6 @@ class ParseIndelQcJob extends AbstractEndStateAwareJobImpl implements AutoRestar
         JSONObject qcJson = JSON.parse(indelQcFile.text)
         JSONObject sampleSwapJson = JSON.parse(sampleSwapFile.text)
         IndelCallingInstance.withTransaction {
-
             IndelQualityControl indelQc = qcJson.values()
             indelQc.file = new File(indelQc.file.replace('./', '')).path
             indelQc.indelCallingInstance = instance
@@ -43,9 +42,7 @@ class ParseIndelQcJob extends AbstractEndStateAwareJobImpl implements AutoRestar
             sampleSwap.indelCallingInstance = instance
             assert sampleSwap.save(flush: true)
 
-            [indelQc, sampleSwap].each { QcTrafficLightValue qc ->
-                qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance, qc)
-            }
+            //TODO OTP-3097: triger qc handling here, please consider both qc class: indelQc, sampleSwap
 
             instance.updateProcessingState(AnalysisProcessingStates.FINISHED)
             succeed()

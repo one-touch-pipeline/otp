@@ -112,8 +112,6 @@ class ParseIndelQcJobSpec extends Specification {
         CollectionUtils.exactlyOneElement(IndelSampleSwapDetection.list()).indelCallingInstance == indelCallingInstance
         CollectionUtils.exactlyOneElement(IndelQualityControl.list()).indelCallingInstance == indelCallingInstance
         indelCallingInstance.processingState == AnalysisProcessingStates.FINISHED
-        indelCallingInstance.sampleType1BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
-        indelCallingInstance.sampleType2BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
     }
 
 

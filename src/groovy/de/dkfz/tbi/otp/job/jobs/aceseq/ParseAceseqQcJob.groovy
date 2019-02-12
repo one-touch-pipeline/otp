@@ -28,16 +28,18 @@ class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoResta
         File qcFile = aceseqInstance.getQcJsonFile()
         JSONObject qcJson = JSON.parse(qcFile.text)
         AceseqQc.withTransaction {
-             AceseqQc qcOne = qcJson.collect { String number, Map values ->
-                 AceseqQc qc = new AceseqQc(values)
-                 qc.number = Integer.parseInt(number)
-                 qc.aceseqInstance = aceseqInstance
-                 assert qc.save(flush: true)
-                 return qc
+            AceseqQc qcOne = qcJson.collect { String number, Map values ->
+                AceseqQc qc = new AceseqQc(values)
+                qc.number = Integer.parseInt(number)
+                qc.aceseqInstance = aceseqInstance
+                assert qc.save(flush: true)
+                return qc
             }.find {
-                 it.number == 1
+                it.number == 1
             }
-            qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(aceseqInstance, qcOne)
+
+            qcOne //the instance to used for qc
+            // TODO OTP-3097: triger qc handling here
 
             List<File> files = aceseqInstance.getAllFiles()
             files.each {

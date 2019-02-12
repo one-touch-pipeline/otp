@@ -96,8 +96,6 @@ class ParseAceseqQcJobSpec extends Specification {
         qc2.solutionPossible == 4
 
         instance.processingState == AnalysisProcessingStates.FINISHED
-        instance.sampleType1BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
-        instance.sampleType2BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
 
         cleanup:
         configService.clean()

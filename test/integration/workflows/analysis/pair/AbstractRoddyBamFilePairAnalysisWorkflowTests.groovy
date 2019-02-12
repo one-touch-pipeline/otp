@@ -2,7 +2,8 @@ package workflows.analysis.pair
 
 import org.junit.Test
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
+import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 
@@ -44,10 +45,6 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
         assert createdInstance.config == config
         assert createdInstance.sampleType1BamFile == bamFileTumor
         assert createdInstance.sampleType2BamFile == bamFileControl
-        createdInstance.sampleType1BamFile.refresh()
-        createdInstance.sampleType2BamFile.refresh()
-        assert createdInstance.sampleType1BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
-        assert createdInstance.sampleType2BamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
 
         filesToCheck(createdInstance).flatten().each {
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
