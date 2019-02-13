@@ -16,7 +16,9 @@ class DocumentService {
     }
 
     List<Document> listDocuments() {
-        Document.all
+        Document.all.sort {
+            it.documentType.title
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
