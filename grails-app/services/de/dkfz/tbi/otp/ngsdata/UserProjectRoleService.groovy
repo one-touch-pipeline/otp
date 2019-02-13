@@ -295,13 +295,22 @@ class UserProjectRoleService {
         }
         return ''
     }
-
-    int getNumberOfValidUsersForProjects(List<Project> projects) {
+    /**
+     * returns the number of all users of specified projects.
+     * If start and end date are set then only users which are created at given time period are returned for specified projects.
+     * @return number of users
+     */
+    int getNumberOfValidUsersForProjects(List<Project> projects, Date startDate = null, Date endDate = null) {
         return UserProjectRole.createCriteria().get {
             'in'("project", projects)
             eq("enabled", true)
             projections {
                 countDistinct("user")
+            }
+            user {
+                if (startDate && endDate) {
+                    between('dateCreated', startDate, endDate)
+                }
             }
         } as int
     }

@@ -710,6 +710,28 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         false                 | false       | false       || ''
     }
 
+    @Unroll
+    void "test getNumberOfValidUsersForProjects for given date"() {
+        given:
+        Date baseDate = new Date(0, 0, 10)
+        Date startDate = startDateOffset  == null ? null : baseDate.minus(startDateOffset)
+        Date endDate = endDateOffset == null ? null : baseDate.minus(endDateOffset)
+
+        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole()
+        userProjectRole.user.dateCreated = baseDate.minus(1)
+
+        when:
+        int users = userProjectRoleService.getNumberOfValidUsersForProjects([userProjectRole.project], startDate, endDate)
+
+        then:
+        users == expectedUsers
+
+        where:
+        startDateOffset | endDateOffset || expectedUsers
+        2               | 0             || 1
+        8               | 2             || 0
+        null            | null          || 1
+    }
 
     PluginAwareResourceBundleMessageSource getMessageSource() {
         return Mock(PluginAwareResourceBundleMessageSource) {

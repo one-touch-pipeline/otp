@@ -71,6 +71,29 @@ class ProjectService {
     }
 
     /**
+     * return the number of projects for specified period if given
+     */
+    int getCountOfProjectsForSpecifiedPeriod(Date startDate = null, Date endDate = null, List<Project> projects) {
+        return DataFile.createCriteria().get {
+            projections {
+                seqTrack {
+                    sample {
+                        individual {
+                            project {
+                                countDistinct('id')
+                            }
+                            'in'('project', projects)
+                        }
+                    }
+                }
+                if (startDate && endDate) {
+                    between('dateCreated', startDate, endDate)
+                }
+            }
+        } as int
+    }
+
+    /**
      * Returns the Project in an acl aware manner
      * @param id The Id of the Project
      * @return The Project

@@ -17,6 +17,7 @@ class User implements TimeStamped, Entity {
     String email
     String realName // with format '<first_name> <last_name>'
     String asperaAccount
+    Date dateCreated
 
     boolean acceptedPrivacyPolicy
 

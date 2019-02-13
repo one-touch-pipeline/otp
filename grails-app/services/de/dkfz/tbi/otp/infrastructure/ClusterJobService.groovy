@@ -269,6 +269,20 @@ class ClusterJobService {
     }
 
     /**
+     * returns the number of cluster jobs for specified period and projects
+     */
+    int getNumberOfClusterJobsForSpecifiedPeriodAndProjects(Date startDate = null, Date endDate = null, List<Project> projects) {
+        return ClusterJob.createCriteria().count {
+            individual {
+                'in'('project', projects)
+            }
+            if (startDate && endDate) {
+                between('started', new DateTime(startDate), new DateTime(endDate))
+            }
+        }
+    }
+
+    /**
      * returns a unique list of job classes in a specific time-span
      * existing in the Cluster Job table
      */

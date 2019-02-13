@@ -1,5 +1,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import spock.lang.Specification
 
@@ -11,14 +13,14 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import spock.lang.Unroll
 
 import java.time.ZoneId
 
 import static java.util.concurrent.TimeUnit.HOURS
 import static java.util.concurrent.TimeUnit.MINUTES
 
-@SuppressWarnings('MethodCount')
-class ClusterJobServiceSpec extends Specification {
+class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     static final org.joda.time.LocalDate SDATE_LOCALDATE = new org.joda.time.LocalDate()
     static final org.joda.time.LocalDate EDATE_LOCALDATE = SDATE_LOCALDATE.plusDays(1)
@@ -547,6 +549,30 @@ class ClusterJobServiceSpec extends Specification {
 
         expect:
         2 == clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, filter)
+    }
+
+    @Unroll
+    void "test getNumberOfClusterJobsForSpecifiedPeriodAndProjects for given date"() {
+        given:
+        Date baseDate = new Date(0, 0, 10)
+        Date startDate = startDateOffset  == null ? null : baseDate.minus(startDateOffset)
+        Date endDate = endDateOffset == null ? null : baseDate.minus(endDateOffset)
+
+        Project project = createProject()
+        Individual individual = DomainFactory.createIndividual(project: project)
+        ClusterJob clusterJob = DomainFactory.createClusterJob(individual: individual, started: new DateTime(baseDate.minus(1)))
+
+        when:
+        int clusterJobs = clusterJobService.getNumberOfClusterJobsForSpecifiedPeriodAndProjects(startDate, endDate, [clusterJob.individual.project])
+
+        then:
+        clusterJobs == expectedClusterJobs
+
+        where:
+        startDateOffset | endDateOffset || expectedClusterJobs
+        2               | 0             || 1
+        8               | 2             || 0
+        null            | null          || 1
     }
 
     void test_findAllJobClassesByDateBetween_WhenNoJobsFound_ShouldReturnEmptyList() {

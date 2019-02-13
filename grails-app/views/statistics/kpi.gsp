@@ -6,7 +6,7 @@
 </head>
 <body>
 <div class="body container">
-    <g:if test="${numberOfProject}">
+    <g:if test="${projectSelection}">
         <div class="col-xs-12">
             <h2>${projectSelection.getDisplayName()}</h2>
             <hr>
@@ -17,14 +17,49 @@
             </p>
         </div>
         <div class="col-xs-12 col-sm-12 statistics-container">
+            <div class="optionsContainer">
+                <g:form action="kpi" class="form-inline">
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <b>${g.message(code: "start.numbers.startDate")}</b>
+                        </div>
+                        <input type="date"class="form-control"  id="start" name="datepickerStartDate">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <b>${g.message(code: "start.numbers.endDate")}</b>
+                        </div>
+                        <input type="date"class="form-control"  id="end" name="datepickerEndDate">
+                    </div>
+                    <g:actionSubmit class="btn btn-primary" value="${g.message(code: "start.numbers.btnDate")}"
+                                    action="kpi"/>
+
+                </g:form>
+            </div>
+            <br>
+            <g:if test="${startDate && endDate}">
+                <br>
+                <div class="alert alert-info" role="alert">
+                    <span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+                    <span class="sr-only">${g.message(code: "start.numbers.info.sign")}</span>
+                    ${g.message(code: "start.numbers.info.users")}</div>
+            </g:if>
             <div class="statistics-box">
-                <p class="projects"><span class="hide-on-xs">${g.message(code: "start.numbers.numberOf")} </span>${g.message(code: "start.numbers.users")}
-                    <span class="highlight">${numberOfUsers}</span></p>
-                <p class="projects"><span class="hide-on-xs">${g.message(code: "start.numbers.numberOf")} </span>${g.message(code: "start.numbers.projects")}
+                <p class="projects"><span
+                        class="hide-on-xs">${g.message(code: "start.numbers.numberOf")}</span> ${g.message(code: "start.numbers.users")}
+                    <span class="highlight">${numberOfUsers} <g:if test="${numberOfCreatedUsers}">(${numberOfCreatedUsers})</g:if></span></p>
+
+                <p class="projects"><span
+                        class="hide-on-xs">${g.message(code: "start.numbers.numberOf")}</span> ${g.message(code: "start.numbers.projects")}
                     <span class="highlight">${numberOfProject}</span></p>
-                <p class="projects"><span class="hide-on-xs">${g.message(code: "start.numbers.numberOf")} </span>${g.message(code: "start.numbers.samples")}
+
+                <p class="projects"><span
+                        class="hide-on-xs">${g.message(code: "start.numbers.numberOf")}</span> ${g.message(code: "start.numbers.samples")}
                     <span class="highlight">${numberOfSamples}</span></p>
-                <p class="projects"><span class="hide-on-xs">${g.message(code: "start.numbers.numberOf")} </span>${g.message(code: "start.numbers.clusterJobs")}
+
+                <p class="projects"><span
+                        class="hide-on-xs">${g.message(code: "start.numbers.numberOf")}</span> ${g.message(code: "start.numbers.clusterJobs")}
                     <span class="highlight">${numberOfClusterJobs}</span></p>
             </div>
             Download <g:link action="downloadDirectoriesCSV">
@@ -38,5 +73,9 @@
 
     </g:else>
 </div>
+<script>
+    var startDate = '${startDate}';
+    var endDate = '${endDate}';
+</script>
 </body>
 </html>
