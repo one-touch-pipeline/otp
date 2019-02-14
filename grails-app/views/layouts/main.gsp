@@ -164,7 +164,7 @@
         <div id="infoBox"></div>
         <g:layoutBody/>
         <div class="footer" role="contentinfo">
-            &copy;2011-2018
+            &copy;2011-2019
             <a href="https://www.dkfz.de" target="_blank">DKFZ</a>,
             <a href="https://www.uni-heidelberg.de/" target="_blank">Universität Heidelberg</a>,
             <a href="https://www.charite.de/" target="_blank">Charité</a>,
