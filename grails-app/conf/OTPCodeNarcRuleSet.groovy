@@ -14,10 +14,16 @@ final int LOW = 4
 ruleset {
 
     description '''
-        A Sample Groovy RuleSet containing all CodeNarc Rules, grouped by category.
-        You can use this as a template for your own custom RuleSet.
-        Just delete the rules that you don't want to include.
+All the Rules that will be used for OTP
         '''
+
+    // OTP Rules
+    rule("file:grails-app/codenarcRules/ScheduledServiceBugRule.groovy")
+    rule("file:grails-app/codenarcRules/DoNotCreateServicesWithNewRule.groovy")
+    rule("file:grails-app/codenarcRules/EnumForBeanNameRule.groovy")
+    rule("file:grails-app/codenarcRules/AnnotationsForValidatorsRule.groovy")
+    rule("file:grails-app/codenarcRules/AnnotationsForStartJobsRule.groovy")
+    rule("file:grails-app/codenarcRules/AnnotationsForJobsRule.groovy")
 
     // rulesets/basic.xml
     AssertWithinFinallyBlock {
@@ -163,6 +169,42 @@ ruleset {
     }
     WhileStatementBraces {
         priority = CRITICAL
+    }
+
+    // rulesets/comments.xml
+    // ClassJavadoc we don't do this
+    JavadocConsecutiveEmptyLines {
+        priority = DEFAULT
+    }
+    JavadocEmptyAuthorTag {
+        priority = DEFAULT
+    }
+    JavadocEmptyExceptionTag {
+        priority = DEFAULT
+    }
+    JavadocEmptyFirstLine { //12
+        priority = HIGH
+    }
+    JavadocEmptyLastLine { //25
+        priority = HIGH
+    }
+    JavadocEmptyParamTag {
+        priority = DEFAULT
+    }
+    JavadocEmptyReturnTag { //25
+        priority = HIGH
+    }
+    JavadocEmptySeeTag {
+        priority = DEFAULT
+    }
+    JavadocEmptySinceTag {
+        priority = DEFAULT
+    }
+    JavadocEmptyThrowsTag {
+        priority = DEFAULT
+    }
+    JavadocEmptyVersionTag {
+        priority = DEFAULT
     }
 
     // rulesets/concurrency.xml
@@ -487,7 +529,8 @@ ruleset {
     BracesForTryCatchFinally {
         priority = DEFAULT
     }
-    //ClassJavadoc
+    // ClassEndsWithBlankLine we dont do this
+    // ClassStartsWithBlankLine we dont do this
     ClosureStatementOnOpeningLineOfMultipleLineClosure {
         priority = CRITICAL
     }
@@ -677,6 +720,9 @@ ruleset {
     ExplicitCallToPowerMethod {
         priority = CRITICAL
     }
+    ExplicitCallToPutAtMethod {
+        priority = CRITICAL
+    }
     ExplicitCallToRightShiftMethod {
         priority = CRITICAL
     }
@@ -734,7 +780,7 @@ ruleset {
         priority = CRITICAL
         comesBefore = false //to change to: Normal imports should appear before static imports
     }
-    //NoWildcardImports //does not fit with OTP-Convention of using only WildcardImports
+    //NoWildcardImports //does not fit with OTP-Convention of using only WildcardImports // :) i will fix TODO
     UnnecessaryGroovyImport {
         priority = MIDDLE
     }

@@ -216,7 +216,7 @@ newName: ${newDataFileName}
         dataFiles.each { DataFile dataFile ->
             String directFileName = lsdfFilesService.getFileFinalPath(dataFile)
             String vbpFileName = lsdfFilesService.getFileViewByPidPath(dataFile)
-            map.putAt(dataFile, [directFileName: directFileName, vbpFileName: vbpFileName])
+            map[dataFile] = [directFileName: directFileName, vbpFileName: vbpFileName]
         }
         return map
     }
