@@ -422,7 +422,6 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
 
     /**
      * Creates a very simple MetaDataEntry with minimum required fields.
-     * @return
      */
     private MetaDataEntry mockEntry() {
         DataFile dataFile = DomainFactory.createDataFile()

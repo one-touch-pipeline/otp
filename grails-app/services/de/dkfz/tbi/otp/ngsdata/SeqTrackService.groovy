@@ -386,7 +386,6 @@ LIMIT 1
      * @param run The Run
      * @param type The Type
      * @param lane The lane
-     * @return
      */
     private def getRunFilesWithTypeAndLane(Run run, FileType.Type type, String lane) {
         MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LANE_NO.name())

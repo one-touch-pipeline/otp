@@ -12,7 +12,6 @@ class RunDateParserService {
     * Best effort to parse a text with a format
     * @param format
     * @param text
-    * @return
     */
    static Date parseDate(String format, String text) {
        Date date = null

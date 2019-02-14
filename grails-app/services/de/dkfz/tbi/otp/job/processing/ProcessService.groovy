@@ -41,7 +41,6 @@ class ProcessService {
     /**
      * Security aware way to access a Process.
      * @param id The Process's id
-     * @return
      */
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
     Process getProcess(long id) {
@@ -75,7 +74,6 @@ class ProcessService {
     /**
      * Security aware way to access a ProcessingStep.
      * @param id The ProcessingStep's id
-     * @return
      */
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
     ProcessingStep getProcessingStep(long id) {
@@ -184,7 +182,6 @@ class ProcessService {
     /**
      * Overloaded method for convenience.
      * @param step
-     * @return
      * @see #getState(Process)
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -196,7 +193,6 @@ class ProcessService {
      * Returns the error message in case the last ProcessingStep failed.
      * If the last ProcessingStep did not fail, {@code null} is returned.
      * @param process The Process for which the possible error message should be returned.
-     * @return
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     String getError(Process process) {
@@ -210,7 +206,6 @@ class ProcessService {
     /**
      * Overloaded method for convenience.
      * @param step
-     * @return
      * @see #getError(Process)
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -225,7 +220,6 @@ class ProcessService {
     /**
      * Retrieves the last update date for the Process.
      * @param process
-     * @return
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Date getLastUpdate(Process process) {
@@ -235,7 +229,6 @@ class ProcessService {
     /**
      * Overloaded method for convenience
      * @param step
-     * @return
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Date getLastUpdate(ProcessingStep step) {
@@ -255,7 +248,6 @@ class ProcessService {
     /**
      * Retrieves the first update date for the ProcessingStep
      * @param step
-     * @return
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Date getFirstUpdate(ProcessingStep step) {
@@ -383,7 +375,6 @@ class ProcessService {
     /**
      * Helper function to retrieve the last ProcessingSTepUpdate for given Process.
      * @param process
-     * @return
      */
     private ProcessingStepUpdate lastUpdate(Process process) {
         return ProcessingStepUpdate.withCriteria {

@@ -15,7 +15,7 @@ ruleset {
 
     description '''
 All the Rules that will be used for OTP
-        '''
+'''
 
     // OTP Rules
     rule("file:grails-app/codenarcRules/ScheduledServiceBugRule.groovy")
@@ -191,8 +191,8 @@ All the Rules that will be used for OTP
     JavadocEmptyParamTag {
         priority = DEFAULT
     }
-    JavadocEmptyReturnTag { //25
-        priority = HIGH
+    JavadocEmptyReturnTag {
+        priority = CRITICAL
     }
     JavadocEmptySeeTag {
         priority = DEFAULT

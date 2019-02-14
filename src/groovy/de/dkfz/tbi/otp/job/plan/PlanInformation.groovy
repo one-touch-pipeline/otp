@@ -24,7 +24,6 @@ class PlanInformation implements Serializable {
     /**
      * Creates the PlanInformation for the given JobExecutionPlan
      * @param plan
-     * @return
      */
     static PlanInformation fromPlan(JobExecutionPlan plan) {
         PlanInformation ret = new PlanInformation()

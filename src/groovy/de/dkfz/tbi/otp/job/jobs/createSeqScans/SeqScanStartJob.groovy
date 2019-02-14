@@ -62,7 +62,6 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
 
    /**
      * returns number of running processes for this execution plan
-     * @return
      */
     private int numberOfRunningProcesses() {
         return Process.countByFinishedAndJobExecutionPlan(false, getJobExecutionPlan())

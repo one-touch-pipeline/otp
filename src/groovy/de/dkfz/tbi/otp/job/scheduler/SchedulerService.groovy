@@ -737,7 +737,6 @@ class SchedulerService {
     /**
      * Creates a Job for one ProcessingStep.
      * @param step
-     * @return
      */
     private Job createJob(ProcessingStep step) {
         Job job = grailsApplication.mainContext.getBean(step.jobDefinition.bean) as Job
@@ -899,7 +898,6 @@ class SchedulerService {
 
     /**
      * Getter for Unit Tests
-     * @return
      */
     protected Queue<ProcessingStep> getQueue() {
         return this.queue
@@ -907,7 +905,6 @@ class SchedulerService {
 
     /**
      * Getter for Unit Tests
-     * @return
      */
     List<Job> getRunning() {
         return this.running

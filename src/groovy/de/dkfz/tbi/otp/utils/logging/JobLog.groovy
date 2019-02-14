@@ -172,7 +172,6 @@ class JobLog implements Log {
      * Overloaded method for convenience.
      * @param message
      * @param throwable
-     * @return
      */
     private JobLogMessage wrap(Object message, Throwable throwable) {
         return new JobLogMessage(message, processingStep, throwable)

@@ -10,7 +10,6 @@ class MergedAlignmentDataFileService {
      * List of fileTypes with alignment is provided by FileTypeService
      *
      * @param scan
-     * @return
      */
 
     List<DataFile> alignmentSequenceFiles(SeqScan scan) {

@@ -16,7 +16,6 @@ class JobExecutionPlanService {
     /**
      * Security aware way to access a JobExecutionPlan.
      * @param id The JobExecutionPlan's id
-     * @return
      */
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
     JobExecutionPlan getPlan(long id) {
@@ -26,7 +25,6 @@ class JobExecutionPlanService {
     /**
      * Security aware way to access a JobDefinition.
      * @param id The JobDefinition's id
-     * @return
      */
     @PostAuthorize("hasRole('ROLE_OPERATOR')")
     JobDefinition getJobDefinition(long id) {
@@ -264,7 +262,6 @@ AND u.id IN (
     /**
      * Retrieves all JobDefinitions for the given JobExecutionPlan
      * @param plan
-     * @return
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<JobDefinition> jobDefinitions(JobExecutionPlan plan) {
@@ -285,7 +282,6 @@ AND u.id IN (
      *
      * Warning: This method is recursive
      * @param plan The plan for which all parents should be retrieved
-     * @return
      */
     protected List<JobExecutionPlan> withParents(JobExecutionPlan plan) {
         if (plan.previousPlan) {
