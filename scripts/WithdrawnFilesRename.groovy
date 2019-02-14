@@ -8,7 +8,6 @@ import de.dkfz.tbi.otp.dataprocessing.*
  * Withdrawn result files (ProcessedMergedBamFiles, RoddyBamFiles)
  * in the project folder are renamed by appending "-withdrawn",
  * for analysis instances complete directories are renamed.
- *
  */
 
 

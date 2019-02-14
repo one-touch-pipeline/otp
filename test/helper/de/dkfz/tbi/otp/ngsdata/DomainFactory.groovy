@@ -98,7 +98,6 @@ class DomainFactory {
      * @param requiredSearchProperties the properties ABSOLUTELY required by the test
      * @param defaultCreationProperties if no matching pre-existing object was found, use these parameters, combined
      * with the requiredSearchProperties, to create a new one (additional properties to make the creation pass validation)
-     *
      */
     private
     static <T> T findOrCreateDomainObject(Class<T> domainClass, Map defaultCreationProperties, Map requiredSearchProperties, boolean saveAndValidate = true) {
@@ -998,7 +997,6 @@ class DomainFactory {
      * <le> ProcessingOption with the allowed   processing options for the
      *
      * create processing thresholds for the merging workpa, the
-     *
      */
     static void initAnalysisForSamplePair(SamplePair samplePair) {
         [

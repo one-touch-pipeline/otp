@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.OtpException
 
 /**
  * Exception to indicate that updating a MetaDataEntry failed.
- *
  */
 class MetaDataEntryUpdateException extends OtpException {
     MetaDataEntry entry

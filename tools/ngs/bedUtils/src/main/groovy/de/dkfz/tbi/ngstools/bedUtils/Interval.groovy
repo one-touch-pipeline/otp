@@ -66,7 +66,6 @@ class Interval implements Comparable<Interval>{
      * <p>
      * so both [10,20] and [20,10] abut all of [21,30], [30,21], [0,9], [9,0]
      * </p>
-     *
      */
     boolean abuts(Interval other) {
         // compare both in ascending order, so we can ignore the direction in this comparison

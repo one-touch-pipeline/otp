@@ -11,7 +11,6 @@ class MetaDataEntry implements Entity {
     /**
      * does the value corresponds to a value
      * known in database (eg. sample)
-     *
      */
 
     enum Status {

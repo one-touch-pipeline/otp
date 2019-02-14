@@ -2,7 +2,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 /**
  * Defines the columns of the metadata file
- *
  */
 enum MetaDataColumn {
     FASTQ_FILE,

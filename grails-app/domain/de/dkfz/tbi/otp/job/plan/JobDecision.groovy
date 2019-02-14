@@ -11,7 +11,6 @@ import de.dkfz.tbi.otp.utils.Entity
  * @see DecidingJobDefinition
  * @see DecisionJob
  * @see DecisionMapping
- *
  */
 class JobDecision implements Entity {
     /**

@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.OtpException
 
 /**
  * Exception to indicate an error with the Changelog.
- *
  */
 class ChangelogException extends OtpException {
 

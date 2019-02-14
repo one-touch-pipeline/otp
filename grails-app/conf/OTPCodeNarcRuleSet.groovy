@@ -185,8 +185,8 @@ All the Rules that will be used for OTP
     JavadocEmptyFirstLine {
         priority = CRITICAL
     }
-    JavadocEmptyLastLine { //25
-        priority = HIGH
+    JavadocEmptyLastLine {
+        priority = CRITICAL
     }
     JavadocEmptyParamTag {
         priority = DEFAULT

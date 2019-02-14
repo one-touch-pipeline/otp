@@ -8,7 +8,6 @@ import de.dkfz.tbi.otp.utils.ProcessOutput
 
 /**
  * This service provides file operations
- *
  */
 class ExecutionHelperService {
 

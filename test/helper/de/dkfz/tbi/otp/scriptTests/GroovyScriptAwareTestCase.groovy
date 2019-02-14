@@ -14,7 +14,6 @@ import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
  * The tests that need such functionality must extend this class.
  * it is not possible to use this class in the unit tests
  * to call scripts creating domain objects
- *
  */
 @TestMixin(IntegrationTestMixin)
 abstract class GroovyScriptAwareTestCase extends AbstractIntegrationTest {

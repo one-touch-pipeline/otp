@@ -1,7 +1,6 @@
 /**
  * Delete NEW Individual/Sample/Sample Identifier
  * Only use this script if the domain object is totally new and no data is connected to it at all!
- *
  */
 
 import de.dkfz.tbi.otp.ngsdata.*

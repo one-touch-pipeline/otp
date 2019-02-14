@@ -181,7 +181,6 @@ enum SequenceSortColumn {
 
 /**
  * Class describing the various filtering to do on WorkPackage.
- *
  */
 class SequenceFiltering {
     List<String> project = []

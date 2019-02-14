@@ -13,7 +13,6 @@ class SeqScanService {
      * Build SeqScans
      * This functions search sequencing tracks which where not assigned
      * to any SeqScan and calls a method to build a specific SeqScan
-     *
      */
     @Deprecated
     void buildSeqScans() {

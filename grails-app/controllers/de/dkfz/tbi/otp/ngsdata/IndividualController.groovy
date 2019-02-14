@@ -398,7 +398,6 @@ class SamplesParser {
 }
 /**
  * Class describing the various filtering to do on Individual page.
- *
  */
 class IndividualFiltering {
     List<Long> project = []

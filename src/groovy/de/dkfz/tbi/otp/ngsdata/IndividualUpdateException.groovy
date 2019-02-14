@@ -4,7 +4,6 @@ import de.dkfz.tbi.otp.OtpException
 
 /**
  * Exception to indicate that updating an Individual failed.
- *
  */
 class IndividualUpdateException extends OtpException {
     Individual individual

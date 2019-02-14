@@ -442,7 +442,6 @@ class ProjectOverviewService {
      * <br> Example:[[patient1, sampleType1, SampleIdentifier1],[patient1, sampleType2, SampleIdentifier2],[patient1, sampleType3, SampleIdentifier3]...]
      * @param project the project for filtering the result
      * @return all combination of name of individual(mockPid) and sampleTypeName with the first SampleIdentifier as list
-     *
      */
     List<Object> overviewSampleIdentifier(Project project) {
         List<Object> sampleIdentifiers = SampleIdentifier.withCriteria {

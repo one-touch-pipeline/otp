@@ -7,7 +7,6 @@ import de.dkfz.tbi.otp.utils.*
  *
  * It check the size in the file system with the one saved in the database. If they differ,
  * the value in the database are updated and the change is logged in the comment.
- *
  */
 
 String runname = ''

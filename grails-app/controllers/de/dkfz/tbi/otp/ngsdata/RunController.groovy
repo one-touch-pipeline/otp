@@ -102,7 +102,6 @@ enum RunSortColumn {
 
 /**
  * Class describing the various filtering to do on WorkPackage.
- *
  */
 class RunFiltering {
     List<String> name = []

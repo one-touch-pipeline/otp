@@ -209,7 +209,6 @@ newName: ${newDataFileName}
 
     /**
      * creates a map containing for every Datafile of the list the direct and the viewByPid file name as map.
-     *
      */
     Map<DataFile, Map<String, String>> collectFileNamesOfDataFiles(List<DataFile> dataFiles) {
         Map<DataFile, Map<String, String>> map = [:]
@@ -1086,7 +1085,6 @@ chmod 440 ${newDirectFileName}
      * - the run itself
      *
      * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
-     *
      */
     List<File> deleteRun(Run run, StringBuilder outputStringBuilder) {
         notNull(run, "The input run of the method deleteRun is null")
@@ -1437,7 +1435,6 @@ chmod 440 ${newDirectFileName}
      *
      * The DB is changed automatically.
      * For the filesystem changes a script is written to ${scriptOutputDirectory} on the server running otp
-     *
      */
     //no test written, because a new data swap function are planned
     void swapLane(Map<String, String> inputInformationOTP, Map<String, String> dataFileMap, String bashScriptName,

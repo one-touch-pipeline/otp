@@ -10,7 +10,6 @@
  *  Other object like SeqTracks or AlignmentLogs or MergingLogs or further processing objects are not deleted.
  *
  *  Therefore it shouldn't be called after buildSequenceTracks of the load meta data workflow has run for any of its run segments.
- *
  */
 
 import de.dkfz.tbi.otp.ngsdata.*

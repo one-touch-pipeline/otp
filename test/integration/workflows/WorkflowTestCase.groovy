@@ -37,7 +37,6 @@ import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndAssertExitCodeAnd
  *
  * To run the workflow tests the preparation steps described in
  * src/docs/guide/testing.md have to be followed.
- *
  */
 @Log4j
 @TestMixin(IntegrationTestMixin)
@@ -429,7 +428,6 @@ echo \$TEMP_DIR
      * first.
      *
      * @return the root directory set in the configuration file, or the default location otherwise.
-     *
      */
     protected File getResultRootDirectory() {
         return configService.getWorkflowTestResultRootDir()

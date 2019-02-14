@@ -9,7 +9,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 /**
  * Represents a merged bam file stored on the file system
  * which was processed externally (not in OTP)
- *
  */
 class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 

@@ -10,7 +10,6 @@
  * - bam file is the latest for the mergingWorkPackage
  *
  * Fo these bam files all not passed thressholds are listed
- *
  */
 
 import de.dkfz.tbi.otp.dataprocessing.*

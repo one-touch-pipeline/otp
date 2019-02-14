@@ -8,7 +8,6 @@ import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 
 /**
  * Very simple Test implementation of the EndStateAware interface which fails.
- *
  */
 @Component("testFailureEndStateAwareJob")
 @Scope("prototype")
