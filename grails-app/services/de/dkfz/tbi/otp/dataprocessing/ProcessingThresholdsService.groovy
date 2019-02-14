@@ -7,7 +7,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 class ProcessingThresholdsService {
 
     /**
-     *
      * @return List of ProcessingThresolds for an project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

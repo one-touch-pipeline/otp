@@ -5,7 +5,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 class SeqCenterService {
 
     /**
-     *
      * @return List of all available SeqCenters
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

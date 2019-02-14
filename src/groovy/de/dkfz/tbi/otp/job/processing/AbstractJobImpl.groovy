@@ -92,7 +92,6 @@ abstract class AbstractJobImpl implements Job {
     }
 
     /**
-     *
      * @return The current state of the Job
      */
     protected State getState() {

@@ -59,7 +59,6 @@ class ProjectService {
     FileService fileService
 
     /**
-     *
      * @return List of all available Projects
      */
     @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')")

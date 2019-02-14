@@ -33,7 +33,6 @@ abstract class AbstractDecisionJobImpl extends AbstractEndStateAwareJobImpl impl
     }
 
     /**
-     *
      * @return List of available decisions the Job can take ordered by ID.
      */
     protected final List<JobDecision> getAvailableDecisions() {

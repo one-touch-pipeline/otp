@@ -182,8 +182,8 @@ All the Rules that will be used for OTP
     JavadocEmptyExceptionTag {
         priority = DEFAULT
     }
-    JavadocEmptyFirstLine { //12
-        priority = HIGH
+    JavadocEmptyFirstLine {
+        priority = CRITICAL
     }
     JavadocEmptyLastLine { //25
         priority = HIGH
@@ -780,7 +780,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
         comesBefore = false //to change to: Normal imports should appear before static imports
     }
-    //NoWildcardImports //does not fit with OTP-Convention of using only WildcardImports // :) i will fix TODO
+    //NoWildcardImports //does not fit with OTP-Convention of using WildcardImports for 3+ imports
     UnnecessaryGroovyImport {
         priority = MIDDLE
     }

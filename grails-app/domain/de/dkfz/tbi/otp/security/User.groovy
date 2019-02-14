@@ -54,7 +54,6 @@ class User implements TimeStamped, Entity {
     }
 
     /**
-     *
      * @return User without any security relevant information.
      */
     User sanitizedUser() {
@@ -62,7 +61,6 @@ class User implements TimeStamped, Entity {
     }
 
     /**
-     *
      * @return Map with information about User without any security relevant information.
      */
     Map sanitizedUserMap() {

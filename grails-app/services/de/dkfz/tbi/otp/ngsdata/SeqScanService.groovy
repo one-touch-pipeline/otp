@@ -10,7 +10,6 @@ class SeqScanService {
     private final Lock buildSeqScanLock = new ReentrantLock()
 
     /**
-     *
      * Build SeqScans
      * This functions search sequencing tracks which where not assigned
      * to any SeqScan and calls a method to build a specific SeqScan
@@ -194,7 +193,6 @@ class SeqScanService {
     }
 
     /**
-     *
      * Fills SeqScan object with numbers derived from
      * its SeqTrack objects. Coverage is calculated as
      * number of base pairs divided by genome size (3e9).
@@ -217,7 +215,6 @@ class SeqScanService {
     }
 
     /**
-     *
      *  Most of samples are sequenced in one sequence center
      *  if this is the case the string seqCenter for a given
      *  SeqScan is filed.
@@ -241,7 +238,6 @@ class SeqScanService {
     }
 
     /**
-     *
      * fills insert size as string
      * in case of mixed library "!" signs
      * are used
