@@ -11,12 +11,6 @@ beans = {
     context.'component-scan'('base-package' :"de.dkfz.tbi.otp" )
 
     if (Environment.getCurrent() == Environment.TEST) {
-        trueExecutorService(grails.plugin.executor.PersistenceContextExecutorWrapper) { bean ->
-            bean.destroyMethod = 'destroy'
-            persistenceInterceptor = ref("persistenceInterceptor")
-            executor = java.util.concurrent.Executors.newCachedThreadPool()
-        }
-        executorService(de.dkfz.tbi.otp.scheduler.SynchronousTestingExecutorService)
         fileSystemService(de.dkfz.tbi.otp.job.processing.TestFileSystemService)
     } else {
         // proper thread pool

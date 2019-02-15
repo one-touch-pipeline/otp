@@ -94,7 +94,6 @@ grails.project.dependency.resolution = {
         compile "org.grails.plugins:spring-security-core:2.0.0"
         compile "org.grails.plugins:spring-security-ldap:2.0.1"
         compile "org.grails.plugins:spring-security-acl:2.0.1"
-        compile ":executor:0.3"
         compile ":console:1.5.12"
         compile ":mail:1.0.7"
         // used by gitlab

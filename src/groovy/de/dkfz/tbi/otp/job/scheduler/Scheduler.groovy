@@ -12,8 +12,6 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 
-import java.util.concurrent.ExecutorService
-
 import static org.springframework.util.Assert.notNull
 
 /**
@@ -38,9 +36,6 @@ class Scheduler {
 
     @Autowired
     ErrorLogService errorLogService
-
-    @Autowired
-    ExecutorService executorService
 
     @Autowired
     GrailsApplication grailsApplication

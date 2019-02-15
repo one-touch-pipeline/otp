@@ -12,8 +12,6 @@ import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
-import java.util.concurrent.ExecutionException
-
 import static org.junit.Assert.*
 
 class SchedulerServiceTests extends AbstractIntegrationTest {
@@ -39,6 +37,9 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         schedulerService.startupOk = true
         schedulerService.queue.clear()
         schedulerService.running.clear()
+        schedulerService.metaClass.executeInNewThread = { Closure job ->
+            job()
+        }
         restartCheckerService.metaClass.canWorkflowBeRestarted = { ProcessingStep step -> false }
     }
 
@@ -47,6 +48,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         schedulerService.schedulerActive = originalSchedulerActive
         schedulerService.startupOk = originalStartupOk
         TestCase.removeMetaClass(RestartCheckerService, restartCheckerService)
+        TestCase.removeMetaClass(SchedulerService, schedulerService)
     }
 
 
@@ -253,9 +255,9 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.running.isEmpty())
         schedulerService.schedule()
         // mapping the parameters from the second Job should have failed
-        assert shouldFail(ExecutionException, {
+        assert shouldFail(SchedulerException, {
             schedulerService.schedule()
-        }).contains('SchedulerException')
+        })
         assertQueueAndRunningToBeEmpty()
         assertFalse(process.finished)
         // the last JobDefinition should have a ProcessingStep with a created and a failed update
@@ -784,9 +786,9 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         schedulerService.createProcess(job, [])
 
         // schedule
-        assert shouldFail(ExecutionException, {
+        assert shouldFail(SchedulerException, {
             schedulerService.schedule()
-        }).contains('SchedulerException')
+        })
     }
 
     @Test
@@ -818,7 +820,9 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         )
         assertNotNull(update.save(flush: true))
         assertTrue(schedulerService.queue.add(step))
+
         schedulerService.schedule()
+
         assertFalse(process.finished)
         // verify first job
         assertEquals(3, ProcessingStepUpdate.countByProcessingStep(step))

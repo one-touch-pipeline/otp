@@ -1,5 +1,6 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
 import org.apache.log4j.Logger
@@ -17,14 +18,14 @@ import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.job.JobMailService
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 import de.dkfz.tbi.otp.utils.logging.*
 
-import java.util.concurrent.Callable
-import java.util.concurrent.ExecutorService
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
+import static grails.async.Promises.task
 import static org.springframework.util.Assert.notNull
 
 @Scope("singleton")
@@ -37,9 +38,6 @@ class SchedulerService {
 
     @Autowired
     ApplicationContext applicationContext
-
-    @Autowired
-    ExecutorService executorService
 
     @Autowired
     JobMailService jobMailService
@@ -299,8 +297,17 @@ class SchedulerService {
         }
 
         if (job) {
-            // start the Job in an own thread
-            executorService.submit({ grailsApplication.mainContext.scheduler.executeJob(job) } as Callable)
+            executeInNewThread {
+                grailsApplication.mainContext.scheduler.executeJob(job)
+            }
+        }
+    }
+
+    protected void executeInNewThread(Closure job) {
+        task {
+            Realm.withNewSession  {
+                job()
+            }
         }
     }
 

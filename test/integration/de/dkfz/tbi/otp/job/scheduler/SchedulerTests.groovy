@@ -1,9 +1,9 @@
 package de.dkfz.tbi.otp.job.scheduler
 
+
 import org.apache.commons.logging.impl.NoOpLog
 import org.codehaus.groovy.grails.commons.GrailsApplication
-import org.junit.After
-import org.junit.Test
+import org.junit.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
@@ -14,7 +14,6 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-import java.util.concurrent.ExecutorService
 import java.util.regex.Pattern
 
 import static org.junit.Assert.*
@@ -23,12 +22,19 @@ class SchedulerTests extends AbstractIntegrationTest {
 
     GrailsApplication grailsApplication
     Scheduler scheduler
-    SchedulerService schedulerService
+
+    @Before
+    void setup() {
+        scheduler.schedulerService.metaClass.executeInNewThread = { Closure job ->
+            job()
+        }
+    }
 
     @After
     void tearDown() {
         TestCase.removeMetaClass(JobMailService, scheduler.jobMailService)
         TestCase.removeMetaClass(RestartHandlerService, scheduler.restartHandlerService)
+        TestCase.removeMetaClass(SchedulerService, scheduler.schedulerService)
     }
 
     @Test
@@ -367,15 +373,5 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertEquals(ExecutionState.FINISHED, updates[2].state)
         assertEquals(ExecutionState.SUCCESS, updates[3].state)
         assertTrue(step.process.finished)
-    }
-
-    private void doWithTrueExecutorService(final Closure closure) {
-        final ExecutorService originalExecutorService = scheduler.executorService
-        scheduler.executorService = grailsApplication.mainContext.trueExecutorService
-        try {
-            closure()
-        } finally {
-            scheduler.executorService = originalExecutorService
-        }
     }
 }

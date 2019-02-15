@@ -1,8 +1,9 @@
 package de.dkfz.tbi.otp.job.processing
 
+import grails.async.Promise
+import grails.async.PromiseList
 import grails.converters.JSON
 import grails.util.GrailsNameUtils
-import groovyx.gpars.GParsPool
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 
@@ -12,11 +13,13 @@ import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.restarting.RestartActionService
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-import java.util.concurrent.Future
+import static grails.async.Promises.task
+import static grails.async.Promises.waitAll
 
 class ProcessesController {
     private enum PlanStatus {
@@ -70,69 +73,61 @@ class ProcessesController {
 
         Map<String, Long> processCounts
         Map<String, Long> finishedProcessCounts
-        Map<String, Long> failedProcessCounts
-        Map<String, Date> lastSuccessDates
-        Map<String, Date> lastFailureDates
 
         Authentication auth = SecurityContextHolder.context.authentication
-
-        GParsPool.withPool() {
-            Future failedProcessesCount = {
-                SecurityContextHolder.context.authentication = auth
-                try {
+        Promise failedProcessesPromise = task {
+            SecurityContextHolder.context.authentication = auth
+            try {
+                Realm.withNewSession {
                     jobExecutionPlanService.failedProcessCount()
-                } finally {
-                    SecurityContextHolder.context.authentication = null
                 }
-            }.async()()
+            } finally {
+                SecurityContextHolder.context.authentication = null
+            }
+        }
 
-            Closure lastSuccessDatesClosure = {
-                SecurityContextHolder.context.authentication = auth
-                try {
+        Promise lastSuccessDatesPromise = task {
+            SecurityContextHolder.context.authentication = auth
+            try {
+                Realm.withNewSession {
                     jobExecutionPlanService.lastProcessDate(ExecutionState.SUCCESS)
-                } finally {
-                    SecurityContextHolder.context.authentication = null
                 }
+            } finally {
+                SecurityContextHolder.context.authentication = null
             }
-            Closure lastSuccessDatesClosureAsync = lastSuccessDatesClosure.async()
-            Future lastSuccessDatesFuture = lastSuccessDatesClosureAsync()
-
-            Closure lastFailureDatesClosure = {
-                SecurityContextHolder.context.authentication = auth
-                try {
+        }
+        Promise lastFailureDatesPromise = task {
+            SecurityContextHolder.context.authentication = auth
+            try {
+                Realm.withNewSession {
                     jobExecutionPlanService.lastProcessDate(ExecutionState.FAILURE)
-                } finally {
-                    SecurityContextHolder.context.authentication = null
                 }
+            } finally {
+                SecurityContextHolder.context.authentication = null
             }
-            Closure lastFailureDatesClosureAsync = lastFailureDatesClosure.async()
-            Future lastFailureDatesFuture = lastFailureDatesClosureAsync()
+        }
 
-            processCounts = jobExecutionPlanService.processCount()
-            finishedProcessCounts = jobExecutionPlanService.finishedProcessCount()
-            failedProcessCounts = failedProcessesCount.get()
-            lastSuccessDates = lastSuccessDatesFuture.get()
-            lastFailureDates = lastFailureDatesFuture.get()
+        processCounts = jobExecutionPlanService.processCount()
+        finishedProcessCounts = jobExecutionPlanService.finishedProcessCount()
+        def (failedProcessesResult,lastSuccessDatesResult,lastFailureDatesResult) = waitAll(failedProcessesPromise,lastSuccessDatesPromise,lastFailureDatesPromise)
+        plans.each { plan ->
+            long allProcessesCount = processCounts[plan.name] ?: 0L
+            long finishedProcessesCount = finishedProcessCounts[plan.name] ?: 0L
+            long failedProcessCount = failedProcessesResult[plan.name] ?: 0L
+            Date successDate = lastSuccessDatesResult[plan.name]
+            Date failureDate = lastFailureDatesResult[plan.name]
 
-            dataToRender.aaData = plans.collectParallel { plan ->
-                long allProcessesCount = processCounts[plan.name] ?: 0L
-                long finishedProcessesCount = finishedProcessCounts[plan.name] ?: 0L
-                long failedProcessCount = failedProcessCounts[plan.name] ?: 0L
-                Date successDate = lastSuccessDates[plan.name]
-                Date failureDate = lastFailureDates[plan.name]
-
-                [
-                        name                    : plan.name,
-                        id                      : plan.id,
-                        enabled                 : plan.enabled,
-                        allProcessesCount       : allProcessesCount,
-                        finishedProcessesCount  : finishedProcessesCount,
-                        failedProcessesCount    : failedProcessCount,
-                        runningProcessesCount   : allProcessesCount - finishedProcessesCount,
-                        lastSuccessfulDate      : successDate,
-                        lastFailureDate         : failureDate,
-                ]
-            }
+            dataToRender.aaData << [
+                    name                    : plan.name,
+                    id                      : plan.id,
+                    enabled                 : plan.enabled,
+                    allProcessesCount       : allProcessesCount,
+                    finishedProcessesCount  : finishedProcessesCount,
+                    failedProcessesCount    : failedProcessCount,
+                    runningProcessesCount   : allProcessesCount - finishedProcessesCount,
+                    lastSuccessfulDate      : successDate,
+                    lastFailureDate         : failureDate,
+            ]
         }
 
         // perform sorting on fetched data
@@ -266,11 +261,11 @@ class ProcessesController {
         List<ProcessingStep> steps = processService.getAllProcessingSteps(process, cmd.iDisplayLength, cmd.iDisplayStart, "id", cmd.sortOrder)
         dataToRender.iTotalRecords = processService.getNumberOfProcessessingSteps(process)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
-        List futures = []
+        PromiseList promiseList = new PromiseList()
         def auth = SecurityContextHolder.context.authentication
         steps.each { ProcessingStep step ->
             // spin off threads to fetch the data in parallel
-            futures << callAsync {
+            promiseList << {
                 SecurityContextHolder.context.authentication = auth
                 Map data = [:]
                 ProcessingStepUpdate update = processService.getLatestProcessingStepUpdate(step)
@@ -283,8 +278,7 @@ class ProcessesController {
                 return data
             }
         }
-        futures.each { future ->
-            def data = future.get()
+        promiseList.get().each { data ->
             def actions = []
             if (data.state == ExecutionState.FAILURE && !Process.findByRestarted(process)) {
                 actions << "restart"
