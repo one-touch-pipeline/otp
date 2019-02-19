@@ -10,7 +10,7 @@ class RealBedFileTest {
 
     @Before
     void setUp() throws Exception {
-        String bedFilePath = "./testdata/Agilent4withoutUTRs_chr.bed"
+        String bedFilePath = "./testdata/test.bed"
         List<String> referenceGenomeEntryNames = [
             "chr1", "chr10", "chr11", "chr12", "chr13", "chr14", "chr15", "chr16",
             "chr17", "chr18", "chr19", "chr2", "chr20", "chr21", "chr22", "chr3",
@@ -32,16 +32,16 @@ class RealBedFileTest {
      */
     @Test
     void testBasicStats() {
-        assertEquals(51189318, targetIntervalsImpl.baseCount)
-        assertEquals(51189318, targetIntervalsImpl.uniqueBaseCount)
+        assertEquals(39973, targetIntervalsImpl.baseCount)
+        assertEquals(39973, targetIntervalsImpl.uniqueBaseCount)
     }
 
     /**
-     * target before last interval which is (chr1, 249210699, 249212659)
+     * target before last interval which is (chr1, 626534, 627367)
      */
     @Test
     void testTargetBeforeLastInterval() {
-        Interval target = new Interval(249210499L, 249210599L)
+        Interval target = new Interval(626400L, 626500L)
         List<Interval> overlappingIntervals = targetIntervalsImpl.getOverlappingIntervals("chr1", target.from, target.to)
         assertEquals(0, overlappingIntervals.size)
     }
@@ -51,7 +51,7 @@ class RealBedFileTest {
      */
     @Test
     void testTargetInLastInterval() {
-        Interval target = new Interval(249211000L, 249211100L)
+        Interval target = new Interval(626600L, 627300L)
         List<Interval> overlappingIntervals = targetIntervalsImpl.getOverlappingIntervals("chr1", target.from, target.to)
         assertEquals(1, overlappingIntervals.size)
     }
@@ -61,7 +61,7 @@ class RealBedFileTest {
      */
     @Test
     void testTargetBeyondLastInterval() {
-        Interval target = new Interval(249212800L, 249212900L)
+        Interval target = new Interval(627400L, 627500L)
         List<Interval> overlappingIntervals = targetIntervalsImpl.getOverlappingIntervals("chr1", target.from, target.to)
         assertEquals(0, overlappingIntervals.size)
     }
