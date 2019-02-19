@@ -218,7 +218,7 @@ class ExecuteWgbsAlignmentJobTests {
         assert lines.get(0).trim() == executeWgbsAlignmentJob.HEADER.trim()
 
 
-        DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks).each {
+        DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks as List).each {
             String oneLine = "${it.sampleType.dirName}\t${it.seqTrack.getLibraryDirectoryName()}\t${it.individual.pid}\t${it.seqType.libraryLayoutDirName}\t${it.run.dirName}\t${it.mateNumber}\t${lsdfFilesService.getFileViewByPidPath(it)}"
 
             assert lines.contains(oneLine)

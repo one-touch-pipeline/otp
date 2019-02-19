@@ -102,7 +102,7 @@ class TrackingService {
                 }
             }
         }
-        return OtrsTicket.findAllByIdInList(otrsIds, [lock: true]) as Set
+        return (otrsIds ? OtrsTicket.findAllByIdInList(otrsIds, [lock: true]) : []) as Set
     }
 
     void setStarted(Collection<OtrsTicket> otrsTickets, OtrsTicket.ProcessingStep step) {

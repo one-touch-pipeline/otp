@@ -63,10 +63,11 @@ class DataSwapService {
      * @param metaDataKey the key of the MetaDataEntry
      */
     void changeMetadataEntry(Sample sample, String metaDataKey, String oldValue, String newValue) {
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrackInList(SeqTrack.findAllBySample(sample))
+        List<SeqTrack> seqtracks = SeqTrack.findAllBySample(sample)
+        List<DataFile> dataFiles = seqtracks ? DataFile.findAllBySeqTrackInList(seqtracks) : []
         List<MetaDataKey> sampleIdentifierKeys = MetaDataKey.findAllByName(metaDataKey)
         assert sampleIdentifierKeys.unique().size() == 1
-        List<MetaDataEntry> metaDataEntries = MetaDataEntry.findAllByValueAndDataFileInListAndKey(oldValue, dataFiles, sampleIdentifierKeys.first())
+        List<MetaDataEntry> metaDataEntries = dataFiles ? MetaDataEntry.findAllByValueAndDataFileInListAndKey(oldValue, dataFiles, sampleIdentifierKeys.first()) : []
         metaDataEntries.each {
             it.value = newValue
             it.save()
@@ -136,7 +137,7 @@ class DataSwapService {
      * @return the dataFiles for the seqTracks
      */
     List<DataFile> getAndValidateAndShowDataFilesForSeqTracks(List<SeqTrack> seqTracks, Map<String, String> dataFileMap, StringBuilder outputStringBuilder) {
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrackInList(seqTracks)
+        List<DataFile> dataFiles = seqTracks ? DataFile.findAllBySeqTrackInList(seqTracks) : []
         outputStringBuilder << "\n  dataFiles (${dataFiles.size()}):"
         dataFiles.each { outputStringBuilder << "\n    - ${it}" }
         notEmpty(dataFiles)
@@ -155,7 +156,7 @@ class DataSwapService {
      */
     List<DataFile> getAndValidateAndShowAlignmentDataFilesForSeqTracks(
             List<SeqTrack> seqTracks, Map<String, String> dataFileMap, StringBuilder outputStringBuilder) {
-        List<AlignmentLog> alignmentsLog = AlignmentLog.findAllBySeqTrackInList(seqTracks)
+        List<AlignmentLog> alignmentsLog = seqTracks ? AlignmentLog.findAllBySeqTrackInList(seqTracks) : []
         if (!alignmentsLog) {
             return []
         }
@@ -411,7 +412,7 @@ chmod 440 ${newDirectFileName}
         isTrue(oldIndividual.project == oldProject, "old individual ${oldPid} should be in project ${oldProjectName}, " +
                 "but was in ${oldIndividual.project}")
 
-        List<SeqTrack> seqTracks = SeqTrack.findAllBySampleInList(samples)
+        List<SeqTrack> seqTracks = samples ? SeqTrack.findAllBySampleInList(samples) : []
         outputStringBuilder << "\n  seqtracks (${seqTracks.size()}): "
         seqTracks.each { outputStringBuilder << "\n    - ${it}" }
 
@@ -423,7 +424,7 @@ chmod 440 ${newDirectFileName}
         throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTracks)
 
         // now the changing process(procedure) starts
-        if (AlignmentPass.findBySeqTrackInList(seqTracks)) {
+        if (seqTracks && AlignmentPass.findBySeqTrackInList(seqTracks)) {
             outputStringBuilder << "\n -->     found alignments for seqtracks (${AlignmentPass.findAllBySeqTrackInList(seqTracks)*.seqTrack.unique()}): "
         }
 
@@ -470,8 +471,8 @@ chmod 440 ${newDirectFileName}
 
 
         samples = Sample.findAllByIndividual(oldIndividual)
-        seqTracks = SeqTrack.findAllBySampleInList(samples)
-        List<DataFile> newDataFiles = DataFile.findAllBySeqTrackInList(seqTracks)
+        seqTracks = samples ? SeqTrack.findAllBySampleInList(samples) : []
+        List<DataFile> newDataFiles = seqTracks ? DataFile.findAllBySeqTrackInList(seqTracks) : []
         List<String> newFastqcFileNames = newDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
 
         bashScriptToMoveFiles << "\n\n\n ################ move fastq files ################ \n"
@@ -574,7 +575,7 @@ chmod 440 ${newDirectFileName}
             throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTrackList)
         }
 
-        if (AlignmentPass.findBySeqTrackInList(seqTrackList)) {
+        if (seqTrackList && AlignmentPass.findBySeqTrackInList(seqTrackList)) {
             outputStringBuilder << "\n -->     found alignments for seqtracks (${AlignmentPass.findBySeqTrackInList(seqTrackList)*.seqTrack.unique()}): "
         }
 
@@ -603,7 +604,7 @@ chmod 440 ${newDirectFileName}
             groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
         }
 
-        if (AlignmentPass.findBySeqTrackInList(seqTrackList)) {
+        if (seqTrackList && AlignmentPass.findBySeqTrackInList(seqTrackList)) {
             bashScriptToMoveFiles << "\n\n\n ################ delete old aligned & merged files ################ \n"
 
             List<AlignmentPass> alignmentPasses = AlignmentPass.findAllBySeqTrackInList(seqTrackList)
@@ -767,12 +768,12 @@ chmod 440 ${newDirectFileName}
         Sample sample = getSingleSampleForIndividualAndSampleType(individual, sampleType, outputStringBuilder)
 
         List<SeqTrack> seqTracks = getAndShowSeqTracksForSample(sample, outputStringBuilder)
-        isNull(AlignmentPass.findBySeqTrackInList(seqTracks))
+        assert !seqTracks || !AlignmentPass.findBySeqTrackInList(seqTracks)
 
         throwExceptionInCaseOfExternalMergedBamFileIsAttached(seqTracks)
         throwExceptionInCaseOfSeqTracksAreOnlyLinked(seqTracks)
 
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrackInList(seqTracks)
+        List<DataFile> dataFiles = seqTracks ? DataFile.findAllBySeqTrackInList(seqTracks) : []
         outputStringBuilder << "\n  dataFiles (${dataFiles.size()}):"
         dataFiles.each { outputStringBuilder << "\n    - ${it}" }
         notEmpty(dataFiles, " no datafiles found for ${sample}")
@@ -797,7 +798,9 @@ chmod 440 ${newDirectFileName}
             outputStringBuilder << "\n    deleted datafile ${it} inclusive fastqc and metadataentries"
         }
 
-        MergingAssignment.findAllBySeqTrackInList(seqTracks)*.delete(flush: true)
+        if (seqTracks) {
+            MergingAssignment.findAllBySeqTrackInList(seqTracks)*.delete(flush: true)
+        }
 
         seqTracks.each {
             it.delete(flush: true)
@@ -857,18 +860,25 @@ chmod 440 ${newDirectFileName}
         if (abstractBamFile instanceof ProcessedBamFile) {
             List<QualityAssessmentPass> qualityAssessmentPasses = QualityAssessmentPass.findAllByProcessedBamFile(abstractBamFile)
 
-            ChromosomeQualityAssessment.findAllByQualityAssessmentPassInList(qualityAssessmentPasses)*.delete()
-            OverallQualityAssessment.findAllByQualityAssessmentPassInList(qualityAssessmentPasses)*.delete()
+            if (qualityAssessmentPasses) {
+                ChromosomeQualityAssessment.findAllByQualityAssessmentPassInList(qualityAssessmentPasses)*.delete()
+                OverallQualityAssessment.findAllByQualityAssessmentPassInList(qualityAssessmentPasses)*.delete()
+            }
+
             qualityAssessmentPasses*.delete()
         } else if (abstractBamFile instanceof ProcessedMergedBamFile) {
             List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
 
-            ChromosomeQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
-            OverallQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
+            if (qualityAssessmentMergedPasses) {
+                ChromosomeQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
+                OverallQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
+            }
             qualityAssessmentMergedPasses*.delete()
         } else if (abstractBamFile instanceof RoddyBamFile) {
             List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
-            RoddyQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
+            if (qualityAssessmentMergedPasses) {
+                RoddyQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
+            }
             qualityAssessmentMergedPasses*.delete()
         } else {
             throw new RuntimeException("This BamFile type " + abstractBamFile + " is not supported")
@@ -897,13 +907,15 @@ chmod 440 ${newDirectFileName}
             throw new RuntimeException("There is not one unique mergingWorkPackage for ProcessedBamFile " + processedBamFile)
         } else {
             MergingWorkPackage mergingWorkPackage = mergingWorkPackages.first()
-            List<MergingPass> mergingPasses = MergingPass.findAllByMergingSetInList(mergingSets).unique()
-            List<ProcessedMergedBamFile> processedMergedBamFiles = ProcessedMergedBamFile.findAllByMergingPassInList(mergingPasses)
+            List<MergingPass> mergingPasses = mergingSets ? MergingPass.findAllByMergingSetInList(mergingSets).unique() : []
+            List<ProcessedMergedBamFile> processedMergedBamFiles = mergingPasses ? ProcessedMergedBamFile.findAllByMergingPassInList(mergingPasses) : []
 
             mergingSetAssignments*.delete(flush: true)
 
-            BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(processedMergedBamFiles, processedMergedBamFiles).each {
-                dirsToDeleteWithOtherUser << AnalysisDeletionService.deleteInstance(it)
+            if (processedMergedBamFiles) {
+                BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(processedMergedBamFiles, processedMergedBamFiles).each {
+                    dirsToDeleteWithOtherUser << AnalysisDeletionService.deleteInstance(it)
+                }
             }
 
             processedMergedBamFiles.each { ProcessedMergedBamFile processedMergedBamFile ->
@@ -981,7 +993,9 @@ chmod 440 ${newDirectFileName}
 
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
 
-        ProcessedSaiFile.findAllByDataFileInList(dataFiles)*.delete(flush: true)
+        if (dataFiles) {
+            ProcessedSaiFile.findAllByDataFileInList(dataFiles)*.delete(flush: true)
+        }
 
         // for ProcessedMergedBamFiles
         AlignmentPass.findAllBySeqTrack(seqTrack).each { AlignmentPass alignmentPass ->
@@ -1014,8 +1028,10 @@ chmod 440 ${newDirectFileName}
             }
         }
 
-        BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(bamFiles, bamFiles).each {
-            dirsToDeleteWithOtherUser << AnalysisDeletionService.deleteInstance(it)
+        if (bamFiles) {
+            BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(bamFiles, bamFiles).each {
+                dirsToDeleteWithOtherUser << AnalysisDeletionService.deleteInstance(it)
+            }
         }
 
         bamFiles.each { RoddyBamFile bamFile ->
@@ -1045,7 +1061,9 @@ chmod 440 ${newDirectFileName}
         notNull(seqScan, "The input seqScan of the method deleteSeqScanAndCorrespondingInformation is null")
 
         List<MergingLog> mergingLogs = MergingLog.findAllBySeqScan(seqScan)
-        MergedAlignmentDataFile.findAllByMergingLogInList(mergingLogs)*.delete()
+        if (mergingLogs) {
+            MergedAlignmentDataFile.findAllByMergingLogInList(mergingLogs)*.delete()
+        }
         mergingLogs*.delete()
         seqScan.delete()
     }
@@ -1169,7 +1187,7 @@ chmod 440 ${newDirectFileName}
             }
         } else {
             assert CollectionUtils.exactlyOneElement(explicitSeqTracks*.project.unique()) == project
-            dataFiles = DataFile.findAllBySeqTrackInList(explicitSeqTracks)
+            dataFiles = explicitSeqTracks ? DataFile.findAllBySeqTrackInList(explicitSeqTracks) : []
         }
 
         output << "found ${dataFiles.size()} data files for this project\n\n"
@@ -1309,8 +1327,8 @@ chmod 440 ${newDirectFileName}
                 }
             }
 
-            List<BamFilePairAnalysis> analysisInstances = BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(
-                    roddyBamFiles, roddyBamFiles)
+            List<BamFilePairAnalysis> analysisInstances = roddyBamFiles ?
+                    BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(roddyBamFiles, roddyBamFiles) : []
             if (analysisInstances) {
                 bashScriptToMoveFilesAsOtherUser << "# delete analysis stuff\n"
                 AnalysisDeletionService.assertThatNoWorkflowsAreRunning(analysisInstances)
@@ -1628,11 +1646,15 @@ chmod 440 ${newDirectFileName}
         List<MergingAssignment> mergingAssignments = MergingAssignment.findAllBySeqTrackInList(seqTracks)
         outputStringBuilder << "\n${mergingAssignments.size()} MergingAssignment found"
         List<SeqScan> seqScans = mergingAssignments*.seqScan.unique()
-        List<MergingLog> mergingLogs = MergingLog.findAllBySeqScanInList(seqScans)
-        MergingAssignment.findAllBySeqScanInList(seqScans)*.delete()
-        MergedAlignmentDataFile.findAllByMergingLogInList(mergingLogs)*.delete()
-        mergingLogs*.delete()
-        seqScans*.delete()
+        if (seqScans)  {
+            List<MergingLog> mergingLogs = MergingLog.findAllBySeqScanInList(seqScans)
+            MergingAssignment.findAllBySeqScanInList(seqScans)*.delete()
+            if (mergingLogs) {
+                MergedAlignmentDataFile.findAllByMergingLogInList(mergingLogs)*.delete()
+                mergingLogs*.delete()
+            }
+            seqScans*.delete()
+        }
 
         createCommentForSwappedDatafiles(DataFile.findAllBySeqTrackInList(seqTracks))
 

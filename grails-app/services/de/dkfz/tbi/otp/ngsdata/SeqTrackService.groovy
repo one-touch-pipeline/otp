@@ -71,12 +71,13 @@ class SeqTrackService {
                 order(column.columnName, sortOrder ? "asc" : "desc")
             }
         } else {
-            return Sequence.findAllByProjectIdInList(projectService.getAllProjects().collect { it.id }, [
+            List<Project> projects = projectService.getAllProjects()
+            return projects ? Sequence.findAllByProjectIdInList(projects*.id, [
                     offset: offset,
                     max: max,
                     sort: column.columnName,
                     order: sortOrder ? "asc" : "desc",
-            ])
+            ]) : []
         }
     }
 
@@ -95,7 +96,8 @@ class SeqTrackService {
             }
         } else {
             // shortcut for unfiltered results
-            return Sequence.countByProjectIdInList(projectService.getAllProjects().collect { it.id })
+            List<Project> projects = projectService.getAllProjects()
+            return projects ? Sequence.countByProjectIdInList(projects*.id) : 0
         }
     }
 

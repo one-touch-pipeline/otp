@@ -3,11 +3,11 @@ package de.dkfz.tbi.otp.ngsdata
 class ProjectProgressService {
 
     List<Project> getProjectsFromNameList(List<String> projectNames) {
-        return Project.findAllByNameInList(projectNames)
+        return projectNames ? Project.findAllByNameInList(projectNames) : []
     }
 
     List<Run> getListOfRuns(List<Project> projects, Date startDate, Date endDate) {
-        List<DataFile> files = DataFile.findAllByProjectInListAndDateFileSystemBetween(projects, startDate, endDate)
+        List<DataFile> files = projects ? DataFile.findAllByProjectInListAndDateFileSystemBetween(projects, startDate, endDate) : []
         return files*.seqTrack*.run.sort { it.seqCenter.name }.unique()
     }
 

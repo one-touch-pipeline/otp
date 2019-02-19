@@ -219,7 +219,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
     @Test
     void testGetFilesToMerge_DataFilesAreNotOnFileSystem_ShouldFail() {
 
-        DataFile dataFile1 = DataFile.findBySeqTrackInListAndMateNumber(roddyBamFile.seqTracks, 1)
+        DataFile dataFile1 = DataFile.findBySeqTrackInListAndMateNumber(roddyBamFile.seqTracks as List, 1)
         File file1 = new File(executePanCanJob.lsdfFilesService.getFileViewByPidPath(dataFile1))
         assert file1.delete()
 

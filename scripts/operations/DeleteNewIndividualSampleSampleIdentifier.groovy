@@ -16,7 +16,8 @@ println "samples " + samples
 
 samples.each { sample ->
     def sampleIndis = SampleIdentifier.findAllBySample(sample)
-    assert DataFile.findAllBySeqTrackInList(SeqTrack.findAllBySample(sample)).isEmpty() : "DataFile loaded for ${sample}"
+    List<SeqTrack> seqTracks = SeqTrack.findAllBySample(sample)
+    assert !seqTracks || DataFile.findAllBySeqTrackInList(seqTracks).isEmpty() : "DataFile loaded for ${sample}"
     println "sampleIndis " + sampleIndis
 }
 

@@ -50,7 +50,7 @@ class UserAdministrationController {
             render cmd as JSON
             return
         }
-        List<Role> roles = Role.findAllByIdInList(cmd.role)
+        List<Role> roles = cmd.role ? Role.findAllByIdInList(cmd.role) : []
         Map data = [
                 success: true,
                 user: userService.createUser(

@@ -45,8 +45,10 @@ Individual.findAllByProject(project).each { Individual individual ->
             }
 
             output << "\t\t\tMergedAlignmentDataFile:"
-            MergedAlignmentDataFile.findAllByMergingLogInList(mergingLogs).each { MergedAlignmentDataFile mergedAlignmentDataFile ->
-                output << "\t\t\t${mergedAlignmentDataFile}"
+            if (mergingLogs) {
+                MergedAlignmentDataFile.findAllByMergingLogInList(mergingLogs).each { MergedAlignmentDataFile mergedAlignmentDataFile ->
+                    output << "\t\t\t${mergedAlignmentDataFile}"
+                }
             }
         }
     }
@@ -71,7 +73,7 @@ Individual.findAllByProject(project).each { Individual individual ->
 
 // Processing Options are only checked on currently existing ones
 output << "ProcessingOption"
-output << ProcessingOption.findAllByProjectAndNameInList(project, ProcessingOption.OptionName.values()).join("\n")
+output << ProcessingOption.findAllByProjectAndNameInList(project, ProcessingOption.OptionName.values() as List).join("\n")
 
 println(output.join("\n"))
 ''

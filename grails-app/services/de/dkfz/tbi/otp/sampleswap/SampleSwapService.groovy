@@ -109,7 +109,7 @@ class SampleSwapService {
                         eq("id", seqTrack.id)
                     }
                 }
-                if (BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(roddyBamFiles, roddyBamFiles)) {
+                if (roddyBamFiles && BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(roddyBamFiles, roddyBamFiles)) {
                     seqTrackIds << seqTrack.id
                     rows << it.rowNumber
                 }

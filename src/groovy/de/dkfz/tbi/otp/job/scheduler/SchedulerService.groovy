@@ -109,7 +109,7 @@ class SchedulerService {
         try {
             ProcessingStep.withTransaction { status ->
                 List<Process> processes = Process.findAllByFinished(false)
-                List<ProcessingStep> lastProcessingSteps = ProcessingStep.findAllByProcessInListAndNextIsNull(processes)
+                List<ProcessingStep> lastProcessingSteps = processes ? ProcessingStep.findAllByProcessInListAndNextIsNull(processes) : []
                 lastProcessingSteps.each { ProcessingStep step ->
                     List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
                     if (updates.isEmpty()) {
@@ -694,7 +694,7 @@ class SchedulerService {
     List<ProcessingStep> retrieveRunningProcessingSteps() {
         List<ProcessingStep> runningSteps = []
         List<Process> process = Process.findAllByFinished(false)
-        List<ProcessingStep> lastProcessingSteps = ProcessingStep.findAllByProcessInListAndNextIsNull(process)
+        List<ProcessingStep> lastProcessingSteps = process ? ProcessingStep.findAllByProcessInListAndNextIsNull(process) : []
         lastProcessingSteps.each { ProcessingStep step ->
             ProcessingStepUpdate last = step.latestProcessingStepUpdate
             if (last == null) {

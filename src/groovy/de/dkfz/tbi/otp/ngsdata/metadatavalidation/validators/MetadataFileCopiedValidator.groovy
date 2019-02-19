@@ -16,7 +16,6 @@ import de.dkfz.tbi.util.spreadsheet.validation.Level
 import java.nio.file.Files
 import java.nio.file.Path
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CENTER_NAME
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ILSE_NO
 
 @Component
@@ -41,7 +40,7 @@ class MetadataFileCopiedValidator implements MetadataValidator {
 
     @Override
     void validate(MetadataValidationContext context) {
-        List<SeqCenter> seqCenters = SeqCenter.findAllByNameInList(context.spreadsheet.dataRows*.getCellByColumnTitle(CENTER_NAME.name())?.text)
+        List<SeqCenter> seqCenters = MetadataImportService.getSeqCenters(context)
         seqCenters.findAll { it?.copyMetadataFile }.unique().each { SeqCenter seqCenter ->
             try  {
                 Path source = context.metadataFile

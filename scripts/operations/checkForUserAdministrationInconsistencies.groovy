@@ -100,7 +100,8 @@ Project.findAll().each { Project project ->
 User.findAll().each { User user ->
     UserProjectRole[] allUserProjectRolesOfUser = UserProjectRole.findAllByUser(user)
     allUserProjectRolesOfUser*.project.unixGroup.unique().each { String unixGroup ->
-        List<UserProjectRole> allUserProjectRolesForUserAndUnixGroup = UserProjectRole.findAllByUserAndProjectInList(user, Project.findAllByUnixGroup(unixGroup))
+        List<Project> projects = Project.findAllByUnixGroup(unixGroup)
+        List<UserProjectRole> allUserProjectRolesForUserAndUnixGroup = projects ? UserProjectRole.findAllByUserAndProjectInList(user, projects) : []
         if (allUserProjectRolesForUserAndUnixGroup*.accessToFiles.unique().size() > 1) {
             output << "Conflict detected for User ${user.username} with the unix Group ${unixGroup}. Affected projects:\n"+
                        allUserProjectRolesForUserAndUnixGroup*.project.name.join(", ")+"\n"

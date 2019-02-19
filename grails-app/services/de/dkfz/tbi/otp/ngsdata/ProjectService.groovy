@@ -785,8 +785,8 @@ echo 'OK'
     }
 
     private void deprecateAllReferenceGenomesByProjectAndSeqTypeAndSampleTypes(Project project, SeqType seqType, List<SampleType> sampleTypes) {
-        Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes =
-                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeInListAndDeprecatedDateIsNull(project, seqType, sampleTypes)
+        Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = sampleTypes ?
+                ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeInListAndDeprecatedDateIsNull(project, seqType, sampleTypes) : []
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
         referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
     }

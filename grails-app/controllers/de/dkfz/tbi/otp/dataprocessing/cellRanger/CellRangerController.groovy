@@ -42,9 +42,8 @@ class CellRangerController {
         List<Individual> selectedIndividuals = samples.selectedSamples*.individual.unique()
         List<SampleType> selectedSampleTypes = samples.selectedSamples*.sampleType.unique()
 
-        List<CellRangerMergingWorkPackage> mwps = CellRangerMergingWorkPackage.findAllBySampleInListAndPipeline(
-                samples.selectedSamples, pipeline
-        )
+        List<CellRangerMergingWorkPackage> mwps = samples.selectedSamples ?
+                CellRangerMergingWorkPackage.findAllBySampleInListAndPipeline(samples.selectedSamples, pipeline) : []
 
         return [
                 configExists       : configExists,

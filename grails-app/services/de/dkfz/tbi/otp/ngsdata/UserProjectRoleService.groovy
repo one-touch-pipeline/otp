@@ -113,14 +113,15 @@ class UserProjectRoleService {
 
     private void requestToRemoveUserFromUnixGroupIfRequired(UserProjectRole userProjectRole) {
         String[] groupNames = ldapService.getGroupsOfUserByUsername(userProjectRole.user.username)
-        if (userProjectRole.project.unixGroup in groupNames &&
-                !UserProjectRole.findAllByUserAndProjectInListAndAccessToFilesAndEnabled(
-                        userProjectRole.user,
-                        Project.findAllByUnixGroupAndIdNotEqual(userProjectRole.project.unixGroup, userProjectRole.project.id),
-                        true,
-                        true
-                )
-        ) {
+        List <Project> projects = Project.findAllByUnixGroupAndIdNotEqual(userProjectRole.project.unixGroup, userProjectRole.project.id)
+        if (userProjectRole.project.unixGroup in groupNames && (
+                !projects || !UserProjectRole.findAllByUserAndProjectInListAndAccessToFilesAndEnabled(
+                                userProjectRole.user,
+                                projects,
+                                true,
+                                true
+                        )
+        )) {
             notifyAdministration(userProjectRole, OperatorAction.REMOVE)
         }
     }

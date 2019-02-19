@@ -185,7 +185,8 @@ class IndividualService {
             }
         } else {
             // shortcut for unfiltered results
-            return Individual.countByProjectInList(projectService.getAllProjects())
+            List<Project> projects = projectService.getAllProjects()
+            return projects ? Individual.countByProjectInList(projects) : []
         }
     }
 

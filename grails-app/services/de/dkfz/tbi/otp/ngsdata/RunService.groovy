@@ -133,7 +133,8 @@ class RunService {
             }
         } else {
             // shortcut for unfiltered results
-            return Run.countBySeqCenterInList(seqCenterService.allSeqCenters())
+            List<SeqCenter> seqCenters = seqCenterService.allSeqCenters()
+            return seqCenters ? Run.countBySeqCenterInList(seqCenters) : 0
         }
     }
 
@@ -185,7 +186,7 @@ class RunService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Collection<MetaDataFile> retrieveMetaDataFiles(Run run) {
         Collection<DataFile> dataFiles = DataFile.findAllByRun(run)
-        return dataFiles ? MetaDataFile.findAllByRunSegmentInList(dataFiles*.runSegment) : Collections.emptyList()
+        return dataFiles ? (dataFiles*.runSegment ? MetaDataFile.findAllByRunSegmentInList(dataFiles*.runSegment) : []) : []
     }
 
     /**

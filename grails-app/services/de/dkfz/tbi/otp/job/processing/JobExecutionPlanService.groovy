@@ -95,7 +95,7 @@ class JobExecutionPlanService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Process> getAllProcesses(JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false) {
         final List<JobExecutionPlan> plans = withParents(plan)
-        return Process.findAllByJobExecutionPlanInList(plans, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"])
+        return plans ? Process.findAllByJobExecutionPlanInList(plans, [max: max, offset: offset, sort: column, order: order ? "asc" : "desc"]) : []
     }
 
     /**
@@ -149,7 +149,7 @@ AND u.id IN (
         }
         def processes = ProcessingStepUpdate.executeQuery(query, params, [max: max, offset: offset])
         List<Long> ids = processes.collect { it[1] }
-        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByIdInList(ids)
+        List<ProcessingStepUpdate> updates = ids ? ProcessingStepUpdate.findAllByIdInList(ids) : []
         processes.each {
             results.put(it[0] as Process, updates.find { update -> update.id == it[1] })
         }
@@ -165,7 +165,7 @@ AND u.id IN (
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     int getProcessCount(JobExecutionPlan plan) {
         final List<JobExecutionPlan> plans = withParents(plan)
-        return Process.countByJobExecutionPlanInList(plans)
+        return plans ? Process.countByJobExecutionPlanInList(plans) : 0
     }
 
     /**
@@ -177,7 +177,7 @@ AND u.id IN (
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     boolean isProcessRunning(JobExecutionPlan plan) {
         final List<JobExecutionPlan> plans = withParents(plan)
-        final Process process = Process.findByFinishedAndJobExecutionPlanInList(false, plans)
+        final Process process = plans ? Process.findByFinishedAndJobExecutionPlanInList(false, plans) : null
         return (process != null)
     }
 
@@ -224,7 +224,7 @@ ORDER BY p.id DESC
     int getNumberOfProcesses(JobExecutionPlan plan, ExecutionState state = null) {
         final List<JobExecutionPlan> plans = withParents(plan)
         if (!state) {
-            return Process.countByJobExecutionPlanInList(plans)
+            return plans ? Process.countByJobExecutionPlanInList(plans) : 0
         }
         String query = '''
 SELECT COUNT(DISTINCT p.id)

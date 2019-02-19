@@ -168,7 +168,7 @@ class MetadataImportService {
     }
 
     protected void copyMetadataFileIfRequested(MetadataValidationContext context) {
-        List<SeqCenter> seqCenters = SeqCenter.findAllByNameInList(context.spreadsheet.dataRows*.getCellByColumnTitle(CENTER_NAME.name())?.text)
+        List<SeqCenter> seqCenters = getSeqCenters(context)
         seqCenters.findAll { it?.copyMetadataFile }.unique().each { SeqCenter seqCenter ->
             Path source = context.metadataFile
             try {
@@ -189,6 +189,11 @@ class MetadataImportService {
                 throw new RuntimeException("Copying of metadata file ${source} failed", t)
             }
         }
+    }
+
+    static  List<SeqCenter> getSeqCenters(MetadataValidationContext context) {
+        List<String> centerNames = context.spreadsheet.dataRows*.getCellByColumnTitle(CENTER_NAME.name())?.text
+        return centerNames ? SeqCenter.findAllByNameInList(centerNames) : []
     }
 
     List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, String ilseNumbers) {

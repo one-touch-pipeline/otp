@@ -68,7 +68,8 @@ class MetaDataService {
             }
             return results
         }
-        List<ChangeLog> changelogs = ChangeLog.findAllByRowIdInListAndReferencedClass(entries.collect { it.id }, clazz)
+        List<Long> rowIds = entries*.id
+        List<ChangeLog> changelogs = rowIds ? ChangeLog.findAllByRowIdInListAndReferencedClass(rowIds, clazz) : []
         Map<MetaDataEntry, Boolean> results = [:]
         entries.each { MetaDataEntry entry ->
             results.put(entry, changelogs.find { it.rowId == entry.id } ? true : false)

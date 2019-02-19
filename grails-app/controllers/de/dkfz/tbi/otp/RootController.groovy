@@ -112,7 +112,7 @@ class RootController {
         HibernateCriteriaBuilder c
         Date fourWeeksAgo = new Date(System.currentTimeMillis() - FOUR_WEEKS_IN_MS)
 
-        int individualsFinder = Individual.countByProjectInList(selection.projects)
+        int individualsFinder = selection.projects ? Individual.countByProjectInList(selection.projects) : []
         c = Sample.createCriteria()
         int samples = c.count {
             individual {

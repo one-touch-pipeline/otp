@@ -59,7 +59,8 @@ class MonitorOutputCollector {
     void showWorkflow(String workflowName, boolean withSlots = true) {
         output << '\n' << workflowName
         if (withSlots) {
-            long occupiedSlots = Process.countByFinishedAndJobExecutionPlanInList(false, JobExecutionPlan.findAllByName(workflowName))
+            List<JobExecutionPlan> jobExecutionPlans = JobExecutionPlan.findAllByName(workflowName)
+            long occupiedSlots = Process.countByFinishedAndJobExecutionPlanInList(false, jobExecutionPlans)
             long totalSlots = ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS, workflowName, null)
             long fastTrackSlots = ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK, workflowName, null)
             long normalSlots = totalSlots - fastTrackSlots
