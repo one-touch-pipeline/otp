@@ -12,7 +12,7 @@ class RoddySnvConfigTemplate {
                description="SNV project configuration for ${snvPipelineConfiguration.seqType.roddyName} in OTP."
                imports="${snvPipelineConfiguration.baseProjectConfig}">
     <subconfigurations>
-        <configuration name="config" usedresourcessize="xl">
+        <configuration name="config" usedresourcessize="${snvPipelineConfiguration.resources}">
             <availableAnalyses>
                 <analysis id="${snvPipelineConfiguration.seqType.roddyName}" configuration="snvCallingAnalysis"/>
             </availableAnalyses>

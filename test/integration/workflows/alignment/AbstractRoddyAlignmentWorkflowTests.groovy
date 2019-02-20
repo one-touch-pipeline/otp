@@ -209,7 +209,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                     mergeTool        : processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_MERGE_TOOL, workPackage.seqType.roddyName),
                     bwaMemVersion    : processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_DEFAULT),
                     sambambaVersion  : processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_DEFAULT),
-                    resources        : "${workPackage.seqType.isChipSeq() ? 'xl' : 't'}",
+                    resources        : 't',
             ] + options))
         }
     }

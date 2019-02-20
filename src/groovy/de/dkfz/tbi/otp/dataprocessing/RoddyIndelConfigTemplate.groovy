@@ -12,7 +12,7 @@ class RoddyIndelConfigTemplate {
                description="Indel project configuration for ${indelPipelineConfiguration.seqType.roddyName} in OTP."
                imports="${indelPipelineConfiguration.baseProjectConfig}">
     <subconfigurations>
-        <configuration name="config" usedresourcessize="xl">
+        <configuration name="config" usedresourcessize="${indelPipelineConfiguration.resources}">
             <availableAnalyses>
                 <analysis id="${indelPipelineConfiguration.seqType.roddyName}" configuration="indelCallingAnalysis"/>
             </availableAnalyses>
