@@ -1,6 +1,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import groovy.transform.CompileStatic
+import groovy.transform.Synchronized
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
@@ -24,6 +25,15 @@ class ClusterJobManagerFactoryService {
         BatchEuphoriaJobManager manager = managerPerRealm[realm]
 
         if (manager == null) {
+            manager = createJobManager(realm)
+        }
+        return manager
+    }
+
+    @Synchronized
+    private BatchEuphoriaJobManager createJobManager(Realm realm) {
+        BatchEuphoriaJobManager manager = managerPerRealm[realm]
+        if (!manager) {
             JobManagerOptions jobManagerParameters = JobManagerOptions.create()
                     .setCreateDaemon(false)
                     .setUpdateInterval(Duration.ZERO)
@@ -38,7 +48,7 @@ class ClusterJobManagerFactoryService {
                 manager = new PBSJobManager(new BEExecutionServiceAdapter(remoteShellHelper, realm), jobManagerParameters)
             } else if (realm.jobScheduler == Realm.JobScheduler.LSF) {
                 manager = new LSFJobManager(new BEExecutionServiceAdapter(remoteShellHelper, realm), jobManagerParameters)
-            }  else {
+            } else {
                 throw new Exception("Unsupported cluster job scheduler")
             }
             managerPerRealm[realm] = manager
