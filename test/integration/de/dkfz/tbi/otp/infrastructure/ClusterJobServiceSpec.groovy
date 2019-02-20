@@ -17,6 +17,7 @@ import java.time.ZoneId
 import static java.util.concurrent.TimeUnit.HOURS
 import static java.util.concurrent.TimeUnit.MINUTES
 
+@SuppressWarnings('MethodCount')
 class ClusterJobServiceSpec extends Specification {
 
     static final org.joda.time.LocalDate SDATE_LOCALDATE = new org.joda.time.LocalDate()
@@ -59,7 +60,7 @@ class ClusterJobServiceSpec extends Specification {
         then:
         job.requestedCores == 8
         job.requestedWalltime == org.joda.time.Duration.standardSeconds(10)
-        job.requestedMemory == 7*1024*1024
+        job.requestedMemory == 7 * 1024 * 1024
 
         job.accountName == "257"
         job.jobLog == new File("/file.log").absolutePath
@@ -205,7 +206,7 @@ class ClusterJobServiceSpec extends Specification {
 
     void testFindWorkflowObjectByClusterJob() {
         given:
-        def(job, run) = createClusterJobWithRun()
+        def (job, run) = createClusterJobWithRun()
 
         expect:
         run == clusterJobService.findProcessParameterObjectByClusterJob(job)
@@ -265,7 +266,7 @@ class ClusterJobServiceSpec extends Specification {
 
     void testGetBasesSum_WhenContainedSeqTracksContainNoBases_ShouldReturnNull() {
         given:
-        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+        def (job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
         DomainFactory.createSeqTrack([run: run])
 
@@ -275,7 +276,7 @@ class ClusterJobServiceSpec extends Specification {
 
     void testGetFileSizesSum_WhenContainedDataFilesContainFileSizesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfFileSizes() {
         given:
-        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+        def (job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
         DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileSize: 150L])
         DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileSize: 150L])
@@ -294,7 +295,7 @@ class ClusterJobServiceSpec extends Specification {
 
     void testGetReadsSum_WhenContainedSeqTracksContainBasesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfReads() {
         given:
-        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+        def (job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
         DomainFactory.createSeqTrackWithOneDataFile([run: run], [nReads: 150L])
         DomainFactory.createSeqTrackWithOneDataFile([run: run], [nReads: 150L])
@@ -313,7 +314,7 @@ class ClusterJobServiceSpec extends Specification {
 
     void testGetReadsSum_WhenContainedSeqTracksContainNoBases_ShouldReturnNull() {
         given:
-        def(job, run) = setupClusterJobsOfSameProcessingStepAndRun()
+        def (job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
         DomainFactory.createSeqTrack([run: run])
 
@@ -325,7 +326,7 @@ class ClusterJobServiceSpec extends Specification {
         given:
         SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq X Ten")
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup([seqPlatformModelLabel: seqPlatformModelLabel])
-        def(job, run) = createClusterJobWithRun(DomainFactory.createRun(seqPlatform: seqPlatform))
+        def (job, run) = createClusterJobWithRun(DomainFactory.createRun(seqPlatform: seqPlatform))
         DomainFactory.createSeqTrack(run: run)
 
         expect:
@@ -336,7 +337,7 @@ class ClusterJobServiceSpec extends Specification {
         given:
         SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq2500")
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup([seqPlatformModelLabel: seqPlatformModelLabel])
-        def(job, run) = createClusterJobWithRun(DomainFactory.createRun(seqPlatform: seqPlatform))
+        def (job, run) = createClusterJobWithRun(DomainFactory.createRun(seqPlatform: seqPlatform))
         DomainFactory.createSeqTrack(run: run)
 
         expect:
@@ -345,10 +346,11 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_handleObviouslyFailedClusterJob_WhenElapsedWalltimeUnderDurationJobObviuoslyFailed_ShouldChangeExitStatusToFailed() {
         given:
-        ClusterJob job = createClusterJob([queued: SDATE_DATETIME,
-                                           started: SDATE_DATETIME,
-                                           ended: SDATE_DATETIME.plusMillis(ClusterJobService.DURATION_JOB_OBVIOUSLY_FAILED.millis as int),
-                                           exitStatus: ClusterJob.Status.COMPLETED])
+        ClusterJob job = createClusterJob([queued    : SDATE_DATETIME,
+                                           started   : SDATE_DATETIME,
+                                           ended     : SDATE_DATETIME.plusMillis(ClusterJobService.DURATION_JOB_OBVIOUSLY_FAILED.millis as int),
+                                           exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         clusterJobService.handleObviouslyFailedClusterJob(job)
 
@@ -357,10 +359,11 @@ class ClusterJobServiceSpec extends Specification {
     }
 
     void test_handleObviouslyFailedClusterJob_WhenElapsedWalltimeOverDurationJobObviuoslyFailed_ShouldKeepExitStatusCompleted() {
-        ClusterJob job = createClusterJob([queued: SDATE_DATETIME,
-                                           started: SDATE_DATETIME,
-                                           ended: SDATE_DATETIME.plusMillis(ClusterJobService.DURATION_JOB_OBVIOUSLY_FAILED.millis + 1 as int),
-                                           exitStatus: ClusterJob.Status.COMPLETED])
+        ClusterJob job = createClusterJob([queued    : SDATE_DATETIME,
+                                           started   : SDATE_DATETIME,
+                                           ended     : SDATE_DATETIME.plusMillis(ClusterJobService.DURATION_JOB_OBVIOUSLY_FAILED.millis + 1 as int),
+                                           exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         clusterJobService.handleObviouslyFailedClusterJob(job)
 
@@ -375,9 +378,10 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllClusterJobsByDateBetween_WhenJobIsOutOfTimeSpanToEarly_ShouldReturnEmptyList() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+        createClusterJob([queued : SDATE_DATETIME.minusDays(1),
                           started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1)])
+                          ended  : SDATE_DATETIME.minusDays(1),
+        ])
 
         expect:
         [] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "", 0, 10, 'clusterJobId', 'asc')
@@ -385,9 +389,10 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllClusterJobsByDateBetween_WhenJobIsOutOfTimeSpanToLate_ShouldReturnEmptyList() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.plusDays(2),
+        createClusterJob([queued : SDATE_DATETIME.plusDays(2),
                           started: SDATE_DATETIME.plusDays(2),
-                          ended: SDATE_DATETIME.plusDays(2)])
+                          ended  : SDATE_DATETIME.plusDays(2),
+        ])
 
         expect:
         [] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "", 0, 10, 'clusterJobId', 'asc')
@@ -395,13 +400,15 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs() {
         given:
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
+        ClusterJob job1 = createClusterJob([queued : SDATE_DATETIME,
                                             started: SDATE_DATETIME,
-                                            ended: EDATE_DATETIME])
+                                            ended  : EDATE_DATETIME,
+        ])
 
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
+        ClusterJob job2 = createClusterJob([queued : SDATE_DATETIME,
                                             started: SDATE_DATETIME,
-                                            ended: EDATE_DATETIME])
+                                            ended  : EDATE_DATETIME,
+        ])
 
         expect:
         [job1, job2] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "", 0, 10, 'clusterJobId', 'asc')
@@ -410,20 +417,23 @@ class ClusterJobServiceSpec extends Specification {
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs_PassingFilter() {
         given:
         String filter = 'filter'
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
-                                            started: SDATE_DATETIME,
-                                            ended: EDATE_DATETIME,
-                                            clusterJobName: "Value with ${filter} something _testClass"])
+        ClusterJob job1 = createClusterJob([queued        : SDATE_DATETIME,
+                                            started       : SDATE_DATETIME,
+                                            ended         : EDATE_DATETIME,
+                                            clusterJobName: "Value with ${filter} something _testClass",
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          clusterJobName: "some other value _testClass"])
+        createClusterJob([queued        : SDATE_DATETIME,
+                          started       : SDATE_DATETIME,
+                          ended         : EDATE_DATETIME,
+                          clusterJobName: "some other value _testClass",
+        ])
 
-        ClusterJob job3 = createClusterJob([queued: SDATE_DATETIME,
-                                            started: SDATE_DATETIME,
-                                            ended: EDATE_DATETIME,
-                                            clusterJobName: "Value with ${filter.toUpperCase()} something _testClass"])
+        ClusterJob job3 = createClusterJob([queued        : SDATE_DATETIME,
+                                            started       : SDATE_DATETIME,
+                                            ended         : EDATE_DATETIME,
+                                            clusterJobName: "Value with ${filter.toUpperCase()} something _testClass",
+        ])
 
         expect:
         [job1, job3] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, filter, 0, 10, 'clusterJobId', 'asc')
@@ -432,24 +442,27 @@ class ClusterJobServiceSpec extends Specification {
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs_UsingPage() {
         given:
         List<ClusterJob> jobs = (1..10).collect {
-            createClusterJob([queued: SDATE_DATETIME,
+            createClusterJob([queued : SDATE_DATETIME,
                               started: SDATE_DATETIME,
-                              ended: EDATE_DATETIME])
+                              ended  : EDATE_DATETIME,
+            ])
         }
 
         expect:
-        jobs.subList(3,7) == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, '', 3, 4, 'clusterJobId', 'asc')
+        jobs.subList(3, 7) == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, '', 3, 4, 'clusterJobId', 'asc')
     }
 
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs_SortedDesc() {
         given:
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
+        ClusterJob job1 = createClusterJob([queued : SDATE_DATETIME,
                                             started: SDATE_DATETIME,
-                                            ended: EDATE_DATETIME])
+                                            ended  : EDATE_DATETIME,
+        ])
 
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
+        ClusterJob job2 = createClusterJob([queued : SDATE_DATETIME,
                                             started: SDATE_DATETIME,
-                                            ended: EDATE_DATETIME])
+                                            ended  : EDATE_DATETIME,
+        ])
 
         expect:
         [job2, job1] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "", 0, 10, 'clusterJobId', 'desc')
@@ -457,20 +470,23 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs_SortedByName() {
         given:
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
-                                            started: SDATE_DATETIME,
-                                            ended: EDATE_DATETIME,
-                                            clusterJobName: "name3 _testClass"])
+        ClusterJob job1 = createClusterJob([queued        : SDATE_DATETIME,
+                                            started       : SDATE_DATETIME,
+                                            ended         : EDATE_DATETIME,
+                                            clusterJobName: "name3 _testClass",
+        ])
 
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
-                                            started: SDATE_DATETIME,
-                                            ended: EDATE_DATETIME,
-                                            clusterJobName: "name1 _testClass"])
+        ClusterJob job2 = createClusterJob([queued        : SDATE_DATETIME,
+                                            started       : SDATE_DATETIME,
+                                            ended         : EDATE_DATETIME,
+                                            clusterJobName: "name1 _testClass",
+        ])
 
-        ClusterJob job3 = createClusterJob([queued: SDATE_DATETIME,
-                                            started: SDATE_DATETIME,
-                                            ended: EDATE_DATETIME,
-                                            clusterJobName: "name2 _testClass"])
+        ClusterJob job3 = createClusterJob([queued        : SDATE_DATETIME,
+                                            started       : SDATE_DATETIME,
+                                            ended         : EDATE_DATETIME,
+                                            clusterJobName: "name2 _testClass",
+        ])
 
         expect:
         [job2, job3, job1] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, '', 0, 10, 'clusterJobName', 'asc')
@@ -483,9 +499,10 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_countAllClusterJobsByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnZero() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+        createClusterJob([queued : SDATE_DATETIME.minusDays(1),
                           started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1)])
+                          ended  : SDATE_DATETIME.minusDays(1),
+        ])
 
         expect:
         0 == clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "")
@@ -493,13 +510,15 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_countAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnTwo() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
+        createClusterJob([queued : SDATE_DATETIME,
                           started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME])
+                          ended  : EDATE_DATETIME,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
+        createClusterJob([queued : SDATE_DATETIME,
                           started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME])
+                          ended  : EDATE_DATETIME,
+        ])
 
         expect:
         2 == clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "")
@@ -508,20 +527,23 @@ class ClusterJobServiceSpec extends Specification {
     void test_countAllClusterJobsByDateBetween_WhenSeveralJobsPassFilter_ShouldReturnTwo() {
         given:
         String filter = 'filter'
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          clusterJobName: "Value with ${filter} something _testClass"])
+        createClusterJob([queued        : SDATE_DATETIME,
+                          started       : SDATE_DATETIME,
+                          ended         : EDATE_DATETIME,
+                          clusterJobName: "Value with ${filter} something _testClass",
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          clusterJobName: "some other value _testClass"])
+        createClusterJob([queued        : SDATE_DATETIME,
+                          started       : SDATE_DATETIME,
+                          ended         : EDATE_DATETIME,
+                          clusterJobName: "some other value _testClass",
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          clusterJobName: "Value with ${filter.toUpperCase()} something _testClass"])
+        createClusterJob([queued        : SDATE_DATETIME,
+                          started       : SDATE_DATETIME,
+                          ended         : EDATE_DATETIME,
+                          clusterJobName: "Value with ${filter.toUpperCase()} something _testClass",
+        ])
 
         expect:
         2 == clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, filter)
@@ -534,10 +556,11 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllJobClassesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1),
-                          jobClass: 'jobClass1'])
+        createClusterJob([queued  : SDATE_DATETIME.minusDays(1),
+                          started : SDATE_DATETIME.minusDays(1),
+                          ended   : SDATE_DATETIME.minusDays(1),
+                          jobClass: 'jobClass1',
+        ])
 
         expect:
         [] == clusterJobService.findAllJobClassesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -545,20 +568,23 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllJobClassesByDateBetween_WhenSeveralJobClassesAreFound_ShouldReturnUniqueListWithJobClasses() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          jobClass: 'jobClass1'])
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : EDATE_DATETIME,
+                          jobClass: 'jobClass1',
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          jobClass: 'jobClass1'])
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : EDATE_DATETIME,
+                          jobClass: 'jobClass1',
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          jobClass: 'jobClass2'])
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : EDATE_DATETIME,
+                          jobClass: 'jobClass2',
+        ])
 
         expect:
         ['jobClass1', 'jobClass2'] == clusterJobService.findAllJobClassesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -571,10 +597,11 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllExitCodesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1),
-                          exitCode: 0])
+        createClusterJob([queued  : SDATE_DATETIME.minusDays(1),
+                          started : SDATE_DATETIME.minusDays(1),
+                          ended   : SDATE_DATETIME.minusDays(1),
+                          exitCode: 0,
+        ])
 
         expect:
         [] == clusterJobService.findAllExitCodesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -582,20 +609,23 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllExitCodesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithOccurancesPerExitCodes() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          exitCode: 0])
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : EDATE_DATETIME,
+                          exitCode: 0,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          exitCode: 0])
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : EDATE_DATETIME,
+                          exitCode: 0,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          exitCode: 1])
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : EDATE_DATETIME,
+                          exitCode: 1,
+        ])
 
         expect:
         [[0, 2], [1, 1]] == clusterJobService.findAllExitCodesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -608,10 +638,11 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllExitStatusesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started: SDATE_DATETIME.minusDays(1),
-                          ended: EDATE_DATETIME.minusDays(1),
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
+                          started   : SDATE_DATETIME.minusDays(1),
+                          ended     : EDATE_DATETIME.minusDays(1),
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         [] == clusterJobService.findAllExitStatusesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -619,23 +650,34 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllExitStatusesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithOccurancesPerExitStatuses() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : EDATE_DATETIME,
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : EDATE_DATETIME,
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          exitStatus: ClusterJob.Status.FAILED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : EDATE_DATETIME,
+                          exitStatus: ClusterJob.Status.FAILED,
+        ])
 
         expect:
-        [[ClusterJob.Status.COMPLETED, 2], [ClusterJob.Status.FAILED, 1]] == clusterJobService.findAllExitStatusesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
+        [
+                [
+                        ClusterJob.Status.COMPLETED,
+                        2,
+                ], [
+                        ClusterJob.Status.FAILED,
+                        1,
+                ],
+        ] == clusterJobService.findAllExitStatusesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findAllFailedByDateBetween_WhenNoJobsFound_ShouldReturnMapWithListInInitialState() {
@@ -645,10 +687,11 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllFailedByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithListInInitialState() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1),
-                          exitStatus: ClusterJob.Status.FAILED])
+        createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
+                          started   : SDATE_DATETIME.minusDays(1),
+                          ended     : SDATE_DATETIME.minusDays(1),
+                          exitStatus: ClusterJob.Status.FAILED,
+        ])
 
         expect:
         [0] * 25 == clusterJobService.findAllFailedByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
@@ -656,20 +699,23 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllFailedByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapWithListContainingOccurencesOfFailedJobsPerHour() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: SDATE_DATETIME.plusMinutes(30),
-                          exitStatus: ClusterJob.Status.FAILED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : SDATE_DATETIME.plusMinutes(30),
+                          exitStatus: ClusterJob.Status.FAILED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: SDATE_DATETIME.plusMinutes(30),
-                          exitStatus: ClusterJob.Status.FAILED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : SDATE_DATETIME.plusMinutes(30),
+                          exitStatus: ClusterJob.Status.FAILED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: SDATE_DATETIME.plusHours(1),
-                          exitStatus: ClusterJob.Status.FAILED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : SDATE_DATETIME.plusHours(1),
+                          exitStatus: ClusterJob.Status.FAILED,
+        ])
 
         expect:
         [2, 1] + [0] * 23 == clusterJobService.findAllFailedByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
@@ -687,9 +733,10 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllStatesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithListInInitialState() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+        createClusterJob([queued : SDATE_DATETIME.minusDays(1),
                           started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1)])
+                          ended  : SDATE_DATETIME.minusDays(1),
+        ])
 
         Map statesMap = clusterJobService.findAllStatesByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE)
 
@@ -701,18 +748,20 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllStatesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapWithListsContainingOccurencesOfStatesPerHour() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
+        createClusterJob([queued : SDATE_DATETIME,
                           started: SDATE_DATETIME,
-                          ended: SDATE_DATETIME])
+                          ended  : SDATE_DATETIME,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
+        createClusterJob([queued : SDATE_DATETIME,
                           started: SDATE_DATETIME.plusHours(1),
-                          ended: SDATE_DATETIME.plusHours(2)])
+                          ended  : SDATE_DATETIME.plusHours(2),
+        ])
 
         Map statesMap = clusterJobService.findAllStatesByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE)
 
         expect:
-        [2] + [0] * 24 ==  statesMap.data.queued
+        [2] + [0] * 24 == statesMap.data.queued
         [1, 1] + [0] * 23 == statesMap.data.started
         [1, 0, 1] + [0] * 22 == statesMap.data.ended
     }
@@ -724,11 +773,12 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllAvgCoreUsageByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithListInInitialState() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1),
-                          cpuTime: new org.joda.time.Duration(30 * MINUTES_TO_MILLIS),
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
+                          started   : SDATE_DATETIME.minusDays(1),
+                          ended     : SDATE_DATETIME.minusDays(1),
+                          cpuTime   : new org.joda.time.Duration(30 * MINUTES_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         [0] * 25 == clusterJobService.findAllAvgCoreUsageByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
@@ -736,23 +786,26 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllAvgCoreUsageByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapWithListContainingCoreUsagePerHour() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: SDATE_DATETIME.plusMinutes(30),
-                          cpuTime: new org.joda.time.Duration(30 * MINUTES_TO_MILLIS),
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : SDATE_DATETIME.plusMinutes(30),
+                          cpuTime   : new org.joda.time.Duration(30 * MINUTES_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: SDATE_DATETIME.plusMinutes(30),
-                          cpuTime: new org.joda.time.Duration(30 * MINUTES_TO_MILLIS),
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : SDATE_DATETIME.plusMinutes(30),
+                          cpuTime   : new org.joda.time.Duration(30 * MINUTES_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME.plusHours(1),
-                          ended: SDATE_DATETIME.plusHours(1).plusMinutes(30),
-                          cpuTime: new org.joda.time.Duration(30 * MINUTES_TO_MILLIS),
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME.plusHours(1),
+                          ended     : SDATE_DATETIME.plusHours(1).plusMinutes(30),
+                          cpuTime   : new org.joda.time.Duration(30 * MINUTES_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         [2, 1] + [0] * 23 == clusterJobService.findAllAvgCoreUsageByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
@@ -765,11 +818,12 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllMemoryUsageByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithDataListInInitialState() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1),
+        createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
+                          started   : SDATE_DATETIME.minusDays(1),
+                          ended     : SDATE_DATETIME.minusDays(1),
                           usedMemory: GiB_TO_KiB,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         [0] * 25 == clusterJobService.findAllAvgCoreUsageByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
@@ -777,23 +831,26 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllMemoryUsageByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapWithDataListContainingMemoryUsagePerHours() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: SDATE_DATETIME.plusMinutes(30),
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : SDATE_DATETIME.plusMinutes(30),
                           usedMemory: GiB_TO_KiB,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: SDATE_DATETIME.plusMinutes(30),
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : SDATE_DATETIME.plusMinutes(30),
                           usedMemory: GiB_TO_KiB,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME.plusHours(1),
-                          ended: SDATE_DATETIME.plusHours(1).plusMinutes(30),
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME.plusHours(1),
+                          ended     : SDATE_DATETIME.plusHours(1).plusMinutes(30),
                           usedMemory: GiB_TO_KiB,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         [2, 1] + [0] * 23 == clusterJobService.findAllMemoryUsageByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
@@ -806,10 +863,11 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllStatesTimeDistributionByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapInInitialState() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(3),
-                          started: EDATE_DATETIME.minusDays(2),
-                          ended: EDATE_DATETIME.minusDays(1),
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME.minusDays(3),
+                          started   : EDATE_DATETIME.minusDays(2),
+                          ended     : EDATE_DATETIME.minusDays(1),
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         [queue: [0, '0'], process: [0, '0']] == clusterJobService.findAllStatesTimeDistributionByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -818,15 +876,17 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findAllStatesTimeDistributionByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapContainingPercentagesAndAbsoluteValuesOfStatesTimeDistribution() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME.plusHours(12),
-                          ended: EDATE_DATETIME,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME.plusHours(12),
+                          ended     : EDATE_DATETIME,
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME.plusHours(6),
-                          ended: EDATE_DATETIME,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME.plusHours(6),
+                          ended     : EDATE_DATETIME,
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         [queue: [37, '18'], process: [63, '30']] == clusterJobService.findAllStatesTimeDistributionByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -839,11 +899,12 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassSpecificSeqTypesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started:  SDATE_DATETIME.minusDays(1),
-                          ended: EDATE_DATETIME.minusDays(1),
-                          seqType: seqType,
-                          jobClass: 'jobClass1'])
+        createClusterJob([queued  : SDATE_DATETIME.minusDays(1),
+                          started : SDATE_DATETIME.minusDays(1),
+                          ended   : EDATE_DATETIME.minusDays(1),
+                          seqType : seqType,
+                          jobClass: 'jobClass1',
+        ])
 
         expect:
         [] == clusterJobService.findJobClassSpecificSeqTypesByDateBetween('jobClass1', SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -855,23 +916,26 @@ class ClusterJobServiceSpec extends Specification {
                 dirName: 'testDir',
         )
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          seqType: seqType,
-                          jobClass: 'jobClass1'])
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : EDATE_DATETIME,
+                          seqType : seqType,
+                          jobClass: 'jobClass1',
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          seqType: seqType,
-                          jobClass: 'jobClass1'])
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : EDATE_DATETIME,
+                          seqType : seqType,
+                          jobClass: 'jobClass1',
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          seqType: seqType2,
-                          jobClass: 'jobClass1'])
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : EDATE_DATETIME,
+                          seqType : seqType2,
+                          jobClass: 'jobClass1',
+        ])
 
         expect:
         [seqType, seqType2] == clusterJobService.findJobClassSpecificSeqTypesByDateBetween('jobClass1', SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -884,11 +948,12 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificExitCodesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1),
+        createClusterJob([queued  : SDATE_DATETIME.minusDays(1),
+                          started : SDATE_DATETIME.minusDays(1),
+                          ended   : SDATE_DATETIME.minusDays(1),
                           jobClass: 'jobClass1',
-                          seqType: seqType, exitCode: 0])
+                          seqType : seqType, exitCode: 0,
+        ])
 
         expect:
         [] == clusterJobService.findJobClassAndSeqTypeSpecificExitCodesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -896,26 +961,29 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificExitCodesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithOccurencesOfExitCodesByJobClassAndSeqType() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : EDATE_DATETIME,
                           jobClass: 'jobClass1',
-                          seqType: seqType,
-                          exitCode: 0])
+                          seqType : seqType,
+                          exitCode: 0,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : EDATE_DATETIME,
                           jobClass: 'jobClass1',
-                          seqType: seqType,
-                          exitCode: 0])
+                          seqType : seqType,
+                          exitCode: 0,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : EDATE_DATETIME,
                           jobClass: 'jobClass1',
-                          seqType: seqType,
-                          exitCode: 10])
+                          seqType : seqType,
+                          exitCode: 10,
+        ])
 
         expect:
         [[0, 2], [10, 1]] == clusterJobService.findJobClassAndSeqTypeSpecificExitCodesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -928,12 +996,13 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificExitStatusesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1),
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
+                          started   : SDATE_DATETIME.minusDays(1),
+                          ended     : SDATE_DATETIME.minusDays(1),
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         [] == clusterJobService.findJobClassAndSeqTypeSpecificExitStatusesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -941,64 +1010,86 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificExitStatusesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithOccurancesOfExitStatussesByJobClassAndSeqType() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : EDATE_DATETIME,
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : EDATE_DATETIME,
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: EDATE_DATETIME,
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
-                          exitStatus: ClusterJob.Status.FAILED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME,
+                          ended     : EDATE_DATETIME,
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
+                          exitStatus: ClusterJob.Status.FAILED,
+        ])
 
         expect:
-        [[ClusterJob.Status.COMPLETED, 2], [ClusterJob.Status.FAILED, 1]] == clusterJobService.findJobClassAndSeqTypeSpecificExitStatusesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
+        [
+                [
+                        ClusterJob.Status.COMPLETED,
+                        2,
+                ], [
+                        ClusterJob.Status.FAILED,
+                        1,
+                ],
+        ] == clusterJobService.findJobClassAndSeqTypeSpecificExitStatusesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findJobClassAndSeqTypeSpecificStatesByDateBetween_WhenNoJobsFound_ShouldReturnMapWithDataListsInInitialState() {
         expect:
-        ['queued': [0] * 25, 'started': [0] * 25, 'ended': [0] * 25] == clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, SDATE_LOCALDATE).data
+        [
+                'queued': [0] * 25,
+                'started': [0] * 25,
+                'ended': [0] * 25,
+        ] == clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
 
     void test_findJobClassAndSeqTypeSpecificStatesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithDataListsInInitialState() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
+        createClusterJob([queued : SDATE_DATETIME.minusDays(1),
                           started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1)])
+                          ended  : SDATE_DATETIME.minusDays(1),
+        ])
 
         expect:
-        ['queued': [0] * 25, 'started': [0] * 25, 'ended': [0] * 25] == clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, SDATE_LOCALDATE).data
+        [
+                'queued': [0] * 25,
+                'started': [0] * 25,
+                'ended': [0] * 25,
+        ] == clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
 
     void test_findJobClassAndSeqTypeSpecificStatesByDateBetween_ShouldReturnMapWithDataListsContainingOccurencesOfStatesPerHour() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME,
-                          ended: SDATE_DATETIME,
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME,
+                          ended   : SDATE_DATETIME,
                           jobClass: 'jobClass1',
-                          seqType: seqType])
+                          seqType : seqType,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME.plusHours(1),
-                          ended: SDATE_DATETIME.plusHours(2),
+        createClusterJob([queued  : SDATE_DATETIME,
+                          started : SDATE_DATETIME.plusHours(1),
+                          ended   : SDATE_DATETIME.plusHours(2),
                           jobClass: 'jobClass1',
-                          seqType: seqType])
+                          seqType : seqType,
+        ])
 
         Map statesMap = clusterJobService.findJobClassAndSeqTypeSpecificStatesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, SDATE_LOCALDATE)
 
         expect:
-        [2] + [0] * 24 ==  statesMap.data.queued
+        [2] + [0] * 24 == statesMap.data.queued
         [1, 1] + [0] * 23 == statesMap.data.started
         [1, 0, 1] + [0] * 22 == statesMap.data.ended
     }
@@ -1014,13 +1105,14 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificWalltimesByDateBetween_WhenJobIstOutOfTimeSpan_ShouldReturnMapInInitialState() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started: SDATE_DATETIME.minusDays(1).plusHours(12),
-                          ended: SDATE_DATETIME.minusDays(1),
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
+        createClusterJob([queued           : SDATE_DATETIME.minusDays(1),
+                          started          : SDATE_DATETIME.minusDays(1).plusHours(12),
+                          ended            : SDATE_DATETIME.minusDays(1),
+                          jobClass         : 'jobClass1',
+                          seqType          : seqType,
                           requestedWalltime: new org.joda.time.Duration(12 * HOURS_TO_MILLIS),
-                          exitStatus: ClusterJob.Status.COMPLETED])
+                          exitStatus       : ClusterJob.Status.COMPLETED,
+        ])
 
         Map walltimeMap = clusterJobService.findJobClassAndSeqTypeSpecificWalltimesByDateBetween('jobClass', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
 
@@ -1031,28 +1123,30 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificWalltimesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapContainingMaximumWalltimeAndWalltimesPerHour() {
         given:
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
-                                            started: SDATE_DATETIME.plusHours(12),
-                                            ended: EDATE_DATETIME,
-                                            jobClass: 'jobClass1',
-                                            seqType: seqType,
+        ClusterJob job1 = createClusterJob([queued    : SDATE_DATETIME,
+                                            started   : SDATE_DATETIME.plusHours(12),
+                                            ended     : EDATE_DATETIME,
+                                            jobClass  : 'jobClass1',
+                                            seqType   : seqType,
                                             exitStatus: ClusterJob.Status.COMPLETED,
-                                            xten: false,
-                                            nReads: 100 * 1000 * 1000])
+                                            xten      : false,
+                                            nReads    : 100 * 1000 * 1000,
+        ])
 
-        ClusterJob job2 = createClusterJob([queued: SDATE_DATETIME,
-                                            started: SDATE_DATETIME.plusHours(18),
-                                            ended: EDATE_DATETIME,
-                                            jobClass: 'jobClass1',
-                                            seqType: seqType,
+        ClusterJob job2 = createClusterJob([queued    : SDATE_DATETIME,
+                                            started   : SDATE_DATETIME.plusHours(18),
+                                            ended     : EDATE_DATETIME,
+                                            jobClass  : 'jobClass1',
+                                            seqType   : seqType,
                                             exitStatus: ClusterJob.Status.COMPLETED,
-                                            xten: true,
-                                            nReads: 100 * 1000 * 1000])
+                                            xten      : true,
+                                            nReads    : 100 * 1000 * 1000,
+        ])
 
         Map walltimeMap = clusterJobService.findJobClassAndSeqTypeSpecificWalltimesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
 
         expect:
-        [[100, 12 * HOURS_TO_MILLIS /1000 /60, 'black', job1.id], [100, 6 * HOURS_TO_MILLIS /1000 /60, 'blue', job2.id]] == walltimeMap.data
+        [[100, 12 * HOURS_TO_MILLIS / 1000 / 60, 'black', job1.id], [100, 6 * HOURS_TO_MILLIS / 1000 / 60, 'blue', job2.id]] == walltimeMap.data
         100 == walltimeMap.xMax
     }
 
@@ -1063,13 +1157,14 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnNullValue() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1),
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
-                          cpuTime: new org.joda.time.Duration(24 * HOURS_TO_MILLIS),
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
+                          started   : SDATE_DATETIME.minusDays(1),
+                          ended     : SDATE_DATETIME.minusDays(1),
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
+                          cpuTime   : new org.joda.time.Duration(24 * HOURS_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         0 == clusterJobService.findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -1077,21 +1172,23 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween_WhenSeveralJobsAreFound_ShouldReturnAverageCoreUsage() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME.plusDays(1),
-                          ended: EDATE_DATETIME.plusDays(1),
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
-                          cpuTime: new org.joda.time.Duration(24 * HOURS_TO_MILLIS),
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME.plusDays(1),
+                          ended     : EDATE_DATETIME.plusDays(1),
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
+                          cpuTime   : new org.joda.time.Duration(24 * HOURS_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME.plusDays(1),
-                          ended: EDATE_DATETIME.plusDays(1),
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
-                          cpuTime: new org.joda.time.Duration(12 * HOURS_TO_MILLIS),
-                          exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME.plusDays(1),
+                          ended     : EDATE_DATETIME.plusDays(1),
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
+                          cpuTime   : new org.joda.time.Duration(12 * HOURS_TO_MILLIS),
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         0.75 == clusterJobService.findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE.plusDays(1))
@@ -1104,13 +1201,14 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween_WhenNoJobIsOutOfTimeSpan_ShouldReturnNullValue() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1),
-                          started: SDATE_DATETIME.minusDays(1),
-                          ended: SDATE_DATETIME.minusDays(1),
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
+        createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
+                          started   : SDATE_DATETIME.minusDays(1),
+                          ended     : SDATE_DATETIME.minusDays(1),
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
                           usedMemory: 900L,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         0 == clusterJobService.findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -1118,21 +1216,23 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween_WhenSeveralJobsAreFound_ShouldReturnAverageMemoryUsage() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME.plusDays(1),
-                          ended: EDATE_DATETIME.plusDays(1),
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME.plusDays(1),
+                          ended     : EDATE_DATETIME.plusDays(1),
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
                           usedMemory: 900L,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME.plusDays(1),
-                          ended: EDATE_DATETIME.plusDays(1),
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME.plusDays(1),
+                          ended     : EDATE_DATETIME.plusDays(1),
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
                           usedMemory: 100L,
-                          exitStatus: ClusterJob.Status.COMPLETED])
+                          exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         500 == clusterJobService.findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE.plusDays(1))
@@ -1140,12 +1240,22 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenNoJobsFound_ShouldReturnNullValues() {
         expect:
-        ['avgQueue': 0, 'avgProcess': 0] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
+        [
+                'avgQueue': 0,
+                'avgProcess': 0,
+        ] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnNullValues() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), started: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), jobClass: 'jobClass1', seqType: seqType, exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([
+                queued: SDATE_DATETIME.minusDays(1),
+                started: SDATE_DATETIME.minusDays(1),
+                ended: SDATE_DATETIME.minusDays(1),
+                jobClass: 'jobClass1',
+                seqType: seqType,
+                exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
         ['avgQueue': 0, 'avgProcess': 0] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
@@ -1153,24 +1263,29 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenSeveralJobsAreFound_ShouldReturnAverageStatesTimeDistribution() {
         given:
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME.plusHours(12),
-                          ended: EDATE_DATETIME,
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME.plusHours(12),
+                          ended     : EDATE_DATETIME,
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
                           exitStatus: ClusterJob.Status.COMPLETED,
-                          nBases: 1])
+                          nBases    : 1,
+        ])
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME.plusHours(18),
-                          ended: EDATE_DATETIME,
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME.plusHours(18),
+                          ended     : EDATE_DATETIME,
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
                           exitStatus: ClusterJob.Status.COMPLETED,
-                          nBases: 1])
+                          nBases    : 1,
+        ])
 
         expect:
-        ['avgQueue': 15 * HOURS_TO_MILLIS, 'avgProcess': 9 * HOURS_TO_MILLIS] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
+        [
+                'avgQueue': 15 * HOURS_TO_MILLIS,
+                'avgProcess': 9 * HOURS_TO_MILLIS,
+        ] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenBasesToBeNormalized_ShouldReturnAverageStatesTimeDistributionNormalizedToBases() {
@@ -1178,29 +1293,50 @@ class ClusterJobServiceSpec extends Specification {
         Long bases = 10
         Long basesToBeNormalized = 5
 
-        createClusterJob([queued: SDATE_DATETIME,
-                          started: SDATE_DATETIME.plusHours(12),
-                          ended: EDATE_DATETIME,
-                          jobClass: 'jobClass1',
-                          seqType: seqType,
+        createClusterJob([queued    : SDATE_DATETIME,
+                          started   : SDATE_DATETIME.plusHours(12),
+                          ended     : EDATE_DATETIME,
+                          jobClass  : 'jobClass1',
+                          seqType   : seqType,
                           exitStatus: ClusterJob.Status.COMPLETED,
-                          nBases: bases])
+                          nBases    : bases,
+        ])
 
         expect:
-        ['avgQueue': 12 * HOURS_TO_MILLIS, 'avgProcess': 12 * HOURS_TO_MILLIS / bases * basesToBeNormalized] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, basesToBeNormalized)
+        [
+                'avgQueue': 12 * HOURS_TO_MILLIS,
+                'avgProcess': 12 * HOURS_TO_MILLIS / bases * basesToBeNormalized,
+        ] == clusterJobService.findSpecificAvgStatesTimeDistribution('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, basesToBeNormalized)
     }
 
     void test_findJobClassAndSeqTypeSpecificCoverages_WhenNoJobsFound_ShouldReturnNullValues() {
         expect:
-        ["minCov": null, "maxCov": null, "avgCov": null, "medianCov": null] == clusterJobService.findJobClassAndSeqTypeSpecificCoverages('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, 1)
+        [
+                "minCov": null,
+                "maxCov": null,
+                "avgCov": null,
+                "medianCov": null,
+        ] == clusterJobService.findJobClassAndSeqTypeSpecificCoverages('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, 1)
     }
 
     void test_findJobClassAndSeqTypeSpecificCoverages_WhenJobIsOutOfTimeSpan_ShouldReturnNullValues() {
         given:
-        createClusterJob([queued: SDATE_DATETIME.minusDays(1), started: SDATE_DATETIME.minusDays(1), ended: SDATE_DATETIME.minusDays(1), jobClass: 'jobClass1', seqType: seqType, exitStatus: ClusterJob.Status.COMPLETED])
+        createClusterJob([
+                queued: SDATE_DATETIME.minusDays(1),
+                started: SDATE_DATETIME.minusDays(1),
+                ended: SDATE_DATETIME.minusDays(1),
+                jobClass: 'jobClass1',
+                seqType: seqType,
+                exitStatus: ClusterJob.Status.COMPLETED,
+        ])
 
         expect:
-        ["minCov": null, "maxCov": null, "avgCov": null, "medianCov": null] == clusterJobService.findJobClassAndSeqTypeSpecificCoverages('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, 1)
+        [
+                "minCov": null,
+                "maxCov": null,
+                "avgCov": null,
+                "medianCov": null,
+        ] == clusterJobService.findJobClassAndSeqTypeSpecificCoverages('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, 1)
     }
 
 
@@ -1209,7 +1345,12 @@ class ClusterJobServiceSpec extends Specification {
         createClusterJobsWithBasesInList([1, 9, 10, 80, 100], seqType)
 
         expect:
-        ["minCov": 1.00, "maxCov": 100.00, "avgCov": 40.00, "medianCov": 10.00] == clusterJobService.findJobClassAndSeqTypeSpecificCoverages('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, 1)
+        [
+                "minCov": 1.00,
+                "maxCov": 100.00,
+                "avgCov": 40.00,
+                "medianCov": 10.00,
+        ] == clusterJobService.findJobClassAndSeqTypeSpecificCoverages('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, 1)
     }
 
     void test_findJobClassAndSeqTypeSpecificCoverages_WhenEvenNumberOfJobsAreFound_ShouldReturnCoverageStatistics() {
@@ -1217,7 +1358,12 @@ class ClusterJobServiceSpec extends Specification {
         createClusterJobsWithBasesInList([1, 5, 9, 25], seqType)
 
         expect:
-        ["minCov": 1.00, "maxCov": 25.00, "avgCov": 10.00, "medianCov": 7.00] == clusterJobService.findJobClassAndSeqTypeSpecificCoverages('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, 1)
+        [
+                "minCov": 1.00,
+                "maxCov": 25.00,
+                "avgCov": 10.00,
+                "medianCov": 7.00,
+        ] == clusterJobService.findJobClassAndSeqTypeSpecificCoverages('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE, 1)
     }
 
     void test_findJobSpecificStatesTimeDistributionByJobId_WhenNoJobIsFound_ShouldReturnNull() {
@@ -1227,19 +1373,20 @@ class ClusterJobServiceSpec extends Specification {
 
     void test_findJobSpecificStatesTimeDistributionByJobId_WhenJobIsFound_ReturnStatesTimeDistribution() {
         given:
-        ClusterJob job1 = createClusterJob([queued: SDATE_DATETIME,
+        ClusterJob job1 = createClusterJob([queued : SDATE_DATETIME,
                                             started: SDATE_DATETIME.plusHours(18),
-                                            ended: EDATE_DATETIME])
+                                            ended  : EDATE_DATETIME,
+        ])
 
         expect:
         [
-                'queue': [
+                'queue'  : [
                         'percentage': 75,
-                        'ms': 18 * HOURS_TO_MILLIS,
+                        'ms'        : 18 * HOURS_TO_MILLIS,
                 ],
                 'process': [
                         'percentage': 25,
-                        'ms': 6 * HOURS_TO_MILLIS,
+                        'ms'        : 6 * HOURS_TO_MILLIS,
                 ]
         ] == clusterJobService.findJobSpecificStatesTimeDistributionByJobId(job1.id)
     }
@@ -1263,7 +1410,7 @@ class ClusterJobServiceSpec extends Specification {
     private static ClusterJob createClusterJob(Map myProps = [:]) {
         Map props = [
                 jobClass: 'testClass',
-                xten: false,
+                xten    : false,
         ] + myProps
 
         Realm realm = DomainFactory.createRealm()
@@ -1299,10 +1446,10 @@ class ClusterJobServiceSpec extends Specification {
         return [job, run]
     }
 
-    private static List createClusterJobWithProcessingStepAndRun( ProcessingStep step = null, Run run = null, Map myProps = [:]) {
+    private static List createClusterJobWithProcessingStepAndRun(ProcessingStep step = null, Run run = null, Map myProps = [:]) {
         def (j, r) = createClusterJobWithRun(run, myProps)
         j.processingStep = step
-        assert j.save(flush:true)
+        assert j.save(flush: true)
         return [j, r]
     }
 
@@ -1315,13 +1462,14 @@ class ClusterJobServiceSpec extends Specification {
 
     private static List<ClusterJob> createClusterJobsWithBasesInList(List<Long> basesInList, SeqType seqType) {
         return basesInList.collect {
-            createClusterJob([queued: SDATE_DATETIME,
-                              started: SDATE_DATETIME.plusHours(12),
-                              ended: EDATE_DATETIME,
-                              jobClass: 'jobClass1',
-                              seqType: seqType,
+            createClusterJob([queued    : SDATE_DATETIME,
+                              started   : SDATE_DATETIME.plusHours(12),
+                              ended     : EDATE_DATETIME,
+                              jobClass  : 'jobClass1',
+                              seqType   : seqType,
                               exitStatus: ClusterJob.Status.COMPLETED,
-                              nBases: it])
+                              nBases    : it,
+            ])
         }
     }
 }
