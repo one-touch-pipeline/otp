@@ -100,7 +100,7 @@ wgbs.each { SeqType seqType ->
 
     processingOptionService.createOrUpdate(
             OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION,
-            "1.2.73-1",
+            "1.2.73-2",
             seqType.roddyName,
     )
 
