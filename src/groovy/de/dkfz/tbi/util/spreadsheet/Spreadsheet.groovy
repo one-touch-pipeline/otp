@@ -23,6 +23,7 @@
 package de.dkfz.tbi.util.spreadsheet
 
 import com.opencsv.*
+import groovy.transform.TupleConstructor
 
 /**
  * An immutable in-memory representation of a tab-separated spreadsheet file
@@ -33,18 +34,30 @@ import com.opencsv.*
  */
 class Spreadsheet {
 
+    @TupleConstructor
+    enum Delimiter {
+        COMMA(',' as char, ','),
+        SPACE(' ' as char, 'space'),
+        SEMICOLON(';' as char, ';'),
+        TAB('\t' as char, 'tab')
+
+        char delimiter
+        String displayName
+    }
+
+
     final Row header
-    final String delimiter
+    final Delimiter delimiter
     private final Map<String, Column> columnsByTitle
     private final List<Row> dataRows
 
-    Spreadsheet(String document, char delimiter = '\t') {
+    Spreadsheet(String document, Delimiter delimiter = Delimiter.TAB) {
         this.delimiter = delimiter
         Map<String, Column> columnsByTitle = [:]
         List<Row> dataRows = []
         int rowIndex = 0
         CSVReader reader = new CSVReaderBuilder(new StringReader(document)).
-                withCSVParser(new RFC4180ParserBuilder().withSeparator(delimiter).build()).build()
+                withCSVParser(new RFC4180ParserBuilder().withSeparator(delimiter.delimiter).build()).build()
         String [] line
         while ((line = reader.readNext()) != null) {
             Row row = new Row(this, rowIndex++, line)

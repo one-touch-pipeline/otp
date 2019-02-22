@@ -41,7 +41,6 @@ class EgaSubmissionValidationService {
             if (!spreadsheet.getColumn(it.value)) {
                 hasError = true
                 error = "The column ${it.value} does not exist"
-                return
             }
         }
         return [

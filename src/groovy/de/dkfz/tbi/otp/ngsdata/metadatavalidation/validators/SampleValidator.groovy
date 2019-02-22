@@ -33,6 +33,8 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BIOMATERIAL_ID
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PATIENT_ID
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -59,7 +61,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [PROJECT]*.name()
+        return [PROJECT, PATIENT_ID, BIOMATERIAL_ID]*.name()
     }
 
     @Override
@@ -67,12 +69,15 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
-        Collection<String> missingIdentifiers = []
+        Collection<String> missingIdentifiersWithProject = []
         Pattern pattern = Pattern.compile("[A-Za-z0-9_-]+")
 
         Map<String, Collection<ValueTuple>> byProjectName = valueTuples.groupBy {
             String sampleId = it.getValue(SAMPLE_ID.name())
-            String projectName = it.getValue(PROJECT.name())
+            String projectName = it.getValue(PROJECT.name()) ?: ''
+            String pid = it.getValue(PATIENT_ID.name()) ?: ''
+            String sampleType = it.getValue(BIOMATERIAL_ID.name()) ?: ''
+
             Project project = Project.getByNameOrNameInMetadataFiles(projectName)
             Matcher matcher = pattern.matcher(sampleId)
             if (!matcher.matches()) {
@@ -82,7 +87,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
             SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
             if (!parsedIdentifier && !sampleIdentifier) {
                 context.addProblem(it.cells, Level.ERROR, "Sample identifier '${sampleId}' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP.")
-                missingIdentifiers.add(sampleId)
+                missingIdentifiersWithProject.add("${projectName},${pid},${sampleType},${sampleId}")
             }
             if (parsedIdentifier && !sampleIdentifier) {
                 if (!atMostOneElement(Project.findAllByName(parsedIdentifier.projectName))) {
@@ -106,8 +111,10 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
             }
             return sampleIdentifier?.project?.name ?: parsedIdentifier?.projectName
         }
-        if (!missingIdentifiers.isEmpty()) {
-            context.addProblem(Collections.emptySet(), Level.INFO, "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\n${missingIdentifiers.sort().join('\n')}")
+        if (!missingIdentifiersWithProject.isEmpty()) {
+            context.addProblem(Collections.emptySet(), Level.INFO, "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\n" +
+                    "${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n" +
+                    "${missingIdentifiersWithProject.sort().join('\n')}")
         }
         if (byProjectName.size() == 1 && context.spreadsheet.getColumn(PROJECT.name()) == null) {
             String projectName = exactlyOneElement(byProjectName.keySet())

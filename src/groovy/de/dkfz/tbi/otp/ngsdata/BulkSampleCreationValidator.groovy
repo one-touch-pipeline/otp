@@ -22,39 +22,35 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-/**
- * Defines the columns of the metadata file
- */
-enum MetaDataColumn {
-    FASTQ_FILE,
-    MD5,
-    CENTER_NAME,
-    RUN_ID,
-    RUN_DATE,
-    LANE_NO,
-    SAMPLE_ID,
-    SEQUENCING_TYPE,
-    ANTIBODY_TARGET,
-    ANTIBODY,
-    INSTRUMENT_PLATFORM,
-    INSTRUMENT_MODEL,
-    PIPELINE_VERSION,
-    ALIGN_TOOL,
-    INSERT_SIZE,
-    LIBRARY_LAYOUT,
-    WITHDRAWN,
-    WITHDRAWN_DATE,
-    COMMENT,
-    BARCODE,
-    LIB_PREP_KIT,
-    SEQUENCING_KIT,
-    ILSE_NO,
-    PROJECT,
-    MATE,
-    CUSTOMER_LIBRARY,
-    SAMPLE_SUBMISSION_TYPE,
-    TAGMENTATION_BASED_LIBRARY,
-    BASE_MATERIAL,
-    PATIENT_ID,
-    BIOMATERIAL_ID,
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.util.spreadsheet.validation.*
+
+import static de.dkfz.tbi.otp.ngsdata.SampleIdentifierService.BulkSampleCreationHeader.*
+
+@Component
+class BulkSampleCreationValidator extends ValueTuplesValidator<ValidationContext> {
+
+    @Override
+    List<String> getRequiredColumnTitles(ValidationContext context) {
+        return [PID, SAMPLE_TYPE, SAMPLE_IDENTIFIER]*.name()
+    }
+
+    @Override
+    List<String> getOptionalColumnTitles(ValidationContext context) {
+        return [PROJECT]*.name()
+    }
+
+    @Override
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) { }
+
+    @Override
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
+        valueTuples.each {
+            String projectName = it.getValue(PROJECT.name()).trim()
+            if (projectName && !Project.findByName(projectName)) {
+                context.addProblem(it.cells, Level.ERROR, "Could not find Project '${projectName}'")
+            }
+        }
+    }
 }

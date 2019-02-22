@@ -83,7 +83,7 @@ class SampleValidatorSpec extends Specification {
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
                         "Sample identifier 'AAA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP."),
                 new Problem(Collections.emptySet(), Level.INFO,
-                        "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\nAAA\nABC"),
+                        "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n,,,AAA\n,,,ABC"),
         ]
         when:
         validator.validate(context)
@@ -227,7 +227,7 @@ class SampleValidatorSpec extends Specification {
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
                         "Sample identifier 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP."),
                 new Problem(Collections.emptySet(), Level.INFO,
-                        "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\nSampleA"),
+                        "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n,,,SampleA"),
         ]
 
         when:
@@ -250,7 +250,7 @@ class SampleValidatorSpec extends Specification {
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
                         "Sample identifier 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP."),
                 new Problem(Collections.emptySet(), Level.INFO,
-                        "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\nSampleA"),
+                        "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n,,,SampleA"),
         ]
 
         when:

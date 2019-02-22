@@ -429,14 +429,13 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     Spreadsheet readFile(UploadFormSubmitCommand cmd) {
-        final char DELIMITER = ","
         if (cmd.file.empty) {
             pushError("No file selected", cmd.submission, true)
             return
         }
         String content = new String(cmd.file.bytes)
         content = content.replace("\"", "")
-        return new Spreadsheet(content, DELIMITER)
+        return new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
     }
 
     def selectFilesBamFilesForm(SelectFilesBamFilesFormSubmitCommand cmd) {

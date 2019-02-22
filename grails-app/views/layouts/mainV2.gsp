@@ -196,7 +196,7 @@ ${assetPath(src: 'v2/otp-favicon.ico')}" type="image/x-icon">
                                                 <li><g:link controller="createProject">${g.message(code: "otp.menu.createProject")}</g:link></li>
                                                 <li><g:link controller="projectConfig">${g.message(code: "otp.menu.projectConfig")}</g:link></li>
                                                 <li><g:link controller="individual" action="insert">${g.message(code: "otp.menu.createIndividual")}</g:link></li>
-                                                <li><g:link controller="individual" action="insertMany">${g.message(code: "otp.menu.createSample")}</g:link></li>
+                                                <li><g:link controller="bulkSampleCreation" action="index">${g.message(code: "otp.menu.createSample")}</g:link></li>
                                                 <li role="separator" class="divider"></li>
                                                 <li><g:link controller="processes" action="list">${g.message(code: "otp.menu.processes")}</g:link></li>
                                                 <li role="separator" class="divider"></li>

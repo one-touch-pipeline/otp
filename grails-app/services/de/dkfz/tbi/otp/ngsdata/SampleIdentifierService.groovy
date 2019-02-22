@@ -22,15 +22,33 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.validation.ValidationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import org.springframework.validation.ObjectError
 
 import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
+import de.dkfz.tbi.util.spreadsheet.Row
+import de.dkfz.tbi.util.spreadsheet.Spreadsheet
+import de.dkfz.tbi.util.spreadsheet.validation.Problem
+import de.dkfz.tbi.util.spreadsheet.validation.ValidationContext
+
+import java.text.MessageFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class SampleIdentifierService {
 
+    enum BulkSampleCreationHeader {
+        PROJECT,
+        PID,
+        SAMPLE_TYPE,
+        SAMPLE_IDENTIFIER,
+
+        static final String getHeaders(Spreadsheet.Delimiter delimiter = Spreadsheet.Delimiter.TAB) {
+            return values().join(delimiter.delimiter as String)
+        }
+    }
 
     static final String XENOGRAFT = "XENOGRAFT"
     static final String CULTURE = "PATIENT-DERIVED-CULTURE"
@@ -74,6 +92,42 @@ class SampleIdentifierService {
         return sampleIdentifierParser.tryParseCellPosition(sampleIdentifier)
     }
 
+    List<String> createBulkSamples(String sampleText, Spreadsheet.Delimiter delimiter, Project project) {
+        Spreadsheet spreadsheet = new Spreadsheet(sampleText, delimiter)
+        List<String> output = []
+        ValidationContext context = new ValidationContext(spreadsheet)
+        getBulkSampleCreationValidatorBean().validate(context)
+        Set<Problem> problems = context.getProblems()
+        if (problems) {
+            return problems*.message
+        }
+
+        try {
+            for (Row row : spreadsheet.dataRows) {
+                String projectName = row.getCellByColumnTitle(BulkSampleCreationHeader.PROJECT.name()).text.trim() ?: project.name
+
+                ParsedSampleIdentifier s = new DefaultParsedSampleIdentifier(
+                        projectName: projectName,
+                        pid: row.getCellByColumnTitle(BulkSampleCreationHeader.PID.name()).text.trim(),
+                        sampleTypeDbName: row.getCellByColumnTitle(BulkSampleCreationHeader.SAMPLE_TYPE.name()).text.trim(),
+                        fullSampleName: row.getCellByColumnTitle(BulkSampleCreationHeader.SAMPLE_IDENTIFIER.name()).text.trim(),
+                )
+                findOrSaveSampleIdentifier(s)
+            }
+        } catch (ValidationException e) {
+            e.errors.allErrors.each { ObjectError err ->
+                output << "${MessageFormat.format(err.defaultMessage, err.arguments)}: ${err.code}"
+            }
+        } catch (RuntimeException e) {
+            output << e.message
+        }
+        return output
+    }
+
+    private BulkSampleCreationValidator getBulkSampleCreationValidatorBean() {
+        return applicationContext.getBean(BulkSampleCreationValidator)
+    }
+
     SampleIdentifier findOrSaveSampleIdentifier(ParsedSampleIdentifier identifier) {
         SampleIdentifier result = atMostOneElement(SampleIdentifier.findAllByName(identifier.fullSampleName))
         if (result) {
@@ -81,14 +135,15 @@ class SampleIdentifierService {
                     result.individual.pid != identifier.pid ||
                     (result.sampleType.name != identifier.sampleTypeDbName && result.sampleType.name != identifier.sampleTypeDbName.replace('_', '-'))) {
                 throw new RuntimeException("A sample identifier ${identifier.fullSampleName} already exists, " +
-                        "but belongs to sample ${result.sample} which does not match the expected properties")
+                        "but belongs to sample ${result.sample} in project ${result.project.name} which does not match the expected properties")
             }
         } else {
+            Sample sample = findOrSaveSample(identifier)
             result = new SampleIdentifier(
-                    sample: findOrSaveSample(identifier),
+                    sample: sample,
                     name: identifier.fullSampleName,
             )
-            assert result.save(failOnError: true, flush: true)
+            result.save(flush: true)
         }
         return result
     }
@@ -134,7 +189,7 @@ class SampleIdentifierService {
                     project: findProject(identifier),
                     type: Individual.Type.REAL
             )
-            assert result.save(failOnError: true, flush: true)
+            assert result.save(flush: true)
         }
         return result
     }

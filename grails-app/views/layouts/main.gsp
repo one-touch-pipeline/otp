@@ -118,7 +118,7 @@
                                             <li><g:link controller="metadataImport" action="blacklistedIlseNumbers"><g:message code="otp.menu.blacklistedIlseNumbers"/></g:link></li>
                                             <li><g:link controller="createProject" action="index"><g:message code="otp.menu.createProject"/></g:link></li>
                                             <li><g:link controller="individual" action="insert"><g:message code="otp.menu.createIndividual"/></g:link></li>
-                                            <li><g:link controller="individual" action="insertMany"><g:message code="otp.menu.createSample"/></g:link></li>
+                                            <li><g:link controller="bulkSampleCreation" action="index"><g:message code="otp.menu.createSample"/></g:link></li>
                                             <li><g:link controller="createSpecies" action="index"><g:message code="otp.menu.createSpecies"/></g:link></li>
                                             <li><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
                                             <li><g:link controller="mergingCriteria" action="defaultSeqPlatformGroupConfiguration"><g:message code="otp.menu.seqPlatformGroup"/></g:link></li>
