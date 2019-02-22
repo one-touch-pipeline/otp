@@ -349,11 +349,22 @@ class ProjectConfigController implements CheckAndCall {
         Project project = projectService.getProjectByName(params.project)
         Map dataToRender = cmd.dataToRender()
         List data = projectOverviewService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it ->
-            String adapterTrimming = it.sampleType ? "" :
-                    it.seqType.isWgbs() || it.seqType.isWgbs() ?:
-                            RoddyWorkflowConfig.getLatestForProject(project, it.seqType, Pipeline.findByName(
-                                    Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded
-            [it.seqType.displayNameWithLibraryLayout, it.sampleType?.name, it.referenceGenome.name, it.statSizeFileName ?: "", adapterTrimming]
+            String adapterTrimming = ""
+            if (!it.sampleType) {
+                adapterTrimming = it.seqType.isWgbs() ?:
+                            RoddyWorkflowConfig.getLatestForProject(
+                                    project,
+                                    it.seqType,
+                                    Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
+                            )?.adapterTrimmingNeeded
+            }
+            return [
+                    it.seqType.displayNameWithLibraryLayout,
+                    it.sampleType?.name,
+                    it.referenceGenome.name,
+                    it.statSizeFileName ?: "",
+                    adapterTrimming
+            ]
         }
         dataToRender.iTotalRecords = data.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
