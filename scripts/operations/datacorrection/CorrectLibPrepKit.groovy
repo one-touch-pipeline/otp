@@ -15,11 +15,20 @@ import de.dkfz.tbi.otp.*
 
 String libPrepKit = '' //new lib prep kit
 
-List<Long> ilseNumbers = [
-        // ilse numbers to update
+List<Long> ilseNumbers = []
 
-]
-SeqType seqType = SeqTypeService.rnaPairedSeqType
+SeqType seqType = null //SeqTypeService.
+/*
+getWholeGenomePairedSeqType()
+getExomePairedSeqType()
+getWholeGenomeBisulfitePairedSeqType()
+getWholeGenomeBisulfiteTagmentationPairedSeqType()
+getRnaPairedSeqType()
+getChipSeqPairedSeqType()
+getRnaSingleSeqType()
+get10xSingleCellRnaSeqType()
+getSingleSeqType()
+ */
 
 String commentInfo = '' //some additional Information about the change, perhaps link to OTRS ticket
 
@@ -55,7 +64,7 @@ SeqTrack.withTransaction {
             String newComment = "Correct ${entry.value} to ${libPrepKit},\n${commentInfo}".trim()
             String combinedComment = (oldComment ? "$oldComment\n\n" : '') + newComment
             println "    $entry"
-            println combinedComment
+            println newComment
             entry.value = libPrepKit
             commentService.saveComment(it, combinedComment)
         }
@@ -64,9 +73,17 @@ SeqTrack.withTransaction {
                 eq('id', seqTrack.id)
             }
         }
-        rbf*.mergingWorkPackage.unique().each {MergingWorkPackage workPackage ->
-            println "    $workPackage  ${workPackage.libraryPreparationKit}"
-            workPackage.libraryPreparationKit = libraryPreparationKit
+
+        /*
+            WGBS can, for experimental reasons, have lanes with different libPrepKits, that still need to be
+            merged. This is OK as long as they all end up using the same Adapter File. The WGBS-alignment for
+            unique(MWP*.seqTracks*.libraryPreparationKit*.adapterfile)
+        */
+        if (!seqType.isWgbs()) {
+            rbf*.mergingWorkPackage.unique().each { MergingWorkPackage workPackage ->
+                println "    $workPackage  ${workPackage.libraryPreparationKit}"
+                workPackage.libraryPreparationKit = libraryPreparationKit
+            }
         }
     }
 

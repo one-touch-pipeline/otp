@@ -77,6 +77,11 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
             if (seqTypeName == SeqTypeNames.EXOME) {
                 return val != null
             } else if (seqTypeName?.isWgbs()) {
+                /*
+                    WGBS can, for experimental reasons, have lanes with different libPrepKits, that still need to be
+                    merged. This is OK as long as they all end up using the same Adapter File. The WGBS-alignment for
+                    unique(MWP*.seqTracks*.libraryPreparationKit*.adapterfile)
+                */
                 return val == null
             } else {
                 return true
