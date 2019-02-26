@@ -48,9 +48,9 @@ class ProjectValidator extends SingleValueValidator<AbstractMetadataValidationCo
     }
 
     @Override
-    void columnMissing(AbstractMetadataValidationContext context) {
+    void checkColumn(AbstractMetadataValidationContext context) {
         if (context instanceof BamMetadataValidationContext) {
-            mandatoryColumnMissing(context, BamMetadataColumn.PROJECT.name())
+            addErrorForMissingRequiredColumn(context, BamMetadataColumn.PROJECT.name())
         }
     }
 

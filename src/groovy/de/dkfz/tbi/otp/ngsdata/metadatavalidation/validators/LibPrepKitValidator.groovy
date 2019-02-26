@@ -52,8 +52,8 @@ class LibPrepKitValidator extends SingleValueValidator<MetadataValidationContext
     }
 
     @Override
-    void columnMissing(MetadataValidationContext context) {
-        optionalColumnMissing(context, LIB_PREP_KIT.name())
+    void checkColumn(MetadataValidationContext context) {
+        addWarningForMissingOptionalColumn(context, LIB_PREP_KIT.name())
     }
 
     @Override

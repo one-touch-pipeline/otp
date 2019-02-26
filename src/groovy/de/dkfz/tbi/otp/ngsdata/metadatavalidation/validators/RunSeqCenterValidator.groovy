@@ -45,8 +45,8 @@ class RunSeqCenterValidator extends ValueTuplesValidator<MetadataValidationConte
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [RUN_ID.name(), CENTER_NAME.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [RUN_ID, CENTER_NAME]*.name()
     }
 
     @Override

@@ -35,7 +35,7 @@ trait DirectoryStructure {
     /**
      * The titles of the columns which the paths are constructed from
      */
-    abstract List<String> getColumnTitles()
+    abstract List<String> getRequiredColumnTitles()
 
     /**
      * @return The path of the data file or {@code null} if it cannot be constructed
@@ -48,7 +48,7 @@ trait DirectoryStructure {
     Path getDataFilePath(MetadataValidationContext context, Row row) {
         Map<String, String> valuesByColumnTitle = [:]
         Set<Cell> cells = new LinkedHashSet<Cell>()
-        getColumnTitles().each {
+        getRequiredColumnTitles().each {
             Cell cell = row.getCellByColumnTitle(it)
             if (cell) {
                 valuesByColumnTitle.put(it, cell.text)

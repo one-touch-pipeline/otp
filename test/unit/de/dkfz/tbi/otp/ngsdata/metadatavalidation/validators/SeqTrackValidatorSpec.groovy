@@ -117,7 +117,7 @@ class SeqTrackValidatorSpec extends Specification {
         given:
         MetadataValidationContext context = createContext("${RUN_ID}\nrunA")
         Collection<Problem> expectedProblems = [
-                new Problem(Collections.emptySet(), Level.ERROR, "Mandatory column 'LANE_NO' is missing."),
+                new Problem(Collections.emptySet(), Level.ERROR, "Required column 'LANE_NO' is missing."),
         ]
 
         when:

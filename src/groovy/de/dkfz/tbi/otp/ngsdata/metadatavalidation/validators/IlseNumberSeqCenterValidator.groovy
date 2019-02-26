@@ -40,19 +40,17 @@ class IlseNumberSeqCenterValidator extends ValueTuplesValidator<MetadataValidati
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle == ILSE_NO.name()) {
-            return true
-        } else {
-            mandatoryColumnMissing(context, columnTitle)
-            return false
-        }
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [CENTER_NAME]*.name()
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [ILSE_NO.name(), CENTER_NAME.name()]
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        return [ILSE_NO]*.name()
     }
+
+    @Override
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {

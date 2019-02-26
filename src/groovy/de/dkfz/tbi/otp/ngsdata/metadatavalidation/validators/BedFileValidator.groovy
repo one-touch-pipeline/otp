@@ -51,17 +51,20 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE.name(), LIBRARY_LAYOUT.name(), LIB_PREP_KIT.name(), SAMPLE_ID.name(), TAGMENTATION_BASED_LIBRARY.name(), BASE_MATERIAL.name(), PROJECT.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [SEQUENCING_TYPE, LIBRARY_LAYOUT, LIB_PREP_KIT, SAMPLE_ID, PROJECT]*.name()
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle in [TAGMENTATION_BASED_LIBRARY.name(), BASE_MATERIAL.name()]) {
-            return true
-        }
-        return false
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        return [TAGMENTATION_BASED_LIBRARY, BASE_MATERIAL]*.name()
     }
+
+    @Override
+    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) { }
+
+    @Override
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {

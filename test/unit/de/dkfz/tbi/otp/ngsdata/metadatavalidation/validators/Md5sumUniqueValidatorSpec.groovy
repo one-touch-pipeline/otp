@@ -77,7 +77,7 @@ SomeValue
         Problem problem = CollectionUtils.exactlyOneElement(context.problems)
         problem.level == Level.ERROR
         TestCase.assertContainSame(problem.affectedCells*.cellAddress, [])
-        problem.message.contains("Mandatory column 'MD5' is missing.")
+        problem.message.contains("Required column 'MD5' is missing.")
     }
 
     void 'validate concerning bam metadata, when column is missing, adds warning'() {

@@ -44,19 +44,17 @@ class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<Metada
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [ANTIBODY_TARGET.name(), ANTIBODY.name(), SEQUENCING_TYPE.name(), TAGMENTATION_BASED_LIBRARY.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [SEQUENCING_TYPE]*.name()
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle == ANTIBODY_TARGET.name() || columnTitle == ANTIBODY.name() || columnTitle == TAGMENTATION_BASED_LIBRARY.name()) {
-            return true
-        } else {
-            mandatoryColumnMissing(context, columnTitle)
-            return false
-        }
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        return [ANTIBODY_TARGET, ANTIBODY, TAGMENTATION_BASED_LIBRARY]*.name()
     }
+
+    @Override
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {

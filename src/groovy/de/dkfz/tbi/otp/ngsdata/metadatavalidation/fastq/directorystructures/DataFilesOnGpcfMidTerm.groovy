@@ -45,11 +45,11 @@ class DataFilesOnGpcfMidTerm implements DirectoryStructure {
     }
 
     @Override
-    List<String> getColumnTitles() {
+    List<String> getRequiredColumnTitles() {
         return [
-                FASTQ_FILE.name(),
-                RUN_ID.name(),
-        ]
+                FASTQ_FILE,
+                RUN_ID,
+        ]*.name()
     }
 
     @Override

@@ -48,8 +48,7 @@ class IlseNumberBlacklistedValidator extends SingleValueValidator<MetadataValida
     }
 
     @Override
-    void columnMissing(MetadataValidationContext context) {
-    }
+    void checkColumn(MetadataValidationContext context) { }
 
     @Override
     void validateValue(MetadataValidationContext context, String value, Set<Cell> cells) {

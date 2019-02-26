@@ -48,11 +48,11 @@ class ValueTuplesValidatorSpec extends Specification {
     Set<Cell> yyCells = [spreadsheet.dataRows[5].cells[1], spreadsheet.dataRows[5].cells[2]] as Set
     ValidationContext context = new ValidationContext(spreadsheet)
 
-    void test_ValueTuplesValidator_WithMissingMandatoryColumn() {
+    void test_ValueTuplesValidator_WithMissingRequiredColumn() {
 
         given:
         ValueTuplesValidator<ValidationContext> validator = [
-                getColumnTitles: { ValidationContext context -> ['B', 'C', 'D'] },
+                getRequiredColumnTitles: { ValidationContext context -> ['B', 'C', 'D'] },
         ] as ValueTuplesValidator<ValidationContext>
 
         when:
@@ -61,7 +61,7 @@ class ValueTuplesValidatorSpec extends Specification {
         Problem problem = exactlyOneElement(context.problems)
         problem.affectedCells.empty
         problem.level == Level.ERROR
-        problem.message == "Mandatory column 'C' is missing."
+        problem.message == "Required column 'C' is missing."
     }
 
     void test_ValueTuplesValidator_WithMissingOptionalColumn() {
@@ -70,13 +70,12 @@ class ValueTuplesValidatorSpec extends Specification {
         Collection<ValueTuple> calledFor = null
         ValueTuplesValidator<ValidationContext> validator = new ValueTuplesValidator<ValidationContext>() {
             @Override
-            List<String> getColumnTitles(ValidationContext context) {
-                return ['B', 'C', 'D']
+            List<String> getRequiredColumnTitles(ValidationContext context) {
+                return []
             }
             @Override
-            boolean columnMissing(ValidationContext context, String columnTitle) {
-                optionalColumnMissing(context, columnTitle)
-                return true
+            List<String> getOptionalColumnTitles(ValidationContext context) {
+                return ['B', 'C', 'D']
             }
             @Override
             void validateValueTuples(ValidationContext ctx, Collection<ValueTuple> valueTuples) {

@@ -47,31 +47,24 @@ class QualityControlFileValidator extends ValueTuplesValidator<BamMetadataValida
     }
 
     @Override
-    List<String> getColumnTitles(BamMetadataValidationContext context) {
-        return [QUALITY_CONTROL_FILE.name(), BAM_FILE_PATH.name()]
+    List<String> getRequiredColumnTitles(BamMetadataValidationContext context) {
+        return [QUALITY_CONTROL_FILE, BAM_FILE_PATH]*.name()
     }
 
     @Override
-    void optionalColumnMissing(BamMetadataValidationContext context, String columnTitle) {
-        context.addProblem(Collections.emptySet(), Level.WARNING, "'${QUALITY_CONTROL_FILE.name()}' has to be set for Sophia",
-                "'${QUALITY_CONTROL_FILE.name()}' has to be set for Sophia")
+    void checkMissingRequiredColumn(BamMetadataValidationContext context, String columnTitle) {
+        if (columnTitle == QUALITY_CONTROL_FILE.name())  {
+            addWarningForMissingOptionalColumn(context, columnTitle, "'${QUALITY_CONTROL_FILE.name()}' has to be set for Sophia")
+        } else {
+            super.checkMissingRequiredColumn(context, columnTitle)
+        }
     }
 
     @Override
-    boolean columnMissing(BamMetadataValidationContext context, String columnTitle) {
-        if (columnTitle == BAM_FILE_PATH.name()) {
-            mandatoryColumnMissing(context, columnTitle)
-            return false
-        }
-        if (columnTitle == QUALITY_CONTROL_FILE.name()) {
-            optionalColumnMissing(context, columnTitle)
-        }
-        return true
-    }
+    void checkMissingOptionalColumn(BamMetadataValidationContext context, String columnTitle) { }
 
     @Override
     void validateValueTuples(BamMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
-
         valueTuples.each {
             String bamFile = it.getValue(BAM_FILE_PATH.name())
             String qualityControlFile = it.getValue(QUALITY_CONTROL_FILE.name())

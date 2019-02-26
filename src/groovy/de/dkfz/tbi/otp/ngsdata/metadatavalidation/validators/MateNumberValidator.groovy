@@ -45,8 +45,7 @@ class MateNumberValidator extends SingleValueValidator<MetadataValidationContext
     }
 
     @Override
-    void columnMissing(MetadataValidationContext context) {
-    }
+    void checkColumn(MetadataValidationContext context) { }
 
     @Override
     void validateValue(MetadataValidationContext context, String mateNumber, Set<Cell> cells) {

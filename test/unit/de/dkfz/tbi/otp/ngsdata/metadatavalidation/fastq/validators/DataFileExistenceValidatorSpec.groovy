@@ -59,7 +59,7 @@ class DataFileExistenceValidatorSpec extends Specification {
 
         DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
             getDescription() >> 'test directory structure'
-            getColumnTitles() >> ['FILENAME']
+            getRequiredColumnTitles() >> ['FILENAME']
             getDataFilePath(_, _) >> { MetadataValidationContext context, ValueTuple valueTuple ->
                 Matcher matcher = valueTuple.getValue('FILENAME') =~ /^(.+) .$/
                 if (matcher) {

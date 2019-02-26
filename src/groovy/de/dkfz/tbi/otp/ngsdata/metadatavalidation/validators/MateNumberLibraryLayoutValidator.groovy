@@ -23,13 +23,14 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import org.springframework.stereotype.Component
-import org.springsource.loaded.*
 
 import de.dkfz.tbi.otp.ngsdata.LibraryLayout
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.LIBRARY_LAYOUT
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.MATE
 
 @Component
 class MateNumberLibraryLayoutValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
@@ -40,24 +41,22 @@ class MateNumberLibraryLayoutValidator extends ValueTuplesValidator<MetadataVali
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [MetaDataColumn.MATE.name(),
-                MetaDataColumn.LIBRARY_LAYOUT.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [MATE, LIBRARY_LAYOUT]*.name()
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle == MetaDataColumn.LIBRARY_LAYOUT.name()) {
-            mandatoryColumnMissing(context, columnTitle)
+    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) {
+        if (columnTitle == LIBRARY_LAYOUT.name()) {
+            addErrorForMissingRequiredColumn(context, columnTitle)
         }
-        return false
     }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
-            String libraryLayoutName = it.getValue(MetaDataColumn.LIBRARY_LAYOUT.name())
-            String mateNumber = it.getValue(MetaDataColumn.MATE.name())
+            String libraryLayoutName = it.getValue(LIBRARY_LAYOUT.name())
+            String mateNumber = it.getValue(MATE.name())
             if (libraryLayoutName && mateNumber && mateNumber.isInteger()) {
                 LibraryLayout libraryLayout = LibraryLayout.values().find {
                     it.toString() == libraryLayoutName

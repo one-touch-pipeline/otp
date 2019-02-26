@@ -48,7 +48,7 @@ class WithdrawnDateValidator extends SingleValueValidator<MetadataValidationCont
     }
 
     @Override
-    void columnMissing(MetadataValidationContext context) {
+    void checkColumn(MetadataValidationContext context) {
     }
 
     @Override

@@ -33,6 +33,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
 class CoverageValidator extends SingleValueValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+
     @Override
     Collection<String> getDescriptions() {
         return ["Coverage must be a double number"]
@@ -44,8 +45,8 @@ class CoverageValidator extends SingleValueValidator<BamMetadataValidationContex
     }
 
     @Override
-    void columnMissing(BamMetadataValidationContext context) {
-        optionalColumnMissing(context, BamMetadataColumn.COVERAGE.name())
+    void checkColumn(BamMetadataValidationContext context) {
+        addWarningForMissingOptionalColumn(context, BamMetadataColumn.COVERAGE.name())
     }
 
     @Override

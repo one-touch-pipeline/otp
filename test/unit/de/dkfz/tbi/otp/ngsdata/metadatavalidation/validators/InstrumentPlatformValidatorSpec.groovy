@@ -51,7 +51,7 @@ class InstrumentPlatformValidatorSpec extends Specification {
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
         containSame(problem.affectedCells*.cellAddress, [])
-        problem.message.contains("Mandatory column 'INSTRUMENT_PLATFORM' is missing.")
+        problem.message.contains("Required column 'INSTRUMENT_PLATFORM' is missing.")
     }
 
     void 'validate adds expected error'() {

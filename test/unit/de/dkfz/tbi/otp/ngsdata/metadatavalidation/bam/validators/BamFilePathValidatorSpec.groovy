@@ -104,7 +104,7 @@ class BamFilePathValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.ERROR,
-                        "Mandatory column '${BAM_FILE_PATH}' is missing.")
+                        "Required column '${BAM_FILE_PATH}' is missing.")
         ]
 
         when:

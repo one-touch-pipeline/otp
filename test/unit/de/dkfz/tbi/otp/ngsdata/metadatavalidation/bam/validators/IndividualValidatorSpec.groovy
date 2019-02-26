@@ -47,7 +47,7 @@ class IndividualValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.ERROR,
-                        "Mandatory column '${INDIVIDUAL}' is missing.")
+                        "Required column '${INDIVIDUAL}' is missing.")
         ]
 
         when:

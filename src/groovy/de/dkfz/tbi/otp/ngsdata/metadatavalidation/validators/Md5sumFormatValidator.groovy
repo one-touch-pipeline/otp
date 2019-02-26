@@ -48,9 +48,9 @@ class Md5sumFormatValidator extends SingleValueValidator<AbstractMetadataValidat
     }
 
     @Override
-    void columnMissing(AbstractMetadataValidationContext context) {
+    void checkColumn(AbstractMetadataValidationContext context) {
         if (context instanceof BamMetadataValidationContext) {
-            optionalColumnMissing(context, BamMetadataColumn.MD5.name())
+            addWarningForMissingOptionalColumn(context, BamMetadataColumn.MD5.name())
         }
     }
 

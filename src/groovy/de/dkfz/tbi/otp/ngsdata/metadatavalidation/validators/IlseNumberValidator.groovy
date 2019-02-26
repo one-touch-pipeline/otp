@@ -45,14 +45,11 @@ class IlseNumberValidator extends ValueTuplesValidator<MetadataValidationContext
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        return false
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [ILSE_NO]*.name()
     }
 
-    @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [ILSE_NO.name()]
-    }
+    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) { }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {

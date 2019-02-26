@@ -44,19 +44,18 @@ class Md5sumUniqueValidator extends ValueTuplesValidator<AbstractMetadataValidat
     }
 
     @Override
-    List<String> getColumnTitles(AbstractMetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(AbstractMetadataValidationContext context) {
         return [MetaDataColumn.MD5.name()]
     }
 
     @Override
-    boolean columnMissing(AbstractMetadataValidationContext context, String columnTitle) {
+    void checkMissingRequiredColumn(AbstractMetadataValidationContext context, String columnTitle) {
         if (columnTitle == MetaDataColumn.MD5.name()) {
             if (context instanceof BamMetadataValidationContext) {
-                optionalColumnMissing(context, columnTitle)
+                addWarningForMissingOptionalColumn(context, columnTitle)
             } else {
-                mandatoryColumnMissing(context, columnTitle)
+                addErrorForMissingRequiredColumn(context, columnTitle)
             }
-            return false
         }
     }
 

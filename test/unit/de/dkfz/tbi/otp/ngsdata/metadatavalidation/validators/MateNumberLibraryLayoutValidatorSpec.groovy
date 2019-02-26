@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.LibraryLayout
@@ -37,6 +38,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 class MateNumberLibraryLayoutValidatorSpec extends Specification {
 
 
+    @Unroll
     void 'validate, when column(s) is/are missing, adds error(s)'() {
 
         given:
@@ -53,9 +55,9 @@ value1\tvalue2
 
         where:
         header || messages
-        "${MetaDataColumn.MATE.name()}\tlayout" || ["Mandatory column 'LIBRARY_LAYOUT' is missing."]
+        "${MetaDataColumn.MATE.name()}\tlayout" || ["Required column 'LIBRARY_LAYOUT' is missing."]
         "nomate\t${MetaDataColumn.LIBRARY_LAYOUT.name()}" || []
-        "nomate\tlayout" || ["Mandatory column 'LIBRARY_LAYOUT' is missing."]
+        "nomate\tlayout" || ["Required column 'LIBRARY_LAYOUT' is missing."]
     }
 
     void 'validate, all are fine'() {

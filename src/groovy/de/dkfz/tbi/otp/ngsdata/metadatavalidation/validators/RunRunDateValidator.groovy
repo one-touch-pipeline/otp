@@ -50,8 +50,8 @@ class RunRunDateValidator extends ValueTuplesValidator<MetadataValidationContext
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [RUN_ID.name(), RUN_DATE.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [RUN_ID, RUN_DATE]*.name()
     }
 
     @Override

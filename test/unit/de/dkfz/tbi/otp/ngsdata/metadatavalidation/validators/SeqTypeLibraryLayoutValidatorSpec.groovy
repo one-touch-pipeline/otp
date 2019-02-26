@@ -40,12 +40,12 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 class SeqTypeLibraryLayoutValidatorSpec extends Specification {
 
     void 'validate, when context is BamMetadataValidationContext, gets expected columns'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext()
+        SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
 
         when:
-        List<String> columns = new SeqTypeLibraryLayoutValidator().getColumnTitles(context)
+        List<String> columns = validator.getRequiredColumnTitles(context) + validator.getOptionalColumnTitles(context)
 
         then:
         columns == [BamMetadataColumn.SEQUENCING_TYPE.name(), BamMetadataColumn.LIBRARY_LAYOUT.name()]
@@ -55,9 +55,10 @@ class SeqTypeLibraryLayoutValidatorSpec extends Specification {
 
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
+        SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
 
         when:
-        List<String> columns = new SeqTypeLibraryLayoutValidator().getColumnTitles(context)
+        List<String> columns = validator.getRequiredColumnTitles(context) + validator.getOptionalColumnTitles(context)
 
         then:
         columns == [MetaDataColumn.SEQUENCING_TYPE.name(), MetaDataColumn.LIBRARY_LAYOUT.name(), MetaDataColumn.BASE_MATERIAL.name(), MetaDataColumn.TAGMENTATION_BASED_LIBRARY.name()]
@@ -79,10 +80,10 @@ value1\tvalue2
 
         where:
         header || messages
-        "${MetaDataColumn.SEQUENCING_TYPE.name()}\tlayout" || ["Mandatory column 'LIBRARY_LAYOUT' is missing."]
-        "seqtype\t${MetaDataColumn.LIBRARY_LAYOUT.name()}" || ["Mandatory column 'SEQUENCING_TYPE' is missing."]
-        "seqtype\t${MetaDataColumn.BASE_MATERIAL.name()}" || ["Mandatory column 'SEQUENCING_TYPE' is missing.", "Mandatory column 'LIBRARY_LAYOUT' is missing."]
-        "seqtype\tlayout" || ["Mandatory column 'SEQUENCING_TYPE' is missing.", "Mandatory column 'LIBRARY_LAYOUT' is missing."]
+        "${MetaDataColumn.SEQUENCING_TYPE.name()}\tlayout" || ["Required column 'LIBRARY_LAYOUT' is missing."]
+        "seqtype\t${MetaDataColumn.LIBRARY_LAYOUT.name()}" || ["Required column 'SEQUENCING_TYPE' is missing."]
+        "seqtype\t${MetaDataColumn.BASE_MATERIAL.name()}" || ["Required column 'SEQUENCING_TYPE' is missing.", "Required column 'LIBRARY_LAYOUT' is missing."]
+        "seqtype\tlayout" || ["Required column 'SEQUENCING_TYPE' is missing.", "Required column 'LIBRARY_LAYOUT' is missing."]
     }
 
     void 'validate, when combinations are in database, adds no problem'() {

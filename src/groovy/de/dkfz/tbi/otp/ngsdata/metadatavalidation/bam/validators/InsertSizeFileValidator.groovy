@@ -46,27 +46,26 @@ class InsertSizeFileValidator extends ValueTuplesValidator<BamMetadataValidation
     }
 
     @Override
-    List<String> getColumnTitles(BamMetadataValidationContext context) {
-        return [INSERT_SIZE_FILE.name(), BAM_FILE_PATH.name()]
+    List<String> getRequiredColumnTitles(BamMetadataValidationContext context) {
+        return [INSERT_SIZE_FILE]*.name()
     }
 
     @Override
-    void mandatoryColumnMissing(BamMetadataValidationContext context, String columnTitle) {
-        context.addProblem(Collections.emptySet(), Level.WARNING, "'${INSERT_SIZE_FILE.name()}' has to be set for Sophia", "'${INSERT_SIZE_FILE.name()}' has to be set for Sophia")
+    List<String> getOptionalColumnTitles(BamMetadataValidationContext context) {
+        return [BAM_FILE_PATH]*.name()
     }
 
     @Override
-    boolean columnMissing(BamMetadataValidationContext context, String columnTitle) {
-        if (columnTitle != BAM_FILE_PATH.name()) {
-            mandatoryColumnMissing(context, columnTitle)
-            return false
-        }
-        return true
+    void checkMissingRequiredColumn(BamMetadataValidationContext context, String columnTitle) {
+        addWarningForMissingOptionalColumn(context, columnTitle, "'${INSERT_SIZE_FILE.name()}' has to be set for Sophia")
+    }
+
+    @Override
+    void checkMissingOptionalColumn(BamMetadataValidationContext context, String columnTitle) {
     }
 
     @Override
     void validateValueTuples(BamMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
-
         valueTuples.each {
             String bamFile = it.getValue(BAM_FILE_PATH.name())
             String insertSizeFile = it.getValue(INSERT_SIZE_FILE.name())

@@ -48,7 +48,7 @@ class ReferenceGenomeValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.ERROR,
-                        "Mandatory column '${REFERENCE_GENOME}' is missing.")
+                        "Required column '${REFERENCE_GENOME}' is missing.")
         ]
 
         when:

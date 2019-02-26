@@ -46,18 +46,17 @@ class SeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> i
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE.name(), TAGMENTATION_BASED_LIBRARY.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [SEQUENCING_TYPE]*.name()
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle == SEQUENCING_TYPE.name()) {
-            mandatoryColumnMissing(context, columnTitle)
-            return false
-        }
-        return true
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        return [TAGMENTATION_BASED_LIBRARY]*.name()
     }
+
+    @Override
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {

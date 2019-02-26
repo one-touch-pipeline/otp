@@ -43,7 +43,7 @@ class DataFilesInSameDirectory implements DirectoryStructure {
     }
 
     @Override
-    List<String> getColumnTitles() {
+    List<String> getRequiredColumnTitles() {
         return [FASTQ_FILE.name()]
     }
 

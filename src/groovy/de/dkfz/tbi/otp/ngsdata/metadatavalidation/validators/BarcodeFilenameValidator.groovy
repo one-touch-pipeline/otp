@@ -41,19 +41,17 @@ class BarcodeFilenameValidator extends ValueTuplesValidator<MetadataValidationCo
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [FASTQ_FILE.name(), BARCODE.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [FASTQ_FILE]*.name()
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle == BARCODE.name()) {
-            return true
-        } else {
-            mandatoryColumnMissing(context, columnTitle)
-            return false
-        }
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        return [BARCODE]*.name()
     }
+
+    @Override
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {

@@ -72,6 +72,6 @@ class RunDateValidatorSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
-        problem.message == "Mandatory column 'RUN_DATE' is missing."
+        problem.message == "Required column 'RUN_DATE' is missing."
     }
 }

@@ -36,11 +36,11 @@ class ColumnSetValidatorSpec extends Specification {
     Column b1 = spreadsheet.getColumn('B1')
     ValidationContext context = new ValidationContext(spreadsheet)
 
-    void test_findColumns_WithMissingMandatoryColumn() {
+    void test_findColumns_WithMissingRequiredColumn() {
 
         given:
         ColumnSetValidator<ValidationContext> validator = [
-                getColumnTitles: { ValidationContext context -> ['C1', 'B1', 'A1'] },
+                getRequiredColumnTitles: { ValidationContext context -> ['C1', 'B1', 'A1'] },
         ] as ColumnSetValidator<ValidationContext>
 
         when:
@@ -50,7 +50,7 @@ class ColumnSetValidatorSpec extends Specification {
         Problem problem = exactlyOneElement(context.problems)
         problem.affectedCells.empty
         problem.level == Level.ERROR
-        problem.message == "Mandatory column 'C1' is missing."
+        problem.message == "Required column 'C1' is missing."
     }
 
     void test_findColumns_WithMissingOptionalColumn() {
@@ -58,17 +58,18 @@ class ColumnSetValidatorSpec extends Specification {
         given:
         ColumnSetValidator<ValidationContext> validator = new ColumnSetValidator<ValidationContext>() {
             @Override
-            List<String> getColumnTitles(ValidationContext context) {
+            List<String> getRequiredColumnTitles(ValidationContext context) {
+                return []
+            }
+
+            @Override
+            List<String> getOptionalColumnTitles(ValidationContext context) {
                 return ['C1', 'B1', 'A1']
             }
+
             @Override
             void validate(ValidationContext context) {
                 assert false : 'should not be called'
-            }
-            @Override
-            boolean columnMissing(ValidationContext context, String columnTitle) {
-                optionalColumnMissing(context, columnTitle)
-                return true
             }
         }
 

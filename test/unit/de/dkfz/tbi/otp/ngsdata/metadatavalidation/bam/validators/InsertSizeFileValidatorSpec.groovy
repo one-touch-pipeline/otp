@@ -96,7 +96,7 @@ class InsertSizeFileValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.WARNING,
-                        "'${INSERT_SIZE_FILE}' has to be set for Sophia", "'${INSERT_SIZE_FILE}' has to be set for Sophia")
+                        "Optional column 'INSERT_SIZE_FILE' is missing. '${INSERT_SIZE_FILE}' has to be set for Sophia", "Optional column 'INSERT_SIZE_FILE' is missing. '${INSERT_SIZE_FILE}' has to be set for Sophia")
         ]
 
         when:

@@ -51,7 +51,7 @@ class LibraryLayoutValidatorSpec extends Specification {
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
         containSame(problem.affectedCells*.cellAddress, [])
-        problem.message.contains("Mandatory column 'LIBRARY_LAYOUT' is missing.")
+        problem.message.contains("Required column 'LIBRARY_LAYOUT' is missing.")
     }
 
     void 'validate adds expected error'() {

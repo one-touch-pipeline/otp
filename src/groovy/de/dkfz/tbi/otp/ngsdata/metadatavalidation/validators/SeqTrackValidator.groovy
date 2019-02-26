@@ -66,11 +66,11 @@ class SeqTrackValidator extends ColumnSetValidator<MetadataValidationContext> im
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
         return [
-                RUN_ID.name(),
-                LANE_NO.name(),
-        ]
+                RUN_ID,
+                LANE_NO,
+        ]*.name()
     }
 
     @Override

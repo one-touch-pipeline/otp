@@ -44,19 +44,20 @@ class ProjectRunNameFileNameValidator extends ValueTuplesValidator<MetadataValid
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [FASTQ_FILE.name(), RUN_ID.name(), PROJECT.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [FASTQ_FILE, RUN_ID]*.name()
     }
-
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle == PROJECT.name()) {
-            return true
-        }
-        return false
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        return [PROJECT]*.name()
     }
 
+    @Override
+    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) { }
+
+    @Override
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {

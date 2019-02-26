@@ -48,7 +48,7 @@ class SampleTypeValidatorSpec extends Specification {
         )
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.ERROR,
-                        "Mandatory column '${SAMPLE_TYPE}' is missing.")
+                        "Required column '${SAMPLE_TYPE}' is missing.")
         ]
 
         when:

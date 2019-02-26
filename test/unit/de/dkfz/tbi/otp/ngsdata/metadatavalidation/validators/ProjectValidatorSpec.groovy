@@ -57,7 +57,7 @@ class ProjectValidatorSpec extends Specification {
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext()
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.ERROR,
-                        "Mandatory column '${BamMetadataColumn.PROJECT}' is missing.")
+                        "Required column '${BamMetadataColumn.PROJECT}' is missing.")
         ]
 
         when:

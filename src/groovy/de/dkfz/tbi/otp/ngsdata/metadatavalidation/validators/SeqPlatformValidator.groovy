@@ -42,23 +42,14 @@ class SeqPlatformValidator extends ValueTuplesValidator<MetadataValidationContex
     Collection<String> getDescriptions() {
         return ['The combination of instrument platform, instrument model and sequencing kit is registered in the OTP database.']
     }
-
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [INSTRUMENT_PLATFORM.name(),
-                INSTRUMENT_MODEL.name(),
-                SEQUENCING_KIT.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [INSTRUMENT_PLATFORM, INSTRUMENT_MODEL]*.name()
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle == SEQUENCING_KIT.name()) {
-            optionalColumnMissing(context, columnTitle)
-            return true
-        } else {
-            mandatoryColumnMissing(context, columnTitle)
-            return false
-        }
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        return [SEQUENCING_KIT]*.name()
     }
 
     @Override

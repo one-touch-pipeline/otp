@@ -128,11 +128,11 @@ class QualityControlFileValidatorSpec extends Specification {
 
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.WARNING,
-                        "'QUALITY_CONTROL_FILE' has to be set for Sophia",
-                        "'QUALITY_CONTROL_FILE' has to be set for Sophia"),
+                        "Optional column 'QUALITY_CONTROL_FILE' is missing. 'QUALITY_CONTROL_FILE' has to be set for Sophia",
+                        "Optional column 'QUALITY_CONTROL_FILE' is missing. 'QUALITY_CONTROL_FILE' has to be set for Sophia"),
                 new Problem(Collections.emptySet(), Level.ERROR,
-                        "Mandatory column 'BAM_FILE_PATH' is missing.",
-                        "Mandatory column 'BAM_FILE_PATH' is missing."),
+                        "Required column 'BAM_FILE_PATH' is missing.",
+                        "Required column 'BAM_FILE_PATH' is missing."),
         ]
 
         when:

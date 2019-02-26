@@ -42,18 +42,20 @@ class LibraryPreparationKitValidator extends ValueTuplesValidator<BamMetadataVal
     }
 
     @Override
-    List<String> getColumnTitles(BamMetadataValidationContext context) {
-        return [LIBRARY_PREPARATION_KIT.name(), SEQUENCING_TYPE.name()]
+    List<String> getRequiredColumnTitles(BamMetadataValidationContext context) {
+        return []
     }
 
     @Override
-    boolean columnMissing(BamMetadataValidationContext context, String columnTitle) {
-        return true
+    List<String> getOptionalColumnTitles(BamMetadataValidationContext context) {
+        return [LIBRARY_PREPARATION_KIT, SEQUENCING_TYPE]*.name()
     }
+
+    @Override
+    void checkMissingOptionalColumn(BamMetadataValidationContext context, String columnTitle) { }
 
     @Override
     void validateValueTuples(BamMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
-
         valueTuples.each {
             String libraryPreparationKit = it.getValue(LIBRARY_PREPARATION_KIT.name())
             String seqType = it.getValue(SEQUENCING_TYPE.name())

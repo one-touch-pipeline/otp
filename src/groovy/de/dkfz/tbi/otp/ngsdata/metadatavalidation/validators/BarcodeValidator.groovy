@@ -49,8 +49,8 @@ class BarcodeValidator extends SingleValueValidator<MetadataValidationContext> i
     }
 
     @Override
-    void columnMissing(MetadataValidationContext context) {
-        optionalColumnMissing(context, BARCODE.name(), " OTP will try to parse the barcodes from the filenames.")
+    void checkColumn(MetadataValidationContext context) {
+        addWarningForMissingOptionalColumn(context, BARCODE.name(), "OTP will try to parse the barcodes from the filenames.")
     }
 
     @Override

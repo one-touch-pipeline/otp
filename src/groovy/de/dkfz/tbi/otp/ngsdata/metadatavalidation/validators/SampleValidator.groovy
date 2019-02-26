@@ -52,20 +52,18 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
                 'All sample identifiers in the metadata file should belong to the same project.',
         ]
     }
-
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SAMPLE_ID.name(), PROJECT.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [SAMPLE_ID]*.name()
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle == PROJECT.name()) {
-            return true
-        }
-        mandatoryColumnMissing(context, columnTitle)
-        return false
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        return [PROJECT]*.name()
     }
+
+    @Override
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {

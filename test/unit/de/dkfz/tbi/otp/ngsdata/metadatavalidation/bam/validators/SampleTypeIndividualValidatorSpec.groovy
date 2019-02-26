@@ -59,9 +59,9 @@ value1\tvalue2
 
         where:
         header                                                || messages
-        "${BamMetadataColumn.SAMPLE_TYPE.name()}\tindividual" || ["Mandatory column 'INDIVIDUAL' is missing."]
-        "sampleType\t${BamMetadataColumn.INDIVIDUAL.name()}"  || ["Mandatory column 'SAMPLE_TYPE' is missing."]
-        "individual\tsampleType"                              || ["Mandatory column 'INDIVIDUAL' is missing.", "Mandatory column 'SAMPLE_TYPE' is missing."]
+        "${BamMetadataColumn.SAMPLE_TYPE.name()}\tindividual" || ["Required column 'INDIVIDUAL' is missing."]
+        "sampleType\t${BamMetadataColumn.INDIVIDUAL.name()}"  || ["Required column 'SAMPLE_TYPE' is missing."]
+        "individual\tsampleType"                              || ["Required column 'INDIVIDUAL' is missing.", "Required column 'SAMPLE_TYPE' is missing."]
     }
 
     void 'validate, when combinations are in database, adds no problem'() {

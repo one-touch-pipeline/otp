@@ -538,7 +538,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         File file = new File(new File(TestCase.getUniqueNonExistentPath(), runName1), 'metadata.tsv')
         DirectoryStructure directoryStructure = [
-                getColumnTitles: { [FASTQ_FILE.name()] },
+                getRequiredColumnTitles: { [FASTQ_FILE.name()] },
                 getDataFilePath: { MetadataValidationContext context, ValueTuple valueTuple ->
                     return Paths.get(file.parent, valueTuple.getValue(FASTQ_FILE.name()))
                 },

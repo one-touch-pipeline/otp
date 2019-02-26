@@ -79,6 +79,6 @@ class FilenameValidatorSpec extends Specification {
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
-        problem.message == "Mandatory column 'FASTQ_FILE' is missing."
+        problem.message == "Required column 'FASTQ_FILE' is missing."
     }
 }

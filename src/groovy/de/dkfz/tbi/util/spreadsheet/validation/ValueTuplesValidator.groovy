@@ -74,36 +74,23 @@ class ValueTuple {
 abstract class SingleValueValidator<C extends ValidationContext> extends ValueTuplesValidator<C> {
 
     @Override
-    final List<String> getColumnTitles(C context) {
+    final List<String> getRequiredColumnTitles(C context) {
         return [getColumnTitle(context)]
-    }
-
-    @Override
-    final boolean columnsMissing(C context, Collection<String> columnTitles) {
-        return super.columnsMissing(context, columnTitles)
     }
 
     abstract String getColumnTitle(C context)
 
     @Override
-    final boolean columnMissing(C context, String columnTitle) {
-        columnMissing(context)
-        return false
+    final void checkMissingRequiredColumn(C context, String columnTitle) {
+        checkColumn(context)
     }
 
-    /**
-     * Called by {@link #columnsMissing(C, Collection)} for every missing column
-     *
-     * <p>
-     * May be overridden.
-     */
-    void columnMissing(C context) {
-        mandatoryColumnMissing(context, getColumnTitle(context))
+    void checkColumn(C context) {
+        super.checkMissingRequiredColumn(context, getColumnTitle(context))
     }
-
 
     @Override
-    void validateValueTuples(C context, Collection<ValueTuple> valueTuples) {
+    final void validateValueTuples(C context, Collection<ValueTuple> valueTuples) {
         valueTuples.each {
             validateValue(context, CollectionUtils.exactlyOneElement(it.valuesByColumnTitle.values()), it.cells)
         }

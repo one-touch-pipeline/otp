@@ -45,18 +45,16 @@ class SampleProjectValidator extends ValueTuplesValidator<MetadataValidationCont
     Collection<String> getDescriptions() {
         return ["The value in the column '${PROJECT}' should be consistent with the sample identifier."]
     }
-
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SAMPLE_ID.name(), PROJECT.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [SAMPLE_ID, PROJECT]*.name()
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
+    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) {
         if (columnTitle == PROJECT.name()) {
-            optionalColumnMissing(context, columnTitle)
+            addWarningForMissingOptionalColumn(context, columnTitle)
         }
-        return false
     }
 
     @Override

@@ -46,26 +46,21 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
     }
 
     @Override
-    List<String> getColumnTitles(AbstractMetadataValidationContext context) {
-        List<String> columns = [SEQUENCING_TYPE.name(), LIBRARY_LAYOUT.name()]
+    List<String> getRequiredColumnTitles(AbstractMetadataValidationContext context) {
+        return [SEQUENCING_TYPE, LIBRARY_LAYOUT]*.name()
+    }
+
+    @Override
+    List<String> getOptionalColumnTitles(AbstractMetadataValidationContext context) {
         if (context instanceof BamMetadataValidationContext) {
-            return columns
+            return []
         } else {
-            columns.add(BASE_MATERIAL.name())
-            columns.add(TAGMENTATION_BASED_LIBRARY.name())
-            return columns
+            return [BASE_MATERIAL, TAGMENTATION_BASED_LIBRARY]*.name()
         }
     }
 
     @Override
-    boolean columnMissing(AbstractMetadataValidationContext context, String columnTitle) {
-        if (columnTitle in [TAGMENTATION_BASED_LIBRARY.name(), BASE_MATERIAL.name()]) {
-            return true
-        } else {
-            mandatoryColumnMissing(context, columnTitle)
-            return false
-        }
-    }
+    void checkMissingOptionalColumn(AbstractMetadataValidationContext context, String columnTitle) { }
 
     @Override
     void validateValueTuples(AbstractMetadataValidationContext context, Collection<ValueTuple> valueTuples) {

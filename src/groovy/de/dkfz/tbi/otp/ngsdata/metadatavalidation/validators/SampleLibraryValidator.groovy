@@ -42,20 +42,17 @@ class SampleLibraryValidator extends ValueTuplesValidator<MetadataValidationCont
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [SAMPLE_ID.name(), CUSTOMER_LIBRARY.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [SAMPLE_ID]*.name()
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-
-        if (columnTitle == SAMPLE_ID.name()) {
-            mandatoryColumnMissing(context, columnTitle)
-            return false
-        } else {
-            return true
-        }
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        return [CUSTOMER_LIBRARY]*.name()
     }
+
+    @Override
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {

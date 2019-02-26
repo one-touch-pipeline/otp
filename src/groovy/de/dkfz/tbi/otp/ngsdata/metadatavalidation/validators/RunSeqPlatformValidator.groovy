@@ -48,22 +48,13 @@ class RunSeqPlatformValidator extends ValueTuplesValidator<MetadataValidationCon
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return [RUN_ID.name(),
-                INSTRUMENT_PLATFORM.name(),
-                INSTRUMENT_MODEL.name(),
-                SEQUENCING_KIT.name()]
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [RUN_ID, INSTRUMENT_PLATFORM, INSTRUMENT_MODEL]*.name()
     }
 
     @Override
-    boolean columnMissing(MetadataValidationContext context, String columnTitle) {
-        if (columnTitle == SEQUENCING_KIT.name()) {
-            optionalColumnMissing(context, columnTitle)
-            return true
-        } else {
-            mandatoryColumnMissing(context, columnTitle)
-            return false
-        }
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        return [SEQUENCING_KIT]*.name()
     }
 
     @Override

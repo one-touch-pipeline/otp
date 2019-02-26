@@ -46,7 +46,7 @@ class SampleLibraryValidatorSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.ERROR,
-                        "Mandatory column 'SAMPLE_ID' is missing.")
+                        "Required column 'SAMPLE_ID' is missing.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -84,7 +84,7 @@ class SampleLibraryValidatorSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(), Level.ERROR,
-                        "Mandatory column 'SAMPLE_ID' is missing.")
+                        "Required column 'SAMPLE_ID' is missing.")
         ]
         assertContainSame(context.problems, expectedProblems)
     }

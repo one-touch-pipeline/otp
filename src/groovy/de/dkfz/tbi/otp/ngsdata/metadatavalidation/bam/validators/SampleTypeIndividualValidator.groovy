@@ -41,8 +41,8 @@ class SampleTypeIndividualValidator extends ValueTuplesValidator<BamMetadataVali
     }
 
     @Override
-    List<String> getColumnTitles(BamMetadataValidationContext context) {
-        return [INDIVIDUAL.name(), SAMPLE_TYPE.name()]
+    List<String> getRequiredColumnTitles(BamMetadataValidationContext context) {
+        return [INDIVIDUAL, SAMPLE_TYPE]*.name()
     }
 
     @Override

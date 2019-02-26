@@ -48,7 +48,7 @@ class AntibodyTargetValidator extends SingleValueValidator<MetadataValidationCon
     }
 
     @Override
-    void columnMissing(MetadataValidationContext context) { }
+    void checkColumn(MetadataValidationContext context) { }
 
     @Override
     void validateValue(MetadataValidationContext context, String antibodyTarget, Set<Cell> cells) {

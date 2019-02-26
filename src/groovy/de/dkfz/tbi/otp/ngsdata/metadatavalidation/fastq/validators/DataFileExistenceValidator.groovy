@@ -47,8 +47,8 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
     }
 
     @Override
-    List<String> getColumnTitles(MetadataValidationContext context) {
-        return context.directoryStructure.columnTitles
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return context.directoryStructure.requiredColumnTitles
     }
 
     @Override

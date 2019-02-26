@@ -50,8 +50,8 @@ class SequencingKitValidator extends SingleValueValidator<MetadataValidationCont
     }
 
     @Override
-    void columnMissing(MetadataValidationContext context) {
-        optionalColumnMissing(context, MetaDataColumn.SEQUENCING_KIT.name())
+    void checkColumn(MetadataValidationContext context) {
+        addWarningForMissingOptionalColumn(context, MetaDataColumn.SEQUENCING_KIT.name())
     }
 
     @Override

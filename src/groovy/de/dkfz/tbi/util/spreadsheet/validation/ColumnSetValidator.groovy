@@ -30,70 +30,70 @@ import de.dkfz.tbi.util.spreadsheet.Column
 abstract class ColumnSetValidator<C extends ValidationContext> implements Validator<C> {
 
     /**
-     * The titles of the columns which this validator is interested in
+     * A List of all Columns that are required for the Validator to run
      */
-    abstract List<String> getColumnTitles(C context)
+    abstract List<String> getRequiredColumnTitles(C context)
 
     /**
-     * @return The columns in the same order as returned by {@link #getColumnTitles(C)}. Contains {@code null} in place of
+     * A List of all Columns that not are required for the Validator to run, but are needed for certain validation
+     */
+    List<String> getOptionalColumnTitles(C context) {
+        return []
+    }
+
+    /**
+     * @return The columns in the same order as returned by {@link #getRequiredColumnTitles(C)} and {@link #getOptionalColumnTitles(C)} . Contains {@code null} in place of
      * missing columns. Or {@code null} if the validator cannot continue because of missing columns
      */
-    List<Column> findColumns(C context) {
+    final List<Column> findColumns(C context) {
         List<Column> columns = []
         Collection<String> missingColumns = []
-        getColumnTitles(context).each {
+        getRequiredColumnTitles(context).each {
             Column column = context.spreadsheet.getColumn(it)
-            columns.add(column)
+            columns << column
             if (column == null) {
                 missingColumns.add(it)
+                checkMissingRequiredColumn(context, it)
             }
         }
         if (!missingColumns.empty) {
-            if (!columnsMissing(context, missingColumns)) {
-                return null
+            return null
+        }
+        getOptionalColumnTitles(context).each {
+            Column column = context.spreadsheet.getColumn(it)
+            columns << column
+            if (column == null) {
+                checkMissingOptionalColumn(context, it)
             }
         }
         return columns
     }
 
     /**
-     * Called if columns returned by {@link #getColumnTitles(C)} are missing
+     * Called for each column returned by {@link #getRequiredColumnTitles(C)} that is missing.
+     * Calls {@link #addErrorForMissingRequiredColumn(C, String)}
      *
-     * <p>
-     * May be overridden.
-     *
-     * @param columnTitles The titles of the missing columns
-     * @return Whether the validator can continue even though the columns are missing
+     * Overwrite when this is not the desired behaviour
      */
-    boolean columnsMissing(C context, Collection<String> columnTitles) {
-        boolean canContinue = true
-        columnTitles.each {
-            if (!columnMissing(context, it)) {
-                canContinue = false
-            }
-        }
-        return canContinue
+    void checkMissingRequiredColumn(C context, String columnTitle) {
+        addErrorForMissingRequiredColumn(context, columnTitle)
+    }
+
+    static final void addErrorForMissingRequiredColumn(C context, String columnTitle) {
+        context.addProblem(Collections.emptySet(), Level.ERROR, "Required column '${columnTitle}' is missing.")
     }
 
     /**
-     * Called by {@link #columnsMissing(C, Collection)} for every missing column
+     * Called for each column returned by {@link #getOptionalColumnTitles(C)} that is missing.
+     * Calls {@link #addWarningForMissingOptionalColumn(C, String)}
      *
-     * <p>
-     * May be overridden.
-     *
-     * @param columnTitle The title of a missing column
-     * @return Whether the validator can continue even though the column is missing
+     * Overwrite when this is not the desired behaviour
      */
-    boolean columnMissing(C context, String columnTitle) {
-        mandatoryColumnMissing(context, columnTitle)
-        return false
+    void checkMissingOptionalColumn(C context, String columnTitle) {
+        addWarningForMissingOptionalColumn(context, columnTitle)
     }
 
-    void mandatoryColumnMissing(C context, String columnTitle) {
-        context.addProblem(Collections.emptySet(), Level.ERROR, "Mandatory column '${columnTitle}' is missing.")
-    }
-
-    void optionalColumnMissing(C context, String columnTitle, String additionalWarningMessage = '') {
-        context.addProblem(Collections.emptySet(), Level.WARNING, "Optional column '${columnTitle}' is missing.${additionalWarningMessage}")
+    static final void addWarningForMissingOptionalColumn(C context, String columnTitle, String additionalWarningMessage = '') {
+        context.addProblem(Collections.emptySet(), Level.WARNING, "Optional column '${columnTitle}' is missing. ${additionalWarningMessage}".trim())
     }
 }
