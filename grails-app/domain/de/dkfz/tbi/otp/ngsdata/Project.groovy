@@ -152,6 +152,9 @@ class Project implements Commentable, Entity {
     }
 
     static Project getByNameOrNameInMetadataFiles(String name) {
-        return findByNameOrNameInMetadataFiles(name, name)
+        if (name) {
+            return findByNameOrNameInMetadataFiles(name, name)
+        }
+        return null
     }
 }
