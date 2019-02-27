@@ -268,13 +268,15 @@ class ProcessesController {
             promiseList << {
                 SecurityContextHolder.context.authentication = auth
                 Map data = [:]
-                ProcessingStepUpdate update = processService.getLatestProcessingStepUpdate(step)
-                data.put("step", step)
-                data.put("state", update?.state)
-                data.put("firstUpdate", processService.getFirstUpdate(step))
-                data.put("lastUpdate", update?.date)
-                data.put("duration", processService.getProcessingStepDuration(step))
-                data.put("error", update?.error?.errorMessage)
+                Realm.withNewSession {
+                    ProcessingStepUpdate update = processService.getLatestProcessingStepUpdate(step)
+                    data.put("step", step)
+                    data.put("state", update?.state)
+                    data.put("firstUpdate", processService.getFirstUpdate(step))
+                    data.put("lastUpdate", update?.date)
+                    data.put("duration", processService.getProcessingStepDuration(step))
+                    data.put("error", update?.error?.errorMessage)
+                }
                 return data
             }
         }
