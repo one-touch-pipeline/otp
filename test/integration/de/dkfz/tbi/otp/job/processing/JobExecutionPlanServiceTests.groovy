@@ -326,14 +326,14 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         assertTrue(planData.containsKey(process1))
         assertEquals(planData.get(process1).state, ExecutionState.FINISHED)
         // lets restrict the returned data
-        assertEquals(1, service.getNumberOfProcesses(plan,  ExecutionState.FINISHED))
-        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, ExecutionState.FINISHED)
+        assertEquals(1, service.getNumberOfProcesses(plan, [ExecutionState.FINISHED]))
+        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, [ExecutionState.FINISHED])
         assertFalse(planData.isEmpty())
         assertTrue(planData.containsKey(process1))
         assertEquals(planData.get(process1).state, ExecutionState.FINISHED)
         // try to restrict on something else
-        assertEquals(0, service.getNumberOfProcesses(plan,  ExecutionState.CREATED))
-        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, ExecutionState.CREATED)
+        assertEquals(0, service.getNumberOfProcesses(plan,  [ExecutionState.CREATED]))
+        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, [ExecutionState.CREATED])
         assertTrue(planData.isEmpty())
         // lets create a failure for the processing step
         ProcessingStepUpdate update = ProcessingStepUpdate.findByState(ExecutionState.FINISHED)
@@ -345,8 +345,8 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         )
         assertNotNull(failure.save())
         // test for failure
-        assertEquals(1, service.getNumberOfProcesses(plan,  ExecutionState.FAILURE))
-        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, ExecutionState.FAILURE)
+        assertEquals(1, service.getNumberOfProcesses(plan,  [ExecutionState.FAILURE]))
+        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, [ExecutionState.FAILURE])
         assertFalse(planData.isEmpty())
         assertTrue(planData.containsKey(process1))
         assertEquals(planData.get(process1), failure)
@@ -359,12 +359,12 @@ class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
         )
         assertNotNull(restarted.save())
         // test for failure
-        assertEquals(0, service.getNumberOfProcesses(plan,  ExecutionState.FAILURE))
-        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, ExecutionState.FAILURE)
+        assertEquals(0, service.getNumberOfProcesses(plan,  [ExecutionState.FAILURE]))
+        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, [ExecutionState.FAILURE])
         assertTrue(planData.isEmpty())
         // test for restarted
-        assertEquals(1, service.getNumberOfProcesses(plan,  ExecutionState.RESTARTED))
-        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, ExecutionState.RESTARTED)
+        assertEquals(1, service.getNumberOfProcesses(plan,  [ExecutionState.RESTARTED]))
+        planData = service.getLatestUpdatesForPlan(plan, 10, 0, "id", false, [ExecutionState.RESTARTED])
         assertFalse(planData.isEmpty())
         assertTrue(planData.containsKey(process1))
         assertEquals(planData.get(process1), restarted)

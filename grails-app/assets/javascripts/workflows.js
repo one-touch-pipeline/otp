@@ -456,7 +456,7 @@ $.otp.workflows = {
                             action: 'plan',
                             id: row.id,
                             parameters: {
-                                failed: true
+                                state: 'FAILURE'
                             },
                             text: row.failedProcessesCount
                         });
@@ -465,7 +465,15 @@ $.otp.workflows = {
                 }, "aTargets": [2] },
                 { "mRender": function (data, type, row) {
                     if (row.runningProcessesCount) {
-                        return row.runningProcessesCount;
+                        return $.otp.createLinkMarkup({
+                            controller: 'processes',
+                            action: 'plan',
+                            id: row.id,
+                            parameters: {
+                                state: 'RUNNING'
+                            },
+                            text: row.runningProcessesCount
+                        });
                     }
                     return "-";
                 }, "aTargets": [3] },
@@ -490,16 +498,16 @@ $.otp.workflows = {
      * Creates the datatables view for the list of all Processes for a given JobExecutionPlan
      * @param selector The JQuery selector for the table to create the datatable into
      * @param planId The id of the JobExecutionPlan for which the list of Processes should be retrieved.
-     * @param failed Whether to limit to failed processes (true) or include all processes (false)
+     * @param state Whether to limit to specific processes (failed, running) or include all processes
      */
-    registerProcesses: function (selector, planId, failed) {
+    registerProcesses: function (selector, planId, state) {
         "use strict";
         $.otp.createListView(selector, $.otp.createLink({
             controller: 'processes',
             action: 'planData',
             id: planId,
             parameters: {
-                failed: failed
+                state: state
             }
         }), false, function (json) {
             var i, j, rowData, stepId, actions;

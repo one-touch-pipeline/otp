@@ -187,7 +187,12 @@ class ProcessesController {
 
     def plan() {
         JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
-        [name: plan.name, id: plan.id, failed: Boolean.parseBoolean(params.failed), enabled: plan.enabled]
+        [
+                name   : plan.name,
+                id     : plan.id,
+                state  : params.state,
+                enabled: plan.enabled,
+        ]
     }
 
     def planData(DataTableCommand cmd) {
@@ -204,9 +209,16 @@ class ProcessesController {
         }
 
         JobExecutionPlan plan = jobExecutionPlanService.getPlan(params.id as long)
-        ExecutionState restriction = null
-        if (Boolean.parseBoolean(params.failed)) {
-            restriction = ExecutionState.FAILURE
+        List<ExecutionState> restriction = []
+        if (params.state == PlanStatus.FAILURE.toString()) {
+            restriction = [
+                    ExecutionState.FAILURE,
+            ]
+        } else if (params.state == PlanStatus.RUNNING.toString()) {
+            restriction = [
+                    ExecutionState.CREATED,
+                    ExecutionState.STARTED,
+            ]
         }
         Map<Process, ProcessingStepUpdate> processes = jobExecutionPlanService.getLatestUpdatesForPlan(plan, cmd.iDisplayLength, cmd.iDisplayStart, sort, cmd.sortOrder, restriction)
         dataToRender.iTotalRecords = jobExecutionPlanService.getNumberOfProcesses(plan, restriction)

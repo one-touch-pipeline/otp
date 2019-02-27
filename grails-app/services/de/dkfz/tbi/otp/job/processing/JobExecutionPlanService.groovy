@@ -137,7 +137,7 @@ class JobExecutionPlanService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(
-            JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, ExecutionState state = null) {
+            JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, List<ExecutionState> states = []) {
         final List<Long> plans = withParents(plan).collect { it.id }
         String query = '''
 SELECT p, max(u.id)
@@ -158,16 +158,16 @@ AND u.id IN (
     GROUP BY p2.id
 )
 '''
-        if (state) {
-            query = query + "AND u.state = :state\n"
+        if (states) {
+            query = query + "AND u.state IN (:states)\n"
         }
         query = query + "GROUP BY p.id\n"
         query = query + "ORDER BY p.${column} ${order ? 'asc' : 'desc'}"
 
         LinkedHashMap<Process, ProcessingStepUpdate> results = [:]
         Map params = [planIds: plans]
-        if (state) {
-            params.put("state", state)
+        if (states) {
+            params.put("states", states)
         }
         def processes = ProcessingStepUpdate.executeQuery(query, params, [max: max, offset: offset])
         List<Long> ids = processes.collect { it[1] }
@@ -243,9 +243,9 @@ ORDER BY p.id DESC
      * @return The number of Processes which have been started for plan
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    int getNumberOfProcesses(JobExecutionPlan plan, ExecutionState state = null) {
+    int getNumberOfProcesses(JobExecutionPlan plan, List<ExecutionState> states = null) {
         final List<JobExecutionPlan> plans = withParents(plan)
-        if (!state) {
+        if (!states) {
             return plans ? Process.countByJobExecutionPlanInList(plans) : 0
         }
         String query = '''
@@ -256,7 +256,7 @@ INNER JOIN step.process as p
 INNER JOIN p.jobExecutionPlan as plan
 WHERE plan.id in (:planIds)
 AND step.next IS NULL
-AND u.state = :state
+AND u.state in (:states)
 AND u.id IN (
     SELECT MAX(u2.id)
     FROM ProcessingStepUpdate AS u2
@@ -268,7 +268,7 @@ AND u.id IN (
     GROUP BY p2.id
 )
 '''
-        return Process.executeQuery(query, [planIds: plans.collect { it.id }, state: state])[0]
+        return Process.executeQuery(query, [planIds: plans.collect { it.id }, states: states])[0]
     }
 
     /**
