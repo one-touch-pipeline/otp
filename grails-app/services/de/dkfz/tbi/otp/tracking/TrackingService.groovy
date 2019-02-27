@@ -83,10 +83,10 @@ class TrackingService {
     }
 
     void setStartedForSeqTracks(Collection<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
-        setStarted(findAllOtrsTickets(seqTracks), step)
+        setStarted(findAllOtrsTickets(seqTracks, true), step)
     }
 
-    Set<OtrsTicket> findAllOtrsTickets(Collection<SeqTrack> seqTracks) {
+    Set<OtrsTicket> findAllOtrsTickets(Collection<SeqTrack> seqTracks, boolean lock = false) {
         if (!seqTracks) {
             return [] as Set
         }
@@ -102,7 +102,7 @@ class TrackingService {
                 }
             }
         }
-        return (otrsIds ? OtrsTicket.findAllByIdInList(otrsIds, [lock: true]) : []) as Set
+        return (otrsIds ? OtrsTicket.findAllByIdInList(otrsIds, [lock: lock]) : []) as Set
     }
 
     void setStarted(Collection<OtrsTicket> otrsTickets, OtrsTicket.ProcessingStep step) {
@@ -117,7 +117,7 @@ class TrackingService {
     void processFinished(Set<SeqTrack> seqTracks) {
         SamplePairCreation samplePairCreation = new SamplePairCreation()
         Set<OtrsTicket> otrsTickets = findAllOtrsTickets(seqTracks)
-        LogThreadLocal.getThreadLog()?.trace("evaluating processFinished for SPD: ${samplePairCreation}; OtrsTickets: ${otrsTickets}; " +
+        LogThreadLocal.getThreadLog()?.debug("evaluating processFinished for SPD: ${samplePairCreation}; OtrsTickets: ${otrsTickets}; " +
                 "SeqTracks: ${seqTracks*.id}")
         for (OtrsTicket ticket : otrsTickets) {
             setFinishedTimestampsAndNotify(ticket, samplePairCreation)
@@ -131,30 +131,35 @@ class TrackingService {
         Date now = new Date()
         Set<SeqTrack> seqTracks = ticket.findAllSeqTracks()
         ProcessingStatus status = getProcessingStatus(seqTracks, samplePairCreation)
-        boolean anythingJustCompleted = false
+        boolean anyProcessingStepJustCompleted = false
         boolean mightDoMore = false
         for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
             WorkflowProcessingStatus stepStatus = status."${step}ProcessingStatus"
             boolean previousStepFinished = step.dependsOn ? (ticket."${step.dependsOn}Finished" != null) : true
+            ticket.discard()
+            ticket = OtrsTicket.lock(ticket.id)
             if (ticket."${step}Finished" == null && stepStatus.done != NOTHING && !stepStatus.mightDoMore && previousStepFinished) {
-                anythingJustCompleted = true
+                anyProcessingStepJustCompleted = true
                 ticket."${step}Finished" = now
                 sendCustomerNotification(ticket, status, step)
                 LogThreadLocal.getThreadLog()?.info("sent customer notification for OTRS Ticket ${ticket.ticketNumber}: ${step}")
             }
+            ticket.save(flush: true)
             if (stepStatus.mightDoMore) {
                 mightDoMore = true
             }
         }
-        if (anythingJustCompleted) {
-            LogThreadLocal.getThreadLog()?.trace("inside if anythingJustCompleted, sending operator notification")
+        ticket.discard()
+        ticket = OtrsTicket.lock(ticket.id)
+        if (anyProcessingStepJustCompleted) {
+            LogThreadLocal.getThreadLog()?.debug("inside if anythingJustCompleted, sending operator notification")
             sendOperatorNotification(ticket, seqTracks, status, !mightDoMore)
             if (!mightDoMore) {
-                LogThreadLocal.getThreadLog()?.trace("!mightDoMore: marking as finalNotificationSent")
+                LogThreadLocal.getThreadLog()?.debug("!mightDoMore: marking as finalNotificationSent")
                 ticket.finalNotificationSent = true
             }
-            assert ticket.save(flush: true)
         }
+        assert ticket.save(flush: true)
     }
 
     void sendCustomerNotification(OtrsTicket ticket, ProcessingStatus status, OtrsTicket.ProcessingStep notificationStep) {

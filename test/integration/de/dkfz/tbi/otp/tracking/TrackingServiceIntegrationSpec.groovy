@@ -189,6 +189,8 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         when: "running our tracking update"
         trackingService.processFinished([seqTrackA, seqTrackB1] as Set)
+        ticketA = OtrsTicket.get(ticketA.id)
+        ticketB = OtrsTicket.get(ticketA.id)
 
         then: "installation should be marked as done, but fastQC as still running"
         ticketA.installationFinished != null
@@ -218,6 +220,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         when:
         trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
+        ticket = OtrsTicket.get(ticket.id)
 
         then:
         ticket.installationFinished == installationFinished
@@ -306,6 +309,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         when:
         trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
+        ticket = OtrsTicket.get(ticket.id)
 
         then:
         ticket.installationFinished != null
@@ -391,6 +395,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         when:
         trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
+        ticket = OtrsTicket.get(ticket.id)
 
         then:
         ticket.installationFinished != null
@@ -455,6 +460,7 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
 
         when:
         trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
+        ticket = OtrsTicket.get(ticket.id)
 
         then:
         ticket.installationFinished == null
