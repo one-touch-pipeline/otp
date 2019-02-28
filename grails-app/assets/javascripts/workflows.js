@@ -160,7 +160,7 @@ $.otp.workflows = {
             controller: 'assets',
             action: 'redo.png'
         });
-        return '<a onclick="$.otp.workflows.restartProcessingStep(' + id + ', \'' + dataTable + '\');" href="#" title="Restart" ><img src="' + imageLink + '"/></a>';
+        return '<a id="restartProcessingStepLink" onclick="$.otp.workflows.restartProcessingStep(' + id + ', \'' + dataTable + '\');" href="#" title="Restart" ><img src="' + imageLink + '"/></a>';
     },
     planGraph: {
         render: function (r, n) {
@@ -714,13 +714,6 @@ $.otp.workflows = {
             $("#process-visualization").hide();
             $("#show-visualization").show();
             $(this).hide();
-        });
-        $("#show-restart-process").click(function () {
-            $.getJSON($.otp.createLink({
-                controller: 'processes',
-                action: 'restartWithProcess',
-                id: processId
-            }));
         });
     },
     processingStep: {

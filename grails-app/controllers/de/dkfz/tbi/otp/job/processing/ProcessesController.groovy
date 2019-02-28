@@ -30,6 +30,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.context.SecurityContextHolder
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
@@ -44,6 +45,10 @@ import static grails.async.Promises.task
 import static grails.async.Promises.waitAll
 
 class ProcessesController {
+    static allowedMethods = [
+            restartWithProcess : "POST",
+    ]
+
     private enum PlanStatus {
         /**
          * No plan has been executed yet
@@ -327,18 +332,19 @@ class ProcessesController {
         render processService.processInformation(process) as JSON
     }
 
-    def restartWithProcess() {
-        Map data = [success: true]
+    def restartWithProcess(Process process) {
         StringBuilder stringBuilder = new StringBuilder()
         LogThreadLocal.withThreadLog(stringBuilder) {
             try {
-                restartActionService.restartWorkflowWithProcess(params.id as long)
+                restartActionService.restartWorkflowWithProcess(process)
+                flash.message = new FlashMessage(g.message(code: "processes.process.restartProcess.succeeded") as String)
             } catch (RuntimeException e) {
-                data = [success: false, error: e.message]
+                log.debug("Restarting workflow failed.", e)
+                flash.message = new FlashMessage(g.message(code: "processes.process.restartProcess.failed") as String, [e.message])
             }
         }
         log.debug("Output of restartActionService.restartWorkflowWithProcess: ${stringBuilder}")
-        render data as JSON
+        redirect action: "process", id: process.id
     }
 
     def processingStep() {

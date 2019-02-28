@@ -104,8 +104,7 @@ class RestartActionService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    protected void restartWorkflowWithProcess(long processId) {
-        Process process = processService.getProcess(processId)
+    void restartWorkflowWithProcess(Process process) {
         StartJob startJob = getStartJob(process)
         ProcessingStepUpdate processingStepUpdate = processService.getLatestProcessingStepUpdate(processService.getLatestProcessingStep(process))
 

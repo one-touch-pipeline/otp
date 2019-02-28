@@ -30,6 +30,8 @@
 </head>
 <body>
     <div class="body">
+        <g:render template="/templates/messages"/>
+
         <div id="processInfoBox">
             <h1><g:message code="processes.process.title.listOfProcessingSteps" args="${ [id] }"/>  <g:link action="plan" id="${planId}"><g:message code="processes.process.title.workflow" args="${ [name] }"/></g:link><br>
             <g:if test="${process.restarted}">
@@ -44,14 +46,18 @@
                     <tr>
                         <td>
                             <g:form name="operatorIsAwareOfFailureForm" controller="processes" action="updateOperatorIsAwareOfFailure">
-                                <g:message code="processes.process.operatorIsAwareOfFailure"/> <g:checkBox name="operatorIsAwareOfFailure" checked="${operatorIsAwareOfFailure}" value="true" onChange="submit();"/>
+                                <g:message code="processes.process.operatorIsAwareOfFailure"/>
+                                <g:checkBox id="operatorIsAwareOfFailureCheckBox" name="operatorIsAwareOfFailure" checked="${operatorIsAwareOfFailure}" value="true" onChange="submit();"/>
                                 <g:hiddenField name="process.id" value="${id}"/>
                             </g:form>
                         </td>
                         <td>
                             <g:if test="${showRestartButton}">
                                 <sec:ifAllGranted roles="ROLE_ADMIN">
-                                    <button id="show-restart-process"><g:message code="processes.process.restartProcess"/></button>
+                                    <g:form action="restartWithProcess" method="POST">
+                                        <g:hiddenField name="id" value="${process.id}"/>
+                                        <g:submitButton id="restartProcessButton" name="${g.message(code: "processes.process.restartProcess")}"/>
+                                    </g:form>
                                 </sec:ifAllGranted>
                             </g:if>
                         </td>

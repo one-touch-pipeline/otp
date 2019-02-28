@@ -257,7 +257,7 @@ class RestartActionServiceSpec extends Specification {
         )
 
         expect:
-        service.restartWorkflowWithProcess(process.id)
+        service.restartWorkflowWithProcess(process)
     }
 
     void "test logInCommentAndJobLog without old message"() {
