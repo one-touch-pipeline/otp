@@ -134,17 +134,17 @@ class EgaSubmissionService {
         }
     }
 
-    List<Long> deleteSampleSubmissionObjects(EgaSubmission submission) {
-        List<Long> sampleIds = []
+    List deleteSampleSubmissionObjects(EgaSubmission submission) {
+        List samplesWithSeqType = []
         submission.samplesToSubmit.toArray().each { SampleSubmissionObject it ->
             submission.samplesToSubmit.remove(it)
-            sampleIds.add(it.sample.id)
+            samplesWithSeqType.add("${it.sample.id}${it.seqType.toString()}")
             it.delete()
         }
         submission.selectionState = EgaSubmission.SelectionState.SELECT_SAMPLES
         submission.save(flush: true)
 
-        return sampleIds
+        return samplesWithSeqType
     }
 
     void updateDataFileSubmissionObjects(List<String> filenames, List<String> egaFileAlias, EgaSubmission submission) {

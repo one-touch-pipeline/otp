@@ -25,7 +25,7 @@
 
 $.otp.selectSamplesTable = {
 
-    selectSamples: function (preSelectedSampleIds) {
+    selectSamples: function (preSelectedSamples) {
         "use strict";
         var oTable = $('#selectSamplesTable').dataTable({
             sDom: '<i> T rt<"clear">',
@@ -61,8 +61,8 @@ $.otp.selectSamplesTable = {
                     "success": function (json) {
                         for (var i = 0; i < json.aaData.length; i += 1) {
                             var column = json.aaData[i];
-                            var currentSampleId = parseInt(column[0].split("-")[0]);
-                            var checked = preSelectedSampleIds.includes(currentSampleId) ? 'checked' : '';
+                            var currentSampleAndSeqType = parseInt(column[0].split("-")[0]) + column[3];
+                            var checked = preSelectedSamples.includes(currentSampleAndSeqType) ? 'checked' : '';
                             column[0] = '<input type="checkbox" name="sampleAndSeqType" value="'+ column[0] + '" ' + checked + '/>';
                         }
                         fnCallback(json);

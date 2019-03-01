@@ -75,7 +75,7 @@
         </g:form>
         <asset:script>
             $(function() {
-                $.otp.selectSamplesTable.selectSamples(${sampleIds});
+                $.otp.selectSamplesTable.selectSamples("${samplesWithSeqType}");
             });
         </asset:script>
     </div>

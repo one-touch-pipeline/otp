@@ -116,10 +116,10 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     Map selectSamples(EgaSubmission submission) {
         return [
-                submissionId: submission.id,
-                project: submission.project,
-                seqTypes : egaSubmissionService.seqTypeByProject(submission.project),
-                sampleIds : flash.sampleIds ?: [],
+                submissionId      : submission.id,
+                project           : submission.project,
+                seqTypes          : egaSubmissionService.seqTypeByProject(submission.project),
+                samplesWithSeqType: flash.samplesWithSeqType ?: [],
         ]
     }
 
@@ -298,7 +298,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
 
         if (cmd.back == "Back to selection") {
-            flash.sampleIds = egaSubmissionService.deleteSampleSubmissionObjects(cmd.submission)
+            flash.samplesWithSeqType = egaSubmissionService.deleteSampleSubmissionObjects(cmd.submission)
             redirect(action: "editSubmission", params: ['id': cmd.submission.id])
         }
     }

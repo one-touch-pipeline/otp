@@ -219,7 +219,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
         then:
         submission.samplesToSubmit.isEmpty()
-        l == [sampleSubmissionObject.sample.id]
+        l == ["${sampleSubmissionObject.sample.id}${sampleSubmissionObject.seqType.toString()}"]
     }
 
     @Unroll
