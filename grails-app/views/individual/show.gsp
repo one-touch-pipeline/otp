@@ -102,10 +102,10 @@
                     <tr>
                         <td class="myKey">${sample.sampleType.name}</td>
                         <td class="myValue sample">
-                            <sec:ifAllGranted roles="ROLE_ADMIN">
+                            <sec:access expression="hasRole('ROLE_OPERATOR') or ${!projectBlacklisted}">
                                 <otp:editorSwitch roles="ROLE_OPERATOR" template="sampleIdentifier" link="${g.createLink(controller: 'individual', action: 'updateSamples', id: ind.id)}" value="${sample.sampleIdentifiers}"/>
                                 <input type="hidden" name="sampleIdentifiersIds" value="${sample.sampleIdentifiers.id}"/>
-                            </sec:ifAllGranted>
+                            </sec:access>
                         </td>
                     </tr>
                 </g:each>

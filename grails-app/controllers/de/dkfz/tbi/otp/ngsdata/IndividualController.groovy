@@ -61,7 +61,8 @@ class IndividualController {
             ind: ind,
             comment: ind.comment,
             typeDropDown: Individual.Type.values(),
-            sampleTypeDropDown: individualService.getSampleTypeNames()
+            sampleTypeDropDown: individualService.getSampleTypeNames(),
+            projectBlacklisted: ProjectOverviewService.hideSampleIdentifier(ind.project),
         ]
     }
 
