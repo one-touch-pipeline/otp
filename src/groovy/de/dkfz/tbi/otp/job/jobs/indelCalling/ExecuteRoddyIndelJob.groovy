@@ -46,16 +46,19 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
     @Autowired
     IndelCallingService indelCallingService
 
+
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(IndelCallingInstance indelCallingInstance) {
         assert indelCallingInstance
 
         indelCallingService.validateInputBamFiles(indelCallingInstance)
+        File workDirectory = indelCallingInstance.workDirectory
 
         AbstractMergedBamFile bamFileDisease = indelCallingInstance.sampleType1BamFile
         AbstractMergedBamFile bamFileControl = indelCallingInstance.sampleType2BamFile
-        File bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing
-        File bamFileControlPath = bamFileControl.pathForFurtherProcessing
+
+        Path bamFileDiseasePath = linkBamFileInWorkDirectory(bamFileDisease, workDirectory)
+        Path bamFileControlPath = linkBamFileInWorkDirectory(bamFileControl, workDirectory)
 
         ReferenceGenome referenceGenome = indelCallingInstance.referenceGenome
         File referenceGenomeFastaFile = referenceGenomeService.fastaFilePath(referenceGenome)
@@ -95,7 +98,7 @@ class ExecuteRoddyIndelJob extends AbstractExecutePanCanJob<IndelCallingInstance
 
     @Override
     protected void validate(IndelCallingInstance indelCallingInstance) throws Throwable {
-        assert indelCallingInstance : "The input indelCallingInstance must not be null"
+        assert indelCallingInstance: "The input indelCallingInstance must not be null"
 
         executeRoddyCommandService.correctPermissionsAndGroups(indelCallingInstance, indelCallingInstance.project.realm)
 

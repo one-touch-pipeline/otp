@@ -35,13 +35,13 @@ processingOptionService.createOrUpdate(
 SeqTypeService.indelPipelineSeqTypes.each { SeqType seqType ->
     processingOptionService.createOrUpdate(
             PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_VERSION,
-            '1.2.177',
+            '2.0.0',
             seqType.roddyName,
     )
 
     processingOptionService.createOrUpdate(
             PIPELINE_RODDY_INDEL_DEFAULT_BASE_PROJECT_CONFIG,
-            'otpIndelCallingWorkflow-1.0',
+            'otpIndelCallingWorkflow-1.1',
             seqType.roddyName,
     )
 }

@@ -33,8 +33,12 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
+
+import java.nio.file.FileSystems
 
 @Mock([
         AbstractMergedBamFile,
@@ -100,6 +104,10 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                     1 * fastaFilePath(_) >> fasta
                     0 * _
                 },
+                fileSystemService: Mock(FileSystemService) {
+                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                },
+                fileService: new FileService(),
         ])
 
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
@@ -122,9 +130,11 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 "${indelCallingInstance.sampleType1BamFile.sampleType.dirName}_${indelCallingInstance.sampleType2BamFile.sampleType.dirName}/" +
                 "${indelCallingInstance.instanceName}"
 
+        String finalBamFileControlPath = "${indelCallingInstance.workDirectory}/${bamFileControl.sampleType.dirName}_${bamFileControl.individual.pid}_merged.mdup.bam"
+        String finalBamFileDiseasePath = "${indelCallingInstance.workDirectory}/${bamFileDisease.sampleType.dirName}_${bamFileDisease.individual.pid}_merged.mdup.bam"
 
         List<String> expectedList = [
-                "bamfile_list:${bamFileControl.pathForFurtherProcessing.path};${bamFileDisease.pathForFurtherProcessing.path}",
+                "bamfile_list:${finalBamFileControlPath};${finalBamFileDiseasePath}",
                 "sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}",
                 "possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}",
@@ -164,6 +174,10 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 bedFileService        : Mock(BedFileService) {
                     1 * filePath(_) >> bedFile
                 },
+                fileSystemService: Mock(FileSystemService) {
+                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                },
+                fileService: new FileService(),
         ])
         new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
@@ -207,9 +221,11 @@ class ExecuteRoddyIndelJobSpec extends Specification {
                 "${indelCallingInstance.sampleType1BamFile.sampleType.dirName}_${indelCallingInstance.sampleType2BamFile.sampleType.dirName}/" +
                 "${indelCallingInstance.instanceName}"
 
+        String finalBamFileControlPath = "${indelCallingInstance.workDirectory}/${bamFileControl.sampleType.dirName}_${bamFileControl.individual.pid}_merged.mdup.bam"
+        String finalBamFileDiseasePath = "${indelCallingInstance.workDirectory}/${bamFileDisease.sampleType.dirName}_${bamFileDisease.individual.pid}_merged.mdup.bam"
 
         List<String> expectedList = [
-                "bamfile_list:${bamFileControl.pathForFurtherProcessing.path};${bamFileDisease.pathForFurtherProcessing.path}",
+                "bamfile_list:${finalBamFileControlPath};${finalBamFileDiseasePath}",
                 "sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}",
                 "possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}",
                 "possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}",
