@@ -89,6 +89,10 @@
                 <td><g:select class="criteria" name='tumorName' from='${tumorEntities}' value="${cmd.tumorEntity}"/></td>
             </tr>
             <tr>
+                <td class="myKey"><g:message code="createProject.species"/></td>
+                <td><g:select class="criteria" name='species' from='${species}' value="${cmd.species}"/></td>
+            </tr>
+            <tr>
                 <td class="myKey"><g:message code="createProject.category"/></td>
                 <td>
                     <g:each in="${projectCategories}" var="category">

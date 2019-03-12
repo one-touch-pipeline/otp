@@ -64,6 +64,7 @@ class CreateProjectController {
                         processingPriority: cmd.processingPriority,
                         tumorEntity: cmd.tumorEntity,
                         projectInfoFile: cmd.projectInfoFile,
+                        species: cmd.species,
                 )
                 Project project = projectService.createProject(projectParams)
                 projectSelectionService.setSelectedProject([project], project.name)
@@ -78,6 +79,7 @@ class CreateProjectController {
             defaultQcThresholdHandling: QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
             processingPriorities: ProcessingPriority.displayPriorities,
             defaultProcessingPriority: ProcessingPriority.NORMAL,
+            species: ['No Species'] + Species.list().sort { it.toString() },
             projectCategories: ProjectCategory.listOrderByName(),
             message: message,
             cmd: cmd,
@@ -99,6 +101,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     QcThresholdHandling qcThresholdHandling
     TumorEntity tumorEntity
     List<String> projectCategories = [].withLazyDefault { new String() }
+    String species
     MultipartFile projectInfoFile
     String description
     String submit

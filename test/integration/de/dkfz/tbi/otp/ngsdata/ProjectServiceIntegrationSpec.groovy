@@ -38,6 +38,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
@@ -49,7 +50,7 @@ import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
 
-class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
+class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles, DomainFactoryCore {
 
     RemoteShellHelper remoteShellHelper
     ProcessingOptionService processingOptionService
@@ -69,8 +70,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     def setup() {
         createUserAndRoles()
-        DomainFactory.createProject(name: 'testProject', nameInMetadataFiles: 'testProject2', dirName: 'testDir')
-        DomainFactory.createProject(name: 'testProject3', nameInMetadataFiles: null)
+        createProject(name: 'testProject', nameInMetadataFiles: 'testProject2', dirName: 'testDir')
+        createProject(name: 'testProject3', nameInMetadataFiles: null)
         ProjectGroup projectGroup = new ProjectGroup(name: 'projectGroup')
         projectGroup.save(flush: true, failOnError: true)
         DomainFactory.createProjectCategory(name: 'category')
@@ -84,9 +85,9 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         ])
         configService.processingOptionService = new ProcessingOptionService()
 
-        DomainFactory.createProject(name: 'testProjectAlignment', realm: realm)
-        DomainFactory.createReferenceGenome(name: 'testReferenceGenome')
-        DomainFactory.createReferenceGenome(name: 'testReferenceGenome2')
+        createProject(name: 'testProjectAlignment', realm: realm)
+        createReferenceGenome(name: 'testReferenceGenome')
+        createReferenceGenome(name: 'testReferenceGenome2')
         DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createPanCanPipeline()
         DomainFactory.createRnaPipeline()
@@ -839,7 +840,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test configurePanCanAlignmentDeciderProject phix reference genome require sambamba for merge"() {
         setup:
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
-                referenceGenome: DomainFactory.createReferenceGenome(name: "referencegenome_${ProjectService.PHIX_INFIX}").name,
+                referenceGenome: createReferenceGenome(name: "referencegenome_${ProjectService.PHIX_INFIX}").name,
                 mergeTool: tool,
         )
 
@@ -977,10 +978,10 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
     void "test configureRnaAlignmentReferenceGenome set general reference genome and deprecate = #deprecateConfigurations specific ones"() {
         given:
         int configuredSampleTypes = 3
-        Project project = DomainFactory.createProject()
-        SeqType seqType = DomainFactory.createSeqType()
-        ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
-        ReferenceGenome newReferenceGenome = DomainFactory.createReferenceGenome()
+        Project project = createProject()
+        SeqType seqType = createSeqType()
+        ReferenceGenome referenceGenome = createReferenceGenome()
+        ReferenceGenome newReferenceGenome = createReferenceGenome()
 
         List<SampleType> sampleTypes = (1..configuredSampleTypes).collect { return DomainFactory.createSampleType() }
         sampleTypes.add(null)
@@ -1082,7 +1083,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         Project project = Project.findByName("testProjectAlignment")
 
         Realm realm = project.realm
-        Project basedProject = DomainFactory.createProject(name: 'basedTestProjectAlignment', realm: realm)
+        Project basedProject = createProject(name: 'basedTestProjectAlignment', realm: realm)
 
         File tempFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_PAIRED_1.1.51_v1_0.xml")
         CreateFileHelper.createRoddyWorkflowConfig(tempFile, "PANCAN_ALIGNMENT_WES_PAIRED_pluginVersion:1.1.51_v1_0")
@@ -1398,7 +1399,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProjectInfo, succeeds"() {
         given:
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
 
         when:
         ProjectInfo projectInfo = projectService.createProjectInfo(project, FILE_NAME)
@@ -1409,8 +1410,8 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProjectInfo, with same fileName for different projects, succeeds"() {
         given:
-        Project project1 = DomainFactory.createProject()
-        Project project2 = DomainFactory.createProject()
+        Project project1 = createProject()
+        Project project2 = createProject()
 
         when:
         ProjectInfo projectInfo1 = projectService.createProjectInfo(project1, FILE_NAME)
@@ -1423,7 +1424,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProjectInfo, with same fileName for same project, fails"() {
         given:
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
 
         when:
         projectService.createProjectInfo(project, FILE_NAME)
@@ -1436,7 +1437,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test createProjectInfoAndUploadFile, succeeds"() {
         given:
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
         mockMultipartFile.originalFilename = FILE_NAME
 
@@ -1455,7 +1456,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test copyprojectInfoToProjectFolder, succeeds"() {
         given:
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         byte[] projectInfoContent = []
         MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
         mockMultipartFile.originalFilename = FILE_NAME
@@ -1473,7 +1474,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
 
     void "test copyprojectInfoToProjectFolder, when no file exists, returns []"() {
         given:
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         byte[] projectInfoContent = []
         MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
         mockMultipartFile.originalFilename = FILE_NAME
@@ -1518,6 +1519,30 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         null            | null          || 1
     }
 
+    void "test getSpecies with correct input, return correct output"() {
+        given:
+        Species species = createSpecies()
+        Species output
+
+        when:
+        output = projectService.getSpecies(species.toString())
+
+        then:
+        output == species
+    }
+
+    void "test getSpecies with wrong input, returns null"() {
+        given:
+        Species species = createSpecies()
+        Species output
+
+        when:
+        output = projectService.getSpecies(species.scientificName)
+
+        then:
+        !output
+    }
+
     private File makeStatFile(ReferenceGenome referenceGenome, String statFileName) {
         File statDirectory = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
         assert statDirectory.exists() || statDirectory.mkdirs()
@@ -1557,11 +1582,11 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 seqType             : SeqTypeService.rnaPairedSeqType,
                 referenceGenome     : "testReferenceGenome",
                 referenceGenomeIndex: [
-                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: "${ProjectService.GENOME_STAR_INDEX}_200")),
-                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.GENOME_KALLISTO_INDEX)),
-                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.GENOME_GATK_INDEX)),
-                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.ARRIBA_KNOWN_FUSIONS)),
-                        DomainFactory.createReferenceGenomeIndex(toolName: DomainFactory.createToolName(name: ProjectService.ARRIBA_BLACKLIST)),
+                        createReferenceGenomeIndex(toolName: createToolName(name: "${ProjectService.GENOME_STAR_INDEX}_200")),
+                        createReferenceGenomeIndex(toolName: createToolName(name: ProjectService.GENOME_KALLISTO_INDEX)),
+                        createReferenceGenomeIndex(toolName: createToolName(name: ProjectService.GENOME_GATK_INDEX)),
+                        createReferenceGenomeIndex(toolName: createToolName(name: ProjectService.ARRIBA_KNOWN_FUSIONS)),
+                        createReferenceGenomeIndex(toolName: createToolName(name: ProjectService.ARRIBA_BLACKLIST)),
                 ],
                 geneModel           : DomainFactory.createGeneModel(),
                 mouseData           : true,

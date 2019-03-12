@@ -22,42 +22,54 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+import grails.plugin.springsecurity.SpringSecurityUtils
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.validation.Errors
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.security.UserAndRoles
 
-@Mock([
-        Project,
-        ProjectCategory,
-        Realm,
-])
-class ProjectSpec extends Specification implements DomainFactoryCore {
+class CreateSpeciesServiceIntegrationSpec extends Specification implements UserAndRoles {
 
-    void "test getProjectDirectory all fine should return File"() {
-        given:
-        Project project = createProject()
+    @Autowired
+    CreateSpeciesService createSpeciesService
 
-        when:
-        File file = project.getProjectDirectory()
-
-        then:
-        file.isAbsolute()
-        file.path.contains(project.dirName)
+    void setupDate() {
+        createUserAndRoles()
     }
 
-    void "test getProjectDirectory project directory contains slashes should return File"() {
+    void "test createSpecies, all fine"() {
         given:
-        Project project = createProject(
-                dirName: "${HelperUtils.uniqueString}/${HelperUtils.uniqueString}/${HelperUtils.uniqueString}"
-        )
+        Errors errors
+        setupDate()
 
         when:
-        File file = project.getProjectDirectory()
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            errors = createSpeciesService.createSpecies('test', 'test')
+        }
 
         then:
-        file.isAbsolute()
-        file.path.contains(project.dirName)
+        errors == null
     }
+
+    void "test createSpecies add expected errors, returns errors"() {
+        given:
+        Errors errors
+        setupDate()
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            errors = createSpeciesService.createSpecies(commonName, scientificName)
+        }
+
+        then:
+        errors.allErrors*.codes*.contains('Contains invalid characters')
+
+        where:
+        commonName | scientificName
+        'test('    | 'test'
+        'test'     | 'test)'
+        'test('    | 'test)'
+    }
+
 }

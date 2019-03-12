@@ -35,7 +35,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 dirName                       : "projectDirName_${nextId}",
                 realm                         : { DomainFactory.createRealm() },
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling           : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
+                qcThresholdHandling           : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
         ], properties, saveAndValidate)
     }
 
@@ -91,6 +91,13 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 toolName        : { createToolName() },
                 path            : "path_${nextId}",
                 indexToolVersion: "indexToolVersion_${nextId}",
+        ], properties, saveAndValidate)
+    }
+
+    Species createSpecies(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(Species, [
+                commonName     : 'commonName',
+                scientificName : 'scientificName',
         ], properties, saveAndValidate)
     }
 }

@@ -41,6 +41,8 @@ class Project implements Commentable, Entity {
         UNKNOWN,
     }
 
+    Species species
+
     Snv snv = Snv.UNKNOWN
 
     String name
@@ -146,6 +148,8 @@ class Project implements Commentable, Entity {
         costCenter(nullable: true)
 
         tumorEntity(nullable: true)
+
+        species(nullable : true)
     }
 
     @Override

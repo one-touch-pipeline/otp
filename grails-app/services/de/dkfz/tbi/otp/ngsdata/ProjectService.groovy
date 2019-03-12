@@ -44,6 +44,7 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
+import java.util.regex.Matcher
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -187,6 +188,8 @@ class ProjectService {
         project.unixGroup = projectParams.unixGroup
         project.costCenter = projectParams.costCenter
         project.tumorEntity = projectParams.tumorEntity
+        project.species = getSpecies(projectParams.species)
+
         assert project.save(flush: true, failOnError: true)
 
         createProjectDirectoryIfNeeded(project, projectParams)
@@ -268,6 +271,7 @@ class ProjectService {
         ProcessingPriority processingPriority
         TumorEntity tumorEntity
         MultipartFile projectInfoFile
+        String species
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -297,6 +301,22 @@ class ProjectService {
 
         project."${fieldName}" = fieldValue
         project.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateSpecies(String fieldName, Project project) {
+        project.species = getSpecies(fieldName)
+        project.save(flush: true)
+    }
+
+    Species getSpecies(String speciesToStringName) {
+        Matcher matcher = speciesToStringName =~ /.*\((?<scientificName>.*)\)/
+        matcher.matches()
+        try {
+            return Species.findByScientificName(matcher.group('scientificName'))
+        } catch (IllegalStateException t) {
+            return null
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")

@@ -22,42 +22,40 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
-import spock.lang.Specification
+import org.springframework.validation.Errors
 
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.FlashMessage
 
-@Mock([
-        Project,
-        ProjectCategory,
-        Realm,
-])
-class ProjectSpec extends Specification implements DomainFactoryCore {
+class CreateSpeciesController {
 
-    void "test getProjectDirectory all fine should return File"() {
-        given:
-        Project project = createProject()
+    CreateSpeciesService createSpeciesService
 
-        when:
-        File file = project.getProjectDirectory()
+    static allowedMethods = [
+            index : "GET",
+            create: "POST",
+    ]
 
-        then:
-        file.isAbsolute()
-        file.path.contains(project.dirName)
+    def index() {
+        return [
+                commonName    : flash.commonName ?: '',
+                scientificName: flash.scientificName ?: '',
+        ]
     }
 
-    void "test getProjectDirectory project directory contains slashes should return File"() {
-        given:
-        Project project = createProject(
-                dirName: "${HelperUtils.uniqueString}/${HelperUtils.uniqueString}/${HelperUtils.uniqueString}"
-        )
-
-        when:
-        File file = project.getProjectDirectory()
-
-        then:
-        file.isAbsolute()
-        file.path.contains(project.dirName)
+    def create(CreateSpeciesCommand cmd) {
+        Errors errors = createSpeciesService.createSpecies(cmd.commonName, cmd.scientificName)
+        if (errors) {
+            flash.message = new FlashMessage(g.message(code: "create.species.fail") as String, errors)
+            flash.commonName = cmd.commonName
+            flash.scientificName = cmd.scientificName
+        } else {
+            flash.message = new FlashMessage(g.message(code: "create.species.succ") as String)
+        }
+        redirect(action: 'index')
     }
+}
+
+class CreateSpeciesCommand {
+    String commonName
+    String scientificName
 }

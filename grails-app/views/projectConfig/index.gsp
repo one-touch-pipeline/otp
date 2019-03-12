@@ -193,6 +193,17 @@
                     </td>
                 </tr>
                 <tr>
+                    <td class="myKey"><g:message code="projectOverview.species"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: "projectConfig", action: "updateSpecies", params: ['project.id': project.id, 'fieldName': 'species'])}"
+                                values="${allSpecies}"
+                                value="${species}"/>
+                    </td>
+                </tr>
+                <tr>
                     <td class="myKey"><g:message code="projectOverview.customFinalNotification.message"/></td>
                     <td id="customFinalNotification">
                         <otp:editorSwitch

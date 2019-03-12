@@ -22,42 +22,27 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
-import spock.lang.Specification
+import de.dkfz.tbi.otp.utils.Entity
 
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.utils.HelperUtils
+class Species implements Entity {
+    String commonName
+    String scientificName
 
-@Mock([
-        Project,
-        ProjectCategory,
-        Realm,
-])
-class ProjectSpec extends Specification implements DomainFactoryCore {
-
-    void "test getProjectDirectory all fine should return File"() {
-        given:
-        Project project = createProject()
-
-        when:
-        File file = project.getProjectDirectory()
-
-        then:
-        file.isAbsolute()
-        file.path.contains(project.dirName)
+    static constraints = {
+        commonName(unique: false, validator: { String val ->
+            if (val && val==~/.*(\(|\)).*/) {
+                return 'Contains invalid characters'
+            }
+        })
+        scientificName(unique: true, validator: { String val ->
+            if (val && val==~/.*(\(|\)).*/) {
+                return 'Contains invalid characters'
+            }
+        })
     }
 
-    void "test getProjectDirectory project directory contains slashes should return File"() {
-        given:
-        Project project = createProject(
-                dirName: "${HelperUtils.uniqueString}/${HelperUtils.uniqueString}/${HelperUtils.uniqueString}"
-        )
-
-        when:
-        File file = project.getProjectDirectory()
-
-        then:
-        file.isAbsolute()
-        file.path.contains(project.dirName)
+    @Override
+    String toString() {
+        return "${commonName} (${scientificName})"
     }
 }

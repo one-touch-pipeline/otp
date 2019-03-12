@@ -22,42 +22,23 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
-import spock.lang.Specification
+import grails.validation.ValidationException
+import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.validation.Errors
 
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.utils.HelperUtils
+class CreateSpeciesService {
 
-@Mock([
-        Project,
-        ProjectCategory,
-        Realm,
-])
-class ProjectSpec extends Specification implements DomainFactoryCore {
-
-    void "test getProjectDirectory all fine should return File"() {
-        given:
-        Project project = createProject()
-
-        when:
-        File file = project.getProjectDirectory()
-
-        then:
-        file.isAbsolute()
-        file.path.contains(project.dirName)
-    }
-
-    void "test getProjectDirectory project directory contains slashes should return File"() {
-        given:
-        Project project = createProject(
-                dirName: "${HelperUtils.uniqueString}/${HelperUtils.uniqueString}/${HelperUtils.uniqueString}"
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors createSpecies(String commonName, String scientificName) {
+        Species species = new Species(
+                commonName: commonName,
+                scientificName: scientificName
         )
-
-        when:
-        File file = project.getProjectDirectory()
-
-        then:
-        file.isAbsolute()
-        file.path.contains(project.dirName)
+        try {
+            species.save(flush: true)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
     }
 }

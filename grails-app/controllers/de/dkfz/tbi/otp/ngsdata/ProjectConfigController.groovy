@@ -163,6 +163,8 @@ class ProjectConfigController implements CheckAndCall {
                 cellRangerOverview             : cellRangerOverview,
                 qcThresholdHandling            : project?.qcThresholdHandling,
                 qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
+                species                        : project?.species,
+                allSpecies                     : ['No Species'] + Species.list().sort { it.toString() } ?: [],
         ]
     }
 
@@ -191,6 +193,10 @@ class ProjectConfigController implements CheckAndCall {
 
     JSON updateCostCenter(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
+    }
+
+    JSON updateSpecies(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateSpecies(cmd.value, cmd.project) })
     }
 
     JSON updatePhabricatorAlias(UpdateProjectCommand cmd) {
