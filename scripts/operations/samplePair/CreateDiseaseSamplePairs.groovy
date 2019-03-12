@@ -28,9 +28,14 @@ import de.dkfz.tbi.otp.utils.*
  * Creates all not existing possible sample pairs for an project, including disease disease sample pairs.
  */
 
+//------------------------------
+//input area
 String projectName = ''
 
+
 //------------------------------
+//work area
+
 assert projectName: 'No project Name is given'
 
 Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName))
