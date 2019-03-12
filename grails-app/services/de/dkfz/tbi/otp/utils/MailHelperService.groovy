@@ -43,15 +43,15 @@ class MailHelperService {
         sendEmail(emailSubject, content, Arrays.asList(recipient))
     }
 
-    void sendEmail(String emailSubject, String content, String recipient, String sender) {
-        sendEmail(emailSubject, content, Arrays.asList(recipient), sender)
+    void sendEmail(String emailSubject, String content, String recipient, String replyToAddress) {
+        sendEmail(emailSubject, content, Arrays.asList(recipient), replyToAddress)
     }
 
     void sendEmail(String emailSubject, String content, List<String> recipients) {
-        sendEmail(emailSubject, content, recipients, processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER))
+        sendEmail(emailSubject, content, recipients, processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_REPLY_TO))
     }
 
-    void sendEmail(String emailSubject, String content, List<String> recipients, String sender) {
+    void sendEmail(String emailSubject, String content, List<String> recipients, String replyToAddress) {
         assert emailSubject
         assert content
         assert recipients
@@ -59,7 +59,8 @@ class MailHelperService {
         log.info "Send email: subject: '${emailSubject}', to: '${recipients}', content: '${content}'"
         if (configService.otpSendsMails()) {
             mailService.sendMail {
-                from sender
+                from processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER)
+                replyTo replyToAddress
                 to recipients
                 subject emailSubject
                 body content

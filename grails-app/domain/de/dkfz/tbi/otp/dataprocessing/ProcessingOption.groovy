@@ -367,6 +367,10 @@ class ProcessingOption implements Entity {
                 "Recipient of error messages",
                 Necessity.REQUIRED, null, TypeValidators.MAIL
         ),
+        EMAIL_REPLY_TO(
+                "Email address that is used to reply emails",
+                Necessity.REQUIRED, null, TypeValidators.MAIL
+        ),
         EMAIL_SENDER(
                 "Email address that is used to send emails",
                 Necessity.REQUIRED, null, TypeValidators.MAIL

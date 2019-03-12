@@ -32,6 +32,7 @@ ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 [
         (ProcessingOption.OptionName.EMAIL_SENDER)                     : '',
+        (ProcessingOption.OptionName.EMAIL_REPLY_TO)                   : '',
         (ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)     : '',
         (ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)           : '',
         (ProcessingOption.OptionName.OTP_USER_LINUX_GROUP)             : 'otp',
