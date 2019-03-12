@@ -554,6 +554,31 @@ ${expectedAlign}"""
         false        | false            | false            | ProcessingStatus.WorkflowProcessingStatus.ALL_DONE                 | true
     }
 
+    @Unroll
+    void "#methodName Notification when not ALL_DONE, returns empty String"() {
+        given:
+        DomainFactory.createAllAlignableSeqTypes()
+        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService()
+        ProcessingStatus status = new ProcessingStatus([new SeqTrackProcessingStatus(DomainFactory.createSeqTrack())])
+        status.metaClass.getSamplePairProcessingStatuses = { return [] }
+        String message
+
+        when:
+        message = createNotificationTextService."${methodName}Notification"(status)
+
+        then:
+        message == ''
+
+        where:
+        methodName     | _
+        'installation' | _
+        'alignment'    | _
+        'snv'          | _
+        'indel'        | _
+        'aceseq'       | _
+        'runYapsa'     | _
+    }
+
     void "alignmentNotification, when seqTracks is null, throw assert"() {
         when:
         new CreateNotificationTextService().alignmentNotification(null)

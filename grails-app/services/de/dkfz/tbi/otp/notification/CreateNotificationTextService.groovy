@@ -65,6 +65,10 @@ class CreateNotificationTextService {
 
         String stepInformation = "${processingStep}Notification"(status).trim()
 
+        if (!stepInformation) {
+            return ''
+        }
+
         String otrsTicketSeqCenterComment = otrsTicket.seqCenterComment ?: ""
         List<SeqCenter> seqCenters = otrsTicket.findAllSeqTracks()*.seqCenter.unique()
         String generalSeqCenterComment = seqCenters.size() == 1 ? processingOptionService.findOptionAsString(
@@ -120,7 +124,8 @@ class CreateNotificationTextService {
 
         Collection<SeqTrack> seqTracks = status.seqTrackProcessingStatuses*.seqTrack
         if (!seqTracks) {
-            throw new RuntimeException("No installation finished yet.")
+            log.debug("No installation finished yet.")
+            return ''
         }
         String runNames = seqTracks*.run*.name.unique().sort().join(", ")
         String directories = getSeqTypeDirectories(seqTracks)
@@ -150,7 +155,8 @@ class CreateNotificationTextService {
 
         Collection<SeqTrack> seqTracks = status.seqTrackProcessingStatuses*.seqTrack
         if (!seqTracks) {
-            throw new RuntimeException("No alignment finished yet.")
+            log.debug('No alignment finished yet.')
+            return ''
         }
         String sampleNames = seqTracks.groupBy {
             getSampleName(it)
@@ -285,7 +291,8 @@ class CreateNotificationTextService {
 
         List<SamplePair> samplePairsFinished = map[ALL_DONE]*.samplePair
         if (!samplePairsFinished) {
-            throw new RuntimeException("No ${notificationStep.displayName} finished yet.")
+            log.debug("No ${notificationStep.displayName} finished yet.")
+            return ''
         }
         String directories = variantCallingDirectories(samplePairsFinished, notificationStep)
         String message = createMessage("notification.template.step.processed", [

@@ -636,6 +636,36 @@ class TrackingServiceIntegrationSpec extends IntegrationSpec {
         trackingService.sendCustomerNotification(ticket, status, OtrsTicket.ProcessingStep.INSTALLATION)
     }
 
+    void 'sendCustomerNotification, with multiple projects, when non are finished, doesnt send emails'() {
+        given:
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        ProcessingStatus status = new ProcessingStatus([1, 2].collect { int index ->
+            UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
+                    user: DomainFactory.createUser(email: "project${index}@test.com"),
+                    project: DomainFactory.createProject(name: "Project_X${index}"),
+            )
+            new SeqTrackProcessingStatus(DomainFactory.createSeqTrack(
+                    sample: DomainFactory.createSample(
+                            individual: DomainFactory.createIndividual(
+                                    project: userProjectRole.project,
+                            )
+                    ),
+            ))
+        })
+
+        String prefix = HelperUtils.uniqueString
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
+        DomainFactory.createProcessingOptionForNotificationRecipient(OTRS_RECIPIENT)
+
+        trackingService.mailHelperService = Mock(MailHelperService) {
+            0 * sendEmail(_, _, _)
+        }
+
+        expect:
+        trackingService.sendCustomerNotification(ticket, status, OtrsTicket.ProcessingStep.INSTALLATION)
+    }
+
+
 
     private static SeqTrackProcessingStatus createSeqTrackProcessingStatus(SeqTrack seqTrack) {
         return new SeqTrackProcessingStatus(seqTrack, ALL_DONE, ALL_DONE, [])

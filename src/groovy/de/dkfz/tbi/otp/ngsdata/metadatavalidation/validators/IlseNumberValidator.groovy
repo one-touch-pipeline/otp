@@ -56,7 +56,7 @@ class IlseNumberValidator extends ValueTuplesValidator<MetadataValidationContext
         if (allValueTuples) {
             Map<String, List<ValueTuple>> allIlseNumbers = allValueTuples.groupBy { it.getValue(ILSE_NO.name()) }
             if (allIlseNumbers.size() != 1) {
-                context.addProblem((Set) allValueTuples.cells.sum(), Level.WARNING, "There are multiple ILSe numbers in the metadata file.")
+                context.addProblem((Set) allValueTuples.cells.sum(), Level.INFO, "There are multiple ILSe numbers in the metadata file.")
             }
             allIlseNumbers.each { String ilseNo, List<ValueTuple> valueTuplesOfIlseNo ->
                 ValueTuple tuple = CollectionUtils.exactlyOneElement(valueTuplesOfIlseNo)

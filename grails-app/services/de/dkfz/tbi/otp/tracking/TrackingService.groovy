@@ -217,6 +217,10 @@ class TrackingService {
             subject.append("${project.name} sequencing data ${notificationStep.notificationSubject}")
 
             String content = createNotificationTextService.notification(ticket, status, notificationStep, project)
+            if (!content) {
+                log.debug("No Email was sent! Subject would have been '${subject.toString()}.")
+                return
+            }
             mailHelperService.sendEmail(subject.toString(), content, recipients)
         }
     }

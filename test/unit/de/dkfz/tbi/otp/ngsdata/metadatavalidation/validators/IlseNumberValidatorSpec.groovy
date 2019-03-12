@@ -104,7 +104,7 @@ class IlseNumberValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.WARNING, "There are multiple ILSe numbers in the metadata file.", "There are multiple ILSe numbers in the metadata file."),
+                new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.INFO, "There are multiple ILSe numbers in the metadata file.", "There are multiple ILSe numbers in the metadata file."),
                 new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING, "The metadata file path '${context.metadataFile}' does not contain the ILSe number '${ILSE_NO_2}'.", "At least one metadata file path does not contain the ILSe number.")
                 ]
         containSame(context.problems, expectedProblems)
