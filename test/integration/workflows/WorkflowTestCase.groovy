@@ -161,6 +161,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         DomainFactory.createProcessingOptionLazy(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
         DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_RECIPIENT_ERRORS, value: HelperUtils.randomEmail)
         DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_REPLY_TO, value: HelperUtils.randomEmail)
+        DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
         DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION, value: HelperUtils.randomEmail)
         DomainFactory.createProcessingOptionLazy(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
 
