@@ -20,13 +20,20 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.PIPELINE_RUNYAPSA_DEFAULT_VERSION
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME
 
 ProcessingOptionService processingOptionService = ctx.processingOptionService
 
 processingOptionService.createOrUpdate(
         PIPELINE_RUNYAPSA_REFERENCE_GENOME,
         'hg19, hs37d5, 1KGRef_PhiX'
+)
+
+
+processingOptionService.createOrUpdate(
+        PIPELINE_RUNYAPSA_DEFAULT_VERSION,
+        'yapsa-devel/b765fa8',
 )
