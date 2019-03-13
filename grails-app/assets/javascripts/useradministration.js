@@ -161,6 +161,13 @@ $.otp.userAdministration.editUser = {
             "remove" : {opposite: "add",    appendToSection: "available"}
         };
 
+        var messages = {
+            "user.administration.role.addRole": "Add Role to User",
+            "user.administration.role.removeRole": "Remove Role from User",
+            "user.administration.role.addGroup": "Add User to this Group",
+            "user.administration.role.removeGroup": "Remove User from this Group"
+        };
+
         $.ajax({
             type: 'GET',
             url: $.otp.createLink({
@@ -177,7 +184,7 @@ $.otp.userAdministration.editUser = {
                 if (data.success) {
                     var tableRow = $(origin).parents("tr");
                     var opposite = labels[action].opposite;
-                    $("a", tableRow).text($L("user.administration.role."+opposite+""+type));
+                    $("a", tableRow).text(messages["user.administration.role."+opposite+""+type]);
                     $("a", tableRow).attr('class', opposite);
                     tableRow.detach();
                     tableRow.appendTo($("table tbody", $("#"+labels[action].appendToSection+""+type)));
