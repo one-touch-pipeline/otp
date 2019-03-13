@@ -149,4 +149,8 @@ databaseChangeLog = {
     changeSet(author: "kosnac", id: "add-missing-null-constraints") {
         sqlFile(path: 'changelogs/2019/add-missing-null-constraints.sql')
     }
+
+    changeSet(author: "kosnac", id: "match-unique-constraints-between-gorm-and-database") {
+        sqlFile(path: 'changelogs/2019/match-unique-constraints-between-gorm-and-database.sql')
+    }
 }
