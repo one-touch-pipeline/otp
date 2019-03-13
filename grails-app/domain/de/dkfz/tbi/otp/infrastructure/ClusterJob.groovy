@@ -228,7 +228,7 @@ class ClusterJob implements Entity {
      */
     Integer startCount
 
-    Set<ClusterJob> dependencies
+    Set<ClusterJob> dependencies = [] as Set<ClusterJob>
 
     Individual individual
 

@@ -200,7 +200,7 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
         clusterJob.node == null
         clusterJob.accountName == null
         clusterJob.startCount == null
-        clusterJob.dependencies == null
+        clusterJob.dependencies == [] as Set<ClusterJob>
     }
 
     void "test convertFromJava8DurationToJodaDuration"() {

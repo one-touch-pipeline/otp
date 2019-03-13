@@ -51,11 +51,11 @@ class ProcessingStep implements Serializable, Entity {
     /**
      * Input Parameters added to this ProcessingStep.
      */
-    Collection<Parameter> input
+    Collection<Parameter> input = [] as Collection<Parameter>
     /**
      * Output Parameters generated during this ProcessingStep.
      */
-    Collection<Parameter> output
+    Collection<Parameter> output = [] as Collection<Parameter>
     static hasMany = [input: Parameter, output: Parameter]
     /**
      * The JobDefinition this ProcessingStep is generated from.
@@ -128,7 +128,7 @@ class ProcessingStep implements Serializable, Entity {
             }
             return true
         })
-        input(validator: { Collection<Parameter> val, ProcessingStep obj ->
+        input(nullable: true, validator: { Collection<Parameter> val, ProcessingStep obj ->
             if (!val) {
                 return true
             }
@@ -155,7 +155,7 @@ class ProcessingStep implements Serializable, Entity {
             }
             return errors
         })
-        output(validator: { Collection<Parameter> val, ProcessingStep obj ->
+        output(nullable: true, validator: { Collection<Parameter> val, ProcessingStep obj ->
             if (!val) {
                 return true
             }

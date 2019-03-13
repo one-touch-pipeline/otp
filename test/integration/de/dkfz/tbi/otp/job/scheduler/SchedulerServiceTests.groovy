@@ -224,7 +224,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(step2)
         assertSame(step, step2.previous)
         assertSame(step2, step.next)
-        assertNull(step2.input)
+        assertTrue(step2.input.isEmpty())
         // continue
         schedulerService.schedule()
         // the third Job should be scheduled
@@ -419,7 +419,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(step2)
         assertSame(step, step2.previous)
         assertSame(step2, step.next)
-        assertNull(step2.input)
+        assertTrue(step2.input.isEmpty())
         // schedule the next Job
         schedulerService.schedule()
         // no Job should be be scheduled

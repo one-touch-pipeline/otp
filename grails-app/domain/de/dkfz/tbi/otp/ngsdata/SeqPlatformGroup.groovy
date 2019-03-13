@@ -77,6 +77,7 @@ class SeqPlatformGroup implements Entity, CommentableWithHistory {
             }
             return
         }
+        comments nullable: true
     }
 
     @Override
