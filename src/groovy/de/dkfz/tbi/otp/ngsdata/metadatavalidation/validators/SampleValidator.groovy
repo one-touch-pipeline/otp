@@ -33,10 +33,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.*
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BIOMATERIAL_ID
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PATIENT_ID
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -87,7 +84,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
             SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
             if (!parsedIdentifier && !sampleIdentifier) {
                 context.addProblem(it.cells, Level.ERROR, "Sample identifier '${sampleId}' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP.")
-                missingIdentifiersWithProject.add("${projectName},${pid},${sampleType},${sampleId}")
+                missingIdentifiersWithProject.add("${projectName}\t${pid}\t${sampleType}\t${sampleId}")
             }
             if (parsedIdentifier && !sampleIdentifier) {
                 if (!atMostOneElement(Project.findAllByName(parsedIdentifier.projectName))) {

@@ -104,7 +104,7 @@ class SampleIdentifierService {
 
         try {
             for (Row row : spreadsheet.dataRows) {
-                String projectName = row.getCellByColumnTitle(BulkSampleCreationHeader.PROJECT.name()).text.trim() ?: project.name
+                String projectName = row.getCellByColumnTitle(BulkSampleCreationHeader.PROJECT.name())?.text?.trim() ?: project.name
 
                 ParsedSampleIdentifier s = new DefaultParsedSampleIdentifier(
                         projectName: projectName,
