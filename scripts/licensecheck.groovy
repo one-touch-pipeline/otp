@@ -113,7 +113,7 @@ class LicenseCheck {
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
                 @Override
                 FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    if (!ignoredFiles.any { file.normalize() == it } ) {
+                    if (!Files.isSymbolicLink(file) && !ignoredFiles.any { file.normalize() == it } ) {
                         checkLicense(file, problems)
                     }
                     return FileVisitResult.CONTINUE
