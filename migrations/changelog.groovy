@@ -146,4 +146,7 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2019/OTP-3075.sql')
     }
 
+    changeSet(author: "kosnac", id: "add-missing-null-constraints") {
+        sqlFile(path: 'changelogs/2019/add-missing-null-constraints.sql')
+    }
 }
