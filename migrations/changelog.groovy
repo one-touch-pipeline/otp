@@ -153,4 +153,8 @@ databaseChangeLog = {
     changeSet(author: "kosnac", id: "match-unique-constraints-between-gorm-and-database") {
         sqlFile(path: 'changelogs/2019/match-unique-constraints-between-gorm-and-database.sql')
     }
+
+    changeSet(author: "kosnac", id: "remove-default-values-from-database") {
+        sqlFile(path: 'changelogs/2019/remove-default-values-from-database.sql')
+    }
 }
