@@ -161,4 +161,10 @@ databaseChangeLog = {
     changeSet(author: "kosnac", id: "set-blank-phabricator-alias-to-null") {
         sqlFile(path: 'changelogs/2019/set-blank-phabricator-alias-to-null.sql')
     }
+
+    changeSet(author: "kosnac", id: "replace-unique-index-with-unique-constraint") {
+        sqlFile(path: 'changelogs/2019/replace-unique-index-with-unique-constraint.sql')
+    }
+
+    include file: 'changelogs/2019/add-unique-constraints-required-by-migration-plugin.groovy'
 }
