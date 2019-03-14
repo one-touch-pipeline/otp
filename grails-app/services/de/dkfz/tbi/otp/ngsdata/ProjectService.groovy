@@ -176,7 +176,7 @@ class ProjectService {
         assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
         Project project = createProject(
                 projectParams.name, projectParams.dirName, projectParams.realm, projectParams.categoryNames, projectParams.qcThresholdHandling)
-        project.phabricatorAlias = projectParams.phabricatorAlias
+        project.phabricatorAlias = projectParams.phabricatorAlias ?: null
         project.dirAnalysis = projectParams.dirAnalysis
         project.processingPriority = projectParams.processingPriority.priority
         project.hasToBeCopied = projectParams.copyFiles
@@ -321,7 +321,7 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     void updatePhabricatorAlias(String value, Project project) {
-        project.phabricatorAlias = value
+        project.phabricatorAlias = value ?: null
         project.save(flush: true)
     }
 

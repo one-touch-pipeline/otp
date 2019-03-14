@@ -157,4 +157,8 @@ databaseChangeLog = {
     changeSet(author: "kosnac", id: "remove-default-values-from-database") {
         sqlFile(path: 'changelogs/2019/remove-default-values-from-database.sql')
     }
+
+    changeSet(author: "kosnac", id: "set-blank-phabricator-alias-to-null") {
+        sqlFile(path: 'changelogs/2019/set-blank-phabricator-alias-to-null.sql')
+    }
 }

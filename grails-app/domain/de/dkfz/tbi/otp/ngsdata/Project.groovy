@@ -110,7 +110,7 @@ class Project implements Commentable, Entity {
             }
         })
 
-        phabricatorAlias(nullable: true, unique: true, blank: true)
+        phabricatorAlias(nullable: true, unique: true, blank: false)
 
         dirName(blank: false, unique: true, validator: { String val ->
             OtpPath.isValidRelativePath(val)
