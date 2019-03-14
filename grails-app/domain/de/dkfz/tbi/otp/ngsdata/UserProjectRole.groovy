@@ -38,7 +38,7 @@ class UserProjectRole implements Serializable, Entity {
     boolean receivesNotifications = true
 
     static constraints = {
-        user(unique: ['project'])
+        project(unique: 'user')
     }
 
     boolean getManageUsers() {
