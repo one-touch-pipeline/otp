@@ -143,7 +143,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 unixGroup: unixGroup,
                 projectGroup: projectGroup,
                 nameInMetadataFiles: nameInMetadataFiles,
-                copyFiles: copyFiles,
+                forceCopyFiles: forceCopyFiles,
                 description: description,
                 processingPriority: processingPriority,
         )
@@ -161,18 +161,18 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         project.unixGroup == unixGroup
         project.projectGroup == ProjectGroup.findByName(projectGroup)
         project.nameInMetadataFiles == nameInMetadataFiles
-        project.hasToBeCopied == copyFiles
+        project.forceCopyFiles == forceCopyFiles
         project.description == description
         project.processingPriority == processingPriority.priority
 
         where:
-        name      | dirName | dirAnalysis | projectGroup   | nameInMetadataFiles | copyFiles | description   | categoryNames | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
-        'project' | 'dir'   | ''          | ''             | 'project'           | true      | 'description' | ["category"]  | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
-        'project' | 'dir'   | ''          | ''             | null                | true      | ''            | ["category"]  | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM    | QcThresholdHandling.CHECK_AND_NOTIFY
-        'project' | 'dir'   | ''          | 'projectGroup' | 'project'           | true      | 'description' | ["category"]  | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO      | QcThresholdHandling.NO_CHECK
-        'project' | 'dir'   | ''          | ''             | 'project'           | false     | ''            | ["category"]  | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.HIPO2     | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
-        'project' | 'dir'   | ''          | ''             | 'project'           | true      | 'description' | ["category"]  | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP      | QcThresholdHandling.CHECK_AND_NOTIFY
-        'project' | 'dir'   | '/dirA'     | ''             | 'project'           | true      | 'description' | []            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.NO_CHECK
+        name      | dirName | dirAnalysis | projectGroup   | nameInMetadataFiles | forceCopyFiles | description   | categoryNames | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
+        'project' | 'dir'   | ''          | ''             | 'project'           | true           | 'description' | ["category"]  | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
+        'project' | 'dir'   | ''          | ''             | null                | true           | ''            | ["category"]  | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM    | QcThresholdHandling.CHECK_AND_NOTIFY
+        'project' | 'dir'   | ''          | 'projectGroup' | 'project'           | true           | 'description' | ["category"]  | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO      | QcThresholdHandling.NO_CHECK
+        'project' | 'dir'   | ''          | ''             | 'project'           | false          | ''            | ["category"]  | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.HIPO2     | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
+        'project' | 'dir'   | ''          | ''             | 'project'           | true           | 'description' | ["category"]  | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP      | QcThresholdHandling.CHECK_AND_NOTIFY
+        'project' | 'dir'   | '/dirA'     | ''             | 'project'           | true           | 'description' | []            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.NO_CHECK
     }
 
     void "test createProject if directory is created"() {
@@ -190,7 +190,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
-                copyFiles: false,
+                forceCopyFiles: false,
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
@@ -227,7 +227,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: nameInMetadataFiles,
-                copyFiles: true,
+                forceCopyFiles: true,
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
@@ -264,7 +264,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 unixGroup: 'invalidValue',
                 projectGroup: '',
                 nameInMetadataFiles: null,
-                copyFiles: false,
+                forceCopyFiles: false,
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
@@ -293,7 +293,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
-                copyFiles: false,
+                forceCopyFiles: false,
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
@@ -332,7 +332,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
-                copyFiles: false,
+                forceCopyFiles: false,
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
@@ -377,7 +377,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
-                copyFiles: false,
+                forceCopyFiles: false,
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
                 projectInfoFile: mockMultipartFile,
@@ -442,7 +442,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: 'project',
-                copyFiles: true,
+                forceCopyFiles: true,
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
         )

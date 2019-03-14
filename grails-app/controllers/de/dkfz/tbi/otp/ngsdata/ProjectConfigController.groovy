@@ -146,7 +146,7 @@ class ProjectConfigController implements CheckAndCall {
                 projectGroup                   : project?.projectGroup,
                 sampleIdentifierParserBeanName : project?.sampleIdentifierParserBeanName,
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
-                copyFiles                      : project?.hasToBeCopied,
+                forceCopyFiles                 : project?.forceCopyFiles,
                 fingerPrinting                 : project?.fingerPrinting,
                 description                    : project?.description,
                 customFinalNotification        : project?.customFinalNotification,

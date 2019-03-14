@@ -57,7 +57,7 @@ class CreateProjectController {
                         sampleIdentifierParserBeanName: cmd.sampleIdentifierParserBeanName,
                         qcThresholdHandling: cmd.qcThresholdHandling,
                         nameInMetadataFiles: cmd.nameInMetadataFiles,
-                        copyFiles: cmd.copyFiles,
+                        forceCopyFiles: cmd.forceCopyFiles,
                         fingerPrinting: cmd.fingerPrinting,
                         costCenter: cmd.costCenter,
                         description: cmd.description,
@@ -106,7 +106,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     String description
     String submit
     ProcessingPriority processingPriority
-    boolean copyFiles
+    boolean forceCopyFiles
     boolean fingerPrinting = true
 
     static constraints = {

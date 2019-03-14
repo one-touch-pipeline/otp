@@ -62,7 +62,7 @@ class Project implements Commentable, Entity {
      * this flag defines if the fastq files of this project have to be copied (instead of linked) regardless of whether
      * they will be processed or not
      */
-    boolean hasToBeCopied = false
+    boolean forceCopyFiles = false
 
     boolean fingerPrinting = true
 

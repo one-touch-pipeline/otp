@@ -469,7 +469,7 @@ AND entry.value = :value
     void determineAndStoreIfFastqFilesHaveToBeLinked(SeqTrack seqTrack, boolean willBeAligned) {
         assert seqTrack : "The input seqTrack for determineAndStoreIfFastqFilesHaveToBeLinked must not be null"
         boolean importDirAllowsLinking = doesImportDirAllowLinking(seqTrack)
-        boolean projectAllowsLinking = !seqTrack.project.hasToBeCopied
+        boolean projectAllowsLinking = !seqTrack.project.forceCopyFiles
         boolean seqTypeAllowsLinking = seqTrack.seqType.seqTypeAllowsLinking()
         boolean adapterTrimming = RoddyWorkflowConfig.getLatestForIndividual(seqTrack.individual, seqTrack.seqType,
                 Pipeline.findByName(seqTrack.seqType.isRna() ?

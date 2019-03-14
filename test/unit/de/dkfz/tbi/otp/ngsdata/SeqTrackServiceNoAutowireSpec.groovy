@@ -115,7 +115,7 @@ class SeqTrackServiceNoAutowireSpec extends Specification {
     void "test determineAndStoreIfFastqFilesHaveToBeLinked, project doesn't allow linking, has to be copied"() {
         given:
         SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
-        seqTrack.sample.individual.project.hasToBeCopied = true
+        seqTrack.sample.individual.project.forceCopyFiles = true
 
         when:
         service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
@@ -172,7 +172,7 @@ class SeqTrackServiceNoAutowireSpec extends Specification {
                 run: run,
                 sample: DomainFactory.createSample(
                         individual: DomainFactory.createIndividual(
-                                project: DomainFactory.createProject(hasToBeCopied: false)
+                                project: DomainFactory.createProject(forceCopyFiles: false)
                         )
                 )
         )

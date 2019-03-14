@@ -179,7 +179,7 @@ class ProjectService {
         project.phabricatorAlias = projectParams.phabricatorAlias ?: null
         project.dirAnalysis = projectParams.dirAnalysis
         project.processingPriority = projectParams.processingPriority.priority
-        project.hasToBeCopied = projectParams.copyFiles
+        project.forceCopyFiles = projectParams.forceCopyFiles
         project.fingerPrinting = projectParams.fingerPrinting
         project.nameInMetadataFiles = projectParams.nameInMetadataFiles
         project.setProjectGroup(ProjectGroup.findByName(projectParams.projectGroup))
@@ -262,7 +262,7 @@ class ProjectService {
         String unixGroup
         String projectGroup
         String nameInMetadataFiles
-        boolean copyFiles
+        boolean forceCopyFiles
         boolean fingerPrinting
         String costCenter
         String description
@@ -297,7 +297,7 @@ class ProjectService {
                 "sampleIdentifierParserBeanName",
                 "qcThresholdHandling",
                 "unixGroup",
-                "hasToBeCopied"
+                "forceCopyFiles"
         ].contains(fieldName)
 
         project."${fieldName}" = fieldValue

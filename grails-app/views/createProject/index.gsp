@@ -101,8 +101,8 @@
                 </td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="createProject.copyFiles"/></td>
-                <td><g:checkBox name="copyFiles" checked="${cmd == null || cmd.copyFiles}" value="true"/></td>
+                <td class="myKey"><g:message code="createProject.forceCopyFiles"/></td>
+                <td><g:checkBox name="forceCopyFiles" checked="${cmd == null || cmd.forceCopyFiles}" value="true"/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.fingerPrinting"/></td>

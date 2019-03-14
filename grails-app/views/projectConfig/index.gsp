@@ -131,14 +131,14 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.copyFiles"/></td>
-                    <td id="copyFiles">
+                    <td class="myKey"><g:message code="projectOverview.forceCopyFiles"/></td>
+                    <td id="forceCopyFiles">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: 'projectConfig', action: "updateCopyFiles", params: ['project.id': project.id, 'fieldName': 'hasToBeCopied'])}"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateCopyFiles", params: ['project.id': project.id, 'fieldName': 'forceCopyFiles'])}"
                                 values="${["true","false"]}"
-                                value="${copyFiles}"/>
+                                value="${forceCopyFiles}"/>
                     </td>
                 </tr>
                 <tr>
