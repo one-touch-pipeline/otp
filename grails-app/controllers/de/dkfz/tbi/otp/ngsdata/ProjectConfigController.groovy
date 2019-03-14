@@ -249,6 +249,13 @@ class ProjectConfigController implements CheckAndCall {
         })
     }
 
+    JSON updateCopyFiles(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd, {
+            projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, cmd.project)
+        })
+    }
+
+
     def addProjectInfo(AddProjectInfoCommand cmd) {
         withForm {
             if (cmd.hasErrors()) {

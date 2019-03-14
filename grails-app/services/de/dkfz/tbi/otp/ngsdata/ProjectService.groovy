@@ -297,6 +297,7 @@ class ProjectService {
                 "sampleIdentifierParserBeanName",
                 "qcThresholdHandling",
                 "unixGroup",
+                "hasToBeCopied"
         ].contains(fieldName)
 
         project."${fieldName}" = fieldValue

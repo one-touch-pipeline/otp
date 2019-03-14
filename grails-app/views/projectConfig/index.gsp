@@ -132,7 +132,14 @@
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.copyFiles"/></td>
-                    <td id="copyFiles">${copyFiles}</td>
+                    <td id="copyFiles">
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateCopyFiles", params: ['project.id': project.id, 'fieldName': 'hasToBeCopied'])}"
+                                values="${["true","false"]}"
+                                value="${copyFiles}"/>
+                    </td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.fingerPrinting"/></td>
