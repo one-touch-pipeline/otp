@@ -22,8 +22,30 @@
 
 import de.dkfz.tbi.otp.ngsdata.*
 
-new SampleType(
-        name: '',
-//        specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
-//        specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC,
-).save(flush: true)
+//************ List of Sample Types (one Type per line) ************//
+List sampleTypeNames = """
+#SampleType1
+#SampleType2
+
+
+""".split("\n").findAll {
+    it && !it.startsWith('#')
+}
+
+//************ Choose specific reference genome (per project or sample type) ************//
+SampleType.SpecificReferenceGenome specificReferenceGenome =
+        //SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        //SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+
+SampleType.withTransaction {
+    sampleTypeNames.each {
+        println "create: " + new SampleType (
+                name: it,
+                specificReferenceGenome: specificReferenceGenome,
+        ).save(flush: true)
+    }
+
+    assert false: "DEBUG: transaction intentionally failed to rollback changes"
+}
+
+""
