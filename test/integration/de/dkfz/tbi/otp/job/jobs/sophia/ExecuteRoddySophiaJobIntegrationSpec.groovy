@@ -88,7 +88,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
                 "tumorProperPairPercentage:${bamFileDiseaseMergedBamQa.getPercentProperlyPaired()}",
                 "bamfile_list:${bamFileControlPath};${bamFileDiseasePath}",
                 "sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}",
-                "insertsizesfile_list:${bamFileDisease.finalInsertSizeFile};${bamFileControl.finalInsertSizeFile}",
+                "insertsizesfile_list:${bamFileControl.finalInsertSizeFile};${bamFileDisease.finalInsertSizeFile}",
                 "possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}",
                 "possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}",
                 "controlDefaultReadLength:${bamFileControl.getMaximalReadLength()}",

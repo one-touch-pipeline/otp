@@ -82,7 +82,7 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
 
         cValues.add("bamfile_list:${bamFileControlPath};${bamFileDiseasePath}")
         cValues.add("sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}")
-        cValues.add("insertsizesfile_list:${diseaseInsertSizeFile};${controlInsertSizeFile}")
+        cValues.add("insertsizesfile_list:${controlInsertSizeFile};${diseaseInsertSizeFile}")
         cValues.add("possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}")
         cValues.add("possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}")
         cValues.add("controlDefaultReadLength:${controlDefaultReadLength}")
