@@ -42,7 +42,7 @@ class SamplePairDeciderService {
 
         return mergingWorkPackages.collect { AbstractMergingWorkPackage workPackage ->
             findOrCreateSamplePairs(workPackage)
-        }.flatten().unique()
+        }.flatten().unique() as List<SamplePair>
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
