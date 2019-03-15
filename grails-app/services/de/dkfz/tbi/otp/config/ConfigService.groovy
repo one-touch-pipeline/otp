@@ -44,7 +44,7 @@ class ConfigService implements ApplicationContextAware {
 
     /**
      * Parses the file in the environment variable $OTP_PROPERTIES with fallback to ~/.otp.properties
-     * This method must only be used in ConfigService, Config.groovy and DataSource.groovy
+     * This method must only be used where the ConfigService bean is not available.
      */
     static Properties parsePropertiesFile() {
         Properties properties = new Properties()
