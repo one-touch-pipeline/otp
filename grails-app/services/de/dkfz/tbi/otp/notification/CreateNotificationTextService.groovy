@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.notification
 
 import groovy.text.SimpleTemplateEngine
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
-import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.NoSuchMessageException
 import org.springframework.context.i18n.LocaleContextHolder

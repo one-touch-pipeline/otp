@@ -25,7 +25,7 @@ package de.dkfz.tbi.otp.notification
 import grails.test.spock.IntegrationSpec
 import grails.core.GrailsApplication
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
-import org.codehaus.groovy.grails.web.mapping.LinkGenerator
+import grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Unroll
 
