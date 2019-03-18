@@ -30,7 +30,6 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problems
 import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
 
 class MetadataValidationContext extends AbstractMetadataValidationContext {
 
@@ -44,8 +43,7 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
     static MetadataValidationContext createFromFile(Path metadataFile, DirectoryStructure directoryStructure) {
 
         Map parametersForFile = readAndCheckFile(metadataFile, { Row row ->
-            !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined') ||
-                    !row.getCellByColumnTitle(SAMPLE_ID.name())?.text?.startsWith('Undetermined')
+            !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined')
         })
 
         return new MetadataValidationContext(metadataFile, parametersForFile.metadataFileMd5sum,

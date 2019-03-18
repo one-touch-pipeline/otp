@@ -67,13 +67,11 @@ class MetadataValidationContextSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure)
 
         then:
-        context.spreadsheet.dataRows.size() == 6
-        context.spreadsheet.dataRows[0].cells[0].text == '0'
-        context.spreadsheet.dataRows[1].cells[0].text == '1'
-        context.spreadsheet.dataRows[2].cells[0].text == '4'
-        context.spreadsheet.dataRows[3].cells[0].text == '5'
-        context.spreadsheet.dataRows[4].cells[0].text == '6'
-        context.spreadsheet.dataRows[5].cells[0].text == '7'
+        context.spreadsheet.dataRows.size() == 4
+        context.spreadsheet.dataRows[0].cells[0].text == '4'
+        context.spreadsheet.dataRows[1].cells[0].text == '5'
+        context.spreadsheet.dataRows[2].cells[0].text == '6'
+        context.spreadsheet.dataRows[3].cells[0].text == '7'
     }
 
 
