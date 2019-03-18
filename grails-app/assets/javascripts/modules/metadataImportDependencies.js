@@ -20,5 +20,5 @@
  * SOFTWARE.
  */
 
-//= require jquery
+//= require jquery/jquery.js
 //= require ../pages/metadataImport/index/metadataImportDataTable.js

@@ -21,7 +21,7 @@
  */
 
 /*
-*= require bootstrap
+*= require bootstrap/css/bootstrap.css
 *= require general-layout
 *= require header
 *= require login

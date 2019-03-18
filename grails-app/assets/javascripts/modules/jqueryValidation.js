@@ -20,4 +20,4 @@
  * SOFTWARE.
  */
 
-//= require jquery/validation/jquery.validate.min.js
+//= require jquery-validation/jquery.validate.js

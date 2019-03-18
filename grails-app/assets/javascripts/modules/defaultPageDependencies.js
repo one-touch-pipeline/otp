@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
-//= require jquery
-//= require jquery-ui/jquery-ui-1.10.4.custom.js
-//= require jquery/jquery.form.js
+//= require jquery/jquery.js
+//= require jquery-ui/js/jquery-ui.js
+//= require jquery-form/jquery.form.js
 //= require jqueryDatatables
 //= require ../otp
 //= require ../messages.i18n
