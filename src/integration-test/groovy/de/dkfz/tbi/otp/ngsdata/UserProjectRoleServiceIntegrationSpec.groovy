@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
-import org.codehaus.groovy.grails.context.support.PluginAwareResourceBundleMessageSource
+import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import spock.lang.*
 
 import de.dkfz.tbi.otp.administration.*

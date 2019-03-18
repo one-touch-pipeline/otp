@@ -25,7 +25,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import groovy.text.SimpleTemplateEngine
-import org.codehaus.groovy.grails.context.support.PluginAwareResourceBundleMessageSource
+import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.context.NoSuchMessageException
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.security.access.prepost.PreAuthorize

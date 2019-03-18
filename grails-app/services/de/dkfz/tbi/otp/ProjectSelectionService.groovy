@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp
 
 import grails.plugin.springsecurity.SpringSecurityService
-import org.codehaus.groovy.grails.context.support.PluginAwareResourceBundleMessageSource
+import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsHttpSession
 import org.codehaus.groovy.grails.web.util.WebUtils
 import org.springframework.context.ApplicationContext

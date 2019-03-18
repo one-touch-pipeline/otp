@@ -25,7 +25,7 @@ package de.dkfz.tbi.otp.notification
 import grails.test.mixin.Mock
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import org.codehaus.groovy.grails.context.support.PluginAwareResourceBundleMessageSource
+import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 import spock.lang.Unroll

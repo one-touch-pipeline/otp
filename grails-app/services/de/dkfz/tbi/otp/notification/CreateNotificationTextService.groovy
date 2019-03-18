@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.notification
 
 import groovy.text.SimpleTemplateEngine
-import org.codehaus.groovy.grails.context.support.PluginAwareResourceBundleMessageSource
+import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.codehaus.groovy.grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.NoSuchMessageException
