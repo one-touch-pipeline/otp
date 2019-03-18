@@ -68,7 +68,7 @@
                         <li class="menuContainerItem"><g:link controller="sequence" action="index"><g:message code="otp.menu.sequences"/></g:link></li>
                         <li class="navigation menuContainerItem project">
                             <ul>
-                                <li class="overview_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.project"/> &#9661;</g:link>
+                                <li class="overview_nav_container nav_container"><a class="menuLinkContainer"><g:message code="otp.menu.project"/> &#9661;</a>
                                     <ul>
                                         <li><g:link controller="projectOverview" action="index"><g:message code="otp.menu.projectSpecificStatistics"/></g:link></li>
                                         <li><g:link controller="projectConfig" action="index"><g:message code="otp.menu.projectConfig"/></g:link></li>
@@ -82,7 +82,7 @@
                         </li>
                         <li class="navigation menuContainerItem results">
                             <ul>
-                                <li class="analysis_results_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.results"/> &#9661;</g:link>
+                                <li class="analysis_results_nav_container nav_container"><a class="menuLinkContainer"><g:message code="otp.menu.results"/> &#9661;</a>
                                     <ul>
                                         <li><g:link controller="alignmentQualityOverview" action="index"><g:message code="otp.menu.alignmentQuality"/></g:link></li><br>
                                         <li><g:link controller="snv" action="results"><g:message code="otp.menu.snv.results"/></g:link></li>
@@ -98,7 +98,7 @@
                             <li class="menuContainerItem"><g:link controller="egaSubmission" action="overview">EGA</g:link></li>
                             <li class="navigation menuContainerItem statistic">
                                 <ul>
-                                    <li class="allGranted overview_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.statistics"/> &#9661;</g:link>
+                                    <li class="allGranted overview_nav_container nav_container"><a class="menuLinkContainer"><g:message code="otp.menu.statistics"/> &#9661;</a>
                                         <ul>
                                             <li><g:link controller="clusterJobGeneral" action="index"><g:message code="otp.menu.jobstats.general"/></g:link></li><br>
                                             <li><g:link controller="clusterJobJobTypeSpecific" action="index"><g:message code="otp.menu.jobstats.jobTypeSpecific"/></g:link></li><br>
@@ -110,7 +110,7 @@
                             </li>
                             <li class="navigation menuContainerItem operator">
                                 <ul>
-                                    <li class="allGranted operator_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.operatorSection"/> &#9661;</g:link>
+                                    <li class="allGranted operator_nav_container nav_container"><a class="menuLinkContainer"><g:message code="otp.menu.operatorSection"/> &#9661;</a>
                                         <ul>
                                             <li><g:link controller="metadataImport" action="index"><g:message code="otp.menu.importAndValidation"/></g:link></li>
                                             <li><g:link controller="bamMetadataImport" action="index"><g:message code="otp.menu.bamMetadataImport"/></g:link></li>
@@ -137,7 +137,7 @@
                         <sec:ifAnyGranted roles="ROLE_ADMIN">
                             <li class="navigation menuContainerItem admin">
                                 <ul>
-                                    <li class="allGranted admin_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="otp.menu.adminSection"/> &#9661;</g:link>
+                                    <li class="allGranted admin_nav_container nav_container"><a class="menuLinkContainer"><g:message code="otp.menu.adminSection"/> &#9661;</a>
                                         <ul>
                                             <li><g:link controller="userAdministration"><g:message code="otp.menu.userAdministration"/></g:link></li>
                                             <li><g:link controller="roles"><g:message code="otp.menu.roles"/></g:link></li>
@@ -164,7 +164,7 @@
                         <li class="menuContainerItem"><g:link controller="logout" action="index"><g:message code="otp.menu.logout"/></g:link></li>
                         <li class="navigation menuContainerItem info">
                             <ul>
-                                <li class="info_nav_container nav_container"><g:link class="menuLinkContainer"><g:message code="info.info.link"/> &#9661;</g:link>
+                                <li class="info_nav_container nav_container"><a class="menuLinkContainer"><g:message code="info.info.link"/> &#9661;</a>
                                     <ul>
                                         <li><g:link controller="info" action="about"><g:message code="info.about.link"/></g:link></li>
                                         <li><g:link controller="info" action="numbers"><g:message code="info.numbers.link"/></g:link></li>
