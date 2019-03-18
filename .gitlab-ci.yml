@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-image: grails:2.5.1
+image: otp-tests:3.x.x
 
 # notes:
 ## recursive expansion of variables does not work
@@ -27,17 +27,18 @@ image: grails:2.5.1
 ## putting the expire time to a variable does not work
 
 variables:
-  GRAILS_OPTS: '-Xms1G'
+  GRADLE_OPTS: '-Xms4g -Xms1g'
   ARTIFACTS_BASE_DIRECTORY: 'artifacts'
   WAR_DIRECTORY: $ARTIFACTS_BASE_DIRECTORY/war
-  MAVEN_CACHE: $CI_PROJECT_DIR/.m2
-  PREPARE_MAVEN_CACHE1: "mkdir -p $CI_PROJECT_DIR/.m2"
-  PREPARE_MAVEN_CACHE2: "ln -s $CI_PROJECT_DIR/.m2 /home/grails/.m2"
+  GRADLE_CACHES: $CI_PROJECT_DIR/.gradle/caches
+  GRADLE_WRAPPER: $CI_PROJECT_DIR/.gradle/wrapper
+  PREPARE_GRADLE_CACHE1: "mkdir -p $CI_PROJECT_DIR/.gradle/caches $CI_PROJECT_DIR/.gradle/wrapper"
+  PREPARE_GRADLE_CACHE2: "ln -s $CI_PROJECT_DIR/.gradle/caches /home/grails/.gradle/caches"
+  PREPARE_GRADLE_CACHE3: "ln -s $CI_PROJECT_DIR/.gradle/wrapper /home/grails/.gradle/wrapper"
   ARTIFACT_DOWNLOAD_ATTEMPTS: "3"
   GET_SOURCES_ATTEMPTS: "3"
   RESTORE_CACHE_ATTEMPTS: "3"
-
-
+  GRADLE_USER_HOME: "/home/grails/gradle"
 
 stages:
   - status start
@@ -49,23 +50,16 @@ stages:
 # ------------------------------------------------------
 # general templates
 
-.abstract only branches: &only_branches
-  only:
-    - branches
-
-.abstract only branches and tags: &only_branches_and_tags
-  only:
-  - branches
-  - tags
-
 .abstract cache: &cache_template
   cache:
-    key: "${CI_PROJECT_PATH_SLUG}-maven"
+    key: "${CI_PROJECT_PATH_SLUG}-cache"
     paths:
-      - $MAVEN_CACHE
+      - $GRADLE_CACHES
+      - $GRADLE_WRAPPER
   before_script:
-    - $PREPARE_MAVEN_CACHE1
-    - $PREPARE_MAVEN_CACHE2
+    - $PREPARE_GRADLE_CACHE1
+    - $PREPARE_GRADLE_CACHE2
+    - $PREPARE_GRADLE_CACHE3
 
 .abstract_trigger: &trigger_template
   image: centos:7
@@ -73,27 +67,27 @@ stages:
   script:
     - if [[ ! -v DEPLOY_PIPELINE_TOKEN || ! -v DEPLOY_PIPELINE_BRANCH || ! -v DEPLOY_PIPELINE_URL ]] ; then exit 0 ; fi
     - curl -X POST
-        -F token=$DEPLOY_PIPELINE_TOKEN
-        -F ref=$DEPLOY_PIPELINE_BRANCH
-        -F "variables[TRIGGER_CI_PIPELINE_ID]=$CI_PIPELINE_ID"
-        -F "variables[TRIGGER_CI_JOB_ID]=$CI_JOB_ID"
-        -F "variables[TRIGGER_CI_COMMIT_REF_NAME]=$CI_COMMIT_REF_NAME"
-        -F "variables[TRIGGER_CI_COMMIT_TAG]=$CI_COMMIT_TAG"
-        -F "variables[TRIGGER_CI_COMMIT_SHA]=$CI_COMMIT_SHA"
-        -F "variables[TRIGGER_CI_COMMIT_TITLE]=$CI_COMMIT_TITLE"
-        -F "variables[TRIGGER_CI_COMMIT_DESCRIPTION]=$CI_COMMIT_DESCRIPTION"
-        -F "variables[TRIGGER_CASE]=$TRIGGER_CASE"
-        -F "variables[TRIGGER_PIPELINE_STATE]=$TRIGGER_PIPELINE_STATE"
-        $DEPLOY_PIPELINE_URL
+      -F token=$DEPLOY_PIPELINE_TOKEN
+      -F ref=$DEPLOY_PIPELINE_BRANCH
+      -F "variables[TRIGGER_CI_PIPELINE_ID]=$CI_PIPELINE_ID"
+      -F "variables[TRIGGER_CI_JOB_ID]=$CI_JOB_ID"
+      -F "variables[TRIGGER_CI_COMMIT_REF_NAME]=$CI_COMMIT_REF_NAME"
+      -F "variables[TRIGGER_CI_COMMIT_TAG]=$CI_COMMIT_TAG"
+      -F "variables[TRIGGER_CI_COMMIT_SHA]=$CI_COMMIT_SHA"
+      -F "variables[TRIGGER_CI_COMMIT_TITLE]=$CI_COMMIT_TITLE"
+      -F "variables[TRIGGER_CI_COMMIT_DESCRIPTION]=$CI_COMMIT_DESCRIPTION"
+      -F "variables[TRIGGER_CASE]=$TRIGGER_CASE"
+      -F "variables[TRIGGER_PIPELINE_STATE]=$TRIGGER_PIPELINE_STATE"
+      $DEPLOY_PIPELINE_URL
     - echo send
-
 
 # ------------------------------------------------------
 # job trigger status update start
 
 trigger start:
   <<: *trigger_template
-  <<: *only_branches
+  only:
+    - branches
   stage: status start
   variables:
     GIT_STRATEGY: none
@@ -104,107 +98,103 @@ trigger start:
 # job compile
 
 compile:
-  <<: *only_branches_and_tags
   <<: *cache_template
+  only:
+    - branches
+    - tags
   stage: build
   dependencies: []
   script:
-    - grails compile --non-interactive
-
-
+    - ./gradlew build
 
 # ------------------------------------------------------
 # job tests
 
-.abstract test: &test_template
-  <<: *only_branches_and_tags
+unit tests:
   <<: *cache_template
+  only:
+    - branches
+    - tags
   stage: test
-  image: otp-tests
   dependencies: []
-  before_script:
-    - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
-    - $PREPARE_MAVEN_CACHE1
-    - $PREPARE_MAVEN_CACHE2
   script:
-    - grails test compile --non-interactive
-    - "grails test-app --non-interactive $TEST_TYPE: -coverage de.**.*"
-  after_script:
-    - head -1 target/test-reports/cobertura/coverage.xml
-  coverage: /line-rate="\d.(\d\d)\d+"/
+    - ./gradlew test
   artifacts:
     paths:
-      - target/test-reports/*.xml
-      - target/test-reports/html/
-      - target/test-reports/cobertura/coverage.xml
+      - build/test-results/test/*.xml
+      - build/reports/tests
     expire_in: 4 weeks
     when: always
-
-
-unit tests:
-  <<: *test_template
-  variables:
-    TEST_TYPE: unit
-
 
 integration tests:
-  <<: *test_template
-  variables:
-    TEST_TYPE: integration
-
-
-codenarc:
-  <<: *only_branches
   <<: *cache_template
+  only:
+    - branches
+    - tags
   stage: test
   dependencies: []
   script:
-    - grails compile --non-interactive
-    - grails codenarc --non-interactive
-  after_script:
-  - bashScripts/gitlab-ci/codenarc-informations.sh
+    - ./gradlew integrationTest
   artifacts:
     paths:
-      - target/CodeNarc-Report*
+      - build/test-results/integrationTest/*.xml
+      - build/reports/tests
     expire_in: 4 weeks
     when: always
 
+codenarc:
+  <<: *cache_template
+  only:
+    - branches
+  stage: test
+  dependencies: []
+  script:
+    - ./gradlew codenarcAll
+  after_script:
+    - bashScripts/gitlab-ci/codenarc-informations.sh
+  artifacts:
+    paths:
+      - build/reports/codenarc
+    expire_in: 4 weeks
+    when: always
 
 war:
-  <<: *only_branches_and_tags
   <<: *cache_template
+  only:
+    - branches
+    - tags
   stage: test
-  image: otp-tests
-  dependencies: []
   artifacts:
     paths:
       - $ARTIFACTS_BASE_DIRECTORY
     expire_in: 4 weeks
   before_script:
+    - $PREPARE_GRADLE_CACHE1
+    - $PREPARE_GRADLE_CACHE2
+    - $PREPARE_GRADLE_CACHE3
     - export CI_COMMIT_REF_NAME
     - export CI_COMMIT_SHA
-    - echo 'otp.testing.group=othergroup' > /home/grails/.otp.properties
     - mkdir -p logs/jobs
-    - $PREPARE_MAVEN_CACHE1
-    - $PREPARE_MAVEN_CACHE2
   script:
     - set -e -o pipefail
 
     - echo $WAR_DIRECTORY
     - export WAR_FILE=$WAR_DIRECTORY/otp.war
 
-    - 'grails war --non-interactive'
+    - ./gradlew war
 
     - mkdir -p $WAR_DIRECTORY
-    - mv target/otp.war $WAR_DIRECTORY
+    - mv build/libs/otp.war $WAR_DIRECTORY
     - md5sum "$WAR_FILE" | tee "$WAR_FILE.md5"
     - sha256sum "$WAR_FILE" | tee "$WAR_FILE.sha256"
     - git rev-parse HEAD | tee "$WAR_FILE.gitrev"
 
-
-test migration:
-  <<: *only_branches_and_tags
+#TODO after OTP-3110
+.test migration:
   <<: *cache_template
+  only:
+    - branches
+    - tags
   stage: test
   dependencies: []
   image: otp-test-migration
@@ -215,13 +205,14 @@ test migration:
     POSTGRES_USER: otp
     POSTGRES_PASSWORD: otp
   before_script:
+    - $PREPARE_GRADLE_CACHE1
+    - $PREPARE_GRADLE_CACHE2
+    - $PREPARE_GRADLE_CACHE3
     - echo 'otp.database.server=postgres' >> /home/grails/.otp.properties
     - echo 'otp.database.port=5432' >> /home/grails/.otp.properties
     - echo 'otp.database.database=otp' >> /home/grails/.otp.properties
     - echo 'otp.database.username=otp' >> /home/grails/.otp.properties
     - echo 'otp.database.password=otp' >> /home/grails/.otp.properties
-    - $PREPARE_MAVEN_CACHE1
-    - $PREPARE_MAVEN_CACHE2
   script:
     - grails compile --non-interactive
     - grails dbm-update --non-interactive
@@ -233,9 +224,10 @@ test migration:
     expire_in: 4 weeks
     when: on_failure
 
-
 generate_changelog:
-  <<: *only_branches_and_tags
+  only:
+    - branches
+    - tags
   stage: test
   dependencies: []
   image: otp-generate-changelog
@@ -255,15 +247,12 @@ generate_changelog:
     expire_in: 4 weeks
     when: on_success
 
-
-
 # ------------------------------------------------------
 # job trigger deployment
 
 .abstract_trigger_deployment: &trigger_deployment_template
   <<: *trigger_template
   stage: trigger deployment
-
 
 trigger master:
   <<: *trigger_deployment_template
@@ -272,7 +261,6 @@ trigger master:
   variables:
     GIT_STRATEGY: none
     TRIGGER_CASE: master
-
 
 trigger release:
   <<: *trigger_deployment_template
@@ -285,7 +273,7 @@ trigger release:
 trigger release failed:
   <<: *trigger_deployment_template
   only:
-  - /^v\d+\.\d+\.\d+$/
+    - /^v\d+\.\d+\.\d+$/
   when: on_failure
   variables:
     GIT_STRATEGY: none
@@ -296,7 +284,8 @@ trigger release failed:
 
 trigger success:
   <<: *trigger_template
-  <<: *only_branches
+  only:
+    - branches
   stage: status end
   variables:
     GIT_STRATEGY: none
@@ -307,7 +296,8 @@ trigger success:
 
 trigger failed:
   <<: *trigger_template
-  <<: *only_branches
+  only:
+    - branches
   stage: status end
   variables:
     GIT_STRATEGY: none
