@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.analysis.pair.runyapsa
 
 import org.junit.Ignore
-import workflows.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div128
+import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div128
 
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService

@@ -20,12 +20,17 @@
  * SOFTWARE.
  */
 
-package workflows.analysis.pair.bamfiles
+package de.dkfz.tbi.otp.analysis.pair.bamfiles
 
-trait SeqTypeAndInputBamFilesHCC1187Div8 implements SeqTypeAndInputBamFilesHCC1187Div {
+import de.dkfz.tbi.otp.ngsdata.SeqType
 
-    @Override
-    BamFileSet getBamFileSet() {
-        return getBamFileSet(8)
-    }
+interface SeqTypeAndInputBamFiles {
+
+    SeqType seqTypeToUse()
+
+    @SuppressWarnings('JavaIoPackageAccess')
+    File getBamFilePairBaseDirectory()
+
+    BamFileSet getBamFileSet()
 }
+

@@ -20,25 +20,12 @@
  * SOFTWARE.
  */
 
-package workflows.analysis.pair.bamfiles
+package de.dkfz.tbi.otp.analysis.pair.bamfiles
 
-@SuppressWarnings('JavaIoPackageAccess')
-class BamFileSet {
+trait SeqTypeAndInputBamFilesHCC1187Div64 implements SeqTypeAndInputBamFilesHCC1187Div {
 
-    final File diseaseBamFile
-    final File diseaseBaiFile
-    final File controlBamFile
-    final File controlBaiFile
-
-    BamFileSet(File bamFileDirectory,
-               String diseaseBamFileName,
-               String diseaseBaiFileName,
-               String controlBamFileName,
-               String controlBaiFileName
-    ) {
-        diseaseBamFile = new File(bamFileDirectory, diseaseBamFileName)
-        diseaseBaiFile = new File(bamFileDirectory, diseaseBaiFileName)
-        controlBamFile = new File(bamFileDirectory, controlBamFileName)
-        controlBaiFile = new File(bamFileDirectory, controlBaiFileName)
+    @Override
+    BamFileSet getBamFileSet() {
+        return getBamFileSet(64)
     }
 }

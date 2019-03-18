@@ -23,8 +23,8 @@
 package de.dkfz.tbi.otp.analysis.pair
 
 import workflows.WorkflowTestCase
-import workflows.analysis.pair.bamfiles.BamFileSet
-import workflows.analysis.pair.bamfiles.SeqTypeAndInputBamFiles
+import de.dkfz.tbi.otp.analysis.pair.bamfiles.BamFileSet
+import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFiles
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair

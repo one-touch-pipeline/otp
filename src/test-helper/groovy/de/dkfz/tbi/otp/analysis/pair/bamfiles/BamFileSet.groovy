@@ -20,18 +20,25 @@
  * SOFTWARE.
  */
 
-package workflows.analysis.pair.bamfiles
+package de.dkfz.tbi.otp.analysis.pair.bamfiles
 
-trait SeqTypeAndInputBamFilesHCC1187Div implements SeqTypeAndInputBamFiles {
+@SuppressWarnings('JavaIoPackageAccess')
+class BamFileSet {
 
-    @SuppressWarnings('JavaIoPackageAccess')
-    BamFileSet getBamFileSet(int div) {
-        return new BamFileSet(
-                new File(getBamFilePairBaseDirectory(), "small/div${div}"),
-                "tumor_HCC1187-div${div}_merged.mdup.bam",
-                "tumor_HCC1187-div${div}_merged.mdup.bam.bai",
-                "blood_HCC1187-div${div}_merged.mdup.bam",
-                "blood_HCC1187-div${div}_merged.mdup.bam.bai "
-        )
+    final File diseaseBamFile
+    final File diseaseBaiFile
+    final File controlBamFile
+    final File controlBaiFile
+
+    BamFileSet(File bamFileDirectory,
+               String diseaseBamFileName,
+               String diseaseBaiFileName,
+               String controlBamFileName,
+               String controlBaiFileName
+    ) {
+        diseaseBamFile = new File(bamFileDirectory, diseaseBamFileName)
+        diseaseBaiFile = new File(bamFileDirectory, diseaseBaiFileName)
+        controlBamFile = new File(bamFileDirectory, controlBamFileName)
+        controlBaiFile = new File(bamFileDirectory, controlBaiFileName)
     }
 }
