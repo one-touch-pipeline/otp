@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.job.scheduler
 
 
 import org.apache.commons.logging.impl.NoOpLog
-import org.codehaus.groovy.grails.commons.GrailsApplication
+import grails.core.GrailsApplication
 import org.junit.*
 
 import de.dkfz.tbi.TestCase

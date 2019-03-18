@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.plugin.springsecurity.acl.*
-import org.codehaus.groovy.grails.commons.GrailsApplication
+import grails.core.GrailsApplication
 import seedme.SeedMeChecksum
 import spock.lang.Specification
 

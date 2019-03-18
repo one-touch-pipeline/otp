@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.job
 
-import org.codehaus.groovy.grails.commons.GrailsApplication
+import grails.core.GrailsApplication
 import org.joda.time.DateTime
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName

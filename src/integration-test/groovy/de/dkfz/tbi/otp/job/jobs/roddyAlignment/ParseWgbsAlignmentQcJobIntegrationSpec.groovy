@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.test.spock.IntegrationSpec
-import org.codehaus.groovy.grails.commons.spring.GrailsApplicationContext
+import grails.core.spring.GrailsApplicationContext
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired

@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.plugin.mail.MailService
-import org.codehaus.groovy.grails.commons.GrailsApplication
+import grails.core.GrailsApplication
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.config.ConfigService

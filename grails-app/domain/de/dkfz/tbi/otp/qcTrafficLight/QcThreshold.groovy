@@ -25,7 +25,7 @@ package de.dkfz.tbi.otp.qcTrafficLight
 import grails.util.Holders
 import groovy.transform.ToString
 import groovy.transform.TupleConstructor
-import org.codehaus.groovy.grails.commons.GrailsClass
+import grails.core.GrailsClass
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.ngsdata.Project

@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.administration
 
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.ValidationException
-import org.codehaus.groovy.grails.commons.GrailsApplication
+import grails.core.GrailsApplication
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
