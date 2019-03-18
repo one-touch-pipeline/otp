@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.converters.JSON
-import org.codehaus.groovy.grails.web.converters.exceptions.ConverterException
+import grails.web.converters.exceptions.ConverterException
 import org.grails.web.json.JSONElement
 import org.grails.web.json.JSONObject
 

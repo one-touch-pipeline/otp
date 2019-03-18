@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import org.codehaus.groovy.grails.web.servlet.mvc.SynchronizerTokensHolder
+import grails.web.servlet.mvc.SynchronizerTokensHolder
 import org.springframework.security.access.AccessDeniedException
 import spock.lang.Specification
 import spock.lang.Unroll

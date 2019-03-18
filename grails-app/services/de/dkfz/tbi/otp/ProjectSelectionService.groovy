@@ -24,8 +24,8 @@ package de.dkfz.tbi.otp
 
 import grails.plugin.springsecurity.SpringSecurityService
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
-import org.codehaus.groovy.grails.web.servlet.mvc.GrailsHttpSession
-import org.codehaus.groovy.grails.web.util.WebUtils
+import grails.web.servlet.mvc.GrailsHttpSession
+import org.grails.web.util.WebUtils
 import org.springframework.context.ApplicationContext
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.security.access.prepost.PostAuthorize
