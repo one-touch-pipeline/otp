@@ -22,8 +22,8 @@
 
 package de.dkfz.tbi.otp.utils
 
-import grails.plugin.mail.MailService
 import grails.core.GrailsApplication
+import grails.plugins.mail.MailService
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.config.ConfigService

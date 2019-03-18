@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.utils
 
-import org.codehaus.groovy.grails.support.PersistenceContextInterceptor
+import grails.persistence.support.PersistenceContextInterceptor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 

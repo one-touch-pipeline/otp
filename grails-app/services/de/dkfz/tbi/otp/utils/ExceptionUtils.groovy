@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.util.Environment
-import org.codehaus.groovy.grails.exceptions.DefaultStackTraceFilterer
+import org.grails.exceptions.reporting.DefaultStackTraceFilterer
 
 class ExceptionUtils {
 
