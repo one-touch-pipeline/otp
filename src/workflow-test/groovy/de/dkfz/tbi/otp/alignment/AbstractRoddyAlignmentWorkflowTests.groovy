@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.alignment
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
-import org.codehaus.groovy.grails.web.json.JSONObject
+import org.grails.web.json.JSONObject
 import org.junit.Before
 
 import de.dkfz.tbi.TestCase

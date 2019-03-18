@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.job.jobs.aceseq
 
 import grails.converters.JSON
-import org.codehaus.groovy.grails.web.json.JSONObject
+import org.grails.web.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component

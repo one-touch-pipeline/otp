@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.converters.JSON
-import org.codehaus.groovy.grails.web.json.JSONObject
+import org.grails.web.json.JSONObject
 
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.*
