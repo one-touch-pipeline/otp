@@ -32,8 +32,8 @@ $(function() {
         existingValues = $("span.wordBreak", outerContainer).text();
         existingValues = existingValues.substring(1, existingValues.length - 1);
         extractedElements = existingValues.split(', ');
-        saveButton = $("<button class=\"buttons save\">" + $L("default.button.update.label") + "</button>");
-        cancelButton = $("<button class=\"buttons cancel\">" + $L("default.button.cancel.label") + "</button>");
+        saveButton = $("<button class=\"buttons save\">Update</button>");
+        cancelButton = $("<button class=\"buttons cancel\">Cancel</button>");
         textFieldContainer = $("p.sample-identifiers-field-editor", outerContainer);
         textField = $("<input type=\"text\" name=\"value\"/>");
         $.each(extractedElements, function () {
@@ -129,7 +129,7 @@ $(function() {
                 data: {samples: samples},
                 success: function (data) {
                     if (data.success) {
-                        $.otp.infoMessage($L("editorSwitch.notification.success"));
+                        $.otp.infoMessage("Data stored successfully");
                         $("p.edit-switch-label span", outerContainer).text($("input:text[name=value]", container).val());
                     } else {
                         $.otp.warningMessage(data.error);
@@ -137,7 +137,7 @@ $(function() {
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
+                    $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
                     $("input:text[name=value]", container).val($("p.edit-switch-label span", outerContainer).text());
                 }
             });

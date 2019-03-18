@@ -28,21 +28,18 @@ $.otp.sequence = {
     register: function () {
         "use strict";
         var searchCriteria = $.otp.dataTableFilter.register($("#searchCriteriaTable"), $("#sequenceTable"), true);
-console.log("sssssssssssssssssssssssssss")
+
         var link = $.otp.createLink({
             controller: 'sequence',
             action: 'exportAll',
         });
-console.log("dddddd")
-console.log($("#sequenceTable"))
+
         $("#sequenceTable").dataTable({
             dom: '<i> B rt<"clear">S',
             buttons: [ {
                 extend: 'csv',
                 titleAttr: 'Attention: Download can take a while',
                 action: function ( e, dt, node, config ) {
-                    console.log("jjjjjjjjjjjjjj")
-
                     var iframe = document.createElement('iframe');
                     iframe.style.height = "0px";
                     iframe.style.width = "0px";
@@ -68,8 +65,6 @@ console.log($("#sequenceTable"))
             iDisplayLength: 100,
             bDeferRender: true,
             fnServerData: function (sSource, aoData, fnCallback) {
-              console.log("hhhhhhh")
-
                 aoData.push({
                     name: "filtering",
                     value: JSON.stringify(searchCriteria())
@@ -84,11 +79,8 @@ console.log($("#sequenceTable"))
                     },
                     "error": function () {
                         fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
-                                console.log("444444444444")
-  },
+                    },
                     "success": function (json) {
-                                      console.log("666666666666")
-
                         $("#withdrawn_description").hide();
                         var i, j, rowData, row, fastQC;
                         for (i = 0; i < json.aaData.length; i += 1) {
@@ -100,7 +92,7 @@ console.log($("#sequenceTable"))
                                         controller: 'fastqcResults',
                                         action: 'show',
                                         id: row.fastQCFiles[j].id,
-                                        text: $L("sequence.list.numberedFastQCFile", (j + 1))
+                                        text: "R" + (j + 1)
                                     });
                                     fastQC += " ";
                                 }
@@ -112,7 +104,7 @@ console.log($("#sequenceTable"))
                                     controller: 'projectOverview',
                                     action: 'index',
                                     parameters: {
-                                                project: row.projectName
+                                        project: row.projectName
                                     },
                                     text: row.projectName,
                                     title: row.projectName
@@ -144,7 +136,7 @@ console.log($("#sequenceTable"))
                                 fastQC,
                                 row.ilseId,
                                 row.problem ?
-                                   "<span title='" + row.problemDescription + "'>" + row.problem + "</span>" : "",
+                                    "<span title='" + row.problemDescription + "'>" + row.problem + "</span>" : "",
                                 row.fileExists,
                                 row.dateCreated,
                             ];
@@ -166,8 +158,7 @@ console.log($("#sequenceTable"))
                 });
             },
             fnRowCallback: function (nRow) {
-                 console.log("ccccccccccccccc")
-       var fastqc;
+                var fastqc;
                 fastqc = $("td:eq(11)", nRow);
                 if ($("a", fastqc).length > 0) {
                     fastqc.addClass("true");
@@ -193,6 +184,5 @@ console.log($("#sequenceTable"))
                 fileExists.text('');
             }
         });
-        console.log("dddddddddddddddddddddddddddddddddddd")
     }
 };

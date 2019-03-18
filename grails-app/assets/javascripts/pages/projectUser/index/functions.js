@@ -99,7 +99,7 @@ $.otp.projectUser = {
                         searchElement.data("uiAutocomplete").search(searchElement.val());
                     },
                     error: function (jqXHR, textStatus, errorThrown) {
-                        $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown))
+                        $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown)
                     }
                 });
             }

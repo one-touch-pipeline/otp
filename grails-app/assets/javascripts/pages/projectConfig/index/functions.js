@@ -122,7 +122,7 @@ $.otp.projectConfig = {
             $('#alignment_info_table').css('visibility', 'visible');
             $.otp.projectConfig.createAlignmentTable(data);
         } else {
-            $('#alignment_info').html($L("projectOverview.alignmentInformation.noAlign"));
+            $('#alignment_info').html("No Alignment");
         }
     },
 
@@ -142,10 +142,10 @@ $.otp.projectConfig = {
      * @param data holds the data that have been loaded
      */
     createAlignmentTable: function (data) {
-        var aligning = $L("projectOverview.alignmentInformation.aligning");
-        var merging = $L("projectOverview.alignmentInformation.merging");
-        var samtools = $L("projectOverview.alignmentInformation.samtools");
-        var roddyPipelineVersion = $L("projectOverview.alignmentInformation.roddyPipelineVersion");
+        var aligning = "Aligning";
+        var merging = "Merging";
+        var samtools = "Samtools";
+        var roddyPipelineVersion = "Roddy Pipeline Version";
 
         $.each(data.alignmentInfo, function (key, value) {
             $('#alignment_info_table tr:last').after(

@@ -62,7 +62,7 @@ $.otp.configureAlignment = {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
             }
         });
     },
@@ -89,7 +89,7 @@ $.otp.configureAlignment = {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
             }
         });
     },
@@ -124,7 +124,7 @@ $.otp.configureAlignment = {
                 });
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
             }
         });
     },

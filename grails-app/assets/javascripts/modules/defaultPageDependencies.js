@@ -25,5 +25,3 @@
 //= require jquery-form/jquery.form.js
 //= require jqueryDatatables
 //= require ../otp
-//= require ../messages.i18n
-//= require ../messageWorkaround.js

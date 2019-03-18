@@ -34,13 +34,13 @@ $.otp.userAdministration.changeUser = function (userId, field, target) {
             // redraw the dataTable to reset all changes
             $('#userTable').dataTable().fnDraw();
             if (data.success) {
-                $.otp.infoMessage($L("editorSwitch.notification.success"));
+                $.otp.infoMessage("Data stored successfully");
             } else {
                 $.otp.warningMessage(data.error);
             }
         },
         error: function (jqXHR, textStatus, errorThrown) {
-            $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
+            $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
         }
     });
 };
@@ -138,9 +138,9 @@ $.otp.userAdministration.editUser = {
             },
             success: function (data) {
                 if (data.error) {
-                    $.otp.warningMessage($L(data.error));
+                    $.otp.warningMessage(data.error);
                 } else if (data.success) {
-                    $.otp.infoMessage($L("user.administration.edit.success"));
+                    $.otp.infoMessage("User updated successfully.");
                 }
             }
         });
@@ -193,7 +193,7 @@ $.otp.userAdministration.editUser = {
                 }
             },
             error: function (jqXHR, textStatus, errorThrown) {
-                $.otp.warningMessage($L("editorSwitch.notification.error", textStatus, errorThrown));
+                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
             }
         });
     },
@@ -236,7 +236,7 @@ $.otp.userAdministration.create = {
                     success: function (data) {
                         var validator, i;
                         if (data.success === true) {
-                            $.otp.infoMessage($L("user.administration.register.success", data.user.id));
+                            $.otp.infoMessage("New User with Id " + data.user.id + " created.");
                         } else if (data.errors) {
                             for (i = 0; i < data.errors.errors.length; i += 1) {
                                 validator = $("#create-user-form").validate().settings;

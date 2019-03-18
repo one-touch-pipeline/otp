@@ -93,7 +93,7 @@ $.otp.addIndividual = {
                 message += "</ul>";
                 $.otp.warningMessage(message);
             } else if (data.success) {
-                $.otp.infoMessage($L("individual.insert.add.success", data.id));
+                $.otp.infoMessage("New Individual with Id " + data.id + " created.");
             }
         }).error(function (jqXHR) {
             $.otp.warningMessage(jqXHR.statusText + jqXHR.status);

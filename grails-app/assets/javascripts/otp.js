@@ -535,7 +535,7 @@ $.otp.initCommentBox = function (id, element) {
             cancelCommentElement.prop("disabled", true);
         });
         promise.error(function () {
-            $.otp.warningMessage($L("commentBox.error"));
+            $.otp.warningMessage("Saving failed");
         });
     });
 
