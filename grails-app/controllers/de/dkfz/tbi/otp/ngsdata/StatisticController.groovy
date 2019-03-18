@@ -221,8 +221,7 @@ class StatisticController {
     }
 }
 
-@Validateable
-class ProjectCommand implements Serializable {
+class ProjectCommand implements Validateable {
 
     ProjectService projectService
 
@@ -235,8 +234,7 @@ class ProjectCommand implements Serializable {
     }
 }
 
-@Validateable
-class ProjectGroupCommand implements Serializable {
+class ProjectGroupCommand implements Validateable {
 
     ProjectGroupService projectGroupService
     String projectGroupName

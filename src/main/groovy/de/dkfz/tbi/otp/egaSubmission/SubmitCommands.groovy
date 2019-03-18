@@ -29,8 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.Project
 
 trait SubmitCommands { }
 
-@Validateable
-class NewSubmissionControllerSubmitCommand implements Serializable {
+class NewSubmissionControllerSubmitCommand implements Validateable {
     Project project
     String egaBox
     String submissionName
@@ -48,8 +47,7 @@ class NewSubmissionControllerSubmitCommand implements Serializable {
     }
 }
 
-@Validateable
-class UpdateSubmissionStateSubmitCommand implements Serializable {
+class UpdateSubmissionStateSubmitCommand implements Validateable {
     EgaSubmission submission
     EgaSubmission.State state
 
@@ -71,15 +69,13 @@ class UpdateSubmissionStateSubmitCommand implements Serializable {
     }
 }
 
-@Validateable
-class SelectSamplesControllerSubmitCommand implements Serializable {
+class SelectSamplesControllerSubmitCommand implements Validateable {
     EgaSubmission submission
     String next
     List<String> sampleAndSeqType
 }
 
-@Validateable
-class UploadFormSubmitCommand implements Serializable {
+class UploadFormSubmitCommand implements Validateable {
     EgaSubmission submission
     String upload
     MultipartFile file
@@ -89,8 +85,7 @@ class UploadFormSubmitCommand implements Serializable {
     }
 }
 
-@Validateable
-class SampleInformationFormsSubmitCommand implements Serializable {
+class SampleInformationFormsSubmitCommand implements Validateable {
     EgaSubmission submission
     String csv
     String next
@@ -106,8 +101,7 @@ class SampleInformationFormsSubmitCommand implements Serializable {
     }
 }
 
-@Validateable
-class SelectFilesDataFilesFormSubmitCommand implements Serializable {
+class SelectFilesDataFilesFormSubmitCommand implements Validateable {
     EgaSubmission submission
     String saveSelection
     String download
@@ -127,8 +121,7 @@ class SelectFilesDataFilesFormSubmitCommand implements Serializable {
     }
 }
 
-@Validateable
-class SelectFilesBamFilesFormSubmitCommand implements Serializable {
+class SelectFilesBamFilesFormSubmitCommand implements Validateable {
     EgaSubmission submission
     String saveSelection
     String saveAliases
@@ -145,14 +138,12 @@ class SelectFilesBamFilesFormSubmitCommand implements Serializable {
     }
 }
 
-@Validateable
-class GenerateFilesToUploadFileSubmitCommand implements Serializable {
+class GenerateFilesToUploadFileSubmitCommand implements Validateable {
     EgaSubmission submission
     String save
 }
 
-@Validateable
-class SampleMetadataFormSubmitCommand implements Serializable {
+class SampleMetadataFormSubmitCommand implements Validateable {
     EgaSubmission submission
     String download
 }

@@ -24,8 +24,7 @@ package de.dkfz.tbi.otp.utils
 
 import grails.validation.Validateable
 
-@Validateable
-class CommentCommand implements Serializable {
+class CommentCommand implements Validateable {
     long id
     String comment
 }

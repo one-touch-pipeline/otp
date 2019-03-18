@@ -24,8 +24,7 @@ package de.dkfz.tbi.otp.utils
 
 import grails.validation.Validateable
 
-@Validateable
-class DataTableCommand implements Serializable {
+class DataTableCommand implements Validateable {
 
     int iDisplayStart = 0
     int iDisplayLength = 10

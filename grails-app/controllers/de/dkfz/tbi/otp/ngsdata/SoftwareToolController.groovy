@@ -101,8 +101,7 @@ class SoftwareToolController {
 
 }
 
-@Validateable
-class UpdateCommand implements Serializable {
+class UpdateCommand implements Validateable {
 
     Long id
     String value

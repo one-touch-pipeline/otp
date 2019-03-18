@@ -282,8 +282,7 @@ class MetadataImportController {
     }
 }
 
-@Validateable
-class BlackListedIlseCommand {
+class BlackListedIlseCommand implements Validateable {
 
     String addButton
     Integer ilse

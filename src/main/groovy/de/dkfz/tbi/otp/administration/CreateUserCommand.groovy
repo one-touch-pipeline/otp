@@ -26,8 +26,7 @@ import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.security.*
 
-@Validateable
-class CreateUserCommand implements Serializable {
+class CreateUserCommand implements Validateable {
 
     String username
     String email

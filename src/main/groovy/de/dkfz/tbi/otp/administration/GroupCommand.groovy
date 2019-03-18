@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.administration
 
+import grails.validation.Validateable
+
 import de.dkfz.tbi.otp.security.Group
 import de.dkfz.tbi.otp.security.Role
 
@@ -33,8 +35,7 @@ import de.dkfz.tbi.otp.security.Role
  *
  * @see Group
  */
-@grails.validation.Validateable
-class GroupCommand {
+class GroupCommand implements Validateable {
     String name
     String description
     boolean readProject

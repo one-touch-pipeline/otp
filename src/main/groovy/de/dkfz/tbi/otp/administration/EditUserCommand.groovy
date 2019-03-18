@@ -26,8 +26,7 @@ import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.security.User
 
-@Validateable
-class EditUserCommand implements Serializable {
+class EditUserCommand implements Validateable {
     private static final long serialVersionUID = 1L
 
     User user
