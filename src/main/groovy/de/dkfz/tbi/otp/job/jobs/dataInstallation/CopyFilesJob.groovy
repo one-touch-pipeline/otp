@@ -22,13 +22,13 @@
 
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.ast.UseJobLog
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -37,7 +37,7 @@ import java.nio.file.*
 
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
 
 

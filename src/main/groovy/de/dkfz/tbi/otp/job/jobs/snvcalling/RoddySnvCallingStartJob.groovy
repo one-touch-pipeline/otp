@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 
 @Component("roddySnvStartJob")
 @Scope("singleton")
+@Slf4j
 class RoddySnvCallingStartJob extends AbstractBamFilePairAnalysisStartJob implements RoddyBamFilePairAnalysisStartJob {
 
     @Autowired

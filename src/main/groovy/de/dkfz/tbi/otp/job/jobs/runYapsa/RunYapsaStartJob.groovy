@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.runYapsa
 
+import groovy.util.logging.Slf4j
 import org.hibernate.Hibernate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
@@ -37,6 +38,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Component("runYapsaStartJob")
 @Scope("singleton")
+@Slf4j
 class RunYapsaStartJob extends AbstractBamFilePairAnalysisStartJob {
     @Autowired
     RunYapsaService runYapsaService

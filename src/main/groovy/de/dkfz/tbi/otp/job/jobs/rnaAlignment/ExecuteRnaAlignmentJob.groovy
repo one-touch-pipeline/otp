@@ -22,18 +22,18 @@
 
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
+import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.job.ast.UseJobLog
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.ExecutePanCanJob
 import de.dkfz.tbi.otp.ngsdata.LibraryLayout
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class ExecuteRnaAlignmentJob extends ExecutePanCanJob {
 
     @Override

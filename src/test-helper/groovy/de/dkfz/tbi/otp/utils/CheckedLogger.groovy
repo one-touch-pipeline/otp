@@ -22,13 +22,15 @@
 
 package de.dkfz.tbi.otp.utils
 
-import org.apache.commons.logging.Log
-import org.junit.Assert
+
+import org.junit.*
+import org.slf4j.*
+import org.slf4j.helpers.*
 
 /**
  * A logger to check log statement.
  *
- * The idea behind this logger is the check of occured log messages against expected ones.
+ * The idea behind this logger is the check of occurred log messages against expected ones.
  *
  * The developer defined the expected message(s) on the expected level with one of the add methods,
  * for example {@link #addError(Object)} for an error message.
@@ -42,7 +44,7 @@ import org.junit.Assert
  *
  * If an exception is thrown, the further checks are disabled, because the queue may no longer be correct.
  */
-class CheckedLogger implements Log {
+class CheckedLogger extends MarkerIgnoringBase implements Logger {
 
     /**
      * Defines the message level.
@@ -93,14 +95,6 @@ class CheckedLogger implements Log {
     private boolean hasAlreadyThrownAnException = false
 
 
-
-    /**
-     * Add a message expected on the fatal level
-     */
-    CheckedLogger addFatal(Object message) {
-        expectedMessages << new ExpectedMessage(Level.FATAL, message)
-        return this
-    }
 
     /**
      * Add a message expected on the error level
@@ -185,70 +179,132 @@ class CheckedLogger implements Log {
 
 
     @Override
-    void fatal(Object object) {
-        checkConsumedMessage(Level.FATAL, object)
+    void error(String msg) {
+        checkConsumedMessage(Level.ERROR, msg)
     }
 
     @Override
-    void fatal(Object object, Throwable throwable) {
-        checkConsumedMessage(Level.FATAL, object)
+    void error(String format, Object arg) {
+        checkConsumedMessage(Level.ERROR, format)
     }
 
     @Override
-    void error(Object object) {
-        checkConsumedMessage(Level.ERROR, object)
+    void error(String format, Object arg1, Object arg2) {
+        checkConsumedMessage(Level.ERROR, format)
     }
 
     @Override
-    void error(Object object, Throwable throwable) {
-        checkConsumedMessage(Level.ERROR, object)
+    void error(String format, Object... arguments) {
+        checkConsumedMessage(Level.ERROR, format)
     }
 
     @Override
-    void warn(Object object) {
-        checkConsumedMessage(Level.WARN, object)
+    void error(String msg, Throwable t) {
+        checkConsumedMessage(Level.ERROR, msg)
     }
 
     @Override
-    void warn(Object object, Throwable throwable) {
-        checkConsumedMessage(Level.WARN, object)
+    void warn(String msg) {
+        checkConsumedMessage(Level.WARN, msg)
     }
 
     @Override
-    void debug(Object object) {
-        checkConsumedMessage(Level.DEBUG, object)
+    void warn(String format, Object arg) {
+        checkConsumedMessage(Level.WARN, format)
     }
 
     @Override
-    void debug(Object object, Throwable throwable) {
-        checkConsumedMessage(Level.DEBUG, object)
+    void warn(String format, Object... arguments) {
+        checkConsumedMessage(Level.WARN, format)
     }
 
     @Override
-    void info(Object object) {
-        checkConsumedMessage(Level.INFO, object)
+    void warn(String format, Object arg1, Object arg2) {
+        checkConsumedMessage(Level.WARN, format)
     }
 
     @Override
-    void info(Object object, Throwable throwable) {
-        checkConsumedMessage(Level.INFO, object)
+    void warn(String msg, Throwable t) {
+        checkConsumedMessage(Level.WARN, msg)
     }
 
     @Override
-    void trace(Object object) {
-        checkConsumedMessage(Level.TRACE, object)
+    void debug(String msg) {
+        checkConsumedMessage(Level.DEBUG, msg)
     }
 
     @Override
-    void trace(Object object, Throwable throwable) {
-        checkConsumedMessage(Level.TRACE, object)
+    void debug(String format, Object arg) {
+        checkConsumedMessage(Level.DEBUG, format)
     }
 
-
+    @Override
+    void debug(String format, Object arg1, Object arg2) {
+        checkConsumedMessage(Level.DEBUG, format)
+    }
 
     @Override
-    boolean isFatalEnabled() {
-        Assert.fail("Method isFatalEnabled not expected to be called")
+    void debug(String format, Object... arguments) {
+        checkConsumedMessage(Level.DEBUG, format)
+    }
+
+    @Override
+    void debug(String msg, Throwable t) {
+        checkConsumedMessage(Level.DEBUG, msg)
+    }
+
+    @Override
+    void info(String msg) {
+        checkConsumedMessage(Level.INFO, msg)
+
+    }
+
+    @Override
+    void info(String format, Object arg) {
+        checkConsumedMessage(Level.INFO, format)
+
+    }
+
+    @Override
+    void info(String format, Object arg1, Object arg2) {
+        checkConsumedMessage(Level.INFO, format)
+
+    }
+
+    @Override
+    void info(String format, Object... arguments) {
+        checkConsumedMessage(Level.INFO, format)
+
+    }
+
+    @Override
+    void info(String msg, Throwable t) {
+        checkConsumedMessage(Level.INFO, msg)
+    }
+
+    @Override
+    void trace(String msg) {
+        checkConsumedMessage(Level.TRACE, msg)
+    }
+
+    @Override
+    void trace(String format, Object arg) {
+        checkConsumedMessage(Level.TRACE, format)
+    }
+
+    @Override
+    void trace(String format, Object arg1, Object arg2) {
+        checkConsumedMessage(Level.TRACE, format)
+    }
+
+    @Override
+    void trace(String format, Object... arguments) {
+        checkConsumedMessage(Level.TRACE, format)
+    }
+
+    @Override
+    void trace(String msg, Throwable t) {
+        checkConsumedMessage(Level.TRACE, msg)
     }
 
     @Override

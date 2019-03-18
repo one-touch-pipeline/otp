@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.validation.ValidationException
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
@@ -38,6 +39,7 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 
 @Scope("singleton")
 @Component
+@Slf4j
 class DataFileConsistencyChecker {
 
     static final int MAX_RESULTS = 1000

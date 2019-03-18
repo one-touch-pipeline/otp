@@ -22,18 +22,17 @@
 
 package de.dkfz.tbi.otp.job.jobs
 
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.job.ast.UseJobLog
-import de.dkfz.tbi.otp.job.processing.AbstractValidatingJobImpl
+import de.dkfz.tbi.otp.job.processing.*
+import groovy.util.logging.Slf4j
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 /**
  * Very simple test job which sets the validated job to failure.
  */
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class FailingValidatingTestJob extends AbstractValidatingJobImpl {
     @Override
     void execute() throws Exception {

@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
@@ -35,6 +36,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 
 @Component("dataInstallationStartJob")
 @Scope("singleton")
+@Slf4j
 class DataInstallationStartJob extends AbstractStartJobImpl {
 
     @Autowired

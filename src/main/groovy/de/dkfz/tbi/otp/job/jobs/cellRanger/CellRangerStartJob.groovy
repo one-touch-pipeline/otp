@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
+import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -35,6 +36,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Component('cellRangerAlignmentStartJob')
 @Scope('singleton')
+@Slf4j
 class CellRangerStartJob extends AbstractAlignmentStartJob implements RestartableStartJob {
 
     @Override

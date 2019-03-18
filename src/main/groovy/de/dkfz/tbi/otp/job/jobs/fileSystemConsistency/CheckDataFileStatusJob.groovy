@@ -22,13 +22,13 @@
 
 package de.dkfz.tbi.otp.job.jobs.fileSystemConsistency
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.fileSystemConsistency.*
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus.Status
-import de.dkfz.tbi.otp.job.ast.UseJobLog
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
  */
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class CheckDataFileStatusJob extends AbstractEndStateAwareJobImpl {
 
     @Autowired

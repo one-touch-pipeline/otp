@@ -25,7 +25,7 @@ package de.dkfz.tbi.otp.job.processing
 import grails.compiler.GrailsCompileStatic
 import grails.util.Environment
 import groovy.transform.EqualsAndHashCode
-import org.apache.commons.logging.impl.SimpleLog
+import org.slf4j.event.Level
 
 import de.dkfz.roddy.config.JobLog
 import de.dkfz.roddy.config.ResourceSet
@@ -40,6 +40,7 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.otp.utils.logging.SimpleLogger
 
 import java.nio.file.Path
 import java.time.Duration
@@ -47,7 +48,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
 /**
  * This class contains methods to communicate with the cluster job scheduler.
@@ -203,7 +204,7 @@ class ClusterJobSchedulerService {
         Map<BEJobID, JobState> jobStates
         StringBuilder logStringBuilder = new StringBuilder()
         LogThreadLocal.withThreadLog(logStringBuilder) {
-            ((SimpleLog) LogThreadLocal.threadLog).setLevel(SimpleLog.LOG_LEVEL_DEBUG)
+            ((SimpleLogger) LogThreadLocal.threadLog).setLevel(Level.DEBUG)
             jobStates = jobManager.queryJobStatusAll()
         }
 

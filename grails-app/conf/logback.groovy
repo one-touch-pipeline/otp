@@ -84,21 +84,36 @@ String jobLogConfig = """\
         <sift>
             <appender name="JOB-\${PROCESS_AND_JOB_ID}" class="ch.qos.logback.core.FileAppender">
                 <file>${jobLogDir}${File.separator}\${PROCESS_AND_JOB_ID}.log</file>
-                <append>false</append>
                 <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
-                    <layout class="ch.qos.logback.classic.html.HTMLLayout">
-                        <title>Job log for process/step \${PROCESS_AND_JOB_ID}</title>
+                    <layout class="de.dkfz.tbi.otp.utils.logging.ContentOnlyHtmlLayout">
                         <pattern>%date%level%logger{0}%msg</pattern>
-                        <cssBuilder class="ch.qos.logback.classic.html.UrlCssBuilder">
-                            <url>/assets/log.css</url>
-                        </cssBuilder>
                     </layout>
                 </encoder>
             </appender>
         </sift>
     </appender>
+    <appender name="STARTJOBS" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.core.filter.EvaluatorFilter">
+            <evaluator class="ch.qos.logback.classic.boolex.GEventEvaluator">
+                <expression>
+                    e.mdc?.containsKey("PROCESS_AND_JOB_ID")
+                </expression>
+            </evaluator>
+            <onMismatch>ACCEPT</onMismatch>
+            <onMatch>DENY</onMatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover, keeping seven days of logs-->
+            <fileNamePattern>${jobLogDir}${File.separator}startjobs${File.separator}%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%date %level %-40.40logger{39} : %msg%n</pattern>
+        </encoder>
+    </appender>
     <logger name="de.dkfz.tbi.otp.job.jobs" level="DEBUG" additivity="false">
         <appender-ref ref="JOBS" />
+        <appender-ref ref="STARTJOBS" />
     </logger>
 </configuration>
 """
@@ -109,6 +124,7 @@ logger("de.dkfz.tbi.otp", DEBUG, ['STDOUT'], false)
 logger("seedme", DEBUG, ['STDOUT'], false)
 logger("liquibase", INFO, ['STDOUT'], false)
 logger("grails.plugin.databasemigration", INFO, ['STDOUT'], false)
+logger("org.hibernate.SQL", ERROR, ['STDOUT'], false)
 
 
 logger("de.dkfz.roddy.execution.jobs.cluster", DEBUG, ['STDOUT'], false)

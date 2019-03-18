@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 
 @Component('WgbsAlignmentStartJob')
 @Scope('singleton')
+@Slf4j
 class WgbsAlignmentStartJob extends AbstractRoddyAlignmentStartJob {
 
     @Override

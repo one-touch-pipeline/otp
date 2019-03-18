@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.fileSystemConsistency
 
+import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 
 @Component("dataFileStatusStartJob")
 @Scope("singleton")
+@Slf4j
 class DataFileStatusStartJob extends AbstractStartJobImpl {
 
     //@Scheduled(cron="0 0 1 * * SAT")

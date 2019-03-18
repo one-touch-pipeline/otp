@@ -22,11 +22,10 @@
 
 package de.dkfz.tbi.otp.job.jobs
 
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.job.ast.UseJobLog
 import de.dkfz.tbi.otp.job.processing.*
+import groovy.util.logging.Slf4j
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 /**
  * Simple test implementing the Job interface without inheriting
@@ -34,7 +33,7 @@ import de.dkfz.tbi.otp.job.processing.*
  */
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class DirectTestJob implements Job {
     private ProcessingStep step
 

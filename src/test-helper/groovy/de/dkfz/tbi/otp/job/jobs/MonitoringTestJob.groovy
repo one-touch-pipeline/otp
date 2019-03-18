@@ -22,19 +22,19 @@
 
 package de.dkfz.tbi.otp.job.jobs
 
+import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.TestConstants
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.job.ast.UseJobLog
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class MonitoringTestJob extends AbstractEndStateAwareJobImpl implements MonitoringJob {
 
     SchedulerService schedulerService

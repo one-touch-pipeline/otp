@@ -23,13 +23,13 @@
 package de.dkfz.tbi.otp.job.jobs.aceseq
 
 import grails.converters.JSON
+import groovy.util.logging.Slf4j
 import org.grails.web.json.JSONObject
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.job.ast.UseJobLog
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class ParseAceseqQcJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
 
     @Autowired

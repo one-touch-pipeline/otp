@@ -22,18 +22,17 @@
 
 package de.dkfz.tbi.otp.job.jobs
 
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.job.ast.UseJobLog
-import de.dkfz.tbi.otp.job.processing.AbstractDecisionJobImpl
+import de.dkfz.tbi.otp.job.processing.*
+import groovy.util.logging.Slf4j
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 /**
  * Test job for a decision, taking the first available decision as it's outcome.
  */
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class DecisionTestJob extends AbstractDecisionJobImpl {
 
     @Override

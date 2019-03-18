@@ -368,9 +368,12 @@ class ProcessesController {
         ]
     }
 
-    def processingStepLog() {
-        ProcessingStep step = processService.getProcessingStep(params.id as long)
-        render processService.processingStepLog(step)
+    def processingStepLog(ProcessingStep step) {
+        String log = processService.processingStepLog(step)
+        return [
+                log: log,
+                step: step,
+        ]
     }
 
     def processingStepClusterJobLog() {

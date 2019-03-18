@@ -22,12 +22,12 @@
 
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.job.ast.UseJobLog
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.utils.ProcessOutput
 
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoRestartableJob {
 
 

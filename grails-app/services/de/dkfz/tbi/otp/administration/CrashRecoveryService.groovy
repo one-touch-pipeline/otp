@@ -185,7 +185,7 @@ class CrashRecoveryService {
                 processingStep: step
         )
         if (!update.validate()) {
-            log.fatal("Could not create a ${state} Update for ProcessingStep ${step.id}")
+            log.error("Could not create a ${state} Update for ProcessingStep ${step.id}")
             throw new ProcessingException("Could not create a ${state} Update for ProcessingStep ${step.id}")
         }
         return update.save(flush: true)
@@ -245,14 +245,14 @@ class CrashRecoveryService {
         update.error = error
         if (!update.save(flush: true)) {
             // TODO: trigger error handling
-            log.fatal("Could not create a FAILURE Update for ProcessingStep ${step.id}")
+            log.error("Could not create a FAILURE Update for ProcessingStep ${step.id}")
             throw new ProcessingException("Could not create a FAILURE Update for ProcessingStep ${step.id}")
         }
         Process process = Process.get(step.process.id)
         process.finished = true
         if (!process.save(flush: true)) {
             // TODO: trigger error handling
-            log.fatal("Could not set Process ${step.process.id} to finished")
+            log.error("Could not set Process ${step.process.id} to finished")
             throw new ProcessingException("Could not set Process ${step.process.id} to finished")
         }
     }

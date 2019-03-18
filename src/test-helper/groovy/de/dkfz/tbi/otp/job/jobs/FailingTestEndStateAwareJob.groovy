@@ -22,18 +22,18 @@
 
 package de.dkfz.tbi.otp.job.jobs
 
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.job.ast.UseJobLog
-import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
+import de.dkfz.tbi.otp.job.processing.*
+import groovy.util.logging.Slf4j
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 /**
  * Very simple Test implementation of the EndStateAware interface which fails.
+ *
  */
 @Component("testFailureEndStateAwareJob")
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class FailingTestEndStateAwareJob extends AbstractEndStateAwareJobImpl {
 
     @Override

@@ -22,19 +22,18 @@
 
 package de.dkfz.tbi.otp.job.jobs
 
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.job.ast.UseJobLog
-import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
-import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.utils.*
+import groovy.util.logging.Slf4j
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 /**
  * Very simple test job which just throws an Exception during Execution.
  */
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class FailingTestJob extends AbstractJobImpl implements AutoRestartableJob {
 
     static final String EXCEPTION_MESSAGE = HelperUtils.uniqueString

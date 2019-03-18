@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
+import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 @Component('rnaAlignmentStartJob')
 @Scope('singleton')
+@Slf4j
 class RnaAlignmentStartJob extends AbstractRoddyAlignmentStartJob {
     @Override
     List<SeqType> getSeqTypes() {

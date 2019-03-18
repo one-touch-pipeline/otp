@@ -25,7 +25,8 @@ package de.dkfz.tbi.otp.job.processing
 import com.jcraft.jsch.*
 import com.jcraft.jsch.agentproxy.*
 import groovy.transform.Synchronized
-import org.apache.commons.logging.Log
+import groovy.util.logging.Slf4j
+import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
@@ -37,7 +38,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LocalShellHelper
-import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.util.concurrent.Semaphore
@@ -51,6 +52,7 @@ import java.util.concurrent.Semaphore
  */
 @Scope("singleton")
 @Component
+@Slf4j
 class RemoteShellHelper {
 
     static private final int TIME_FOR_RETRY_REMOTE_ACCESS = 10 * 60
@@ -256,7 +258,7 @@ class RemoteShellHelper {
     }
 
     private void logToJob(String message) {
-        Log log = LogThreadLocal.getThreadLog()
+        Logger log = LogThreadLocal.getThreadLog()
         log?.debug message
     }
 }

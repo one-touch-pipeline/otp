@@ -22,12 +22,15 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import groovy.util.logging.Slf4j
+
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 
 /**
  * Base class for jobs which maybe submit cluster jobs, wait for them to finish, and then validate their results.
  */
+@Slf4j
 abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
 
     @Override

@@ -22,9 +22,8 @@
 
 package de.dkfz.tbi.otp.job.scheduler
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
 import grails.core.GrailsApplication
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -35,7 +34,6 @@ import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 
 import static org.springframework.util.Assert.notNull
-
 /**
  * Class handling the scheduling of Jobs.
  *
@@ -51,6 +49,7 @@ import static org.springframework.util.Assert.notNull
  * @see ProcessingStepUpdate
  */
 @Component("scheduler")
+@Slf4j
 class Scheduler {
 
     @Autowired
@@ -70,11 +69,6 @@ class Scheduler {
 
     @Autowired
     RestartHandlerService restartHandlerService
-
-    /**
-     * Log for this class.
-     */
-    private static final Log log = LogFactory.getLog(this)
 
     /**
      * Calls the job's {@link Job#execute()} method in the context of the job and with error handling.
@@ -145,14 +139,14 @@ class Scheduler {
         try {
             // verify that the Job has a processing Step
             if (!job.processingStep) {
-                log.fatal("Job of type ${job.class} executed without a ProcessingStep being set")
+                log.error("Job of type ${job.class} executed without a ProcessingStep being set")
                 throw new ProcessingException("Job executed without a ProcessingStep being set")
             }
             ProcessingStep step = ProcessingStep.getInstance(job.processingStep.id)
             // get the last ProcessingStepUpdate
             List<ProcessingStepUpdate> existingUpdates = ProcessingStepUpdate.findAllByProcessingStep(step)
             if (existingUpdates.isEmpty()) {
-                log.fatal("Job of type ${job.class} executed before entering the CREATED state")
+                log.error("Job of type ${job.class} executed before entering the CREATED state")
                 throw new ProcessingException("Job executed before entering the CREATED state")
             } else if (existingUpdates.size() > 1) {
                 if (existingUpdates.sort { it.id }.last().state == ExecutionState.FAILURE ||
@@ -175,7 +169,7 @@ class Scheduler {
                     processingStep: step
             )
             if (!update.save(flush: true)) {
-                log.fatal("Could not create a STARTED Update for Job of type ${job.class}")
+                log.error("Could not create a STARTED Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a STARTED Update for Job")
             }
             log.debug("doCreateCheck performed for ${job} with ProcessingStep ${job.processingStep.id}")
@@ -265,7 +259,7 @@ class Scheduler {
             update.error = error
             if (!update.save(flush: true)) {
                 // TODO: trigger error handling
-                log.fatal("Could not create a FAILURE Update for Job of type ${job.class}")
+                log.error("Could not create a FAILURE Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a FAILURE Update for Job")
             }
             markProcessAsFailed(step)

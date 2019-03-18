@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam
 
+import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 
 @Component("importExternallyMergedBamStartJob")
 @Scope("singleton")
+@Slf4j
 class ImportExternallyMergedBamStartJob extends AbstractStartJobImpl {
 
     @Scheduled(fixedDelay = 60000L)

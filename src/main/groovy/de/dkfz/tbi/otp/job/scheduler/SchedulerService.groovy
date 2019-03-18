@@ -22,11 +22,10 @@
 
 package de.dkfz.tbi.otp.job.scheduler
 
-
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.LogFactory
-import org.apache.log4j.Logger
 import grails.core.GrailsApplication
+import groovy.util.logging.Slf4j
+import org.slf4j.Logger
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Scope
@@ -42,16 +41,18 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 import de.dkfz.tbi.otp.utils.PersistenceContextUtils
-import de.dkfz.tbi.otp.utils.logging.*
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
+import static ch.qos.logback.classic.ClassicConstants.FINALIZE_SESSION_MARKER
 import static grails.async.Promises.task
 import static org.springframework.util.Assert.notNull
 
 @Scope("singleton")
 @Component
+@Slf4j
 // this class is NOT transactional
 class SchedulerService {
 
@@ -327,17 +328,30 @@ class SchedulerService {
         }
 
         if (job) {
-            executeInNewThread {
+            executeInNewThread (job) {
                 grailsApplication.mainContext.scheduler.executeJob(job)
             }
         }
     }
 
-    protected void executeInNewThread(Closure job) {
+    protected void executeInNewThread(Job job, Closure closure) {
         task {
             Realm.withNewSession  {
-                job()
+                withLoggingContext(job) {
+                    closure()
+                }
             }
+        }
+    }
+
+    void withLoggingContext(Job job, Closure closure) {
+        MDC.put("PROCESS_AND_JOB_ID", "${job.processingStep.process.id}${File.separator}${job.processingStep.id}")
+        try {
+            job.log.info("SchedulerService: starting job")
+            closure()
+            job.log.info(FINALIZE_SESSION_MARKER, "SchedulerService: finished job")
+        } finally {
+            MDC.clear()
         }
     }
 
@@ -390,7 +404,7 @@ class SchedulerService {
                     processingStep: step
             )
             if (!update.save(flush: true)) {
-                log.fatal("Could not create a FINISHED Update for Job of type ${job.class}")
+                log.error("Could not create a FINISHED Update for Job of type ${job.class}")
                 throw new ProcessingException("Could not create a FINISHED Update for Job")
             }
         } else {
@@ -409,7 +423,7 @@ class SchedulerService {
             step.addToOutput(param)
         }
         if (!step.save(flush: true)) {
-            log.fatal("Could not create a FINISHED Update for Job of type ${job.class}")
+            log.error("Could not create a FINISHED Update for Job of type ${job.class}")
             throw new ProcessingException("Could not create a FINISHED Update for Job")
         }
         if (failedOutputParameter) {
@@ -466,7 +480,7 @@ class SchedulerService {
                     ((DecisionProcessingStep) step).decision = (job as DecisionJob).getDecision()
                 }
                 if (!step.save(flush: true)) {
-                    log.fatal("Could not create a ERROR/SUCCESS Update for Job of type ${job.class}")
+                    log.error("Could not create a ERROR/SUCCESS Update for Job of type ${job.class}")
                     throw new JobExcecutionException("Could not create a ERROR/SUCCESS Update for Job")
                 }
                 if (endState == ExecutionState.FAILURE) {
@@ -474,7 +488,7 @@ class SchedulerService {
                     ProcessingError error = new ProcessingError(errorMessage: "Something went wrong in endStateAwareJob of type ${job.class}, execution state set to FAILURE", processingStepUpdate: endStateUpdate)
                     endStateUpdate.error = error
                     if (!error.save(flush: true)) {
-                        log.fatal("Could not create a FAILURE Update for Job of type ${jobClass}")
+                        log.error("Could not create a FAILURE Update for Job of type ${jobClass}")
                         throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
                     }
                     markProcessAsFailed(step)
@@ -502,7 +516,7 @@ class SchedulerService {
                         validatedUpdate.error = validatedError
                     }
                     if (!validatedUpdate.save(flush: true)) {
-                        log.fatal("Could not create a FAILED/SUCCEEDED Update for validated job processed by ${job.class}")
+                        log.error("Could not create a FAILED/SUCCEEDED Update for validated job processed by ${job.class}")
                         throw new ProcessingException("Could not create a FAILED/SUCCEEDED Update for validated job")
                     }
                     if (!succeeded) {
@@ -510,7 +524,7 @@ class SchedulerService {
                         process.finished = true
                         if (!process.save(flush: true)) {
                             // TODO: trigger error handling
-                            log.fatal("Could not set Process to finished")
+                            log.error("Could not set Process to finished")
                             throw new ProcessingException("Could not set Process to finished")
                         }
                         // do not trigger next generation of Processing Step
@@ -542,7 +556,7 @@ class SchedulerService {
         process.finished = true
         if (!process.save(flush: true)) {
             // TODO: trigger error handling
-            log.fatal("Could not set Process to finished")
+            log.error("Could not set Process to finished")
             throw new ProcessingException("Could not set Process to finished")
         }
     }
@@ -563,14 +577,14 @@ class SchedulerService {
                 previous: step.latestProcessingStepUpdate,
                 processingStep: step)
         if (!update.save()) {
-            log.fatal("Could not create a FAILURE Update for Job of type ${jobClass}")
+            log.error("Could not create a FAILURE Update for Job of type ${jobClass}")
             throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
         }
         ProcessingError error = new ProcessingError(errorMessage: errorMessage, processingStepUpdate: update)
         update.error = error
         error.save()
         if (!error.save(flush: true)) {
-            log.fatal("Could not create a FAILURE Update for Job of type ${jobClass}")
+            log.error("Could not create a FAILURE Update for Job of type ${jobClass}")
             throw new ProcessingException("Could not create a FAILURE Update for Job of type ${jobClass}")
         }
     }
@@ -581,21 +595,6 @@ class SchedulerService {
      * @param job The Job which finished
      */
     void removeRunningJob(Job job) {
-        // unregister the logging
-        Logger logger = Logger.getLogger(job.class.getName())
-        if (logger) {
-            // the JobAppender might not be added to the Logger directly but to a parent Logger
-            // therefore move up the hierarchy till we are at the root Logger (getParent() returns null)
-            // and check for each whether our jobs appender is added
-            JobAppender jobAppender = null
-            while (!jobAppender && logger) {
-                jobAppender = (JobAppender) logger.getAppender("jobs")
-                logger = (Logger) logger.getParent()
-            }
-            if (jobAppender) {
-                jobAppender.unregisterProcessingStep(job.processingStep)
-            }
-        }
         lock.lock()
         try {
             // need to use an iterator and compare the processing step as identity of the Job
@@ -655,12 +654,12 @@ class SchedulerService {
                         previous: lastUpdate,
                         processingStep: step)
                 if (!restart.save(flush: true)) {
-                    log.fatal("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
+                    log.error("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
                     throw new ProcessingException("Could not create a RESTARTED Update for ProcessingStep ${step.id}")
                 }
                 restartedStep = RestartedProcessingStep.create(step)
                 if (!restartedStep.save(flush: true)) {
-                    log.fatal("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
+                    log.error("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
                     throw new SchedulerPersistencyException("Could not create a RestartedProcessingStep for ProcessingStep ${step.id}")
                 }
                 // Limitation: in case the restartedStep is the first step of the Process and the Process had been started with Input Parameters
@@ -672,7 +671,7 @@ class SchedulerService {
                 if (restartedStep.previous) {
                     restartedStep.previous.next = restartedStep
                     if (!restartedStep.previous.save(flush: true)) {
-                        log.fatal("Could not update previous ProcessingStep of ProcessingStep ${step.id}")
+                        log.error("Could not update previous ProcessingStep of ProcessingStep ${step.id}")
                         throw new SchedulerPersistencyException("Could not update previous ProcessingStep of ProcessingStep ${step.id}")
                     }
                 }
@@ -685,7 +684,7 @@ class SchedulerService {
             Process process = Process.get(step.process.id)
             process.finished = false
             if (!process.save(flush: true)) {
-                log.fatal("Could not set Process ${process.id} to not finished")
+                log.error("Could not set Process ${process.id} to not finished")
                 throw new ProcessingException("Could not set Process ${process.id} to not finished")
             }
         }
@@ -759,7 +758,6 @@ class SchedulerService {
         job.processingStep = step
         step.jobClass = job.class.getName()
         step.save(flush: true)
-        job.log = new JobLog(step, LogFactory.getLog(job.class))
         return job
     }
 
@@ -867,14 +865,13 @@ class SchedulerService {
      * @param job The job that the current thread is about to execute.
      */
     void startingJobExecutionOnCurrentThread(final Job job) {
-        //log.debug "Job ${System.identityHashCode(job)}, Thread ${Thread.currentThread()}", new Throwable()
-        notNull job
-        notNull job.log
+        assert job
+        assert job.log
         final Job currentJob = jobExecutedByCurrentThread
         if (currentJob != null) {
             throw new IllegalStateException("SchedulerService was notified by the current thread that it is about to start executing job ${job}, but SchedulerService thinks that the thread is already executing job ${currentJob}. Apparently the thread did not call SchedulerService.finishedJobExecutionOnCurrentThread() or it called startingJobExecutionOnCurrentThread() more than once.")
         }
-        final Log currentLog = LogThreadLocal.threadLog
+        final Logger currentLog = LogThreadLocal.threadLog
         if (currentLog != null) {
             throw new IllegalStateException("SchedulerService was notified by the current thread that it is about to start executing job ${job}, but LogThreadLocal is already holding a log (${currentLog}).")
         }
@@ -895,7 +892,7 @@ class SchedulerService {
         } else if (job != currentJob) {
             ExceptionUtils.logOrThrow log, new IllegalStateException("SchedulerService was notified by the current thread that it finished executing job ${job}, but SchedulerService thought that the thread is executing job ${currentJob}.")
         } else {
-            final Log currentLog = LogThreadLocal.threadLog
+            final Logger currentLog = LogThreadLocal.threadLog
             if (currentLog != job.log) {
                 ExceptionUtils.logOrThrow log, new IllegalStateException("SchedulerService was notified by the current thread that it finished executing job ${job} and SchedulerService thought that LogThreadLocal is holding that job's log, but LogThreadLocal is holding log ${currentLog}.")
             }

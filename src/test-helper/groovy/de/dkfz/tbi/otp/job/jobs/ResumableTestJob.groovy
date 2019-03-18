@@ -22,17 +22,15 @@
 
 package de.dkfz.tbi.otp.job.jobs
 
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.job.ast.UseJobLog
-import de.dkfz.tbi.otp.job.processing.AbstractJobImpl
-import de.dkfz.tbi.otp.job.processing.ResumableJob
+import de.dkfz.tbi.otp.job.processing.*
+import groovy.util.logging.Slf4j
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 @Component
 @Scope("prototype")
 @ResumableJob
-@UseJobLog
+@Slf4j
 class ResumableTestJob extends AbstractJobImpl {
 
     @Override

@@ -78,7 +78,7 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor {
             addViolation(node, buildErrorString("@Scope"))
         }
         if (!hasJobLog) {
-            addViolation(node, buildErrorString("@UseJobLog"))
+            addViolation(node, buildErrorString("@Slf4j"))
         }
     }
 

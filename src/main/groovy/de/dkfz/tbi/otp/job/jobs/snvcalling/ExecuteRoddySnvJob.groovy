@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -30,7 +31,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
-import de.dkfz.tbi.otp.job.ast.UseJobLog
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.AbstractExecutePanCanJob
 import de.dkfz.tbi.otp.ngsdata.*
@@ -40,7 +40,7 @@ import java.nio.file.Paths
 
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstance> implements AutoRestartableJob {
 
     @Autowired

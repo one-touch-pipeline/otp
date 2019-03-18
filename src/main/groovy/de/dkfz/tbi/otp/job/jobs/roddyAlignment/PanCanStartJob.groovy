@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
 @Component('PanCanStartJob')
 @Scope('singleton')
+@Slf4j
 class PanCanStartJob extends AbstractRoddyAlignmentStartJob {
 
     @Override

@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 
@@ -36,6 +37,7 @@ import java.time.LocalDateTime
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
+@Slf4j
 abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl implements RestartableStartJob, BamFilePairAnalysisStartJobTrait {
 
     @Autowired

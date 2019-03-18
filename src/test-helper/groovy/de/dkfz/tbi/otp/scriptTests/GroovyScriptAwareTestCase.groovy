@@ -22,10 +22,8 @@
 
 package de.dkfz.tbi.otp.scriptTests
 
-import grails.test.mixin.TestMixin
-import grails.test.mixin.integration.IntegrationTestMixin
-import org.codehaus.groovy.control.CompilerConfiguration
 import grails.core.GrailsApplication
+import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.runtime.InvokerHelper
 
 import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
@@ -36,8 +34,8 @@ import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
  * The tests that need such functionality must extend this class.
  * it is not possible to use this class in the unit tests
  * to call scripts creating domain objects
+ *
  */
-@TestMixin(IntegrationTestMixin)
 abstract class GroovyScriptAwareTestCase extends AbstractIntegrationTest {
 
     GrailsApplication grailsApplication
@@ -56,7 +54,7 @@ abstract class GroovyScriptAwareTestCase extends AbstractIntegrationTest {
         GroovyShell shell = new GroovyShell(
                 grailsApplication.getClassLoader(),
                 new Binding(ctx: grailsApplication.getMainContext(),
-                grailsApplication: grailsApplication))
+                        grailsApplication: grailsApplication))
         properties?.each {  Map.Entry<String, String> entry ->
             System.setProperty(entry.key, entry.value)
         }

@@ -22,16 +22,16 @@
 
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyMergedBamQa
-import de.dkfz.tbi.otp.job.ast.UseJobLog
 
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class ParseWgbsAlignmentQcJob extends AbstractParseAlignmentQcJob {
 
     @Override

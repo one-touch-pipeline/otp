@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.indelCalling
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 
 @Component("roddyIndelStartJob")
 @Scope("singleton")
+@Slf4j
 class RoddyIndelCallingStartJob extends AbstractBamFilePairAnalysisStartJob implements RoddyBamFilePairAnalysisStartJob {
 
     @Autowired

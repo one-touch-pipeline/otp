@@ -22,20 +22,19 @@
 
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
-import de.dkfz.tbi.otp.job.ast.UseJobLog
-import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
-import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
+import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.*
+import de.dkfz.tbi.otp.job.jobs.*
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
+import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.*
+import org.springframework.context.annotation.*
+import org.springframework.stereotype.*
 
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class ParseRnaAlignmentQcJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
 
     @Autowired

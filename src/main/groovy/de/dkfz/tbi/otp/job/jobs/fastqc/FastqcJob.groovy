@@ -22,13 +22,13 @@
 
 package de.dkfz.tbi.otp.job.jobs.fastqc
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.*
-import de.dkfz.tbi.otp.job.ast.UseJobLog
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -41,7 +41,7 @@ import java.nio.file.Path
 
 @Component
 @Scope("prototype")
-@UseJobLog
+@Slf4j
 class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
 
     @Autowired

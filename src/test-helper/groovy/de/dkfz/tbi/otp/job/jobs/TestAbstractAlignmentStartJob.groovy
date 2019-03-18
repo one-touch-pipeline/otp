@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs
 
+import groovy.util.logging.Slf4j
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 @Component('testAbstractAlignmentStartJob')
 @Scope('singleton')
+@Slf4j
 class TestAbstractAlignmentStartJob extends AbstractAlignmentStartJob {
 
     JobExecutionPlan jep

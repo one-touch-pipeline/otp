@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.scheduler
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -42,6 +43,7 @@ import de.dkfz.tbi.otp.utils.PersistenceContextUtils
  * notifies the MonitoringJobs the cluster job belongs to.
  */
 @Component
+@Slf4j
 class ClusterJobMonitor {
 
     @Autowired

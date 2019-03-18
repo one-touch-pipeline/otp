@@ -22,45 +22,46 @@
 
 package de.dkfz.tbi.otp.utils.logging
 
-import org.apache.commons.logging.Log
-import org.apache.commons.logging.impl.SimpleLog
+import org.slf4j.*
+import org.slf4j.event.Level
+import org.slf4j.helpers.*
 
-import static org.springframework.util.Assert.notNull
+import static org.springframework.util.Assert.*
 
 /**
- * Holds a {@link Log} instance in a {@link Thread}
+ * Holds a {@link Logger} instance in a {@link Thread}
  */
 class LogThreadLocal {
 
     /**
-     * The thread local holder for {@link Log}
+     * The thread local holder for {@link Logger}
      */
-    private static final ThreadLocal<Log> jobLogHolder = new ThreadLocal<Log>()
+    private static final ThreadLocal<Logger> jobLogHolder = new ThreadLocal<Logger>()
 
     /**
-     * return the {@link Log} connected to this {@link Thread}.
-     * If no {@link Log} is connected <code>null</code> is returned.
+     * return the {@link Logger} connected to this {@link Thread}.
+     * If no {@link Logger} is connected <code>null</code> is returned.
      *
-     * @return the connected {@link Log} or null, if no {@link Log} is connected
+     * @return the connected {@link Logger} or null, if no {@link Logger} is connected
      */
-    static Log getThreadLog() {
+    static Logger getThreadLog() {
         return jobLogHolder.get()
     }
 
     /**
-     * set the given {@link Log} to this {@link Thread}
+     * set the given {@link Logger} to this {@link Thread}
      *
      * <p><strong>Make sure that you call {@link #removeThreadLog()} when done (best in a finally block).</strong></p>
      *
-     * @param log the {@link Log} to add to this {@link Thread}
+     * @param log the {@link Logger} to add to this {@link Thread}
      */
-    static void setThreadLog(Log log) {
+    static void setThreadLog(Logger log) {
         notNull(log, "The log may not be null")
         jobLogHolder.set(log)
     }
 
     /**
-     * remove the {@link Log} connected to this {@link Thread}, if any.
+     * remove the {@link Logger} connected to this {@link Thread}, if any.
      */
     static void removeThreadLog() {
         jobLogHolder.remove()
@@ -70,31 +71,225 @@ class LogThreadLocal {
         assert out != null
         assert code != null
         assert threadLog == null
-        threadLog = new SimpleLog('ThreadLog') {
-            // The write method has been introduced in commons-logging version 1.0.4
+
+        setThreadLog(new SimpleLogger() {
             @Override
-            protected void write(StringBuffer buffer) {
+            protected void write(String buffer) {
                 out.append(buffer)
                 out.append('\n')
             }
-        }
+        })
         try {
             code()
         } finally {
             removeThreadLog()
         }
     }
+}
 
-    static void withThreadLog(Log log, Closure code) {
-        assert log != null
-        assert code != null
-        assert threadLog == null
+abstract class SimpleLogger extends MarkerIgnoringBase implements Logger {
 
-        setThreadLog(log)
-        try {
-            code()
-        } finally {
-            removeThreadLog()
+    Level level = Level.INFO
+
+    abstract protected void write(String buffer)
+
+    @Override
+    boolean isTraceEnabled() {
+        return Level.TRACE.toInt() >= level.toInt()
+    }
+
+    @Override
+    void trace(String msg) {
+        if (isTraceEnabled()) {
+            write(msg)
+        }
+    }
+
+    @Override
+    void trace(String format, Object arg) {
+        if (isTraceEnabled()) {
+            write(MessageFormatter.format(format, arg).message)
+        }
+    }
+
+    @Override
+    void trace(String format, Object arg1, Object arg2) {
+        if (isTraceEnabled()) {
+            write(MessageFormatter.format(format, arg1, arg2).message)
+        }
+    }
+
+    @Override
+    void trace(String format, Object... arguments) {
+        if (isTraceEnabled()) {
+            write(MessageFormatter.arrayFormat(format, arguments).message)
+        }
+    }
+
+    @Override
+    void trace(String msg, Throwable t) {
+        if (isTraceEnabled()) {
+            write(MessageFormatter.format(msg, t).message)
+        }
+    }
+
+    @Override
+    boolean isDebugEnabled() {
+        return Level.DEBUG.toInt() >= level.toInt()
+    }
+
+    @Override
+    void debug(String msg) {
+        if (isDebugEnabled()) {
+            write(msg)
+        }
+    }
+
+    @Override
+    void debug(String format, Object arg) {
+        if (isDebugEnabled()) {
+            write(MessageFormatter.format(format, arg).message)
+        }
+    }
+
+    @Override
+    void debug(String format, Object arg1, Object arg2) {
+        if (isDebugEnabled()) {
+            write(MessageFormatter.format(format, arg1, arg2).message)
+        }
+    }
+
+    @Override
+    void debug(String format, Object... arguments) {
+        if (isDebugEnabled()) {
+            write(MessageFormatter.arrayFormat(format, arguments).message)
+        }
+    }
+
+    @Override
+    void debug(String msg, Throwable t) {
+        if (isDebugEnabled()) {
+            write(MessageFormatter.format(msg, t).message)
+        }
+    }
+
+    @Override
+    boolean isInfoEnabled() {
+        return Level.INFO.toInt() >= level.toInt()
+    }
+
+    @Override
+    void info(String msg) {
+        if (isInfoEnabled()) {
+            write(msg)
+        }
+    }
+
+    @Override
+    void info(String format, Object arg) {
+        if (isInfoEnabled()) {
+            write(MessageFormatter.format(format, arg).message)
+        }
+    }
+
+    @Override
+    void info(String format, Object arg1, Object arg2) {
+        if (isInfoEnabled()) {
+            write(MessageFormatter.format(format, arg1, arg2).message)
+        }
+    }
+
+    @Override
+    void info(String format, Object... arguments) {
+        if (isInfoEnabled()) {
+            write(MessageFormatter.arrayFormat(format, arguments).message)
+        }
+    }
+
+    @Override
+    void info(String msg, Throwable t) {
+        if (isInfoEnabled()) {
+            write(MessageFormatter.format(msg, t).message)
+        }
+    }
+
+    @Override
+    boolean isWarnEnabled() {
+        return Level.WARN.toInt() >= level.toInt()
+    }
+
+    @Override
+    void warn(String msg) {
+        if (isWarnEnabled()) {
+            write(msg)
+        }
+    }
+
+    @Override
+    void warn(String format, Object arg) {
+        if (isWarnEnabled()) {
+            write(MessageFormatter.format(format, arg).message)
+        }
+    }
+
+    @Override
+    void warn(String format, Object arg1, Object arg2) {
+        if (isWarnEnabled()) {
+            write(MessageFormatter.format(format, arg1, arg2).message)
+        }
+    }
+
+    @Override
+    void warn(String format, Object... arguments) {
+        if (isWarnEnabled()) {
+            write(MessageFormatter.arrayFormat(format, arguments).message)
+        }
+    }
+
+    @Override
+    void warn(String msg, Throwable t) {
+        if (isWarnEnabled()) {
+            write(MessageFormatter.format(msg, t).message)
+        }
+    }
+
+    @Override
+    boolean isErrorEnabled() {
+        return Level.ERROR.toInt() >= level.toInt()
+    }
+
+    @Override
+    void error(String msg) {
+        if (isErrorEnabled()) {
+            write(msg)
+        }
+    }
+
+    @Override
+    void error(String format, Object arg) {
+        if (isErrorEnabled()) {
+            write(MessageFormatter.format(format, arg).message)
+        }
+    }
+
+    @Override
+    void error(String format, Object arg1, Object arg2) {
+        if (isErrorEnabled()) {
+            write(MessageFormatter.format(format, arg1, arg2).message)
+        }
+    }
+
+    @Override
+    void error(String format, Object... arguments) {
+        if (isErrorEnabled()) {
+            write(MessageFormatter.arrayFormat(format, arguments).message)
+        }
+    }
+
+    @Override
+    void error(String msg, Throwable t) {
+        if (isErrorEnabled()) {
+            write(MessageFormatter.format(msg, t).message)
         }
     }
 }

@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs
 
+import groovy.util.logging.Slf4j
 import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -40,6 +41,7 @@ import de.dkfz.tbi.otp.job.processing.StartJob
  */
 @Component("testSingletonStartJob")
 @Scope("singleton")
+@Slf4j
 class TestSingletonStartJob implements StartJob, ApplicationListener<JobExecutionPlanChangedEvent> {
     private JobExecutionPlan plan
     private boolean planNeedsRefresh = false

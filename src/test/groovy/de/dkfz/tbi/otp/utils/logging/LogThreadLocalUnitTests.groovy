@@ -35,7 +35,7 @@ class LogThreadLocalUnitTests {
             LogThreadLocal.threadLog.info(message)
         })
 
-        assert out.toString() == "[INFO] ThreadLog - ${message}\n"
+        assert out.toString() == "${message}\n"
         assert LogThreadLocal.threadLog == null
     }
 }
