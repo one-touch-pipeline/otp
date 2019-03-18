@@ -296,23 +296,6 @@ class SampleValidatorSpec extends Specification {
         context.problems.isEmpty()
     }
 
-    void 'validate, when sample identifier contains not allowed characters, adds warning'() {
-
-        given:
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${PROJECT}\nP:X I:Y S:Z")
-        createSampleIdentifier(context.spreadsheet.dataRows.get(0).cells.get(0).text, 'X', 'Y', 'Z')
-
-        when:
-        validator.validate(context)
-
-        then:
-        Problem problem = exactlyOneElement(context.problems)
-        problem.level == Level.WARNING
-        problem.message == "Sample identifier 'P:X I:Y S:Z' contains not allowed characters."
-        problem.type == "Sample identifiers are only allowed with the characters [A-Za-z0-9_-]"
-    }
-
     private
     static SampleIdentifier createSampleIdentifier(String sampleIdentifierName, String projectName, String pid, String sampleTypeName) {
         return DomainFactory.createSampleIdentifier(

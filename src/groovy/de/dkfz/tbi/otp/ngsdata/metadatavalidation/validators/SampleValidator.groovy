@@ -30,9 +30,6 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContex
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -67,7 +64,6 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         Collection<String> missingIdentifiersWithProject = []
-        Pattern pattern = Pattern.compile("[A-Za-z0-9_-]+")
 
         Map<String, Collection<ValueTuple>> byProjectName = valueTuples.groupBy {
             String sampleId = it.getValue(SAMPLE_ID.name())
@@ -76,10 +72,6 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
             String sampleType = it.getValue(BIOMATERIAL_ID.name()) ?: ''
 
             Project project = Project.getByNameOrNameInMetadataFiles(projectName)
-            Matcher matcher = pattern.matcher(sampleId)
-            if (!matcher.matches()) {
-                context.addProblem(it.cells, Level.WARNING, "Sample identifier '${sampleId}' contains not allowed characters.", "Sample identifiers are only allowed with the characters [A-Za-z0-9_-]")
-            }
             ParsedSampleIdentifier parsedIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId, project)
             SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
             if (!parsedIdentifier && !sampleIdentifier) {
