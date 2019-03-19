@@ -26,6 +26,7 @@ import grails.test.spock.IntegrationSpec
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
@@ -40,7 +41,8 @@ class ParsePanCanQcJobIntegrationSpec extends IntegrationSpec {
     @Rule
     TemporaryFolder temporaryFolder
 
-    void "test execute ParsePanCanQcJob"() {
+    @Unroll
+    void "test execute ParsePanCanQcJob (percentageMatesOnDifferentChr: #percentageMatesOnDifferentChr"() {
         given:
         File qaFile = temporaryFolder.newFile(RoddyBamFile.QUALITY_CONTROL_JSON_FILE_NAME)
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
@@ -50,7 +52,7 @@ class ParsePanCanQcJobIntegrationSpec extends IntegrationSpec {
 
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
         DomainFactory.createReferenceGenomeEntries(referenceGenome, ['7', '8'])
-        DomainFactory.createQaFileOnFileSystem(qaFile)
+        DomainFactory.createQaFileOnFileSystem(qaFile, [percentageMatesOnDifferentChr: percentageMatesOnDifferentChr])
 
         ParsePanCanQcJob job = [
                 getProcessParameterObject: { -> roddyBamFile },
@@ -69,5 +71,12 @@ class ParsePanCanQcJobIntegrationSpec extends IntegrationSpec {
         roddyBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
         roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
         roddyBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+
+        where:
+        percentageMatesOnDifferentChr << [
+                '123456',
+                'NA',
+        ]
     }
+
 }

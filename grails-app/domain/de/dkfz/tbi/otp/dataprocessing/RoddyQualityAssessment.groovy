@@ -68,7 +68,7 @@ abstract class RoddyQualityAssessment extends AbstractQualityAssessment {
         chromosome blank: false
 
         insertSizeCV(nullable: true, validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
-        percentageMatesOnDifferentChr(nullable: true, validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
+        percentageMatesOnDifferentChr(nullable: true)
 
         totalReadCounter(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)
         qcFailedReads(validator: RoddyQualityAssessment.nullIfAndOnlyIfPerChromosomeQc)

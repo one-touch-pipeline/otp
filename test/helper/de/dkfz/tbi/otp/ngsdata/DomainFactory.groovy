@@ -2341,7 +2341,16 @@ class DomainFactory {
         }
     }
 
-    static void createQaFileOnFileSystem(File qaFile, long chromosome8QcBasesMapped = 1866013) {
+    static void createQaFileOnFileSystem(File qaFile, long chromosome8QcBasesMapped) {
+        createQaFileOnFileSystem(qaFile, [chromosome8QcBasesMapped: chromosome8QcBasesMapped])
+    }
+
+    static void createQaFileOnFileSystem(File qaFile, Map properties = [:]) {
+        Map map = [
+                chromosome8QcBasesMapped     : '1866013',
+                percentageMatesOnDifferentChr: '1.551',
+        ] + properties
+
         qaFile.parentFile.mkdirs()
         // the values are from the documentation on the Wiki: https://wiki.local/NGS/OTP-Roddy+Interface#HTheQCData
         qaFile <<
@@ -2351,7 +2360,7 @@ class DomainFactory {
     "genomeWithoutNCoverageQcBases": 0.011,
     "referenceLength": 14636402211,
     "chromosome": 8,
-    "qcBasesMapped": ${chromosome8QcBasesMapped}
+    "qcBasesMapped": ${map.chromosome8QcBasesMapped}
   },
   "all": {
     "pairedRead1": 2091461,
@@ -2366,10 +2375,10 @@ class DomainFactory {
     "insertSizeMedian": 3991,
     "insertSizeSD": 931,
     "pairedRead2": 2121631,
-    "percentageMatesOnDifferentChr": 1.551,
+    "percentageMatesOnDifferentChr": ${map.percentageMatesOnDifferentChr},
     "chromosome": "all",
     "withItselfAndMateMapped": 4192891,
-    "qcBasesMapped": ${chromosome8QcBasesMapped},
+    "qcBasesMapped": ${map.chromosome8QcBasesMapped},
     "duplicates": 8051,
     "insertSizeCV": 231,
     "referenceLength": 30956774121,
@@ -2378,7 +2387,7 @@ class DomainFactory {
   "7": {
     "referenceLength": 1591386631,
     "genomeWithoutNCoverageQcBases": 0.011,
-    "qcBasesMapped": ${chromosome8QcBasesMapped},
+    "qcBasesMapped": ${map.chromosome8QcBasesMapped},
     "chromosome": 7
   }
 }

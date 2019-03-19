@@ -96,7 +96,7 @@ class AbstractQualityAssessmentService {
         qaFilesPerSeqTrack.each { seqTrack, qaFile ->
             Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, null)
             chromosomeInformation.each { chromosome, chromosomeValues ->
-                RoddySingleLaneQa qa = new RoddySingleLaneQa(chromosomeValues)
+                RoddySingleLaneQa qa = new RoddySingleLaneQa(handleNaValue(chromosomeValues))
                 qa.seqTrack = seqTrack
                 assert qa.chromosome == chromosome
                 qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
@@ -110,7 +110,7 @@ class AbstractQualityAssessmentService {
         Map<String, Map> chromosomeInformation = parseRoddyQaStatistics(roddyBamFile, qaFile, { roddyBamFile.workMergedQATargetExtractJsonFile })
 
         List<RoddyMergedBamQa> chromosomeInformationQa = chromosomeInformation.collect { chromosome, chromosomeValues ->
-            RoddyMergedBamQa qa = new RoddyMergedBamQa(chromosomeValues)
+            RoddyMergedBamQa qa = new RoddyMergedBamQa(handleNaValue(chromosomeValues))
             assert qa.chromosome == chromosome
             qa.qualityAssessmentMergedPass = roddyBamFile.findOrSaveQaPass()
             assert qa.save(flush: true)
@@ -119,6 +119,14 @@ class AbstractQualityAssessmentService {
         return chromosomeInformationQa.find {
             it.chromosome == RoddyQualityAssessment.ALL
         }
+    }
+
+
+    private Map handleNaValue(Map map ) {
+        if (map.containsKey('percentageMatesOnDifferentChr') && map.percentageMatesOnDifferentChr == 'NA') {
+            map.percentageMatesOnDifferentChr = null
+        }
+        return map
     }
 
     RnaQualityAssessment parseRnaRoddyBamFileQaStatistics(RnaRoddyBamFile rnaRoddyBamFile) {
