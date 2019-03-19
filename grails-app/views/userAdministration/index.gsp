@@ -35,7 +35,7 @@
 
         <h1><g:message code="user.administration.header"/></h1>
         <div>
-            <form id="switch-user-form" action="${request.contextPath}/j_spring_security_switch_user" method="POST">
+            <form id="switch-user-form" action="${request.contextPath}/login/impersonate" method="POST">
                 <input type="hidden" name="j_username"/>
             </form>
             <div class="otpDataTables">

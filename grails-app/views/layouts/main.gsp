@@ -152,7 +152,7 @@
                             </li>
                         </sec:ifAnyGranted>
                         <sec:ifSwitched>
-                            <li><a href='${request.contextPath}/j_spring_security_exit_user'>Resume as <sec:switchedUserOriginalUsername/></a></li>
+                            <li><a href='${request.contextPath}/logout/impersonate'>Resume as <sec:switchedUserOriginalUsername/></a></li>
                         </sec:ifSwitched>
                     </sec:ifLoggedIn>
                 </ul>
