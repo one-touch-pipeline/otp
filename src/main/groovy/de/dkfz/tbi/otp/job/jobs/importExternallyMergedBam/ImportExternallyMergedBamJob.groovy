@@ -191,7 +191,7 @@ touch ${checkpoint}
 
                 return null
             } catch (Throwable t) {
-                log.error(t)
+                log.error(t.message, t)
                 return "Copying of target ${target} failed, ${t.message}"
             }
         }.findAll()
