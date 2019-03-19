@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.tracking.TrackingService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 @Mock([
@@ -80,9 +81,18 @@ class QcTrafficLightNotificationServiceSpec extends Specification {
         AbstractMergedBamFile bamFile = DomainFactory.createRoddyBamFile([:])
         String emailSenderSalutation = DomainFactory.createProcessingOptionForEmailSenderSalutation().value
         DomainFactory.createProcessingOptionForNotificationRecipient()
+        Set<OtrsTicket> otrsTickets = [
+                DomainFactory.createOtrsTicket([
+                        finalNotificationSent: finalNotificationSent,
+                        automaticNotification: automaticNotification,
+                ]),
+        ] as Set
 
         QcTrafficLightNotificationService service = new QcTrafficLightNotificationService([
                 processingOptionService: new ProcessingOptionService(),
+                trackingService        : Mock(TrackingService) {
+                    1 * findAllOtrsTickets(_) >> otrsTickets
+                },
         ])
 
         service.createNotificationTextService = Mock(CreateNotificationTextService) {
@@ -104,7 +114,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification {
         }
 
         service.userProjectRoleService = Mock(UserProjectRoleService) {
-            1 * getEmailsOfToBeNotifiedProjectUsers(_) >> emails
+            (0..1) * getEmailsOfToBeNotifiedProjectUsers(_) >> emails
         }
 
         service.mailHelperService = Mock(MailHelperService) {
@@ -121,8 +131,10 @@ class QcTrafficLightNotificationServiceSpec extends Specification {
         service.informResultsAreBlocked(bamFile)
 
         where:
-        name                      | emails    | subjectHeader  || recipientsCount
-        'without userProjectRole' | []        | 'TO BE SENT: ' || 1
-        'with userProjectRole'    | ['email'] | ''             || 2
+        name                                         | finalNotificationSent | automaticNotification | emails    | subjectHeader  || recipientsCount
+        'without userProjectRole'                    | false                 | true                  | []        | 'TO BE SENT: ' || 1
+        'with userProjectRole'                       | false                 | true                  | ['email'] | ''             || 2
+        'ticket has already send final notification' | true                  | true                  | ['email'] | 'TO BE SENT: ' || 1
+        'ticket has disabled automaticNotification'  | false                 | false                 | ['email'] | 'TO BE SENT: ' || 1
     }
 }

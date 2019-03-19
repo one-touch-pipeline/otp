@@ -71,7 +71,10 @@ class QcTrafficLightNotificationService {
     }
 
     void informResultsAreBlocked(AbstractMergedBamFile bamFile) {
-        List<String> recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(bamFile.project)
+        boolean shouldSendEmailToProjectReceiver = trackingService.findAllOtrsTickets(bamFile.containedSeqTracks).find {
+            !it.finalNotificationSent && it.automaticNotification
+        } as boolean
+        List<String> recipients = shouldSendEmailToProjectReceiver ? userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(bamFile.project) : []
         String subject = createResultsAreBlockedSubject(bamFile, recipients.empty)
         String content = createResultsAreBlockedMessage(bamFile)
         recipients << processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION)
