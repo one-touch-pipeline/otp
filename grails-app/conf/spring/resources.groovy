@@ -31,10 +31,11 @@ import de.dkfz.tbi.otp.security.*
 beans = {
     // include Spring Beans with @Component annotation
     xmlns context:"http://www.springframework.org/schema/context"
-    context.'component-scan'('base-package' :"de.dkfz.tbi.otp" )
+    context.'component-scan'('base-package': "de.dkfz.tbi.otp")
 
     if (Environment.getCurrent() == Environment.TEST) {
-        fileSystemService(de.dkfz.tbi.otp.job.processing.TestFileSystemService)
+        // use Class.forName because classes in test-helper are not found in production env
+        fileSystemService(Class.forName("de.dkfz.tbi.otp.job.processing.TestFileSystemService"))
     } else {
         // proper thread pool
         xmlns task: "http://www.springframework.org/schema/task"
@@ -45,7 +46,7 @@ beans = {
         }
     }
     if (Environment.getCurrent() == Environment.TEST || Environment.getCurrent().getName() == "WORKFLOW_TEST") {
-        configService(de.dkfz.tbi.otp.TestConfigService) {
+        configService(Class.forName("de.dkfz.tbi.otp.TestConfigService")) {
             processingOptionService = ref('processingOptionService')
         }
     }

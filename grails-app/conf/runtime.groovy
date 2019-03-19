@@ -30,6 +30,56 @@ import static java.util.concurrent.TimeUnit.*
 
 Properties otpProperties = ConfigService.parsePropertiesFile()
 
+// set per-environment serverURL stem for creating absolute links
+environments {
+    development {
+        grails.logging.jul.usebridge = true
+    }
+    production {
+        grails.logging.jul.usebridge = false
+        grails.serverURL = otpProperties.getProperty(OtpProperty.CONFIG_SERVER_URL.key)
+    }
+    WORKFLOW_TEST {
+        grails.serverURL = "http://localhost:8080"
+    }
+}
+
+// ldap
+if (!Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.LDAP_ENABLED.key))) {
+    println("Using database only for authentication")
+    grails.plugin.springsecurity.providerNames = [
+            'daoAuthenticationProvider',
+            'anonymousAuthenticationProvider',
+    ]
+} else {
+    println("Using LDAP and database for authentication")
+    grails.plugin.springsecurity.providerNames = [
+            'ldapDaoAuthenticationProvider',
+            'anonymousAuthenticationProvider',
+    ]
+    if (otpProperties.getProperty(OtpProperty.LDAP_MANAGER_DN.key)) {
+        grails.plugin.springsecurity.ldap.context.managerDn     = otpProperties.getProperty(OtpProperty.LDAP_MANAGER_DN.key)
+    }
+    grails.plugin.springsecurity.ldap.context.managerPassword = otpProperties.getProperty(OtpProperty.LDAP_MANAGER_PASSWORD.key)
+    if (otpProperties.getProperty(OtpProperty.LDAP_MANAGER_PASSWORD.key)) {
+        grails.plugin.springsecurity.ldap.auth.useAuthPassword = true
+    } else {
+        grails.plugin.springsecurity.ldap.auth.useAuthPassword = false
+    }
+    grails.plugin.springsecurity.ldap.context.server            = otpProperties.getProperty(OtpProperty.LDAP_SERVER.key)
+    grails.plugin.springsecurity.ldap.search.base               = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_BASE.key)
+    grails.plugin.springsecurity.ldap.authorities.searchSubtree = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_SUBTREE.key)
+    grails.plugin.springsecurity.ldap.search.filter             = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_FILTER.key)
+
+    // static options
+    grails.plugin.springsecurity.ldap.authorities.ignorePartialResultException = true
+    grails.plugin.springsecurity.ldap.authorities.retrieveGroupRoles = false
+    grails.plugin.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
+    grails.plugin.springsecurity.ldap.mapper.userDetailsClass = 'inetOrgPerson'
+}
+
+
+
 String server = otpProperties.getProperty(OtpProperty.DATABASE_SERVER.key)
 String port = otpProperties.getProperty(OtpProperty.DATABASE_PORT.key)
 String database = otpProperties.getProperty(OtpProperty.DATABASE_SCHEMA.key)
@@ -41,6 +91,7 @@ dataSource {
     username = otpProperties.getProperty(OtpProperty.DATABASE_USERNAME.key)
     password = otpProperties.getProperty(OtpProperty.DATABASE_PASSWORD.key)
     url = "jdbc:postgresql://${server}:${port}/${database}"
+    dbCreate = "none"
 }
 
 hibernate {
@@ -59,7 +110,7 @@ environments {
         dataSource {
             //the properties are described on http://tomcat.apache.org/tomcat-7.0-doc/jdbc-pool.html
             properties {
-                maxActive = 200                                         //max parallel connection
+                maxActive = 100                                         //max parallel connection
                 maxIdle = 50                                            //max parallel idle connection
                 minIdle = 25                                            //min idle connection
                 maxAge = HOURS.toMillis(1)                              //the time after which a connection will be closed

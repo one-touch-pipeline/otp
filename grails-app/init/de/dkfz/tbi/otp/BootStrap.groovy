@@ -20,6 +20,9 @@
  * SOFTWARE.
  */
 
+package de.dkfz.tbi.otp
+
+
 import grails.converters.JSON
 import grails.plugin.springsecurity.SecurityFilterPosition
 import grails.plugin.springsecurity.SpringSecurityUtils

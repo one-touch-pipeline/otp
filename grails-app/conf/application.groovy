@@ -20,42 +20,43 @@
  * SOFTWARE.
  */
 
-import grails.util.Environment
-import org.springframework.security.access.event.AuthorizationFailureEvent
+import org.hibernate.dialect.H2Dialect
+import org.hibernate.dialect.PostgreSQL9Dialect
 
-import de.dkfz.odcf.audit.impl.DicomAuditLogger
-import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
-import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
+import static java.util.concurrent.TimeUnit.*
 
-import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
-
-Properties otpProperties = ConfigService.parsePropertiesFile()
-
+endpoints {
+    enabled = false
+    jmx {
+        enabled = true
+    }
+}
+endpoints.enabled = false
+server.session.timeout = 3*60*60 //sec
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
 grails.mime.types = [ html: [
         'text/html',
         'application/xhtml+xml',
-    ],
-    xml: [
-        'text/xml',
-        'application/xml',
-    ],
-    text: 'text/plain',
-    js: 'text/javascript',
-    rss: 'application/rss+xml',
-    atom: 'application/atom+xml',
-    css: 'text/css',
-    csv: 'text/csv',
-    all: '*/*',
-    json: [
-        'application/json',
-        'text/json',
-    ],
-    form: 'application/x-www-form-urlencoded',
-    multipartForm: 'multipart/form-data'
+],
+                      xml: [
+                              'text/xml',
+                              'application/xml',
+                      ],
+                      text: 'text/plain',
+                      js: 'text/javascript',
+                      rss: 'application/rss+xml',
+                      atom: 'application/atom+xml',
+                      css: 'text/css',
+                      csv: 'text/csv',
+                      all: '*/*',
+                      json: [
+                              'application/json',
+                              'text/json',
+                      ],
+                      form: 'application/x-www-form-urlencoded',
+                      multipartForm: 'multipart/form-data'
 ]
 
 // GSP settings
@@ -95,177 +96,36 @@ grails.web.disable.multipart=false
 // request parameters to mask when logging exceptions
 grails.exceptionresolver.params.exclude = ['password']
 
-// set per-environment serverURL stem for creating absolute links
-environments {
-    development {
-        grails.logging.jul.usebridge = true
-    }
-    production {
-        grails.logging.jul.usebridge = false
-        grails.serverURL = otpProperties.getProperty(OtpProperty.CONFIG_SERVER_URL.key)
-    }
-    WORKFLOW_TEST {
-        grails.serverURL = "http://localhost:8080"
-    }
-}
-
-
-String jobLogDir = otpProperties.getProperty(OtpProperty.PATH_JOB_LOGS.key) ?: OtpProperty.PATH_JOB_LOGS.defaultValue
-
-// log4j configuration
-log4j = {
-    appenders {
-        def jobHtmlLayout = new de.dkfz.tbi.otp.utils.logging.JobHtmlLayout()
-        def jobAppender = new de.dkfz.tbi.otp.utils.logging.JobAppender(logDirectory: new File(jobLogDir), layout : jobHtmlLayout)
-        def syslogAppender = new org.apache.log4j.net.SyslogAppender(
-            syslogHost: "localhost",
-            facility: "USER",
-            header: true,
-        )
-
-        appender name: "jobs", jobAppender
-        appender name: "dicom", syslogAppender
-
-        console name: 'stdout', threshold: Environment.getCurrent() == Environment.TEST ? org.apache.log4j.Level.OFF : org.apache.log4j.Level.DEBUG
-    }
-
-    info dicom: [
-        'de.dkfz.odcf.audit.impl'
-    ], additivity: false
-
-    error stdout: [
-            'org.codehaus.groovy.grails.web.servlet',           //  controllers
-            'org.codehaus.groovy.grails.web.pages',             //  GSP
-            'org.codehaus.groovy.grails.web.sitemesh',          //  layouts
-            'org.codehaus.groovy.grails.web.mapping.filter',    // URL mapping
-            'org.codehaus.groovy.grails.web.mapping',           // URL mapping
-            'org.codehaus.groovy.grails.commons',               // core / classloading
-            'org.codehaus.groovy.grails.plugins',               // plugins
-            'org.codehaus.groovy.grails.orm.hibernate',         // hibernate integration
-            'org.springframework',
-            'org.hibernate',
-            'net.sf.ehcache.hibernate',
-    ], additivity: false
-
-    info stdout: [
-            'liquibase',                                        // migration plugin: liquibase library
-            'grails.plugin.databasemigration',                  // migration plugin: grails
-    ], additivity: false
-
-    debug stdout: [
-            'de.dkfz.tbi.otp',                                  // our own stuff
-            'seedme',                                           // seed plugin
-            'grails.app.controllers.de.dkfz.tbi.otp',           // controllers
-            'grails.app.domain.de.dkfz.tbi.otp',
-            'grails.app.services.de.dkfz.tbi.otp',
-            'grails.app.taglib.de.dkfz.tbi.otp',
-            'grails.app.conf.BootStrap',
-            'de.dkfz.roddy.execution.jobs.cluster', //ClusterJobManager conversion errors
-    ], jobs: [
-            'de.dkfz.tbi.otp.job.jobs',
-    ], additivity: false
-}
-
-// Spring Security Authentification event listeners for logging login processes to the Dicom audit log
-grails.plugin.springsecurity.useSecurityEventListener = true
-// Login failure
-grails.plugin.springsecurity.onAbstractAuthenticationFailureEvent = { event, context ->
-    DicomAuditLogger.logUserLogin(EventOutcomeIndicator.MINOR_FAILURE, event.authentication.principal.hasProperty("username") ?
-        event.authentication.principal.username : event.authentication.principal)
-}
-// Login success, this event fires on any login, automated and interactive
-//grails.plugin.springsecurity.onAuthenticationSuccessEvent = { event, context ->
-//}
-// Login success, this event fires only on interactive (Non-automated) login
-grails.plugin.springsecurity.onInteractiveAuthenticationSuccessEvent = { event, context ->
-    DicomAuditLogger.logUserLogin(EventOutcomeIndicator.SUCCESS, event.authentication.principal.username)
-}
-// User switch
-grails.plugin.springsecurity.onAuthenticationSwitchUserEvent = { event, context ->
-    context.projectSelectionService.setSelectedProject([], 'none') //clear cache if user switched
-    DicomAuditLogger.logUserSwitched(EventOutcomeIndicator.SUCCESS,
-        getRealUserName(event.authentication.principal.getUsername()), event.getTargetUser()?.getUsername())
-}
-grails.plugin.springsecurity.onAuthorizationEvent = { event, context ->
-    if (event instanceof AuthorizationFailureEvent) {
-        DicomAuditLogger.logRestrictedFunctionUsed(EventOutcomeIndicator.MINOR_FAILURE,
-            getRealUserName(event.authentication.principal.getUsername()),
-            event.source.hasProperty("request") ? event.source.request.getRequestURI() : "null")
-    }
-}
-
-// Injection of the Dicom logout handler
-// The way used above (Adding listeners to Spring Security) would be preferred,
-// but Spring doesn't offer an interface for logout, so we had to use a bean.
-// For the bean configuration please refer to conf/spring/resources.groovy
-grails.plugin.springsecurity.logout.additionalHandlerNames = [
-   'dicomAuditLogoutHandler',
-]
 
 // Added by the Spring Security Core plugin:
 grails.plugin.springsecurity.userLookup.userDomainClassName = 'de.dkfz.tbi.otp.security.User'
 grails.plugin.springsecurity.userLookup.authorityJoinClassName = 'de.dkfz.tbi.otp.security.UserRole'
 grails.plugin.springsecurity.authority.className = 'de.dkfz.tbi.otp.security.Role'
 
-// ldap
-if (!Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.LDAP_ENABLED.key))) {
-    println("Using database only for authentication")
-    grails.plugin.springsecurity.providerNames = [
-            'daoAuthenticationProvider',
-            'anonymousAuthenticationProvider',
-    ]
-} else {
-    println("Using LDAP and database for authentication")
-    grails.plugin.springsecurity.providerNames = [
-            'ldapDaoAuthenticationProvider',
-            'anonymousAuthenticationProvider',
-    ]
-    if (otpProperties.getProperty(OtpProperty.LDAP_MANAGER_DN.key)) {
-        grails.plugin.springsecurity.ldap.context.managerDn     = otpProperties.getProperty(OtpProperty.LDAP_MANAGER_DN.key)
-    }
-    grails.plugin.springsecurity.ldap.context.managerPassword = otpProperties.getProperty(OtpProperty.LDAP_MANAGER_PASSWORD.key)
-    if (otpProperties.getProperty(OtpProperty.LDAP_MANAGER_PASSWORD.key)) {
-        grails.plugin.springsecurity.ldap.auth.useAuthPassword = true
-    } else {
-        grails.plugin.springsecurity.ldap.auth.useAuthPassword = false
-    }
-    grails.plugin.springsecurity.ldap.context.server            = otpProperties.getProperty(OtpProperty.LDAP_SERVER.key)
-    grails.plugin.springsecurity.ldap.search.base               = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_BASE.key)
-    grails.plugin.springsecurity.ldap.authorities.searchSubtree = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_SUBTREE.key)
-    grails.plugin.springsecurity.ldap.search.filter             = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_FILTER.key)
-
-    // static options
-    grails.plugin.springsecurity.ldap.authorities.ignorePartialResultException = true
-    grails.plugin.springsecurity.ldap.authorities.retrieveGroupRoles = false
-    grails.plugin.springsecurity.ldap.authorities.retrieveDatabaseRoles = true
-    grails.plugin.springsecurity.ldap.mapper.userDetailsClass = 'inetOrgPerson'
-}
 
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
         // restricted access to special pages
-        "/adminSeed/**"                                        : ["denyAll"],
-        // Hack: The dicomAuditConsolseHandler#log method is a pseudo condition
-        // that always returns true and logs the access to the console as side effect.
-        // There is sadly no other way to intercept the access to these URLs.
-        "/console/**"                                          : ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"],
-        "/plugins/console*/**"                                 : ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"],
-        "/plugins/**"                                          : ["denyAll"],
-        "/projectOverview/mmmlIdentifierMapping/**"            : ["hasRole('ROLE_MMML_MAPPING')"],
-        "/j_spring_security_switch_user"                       : ["hasRole('ROLE_SWITCH_USER')"],
+        [pattern: "/adminSeed/**"                                        , access: ["denyAll"]],
+        [pattern: "/console/**"                                          , access: ["hasRole('ROLE_ADMIN')"]],
+        [pattern: "/static/console*/**"                                  , access: ["hasRole('ROLE_ADMIN')"]],
+        [pattern: "/plugins/**"                                          , access: ["denyAll"]],
+        [pattern: "/projectOverview/mmmlIdentifierMapping/**"            , access: ["hasRole('ROLE_MMML_MAPPING')"]],
+        [pattern: "/login/impersonate"                                   , access: ["hasRole('ROLE_SWITCH_USER')"]],
 
         // publicly available pages
-        "/grails-errorhandler/**"                              : ["permitAll"],
-        "/login/**"                                            : ["permitAll"],
-        "/logout/**"                                           : ["permitAll"],
-        "/document/download/**"                                : ["permitAll"],
-        "/info/**"                                             : ["permitAll"],
-        "/privacyPolicy/index"                                 : ["permitAll"],
-        "/root/intro*"                                         : ["permitAll"],
-        "/"                                                    : ["permitAll"],
-        "/metadataImport/autoImport"                           : ["permitAll"],
+        [pattern: "/assets/**"                                           , access: ["permitAll"]],
+        [pattern: "/grails-errorhandler/**"                              , access: ["permitAll"]],
+        [pattern: "/login/**"                                            , access: ["permitAll"]],
+        [pattern: "/logout/**"                                           , access: ["permitAll"]],
+        [pattern: "/document/download/**"                                , access: ["permitAll"]],
+        [pattern: "/info/**"                                             , access: ["permitAll"]],
+        [pattern: "/privacyPolicy/index"                                 , access: ["permitAll"]],
+        [pattern: "/root/intro*"                                         , access: ["permitAll"]],
+        [pattern: "/"                                                    , access: ["permitAll"]],
+        [pattern: "/metadataImport/autoImport"                           , access: ["permitAll"]],
 
         // regular pages with access for logged-in users, protected by annotations in services
-        "/**"                                                  : ["isFullyAuthenticated()"],
+        [pattern: "/**"                                                  , access:  ["isFullyAuthenticated()"]],
 ]
 
 // hierarchy of roles
@@ -288,14 +148,15 @@ grails.plugin.springsecurity.apf.storeLastUsername = true
 grails.plugin.databasemigration.changelogLocation = 'migrations'
 grails.plugin.databasemigration.changelogFileName = 'changelog.groovy'
 grails.plugin.databasemigration.updateOnStart = true
-grails.plugin.databasemigration.updateOnStartFileNames = ['changelog.groovy', 'createSequenceViews.groovy']
-grails.plugin.databasemigration.ignoredObjects = [
+grails.plugin.databasemigration.updateOnStartFileName = "changelog.groovy"
+grails.plugin.databasemigration.excludeObjects = [
         'aggregate_sequences',
         'meta_data_key',
         'sequences',
+        'seed_me_checksum',
 ]
 
-// WARNING: This setting (same as this entire Config.groovy) has no effect on unit tests. See:
+// WARNING: This setting (same as this entire application.groovy) has no effect on unit tests. See:
 // * OTP-1126
 // * http://grails.1312388.n4.nabble.com/unit-testing-grails-gorm-failOnError-true-td4231435.html
 // * http://grails.1312388.n4.nabble.com/Unit-testing-with-failOnError-true-td2718543.html
@@ -304,6 +165,9 @@ grails.gorm.failOnError=true
 // Shared constraints
 grails.gorm.default.constraints = {
     greaterThanZero validator: { val, obj -> val > 0 }
+}
+grails.gorm.default.mapping = {
+    id generator:'sequence'
 }
 
 // Documentation settings
@@ -314,13 +178,9 @@ grails.doc.authors = 'The OTP Development Team'
 grails.databinding.convertEmptyStringsToNull = false
 grails.databinding.trimStrings = false
 
-//For ega submissions lists can be very large. Default the limit is 256.
-//See https://grails.github.io/grails2-doc/2.5.1/guide/single.html#dataBinding
-grails.databinding.autoGrowCollectionLimit = Integer.MAX_VALUE
 
-
+//disable mail sending for tests
 environments {
-    //disable mail sending for tests
     WORKFLOW_TEST {
         grails.mail.disabled=true
     }
@@ -338,10 +198,5 @@ environments {
     }
 }
 
-grails.mail.host = otpProperties.getProperty(OtpProperty.CONFIG_EMAIL_SERVER.key) ?: OtpProperty.CONFIG_EMAIL_SERVER.defaultValue
-grails.mail.port = (otpProperties.getProperty(OtpProperty.CONFIG_EMAIL_PORT.key) ?: OtpProperty.CONFIG_EMAIL_PORT.defaultValue) as int
-grails.mail.username = otpProperties.getProperty(OtpProperty.CONFIG_EMAIL_USERNAME.key) ?: OtpProperty.CONFIG_EMAIL_USERNAME.defaultValue
-grails.mail.password = otpProperties.getProperty(OtpProperty.CONFIG_EMAIL_PASSWORD.key) ?: OtpProperty.CONFIG_EMAIL_PASSWORD.defaultValue
-
 grails.plugin.console.enabled = true
-grails.plugin.console.baseUrl="/${appName}/console"
+grails.plugin.console.baseUrl="/console"
