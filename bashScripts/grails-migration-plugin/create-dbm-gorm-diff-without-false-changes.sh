@@ -23,28 +23,20 @@
 set -e
 
 if [ ! "$1" ]; then
-    echo "Please provide a filename (without suffix) and optionally '--add'"
-    exit 1
-fi
-
-if [ "$2" -a "$2" != "--add" ]; then
-    echo "Unknown argument '$2'"
+    echo "Please provide a filename (without suffix)"
     exit 1
 fi
 
 # see http://grails-plugins.github.io/grails-database-migration/1.4.0/ref/Diff%20Scripts/dbm-gorm-diff.html for reference
 # $1 is the filename
-# $2 additional parameter --add, to add directly to changelog.groovy
 year=`date +'%Y'`
-#dbm-gorm-diff adds automatically the directory 'migrations', but mkdir not
+#dbm-gorm-diff adds automatically the directory 'migrations', but mkdir does not
 mkdir -p migrations/changelogs/${year}
-grails dbm-gorm-diff changelogs/${year}/${1}.groovy $2
+bash gradlew dbmGormDiff -q > migrations/changelogs/${year}/${1}.groovy
 
-
-prefix="s/\n\tchangeSet.*\n\t\t"
-suffix=".*\n\t\}\n//g"
+prefix="s/\n\s{4}changeSet.*\n\s{8}"
+suffix=".*\n\s{4}\}\n//g"
 changelogPath="migrations/changelogs/${year}/${1}.groovy"
-indices="(_class_idx)|(config_per_project_project_seqtype_pipeline_individual_idx)"
 tables="(job_error_definition_job_error_definition)|(aceseq_instance_roddy_execution_directory_names)|(externally_processed_merged_bam_file_further_files)|\
 (import_process_externally_processed_merged_bam_file)|(merging_work_package_seq_track)|(indel_calling_instance_roddy_execution_directory_names)|\
 (job_error_definition_job_definition)|(roddy_bam_file_seq_track)|(roddy_snv_calling_instance_roddy_execution_directory_names)|\
@@ -54,24 +46,17 @@ tables="(job_error_definition_job_error_definition)|(aceseq_instance_roddy_execu
 (ega_submission_bam_file_submission_object)|(ega_submission_data_file_submission_object)|(ega_submission_sample_submission_object)|\
 (cluster_job_cluster_job)|(job_definition_parameter)"
 
-perl -0pi -e "${prefix}.*\"meta_data_key\".*\n.*\n${suffix}" $changelogPath
 perl -0pi -e "${prefix}.*file_system_changes_idx${suffix}" $changelogPath
-perl -0pi -e "${prefix}dropIndex\(.*(${indices})\"${suffix}" $changelogPath
-perl -0pi -e "${prefix}modifyDataType.*newDataType: \"((boolean)|(int4))\"${suffix}" $changelogPath
-perl -0pi -e "${prefix}.*ableName: \"(${tables})\"${suffix}" $changelogPath
+perl -0pi -e "${prefix}((dropPrimaryKey)|(dropNotNullConstraint)|(dropUniqueConstraint)|(dropForeignKeyConstraint)).*ableName: \"(${tables})\"${suffix}" $changelogPath
+perl -0pi -e "${prefix}dropIndex.*\n\n\s{8}createIndex.*\{(\n\s{12}column.*\n)+\s{8}\}${suffix}" $changelogPath
+perl -0pi -e "${prefix}dropUniqueConstraint.*\n\n\s{8}addUniqueConstraint${suffix}" $changelogPath
+perl -0pi -e "${prefix}addUniqueConstraint.*columnNames: \"((alignment_pass_id)|(merging_pass_id))\".*tableName: \"abstract_bam_file\"${suffix}" $changelogPath
 perl -0pi -e "s/databaseChangeLog = \{\n\}\n//g" $changelogPath
 
 if [ ! -s $changelogPath ]; then
-    if [ "$2" ]; then
-        perl -0pi -e "s/\n\tinclude file: \'changelogs\/${year}\/${1}.groovy\'\n//g" migrations/changelog.groovy
-    fi
     rm $changelogPath
     echo "No changes found, file was automatically deleted"
 else
     perl -0pi -e "s/\t/    /g" $changelogPath
     echo "Created file '$changelogPath'"
-    if [ "$2" ]; then
-        perl -0pi -e "s/\t/    /g" migrations/changelog.groovy
-        echo "Added file to 'migrations/changelog.groovy'"
-    fi
 fi

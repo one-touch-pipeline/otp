@@ -157,7 +157,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
             logMessages: LogMessage,
     ]
     static constraints = {
-        laneId(validator: { OtpPath.isValidPathComponent(it) })
+        laneId(unique: ['run', 'cellPosition'], validator: { OtpPath.isValidPathComponent(it) })
         hasOriginalBam()
         seqType()
         sample()
@@ -181,7 +181,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
         normalizedLibraryName(nullable: true, validator: { String val, SeqTrack obj ->
             (val == null) ? (obj.libraryName == null) : (val == normalizeLibraryName(obj.libraryName))
         })
-        cellPosition nullable: true, unique: ['run', 'laneId']
+        cellPosition nullable: true
         problem nullable: true
     }
 

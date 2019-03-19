@@ -46,13 +46,11 @@ environments {
 
 // ldap
 if (!Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.LDAP_ENABLED.key))) {
-    println("Using database only for authentication")
     grails.plugin.springsecurity.providerNames = [
             'daoAuthenticationProvider',
             'anonymousAuthenticationProvider',
     ]
 } else {
-    println("Using LDAP and database for authentication")
     grails.plugin.springsecurity.providerNames = [
             'ldapDaoAuthenticationProvider',
             'anonymousAuthenticationProvider',

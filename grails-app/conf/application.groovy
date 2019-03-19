@@ -20,9 +20,6 @@
  * SOFTWARE.
  */
 
-import org.hibernate.dialect.H2Dialect
-import org.hibernate.dialect.PostgreSQL9Dialect
-
 import static java.util.concurrent.TimeUnit.*
 
 endpoints {
@@ -144,11 +141,12 @@ grails.plugin.springsecurity.adh.errorPage = null
 grails.plugin.springsecurity.apf.storeLastUsername = true
 //*/
 
+grails.plugin.springsecurity.printStatusMessages = false
 
 grails.plugin.databasemigration.changelogLocation = 'migrations'
-grails.plugin.databasemigration.changelogFileName = 'changelog.groovy'
+grails.plugin.databasemigration.changelogFileName = 'migration-wrapper.groovy'
 grails.plugin.databasemigration.updateOnStart = true
-grails.plugin.databasemigration.updateOnStartFileName = "changelog.groovy"
+grails.plugin.databasemigration.updateOnStartFileName = "migration-wrapper.groovy"
 grails.plugin.databasemigration.excludeObjects = [
         'aggregate_sequences',
         'meta_data_key',
