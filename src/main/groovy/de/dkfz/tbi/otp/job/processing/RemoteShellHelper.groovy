@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.LocalShellHelper
-import de.dkfz.tbi.otp.utils.LocalShellHelper.ProcessOutput
+import de.dkfz.tbi.otp.utils.ProcessOutput
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.util.concurrent.Semaphore
