@@ -220,7 +220,7 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
     }
 
     File getBaseDirectory() {
-        String antiBodyTarget = seqType.isChipSeq() ? "-${((MergingWorkPackage) mergingWorkPackage).antibodyTarget.name}" : ''
+        String antiBodyTarget = seqType.hasAntibodyTarget ? "-${((MergingWorkPackage) mergingWorkPackage).antibodyTarget.name}" : ''
         OtpPath viewByPid = individual.getViewByPidPath(seqType)
         OtpPath path = new OtpPath(
                 viewByPid,

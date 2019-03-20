@@ -20,41 +20,35 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+databaseChangeLog = {
 
-/**
- * Holds possible seqType names for using in the code
- */
-enum SeqTypeNames {
-    _10X_SCRNA("10x_scRNA"),
-    WHOLE_GENOME,
-    WHOLE_GENOME_BISULFITE,
-    RNA,
-    MI_RNA,
-    EXOME("EXON", ExomeSeqTrack),
-    MEDIP,
-    SNC_RNA("sncRNA"),
-    CHIP_SEQ("ChIP Seq", ChipSeqSeqTrack),
-    WHOLE_GENOME_BISULFITE_TAGMENTATION
-
-    /**
-     * the name of the seq type
-     */
-    final String seqTypeName
-
-    final Class<? extends SeqTrack> seqTrackClass
-
-    private SeqTypeNames(String seqTypeName = null,
-                         Class<? extends SeqTrack> seqTrackClass = SeqTrack) {
-        this.seqTypeName = seqTypeName ?: name()
-        this.seqTrackClass = seqTrackClass
+    changeSet(author: "borufka (generated)", id: "1553072107377-162") {
+        createIndex(indexName: "seq_type__dir_name_idx", tableName: "seq_type") {
+            column(name: "dir_name")
+        }
     }
 
-    boolean isWgbs() {
-        return SeqType.WGBS_SEQ_TYPE_NAMES.contains(this)
+    changeSet(author: "borufka (generated)", id: "1553072107377-163") {
+        createIndex(indexName: "seq_type__display_name_idx", tableName: "seq_type") {
+            column(name: "display_name")
+        }
     }
 
-    static SeqTypeNames fromSeqTypeName(String seqTypeName) {
-        return values().find { it.seqTypeName == seqTypeName }
+    changeSet(author: "borufka (generated)", id: "1553072107377-165") {
+        createIndex(indexName: "seq_type__library_layout_idx", tableName: "seq_type") {
+            column(name: "library_layout")
+        }
+    }
+
+    changeSet(author: "borufka (generated)", id: "1553072107377-166") {
+        createIndex(indexName: "seq_type__name_idx", tableName: "seq_type") {
+            column(name: "name")
+        }
+    }
+
+    changeSet(author: "borufka (generated)", id: "1553072107377-167") {
+        createIndex(indexName: "seq_type__single_cell_idx", tableName: "seq_type") {
+            column(name: "single_cell")
+        }
     }
 }

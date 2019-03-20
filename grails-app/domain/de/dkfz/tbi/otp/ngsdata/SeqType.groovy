@@ -68,6 +68,11 @@ class SeqType implements Entity {
     /** name used in roddy config files */
     String roddyName
 
+    /**
+     * Indicates, if the SeqType require antibodyTarget
+     */
+    boolean hasAntibodyTarget = false
+
     static hasMany = [importAlias : String]
 
     static constraints = {
@@ -90,6 +95,15 @@ class SeqType implements Entity {
         roddyName(nullable: true, blank: false, validator: {
             !it?.contains('_')  // Roddy has problems with underscores
         })
+    }
+
+    static mapping = {
+        name index: 'seq_type__name_idx'
+        dirName index: 'seq_type__dir_name_idx'
+        displayName index: 'seq_type__display_name_idx'
+        libraryLayout index: 'seq_type__library_layout_idx'
+        singleCell index: 'seq_type__single_cell_idx'
+        hasAntibodyTarget index: 'seq_type__has_antibody_target_idx'
     }
 
     /**

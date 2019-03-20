@@ -20,41 +20,10 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+UPDATE seq_type
+SET has_antibody_target = TRUE
+WHERE name = 'ChIP Seq';
 
-/**
- * Holds possible seqType names for using in the code
- */
-enum SeqTypeNames {
-    _10X_SCRNA("10x_scRNA"),
-    WHOLE_GENOME,
-    WHOLE_GENOME_BISULFITE,
-    RNA,
-    MI_RNA,
-    EXOME("EXON", ExomeSeqTrack),
-    MEDIP,
-    SNC_RNA("sncRNA"),
-    CHIP_SEQ("ChIP Seq", ChipSeqSeqTrack),
-    WHOLE_GENOME_BISULFITE_TAGMENTATION
-
-    /**
-     * the name of the seq type
-     */
-    final String seqTypeName
-
-    final Class<? extends SeqTrack> seqTrackClass
-
-    private SeqTypeNames(String seqTypeName = null,
-                         Class<? extends SeqTrack> seqTrackClass = SeqTrack) {
-        this.seqTypeName = seqTypeName ?: name()
-        this.seqTrackClass = seqTrackClass
-    }
-
-    boolean isWgbs() {
-        return SeqType.WGBS_SEQ_TYPE_NAMES.contains(this)
-    }
-
-    static SeqTypeNames fromSeqTypeName(String seqTypeName) {
-        return values().find { it.seqTypeName == seqTypeName }
-    }
-}
+UPDATE seq_type
+SET has_antibody_target = FALSE
+WHERE has_antibody_target IS NULL;

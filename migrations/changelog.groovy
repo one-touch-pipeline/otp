@@ -171,4 +171,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2019/add-unique-constraints-required-by-migration-plugin.groovy'
+
+    include file: 'changelogs/2019/make-anitbody-configureable-in-seqtype.groovy'
+
+    include file: 'changelogs/2019/create-missing-indexes-in-seqtype.groovy'
 }

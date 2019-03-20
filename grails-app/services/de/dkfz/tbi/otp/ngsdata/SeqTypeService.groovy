@@ -293,4 +293,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         ].flatten().unique()
     }
 
+    static List<SeqType> getSeqTypesWithAntibodyTarget() {
+        return SeqType.findAllByHasAntibodyTarget(true)
+    }
 }

@@ -393,14 +393,13 @@ class MetadataImportService {
                     seqTypeMaybeTagmentationName(seqTypeRaw, tagmentationRaw),
                     [libraryLayout: libLayout, singleCell: isSingleCell]
             )
-            SeqTypeNames seqTypeName = seqType.seqTypeName
             String pipelineVersionString = uniqueColumnValue(rows, PIPELINE_VERSION) ?: 'unknown'
             String sampleIdString = uniqueColumnValue(rows, SAMPLE_ID)
             String libPrepKitString = uniqueColumnValue(rows, LIB_PREP_KIT)
             InformationReliability kitInfoReliability
             LibraryPreparationKit libraryPreparationKit = null
             if (!libPrepKitString) {
-                assert seqTypeName != SeqTypeNames.EXOME
+                assert !seqType.isExome()
                 kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
             } else if (libPrepKitString == InformationReliability.UNKNOWN_VERIFIED.rawValue) {
                 kitInfoReliability = InformationReliability.UNKNOWN_VERIFIED
@@ -426,7 +425,7 @@ class MetadataImportService {
                     libraryName: libraryName,
                     normalizedLibraryName: normalizedLibraryName,
             ]
-            if (seqTypeName == SeqTypeNames.CHIP_SEQ) {
+            if (seqType.hasAntibodyTarget) {
                 properties['antibodyTarget'] = exactlyOneElement(AntibodyTarget.findAllByNameIlike(
                         escapeForSqlLike(uniqueColumnValue(rows, ANTIBODY_TARGET))))
                 properties['antibody'] = uniqueColumnValue(rows, ANTIBODY) ?: null
@@ -436,7 +435,9 @@ class MetadataImportService {
                 properties['cellPosition'] = sampleIdentifierService.parseCellPosition(sampleIdString, project)
             }
 
-            SeqTrack seqTrack = (seqTypeName?.factory ?: SeqTrack.FACTORY).call(properties)
+            SeqTrack seqTrack = seqType.isExome() ? new ExomeSeqTrack(properties) :
+                    seqType.hasAntibodyTarget ? new ChipSeqSeqTrack(properties) :
+                            new SeqTrack(properties)
             assert seqTrack.save()
 
             Long timeStarted = System.currentTimeMillis()

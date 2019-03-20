@@ -183,24 +183,26 @@ class AbstractMergingWorkPackageSpec extends Specification {
 
     void "constraint for antibodyTarget, when seqType is chip seq and antibodyTarget is not set, then validate should create errors"() {
         when:
+        SeqType seqtype = DomainFactory.createChipSeqType()
         AbstractMergingWorkPackage workPackage = createTestAbstractMergingWorkPackage([
-                seqType       : DomainFactory.createChipSeqType(),
+                seqType       : seqtype,
                 antibodyTarget: null,
         ])
 
         then:
-        TestCase.assertValidateError(workPackage, 'antibodyTarget', 'For ChipSeq the antibody target have to be set', workPackage.antibodyTarget)
+        TestCase.assertValidateError(workPackage, 'antibodyTarget', "For seqtype '${seqtype}' the antibody target have to be set", workPackage.antibodyTarget)
     }
 
     void "constraint for antibodyTarget, when seqType is not chip seq and antibodyTarget is set, then validate should create errors"() {
         when:
+        SeqType seqType = DomainFactory.createSeqType()
         AbstractMergingWorkPackage workPackage = createTestAbstractMergingWorkPackage([
-                seqType       : DomainFactory.createSeqType(),
+                seqType       : seqType,
                 antibodyTarget: DomainFactory.createAntibodyTarget(),
         ])
 
         then:
-        TestCase.assertValidateError(workPackage, 'antibodyTarget', 'For non ChipSeq the antibody target may not be set', workPackage.antibodyTarget)
+        TestCase.assertValidateError(workPackage, 'antibodyTarget', "For seqtype '${seqType}' the antibody target may not be set", workPackage.antibodyTarget)
     }
 
     TestAbstractMergingWorkPackage createTestAbstractMergingWorkPackage(Map properties) {

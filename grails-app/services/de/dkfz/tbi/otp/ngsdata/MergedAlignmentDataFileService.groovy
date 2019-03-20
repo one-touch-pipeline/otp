@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+
 class MergedAlignmentDataFileService {
 
     FileTypeService fileTypeService
@@ -51,11 +53,11 @@ class MergedAlignmentDataFileService {
     }
 
     /**
-     * @deprecated can not handle chipseq correctly , bamfile.baseDirectory instead
+     * @deprecated can not handle {@link SeqType} with {@link AntibodyTarget} correctly, use {@link AbstractMergedBamFile#getBaseDirectory()}  instead
      */
     @Deprecated
     static String buildRelativePath(SeqType type, Sample sample) {
-        assert !type.isChipSeq()
+        assert !type.hasAntibodyTarget
         // this method is also used in the ProcessedMergedBamFileService,
         // if this method is changed make sure that the path in the ProcessedMergedBamFileService is still correct
         String sampleType = sample.sampleType.dirName

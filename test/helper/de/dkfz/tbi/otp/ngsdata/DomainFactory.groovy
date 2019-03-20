@@ -796,7 +796,7 @@ class DomainFactory {
         if (!base.seqType.isWgbs()) {
             mergingProperties.add("libraryPreparationKit")
         }
-        if (base.seqType.isChipSeq()) {
+        if (base.seqType.hasAntibodyTarget) {
             mergingProperties.add("antibodyTarget")
         }
 
@@ -1593,7 +1593,7 @@ class DomainFactory {
     }
 
     static SeqTrack createSeqTrack(Map properties = [:]) {
-        if (properties.seqType?.isChipSeq()) {
+        if (properties.seqType?.hasAntibodyTarget) {
             return createChipSeqSeqTrack(properties)
         }
         if (properties.seqType?.isExome()) {
@@ -1629,7 +1629,7 @@ class DomainFactory {
                 sample               : { createSample() },
                 seqPlatformGroup     : { createSeqPlatformGroup() },
                 referenceGenome      : { createReferenceGenome() },
-                antibodyTarget       : { properties.seqType?.isChipSeq() ? createAntibodyTarget() : null },
+                antibodyTarget       : { properties.seqType?.hasAntibodyTarget ? createAntibodyTarget() : null },
         ]
     }
 
@@ -1778,7 +1778,7 @@ class DomainFactory {
                 libraryPreparationKit: mergingWorkPackage.libraryPreparationKit,
                 run                  : createRun(seqPlatform: seqPlatform),
         ]
-        if (mergingWorkPackage.seqType.isChipSeq()) {
+        if (mergingWorkPackage.seqType.hasAntibodyTarget) {
             properties += [
                     antibodyTarget: mergingWorkPackage.antibodyTarget,
             ]
@@ -1810,7 +1810,7 @@ class DomainFactory {
         SeqTrack seqTrack
         if (seqTrackProperties.seqType?.name == SeqTypeNames.EXOME.seqTypeName) {
             seqTrack = createExomeSeqTrack(seqTrackProperties)
-        } else if (seqTrackProperties.seqType?.name == SeqTypeNames.CHIP_SEQ.seqTypeName) {
+        } else if (seqTrackProperties.seqType?.hasAntibodyTarget) {
             seqTrack = createChipSeqSeqTrack(seqTrackProperties)
         } else {
             seqTrack = createSeqTrack(seqTrackProperties)
@@ -1965,14 +1965,17 @@ class DomainFactory {
      * creation of the different seqTypes.
      */
     @Deprecated
-    private static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName, String roddyName = null, LibraryLayout libraryLayout = LibraryLayout.PAIRED, boolean singleCell = false) {
+    private static SeqType createSeqTypeLazy(SeqTypeNames seqTypeNames, String displayName, String dirName,
+                                             String roddyName = null, LibraryLayout libraryLayout = LibraryLayout.PAIRED,
+                                             boolean singleCell = false, boolean hasAntibodyTarget = false) {
         findOrCreateDomainObject(SeqType, [:], [
-                name         :  seqTypeNames.seqTypeName,
-                displayName  :  displayName,
-                dirName      :  dirName,
-                roddyName    :  roddyName,
-                libraryLayout:  libraryLayout,
-                singleCell   :  singleCell
+                name             : seqTypeNames.seqTypeName,
+                displayName      : displayName,
+                dirName          : dirName,
+                roddyName        : roddyName,
+                libraryLayout    : libraryLayout,
+                singleCell       : singleCell,
+                hasAntibodyTarget: hasAntibodyTarget,
         ]).refresh()
     }
 
@@ -1993,7 +1996,7 @@ class DomainFactory {
     }
 
     static SeqType createChipSeqType(LibraryLayout libraryLayout = LibraryLayout.PAIRED) {
-        createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ", libraryLayout)
+        createSeqTypeLazy(SeqTypeNames.CHIP_SEQ, 'ChIP', 'chip_seq_sequencing', "CHIPSEQ", libraryLayout, false, true)
     }
 
     static SeqType createRnaPairedSeqType() {

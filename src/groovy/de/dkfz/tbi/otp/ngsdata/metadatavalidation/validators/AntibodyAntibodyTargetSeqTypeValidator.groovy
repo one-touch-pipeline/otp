@@ -22,10 +22,10 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.MetadataImportService
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -35,39 +35,61 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 @Component
 class AntibodyAntibodyTargetSeqTypeValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
 
+    @Autowired
+    SeqTypeService seqTypeService
+
     @Override
     Collection<String> getDescriptions() {
+        String seqTypeString = seqTypesStringWithAntibody()
         return [
-                "Antibody target must be given if the sequencing type is '${SeqTypeNames.CHIP_SEQ.seqTypeName}'.",
-                "Antibody target and antibody should not be given if the sequencing type is not '${SeqTypeNames.CHIP_SEQ.seqTypeName}'.",
+                "Antibody target must be given if the sequencing type is ${seqTypeString}.",
+                "Antibody target and antibody should not be given if the sequencing type is not ${seqTypeString}.",
         ]
+    }
+
+    private String seqTypesStringWithAntibody() {
+        return seqTypeService.seqTypesWithAntibodyTarget.collect {
+            "'${it}'".toString()
+        }.sort().join(', ')
     }
 
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [SEQUENCING_TYPE]*.name()
+        return [SEQUENCING_TYPE, LIBRARY_LAYOUT]*.name()
     }
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [ANTIBODY_TARGET, ANTIBODY, TAGMENTATION_BASED_LIBRARY]*.name()
+        return [ANTIBODY_TARGET, ANTIBODY, TAGMENTATION_BASED_LIBRARY, BASE_MATERIAL]*.name()
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { ValueTuple valueTuple ->
             String antibodyTarget = valueTuple.getValue(ANTIBODY_TARGET.name()) ?: ""
             String antibody = valueTuple.getValue(ANTIBODY.name()) ?: ""
-            String seqType = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
+            String seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
 
-            if ((antibodyTarget || antibody) && seqType != SeqTypeNames.CHIP_SEQ.seqTypeName) {
-                context.addProblem(valueTuple.cells, Level.WARNING, "Antibody target ('${antibodyTarget}') and/or antibody ('${antibody}') are/is provided although data is no ChIP seq data. OTP will ignore the values.", "Antibody target and/or antibody are/is provided although data is no ChIP seq data. OTP will ignore the values.")
+            String baseMaterial = valueTuple.getValue(BASE_MATERIAL.name())
+            boolean isSingleCell = SeqTypeService.isSingleCell(baseMaterial)
+
+            LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(LIBRARY_LAYOUT.name()))
+
+            SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayout, singleCell: isSingleCell])
+
+            if (!seqType) {
+                return
             }
-            if (seqType == SeqTypeNames.CHIP_SEQ.seqTypeName && !antibodyTarget) {
-                context.addProblem(valueTuple.cells, Level.ERROR, "Antibody target is not provided although data is ChIP seq data.")
+
+            if ((antibodyTarget || antibody) && !seqType.hasAntibodyTarget) {
+                context.addProblem(valueTuple.cells, Level.WARNING, "Antibody target ('${antibodyTarget}') and/or antibody ('${antibody}') are/is provided although the SeqType '${seqType} do not support it. OTP will ignore the values.", "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values.")
+            }
+            if (seqType.hasAntibodyTarget && !antibodyTarget) {
+                context.addProblem(valueTuple.cells, Level.ERROR, "Antibody target is not provided although the SeqType '${seqType}' require it.", "Antibody target is not provided for SeqType require AntibodyTarget")
             }
         }
     }

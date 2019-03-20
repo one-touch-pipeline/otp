@@ -82,19 +82,20 @@ class MetaDataFieldsController implements CheckAndCall {
 
         List seqTypes = SeqType.list(sort: "name", order: "asc").collect {
             [
-                    id            : SeqType.findAllByName(it.name)*.id?.sort()?.first(),
-                    name          : it.name,
-                    dirName       : it.dirName,
-                    singleCell    : it.singleCell,
-                    libraryLayouts: SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().reverse().join(' | '),
-                    layouts       :
+                    id               : SeqType.findAllByName(it.name)*.id?.sort()?.first(),
+                    name             : it.name,
+                    dirName          : it.dirName,
+                    singleCell       : it.singleCell,
+                    hasAntibodyTarget: it.hasAntibodyTarget,
+                    libraryLayouts   : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().reverse().join(' | '),
+                    layouts          :
                             [
                                     SINGLE   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.SINGLE, it.singleCell) ? true : false,
                                     PAIRED   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.PAIRED, it.singleCell) ? true : false,
                                     MATE_PAIR: SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.MATE_PAIR, it.singleCell) ? true : false,
                             ],
-                    displayName   : it.displayName,
-                    importAliases : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(' | '),
+                    displayName      : it.displayName,
+                    importAliases    : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(' | '),
             ]
         }.unique()
 
@@ -164,7 +165,12 @@ class MetaDataFieldsController implements CheckAndCall {
 
     JSON createSeqType(CreateSeqTypeCommand cmd) {
         checkErrorAndCallMethod(cmd, {
-            seqTypeService.createMultiple(cmd.type, cmd.getLibraryLayouts(), [dirName: cmd.dirName, displayName: cmd.displayName, singleCell: cmd.singleCell])
+            seqTypeService.createMultiple(cmd.type, cmd.getLibraryLayouts(), [
+                    dirName: cmd.dirName,
+                    displayName: cmd.displayName,
+                    singleCell: cmd.singleCell,
+                    hasAntibodyTarget: cmd.hasAntibodyTarget,
+            ])
         })
     }
 
@@ -175,6 +181,7 @@ class MetaDataFieldsController implements CheckAndCall {
                     dirName: seqType.dirName,
                     displayName: seqType.displayName,
                     singleCell: cmd.singleCell,
+                    hasAntibodyTarget: seqType.hasAntibodyTarget,
             ], seqType.importAlias.toList())
         })
     }
@@ -432,6 +439,7 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
     String type
     String dirName
     String displayName
+    boolean hasAntibodyTarget
 
     static constraints = {
         type(blank: false, validator: { val, obj ->

@@ -265,6 +265,7 @@
                     <tr>
                         <th><g:message code="dataFields.listSeqType"/></th>
                         <th><g:message code="dataFields.listSingleCell"/></th>
+                        <th><g:message code="dataFields.listSeqTypeSupportAntibody"/></th>
                         <th><g:message code="dataFields.listSeqTypeDir"/></th>
                         <th><g:message code="dataFields.listSeqTypeLayouts"/></th>
                         <th></th>
@@ -281,6 +282,14 @@
                         </td>
                         <td>
                             ${seqType.singleCell}
+                        </td>
+                        <td>
+                            <g:if test="${seqType.hasAntibodyTarget}">
+                                <g:message code="dataFields.listSeqType.antibody.yes"/>
+                            </g:if>
+                            <g:else>
+                                <g:message code="dataFields.listSeqType.antibody.no"/>
+                            </g:else>
                         </td>
                         <td>
                             ${seqType.dirName}
@@ -314,7 +323,7 @@
                         </td>
                     </tr>
                 </g:each>
-                <td colspan="3">
+                <td colspan="4">
                     <div class="edit-switch edit-switch-new-free-text-values">
                         <span class="edit-switch-editor" style="display: none">
                             <h4>
@@ -368,6 +377,16 @@
                                         </td>
                                         <td colspan="1" valign="top" class="name">
                                             <input name="singleCell" id="singleCell" type="checkbox"/>
+                                        </td>
+                                    </tr>
+                                    <tr class="prop">
+                                        <td colspan="1" valign="top" class="name">
+                                            <label for="hasAntibodyTarget">
+                                                <g:message code="dataFields.seqType.hasAntibodyTarget"/>
+                                            </label>
+                                        </td>
+                                        <td colspan="1" valign="top" class="name">
+                                            <input name="hasAntibodyTarget" id="hasAntibodyTarget" type="checkbox"/>
                                         </td>
                                     </tr>
                                     <tr class="prop">

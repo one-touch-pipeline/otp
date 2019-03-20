@@ -103,8 +103,8 @@ class DataSwapService {
         assert seqTrack.class == seqTrack.seqType.seqTrackClass
         if (seqTrack.seqType.id != newSeqType.id) {
             if (seqTrack.class != newSeqType.seqTrackClass) {
-                if (newSeqType.name == SeqTypeNames.CHIP_SEQ.name()) {
-                    throw new UnsupportedOperationException("Changing to ${SeqTypeNames.CHIP_SEQ.name()} is not supported yet.")
+                if (newSeqType.hasAntibodyTarget) {
+                    throw new UnsupportedOperationException("Changing to ${newSeqType} is not supported yet because new need antibody, which is not avilable.")
                 }
                 Sql sql = new Sql(dataSource)
                 assert 1 == sql.executeUpdate("update seq_track set class = ${newSeqType.seqTrackClass.name} " +

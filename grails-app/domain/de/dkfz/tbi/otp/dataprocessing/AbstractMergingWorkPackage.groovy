@@ -63,13 +63,13 @@ abstract class AbstractMergingWorkPackage implements Entity {
         }
         antibodyTarget nullable: true, validator: { AntibodyTarget val, AbstractMergingWorkPackage obj ->
             if (obj.seqType) {
-                if (obj.seqType.isChipSeq()) {
+                if (obj.seqType.hasAntibodyTarget) {
                     if (val == null) {
-                        return 'For ChipSeq the antibody target have to be set'
+                        return "For seqtype '${obj.seqType}' the antibody target have to be set"
                     }
                 } else {
                     if (val != null) {
-                        return 'For non ChipSeq the antibody target may not be set'
+                        return "For seqtype '${obj.seqType}' the antibody target may not be set"
                     }
                 }
             } else {

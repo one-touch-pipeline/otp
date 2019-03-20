@@ -412,7 +412,7 @@ class CreateNotificationTextService {
             String projectDir = it.project.projectDirectory
             String seqTypeDir = it.seqType.dirName
             String layout = it.seqType.libraryLayoutDirName
-            String antiBodyTarget = it.seqType.isChipSeq() ? '-${ANTI_BODY_TARGET}' : ''
+            String antiBodyTarget = it.seqType.hasAntibodyTarget ? '-${ANTI_BODY_TARGET}' : ''
             "${projectDir}/sequencing/" +
                     "${seqTypeDir}/" +
                     "view-by-pid/${pid}/" +

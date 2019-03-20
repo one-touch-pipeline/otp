@@ -29,8 +29,7 @@ import org.joda.time.LocalDate
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.context.ApplicationContext
-import spock.lang.Specification
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
@@ -834,6 +833,174 @@ ${ILSE_NO}                      -             1234          1234          -     
         true      | false           | true  | RunSegment.ImportMode.MANUAL
     }
 
+
+    @SuppressWarnings(["MethodSize", "AbcMetric"])
+    void "importMetadataFile imports correctly data withAntibodyTarget"() {
+        given:
+        String runName = 'run'
+        Date date = new LocalDate(2000, 1, 1).toDate()
+        String dateString = date.format("yyyy-MM-dd")
+        String fastq1 = "fastq_1.gz"
+        String fastq2 = "fastq_2.gz"
+        String md5sum1 = HelperUtils.randomMd5sum
+        String md5sum2 = HelperUtils.randomMd5sum
+
+        SeqType seqTypeWithAntibodyTarget = DomainFactory.createSeqType([
+                libraryLayout    : LibraryLayout.PAIRED,
+                hasAntibodyTarget: true,
+        ])
+        SeqCenter seqCenter = DomainFactory.createSeqCenter()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
+        AntibodyTarget antibodyTarget = DomainFactory.createAntibodyTarget()
+        SoftwareToolIdentifier softwareToolIdentifier = DomainFactory.createSoftwareToolIdentifier([
+                softwareTool: DomainFactory.createSoftwareTool([
+                        type: SoftwareTool.Type.BASECALLING,
+                ]),
+        ])
+        FileType fileType = DomainFactory.createFileType(
+                type: FileType.Type.SEQUENCE,
+                signature: '_',
+        )
+
+        MetadataImportService service = new MetadataImportService()
+        service.sampleIdentifierService = Mock(SampleIdentifierService) {
+            0 * _
+        }
+        service.seqTrackService = Mock(SeqTrackService) {
+            1 * decideAndPrepareForAlignment(!null)
+            1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
+        }
+        service.seqPlatformService = Mock(SeqPlatformService) {
+            1 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
+            0 * _
+        }
+        service.seqTypeService = Mock(SeqTypeService) {
+            1 * findByNameOrImportAlias(seqTypeWithAntibodyTarget.name, [
+                    libraryLayout: seqTypeWithAntibodyTarget.libraryLayout,
+                    singleCell: seqTypeWithAntibodyTarget.singleCell,
+            ]) >> seqTypeWithAntibodyTarget
+            0 * _
+        }
+
+        GroovyMock(SamplePair, global: true)
+        1 * SamplePair.findMissingDiseaseControlSamplePairs() >> []
+
+        File file = new File(new File(TestCase.uniqueNonExistentPath, runName), 'metadata.tsv')
+        DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
+            _ * getRequiredColumnTitles() >> [FASTQ_FILE.name()]
+            _ * getDataFilePath(_, _) >> { MetadataValidationContext context, Row row ->
+                return Paths.get(file.parent, row.getCellByColumnTitle(FASTQ_FILE.name()).text)
+            }
+        }
+
+        String metadata = """
+${FASTQ_FILE}                   ${fastq1}                                   ${fastq2}
+${MD5}                          ${md5sum1}                                  ${md5sum2}
+${RUN_ID}                       ${runName}                                  ${runName}
+${CENTER_NAME}                  ${seqCenter}                                ${seqCenter}
+${INSTRUMENT_PLATFORM}          ${seqPlatform.name}                         ${seqPlatform.name}
+${INSTRUMENT_MODEL}             ${seqPlatform.seqPlatformModelLabel.name}   ${seqPlatform.seqPlatformModelLabel.name}
+${RUN_DATE}                     ${dateString}                               ${dateString}
+${LANE_NO}                      1                                           1
+${SEQUENCING_TYPE}              ${seqTypeWithAntibodyTarget.name}           ${seqTypeWithAntibodyTarget.name}
+${LIBRARY_LAYOUT}               ${seqTypeWithAntibodyTarget.libraryLayout}  ${seqTypeWithAntibodyTarget.libraryLayout}
+${MATE}                         1                                           2
+${SAMPLE_ID}                    ${sampleIdentifier.name}                    ${sampleIdentifier.name}
+${ANTIBODY_TARGET}              ${antibodyTarget.name}                      ${antibodyTarget.name}
+${ANTIBODY}                     -                                           -
+${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${softwareToolIdentifier.name}
+"""
+
+        List<List<String>> lines = metadata.readLines().findAll()*.split(/ {2,}/).transpose()
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                lines.collect { it*.replaceFirst(/^-$/, '').join('\t') }.join('\n'),
+                [
+                        metadataFile      : file.toPath(),
+                        directoryStructure: directoryStructure,
+                ]
+        )
+
+        when:
+        MetaDataFile result = service.importMetadataFile(context, false, RunSegment.ImportMode.MANUAL, null, null, false)
+
+        then:
+        // runs
+        Run.count == 1
+        Run run = Run.findWhere(
+                name: runName,
+                seqCenter: seqCenter,
+                seqPlatform: seqPlatform,
+        )
+        run != null
+        run.dateExecuted == date
+
+        // runSegment
+        RunSegment.count == 1
+        RunSegment runSegment = RunSegment.findWhere(
+                align: false,
+                otrsTicket: null,
+                importMode: RunSegment.ImportMode.MANUAL
+        )
+        runSegment != null
+
+        // metadataFile
+        MetaDataFile.count == 1
+        MetaDataFile metadataFile = MetaDataFile.findWhere(
+                fileName: file.name,
+                filePath: file.parent,
+                md5sum: context.metadataFileMd5sum,
+                runSegment: runSegment,
+        )
+        result == metadataFile
+
+        SeqTrack.count == 1
+        DataFile.count == 2
+        MetaDataKey.count == context.spreadsheet.header.cells.size()
+        MetaDataEntry.count == context.spreadsheet.header.cells.size() * 2
+
+        // seqTrack1
+        SeqTrack seqTrack = SeqTrack.findWhere(
+                laneId: '1',
+                insertSize: 0,
+                run: run,
+                sample: sampleIdentifier.sample,
+                seqType: seqTypeWithAntibodyTarget,
+                pipelineVersion: softwareToolIdentifier.softwareTool,
+                kitInfoReliability: InformationReliability.UNKNOWN_UNVERIFIED,
+                libraryPreparationKit: null,
+        )
+        seqTrack.ilseId == null
+        seqTrack.class == ChipSeqSeqTrack
+        seqTrack.antibodyTarget == antibodyTarget
+
+        Map commonRunDataFileProperties = [
+                pathName    : '',
+                used        : true,
+                runSegment  : runSegment,
+                fileType    : fileType,
+                dateExecuted: date,
+                run         : run,
+                project     : sampleIdentifier.project,
+                seqTrack    : seqTrack,
+        ]
+
+        DataFile dataFile1 = DataFile.findWhere(commonRunDataFileProperties + [
+                fileName   : fastq1,
+                vbpFileName: fastq1,
+                md5sum     : md5sum1,
+                mateNumber : 1,
+        ])
+        dataFile1 != null
+
+        DataFile dataFile2 = DataFile.findWhere(commonRunDataFileProperties + [
+                fileName   : fastq2,
+                vbpFileName: fastq2,
+                md5sum     : md5sum2,
+                mateNumber : 2,
+        ])
+        dataFile2 != null
+    }
 
     void "extractBarcode, when both BARCODE and FASTQ_FILE columns are missing, returns null"() {
         given:

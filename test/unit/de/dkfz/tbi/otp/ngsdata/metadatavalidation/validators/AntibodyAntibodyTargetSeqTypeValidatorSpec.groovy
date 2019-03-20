@@ -22,8 +22,11 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import spock.lang.Specification
 
+import spock.lang.*
+
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.util.spreadsheet.validation.Level
@@ -32,123 +35,142 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
-class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification {
+class AntibodyAntibodyTargetSeqTypeValidatorSpec extends Specification implements DomainFactoryCore {
 
 
-    void 'validate, when no ANTIBODY_TARGET and ANTIBODY column exist and seqType is not ChIP seq, succeeds'() {
+    @Unroll
+    void 'validate, when  #name, then validation do not return problems'() {
         given:
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE}\n" +
-                "some seqType"
+        SeqType seqType = new SeqType([
+                name             : 'seqType',
+                displayName      : 'seqType',
+                libraryLayout    : LibraryLayout.PAIRED,
+                hasAntibodyTarget: hasAntibodyTarget,
+        ])
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
+${SEQUENCING_TYPE},${LIBRARY_LAYOUT},${ANTIBODY_TARGET},${ANTIBODY}
+${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
+""".replaceAll(',', '\t')
         )
 
         when:
-        new AntibodyAntibodyTargetSeqTypeValidator().validate(context)
+        new AntibodyAntibodyTargetSeqTypeValidator([
+                seqTypeService: Mock(SeqTypeService) {
+                    1 * findByNameOrImportAlias(_, _) >> seqType
+                }
+        ]).validate(context)
+
+        then:
+        context.problems.empty
+
+        where:
+        name                                                                         | hasAntibodyTarget | antibodyTarget    | antibody
+        'seq type do not support antibody target and no antibody is given'           | false             | ''                | ''
+        'seq type require antibody target and only antibody target is given'         | true              | 'some text'       | ''
+        'seq type require antibody target and antibody target and antibody is given' | true              | 'antibody target' | 'antibody'
+    }
+
+
+    @Unroll
+    void 'validate, when  #name, then validation return extpected problems'() {
+        given:
+        SeqType seqType = new SeqType([
+                name             : 'seqType',
+                displayName      : 'seqType',
+                libraryLayout    : LibraryLayout.PAIRED,
+                hasAntibodyTarget: hasAntibodyTarget,
+        ])
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
+${SEQUENCING_TYPE},${LIBRARY_LAYOUT},${ANTIBODY_TARGET},${ANTIBODY}
+${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
+""".replaceAll(',', '\t')
+        )
+
+        Collection<Problem> expectedProblems = [
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, level, message, message2),
+        ]
+
+        when:
+        new AntibodyAntibodyTargetSeqTypeValidator([
+                seqTypeService: Mock(SeqTypeService) {
+                    1 * findByNameOrImportAlias(_, _) >> seqType
+                }
+        ]).validate(context)
+
+        then:
+        assertContainSame(context.problems, expectedProblems)
+
+        where:
+        name                                                                       | hasAntibodyTarget | antibodyTarget    | antibody   || level         | message                                                                                                                                                                     | message2
+        'seq type require antibody target and no antibody is given'                | true              | ''                | ''         || Level.ERROR   | "Antibody target is not provided although the SeqType 'seqType PAIRED bulk' require it."                                                                                    | "Antibody target is not provided for SeqType require AntibodyTarget"
+        'seq type do not support target and only antibody target is given'         | false             | 'antibody target' | ''         || Level.WARNING | "Antibody target ('antibody target') and/or antibody ('') are/is provided although the SeqType 'seqType PAIRED bulk do not support it. OTP will ignore the values."         | "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values."
+        'seq type do not support target and antibody target and antibody is given' | false             | 'antibody target' | 'antibody' || Level.WARNING | "Antibody target ('antibody target') and/or antibody ('antibody') are/is provided although the SeqType 'seqType PAIRED bulk do not support it. OTP will ignore the values." | "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values."
+        'seq type do not support target and only antibody is given'                | false             | ''                | 'antibody' || Level.WARNING | "Antibody target ('') and/or antibody ('antibody') are/is provided although the SeqType 'seqType PAIRED bulk do not support it. OTP will ignore the values."                | "Antibody target and/or antibody are/is provided for an SeqType not supporting it. OTP will ignore the values."
+    }
+
+
+    void 'validate, when no ANTIBODY_TARGET and ANTIBODY column exist and seqType do not require antibody Target, succeeds'() {
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "${SEQUENCING_TYPE}\t${LIBRARY_LAYOUT}\n" +
+                        "some seqType\tPAIRED"
+        )
+
+        when:
+        new AntibodyAntibodyTargetSeqTypeValidator([
+                seqTypeService: Mock(SeqTypeService) {
+                    1 * findByNameOrImportAlias(_, _) >> new SeqType()
+                }
+        ]).validate(context)
+
 
         then:
         context.problems.empty
     }
 
 
-    void 'validate, when no ANTIBODY column exists and seqType is ChIP seq, succeeds'() {
+    void 'validate, when no ANTIBODY column exists and seqType require AntibodyTarget and AntibodyTarget is given, succeeds'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE}\t${ANTIBODY_TARGET}\n" +
-                        "ChIP Seq\tsome_antibody_target"
+                "${SEQUENCING_TYPE}\t${LIBRARY_LAYOUT}\t${ANTIBODY_TARGET}\n" +
+                        "ChIP Seq\tPAIRED\tsome_antibody_target"
         )
 
         when:
-        new AntibodyAntibodyTargetSeqTypeValidator().validate(context)
+        new AntibodyAntibodyTargetSeqTypeValidator([
+                seqTypeService: Mock(SeqTypeService) {
+                    1 * findByNameOrImportAlias(_, _) >> new SeqType(hasAntibodyTarget: true)
+                }
+        ]).validate(context)
+
 
         then:
         assertContainSame(context.problems, [])
     }
 
-
-    void 'validate, when ANTIBODY column is empty and seqType is ChIP seq, succeeds'() {
+    void 'validate, when no ANTIBODY_TARGET column exists and seqType require AntibodyTarget, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE}\t${ANTIBODY_TARGET}\t${ANTIBODY}\n" +
-                        "ChIP Seq\tsome_antibody_target\t"
+                "${SEQUENCING_TYPE}\t${LIBRARY_LAYOUT}\t${ANTIBODY}\n" +
+                        "ChIP Seq\tPAIRED\tsome_antibody"
         )
 
         when:
-        new AntibodyAntibodyTargetSeqTypeValidator().validate(context)
-
-        then:
-        assertContainSame(context.problems, [])
-    }
-
-
-    void 'validate, when no ANTIBODY_TARGET column exists and seqType is ChIP seq, adds error'() {
-        given:
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE}\t${ANTIBODY}\n" +
-                        "ChIP Seq\tsome_antibody"
-        )
-
-        when:
-        new AntibodyAntibodyTargetSeqTypeValidator().validate(context)
+        new AntibodyAntibodyTargetSeqTypeValidator([
+                seqTypeService: Mock(SeqTypeService) {
+                    1 * findByNameOrImportAlias(_, _) >> new SeqType(hasAntibodyTarget: true, displayName: 'seqType', libraryLayout: LibraryLayout.PAIRED)
+                }
+        ]).validate(context)
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR, "Antibody target is not provided although data is ChIP seq data."),
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
+                        "Antibody target is not provided although the SeqType 'seqType PAIRED bulk' require it.",
+                "Antibody target is not provided for SeqType require AntibodyTarget"),
         ]
         assertContainSame(context.problems, expectedProblems)
-    }
-
-
-    void 'validate, when ANTIBODY_TARGET column is empty and seqType is ChIP seq, adds error'() {
-        given:
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE}\t${ANTIBODY_TARGET}\t${ANTIBODY}\n" +
-                        "ChIP Seq\t\tsome_antibody"
-        )
-
-        when:
-        new AntibodyAntibodyTargetSeqTypeValidator().validate(context)
-
-        then:
-        Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR, "Antibody target is not provided although data is ChIP seq data."),
-        ]
-        assertContainSame(context.problems, expectedProblems)
-    }
-
-
-    void 'validate, when ANTIBODY_TARGET and ANTIBODY column exist and seqType is not ChIP seq, adds warning'() {
-        given:
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE}\t${ANTIBODY_TARGET}\t${ANTIBODY}\t${TAGMENTATION_BASED_LIBRARY}\n" +
-                        "some seqtype\tsome_antibody_target\tsome_antibody\t\n" +
-                        "ChIP Seq\tsome_antibody_target\tsome_antibody\t\n" +
-                        "ChIP Seq\tsome_antibody_target\tsome_antibody\ttrue"
-        )
-
-        when:
-        new AntibodyAntibodyTargetSeqTypeValidator().validate(context)
-
-        then:
-        Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, "Antibody target ('some_antibody_target') and/or antibody ('some_antibody') are/is provided although data is no ChIP seq data. OTP will ignore the values.", "Antibody target and/or antibody are/is provided although data is no ChIP seq data. OTP will ignore the values."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.WARNING, "Antibody target ('some_antibody_target') and/or antibody ('some_antibody') are/is provided although data is no ChIP seq data. OTP will ignore the values.", "Antibody target and/or antibody are/is provided although data is no ChIP seq data. OTP will ignore the values."),
-        ]
-        assertContainSame(context.problems, expectedProblems)
-    }
-
-
-    void 'validate, when ANTIBODY_TARGET and ANTIBODY column exist and seqType is ChIP seq, succeeds'() {
-        given:
-        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SEQUENCING_TYPE}\t${ANTIBODY_TARGET}\t${ANTIBODY}\n" +
-                        "ChIP Seq\tsome_antibody_target\tsome_antibody"
-        )
-
-        when:
-        new AntibodyAntibodyTargetSeqTypeValidator().validate(context)
-
-        then:
-        context.problems.empty
     }
 
 }

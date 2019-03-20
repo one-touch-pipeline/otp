@@ -21,5 +21,8 @@
     <MarkdownNavigatorCodeStyleSettings>
       <option name="RIGHT_MARGIN" value="72" />
     </MarkdownNavigatorCodeStyleSettings>
+    <SqlCodeStyleSettings version="1">
+      <option name="KEYWORD_CASE" value="0" />
+    </SqlCodeStyleSettings>
   </code_scheme>
 </component>

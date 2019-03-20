@@ -197,7 +197,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     // Example: blood_somePid_merged.mdup.bam
     @Override
     String getBamFileName() {
-        String antiBodyTarget = seqType.isChipSeq() ? "-${((MergingWorkPackage) mergingWorkPackage).antibodyTarget.name}" : ''
+        String antiBodyTarget = seqType.hasAntibodyTarget ? "-${((MergingWorkPackage) mergingWorkPackage).antibodyTarget.name}" : ''
         return "${sampleType.dirName}${antiBodyTarget}_${individual.pid}_merged.mdup.bam"
     }
 
