@@ -103,12 +103,12 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
         succeed()
     }
 
-    private void createLinkMap(File source, File target, Map linkMap) {
+    protected void createLinkMap(File source, File target, Map linkMap) {
         FileSystem fs = fileSystemService.filesystemForBamImport
         createLinkMap(fs.getPath(source.absolutePath).toRealPath(), fs.getPath(target.absolutePath).toRealPath(), linkMap)
     }
 
-    private void createLinkMap(Path source, Path target, Map linkMap) {
+    protected void createLinkMap(Path source, Path target, Map linkMap) {
         if (Files.isSymbolicLink(source)) {
             createLinkMap(source.toRealPath(), target, linkMap)
         } else if (Files.isRegularFile(source)) {
