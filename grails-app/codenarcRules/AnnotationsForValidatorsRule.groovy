@@ -20,13 +20,11 @@
  * SOFTWARE.
  */
 
+
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.ClassNode
-import org.codehaus.groovy.transform.trait.Traits
 import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
-
-import java.lang.reflect.Modifier
 
 @CompileStatic
 class AnnotationsForValidatorsRule extends AbstractAstVisitorRule {
@@ -39,11 +37,11 @@ class AnnotationsForValidatorsRule extends AbstractAstVisitorRule {
 }
 
 @CompileStatic
-class AnnotationsForValidatorsVisitor extends AbstractAstVisitor {
+class AnnotationsForValidatorsVisitor extends AbstractAstVisitor implements IsAnnotationVisitor {
 
     @Override
     void visitClassComplete(ClassNode node) {
-        if (Modifier.isAbstract(node.modifiers) || Modifier.isInterface(node.modifiers) || isEnum(node.modifiers) || Traits.isTrait(node)) {
+        if (isNoOrdinaryClass(node)) {
             return
         }
         if (!(node.text =~ /^.*Validator$/)) {
@@ -53,10 +51,6 @@ class AnnotationsForValidatorsVisitor extends AbstractAstVisitor {
         if (node.annotations*.classNode.text.contains('Component')) {
             return
         }
-        addViolation(node, "Missing @Component Annotation.")
-    }
-
-    private static boolean isEnum(int mod) {
-        return (mod & 16384) != 0
+        addViolation(node, buildErrorString("@Component"))
     }
 }

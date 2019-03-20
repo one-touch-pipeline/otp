@@ -20,14 +20,12 @@
  * SOFTWARE.
  */
 
+
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassNode
-import org.codehaus.groovy.transform.trait.Traits
 import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
-
-import java.lang.reflect.Modifier
 
 @CompileStatic
 class AnnotationsForStartJobsRule extends AbstractAstVisitorRule {
@@ -40,16 +38,17 @@ class AnnotationsForStartJobsRule extends AbstractAstVisitorRule {
 }
 
 @CompileStatic
-class AnnotationsForStartJobsVisitor extends AbstractAstVisitor {
+class AnnotationsForStartJobsVisitor extends AbstractAstVisitor implements IsAnnotationVisitor {
 
     @Override
     void visitClassEx(ClassNode node) {
-        if (Modifier.isAbstract(node.modifiers) || Modifier.isInterface(node.modifiers) || isEnum(node.modifiers) || Traits.isTrait(node)) {
+        if (isNoOrdinaryClass(node)) {
             return
         }
 
         boolean hasComponent = false
         boolean hasScope = false
+        boolean hasLog = false
 
         node.annotations.each { AnnotationNode annotationNode ->
             switch (annotationNode.classNode.text) {
@@ -65,6 +64,9 @@ class AnnotationsForStartJobsVisitor extends AbstractAstVisitor {
                         addViolation(node, "The @Scope annotation is missing the value 'singleton'.")
                     }
                     break
+                case 'Slf4j':
+                    hasLog = true
+                    break
                 default:
                     return
             }
@@ -76,13 +78,8 @@ class AnnotationsForStartJobsVisitor extends AbstractAstVisitor {
         if (!hasScope) {
             addViolation(node, buildErrorString("@Scope"))
         }
-    }
-
-    private static String buildErrorString(String value) {
-        "Missing ${value} Annotation."
-    }
-
-    private static boolean isEnum(int mod) {
-        return (mod & 16384) != 0
+        if (!hasLog) {
+            addViolation(node, buildErrorString("@Slf4j"))
+        }
     }
 }

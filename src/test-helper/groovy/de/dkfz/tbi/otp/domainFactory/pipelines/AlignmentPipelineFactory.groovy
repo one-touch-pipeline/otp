@@ -51,6 +51,7 @@ trait AlignmentPipelineFactory {
     AbstractBamFile createBamFileForPipelineName(Pipeline.Name pipeline) {
         assert pipeline?.type == Pipeline.Type.ALIGNMENT
         assert alignmentCreation.containsKey(pipeline): "Bam file creation for Pipeline ${pipeline} is not configured"
-        return alignmentCreation[pipeline]()
+        Closure removeMeOnceCodeNarcIsUpdated = alignmentCreation[pipeline]
+        return removeMeOnceCodeNarcIsUpdated()
     }
 }

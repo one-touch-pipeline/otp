@@ -54,7 +54,7 @@ class OptionsInterceptor {
             InstanceLogo logo = InstanceLogo.NONE
             try {
                 logo = InstanceLogo.valueOf(processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_LOGO))
-            } catch (IllegalArgumentException e) {}
+            } catch (IllegalArgumentException e) { }
             model.logo = logo.fileName
 
             String resourceName = "git.properties"

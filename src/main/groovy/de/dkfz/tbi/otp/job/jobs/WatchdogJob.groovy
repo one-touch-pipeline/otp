@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 import de.dkfz.tbi.otp.job.processing.*
+
 /**
  * A {@link Job} that watches for cluster jobs to finish. It also checks whether the job has logged a message in
  * the job status log file and fails if at least one job was not successful.

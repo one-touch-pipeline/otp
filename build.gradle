@@ -78,7 +78,7 @@ sourceSets {
                 "src/workflow-test/groovy"
             }
         }
-        compileClasspath += main.runtimeClasspath + testHelper.output+ integrationTest.runtimeClasspath
+        compileClasspath += main.runtimeClasspath + testHelper.output + integrationTest.runtimeClasspath
         runtimeClasspath += main.runtimeClasspath + testHelper.output + integrationTest.runtimeClasspath
 
         File r = new File(project.projectDir, "grails-app/conf")
@@ -111,7 +111,7 @@ dependencies {
 
     // JDBC
     runtime "org.postgresql:postgresql:42.1.4"
-    
+
     // Dicom Audit Logging
     if (Environment.isDevelopmentMode()) {
         compile "de.dkfz.odcf:DicomAuditImpl:1.1-nop"

@@ -60,7 +60,7 @@ class EnumForBeanNameVisitor extends AbstractAstVisitor {
         node.interfaces.each { ClassNode interfaceNode ->
             properties.each { key, value ->
                 if (interfaceNode.name == key) {
-                    String beanName = uncapitalize(node.nameWithoutPackage)
+                    String beanName = node.nameWithoutPackage.uncapitalize()
                     node.annotations.each { AnnotationNode annotationNode ->
                         if (annotationNode.classNode.text == 'Component') {
                             String annotationValue = annotationNode.members['value']?.text
@@ -77,12 +77,6 @@ class EnumForBeanNameVisitor extends AbstractAstVisitor {
                 }
             }
         }
-    }
-
-    //This will be implemented in Groovy 2.4.8
-    private static String uncapitalize(CharSequence self) {
-        String s = self.toString()
-        return s != null && s.length() != 0 ? "${Character.toLowerCase(s.charAt(0))}${s.substring(1)}" : s
     }
 
     private static boolean isEnum(int mod) {

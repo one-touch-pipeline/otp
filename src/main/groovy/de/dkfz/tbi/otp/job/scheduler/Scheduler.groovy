@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 
 import static org.springframework.util.Assert.notNull
+
 /**
  * Class handling the scheduling of Jobs.
  *

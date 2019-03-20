@@ -20,14 +20,12 @@
  * SOFTWARE.
  */
 
+
 import groovy.transform.CompileStatic
 import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.ClassNode
-import org.codehaus.groovy.transform.trait.Traits
 import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
-
-import java.lang.reflect.Modifier
 
 @CompileStatic
 class AnnotationsForJobsRule extends AbstractAstVisitorRule {
@@ -40,17 +38,17 @@ class AnnotationsForJobsRule extends AbstractAstVisitorRule {
 }
 
 @CompileStatic
-class AnnotationsForJobsVisitor extends AbstractAstVisitor {
+class AnnotationsForJobsVisitor extends AbstractAstVisitor implements IsAnnotationVisitor {
 
     @Override
     void visitClassEx(ClassNode node) {
-        if (Modifier.isAbstract(node.modifiers) || Modifier.isInterface(node.modifiers) || isEnum(node.modifiers) || Traits.isTrait(node)) {
+        if (isNoOrdinaryClass(node)) {
             return
         }
 
         boolean hasComponent = false
         boolean hasScope = false
-        boolean hasJobLog = false
+        boolean hasLog = false
 
         node.annotations.each { AnnotationNode annotationNode ->
             switch (annotationNode.classNode.text) {
@@ -63,8 +61,8 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor {
                         addViolation(node, "The @Scope annotation is missing the value 'prototype'")
                     }
                     break
-                case 'UseJobLog':
-                    hasJobLog = true
+                case 'Slf4j':
+                    hasLog = true
                     break
                 default:
                     return
@@ -77,16 +75,8 @@ class AnnotationsForJobsVisitor extends AbstractAstVisitor {
         if (!hasScope) {
             addViolation(node, buildErrorString("@Scope"))
         }
-        if (!hasJobLog) {
+        if (!hasLog) {
             addViolation(node, buildErrorString("@Slf4j"))
         }
-    }
-
-    private static String buildErrorString(String value) {
-        "Missing ${value} Annotation"
-    }
-
-    private static boolean isEnum(int mod) {
-        return (mod & 16384) != 0
     }
 }

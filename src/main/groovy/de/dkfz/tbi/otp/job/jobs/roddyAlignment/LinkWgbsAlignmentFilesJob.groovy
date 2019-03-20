@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
 import de.dkfz.tbi.otp.ngsdata.Realm
+
 /**
  * This is the last job of the PanCan workflow.
  * Within this job the merged bam file, the corresponding index file, the QA-folder and the roddyExecutionStore folder

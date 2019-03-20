@@ -29,7 +29,6 @@ import org.springframework.stereotype.*
 
 /**
  * Very simple Test implementation of the EndStateAware interface which fails.
- *
  */
 @Component("testFailureEndStateAwareJob")
 @Scope("prototype")

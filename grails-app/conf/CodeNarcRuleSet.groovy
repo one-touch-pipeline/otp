@@ -806,9 +806,9 @@ All the Rules that will be used for OTP
     UnnecessaryGroovyImport {
         priority = MIDDLE
     }
-    UnusedImport {
-        priority = CRITICAL
-    }
+    /*UnusedImport {
+        priority = CRITICAL //TODO
+    }*/
 
     // rulesets/jdbc.xml
     DirectConnectionManagement {

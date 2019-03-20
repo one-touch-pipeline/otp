@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.*
+
 /**
  * @deprecated Do not use a separate watchdog job.
  * Instead create/use a subclass of {@link AbstractMultiJob}, so restarting the job will resubmit the cluster jobs.

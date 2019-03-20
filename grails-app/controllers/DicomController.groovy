@@ -19,10 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-import grails.compiler.GrailsCompileStatic
-
-@GrailsCompileStatic
 class DicomController {
 
     def dictionary() {
