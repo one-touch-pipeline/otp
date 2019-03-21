@@ -23,8 +23,6 @@
 package de.dkfz.tbi.otp.notification
 
 
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
 import grails.testing.gorm.DataTest
 import grails.web.mapping.LinkGenerator
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
@@ -46,7 +44,6 @@ import de.dkfz.tbi.otp.tracking.*
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
 //TODO refactor classes SNV INDEL ACESEQSpec abstract from BamFilePairAnalyses abstract
-@TestMixin(GrailsUnitTestMixin)
 @SuppressWarnings(["ClassSize", "MethodCount"])
 class CreateNotificationTextServiceSpec extends Specification implements AlignmentPipelineFactory, DataTest {
 

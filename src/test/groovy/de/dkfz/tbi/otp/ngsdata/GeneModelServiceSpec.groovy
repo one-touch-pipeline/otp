@@ -23,15 +23,14 @@
 package de.dkfz.tbi.otp.ngsdata
 
 
-import grails.test.mixin.TestFor
 import grails.testing.gorm.DataTest
+import grails.testing.services.ServiceUnitTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
-@TestFor(GeneModelService)
-class GeneModelServiceSpec extends Specification implements DataTest {
+class GeneModelServiceSpec extends Specification implements DataTest, ServiceUnitTest<GeneModelService> {
 
     Class[] getDomainClassesToMock() {[
             GeneModel,

@@ -23,8 +23,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
-import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
 import org.joda.time.LocalDate
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -58,7 +56,6 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@TestMixin(ControllerUnitTestMixin)
 class MetadataImportServiceSpec extends Specification implements DomainFactoryCore, DataTest {
 
     Class[] getDomainClassesToMock() {[

@@ -23,8 +23,6 @@
 package de.dkfz.tbi.otp.tracking
 
 import grails.testing.gorm.DataTest
-import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
 import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -38,7 +36,6 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
-@TestMixin(ControllerUnitTestMixin)
 class TrackingServiceSpec extends Specification implements DataTest {
 
     Class[] getDomainClassesToMock() {[
