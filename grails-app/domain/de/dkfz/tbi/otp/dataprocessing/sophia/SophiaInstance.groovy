@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.utils.Entity
 
-class SophiaInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity, RoddyAnalysisResult {
+class SophiaInstance extends BamFilePairAnalysis implements RoddyAnalysisResult {
 
     private final static String SOPHIA_OUTPUT_FILE_SUFFIX = "filtered_somatic_minEventScore3.tsv"
     private final static String QUALITY_CONTROL_JSON_FILE_NAME = "qualitycontrol.json"

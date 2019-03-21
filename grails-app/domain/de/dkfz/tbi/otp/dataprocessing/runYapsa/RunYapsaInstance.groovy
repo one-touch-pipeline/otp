@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.utils.Entity
 /**
  * An execution of the RunYAPSA workflow.
  */
-class RunYapsaInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity {
+class RunYapsaInstance extends BamFilePairAnalysis {
 
     @Override
     OtpPath getInstancePath() {

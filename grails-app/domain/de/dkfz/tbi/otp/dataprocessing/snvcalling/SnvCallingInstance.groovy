@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * @deprecated: succeeded by {@link RoddySnvCallingInstance}
  */
 @Deprecated
-class SnvCallingInstance extends AbstractSnvCallingInstance implements ProcessParameterObject, Entity {
+class SnvCallingInstance extends AbstractSnvCallingInstance {
 
     static constraints = {
         config validator: { val, obj ->

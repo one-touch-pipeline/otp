@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
 import de.dkfz.tbi.otp.utils.Entity
 
-class IndelCallingInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity, RoddyAnalysisResult {
+class IndelCallingInstance extends BamFilePairAnalysis implements RoddyAnalysisResult {
 
     static hasMany = [
             roddyExecutionDirectoryNames: String,

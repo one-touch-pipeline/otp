@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * For each tumor-control pair the snv pipeline will be called.
  * The AbstractSnvCallingInstance symbolizes one call of the pipeline.
  */
-abstract class AbstractSnvCallingInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity {
+abstract class AbstractSnvCallingInstance extends BamFilePairAnalysis {
 
     /**
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control/2014-08-25_15h32

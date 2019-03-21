@@ -32,7 +32,7 @@ import de.dkfz.tbi.otp.utils.Entity
 import java.text.DecimalFormat
 import java.text.NumberFormat
 
-class AceseqInstance extends BamFilePairAnalysis implements ProcessParameterObject, Entity, RoddyAnalysisResult {
+class AceseqInstance extends BamFilePairAnalysis implements RoddyAnalysisResult {
 
     static hasMany = [
             roddyExecutionDirectoryNames: String,
