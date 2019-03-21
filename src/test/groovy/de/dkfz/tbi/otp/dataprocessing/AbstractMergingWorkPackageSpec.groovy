@@ -45,6 +45,7 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
             SampleType,
             SeqPlatformGroup,
             SeqType,
+            TestAbstractMergingWorkPackage,
     ]}
 
     TestAbstractMergingWorkPackage testAMWP

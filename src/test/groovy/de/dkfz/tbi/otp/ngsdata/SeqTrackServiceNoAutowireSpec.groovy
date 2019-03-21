@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 class SeqTrackServiceNoAutowireSpec extends Specification implements DataTest {
 
     Class[] getDomainClassesToMock() {[
+            DataFile,
             FileType,
             Individual,
             LogMessage,

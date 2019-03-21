@@ -45,6 +45,7 @@ class RoddySnvCallingInstanceSpec extends Specification implements DataTest {
             MergingSet,
             MergingSetAssignment,
             MergingWorkPackage,
+            BamFilePairAnalysis,
             Pipeline,
             ProcessedBamFile,
             ProcessedMergedBamFile,
