@@ -289,9 +289,9 @@ ILSe 5678, runA, lane 1, ${sampleText}
             @Override
             void sendEmail(String emailSubject, String content, List<String> recipient) {
                 callCount++
-                assertEquals("${PREFIX}#${ticket.ticketNumber} Processing Status Update".toString(), emailSubject)
-                assertEquals([notificationRecipient], recipient)
-                assertEquals(expectedContent, content)
+                assert "${PREFIX}#${ticket.ticketNumber} Processing Status Update".toString() == emailSubject
+                assert [notificationRecipient] == recipient
+                assert expectedContent == content
             }
         }
 
