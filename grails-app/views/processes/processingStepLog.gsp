@@ -29,10 +29,11 @@
 </head>
 
 <body>
-<div class="body">
-    <h1><g:message code="processes.processingStep.log.title" args="${ [step.processId, step.id] }"/></h1>
+    <div class="body log">
+        <h1><g:message code="processes.processingStep.log.title" args="${ [step.processId, step.id] }"/></h1>
 
-    ${raw(log)}
-</div>
+        ${raw(log)}
+        </table>%{--workaround for unfinished log files--}%
+    </div>
 </body>
 </html>
