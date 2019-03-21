@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class ProjectServiceWithoutAutowiredSpec extends Specification implements DataTest {
+class ProjectServiceSpec extends Specification implements DataTest {
 
     Class[] getDomainClassesToMock() {[
             ConfigPerProjectAndSeqType,

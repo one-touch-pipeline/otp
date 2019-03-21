@@ -30,9 +30,7 @@ import de.dkfz.tbi.otp.LogMessage
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 
-// If the class is named SeqTrackServiceSpec, Grails tries to autowire the service, which fails.
-// tested with Grails 2.5.1
-class SeqTrackServiceNoAutowireSpec extends Specification implements DataTest {
+class SeqTrackServiceSpec extends Specification implements DataTest {
 
     Class[] getDomainClassesToMock() {[
             DataFile,

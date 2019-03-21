@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-class ExecuteRoddyCommandServiceWithoutAutowireSpec extends Specification implements DataTest {
+class ExecuteRoddyCommandServiceSpec extends Specification implements DataTest {
 
     Class[] getDomainClassesToMock() {[
             ProcessingOption,

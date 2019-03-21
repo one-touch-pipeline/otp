@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 
-class ClusterJobManagerFactoryServiceWithoutAutowiredSpec extends Specification implements DataTest {
+class ClusterJobManagerFactoryServiceSpec extends Specification implements DataTest {
 
     Class[] getDomainClassesToMock() {[
             ProcessingOption,
