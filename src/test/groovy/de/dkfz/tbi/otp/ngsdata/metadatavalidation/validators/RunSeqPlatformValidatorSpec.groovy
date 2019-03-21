@@ -64,6 +64,16 @@ class RunSeqPlatformValidatorSpec extends Specification implements DataTest {
         model2 = DomainFactory.createSeqPlatformModelLabel(name: 'Model2', importAlias: ['Model2ImportAlias'])
         kit1 = DomainFactory.createSequencingKitLabel(name: 'Kit1', importAlias: ['Kit1ImportAlias'])
         kit2 = DomainFactory.createSequencingKitLabel(name: 'Kit2', importAlias: ['Kit2ImportAlias'])
+        platform_1_2_X = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
+                name: 'Platform1',
+                seqPlatformModelLabel: model2,
+                sequencingKitLabel: null,
+        )
+        platform_2_1_X = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
+                name: 'Platform2',
+                seqPlatformModelLabel: model1,
+                sequencingKitLabel: null,
+        )
         platform_1_1_1 = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform1',
                 seqPlatformModelLabel: model1,
@@ -87,16 +97,6 @@ class RunSeqPlatformValidatorSpec extends Specification implements DataTest {
         platform_2_2_X = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: 'Platform2',
                 seqPlatformModelLabel: model2,
-                sequencingKitLabel: null,
-        )
-        platform_1_2_X = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
-                name: 'Platform1',
-                seqPlatformModelLabel: model2,
-                sequencingKitLabel: null,
-        )
-        platform_2_1_X = DomainFactory.createSeqPlatformWithSeqPlatformGroup(
-                name: 'Platform2',
-                seqPlatformModelLabel: model1,
                 sequencingKitLabel: null,
         )
     }
