@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -38,37 +39,37 @@ import de.dkfz.tbi.otp.ngsdata.*
 import java.nio.file.FileSystems
 import java.nio.file.Path
 
-@Mock([
-        AbstractMergedBamFile,
-        CellRangerMergingWorkPackage,
-        CellRangerConfig,
-        DataFile,
-        Individual,
-        LibraryPreparationKit,
-        FileType,
-        MergingCriteria,
-        Pipeline,
-        Project,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        ReferenceGenomeIndex,
-        Run,
-        RunSegment,
-        SeqTrack,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqType,
-        SingleCellBamFile,
-        SoftwareTool,
-        ToolName,
-])
-class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactory {
+class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactory, DataTest {
 
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            CellRangerMergingWorkPackage,
+            CellRangerConfig,
+            DataFile,
+            Individual,
+            LibraryPreparationKit,
+            FileType,
+            MergingCriteria,
+            Pipeline,
+            Project,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeProjectSeqType,
+            ReferenceGenomeIndex,
+            Run,
+            RunSegment,
+            SeqTrack,
+            Sample,
+            SampleType,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqType,
+            SingleCellBamFile,
+            SoftwareTool,
+            ToolName,
+    ]}
 
     void "maybeSubmit, when all fine, then send expected script to cluster"() {
         given:

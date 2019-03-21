@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.junit.ClassRule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Shared
@@ -37,11 +38,12 @@ import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
-@Mock([
-        SeqType,
-        Realm,
-])
-class MetadataValidationContextSpec extends Specification {
+class MetadataValidationContextSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            SeqType,
+            Realm,
+    ]}
 
     DirectoryStructure directoryStructure = [:] as DirectoryStructure
 

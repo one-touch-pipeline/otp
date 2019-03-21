@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -41,37 +41,37 @@ import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.*
 
-@Mock([
-        AbstractMergedBamFile,
-        CellRangerMergingWorkPackage,
-        CellRangerConfig,
-        DataFile,
-        Individual,
-        LibraryPreparationKit,
-        FileType,
-        MergingCriteria,
-        Pipeline,
-        Project,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        ReferenceGenomeIndex,
-        Run,
-        RunSegment,
-        SeqTrack,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqType,
-        SingleCellBamFile,
-        SoftwareTool,
-        ToolName,
-])
-class CellRangerServiceSpec extends Specification implements CellRangerFactory {
+class CellRangerServiceSpec extends Specification implements CellRangerFactory, DataTest {
 
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            CellRangerMergingWorkPackage,
+            CellRangerConfig,
+            DataFile,
+            Individual,
+            LibraryPreparationKit,
+            FileType,
+            MergingCriteria,
+            Pipeline,
+            Project,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeProjectSeqType,
+            ReferenceGenomeIndex,
+            Run,
+            RunSegment,
+            SeqTrack,
+            Sample,
+            SampleType,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqType,
+            SingleCellBamFile,
+            SoftwareTool,
+            ToolName,
+    ]}
 
     @Rule
     TemporaryFolder temporaryFolder

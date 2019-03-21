@@ -22,32 +22,34 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 
-@Mock([
-        DataFile,
-        FileType,
-        Individual,
-        MetaDataFile,
-        Project,
-        ProjectCategory,
-        Realm,
-        Run,
-        RunSegment,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-])
-class RunServiceSpec extends Specification {
+class RunServiceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            DataFile,
+            FileType,
+            Individual,
+            MetaDataFile,
+            Project,
+            ProjectCategory,
+            Realm,
+            Run,
+            RunSegment,
+            Sample,
+            SampleType,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+    ]}
 
     RunService runService = new RunService()
 

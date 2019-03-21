@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -31,25 +32,25 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@Mock([
-        AbstractMergingWorkPackage,
-        ExternalMergingWorkPackage,
-        Individual,
-        LibraryPreparationKit,
-        MergingWorkPackage,
-        Pipeline,
-        Project,
-        Realm,
-        ReferenceGenome,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqPlatformGroup,
-        SeqType,
-])
-class SamplePairDeciderServiceSpec extends Specification {
+class SamplePairDeciderServiceSpec extends Specification implements DataTest {
 
+    Class[] getDomainClassesToMock() {[
+            AbstractMergingWorkPackage,
+            ExternalMergingWorkPackage,
+            Individual,
+            LibraryPreparationKit,
+            MergingWorkPackage,
+            Pipeline,
+            Project,
+            Realm,
+            ReferenceGenome,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqPlatformGroup,
+            SeqType,
+    ]}
 
     @Unroll
     void "findOrCreateSamplePairs(mergingWorkPackage), create SamplePair for #pipelineName1 and #pipelineName2 and #category1"() {

@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -36,20 +37,21 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
-@Mock([
-        Individual,
-        LibraryPreparationKit,
-        Pipeline,
-        ProcessingOption,
-        Project,
-        Realm,
-        RoddyWorkflowConfig,
-        Sample,
-        SampleIdentifier,
-        SampleType,
-        SeqType,
-])
-class LibPrepKitAdapterValidatorSpec extends Specification {
+class LibPrepKitAdapterValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Individual,
+            LibraryPreparationKit,
+            Pipeline,
+            ProcessingOption,
+            Project,
+            Realm,
+            RoddyWorkflowConfig,
+            Sample,
+            SampleIdentifier,
+            SampleType,
+            SeqType,
+    ]}
 
     void 'validate, when metadata file contains valid data, succeeds'() {
 

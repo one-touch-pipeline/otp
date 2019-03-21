@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.indelCalling
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -40,43 +40,43 @@ import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.FileSystems
 
-@Mock([
-        AbstractMergedBamFile,
-        BedFile,
-        DataFile,
-        FileType,
-        IndelCallingInstance,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        Pipeline,
-        Project,
-        ProjectCategory,
-        ProcessingOption,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SequencingKitLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-        ReferenceGenome,
-        ReferenceGenomeEntry,
-        ReferenceGenomeProjectSeqType,
-        Realm,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-])
-class ExecuteRoddyIndelJobSpec extends Specification {
+class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
 
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            BedFile,
+            DataFile,
+            FileType,
+            IndelCallingInstance,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingWorkPackage,
+            Pipeline,
+            Project,
+            ProjectCategory,
+            ProcessingOption,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SequencingKitLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+            ReferenceGenome,
+            ReferenceGenomeEntry,
+            ReferenceGenomeProjectSeqType,
+            Realm,
+            RoddyBamFile,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+    ]}
 
     @Rule
     public TemporaryFolder temporaryFolder

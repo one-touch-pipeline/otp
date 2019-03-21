@@ -22,15 +22,17 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 
-@Mock([
-        SeqType,
-])
-class SeqTypeSpec extends Specification {
+class SeqTypeSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            SeqType,
+    ]}
 
     void "test get WGS Paired SeqType, no SeqType in DB, should fail"() {
         when:

@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.job.processing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.roddy.execution.jobs.BatchEuphoriaJobManager
@@ -33,11 +34,12 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 
-@Mock([
-        ProcessingOption,
-        Realm
-])
-class ClusterJobManagerFactoryServiceWithoutAutowiredSpec extends Specification {
+class ClusterJobManagerFactoryServiceWithoutAutowiredSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ProcessingOption,
+            Realm
+    ]}
 
     final static String SSH_USER = "user"
 

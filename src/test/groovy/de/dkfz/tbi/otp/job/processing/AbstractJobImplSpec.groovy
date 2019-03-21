@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.job.processing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -32,16 +33,17 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 
-@Mock([
-        ClusterJob,
-        JobDefinition,
-        JobExecutionPlan,
-        Process,
-        ProcessingStep,
-        ProcessingStepUpdate,
-        Realm,
-])
-class AbstractJobImplSpec extends Specification {
+class AbstractJobImplSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ClusterJob,
+            JobDefinition,
+            JobExecutionPlan,
+            Process,
+            ProcessingStep,
+            ProcessingStepUpdate,
+            Realm,
+    ]}
 
     AbstractJobImpl abstractJobImpl
     TestConfigService configService

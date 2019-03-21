@@ -22,35 +22,38 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.buildtestdata.mixin.Build
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.LogMessage
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 
-@Build([
-        Individual,
-        LogMessage,
-        Pipeline,
-        Project,
-        Realm,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-])
 // If the class is named SeqTrackServiceSpec, Grails tries to autowire the service, which fails.
 // tested with Grails 2.5.1
-class SeqTrackServiceNoAutowireSpec extends Specification {
+class SeqTrackServiceNoAutowireSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            FileType,
+            Individual,
+            LogMessage,
+            Pipeline,
+            Project,
+            Realm,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+            Sample,
+            SampleType,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+    ]}
 
     SeqTrackService service = new SeqTrackService()
 

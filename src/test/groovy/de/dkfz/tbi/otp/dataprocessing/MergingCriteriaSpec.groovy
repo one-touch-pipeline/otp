@@ -22,19 +22,21 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.*
 
-@Mock([
-        MergingCriteria,
-        Project,
-        Realm,
-        SeqType,
-])
-class MergingCriteriaSpec extends Specification {
+class MergingCriteriaSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            MergingCriteria,
+            Project,
+            Realm,
+            SeqType,
+    ]}
 
     void "test that for Exome data LibPrepKit must be true"() {
         expect:

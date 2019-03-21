@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.utils
 
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -30,7 +31,7 @@ import spock.lang.Unroll
 import java.nio.file.Path
 import java.nio.file.Paths
 
-class Md5SumServiceSpec extends Specification {
+class Md5SumServiceSpec extends Specification implements DataTest {
 
     @Rule
     TemporaryFolder temporaryFolder

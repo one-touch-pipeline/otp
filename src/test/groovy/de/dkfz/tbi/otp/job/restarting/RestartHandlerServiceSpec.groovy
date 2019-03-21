@@ -22,8 +22,8 @@
 
 package de.dkfz.tbi.otp.job.restarting
 
-import grails.test.mixin.Mock
 import org.apache.commons.logging.Log
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -31,16 +31,17 @@ import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-@Mock([
-        JobErrorDefinition,
-        JobDefinition,
-        JobExecutionPlan,
-        Process,
-        ProcessingError,
-        ProcessingStep,
-        ProcessingStepUpdate,
-])
-class RestartHandlerServiceSpec extends Specification {
+class RestartHandlerServiceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            JobErrorDefinition,
+            JobDefinition,
+            JobExecutionPlan,
+            Process,
+            ProcessingError,
+            ProcessingStep,
+            ProcessingStepUpdate,
+    ]}
 
     @Unroll
     void "test handleRestart"() {

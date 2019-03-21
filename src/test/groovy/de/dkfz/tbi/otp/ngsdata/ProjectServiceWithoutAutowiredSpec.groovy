@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -33,15 +34,16 @@ import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@Mock([
-        ConfigPerProjectAndSeqType,
-        Pipeline,
-        Project,
-        Realm,
-        RunYapsaConfig,
-        SeqType,
-])
-class ProjectServiceWithoutAutowiredSpec extends Specification {
+class ProjectServiceWithoutAutowiredSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ConfigPerProjectAndSeqType,
+            Pipeline,
+            Project,
+            Realm,
+            RunYapsaConfig,
+            SeqType,
+    ]}
 
     void "createProject: dirName shouldn't overlap with root path"() {
         given:

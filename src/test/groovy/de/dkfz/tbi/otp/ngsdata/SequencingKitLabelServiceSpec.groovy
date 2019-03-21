@@ -22,12 +22,15 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
 
-@Mock([
-        SequencingKitLabel,
-])
-class SequencingKitLabelServiceSpec extends MetadataFieldsServiceSpec<SequencingKitLabel> {
+import grails.testing.gorm.DataTest
+
+class SequencingKitLabelServiceSpec extends MetadataFieldsServiceSpec<SequencingKitLabel> implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            SequencingKitLabel,
+    ]}
+
     SequencingKitLabelService sequencingKitLabelService = new SequencingKitLabelService()
 
     @Override

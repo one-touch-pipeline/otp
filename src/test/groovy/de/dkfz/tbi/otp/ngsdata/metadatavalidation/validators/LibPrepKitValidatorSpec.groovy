@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -36,10 +37,11 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock([
-        LibraryPreparationKit,
-])
-class LibPrepKitValidatorSpec extends Specification {
+class LibPrepKitValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            LibraryPreparationKit,
+    ]}
 
     LibPrepKitValidator validator
 

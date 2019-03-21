@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.job.processing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -33,15 +34,16 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.*
 
-@Mock([
-        JobDefinition,
-        JobExecutionPlan,
-        Process,
-        ProcessingStep,
-        ProcessingStepUpdate,
-        Realm,
-])
-class ClusterJobLoggingServiceSpec extends Specification {
+class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            JobDefinition,
+            JobExecutionPlan,
+            Process,
+            ProcessingStep,
+            ProcessingStepUpdate,
+            Realm,
+    ]}
 
     TestConfigService configService
 

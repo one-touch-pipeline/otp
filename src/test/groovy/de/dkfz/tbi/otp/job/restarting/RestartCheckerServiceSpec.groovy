@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.restarting
 
+import grails.testing.gorm.DataTest
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
@@ -32,7 +33,7 @@ import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.HelperUtils
 
-class RestartCheckerServiceSpec extends Specification {
+class RestartCheckerServiceSpec extends Specification implements DataTest {
 
     void "canJobBeRestarted, when job is of type AutoRestartable, returns true"() {
         given:

@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -37,30 +38,31 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
-@Mock([
-        DataFile,
-        ExternallyProcessedMergedBamFile,
-        ExternalMergingWorkPackage,
-        FileType,
-        Individual,
-        Pipeline,
-        Project,
-        ProjectCategory,
-        Realm,
-        ReferenceGenome,
-        Run,
-        RunSegment,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-])
-class Md5sumUniqueValidatorSpec extends Specification {
+class Md5sumUniqueValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            DataFile,
+            ExternallyProcessedMergedBamFile,
+            ExternalMergingWorkPackage,
+            FileType,
+            Individual,
+            Pipeline,
+            Project,
+            ProjectCategory,
+            Realm,
+            ReferenceGenome,
+            Run,
+            RunSegment,
+            Sample,
+            SampleType,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+    ]}
 
     void 'validate concerning metadata, when column is missing, adds error'() {
 

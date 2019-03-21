@@ -22,18 +22,20 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.utils.HelperUtils
 
-@Mock([
-        Project,
-        ProjectCategory,
-        Realm,
-])
-class ProjectSpec extends Specification implements DomainFactoryCore {
+class ProjectSpec extends Specification implements DomainFactoryCore, DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Project,
+            ProjectCategory,
+            Realm,
+    ]}
 
     void "test getProjectDirectory all fine should return File"() {
         given:

@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.job.processing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -39,18 +40,19 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessOutput
 
-@Mock([
-        ClusterJob,
-        JobDefinition,
-        JobExecutionPlan,
-        Process,
-        ProcessingOption,
-        ProcessingStep,
-        ProcessingStepUpdate,
-        Realm,
-        SeqType,
-])
-class ClusterJobSchedulerServiceSpec extends Specification {
+class ClusterJobSchedulerServiceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ClusterJob,
+            JobDefinition,
+            JobExecutionPlan,
+            Process,
+            ProcessingOption,
+            ProcessingStep,
+            ProcessingStepUpdate,
+            Realm,
+            SeqType,
+    ]}
 
     static final String SSHUSER = "user"
 

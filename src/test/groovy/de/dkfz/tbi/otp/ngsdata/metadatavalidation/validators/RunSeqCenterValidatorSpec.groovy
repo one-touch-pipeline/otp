@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -35,14 +36,15 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CENTER_NAME
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
-@Mock([
-        Run,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-])
-class RunSeqCenterValidatorSpec extends Specification {
+class RunSeqCenterValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Run,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+    ]}
 
     void 'validate adds expected errors'() {
 

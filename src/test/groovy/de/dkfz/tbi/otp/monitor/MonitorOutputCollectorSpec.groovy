@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.monitor
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -32,12 +33,13 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-@Mock([
-        JobExecutionPlan,
-        Process,
-        ProcessingOption,
-])
-class MonitorOutputCollectorSpec extends Specification {
+class MonitorOutputCollectorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            JobExecutionPlan,
+            Process,
+            ProcessingOption,
+    ]}
 
     void "leftShift, added value appear in output"() {
         given:

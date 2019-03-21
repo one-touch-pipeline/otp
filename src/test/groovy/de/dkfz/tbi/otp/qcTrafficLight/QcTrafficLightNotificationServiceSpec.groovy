@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -36,40 +37,40 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.TrackingService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
-@Mock([
-        AbstractMergedBamFile,
-        DataFile,
-        Comment,
-        ExomeSeqTrack,
-        FileType,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        Pipeline,
-        Project,
-        ProcessingOption,
-        OtrsTicket,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        RnaRoddyBamFile,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        Sample,
-        SampleType,
-        SeqType,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqCenter,
-        SeqTrack,
-        SoftwareTool,
-])
-class QcTrafficLightNotificationServiceSpec extends Specification {
+class QcTrafficLightNotificationServiceSpec extends Specification implements DataTest {
 
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            DataFile,
+            Comment,
+            ExomeSeqTrack,
+            FileType,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingWorkPackage,
+            Pipeline,
+            Project,
+            ProcessingOption,
+            OtrsTicket,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeProjectSeqType,
+            RnaRoddyBamFile,
+            RoddyBamFile,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+            Sample,
+            SampleType,
+            SeqType,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqCenter,
+            SeqTrack,
+            SoftwareTool,
+    ]}
 
     @Unroll
     void "test informResultsAreBlocked (#name)"() {

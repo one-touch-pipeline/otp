@@ -22,23 +22,25 @@
 
 package de.dkfz.tbi.otp.tracking
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import grails.validation.ValidationException
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ThreadUtils
 
-@Mock([
-    MetaDataFile,
-    OtrsTicket,
-    Run,
-    RunSegment,
-    SeqCenter,
-    SeqPlatform,
-    SeqPlatformGroup,
-])
-class OtrsTicketSpec extends Specification {
+class OtrsTicketSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            MetaDataFile,
+            OtrsTicket,
+            Run,
+            RunSegment,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+    ]}
 
     def 'test creation, correct String' () {
         given:

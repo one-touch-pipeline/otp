@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.plugin.springsecurity.SpringSecurityService
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -46,38 +46,39 @@ import java.nio.file.FileSystems
 
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
-@Mock([
-        AbstractMergedBamFile,
-        BamFileSubmissionObject,
-        DataFile,
-        DataFileSubmissionObject,
-        FileType,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        Pipeline,
-        Project,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        Sample,
-        SampleSubmissionObject,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-        EgaSubmission,
-])
-class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissionFactory {
+class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissionFactory, DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            BamFileSubmissionObject,
+            DataFile,
+            DataFileSubmissionObject,
+            FileType,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingWorkPackage,
+            Pipeline,
+            Project,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeProjectSeqType,
+            RoddyBamFile,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+            Sample,
+            SampleSubmissionObject,
+            SampleType,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+            EgaSubmission,
+    ]}
 
     private EgaSubmissionFileService egaSubmissionFileService = new EgaSubmissionFileService()
 

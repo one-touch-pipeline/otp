@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -40,10 +41,11 @@ import java.util.regex.Matcher
 import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory.createContext
 
-@Mock([
-        Realm,
-])
-class DataFileExistenceValidatorSpec extends Specification {
+class DataFileExistenceValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Realm,
+    ]}
 
     @Rule
     TemporaryFolder temporaryFolder

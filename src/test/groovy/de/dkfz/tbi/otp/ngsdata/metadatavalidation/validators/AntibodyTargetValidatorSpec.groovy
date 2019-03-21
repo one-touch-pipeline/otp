@@ -21,7 +21,8 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.AntibodyTarget
@@ -36,8 +37,11 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ANTIBODY_TARGET
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock([AntibodyTarget])
-class AntibodyTargetValidatorSpec extends Specification {
+class AntibodyTargetValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AntibodyTarget,
+    ]}
 
     void 'validate, when no ANTIBODY_TARGET column exists in metadata file, succeeds'() {
         given:

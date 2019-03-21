@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -35,8 +36,13 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.INDIVIDUAL
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock([Individual, Realm, Project])
-class IndividualValidatorSpec extends Specification {
+class IndividualValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Individual,
+            Realm,
+            Project,
+    ]}
 
     void 'validate, when column INDIVIDUAL missing, then add expected problem'() {
 

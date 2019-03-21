@@ -22,17 +22,19 @@
 
 package de.dkfz.tbi.otp.utils
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-@Mock([
-        ProcessingOption,
-])
-class ExecuteRoddyCommandServiceWithoutAutowireSpec extends Specification {
+class ExecuteRoddyCommandServiceWithoutAutowireSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ProcessingOption,
+    ]}
 
     void "check activateModulesForRoddyCommand with modules, should return activation commands"() {
         given:

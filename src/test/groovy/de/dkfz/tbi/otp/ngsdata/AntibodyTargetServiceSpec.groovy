@@ -22,12 +22,15 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
 
-@Mock([
-        AntibodyTarget,
-])
-class AntibodyTargetServiceSpec extends MetadataFieldsServiceSpec<AntibodyTarget> {
+import grails.testing.gorm.DataTest
+
+class AntibodyTargetServiceSpec extends MetadataFieldsServiceSpec<AntibodyTarget> implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AntibodyTarget,
+    ]}
+
     AntibodyTargetService antibodyTargetService = new AntibodyTargetService()
 
     protected MetadataFieldsService getService() {

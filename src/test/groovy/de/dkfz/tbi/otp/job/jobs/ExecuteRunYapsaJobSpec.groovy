@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.job.jobs
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -39,43 +40,44 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
-@Mock([
-        AbstractMergedBamFile,
-        AbstractMergingWorkPackage,
-        AbstractSnvCallingInstance,
-        DataFile,
-        FileType,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        Pipeline,
-        ProcessingOption,
-        ProcessingStep,
-        Project,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        RoddyBamFile,
-        RoddySnvCallingInstance,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        RunYapsaConfig,
-        RunYapsaInstance,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-])
-class ExecuteRunYapsaJobSpec extends Specification {
+class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            AbstractMergingWorkPackage,
+            AbstractSnvCallingInstance,
+            DataFile,
+            FileType,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingWorkPackage,
+            Pipeline,
+            ProcessingOption,
+            ProcessingStep,
+            Project,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeProjectSeqType,
+            RoddyBamFile,
+            RoddySnvCallingInstance,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+            RunYapsaConfig,
+            RunYapsaInstance,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+    ]}
 
     void "test createScript"() {
         given:

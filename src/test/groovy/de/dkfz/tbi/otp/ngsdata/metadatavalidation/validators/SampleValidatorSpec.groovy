@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -40,17 +41,18 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock([
-        Individual,
-        ProcessingOption,
-        Project,
-        ProjectCategory,
-        Realm,
-        Sample,
-        SampleIdentifier,
-        SampleType,
-])
-class SampleValidatorSpec extends Specification {
+class SampleValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Individual,
+            ProcessingOption,
+            Project,
+            ProjectCategory,
+            Realm,
+            Sample,
+            SampleIdentifier,
+            SampleType,
+    ]}
 
     static final Pattern PATTERN = Pattern.compile(/^P-([^ ]+)_I-([^ ]+)_S-([^ ]+)$/)
     static final String SAMPLE_Z = "P-X_I-Y_S-Z"

@@ -22,10 +22,14 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-@Mock([
-        SeqPlatformModelLabel,
-])
-class SeqPlatformModelLabelServiceSpec extends MetadataFieldsServiceSpec<SeqPlatformModelLabel> {
+import grails.testing.gorm.DataTest
+
+class SeqPlatformModelLabelServiceSpec extends MetadataFieldsServiceSpec<SeqPlatformModelLabel> implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            SeqPlatformModelLabel,
+    ]}
+
     SeqPlatformModelLabelService seqPlatformModelLabelService = new SeqPlatformModelLabelService()
 
     @Override

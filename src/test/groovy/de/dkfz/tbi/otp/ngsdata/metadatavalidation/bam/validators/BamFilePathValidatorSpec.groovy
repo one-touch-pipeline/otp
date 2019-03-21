@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.junit.ClassRule
 import org.junit.rules.TemporaryFolder
 import spock.lang.*
@@ -38,8 +39,11 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
-@Mock([FileType])
-class BamFilePathValidatorSpec extends Specification {
+class BamFilePathValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            FileType,
+    ]}
 
     @Shared
     @ClassRule

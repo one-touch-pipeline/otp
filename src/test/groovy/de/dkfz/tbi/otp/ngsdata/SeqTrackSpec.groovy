@@ -22,29 +22,31 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-@Mock([
-        DataFile,
-        FileType,
-        Individual,
-        Project,
-        ProjectCategory,
-        Realm,
-        Run,
-        RunSegment,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-])
-class SeqTrackSpec extends Specification {
+class SeqTrackSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            DataFile,
+            FileType,
+            Individual,
+            Project,
+            ProjectCategory,
+            Realm,
+            Run,
+            RunSegment,
+            Sample,
+            SampleType,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+    ]}
 
     void "test getNReads, returns null"() {
         given:

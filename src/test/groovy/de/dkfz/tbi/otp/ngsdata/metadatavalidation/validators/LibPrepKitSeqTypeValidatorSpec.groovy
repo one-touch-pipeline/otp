@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.InformationReliability
@@ -34,11 +35,12 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
-@Mock([
-        LibraryPreparationKit,
-        SeqType,
-])
-class LibPrepKitSeqTypeValidatorSpec extends Specification {
+class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            LibraryPreparationKit,
+            SeqType,
+    ]}
 
     static final String VALID_METADATA =
             "${MetaDataColumn.LIB_PREP_KIT}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\n" +

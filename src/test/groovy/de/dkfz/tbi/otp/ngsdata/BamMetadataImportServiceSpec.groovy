@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.context.ApplicationContext
@@ -44,23 +45,24 @@ import java.nio.file.Paths
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
-@Mock([
-        ExternalMergingWorkPackage,
-        ExternallyProcessedMergedBamFile,
-        ExternalProcessedMergedBamFileQualityAssessment,
-        QualityAssessmentMergedPass,
-        ImportProcess,
-        Individual,
-        Project,
-        Pipeline,
-        Realm,
-        ReferenceGenome,
-        Sample,
-        SampleType,
-        SeqType,
-        LibraryPreparationKit,
-])
-class BamMetadataImportServiceSpec extends Specification {
+class BamMetadataImportServiceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ExternalMergingWorkPackage,
+            ExternallyProcessedMergedBamFile,
+            ExternalProcessedMergedBamFileQualityAssessment,
+            QualityAssessmentMergedPass,
+            ImportProcess,
+            Individual,
+            Project,
+            Pipeline,
+            Realm,
+            ReferenceGenome,
+            Sample,
+            SampleType,
+            SeqType,
+            LibraryPreparationKit,
+    ]}
 
     @Rule
     TemporaryFolder temporaryFolder

@@ -22,29 +22,31 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@Mock([
-        Project,
-        ProjectCategory,
-        Individual,
-        Realm,
-        Run,
-        SeqTrack,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqType,
-        SoftwareTool,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-])
-class ReferenceGenomeProjectSeqTypeSpec extends Specification {
+class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Project,
+            ProjectCategory,
+            Individual,
+            Realm,
+            Run,
+            SeqTrack,
+            Sample,
+            SampleType,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqType,
+            SoftwareTool,
+            ReferenceGenome,
+            ReferenceGenomeProjectSeqType,
+    ]}
 
     static final String PROJECT_NAME = "project"
     static final String SEQ_TYPE_NAME = "seqType"

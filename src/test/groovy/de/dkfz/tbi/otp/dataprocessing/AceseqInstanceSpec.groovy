@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -35,39 +36,41 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
-@Mock([
-        AbstractMergedBamFile,
-        AceseqInstance,
-        AceseqQc,
-        DataFile,
-        FileType,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingSet,
-        MergingWorkPackage,
-        Pipeline,
-        Project,
-        ProjectCategory,
-        Realm,
-        ReferenceGenome,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool
-])
-class AceseqInstanceSpec extends Specification {
+class AceseqInstanceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            AceseqInstance,
+            AceseqQc,
+            DataFile,
+            FileType,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingSet,
+            MergingWorkPackage,
+            Pipeline,
+            Project,
+            ProjectCategory,
+            Realm,
+            ReferenceGenome,
+            RoddyBamFile,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool
+    ]}
+
     @Rule
     TemporaryFolder temporaryFolder
 

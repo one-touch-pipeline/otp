@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -37,32 +38,33 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
-@Mock([
-        DataFile,
-        FileType,
-        Individual,
-        JobDefinition,
-        JobExecutionPlan,
-        Process,
-        ProcessingStep,
-        ProcessParameter,
-        Project,
-        ProjectCategory,
-        Realm,
-        Run,
-        RunSegment,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatformGroup,
-        SeqPlatform,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-        SoftwareToolIdentifier,
-])
-class CopyFilesJobSpec extends Specification {
+class CopyFilesJobSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            DataFile,
+            FileType,
+            Individual,
+            JobDefinition,
+            JobExecutionPlan,
+            Process,
+            ProcessingStep,
+            ProcessParameter,
+            Project,
+            ProjectCategory,
+            Realm,
+            Run,
+            RunSegment,
+            Sample,
+            SampleType,
+            SeqCenter,
+            SeqPlatformGroup,
+            SeqPlatform,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+            SoftwareToolIdentifier,
+    ]}
 
     final long PROCESSING_STEP_ID = 1234567
 

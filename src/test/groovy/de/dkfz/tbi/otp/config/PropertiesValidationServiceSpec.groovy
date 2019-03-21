@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.config
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -33,11 +34,12 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
-@Mock([
-        ProcessingOption,
-        SeqType,
-])
-class PropertiesValidationServiceSpec extends Specification {
+class PropertiesValidationServiceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ProcessingOption,
+            SeqType,
+    ]}
 
     static final String INVALID = 'i\nvalid'
     static final String SEQ_TYPE_RODDY_NAME = 'seqTypeRoddyName'

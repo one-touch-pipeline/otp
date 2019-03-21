@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.grails.datastore.mapping.validation.ValidationErrors
 import org.springframework.validation.Errors
 import spock.lang.Specification
@@ -33,14 +34,16 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.qcTrafficLight.TableCellValue.WarnColor.*
 
-@Mock([
-        Project,
-        QcThreshold,
-        Realm,
-        SeqType,
-        SophiaQc,
-])
-class QcThresholdServiceSpec extends Specification {
+class QcThresholdServiceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Project,
+            QcThreshold,
+            Realm,
+            SeqType,
+            SophiaQc,
+    ]}
+
     QcThresholdService qcThresholdService
 
     String testedProperty

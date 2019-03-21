@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -36,8 +37,11 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.REFERENCE_GENOME
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock([ReferenceGenome])
-class ReferenceGenomeValidatorSpec extends Specification {
+class ReferenceGenomeValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ReferenceGenome,
+    ]}
 
     void 'validate, when column REFERENCE_GENOME missing, then add expected problem'() {
 

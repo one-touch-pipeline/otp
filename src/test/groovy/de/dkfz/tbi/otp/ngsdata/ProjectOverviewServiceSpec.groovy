@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import org.apache.commons.logging.impl.NoOpLog
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -32,19 +32,20 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.*
 
-@Mock([
-        Individual,
-        Pipeline,
-        Project,
-        ProjectCategory,
-        ProcessingOption,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        RoddyWorkflowConfig,
-        SeqType,
-])
-class ProjectOverviewServiceSpec extends Specification {
+class ProjectOverviewServiceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Individual,
+            Pipeline,
+            Project,
+            ProjectCategory,
+            ProcessingOption,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeProjectSeqType,
+            RoddyWorkflowConfig,
+            SeqType,
+    ]}
 
     void "getRoddyAlignmentInformation, throws AssertionError when WorkflowConfig is null"() {
         when:

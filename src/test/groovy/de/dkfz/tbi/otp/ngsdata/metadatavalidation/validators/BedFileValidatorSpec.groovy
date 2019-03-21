@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -40,22 +41,23 @@ import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.NO_ALIGNMENT
 import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.OTP_ALIGNMENT
 
-@Mock([
-        BedFile,
-        Individual,
-        LibraryPreparationKit,
-        Project,
-        ProjectCategory,
-        ProcessingOption,
-        Sample,
-        SampleIdentifier,
-        SampleType,
-        SeqType,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        ])
-class BedFileValidatorSpec extends Specification {
+class BedFileValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            BedFile,
+            Individual,
+            LibraryPreparationKit,
+            Project,
+            ProjectCategory,
+            ProcessingOption,
+            Sample,
+            SampleIdentifier,
+            SampleType,
+            SeqType,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeProjectSeqType,
+    ]}
 
     static final List<String> HEADER = [
             MetaDataColumn.SEQUENCING_TYPE,

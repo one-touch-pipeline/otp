@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.bamImport
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import org.apache.commons.logging.impl.NoOpLog
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -44,27 +44,27 @@ import java.nio.file.Files
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
-@Mock([
-        ExternalMergingWorkPackage,
-        ExternallyProcessedMergedBamFile,
-        ImportProcess,
-        Individual,
-        JobDefinition,
-        JobExecutionPlan,
-        Pipeline,
-        Process,
-        ProcessingOption,
-        ProcessingStep,
-        ProcessParameter,
-        Project,
-        Realm,
-        ReferenceGenome,
-        Sample,
-        SampleType,
-        SeqType
-])
-class ImportExternallyMergedBamJobSpec extends Specification {
+class ImportExternallyMergedBamJobSpec extends Specification implements DataTest {
 
+    Class[] getDomainClassesToMock() {[
+            ExternalMergingWorkPackage,
+            ExternallyProcessedMergedBamFile,
+            ImportProcess,
+            Individual,
+            JobDefinition,
+            JobExecutionPlan,
+            Pipeline,
+            Process,
+            ProcessingOption,
+            ProcessingStep,
+            ProcessParameter,
+            Project,
+            Realm,
+            ReferenceGenome,
+            Sample,
+            SampleType,
+            SeqType
+    ]}
 
     final long PROCESSING_STEP_ID = 1234567
 

@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityService
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -32,12 +32,12 @@ import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.utils.HelperUtils
 
-@Mock([
-        Comment,
-        IlseSubmission,
-])
-class IlseSubmissionServiceSpec extends Specification {
+class IlseSubmissionServiceSpec extends Specification implements DataTest {
 
+    Class[] getDomainClassesToMock() {[
+            Comment,
+            IlseSubmission,
+    ]}
 
     @Unroll
     void "test getSortedBlacklistedIlseSubmissions single"() {

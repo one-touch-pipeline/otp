@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.joda.time.format.ISODateTimeFormat
 import spock.lang.Specification
 
@@ -36,14 +37,15 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_DATE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
-@Mock([
-        Run,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-])
-class RunRunDateValidatorSpec extends Specification {
+class RunRunDateValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Run,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+    ]}
 
     void 'validate adds expected errors'() {
 

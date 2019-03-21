@@ -22,18 +22,19 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-@Mock([
-        ExternallyProcessedMergedBamFile,
-])
-class ExternallyProcessedMergedBamFileSpec extends Specification {
+class ExternallyProcessedMergedBamFileSpec extends Specification implements DataTest {
 
+    Class[] getDomainClassesToMock() {[
+            ExternallyProcessedMergedBamFile,
+    ]}
 
     private Map createMap() {
         return [

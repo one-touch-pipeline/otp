@@ -22,46 +22,47 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 
-@Mock([
-        AbstractMergedBamFile,
-        DataFile,
-        FileType,
-        IndelCallingInstance,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingSet,
-        MergingWorkPackage,
-        Pipeline,
-        Project,
-        ProjectCategory,
-        Realm,
-        ReferenceGenome,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool
-])
-class IndelCallingInstanceSpec extends Specification {
+class IndelCallingInstanceSpec extends Specification implements DataTest {
 
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            DataFile,
+            FileType,
+            IndelCallingInstance,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingSet,
+            MergingWorkPackage,
+            Pipeline,
+            Project,
+            ProjectCategory,
+            Realm,
+            ReferenceGenome,
+            RoddyBamFile,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool
+    ]}
 
     void testGetIndelInstancePath() {
         given:

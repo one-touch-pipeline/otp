@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.job.jobs.aceseq
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -37,44 +37,45 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
-@Mock([
-        AbstractMergedBamFile,
-        AceseqInstance,
-        AceseqQc,
-        DataFile,
-        FileType,
-        IndelCallingInstance,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        Pipeline,
-        Project,
-        ProjectCategory,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SequencingKitLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-        SophiaInstance,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeEntry,
-        ReferenceGenomeProjectSeqType,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-])
-class ExecuteRoddyAceseqJobSpec extends Specification {
+class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            AceseqInstance,
+            AceseqQc,
+            DataFile,
+            FileType,
+            IndelCallingInstance,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingWorkPackage,
+            Pipeline,
+            ProcessingOption,
+            Project,
+            ProjectCategory,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SequencingKitLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+            SophiaInstance,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeEntry,
+            ReferenceGenomeProjectSeqType,
+            RoddyBamFile,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+    ]}
 
     @Rule
     public TemporaryFolder temporaryFolder

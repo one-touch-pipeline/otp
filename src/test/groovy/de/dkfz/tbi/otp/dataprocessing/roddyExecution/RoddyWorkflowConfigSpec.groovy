@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -32,15 +33,16 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 
-@Mock([
-        Pipeline,
-        Project,
-        ProjectCategory,
-        Realm,
-        RoddyWorkflowConfig,
-        SeqType,
-])
-class RoddyWorkflowConfigSpec extends Specification {
+class RoddyWorkflowConfigSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Pipeline,
+            Project,
+            ProjectCategory,
+            Realm,
+            RoddyWorkflowConfig,
+            SeqType,
+    ]}
 
     final static String RODDY_NAME = 'roddyName'
     final static String PLUGIN_VERSION = 'pluginVersion:1.1.1'

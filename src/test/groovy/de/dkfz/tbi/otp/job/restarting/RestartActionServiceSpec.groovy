@@ -22,8 +22,8 @@
 
 package de.dkfz.tbi.otp.job.restarting
 
-import grails.test.mixin.Mock
 import org.apache.commons.logging.Log
+import grails.testing.gorm.DataTest
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
@@ -36,13 +36,14 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.HelperUtils
 
-@Mock([
-        Process,
-        ProcessingStep,
-        ProcessingStepUpdate,
-        JobExecutionPlan,
-])
-class RestartActionServiceSpec extends Specification {
+class RestartActionServiceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Process,
+            ProcessingStep,
+            ProcessingStepUpdate,
+            JobExecutionPlan,
+    ]}
 
     void "handleAction, when action is null, does nothing"() {
         given:

@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -35,15 +36,16 @@ import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock([
-        Run,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SequencingKitLabel,
-])
-class RunSeqPlatformValidatorSpec extends Specification {
+class RunSeqPlatformValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Run,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SequencingKitLabel,
+    ]}
 
     SeqPlatformModelLabel model1
     SeqPlatformModelLabel model2

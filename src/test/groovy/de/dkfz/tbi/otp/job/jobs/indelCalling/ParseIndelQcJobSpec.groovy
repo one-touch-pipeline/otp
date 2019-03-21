@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.job.jobs.indelCalling
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -39,45 +40,46 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@Mock([
-        AbstractMergedBamFile,
-        DataFile,
-        FileType,
-        IndelCallingInstance,
-        IndelSampleSwapDetection,
-        IndelQualityControl,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        Pipeline,
-        ProcessingOption,
-        ProcessingStep,
-        Project,
-        ProjectCategory,
-        QcThreshold,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SequencingKitLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-        ReferenceGenome,
-        ReferenceGenomeEntry,
-        ReferenceGenomeProjectSeqType,
-        Realm,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-])
-class ParseIndelQcJobSpec extends Specification {
+class ParseIndelQcJobSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            DataFile,
+            FileType,
+            IndelCallingInstance,
+            IndelSampleSwapDetection,
+            IndelQualityControl,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingWorkPackage,
+            Pipeline,
+            ProcessingOption,
+            ProcessingStep,
+            Project,
+            ProjectCategory,
+            QcThreshold,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SequencingKitLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+            ReferenceGenome,
+            ReferenceGenomeEntry,
+            ReferenceGenomeProjectSeqType,
+            Realm,
+            RoddyBamFile,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+    ]}
 
     TestConfigService configService
 

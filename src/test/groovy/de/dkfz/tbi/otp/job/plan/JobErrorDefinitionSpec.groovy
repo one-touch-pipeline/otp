@@ -22,21 +22,21 @@
 
 package de.dkfz.tbi.otp.job.plan
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import grails.validation.ValidationException
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@Mock([
-        JobDefinition,
-        JobErrorDefinition,
-        JobExecutionPlan,
-])
+class JobErrorDefinitionSpec extends Specification implements DataTest {
 
-class JobErrorDefinitionSpec extends Specification {
-
+    Class[] getDomainClassesToMock() {[
+            JobDefinition,
+            JobErrorDefinition,
+            JobExecutionPlan,
+    ]}
 
     def setup() {
         DomainFactory.createJobDefinition()

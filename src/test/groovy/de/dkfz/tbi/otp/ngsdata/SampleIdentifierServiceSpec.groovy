@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -32,16 +33,17 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
-@Mock([
-        Realm,
-        Project,
-        SampleIdentifier,
-        Individual,
-        SampleType,
-        Sample,
-        ProcessingOption,
-])
-class SampleIdentifierServiceSpec extends Specification implements DomainFactoryCore {
+class SampleIdentifierServiceSpec extends Specification implements DomainFactoryCore, DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Realm,
+            Project,
+            SampleIdentifier,
+            Individual,
+            SampleType,
+            Sample,
+            ProcessingOption,
+    ]}
 
     SampleIdentifierService sampleIdentifierService
 

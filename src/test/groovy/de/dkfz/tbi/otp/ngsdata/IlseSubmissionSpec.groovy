@@ -22,18 +22,20 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.Comment
 
-@Mock([
-        Comment,
-        IlseSubmission,
-])
-class IlseSubmissionSpec extends Specification {
+class IlseSubmissionSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Comment,
+            IlseSubmission,
+    ]}
 
     @Unroll
     void "test constraints all fine"() {

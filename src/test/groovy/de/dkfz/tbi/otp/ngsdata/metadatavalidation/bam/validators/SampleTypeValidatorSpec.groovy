@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -36,8 +37,11 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SAMPLE_TYPE
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock([SampleType])
-class SampleTypeValidatorSpec extends Specification {
+class SampleTypeValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            SampleType,
+    ]}
 
     void 'validate, when column SAMPLE_TYPE missing, then add expected problem'() {
 

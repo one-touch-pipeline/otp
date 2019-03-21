@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -38,17 +39,18 @@ import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
 
-@Mock([
-        Individual,
-        ProcessingOption,
-        Project,
-        ProjectCategory,
-        Realm,
-        Sample,
-        SampleIdentifier,
-        SampleType,
-])
-class SampleProjectValidatorSpec extends Specification {
+class SampleProjectValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Individual,
+            ProcessingOption,
+            Project,
+            ProjectCategory,
+            Realm,
+            Sample,
+            SampleIdentifier,
+            SampleType,
+    ]}
 
     void 'validate adds expected warnings'() {
         given:

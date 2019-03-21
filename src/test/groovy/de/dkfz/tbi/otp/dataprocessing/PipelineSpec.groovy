@@ -22,14 +22,16 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
-@Mock([
-        Pipeline
-])
-class PipelineSpec extends Specification {
+class PipelineSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Pipeline
+    ]}
 
     @Unroll
     void "test name type constraint"() {

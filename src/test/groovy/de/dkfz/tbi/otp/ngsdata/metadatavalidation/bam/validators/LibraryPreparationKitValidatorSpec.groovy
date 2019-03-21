@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -35,8 +36,11 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.LIBRARY_PREPARATION_KIT
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SEQUENCING_TYPE
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
-@Mock([LibraryPreparationKit])
-class LibraryPreparationKitValidatorSpec extends Specification {
+class LibraryPreparationKitValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            LibraryPreparationKit,
+    ]}
 
     void 'validate, when library preparation kit is not registered in OTP, then add expected problem'() {
 

@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.job.jobs.snvcalling
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -36,41 +37,42 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
-@Mock([
-        AbstractMergedBamFile,
-        DataFile,
-        FileType,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        Pipeline,
-        ProcessingOption,
-        Project,
-        ProjectCategory,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SequencingKitLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-        ReferenceGenome,
-        ReferenceGenomeEntry,
-        ReferenceGenomeProjectSeqType,
-        Realm,
-        RoddyBamFile,
-        RoddySnvCallingInstance,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-])
-class ExecuteRoddySnvJobSpec extends Specification {
+class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            DataFile,
+            FileType,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingWorkPackage,
+            Pipeline,
+            ProcessingOption,
+            Project,
+            ProjectCategory,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SequencingKitLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+            ReferenceGenome,
+            ReferenceGenomeEntry,
+            ReferenceGenomeProjectSeqType,
+            Realm,
+            RoddyBamFile,
+            RoddySnvCallingInstance,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+    ]}
 
     TestConfigService configService
 

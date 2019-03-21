@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -32,7 +33,7 @@ import java.nio.file.Path
 import java.nio.file.attribute.PosixFilePermissions
 
 
-class ChecksumFileServiceSpec extends Specification {
+class ChecksumFileServiceSpec extends Specification implements DataTest {
     ChecksumFileService checksumFileService
     Path file
 

@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.egaSubmission
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -33,38 +33,39 @@ import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-@Mock([
-        AbstractMergedBamFile,
-        BamFileSubmissionObject,
-        DataFile,
-        DataFileSubmissionObject,
-        FileType,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        Pipeline,
-        Project,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        Sample,
-        SampleSubmissionObject,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-        EgaSubmission,
-])
-class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFactory {
+class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFactory, DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            BamFileSubmissionObject,
+            DataFile,
+            DataFileSubmissionObject,
+            FileType,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingWorkPackage,
+            Pipeline,
+            Project,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeProjectSeqType,
+            RoddyBamFile,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+            Sample,
+            SampleSubmissionObject,
+            SampleType,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+            EgaSubmission,
+    ]}
 
     private EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
 

@@ -22,14 +22,17 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock([
-        LibraryPreparationKit,
-])
-class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<LibraryPreparationKit> {
+class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<LibraryPreparationKit> implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            LibraryPreparationKit,
+    ]}
+
     LibraryPreparationKitService libraryPreparationKitService = new LibraryPreparationKitService()
 
     final static String SHORT_DISPLAY_NAME = "LPK"

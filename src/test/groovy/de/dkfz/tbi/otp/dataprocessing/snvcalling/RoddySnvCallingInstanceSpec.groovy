@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -30,45 +31,46 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-@Mock([
-        AbstractMergedBamFile,
-        AlignmentPass,
-        DataFile,
-        FileType,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingPass,
-        MergingSet,
-        MergingSetAssignment,
-        MergingWorkPackage,
-        Pipeline,
-        ProcessedBamFile,
-        ProcessedMergedBamFile,
-        ProcessingOption,
-        ProcessingThresholds,
-        Project,
-        Realm,
-        ReferenceGenome,
-        RoddyBamFile,
-        RoddySnvCallingInstance,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SequencingKitLabel,
-        SoftwareTool,
-])
-class RoddySnvCallingInstanceSpec extends Specification {
+class RoddySnvCallingInstanceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            AlignmentPass,
+            DataFile,
+            FileType,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingPass,
+            MergingSet,
+            MergingSetAssignment,
+            MergingWorkPackage,
+            Pipeline,
+            ProcessedBamFile,
+            ProcessedMergedBamFile,
+            ProcessingOption,
+            ProcessingThresholds,
+            Project,
+            Realm,
+            ReferenceGenome,
+            RoddyBamFile,
+            RoddySnvCallingInstance,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SequencingKitLabel,
+            SoftwareTool,
+    ]}
 
     SamplePair samplePair
     String samplePairPath

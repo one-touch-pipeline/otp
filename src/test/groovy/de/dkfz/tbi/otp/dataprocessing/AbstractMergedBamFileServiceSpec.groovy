@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -31,7 +32,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 
-class AbstractMergedBamFileServiceSpec extends Specification {
+class AbstractMergedBamFileServiceSpec extends Specification implements DataTest {
 
     @Rule
     TemporaryFolder temporaryFolder

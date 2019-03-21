@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.restarting
 
+import grails.testing.gorm.DataTest
 import org.apache.commons.logging.Log
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -36,7 +37,7 @@ import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 
-class RestartParseServiceSpec extends Specification {
+class RestartParseServiceSpec extends Specification implements DataTest {
 
     @Rule
     TemporaryFolder temporaryFolder

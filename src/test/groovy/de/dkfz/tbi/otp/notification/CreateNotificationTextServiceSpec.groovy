@@ -22,11 +22,12 @@
 
 package de.dkfz.tbi.otp.notification
 
-import grails.test.mixin.Mock
+
 import grails.test.mixin.TestMixin
 import grails.test.mixin.support.GrailsUnitTestMixin
-import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
+import grails.testing.gorm.DataTest
 import grails.web.mapping.LinkGenerator
+import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -44,54 +45,55 @@ import de.dkfz.tbi.otp.tracking.*
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
-@Mock([
-        AbstractMergedBamFile,
-        AntibodyTarget,
-        CellRangerConfig,
-        CellRangerMergingWorkPackage,
-        ChipSeqSeqTrack,
-        DataFile,
-        ExomeSeqTrack,
-        FileType,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        MetaDataEntry,
-        MetaDataKey,
-        OtrsTicket,
-        Pipeline,
-        ProcessingOption,
-        Project,
-        ProjectCategory,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeIndex,
-        ReferenceGenomeProjectSeqType,
-        RnaRoddyBamFile,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SingleCellBamFile,
-        SoftwareTool,
-        SoftwareToolIdentifier,
-        ToolName,
-])
 //TODO refactor classes SNV INDEL ACESEQSpec abstract from BamFilePairAnalyses abstract
 @TestMixin(GrailsUnitTestMixin)
 @SuppressWarnings(["ClassSize", "MethodCount"])
-class CreateNotificationTextServiceSpec extends Specification implements AlignmentPipelineFactory {
+class CreateNotificationTextServiceSpec extends Specification implements AlignmentPipelineFactory, DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            AntibodyTarget,
+            CellRangerConfig,
+            CellRangerMergingWorkPackage,
+            ChipSeqSeqTrack,
+            DataFile,
+            ExomeSeqTrack,
+            FileType,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingWorkPackage,
+            MetaDataEntry,
+            MetaDataKey,
+            OtrsTicket,
+            Pipeline,
+            ProcessingOption,
+            Project,
+            ProjectCategory,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeIndex,
+            ReferenceGenomeProjectSeqType,
+            RnaRoddyBamFile,
+            RoddyBamFile,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SingleCellBamFile,
+            SoftwareTool,
+            SoftwareToolIdentifier,
+            ToolName,
+    ]}
 
     TestConfigService configService
 

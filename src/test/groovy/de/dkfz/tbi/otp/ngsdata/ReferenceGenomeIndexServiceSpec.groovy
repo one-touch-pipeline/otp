@@ -22,22 +22,24 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+
 import grails.test.mixin.TestFor
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
-
-@Mock([
-        ProcessingOption,
-        ReferenceGenome,
-        ReferenceGenomeIndex,
-        ToolName,
-])
 @TestFor(ReferenceGenomeIndexService)
-class ReferenceGenomeIndexServiceSpec extends Specification {
+class ReferenceGenomeIndexServiceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ProcessingOption,
+            ReferenceGenome,
+            ReferenceGenomeIndex,
+            ToolName,
+    ]}
+
     ReferenceGenomeIndex referenceGenomeIndex
 
     def setup() {

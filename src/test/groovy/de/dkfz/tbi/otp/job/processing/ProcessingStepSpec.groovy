@@ -22,21 +22,23 @@
 
 package de.dkfz.tbi.otp.job.processing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-@Mock([
-        JobDefinition,
-        JobExecutionPlan,
-        Process,
-        ProcessingStep,
-        ProcessingStepUpdate,
-])
-class ProcessingStepSpec extends Specification {
+class ProcessingStepSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            JobDefinition,
+            JobExecutionPlan,
+            Process,
+            ProcessingStep,
+            ProcessingStepUpdate,
+    ]}
 
     void "test firstProcessingStepUpdate return first update"() {
         given:

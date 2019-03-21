@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -41,8 +42,11 @@ import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
-@Mock([SeqCenter])
-class MetadataFileCopiedValidatorSpec extends Specification {
+class MetadataFileCopiedValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            SeqCenter,
+    ]}
 
     MetadataFileCopiedValidator metadataFileCopiedValidator
 

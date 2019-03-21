@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.tracking
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import grails.validation.ValidationException
@@ -39,35 +39,36 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
 @TestMixin(ControllerUnitTestMixin)
-@Mock([
-        DataFile,
-        FileType,
-        IlseSubmission,
-        Individual,
-        OtrsTicket,
-        ProjectRole,
-        MergingWorkPackage,
-        ProcessingOption,
-        Project,
-        ProjectCategory,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        Run,
-        RunSegment,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-        User,
-        UserProjectRole,
-])
-class TrackingServiceSpec extends Specification {
+class TrackingServiceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            DataFile,
+            FileType,
+            IlseSubmission,
+            Individual,
+            OtrsTicket,
+            ProjectRole,
+            MergingWorkPackage,
+            ProcessingOption,
+            Project,
+            ProjectCategory,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeProjectSeqType,
+            Run,
+            RunSegment,
+            Sample,
+            SampleType,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+            User,
+            UserProjectRole,
+    ]}
 
     private final static String TICKET_NUMBER = "2000010112345678"
     private final static String PREFIX = "the prefix"

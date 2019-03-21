@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -36,8 +37,13 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock([Realm, Project, ProjectCategory,])
-class ProjectValidatorSpec extends Specification {
+class ProjectValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Realm,
+            Project,
+            ProjectCategory,
+    ]}
 
     void 'validate concerning metadata, when column does not exist, succeeds'() {
 

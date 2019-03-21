@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -33,50 +34,51 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-@Mock([
-        AbstractMergedBamFile,
-        AlignmentPass,
-        AceseqInstance,
-        BamFilePairAnalysis,
-        DataFile,
-        ExternalMergingWorkPackage,
-        ExternallyProcessedMergedBamFile,
-        FileType,
-        Individual,
-        IndelCallingInstance,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingPass,
-        MergingSet,
-        MergingSetAssignment,
-        MergingWorkPackage,
-        Pipeline,
-        ProcessedBamFile,
-        ProcessedMergedBamFile,
-        Project,
-        ProjectCategory,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        RoddyBamFile,
-        RoddySnvCallingInstance,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-        SophiaInstance,
-])
-class BamFilePairAnalysisSpec extends Specification {
+class BamFilePairAnalysisSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            AlignmentPass,
+            AceseqInstance,
+            BamFilePairAnalysis,
+            DataFile,
+            ExternalMergingWorkPackage,
+            ExternallyProcessedMergedBamFile,
+            FileType,
+            Individual,
+            IndelCallingInstance,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingPass,
+            MergingSet,
+            MergingSetAssignment,
+            MergingWorkPackage,
+            Pipeline,
+            ProcessedBamFile,
+            ProcessedMergedBamFile,
+            Project,
+            ProjectCategory,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeProjectSeqType,
+            RoddyBamFile,
+            RoddySnvCallingInstance,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+            SophiaInstance,
+    ]}
 
     void "test constraints when everything is fine, should be valid"() {
         given:

@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.qcTrafficLight
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -35,39 +36,40 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.TrackingService
 
-@Mock([
-        AbstractMergedBamFile,
-        DataFile,
-        Comment,
-        ExomeSeqTrack,
-        FileType,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingWorkPackage,
-        Pipeline,
-        Project,
-        ProcessingOption,
-        OtrsTicket,
-        Realm,
-        ReferenceGenome,
-        ReferenceGenomeProjectSeqType,
-        RnaRoddyBamFile,
-        RoddyBamFile,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        Sample,
-        SampleType,
-        SeqType,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqCenter,
-        SeqTrack,
-        SoftwareTool,
-])
-class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory {
+class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory, DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
+            DataFile,
+            Comment,
+            ExomeSeqTrack,
+            FileType,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingWorkPackage,
+            Pipeline,
+            Project,
+            ProcessingOption,
+            OtrsTicket,
+            Realm,
+            ReferenceGenome,
+            ReferenceGenomeProjectSeqType,
+            RnaRoddyBamFile,
+            RoddyBamFile,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+            Sample,
+            SampleType,
+            SeqType,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqCenter,
+            SeqTrack,
+            SoftwareTool,
+    ]}
 
     QcTrafficLightService qcTrafficLightService
     TestConfigService testConfigService

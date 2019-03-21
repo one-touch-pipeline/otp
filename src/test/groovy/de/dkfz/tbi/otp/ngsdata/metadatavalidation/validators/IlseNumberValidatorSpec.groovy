@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -37,10 +38,11 @@ import java.nio.file.Paths
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
-@Mock([
-    IlseSubmission
-])
-class IlseNumberValidatorSpec extends Specification {
+class IlseNumberValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            IlseSubmission,
+    ]}
 
     void 'validate, when metadata fields contain valid ILSe number, succeeds'() {
         given:

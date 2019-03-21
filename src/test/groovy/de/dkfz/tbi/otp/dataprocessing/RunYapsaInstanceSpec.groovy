@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -33,46 +33,47 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-@Mock([
-        AlignmentPass,
-        DataFile,
-        FileType,
-        Individual,
-        LibraryPreparationKit,
-        MergingCriteria,
-        MergingPass,
-        MergingSet,
-        MergingSetAssignment,
-        MergingWorkPackage,
-        Pipeline,
-        ProcessedBamFile,
-        ProcessedMergedBamFile,
-        ProcessingOption,
-        ProcessingThresholds,
-        Project,
-        Realm,
-        ReferenceGenome,
-        RoddyBamFile,
-        RoddySnvCallingInstance,
-        RoddyWorkflowConfig,
-        Run,
-        RunSegment,
-        RunYapsaConfig,
-        RunYapsaInstance,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SequencingKitLabel,
-        SoftwareTool,
-])
-class RunYapsaInstanceSpec extends Specification {
+class RunYapsaInstanceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AlignmentPass,
+            DataFile,
+            FileType,
+            Individual,
+            LibraryPreparationKit,
+            MergingCriteria,
+            MergingPass,
+            MergingSet,
+            MergingSetAssignment,
+            MergingWorkPackage,
+            Pipeline,
+            ProcessedBamFile,
+            ProcessedMergedBamFile,
+            ProcessingOption,
+            ProcessingThresholds,
+            Project,
+            Realm,
+            ReferenceGenome,
+            RoddyBamFile,
+            RoddySnvCallingInstance,
+            RoddyWorkflowConfig,
+            Run,
+            RunSegment,
+            RunYapsaConfig,
+            RunYapsaInstance,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SequencingKitLabel,
+            SoftwareTool,
+    ]}
 
     SamplePair samplePair
     String samplePairPath

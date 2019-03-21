@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.job.scheduler
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.OtpRuntimeException
@@ -31,11 +32,12 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-@Mock([
-        ClusterJob,
-        Realm,
-])
-class ClusterJobMonitorSpec extends Specification {
+class ClusterJobMonitorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ClusterJob,
+            Realm,
+    ]}
 
     private ClusterJob createMockedClusterJob(Map map = [:]) {
         return DomainFactory.createClusterJob([

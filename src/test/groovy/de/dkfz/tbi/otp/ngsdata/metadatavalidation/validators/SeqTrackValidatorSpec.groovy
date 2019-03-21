@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -39,23 +40,24 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.ngsdata.MultiplexingService.combineLaneNumberAndBarcode
 import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory.createContext
 
-@Mock([
-        Individual,
-        Project,
-        ProjectCategory,
-        Realm,
-        Run,
-        Sample,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-])
-class SeqTrackValidatorSpec extends Specification {
+class SeqTrackValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Individual,
+            Project,
+            ProjectCategory,
+            Realm,
+            Run,
+            Sample,
+            SampleType,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+    ]}
 
     SeqTrackValidator validator = new SeqTrackValidator()
 

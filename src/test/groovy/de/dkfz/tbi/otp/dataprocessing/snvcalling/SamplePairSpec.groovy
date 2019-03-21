@@ -22,30 +22,32 @@
 
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-@Mock([
-        ExternalMergingWorkPackage,
-        Individual,
-        LibraryPreparationKit,
-        MergingWorkPackage,
-        Pipeline,
-        Project,
-        Realm,
-        ReferenceGenome,
-        Sample,
-        SamplePair,
-        SampleType,
-        SampleTypePerProject,
-        SeqPlatformGroup,
-        SeqType,
-])
-class SamplePairSpec extends Specification {
+class SamplePairSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ExternalMergingWorkPackage,
+            Individual,
+            LibraryPreparationKit,
+            MergingWorkPackage,
+            Pipeline,
+            Project,
+            Realm,
+            ReferenceGenome,
+            Sample,
+            SamplePair,
+            SampleType,
+            SampleTypePerProject,
+            SeqPlatformGroup,
+            SeqType,
+    ]}
 
     List setUpForPathTests(String analysisName) {
         Realm realm = DomainFactory.createRealm()

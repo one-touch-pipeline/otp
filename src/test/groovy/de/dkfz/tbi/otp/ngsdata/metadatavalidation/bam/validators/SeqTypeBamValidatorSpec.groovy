@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -36,8 +37,11 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SEQUENCING_TYPE
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock([SeqType])
-class SeqTypeBamValidatorSpec extends Specification {
+class SeqTypeBamValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            SeqType,
+    ]}
 
     void 'validate, when column SEQUENCING_TYPE missing, then add expected problem'() {
 

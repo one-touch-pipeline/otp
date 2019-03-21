@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.job.jobs.bamImport
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -41,25 +42,26 @@ import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.Files
 
-@Mock([
-        ExternalMergingWorkPackage,
-        ExternallyProcessedMergedBamFile,
-        ImportProcess,
-        Individual,
-        JobDefinition,
-        JobExecutionPlan,
-        Pipeline,
-        Process,
-        ProcessingStep,
-        ProcessParameter,
-        Project,
-        Realm,
-        ReferenceGenome,
-        Sample,
-        SampleType,
-        SeqType
-])
-class ReplaceSourceWithLinkJobSpec extends Specification {
+class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ExternalMergingWorkPackage,
+            ExternallyProcessedMergedBamFile,
+            ImportProcess,
+            Individual,
+            JobDefinition,
+            JobExecutionPlan,
+            Pipeline,
+            Process,
+            ProcessingStep,
+            ProcessParameter,
+            Project,
+            Realm,
+            ReferenceGenome,
+            Sample,
+            SampleType,
+            SeqType
+    ]}
 
     final long PROCESSING_STEP_ID = 1234567
 

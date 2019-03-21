@@ -22,12 +22,14 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
 
-@Mock([
-        SeqType,
-])
-class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> {
+import grails.testing.gorm.DataTest
+
+class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            SeqType,
+    ]}
 
     SeqTypeService seqTypeService = new SeqTypeService()
 

@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.infrastructure
 
+import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -31,7 +32,7 @@ import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
 @SuppressWarnings('MethodCount')
-class FileServiceSpec extends Specification {
+class FileServiceSpec extends Specification implements DataTest {
 
     static final String SOME_CONTENT = 'SomeContent'
 

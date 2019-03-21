@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.config
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,13 +30,14 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.*
 
-@Mock([
-        JobExecutionPlan,
-        JobDefinition,
-        SeqCenter,
-        SeqType,
-])
-class TypeValidatorsSpec extends Specification {
+class TypeValidatorsSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            JobExecutionPlan,
+            JobDefinition,
+            SeqCenter,
+            SeqType,
+    ]}
 
     private static String CENTER_A = 'CenterA'
     private static String CENTER_B = 'CenterB'

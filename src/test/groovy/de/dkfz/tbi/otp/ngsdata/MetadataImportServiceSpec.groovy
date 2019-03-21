@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.mixin.Mock
+import grails.testing.gorm.DataTest
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import org.joda.time.LocalDate
@@ -58,39 +58,40 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Mock([
-        AntibodyTarget,
-        ChipSeqSeqTrack,
-        DataFile,
-        ExomeSeqTrack,
-        FileType,
-        IlseSubmission,
-        Individual,
-        LibraryPreparationKit,
-        MetaDataEntry,
-        MetaDataFile,
-        MetaDataKey,
-        OtrsTicket,
-        Project,
-        ProjectCategory,
-        Realm,
-        Run,
-        RunSegment,
-        ProcessingOption,
-        Sample,
-        SampleIdentifier,
-        SampleType,
-        SeqCenter,
-        SeqPlatform,
-        SeqPlatformGroup,
-        SeqPlatformModelLabel,
-        SeqTrack,
-        SeqType,
-        SoftwareTool,
-        SoftwareToolIdentifier,
-])
 @TestMixin(ControllerUnitTestMixin)
-class MetadataImportServiceSpec extends Specification implements DomainFactoryCore {
+class MetadataImportServiceSpec extends Specification implements DomainFactoryCore, DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            AntibodyTarget,
+            ChipSeqSeqTrack,
+            DataFile,
+            ExomeSeqTrack,
+            FileType,
+            IlseSubmission,
+            Individual,
+            LibraryPreparationKit,
+            MetaDataEntry,
+            MetaDataFile,
+            MetaDataKey,
+            OtrsTicket,
+            Project,
+            ProjectCategory,
+            Realm,
+            Run,
+            RunSegment,
+            ProcessingOption,
+            Sample,
+            SampleIdentifier,
+            SampleType,
+            SeqCenter,
+            SeqPlatform,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+            SoftwareToolIdentifier,
+    ]}
 
     final static String TICKET_NUMBER = "2000010112345678"
 

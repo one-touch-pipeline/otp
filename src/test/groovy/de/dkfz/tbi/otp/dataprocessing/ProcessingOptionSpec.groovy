@@ -22,16 +22,18 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 
-@Mock([
-        ProcessingOption,
-])
-class ProcessingOptionSpec extends Specification {
+class ProcessingOptionSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ProcessingOption,
+    ]}
 
     @Unroll
     void "validate #optionName with #value, should be valid"() {

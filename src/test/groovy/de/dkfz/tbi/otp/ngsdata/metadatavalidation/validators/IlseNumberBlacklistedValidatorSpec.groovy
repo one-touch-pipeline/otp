@@ -22,7 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.Comment
@@ -34,11 +35,12 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
-@Mock([
-        Comment,
-        IlseSubmission,
-])
-class IlseNumberBlacklistedValidatorSpec extends Specification {
+class IlseNumberBlacklistedValidatorSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            Comment,
+            IlseSubmission,
+    ]}
 
     void 'validate, when column does not exist, succeeds'() {
         given:

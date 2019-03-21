@@ -22,24 +22,26 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
+
+import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
 
-@Mock([
-        ExternalMergingWorkPackage,
-        Individual,
-        Pipeline,
-        Project,
-        ProjectCategory,
-        Realm,
-        ReferenceGenome,
-        Sample,
-        SampleType,
-        SeqType,
-])
-class ExternalMergingWorkPackageSpec extends Specification {
+class ExternalMergingWorkPackageSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ExternalMergingWorkPackage,
+            Individual,
+            Pipeline,
+            Project,
+            ProjectCategory,
+            Realm,
+            ReferenceGenome,
+            Sample,
+            SampleType,
+            SeqType,
+    ]}
 
     void "test constraint, when all fine then no exception should be thrown"() {
         given:
