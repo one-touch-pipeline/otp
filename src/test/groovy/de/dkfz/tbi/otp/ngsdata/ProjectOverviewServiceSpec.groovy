@@ -23,7 +23,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
-import org.apache.commons.logging.impl.NoOpLog
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -171,7 +170,6 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
                     1 * roddyGetRuntimeConfigCommand(roddyWorkflowConfig, _, roddyWorkflowConfig.seqType.roddyName) >> ''
                     0 * roddyGetRuntimeConfigCommand(_, _, _)
                 },
-                log                       : new NoOpLog(),
         ])
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {

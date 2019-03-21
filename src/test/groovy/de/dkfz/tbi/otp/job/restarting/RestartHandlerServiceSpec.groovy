@@ -22,8 +22,8 @@
 
 package de.dkfz.tbi.otp.job.restarting
 
-import org.apache.commons.logging.Log
 import grails.testing.gorm.DataTest
+import org.slf4j.Logger
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -65,7 +65,7 @@ class RestartHandlerServiceSpec extends Specification implements DataTest {
         )
         ProcessingError error = DomainFactory.createProcessingError()
         Job job = GroovyMock(Job) {
-            _ * getLog() >> Mock(Log) {
+            _ * getLog() >> Mock(Logger) {
                 _ * debug(_)
             }
             _ * getProcessingStep() >> error.processingStep

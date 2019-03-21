@@ -60,7 +60,7 @@ class RestartActionService {
             return
         }
 
-        job.log.debug("Handling action ${action}.")
+        job.log.debug("Handling action {}.", action)
 
         switch (action) {
             case JobErrorDefinition.Action.STOP:

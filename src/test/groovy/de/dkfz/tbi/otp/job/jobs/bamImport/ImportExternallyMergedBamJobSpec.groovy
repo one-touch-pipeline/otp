@@ -23,7 +23,6 @@
 package de.dkfz.tbi.otp.job.jobs.bamImport
 
 import grails.testing.gorm.DataTest
-import org.apache.commons.logging.impl.NoOpLog
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -493,7 +492,6 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         importExternallyMergedBamJob.executionHelperService = new ExecutionHelperService()
         importExternallyMergedBamJob.fileSystemService = new FileSystemService()
         importExternallyMergedBamJob.fileSystemService.processingOptionService = new ProcessingOptionService()
-        importExternallyMergedBamJob.metaClass.log = new NoOpLog()
         importExternallyMergedBamJob.processingOptionService = new ProcessingOptionService()
 
         CreateFileHelper.createFile(new File("${importProcess.externallyProcessedMergedBamFiles[0].importedFrom}"))

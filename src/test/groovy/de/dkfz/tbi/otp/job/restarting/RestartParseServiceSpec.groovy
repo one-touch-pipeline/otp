@@ -23,9 +23,9 @@
 package de.dkfz.tbi.otp.job.restarting
 
 import grails.testing.gorm.DataTest
-import org.apache.commons.logging.Log
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.slf4j.Logger
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -49,7 +49,7 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         JobErrorDefinition jobErrorDefinition = new JobErrorDefinition(action: JobErrorDefinition.Action.RESTART_WF, errorExpression: errorExpression)
         RestartParseService service = new RestartParseService()
         Job job = GroovyMock(Job) {
-            _ * getLog() >> Mock(Log) {
+            _ * getLog() >> Mock(Logger) {
                 _ * debug(_)
             }
         }
@@ -83,7 +83,7 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         }
         RestartParseService service = new RestartParseService()
         Job job = GroovyMock(Job) {
-            _ * getLog() >> Mock(Log) {
+            _ * getLog() >> Mock(Logger) {
                 _ * debug(_)
             }
             _ * getProcessingStep() >> Mock(ProcessingStep) {
@@ -112,7 +112,7 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         List<JobErrorDefinition> jobErrorDefinitions = createJobErrorDefinitions()
         RestartParseService service = new RestartParseService()
         Job job = GroovyMock(Job) {
-            _ * getLog() >> Mock(Log) {
+            _ * getLog() >> Mock(Logger) {
                 _ * debug(_)
             }
             _ * getProcessingStep() >> Mock(ProcessingStep) {
@@ -147,7 +147,7 @@ class RestartParseServiceSpec extends Specification implements DataTest {
                 }
         )
         Job job = GroovyMock(Job) {
-            _ * getLog() >> Mock(Log) {
+            _ * getLog() >> Mock(Logger) {
                 _ * debug(_)
             }
             _ * getProcessingStep() >> Mock(ProcessingStep) {
@@ -178,7 +178,7 @@ class RestartParseServiceSpec extends Specification implements DataTest {
                 }
         )
         Job job = GroovyMock(Job) {
-            _ * getLog() >> Mock(Log) {
+            _ * getLog() >> Mock(Logger) {
                 _ * debug(_)
             }
             _ * getProcessingStep() >> Mock(ProcessingStep) {
@@ -221,7 +221,7 @@ class RestartParseServiceSpec extends Specification implements DataTest {
                     }
                 }
             }
-            _ * getLog() >> Mock(Log) {
+            _ * getLog() >> Mock(Logger) {
                 _ * debug(_)
             }
             _ * getProcessingStep() >> Mock(ProcessingStep) {
@@ -271,7 +271,7 @@ class RestartParseServiceSpec extends Specification implements DataTest {
                             jobLog: TestCase.uniqueNonExistentPath.absolutePath,
                     ])
             ]
-            _ * getLog() >> Mock(Log) {
+            _ * getLog() >> Mock(Logger) {
                 _ * debug(_)
             }
             _ * getProcessingStep() >> Mock(ProcessingStep) {
@@ -377,7 +377,7 @@ class RestartParseServiceSpec extends Specification implements DataTest {
                             jobLog: CreateFileHelper.createFile(temporaryFolder.newFile(), cluster).absolutePath,
                     ])
             ]
-            _ * getLog() >> Mock(Log) {
+            _ * getLog() >> Mock(Logger) {
                 _ * debug(_)
             }
             _ * getProcessingStep() >> Mock(ProcessingStep) {

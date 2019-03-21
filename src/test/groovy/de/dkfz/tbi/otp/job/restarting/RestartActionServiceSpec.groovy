@@ -22,8 +22,8 @@
 
 package de.dkfz.tbi.otp.job.restarting
 
-import org.apache.commons.logging.Log
 import grails.testing.gorm.DataTest
+import org.slf4j.Logger
 import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 
@@ -49,7 +49,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
         given:
         RestartActionService service = new RestartActionService()
         Job job = GroovyMock(Job) {
-            1 * getLog() >> Mock(Log) {
+            1 * getLog() >> Mock(Logger) {
                 1 * debug(_) >> { String message ->
                     assert message.contains('Stopping') && message.contains('null')
                 }
@@ -64,9 +64,9 @@ class RestartActionServiceSpec extends Specification implements DataTest {
         given:
         RestartActionService service = new RestartActionService()
         Job job = GroovyMock(Job) {
-            1 * getLog() >> Mock(Log) {
-                1 * debug(_) >> { GString message ->
-                    assert message.contains('STOP')
+            1 * getLog() >> Mock(Logger) {
+                1 * debug(_, _) >> { _, JobErrorDefinition.Action action ->
+                    assert action == JobErrorDefinition.Action.STOP
                 }
             }
         }
@@ -79,9 +79,9 @@ class RestartActionServiceSpec extends Specification implements DataTest {
         given:
         RestartActionService service = new RestartActionService()
         Job job = GroovyMock(Job) {
-            1 * getLog() >> Mock(Log) {
-                1 * debug(_) >> { GString message ->
-                    assert message.contains('CHECK_FURTHER')
+            1 * getLog() >> Mock(Logger) {
+                1 * debug(_, _) >> { _, JobErrorDefinition.Action action ->
+                    assert action == JobErrorDefinition.Action.CHECK_FURTHER
                 }
             }
         }
@@ -103,9 +103,9 @@ class RestartActionServiceSpec extends Specification implements DataTest {
                 },
         )
         Job job = GroovyMock(AutoRestartableJob) {
-            2 * getLog() >> Mock(Log) {
-                2 * debug(_) >> { GString message ->
-                    assert message.contains('RESTART_JOB')
+            2 * getLog() >> Mock(Logger) {
+                1 * debug(_, _) >> { _, JobErrorDefinition.Action action ->
+                    assert action == JobErrorDefinition.Action.RESTART_JOB
                 } >> { String message ->
                     assert message.contains('Job restarted.')
                 }
@@ -121,9 +121,9 @@ class RestartActionServiceSpec extends Specification implements DataTest {
         given:
         RestartActionService service = new RestartActionService()
         Job job = GroovyMock(Job) {
-            1 * getLog() >> Mock(Log) {
-                1 * debug(_) >> { GString message ->
-                    assert message.contains('RESTART_JOB')
+            1 * getLog() >> Mock(Logger) {
+                1 * debug(_, _) >> { _, JobErrorDefinition.Action action ->
+                    assert action == JobErrorDefinition.Action.RESTART_JOB
                 }
             }
             1 * getProcessingStep() >> new ProcessingStep(jobClass: HelperUtils.uniqueString, process: new Process())
@@ -155,9 +155,9 @@ class RestartActionServiceSpec extends Specification implements DataTest {
                 }
         )
         Job job = GroovyMock(Job) {
-            2 * getLog() >> Mock(Log) {
-                2 * debug(_) >> { GString message ->
-                    assert message.contains('RESTART_WF')
+            2 * getLog() >> Mock(Logger) {
+                1 * debug(_, _) >> { _, JobErrorDefinition.Action action ->
+                    assert action == JobErrorDefinition.Action.RESTART_WF
                 } >> { String message ->
                     assert message == RestartActionService.WORKFLOW_RESTARTED
                 }
@@ -189,9 +189,9 @@ class RestartActionServiceSpec extends Specification implements DataTest {
                 },
         )
         Job job = GroovyMock(Job) {
-            1 * getLog() >> Mock(Log) {
-                1 * debug(_) >> { GString message ->
-                    assert message.contains('RESTART_WF')
+            1 * getLog() >> Mock(Logger) {
+                1 * debug(_, _) >> { _, JobErrorDefinition.Action action ->
+                    assert action == JobErrorDefinition.Action.RESTART_WF
                 }
             }
             1 * getProcessingStep() >> new ProcessingStep(
@@ -272,7 +272,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
                 }
         )
         Job job = GroovyMock(AutoRestartableJob) {
-            1 * getLog() >> Mock(Log) {
+            1 * getLog() >> Mock(Logger) {
                 1 * debug(_) >> { String message ->
                     assert message.contains(messageValue)
                 }
@@ -297,7 +297,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
                 }
         )
         Job job = GroovyMock(AutoRestartableJob) {
-            1 * getLog() >> Mock(Log) {
+            1 * getLog() >> Mock(Logger) {
                 1 * debug(_) >> { String message ->
                     assert message.contains(messageValue)
                 }
