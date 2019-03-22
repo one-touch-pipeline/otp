@@ -40,7 +40,7 @@ class DataFile implements Commentable, Entity {
 
     /** @deprecated OTP-2311: Redundant with seqTrack.project  */
     @Deprecated
-    Project project = null;
+    Project project = null
 
     /** @deprecated OTP-2311: Redundant with run.dateExecuted  */
     @Deprecated
@@ -180,6 +180,10 @@ class DataFile implements Commentable, Entity {
 
     SeqType getSeqType() {
         return seqTrack.seqType
+    }
+
+    String getReadName() {
+        return "R${mateNumber}"
     }
 
     static mapping = {

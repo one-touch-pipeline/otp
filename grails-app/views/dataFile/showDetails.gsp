@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.MetaDataColumn" contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.ngsdata.ProjectOverviewService; de.dkfz.tbi.otp.ngsdata.MetaDataColumn" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -50,7 +50,14 @@
         <table>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.runName"/></td>
-                <td class="myValue"><b><g:link controller="run" action="show" params="[id:  dataFile.run.name]">${dataFile.run.name}</g:link></b></td>
+                <td class="myValue">
+                    <sec:ifAllGranted roles="ROLE_OPERATOR">
+                        <b><g:link controller="run" action="show" params="[id:  dataFile.run.name]">${dataFile.run.name}</g:link></b>
+                    </sec:ifAllGranted>
+                    <sec:ifNotGranted roles="ROLE_OPERATOR">
+                        ${dataFile.run.name}
+                    </sec:ifNotGranted>
+                </td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.fileName"/></td>
@@ -100,10 +107,12 @@
                 <td class="myKey"><g:message code="datafile.showDetails.fileSize"/></td>
                 <td class="myValue">${dataFile.fileSizeString()}</td>
             </tr>
-            <tr>
-                <td class="myKey"><g:message code="datafile.showDetails.import"/></td>
-                <td class="myValue"><g:link controller="metadataImport" action="details" id="${dataFile.runSegmentId}">Import</g:link></td>
-            </tr>
+            <sec:ifAllGranted roles="ROLE_OPERATOR">
+                <tr>
+                    <td class="myKey"><g:message code="datafile.showDetails.import"/></td>
+                    <td class="myValue"><g:link controller="metadataImport" action="details" id="${dataFile.runSegmentId}">Import</g:link></td>
+                </tr>
+            </sec:ifAllGranted>
         </table>
         <H1><g:message code="datafile.showDetails.dates"/></H1>
         <table>
@@ -145,7 +154,7 @@
                         <otp:editorSwitch roles="ROLE_ADMIN" link="${g.createLink(controller: 'dataFile', action: 'updateMetaData', id: metaDataEntry.id)}" value="${metaDataEntry.value}"/>
                     </sec:ifAllGranted>
                     <sec:ifNotGranted roles="ROLE_ADMIN">
-                        <g:if test="${metaDataEntry.key.name == MetaDataColumn.SAMPLE_ID.name()}">
+                        <g:if test="${metaDataEntry.key.name == MetaDataColumn.SAMPLE_ID.name() && ProjectOverviewService.PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(dataFile.project.name)}">
                             <g:message code="datafile.showDetails.hiddenSampleIdentifier"/>
                         </g:if>
                         <g:else>

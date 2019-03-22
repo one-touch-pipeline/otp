@@ -47,8 +47,7 @@ class DataFileController {
             return
         }
         List<MetaDataEntry> entries = MetaDataEntry.findAllByDataFile(dataFile, [sort:"key.id"])
-        Map<MetaDataEntry, Boolean> changelogs = metaDataService.checkForChangelog(entries)
-
+        Map<MetaDataEntry, Boolean> changelogs = metaDataService.checkForChangelog(entries.clone())
         List<String> keys = []
         List<String> values = []
 
@@ -61,7 +60,7 @@ class DataFileController {
         [
                 dataFile: dataFile,
                 entries: entries,
-                values: values,
+                values: values*.replaceAll('//', '/'),
                 changelogs: changelogs,
                 comment: dataFile.comment,
                 fastqcAvailable: fastqcResultsService.isFastqcAvailable(dataFile),

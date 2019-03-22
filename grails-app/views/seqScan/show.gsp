@@ -104,7 +104,12 @@
 
         <div class="tableBlock">
             <h3>
-                <g:link controller="run" action="show" id="${run}">${run}</g:link>
+                <sec:ifAllGranted roles="ROLE_ADMIN">
+                    <g:link controller="run" action="show" id="${run}">${run}</g:link>
+                </sec:ifAllGranted>
+                <sec:ifNotGranted roles="ROLE_ADMIN">
+                    ${run}
+                </sec:ifNotGranted>
             </h3>
             <table>
                 <tbody>
@@ -112,6 +117,9 @@
                     <g:if test="${track.seqTrack.run.name == run}">
                     <tr>
                         <td><strong>${track.seqTrack.laneId}</strong></td>
+                        <g:each var="dataFile" in="${track.seqTrack.dataFiles}">
+                            <td><strong><g:link controller="dataFile" action="showDetails" id="${dataFile.id}">${dataFile.readName}</g:link></strong></td>
+                        </g:each>
                         <td>${track.seqTrack.sample}</td>
                         <td>${track.seqTrack.nBaseString()}</td>
                         <td>${track.seqTrack.insertSize}</td>
