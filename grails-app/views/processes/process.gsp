@@ -65,15 +65,9 @@
                 </table>
             </g:if>
             <g:if test="${parameter}">
-                <p><g:message code="processes.process.operatesOn"/>
-                    <g:if test="parameter.controller">
-                        <g:link controller="${parameter.controller}" action="${parameter.action}" id="${parameter.id}">
-                            ${parameter.text}
-                        </g:link>
-                    </g:if>
-                    <g:else>
-                        ${parameter.text}
-                    </g:else>
+                <p>
+                    <g:message code="processes.process.operatesOn"/>
+                    ${parameter.text}
                 </p>
             </g:if>
             <div>

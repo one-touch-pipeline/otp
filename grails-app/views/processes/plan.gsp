@@ -25,7 +25,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
-    <title><g:message code="processes.plan.title" args="${ [state, name] }" /></title>
+    <title><g:message code="processes.plan.title" args="${ [state ?: "all", name] }" /></title>
     <asset:javascript src="modules/workflows"/>
 </head>
 <body>
@@ -34,7 +34,7 @@
         <div id="plan-dsl-dialog" title="DSL for Workflow ${name}" style="display: none">
             <textarea readonly="readonly" cols="200" rows="100"></textarea>
         </div>
-        <h1><g:message code="processes.plan.title" args="${ [state, name] }" /></h1>
+        <h1><g:message code="processes.plan.title" args="${ [state ?: "all", name] }" /></h1>
         <div>
             <g:img dir="assets/status" file="${enabled ? 'green.png' : 'grey.png'}" style="vertical-align: middle"/>
             <g:if test="${enabled}">
