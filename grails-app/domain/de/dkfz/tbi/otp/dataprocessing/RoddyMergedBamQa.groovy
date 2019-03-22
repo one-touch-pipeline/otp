@@ -27,6 +27,11 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 class RoddyMergedBamQa extends RoddyQualityAssessment implements QcTrafficLightValue, SophiaWorkflowQualityAssessment {
 
     static constraints = {
-        chromosome(unique: ['qualityAssessmentMergedPass', 'class'])
+        chromosome(validator: { val, obj ->
+            RoddyMergedBamQa roddyMergedBamQa = RoddyMergedBamQa.findByQualityAssessmentMergedPassAndChromosome(obj.qualityAssessmentMergedPass, val)
+            if (roddyMergedBamQa && roddyMergedBamQa != obj) {
+                return "Unique"
+            }
+        })
     }
 }
