@@ -243,7 +243,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
         )
         ProcessingStep processingStep = DomainFactory.createProcessingStep(
                 process: process,
-                jobDefinition: new JobDefinition(),
+                jobDefinition: new JobDefinition(plan: process.jobExecutionPlan),
         )
         ProcessingStepUpdate processingStepUpdate = DomainFactory.createProcessingStepUpdate(
                 processingStep: processingStep,
