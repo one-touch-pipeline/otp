@@ -115,9 +115,10 @@ class DataFile implements Commentable, Entity {
         md5sum(matches: /^([0-9a-f]{32})|(n\/a)$/) //should not be n/a, but legacy data exists
         initialDirectory(blank: false, validator: { OtpPath.isValidAbsolutePath(it) })
 
-        project(nullable: true,  // Shall not be null, but legacy data exists
-                validator: { Project val, DataFile obj -> obj.seqTrack == null || val == obj.seqTrack.project })
-
+        project nullable: true,  // Shall not be null, but legacy data exists
+                validator: { Project val, DataFile obj ->
+                    obj.seqTrack == null || val == obj.seqTrack.project
+                }
         dateExecuted(nullable: true)  // Shall not be null, but legacy data exists
         dateFileSystem(nullable: true)
 

@@ -283,6 +283,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
             SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles()
             seqTrack.individual.project = project
             seqTrack.dataFiles.each {
+                it.project = project
                 DomainFactory.createMetaDataKeyAndEntry(it, MetaDataColumn.SAMPLE_ID, identifier)
             }
             return seqTrack
