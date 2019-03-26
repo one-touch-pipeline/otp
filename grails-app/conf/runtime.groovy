@@ -42,6 +42,9 @@ environments {
     WORKFLOW_TEST {
         grails.serverURL = "http://localhost:8080"
     }
+    test {
+        grails.serverURL = "http://test.otp.de"
+    }
 }
 
 // ldap
