@@ -126,14 +126,12 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 workPackage      : tumorMwp,
                 insertSizeFile   : 'tumor_insertsize_plot.png_qcValues.txt',
                 maximumReadLength: 101,
-                fileName         : "${tumorMwp.sampleType.dirName}_${tumorMwp.individual.pid}_merged.mdup.bam",
         ] + createProcessMergedBamFileProperties())
 
         bamFileControl = DomainFactory.createExternallyProcessedMergedBamFile(createProcessMergedBamFileProperties() + [
                 workPackage      : controlMwp,
                 insertSizeFile   : 'control_insertsize_plot.png_qcValues.txt',
                 maximumReadLength: 101,
-                fileName         : "${controlMwp.sampleType.dirName}_${controlMwp.individual.pid}_merged.mdup.bam",
         ])
         commonBamFileSetup()
         createBedFileAndLibPrepKit()

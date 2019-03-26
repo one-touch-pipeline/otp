@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.AbstractExecutePanCanJob
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
+import java.nio.file.Path
+
 @Component
 @Scope("prototype")
 @UseJobLog
@@ -42,16 +44,20 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
     @Autowired
     SophiaService sophiaService
 
+    @SuppressWarnings('JavaIoPackageAccess')
     @Override
     protected List<String> prepareAndReturnWorkflowSpecificCValues(SophiaInstance sophiaInstance) {
         assert sophiaInstance
 
         sophiaService.validateInputBamFiles(sophiaInstance)
+        File workDirectory = sophiaInstance.workDirectory
 
         AbstractMergedBamFile bamFileDisease = sophiaInstance.sampleType1BamFile
         AbstractMergedBamFile bamFileControl = sophiaInstance.sampleType2BamFile
-        File bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing
-        File bamFileControlPath = bamFileControl.pathForFurtherProcessing
+
+        Path bamFileDiseasePath = linkBamFileInWorkDirectory(bamFileDisease, workDirectory)
+        Path bamFileControlPath = linkBamFileInWorkDirectory(bamFileControl, workDirectory)
+
         File diseaseInsertSizeFile = bamFileDisease.finalInsertSizeFile
         File controlInsertSizeFile = bamFileControl.finalInsertSizeFile
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(diseaseInsertSizeFile)
@@ -87,6 +93,7 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         cValues.add("possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}")
         cValues.add("controlDefaultReadLength:${controlDefaultReadLength}")
         cValues.add("tumorDefaultReadLength:${tumorDefaultReadLength}")
+        cValues.add("selectSampleExtractionMethod:version_2")
 
         return cValues
     }

@@ -24,12 +24,18 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ChromosomeIdentifierSortingService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
+
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
 abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractRoddyJob<R> {
 
@@ -49,8 +55,31 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     RemoteShellHelper remoteShellHelper
 
     @Autowired
+    FileService fileService
+
+    @Autowired
+    FileSystemService fileSystemService
+
+    @Autowired
     ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
 
+
+    protected Path linkBamFileInWorkDirectory(AbstractMergedBamFile abstractMergedBamFile, File workDirectory) {
+        Realm realm = abstractMergedBamFile.realm
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+        String bamFileName = "${abstractMergedBamFile.sampleType.dirName}_${abstractMergedBamFile.individual.pid}_merged.mdup.bam"
+        String baiFileName = "${bamFileName}.bai"
+
+        Path targetFileBam = fileService.toPath(abstractMergedBamFile.pathForFurtherProcessing, fileSystem)
+        Path targetFileBai = targetFileBam.resolveSibling(abstractMergedBamFile.baiFileName)
+        Path workDirectoryPath = fileService.toPath(workDirectory, fileSystem)
+
+        Path linkBamFile = workDirectoryPath.resolve(bamFileName)
+        Path linkBaiFile = workDirectoryPath.resolve(baiFileName)
+        fileService.createLink(linkBamFile, targetFileBam, realm)
+        fileService.createLink(linkBaiFile, targetFileBai, realm)
+        return linkBamFile
+    }
 
     @Override
     protected String prepareAndReturnWorkflowSpecificCommand(R roddyResult, Realm realm) throws Throwable {

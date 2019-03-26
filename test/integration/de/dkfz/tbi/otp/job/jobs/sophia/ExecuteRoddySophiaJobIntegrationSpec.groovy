@@ -31,8 +31,12 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.*
+
+import java.nio.file.FileSystems
 
 class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
 
@@ -55,6 +59,10 @@ class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
                 sophiaService: Mock(SophiaService) {
                     1 * validateInputBamFiles(_) >> { }
                 },
+                fileSystemService: Mock(FileSystemService) {
+                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                },
+                fileService: new FileService(),
         ])
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
@@ -75,9 +83,8 @@ class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
         bamFileControl.mergingWorkPackage.bamFileInProjectFolder = bamFileControl
         assert bamFileControl.mergingWorkPackage.save(flush: true)
 
-        String bamFileDiseasePath = bamFileDisease.pathForFurtherProcessing.path
-        String bamFileControlPath = bamFileControl.pathForFurtherProcessing.path
-
+        String finalBamFileControlPath = "${sophiaInstance.workDirectory}/${bamFileControl.sampleType.dirName}_${bamFileControl.individual.pid}_merged.mdup.bam"
+        String finalBamFileDiseasePath = "${sophiaInstance.workDirectory}/${bamFileDisease.sampleType.dirName}_${bamFileDisease.individual.pid}_merged.mdup.bam"
 
         List<String> expectedList = [
                 "controlMedianIsize:${bamFileControlMergedBamQa.insertSizeMedian}",
@@ -86,13 +93,14 @@ class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
                 "tumorStdIsizePercentage:${bamFileDiseaseMergedBamQa.insertSizeCV}",
                 "controlProperPairPercentage:${bamFileControlMergedBamQa.getPercentProperlyPaired()}",
                 "tumorProperPairPercentage:${bamFileDiseaseMergedBamQa.getPercentProperlyPaired()}",
-                "bamfile_list:${bamFileControlPath};${bamFileDiseasePath}",
+                "bamfile_list:${finalBamFileControlPath};${finalBamFileDiseasePath}",
                 "sample_list:${bamFileControl.sampleType.dirName};${bamFileDisease.sampleType.dirName}",
                 "insertsizesfile_list:${bamFileControl.finalInsertSizeFile};${bamFileDisease.finalInsertSizeFile}",
                 "possibleTumorSampleNamePrefixes:${bamFileDisease.sampleType.dirName}",
                 "possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}",
                 "controlDefaultReadLength:${bamFileControl.getMaximalReadLength()}",
                 "tumorDefaultReadLength:${bamFileDisease.getMaximalReadLength()}",
+                "selectSampleExtractionMethod:version_2",
         ]
 
         when:
