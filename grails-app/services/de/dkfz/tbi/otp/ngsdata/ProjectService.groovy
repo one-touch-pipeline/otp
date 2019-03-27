@@ -76,6 +76,7 @@ class ProjectService {
     AceseqService aceseqService
     ConfigService configService
     FileSystemService fileSystemService
+    WorkflowConfigService workflowConfigService
     RoddyWorkflowConfigService roddyWorkflowConfigService
     ProcessingOptionService processingOptionService
 
@@ -432,7 +433,7 @@ class ProjectService {
         ConfigPerProjectAndSeqType config = atMostOneElement(ConfigPerProjectAndSeqType.findAllByProjectAndSeqTypeAndPipelineAndObsoleteDate(
                 project, seqType, pipeline, null))
         if (config) {
-            config.makeObsolete()
+            workflowConfigService.makeObsolete(config)
         }
         if (pipeline.name == Pipeline.Name.CELL_RANGER) {
             deprecateReferenceGenomeProjectSeqType(project, seqType)
@@ -445,7 +446,7 @@ class ProjectService {
         ConfigPerProjectAndSeqType latest = getLatestRunYapsaConfig(project, seqType)
 
         if (latest?.programVersion != programVersion) {
-            latest?.makeObsolete()
+            workflowConfigService.makeObsolete(latest)
 
             try {
                 new RunYapsaConfig(
@@ -476,7 +477,7 @@ class ProjectService {
         Pipeline pipeline = Pipeline.findByName(Pipeline.Name.CELL_RANGER)
         ConfigPerProjectAndSeqType latest = getLatestCellRangerConfig(project, seqType)
 
-        latest?.makeObsolete()
+        workflowConfigService.makeObsolete(latest)
         try {
             new CellRangerConfig(
                     project: project,

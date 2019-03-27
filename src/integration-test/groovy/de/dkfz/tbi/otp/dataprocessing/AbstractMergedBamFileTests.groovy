@@ -31,6 +31,8 @@ import static org.junit.Assert.assertEquals
 
 class AbstractMergedBamFileTests {
 
+    LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
+
     @Test
     void testConstraints_allFine_succeeds() {
         DomainFactory.createProcessedMergedBamFile()
@@ -77,7 +79,7 @@ class AbstractMergedBamFileTests {
         ])
 
         TestCase.shouldFail(AssertionError) {
-            bamFile.validateAndSetBamFileInProjectFolder()
+            linkFilesToFinalDestinationService.validateAndSetBamFileInProjectFolder(bamFile)
         }
     }
 
@@ -89,7 +91,7 @@ class AbstractMergedBamFileTests {
         ])
 
         TestCase.shouldFail(AssertionError) {
-            bamFile.validateAndSetBamFileInProjectFolder()
+            linkFilesToFinalDestinationService.validateAndSetBamFileInProjectFolder(bamFile)
         }
     }
 
@@ -106,7 +108,7 @@ class AbstractMergedBamFileTests {
         ])
 
         TestCase.shouldFail(AssertionError) {
-            bamFile.validateAndSetBamFileInProjectFolder()
+            linkFilesToFinalDestinationService.validateAndSetBamFileInProjectFolder(bamFile)
         }
     }
 
@@ -130,7 +132,7 @@ class AbstractMergedBamFileTests {
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
         ])
 
-        bamFile.validateAndSetBamFileInProjectFolder()
+        linkFilesToFinalDestinationService.validateAndSetBamFileInProjectFolder(bamFile)
 
         assert bamFile.mergingWorkPackage.bamFileInProjectFolder == bamFile
     }

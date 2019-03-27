@@ -168,7 +168,7 @@ class UserService {
         assert user : "User can not be null"
         assert role : "Role can not be null"
         if (!UserRole.findByUserAndRole(user, role)) {
-            UserRole.create(user, role, true)
+            UserRole.create(user, role)
         }
     }
 
@@ -176,7 +176,10 @@ class UserService {
     void removeRoleFromUser(User user, Role role) {
         assert user : "User can not be null"
         assert role : "Role can not be null"
-        UserRole.remove(user, role, true)
+        UserRole userRole = UserRole.findByUserAndRole(user, role)
+        if (userRole) {
+            userRole.delete(flush: true)
+        }
     }
 
     boolean isPrivacyPolicyAccepted() {

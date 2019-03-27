@@ -29,6 +29,7 @@ import spock.lang.Unroll
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Mock([
@@ -80,7 +81,7 @@ class RoddyWorkflowConfigSpec extends Specification {
     void "test constraint, when seqType is null for obsolete object, then validate should return true"() {
         given:
         RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig()
-        config.makeObsolete()
+        new WorkflowConfigService().makeObsolete(config)
         config.seqType = null
 
         expect:

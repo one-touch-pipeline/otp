@@ -38,27 +38,6 @@ class SnvCallingInstanceTests {
     }
 
     @Test
-    void test_updateProcessingState_WhenStateIsNull_ShouldFail() {
-        RoddySnvCallingInstance snvCallingInstance = createSnvCallingInstance()
-        def msg = shouldFail AssertionError, { snvCallingInstance.updateProcessingState(null) }
-        assert msg =~ /not allowed to be null/
-    }
-
-    @Test
-    void test_updateProcessingState_WhenStateIsChangedToSame_ShouldSucceed() {
-        RoddySnvCallingInstance snvCallingInstance = createSnvCallingInstance()
-        snvCallingInstance.updateProcessingState(AnalysisProcessingStates.IN_PROGRESS)
-        assert snvCallingInstance.processingState == AnalysisProcessingStates.IN_PROGRESS
-    }
-
-    @Test
-    void test_updateProcessingState_WhenStateIsChangedToDifferent_ShouldSucceed() {
-        RoddySnvCallingInstance snvCallingInstance = createSnvCallingInstance()
-        snvCallingInstance.updateProcessingState(AnalysisProcessingStates.FINISHED)
-        assert snvCallingInstance.processingState == AnalysisProcessingStates.FINISHED
-    }
-
-    @Test
     void testProcessingStateIsFailed() {
         def instance = createSnvCallingInstance()
         instance.withdrawn = true

@@ -129,6 +129,7 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
 
         sophiaService.validateInputBamFiles(sophiaInstance)
 
-        sophiaInstance.updateProcessingState(AnalysisProcessingStates.FINISHED)
+        sophiaInstance.processingState = AnalysisProcessingStates.FINISHED
+        sophiaInstance.save(flush: true)
     }
 }

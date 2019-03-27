@@ -35,7 +35,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 abstract class BamFilePairAnalysis implements TimeStamped, ProcessParameterObject, Entity {
     /**
@@ -132,21 +131,5 @@ abstract class BamFilePairAnalysis implements TimeStamped, ProcessParameterObjec
         return getInstancePath().absoluteDataManagementPath
     }
 
-    void updateProcessingState(AnalysisProcessingStates state) {
-        assert state: 'The argument "state" is not allowed to be null'
-        if (processingState != state) {
-            processingState = state
-            this.save([flush: true])
-        }
-    }
-
     abstract OtpPath getInstancePath()
-
-    void withdraw() {
-        withTransaction {
-            withdrawn = true
-            assert save(flush: true)
-            LogThreadLocal.threadLog.info("Withdrawing ${this}")
-        }
-    }
 }

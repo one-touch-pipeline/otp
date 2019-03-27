@@ -259,7 +259,7 @@ class RoddyWorkflowConfigTests {
 
         assert !firstConfigPerProject.obsoleteDate
 
-        newConfigPerProject.createConfigPerProjectAndSeqType()
+        service.createConfigPerProjectAndSeqType(newConfigPerProject)
 
         assert ConfigPerProjectAndSeqType.findAllByProject(project).size() == 2
         assert firstConfigPerProject.obsoleteDate
@@ -272,7 +272,7 @@ class RoddyWorkflowConfigTests {
         ConfigPerProjectAndSeqType configPerProject = DomainFactory.createRoddyWorkflowConfig(
                 project: project,
         )
-        configPerProject.createConfigPerProjectAndSeqType()
+        service.createConfigPerProjectAndSeqType(configPerProject)
         assert ConfigPerProjectAndSeqType.findAllByProject(project).size() == 1
     }
 
@@ -281,7 +281,7 @@ class RoddyWorkflowConfigTests {
     void testMakeObsolete() {
         ConfigPerProjectAndSeqType configPerProject = DomainFactory.createRoddyWorkflowConfig()
         assert !configPerProject.obsoleteDate
-        configPerProject.makeObsolete()
+        service.makeObsolete(configPerProject)
         assert configPerProject.obsoleteDate
     }
 }

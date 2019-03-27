@@ -48,7 +48,7 @@ class ImportExternallyMergedBamStartJob extends AbstractStartJobImpl {
             ImportProcess.withTransaction {
                 ImportProcess importProcess = ImportProcess.findByState(ImportProcess.State.NOT_STARTED)
                 if (importProcess) {
-                    importProcess.updateState(ImportProcess.State.STARTED)
+                    importProcess.state = ImportProcess.State.STARTED
                     assert importProcess.save(flush: true)
                     createProcess(importProcess)
                     log.debug "Creating process for import ${importProcess}"

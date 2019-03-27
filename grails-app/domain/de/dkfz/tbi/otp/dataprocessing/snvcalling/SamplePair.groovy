@@ -296,34 +296,4 @@ class SamplePair implements TimeStamped, Entity {
             )
         }
     }
-
-
-    static void setSnvProcessingStatus(final Collection<SamplePair> samplePairs,
-                                       final ProcessingStatus snvProcessingStatus) {
-        setProcessingStatus(samplePairs, snvProcessingStatus, "snvProcessingStatus")
-    }
-
-    static void setIndelProcessingStatus(final Collection<SamplePair> samplePairs,
-                                         final ProcessingStatus indelProcessingStatus) {
-        setProcessingStatus(samplePairs, indelProcessingStatus, "indelProcessingStatus")
-    }
-
-    static void setAceseqProcessingStatus(final Collection<SamplePair> samplePairs,
-                                         final ProcessingStatus aceseqProcessingStatus) {
-        setProcessingStatus(samplePairs, aceseqProcessingStatus, "aceseqProcessingStatus")
-    }
-
-
-    private static void setProcessingStatus(final Collection<SamplePair> samplePairs,
-                                            final ProcessingStatus processingStatus, String property) {
-        if (processingStatus == null) {
-            throw new IllegalArgumentException()
-        }
-        SamplePair.withTransaction {
-            samplePairs.each {
-                it."${property}" = processingStatus
-                assert it.save()
-            }
-        }
-    }
 }

@@ -68,16 +68,4 @@ abstract class ConfigPerProjectAndSeqType implements TimeStamped, Entity {
         seqType index: "config_per_project_project_id_seq_type_id_obsolete_date_idx"
         project index: "config_per_project_project_id_seq_type_id_obsolete_date_idx"
     }
-
-    void createConfigPerProjectAndSeqType() {
-        Project.withTransaction {
-            this.previousConfig?.makeObsolete()
-            assert this.save(flush: true)
-        }
-    }
-
-    void makeObsolete() {
-        this.obsoleteDate = new Date()
-        assert this.save(flush: true)
-    }
 }

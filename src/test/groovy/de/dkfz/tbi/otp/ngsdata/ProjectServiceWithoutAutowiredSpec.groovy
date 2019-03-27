@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -77,6 +78,7 @@ class ProjectServiceWithoutAutowiredSpec extends Specification {
     void "test invalidateProjectConfig"() {
         given:
         ProjectService projectService = new ProjectService()
+        projectService.workflowConfigService = new WorkflowConfigService()
         RunYapsaConfig config = DomainFactory.createRunYapsaConfig()
 
         when:
@@ -90,6 +92,7 @@ class ProjectServiceWithoutAutowiredSpec extends Specification {
     void "test createOrUpdateRunYapsaConfig"() {
         given:
         ProjectService projectService = new ProjectService()
+        projectService.workflowConfigService = new WorkflowConfigService()
         RunYapsaConfig config = DomainFactory.createRunYapsaConfig()
 
         when:

@@ -30,6 +30,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PostAuthorize
 
 import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.LogMessage
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.ProcessingException
@@ -37,7 +38,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import javax.sql.DataSource
 import java.nio.file.Paths
+import java.text.MessageFormat
 
+import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 import static org.springframework.util.Assert.notNull
 
 class SeqTrackService {
@@ -523,6 +526,18 @@ AND entry.value = :value
             }
             order('id')
             maxResults(1)
+        }
+    }
+
+    static void logToSeqTrack(SeqTrack seqTrack, String message, boolean saveInSeqTrack = true) {
+        threadLog?.info(MessageFormat.format(message, " " + seqTrack))
+        if (saveInSeqTrack) {
+            SeqTrack.withTransaction {
+                LogMessage logMessage = new LogMessage(message: MessageFormat.format(message, ""))
+                logMessage.save(flush: true, failOnError: true)
+                seqTrack.logMessages.add(logMessage)
+                seqTrack.save(flush: true, failOnError: true)
+            }
         }
     }
 }

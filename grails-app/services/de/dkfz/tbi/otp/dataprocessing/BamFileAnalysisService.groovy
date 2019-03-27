@@ -146,6 +146,13 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
         }
     }
 
+    static void withdraw(BamFilePairAnalysis bamFilePairAnalysis) {
+        BamFilePairAnalysis.withTransaction {
+            bamFilePairAnalysis.withdrawn = true
+            assert bamFilePairAnalysis.save(flush: true)
+        }
+    }
+
     @SuppressWarnings("UnusedMethodParameter")
     protected String pipelineSpecificBamFileChecks(String number) {
         return ''

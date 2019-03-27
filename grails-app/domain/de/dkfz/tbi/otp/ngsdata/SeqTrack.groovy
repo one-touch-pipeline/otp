@@ -32,10 +32,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.StringUtils
 
-import java.text.MessageFormat
-
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 
 /*
  * In the GUI and e-mails sent by OTP this shall be called "Lane", even if it is only part of a multiplexed physical
@@ -323,16 +320,12 @@ class SeqTrack implements ProcessParameterObject, Entity {
         return DataFile.findAllBySeqTrack(this)
     }
 
+    /**
+     * @deprecated Can't use save in a domain object, use SeqTrackService.logToSeqTrack() instead
+     */
+    @Deprecated
     void log(String message, boolean saveInSeqTrack = true) {
-        threadLog?.info(MessageFormat.format(message, " " + this))
-        if (saveInSeqTrack) {
-            withTransaction {
-                LogMessage logMessage = new LogMessage(message: MessageFormat.format(message, ""))
-                logMessage.save(flush: true, failOnError: true)
-                logMessages.add(logMessage)
-                this.save(flush: true, failOnError: true)
-            }
-        }
+        SeqTrackService.logToSeqTrack(this, message, saveInSeqTrack)
     }
 
     String getReadGroupName() {

@@ -104,6 +104,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         }
         projectService.roddyWorkflowConfigService = new RoddyWorkflowConfigService()
         projectService.roddyWorkflowConfigService.fileSystemService = new TestFileSystemService()
+        projectService.roddyWorkflowConfigService.workflowConfigService = new WorkflowConfigService()
 
         DomainFactory.createProcessingOptionLazy([
                 name : OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE,

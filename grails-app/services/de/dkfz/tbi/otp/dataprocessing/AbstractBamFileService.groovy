@@ -128,7 +128,6 @@ class AbstractBamFileService {
         }
     }
 
-
     private Double calculateCoverage(AbstractBamFile bamFile, String property) {
         assert bamFile : 'Parameter bamFile must not be null'
 
@@ -166,6 +165,9 @@ class AbstractBamFileService {
         return basesMapped / length
     }
 
+    static AbstractBamFile saveBamFile(AbstractBamFile bamFile) {
+        return bamFile.save(flush: true)
+    }
 
     private def assertSave(def object) {
         object = object.save(flush: true)

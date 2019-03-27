@@ -62,8 +62,22 @@ class LinkFilesToFinalDestinationService {
                 assert [FileOperationStatus.NEEDS_PROCESSING, FileOperationStatus.INPROGRESS].contains(roddyBamFile.fileOperationStatus)
                 roddyBamFile.fileOperationStatus = FileOperationStatus.INPROGRESS
                 assert roddyBamFile.save(flush: true)
-                roddyBamFile.validateAndSetBamFileInProjectFolder()
+                validateAndSetBamFileInProjectFolder(roddyBamFile)
             }
+        }
+    }
+
+    void validateAndSetBamFileInProjectFolder(AbstractMergedBamFile bamFile) {
+        RoddyBamFile.withTransaction {
+            assert bamFile.fileOperationStatus == FileOperationStatus.INPROGRESS
+            assert !bamFile.withdrawn
+            assert CollectionUtils.exactlyOneElement(AbstractMergedBamFile.findAllWhere(
+                    workPackage        : bamFile.workPackage,
+                    withdrawn          : false,
+                    fileOperationStatus: FileOperationStatus.INPROGRESS
+            )) == bamFile
+            bamFile.workPackage.bamFileInProjectFolder = bamFile
+            assert bamFile.workPackage.save(flush: true)
         }
     }
 

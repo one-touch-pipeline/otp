@@ -26,8 +26,6 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 
-import static org.springframework.util.Assert.notNull
-
 /**
  * Represents the state of the import process of the externally processed merged BAM files
  */
@@ -65,12 +63,6 @@ class ImportProcess implements Entity, ProcessParameterObject {
             }
             return true
         }
-    }
-
-    void updateState(State state) {
-        notNull(state, "the input state for the method updateState is null")
-        this.state = state
-        assert this.save(flush:true)
     }
 
     @Override

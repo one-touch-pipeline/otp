@@ -117,7 +117,7 @@ class ExecuteRoddySnvJob extends AbstractExecutePanCanJob<RoddySnvCallingInstanc
 
         snvCallingService.validateInputBamFiles(roddySnvCallingInstance)
 
-        roddySnvCallingInstance.updateProcessingState(AnalysisProcessingStates.FINISHED)
-
+        roddySnvCallingInstance.processingState = AnalysisProcessingStates.FINISHED
+        roddySnvCallingInstance.save(flush: true)
     }
 }

@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
 abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
@@ -71,7 +72,7 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
     boolean canPipelineAlign(SeqTrack seqTrack) {
         boolean canAlign = SeqTypeService.getRoddyAlignableSeqTypes().contains(seqTrack.seqType)
         if (canAlign && (RoddyWorkflowConfig.getLatestForProject(seqTrack.project, seqTrack.seqType, getPipeline(seqTrack)) == null)) {
-            seqTrack.log("RoddyWorkflowConfig is missing for ${seqTrack.project} ${seqTrack.seqType} ${getPipeline(seqTrack).name}.")
+            SeqTrackService.logToSeqTrack(seqTrack, "RoddyWorkflowConfig is missing for ${seqTrack.project} ${seqTrack.seqType} ${getPipeline(seqTrack).name}.")
             return false
         }
         return canAlign

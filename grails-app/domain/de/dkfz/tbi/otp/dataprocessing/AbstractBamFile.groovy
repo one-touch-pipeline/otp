@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -192,11 +191,7 @@ abstract class AbstractBamFile implements Entity {
                 //if withdraw, the status may not be NEEDS_PROCESSING
                 status = AbstractBamFile.State.DECLARED
             }
-            assert save(flush: true)
-
-            assert LogThreadLocal.threadLog: 'This method produces relevant log messages. Thread log must be set.'
-            LogThreadLocal.threadLog.info("Execute WithdrawnFilesRename.groovy script afterwards")
-            LogThreadLocal.threadLog.info("Withdrawing ${this}")
+            assert AbstractBamFileService.saveBamFile(this)
         }
     }
 

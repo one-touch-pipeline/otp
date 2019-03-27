@@ -66,8 +66,8 @@ trait UserAndRoles {
             User user = DomainFactory.createUser([username: it])
             assertNotNull(user.save(flush: true))
             assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
-            it == ADMIN ? UserRole.create(user, adminRole, true) : ""
-            it == OPERATOR ? UserRole.create(user, operatorRole, true) : ""
+            it == ADMIN ? UserRole.create(user, adminRole) : ""
+            it == OPERATOR ? UserRole.create(user, operatorRole) : ""
         }
     }
 

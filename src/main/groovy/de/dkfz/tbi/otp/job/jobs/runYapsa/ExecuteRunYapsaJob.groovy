@@ -109,6 +109,7 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
     @Override
     protected final void validate() throws Throwable {
         final RunYapsaInstance instance = getProcessParameterObject()
-        instance.updateProcessingState(AnalysisProcessingStates.FINISHED)
+        instance.processingState = AnalysisProcessingStates.FINISHED
+        instance.save(flush: true)
     }
 }

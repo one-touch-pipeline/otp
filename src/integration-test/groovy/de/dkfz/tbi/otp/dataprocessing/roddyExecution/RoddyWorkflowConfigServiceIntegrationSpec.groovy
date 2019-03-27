@@ -126,6 +126,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         CreateFileHelper.createRoddyWorkflowConfig(secondConfigFile, TEST_RODDY_CONFIG_LABEL_IN_FILE)
         RoddyWorkflowConfigService service = new RoddyWorkflowConfigService()
         service.fileSystemService = new TestFileSystemService()
+        service.workflowConfigService = new WorkflowConfigService()
         return service
     }
 

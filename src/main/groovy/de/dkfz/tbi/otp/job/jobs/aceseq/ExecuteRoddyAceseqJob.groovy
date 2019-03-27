@@ -130,6 +130,7 @@ class ExecuteRoddyAceseqJob extends AbstractExecutePanCanJob<AceseqInstance> imp
 
         aceseqService.validateInputBamFiles(aceseqInstance)
 
-        aceseqInstance.updateProcessingState(AnalysisProcessingStates.FINISHED)
+        aceseqInstance.processingState = AnalysisProcessingStates.FINISHED
+        aceseqInstance.save(flush: true)
     }
 }

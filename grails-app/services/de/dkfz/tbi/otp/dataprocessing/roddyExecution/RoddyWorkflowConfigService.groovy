@@ -35,6 +35,7 @@ import java.util.regex.Pattern
 class RoddyWorkflowConfigService {
 
     FileSystemService fileSystemService
+    WorkflowConfigService workflowConfigService
 
     void loadPanCanConfigAndTriggerAlignment(Project project, SeqType seqType, String pluginVersionToUse, Pipeline pipeline, String configFilePath,
                                              String configVersion, boolean adapterTrimmingNeeded, Individual individual) {
@@ -86,9 +87,23 @@ class RoddyWorkflowConfigService {
                 nameUsedInConfig: RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, pluginVersionToUse, configVersion)
         )
         validateConfig(config)
-        config.createConfigPerProjectAndSeqType()
+        workflowConfigService.createConfigPerProjectAndSeqType(config)
 
         return config
+    }
+
+    void createConfigPerProjectAndSeqType(ConfigPerProjectAndSeqType configPerProjectAndSeqType) {
+        Project.withTransaction {
+            if (configPerProjectAndSeqType.previousConfig) {
+                makeObsolete(configPerProjectAndSeqType.previousConfig)
+            }
+            assert configPerProjectAndSeqType.save(flush: true)
+        }
+    }
+
+    void makeObsolete(ConfigPerProjectAndSeqType configPerProjectAndSeqType) {
+        configPerProjectAndSeqType.obsoleteDate = new Date()
+        assert configPerProjectAndSeqType.save(flush: true)
     }
 
 

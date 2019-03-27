@@ -20,31 +20,24 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.security
+package de.dkfz.tbi.otp.dataprocessing
 
-import org.springframework.security.access.prepost.PreAuthorize
+import de.dkfz.tbi.otp.ngsdata.Project
 
-class RolesService {
+class WorkflowConfigService {
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    List<RolesWithUsers> getRolesAndUsers() {
-        List<RolesWithUsers> roles = Role.list().collect { Role role ->
-            new RolesWithUsers(role: role)
+    void createConfigPerProjectAndSeqType(ConfigPerProjectAndSeqType workflowConfig) {
+        Project.withTransaction {
+            makeObsolete(workflowConfig.previousConfig)
+            assert workflowConfig.save(flush: true)
         }
-        roles.each {
-            it.users = UserRole.findAllByRole(it.role)*.user.flatten()
-            it.users.sort { User user -> user.username }
-        }
-        roles.sort { it.role.authority }
-        return roles
     }
 
-    static void createUserRole(User user, Role role) {
-        new UserRole(user: user, role: role).save(flush: true, insert: true)
+    void makeObsolete(ConfigPerProjectAndSeqType workflowConfig) {
+        if (!workflowConfig) {
+            return
+        }
+        workflowConfig.obsoleteDate = new Date()
+        assert workflowConfig.save(flush: true)
     }
-}
-
-class RolesWithUsers {
-    Role role
-    List<User> users = []
 }
