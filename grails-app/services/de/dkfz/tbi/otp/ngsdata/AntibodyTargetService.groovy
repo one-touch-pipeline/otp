@@ -22,10 +22,17 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.utils.StringUtils
+
 class AntibodyTargetService extends MetadataFieldsService<AntibodyTarget> {
 
     @Override
     protected Class getClazz() {
         return AntibodyTarget
+    }
+
+    @Override
+    protected AntibodyTarget findByName(String name, Map properties) {
+        return super.findByName(StringUtils.escapeForSqlLike(name), properties)
     }
 }

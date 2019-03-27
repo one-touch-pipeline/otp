@@ -19,12 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.AntibodyTarget
+import de.dkfz.tbi.otp.ngsdata.AntibodyTargetService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Cell
@@ -32,10 +32,12 @@ import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.ANTIBODY_TARGET
-import static de.dkfz.tbi.otp.utils.StringUtils.escapeForSqlLike
 
 @Component
 class AntibodyTargetValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+
+    @Autowired
+    AntibodyTargetService antibodyTargetService
 
     @Override
     Collection<String> getDescriptions() {
@@ -48,11 +50,12 @@ class AntibodyTargetValidator extends SingleValueValidator<MetadataValidationCon
     }
 
     @Override
-    void checkColumn(MetadataValidationContext context) { }
+    void checkColumn(MetadataValidationContext context) {
+    }
 
     @Override
     void validateValue(MetadataValidationContext context, String antibodyTarget, Set<Cell> cells) {
-        if (antibodyTarget && !AntibodyTarget.findByNameIlike(escapeForSqlLike(antibodyTarget))) {
+        if (antibodyTarget && !antibodyTargetService.findByNameOrImportAlias(antibodyTarget)) {
             context.addProblem(cells, Level.ERROR, "The antibody target '${antibodyTarget}' is not registered in OTP.",
                     "At least one antibody target is not registered in OTP.")
         }

@@ -52,7 +52,6 @@ import java.util.regex.Matcher
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-import static de.dkfz.tbi.otp.utils.StringUtils.escapeForSqlLike
 
 /**
  * Metadata import 2.0 (OTP-34)
@@ -83,13 +82,13 @@ class MetadataImportService {
     MailHelperService mailHelperService
     ProcessingOptionService processingOptionService
     FileService fileService
+    AntibodyTargetService antibodyTargetService
 
     static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
     static final String AUTO_DETECT_DIRECTORY_STRUCTURE_NAME = ''
     static final String DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME = 'dataFilesInSameDirectory'
     static final String MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME = 'dataFilesOnGpcfMidTerm'
-
 
 
     /**
@@ -426,8 +425,7 @@ class MetadataImportService {
                     normalizedLibraryName: normalizedLibraryName,
             ]
             if (seqType.hasAntibodyTarget) {
-                properties['antibodyTarget'] = exactlyOneElement(AntibodyTarget.findAllByNameIlike(
-                        escapeForSqlLike(uniqueColumnValue(rows, ANTIBODY_TARGET))))
+                properties['antibodyTarget'] = antibodyTargetService.findByNameOrImportAlias(uniqueColumnValue(rows, ANTIBODY_TARGET))
                 properties['antibody'] = uniqueColumnValue(rows, ANTIBODY) ?: null
             }
 

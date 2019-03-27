@@ -531,6 +531,10 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             findByNameOrImportAlias(CHIP_SEQ, [libraryLayout: LibraryLayout.PAIRED, singleCell: false]) >> chipSeqPaired
             findByNameOrImportAlias(SC_EXON, [libraryLayout: LibraryLayout.SINGLE, singleCell: true]) >> scExomeSingle
         }
+        service.antibodyTargetService = Mock(AntibodyTargetService) {
+            findByNameOrImportAlias(target1) >> antibodyTarget1
+            findByNameOrImportAlias(target2) >> antibodyTarget2
+        }
         GroovyMock(SamplePair, global: true)
         1 * SamplePair.findMissingDiseaseControlSamplePairs() >> [samplePair]
         1 * samplePair.save()
@@ -881,6 +885,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                     singleCell: seqTypeWithAntibodyTarget.singleCell,
             ]) >> seqTypeWithAntibodyTarget
             0 * _
+        }
+        service.antibodyTargetService = Mock(AntibodyTargetService) {
+            findByNameOrImportAlias(antibodyTarget.name) >> antibodyTarget
         }
 
         GroovyMock(SamplePair, global: true)
