@@ -213,21 +213,33 @@ class SampleValidatorSpec extends Specification {
                 "${SAMPLE_ID}\n" +
                         "SampleA\n" +
                         "SampleB\n" +
-                        "SampleC\n" +
+                        "SampleC1\n" +
+                        "SampleC2\n" +
+                        "SampleC3\n" +
                         "${SAMPLE_N}\n" +
                         "P-C_I-M_S-N\n")
         createSampleIdentifier('SampleB', 'B', 'W', 'X')
-        createSampleIdentifier('SampleC', 'C', 'Y', 'Z')
+        SampleIdentifier c1 = createSampleIdentifier('SampleC1', 'C', 'Y', 'Z')
+        DomainFactory.createSampleIdentifier(name: 'SampleC2', sample: c1.sample)
+        DomainFactory.createSampleIdentifier(name: 'SampleC3', sample: c1.sample)
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[1].cells +
-                        context.spreadsheet.dataRows[2].cells +
-                        context.spreadsheet.dataRows[3].cells +
-                        context.spreadsheet.dataRows[4].cells as Set, Level.WARNING,
-                        "The sample identifiers belong to different projects:\nProject 'B': '${SAMPLE_N}', 'SampleB'\nProject 'C': 'P-C_I-M_S-N', 'SampleC'"),
+                new Problem(context.spreadsheet.dataRows[1..6]*.cells.flatten() as Set, Level.WARNING, """\
+The sample identifiers belong to different projects:
+Project 'B':
+        '${SAMPLE_N}'
+        'SampleB'
+Project 'C':
+        'P-C_I-M_S-N'
+        'SampleC1'
+        'SampleC2'
+        'SampleC3'\
+"""),
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
-                        "Sample identifier 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP."),
+                        "Sample identifier 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.",
+                        "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP."),
                 new Problem(Collections.emptySet(), Level.INFO,
-                        "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tSampleA"),
+                        "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\n" +
+                                "${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tSampleA"),
         ]
 
         when:

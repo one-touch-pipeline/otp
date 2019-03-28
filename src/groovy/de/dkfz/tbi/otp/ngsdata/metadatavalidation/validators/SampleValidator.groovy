@@ -117,7 +117,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
             context.addProblem((Set)byProjectName.values().sum()*.cells.sum(), Level.WARNING,
                     'The sample identifiers belong to different projects:\n' +
                             byProjectName.collect { projectName, valueTuplesOfProject ->
-                                return "Project '${projectName}': ${valueTuplesOfProject.collect { "'${it.getValue(SAMPLE_ID.name())}'" }.sort().join(', ')}"
+                                return "Project '${projectName}':\n        ${valueTuplesOfProject.collect { "'${it.getValue(SAMPLE_ID.name())}'" }.sort().join('\n        ')}"
                             }.join('\n'))
         }
     }

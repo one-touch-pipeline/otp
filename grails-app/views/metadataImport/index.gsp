@@ -45,7 +45,7 @@
             <g:else>
                 <ul>
                     <g:each var="problem" in="${context.problems}" >
-                        <li class="${Level.normalize(problem.level).name}"><span style="white-space: pre-line "> ${problem.getLevelAndMessage()}</span>
+                        <li class="${Level.normalize(problem.level).name}"><span style="white-space: pre-wrap"> ${problem.getLevelAndMessage()}</span>
                             <g:each var="cell" in="${problem.affectedCells}" >
                                 <a href="#${cell.cellAddress}">${cell.cellAddress}</a>
                             </g:each>
@@ -55,7 +55,7 @@
                 <h4><g:message code="metadataImport.summary"/></h4>
                 <ul>
                     <g:each var="problemType" in="${context.getSummary()}" >
-                        <li> <span style="white-space: pre-line ">${problemType} </span></li>
+                        <li> <span style="white-space: pre">${problemType} </span></li>
                     </g:each>
                 </ul>
             </g:else>
