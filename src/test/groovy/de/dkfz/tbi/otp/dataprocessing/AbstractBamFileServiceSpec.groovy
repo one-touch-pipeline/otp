@@ -22,150 +22,157 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestFor
-import org.junit.Before
-import org.junit.Test
+
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Build([
-    DataFile,
-    FileType,
-    ProcessedBamFile,
-    MergingCriteria,
-    MergingSetAssignment,
-    MergingWorkPackage,
-    ProcessedMergedBamFile,
-])
-@TestFor(AbstractBamFileService)
-class AbstractBamFileServiceUnitTests {
+class AbstractBamFileServiceSpec extends Specification implements DataTest {
 
     AbstractBamFileService abstractBamFileService
 
     Date createdBefore = new Date().plus(1)
 
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                DataFile,
+                FileType,
+                ProcessedBamFile,
+                MergingCriteria,
+                MergingSetAssignment,
+                MergingWorkPackage,
+                ProcessedMergedBamFile,
+        ]
+    }
 
-
-    @Before
-    void setUp() {
+    void setup() {
         abstractBamFileService = new AbstractBamFileService()
     }
 
-
-
     private ProcessedBamFile createTestDataForHasBeenQualityAssessedAndMerged(Map processedBamFileMap = [:], Map mergingSetMap = [:], Map mergingSetAssignmentMap = [:], Map processedMergedBamFileMap = [:]) {
-        ProcessedBamFile processedBamFile = ProcessedBamFile.build([
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            status: AbstractBamFile.State.PROCESSED,
+        ProcessedBamFile processedBamFile = DomainFactory.createProcessedBamFile([
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                status                 : AbstractBamFile.State.PROCESSED,
         ] + processedBamFileMap)
-        MergingSet mergingSet = MergingSet.build([
-            mergingWorkPackage: processedBamFile.mergingWorkPackage,
-            status: MergingSet.State.PROCESSED,
+        MergingSet mergingSet = DomainFactory.createMergingSet([
+                mergingWorkPackage: processedBamFile.mergingWorkPackage,
+                status            : MergingSet.State.PROCESSED,
         ] + mergingSetMap)
-        MergingSetAssignment.build([
-            bamFile: processedBamFile,
-            mergingSet: mergingSet,
-        ] + mergingSetAssignmentMap)
-        ProcessedMergedBamFile.build([
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            mergingPass: DomainFactory.createMergingPass([
+        DomainFactory.createMergingSetAssignment([
+                bamFile   : processedBamFile,
                 mergingSet: mergingSet,
-            ]),
-            workPackage: mergingSet.mergingWorkPackage,
+        ] + mergingSetAssignmentMap)
+        DomainFactory.createProcessedMergedBamFile([
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
+                mergingPass            : DomainFactory.createMergingPass([
+                        mergingSet: mergingSet,
+                ]),
+                workPackage            : mergingSet.mergingWorkPackage,
         ] + processedMergedBamFileMap)
         return processedBamFile
     }
 
 
-    @Test
     void testHasBeenQualityAssessedAndMerged() {
+        given:
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged()
 
-        assert abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
+        expect:
+        abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
-    @Test
     void testHasBeenQualityAssessedAndMerged_QAIsNotFinished() {
+        given:
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS,
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS,
         ])
 
-        assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
+        expect:
+        !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
-    @Test
     void testHasBeenQualityAssessedAndMerged_StatusIsNotProcessed() {
+        given:
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([
-            status: AbstractBamFile.State.INPROGRESS,
+                status: AbstractBamFile.State.INPROGRESS,
         ])
 
-        assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
+        expect:
+        !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
-    @Test
     void testHasBeenQualityAssessedAndMerged_BamFileIsNotInMergingSet() {
+        given:
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged()
         MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedBamFile))
         msa.bamFile = DomainFactory.createProcessedBamFile(msa.mergingSet.mergingWorkPackage)
         assert msa.save(failOnError: true)
 
-        assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
+        expect:
+        !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
-    @Test
     void testHasBeenQualityAssessedAndMerged_MergingSetIsNorProcessed() {
+        given:
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([:], [
-            status: MergingSet.State.INPROGRESS,
+                status: MergingSet.State.INPROGRESS,
         ])
 
-        assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
+        expect:
+        !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
-    @Test
     void testHasBeenQualityAssessedAndMerged_ProcessedMergedBamFileHasQANotFinished() {
+        given:
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([:], [:], [:], [
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS,
+                qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.IN_PROGRESS,
         ])
 
-        assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
+        expect:
+        !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
-    @Test
     void testHasBeenQualityAssessedAndMerged_ProcessedMergedBamFileDateIsLater() {
+        given:
         createdBefore = new Date().minus(1)
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged()
 
-        assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
+        expect:
+        !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
-    @Test
     void testHasBeenQualityAssessedAndMerged_ProcessedMergedBamFileIsWithdrawn() {
+        given:
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([:], [:], [:], [
-            withdrawn: true,
+                withdrawn: true,
         ])
 
-        assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
+        expect:
+        !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
-    @Test
     void testHasBeenQualityAssessedAndMerged_ProcessedMergedBamFileAndBamFileAreWithdrawn() {
+        given:
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([
-            withdrawn: true], [:], [:], [withdrawn: true])
+                withdrawn: true], [:], [:], [withdrawn: true])
 
-        assert abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
+        expect:
+        abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 
-    @Test
     void testHasBeenQualityAssessedAndMerged_ProcessedMergedBamFileOtherMergingSet() {
-        MergingPass mergingPass = MergingPass.build()
+        given:
+        MergingPass mergingPass = DomainFactory.createMergingPass()
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged([:], [:], [:], [
-            mergingPass: mergingPass,
-            workPackage: mergingPass.mergingWorkPackage,
+                mergingPass: mergingPass,
+                workPackage: mergingPass.mergingWorkPackage,
         ])
 
-        assert !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
+        expect:
+        !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)
     }
 }
