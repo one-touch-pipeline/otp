@@ -22,10 +22,10 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.utils.HelperUtils
 
@@ -36,6 +36,16 @@ class ProjectSpec extends Specification implements DomainFactoryCore, DataTest {
             ProjectCategory,
             Realm,
     ]}
+
+    TestConfigService configService
+
+    void setup() {
+         configService = new TestConfigService()
+    }
+
+    void cleanup() {
+        configService.clean()
+    }
 
     void "test getProjectDirectory all fine should return File"() {
         given:
