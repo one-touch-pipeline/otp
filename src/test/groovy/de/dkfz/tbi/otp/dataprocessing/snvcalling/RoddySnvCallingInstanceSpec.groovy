@@ -126,17 +126,4 @@ class RoddySnvCallingInstanceSpec extends Specification implements DataTest {
                 samplePair        : samplePair,
         ])
     }
-
-    void "test withdraw"() {
-        given:
-        RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
-
-        when:
-        LogThreadLocal.withThreadLog(System.out) {
-            snvCallingInstance.withdraw()
-        }
-
-        then:
-        snvCallingInstance.withdrawn
-    }
 }

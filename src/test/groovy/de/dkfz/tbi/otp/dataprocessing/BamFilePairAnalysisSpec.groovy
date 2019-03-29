@@ -136,38 +136,6 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
     }
 
     @Unroll
-    void "withdraw, the flag withdraw should be true"() {
-        given:
-        BamFilePairAnalysis analysis = createAnalysisClosure()
-
-
-        when:
-        LogThreadLocal.withThreadLog(System.out) {
-            analysis.withdraw()
-        }
-
-        then:
-        analysis.withdrawn
-
-        where:
-        createAnalysisClosure << [
-                {
-                    DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
-                },
-                {
-                    DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
-                },
-                {
-                    DomainFactory.createSophiaInstanceWithRoddyBamFiles()
-                },
-                {
-                    DomainFactory.createAceseqInstanceWithRoddyBamFiles()
-                },
-        ]
-    }
-
-
-    @Unroll
     void "check different bamFiles classes: #classBamFile1, #classBamFile2"() {
         given:
         AbstractMergedBamFile bamFile1 = createBamFile(classBamFile1)

@@ -105,19 +105,6 @@ class RunYapsaInstanceSpec extends Specification implements DataTest {
         new File(getInstancePathHelper(instance)) == path.relativePath
     }
 
-    void "test withdraw"() {
-        given:
-        BamFilePairAnalysis instance = createBamFilePairAnalysis()
-
-        when:
-        LogThreadLocal.withThreadLog(System.out) {
-            instance.withdraw()
-        }
-
-        then:
-        instance.withdrawn
-    }
-
     private String getInstancePathHelper(BamFilePairAnalysis instance) {
         return "${samplePairPath}/${instance.instanceName}"
     }
