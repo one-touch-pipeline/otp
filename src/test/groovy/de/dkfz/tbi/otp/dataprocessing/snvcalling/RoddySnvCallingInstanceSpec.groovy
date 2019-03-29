@@ -81,15 +81,10 @@ class RoddySnvCallingInstanceSpec extends Specification implements DataTest {
 
         samplePairPath = "${samplePair.sampleType1.name}_${samplePair.sampleType2.name}"
 
-        SamplePair.metaClass.getSnvSamplePairPath = {
+        samplePair.metaClass.getSnvSamplePairPath = {
             return new OtpPath(samplePair.project, samplePairPath)
         }
     }
-
-    void cleanup() {
-        SamplePair.metaClass = null
-    }
-
 
     void "test getSnvInstancePath"() {
         given:
