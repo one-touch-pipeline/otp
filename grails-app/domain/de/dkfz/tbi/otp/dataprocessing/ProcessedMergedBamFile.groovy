@@ -39,13 +39,16 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
     ]
 
     static constraints = {
-        type validator: { it == BamType.MDUP }
         mergingPass nullable: false, unique: true
         workPackage validator: { val, obj ->
             val.id == obj.mergingSet.mergingWorkPackage.id &&
                     val?.pipeline?.name == Pipeline.Name.DEFAULT_OTP &&
                     MergingWorkPackage.isAssignableFrom(Hibernate.getClass(val))
         }
+    }
+
+    List<BamType> getAllowedTypes() {
+        return [BamType.MDUP]
     }
 
     MergingSet getMergingSet() {

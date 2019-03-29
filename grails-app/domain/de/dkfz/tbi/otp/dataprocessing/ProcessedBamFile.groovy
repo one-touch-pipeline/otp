@@ -32,10 +32,13 @@ class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParam
     ]
 
     static constraints = {
-        type validator: { it == AbstractBamFile.BamType.SORTED }
         alignmentPass nullable: false, unique: true, validator: { AlignmentPass alignmentPass ->
             return alignmentPass.referenceGenome != null
         }
+    }
+
+    List<BamType> getAllowedTypes() {
+        return [BamType.SORTED]
     }
 
     SeqTrack getSeqTrack() {

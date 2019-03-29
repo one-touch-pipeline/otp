@@ -87,13 +87,9 @@ class ProcessingStep implements Serializable, Entity {
 
 
     static constraints = {
-        jobDefinition(nullable: false)
         jobClass(nullable: true, blank: false)
-        process(nullable: false, validator: { Process val, ProcessingStep obj ->
-            if (!val) {
-                return false
-            }
-            if (val.jobExecutionPlan?.id != obj.jobDefinition?.plan?.id) {
+        process(validator: { Process val, ProcessingStep obj ->
+            if (val?.jobExecutionPlan?.id != obj.jobDefinition?.plan?.id) {
                 return "jobExecutionPlan"
             }
             return true

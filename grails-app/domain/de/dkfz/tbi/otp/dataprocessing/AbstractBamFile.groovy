@@ -103,7 +103,10 @@ abstract class AbstractBamFile implements Entity {
         // Type is not nullable for BamFiles except RoddyBamFile,
         // Grails does not create the SQL schema correctly when using simple nullable constraints,
         // therefore this workaround with validator constraints is used
-        type nullable: true, validator: { it == null }
+        type nullable: true, validator: { val, obj ->
+            // validator doesn't work correctly with subclasses
+            return val in obj.allowedTypes
+        }
         hasMetricsFile validator: { val, obj ->
             if (obj.type == BamType.SORTED) {
                 return !val
@@ -113,7 +116,7 @@ abstract class AbstractBamFile implements Entity {
         }
         status validator: { val, obj ->
             if (val == State.NEEDS_PROCESSING) {
-                if (obj.withdrawn == true || obj.type == BamType.RMDUP) {
+                if (obj.withdrawn || obj.type == BamType.RMDUP) {
                     return false
                 }
             }
@@ -124,7 +127,9 @@ abstract class AbstractBamFile implements Entity {
         coverageWithN(nullable: true)
     }
 
-
+    List<BamType> getAllowedTypes() {
+        return [null]
+    }
 
     static mapping = {
         'class' index: "abstract_bam_file_class_idx"

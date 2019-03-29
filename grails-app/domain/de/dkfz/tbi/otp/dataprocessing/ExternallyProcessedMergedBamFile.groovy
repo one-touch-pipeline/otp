@@ -148,7 +148,6 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
 
     static constraints = {
-        type validator: { true }
         importedFrom nullable: true, blank: false, validator: { it == null || OtpPath.isValidAbsolutePath(it) }
         fileName blank: false, validator: { OtpPath.isValidPathComponent(it) }
         workPackage validator: { val, obj ->
@@ -175,4 +174,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         maximumReadLength nullable: true, min: 0
     }
 
+    List<BamType> getAllowedTypes() {
+        return BamType.values() + [null]
+    }
 }
