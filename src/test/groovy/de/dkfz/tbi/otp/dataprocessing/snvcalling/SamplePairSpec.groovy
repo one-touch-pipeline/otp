@@ -105,25 +105,6 @@ class SamplePairSpec extends Specification implements DataTest {
     }
 
     @Unroll
-    def "set #analysisName processing status"() {
-        given:
-        SamplePair samplePair = setUpForPathTests(analysisName)[1]
-
-        when:
-        SamplePair."set${analysisName}ProcessingStatus"([samplePair], SamplePair.ProcessingStatus.DISABLED)
-
-        then:
-        samplePair."${analysisName.toLowerCase()}ProcessingStatus" == SamplePair.ProcessingStatus.DISABLED
-
-        where:
-        analysisName << [
-                "Aceseq",
-                "Indel",
-                "Snv",
-        ]
-    }
-
-    @Unroll
     void "check different mergingWorkPackage classes: #classMWP1, #classMWP2"() {
         given:
         AbstractMergingWorkPackage mergingWorkPackage1 = DomainFactory.createMergingWorkPackage(classMWP1)
