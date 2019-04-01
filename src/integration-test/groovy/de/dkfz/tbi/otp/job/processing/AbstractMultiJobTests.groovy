@@ -25,6 +25,9 @@ package de.dkfz.tbi.otp.job.processing
 import grails.test.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.apache.commons.logging.impl.NoOpLog
+import org.junit.After
+import org.junit.Before
+import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
@@ -34,6 +37,8 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
+import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitor
+import de.dkfz.tbi.otp.job.scheduler.Scheduler
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -397,22 +402,19 @@ class AbstractMultiJobTests implements UserAndRoles {
 
 class TestThread extends Thread {
 
-    PersistenceContextUtils persistenceContextUtils
-
     AtomicBoolean suspendCancelled
     AbstractMultiJob job
 
-    TestThread(AtomicBoolean suspendCancelled, AbstractMultiJob job, PersistenceContextUtils persistenceContextUtils) {
+    TestThread(AtomicBoolean suspendCancelled, AbstractMultiJob job) {
         this.suspendCancelled = suspendCancelled
         this.job = job
-        this.persistenceContextUtils = persistenceContextUtils
     }
 
     @Override
     void run() {
         Thread.sleep(200)
         suspendCancelled.set(true)
-        persistenceContextUtils.doWithPersistenceContext {
+        Realm.withNewSession {
             job.cancelSuspend()
         }
     }

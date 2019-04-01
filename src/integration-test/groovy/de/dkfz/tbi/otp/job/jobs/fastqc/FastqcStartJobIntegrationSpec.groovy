@@ -56,7 +56,6 @@ class FastqcStartJobIntegrationSpec extends Specification {
         }
         fastqcStartJob.trackingService = new TrackingService()
         fastqcStartJob.setJobExecutionPlan(plan)
-        fastqcStartJob.persistenceContextUtils = persistenceContextUtils
 
         when:
         fastqcStartJob.execute()

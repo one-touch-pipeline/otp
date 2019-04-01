@@ -53,7 +53,6 @@ class ImportExternallyMergedBamStartJobIntegrationSpec extends Specification {
         }
         importExternallyMergedBamStartJob.optionService = new ProcessingOptionService()
         importExternallyMergedBamStartJob.setJobExecutionPlan(plan)
-        importExternallyMergedBamStartJob.persistenceContextUtils = persistenceContextUtils
 
         when:
         importExternallyMergedBamStartJob.execute()

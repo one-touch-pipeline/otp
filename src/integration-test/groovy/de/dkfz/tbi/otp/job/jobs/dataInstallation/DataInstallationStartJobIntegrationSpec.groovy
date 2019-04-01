@@ -53,7 +53,6 @@ class DataInstallationStartJobIntegrationSpec extends Specification {
 
         dataInstallationStartJob.trackingService = new TrackingService()
         dataInstallationStartJob.setJobExecutionPlan(plan)
-        dataInstallationStartJob.persistenceContextUtils = persistenceContextUtils
         dataInstallationStartJob.seqTrackService = new SeqTrackService()
 
         when:
