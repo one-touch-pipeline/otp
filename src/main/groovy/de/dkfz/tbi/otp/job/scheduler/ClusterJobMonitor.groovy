@@ -97,22 +97,22 @@ class ClusterJobMonitor {
     }
 
     private void handleFinishedClusterJob(ClusterJob clusterJob) {
-        ClusterJob.withTransaction {
-            clusterJob.refresh()
-            saveJobFinishedInformation(clusterJob)
-            notifyJobAboutFinishedClusterJob(clusterJob)
-        }
+        saveJobFinishedInformation(clusterJob)
+        notifyJobAboutFinishedClusterJob(clusterJob)
     }
 
     @SuppressWarnings('CatchThrowable')
     private void saveJobFinishedInformation(ClusterJob clusterJob) {
-        try {
-            clusterJobSchedulerService.retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob)
-        } catch (Throwable e) {
-            log.warn("Failed to fill in runtime statistics for ${clusterJob}", e)
+        ClusterJob.withTransaction {
+            clusterJob.refresh()
+            try {
+                clusterJobSchedulerService.retrieveAndSaveJobStatisticsAfterJobFinished(clusterJob)
+            } catch (Throwable e) {
+                log.warn("Failed to fill in runtime statistics for ${clusterJob}", e)
+            }
+            clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
+            clusterJob.save(flush: true)
         }
-        clusterJob.checkStatus = ClusterJob.CheckStatus.FINISHED
-        clusterJob.save(flush: true)
     }
 
     protected void notifyJobAboutFinishedClusterJob(final ClusterJob clusterJob) {
