@@ -22,9 +22,11 @@
 
 package de.dkfz.tbi.otp.job.jobs.sophia
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.TestConfigService
@@ -38,7 +40,9 @@ import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.FileSystems
 
-class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
 
     @Rule
     TemporaryFolder temporaryFolder

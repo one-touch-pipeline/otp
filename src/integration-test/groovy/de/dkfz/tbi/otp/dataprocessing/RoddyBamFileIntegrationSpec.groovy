@@ -22,10 +22,14 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
+@Rollback
+@Integration
 class RoddyBamFileIntegrationSpec extends Specification {
 
     static final Long ARBITRARY_UNUSED_VALUE = 1

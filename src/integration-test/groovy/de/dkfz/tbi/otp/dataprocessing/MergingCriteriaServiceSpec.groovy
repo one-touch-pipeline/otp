@@ -23,12 +23,16 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@Rollback
+@Integration
 class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
     MergingCriteriaService mergingCriteriaService = new MergingCriteriaService()
 

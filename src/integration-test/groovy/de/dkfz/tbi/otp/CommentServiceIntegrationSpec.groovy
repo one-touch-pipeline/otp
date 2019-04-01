@@ -23,11 +23,15 @@
 package de.dkfz.tbi.otp
 
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.UserAndRoles
 
+@Rollback
+@Integration
 class CommentServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     CommentService commentService

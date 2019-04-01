@@ -22,10 +22,12 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
@@ -40,7 +42,9 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightNotificationService
 import de.dkfz.tbi.otp.utils.*
 
-class LinkFilesToFinalDestinationServiceIntegrationSpec extends IntegrationSpec implements RoddyRnaFactory {
+@Rollback
+@Integration
+class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification implements RoddyRnaFactory {
     LinkFilesToFinalDestinationService service
 
     @Autowired

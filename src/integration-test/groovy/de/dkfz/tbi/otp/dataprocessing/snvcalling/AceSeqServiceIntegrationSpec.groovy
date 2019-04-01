@@ -22,12 +22,16 @@
 
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-class AceSeqServiceIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class AceSeqServiceIntegrationSpec extends Specification {
 
     SamplePair samplePair1
     ConfigPerProjectAndSeqType roddyConfig1

@@ -22,11 +22,13 @@
 
 package de.dkfz.tbi.otp.notification
 
-import grails.test.spock.IntegrationSpec
 import grails.core.GrailsApplication
-import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import grails.web.mapping.LinkGenerator
+import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -38,7 +40,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
-class CreateNotificationTextServiceIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class CreateNotificationTextServiceIntegrationSpec extends Specification {
 
     static final String CONTROLLER = 'controller'
     static final String ACTION = 'action'

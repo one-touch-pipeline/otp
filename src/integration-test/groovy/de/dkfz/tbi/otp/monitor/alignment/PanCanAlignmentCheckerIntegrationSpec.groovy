@@ -22,6 +22,9 @@
 
 package de.dkfz.tbi.otp.monitor.alignment
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
@@ -29,6 +32,8 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
 
+@Rollback
+@Integration
 class PanCanAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentCheckerIntegrationSpec {
 
     @Override

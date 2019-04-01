@@ -22,14 +22,18 @@
 
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
-class SnvCallingServiceIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class SnvCallingServiceIntegrationSpec extends Specification {
 
     final static String ARBITRARY_INSTANCE_NAME = '2014-08-25_15h32'
     final static double COVERAGE_TOO_LOW = 20.0

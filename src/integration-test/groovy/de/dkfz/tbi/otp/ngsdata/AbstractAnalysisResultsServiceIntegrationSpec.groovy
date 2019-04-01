@@ -23,7 +23,9 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -37,7 +39,9 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaResultsService
 import de.dkfz.tbi.otp.security.UserAndRoles
 
-class AbstractAnalysisResultsServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
+@Rollback
+@Integration
+class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     AbstractAnalysisResultsService abstractAnalysisResultsService
 

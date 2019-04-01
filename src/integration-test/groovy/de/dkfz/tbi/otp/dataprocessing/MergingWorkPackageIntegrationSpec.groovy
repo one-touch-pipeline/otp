@@ -22,13 +22,17 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-class MergingWorkPackageIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class MergingWorkPackageIntegrationSpec extends Specification {
 
     @Unroll
     void "constraint for sample, when seqType is not chip seq and  #text, then validate should not create errors"() {

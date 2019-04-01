@@ -22,11 +22,15 @@
 
 package de.dkfz.tbi.otp.dataprocessing.singleCell
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 
+@Rollback
+@Integration
 class SingleCellBamFileIntegrationSpec extends Specification implements CellRangerFactory {
 
     void "test getOverallQualityAssessment"() {

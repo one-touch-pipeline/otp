@@ -22,7 +22,9 @@
 
 package de.dkfz.tbi.otp.job.processing
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
@@ -30,7 +32,9 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.jobs.dataInstallation.CopyFilesJob
 import de.dkfz.tbi.otp.ngsdata.*
 
-class ClusterJobSubmissionOptionsServiceIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class ClusterJobSubmissionOptionsServiceIntegrationSpec extends Specification {
 
     @Unroll
     void "test readOptionsFromDatabase ('#realmOption', ''#jobSpecificOption', '#jobAndSeqTypeSpecific')"() {

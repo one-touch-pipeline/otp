@@ -22,12 +22,16 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 
+@Rollback
+@Integration
 class AbstractMergingWorkPackageServiceSpec extends Specification {
 
 

@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.monitor.alignment
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
@@ -32,6 +34,8 @@ import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
+@Rollback
+@Integration
 class AllRoddyAlignmentsCheckerIntegrationSpec extends Specification implements RoddyRnaFactory {
 
 

@@ -22,7 +22,9 @@
 
 package de.dkfz.tbi.otp.tracking
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -40,7 +42,9 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class TrackingServiceIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class TrackingServiceIntegrationSpec extends Specification {
 
     TrackingService trackingService
     MailHelperService mailHelperService

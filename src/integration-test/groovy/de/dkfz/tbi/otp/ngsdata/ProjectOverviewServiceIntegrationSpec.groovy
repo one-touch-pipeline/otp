@@ -22,15 +22,19 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class ProjectOverviewServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
+@Rollback
+@Integration
+class ProjectOverviewServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     @Autowired
     ProjectOverviewService projectOverviewService

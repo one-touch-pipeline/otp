@@ -23,11 +23,15 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 
+@Rollback
+@Integration
 class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
     UserService userService = new UserService()
 

@@ -22,7 +22,9 @@
 
 package de.dkfz.tbi.otp.job.processing
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -30,7 +32,9 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-class AbstractStartJobImplIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class AbstractStartJobImplIntegrationSpec extends Specification {
 
     AbstractStartJobImpl job
     JobExecutionPlan jep

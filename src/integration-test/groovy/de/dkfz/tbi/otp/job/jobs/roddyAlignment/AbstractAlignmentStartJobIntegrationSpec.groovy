@@ -22,7 +22,9 @@
 
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
@@ -32,7 +34,9 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-class AbstractAlignmentStartJobIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class AbstractAlignmentStartJobIntegrationSpec extends Specification {
 
     def "restart creates new Process on new RoddyBamFile"() {
         given:

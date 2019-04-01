@@ -26,14 +26,14 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 
-import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
 import de.dkfz.tbi.otp.job.jobs.TestSingletonStartJob
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 import static org.junit.Assert.*
 
-class JobExecutionPlanServiceTests extends AbstractIntegrationTest  {
+class JobExecutionPlanServiceTests implements UserAndRoles {
     def jobExecutionPlanService
     def grailsApplication
 

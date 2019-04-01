@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.apache.commons.logging.impl.NoOpLog
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -38,6 +40,8 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.TrackingService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
+@Rollback
+@Integration
 class JobMailServiceIntegrationSpec extends Specification {
 
     @Rule

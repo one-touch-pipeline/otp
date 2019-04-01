@@ -23,12 +23,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.Errors
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.security.UserAndRoles
 
+@Rollback
+@Integration
 class CreateSpeciesServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     @Autowired

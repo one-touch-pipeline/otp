@@ -22,17 +22,22 @@
 
 package de.dkfz.tbi.otp.infrastructure
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.joda.time.LocalDate
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Ignore
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class ProcessingTimeStatisticsServiceIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
 
     @Autowired
     ProcessingTimeStatisticsService processingTimeStatisticsService

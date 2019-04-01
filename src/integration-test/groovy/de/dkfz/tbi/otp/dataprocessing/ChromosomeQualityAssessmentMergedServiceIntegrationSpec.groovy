@@ -22,11 +22,15 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Specification {
 
     ChromosomeQualityAssessmentMergedService chromosomeQualityAssessmentMergedService
 

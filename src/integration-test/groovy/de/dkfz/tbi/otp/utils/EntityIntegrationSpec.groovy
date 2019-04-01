@@ -24,12 +24,16 @@ package de.dkfz.tbi.otp.utils
 
 import grails.plugin.springsecurity.acl.*
 import grails.core.GrailsApplication
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import seedme.SeedMeChecksum
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
 
 @SuppressWarnings("ComparisonWithSelf")
+@Rollback
+@Integration
 class EntityIntegrationSpec extends Specification {
 
     GrailsApplication grailsApplication

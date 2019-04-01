@@ -22,9 +22,11 @@
 
 package de.dkfz.tbi.otp.job.jobs.rnaAlignment
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
@@ -35,7 +37,9 @@ import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 
-class ExecuteRnaAlignmentJobIntegrationSpec extends IntegrationSpec implements RoddyRnaFactory {
+@Rollback
+@Integration
+class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements RoddyRnaFactory {
 
     ExecuteRnaAlignmentJob executeRnaAlignmentJob
 

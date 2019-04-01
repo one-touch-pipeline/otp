@@ -22,7 +22,9 @@
 
 package de.dkfz.tbi.otp.job.jobs
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
@@ -34,7 +36,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends IntegrationSpec implements StartJobIntegrationSpec {
+@Rollback
+@Integration
+abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specification implements StartJobIntegrationSpec {
 
     void "getConfig when config is null, throw an exception"() {
         given:

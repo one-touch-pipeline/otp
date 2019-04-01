@@ -22,11 +22,15 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
+@Rollback
+@Integration
 class ProcessingOptionServiceSpec extends Specification {
 
     ProcessingOptionService processingOptionService

@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -32,6 +34,8 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 import static de.dkfz.tbi.TestCase.assertContainSame
 
+@Rollback
+@Integration
 class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
 
     static final String PROJECT = 'project'

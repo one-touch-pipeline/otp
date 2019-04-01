@@ -23,6 +23,8 @@
 package de.dkfz.tbi.otp.security
 
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import spock.lang.Specification
@@ -31,6 +33,8 @@ import spock.lang.Unroll
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Principal
 
+@Rollback
+@Integration
 class OtpPermissionEvaluatorIntegrationSpec extends Specification implements UserAndRoles {
 
     OtpPermissionEvaluator permissionEvaluator

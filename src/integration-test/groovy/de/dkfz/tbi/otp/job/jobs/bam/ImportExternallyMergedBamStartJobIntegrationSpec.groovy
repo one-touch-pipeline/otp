@@ -22,7 +22,9 @@
 
 package de.dkfz.tbi.otp.job.jobs.bam
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ImportProcess
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -31,9 +33,9 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-class ImportExternallyMergedBamStartJobIntegrationSpec extends IntegrationSpec {
-
-    PersistenceContextUtils persistenceContextUtils
+@Rollback
+@Integration
+class ImportExternallyMergedBamStartJobIntegrationSpec extends Specification {
 
     def "execute sets state of importProcess on STARTED"() {
         given:

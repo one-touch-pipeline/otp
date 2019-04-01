@@ -22,9 +22,11 @@
 
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
@@ -35,7 +37,9 @@ import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 
-class CellRangerServiceIntegrationSpec extends IntegrationSpec implements CellRangerFactory {
+@Rollback
+@Integration
+class CellRangerServiceIntegrationSpec extends Specification implements CellRangerFactory {
 
     @Rule
     public TemporaryFolder temporaryFolder

@@ -22,7 +22,9 @@
 
 package de.dkfz.tbi.otp.job.jobs.dataInstallation
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -31,9 +33,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.TrackingService
 
-class DataInstallationStartJobIntegrationSpec extends IntegrationSpec {
-
-    PersistenceContextUtils persistenceContextUtils
+@Rollback
+@Integration
+class DataInstallationStartJobIntegrationSpec extends Specification {
 
     void "execute calls setStartedForSeqTracks"() {
         given:

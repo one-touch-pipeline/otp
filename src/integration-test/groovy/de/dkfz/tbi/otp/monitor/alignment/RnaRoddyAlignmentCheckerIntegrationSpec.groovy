@@ -22,12 +22,17 @@
 
 package de.dkfz.tbi.otp.monitor.alignment
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
+@Rollback
+@Integration
 class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentCheckerIntegrationSpec implements RoddyRnaFactory {
 
     @Override

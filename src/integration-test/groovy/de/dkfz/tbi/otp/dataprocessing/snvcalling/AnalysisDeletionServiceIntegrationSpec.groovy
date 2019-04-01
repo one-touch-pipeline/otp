@@ -22,11 +22,15 @@
 
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
+@Rollback
+@Integration
 class AnalysisDeletionServiceIntegrationSpec extends Specification {
 
     AnalysisDeletionService analysisDeletionService

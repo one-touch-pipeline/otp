@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -34,6 +36,8 @@ import static de.dkfz.tbi.TestCase.assertContainSame
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CUSTOMER_LIBRARY
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
 
+@Rollback
+@Integration
 class LibraryProjectValidatorIntegrationSpec extends Specification {
 
     void 'validate, adds expected warnings,succeeds'() {

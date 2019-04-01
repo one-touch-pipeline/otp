@@ -22,13 +22,16 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import grails.validation.ValidationException
+import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 
-class SampleIdentifierIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class SampleIdentifierIntegrationSpec extends Specification {
 
     static private String CORRECT_NAME = 'name'
 

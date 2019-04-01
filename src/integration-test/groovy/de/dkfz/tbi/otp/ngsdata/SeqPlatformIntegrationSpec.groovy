@@ -22,13 +22,16 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import grails.validation.ValidationException
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 
-
-class SeqPlatformIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class SeqPlatformIntegrationSpec extends Specification {
     SeqPlatform sp1
     SeqPlatform sp2
     SeqPlatform sp3

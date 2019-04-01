@@ -23,6 +23,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.springframework.security.access.AccessDeniedException
 import spock.lang.Shared
 import spock.lang.Specification
@@ -30,6 +32,8 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 
+@Rollback
+@Integration
 class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     SeqTypeService seqTypeService

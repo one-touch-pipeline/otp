@@ -22,11 +22,15 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
 
-class AbstractAlignmentDeciderIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class AbstractAlignmentDeciderIntegrationSpec extends Specification {
 
     void "test isLibraryPreparationKitOrBedFileMissing, with null"() {
         when:

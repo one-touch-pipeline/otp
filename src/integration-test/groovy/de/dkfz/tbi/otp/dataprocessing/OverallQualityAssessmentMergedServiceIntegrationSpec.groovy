@@ -22,17 +22,17 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
 
+@Rollback
+@Integration
 class OverallQualityAssessmentMergedServiceIntegrationSpec extends Specification {
 
-
-
     OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
-
-
 
     void "test findChromosomeLengthForQualityAssessmentMerged case one element should return one element"() {
         given:

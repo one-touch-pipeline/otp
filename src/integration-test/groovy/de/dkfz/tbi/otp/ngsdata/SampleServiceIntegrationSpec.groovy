@@ -22,11 +22,14 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 import spock.lang.Unroll
 
-
-class SampleServiceIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class SampleServiceIntegrationSpec extends Specification {
     SampleService sampleService
 
     @Unroll

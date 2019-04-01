@@ -23,17 +23,21 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.validation.Errors
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 
-class DocumentServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles {
+@Rollback
+@Integration
+class DocumentServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     private static final String TITLE = "title"
     private static final String DESCRIPTION = "description"

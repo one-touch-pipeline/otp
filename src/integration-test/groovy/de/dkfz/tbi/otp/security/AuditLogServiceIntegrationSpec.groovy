@@ -24,9 +24,13 @@ package de.dkfz.tbi.otp.security
 
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.joda.time.DateTime
 import spock.lang.Specification
 
+@Rollback
+@Integration
 class AuditLogServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     AuditLogService auditLogService

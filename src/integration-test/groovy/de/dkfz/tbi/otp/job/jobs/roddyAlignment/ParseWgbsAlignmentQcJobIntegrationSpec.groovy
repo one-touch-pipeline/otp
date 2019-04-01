@@ -22,12 +22,14 @@
 
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import grails.core.GrailsApplication
 import grails.plugin.springsecurity.SpringSecurityService
-import grails.test.spock.IntegrationSpec
-import grails.core.spring.GrailsApplicationContext
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.CommentService
@@ -41,7 +43,9 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Principal
 
-class ParseWgbsAlignmentQcJobIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
 
     @Autowired
     GrailsApplicationContext context

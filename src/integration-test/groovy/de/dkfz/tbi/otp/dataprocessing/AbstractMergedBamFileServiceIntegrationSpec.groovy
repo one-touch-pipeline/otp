@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,6 +32,8 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
+@Rollback
+@Integration
 class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
 
     AbstractMergedBamFileService abstractMergedBamFileService
@@ -53,7 +57,6 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
         expect:
         analysisPipelines.size() == processingSteps.size()
     }
-
 
     def "destination directory of ProcessedMergedBamFile"() {
         given:

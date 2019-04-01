@@ -22,9 +22,13 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
+@Rollback
+@Integration
 class InformSampleIdentifierParserIntegrationSpec extends Specification {
     InformSampleIdentifierParser informSampleIdentifierParser = new InformSampleIdentifierParser()
 

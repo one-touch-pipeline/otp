@@ -22,13 +22,17 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInSameDirectory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.Md5sumFormatValidator
 
-class MetadataImportServiceIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class MetadataImportServiceIntegrationSpec extends Specification {
 
     @Autowired
     MetadataImportService metadataImportService

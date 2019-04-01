@@ -22,8 +22,10 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
@@ -33,7 +35,9 @@ import javax.sql.DataSource
 import static de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState.NOT_STARTED
 import static de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState.UNKNOWN
 
-class SeqTrackServiceIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class SeqTrackServiceIntegrationSpec extends Specification {
 
     @Autowired
     DataSource dataSource

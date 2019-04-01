@@ -22,26 +22,30 @@
 
 package de.dkfz.tbi.otp.infrastructure
 
-import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.execution.jobs.GenericJobInfo
 import de.dkfz.roddy.tools.BufferValue
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
-import spock.lang.Unroll
 
 import java.time.ZoneId
 
 import static java.util.concurrent.TimeUnit.HOURS
 import static java.util.concurrent.TimeUnit.MINUTES
 
+@Rollback
+@Integration
 class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     static final org.joda.time.LocalDate SDATE_LOCALDATE = new org.joda.time.LocalDate()

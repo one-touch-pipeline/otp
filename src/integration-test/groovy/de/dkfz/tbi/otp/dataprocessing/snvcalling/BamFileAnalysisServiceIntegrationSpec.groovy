@@ -22,7 +22,9 @@
 
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -30,7 +32,9 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 import static de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 
-class BamFileAnalysisServiceIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class BamFileAnalysisServiceIntegrationSpec extends Specification {
 
     SamplePair samplePair1
     ConfigPerProjectAndSeqType roddyConfig1

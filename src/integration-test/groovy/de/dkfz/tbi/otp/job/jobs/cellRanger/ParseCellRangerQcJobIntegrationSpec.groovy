@@ -22,9 +22,11 @@
 
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
@@ -38,7 +40,9 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 
-class ParseCellRangerQcJobIntegrationSpec extends IntegrationSpec implements CellRangerFactory {
+@Rollback
+@Integration
+class ParseCellRangerQcJobIntegrationSpec extends Specification implements CellRangerFactory {
 
     @Rule
     TemporaryFolder temporaryFolder

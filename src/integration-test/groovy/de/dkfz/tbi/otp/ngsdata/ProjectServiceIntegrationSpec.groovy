@@ -23,11 +23,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import grails.validation.ValidationException
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.mock.web.MockMultipartFile
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
@@ -50,7 +52,9 @@ import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
 
-class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRoles, DomainFactoryCore {
+@Rollback
+@Integration
+class ProjectServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
 
     RemoteShellHelper remoteShellHelper
     ProcessingOptionService processingOptionService
@@ -342,6 +346,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
         }
+
         then:
         Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() == group
     }
@@ -388,6 +393,7 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
         }
+
         then:
         Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() == group
     }
@@ -420,7 +426,6 @@ class ProjectServiceIntegrationSpec extends IntegrationSpec implements UserAndRo
         then:
         ValidationException ex = thrown()
         ex.message.contains(errorName) && ex.message.contains(errorLocaction)
-
 
         where:
         name           || errorName                                                                                  | errorLocaction

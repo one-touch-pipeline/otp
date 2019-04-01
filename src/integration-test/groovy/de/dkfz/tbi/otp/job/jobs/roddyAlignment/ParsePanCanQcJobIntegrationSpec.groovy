@@ -22,10 +22,12 @@
 
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -33,7 +35,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class ParsePanCanQcJobIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class ParsePanCanQcJobIntegrationSpec extends Specification {
 
     @Autowired
     AbstractQualityAssessmentService abstractQualityAssessmentService

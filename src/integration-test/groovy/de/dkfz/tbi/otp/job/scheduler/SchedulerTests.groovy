@@ -22,10 +22,11 @@
 
 package de.dkfz.tbi.otp.job.scheduler
 
-
-import org.apache.commons.logging.impl.NoOpLog
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import grails.core.GrailsApplication
 import org.junit.*
+import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
@@ -40,6 +41,8 @@ import java.util.regex.Pattern
 
 import static org.junit.Assert.*
 
+@Rollback
+@Integration
 class SchedulerTests extends AbstractIntegrationTest {
 
     GrailsApplication grailsApplication

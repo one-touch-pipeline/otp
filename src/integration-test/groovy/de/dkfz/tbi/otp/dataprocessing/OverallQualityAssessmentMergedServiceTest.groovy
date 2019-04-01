@@ -27,11 +27,11 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
 
-import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 
-class OverallQualityAssessmentMergedServiceTest extends AbstractIntegrationTest {
+class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     final static String SEQUENCE_LENGTH = "100"
 

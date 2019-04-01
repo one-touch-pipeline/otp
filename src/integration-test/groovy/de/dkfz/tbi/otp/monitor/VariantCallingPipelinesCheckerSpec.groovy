@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.monitor
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.codehaus.groovy.runtime.MethodClosure
 import spock.lang.Specification
 
@@ -29,6 +31,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 
+@Rollback
+@Integration
 class VariantCallingPipelinesCheckerSpec extends Specification {
 
     SamplePair createSamplePair(Map properties = [:]) {

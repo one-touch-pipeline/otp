@@ -22,7 +22,9 @@
 
 package de.dkfz.tbi.otp.egaSubmission
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
@@ -31,7 +33,9 @@ import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
-class EgaSubmissionServiceIntegrationSpec extends IntegrationSpec implements EgaSubmissionFactory {
+@Rollback
+@Integration
+class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSubmissionFactory {
 
     EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
 

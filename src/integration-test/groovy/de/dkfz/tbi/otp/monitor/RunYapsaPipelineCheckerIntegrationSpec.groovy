@@ -22,11 +22,16 @@
 
 package de.dkfz.tbi.otp.monitor
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
+@Rollback
+@Integration
 class RunYapsaPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipelineCheckerIntegrationSpec {
 
     @Override
@@ -53,7 +58,6 @@ class RunYapsaPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipel
     BamFilePairAnalysis createAnalysisForCrosschecking(Map properties) {
         return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles(properties)
     }
-
 
     // RunYapsa is not a Roddy workflow, so the default doesn't work...
     @Override

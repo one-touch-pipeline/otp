@@ -33,10 +33,10 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
-import de.dkfz.tbi.otp.scriptTests.GroovyScriptAwareTestCase
+import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
 
-class DataSwapServiceTests extends GroovyScriptAwareTestCase {
+class DataSwapServiceTests implements UserAndRoles {
     DataSwapService dataSwapService
     LsdfFilesService lsdfFilesService
     DataProcessingFilesService dataProcessingFilesService

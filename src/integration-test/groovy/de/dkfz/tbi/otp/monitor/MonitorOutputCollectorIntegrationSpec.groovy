@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.monitor
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,8 +32,9 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
+@Rollback
+@Integration
 class MonitorOutputCollectorIntegrationSpec extends Specification {
-
 
     void "addInfoAboutProcessErrors, when all fine, then return nothing"() {
         given:
@@ -51,7 +54,6 @@ class MonitorOutputCollectorIntegrationSpec extends Specification {
         then:
         expected == output
     }
-
 
     @Unroll
     void "addInfoAboutProcessErrors, when error '#errorCase', then create some error output"() {

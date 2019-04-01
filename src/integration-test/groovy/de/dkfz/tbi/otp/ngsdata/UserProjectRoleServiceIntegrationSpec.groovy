@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import spock.lang.*
 
@@ -35,6 +37,8 @@ import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 
+@Rollback
+@Integration
 class UserProjectRoleServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
     final static String UNIX_GROUP = "UNIX_GROUP"
     final static String OTHER_GROUP = "OTHER_GROUP"

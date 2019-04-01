@@ -22,13 +22,17 @@
 
 package de.dkfz.tbi.otp.tracking
 
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.TestCase.assertContainSame
 
-class OtrsTicketIntegrationSpec extends IntegrationSpec {
+@Rollback
+@Integration
+class OtrsTicketIntegrationSpec extends Specification {
 
     void 'findAllSeqTracks finds expected SeqTracks'() {
         given:

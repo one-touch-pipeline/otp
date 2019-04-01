@@ -23,6 +23,8 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
 import grails.plugin.springsecurity.SpringSecurityService
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -35,6 +37,8 @@ import de.dkfz.tbi.otp.utils.Principal
 
 import static de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus.*
 
+@Rollback
+@Integration
 class QcTrafficLightServiceIntegrationSpec extends Specification implements DomainFactoryCore {
 
     QcTrafficLightService qcTrafficLightService

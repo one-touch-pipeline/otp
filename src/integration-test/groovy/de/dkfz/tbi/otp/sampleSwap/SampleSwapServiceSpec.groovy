@@ -23,6 +23,8 @@
 package de.dkfz.tbi.otp.sampleSwap
 
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -36,6 +38,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.nio.file.Files
 
+@Rollback
+@Integration
 class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     @Rule

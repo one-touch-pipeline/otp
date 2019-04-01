@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.monitor
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -30,8 +32,9 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
+@Rollback
+@Integration
 abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Specification {
-
 
     abstract AbstractVariantCallingPipelineChecker createVariantCallingPipelineChecker()
 
@@ -127,7 +130,6 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         TestCase.assertContainSame(expected, returnValue)
     }
 
-
     void "analysisAlreadyRunningForSamplePairAndPipeline, when some sample pairs have running analysis and some not, return the running analysis"() {
         given:
         AbstractVariantCallingPipelineChecker pipelineChecker = createVariantCallingPipelineChecker()
@@ -219,7 +221,6 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         TestCase.assertContainSame(expected, returnValue*.samplePair)
     }
 
-
     void "samplePairsWithoutAnalysis, when some sample pairs are triggered for analysis and some not, return the not triggered SamplePairs"() {
         given:
         AbstractVariantCallingPipelineChecker pipelineChecker = createVariantCallingPipelineChecker()
@@ -246,7 +247,6 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         then:
         TestCase.assertContainSame(expected, returnValue)
     }
-
 
     void "lastAnalysisForSamplePair, when some sample pairs have multiple analysis, return the last analysis of every SamplePair"() {
         given:
@@ -283,7 +283,6 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         TestCase.assertContainSame(expected, returnValue)
     }
 
-
     void "handle, if no samplePairs given, do nothing"() {
         given:
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
@@ -295,7 +294,6 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         then:
         0 * output._
     }
-
 
     void "displayRunning, check that running is called with expected parameters"() {
         given:
@@ -322,7 +320,6 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         1 * output.showRunning(workFlowName, [runningAnalysis])
         0 * output.showRunning(_, _)
     }
-
 
     void "handle, if samplePairs given, then return analysis and create output for the others"() {
         given:
@@ -501,5 +498,4 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
 
         0 * output._
     }
-
 }

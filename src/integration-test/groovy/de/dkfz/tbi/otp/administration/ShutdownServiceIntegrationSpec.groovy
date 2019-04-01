@@ -23,6 +23,8 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.springframework.validation.Errors
 import spock.lang.Specification
 
@@ -30,6 +32,8 @@ import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@Rollback
+@Integration
 class ShutdownServiceIntegrationSpec extends Specification implements UserAndRoles {
     ShutdownService shutdownService = new ShutdownService()
     static final String REASON = 'reason'

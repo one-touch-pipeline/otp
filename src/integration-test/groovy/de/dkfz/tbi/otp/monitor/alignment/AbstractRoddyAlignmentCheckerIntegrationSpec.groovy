@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.monitor.alignment
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,6 +32,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
 
+@Rollback
+@Integration
 abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specification {
 
     AbstractRoddyAlignmentChecker checker

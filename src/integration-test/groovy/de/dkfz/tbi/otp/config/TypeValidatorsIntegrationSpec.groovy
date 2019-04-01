@@ -22,11 +22,15 @@
 
 package de.dkfz.tbi.otp.config
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.job.jobs.dataInstallation.CopyFilesJob
 
+@Rollback
+@Integration
 class TypeValidatorsIntegrationSpec extends Specification {
 
     private static String JOB_NAME = CopyFilesJob.class.getSimpleName()

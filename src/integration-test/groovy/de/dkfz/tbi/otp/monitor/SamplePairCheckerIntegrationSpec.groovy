@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.monitor
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -32,6 +34,8 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.HelperUtils
 
+@Rollback
+@Integration
 class SamplePairCheckerIntegrationSpec extends Specification {
 
     SamplePair createSamplePair(Map properties = [:]) {
@@ -76,7 +80,6 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         TestCase.assertContainSame(expected, returnValue)
     }
 
-
     @Unroll
     void "bamFilesWithCategory, when some bam files has the category #category and some not, return only bam files with category #category"() {
         given:
@@ -110,7 +113,6 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         ]
     }
 
-
     void "bamFilesWithoutThreshold, when some bam files has a threshold  and some not, return only bam files without threshold"() {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
@@ -133,7 +135,6 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         then:
         TestCase.assertContainSame(expected, returnValue)
     }
-
 
     void "bamFilesWithoutSamplePair, when some bam files has a sample pair and some not, return only bam files without sample pair"() {
         given:
@@ -159,7 +160,6 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         TestCase.assertContainSame(expected, returnValue)
     }
 
-
     void "samplePairsForBamFiles, when some bam files has a samplePair and some not, return sample pair for the given bam files"() {
         given:
         SamplePairChecker samplePairChecker = new SamplePairChecker()
@@ -174,7 +174,6 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         SamplePair samplePair1 = DomainFactory.createSamplePair(mergingWorkPackage1: bamFile1.mergingWorkPackage)
         SamplePair samplePair2 = DomainFactory.createSamplePair(mergingWorkPackage2: bamFile2.mergingWorkPackage)
 
-
         List<SamplePair> expected = [samplePair1, samplePair2]
 
         when:
@@ -183,7 +182,6 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         then:
         TestCase.assertContainSame(expected, returnValue)
     }
-
 
     void "samplePairWithMissingBamFile, when not all sample pairs has both bam file objects, return bam files without both bam files"() {
         given:
@@ -208,7 +206,6 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         then:
         TestCase.assertContainSame(expected, returnValue)
     }
-
 
     @Unroll
     void "blockedSamplePairs, when case '#testcase', result contains expected values"() {
@@ -270,7 +267,6 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         'control blocked qc state'   | false      | false         | 4                    | 40        | QcTrafficLightStatus.ACCEPTED | false      | false         | 4                    | 40        | QcTrafficLightStatus.BLOCKED  || "control ${SamplePairChecker.BLOCKED_HAS_BLOCKED_QC_STATE}"
     }
 
-
     void "handle, if no bam files given, do nothing"() {
         given:
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
@@ -282,9 +278,7 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         then:
         [] == result
         0 * output._
-
     }
-
 
     void "handle, if bam files given, then return non waiting sample pairs and create output for the others"() {
         given:

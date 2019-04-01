@@ -22,17 +22,22 @@
 
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.codehaus.groovy.control.io.NullWriter
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
+@Rollback
+@Integration
 class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
 
     void "test method loadPanCanConfigAndTriggerAlignment, valid"() {
