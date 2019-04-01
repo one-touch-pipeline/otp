@@ -58,6 +58,7 @@ class Spreadsheet {
         int rowIndex = 0
         CSVReader reader = new CSVReaderBuilder(new StringReader(document)).
                 withCSVParser(new RFC4180ParserBuilder().withSeparator(delimiter.delimiter).build()).build()
+        reader.setErrorLocale(Locale.ENGLISH)
         String [] line
         while ((line = reader.readNext()) != null) {
             Row row = new Row(this, rowIndex++, line)
