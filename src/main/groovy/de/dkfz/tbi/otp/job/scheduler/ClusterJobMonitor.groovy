@@ -67,8 +67,8 @@ class ClusterJobMonitor {
 
     @SuppressWarnings('CatchThrowable')
     private void doCheck() {
-        log.debug('Check for finished cluster jobs')
         List<ClusterJob> clusterJobsToCheck = ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING)
+        log.debug("Check for finished cluster jobs: ${clusterJobsToCheck.size()}")
 
         clusterJobsToCheck.groupBy { ClusterJob clusterJob ->
             clusterJob.realm
