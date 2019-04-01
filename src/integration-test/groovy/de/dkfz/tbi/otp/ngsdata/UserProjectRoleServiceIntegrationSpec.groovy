@@ -43,15 +43,17 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     final static String UNIX_GROUP = "UNIX_GROUP"
     final static String OTHER_GROUP = "OTHER_GROUP"
     final static String SEARCH = "search"
-    final static ProjectRole PI_PROJECT_ROLE = DomainFactory.createProjectRole(name: "PI")
 
     UserProjectRoleService userProjectRoleService
 
     @Shared
     static String email = HelperUtils.randomEmail
 
-    def setup() {
+    ProjectRole piProjectRole
+
+    void setupData() {
         SpringSecurityService springSecurityService = new SpringSecurityService()
+        piProjectRole = DomainFactory.createProjectRole(name: "PI")
         userProjectRoleService = new UserProjectRoleService()
         userProjectRoleService.messageSource = getMessageSource()
         userProjectRoleService.springSecurityService = springSecurityService
@@ -70,6 +72,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "test updateProjectRole on valid input"() {
         given:
+        setupData()
+
         ProjectRole newRole = DomainFactory.createProjectRole()
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole()
 
@@ -85,6 +89,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     @Unroll
     void "notifyAdministration sends email with correct content (action=#operatorAction)"() {
         given:
+        setupData()
+
         Project project = DomainFactory.createProject()
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(project: project)
         UserProjectRole requesterUserProjectRole = DomainFactory.createUserProjectRole(project: project)
@@ -115,6 +121,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     @Unroll
     void "notifyAdministration sends email with unswitched user as requester (action=#operatorAction)"() {
         given:
+        setupData()
+
         User executingUser = User.findByUsername(ADMIN)
         User switchedUser = User.findByUsername(OPERATOR)
 
@@ -147,10 +155,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "updateEnabledStatus, send mails when activating a user with file access"() {
         given:
+        setupData()
+
         Project project = createProject(unixGroup: UNIX_GROUP)
         UserProjectRole requesterUserProjectRole = DomainFactory.createUserProjectRole(
                 project: project,
-                projectRole: PI_PROJECT_ROLE,
+                projectRole: piProjectRole,
                 manageUsers: true
         )
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
@@ -186,6 +196,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "addUserToProjectAndNotifyGroupManagementAuthority, create User if non is found for username or email"() {
         given:
+        setupData()
+
         Project project = createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
@@ -212,6 +224,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "addUserToProjectAndNotifyGroupManagementAuthority, throw exception when user is already connected to project"() {
         given:
+        setupData()
+
         User user = DomainFactory.createUser()
         Project project = createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
@@ -240,6 +254,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "addUserToProjectAndNotifyGroupManagementAuthority, create UserProjectRole for new User"() {
         given:
+        setupData()
+
         User user = DomainFactory.createUser()
         Project project = createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
@@ -266,6 +282,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "addUserToProjectAndNotifyGroupManagementAuthority, unsuccessful ldap search throws exception"() {
         given:
+        setupData()
+
         Project project = createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
         userProjectRoleService.ldapService = Mock(LdapService) {
@@ -285,6 +303,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     @Unroll
     void "addUserToProjectAndNotifyGroupManagementAuthority, send mail only for users with access to files (accessToFiles = #accessToFiles)"() {
         given:
+        setupData()
+
         User user = DomainFactory.createUser()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
                 cn: user.username,
@@ -294,7 +314,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = createProject(unixGroup: UNIX_GROUP)
         UserProjectRole requesterUserProjectRole = DomainFactory.createUserProjectRole(
                 project: project,
-                projectRole: PI_PROJECT_ROLE,
+                projectRole: piProjectRole,
                 manageUsers: true
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
@@ -324,6 +344,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "addExternalUserToProject, create User if non is found for realName or email"() {
         given:
+        setupData()
+
         ProjectRole projectRole = DomainFactory.createProjectRole()
         String realName = "realName"
         String email = "email@dummy.de"
@@ -344,6 +366,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "addExternalUserToProject, throw exception when user is already connected to project"() {
         given:
+        setupData()
+
         String email = "email@dummy.de"
         ProjectRole projectRole = DomainFactory.createProjectRole()
         Project project = createProject()
@@ -368,6 +392,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "addExternalUserToProject, create UserProjectRole for new User"() {
         given:
+        setupData()
+
         ProjectRole projectRole = DomainFactory.createProjectRole()
         User user = DomainFactory.createUser(username: null)
         Project project = createProject()
@@ -386,6 +412,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "addExternalUserToProject, sends a mail when a user is added"() {
         given:
+        setupData()
+
         ProjectRole projectRole = DomainFactory.createProjectRole()
         User user = DomainFactory.createUser()
         Project project = createProject()
@@ -401,9 +429,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "notifyProjectAuthoritiesAndUser, uses the mails of each project authority and the affected user"() {
         given:
+        setupData()
+
         int numberOfRoles = 5
         int disabledRoles = 2
-        ProjectRole pi = PI_PROJECT_ROLE
+        ProjectRole pi = piProjectRole
         Project project = createProject()
 
         User userToAdd = DomainFactory.createUser()
@@ -436,12 +466,14 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "notifyProjectAuthoritiesAndUser, is unaffected by receivesNotification flag"() {
         given:
+        setupData()
+
         Project project = createProject()
 
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
                 user: DomainFactory.createUser(),
                 project: project,
-                projectRole: PI_PROJECT_ROLE,
+                projectRole: piProjectRole,
                 receivesNotifications: false,
         )
         User user = DomainFactory.createUser()
@@ -457,6 +489,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "notifyProjectAuthoritiesAndUser sends email with correct content"() {
         given:
+        setupData()
+
         User user = DomainFactory.createUser()
         Project project = createProject()
 
@@ -475,6 +509,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "requestToAddUserToUnixGroupIfRequired, only send notification when user is not already in group"() {
         given:
+        setupData()
+
         userProjectRoleService.ldapService = Mock(LdapService) {
             getGroupsOfUserByUsername(_) >> unixGroupsOfUser
         }
@@ -500,6 +536,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "requestToRemoveUserFromUnixGroupIfRequired, user is not in projects with shared unix groups or no others exist"() {
         given:
+        setupData()
+
         userProjectRoleService.ldapService = Mock(LdapService) {
             getGroupsOfUserByUsername(_) >> [unixGroup1]
         }
@@ -524,6 +562,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "requestToRemoveUserFromUnixGroupIfRequired, removed user has no remaining file access role in projects with shared unix group"() {
         given:
+        setupData()
+
         userProjectRoleService.ldapService = Mock(LdapService) {
             getGroupsOfUserByUsername(_) >> [UNIX_GROUP]
         }
@@ -550,6 +590,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "requestToRemoveUserFromUnixGroupIfRequired, file access role in disabled UserProjectRole"() {
         given:
+        setupData()
+
         userProjectRoleService.ldapService = Mock(LdapService) {
             getGroupsOfUserByUsername(_) >> [UNIX_GROUP]
         }
@@ -578,6 +620,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     @Unroll
     void "test #flag toggle function"() {
         given:
+        setupData()
+
         userProjectRoleService.ldapService = Mock(LdapService) {
             getGroupsOfUserByUsername(_) >> []
         }
@@ -608,6 +652,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "requestToRemoveUserFromUnixGroupIfRequired, removed user has file access role in project with same unix group"() {
         given:
+        setupData()
+
         userProjectRoleService.ldapService = Mock(LdapService) {
             getGroupsOfUserByUsername(_) >> [UNIX_GROUP]
         }
@@ -634,6 +680,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "requestToRemoveUserFromUnixGroupIfRequired, only notify when user is in unix group"() {
         given:
+        setupData()
+
         userProjectRoleService.ldapService = Mock(LdapService) {
             getGroupsOfUserByUsername(_) >> ldapResult
         }
@@ -658,6 +706,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "getEmailsOfToBeNotifiedProjectUsers, only return emails of users that receive notification and are enabled"() {
         given:
+        setupData()
+
         Project project = createProject()
         List<String> expectedEmails = []
         int numberOfUsers = 12
@@ -684,6 +734,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
     void "getEmailsOfToBeNotifiedProjectUsers, do not return email of disabled user"() {
         given:
+        setupData()
+
         Project project = createProject()
         DomainFactory.createUserProjectRole(
                 user: DomainFactory.createUser([
@@ -704,6 +756,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     @Unroll
     void "test getEmailsForNotification with receivesNotifications #receivesNotifications roleEnabled #roleEnabled userEnabled #userEnabled result #result"() {
         given:
+        setupData()
+
         String output
         Project project = createProject()
         DomainFactory.createUserProjectRole(
@@ -739,12 +793,15 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     @Unroll
     void "test getNumberOfValidUsersForProjects for given date"() {
         given:
+        setupData()
+
         Date baseDate = new Date(0, 0, 10)
         Date startDate = startDateOffset  == null ? null : baseDate.minus(startDateOffset)
         Date endDate = endDateOffset == null ? null : baseDate.minus(endDateOffset)
 
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole()
         userProjectRole.user.dateCreated = baseDate.minus(1)
+        userProjectRole.user.save(flush: true)
 
         when:
         int users = userProjectRoleService.getNumberOfValidUsersForProjects([userProjectRole.project], startDate, endDate)

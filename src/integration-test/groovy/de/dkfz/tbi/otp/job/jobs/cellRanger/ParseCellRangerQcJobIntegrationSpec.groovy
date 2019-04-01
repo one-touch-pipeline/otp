@@ -51,7 +51,7 @@ class ParseCellRangerQcJobIntegrationSpec extends Specification implements CellR
     SingleCellBamFile singleCellBamFile
     ParseCellRangerQcJob job
 
-    void setup() {
+    void setupData() {
         qaFile = temporaryFolder.newFile(SingleCellBamFile.METRICS_SUMMARY_CSV_FILE_NAME)
         createQaFileOnFileSystem(qaFile)
         singleCellBamFile = createBamFile()
@@ -67,6 +67,8 @@ class ParseCellRangerQcJobIntegrationSpec extends Specification implements CellR
 
     void "ParseCellRangerQcJob sets QcTrafficLight depending on exceeded thresholds"() {
         given:
+        setupData()
+
         createQaFileOnFileSystem(qaFile, ["Estimated Number of Cells": estimatedNumberOfCells])
         DomainFactory.createQcThreshold([
                 qcProperty1          : "estimatedNumberOfCells",
@@ -93,6 +95,9 @@ class ParseCellRangerQcJobIntegrationSpec extends Specification implements CellR
     }
 
     void "ParseCellRangerQcJob sets qualityAssessmentStatus of BamFile to FINISHED"() {
+        given:
+        setupData()
+
         when:
         job.execute()
 

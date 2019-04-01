@@ -56,7 +56,6 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         e.message.contains('assert sophiaInstance')
     }
 
-
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
@@ -117,7 +116,6 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         configService.clean()
     }
 
-
     @Unroll
     void "prepareAndReturnWorkflowSpecificParameter, return always empty String"() {
         expect:
@@ -129,7 +127,6 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
                 new SophiaInstance(),
         ]
     }
-
 
     void "validate, when all fine, set processing state to finished"() {
         given:
@@ -157,7 +154,6 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         configService.clean()
     }
 
-
     void "validate, when sophiaInstance is null, throw assert"() {
         when:
         new ExecuteRoddySophiaJob().validate(null)
@@ -166,7 +162,6 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         AssertionError e = thrown()
         e.message.contains('The input sophiaInstance must not be null. Expression')
     }
-
 
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
@@ -195,7 +190,6 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
         cleanup:
         configService.clean()
     }
-
 
     @Unroll
     void "validate, when file not exist, throw assert"() {

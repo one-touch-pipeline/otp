@@ -56,7 +56,6 @@ faq:${faq}
 phabricatorAlias:${phabricatorAlias}
 '''
 
-
     CreateNotificationTextService createNotificationTextService
 
     @Autowired
@@ -80,7 +79,6 @@ phabricatorAlias:${phabricatorAlias}
         [new Project()] | null       | ACTION || CONTROLLER
         [new Project()] | CONTROLLER | null   || ACTION
     }
-
 
     void "createOtpLinks, when input valid, return sorted URLs of the projects"() {
         given:
@@ -310,7 +308,6 @@ ${otrsTicketSeqCenterComment}
         } else {
             expectedSeqCenterComment = ""
         }
-
 
         String expected = """
 base notification

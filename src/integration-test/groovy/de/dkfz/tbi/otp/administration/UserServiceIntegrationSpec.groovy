@@ -35,12 +35,13 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
     UserService userService = new UserService()
 
-    def setup() {
+    def setupData() {
         createUserAndRoles()
     }
 
     void "test updateEmail valid input"() {
         given:
+        setupData()
         User user = User.findByUsername(TESTUSER)
         String newMail = "dummy@dummy.de"
 
@@ -55,6 +56,7 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     void "test updateEmail invalid input"() {
         given:
+        setupData()
         User user = User.findByUsername(TESTUSER)
 
         when:
@@ -68,6 +70,7 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     void "test updateAsperaAccount valid input"() {
         given:
+        setupData()
         User user = User.findByUsername(TESTUSER)
 
         when:
@@ -81,6 +84,7 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     void "test updateRealName valid input"() {
         given:
+        setupData()
         User user = User.findByUsername(TESTUSER)
 
         when:
@@ -95,6 +99,7 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     void "test updateRealName invalid input no name"() {
         given:
+        setupData()
         User user = User.findByUsername(TESTUSER)
 
         when:

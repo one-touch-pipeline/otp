@@ -41,7 +41,7 @@ class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJo
     @Autowired
     RunYapsaStartJob runYapsaStartJob
 
-    void setup() {
+    void setupData() {
         DomainFactory.createExomeSeqType()
     }
 

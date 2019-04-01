@@ -38,14 +38,14 @@ class CreateSpeciesServiceIntegrationSpec extends Specification implements UserA
     @Autowired
     CreateSpeciesService createSpeciesService
 
-    void setupDate() {
+    void setupData() {
         createUserAndRoles()
     }
 
     void "test createSpecies, all fine"() {
         given:
+        setupData()
         Errors errors
-        setupDate()
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -58,8 +58,8 @@ class CreateSpeciesServiceIntegrationSpec extends Specification implements UserA
 
     void "test createSpecies add expected errors, returns errors"() {
         given:
+        setupData()
         Errors errors
-        setupDate()
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {

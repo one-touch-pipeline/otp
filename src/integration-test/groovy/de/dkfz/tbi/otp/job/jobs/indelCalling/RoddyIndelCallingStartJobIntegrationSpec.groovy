@@ -42,7 +42,7 @@ class RoddyIndelCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalys
     @Autowired
     RoddyIndelCallingStartJob roddyIndelCallingStartJob
 
-    void setup() {
+    void setupData() {
         DomainFactory.createIndelSeqTypes()
     }
 

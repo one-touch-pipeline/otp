@@ -45,7 +45,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
     ProjectService projectService
 
-    void setup() {
+    void setupData() {
         createUserAndRoles()
         user = DomainFactory.createUser()
         project = DomainFactory.createProject()
@@ -60,6 +60,8 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
     @Unroll
     void "test evaluation of hasPermission in annotation (otpAccess = #otpAccess)"() {
         given:
+        setupData()
+
         userProjectRole.accessToOtp = otpAccess
 
         when:
@@ -78,6 +80,8 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
     void "pass annotation via userrole"() {
         given:
+        setupData()
+
         user = User.findByUsername(OPERATOR)
 
         when:
@@ -90,6 +94,9 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
     }
 
     void "hasPermission, aclPermissionEvaluator throws exceptions on unsupported permissions"() {
+        given:
+        setupData()
+
         when:
         permissionEvaluator.hasPermission(authentication, project, permission)
 
@@ -103,6 +110,9 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
     }
 
     void "hasPermission, string permission but unknown target domain results in false"() {
+        given:
+        setupData()
+
         when:
         boolean access = permissionEvaluator.hasPermission(authentication, DomainFactory.createSeqType(), 'MANAGE_USERS')
 
@@ -113,6 +123,8 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
     void "hasPermission, missing user for project role permissions returns false"() {
         given:
+        setupData()
+
         authentication = new UsernamePasswordAuthenticationToken(new Principal(username: "unknownUsername"), null, [])
 
         when:
@@ -124,6 +136,9 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
     }
 
     void "hasPermission, missing userProjectRole for project role permissions returns false"() {
+        given:
+        setupData()
+
         when:
         boolean checkResult = permissionEvaluator.hasPermission(authentication, DomainFactory.createProject(), "MANAGE_USERS")
 
@@ -133,6 +148,8 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
     void "hasPermission, disabled user for project role permissions returns false"() {
         given:
+        setupData()
+
         user.enabled = enabledUser
         userProjectRole.enabled = enabledUserProjectRole
 
@@ -152,6 +169,8 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
     void "hasPermission, test conditions for project role permissions"() {
         given:
+        setupData()
+
         userProjectRole.manageUsers = manageUsers
         userProjectRole.accessToOtp = accessToOtp
         userProjectRole.manageUsersAndDelegate = manageUsersAndDelegate
@@ -175,8 +194,11 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
     @Unroll
     void "hasPermission, different combinations for ADD_USER permission (access = #access)"() {
         given:
+        setupData()
+
         userProjectRole.manageUsersAndDelegate = manageUsersAndDelegate
         userProjectRole.manageUsers = manageUsers
+        userProjectRole.save(flush: true)
 
         when:
         boolean checkResult = permissionEvaluator.hasPermission(authentication, null, "ADD_USER")
@@ -195,6 +217,8 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
     @Unroll
     void "hasPermission, ADD_USER only considers enabled UserProjectRole entries (enabled=#enabled)"() {
         given:
+        setupData()
+
         userProjectRole.enabled = enabled
         3.times {
             DomainFactory.createUserProjectRole(user: userProjectRole.user, manageUsersAndDelegate: true, enabled: false)
@@ -211,6 +235,8 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
 
     void "hasPermission, ADD_USER takes all enabled UserProjectRoles of the user into account"() {
         given:
+        setupData()
+
         3.times {
             DomainFactory.createUserProjectRole(user: userProjectRole.user, manageUsersAndDelegate: true, enabled: true)
         }

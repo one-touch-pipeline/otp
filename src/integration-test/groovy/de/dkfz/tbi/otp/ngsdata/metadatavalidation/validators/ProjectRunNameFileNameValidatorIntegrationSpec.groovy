@@ -51,7 +51,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
                     "${DATAFILE}\t${RUN_ID}\t${PROJECT}\n"
 
 
-    void setup() {
+    void setupData() {
         Run run = DomainFactory.createRun(["name": RUN_ID])
         Project project = DomainFactory.createProject(["name": PROJECT])
         Individual individual = DomainFactory.createIndividual(["project": project])
@@ -61,10 +61,9 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
     }
 
     void 'validate, when file name does not exist for specified run and project (not using parseSampleIdentifier)'() {
-
         given:
+        setupData()
         DomainFactory.createSampleIdentifier(["name": SAMPLE_ID, "sample": dataFile.seqTrack.sample]).name
-
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.FASTQ_FILE}\t${MetaDataColumn.RUN_ID}\t${MetaDataColumn.PROJECT}\n" +
@@ -81,8 +80,8 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
     }
 
     void 'validate, when file name already exists for specified run and project (using parseSampleIdentifier)'() {
-
         given:
+        setupData()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA
         )
@@ -101,8 +100,8 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
     }
 
     void 'validate, when file name already exists for specified run and project (not using parseSampleIdentifier)'() {
-
         given:
+        setupData()
         DomainFactory.createSampleIdentifier(["name": PROJECT, "sample": dataFile.seqTrack.sample]).name
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(

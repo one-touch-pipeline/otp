@@ -55,7 +55,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
     SeqTrack seqTrack3
     Realm realm
 
-    def setup() {
+    void setupData() {
         createUserAndRoles()
         DomainFactory.createAllAlignableSeqTypes()
         realm = DomainFactory.createRealm()
@@ -93,6 +93,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput comment missing, fails"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, 3)
@@ -126,6 +128,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with different project for one entry, fails"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [project: seqTrack2.project.name], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, 3)
@@ -152,6 +156,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with different project for all entries, succeeds"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [project: seqTrack2.project.name], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [project: seqTrack2.project.name], 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, [project: seqTrack2.project.name], 3)
@@ -185,6 +191,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with empty pid for one entry, fails"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [pid: ""], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, 3)
@@ -212,6 +220,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with different already existing pid and non matching project for one entry, fails"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [pid: seqTrack2.individual.pid], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, 3)
@@ -239,6 +249,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with different already existing pid and non matching project for all entries, fails"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [pid: seqTrack2.individual.pid], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [pid: seqTrack2.individual.pid], 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, [pid: seqTrack2.individual.pid], 3)
@@ -278,6 +290,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with difateInput with new pids in different project for all entries, succeeds"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [pid: seqTrack2.individual.pid, project: seqTrack2.individual.project.name], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [pid: seqTrack2.individual.pid, project: seqTrack2.individual.project.name], 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, [pid: seqTrack2.individual.pid, project: seqTrack2.individual.project.name], 3)
@@ -311,6 +325,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with different new pid for one entry, succeeds"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [pid: "newTestPid"], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack1, 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, 3)
@@ -338,6 +354,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with new pid for all entries, succeeds"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [pid: "newTestPid"], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [pid: "newTestPid"], 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, [pid: "newTestPid"], 3)
@@ -371,6 +389,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with new pid in different project for one entry, succeeds"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [project: seqTrack2.project.name, pid: "newTestPid"], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, 3)
@@ -402,6 +422,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with new pid in different project for all entries, succeeds"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [project: seqTrack2.project.name, pid: "newTestPid"], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [project: seqTrack2.project.name, pid: "newTestPid"], 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, [project: seqTrack2.project.name, pid: "newTestPid"], 3)
@@ -435,6 +457,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with new pids in different project for all entries, succeeds"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [project: seqTrack2.project.name, pid: "newTestPid1"], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [project: seqTrack2.project.name, pid: "newTestPid2"], 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, [project: seqTrack2.project.name, pid: "newTestPid3"], 3)
@@ -468,6 +492,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput already existing pid into two different projects, fails"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [pid: seqTrack2.individual.pid, project: seqTrack2.project.name], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, [pid: seqTrack2.individual.pid, project: seqTrack3.project.name], 3)
@@ -505,6 +531,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with new pid for one entry and already existing entry for another entry, succeeds"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [pid: "newTestPid"], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [pid: DomainFactory.createIndividual(project: seqTrack11.project).pid], 2)
         Map data = [
@@ -534,6 +562,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with empty Pid, fails"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData = createSampleSwapData(seqTrack1, [pid: ""], 1)
         Map data = [
                 data      : [sampleSwapData],
@@ -557,6 +587,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with project changed to deep and invalid pid, shows warnings"() {
         given:
+        setupData()
+
         DomainFactory.createProject(name: 'DEEP', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.DEEP)
         SampleSwapData sampleSwapData = createSampleSwapData(seqTrack1, [project: "DEEP"], 1)
         Map data = [
@@ -581,6 +613,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with project deep and invalid pid, shows warnings"() {
         given:
+        setupData()
+
         seqTrack1.individual.project = DomainFactory.createProject(name: 'DEEP', sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.DEEP)
         seqTrack1.individual.pid = "41_Hf01_BlAd_CD_WGBS_S_1"
         SampleSwapData sampleSwapData = createSampleSwapData(seqTrack1, [pid: "invalidPid"], 1)
@@ -606,6 +640,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with project deep and valid pid, succeeds"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData = createSampleSwapData(seqTrack1, [project: "DEEP", pid: "41_Hf01_BlAd_CD"], 1)
         Map data = [
                 data      : [sampleSwapData],
@@ -625,6 +661,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with project hipo and invalid datafile name, fails"() {
         given:
+        setupData()
+
         File validFileName = temporaryFolder.newFile("test/linked/H059-ABCDEF_filename")
 
         seqTrack1.individual.project = DomainFactory.createProject(name: "hipo059", realm: realm)
@@ -657,6 +695,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with project hipo and valid datafile name, succeeds"() {
         given:
+        setupData()
+
         File invalidFileName = temporaryFolder.newFile("test/linked/invalid_filename")
 
         seqTrack1.individual.project = DomainFactory.createProject(name: "hipo059", realm: realm)
@@ -686,6 +726,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput antibody and antibodyTarget without seqType ChIP, fails"() {
         given:
+        setupData()
+
         seqTrack1.seqType = DomainFactory.createSeqType(name: "ChIP")
         AntibodyTarget antibodyTarget = DomainFactory.createAntibodyTarget()
         DomainFactory.createSeqType(displayName: "newSeqType")
@@ -727,6 +769,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with project ChIP no antibodyTarget, fails"() {
         given:
+        setupData()
+
         SeqType seqType = DomainFactory.createSeqType(name: "ChIP")
         DomainFactory.createAntibodyTarget(name: "antibodyTarget")
 
@@ -763,6 +807,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with project ChIP no libPrepKit, fails"() {
         given:
+        setupData()
+
         SeqType seqType = DomainFactory.createSeqType(name: "ChIP")
         AntibodyTarget antibodyTarget = DomainFactory.createAntibodyTarget()
         DomainFactory.createLibraryPreparationKit(name: "libPrepKit")
@@ -799,6 +845,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with SeqType EXOME, WGBS and RNA no libPrepKit, fails"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [seqType: SeqTypeService.exomePairedSeqType.displayName], 1)
         SampleSwapData sampleSwapData11 = createSampleSwapData(seqTrack11, [seqType: SeqTypeService.wholeGenomeBisulfitePairedSeqType.displayName], 2)
         SampleSwapData sampleSwapData12 = createSampleSwapData(seqTrack12, [seqType: SeqTypeService.rnaPairedSeqType.displayName], 3)
@@ -833,6 +881,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with not registered sampleType, seqType antiBodyTarget and libraryPreparationKit, fails"() {
         given:
+        setupData()
+
         SampleSwapData sampleSwapData = createSampleSwapData(seqTrack1, [sampleType: "invalid", seqType: "invalid", antibodyTarget: "invalid", libPrepKit: "invalid"], 1)
 
 
@@ -861,6 +911,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with new Individual SampleType combination, shows info"() {
         given:
+        setupData()
+
         Individual individual = DomainFactory.createIndividual(project: seqTrack1.project)
         SampleType sampleType = DomainFactory.createSampleType()
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [pid: individual.pid], 1)
@@ -890,6 +942,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with pids that have ExternallyProcessedMergedBamFiles registered to them, fails"() {
         given:
+        setupData()
+
         DomainFactory.createExternallyProcessedMergedBamFile(workPackage:
                 DomainFactory.createExternalMergingWorkPackage(sample: seqTrack1.sample))
 
@@ -916,6 +970,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput when datafile is linked and will be realigned, shows warning"() {
         given:
+        setupData()
+
         seqTrack1.seqType = SeqTypeService.getExomePairedSeqType()
         seqTrack1.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.OTP_ALIGNMENT
         seqTrack1.project.save(flush: true)
@@ -951,6 +1007,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput when datafile is linked and will not be realigned, fails"() {
         given:
+        setupData()
+
         seqTrack1.seqType = SeqTypeService.getExomePairedSeqType()
         DomainFactory.createPanCanPipeline()
         File initialFile = temporaryFolder.newFile("test/initial/linkedFileName")
@@ -983,6 +1041,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput when datafile is missing, fails"() {
         given:
+        setupData()
+
         File initialFile = temporaryFolder.newFile("test/initial/deletedFileName")
         DataFile dataFile1 = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: initialFile.name, initialDirectory: "${testFolder.absolutePath}/initial")
         Files.createSymbolicLink(new File("${testFolder.absolutePath}/linked/deletedFileName").toPath(), initialFile.toPath())
@@ -1017,6 +1077,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput when datafile is copied, succeeds"() {
         given:
+        setupData()
+
         File initialFile = temporaryFolder.newFile("test/initial/fileName")
         DataFile dataFile1 = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: initialFile.name, initialDirectory: "${testFolder.absolutePath}/initial")
         Files.copy(initialFile.toPath(), new File("${testFolder.absolutePath}/linked/fileName").toPath())
@@ -1045,6 +1107,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
 
     void "test validateInput with analysis, shows info"() {
         given:
+        setupData()
+
         DomainFactory.createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
         DomainFactory.createIndelCallingInstanceWithRoddyBamFiles([:], [seqTracks: [seqTrack1, seqTrack11]])
         SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [seqType: DomainFactory.createSeqType().displayName], 1)

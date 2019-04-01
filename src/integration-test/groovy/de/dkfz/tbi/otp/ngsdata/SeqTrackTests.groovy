@@ -33,11 +33,9 @@ import de.dkfz.tbi.TestCase
 @Integration
 class SeqTrackTests {
 
-
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqTypeWithoutSampleType
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqTypeWithSampleType
     SeqTrack seqTrack
-
 
     @Before
     void setup() {
@@ -70,8 +68,6 @@ class SeqTrackTests {
         assert referenceGenomeProjectSeqTypeWithSampleType.referenceGenome == referenceGenome
     }
 
-
-
     @Test
     void testLog() {
         seqTrack.log("Test")
@@ -96,6 +92,5 @@ class SeqTrackTests {
         shouldFail {
             assert seqTrack.logMessages.message[1] == "Test"
         }
-
     }
 }

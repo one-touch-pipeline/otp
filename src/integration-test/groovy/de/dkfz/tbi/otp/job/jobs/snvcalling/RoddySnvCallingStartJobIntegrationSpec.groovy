@@ -42,7 +42,7 @@ class RoddySnvCallingStartJobIntegrationSpec extends AbstractBamFilePairAnalysis
     @Autowired
     RoddySnvCallingStartJob roddySnvCallingStartJob
 
-    void setup() {
+    void setupData() {
         DomainFactory.createSnvSeqTypes()
     }
 

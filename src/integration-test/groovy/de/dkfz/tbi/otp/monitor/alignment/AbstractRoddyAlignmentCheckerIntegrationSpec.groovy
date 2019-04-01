@@ -41,7 +41,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
     List<SeqType> seqTypes
 
 
-    void setup() {
+    void setupData() {
         DomainFactory.createRoddyAlignableSeqTypes()
         checker = createRoddyAlignmentChecker()
         seqTypes = checker.seqTypes
@@ -126,6 +126,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
     void "seqTracksWithoutCorrespondingRoddyAlignmentConfig, when some SamplePairs have a Config and some not some not, return Project and SeqType of SamplePairs without Config"() {
         given:
+        setupData()
         List<SeqTrack> seqTracksWithoutConfig = createSeqTracks()
 
         List<SeqTrack> seqTracksCorrectConfig1 = createSeqTracksWithConfig()
@@ -176,6 +177,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
     void "mergingWorkPackageForSeqTracks, when for some SeqTracks a MergingWorkPackage exist and for some not, return list of SeqTracks without MergingWorkPackage and List of MergingWorkpackage"() {
         given:
+        setupData()
         List<MergingWorkPackage> expectedMergingWorkPackage = []
 
         List<SeqTrack> seqTracksWrongSeqType = createSeqTracks()
@@ -240,6 +242,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
     @Unroll
     void "roddyBamFileForMergingWorkPackage, when some mergingWorkPackages have BamFiles and some not, return the correct BamFiles (case showFinished=#showFinished, showWithdrawn=#showWithdrawn)"() {
         given:
+        setupData()
         int expectedSize = checker.seqTypes.size() * count
         List<RoddyBamFile> expected = []
 
@@ -276,6 +279,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
     void "handle, if SeqTracks given, then return finished RoddyBamFile and create output for the others cases"() {
         given:
+        setupData()
         String workflowName = checker.workflowName
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
         checker = Spy(checker.class)
@@ -416,6 +420,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
     void "handle, if no SeqTracks given, then return empty list and do not create output"() {
         given:
+        setupData()
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
         checker = Spy(checker.class)
 

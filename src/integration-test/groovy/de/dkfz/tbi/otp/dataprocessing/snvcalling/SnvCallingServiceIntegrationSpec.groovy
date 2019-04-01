@@ -46,7 +46,7 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
     SnvCallingService snvCallingService
 
-    def setup() {
+    void setupData() {
         def map = DomainFactory.createProcessableSamplePair()
 
         samplePair1 = map.samplePair
@@ -60,6 +60,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing when config has wrong #property"() {
         given:
+        setupData()
+
         if (property == "project") {
             roddyConfig1.project = DomainFactory.createProject(name: "otherProject", dirName: "tmp")
         } else {
@@ -76,6 +78,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
     void "samplePairForProcessing when config is obsolete"() {
         given:
+        setupData()
+
         roddyConfig1.obsoleteDate = new Date()
         assert roddyConfig1.save(flush: true)
 
@@ -85,6 +89,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
     void "samplePairForProcessing when the snvCallingInstance is already in progress"() {
         given:
+        setupData()
+
         DomainFactory.createRoddySnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
@@ -100,6 +106,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
     void "samplePairForProcessing when a snvCallingInstance already finished"() {
         given:
+        setupData()
+
         DomainFactory.createRoddySnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
@@ -115,6 +123,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
     void "samplePairForProcessing when other samplePair inProcess"() {
         given:
+        setupData()
+
         def map2 = DomainFactory.createProcessableSamplePair()
         SamplePair samplePair2 = map2.samplePair
 
@@ -135,6 +145,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing when bamFile#number does not contain all seqTracks"() {
         given:
+        setupData()
+
         if (number == 1) {
             DomainFactory.createSeqTrackWithDataFiles(bamFile1_1.mergingWorkPackage)
         } else {
@@ -153,6 +165,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing when no samplepair for bamFile#number exists"() {
         given:
+        setupData()
+
         MergingWorkPackage withSamplePair
         MergingWorkPackage withoutSamplePair
         if (number == 1) {
@@ -179,6 +193,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing when bamFile#number is still in progress"() {
         given:
+        setupData()
+
         AbstractMergedBamFile bamFileInProgress = (number == 1) ? bamFile1_1 : bamFile2_1
 
         bamFileInProgress.md5sum = null
@@ -196,6 +212,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing when for bamFile#number the coverage is too low"() {
         given:
+        setupData()
+
         AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1_1 : bamFile2_1
         problematicBamFile.coverage = COVERAGE_TOO_LOW
         assert problematicBamFile.save(flush: true)
@@ -211,6 +229,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing when for bamFile#number the number of lanes is too low"() {
         given:
+        setupData()
+
         AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1_1 : bamFile2_1
         ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(problematicBamFile.seqType)
         thresholds.numberOfLanes = 5
@@ -226,6 +246,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
     void "samplePairForProcessing when for both bam Files the number of lanes is too low"() {
         given:
+        setupData()
+
         ProcessingThresholds.findByProject(samplePair1.project).each {
             it.numberOfLanes = 5
             it.save(flush: true)
@@ -238,6 +260,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
     void "samplePairForProcessing when for both bam Files the coverage is too low"() {
         given:
+        setupData()
+
         [bamFile1_1, bamFile2_1].each {
             it.coverage = COVERAGE_TOO_LOW
             it.save(flush: true)
@@ -251,6 +275,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing when for bamFile#number no threshold exists"() {
         given:
+        setupData()
+
         Project otherProject = DomainFactory.createProject()
         AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1_1 : bamFile2_1
         ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(problematicBamFile.seqType)
@@ -268,6 +294,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing when for bamFile#number the processing threshold #property is null"() {
         given:
+        setupData()
+
         AbstractMergedBamFile bamFile = (number == 1) ? bamFile1_1 : bamFile2_1
         ProcessingThresholds thresholds = ProcessingThresholds.findBySeqType(bamFile.seqType)
         thresholds[property] = null
@@ -291,6 +319,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing when bamFile#number is withdrawn"() {
         given:
+        setupData()
+
         AbstractMergedBamFile problematicBamFile = (number == 1) ? bamFile1_1 : bamFile2_1
         problematicBamFile.withdrawn = true
         assert problematicBamFile.save(flush: true)
@@ -305,6 +335,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
     void "samplePairForProcessing when check if the order correct"() {
         given:
+        setupData()
+
         DomainFactory.createProcessableSamplePair()
 
         expect:
@@ -314,6 +346,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
     void "samplePairForProcessing ensure that FastTrack is processed first"() {
         given:
+        setupData()
+
         SamplePair samplePairFastTrack = DomainFactory.createProcessableSamplePair().samplePair
         Project project = samplePairFastTrack.project
         project.processingPriority = ProcessingPriority.FAST_TRACK.priority
@@ -325,6 +359,9 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
 
     void "samplePairForProcessing, make sure that min processing priority is taken into account"() {
+        given:
+        setupData()
+
         expect:
         null == snvCallingService.samplePairForProcessing(ProcessingPriority.FAST_TRACK)
     }
@@ -332,6 +369,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
     void "validateInputBamFiles, when all okay, return without exception"() {
         given:
+        setupData()
+
         RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(
                 instanceName: ARBITRARY_INSTANCE_NAME,
                 samplePair: samplePair1,
@@ -354,6 +393,8 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
     void "validateInputBamFiles, when path throw an exception, throw a new runtime exception"() {
         given:
+        setupData()
+
         RoddySnvCallingInstance instance = new RoddySnvCallingInstance([
                 sampleType1BamFile: new RoddyBamFile(),
                 sampleType2BamFile: new RoddyBamFile(),

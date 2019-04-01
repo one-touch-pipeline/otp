@@ -36,12 +36,14 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
     MergingCriteriaService mergingCriteriaService = new MergingCriteriaService()
 
-    def setup() {
+    void setupData() {
         createUserAndRoles()
     }
 
     def "test findMergingCriteria, no MergingCriteria exists"() {
         given:
+        setupData()
+
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
@@ -58,6 +60,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test findMergingCriteria, MergingCriteria exists"() {
         given:
+        setupData()
+
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(project: project, seqType: seqType)
@@ -70,6 +74,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test createOrUpdateMergingCriteria, no MergingCriteria exists"() {
         given:
+        setupData()
+
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
@@ -90,6 +96,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test createOrUpdateMergingCriteria, MergingCriteria exists"() {
         given:
+        setupData()
+
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(project: project, seqType: seqType)
@@ -110,6 +118,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test createOrUpdateMergingCriteria, no MergingCriteria exists, seqType Exome"() {
         given:
+        setupData()
+
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createExomeSeqType()
 
@@ -126,6 +136,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test removePlatformFromSeqPlatformGroup, group contains many seqPlatforms"() {
         given:
+        setupData()
+
         SeqPlatformGroup group = DomainFactory.createSeqPlatformGroup()
         SeqPlatform seqPlatform1 = DomainFactory.createSeqPlatform()
         SeqPlatform seqPlatform2 = DomainFactory.createSeqPlatform()
@@ -148,6 +160,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test removePlatformFromSeqPlatformGroup, group contains only one seqPlatform"() {
         given:
+        setupData()
+
         SeqPlatformGroup group = DomainFactory.createSeqPlatformGroup()
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         group.addToSeqPlatforms(seqPlatform)
@@ -168,6 +182,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test addPlatformToExistingSeqPlatformGroup"() {
         given:
+        setupData()
+
         SeqPlatformGroup group = DomainFactory.createSeqPlatformGroup()
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
 
@@ -184,6 +200,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test createNewGroupAndAddPlatform, mergingCriteria is null"() {
         given:
+        setupData()
+
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
 
         when:
@@ -199,6 +217,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test createNewGroupAndAddPlatform, mergingCriteria exists"() {
         given:
+        setupData()
+
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
                 useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
@@ -218,6 +238,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test deleteSeqPlatformGroup when no seqPlatform is left"() {
         given:
+        setupData()
+
         SeqPlatformGroup group = DomainFactory.createSeqPlatformGroup()
 
         when:
@@ -235,6 +257,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test deleteSeqPlatformGroup when seqPlatformGroup still contains seqPlatforms"() {
         given:
+        setupData()
+
         SeqPlatformGroup seqPlatformGroup = DomainFactory.createSeqPlatformGroup()
         SeqPlatform seqPlatform1 = DomainFactory.createSeqPlatform()
         SeqPlatform seqPlatform2 = DomainFactory.createSeqPlatform()
@@ -255,6 +279,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test copyDefaultToSpecific"() {
         given:
+        setupData()
+
         SeqPlatformGroup defaultGroup = DomainFactory.createSeqPlatformGroup()
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         defaultGroup.addToSeqPlatforms(seqPlatform)
@@ -274,6 +300,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test copyAllDefaultToSpecific"() {
         given:
+        setupData()
+
         SeqPlatformGroup defaultGroup = DomainFactory.createSeqPlatformGroup()
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         defaultGroup.addToSeqPlatforms(seqPlatform)
@@ -297,6 +325,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test findSeqPlatformGroupsForProjectAndSeqType"() {
         given:
+        setupData()
+
         DomainFactory.createSeqPlatformGroup()
         SeqPlatformGroup seqPlatformGroup = DomainFactory.createSeqPlatformGroupWithMergingCriteria()
         seqPlatformGroup.addToSeqPlatforms(DomainFactory.createSeqPlatform())
@@ -311,6 +341,8 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     def "test findDefaultSeqPlatformGroups"() {
         given:
+        setupData()
+
         DomainFactory.createSeqPlatformGroup()
         DomainFactory.createSeqPlatformGroupWithMergingCriteria()
         SeqPlatform platform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()

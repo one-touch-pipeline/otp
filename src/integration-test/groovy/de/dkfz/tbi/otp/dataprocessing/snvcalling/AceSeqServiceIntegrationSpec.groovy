@@ -40,7 +40,7 @@ class AceSeqServiceIntegrationSpec extends Specification {
 
     AceseqService aceseqService
 
-    def setup() {
+    void setupData() {
         def map = DomainFactory.createProcessableSamplePair()
 
         samplePair1 = map.samplePair
@@ -53,6 +53,7 @@ class AceSeqServiceIntegrationSpec extends Specification {
 
     void "samplePairForProcessing, for Aceseq pipeline, when sophia has not run, should not return SamplePair"() {
         given:
+        setupData()
         prepareSophiaForAceseqBase()
 
         expect:
@@ -61,6 +62,7 @@ class AceSeqServiceIntegrationSpec extends Specification {
 
     void "samplePairForProcessing, for Aceseq pipeline, when last sophia instance is running and not withdrawn and an older finish exist, should not return SamplePair"() {
         given:
+        setupData()
         prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: false], [processingState: AnalysisProcessingStates.IN_PROGRESS, withdrawn: false])
 
         expect:
@@ -69,16 +71,16 @@ class AceSeqServiceIntegrationSpec extends Specification {
 
     void "samplePairForProcessing, for Aceseq pipeline, when last sophia instance is running and withdrawn and an older finish exist, should return SamplePair"() {
         given:
+        setupData()
         prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: false], [processingState: AnalysisProcessingStates.IN_PROGRESS, withdrawn: true])
 
         expect:
         samplePair1 == aceseqService.samplePairForProcessing(ProcessingPriority.NORMAL)
     }
 
-
-
     void "samplePairForProcessing, for Aceseq pipeline, when all sophia instances are withdrawn, should not return SamplePair"() {
         given:
+        setupData()
         prepareSophiaForAceseq([processingState: AnalysisProcessingStates.FINISHED, withdrawn: true], [processingState: AnalysisProcessingStates.FINISHED, withdrawn: true])
 
         expect:
@@ -87,6 +89,7 @@ class AceSeqServiceIntegrationSpec extends Specification {
 
     void "samplePairForProcessing, for ACEseq pipeline, coverage is not high enough, should not return SamplePair"() {
         given:
+        setupData()
         prepareSophiaForAceseq([:], [:])
         DomainFactory.createProcessingOptionLazy([
                 name: ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
@@ -129,6 +132,4 @@ class AceSeqServiceIntegrationSpec extends Specification {
         DomainFactory.createSophiaInstance(samplePair1, defaultMap + propertiesSophia1)
         DomainFactory.createSophiaInstance(samplePair1, defaultMap + propertiesSophia2)
     }
-
-
 }

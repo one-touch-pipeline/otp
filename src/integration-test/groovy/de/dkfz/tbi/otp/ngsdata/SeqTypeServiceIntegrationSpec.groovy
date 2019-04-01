@@ -43,23 +43,16 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
 
     SeqTrack seqTrack
 
-    void setupSpec() {
-        alignableSeqTypes = DomainFactory.createAllAlignableSeqTypes()
-    }
-
-    void setup() {
+    void setupData() {
         createUserAndRoles()
+        alignableSeqTypes = DomainFactory.createAllAlignableSeqTypes()
         seqTrack = DomainFactory.createSeqTrack()
         addUserWithReadAccessToProject(User.findByUsername(USER), seqTrack.project)
     }
 
-    void cleanupSpec() {
-        alignableSeqTypes*.delete(flush: true)
-    }
-
-
     void "test testAlignableSeqTypesByProject with different users, when no seqType is connected to the project"() {
         given:
+        setupData()
         List<SeqType> seqTypes = []
 
         when:
@@ -79,6 +72,7 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test testAlignableSeqTypesByProject with different users, when one seqType is connected to the project"() {
         given:
+        setupData()
         List<SeqType> seqTypes = []
         DomainFactory.createSeqTrack(sample: seqTrack.sample)
         DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
@@ -101,6 +95,7 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test testAlignableSeqTypesByProject with different users, when two seqTypes are connected to the project"() {
         given:
+        setupData()
         List<SeqType> seqTypes = []
         DomainFactory.createSeqTrack(sample: seqTrack.sample)
         DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: alignableSeqTypes[0])
@@ -124,6 +119,9 @@ class SeqTypeServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test testAlignableSeqTypesByProject with user that has no access to the project, throws exception"()  {
+        given:
+        setupData()
+
         when:
         SpringSecurityUtils.doWithAuth(TESTUSER) {
             seqTypeService.alignableSeqTypesByProject(seqTrack.project)

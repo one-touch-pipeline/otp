@@ -67,12 +67,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     static final String FILE_NAME = "fileName"
     static final byte[] CONTENT = 0..3
 
-
     @Rule
     TemporaryFolder temporaryFolder
 
-
-    def setup() {
+    void setupData() {
         createUserAndRoles()
         createProject(name: 'testProject', nameInMetadataFiles: 'testProject2', dirName: 'testDir')
         createProject(name: 'testProject3', nameInMetadataFiles: null)
@@ -133,6 +131,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test createProject valid input"() {
         given:
+        setupData()
         String unixGroup = configService.getTestingGroup()
 
         when:
@@ -182,6 +181,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test createProject if directory is created"() {
         given:
+        setupData()
         String group = configService.getTestingGroup()
 
         when:
@@ -220,6 +220,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     @Unroll
     void "test createProject invalid input ('#name', '#dirName', '#nameInMetadataFiles')"() {
         given:
+        setupData()
         String group = configService.getTestingGroup()
 
         when:
@@ -260,6 +261,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test createProject invalid unix group"() {
         when:
+        setupData()
         ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
                 name: 'project',
                 dirName: 'dir',
@@ -286,6 +288,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test createProject with invalid dirAnalysis"() {
         given:
+        setupData()
         String group = configService.getTestingGroup()
 
         when:
@@ -314,6 +317,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test createProject valid input, when directory with wrong unix group already exists"() {
         given:
+        setupData()
         String group = configService.getTestingGroup()
         File projectDirectory = LsdfFilesService.getPath(
                 configService.getRootPath().absolutePath,
@@ -353,6 +357,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test createProject valid input, when directory with correct unix group already exists and project file, then do not create the directory and upload file"() {
         given:
+        setupData()
         File projectDirectory = LsdfFilesService.getPath(
                 configService.getRootPath().absolutePath,
                 "/dir",
@@ -400,6 +405,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test updateNameInMetadata valid input"() {
         when:
+        setupData()
         Project project = Project.findByName("testProject")
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateProjectField(name, "nameInMetadataFiles", project)
@@ -418,6 +424,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test updateNameInMetadata invalid input"() {
         when:
+        setupData()
         Project project = Project.findByName("testProject3")
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.updateProjectField(name, "nameInMetadataFiles", project)
@@ -436,6 +443,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test createProject invalid project category should fail"() {
         given:
+        setupData()
         String group = configService.getTestingGroup()
 
         when:
@@ -464,6 +472,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     @Unroll
     void "test updatePhabricatorAlias valid alias and valid user #username"() {
         given:
+        setupData()
         String phabricatorAlias = "some alias"
         Project project = Project.findByName("testProject")
         addUserWithReadAccessToProject(User.findByUsername(USER), project)
@@ -485,6 +494,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test updatePhabricatorAlias valid alias and invalide user"() {
         given:
+        setupData()
         String phabricatorAlias = "some alias"
         Project project = Project.findByName("testProject")
 
@@ -500,6 +510,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test updateCategory invalid project category should fail"() {
         given:
+        setupData()
         Project project = Project.findByName("testProject")
 
         when:
@@ -514,6 +525,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test updateCategory valid project category"() {
         given:
+        setupData()
         Project project = Project.findByName("testProject")
         ProjectCategory projectCategory = DomainFactory.createProjectCategory(name: 'valid category')
 
@@ -529,6 +541,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test updateAnalysisDirectory valid name"() {
         given:
+        setupData()
         String analysisDirectory = '/dirA'
         Project project = Project.findByName("testProject")
 
@@ -544,6 +557,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test updateProcessingPriority valid name"() {
         given:
+        setupData()
         Project project = Project.findByName("testProject")
 
         when:
@@ -558,6 +572,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test updateTumor valid name"() {
         given:
+        setupData()
         Project project = Project.findByName("testProject")
         TumorEntity tumorEntity = DomainFactory.createTumorEntity()
 
@@ -572,7 +587,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configureNoAlignmentDeciderProject"() {
-        setup:
+        given:
+        setupData()
         Project project = Project.findByName("testProjectAlignment")
 
         when:
@@ -586,7 +602,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configureDefaultOtpAlignmentDecider valid input"() {
-        setup:
+        given:
+        setupData()
         Project project = Project.findByName("testProjectAlignment")
         ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
 
@@ -603,7 +620,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configureDefaultOtpAlignmentDecider valid input, twice"() {
-        setup:
+        given:
+        setupData()
         Project project = Project.findByName("testProjectAlignment")
         ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
         ReferenceGenome referenceGenome2 = ReferenceGenome.findByName("testReferenceGenome2")
@@ -622,7 +640,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configureDefaultOtpAlignmentDecider invalid input"() {
-        setup:
+        given:
+        setupData()
         Project project = Project.findByName("testProjectAlignment")
         ReferenceGenome.findByName("testReferenceGenome")
 
@@ -637,7 +656,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configurePanCanAlignmentDeciderProject valid input"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
@@ -661,7 +681,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configurePanCanAlignmentDeciderProject valid input, twice"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
         PanCanAlignmentConfiguration configuration2 = createPanCanAlignmentConfiguration([
                 referenceGenome : "testReferenceGenome2",
@@ -688,7 +709,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configurePanCanAlignmentDeciderProject valid input, multiple SeqTypes"() {
-        setup:
+        given:
+        setupData()
         List<PanCanAlignmentConfiguration> configurations = DomainFactory.createPanCanAlignableSeqTypes().collect {
             createPanCanAlignmentConfiguration(seqType: it)
         }
@@ -709,7 +731,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configurePanCanAlignmentDeciderProject invalid referenceGenome input"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
         configuration.referenceGenome = 'invalidReferenceGenome'
 
@@ -724,7 +747,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configurePanCanAlignmentDeciderProject invalid pluginName input"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
                 pluginName: 'invalid/name'
         )
@@ -740,7 +764,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configurePanCanAlignmentDeciderProject invalid pluginVersion input"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
                 pluginVersion: 'invalid/version'
         )
@@ -757,7 +782,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     @Unroll
     void "test configurePanCanAlignmentDeciderProject invalid baseProjectConfig input"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
                 baseProjectConfig: baseProjectConfig
         )
@@ -778,7 +804,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configurePanCanAlignmentDeciderProject invalid statSizeFileName input"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
         configuration.statSizeFileName = 'nonExistingFile.tab'
 
@@ -793,7 +820,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configurePanCanAlignmentDeciderProject invalid alignment version input"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
                 bwaMemVersion: 'invalidBwa_memVersion',
         )
@@ -809,7 +837,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configurePanCanAlignmentDeciderProject invalid mergeTool input"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
                 mergeTool: 'invalidMergeTool',
         )
@@ -826,7 +855,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
 
     void "test configurePanCanAlignmentDeciderProject invalid sambamba version input"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
                 mergeTool: MergeConstants.MERGE_TOOL_SAMBAMBA,
                 sambambaVersion: 'invalidSambambaVersion',
@@ -844,7 +874,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     @Unroll
     void "test configurePanCanAlignmentDeciderProject phix reference genome require sambamba for merge"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
                 referenceGenome: createReferenceGenome(name: "referencegenome_${ProjectService.PHIX_INFIX}").name,
                 mergeTool: tool,
@@ -864,7 +895,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configurePanCanAlignmentDeciderProject invalid configVersion input"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration(
                 configVersion: 'invalid/Version',
         )
@@ -880,7 +912,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configurePanCanAlignmentDeciderProject to configureDefaultOtpAlignmentDecider"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
@@ -899,7 +932,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configurePanCanAlignmentDeciderProject to configureNoAlignmentDeciderProject"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
@@ -914,7 +948,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configureRnaAlignmentConfig valid input"() {
-        setup:
+        given:
+        setupData()
         RoddyConfiguration configuration = new RoddyConfiguration(
                 project: Project.findByName("testProjectAlignment"),
                 seqType: SeqTypeService.wholeGenomePairedSeqType,
@@ -949,7 +984,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     @Unroll
     void "test configureRnaAlignmentReferenceGenome valid input (mouseData = #mouseData)"() {
-        setup:
+        given:
+        setupData()
         RnaAlignmentReferenceGenomeConfiguration configuration = createRnaAlignmentConfiguration(
                 mouseData: mouseData
         )
@@ -983,6 +1019,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     @Unroll
     void "test configureRnaAlignmentReferenceGenome set general reference genome and deprecate = #deprecateConfigurations specific ones"() {
         given:
+        setupData()
         int configuredSampleTypes = 3
         Project project = createProject()
         SeqType seqType = createSeqType()
@@ -1027,7 +1064,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configureDefaultOtpAlignmentDecider to configurePanCanAlignmentDeciderProject"() {
-        setup:
+        given:
+        setupData()
         PanCanAlignmentConfiguration configuration = createPanCanAlignmentConfiguration()
 
         when:
@@ -1047,7 +1085,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test copyPanCanAlignmentXml valid input, no reference genome configured already"() {
-        setup:
+        given:
+        setupData()
         List<Project, SeqType, Project> setupOutput = createValidInputForCopyPanCanAlignmentXml()
         Project basedProject = setupOutput[0]
         SeqType seqType = setupOutput[1]
@@ -1063,7 +1102,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test copyPanCanAlignmentXml valid input, reference genome configured already"() {
-        setup:
+        given:
+        setupData()
         List setupOutput = createValidInputForCopyPanCanAlignmentXml()
         Project basedProject = setupOutput[0]
         SeqType seqType = setupOutput[1]
@@ -1137,7 +1177,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
 
     void "test configureDefaultOtpAlignmentDecider to configureNoAlignmentDeciderProject"() {
-        setup:
+        given:
+        setupData()
         Project project = Project.findByName("testProjectAlignment")
         ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
 
@@ -1155,7 +1196,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     @Unroll
     void "test configure #analysisName pipelineProject valid input"() {
-        setup:
+        given:
+        setupData()
         RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"()
         if (analysisName in ["Sophia", "Aceseq"]) {
             ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
@@ -1200,7 +1242,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     @Unroll
     void "test configure #analysisName pipelineProject valid input, twice"() {
-        setup:
+        given:
+        setupData()
         RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"()
         RoddyConfiguration configuration2 = "createRoddy${analysisName}Configuration"([
                 configVersion: 'v1_1',
@@ -1244,7 +1287,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     void "test configure Snv PipelineProject valid input, old otp snv config exist"() {
-        setup:
+        given:
+        setupData()
         SnvConfig configuration = DomainFactory.createSnvConfig([
                 project: Project.findByName("testProjectAlignment"),
                 seqType: SeqTypeService.exomePairedSeqType,
@@ -1282,7 +1326,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     @Unroll
     void "test configure #analysisName pipelineProject valid input, multiple SeqTypes"() {
-        setup:
+        given:
+        setupData()
         List<RoddyConfiguration> configurations = DomainFactory."create${analysisName}SeqTypes"().collect {
             "createRoddy${analysisName}Configuration"(seqType: it)
         }
@@ -1308,7 +1353,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     @Unroll
     void "test configure #analysisName PipelineProject invalid pluginName input"() {
-        setup:
+        given:
+        setupData()
         RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"(
                 pluginName: 'invalid/name'
         )
@@ -1332,7 +1378,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     @Unroll
     void "test configure #analysisName pipelineProject invalid pluginVersion input"() {
-        setup:
+        given:
+        setupData()
         RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"(
                 pluginVersion: 'invalid/version'
         )
@@ -1354,8 +1401,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ]
     }
 
+    @Unroll
     void "test configure #analysisName pipelineProject invalid configVersion input"() {
-        setup:
+        given:
+        setupData()
         RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"(
                 configVersion: 'invalid/Version',
         )
@@ -1379,7 +1428,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     @Unroll
     void "test configure #analysisName PipelineProject invalid baseProjectConfig input"() {
-        setup:
+        given:
+        setupData()
         RoddyConfiguration configuration = "createRoddy${analysisName}Configuration"(
                 baseProjectConfig: baseProjectConfig
         )
@@ -1405,6 +1455,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test createProjectInfo, succeeds"() {
         given:
+        setupData()
         Project project = createProject()
 
         when:
@@ -1416,6 +1467,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test createProjectInfo, with same fileName for different projects, succeeds"() {
         given:
+        setupData()
         Project project1 = createProject()
         Project project2 = createProject()
 
@@ -1430,6 +1482,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test createProjectInfo, with same fileName for same project, fails"() {
         given:
+        setupData()
         Project project = createProject()
 
         when:
@@ -1443,6 +1496,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test createProjectInfoAndUploadFile, succeeds"() {
         given:
+        setupData()
         Project project = createProject()
         MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
         mockMultipartFile.originalFilename = FILE_NAME
@@ -1462,6 +1516,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test copyprojectInfoToProjectFolder, succeeds"() {
         given:
+        setupData()
         Project project = createProject()
         byte[] projectInfoContent = []
         MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
@@ -1480,11 +1535,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test copyprojectInfoToProjectFolder, when no file exists, returns []"() {
         given:
+        setupData()
         Project project = createProject()
         byte[] projectInfoContent = []
         MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
         mockMultipartFile.originalFilename = FILE_NAME
-
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -1497,7 +1552,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
             projectInfoContent = projectService.getProjectInfoContent(CollectionUtils.exactlyOneElement(project.projectInfos))
         }
 
-
         then:
         projectInfoContent == [] as byte[]
     }
@@ -1505,6 +1559,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     @Unroll
     void "test getCountOfProjectsForSpecifiedPeriod for given date"() {
         given:
+        setupData()
         Date baseDate = new Date(0, 0, 10)
         Date startDate = startDateOffset  == null ? null : baseDate.minus(startDateOffset)
         Date endDate = endDateOffset == null ? null : baseDate.minus(endDateOffset)
@@ -1527,6 +1582,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test getSpecies with correct input, return correct output"() {
         given:
+        setupData()
         Species species = createSpecies()
         Species output
 
@@ -1539,6 +1595,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test getSpecies with wrong input, returns null"() {
         given:
+        setupData()
         Species species = createSpecies()
         Species output
 

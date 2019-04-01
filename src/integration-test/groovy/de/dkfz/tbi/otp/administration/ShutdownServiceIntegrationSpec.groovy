@@ -38,12 +38,13 @@ class ShutdownServiceIntegrationSpec extends Specification implements UserAndRol
     ShutdownService shutdownService = new ShutdownService()
     static final String REASON = 'reason'
 
-    void setup() {
+    void setupData() {
         createUserAndRoles()
     }
 
     void "test planShutdown valid input"() {
         given:
+        setupData()
         Errors errors
 
         when:
@@ -60,6 +61,7 @@ class ShutdownServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "test cancelShutdown, when planned"() {
         given:
+        setupData()
         Errors errors
 
         when:
@@ -76,6 +78,9 @@ class ShutdownServiceIntegrationSpec extends Specification implements UserAndRol
     }
 
     void "test cancelShutdown, when not planned"() {
+        given:
+        setupData()
+
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
             shutdownService.cancelShutdown()
@@ -87,6 +92,9 @@ class ShutdownServiceIntegrationSpec extends Specification implements UserAndRol
     }
 
     void "test destroy, when planned"() {
+        given:
+        setupData()
+
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
             shutdownService.planShutdown(REASON)
@@ -101,6 +109,9 @@ class ShutdownServiceIntegrationSpec extends Specification implements UserAndRol
     }
 
     void "test destroy, when not planned"() {
+        given:
+        setupData()
+
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
             shutdownService.destroy()

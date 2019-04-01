@@ -45,7 +45,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
     List<File> analysisSamplePairsDirectories
     List<SamplePair> samplePairs
 
-    void setup() {
+    void setupData() {
         samplePair = DomainFactory.createSamplePairWithProcessedMergedBamFiles()
         snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(
                 sampleType1BamFile  : samplePair.mergingWorkPackage1.bamFileInProjectFolder,
@@ -79,7 +79,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         ]
     }
 
-    void cleanup() {
+    void cleanupData() {
         analysisDeletionService = null
         snvCallingInstance = null
         indelCallingInstance = null
@@ -91,6 +91,8 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
 
     def "delete instance and then delete sample pairs without analysis instances from analysis deletion service with analysis instances finished for control tumor 1"() {
         given:
+        setupData()
+
         snvCallingInstance.processingState = AnalysisProcessingStates.FINISHED
         indelCallingInstance.processingState = AnalysisProcessingStates.FINISHED
         aceseqInstance.processingState = AnalysisProcessingStates.FINISHED
@@ -113,10 +115,15 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         IndelCallingInstance.list() == []
         AceseqInstance.list() == []
         SamplePair.list() == [samplePair2]
+
+        cleanup:
+        cleanupData()
     }
 
     def "delete instance and then delete sample pairs without analysis instances from analysis deletion service with analysis instances finished for control tumor 1 and control tumor 2"() {
         given:
+        setupData()
+
         snvCallingInstance.processingState = AnalysisProcessingStates.FINISHED
         indelCallingInstance.processingState = AnalysisProcessingStates.FINISHED
         aceseqInstance.processingState = AnalysisProcessingStates.FINISHED
@@ -165,5 +172,8 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         IndelCallingInstance.list() == []
         AceseqInstance.list() == []
         SamplePair.list() == []
+
+        cleanup:
+        cleanupData()
     }
 }

@@ -36,12 +36,13 @@ class SophiaServiceIntegrationSpec extends Specification {
 
     SophiaService sophiaService
 
-    def setup() {
+    void setupData() {
         DomainFactory.createAllAnalysableSeqTypes()
     }
 
     void "samplePairForProcessing, for Sophia pipeline, only PMBF available, should not return any bam file"() {
         given:
+        setupData()
 
         RoddyBamFile.list().each {
             it.withdrawn = true
@@ -56,12 +57,13 @@ class SophiaServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing, for Sophia pipeline, only EPMBF available with #property is #value, should not return any bam file"() {
         given:
+        setupData()
+
         RoddyBamFile.list().each {
             it.withdrawn = true
             assert it.save(flush: true)
         }
         DomainFactory.createSamplePairWithExternalProcessedMergedBamFiles(true, [(property): value])
-
 
         expect:
         !sophiaService.samplePairForProcessing(ProcessingPriority.NORMAL)
@@ -76,6 +78,8 @@ class SophiaServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing, for Sophia pipeline, only EPMBF available with #property is #value, should return new instance"() {
         given:
+        setupData()
+
         RoddyBamFile.list().each {
             it.withdrawn = true
             assert it.save(flush: true)
@@ -96,6 +100,4 @@ class SophiaServiceIntegrationSpec extends Specification {
         'maximumReadLength'  | 5
         'maximumReadLength'  | 200
     }
-
-
 }

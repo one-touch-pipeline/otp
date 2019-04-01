@@ -47,7 +47,7 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
     SophiaService sophiaService
     RunYapsaService runYapsaService
 
-    def setup() {
+    void setupData() {
         def map = DomainFactory.createProcessableSamplePair()
 
         samplePair1 = map.samplePair
@@ -62,6 +62,8 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing shouldn't find anything for wrong referenceGenome"() {
         given:
+        setupData()
+
         samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
         assert samplePair1.save(flush: true)
         Pipeline pipeline1 = pipeline()
@@ -100,6 +102,8 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing should not return a sample pair when qc of bam file is too bad"() {
         given:
+        setupData()
+
         samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
         if (processingStatus == "aceseqProcessingStatus") {
             samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED
@@ -147,6 +151,8 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
     @Unroll
     void "samplePairForProcessing should return a sample pair when qc of bam file is okay"() {
         given:
+        setupData()
+
         samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
         if (processingStatus == "aceseqProcessingStatus") {
             samplePair1.sophiaProcessingStatus = ProcessingStatus.NO_PROCESSING_NEEDED

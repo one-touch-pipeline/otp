@@ -49,7 +49,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements CellRang
     SingleCellBamFile singleCellBamFile
     File file
 
-    void setup() {
+    void setupData() {
         cellRangerService = new CellRangerService()
         cellRangerService.fileSystemService = new TestFileSystemService()
         singleCellBamFile = createBamFile()
@@ -59,6 +59,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements CellRang
 
     void "parseCellRangerQaStatistics, all values are parsed and stored in CellRangerQualityAssessment"() {
         given:
+        setupData()
         createQaFileOnFileSystem(file)
 
         when:
@@ -73,6 +74,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements CellRang
     @Unroll
     void "parseCellRangerQaStatistics, unparsable value #value cause an exception"() {
         given:
+        setupData()
         createQaFileOnFileSystem(file, [(key): value])
 
         when:
@@ -91,6 +93,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements CellRang
 
     void "parseCellRangerQaStatistics, missing columns cause an exception"() {
         given:
+        setupData()
         file = CreateFileHelper.createFile(
                 new File(temporaryFolder.newFolder(), "${HelperUtils.uniqueString}_metrics_summary.csv"),
                 "column1,column2\ncontent1,content2"

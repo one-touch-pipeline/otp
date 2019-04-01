@@ -58,8 +58,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
     TestConfigService configService
     String fileName
 
-    @Override
-    void setup() {
+    void setupData() {
         service = new LinkFilesToFinalDestinationService()
         service.remoteShellHelper = remoteShellHelper
         service.linkFileUtils = new LinkFileUtils()
@@ -84,6 +83,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
 
     void "test linkNewRnaResults"() {
         given:
+        setupData()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         when:
@@ -106,6 +106,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
 
     void "test cleanupOldRnaResults"() {
         given:
+        setupData()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         RnaRoddyBamFile roddyBamFile2 = createBamFile([workPackage: roddyBamFile.workPackage, config: roddyBamFile.config])
@@ -151,6 +152,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
 
     void "linkToFinalDestinationAndCleanupRna, when qcTrafficLightStatus is #QC_PASSED"() {
         given:
+        setupData()
         roddyBamFile = createBamFile([fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy() {
@@ -181,6 +183,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
 
     void "linkToFinalDestinationAndCleanupRna, when qcTrafficLightStatus is #BLOCKED"() {
         given:
+        setupData()
         roddyBamFile = createBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
                 qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,

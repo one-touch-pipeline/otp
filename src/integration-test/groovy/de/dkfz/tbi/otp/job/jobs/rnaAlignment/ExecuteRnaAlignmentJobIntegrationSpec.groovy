@@ -49,7 +49,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
     TemporaryFolder tmpDir = new TemporaryFolder()
     TestConfigService configService
 
-    void setup() {
+    void setupData() {
         configService = new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT)   : tmpDir.root.path,
                 (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path,
@@ -63,6 +63,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
 
     void "test prepareAndReturnWorkflowSpecificCValues no adapter sequence available"() {
         given:
+        setupData()
         RnaRoddyBamFile roddyBamFile = setUpForPrepareAndReturnWorkflowSpecificCValues()
         executeRnaAlignmentJob.fileSystemService = new TestFileSystemService()
 
@@ -76,6 +77,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
 
     void "test prepareAndReturnWorkflowSpecificCValues exactly one adapter sequence available"() {
         given:
+        setupData()
         RnaRoddyBamFile roddyBamFile = setUpForPrepareAndReturnWorkflowSpecificCValues()
         roddyBamFile.containedSeqTracks.each {
             LibraryPreparationKit libraryPreparationKit = it.libraryPreparationKit

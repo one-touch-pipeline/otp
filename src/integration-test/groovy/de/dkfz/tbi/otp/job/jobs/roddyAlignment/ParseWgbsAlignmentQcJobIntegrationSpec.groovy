@@ -64,7 +64,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
 
     RoddyBamFile roddyBamFile
 
-    void setup() {
+    void setupData() {
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
 
         qcTrafficLightService = new QcTrafficLightService()
@@ -92,6 +92,8 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
     @Unroll
     void "testExecute, no RoddyLibraryQa created when #seqTrackNumber SeqTracks have a common library name"() {
         given:
+        setupData()
+
         MergingWorkPackage workPackage = roddyBamFile.mergingWorkPackage
         while (roddyBamFile.getContainedSeqTracks().size() < seqTrackNumber) {
             SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, [
@@ -123,6 +125,9 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
     }
 
     void "testExecute, RoddyLibraryQa created when SeqTracks have different library names"() {
+        given:
+        setupData()
+
         String libraryName = "library14"
         MergingWorkPackage workPackage = roddyBamFile.mergingWorkPackage
         SeqTrack secondSeqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, [
@@ -156,6 +161,8 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
     @Unroll
     void "testExecute, libraryName=#libraryName does not throw exception"() {
         given:
+        setupData()
+
         SeqTrack seqTrack = CollectionUtils.exactlyOneElement(roddyBamFile.seqTracks)
         seqTrack.libraryName = libraryName
         seqTrack.normalizedLibraryName = libraryName

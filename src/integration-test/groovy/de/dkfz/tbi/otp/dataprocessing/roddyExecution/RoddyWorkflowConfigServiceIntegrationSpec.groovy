@@ -135,7 +135,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         return service
     }
 
-    void testImportProjectConfigFile_ProjectIsNull_ShouldFail() {
+    void "test importProjectConfigFile fails when project is null"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
@@ -149,7 +149,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         e.message.contains('The project is not allowed to be null')
     }
 
-    void testImportProjectConfigFile_SeqTypeIsNull_ShouldFail() {
+    void "test importProjectConfigFile fails when seqType is null"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
@@ -163,7 +163,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         e.message.contains('The seqType is not allowed to be null')
     }
 
-    void testImportProjectConfigFile_PipelineIsNull_ShouldFail() {
+    void "test importProjectConfigFile fails when pipeline is null"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()
         Project project = DomainFactory.createProject()
@@ -177,7 +177,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         e.message.contains('The pipeline is not allowed to be null')
     }
 
-    void testImportProjectConfigFile_PluginVersionToUseIsNull_ShouldFail() {
+    void "test importProjectConfigFile fails when pluginVersionToUse is null"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()
         Project project = DomainFactory.createProject()
@@ -192,7 +192,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         e.message.contains('The pluginVersionToUse is not allowed to be null')
     }
 
-    void testImportProjectConfigFile_ConfigFilePathIsNull_ShouldFail() {
+    void "test importProjectConfigFile fails when configFilePath is null"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()
         Project project = DomainFactory.createProject()
@@ -207,7 +207,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         e.message.contains('The configFilePath is not allowed to be null')
     }
 
-    void testImportProjectConfigFile_ConfigVersionIsBlank_ShouldFail() {
+    void "test importProjectConfigFile fails when configVersion is blank"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()
         Project project = DomainFactory.createProject()
@@ -222,7 +222,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         e.message.contains('The configVersion is not allowed to be null')
     }
 
-    void testImportProjectConfigFile_NoPreviousRoddyWorkflowConfigExists() {
+    void "test importProjectConfigFile when no previous RoddyWorkflowConfig exists"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()
         Project project = DomainFactory.createProject()
@@ -245,7 +245,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         roddyWorkflowConfig.individual == null
     }
 
-    void testImportProjectConfigFile_WithIndividual_NoPreviousRoddyWorkflowConfigExists() {
+    void "test importProjectConfigFile with individual when no previous RoddyWorkflowConfig exists"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()
         Project project = DomainFactory.createProject()
@@ -266,7 +266,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
     }
 
 
-    void testImportProjectConfigFile_PreviousRoddyWorkflowConfigExists() {
+    void "test importProjectConfigFile when previous RoddyWorkflowConfig exists"() {
         given:
         RoddyWorkflowConfigService service = createObjectsAndService()
         Project project = DomainFactory.createProject()

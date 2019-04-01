@@ -45,13 +45,14 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implem
 
     AbstractAnalysisResultsService abstractAnalysisResultsService
 
-    void setup() {
+    void setupData() {
         createUserAndRoles()
     }
 
     @Unroll
     void "getCallingInstancesForProject with #analysis Instance"() {
         given:
+        setupData()
         BamFilePairAnalysis analysisInstance = DomainFactory."create${analysis}InstanceWithRoddyBamFiles"()
         abstractAnalysisResultsService = service.newInstance()
         abstractAnalysisResultsService.projectService = [
@@ -77,6 +78,9 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implem
     }
 
     void "checkFile with no callingInstance"() {
+        given:
+        setupData()
+
         when:
         abstractAnalysisResultsService = Mock(AbstractAnalysisResultsService)
         File result
@@ -91,6 +95,8 @@ class AbstractAnalysisResultsServiceIntegrationSpec extends Specification implem
     @Unroll
     void "checkFile with #instance and no File"() {
         given:
+        setupData()
+
         abstractAnalysisResultsService = Mock(AbstractAnalysisResultsService)
         BamFilePairAnalysis analysisInstance = DomainFactory."create${analysis}InstanceWithRoddyBamFiles"()
         DomainFactory.createRealm()

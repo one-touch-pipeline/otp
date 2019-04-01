@@ -46,7 +46,7 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
     AceseqInstance instance
     AceseqQc aceseqQc
 
-    def setup() {
+    void setupData() {
         qcTrafficLightService = new QcTrafficLightService()
         qcTrafficLightService.commentService = new CommentService()
         qcTrafficLightService.commentService.springSecurityService = Mock(SpringSecurityService) {
@@ -72,6 +72,8 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
     @Unroll
     void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling (tcc = #tcc & ploidy = #ploidy --> #resultStatus)"() {
         given:
+        setupData()
+
         aceseqQc.tcc = tcc
         aceseqQc.ploidy = ploidy
 
@@ -93,6 +95,8 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
     @Unroll
     void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, use project specific (tcc = #tcc --> #resultStatus)"() {
         given:
+        setupData()
+
         aceseqQc.tcc = tcc
         aceseqQc.ploidy = 5
 
@@ -127,6 +131,8 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
     @Unroll
     void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, do not use project specific of other project (tcc = #tcc --> #resultStatus)"() {
         given:
+        setupData()
+
         aceseqQc.tcc = tcc
         aceseqQc.ploidy = 5
 
@@ -150,6 +156,8 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
     @Unroll
     void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, once blocked files do not get unblocked (tcc = #tcc & ploidy = #ploidy --> #resultStatus)"() {
         given:
+        setupData()
+
         aceseqQc.tcc = tcc
         aceseqQc.ploidy = ploidy
         AbstractMergedBamFile bamFile = instance.sampleType1BamFile
@@ -171,6 +179,8 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
 
     void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, NO_CHECK causes UNCHECKED regardless of thresholds"() {
         given:
+        setupData()
+
         [instance.sampleType1BamFile, instance.sampleType2BamFile].each {
             it.individual.project = createProject(qcThresholdHandling: QcThresholdHandling.NO_CHECK)
         }
@@ -189,6 +199,8 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
 
     void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, CHECK_AND_NOTIFY only causes AUTO_ACCEPTED if the threshold would fail"() {
         given:
+        setupData()
+
         [instance.sampleType1BamFile, instance.sampleType2BamFile].each {
             it.individual.project = createProject(qcThresholdHandling: QcThresholdHandling.CHECK_AND_NOTIFY)
         }

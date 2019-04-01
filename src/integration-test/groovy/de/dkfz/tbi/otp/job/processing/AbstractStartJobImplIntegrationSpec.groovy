@@ -39,7 +39,7 @@ class AbstractStartJobImplIntegrationSpec extends Specification {
     AbstractStartJobImpl job
     JobExecutionPlan jep
 
-    void setup() {
+    void setupData() {
         jep = DomainFactory.createJobExecutionPlan(enabled: true)
 
         job = [
@@ -58,6 +58,7 @@ class AbstractStartJobImplIntegrationSpec extends Specification {
 
     void "test getMinimumProcessingPriorityForOccupyingASlot, no JobExecutionPlan"() {
         given:
+        setupData()
         job = [
                 getJobExecutionPlan : { -> null },
         ] as AbstractStartJobImpl
@@ -71,6 +72,7 @@ class AbstractStartJobImplIntegrationSpec extends Specification {
 
     void "test getMinimumProcessingPriorityForOccupyingASlot, job system is disabled"() {
         given:
+        setupData()
         job.schedulerService = Mock(SchedulerService) {
             _ * isActive() >> false
         }
@@ -83,6 +85,7 @@ class AbstractStartJobImplIntegrationSpec extends Specification {
     @Unroll
     void "test getMinimumProcessingPriorityForOccupyingASlot, JobExecutionPlan obsoleted #obsoleted enabled #enabled"() {
         given:
+        setupData()
         jep.enabled = enabled
         jep.obsoleted = obsoleted
 
@@ -100,6 +103,7 @@ class AbstractStartJobImplIntegrationSpec extends Specification {
     @Unroll
     void "test getMinimumProcessingPriorityForOccupyingASlot with #runningProcesses running processes "() {
         given:
+        setupData()
         prepareTestGetMinimumProcessingPriorityForOccupyingASlot(runningProcesses)
 
         expect:

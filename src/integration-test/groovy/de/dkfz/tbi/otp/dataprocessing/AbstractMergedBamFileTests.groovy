@@ -49,7 +49,6 @@ class AbstractMergedBamFileTests {
         TestCase.assertValidateError(bamFile, "numberOfMergedLanes", "validator.invalid", 0)
     }
 
-
     @Test
     void testUpdateFileOperationStatus_ProcessedMergedBamFile() {
         ProcessedMergedBamFile mergedBamFile = DomainFactory.createProcessedMergedBamFile()

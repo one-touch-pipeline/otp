@@ -40,9 +40,7 @@ class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Specificat
 
     List<ChromosomeQualityAssessmentMerged> chromosomeQualityAssessmentMergedList
 
-
-
-    void setup() {
+    void setupData() {
         chromosomeQualityAssessmentMergedService = new ChromosomeQualityAssessmentMergedService()
 
         chromosomes = [
@@ -69,8 +67,10 @@ class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Specificat
         ]
     }
 
+    void "test qualityAssessmentMergedForSpecificChromosomes"() {
+        given:
+        setupData()
 
-    void testQualityAssessmentMergedForSpecificChromosomes() {
         List<ChromosomeQualityAssessmentMerged> expected = chromosomeQualityAssessmentMergedList
         List<ChromosomeQualityAssessmentMerged> result = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, qualityAssessmentMergedPasses)
 
@@ -78,8 +78,10 @@ class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Specificat
         expected as Set == result as Set
     }
 
+    void "test qualityAssessmentMergedForSpecificChromosomes with empty chromosome list"() {
+        given:
+        setupData()
 
-    void testQualityAssessmentMergedForSpecificChromosomes_emptyChromosomesList() {
         List<ChromosomeQualityAssessmentMerged> expected = []
         List<ChromosomeQualityAssessmentMerged> result = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes([], qualityAssessmentMergedPasses)
 
@@ -87,8 +89,10 @@ class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Specificat
         expected == result
     }
 
+    void "test qualityAssessmentMergedForSpecificChromosomes with empty qualityAssessmentMergedPasses list"() {
+        given:
+        setupData()
 
-    void testQualityAssessmentMergedForSpecificChromosomes_emptyQualityAssessmentMergedPassesList() {
         List<ChromosomeQualityAssessmentMerged> expected = []
         List<ChromosomeQualityAssessmentMerged> result = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, [])
 
@@ -96,8 +100,10 @@ class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Specificat
         expected == result
     }
 
+    void "test qualityAssessmentMergedForSpecificChromosomes when chromosome list is null"() {
+        given:
+        setupData()
 
-    void testQualityAssessmentMergedForSpecificChromosomes_ChromosomesListIsNull() {
         when:
         chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(null, qualityAssessmentMergedPasses)
 
@@ -105,8 +111,10 @@ class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Specificat
         thrown(IllegalArgumentException)
     }
 
+    void "test qualityAssessmentMergedForSpecificChromosomes when qualityAssessmentMergedPasses list is null"() {
+        given:
+        setupData()
 
-    void testQualityAssessmentMergedForSpecificChromosomes_QualityAssessmentMergedPassesListIsNull() {
         when:
         chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes, null)
 
@@ -114,8 +122,10 @@ class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Specificat
         thrown(IllegalArgumentException)
     }
 
+    void "test qualityAssessmentMergedForSpecificChromosomes when no qa available"() {
+        given:
+        setupData()
 
-    void testQualityAssessmentMergedForSpecificChromosomes_NoQaAvailable() {
         chromosomeQualityAssessmentMergedList*.delete([flush: true])
 
         List<ChromosomeQualityAssessmentMerged> expected = []

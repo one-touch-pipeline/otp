@@ -42,7 +42,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
     private static final String TITLE = "title"
     private static final String DESCRIPTION = "description"
 
-    void setup() {
+    void setupData() {
         createUserAndRoles()
     }
 
@@ -51,6 +51,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "test createDocumentType, valid input succeeds"() {
         given:
+        setupData()
         Errors errors
 
         when:
@@ -65,6 +66,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "test createDocumentType, invalid input fails"() {
         given:
+        setupData()
         Errors errors
 
         when:
@@ -87,6 +89,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "test createDocumentType, twice with same titles fails"() {
         given:
+        setupData()
         Errors errors
 
         when:
@@ -101,6 +104,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "test deleteDocument, no document for documentType succeeds"() {
         given:
+        setupData()
         Errors errors
         DocumentType documentType = DomainFactory.createDocumentType()
 
@@ -116,6 +120,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "test deleteDocument, one document for documentType succeeds"() {
         given:
+        setupData()
         Errors errors
         Document document = DomainFactory.createDocument()
 
@@ -131,6 +136,9 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
     }
 
     void "test deleteDocument, no documentType fails"() {
+        given:
+        setupData()
+
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
             service.deleteDocumentType(null)
@@ -142,6 +150,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "test updateDocument, not authenticated"() {
         given:
+        setupData()
         DocumentType documentType = DomainFactory.createDocumentType()
 
         when:
@@ -155,6 +164,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "test updateDocument, create new document"() {
         given:
+        setupData()
         DocumentType documentType = DomainFactory.createDocumentType()
         byte[] content = HelperUtils.getUniqueString().bytes
         Document.FormatType type = Document.FormatType.PDF
@@ -173,6 +183,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "test updateDocument, update existing document"() {
         given:
+        setupData()
         DocumentType documentType = DomainFactory.createDocumentType()
         DomainFactory.createDocument([
                 documentType: documentType,
@@ -194,6 +205,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "test listDocumentTypes, not authenticated"() {
         when:
+        setupData()
         SpringSecurityUtils.doWithAuth(USER) {
             service.listDocumentTypes()
         }
@@ -204,6 +216,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "test listDocumentTypes and listDocuments, none found"() {
         expect:
+        setupData()
         [] == SpringSecurityUtils.doWithAuth(ADMIN) {
             service.listDocumentTypes()
         }
@@ -212,6 +225,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "test listDocumentTypes and listDocuments, documentTypes and documents found"() {
         given:
+        setupData()
         Document document = DomainFactory.createDocument()
 
         expect:

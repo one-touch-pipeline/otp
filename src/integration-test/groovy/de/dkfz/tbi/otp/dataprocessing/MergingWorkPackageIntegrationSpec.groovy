@@ -73,7 +73,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
     }
 
     @Unroll
-    void "constraint for sample, when seqType is chip seq and  #text, then validate should not create errors"() {
+    void "constraint for sample, when seqType is chip seq and #text, then validate should not create errors"() {
         given:
         MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
                 seqType: DomainFactory.createChipSeqType()

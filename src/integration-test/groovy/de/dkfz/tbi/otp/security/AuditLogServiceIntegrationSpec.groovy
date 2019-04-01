@@ -34,17 +34,17 @@ import spock.lang.Specification
 class AuditLogServiceIntegrationSpec extends Specification implements UserAndRoles {
 
     AuditLogService auditLogService
-    SpringSecurityService springSecurityService
 
-    void setup() {
+    void setupData() {
         createUserAndRoles()
-        springSecurityService = new SpringSecurityService()
         auditLogService = new AuditLogService()
-        auditLogService.springSecurityService = springSecurityService
+        auditLogService.springSecurityService = new SpringSecurityService()
     }
 
     void "new ActionLogs only get a date and lose their time"() {
         given:
+        setupData()
+
         AuditLog actionLog = null
 
         when:
@@ -61,6 +61,8 @@ class AuditLogServiceIntegrationSpec extends Specification implements UserAndRol
 
     void "logAction uses the original user, even if switched to another one"() {
         given:
+        setupData()
+
         AuditLog actionLog = null
         User admin = User.findByUsername(ADMIN)
 

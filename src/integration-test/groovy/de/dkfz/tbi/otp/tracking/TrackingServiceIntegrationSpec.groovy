@@ -91,7 +91,7 @@ class TrackingServiceIntegrationSpec extends Specification {
             ],
     ]*.asImmutable().asImmutable()
 
-    void setup() {
+    void setupData() {
         // Overwrite the autowired service with a new instance for each test, so mocks do not have to be cleaned up
         trackingService = new TrackingService(
                 mailHelperService: mailHelperService,
@@ -126,6 +126,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "check that all analysis are provided in the list 'listPairAnalysis'"() {
         given:
+        setupData()
+
         List<OtrsTicket.ProcessingStep> analysisProcessingSteps = OtrsTicket.ProcessingStep.values() - [
                 OtrsTicket.ProcessingStep.INSTALLATION,
                 OtrsTicket.ProcessingStep.FASTQC,
@@ -140,6 +142,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     def 'test findAllOtrsTickets'() {
         given: "a handfull of tickets and linked and unlinked seqtracks"
+        setupData()
+
         TrackingService trackingService = new TrackingService()
         // one ticket, with two seqtracks
         OtrsTicket otrsTicket01 = DomainFactory.createOtrsTicket()
@@ -184,6 +188,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void 'processFinished calls setFinishedTimestampsAndNotify for the tickets of the passed SeqTracks'() {
         given: "tickets with (at least one) fastQC still in progress"
+        setupData()
+
         OtrsTicket ticketA = DomainFactory.createOtrsTicket()
         SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile(
                 [
@@ -226,6 +232,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void 'setFinishedTimestampsAndNotify, when final notification has already been sent, does nothing'() {
         given:
+        setupData()
+
         // Installation: finished timestamp set,     all done,     won't do more
         // FastQC:       finished timestamp not set, all done,     won't do more
         // Alignment:    finished timestamp not set, nothing done, won't do more
@@ -258,6 +266,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void 'setFinishedTimestampsAndNotify, when nothing just completed, does nothing'() {
         given:
+        setupData()
+
         // Installation: finished timestamp set,     all done,     won't do more
         // FastQC:       finished timestamp not set, partly done,  might do more
         // Alignment:    finished timestamp not set, nothing done, won't do more
@@ -291,6 +301,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void 'setFinishedTimestampsAndNotify, when something just completed and might do more, sends normal notification'() {
         given:
+        setupData()
+
         // Installation: finished timestamp not set, all done,     won't do more
         // FastQC:       finished timestamp not set, nothing done, might do more
         // Alignment:    finished timestamp not set, nothing done, won't do more
@@ -347,6 +359,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "setFinishedTimestampsAndNotify, when something just completed and won't do more, sends final notification"() {
         given:
+        setupData()
+
         // Installation: finished timestamp not set, all done,     won't do more
         // FastQC:       finished timestamp not set, all done,     won't do more
         // Alignment:    finished timestamp not set, partly done,  won't do more
@@ -433,6 +447,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "setFinishedTimestampsAndNotify, when alignment is finished but installation is not, don't send notification"() {
         given:
+        setupData()
+
         // Installation: finished timestamp not set, all done,     won't do more
         // FastQC:       finished timestamp not set, all done,     won't do more
         // Alignment:    finished timestamp not set, partly done,  won't do more
@@ -501,6 +517,8 @@ class TrackingServiceIntegrationSpec extends Specification {
     @Unroll
     void 'sendCustomerNotification sends expected notification'(int dataCase, boolean automaticNotification, OtrsTicket.ProcessingStep notificationStep, List<String> recipients, String subject) {
         given:
+        setupData()
+
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
                 project: DomainFactory.createProject(name: 'Project1'),
                 user: DomainFactory.createUser(email: EMAIL),
@@ -605,6 +623,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void 'sendCustomerNotification, with multiple projects, sends multiple notifications'() {
         given:
+        setupData()
+
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         ProcessingStatus status = new ProcessingStatus([1, 2].collect { int index ->
             UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
@@ -642,6 +662,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void 'sendCustomerNotification, with multiple projects, when non are finished, doesnt send emails'() {
         given:
+        setupData()
+
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         ProcessingStatus status = new ProcessingStatus([1, 2].collect { int index ->
             UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
@@ -680,12 +702,17 @@ class TrackingServiceIntegrationSpec extends Specification {
     }
 
     void "fillInMergingWorkPackageProcessingStatuses, no ST, does not crash"() {
+        given:
+        setupData()
+
         expect:
         trackingService.fillInMergingWorkPackageProcessingStatuses([]).empty
     }
 
     void "fillInMergingWorkPackageProcessingStatuses, 1 ST not alignable, returns NOTHING_DONE_WONT_DO"() {
         given:
+        setupData()
+
         SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile([:], [fileWithdrawn: true]))
         ProcessingStatus processingStatus = createProcessingStatus(seqTrackStatus)
 
@@ -702,6 +729,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "fillInMergingWorkPackageProcessingStatuses, 1 MWP ALL_DONE, returns ALL_DONE"() {
         given:
+        setupData()
+
         AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
         SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
 
@@ -719,6 +748,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "fillInMergingWorkPackageProcessingStatuses, 1 MWP NOTHING_DONE_MIGHT_DO, returns NOTHING_DONE_MIGHT_DO"() {
         given:
+        setupData()
+
         AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
         SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage))
 
@@ -736,6 +767,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "fillInMergingWorkPackageProcessingStatuses, 1 ST not alignable, rest merged, returns NOTHING_DONE_WONT_DO_MORE and ALL_DONE"() {
         given:
+        setupData()
+
         AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
         Set<SeqTrack> seqTracks = new HashSet<SeqTrack>(((MergingWorkPackage) (bamFile.workPackage)).seqTracks)
         SeqTrackProcessingStatus seqTrack1Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage, [:], [fileWithdrawn: true]))
@@ -761,6 +794,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "fillInMergingWorkPackageProcessingStatuses, no MWP, returns NOTHING_DONE_WONT_DO"() {
         given:
+        setupData()
+
         SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile())
         ProcessingStatus processingStatus = createProcessingStatus(seqTrackStatus)
 
@@ -777,6 +812,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "fillInMergingWorkPackageProcessingStatuses, 1 MWP in progress, returns NOTHING_DONE_MIGHT_DO"() {
         given:
+        setupData()
+
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile()
         SeqTrackProcessingStatus seqTrackStatus = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
 
@@ -794,6 +831,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "fillInMergingWorkPackageProcessingStatuses, 2 MergingProperties, 1 MWP ALL_DONE, returns PARTLY_DONE_WONT_DO_MORE"() {
         given:
+        setupData()
+
         AbstractMergedBamFile bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
         SeqTrackProcessingStatus seqTrack1Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
         SeqTrackProcessingStatus seqTrack2Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile())
@@ -816,6 +855,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "fillInMergingWorkPackageProcessingStatuses, 2 MergingProperties, 1 MWP in progress, returns NOTHING_DONE_MIGHT_DO"() {
         given:
+        setupData()
+
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile()
         SeqTrackProcessingStatus seqTrack1Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
         SeqTrackProcessingStatus seqTrack2Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile())
@@ -838,6 +879,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "fillInMergingWorkPackageProcessingStatuses, 2 MergingProperties, 1 MWP NOTHING_DONE_MIGHT_DO, 1 MWP ALL_DONE, returns PARTLY_DONE_MIGHT_DO_MORE"() {
         given:
+        setupData()
+
         AbstractMergedBamFile bamFile1 = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
         AbstractMergedBamFile bamFile2 = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
         SeqTrackProcessingStatus seqTrack1Status = createSeqTrackProcessingStatus(bamFile1.containedSeqTracks.first())
@@ -880,12 +923,17 @@ class TrackingServiceIntegrationSpec extends Specification {
     }
 
     void "fillInSamplePairStatuses, no MWP, does not crash"() {
+        given:
+        setupData()
+
         expect:
         trackingService.fillInSamplePairStatuses([], new SamplePairCreation())
     }
 
     void "fillInSamplePairStatuses, no SP, returns NOTHING_DONE_WONT_DO"() {
         given:
+        setupData()
+
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
                 DomainFactory.createMergingWorkPackage(), NOTHING_DONE_MIGHT_DO)
 
@@ -905,6 +953,8 @@ class TrackingServiceIntegrationSpec extends Specification {
     @Unroll("fillInSamplePairStatuses, #pairAnalysis.analysisType withdrawn, returns NOTHING_DONE_WONT_DO")
     void "fillInSamplePairStatuses, analysisInstance withdrawn, returns NOTHING_DONE_WONT_DO"() {
         given:
+        setupData()
+
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
@@ -932,6 +982,8 @@ class TrackingServiceIntegrationSpec extends Specification {
     @Unroll("fillInSamplePairStatuses, no #pairAnalysis.analysisType, bamFileInProjectFolder set, no samplePairForProcessing, returns NOTHING_DONE_WONT_DO")
     void "fillInSamplePairStatuses, no analysisInstance, bamFileInProjectFolder set, no samplePairForProcessing, returns NOTHING_DONE_WONT_DO"() {
         given:
+        setupData()
+
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"()
 
         [1, 2].each {
@@ -961,6 +1013,8 @@ class TrackingServiceIntegrationSpec extends Specification {
     @Unroll("fillInSamplePairStatuses, no #pairAnalysis.analysisType, bamFileInProjectFolder set, samplePairForProcessing exists, returns NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, no analysisInstance, bamFileInProjectFolder set, samplePairForProcessing exists, returns NOTHING_DONE_MIGHT_DO"() {
         given:
+        setupData()
+
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"([:], [coverage: 2], [coverage: 2])
         [1, 2].each {
             setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
@@ -1007,6 +1061,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "fillInSamplePairStatuses, no AI, bamFileInProjectFolder set, samplePairForProcessing exists, but Sophia is not finished yet, returns NOTHING_DONE_WONT_DO"() {
         given:
+        setupData()
+
         BamFilePairAnalysis analysisInstance = DomainFactory.createAceseqInstanceWithRoddyBamFiles([:], [coverage: 2], [coverage: 2])
         [1, 2].each {
             setBamFileInProjectFolder(analysisInstance."sampleType${it}BamFile")
@@ -1038,6 +1094,8 @@ class TrackingServiceIntegrationSpec extends Specification {
     @Unroll("fillInSamplePairStatuses, no #pairAnalysis.analysisType, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, no analysisInstance, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
         given:
+        setupData()
+
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"()
 
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
@@ -1063,6 +1121,8 @@ class TrackingServiceIntegrationSpec extends Specification {
     @Unroll("fillInSamplePairStatuses, 1 #pairAnalysis.analysisType FINISHED, bamFileInProjectFolder set, returns ALL_DONE")
     void "fillInSamplePairStatuses, 1 analysisInstance FINISHED, bamFileInProjectFolder set, returns ALL_DONE"() {
         given:
+        setupData()
+
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
@@ -1090,6 +1150,8 @@ class TrackingServiceIntegrationSpec extends Specification {
     @Unroll("fillInSamplePairStatuses, 1 #pairAnalysis.analysisType FINISHED, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, 1 analysisInstance FINISHED, bamFileInProjectFolder unset, returns NOTHING_DONE_MIGHT_DO"() {
         given:
+        setupData()
+
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         MergingWorkPackageProcessingStatus mwpStatus = createMergingWorkPackageProcessingStatus(
@@ -1114,6 +1176,8 @@ class TrackingServiceIntegrationSpec extends Specification {
     @Unroll("fillInSamplePairStatuses, 1 #pairAnalysis.analysisType not FINISHED, returns NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, 1 analysisInstance not FINISHED, returns NOTHING_DONE_MIGHT_DO"() {
         given:
+        setupData()
+
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"()
 
         [1, 2].each {
@@ -1142,6 +1206,8 @@ class TrackingServiceIntegrationSpec extends Specification {
     @Unroll("fillInSamplePairStatuses, with #pairAnalysis.analysisType 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO")
     void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 SP ALL_DONE, 1 MWP without SP, returns ALL_DONE and NOTHING_DONE_WONT_DO"() {
         given:
+        setupData()
+
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
@@ -1175,6 +1241,8 @@ class TrackingServiceIntegrationSpec extends Specification {
     @Unroll("fillInSamplePairStatuses, with #pairAnalysis.analysisType 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 MWP without SP, 1 MWP MIGHT_DO_MORE, returns NOTHING_DONE_WONT_DO and NOTHING_DONE_MIGHT_DO"() {
         given:
+        setupData()
+
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         MergingWorkPackageProcessingStatus mwp1Status = createMergingWorkPackageProcessingStatus(
@@ -1203,8 +1271,9 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     @Unroll("fillInSamplePairStatuses, with #pairAnalysis.analysisType 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO")
     void "fillInSamplePairStatuses, with analysisInstance 2 MWP, 1 SP ALL_DONE, 1 SP MIGHT_DO_MORE, returns ALL_DONE and NOTHING_DONE_MIGHT_DO"() {
-
         given:
+        setupData()
+
         BamFilePairAnalysis analysisInstance = DomainFactory."${pairAnalysis.createRoddyBamFile}"(processingState: AnalysisProcessingStates.FINISHED)
 
         [1, 2].each {
@@ -1254,6 +1323,9 @@ class TrackingServiceIntegrationSpec extends Specification {
     }
 
     void "assignOtrsTicketToRunSegment, no RunSegment for runSegementId, throws AssertionError "() {
+        given:
+        setupData()
+
         when:
         trackingService.assignOtrsTicketToRunSegment("", 1)
 
@@ -1264,6 +1336,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "assignOtrsTicketToRunSegment, new ticketNumber equals old ticketNumber, returns true"() {
         given:
+        setupData()
+
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345678')
         RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
 
@@ -1273,6 +1347,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "assignOtrsTicketToRunSegment, new ticketNumber does not pass custom validation, throws UserException"() {
         given:
+        setupData()
+
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345678')
         RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
 
@@ -1286,6 +1362,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "assignOtrsTicketToRunSegment, old OtrsTicket consists of several other RunSegements, throws UserException"() {
         given:
+        setupData()
+
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345678')
         RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
         DomainFactory.createRunSegment(otrsTicket: otrsTicket)
@@ -1300,6 +1378,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "assignOtrsTicketToRunSegment, new OtrsTicket final notification already sent, throws UserException"() {
         given:
+        setupData()
+
         OtrsTicket oldOtrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345678')
         RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: oldOtrsTicket)
         OtrsTicket newOtrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345679', finalNotificationSent: true)
@@ -1314,6 +1394,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "assignOtrsTicketToRunSegment, adjust ProcessingStatus of new OtrsTicket"() {
         given:
+        setupData()
+
         Date minDate = new Date().minus(1)
         Date maxDate = new Date().plus(1)
 
@@ -1367,6 +1449,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "fillInMergingWorkPackageProcessingStatuses, when a SeqTrack is added manually to an existing MergingWorkPackage, then find the MergingWorkPackage for this SeqTrack"() {
         given: "two seqtracks, with different merging properties, but manually combined in the same MergingWorkPackage"
+        setupData()
+
         // shared
         Sample sharedSample = DomainFactory.createSample()
         SeqType sharedSeqType = DomainFactory.createSeqType()
@@ -1411,6 +1495,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void "fillInMergingWorkPackageProcessingStatuses, when a SeqTrack is removed manually from an existing MergingWorkPackage, then do not find the MergingWorkPackage for this SeqTrack"() {
         given: "two seqtracks, with same merging properties, but one manually removed from the MergingWorkPackage"
+        setupData()
+
         // shared
         Sample sharedSample = DomainFactory.createSample()
         SeqType sharedSeqType = DomainFactory.createSeqType()
@@ -1467,6 +1553,8 @@ class TrackingServiceIntegrationSpec extends Specification {
 
     void 'sendOperatorNotification, when finalNotification is true and project.customFinalNotification is true and no Ilse, sends final notification with correct subject and to project list'() {
         given:
+        setupData()
+
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(project: DomainFactory.createProject(customFinalNotification: true))
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(

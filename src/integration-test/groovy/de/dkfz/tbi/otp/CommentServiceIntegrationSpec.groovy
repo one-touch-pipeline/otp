@@ -38,12 +38,13 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
 
     static final TEST_MESSAGE = "testMessage"
 
-    def setup() {
+    void setupData() {
         createUserAndRoles()
     }
 
     void "test saveComment with Project"() {
         given:
+        setupData()
         Commentable project = DomainFactory.createProject()
         Comment comment
 
@@ -60,6 +61,7 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test saveComment with Individual"() {
         given:
+        setupData()
         Commentable individual = DomainFactory.createIndividual()
         Comment comment
 
@@ -76,6 +78,7 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test saveComment with Datafile"() {
         given:
+        setupData()
         Commentable datafile = DomainFactory.createDataFile()
         Comment comment
 
@@ -92,6 +95,7 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test saveComment with Process"() {
         given:
+        setupData()
         Commentable process = DomainFactory.createProcess()
         Comment comment
 
@@ -108,6 +112,7 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
 
     void "test createOrUpdateComment with Process"() {
         given:
+        setupData()
         Commentable process = DomainFactory.createProcess()
 
         when:

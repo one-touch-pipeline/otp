@@ -33,7 +33,7 @@ class InformSampleIdentifierParserIntegrationSpec extends Specification {
     InformSampleIdentifierParser informSampleIdentifierParser = new InformSampleIdentifierParser()
 
 
-    def setup() {
+    void setupData() {
         Individual i123_456 = DomainFactory.createIndividual(pid: 'I123_456')
         Individual i654_321 = DomainFactory.createIndividual(pid: 'I654_321')
         Individual i124_456 = DomainFactory.createIndividual(pid: 'I124_456')
@@ -60,6 +60,7 @@ class InformSampleIdentifierParserIntegrationSpec extends Specification {
     @Unroll('INFORM identifier #input is parsed to PID #pid, sample type name #sampleTypeDbName and Full Sample Name #fullSampleName')
     void "test parse valid input"() {
         given:
+        setupData()
         DefaultParsedSampleIdentifier defaultParsedSampleIdentifier
         boolean validPid
 
@@ -94,6 +95,7 @@ class InformSampleIdentifierParserIntegrationSpec extends Specification {
     @Unroll
     void "test parse invalid input #input"() {
         given:
+        setupData()
         DefaultParsedSampleIdentifier defaultParsedSampleIdentifier
 
         when:
@@ -122,6 +124,7 @@ class InformSampleIdentifierParserIntegrationSpec extends Specification {
     @Unroll
     void "test parsePid invalid input #pid"() {
         given:
+        setupData()
         boolean validPid
 
         when:
@@ -141,6 +144,7 @@ class InformSampleIdentifierParserIntegrationSpec extends Specification {
     @Unroll
     void "test tryParseCellPosition is not implemented and always returns null"() {
         given:
+        setupData()
         String cellPosition
 
         when:

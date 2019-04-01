@@ -145,11 +145,13 @@ class SeqTrackServiceIntegrationSpec extends Specification {
 
         when: "asked for normal priority"
         SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL)
+
         then:
         result == importantSeqTrack
 
         when: "asked for high priority fastTrack"
         result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.FAST_TRACK)
+
         then:
         result == importantSeqTrack
     }

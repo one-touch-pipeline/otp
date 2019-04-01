@@ -42,7 +42,7 @@ class ImportProcessIntegrationSpec extends Specification {
     ExternallyProcessedMergedBamFile epmbf04
     ExternallyProcessedMergedBamFile epmbf05
 
-    def setup() {
+    void setupData() {
         importProcess01 = new ImportProcess()
         importProcess02 = new ImportProcess()
         importProcess03 = new ImportProcess()
@@ -55,6 +55,8 @@ class ImportProcessIntegrationSpec extends Specification {
 
     void "test validate duplicated set of externally processed merged bam files throws an exception"() {
         given:
+        setupData()
+
         Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles = [epmbf01, epmbf02, epmbf03]
         importProcess01.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles
         assert importProcess01.save(flush: true)
@@ -70,6 +72,8 @@ class ImportProcessIntegrationSpec extends Specification {
 
     void "test validate set of externally processed merged bam files partially overlapped by another one throwns an expection"() {
         given:
+        setupData()
+
         Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles01 = [epmbf01, epmbf02]
         Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles02 = [epmbf01, epmbf03]
         importProcess01.externallyProcessedMergedBamFiles = externallyProcessedMergedBamFiles01
@@ -86,6 +90,8 @@ class ImportProcessIntegrationSpec extends Specification {
 
     void "test validate two sets of externally processed merged bam files partially overlapped by another one throwns an expection"() {
         given:
+        setupData()
+
         Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles01 = [epmbf01, epmbf02]
         Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles02 = [epmbf03, epmbf04]
         Set<ExternallyProcessedMergedBamFile> externallyProcessedMergedBamFiles03 = [epmbf02, epmbf04, epmbf05]

@@ -64,12 +64,14 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     SeqType seqType
 
 
-    void setup() {
+    void setupData() {
         seqType = DomainFactory.createSeqType()
     }
 
     void "test amendClusterJob with values"() {
         given:
+        setupData()
+
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
 
         ClusterJob job = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
@@ -97,6 +99,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void "test amendClusterJob empty"() {
         given:
+        setupData()
+
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
 
         ClusterJob job = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
@@ -118,6 +122,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void "test completeClusterJob with values"() {
         given:
+        setupData()
+
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Europe/Berlin")
 
         ClusterJob clusterJob = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
@@ -172,6 +178,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void "test completeClusterJob empty"() {
         given:
+        setupData()
+
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Canada/Saskatchewan")
 
         ClusterJob clusterJob = createClusterJobWithRun(null, [seqType: seqType])[0] as ClusterJob
@@ -208,6 +216,9 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void "test convertFromJava8DurationToJodaDuration"() {
+        given:
+        setupData()
+
         expect:
         jo == clusterJobService.convertFromJava8DurationToJodaDuration(j8)
 
@@ -221,12 +232,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void "test convertFromJava8ZonedDateTimeToJodaDateTime with null"() {
+        given:
+        setupData()
+
         expect:
         null == clusterJobService.convertFromJava8ZonedDateTimeToJodaDateTime(null)
     }
 
     void "test convertFromJava8ZonedDateTimeToJodaDateTime with value"() {
         given:
+        setupData()
+
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.TIME_ZONE, type: null, value: "Australia/West")
 
         expect:
@@ -236,6 +252,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testFindWorkflowObjectByClusterJob() {
         given:
+        setupData()
+
         def (job, run) = createClusterJobWithRun()
 
         expect:
@@ -244,6 +262,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testFindAllClusterJobsToOtpJob_WhenDifferentProcessingSteps_ShouldReturnClusterJobsOfSameProcessingStepAndJobClass() {
         given:
+        setupData()
+
         ClusterJob job1 = createClusterJob()
 
         ClusterJob job2 = createClusterJob()
@@ -258,6 +278,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testFindAllClusterJobsToOtpJob_WhenDifferentJobClasses_ShouldReturnClusterJobsOfSameProcessingStepAndJobClass() {
         given:
+        setupData()
+
         String jobClass1 = "testClass1"
         String jobClass2 = "testClass2"
 
@@ -277,6 +299,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testGetBasesSum_WhenContainedSeqTracksContainBasesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfBases() {
         given:
+        setupData()
+
         def (job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
         DomainFactory.createSeqTrack([run: run, nBasePairs: 150L])
@@ -288,6 +312,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testGetBasesSum_WhenNoContainedSeqTracks_ShouldReturnNull() {
         given:
+        setupData()
+
         ClusterJob job = setupClusterJobsOfSameProcessingStepAndRun()[0] as ClusterJob
 
         expect:
@@ -296,6 +322,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testGetBasesSum_WhenContainedSeqTracksContainNoBases_ShouldReturnNull() {
         given:
+        setupData()
+
         def (job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
         DomainFactory.createSeqTrack([run: run])
@@ -306,6 +334,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testGetFileSizesSum_WhenContainedDataFilesContainFileSizesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfFileSizes() {
         given:
+        setupData()
+
         def (job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
         DomainFactory.createSeqTrackWithOneDataFile([run: run], [fileSize: 150L])
@@ -317,6 +347,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testGetFileSizesSum_WhenNoContainedDataFiles_ShouldReturnNull() {
         given:
+        setupData()
+
         ClusterJob job = setupClusterJobsOfSameProcessingStepAndRun()[0] as ClusterJob
 
         expect:
@@ -325,6 +357,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testGetReadsSum_WhenContainedSeqTracksContainBasesAndSeveralJobsBelongToOtpJob_ShouldReturnNormalizedSumOfReads() {
         given:
+        setupData()
+
         def (job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
         DomainFactory.createSeqTrackWithOneDataFile([run: run], [nReads: 150L])
@@ -336,6 +370,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testGetReadsSum_WhenNoContainedSeqTracks_ShouldReturnNull() {
         given:
+        setupData()
+
         ClusterJob job = setupClusterJobsOfSameProcessingStepAndRun()[0] as ClusterJob
 
         expect:
@@ -344,6 +380,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testGetReadsSum_WhenContainedSeqTracksContainNoBases_ShouldReturnNull() {
         given:
+        setupData()
+
         def (job, run) = setupClusterJobsOfSameProcessingStepAndRun()
 
         DomainFactory.createSeqTrack([run: run])
@@ -354,6 +392,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testIsXten_WhenSeqTrackProcessedWithXten_ShouldReturnTrue() {
         given:
+        setupData()
+
         SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq X Ten")
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup([seqPlatformModelLabel: seqPlatformModelLabel])
         def (job, run) = createClusterJobWithRun(DomainFactory.createRun(seqPlatform: seqPlatform))
@@ -365,6 +405,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void testIsXten_WhenSeqTrackNotProcessedWithXten_ShouldReturnFalse() {
         given:
+        setupData()
+
         SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq2500")
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup([seqPlatformModelLabel: seqPlatformModelLabel])
         def (job, run) = createClusterJobWithRun(DomainFactory.createRun(seqPlatform: seqPlatform))
@@ -376,6 +418,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_handleObviouslyFailedClusterJob_WhenElapsedWalltimeUnderDurationJobObviuoslyFailed_ShouldChangeExitStatusToFailed() {
         given:
+        setupData()
+
         ClusterJob job = createClusterJob([queued    : SDATE_DATETIME,
                                            started   : SDATE_DATETIME,
                                            ended     : SDATE_DATETIME.plusMillis(ClusterJobService.DURATION_JOB_OBVIOUSLY_FAILED.millis as int),
@@ -389,6 +433,9 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_handleObviouslyFailedClusterJob_WhenElapsedWalltimeOverDurationJobObviuoslyFailed_ShouldKeepExitStatusCompleted() {
+        given:
+        setupData()
+
         ClusterJob job = createClusterJob([queued    : SDATE_DATETIME,
                                            started   : SDATE_DATETIME,
                                            ended     : SDATE_DATETIME.plusMillis(ClusterJobService.DURATION_JOB_OBVIOUSLY_FAILED.millis + 1 as int),
@@ -402,12 +449,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findAllClusterJobsByDateBetween_WhenNoJobsFound_ShouldReturnEmptyList() {
+        given:
+        setupData()
+
         expect:
         [] == clusterJobService.findAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "", 0, 10, 'clusterJobId', 'asc')
     }
 
     void test_findAllClusterJobsByDateBetween_WhenJobIsOutOfTimeSpanToEarly_ShouldReturnEmptyList() {
         given:
+        setupData()
+
         createClusterJob([queued : SDATE_DATETIME.minusDays(1),
                           started: SDATE_DATETIME.minusDays(1),
                           ended  : SDATE_DATETIME.minusDays(1),
@@ -419,6 +471,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllClusterJobsByDateBetween_WhenJobIsOutOfTimeSpanToLate_ShouldReturnEmptyList() {
         given:
+        setupData()
+
         createClusterJob([queued : SDATE_DATETIME.plusDays(2),
                           started: SDATE_DATETIME.plusDays(2),
                           ended  : SDATE_DATETIME.plusDays(2),
@@ -430,6 +484,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs() {
         given:
+        setupData()
+
         ClusterJob job1 = createClusterJob([queued : SDATE_DATETIME,
                                             started: SDATE_DATETIME,
                                             ended  : EDATE_DATETIME,
@@ -446,6 +502,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs_PassingFilter() {
         given:
+        setupData()
+
         String filter = 'filter'
         ClusterJob job1 = createClusterJob([queued        : SDATE_DATETIME,
                                             started       : SDATE_DATETIME,
@@ -471,6 +529,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs_UsingPage() {
         given:
+        setupData()
+
         List<ClusterJob> jobs = (1..10).collect {
             createClusterJob([queued : SDATE_DATETIME,
                               started: SDATE_DATETIME,
@@ -484,6 +544,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs_SortedDesc() {
         given:
+        setupData()
+
         ClusterJob job1 = createClusterJob([queued : SDATE_DATETIME,
                                             started: SDATE_DATETIME,
                                             ended  : EDATE_DATETIME,
@@ -500,6 +562,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithJobs_SortedByName() {
         given:
+        setupData()
+
         ClusterJob job1 = createClusterJob([queued        : SDATE_DATETIME,
                                             started       : SDATE_DATETIME,
                                             ended         : EDATE_DATETIME,
@@ -523,12 +587,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_countAllClusterJobsByDateBetween_WhenNoJobsFound_ShouldReturnZero() {
+        given:
+        setupData()
+
         expect:
         0 == clusterJobService.countAllClusterJobsByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE, "")
     }
 
     void test_countAllClusterJobsByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnZero() {
         given:
+        setupData()
+
         createClusterJob([queued : SDATE_DATETIME.minusDays(1),
                           started: SDATE_DATETIME.minusDays(1),
                           ended  : SDATE_DATETIME.minusDays(1),
@@ -540,6 +609,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_countAllClusterJobsByDateBetween_WhenSeveralJobsAreFound_ShouldReturnTwo() {
         given:
+        setupData()
+
         createClusterJob([queued : SDATE_DATETIME,
                           started: SDATE_DATETIME,
                           ended  : EDATE_DATETIME,
@@ -556,6 +627,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_countAllClusterJobsByDateBetween_WhenSeveralJobsPassFilter_ShouldReturnTwo() {
         given:
+        setupData()
+
         String filter = 'filter'
         createClusterJob([queued        : SDATE_DATETIME,
                           started       : SDATE_DATETIME,
@@ -582,6 +655,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     @Unroll
     void "test getNumberOfClusterJobsForSpecifiedPeriodAndProjects for given date"() {
         given:
+        setupData()
+
         Date baseDate = new Date(0, 0, 10)
         Date startDate = startDateOffset  == null ? null : baseDate.minus(startDateOffset)
         Date endDate = endDateOffset == null ? null : baseDate.minus(endDateOffset)
@@ -604,12 +679,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findAllJobClassesByDateBetween_WhenNoJobsFound_ShouldReturnEmptyList() {
+        given:
+        setupData()
+
         expect:
         [] == clusterJobService.findAllJobClassesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findAllJobClassesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
         given:
+        setupData()
+
         createClusterJob([queued  : SDATE_DATETIME.minusDays(1),
                           started : SDATE_DATETIME.minusDays(1),
                           ended   : SDATE_DATETIME.minusDays(1),
@@ -622,6 +702,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllJobClassesByDateBetween_WhenSeveralJobClassesAreFound_ShouldReturnUniqueListWithJobClasses() {
         given:
+        setupData()
+
         createClusterJob([queued  : SDATE_DATETIME,
                           started : SDATE_DATETIME,
                           ended   : EDATE_DATETIME,
@@ -645,12 +727,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findAllExitCodesByDateBetween_WhenNoJobsFound_ShouldReturnEmptyList() {
+        given:
+        setupData()
+
         expect:
         [] == clusterJobService.findAllExitCodesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findAllExitCodesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
         given:
+        setupData()
+
         createClusterJob([queued  : SDATE_DATETIME.minusDays(1),
                           started : SDATE_DATETIME.minusDays(1),
                           ended   : SDATE_DATETIME.minusDays(1),
@@ -663,6 +750,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllExitCodesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithOccurancesPerExitCodes() {
         given:
+        setupData()
+
         createClusterJob([queued  : SDATE_DATETIME,
                           started : SDATE_DATETIME,
                           ended   : EDATE_DATETIME,
@@ -686,12 +775,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findAllExitStatusesByDateBetween_WhenNoJobsFound_ShouldReturnEmptyList() {
+        given:
+        setupData()
+
         expect:
         [] == clusterJobService.findAllExitStatusesByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findAllExitStatusesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
                           started   : SDATE_DATETIME.minusDays(1),
                           ended     : EDATE_DATETIME.minusDays(1),
@@ -704,6 +798,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllExitStatusesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithOccurancesPerExitStatuses() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME,
                           started   : SDATE_DATETIME,
                           ended     : EDATE_DATETIME,
@@ -735,12 +831,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findAllFailedByDateBetween_WhenNoJobsFound_ShouldReturnMapWithListInInitialState() {
+        given:
+        setupData()
+
         expect:
         [0] * 25 == clusterJobService.findAllFailedByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
 
     void test_findAllFailedByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithListInInitialState() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
                           started   : SDATE_DATETIME.minusDays(1),
                           ended     : SDATE_DATETIME.minusDays(1),
@@ -753,6 +854,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllFailedByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapWithListContainingOccurencesOfFailedJobsPerHour() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME,
                           started   : SDATE_DATETIME,
                           ended     : SDATE_DATETIME.plusMinutes(30),
@@ -777,6 +880,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllStatesByDateBetween_WhenNoJobsFound_ShouldReturnMapWithListInInitialState() {
         given:
+        setupData()
+
         Map statesMap = clusterJobService.findAllStatesByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE)
 
         expect:
@@ -787,6 +892,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllStatesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithListInInitialState() {
         given:
+        setupData()
+
         createClusterJob([queued : SDATE_DATETIME.minusDays(1),
                           started: SDATE_DATETIME.minusDays(1),
                           ended  : SDATE_DATETIME.minusDays(1),
@@ -802,6 +909,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllStatesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapWithListsContainingOccurencesOfStatesPerHour() {
         given:
+        setupData()
+
         createClusterJob([queued : SDATE_DATETIME,
                           started: SDATE_DATETIME,
                           ended  : SDATE_DATETIME,
@@ -821,12 +930,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findAllAvgCoreUsageByDateBetween_WhenNoJobsFound_ShouldReturnMapWithListInInitialState() {
+        given:
+        setupData()
+
         expect:
         [0] * 25 == clusterJobService.findAllAvgCoreUsageByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
 
     void test_findAllAvgCoreUsageByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithListInInitialState() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
                           started   : SDATE_DATETIME.minusDays(1),
                           ended     : SDATE_DATETIME.minusDays(1),
@@ -840,6 +954,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllAvgCoreUsageByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapWithListContainingCoreUsagePerHour() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME,
                           started   : SDATE_DATETIME,
                           ended     : SDATE_DATETIME.plusMinutes(30),
@@ -866,12 +982,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findAllMemoryUsageByDateBetween_WhenNoJobsFound_ShouldReturnMapWithDataListInInitialState() {
+        given:
+        setupData()
+
         expect:
         [0] * 25 == clusterJobService.findAllAvgCoreUsageByDateBetween(SDATE_LOCALDATE, SDATE_LOCALDATE).data
     }
 
     void test_findAllMemoryUsageByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithDataListInInitialState() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
                           started   : SDATE_DATETIME.minusDays(1),
                           ended     : SDATE_DATETIME.minusDays(1),
@@ -885,6 +1006,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllMemoryUsageByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapWithDataListContainingMemoryUsagePerHours() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME,
                           started   : SDATE_DATETIME,
                           ended     : SDATE_DATETIME.plusMinutes(30),
@@ -911,12 +1034,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findAllStatesTimeDistributionByDateBetween_WhenNoJobsFound_ShouldReturnMapInInitialState() {
+        given:
+        setupData()
+
         expect:
         [queue: [0, '0'], process: [0, '0']] == clusterJobService.findAllStatesTimeDistributionByDateBetween(SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findAllStatesTimeDistributionByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapInInitialState() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME.minusDays(3),
                           started   : EDATE_DATETIME.minusDays(2),
                           ended     : EDATE_DATETIME.minusDays(1),
@@ -930,6 +1058,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findAllStatesTimeDistributionByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapContainingPercentagesAndAbsoluteValuesOfStatesTimeDistribution() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME,
                           started   : SDATE_DATETIME.plusHours(12),
                           ended     : EDATE_DATETIME,
@@ -947,12 +1077,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findJobClassSpecificSeqTypesByDateBetween_WhenNoJobsFound_ShouldReturnEmptyList() {
+        given:
+        setupData()
+
         expect:
         [] == clusterJobService.findJobClassSpecificSeqTypesByDateBetween('jobClass1', SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findJobClassSpecificSeqTypesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
         given:
+        setupData()
+
         createClusterJob([queued  : SDATE_DATETIME.minusDays(1),
                           started : SDATE_DATETIME.minusDays(1),
                           ended   : EDATE_DATETIME.minusDays(1),
@@ -966,6 +1101,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassSpecificSeqTypesByDateBetween_WhenSeveralSeqTypesAreFound_ShouldReturnUniqueListWithSeqTypesByJobClass() {
         given:
+        setupData()
+
         SeqType seqType2 = DomainFactory.createSeqType(
                 dirName: 'testDir',
         )
@@ -996,12 +1133,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findJobClassAndSeqTypeSpecificExitCodesByDateBetween_WhenNoJobsFound_ShouldReturnEmptyList() {
+        given:
+        setupData()
+
         expect:
         [] == clusterJobService.findJobClassAndSeqTypeSpecificExitCodesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findJobClassAndSeqTypeSpecificExitCodesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
         given:
+        setupData()
+
         createClusterJob([queued  : SDATE_DATETIME.minusDays(1),
                           started : SDATE_DATETIME.minusDays(1),
                           ended   : SDATE_DATETIME.minusDays(1),
@@ -1015,6 +1157,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificExitCodesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithOccurencesOfExitCodesByJobClassAndSeqType() {
         given:
+        setupData()
+
         createClusterJob([queued  : SDATE_DATETIME,
                           started : SDATE_DATETIME,
                           ended   : EDATE_DATETIME,
@@ -1044,12 +1188,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findJobClassAndSeqTypeSpecificExitStatusesByDateBetween_WhenNoJobsFound_ShouldReturnEmptyList() {
+        given:
+        setupData()
+
         expect:
         [] == clusterJobService.findJobClassAndSeqTypeSpecificExitStatusesByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findJobClassAndSeqTypeSpecificExitStatusesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnEmptyList() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
                           started   : SDATE_DATETIME.minusDays(1),
                           ended     : SDATE_DATETIME.minusDays(1),
@@ -1064,6 +1213,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificExitStatusesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnListWithOccurancesOfExitStatussesByJobClassAndSeqType() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME,
                           started   : SDATE_DATETIME,
                           ended     : EDATE_DATETIME,
@@ -1101,6 +1252,9 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findJobClassAndSeqTypeSpecificStatesByDateBetween_WhenNoJobsFound_ShouldReturnMapWithDataListsInInitialState() {
+        given:
+        setupData()
+
         expect:
         [
                 'queued': [0] * 25,
@@ -1111,6 +1265,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificStatesByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnMapWithDataListsInInitialState() {
         given:
+        setupData()
+
         createClusterJob([queued : SDATE_DATETIME.minusDays(1),
                           started: SDATE_DATETIME.minusDays(1),
                           ended  : SDATE_DATETIME.minusDays(1),
@@ -1126,6 +1282,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificStatesByDateBetween_ShouldReturnMapWithDataListsContainingOccurencesOfStatesPerHour() {
         given:
+        setupData()
+
         createClusterJob([queued  : SDATE_DATETIME,
                           started : SDATE_DATETIME,
                           ended   : SDATE_DATETIME,
@@ -1150,6 +1308,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificWalltimesByDateBetween_WhenNoJobsFound_ShouldReturnMapInInitialState() {
         given:
+        setupData()
+
         Map walltimeMap = clusterJobService.findJobClassAndSeqTypeSpecificWalltimesByDateBetween('jobClass', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
 
         expect:
@@ -1159,6 +1319,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificWalltimesByDateBetween_WhenJobIstOutOfTimeSpan_ShouldReturnMapInInitialState() {
         given:
+        setupData()
+
         createClusterJob([queued           : SDATE_DATETIME.minusDays(1),
                           started          : SDATE_DATETIME.minusDays(1).plusHours(12),
                           ended            : SDATE_DATETIME.minusDays(1),
@@ -1177,6 +1339,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificWalltimesByDateBetween_WhenSeveralJobsAreFound_ShouldReturnMapContainingMaximumWalltimeAndWalltimesPerHour() {
         given:
+        setupData()
+
         ClusterJob job1 = createClusterJob([queued    : SDATE_DATETIME,
                                             started   : SDATE_DATETIME.plusHours(12),
                                             ended     : EDATE_DATETIME,
@@ -1205,12 +1369,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween_WhenNoJobsFound_ShouldReturnNullValue() {
+        given:
+        setupData()
+
         expect:
         0 == clusterJobService.findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnNullValue() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
                           started   : SDATE_DATETIME.minusDays(1),
                           ended     : SDATE_DATETIME.minusDays(1),
@@ -1226,6 +1395,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificAvgCoreUsageByDateBetween_WhenSeveralJobsAreFound_ShouldReturnAverageCoreUsage() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME,
                           started   : SDATE_DATETIME.plusDays(1),
                           ended     : EDATE_DATETIME.plusDays(1),
@@ -1249,12 +1420,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween_WhenNoJobsFound_ShouldReturnNullValue() {
+        given:
+        setupData()
+
         expect:
         0 == clusterJobService.findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween('jobClass1', seqType, SDATE_LOCALDATE, EDATE_LOCALDATE)
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween_WhenNoJobIsOutOfTimeSpan_ShouldReturnNullValue() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME.minusDays(1),
                           started   : SDATE_DATETIME.minusDays(1),
                           ended     : SDATE_DATETIME.minusDays(1),
@@ -1270,6 +1446,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificAvgMemoryByDateBetween_WhenSeveralJobsAreFound_ShouldReturnAverageMemoryUsage() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME,
                           started   : SDATE_DATETIME.plusDays(1),
                           ended     : EDATE_DATETIME.plusDays(1),
@@ -1293,6 +1471,9 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenNoJobsFound_ShouldReturnNullValues() {
+        given:
+        setupData()
+
         expect:
         [
                 'avgQueue': 0,
@@ -1302,6 +1483,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenJobIsOutOfTimeSpan_ShouldReturnNullValues() {
         given:
+        setupData()
+
         createClusterJob([
                 queued: SDATE_DATETIME.minusDays(1),
                 started: SDATE_DATETIME.minusDays(1),
@@ -1317,6 +1500,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenSeveralJobsAreFound_ShouldReturnAverageStatesTimeDistribution() {
         given:
+        setupData()
+
         createClusterJob([queued    : SDATE_DATETIME,
                           started   : SDATE_DATETIME.plusHours(12),
                           ended     : EDATE_DATETIME,
@@ -1344,6 +1529,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificAvgStatesTimeDistributionByDateBetween_WhenBasesToBeNormalized_ShouldReturnAverageStatesTimeDistributionNormalizedToBases() {
         given:
+        setupData()
+
         Long bases = 10
         Long basesToBeNormalized = 5
 
@@ -1364,6 +1551,9 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findJobClassAndSeqTypeSpecificCoverages_WhenNoJobsFound_ShouldReturnNullValues() {
+        given:
+        setupData()
+
         expect:
         [
                 "minCov": null,
@@ -1375,6 +1565,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificCoverages_WhenJobIsOutOfTimeSpan_ShouldReturnNullValues() {
         given:
+        setupData()
+
         createClusterJob([
                 queued: SDATE_DATETIME.minusDays(1),
                 started: SDATE_DATETIME.minusDays(1),
@@ -1396,6 +1588,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificCoverages_WhenOddNumberOfJobsAreFound_ShouldReturnCoverageStatistics() {
         given:
+        setupData()
+
         createClusterJobsWithBasesInList([1, 9, 10, 80, 100], seqType)
 
         expect:
@@ -1409,6 +1603,8 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
 
     void test_findJobClassAndSeqTypeSpecificCoverages_WhenEvenNumberOfJobsAreFound_ShouldReturnCoverageStatistics() {
         given:
+        setupData()
+
         createClusterJobsWithBasesInList([1, 5, 9, 25], seqType)
 
         expect:
@@ -1421,12 +1617,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_findJobSpecificStatesTimeDistributionByJobId_WhenNoJobIsFound_ShouldReturnNull() {
+        given:
+        setupData()
+
         expect:
         null == clusterJobService.findJobSpecificStatesTimeDistributionByJobId(0)
     }
 
     void test_findJobSpecificStatesTimeDistributionByJobId_WhenJobIsFound_ReturnStatesTimeDistribution() {
         given:
+        setupData()
+
         ClusterJob job1 = createClusterJob([queued : SDATE_DATETIME,
                                             started: SDATE_DATETIME.plusHours(18),
                                             ended  : EDATE_DATETIME,
@@ -1446,12 +1647,17 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
     }
 
     void test_getLatestJobDate_WhenNoJobsFound_ShouldReturnNull() {
+        given:
+        setupData()
+
         expect:
         null == clusterJobService.getLatestJobDate()
     }
 
     void test_getLatestJobDate_WhenSeveralJobsAreFound_ShouldReturnLatestJobDate() {
         given:
+        setupData()
+
         createClusterJob([queued: SDATE_DATETIME])
         createClusterJob([queued: SDATE_DATETIME.plusDays(1)])
         createClusterJob([queued: SDATE_DATETIME.plusDays(3)])
