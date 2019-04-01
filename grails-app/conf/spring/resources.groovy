@@ -27,6 +27,7 @@ import org.springframework.security.access.expression.method.DefaultMethodSecuri
 import org.springframework.security.acls.AclPermissionEvaluator
 
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.utils.NumberConverter
 
 beans = {
     // include Spring Beans with @Component annotation
@@ -77,4 +78,19 @@ beans = {
 
     // Bean for handling logouts with the Dicom audit logger
     dicomAuditLogoutHandler(DicomAuditLogoutHandler)
+
+    // don't use the default locale specific value converter
+    [
+            Short, Short.TYPE,
+            Integer, Integer.TYPE,
+            Long, Long.TYPE,
+            Float, Float.TYPE,
+            Double, Double.TYPE,
+            BigInteger,
+            BigDecimal,
+    ].each { numberType ->
+        "defaultGrails${numberType.simpleName}Converter"(NumberConverter) {
+            targetType = numberType
+        }
+    }
 }

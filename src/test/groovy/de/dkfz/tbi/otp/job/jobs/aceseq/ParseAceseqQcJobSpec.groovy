@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.NumberConverter
 
 class ParseAceseqQcJobSpec extends Specification implements DataTest {
 
@@ -71,6 +72,26 @@ class ParseAceseqQcJobSpec extends Specification implements DataTest {
             SeqType,
             SoftwareTool,
     ]}
+
+    // copied form resources.groovy
+    // using loadExternalBeans() would be preferable but doesn't work
+    Closure doWithSpring() {
+        { ->
+            [
+                    Short, Short.TYPE,
+                    Integer, Integer.TYPE,
+                    Long, Long.TYPE,
+                    Float, Float.TYPE,
+                    Double, Double.TYPE,
+                    BigInteger,
+                    BigDecimal,
+            ].each { numberType ->
+                "defaultGrails${numberType.simpleName}Converter"(NumberConverter) {
+                    targetType = numberType
+                }
+            }
+        }
+    }
 
     @Rule
     TemporaryFolder temporaryFolder
