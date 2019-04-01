@@ -533,6 +533,10 @@ class ProcessingOption implements Entity {
     Date dateCreated = new Date()
     Date dateObsoleted
 
+    static belongsTo = [
+        project: Project,
+    ]
+
     static mapping = {
         value type: 'text'
     }

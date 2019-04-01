@@ -158,8 +158,6 @@ class EntityIntegrationSpec extends Specification {
         seqTypeUnsaved != seqTypeSaved
     }
 
-
-
     void "test hashcode is same as with proxy"() {
         setup:
         SeqType seqType = DomainFactory.createSeqType()
@@ -175,8 +173,6 @@ class EntityIntegrationSpec extends Specification {
         expect:
         seqType.hashCode() == seqType.id.hashCode()
     }
-
-
 
     void "test that all domain classes implement Entity"() {
         setup:

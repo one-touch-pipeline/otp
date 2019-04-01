@@ -179,7 +179,6 @@ class FileService {
             try {
                 if (Files.isDirectory(file)){
                     stream = Files.list(file)
-
                 } else {
                     Files.isReadable(file)
                 }

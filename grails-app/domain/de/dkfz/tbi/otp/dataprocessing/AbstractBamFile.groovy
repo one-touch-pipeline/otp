@@ -138,7 +138,6 @@ abstract class AbstractBamFile implements Entity {
     }
 
 
-
     boolean isQualityAssessed() {
         qualityAssessmentStatus == QaProcessingStatus.FINISHED
     }

@@ -78,6 +78,9 @@ class SamplePair implements TimeStamped, Entity {
     AbstractMergingWorkPackage mergingWorkPackage1
     AbstractMergingWorkPackage mergingWorkPackage2
 
+    /**
+     * not used, only to check whether the path is unique
+     */
     String relativePath
 
     ProcessingStatus snvProcessingStatus = ProcessingStatus.NEEDS_PROCESSING

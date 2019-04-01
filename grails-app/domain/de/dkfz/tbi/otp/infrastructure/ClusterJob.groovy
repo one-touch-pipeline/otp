@@ -261,7 +261,7 @@ class ClusterJob implements Entity {
         ended(nullable: true)
         requestedWalltime(nullable: true, min: new Duration(1))
         requestedCores(nullable: true, min: 1)
-        usedCores(nullable:true, min: 1)
+        usedCores(nullable: true, min: 1)
         cpuTime(nullable: true)
         requestedMemory(nullable: true, min: 1L)
         usedMemory(nullable: true)

@@ -55,6 +55,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
 
     void "prepareAndReturnWorkflowSpecificCValues, when all fine, return correct value list"() {
         given:
+        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 sophiaService: Mock(SophiaService) {
                     1 * validateInputBamFiles(_) >> { }
@@ -66,7 +67,6 @@ class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
         ])
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
-        TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
 
         RoddyBamFile bamFileDisease = sophiaInstance.sampleType1BamFile as RoddyBamFile
         RoddyBamFile bamFileControl = sophiaInstance.sampleType2BamFile as RoddyBamFile
@@ -166,8 +166,8 @@ class ExecuteRoddySophiaJobIntegrationSpec extends IntegrationSpec {
 
     void "validate, when correctPermissionsAndGroups fail, throw assert"() {
         given:
-        String md5sum = HelperUtils.uniqueString
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
+        String md5sum = HelperUtils.uniqueString
         ExecuteRoddySophiaJob job = new ExecuteRoddySophiaJob([
                 configService             : configService,
                 executeRoddyCommandService: Mock(ExecuteRoddyCommandService) {

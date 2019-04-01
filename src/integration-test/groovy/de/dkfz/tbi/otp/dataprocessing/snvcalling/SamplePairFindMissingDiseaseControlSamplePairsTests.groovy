@@ -106,8 +106,10 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
         assert diseaseSample.save(flush: true)
         assertFindsNothing()
 
-        assertFindsOne(DomainFactory.createMergingWorkPackage(controlMwp,
-                Sample.build(individual: individual, sampleType: diseaseSampleType)), controlMwp)
+        Sample matchingDiseaseSample = DomainFactory.createSample(individual: individual, sampleType: diseaseSampleType)
+        MergingWorkPackage matchingDiseaseMwp = DomainFactory.createMergingWorkPackage(controlMwp, matchingDiseaseSample)
+
+        assertFindsOne(matchingDiseaseMwp, controlMwp)
     }
 
     @Test
@@ -116,8 +118,10 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
         assert controlSample.save(flush: true)
         assertFindsNothing()
 
-        assertFindsOne(diseaseMwp, DomainFactory.createMergingWorkPackage(
-                diseaseMwp, Sample.build(individual: individual, sampleType: controlSampleType)))
+        Sample matchingControlSample = DomainFactory.createSample(individual: individual, sampleType: controlSampleType)
+        MergingWorkPackage matchingControlMwp = DomainFactory.createMergingWorkPackage(diseaseMwp, matchingControlSample)
+
+        assertFindsOne(diseaseMwp, matchingControlMwp)
     }
 
     @Test
