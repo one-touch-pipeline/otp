@@ -20,21 +20,23 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.dataprocessing.singlecell
+package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.test.spock.IntegrationSpec
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.springframework.validation.Errors
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfigurationService
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class CellRangerConfigurationServiceIntegrationSpec extends IntegrationSpec implements CellRangerFactory, UserAndRoles {
+@Rollback
+@Integration
+class CellRangerConfigurationServiceIntegrationSpec extends Specification implements CellRangerFactory, UserAndRoles {
 
     CellRangerConfigurationService cellRangerConfigurationService
     Project project
@@ -45,7 +47,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends IntegrationSpec impl
     Sample sample2
     SeqTrack seqTrack
 
-    void setup() {
+    void setupData() {
         createUserAndRoles()
 
         project = createProject()
@@ -69,6 +71,9 @@ class CellRangerConfigurationServiceIntegrationSpec extends IntegrationSpec impl
     }
 
     void "test getSamples"() {
+        given:
+        setupData()
+
         when:
         CellRangerConfigurationService.Samples samples = SpringSecurityUtils.doWithAuth(ADMIN) {
             cellRangerConfigurationService.getSamples(project, individual, sampleType)
@@ -80,6 +85,9 @@ class CellRangerConfigurationServiceIntegrationSpec extends IntegrationSpec impl
     }
 
     void "test getSamples for whole project "() {
+        given:
+        setupData()
+
         when:
         CellRangerConfigurationService.Samples samples = SpringSecurityUtils.doWithAuth(ADMIN) {
             cellRangerConfigurationService.getSamples(project, null, null)
@@ -91,6 +99,9 @@ class CellRangerConfigurationServiceIntegrationSpec extends IntegrationSpec impl
     }
 
     void "test createMergingWorkPackage"() {
+        given:
+        setupData()
+
         when:
         Errors errors = SpringSecurityUtils.doWithAuth(ADMIN) {
             cellRangerConfigurationService.createMergingWorkPackage(1, 2, project, individual, sampleType)
@@ -109,6 +120,9 @@ class CellRangerConfigurationServiceIntegrationSpec extends IntegrationSpec impl
     }
 
     void "test createMergingWorkPackage for whole project"() {
+        given:
+        setupData()
+
         when:
         Errors errors = SpringSecurityUtils.doWithAuth(ADMIN) {
             cellRangerConfigurationService.createMergingWorkPackage(1, 2, project, null, null)
