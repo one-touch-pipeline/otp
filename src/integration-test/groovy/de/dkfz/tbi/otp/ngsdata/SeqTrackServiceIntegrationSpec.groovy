@@ -45,7 +45,7 @@ class SeqTrackServiceIntegrationSpec extends Specification {
     @Unroll
     void "test seqTrackReadyToInstall"() {
         given:
-        SeqTrackService seqTrackService = new SeqTrackService([dataSource: dataSource])
+        SeqTrackService service = new SeqTrackService([dataSource: dataSource])
 
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
@@ -62,9 +62,10 @@ class SeqTrackServiceIntegrationSpec extends Specification {
 
         )
         seqTrack2.project.processingPriority = priority.priority
+        seqTrack2.save(flush: true)
 
         when:
-        String laneId = seqTrackService.seqTrackReadyToInstall(inputPriority)?.laneId
+        String laneId = service.seqTrackReadyToInstall(inputPriority)?.laneId
 
         then:
         expectedLaneId == laneId
@@ -80,12 +81,12 @@ class SeqTrackServiceIntegrationSpec extends Specification {
     @SuppressWarnings('SeqTrackServiceIntegrationSpec')
     void "getSeqTrackReadyForFastqcProcessing basic lookup"() {
         given:
-        SeqTrackService seqTrackService = new SeqTrackService([dataSource: dataSource])
+        SeqTrackService service = new SeqTrackService([dataSource: dataSource])
         DomainFactory.createAllAlignableSeqTypes()
         DomainFactory.createSeqTrack(params())
 
         when:
-        SeqTrack result = seqTrackService.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL)
+        SeqTrack result = service.getSeqTrackReadyForFastqcProcessing(ProcessingPriority.NORMAL)
 
         then:
         shouldFind ? result : !result

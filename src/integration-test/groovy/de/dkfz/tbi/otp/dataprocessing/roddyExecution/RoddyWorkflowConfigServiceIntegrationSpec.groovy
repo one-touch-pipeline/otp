@@ -145,7 +145,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         service.importProjectConfigFile(null, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
 
         then:
-        def e = thrown(AssertionError)
+        AssertionError e = thrown()
         e.message.contains('The project is not allowed to be null')
     }
 
@@ -159,7 +159,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         service.importProjectConfigFile(project, null, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
 
         then:
-        def e = thrown(AssertionError)
+        AssertionError e = thrown()
         e.message.contains('The seqType is not allowed to be null')
     }
 
@@ -173,7 +173,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, null, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
 
         then:
-        def e = thrown(AssertionError)
+        AssertionError e = thrown()
         e.message.contains('The pipeline is not allowed to be null')
     }
 
@@ -188,7 +188,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         service.importProjectConfigFile(project, seqType, null, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
 
         then:
-        def e = thrown(AssertionError)
+        AssertionError e = thrown()
         e.message.contains('The pluginVersionToUse is not allowed to be null')
     }
 
@@ -203,7 +203,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, null, DomainFactory.TEST_CONFIG_VERSION)
 
         then:
-        def e = thrown(AssertionError)
+        AssertionError e = thrown()
         e.message.contains('The configFilePath is not allowed to be null')
     }
 
@@ -218,7 +218,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, '')
 
         then:
-        def e = thrown(AssertionError)
+        AssertionError e = thrown()
         e.message.contains('The configVersion is not allowed to be null')
     }
 
@@ -279,7 +279,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         service.importProjectConfigFile(project, seqType, TEST_RODDY_PLUGIN_VERSION, pipeline, configFile.path, DomainFactory.TEST_CONFIG_VERSION)
 
         then:
-        assert RoddyWorkflowConfig.list().size() == 2
+        RoddyWorkflowConfig.list().size() == 2
         RoddyWorkflowConfig roddyWorkflowConfig2 = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAllByPluginVersion(TEST_RODDY_PLUGIN_VERSION))
         roddyWorkflowConfig2.previousConfig == roddyWorkflowConfig1
         roddyWorkflowConfig1.obsoleteDate

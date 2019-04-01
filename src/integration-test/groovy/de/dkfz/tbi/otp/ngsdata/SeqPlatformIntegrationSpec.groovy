@@ -114,7 +114,7 @@ class SeqPlatformIntegrationSpec extends Specification {
         when:
         SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup()
         seqPlatformGroup.addToSeqPlatforms(sp3)
-        assert seqPlatformGroup.save(flush: true, failOnError: true)
+        seqPlatformGroup.save(flush: true, failOnError: true)
 
         then:
         thrown(ValidationException)
@@ -193,7 +193,7 @@ class SeqPlatformIntegrationSpec extends Specification {
                 mergingCriteria: mergingCriteria_useProject,
         )
         seqPlatformGroup.addToSeqPlatforms(sp2)
-        assert seqPlatformGroup.save(flush: true, failOnError: true)
+        seqPlatformGroup.save(flush: true, failOnError: true)
 
         then:
         thrown(ValidationException)
