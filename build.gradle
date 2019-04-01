@@ -92,6 +92,15 @@ sourceSets {
             srcDirs 'migrations', 'src/seed'
         }
     }
+
+    script {
+        groovy {
+            srcDirs {
+                "scripts"
+            }
+        }
+        compileClasspath += main.runtimeClasspath
+    }
 }
 
 task workflowTest(type: Test) {
