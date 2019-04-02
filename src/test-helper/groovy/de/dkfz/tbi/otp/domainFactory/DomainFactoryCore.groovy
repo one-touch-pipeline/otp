@@ -39,10 +39,27 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ], properties, saveAndValidate)
     }
 
+    Individual createIndividual(Map properties = [:]) {
+        return createDomainObject(Individual, [
+                pid         : "pid_${nextId}",
+                mockPid     : "mockPid_${nextId}",
+                mockFullName: "mockFullName_${nextId}",
+                type        : Individual.Type.REAL,
+                project     : { createProject() },
+        ], properties)
+    }
+
+    SampleType createSampleType(Map properties = [:]) {
+        return createDomainObject(SampleType, [
+                name                   : "sampleTypeName-${nextId}",
+                specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
+        ], properties)
+    }
+
     Sample createSample(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Sample, [
-                individual: { DomainFactory.createIndividual() },
-                sampleType: { DomainFactory.createSampleType() },
+                individual: { createIndividual() },
+                sampleType: { createSampleType() },
         ], properties, saveAndValidate)
     }
 

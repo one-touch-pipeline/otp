@@ -1434,21 +1434,14 @@ class DomainFactory {
         ], projectRoleProperties)
     }
 
+    @Deprecated
     static Individual createIndividual(Map individualProperties = [:]) {
-        return createDomainObject(Individual, [
-                pid         : 'pid_' + (counter++),
-                mockPid     : 'mockPid_' + (counter++),
-                mockFullName: 'mockFullName_' + (counter++),
-                type        : Individual.Type.REAL,
-                project     : { createProject() },
-        ], individualProperties)
+        return proxyCore.createSampleType(individualProperties)
     }
 
+    @Deprecated
     static SampleType createSampleType(Map sampleTypeProperties = [:]) {
-        return createDomainObject(SampleType, [
-                name                   : 'sampleTypeName-' + (counter++),
-                specificReferenceGenome: SpecificReferenceGenome.USE_PROJECT_DEFAULT,
-        ], sampleTypeProperties)
+        return proxyCore.createSampleType(sampleTypeProperties)
     }
 
     @Deprecated
