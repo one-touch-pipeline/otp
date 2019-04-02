@@ -22,31 +22,41 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestFor
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
-import static org.junit.Assert.assertFalse
-import static org.junit.Assert.assertTrue
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-@TestFor(MergingPass)
-@Build([MergingPass])
-class MergingPassTests {
+class MergingPassSpec extends Specification implements DataTest {
 
-    @Test
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                MergingPass,
+                MergingSet,
+        ]
+    }
+
     void testIsLatestPass() {
-        MergingSet mergingSet = MergingSet.build()
+        MergingSet mergingSet = DomainFactory.createMergingSet()
 
-        MergingPass pass = MergingPass.build(
+        when:
+        MergingPass pass1 = DomainFactory.createMergingPass([
                 identifier: 1,
-                mergingSet: mergingSet)
-        assertTrue(pass.isLatestPass())
+                mergingSet: mergingSet,
+        ])
 
-        MergingPass pass2 = MergingPass.build(
+        then:
+        pass1.isLatestPass()
+
+        when:
+        MergingPass pass2 = DomainFactory.createMergingPass([
                 identifier: 2,
-                mergingSet: mergingSet)
-        assertTrue(pass2.isLatestPass())
+                mergingSet: mergingSet,
+        ])
 
-        assertFalse(pass.isLatestPass())
+        then:
+        pass2.isLatestPass()
+        !pass1.isLatestPass()
     }
 }
