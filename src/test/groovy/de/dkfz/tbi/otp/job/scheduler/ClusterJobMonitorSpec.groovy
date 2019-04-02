@@ -119,11 +119,9 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
             1 * getJobForProcessingStep(clusterJobCheckingRealm2b.processingStep) >> monitoringJob2
             0 * _
         }
-        clusterJobMonitor.persistenceContextUtils = Mock(PersistenceContextUtils) {
-            1 * doWithPersistenceContext(_) >> { Closure closure ->
-                return closure.call()
-            }
-            0 * _
+        GroovySpy(Realm, global: true)
+        1 * Realm.withNewSession(_) >> { Closure closure ->
+            return closure.call()
         }
         clusterJobMonitor.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * retrieveKnownJobsWithState(realm1) >> { Realm realm ->
@@ -171,6 +169,9 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
 
         clusterJobCheckingRealmFailingGetValues.refresh()
         clusterJobCheckingRealmFailingGetValues.checkStatus == ClusterJob.CheckStatus.CHECKING
+
+        cleanup:
+        GroovySystem.metaClassRegistry.removeMetaClass(Realm)
     }
 
     void "check, if scheduler is inactive, do nothing "() {
@@ -212,11 +213,9 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
         clusterJobMonitor.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             0 * _
         }
-        clusterJobMonitor.persistenceContextUtils = Mock(PersistenceContextUtils) {
-            1 * doWithPersistenceContext(_) >> { Closure closure ->
-                return closure.call()
-            }
-            0 * _
+        GroovySpy(Realm, global: true)
+        1 * Realm.withNewSession(_) >> { Closure closure ->
+            return closure.call()
         }
 
         when:
@@ -224,5 +223,8 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
 
         then:
         noExceptionThrown()
+
+        cleanup:
+        GroovySystem.metaClassRegistry.removeMetaClass(Realm)
     }
 }
