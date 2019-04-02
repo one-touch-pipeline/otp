@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import grails.validation.ValidationException
 import org.junit.After
 import org.junit.Test
@@ -33,6 +35,8 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair.ProcessingStatus
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
 
+@Rollback
+@Integration
 class SamplePairTests {
 
     @After

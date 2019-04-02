@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.apache.commons.logging.impl.NoOpLog
 import org.junit.*
 import org.junit.rules.TemporaryFolder
@@ -37,6 +39,8 @@ import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
+@Rollback
+@Integration
 class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Autowired

@@ -22,10 +22,14 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
 
+@Rollback
+@Integration
 class MergedAlignmentDataFileServiceTests {
 
     MergedAlignmentDataFileService mergedAlignmentDataFileService

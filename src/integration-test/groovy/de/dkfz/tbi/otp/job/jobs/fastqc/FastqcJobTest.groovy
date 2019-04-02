@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.jobs.fastqc
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.apache.commons.logging.impl.NoOpLog
 import org.junit.*
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,6 +37,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsqc.FastqcUploadService
 import de.dkfz.tbi.otp.utils.*
 
+@Rollback
+@Integration
 class FastqcJobTest {
 
     @Autowired

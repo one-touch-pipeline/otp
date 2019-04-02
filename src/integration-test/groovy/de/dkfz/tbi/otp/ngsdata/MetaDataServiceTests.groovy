@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.acl.AclUtilService
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.springframework.security.access.AccessDeniedException
@@ -34,6 +36,8 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 
 import static org.junit.Assert.*
 
+@Rollback
+@Integration
 class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRoles {
     MetaDataService metaDataService
     AclUtilService aclUtilService

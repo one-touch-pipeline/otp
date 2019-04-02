@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.utils
 
+import grails.test.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Test
 
 import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
@@ -31,6 +33,8 @@ import de.dkfz.tbi.otp.job.processing.PlanValidatorService
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.plan
 import static org.junit.Assert.*
 
+@Rollback
+@Integration
 class JobExecutionPlanDSLTests extends AbstractIntegrationTest {
     PlanValidatorService planValidatorService
 

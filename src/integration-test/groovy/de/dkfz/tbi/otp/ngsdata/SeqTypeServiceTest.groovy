@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.acl.AclUtilService
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Before
 import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
@@ -31,6 +33,8 @@ import org.springframework.security.access.AccessDeniedException
 import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
 import de.dkfz.tbi.otp.security.User
 
+@Rollback
+@Integration
 class SeqTypeServiceTest extends AbstractIntegrationTest {
 
     SeqTypeService seqTypeService

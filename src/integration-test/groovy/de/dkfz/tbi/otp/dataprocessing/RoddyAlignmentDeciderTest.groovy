@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -30,6 +32,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 
+@Rollback
+@Integration
 class RoddyAlignmentDeciderTest {
     @Autowired
     PanCanAlignmentDecider decider

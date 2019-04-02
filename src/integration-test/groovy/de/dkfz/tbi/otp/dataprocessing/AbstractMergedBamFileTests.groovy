@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Test
 
 import de.dkfz.tbi.TestCase
@@ -29,6 +31,8 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 import static org.junit.Assert.assertEquals
 
+@Rollback
+@Integration
 class AbstractMergedBamFileTests {
 
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService

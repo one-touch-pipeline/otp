@@ -23,6 +23,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.test.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 
@@ -34,6 +36,8 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameter
 
 import static org.junit.Assert.*
 
+@Rollback
+@Integration
 class RunServiceTests extends AbstractIntegrationTest {
     RunService runService
 

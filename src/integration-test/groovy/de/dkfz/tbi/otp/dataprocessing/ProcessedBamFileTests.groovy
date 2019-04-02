@@ -22,12 +22,16 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Before
 import org.junit.Test
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.TestData
 
+@Rollback
+@Integration
 class ProcessedBamFileTests {
 
     TestData data = new TestData()

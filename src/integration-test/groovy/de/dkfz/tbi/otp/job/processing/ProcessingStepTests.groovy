@@ -22,13 +22,17 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Test
 
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
-class ProcessingStepTests  {
+@Rollback
+@Integration
+class ProcessingStepTests {
 
     @Test
     void testBelongsToMultiJob_WhenJobIsMultiJob_ShouldReturnTrue() {

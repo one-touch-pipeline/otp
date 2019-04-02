@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Test
 
 import de.dkfz.tbi.TestCase
@@ -31,11 +33,12 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
+@Rollback
+@Integration
 class ProcessedMergedBamFileIntegrationTests {
 
     @Test
     void test_getOverallQualityAssessment_WhenOnePassExists_ShouldReturnThis() {
-
         final Long ARBITRARY_IDENTIFIER = 42
 
         def processedMergedBamFile = DomainFactory.createProcessedMergedBamFile()
@@ -46,7 +49,6 @@ class ProcessedMergedBamFileIntegrationTests {
 
     @Test
     void test_getOverallQualityAssessment_WhenMultiplePassesExists_ShouldReturnLatest() {
-
         final Long IDENTIFIER_FORMER = 100
         final Long IDENTIFIER_LATER = 200
 
@@ -59,8 +61,6 @@ class ProcessedMergedBamFileIntegrationTests {
         assert processedMergedBamFile.overallQualityAssessment == oqaLater
         assert processedMergedBamFile.overallQualityAssessment != oqaFormer
     }
-
-
 
     @Test
     void testWithdraw_SetOneBamFileWithdrawn() {
@@ -129,8 +129,6 @@ class ProcessedMergedBamFileIntegrationTests {
         assert samplePair.mergingWorkPackage1.bamFileInProjectFolder.withdrawn
         assert snvCallingInstance.withdrawn
     }
-
-
 
     @Test
     void testGetPathForFurtherProcessing_IsSetInMergingWorkPackage_shouldReturnDir() {

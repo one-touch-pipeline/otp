@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Test
 
 import de.dkfz.tbi.otp.job.plan.*
@@ -29,12 +31,14 @@ import de.dkfz.tbi.otp.job.plan.*
 import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.plan
 import static org.junit.Assert.*
 
+@Rollback
+@Integration
 class PlanValidatorServiceTests {
 
     /**
      * Dependency Injection of PlanValidatorService
      */
-    def planValidatorService
+    PlanValidatorService planValidatorService
 
     @Test
     void testMissingStartJob() {

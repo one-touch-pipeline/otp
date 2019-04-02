@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.utils
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 
@@ -34,6 +36,8 @@ import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
+@Rollback
+@Integration
 class ExecuteRoddyCommandServiceTests {
 
     static final private String LOAD_MODULE = "LOAD MODULE"

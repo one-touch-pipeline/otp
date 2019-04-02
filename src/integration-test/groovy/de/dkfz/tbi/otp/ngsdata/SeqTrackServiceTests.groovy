@@ -22,12 +22,16 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
 
+@Rollback
+@Integration
 class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     SeqTrackService seqTrackService

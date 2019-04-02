@@ -22,10 +22,14 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.test.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 
 import static org.junit.Assert.*
 
+@Rollback
+@Integration
 class SeqScanServiceTests {
 
     SeqScanService seqScanService

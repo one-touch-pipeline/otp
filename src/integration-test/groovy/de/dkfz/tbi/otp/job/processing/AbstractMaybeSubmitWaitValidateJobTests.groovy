@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Before
 import org.junit.Test
 
@@ -31,6 +33,8 @@ import de.dkfz.tbi.otp.infrastructure.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 
+@Rollback
+@Integration
 class AbstractMaybeSubmitWaitValidateJobTests extends TestCase {
 
     ClusterJobService clusterJobService

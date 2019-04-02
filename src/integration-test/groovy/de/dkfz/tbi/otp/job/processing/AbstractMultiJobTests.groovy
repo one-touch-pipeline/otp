@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.test.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.apache.commons.logging.impl.NoOpLog
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -46,6 +48,8 @@ import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
 import static junit.framework.TestCase.assertEquals
 import static junit.framework.TestCase.assertTrue
 
+@Rollback
+@Integration
 class AbstractMultiJobTests implements UserAndRoles {
 
     static boolean transactional = false

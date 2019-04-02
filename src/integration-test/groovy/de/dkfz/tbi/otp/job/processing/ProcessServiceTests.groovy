@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.job.processing
 
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.acl.AclUtilService
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.apache.commons.io.FileUtils
 import grails.web.mapping.LinkGenerator
 import org.junit.*
@@ -37,6 +39,8 @@ import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
 
 import static org.junit.Assert.*
 
+@Rollback
+@Integration
 class ProcessServiceTests extends AbstractIntegrationTest {
     AclUtilService aclUtilService
     ErrorLogService errorLogService

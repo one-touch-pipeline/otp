@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -29,6 +31,8 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
+@Rollback
+@Integration
 class PanCanStartJobTests {
 
     @Autowired

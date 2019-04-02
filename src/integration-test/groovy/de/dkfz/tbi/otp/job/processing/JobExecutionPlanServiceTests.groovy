@@ -23,6 +23,8 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 
@@ -33,6 +35,8 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 
 import static org.junit.Assert.*
 
+@Rollback
+@Integration
 class JobExecutionPlanServiceTests implements UserAndRoles {
     def jobExecutionPlanService
     def grailsApplication

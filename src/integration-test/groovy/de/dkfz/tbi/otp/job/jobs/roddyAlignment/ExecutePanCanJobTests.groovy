@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
@@ -35,6 +37,8 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
+@Rollback
+@Integration
 class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Autowired

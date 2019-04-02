@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.codehaus.groovy.control.io.NullWriter
 import org.junit.*
 import org.junit.rules.TemporaryFolder
@@ -42,6 +44,8 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
+@Rollback
+@Integration
 class AbstractRoddyJobTests {
 
     static final String SNV_CALLING_META_SCRIPT_PBSID = "3504988"

@@ -22,11 +22,15 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Before
 import org.junit.Test
 
 import de.dkfz.tbi.TestCase
 
+@Rollback
+@Integration
 class ReferenceGenomeProjectSeqTypeTests {
 
     Project project

@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -40,6 +42,8 @@ import de.dkfz.tbi.otp.tracking.OtrsTicket
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@Rollback
+@Integration
 class AbstractAlignmentStartJobTest {
 
     @Autowired

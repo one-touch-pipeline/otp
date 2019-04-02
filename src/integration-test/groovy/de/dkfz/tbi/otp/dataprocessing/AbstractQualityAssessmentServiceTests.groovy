@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 
@@ -33,6 +35,8 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@Rollback
+@Integration
 class AbstractQualityAssessmentServiceTests {
 
     AbstractQualityAssessmentService abstractQualityAssessmentService

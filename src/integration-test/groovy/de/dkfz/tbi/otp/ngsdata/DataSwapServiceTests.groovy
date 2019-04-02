@@ -23,6 +23,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 
@@ -36,6 +38,8 @@ import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
 
+@Rollback
+@Integration
 class DataSwapServiceTests implements UserAndRoles {
     DataSwapService dataSwapService
     LsdfFilesService lsdfFilesService

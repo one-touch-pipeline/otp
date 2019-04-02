@@ -22,10 +22,14 @@
 
 package de.dkfz.tbi.otp.job.scheduler
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 
 import static org.junit.Assert.*
 
+@Rollback
+@Integration
 class ProcessStatusServiceTests {
 
     ProcessStatusService processStatusService

@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 
 import de.dkfz.tbi.otp.InformationReliability
@@ -32,6 +34,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
+@Rollback
+@Integration
 class AbstractBamFileServiceTests {
 
     AbstractBamFileService abstractBamFileService

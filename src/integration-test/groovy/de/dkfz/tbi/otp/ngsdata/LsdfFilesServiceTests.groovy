@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Before
 import org.junit.Test
 
@@ -31,6 +33,8 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertNotNull
 
+@Rollback
+@Integration
 class LsdfFilesServiceTests {
     LsdfFilesService lsdfFilesService
 

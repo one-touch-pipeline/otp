@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Before
 import org.junit.Test
 
@@ -31,6 +33,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@Rollback
+@Integration
 class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     SeqType wholeGenome

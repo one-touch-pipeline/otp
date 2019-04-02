@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Before
 import org.junit.Test
 
@@ -31,6 +33,8 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 
+@Rollback
+@Integration
 class RoddyWorkflowConfigTests {
 
     static final String TEST_RODDY_SEQ_TYPE_RODDY_NAME = 'roddyName'

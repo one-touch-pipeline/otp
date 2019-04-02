@@ -23,6 +23,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils
 import org.junit.*
@@ -36,6 +38,8 @@ import de.dkfz.tbi.otp.security.User
 
 import static org.junit.Assert.*
 
+@Rollback
+@Integration
 class IndividualServiceTests extends AbstractIntegrationTest {
     IndividualService individualService
     private static long ARBITRARY_TIMESTAMP = 1337

@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 
@@ -35,6 +37,8 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.ExecuteRoddyCommandService
 
+@Rollback
+@Integration
 class AbstractExecutePanCanJobTests {
 
     AbstractExecutePanCanJob abstractExecutePanCanJob

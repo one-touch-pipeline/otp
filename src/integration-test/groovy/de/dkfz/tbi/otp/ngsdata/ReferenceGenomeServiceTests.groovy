@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 
@@ -33,6 +35,8 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 import static org.junit.Assert.assertEquals
 
+@Rollback
+@Integration
 class ReferenceGenomeServiceTests {
 
     ReferenceGenomeService referenceGenomeService

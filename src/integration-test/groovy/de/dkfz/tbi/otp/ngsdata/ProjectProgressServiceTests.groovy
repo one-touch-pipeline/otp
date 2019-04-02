@@ -22,8 +22,12 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.*
 
+@Rollback
+@Integration
 class ProjectProgressServiceTests {
 
     ProjectProgressService projectProgressService

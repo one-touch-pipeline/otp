@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import org.junit.Test
 
 import de.dkfz.tbi.otp.job.plan.JobDefinition
@@ -29,6 +31,8 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 
 import static org.junit.Assert.*
 
+@Rollback
+@Integration
 class ProcessingStepUpdateTests {
 
     @Test
