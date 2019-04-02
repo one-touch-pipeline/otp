@@ -1189,8 +1189,8 @@ a: 2
 
     @Test
     void testCreateComment_WhenCommentAlreadyExists_ShouldAddNewComment() {
-        Individual indOld = Individual.build(comment: Comment.build(comment: "old comment"))
-        Individual indNew = Individual.build()
+        Individual indOld = DomainFactory.createIndividual(comment: DomainFactory.createComment(comment: "old comment"))
+        Individual indNew = DomainFactory.createIndividual()
         String operation = "operation"
         Map mapOld = [individual: indOld]
         Map mapNew = [individual: indNew]
@@ -1222,7 +1222,7 @@ ${indOld.comment.comment}""" == indNew.comment.comment
     @Test
     void testCreateComment_WhenMapsHaveDifferentKeySets_ShouldFail() {
         TestCase.shouldFail(AssertionError) {
-            individualService.createComment(null, [individual: Individual.build(), a: 1], [individual: Individual.build()])
+            individualService.createComment(null, [individual: DomainFactory.createIndividual(), a: 1], [individual: DomainFactory.createIndividual()])
         }
     }
 

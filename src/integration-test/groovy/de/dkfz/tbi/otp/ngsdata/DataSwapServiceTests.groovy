@@ -143,7 +143,7 @@ class DataSwapServiceTests implements UserAndRoles {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
-        Project newProject = Project.build(realm: bamFile.project.realm)
+        Project newProject = DomainFactory.createProject(realm: bamFile.project.realm)
         String script = "TEST-MOVE-INDIVIDUAL"
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         List<String> dataFileLinks = []
@@ -217,12 +217,12 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_changeMetadataEntry() {
-        Sample sample = Sample.build()
+        Sample sample = DomainFactory.createSample()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
-        MetaDataKey metaDataKey = MetaDataKey.build()
+        MetaDataKey metaDataKey = DomainFactory.createMetaDataKeyLazy()
         String newValue = "NEW"
-        MetaDataEntry metaDataEntry = MetaDataEntry.build(key: metaDataKey, dataFile: dataFile)
+        MetaDataEntry metaDataEntry = DomainFactory.createMetaDataKeyLazy(key: metaDataKey, dataFile: dataFile)
 
         dataSwapService.changeMetadataEntry(sample, metaDataKey.name, metaDataEntry.value, newValue)
 
@@ -247,13 +247,13 @@ class DataSwapServiceTests implements UserAndRoles {
     @Test
     void test_renameSampleIdentifiers() {
 
-        Sample sample = Sample.build()
-        SampleIdentifier sampleIdentifier = SampleIdentifier.build(sample: sample)
+        Sample sample = DomainFactory.createSample()
+        SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier(sample: sample)
         String sampleIdentifierName = sampleIdentifier.name
         SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
-        MetaDataKey metaDataKey = MetaDataKey.build(name: "SAMPLE_ID")
-        MetaDataEntry.build(key: metaDataKey, dataFile: dataFile)
+        MetaDataKey metaDataKey = DomainFactory.createMetaDataKeyLazy(name: "SAMPLE_ID")
+        DomainFactory.createMetaDataEntry(key: metaDataKey, dataFile: dataFile)
 
         dataSwapService.renameSampleIdentifiers(sample, new StringBuilder())
 
@@ -263,17 +263,17 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_getSingleSampleForIndividualAndSampleType_singleSample() {
-        Individual individual = Individual.build()
-        SampleType sampleType = SampleType.build()
-        Sample sample = Sample.build(individual: individual, sampleType: sampleType)
+        Individual individual = DomainFactory.createIndividual()
+        SampleType sampleType = DomainFactory.createSampleType()
+        Sample sample = DomainFactory.createSample(individual: individual, sampleType: sampleType)
 
         assert sample == dataSwapService.getSingleSampleForIndividualAndSampleType(individual, sampleType, new StringBuilder())
     }
 
     @Test
     void test_getSingleSampleForIndividualAndSampleType_noSample() {
-        Individual individual = Individual.build()
-        SampleType sampleType = SampleType.build()
+        Individual individual = DomainFactory.createIndividual()
+        SampleType sampleType = DomainFactory.createSampleType()
 
         shouldFail IllegalArgumentException, {
             dataSwapService.getSingleSampleForIndividualAndSampleType(individual, sampleType, new StringBuilder())
@@ -283,7 +283,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_getAndShowSeqTracksForSample() {
-        Sample sample = Sample.build()
+        Sample sample = DomainFactory.createSample()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
 
         assert [seqTrack] == dataSwapService.getAndShowSeqTracksForSample(sample, new StringBuilder())
@@ -319,7 +319,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
         assert [] == dataSwapService.getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
 
-        AlignmentLog alignmentLog = AlignmentLog.build(seqTrack: seqTrack)
+        AlignmentLog alignmentLog = DomainFactory.createAlignmentLog(seqTrack: seqTrack)
         DataFile dataFile2 = DomainFactory.createDataFile(alignmentLog: alignmentLog)
         dataFileMap = [(dataFile2.fileName): ""]
         assert [dataFile2] == dataSwapService.getAndValidateAndShowAlignmentDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
@@ -336,7 +336,7 @@ class DataSwapServiceTests implements UserAndRoles {
     @Test
     void testDeleteFastQCInformationFromDataFile() throws Exception {
         DataFile dataFile = DomainFactory.createDataFile()
-        FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.build(dataFile: dataFile)
+        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
 
         dataSwapService.deleteFastQCInformationFromDataFile(dataFile)
 
@@ -346,7 +346,7 @@ class DataSwapServiceTests implements UserAndRoles {
     @Test
     void testDeleteMetaDataEntryForDataFile() throws Exception {
         DataFile dataFile = DomainFactory.createDataFile()
-        MetaDataEntry metaDataEntry = MetaDataEntry.build(dataFile: dataFile)
+        MetaDataEntry metaDataEntry = DomainFactory.createMetaDataEntry(dataFile: dataFile)
 
         dataSwapService.deleteMetaDataEntryForDataFile(dataFile)
 
@@ -356,21 +356,20 @@ class DataSwapServiceTests implements UserAndRoles {
     @Test
     void testDeleteConsistencyStatusInformationForDataFile() throws Exception {
         DataFile dataFile = DomainFactory.createDataFile()
-        ConsistencyStatus consistencyStatus = ConsistencyStatus.build(dataFile: dataFile)
+        ConsistencyStatus consistencyStatus = DomainFactory.createConsistencyStatus(dataFile: dataFile)
 
         dataSwapService.deleteConsistencyStatusInformationForDataFile(dataFile)
 
         assert !ConsistencyStatus.get(consistencyStatus.id)
     }
 
-
     @Test
     void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedBamFile() throws Exception {
-        AbstractBamFile abstractBamFile = ProcessedBamFile.build()
+        AbstractBamFile abstractBamFile = DomainFactory.createProcessedBamFile()
 
-        QualityAssessmentPass qualityAssessmentPass = QualityAssessmentPass.build(processedBamFile: abstractBamFile)
-        ChromosomeQualityAssessment chromosomeQualityAssessment = ChromosomeQualityAssessment.build(qualityAssessmentPass: qualityAssessmentPass, referenceLength: 0)
-        OverallQualityAssessment overallQualityAssessment = OverallQualityAssessment.build(qualityAssessmentPass: qualityAssessmentPass, referenceLength: 0)
+        QualityAssessmentPass qualityAssessmentPass = DomainFactory.createQualityAssessmentPass(processedBamFile: abstractBamFile)
+        ChromosomeQualityAssessment chromosomeQualityAssessment = DomainFactory.createChromosomeQualityAssessment(qualityAssessmentPass: qualityAssessmentPass, referenceLength: 0)
+        OverallQualityAssessment overallQualityAssessment = DomainFactory.createOverallQualityAssessment(qualityAssessmentPass: qualityAssessmentPass, referenceLength: 0)
 
         dataSwapService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
@@ -383,10 +382,10 @@ class DataSwapServiceTests implements UserAndRoles {
     void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedMergedBamFile() throws Exception {
         AbstractBamFile abstractBamFile = DomainFactory.createProcessedMergedBamFile()
 
-        QualityAssessmentMergedPass qualityAssessmentPass = QualityAssessmentMergedPass.build(abstractMergedBamFile: abstractBamFile)
-        ChromosomeQualityAssessmentMerged chromosomeQualityAssessment = ChromosomeQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentPass, referenceLength: 0)
-        OverallQualityAssessmentMerged overallQualityAssessment = OverallQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentPass, referenceLength: 0)
-        PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = PicardMarkDuplicatesMetrics.build(abstractBamFile: abstractBamFile)
+        QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: abstractBamFile)
+        ChromosomeQualityAssessmentMerged chromosomeQualityAssessment = DomainFactory.createChromosomeQualityAssessmentMerged(qualityAssessmentMergedPass: qualityAssessmentPass, referenceLength: 0)
+        OverallQualityAssessmentMerged overallQualityAssessment = DomainFactory.createOverallQualityAssessmentMerged(qualityAssessmentMergedPass: qualityAssessmentPass, referenceLength: 0)
+        PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = DomainFactory.createPicardMarkDuplicatesMetrics(abstractBamFile: abstractBamFile)
 
         dataSwapService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
@@ -400,10 +399,10 @@ class DataSwapServiceTests implements UserAndRoles {
     void testDeleteQualityAssessmentInfoForAbstractBamFile_RoddyBamFile() throws Exception {
         AbstractBamFile abstractBamFile = DomainFactory.createRoddyBamFile()
 
-        QualityAssessmentMergedPass qualityAssessmentPass = QualityAssessmentMergedPass.build(abstractMergedBamFile: abstractBamFile)
-        RoddyLibraryQa roddyLibraryQa = RoddyLibraryQa.build(qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
-        RoddyMergedBamQa roddyMergedBamQa = RoddyMergedBamQa.build(qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
-        RoddySingleLaneQa roddySingleLaneQa = RoddySingleLaneQa.build(seqTrack: abstractBamFile.seqTracks.iterator().next(), qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
+        QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: abstractBamFile)
+        RoddyLibraryQa roddyLibraryQa = DomainFactory.createRoddyLibraryQa(qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
+        RoddyMergedBamQa roddyMergedBamQa = DomainFactory.createRoddyMergedBamQa(qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
+        RoddySingleLaneQa roddySingleLaneQa = DomainFactory.createRoddySingleLaneQa(seqTrack: abstractBamFile.seqTracks.iterator().next(), qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
 
         dataSwapService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 
@@ -429,10 +428,10 @@ class DataSwapServiceTests implements UserAndRoles {
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 pipeline: DomainFactory.createDefaultOtpPipeline()
         ])
-        MergingSet mergingSet = MergingSet.build(mergingWorkPackage: mergingWorkPackage)
+        MergingSet mergingSet = DomainFactory.createMergingSet(mergingWorkPackage: mergingWorkPackage)
         ProcessedBamFile processedBamFile = DomainFactory.createProcessedBamFile(mergingWorkPackage).save(flush: true)
-        MergingPass mergingPass = MergingPass.build(mergingSet: mergingSet)
-        MergingSetAssignment mergingSetAssignment = MergingSetAssignment.build(bamFile: processedBamFile, mergingSet: mergingSet)
+        MergingPass mergingPass = DomainFactory.createMergingPass(mergingSet: mergingSet)
+        MergingSetAssignment mergingSetAssignment = DomainFactory.createMergingSetAssignment(bamFile: processedBamFile, mergingSet: mergingSet)
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(workPackage: mergingWorkPackage, mergingPass: mergingPass)
 
         dataSwapService.deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
@@ -446,11 +445,11 @@ class DataSwapServiceTests implements UserAndRoles {
     @Test
     void testDeleteDataFile() throws Exception {
         DataFile dataFile = DomainFactory.createDataFile()
-        FastqcProcessedFile fastqcProcessedFile = FastqcProcessedFile.build(dataFile: dataFile)
+        FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
 
-        MetaDataEntry.build(dataFile: dataFile)
+        DomainFactory.createMetaDataEntry(dataFile: dataFile)
 
-        ConsistencyStatus.build(dataFile: dataFile)
+        DomainFactory.createConsistencyStatus(dataFile: dataFile)
 
         dataSwapService.deleteDataFile(dataFile)
 
@@ -460,7 +459,7 @@ class DataSwapServiceTests implements UserAndRoles {
     @Test
     void testDeleteConnectionFromSeqTrackRepresentingABamFile() throws Exception {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        AlignmentLog alignmentLog = AlignmentLog.build(seqTrack: seqTrack)
+        AlignmentLog alignmentLog = DomainFactory.createAlignmentLog(seqTrack: seqTrack)
         DataFile dataFile = DomainFactory.createDataFile(alignmentLog: alignmentLog)
 
         dataSwapService.deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
@@ -473,15 +472,15 @@ class DataSwapServiceTests implements UserAndRoles {
     void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_ProcessedBamFile() throws Exception {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
-        ProcessedSaiFile processedSaiFile = ProcessedSaiFile.build(dataFile: dataFile)
+        ProcessedSaiFile processedSaiFile = DomainFactory.createProcessedSaiFile(dataFile: dataFile)
 
         new TestData()
         AlignmentPass alignmentPass = DomainFactory.createAlignmentPass(seqTrack: seqTrack)
         MergingWorkPackage workPackage = alignmentPass.workPackage
-        MergingSet mergingSet = MergingSet.build(mergingWorkPackage: workPackage)
-        MergingPass mergingPass = MergingPass.build(mergingSet: mergingSet)
+        MergingSet mergingSet = DomainFactory.createMergingSet(mergingWorkPackage: workPackage)
+        MergingPass mergingPass = DomainFactory.createMergingPass(mergingSet: mergingSet)
 
-        AbstractMergedBamFile processedMergedBamFile = ProcessedMergedBamFile.build(mergingPass: mergingPass, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS, workPackage: workPackage)
+        AbstractMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass: mergingPass, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS, workPackage: workPackage)
         workPackage.bamFileInProjectFolder = processedMergedBamFile
         workPackage.save(flush: true, failOnError: true)
         alignmentPass.save(flush: true, failOnError: true)
@@ -509,9 +508,9 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteSeqScanAndCorrespondingInformation() throws Exception {
-        SeqScan seqScan = SeqScan.build()
-        MergingLog mergingLog = MergingLog.build(seqScan: seqScan)
-        MergedAlignmentDataFile mergedAlignmentDataFile = MergedAlignmentDataFile.build(mergingLog: mergingLog)
+        SeqScan seqScan = DomainFactory.createSeqScan()
+        MergingLog mergingLog = DomainFactory.createMergingLog(seqScan: seqScan)
+        MergedAlignmentDataFile mergedAlignmentDataFile = DomainFactory.createMergedAlignmentDataFile(mergingLog: mergingLog)
 
         dataSwapService.deleteSeqScanAndCorrespondingInformation(seqScan)
 
@@ -523,7 +522,7 @@ class DataSwapServiceTests implements UserAndRoles {
     @Test
     void testDeleteSeqTrack() throws Exception {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        MergingAssignment mergingAssignment = MergingAssignment.build(seqTrack: seqTrack)
+        MergingAssignment mergingAssignment = DomainFactory.createMergingAssignment(seqTrack: seqTrack)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
 
         dataSwapService.deleteSeqTrack(seqTrack)
@@ -536,7 +535,7 @@ class DataSwapServiceTests implements UserAndRoles {
     @Test
     void testDeleteSeqTrack_seqTrackIsOnlyLinked() throws Exception {
         SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
-        MergingAssignment.build(seqTrack: seqTrack)
+        DomainFactory.createMergingAssignment(seqTrack: seqTrack)
         DomainFactory.createDataFile(seqTrack: seqTrack)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "seqTracks only linked") {
@@ -547,7 +546,7 @@ class DataSwapServiceTests implements UserAndRoles {
     @Test
     void testDeleteRun() throws Exception {
         StringBuilder outputStringBuilder = new StringBuilder()
-        Run run = Run.build()
+        Run run = DomainFactory.createRun()
         DataFile dataFile = DomainFactory.createDataFile(run: run)
 
         dataSwapService.deleteRun(run, outputStringBuilder)
@@ -559,7 +558,7 @@ class DataSwapServiceTests implements UserAndRoles {
     @Test
     void testDeleteRunByName() throws Exception {
         StringBuilder outputStringBuilder = new StringBuilder()
-        Run run = Run.build()
+        Run run = DomainFactory.createRun()
         DataFile dataFile = DomainFactory.createDataFile(run: run)
 
         dataSwapService.deleteRunByName(run.name, outputStringBuilder)

@@ -81,7 +81,7 @@ class AbstractQualityAssessmentServiceTests {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         RoddyMergedBamQa mergedQa = new RoddyMergedBamQa(
                 AbstractBamFileServiceTests.ARBITRARY_QA_VALUES + [
-                qualityAssessmentMergedPass : QualityAssessmentMergedPass.build(abstractMergedBamFile: roddyBamFile),
+                qualityAssessmentMergedPass : DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: roddyBamFile),
                 qcBasesMapped : QC_BASES_MAPPED,
                 genomeWithoutNCoverageQcBases: EXPECTED_COVERAGE,
                 chromosome: RoddyQualityAssessment.ALL,
@@ -144,7 +144,7 @@ class AbstractQualityAssessmentServiceTests {
     @Test
     void testParseRoddyQaStatistics_missingChromosome() {
         RoddyBamFile roddyBamFile = setUpForParseRoddyQaStatistics(DomainFactory.createWholeGenomeSeqType())
-        ReferenceGenomeEntry.build(
+        DomainFactory.createReferenceGenomeEntry(
                 referenceGenome: roddyBamFile.referenceGenome,
                 classification: Classification.CHROMOSOME,
                 name: '9',
@@ -205,7 +205,7 @@ class AbstractQualityAssessmentServiceTests {
 
     static void createReferenceGenomeEntries(ReferenceGenome referenceGenome) {
         ['7', '8'].each {
-            ReferenceGenomeEntry.build(
+            DomainFactory.createReferenceGenomeEntry(
                     referenceGenome: referenceGenome,
                     classification: Classification.CHROMOSOME,
                     name: it,

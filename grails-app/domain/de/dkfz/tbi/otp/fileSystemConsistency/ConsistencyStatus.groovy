@@ -36,7 +36,7 @@ class ConsistencyStatus implements Entity {
         NO_READ_PERMISSION,     // file exists but cannot be read
         VIEW_BY_PID_NO_FILE,    // path from view by pid is not linked to the correct file.
         SIZE_DIFFERENCE,        // file exists but the size of the file in database is different
-        CONSISTENT
+        CONSISTENT,
     }
 
     /**

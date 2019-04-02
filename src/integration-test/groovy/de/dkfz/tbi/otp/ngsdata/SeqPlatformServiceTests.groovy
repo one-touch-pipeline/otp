@@ -156,7 +156,7 @@ class SeqPlatformServiceTests {
     void test_findForNameAndModelAndSequencingKit_shouldReturnNull_UnknownModelGiven() {
         SequencingKitLabel kit = createDataFor_findForNameAndModelAndSequencingKit()[1] as SequencingKitLabel
 
-        SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, SeqPlatformModelLabel.build(), kit)
+        SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, DomainFactory.createSeqPlatformModelLabel(), kit)
         assert null == seqPlatform
     }
 
@@ -164,7 +164,7 @@ class SeqPlatformServiceTests {
     void test_findForNameAndModelAndSequencingKit_shouldReturnNull_UnknownKitGiven() {
         SeqPlatformModelLabel model = createDataFor_findForNameAndModelAndSequencingKit()[0] as SeqPlatformModelLabel
 
-        SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, SequencingKitLabel.build())
+        SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, DomainFactory.createSequencingKitLabel())
         assert null == seqPlatform
     }
 

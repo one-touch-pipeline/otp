@@ -68,8 +68,7 @@ class RoddyAlignmentDeciderTest {
                 md5sum: fileOperationStatus == FileOperationStatus.PROCESSED ? HelperUtils.randomMd5sum : null,
                 fileOperationStatus: fileOperationStatus,
                 fileSize: fileOperationStatus == FileOperationStatus.PROCESSED ? 10000 : -1,
-                ]
-        )
+        ])
 
         SeqTrack seqTrack = bamFileContainsSeqTrack ?
                 bamFile.seqTracks.iterator().next() :
@@ -206,7 +205,7 @@ class RoddyAlignmentDeciderTest {
 
         Pipeline pipeline = decider.getPipeline(seqTrack)
 
-        MergingWorkPackage workPackage = TestData.createMergingWorkPackage(
+        MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
                 MergingWorkPackage.getMergingProperties(seqTrack) +
                 [
                 pipeline: pipeline,

@@ -61,7 +61,7 @@ class SamplePairTests {
 
     private void testSetNeedsProcessing(final ProcessingStatus processingStatus) {
         MergingWorkPackage mwp1 = DomainFactory.createMergingWorkPackage()
-        SampleTypePerProject.build(project: mwp1.project, sampleType: mwp1.sampleType, category: SampleType.Category.DISEASE)
+        DomainFactory.createSampleTypePerProject(project: mwp1.project, sampleType: mwp1.sampleType, category: SampleType.Category.DISEASE)
         final SamplePair nonPersistedSamplePair = SamplePair.createInstance(
                 mergingWorkPackage1: mwp1,
                 mergingWorkPackage2: DomainFactory.createMergingWorkPackage(mwp1),

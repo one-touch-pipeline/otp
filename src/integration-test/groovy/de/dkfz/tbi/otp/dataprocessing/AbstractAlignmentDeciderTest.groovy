@@ -113,11 +113,11 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testDecideAndPrepareForAlignment_whenCanPipelineAlignReturnsFalse_shouldReturnEmptyList() {
-        SeqTrack st = buildSeqTrack()
-        st.seqType = SeqType.build(name: "Invalid")
-        st.save(failOnError: true)
+        SeqTrack seqTrack = buildSeqTrack()
+        seqTrack.seqType = DomainFactory.createSeqType(name: "Invalid")
+        seqTrack.save(flush: true, failOnError: true)
 
-        Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(st, true)
+        Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
         assert workPackages.empty
     }
 
@@ -190,7 +190,7 @@ class AbstractAlignmentDeciderTest {
 
     private List<Entity> prepareDifferentLibraryPreparationKit() {
         SeqTrack seqTrack = buildSeqTrack()
-        seqTrack.libraryPreparationKit = LibraryPreparationKit.build()
+        seqTrack.libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
         seqTrack.kitInfoReliability = InformationReliability.KNOWN
         seqTrack.save(flush: true, failOnError: true)
 

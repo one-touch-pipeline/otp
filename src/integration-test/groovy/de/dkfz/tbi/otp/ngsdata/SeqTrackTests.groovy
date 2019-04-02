@@ -40,12 +40,12 @@ class SeqTrackTests {
     @Before
     void setup() {
         seqTrack = DomainFactory.createSeqTrack().save(flush: true)
-        referenceGenomeProjectSeqTypeWithSampleType = ReferenceGenomeProjectSeqType.build(
+        referenceGenomeProjectSeqTypeWithSampleType = DomainFactory.createReferenceGenomeProjectSeqType(
                 project: seqTrack.project,
                 seqType: seqTrack.seqType,
                 sampleType: seqTrack.sampleType,
         ).save(flush: true)
-        referenceGenomeProjectSeqTypeWithoutSampleType = ReferenceGenomeProjectSeqType.build(
+        referenceGenomeProjectSeqTypeWithoutSampleType = DomainFactory.createReferenceGenomeProjectSeqType(
                 project: seqTrack.project,
                 seqType: seqTrack.seqType,
         ).save(flush: true)

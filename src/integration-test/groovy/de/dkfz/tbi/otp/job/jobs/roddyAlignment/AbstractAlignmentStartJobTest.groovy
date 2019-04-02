@@ -403,8 +403,8 @@ class AbstractAlignmentStartJobTest {
 
     private void withJobExecutionPlan(Closure closure) {
         try {
-            JobExecutionPlan jep = JobExecutionPlan.build(enabled: true)
-            jep.firstJob = JobDefinition.build(plan: jep)
+            JobExecutionPlan jep = DomainFactory.createJobExecutionPlan(enabled: true)
+            jep.firstJob = DomainFactory.createJobDefinition(plan: jep)
             assert jep.save(failOnError: true)
             testAbstractAlignmentStartJob.jep = jep
             closure()

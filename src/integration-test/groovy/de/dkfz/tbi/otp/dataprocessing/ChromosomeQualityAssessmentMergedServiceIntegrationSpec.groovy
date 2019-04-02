@@ -55,10 +55,10 @@ class ChromosomeQualityAssessmentMergedServiceIntegrationSpec extends Specificat
                 qualityAssessmentMergedPass2,
         ]
 
-        ChromosomeQualityAssessmentMerged chromosomeQualityAssessmentMergedX1 = ChromosomeQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentMergedPass1, chromosomeName: Chromosomes.CHR_X.alias, referenceLength: 0)
-        ChromosomeQualityAssessmentMerged chromosomeQualityAssessmentMergedY1 = ChromosomeQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentMergedPass1, chromosomeName: Chromosomes.CHR_Y.alias, referenceLength: 0)
-        ChromosomeQualityAssessmentMerged chromosomeQualityAssessmentMergedX2 = ChromosomeQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentMergedPass2, chromosomeName: Chromosomes.CHR_X.alias, referenceLength: 0)
-        ChromosomeQualityAssessmentMerged chromosomeQualityAssessmentMergedY2 = ChromosomeQualityAssessmentMerged.build(qualityAssessmentMergedPass: qualityAssessmentMergedPass2, chromosomeName: Chromosomes.CHR_Y.alias, referenceLength: 0)
+        ChromosomeQualityAssessmentMerged chromosomeQualityAssessmentMergedX1 = DomainFactory.createChromosomeQualityAssessmentMerged(qualityAssessmentMergedPass: qualityAssessmentMergedPass1, chromosomeName: Chromosomes.CHR_X.alias, referenceLength: 0)
+        ChromosomeQualityAssessmentMerged chromosomeQualityAssessmentMergedY1 = DomainFactory.createChromosomeQualityAssessmentMerged(qualityAssessmentMergedPass: qualityAssessmentMergedPass1, chromosomeName: Chromosomes.CHR_Y.alias, referenceLength: 0)
+        ChromosomeQualityAssessmentMerged chromosomeQualityAssessmentMergedX2 = DomainFactory.createChromosomeQualityAssessmentMerged(qualityAssessmentMergedPass: qualityAssessmentMergedPass2, chromosomeName: Chromosomes.CHR_X.alias, referenceLength: 0)
+        ChromosomeQualityAssessmentMerged chromosomeQualityAssessmentMergedY2 = DomainFactory.createChromosomeQualityAssessmentMerged(qualityAssessmentMergedPass: qualityAssessmentMergedPass2, chromosomeName: Chromosomes.CHR_Y.alias, referenceLength: 0)
         chromosomeQualityAssessmentMergedList = [
                 chromosomeQualityAssessmentMergedX1,
                 chromosomeQualityAssessmentMergedY1,

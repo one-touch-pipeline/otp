@@ -394,7 +394,7 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
         given:
         setupData()
 
-        SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq X Ten")
+        SeqPlatformModelLabel seqPlatformModelLabel = DomainFactory.createSeqPlatformModelLabel(name: "HiSeq X Ten")
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup([seqPlatformModelLabel: seqPlatformModelLabel])
         def (job, run) = createClusterJobWithRun(DomainFactory.createRun(seqPlatform: seqPlatform))
         DomainFactory.createSeqTrack(run: run)
@@ -407,7 +407,7 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
         given:
         setupData()
 
-        SeqPlatformModelLabel seqPlatformModelLabel = SeqPlatformModelLabel.build(name: "HiSeq2500")
+        SeqPlatformModelLabel seqPlatformModelLabel = DomainFactory.createSeqPlatformModelLabel(name: "HiSeq2500")
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup([seqPlatformModelLabel: seqPlatformModelLabel])
         def (job, run) = createClusterJobWithRun(DomainFactory.createRun(seqPlatform: seqPlatform))
         DomainFactory.createSeqTrack(run: run)

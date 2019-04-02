@@ -98,7 +98,7 @@ class RoddyBamFileTest {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
         SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
-        seqTrack.seqType = SeqType.build()
+        seqTrack.seqType = DomainFactory.createSeqType()
         bamFile.isConsistentAndContainsNoWithdrawnData()
     }
 

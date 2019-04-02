@@ -183,7 +183,7 @@ class ExecuteRoddyCommandServiceTests {
     @Test
     void testGetAnalysisIDinConfigFile_DifferentSeqType_ShouldFail() {
         DomainFactory.createRoddyAlignableSeqTypes()
-        roddyBamFile.mergingWorkPackage.seqType = SeqType.build(name: "differentSeqType")
+        roddyBamFile.mergingWorkPackage.seqType = DomainFactory.createSeqType(name: "differentSeqType")
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         assert TestCase.shouldFail(RuntimeException) {

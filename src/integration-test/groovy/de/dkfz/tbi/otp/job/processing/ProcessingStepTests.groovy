@@ -38,7 +38,7 @@ class ProcessingStepTests {
     void testBelongsToMultiJob_WhenJobIsMultiJob_ShouldReturnTrue() {
         // AbstractOtpJob as dummy for Multijob
         Class testMultiJob = AbstractOtpJob
-        ProcessingStep p = ProcessingStep.build([jobClass: testMultiJob.getName()])
+        ProcessingStep p = DomainFactory.createProcessingStep(jobClass: testMultiJob.getName())
         assert p.belongsToMultiJob()
     }
 

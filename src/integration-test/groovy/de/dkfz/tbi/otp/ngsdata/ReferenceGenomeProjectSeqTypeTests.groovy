@@ -38,17 +38,13 @@ class ReferenceGenomeProjectSeqTypeTests {
     SampleType sampleType
     ReferenceGenome referenceGenome
 
-
-
     @Before
     void setup() {
-        project = Project.build()
-        seqType = SeqType.build()
-        referenceGenome = ReferenceGenome.build()
+        project = DomainFactory.createProject()
+        seqType = DomainFactory.createSeqType()
+        referenceGenome = DomainFactory.createReferenceGenome()
         sampleType = null
     }
-
-
 
     private ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Date deprecatedDate, boolean doSave = true) {
         ReferenceGenomeProjectSeqType domain = new ReferenceGenomeProjectSeqType(
@@ -63,48 +59,42 @@ class ReferenceGenomeProjectSeqTypeTests {
         return domain
     }
 
-
-
     @Test
     void testUnique_NoDuplication_WithDifferentProjects() {
         createReferenceGenomeProjectSeqType(null)
-        project = Project.build()
+        project = DomainFactory.createProject()
 
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
         assert newDomain.validate()
     }
-
 
     @Test
     void testUnique_NoDuplication_WithDifferentSeqType() {
         createReferenceGenomeProjectSeqType(null)
-        seqType = SeqType.build()
+        seqType = DomainFactory.createSeqType()
 
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
         assert newDomain.validate()
     }
-
 
     @Test
     void testUnique_NoDuplication_WithAndWithoutSampleType() {
         createReferenceGenomeProjectSeqType(null)
-        sampleType = SampleType.build()
+        sampleType = DomainFactory.createSampleType()
 
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
         assert newDomain.validate()
     }
-
 
     @Test
     void testUnique_NoDuplication_WithDifferentSampleType() {
-        sampleType = SampleType.build()
+        sampleType = DomainFactory.createSampleType()
         createReferenceGenomeProjectSeqType(null)
-        sampleType = SampleType.build()
+        sampleType = DomainFactory.createSampleType()
 
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
         assert newDomain.validate()
     }
-
 
     @Test
     void testUnique_NoDuplication_WithDeprecatedDateAndWithoutSampleType() {
@@ -114,17 +104,14 @@ class ReferenceGenomeProjectSeqTypeTests {
         assert newDomain.validate()
     }
 
-
     @Test
     void testUnique_NoDuplication_WithDeprecatedDateAndSampleType() {
-        sampleType = SampleType.build()
+        sampleType = DomainFactory.createSampleType()
         createReferenceGenomeProjectSeqType(new Date())
 
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
         assert newDomain.validate()
     }
-
-
 
     @Test
     void testUnique_HasDuplication_WithoutSampleType() {
@@ -134,16 +121,14 @@ class ReferenceGenomeProjectSeqTypeTests {
         TestCase.assertValidateError(newDomain, "referenceGenome", "validator.invalid", referenceGenome)
     }
 
-
     @Test
     void testUnique_HasDuplication_WithSampleType() {
-        sampleType = SampleType.build()
+        sampleType = DomainFactory.createSampleType()
         createReferenceGenomeProjectSeqType(null)
 
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
         TestCase.assertValidateError(newDomain, "referenceGenome", "validator.invalid", referenceGenome)
     }
-
 
     @Test
     void testProjectIsNull() {
@@ -153,7 +138,6 @@ class ReferenceGenomeProjectSeqTypeTests {
         TestCase.assertValidateError(newDomain, "project", "nullable", project)
     }
 
-
     @Test
     void testSeqTypeIsNull() {
         seqType = null
@@ -162,7 +146,6 @@ class ReferenceGenomeProjectSeqTypeTests {
         TestCase.assertValidateError(newDomain, "seqType", "nullable", seqType)
     }
 
-
     @Test
     void testReferenceGenomeIsNull() {
         referenceGenome = null
@@ -170,5 +153,4 @@ class ReferenceGenomeProjectSeqTypeTests {
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
         TestCase.assertValidateError(newDomain, "referenceGenome", "nullable", referenceGenome)
     }
-
 }

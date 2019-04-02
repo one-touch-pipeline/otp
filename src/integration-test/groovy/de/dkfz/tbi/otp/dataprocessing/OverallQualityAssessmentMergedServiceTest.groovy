@@ -119,7 +119,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
         List expected = []
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(Project.build(), overallQualityAssessmentMerged.seqType)
+            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(DomainFactory.createProject(), overallQualityAssessmentMerged.seqType)
             assert expected == result
         }
     }
@@ -129,7 +129,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
         List expected = []
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
+            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, DomainFactory.createSeqType())
             assert expected == result
         }
     }
@@ -137,10 +137,10 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
     @Test
     void testFindAllByProjectAndSeqType_notLastQaMergedPassIdentifier() {
         List expected = []
-        QualityAssessmentMergedPass.build(abstractMergedBamFile: overallQualityAssessmentMerged.processedMergedBamFile, identifier: overallQualityAssessmentMerged.qualityAssessmentMergedPass.identifier + 1)
+        DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: overallQualityAssessmentMerged.processedMergedBamFile, identifier: overallQualityAssessmentMerged.qualityAssessmentMergedPass.identifier + 1)
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
+            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, DomainFactory.createSeqType())
             assert expected == result
         }
     }
@@ -148,10 +148,10 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
     @Test
     void testFindAllByProjectAndSeqType_notLastMergingPassIdentifier() {
         List expected = []
-        MergingPass.build(mergingSet: overallQualityAssessmentMerged.mergingSet, identifier: overallQualityAssessmentMerged.mergingPass.identifier + 1)
+        DomainFactory.createMergingSet(mergingSet: overallQualityAssessmentMerged.mergingSet, identifier: overallQualityAssessmentMerged.mergingPass.identifier + 1)
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
+            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, DomainFactory.createSeqType())
             assert expected == result
         }
     }
@@ -159,10 +159,10 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
     @Test
     void testFindAllByProjectAndSeqType_notLastMergingSetIdentifier() {
         List expected = []
-        MergingSet.build(mergingWorkPackage: overallQualityAssessmentMerged.mergingWorkPackage, identifier: overallQualityAssessmentMerged.mergingSet.identifier + 1)
+        DomainFactory.createMergingSet(mergingWorkPackage: overallQualityAssessmentMerged.mergingWorkPackage, identifier: overallQualityAssessmentMerged.mergingSet.identifier + 1)
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
+            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, DomainFactory.createSeqType())
             assert expected == result
         }
     }
@@ -174,7 +174,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
         overallQualityAssessmentMerged.processedMergedBamFile.md5sum = null
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
+            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, DomainFactory.createSeqType())
             assert expected == result
         }
     }
@@ -185,7 +185,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
         overallQualityAssessmentMerged.processedMergedBamFile.withdrawn = true
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
+            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, DomainFactory.createSeqType())
             assert expected == result
         }
     }
@@ -196,7 +196,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
         overallQualityAssessmentMerged.processedMergedBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.IN_PROGRESS
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, SeqType.build())
+            List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, DomainFactory.createSeqType())
             assert expected == result
         }
     }

@@ -59,14 +59,14 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
         rna = DomainFactory.createRnaPairedSeqType()
         LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
 
-        project = Project.build()
-        diseaseSampleType = SampleType.build()
-        controlSampleType = SampleType.build()
-        diseaseStpp = SampleTypePerProject.build(project: project, sampleType: diseaseSampleType, category: SampleType.Category.DISEASE)
-        controlStpp = SampleTypePerProject.build(project: project, sampleType: controlSampleType, category: SampleType.Category.CONTROL)
-        individual = Individual.build(project: project)
-        diseaseSample = Sample.build(individual: individual, sampleType: diseaseSampleType)
-        controlSample = Sample.build(individual: individual, sampleType: controlSampleType)
+        project = DomainFactory.createProject()
+        diseaseSampleType = DomainFactory.createSampleType()
+        controlSampleType = DomainFactory.createSampleType()
+        diseaseStpp = DomainFactory.createSampleTypePerProject(project: project, sampleType: diseaseSampleType, category: SampleType.Category.DISEASE)
+        controlStpp = DomainFactory.createSampleTypePerProject(project: project, sampleType: controlSampleType, category: SampleType.Category.CONTROL)
+        individual = DomainFactory.createIndividual(project: project)
+        diseaseSample = DomainFactory.createSample(individual: individual, sampleType: diseaseSampleType)
+        controlSample = DomainFactory.createSample(individual: individual, sampleType: controlSampleType)
         diseaseMwp = DomainFactory.createMergingWorkPackage(sample: diseaseSample, seqType: wholeGenome, libraryPreparationKit: libraryPreparationKit)
         controlMwp = DomainFactory.createMergingWorkPackage(diseaseMwp, controlSample)
     }
@@ -106,7 +106,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testDiseaseIndividualMismatch() {
-        diseaseSample.individual = Individual.build(project: project)
+        diseaseSample.individual = DomainFactory.createIndividual(project: project)
         assert diseaseSample.save(flush: true)
         assertFindsNothing()
 
@@ -118,7 +118,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testControlIndividualMismatch() {
-        controlSample.individual = Individual.build(project: project)
+        controlSample.individual = DomainFactory.createIndividual(project: project)
         assert controlSample.save(flush: true)
         assertFindsNothing()
 
@@ -170,41 +170,41 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testDiseaseStppProjectMismatch() {
-        diseaseStpp.project = Project.build()
+        diseaseStpp.project = DomainFactory.createProject()
         assert diseaseStpp.save(flush: true)
         assertFindsNothing()
 
-        SampleTypePerProject.build(project: project, sampleType: diseaseSampleType, category: SampleType.Category.DISEASE)
+        DomainFactory.createSampleTypePerProject(project: project, sampleType: diseaseSampleType, category: SampleType.Category.DISEASE)
         assertFindsOne()
     }
 
     @Test
     void testControlStppProjectMismatch() {
-        controlStpp.project = Project.build()
+        controlStpp.project = DomainFactory.createProject()
         assert controlStpp.save(flush: true)
         assertFindsNothing()
 
-        SampleTypePerProject.build(project: project, sampleType: controlSampleType, category: SampleType.Category.CONTROL)
+        DomainFactory.createSampleTypePerProject(project: project, sampleType: controlSampleType, category: SampleType.Category.CONTROL)
         assertFindsOne()
     }
 
     @Test
     void testDiseaseStppSampleTypeMismatch() {
-        diseaseStpp.sampleType = SampleType.build()
+        diseaseStpp.sampleType = DomainFactory.createSampleType()
         assert diseaseStpp.save(flush: true)
         assertFindsNothing()
 
-        SampleTypePerProject.build(project: project, sampleType: diseaseSampleType, category: SampleType.Category.DISEASE)
+        DomainFactory.createSampleTypePerProject(project: project, sampleType: diseaseSampleType, category: SampleType.Category.DISEASE)
         assertFindsOne()
     }
 
     @Test
     void testControlStppSampleTypeMismatch() {
-        controlStpp.sampleType = SampleType.build()
+        controlStpp.sampleType = DomainFactory.createSampleType()
         assert controlStpp.save(flush: true)
         assertFindsNothing()
 
-        SampleTypePerProject.build(project: project, sampleType: controlSampleType, category: SampleType.Category.CONTROL)
+        DomainFactory.createSampleTypePerProject(project: project, sampleType: controlSampleType, category: SampleType.Category.CONTROL)
         assertFindsOne()
     }
 
@@ -247,20 +247,20 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testSamplePairWithOtherIndividualExists() {
-        Individual otherIndividual = Individual.build(project: project)
+        Individual otherIndividual = DomainFactory.createIndividual(project: project)
         DomainFactory.createSamplePair(
                 DomainFactory.createMergingWorkPackage(diseaseMwp,
-                        Sample.build(individual: otherIndividual, sampleType: diseaseSampleType)),
+                        DomainFactory.createSample(individual: otherIndividual, sampleType: diseaseSampleType)),
                 DomainFactory.createMergingWorkPackage(controlMwp,
-                        Sample.build(individual: otherIndividual, sampleType: controlSampleType)),
+                        DomainFactory.createSample(individual: otherIndividual, sampleType: controlSampleType)),
         )
         assertFindsOne()
     }
 
     @Test
     void testSamplePairWithOtherSampleType1Exists() {
-        final SampleType sampleType1 = SampleType.build()
-        SampleTypePerProject.build(project: project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
+        final SampleType sampleType1 = DomainFactory.createSampleType()
+        DomainFactory.createSampleTypePerProject(project: project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
         DomainFactory.createSamplePair(
                 DomainFactory.createMergingWorkPackage(diseaseMwp, sampleType1),
                 controlMwp,
@@ -272,7 +272,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     void testSamplePairWithOtherSampleType2Exists() {
         DomainFactory.createSamplePair(
                 diseaseMwp,
-                DomainFactory.createMergingWorkPackage(diseaseMwp, SampleType.build()),
+                DomainFactory.createMergingWorkPackage(diseaseMwp, DomainFactory.createSampleType()),
         )
         assertFindsOne()
     }

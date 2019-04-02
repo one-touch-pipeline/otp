@@ -43,6 +43,8 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
+import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyCheck
+import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.plan.*
@@ -545,6 +547,94 @@ class DomainFactory {
         return alignmentPass
     }
 
+    static AlignmentLog createAlignmentLog(Map properties = [:]) {
+        return createDomainObject(AlignmentLog, [
+                qcState        : AlignmentLog.QCState.NON,
+                executedBy     : AlignmentLog.Execution.UNKNOWN,
+                alignmentParams: { createAlignmentParams() },
+                seqTrack       : { createSeqTrack() },
+        ], properties)
+    }
+
+    static AlignmentParams createAlignmentParams(Map properties = [:]) {
+        return createDomainObject(AlignmentParams, [
+                pipeline: createSoftwareTool(),
+                genome  : "genome_${counter++}",
+                params  : "params_${counter++}",
+        ], properties)
+    }
+
+    static ConsistencyCheck createConsistencyCheck(Map properties = [:]) {
+        return createDomainObject(ConsistencyCheck, [
+                date: { new Date() },
+        ], properties)
+    }
+
+    static ConsistencyStatus createConsistencyStatus(Map properties = [:]) {
+        return createDomainObject(ConsistencyStatus, [
+                status          : ConsistencyStatus.Status.NO_FILE,
+                resolvedDate    : { new Date() },
+                consistencyCheck: { createConsistencyCheck() },
+                dataFile        : { createDataFile() },
+        ], properties)
+    }
+
+    static QualityAssessmentPass createQualityAssessmentPass(Map properties = [:]) {
+        return createDomainObject(QualityAssessmentPass, [
+                identifier      : counter++,
+                processedBamFile: { createProcessedBamFile() },
+        ], properties)
+    }
+
+    static Map qaJarQualityAssessmentProperties = [
+            duplicateR1                     : 0L,
+            duplicateR2                     : 0L,
+            properPairStrandConflict        : 0L,
+            referenceAgreement              : 0L,
+            referenceAgreementStrandConflict: 0L,
+            mappedQualityLongR1             : 0L,
+            mappedQualityLongR2             : 0L,
+            mappedLowQualityR1              : 0L,
+            mappedLowQualityR2              : 0L,
+            mappedShortR1                   : 0L,
+            mappedShortR2                   : 0L,
+            notMappedR1                     : 0L,
+            notMappedR2                     : 0L,
+            endReadAberration               : 0L,
+            insertSizeMean                  : 0.0,
+            insertSizeRMS                   : 0.0,
+            percentIncorrectPEorientation   : 0.0,
+            percentReadPairsMapToDiffChrom  : 0.0,
+    ]
+
+    static ChromosomeQualityAssessment createChromosomeQualityAssessment(Map properties = [:]) {
+        return createDomainObject(ChromosomeQualityAssessment, getDefaultValuesForAbstractQualityAssessment() + qaJarQualityAssessmentProperties + [
+                chromosomeName       : "chromosomeName_${counter++}",
+                qualityAssessmentPass: { createQualityAssessmentPass() },
+        ], properties)
+    }
+
+    static OverallQualityAssessment createOverallQualityAssessment(Map properties = [:]) {
+        return createDomainObject(OverallQualityAssessment, getDefaultValuesForAbstractQualityAssessment() + qaJarQualityAssessmentProperties + [
+                qualityAssessmentPass: { createQualityAssessmentPass() },
+        ], properties)
+    }
+
+    static PicardMarkDuplicatesMetrics createPicardMarkDuplicatesMetrics(Map properties = [:]) {
+        return createDomainObject(PicardMarkDuplicatesMetrics, [
+                metricsClass                : "metricsClass_${counter++}",
+                library                     : "library_${counter++}",
+                unpaired_reads_examined     : 0,
+                read_pairs_examined         : 0,
+                unmapped_reads              : 0,
+                unpaired_read_duplicates    : 0,
+                read_pair_duplicates        : 0,
+                read_pair_optical_duplicates: 0,
+                percent_duplication         : 0.0,
+                estimated_library_size      : 0,
+        ], properties)
+    }
+
     static MergingWorkPackage findOrSaveMergingWorkPackage(SeqTrack seqTrack, ReferenceGenome referenceGenome = null, Pipeline pipeline = null) {
         createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         if (referenceGenome == null || pipeline == null) {
@@ -643,7 +733,7 @@ class DomainFactory {
         return processedMergedBamFile
     }
 
-    static ProcessedMergedBamFile createFinishedProcessedMergedBamFile(Map properties = [:], boolean saveAndValidate = true) {
+    static ProcessedMergedBamFile createFinishedProcessedMergedBamFile(Map properties = [:]) {
         ProcessedMergedBamFile processedMergedBamFile = createProcessedMergedBamFileWithoutProcessedBamFile([
                 fileOperationStatus: FileOperationStatus.PROCESSED,
                 md5sum             : HelperUtils.randomMd5sum,
@@ -668,6 +758,18 @@ class DomainFactory {
                 bamFile   : bamFile,
         ])
         return bamFile
+    }
+
+    static ProcessedSaiFile createProcessedSaiFile(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(ProcessedSaiFile, [
+                fileExists        : true,
+                dateCreated       : { new Date() },
+                dateFromFileSystem: { new Date() },
+                fileSize          : { counter++ },
+                deletionDate      : null,
+                alignmentPass     : { createAlignmentPass() },
+                dataFile          : { createDataFile() },
+        ], properties, saveAndValidate)
     }
 
     static ProcessedBamFile createProcessedBamFile(Map properties = [:], boolean saveAndValidate = true) {
@@ -732,17 +834,7 @@ class DomainFactory {
      * Because RoddyMergedBamQa defines a unique constraint with 'class', the instance can only be created in integration tests.
      */
     static createRoddyMergedBamQa(Map properties = [:]) {
-        return createDomainObject(RoddyMergedBamQa, getDefaultValuesForAbstractQualityAssessment() + [
-                qualityAssessmentMergedPass  : {
-                    createQualityAssessmentMergedPass(
-                            abstractMergedBamFile: createRoddyBamFile()
-                    )
-                },
-                chromosome                   : RoddyQualityAssessment.ALL,
-                insertSizeCV                 : 0,
-                percentageMatesOnDifferentChr: 0,
-                genomeWithoutNCoverageQcBases: 0,
-        ], properties)
+        return createDomainObject(RoddyMergedBamQa, getDefaultValuesForAbstractQualityAssessment() + roddyQualityAssessmentProperties, properties)
     }
 
     /**
@@ -755,6 +847,60 @@ class DomainFactory {
                 ),
                 referenceLength            : 1,
         ] + properties)
+    }
+
+    static Map roddyQualityAssessmentProperties = [
+            qualityAssessmentMergedPass  : {
+                createQualityAssessmentMergedPass(
+                        abstractMergedBamFile: createRoddyBamFile()
+                )
+            },
+            chromosome                   : RoddyQualityAssessment.ALL,
+            insertSizeCV                 : 0,
+            percentageMatesOnDifferentChr: 0,
+            genomeWithoutNCoverageQcBases: 0,
+    ]
+
+    static RoddyLibraryQa createRoddyLibraryQa(Map properties = [:]) {
+        return createDomainObject(RoddyLibraryQa, getDefaultValuesForAbstractQualityAssessment() + roddyQualityAssessmentProperties + [
+                libraryDirectoryName: "libraryDirectoryName_${counter++}",
+        ], properties)
+    }
+
+    static RoddySingleLaneQa createRoddySingleLaneQa(Map properties = [:]) {
+        return createDomainObject(RoddySingleLaneQa, getDefaultValuesForAbstractQualityAssessment() + roddyQualityAssessmentProperties + [
+                seqTrack: { createSeqTrack() },
+        ], properties)
+    }
+
+    static MergingLog createMergingLog(Map properties = [:]) {
+        return createDomainObject(MergingLog, [
+                qcState        : MergingLog.QCState.NON,
+                executedBy     : MergingLog.Execution.UNKNOWN,
+                status         : MergingLog.Status.DECLARED,
+                alignmentParams: { createAlignmentParams() },
+                seqScan        : { createSeqScan() },
+        ], properties)
+    }
+
+    static MergedAlignmentDataFile createMergedAlignmentDataFile(Map properties = [:]) {
+        return createDomainObject(MergedAlignmentDataFile, [
+                fileSystem     : "fileSystem_${counter++}",
+                filePath       : "filePath_${counter++}",
+                fileName       : "fileName_${counter++}",
+                createdDate    : { new Date() },
+                fileSystemDate : { new Date() },
+                fileExists     : false,
+                indexFileExists: false,
+                fileSize       : 0,
+                mergingLog     : { createMergingLog() },
+        ], properties)
+    }
+    static MergingAssignment createMergingAssignment(Map properties = [:]) {
+        return createDomainObject(MergingAssignment, [
+                seqTrack: { createSeqTrack() },
+                seqScan: { createSeqScan() },
+        ], properties)
     }
 
     /**
@@ -770,15 +916,14 @@ class DomainFactory {
      * {@link SampleType}.
      */
     static MergingWorkPackage createMergingWorkPackage(MergingWorkPackage base, SampleType sampleType) {
-        Sample sample = new Sample(
+        Sample sample = createSample(
                 individual: base.individual,
                 sampleType: sampleType,
-                libraryPreparationKit: base.libraryPreparationKit,
         )
-        assert sample.save(failOnError: true)
         return createMergingWorkPackage(base, [
-                sample         : sample,
-                referenceGenome: base.referenceGenome,
+                sample               : sample,
+                referenceGenome      : base.referenceGenome,
+                libraryPreparationKit: base.libraryPreparationKit,
         ])
     }
 
@@ -813,7 +958,7 @@ class DomainFactory {
         MergingWorkPackage mwp = new MergingWorkPackage((mergingProperties + []).collectEntries {
             [it, base."${it}"]
         } + properties)
-        assert mwp.save(failOnError: true)
+        assert mwp.save(flush: true, failOnError: true)
         return mwp
     }
 
@@ -877,7 +1022,7 @@ class DomainFactory {
                 mergingWorkPackage1: mergingWorkPackage1,
                 mergingWorkPackage2: mergingWorkPackage2,
         ] + properties)
-        return samplePair.save(failOnError: true)
+        return samplePair.save(flush: true, failOnError: true)
     }
 
     static
@@ -1050,16 +1195,24 @@ class DomainFactory {
                     pipeline: it
             )
         }
+        createReferenceGenomeAndAnalysisProcessingOptions("${samplePair.mergingWorkPackage1.referenceGenome.name}, ${samplePair.mergingWorkPackage2.referenceGenome.name}")
+    }
 
-        [
+    static List<ProcessingOption> createReferenceGenomeAndAnalysisProcessingOptions(String value = null){
+        if (!value) {
+            value = createReferenceGenome().name
+        }
+
+        return [
                 OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
-        ].each {
+                OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME,
+        ].collect {
             createProcessingOptionLazy(
                     name: it,
                     type: null,
                     project: null,
-                    value: "${samplePair.mergingWorkPackage1.referenceGenome.name}, ${samplePair.mergingWorkPackage2.referenceGenome.name}",
+                    value: value,
             )
         }
     }
@@ -1414,13 +1567,13 @@ class DomainFactory {
 
     static ProjectRole createProjectRole(Map projectRoleProperties = [:]) {
         return createDomainObject(ProjectRole, [
-                name                  : 'roleName_' + (counter++),
+                name: 'roleName_' + (counter++),
         ], projectRoleProperties)
     }
 
     @Deprecated
     static Individual createIndividual(Map individualProperties = [:]) {
-        return proxyCore.createSampleType(individualProperties)
+        return proxyCore.createIndividual(individualProperties)
     }
 
     @Deprecated
@@ -1447,6 +1600,22 @@ class DomainFactory {
 
     static SeqType createSeqTypePaired(Map seqTypeProperties = [:], boolean saveAndValidate = true) {
         return createSeqType([libraryLayout: LibraryLayout.PAIRED] + seqTypeProperties, saveAndValidate)
+    }
+
+    @Deprecated
+    static SeqScan createSeqScan(Map properties = [:]) {
+        return createDomainObject(SeqScan, [
+                nLanes     : 0,
+                nBasePairs : 0,
+                coverage   : 0.0,
+                seqCenters : "seqCenters_${counter++}",
+                insertSize : "insertSize_${counter++}",
+                qcState    : SeqScan.QCState.NON,
+                dateCreated: { new Date() },
+                sample     : { createSample() },
+                seqType    : { createSeqType() },
+                seqPlatform: { createSeqPlatform() },
+        ], properties)
     }
 
     @Deprecated
@@ -1839,10 +2008,12 @@ class DomainFactory {
         ], properties)
     }
 
+    @Deprecated
     static ProcessingStep createAndSaveProcessingStep(ProcessParameterObject processParameterObject = null) {
         return createAndSaveProcessingStep("de.dkfz.tbi.otp.test.job.jobs.NonExistentDummyJob", processParameterObject)
     }
 
+    @Deprecated
     static ProcessingStep createAndSaveProcessingStep(String jobClass, ProcessParameterObject processParameterObject = null) {
         final JobExecutionPlan jep = new JobExecutionPlan(name: "DontCare" + sprintf('%016X', new Random().nextLong()), planVersion: 0, startJobBean: "DontCare")
         assert jep.save()
@@ -1898,6 +2069,20 @@ class DomainFactory {
                 className: className,
                 value    : value,
         ], [:])
+    }
+
+    static Parameter createParameter(Map properties = [:]) {
+        return createDomainObject(Parameter, [
+                type : { createParameterType() },
+        ], properties)
+    }
+
+    static ParameterType createParameterType(Map properties = [:]) {
+        return createDomainObject(ParameterType, [
+                name          : "parameterTypeName_${counter++}",
+                jobDefinition : { createJobDefinition() },
+                parameterUsage: ParameterUsage.INPUT,
+        ], properties)
     }
 
     static ClusterJob createClusterJob(
@@ -2060,11 +2245,17 @@ class DomainFactory {
         ], properties)
     }
 
+    static MetaDataKey createMetaDataKey(Map properties = [:]) {
+        return createDomainObject(MetaDataKey, [
+                name: "name_${counter++}",
+        ], properties)
+    }
+
     static MetaDataEntry createMetaDataEntry(Map properties = [:]) {
         return createDomainObject(MetaDataEntry, [
                 value   : "value_${counter++}",
                 dataFile: { createDataFile() },
-                key     : { createMetaDataKeyLazy() },
+                key     : { createMetaDataKey() },
                 status  : MetaDataEntry.Status.VALID,
                 source  : MetaDataEntry.Source.MDFILE,
         ], properties)
