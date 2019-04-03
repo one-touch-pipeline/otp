@@ -27,20 +27,18 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.joda.time.DateTime
 import org.joda.time.DateTimeUtils
-import org.junit.*
+import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.acls.domain.BasePermission
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.Comment
-import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 import static org.junit.Assert.*
 
 @Rollback
 @Integration
-class IndividualServiceTests extends AbstractIntegrationTest {
+class IndividualServiceTests implements UserAndRoles {
     IndividualService individualService
     private static long ARBITRARY_TIMESTAMP = 1337
 
@@ -59,7 +57,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
         Individual individual = mockIndividual()
         // a user should not be able to get the Individual
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 individualService.getIndividual("test")
             }
             // but trying to access an individual that does not exist should work
@@ -85,7 +83,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
         }
         // but a different user should still not be allowed to get the Individual
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 individualService.getIndividual("test")
             }
             // but trying to access an individual that does not exist should work
@@ -99,7 +97,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
         Individual individual = mockIndividual()
         // a user should not be able to get the Individual
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 individualService.getIndividual(individual.id)
             }
             // but trying to access an individual that does not exist should work
@@ -125,7 +123,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
         }
         // but a different user should still not be allowed to get the Individual
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 individualService.getIndividual(individual.id)
             }
             // but trying to access an individual that does not exist should work

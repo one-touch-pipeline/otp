@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
 import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitor
 import de.dkfz.tbi.otp.job.scheduler.Scheduler
+import de.dkfz.tbi.otp.job.scheduler.SchedulerTests
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -347,7 +348,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             throw new NumberFormatException(message)
         }
         scheduler.schedulerService.running.add(job)
-        shouldFail(NumberFormatException) {
+        TestCase.shouldFail(NumberFormatException) {
             scheduler.executeJob(job)
         }
         assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)

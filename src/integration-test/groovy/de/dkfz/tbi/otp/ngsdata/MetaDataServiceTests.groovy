@@ -30,7 +30,7 @@ import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.springframework.security.access.AccessDeniedException
 
-import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 
@@ -38,7 +38,7 @@ import static org.junit.Assert.*
 
 @Rollback
 @Integration
-class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRoles {
+class MetaDataServiceTests implements UserAndRoles {
     MetaDataService metaDataService
     AclUtilService aclUtilService
 
@@ -49,7 +49,6 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
 
     void setupData() {
         baseDir = temporaryFolder.newFolder()
-        // Setup logic here
         createUserAndRoles()
     }
 
@@ -68,7 +67,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
         setupData()
         MetaDataEntry entry = mockEntry()
 
-        shouldFail(AccessDeniedException) {
+        TestCase.shouldFail(AccessDeniedException) {
             doWithAnonymousAuth {
                 metaDataService.getMetaDataEntryById(entry.id)
             }
@@ -89,7 +88,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
         MetaDataEntry entry = mockEntry()
 
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.getMetaDataEntryById(entry.id)
             }
             // accessing a non-existing id should still work
@@ -138,7 +137,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
         setupData()
         MetaDataEntry entry = mockEntry()
 
-        shouldFail(AccessDeniedException) {
+        TestCase.shouldFail(AccessDeniedException) {
             doWithAnonymousAuth {
                 metaDataService.getMetaDataEntryById(entry.id)
             }
@@ -160,7 +159,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
         MetaDataEntry entry = mockEntry()
 
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.getMetaDataEntryById(entry.id)
             }
             // accessing a non-existing id should still work
@@ -177,7 +176,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
 
         // but another user should not have
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.getMetaDataEntryById(entry.id)
             }
             // accessing a non-existing id should still work
@@ -225,7 +224,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
     void testUpdateMetaDataEntryNoProjectAsAnonymous() {
         setupData()
         MetaDataEntry entry = mockEntry()
-        shouldFail(AccessDeniedException) {
+        TestCase.shouldFail(AccessDeniedException) {
             doWithAnonymousAuth {
                 metaDataService.updateMetaDataEntry(entry, "test2")
             }
@@ -241,7 +240,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
         setupData()
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.updateMetaDataEntry(entry, "test2")
             }
         }
@@ -281,7 +280,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
     void testUpdateMetaDataEntryWithProjectAsAnonymous() {
         setupData()
         MetaDataEntry entry = mockEntry()
-        shouldFail(AccessDeniedException) {
+        TestCase.shouldFail(AccessDeniedException) {
             doWithAnonymousAuth {
                 metaDataService.updateMetaDataEntry(entry, "test2")
             }
@@ -293,7 +292,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
         setupData()
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.updateMetaDataEntry(entry, "test2")
             }
         }
@@ -347,7 +346,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
         }
         // but a user should not
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.retrieveChangeLog(entry)
             }
         }
@@ -361,7 +360,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
         }
         // a user should still not be able to see it
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.retrieveChangeLog(entry)
             }
         }
@@ -385,7 +384,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
         }
         // but a user should not
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.retrieveChangeLog(entry)
             }
         }
@@ -399,7 +398,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
         }
         // a user should still not be able to see it
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.retrieveChangeLog(entry)
             }
         }
@@ -428,7 +427,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
         }
         // but another user should not
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.retrieveChangeLog(entry)
             }
         }
@@ -459,7 +458,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
         }
         // but a different user should not
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 metaDataService.retrieveChangeLog(entry)
             }
         }

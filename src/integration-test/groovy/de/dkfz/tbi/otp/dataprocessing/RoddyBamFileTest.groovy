@@ -137,7 +137,7 @@ class RoddyBamFileTest {
     void testIsConsistentAndContainsNoWithdrawnData_notWithdrawnBamFileWithWithdrawnBaseBamFile_shouldReturnErrorMessage() {
         RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
         bamFile.baseBamFile.withdrawn = true
-        assert ["base bam file is withdrawn for not withdrawn bam file ${bamFile}"] == bamFile.isConsistentAndContainsNoWithdrawnData()
+        assert ["base bam file is withdrawn for not withdrawn bam file ${bamFile}" as String] == bamFile.isConsistentAndContainsNoWithdrawnData()
     }
 
     @Test
@@ -178,8 +178,6 @@ class RoddyBamFileTest {
         assert ["total number of merged lanes is not equal to number of contained seq tracks: 5 vs 1"] == bamFile.isConsistentAndContainsNoWithdrawnData()
     }
 
-
-
     @Test
     void testGetContainedSeqTracks() {
         RoddyBamFile bamFile = createRoddyBamFileWithBaseBamFile()
@@ -207,15 +205,13 @@ class RoddyBamFileTest {
     }
 
     private RoddyBamFile createRoddyBamFileWithBaseBamFile() {
-        return DomainFactory.createRoddyBamFile(
-            DomainFactory.createRoddyBamFile(),
-            [md5sum: null,
-             fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
-             fileSize: -1,
+        return DomainFactory.createRoddyBamFile(DomainFactory.createRoddyBamFile(), [
+                md5sum: null,
+                fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
+                fileSize: -1,
             ]
         )
     }
-
 
     @Test
     void testWithdraw_singleFile_ShouldSetToWithdrawn() {

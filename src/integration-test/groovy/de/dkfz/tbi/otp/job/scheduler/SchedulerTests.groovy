@@ -22,20 +22,21 @@
 
 package de.dkfz.tbi.otp.job.scheduler
 
+import grails.core.GrailsApplication
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import grails.core.GrailsApplication
-import org.junit.*
+import org.junit.After
+import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
 import de.dkfz.tbi.otp.job.JobMailService
 import de.dkfz.tbi.otp.job.jobs.FailingTestJob
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 import java.util.regex.Pattern
 
@@ -43,7 +44,7 @@ import static org.junit.Assert.*
 
 @Rollback
 @Integration
-class SchedulerTests extends AbstractIntegrationTest {
+class SchedulerTests implements UserAndRoles {
 
     @Autowired
     GrailsApplication grailsApplication
@@ -79,7 +80,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         Job job = grailsApplication.mainContext.getBean("testEndStateAwareJob") as Job
         job.processingStep = step
         // There is no Created ProcessingStep update - execution should fail
-        shouldFail(RuntimeException) {
+        TestCase.shouldFail(RuntimeException) {
             scheduler.executeJob(job)
         }
         ProcessingStepUpdate update = new ProcessingStepUpdate(
@@ -87,9 +88,9 @@ class SchedulerTests extends AbstractIntegrationTest {
             state: ExecutionState.CREATED,
             previous: null,
             processingStep: step
-            )
+        )
         assertNotNull(update.save(flush: true))
-        shouldFail(InvalidStateException) {
+        TestCase.shouldFail(InvalidStateException) {
             job.getOutputParameters()
         }
         scheduler.executeJob(job)
@@ -129,7 +130,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         Job endStateAwareJob = grailsApplication.mainContext.getBean("testEndStateAwareJob") as Job
         endStateAwareJob.processingStep = step
         // There is no Created ProcessingStep update - execution should fail
-        shouldFail(RuntimeException) {
+        TestCase.shouldFail(RuntimeException) {
             scheduler.executeJob(endStateAwareJob)
         }
         ProcessingStepUpdate update = new ProcessingStepUpdate(
@@ -137,12 +138,12 @@ class SchedulerTests extends AbstractIntegrationTest {
             state: ExecutionState.CREATED,
             previous: null,
             processingStep: step
-            )
+        )
         assertNotNull(update.save(flush: true))
-        shouldFail(InvalidStateException) {
+        TestCase.shouldFail(InvalidStateException) {
             endStateAwareJob.getOutputParameters()
         }
-        shouldFail(InvalidStateException) {
+        TestCase.shouldFail(InvalidStateException) {
             endStateAwareJob.getEndState()
         }
         scheduler.restartHandlerService.metaClass.handleRestart = { Job job ->
@@ -190,7 +191,7 @@ class SchedulerTests extends AbstractIntegrationTest {
         scheduler.jobMailService.metaClass.sendErrorNotification = { Job job2, String message ->
             executedCounter++
         }
-        shouldFail(RuntimeException) {
+        TestCase.shouldFail(RuntimeException) {
             scheduler.executeJob(endStateAwareJob)
         }
         assert 1 == executedCounter
@@ -199,12 +200,12 @@ class SchedulerTests extends AbstractIntegrationTest {
             state: ExecutionState.CREATED,
             previous: null,
             processingStep: step
-            )
+        )
         assertNotNull(update.save(flush: true))
-        shouldFail(InvalidStateException) {
+        TestCase.shouldFail(InvalidStateException) {
             endStateAwareJob.getOutputParameters()
         }
-        shouldFail(InvalidStateException) {
+        TestCase.shouldFail(InvalidStateException) {
             endStateAwareJob.getEndState()
         }
         scheduler.executeJob(endStateAwareJob)
@@ -250,20 +251,19 @@ class SchedulerTests extends AbstractIntegrationTest {
         DomainFactory.createProcessingStepUpdate(
             state: ExecutionState.CREATED,
             processingStep: step
-            )
+        )
         boolean notified = false
         scheduler.jobMailService.metaClass.sendErrorNotification = { Job job2, Throwable exceptionToBeHandled ->
             if (notified) {
-                assert false: 'called twiced'
+                assert false: 'called twice'
             } else {
                 notified = true
             }
         }
 
-        String message = shouldFail(Exception) {
+        TestCase.shouldFailWithMessageContaining(Exception, FailingTestJob.EXCEPTION_MESSAGE) {
             scheduler.executeJob(job)
         }
-        assert message.contains(FailingTestJob.EXCEPTION_MESSAGE)
         step.refresh()
         List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step).sort { it.id }
         assert expectedExecutionStates == updates*.state
@@ -292,7 +292,7 @@ class SchedulerTests extends AbstractIntegrationTest {
             state: ExecutionState.CREATED,
             previous: null,
             processingStep: step
-            )
+        )
         assertNotNull(update.save(flush: true))
         // run the Job
         Job job = grailsApplication.mainContext.getBean("testJob") as Job
@@ -332,7 +332,7 @@ class SchedulerTests extends AbstractIntegrationTest {
             state: ExecutionState.CREATED,
             previous: null,
             processingStep: step
-            )
+        )
         assertNotNull(update.save(flush: true))
         Job job = grailsApplication.mainContext.getBean("directTestJob") as Job
         job.processingStep = step
@@ -400,5 +400,51 @@ class SchedulerTests extends AbstractIntegrationTest {
         assertEquals(ExecutionState.FINISHED, updates[2].state)
         assertEquals(ExecutionState.SUCCESS, updates[3].state)
         assertTrue(step.process.finished)
+    }
+
+    /**
+     * Creates a JobDefinition for the testJob.
+     * @param name Name of the JobDefinition
+     * @param jep The JobExecutionPlan this JobDefinition will belong to
+     * @param previous The previous Job Execution plan (optional)
+     * @return Created JobDefinition
+     * @deprecated this was copied here to be able to delete AbstractIntegrationTest. Don't use it, refactor it.
+     */
+    @Deprecated
+    private JobDefinition createTestJob(String name, JobExecutionPlan jep, JobDefinition previous = null) {
+        JobDefinition jobDefinition = new JobDefinition(name: name, bean: "testJob", plan: jep, previous: previous)
+        assertNotNull(jobDefinition.save())
+        ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+        ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+        assertNotNull(test.save())
+        assertNotNull(test2.save())
+        assertNotNull(input.save())
+        assertNotNull(input2.save(flush: true))
+        return jobDefinition
+    }
+
+    /**
+     * Creates a JobDefinition for the testEndStateAwareJob.
+     * @param name Name of the JobDefinition
+     * @param jep The JobExecutionPlan this JobDefinition will belong to
+     * @param previous The previous Job Execution plan (optional)
+     * @return Created JobDefinition
+     * @deprecated this was copied here to be able to delete AbstractIntegrationTest. Don't use it, refactor it.
+     */
+    @Deprecated
+    protected JobDefinition createTestEndStateAwareJob(String name, JobExecutionPlan jep, JobDefinition previous = null, String beanName = "testEndStateAwareJob") {
+        JobDefinition jobDefinition = new JobDefinition(name: name, bean: beanName, plan: jep, previous: previous)
+        assertNotNull(jobDefinition.save())
+        ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+        ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+        assertNotNull(test.save())
+        assertNotNull(test2.save())
+        assertNotNull(input.save())
+        assertNotNull(input2.save(flush: true))
+        return jobDefinition
     }
 }

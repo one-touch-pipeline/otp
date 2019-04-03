@@ -23,22 +23,23 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.test.mixin.integration.Integration
+import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.junit.*
+import org.junit.Ignore
+import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
 
-import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
-import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 import static org.junit.Assert.*
 
 @Rollback
 @Integration
-class RunServiceTests extends AbstractIntegrationTest {
+class RunServiceTests implements UserAndRoles {
     RunService runService
 
     void setupData() {
@@ -66,7 +67,7 @@ class RunServiceTests extends AbstractIntegrationTest {
             }
         }
         [USER, TESTUSER].each { String username ->
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 SpringSecurityUtils.doWithAuth(username) {
                     runService.getRun(run.id)
                 }
@@ -118,7 +119,7 @@ class RunServiceTests extends AbstractIntegrationTest {
             }
         }
         [USER, TESTUSER].each { String username ->
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 SpringSecurityUtils.doWithAuth(username) {
                     runService.retrieveProcessParameters(run)
                 }
@@ -336,5 +337,28 @@ class RunServiceTests extends AbstractIntegrationTest {
         AlignmentLog log = AlignmentLog.findOrCreateBySeqTrackAndAlignmentParams(seqTrack, params)
         assertNotNull(log.save())
         return log
+    }
+
+    /**
+     * Creates a JobDefinition for the testJob.
+     * @param name Name of the JobDefinition
+     * @param jep The JobExecutionPlan this JobDefinition will belong to
+     * @param previous The previous Job Execution plan (optional)
+     * @return Created JobDefinition
+     * @deprecated this was copied here to be able to delete AbstractIntegrationTest. Don't use it, refactor it.
+     */
+    @Deprecated
+    private JobDefinition createTestJob(String name, JobExecutionPlan jep, JobDefinition previous = null) {
+        JobDefinition jobDefinition = new JobDefinition(name: name, bean: "testJob", plan: jep, previous: previous)
+        assertNotNull(jobDefinition.save())
+        ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+        ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+        assertNotNull(test.save())
+        assertNotNull(test2.save())
+        assertNotNull(input.save())
+        assertNotNull(input2.save(flush: true))
+        return jobDefinition
     }
 }

@@ -90,11 +90,7 @@ class SeqTrackTests {
         seqTrack.log("Test")
         seqTrack.log("Test2")
         TestCase.assertContainSame(seqTrack.logMessages*.message, ["Test", "Test2"])
-        shouldFail {
-            assert seqTrack.logMessages.message[0] == "Test2"
-        }
-        shouldFail {
-            assert seqTrack.logMessages.message[1] == "Test"
-        }
+        assert seqTrack.logMessages.message[0] != "Test2"
+        assert seqTrack.logMessages.message[1] != "Test"
     }
 }

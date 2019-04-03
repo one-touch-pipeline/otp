@@ -264,7 +264,6 @@ class DataSwapServiceTests implements UserAndRoles {
         assert sampleIdentifierName != sampleIdentifier.name
     }
 
-
     @Test
     void test_getSingleSampleForIndividualAndSampleType_singleSample() {
         setupData()
@@ -281,11 +280,10 @@ class DataSwapServiceTests implements UserAndRoles {
         Individual individual = DomainFactory.createIndividual()
         SampleType sampleType = DomainFactory.createSampleType()
 
-        shouldFail IllegalArgumentException, {
+        TestCase.shouldFail(IllegalArgumentException) {
             dataSwapService.getSingleSampleForIndividualAndSampleType(individual, sampleType, new StringBuilder())
         }
     }
-
 
     @Test
     void test_getAndShowSeqTracksForSample() {
@@ -303,7 +301,7 @@ class DataSwapServiceTests implements UserAndRoles {
         List<SeqTrack> seqTracks = [seqTrack]
         Map<String, String> dataFileMap = [:]
 
-        shouldFail IllegalArgumentException, {
+        TestCase.shouldFail(IllegalArgumentException) {
             dataSwapService.getAndValidateAndShowDataFilesForSeqTracks(seqTracks, dataFileMap, new StringBuilder())
         }
     }
@@ -514,7 +512,6 @@ class DataSwapServiceTests implements UserAndRoles {
         assert !AlignmentPass.get(alignmentPass.id)
     }
 
-
     @Test
     void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_RoddyBamFile() throws Exception {
         setupData()
@@ -527,7 +524,6 @@ class DataSwapServiceTests implements UserAndRoles {
         assert !RoddyBamFile.get(roddyBamFile.id)
         assert !MergingWorkPackage.get(roddyBamFile.workPackage.id)
     }
-
 
     @Test
     void testDeleteSeqScanAndCorrespondingInformation() throws Exception {
@@ -622,17 +618,15 @@ class DataSwapServiceTests implements UserAndRoles {
         }
     }
 
-
     @Test
     void testDeleteProcessingFilesOfProject_EmptyProject() {
         setupData()
         Project project = DomainFactory.createProject()
 
-        shouldFail AssertionError, {
+        TestCase.shouldFail(AssertionError) {
             dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
         }
     }
-
 
     @Test
     void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesMissing() {
@@ -640,11 +634,10 @@ class DataSwapServiceTests implements UserAndRoles {
         SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         Project project = seqTrack.project
 
-        shouldFail FileNotFoundException, {
+        TestCase.shouldFail(FileNotFoundException) {
             dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
         }
     }
-
 
     @Test
     void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesAvailable() {
@@ -660,7 +653,7 @@ class DataSwapServiceTests implements UserAndRoles {
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
         markFilesAsLinked(SeqTrack.list())
 
-        shouldFail FileNotFoundException, {
+        TestCase.shouldFail(FileNotFoundException) {
             dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
         }
 
@@ -682,7 +675,7 @@ class DataSwapServiceTests implements UserAndRoles {
         Project project = seqTrack.project
         markFilesAsWithdrawn([seqTrack])
 
-        shouldFail FileNotFoundException, {
+        TestCase.shouldFail(FileNotFoundException) {
             dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true)
         }
     }
@@ -714,7 +707,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
         Project project = DomainFactory.createProject()
 
-        shouldFail AssertionError, {
+        TestCase.shouldFail(AssertionError) {
             assert [st] == dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path, true, true, [st])
         }
     }
@@ -769,7 +762,6 @@ class DataSwapServiceTests implements UserAndRoles {
         }
     }
 
-
     private ProcessedMergedBamFile deleteProcessingFilesOfProject_PMBF_Setup() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
@@ -787,14 +779,12 @@ class DataSwapServiceTests implements UserAndRoles {
         return bamFile
     }
 
-
     private void deleteProcessingFilesOfProject_PMBF_Validation() {
         assert AbstractBamFile.list().empty
         assert MergingWorkPackage.list().empty
         assert AlignmentPass.list().empty
         assert MergingPass.list().empty
     }
-
 
     @Test
     void testDeleteProcessingFilesOfProject_PMBF() {
@@ -811,7 +801,6 @@ class DataSwapServiceTests implements UserAndRoles {
 
         deleteProcessingFilesOfProject_PMBF_Validation()
     }
-
 
     @Test
     void testDeleteProcessingFilesOfProject_PMBF_notVerified() {
@@ -841,12 +830,10 @@ class DataSwapServiceTests implements UserAndRoles {
         return bamFile
     }
 
-
     private void deleteProcessingFilesOfProject_RBF_Validation() {
         assert AbstractBamFile.list().empty
         assert MergingWorkPackage.list().empty
     }
-
 
     @Test
     void testDeleteProcessingFilesOfProject_RBF() {
@@ -863,7 +850,6 @@ class DataSwapServiceTests implements UserAndRoles {
         deleteProcessingFilesOfProject_RBF_Validation()
     }
 
-
     @Test
     void testDeleteProcessingFilesOfProject_RBF_notVerified() {
         setupData()
@@ -878,7 +864,6 @@ class DataSwapServiceTests implements UserAndRoles {
 
         deleteProcessingFilesOfProject_RBF_Validation()
     }
-
 
     private AbstractSnvCallingInstance deleteProcessingFilesOfProject_RBF_SNV_Setup() {
         AbstractSnvCallingInstance snvCallingInstance = DomainFactory.createSnvInstanceWithRoddyBamFiles(processingState: AnalysisProcessingStates.FINISHED)
@@ -897,7 +882,6 @@ class DataSwapServiceTests implements UserAndRoles {
         return snvCallingInstance
     }
 
-
     private void deleteProcessingFilesOfProject_RBF_SNV_Validation(AbstractSnvCallingInstance snvCallingInstance) {
         File snvFolder = snvCallingInstance.samplePair.getSnvSamplePairPath().getAbsoluteDataManagementPath()
 
@@ -907,7 +891,6 @@ class DataSwapServiceTests implements UserAndRoles {
         assert AbstractSnvCallingInstance.list().empty
         assert SamplePair.list().empty
     }
-
 
     @Test
     void testDeleteProcessingFilesOfProject_RBF_SNV() {
@@ -919,7 +902,6 @@ class DataSwapServiceTests implements UserAndRoles {
         deleteProcessingFilesOfProject_RBF_SNV_Validation(snvCallingInstance)
     }
 
-
     @Test
     void testDeleteProcessingFilesOfProject_RBF_SNV_notVerified() {
         setupData()
@@ -929,7 +911,6 @@ class DataSwapServiceTests implements UserAndRoles {
 
         deleteProcessingFilesOfProject_RBF_SNV_Validation(snvCallingInstance)
     }
-
 
     private ExternallyProcessedMergedBamFile deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup() {
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
@@ -951,7 +932,6 @@ class DataSwapServiceTests implements UserAndRoles {
 
         return bamFile
     }
-
 
     private void deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(ExternallyProcessedMergedBamFile bamFile) {
         File nonOtpFolder = bamFile.getNonOtpFolder()
@@ -993,7 +973,6 @@ class DataSwapServiceTests implements UserAndRoles {
 
         deleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified_Validation(bamFile)
     }
-
 
     private List<File> createRoddyFileListToDelete(RoddyBamFile roddyBamFile) {
         [

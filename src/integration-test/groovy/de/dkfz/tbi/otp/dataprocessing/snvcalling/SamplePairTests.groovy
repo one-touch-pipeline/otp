@@ -103,7 +103,9 @@ class SamplePairTests {
 
         SamplePair.metaClass.getSeqType = { -> return mergingWorkPackage1.seqType }
 
-        TestCase.shouldFailWithMessageContaining(ValidationException, "seqType", { samplePair.save(flush: true) })
+        TestCase.shouldFailWithMessageContaining(ValidationException, "seqType") {
+            samplePair.save(flush: true)
+        }
     }
 
     @Test

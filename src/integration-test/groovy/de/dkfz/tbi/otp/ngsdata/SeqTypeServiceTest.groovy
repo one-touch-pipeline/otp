@@ -26,16 +26,16 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.acl.AclUtilService
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.junit.Before
 import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
 
-import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 @Rollback
 @Integration
-class SeqTypeServiceTest extends AbstractIntegrationTest {
+class SeqTypeServiceTest implements UserAndRoles {
 
     SeqTypeService seqTypeService
 
@@ -88,7 +88,7 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
 
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 seqTypeService.alignableSeqTypesByProject(seqTrack.project)
             }
         }

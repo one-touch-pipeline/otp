@@ -283,9 +283,9 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertTrue(schedulerService.running.isEmpty())
         schedulerService.schedule()
         // mapping the parameters from the second Job should have failed
-        assert shouldFail(SchedulerException, {
+        TestCase.shouldFail(SchedulerException) {
             schedulerService.schedule()
-        })
+        }
         assertQueueAndRunningToBeEmpty()
         assertFalse(process.finished)
         // the last JobDefinition should have a ProcessingStep with a created and a failed update
@@ -823,9 +823,9 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         schedulerService.createProcess(job, [])
 
         // schedule
-        assert shouldFail(SchedulerException, {
+        TestCase.shouldFail(SchedulerException) {
             schedulerService.schedule()
-        })
+        }
     }
 
     @Test
@@ -1139,8 +1139,8 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
         assertNotNull(process.save())
         ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process)
         step.metaClass.belongsToMultiJob = { -> return false }
-        assertNotNull(step.save())
-        shouldFail(IncorrectProcessingException) {
+        assertNotNull(step.save(flush: true))
+        TestCase.shouldFail(IncorrectProcessingException) {
             schedulerService.restartProcessingStep(step, false)
         }
         mockProcessingStepAsFailed(step)
@@ -1541,7 +1541,9 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
     void testIsJobResumable_sometimesResumable_noRunningJob() {
         setupData()
         final ProcessingStep processingStep = new ProcessingStep(jobClass: SometimesResumableTestJob.class.name)
-        shouldFail RuntimeException, { schedulerService.isJobResumable(processingStep) }
+        TestCase.shouldFail(RuntimeException) {
+            schedulerService.isJobResumable(processingStep)
+        }
     }
 
     private void assertQueueAndRunningToBeEmpty() {
@@ -1594,5 +1596,28 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
                 processingStep: step
         )
         assertNotNull(update.save(flush: true))
+    }
+
+    /**
+     * Creates a JobDefinition for the testJob.
+     * @param name Name of the JobDefinition
+     * @param jep The JobExecutionPlan this JobDefinition will belong to
+     * @param previous The previous Job Execution plan (optional)
+     * @return Created JobDefinition
+     * @deprecated this was copied here to be able to delete AbstractIntegrationTest. Don't use it, refactor it.
+     */
+    @Deprecated
+    private JobDefinition createTestJob(String name, JobExecutionPlan jep, JobDefinition previous = null) {
+        JobDefinition jobDefinition = new JobDefinition(name: name, bean: "testJob", plan: jep, previous: previous)
+        assertNotNull(jobDefinition.save(flush: true))
+        ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+        ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+        assertNotNull(test.save(flush: true))
+        assertNotNull(test2.save(flush: true))
+        assertNotNull(input.save(flush: true))
+        assertNotNull(input2.save(flush: true))
+        return jobDefinition
     }
 }

@@ -24,15 +24,15 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.junit.*
+import org.junit.After
+import org.junit.Test
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
 
 @Rollback
 @Integration
-class SeqTrackServiceTests extends AbstractIntegrationTest {
+class SeqTrackServiceTests {
 
     SeqTrackService seqTrackService
 
@@ -68,7 +68,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     @Test
     void testReturnExternallyProcessedMergedBamFiles_InputIsNull_ShouldFail() {
         setupData()
-        shouldFail(IllegalArgumentException) {
+        TestCase.shouldFail(IllegalArgumentException) {
             seqTrackService.returnExternallyProcessedMergedBamFiles(null)
         }
     }

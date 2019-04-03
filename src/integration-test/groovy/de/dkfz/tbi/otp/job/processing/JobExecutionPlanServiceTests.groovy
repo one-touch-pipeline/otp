@@ -29,6 +29,7 @@ import grails.util.Holders
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.job.jobs.TestSingletonStartJob
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -493,7 +494,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
             assertSame(plan, jobExecutionPlanService.getPlan(plan.id))
         }
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getPlan(plan.id)
             }
         }
@@ -510,7 +511,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
             jobExecutionPlanService.enablePlan(plan)
         }
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.enablePlan(plan)
             }
         }
@@ -527,7 +528,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
             jobExecutionPlanService.disablePlan(plan)
         }
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.disablePlan(plan)
             }
         }
@@ -562,7 +563,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
             assertTrue(jobExecutionPlanService.getAllProcesses(plan).empty)
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getAllProcesses(plan)
             }
         }
@@ -579,7 +580,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
             assertNull(jobExecutionPlanService.getLatestUpdatesForPlan(plan).empty)
         }
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getLatestUpdatesForPlan(plan)
             }
         }
@@ -596,7 +597,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
             assertFalse(jobExecutionPlanService.isProcessRunning(plan))
         }
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.isProcessRunning(plan)
             }
         }
@@ -613,7 +614,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
             assertEquals(0, jobExecutionPlanService.getProcessCount(plan))
         }
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getProcessCount(plan)
             }
         }
@@ -630,7 +631,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
             assertNull(jobExecutionPlanService.getLastExecutedProcess(plan))
         }
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getLastExecutedProcess(plan)
             }
         }
@@ -647,7 +648,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
             assertEquals(0, jobExecutionPlanService.getNumberOfProcesses(plan))
         }
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.getNumberOfProcesses(plan)
             }
         }
@@ -667,7 +668,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
             jobExecutionPlanService.planInformation(plan)
         }
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 jobExecutionPlanService.planInformation(plan)
             }
         }

@@ -29,6 +29,7 @@ import org.junit.Before
 import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
@@ -110,7 +111,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
     void testFindAllByProjectAndSeqType_userWithoutAccess() {
         setupData()
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, overallQualityAssessmentMerged.seqType)
             }
         }

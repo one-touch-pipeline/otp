@@ -26,22 +26,23 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.acl.AclUtilService
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.apache.commons.io.FileUtils
 import grails.web.mapping.LinkGenerator
-import org.junit.*
+import org.apache.commons.io.FileUtils
+import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AccessDeniedException
-import org.springframework.security.acls.domain.BasePermission
 
-import de.dkfz.tbi.otp.integration.AbstractIntegrationTest
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
+import de.dkfz.tbi.otp.security.UserAndRoles
 
 import static org.junit.Assert.*
 
 @Rollback
 @Integration
-class ProcessServiceTests extends AbstractIntegrationTest {
+class ProcessServiceTests implements UserAndRoles {
+
     AclUtilService aclUtilService
     ErrorLogService errorLogService
 
@@ -55,9 +56,6 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         createUserAndRoles()
     }
 
-    @After
-    void tearDown() {
-    }
 
     /**
      * Tests that getProcess returns null in case of non existing Process
@@ -109,8 +107,9 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             aclUtilService.addPermission(plan, TESTUSER, BasePermission.READ)
         }
+
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getProcess(process.id)
             }
         }
@@ -130,7 +129,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             assertTrue(processService.getAllProcessingSteps(process).empty)
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getAllProcessingSteps(process)
             }
         }
@@ -150,7 +149,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             assertEquals(0, processService.getNumberOfProcessessingSteps(process))
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getNumberOfProcessessingSteps(process)
             }
         }
@@ -209,7 +208,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             processService.getProcessingStep(step.id)
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getProcessingStep(step.id)
             }
         }
@@ -227,7 +226,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             assertTrue(processService.getAllUpdates(step).empty)
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getAllUpdates(step)
             }
         }
@@ -245,7 +244,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             assertEquals(0, processService.getNumberOfUpdates(step))
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getNumberOfUpdates(step)
             }
         }
@@ -265,7 +264,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             assertNull(processService.getLatestProcessingStep(process))
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getLatestProcessingStep(process)
             }
         }
@@ -289,10 +288,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             assertEquals(ExecutionState.CREATED, processService.getState(step))
         }
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getState(process)
             }
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getState(step)
             }
         }
@@ -312,10 +311,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             assertNull(processService.getError(step))
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getError(process)
             }
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getError(step)
             }
         }
@@ -339,10 +338,10 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             assertEquals(update.date, processService.getLastUpdate(step))
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getLastUpdate(process)
             }
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getLastUpdate(step)
             }
         }
@@ -361,7 +360,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             assertSame(update, processService.getLatestProcessingStepUpdate(step))
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getLatestProcessingStepUpdate(step)
             }
         }
@@ -380,7 +379,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             assertEquals(update.date, processService.getFirstUpdate(step))
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getFirstUpdate(step)
             }
         }
@@ -399,7 +398,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             assertNull(processService.getProcessingStepDuration(step))
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.getProcessingStepDuration(step)
             }
         }
@@ -422,7 +421,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
             processService.processInformation(process)
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.processInformation(process)
             }
         }
@@ -442,12 +441,12 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         mockProcessingStepUpdate(step)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            shouldFail(IncorrectProcessingException) {
+            TestCase.shouldFail(IncorrectProcessingException) {
                 processService.restartProcessingStep(step)
             }
         }
         SpringSecurityUtils.doWithAuth(USER) {
-            shouldFail(AccessDeniedException) {
+            TestCase.shouldFail(AccessDeniedException) {
                 processService.restartProcessingStep(step)
             }
         }
@@ -559,5 +558,28 @@ class ProcessServiceTests extends AbstractIntegrationTest {
                         )
         assertNotNull(processingError.save(flush: true))
         return processingError
+    }
+
+    /**
+     * Creates a JobDefinition for the testJob.
+     * @param name Name of the JobDefinition
+     * @param jep The JobExecutionPlan this JobDefinition will belong to
+     * @param previous The previous Job Execution plan (optional)
+     * @return Created JobDefinition
+     * @deprecated this was copied here to be able to delete AbstractIntegrationTest. Don't use it, refactor it.
+     */
+    @Deprecated
+    private JobDefinition createTestJob(String name, JobExecutionPlan jep, JobDefinition previous = null) {
+        JobDefinition jobDefinition = new JobDefinition(name: name, bean: "testJob", plan: jep, previous: previous)
+        assertNotNull(jobDefinition.save())
+        ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
+        ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+        ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
+        assertNotNull(test.save())
+        assertNotNull(test2.save())
+        assertNotNull(input.save())
+        assertNotNull(input2.save(flush: true))
+        return jobDefinition
     }
 }

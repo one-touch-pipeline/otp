@@ -582,7 +582,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
         assert qa.save(flush: true)
         assert roddyBamFile.numberOfReadsFromQa < roddyBamFile.numberOfReadsFromFastQc
 
-        assert shouldFail(AssertionError) {
+        assert TestCase.shouldFail(AssertionError) {
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
         } ==~ /.*bam file (.*) has less number of reads than the sum of all fastqc (.*).*/
     }
@@ -593,7 +593,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
         setUp_allFine()
         roddyBamFile.metaClass.isMostRecentBamFile = { -> false }
 
-        assert shouldFail(AssertionError) {
+        assert TestCase.shouldFail(AssertionError) {
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
         } ==~ /.*The BamFile .* is not the most recent one.*/
     }
@@ -605,7 +605,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.DECLARED
         roddyBamFile.save(flush: true, failOnError: true)
 
-        assert shouldFail(AssertionError) {
+        assert TestCase.shouldFail(AssertionError) {
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
         }.contains('assert [FileOperationStatus.NEEDS_PROCESSING, FileOperationStatus.INPROGRESS].contains(roddyBamFile.fileOperationStatus)')
     }
@@ -624,7 +624,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
                 config             : roddyBamFile.config,
         ])
 
-        assert shouldFail(AssertionError) {
+        assert TestCase.shouldFail(AssertionError) {
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
         }.contains('Collection contains 2 elements. Expected 1.')
     }

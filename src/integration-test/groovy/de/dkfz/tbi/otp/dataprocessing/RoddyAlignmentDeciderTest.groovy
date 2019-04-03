@@ -27,6 +27,7 @@ import grails.transaction.Rollback
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -362,9 +363,9 @@ class RoddyAlignmentDeciderTest {
                 pipeline: decider.getPipeline(seqTrack),
         )
 
-        assert shouldFail {
+        TestCase.shouldFailWithMessageContaining(RuntimeException, "Reference genome is not configured") {
             decider.ensureConfigurationIsComplete(seqTrack)
-        }.contains("Reference genome is not configured")
+        }
     }
 
     @Test
