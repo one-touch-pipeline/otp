@@ -28,6 +28,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 
 import java.nio.file.*
 import java.util.stream.Collectors
+import java.util.stream.Stream
 
 class CellRangerWorkflowService {
 
@@ -55,13 +56,20 @@ class CellRangerWorkflowService {
         Path outputDirectory = fileSystem.getPath(singleCellBamFile.outputDirectory.absolutePath)
         Path resultDirectory = fileSystem.getPath(singleCellBamFile.resultDirectory.absolutePath)
 
-        List<Path> pathToDelete = Files.list(outputDirectory).collect(Collectors.toList())
-        assert pathToDelete.remove(resultDirectory)
+        Stream<Path> stream = null
+        try {
+            stream = Files.list(outputDirectory)
+            List<Path> pathToDelete = stream.collect(Collectors.toList())
+            assert pathToDelete.remove(resultDirectory)
 
-        pathToDelete.each {
-            fileService.deleteDirectoryRecursively(it)
+            pathToDelete.each {
+                fileService.deleteDirectoryRecursively(it)
+            }
+            assert Files.exists(resultDirectory)
+
+        } finally {
+            stream?.close()
         }
-        assert Files.exists(resultDirectory)
     }
 
     void correctFilePermissions(SingleCellBamFile singleCellBamFile) {

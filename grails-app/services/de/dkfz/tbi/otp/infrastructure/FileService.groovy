@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.utils.ThreadUtils
 import java.nio.file.*
 import java.nio.file.attribute.*
 import java.time.Duration
+import java.util.stream.Stream
 
 /**
  * Helper methods to work with file paths
@@ -143,7 +144,14 @@ class FileService {
 
     static void ensureDirIsReadableAndNotEmpty(final Path dir) {
         ensureDirIsReadable(dir)
-        assert Files.list(dir).count() != 0
+        Stream<Path> stream = null
+        try {
+            stream = Files.list(dir)
+            assert stream.count() != 0
+        } finally {
+            stream?.close()
+
+        }
     }
 
     static void ensureDirIsReadable(final Path dir) {
@@ -164,11 +172,20 @@ class FileService {
      * Waits until the specified file system object exists or the specified timeout elapsed.
      */
     static void waitUntilExists(Path file) {
+        Stream<Path> stream = null
         assert ThreadUtils.waitFor({
             try {
-                Files.isDirectory(file) ? Files.list(file) : Files.isReadable(file)
+                if (Files.isDirectory(file)){
+                    stream = Files.list(file)
+
+                } else {
+                    Files.isReadable(file)
+                }
             } catch (NoSuchFileException ignored) {
             } catch (AccessDeniedException ignored) {
+            } finally {
+                stream?.close()
+                stream = null
             }
             Files.exists(file)
         }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES): "${file} not found."
@@ -178,12 +195,20 @@ class FileService {
      * Waits until the specified file system object does not exist or the specified timeout elapsed.
      */
     static void waitUntilDoesNotExist(Path file) {
+        Stream<Path> stream = null
         assert ThreadUtils.waitFor({
             try {
-                Files.isDirectory(file) ? Files.list(file) : Files.isReadable(file)
+                if (Files.isDirectory(file)){
+                    stream = Files.list(file)
+                } else {
+                    Files.isReadable(file)
+                }
             } catch (AccessDeniedException ignored) {
             } catch (NoSuchFileException ignored) {
                 return true
+            } finally {
+                stream?.close()
+                stream = null
             }
             !Files.exists(file)
         }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES): "${file} still exists."
@@ -379,10 +404,16 @@ class FileService {
     @SuppressWarnings('ThrowRuntimeException')
     private void correctPathPermissionRecursiveInternal(Path path) {
         if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-            Files.list(path).each {
-                correctPathPermissionRecursiveInternal(it)
+            Stream<Path> stream = null
+            try  {
+                stream = Files.list(path)
+                stream.each {
+                    correctPathPermissionRecursiveInternal(it)
+                }
+                setPermission(path, DEFAULT_DIRECTORY_PERMISSION)
+            } finally {
+                stream?.close()
             }
-            setPermission(path, DEFAULT_DIRECTORY_PERMISSION)
         } else if (Files.isSymbolicLink(path)) {
             //since a link itself has no permission, nothing is to do
             return

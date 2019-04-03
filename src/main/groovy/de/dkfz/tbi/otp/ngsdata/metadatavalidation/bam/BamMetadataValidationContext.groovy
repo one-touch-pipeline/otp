@@ -32,6 +32,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problems
 
 import java.nio.file.*
+import java.util.stream.Stream
 
 class BamMetadataValidationContext extends AbstractMetadataValidationContext {
 
@@ -97,18 +98,25 @@ class BamMetadataValidationContext extends AbstractMetadataValidationContext {
         }
     }
 
-    static checkFilesInDirectory(Path furtherFile, Problems problems) {
-        if (Files.list(furtherFile).count() == 0) {
-            problems.addProblem(Collections.emptySet(), Level.WARNING, "'The folder ${furtherFile}' is empty.")
-        }
-        for (Path file: Files.list(furtherFile)) {
-            if (Files.isRegularFile(file)) {
-                checkFile(file, problems)
-            } else if (Files.isDirectory(file)) {
-                checkFilesInDirectory(file, problems)
+    static void checkFilesInDirectory(Path furtherFile, Problems problems) {
+        Stream<Path> stream = null
+        try {
+            stream = Files.list(furtherFile)
+            if (stream.count() == 0) {
+                problems.addProblem(Collections.emptySet(), Level.WARNING, "'The folder ${furtherFile}' is empty.")
             } else {
-                problems.addProblem(Collections.emptySet(), Level.ERROR, "'${file}' is not a file.")
+                stream.each { Path file ->
+                    if (Files.isRegularFile(file)) {
+                        checkFile(file, problems)
+                    } else if (Files.isDirectory(file)) {
+                        checkFilesInDirectory(file, problems)
+                    } else {
+                        problems.addProblem(Collections.emptySet(), Level.ERROR, "'${file}' is not a file.")
+                    }
+                }
             }
+        } finally {
+            stream?.close()
         }
     }
 }
