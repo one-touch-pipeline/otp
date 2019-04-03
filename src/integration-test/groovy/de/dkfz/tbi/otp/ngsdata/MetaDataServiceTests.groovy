@@ -47,8 +47,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
 
     File baseDir
 
-    @Before
-    void setUp() {
+    void setupData() {
         baseDir = temporaryFolder.newFolder()
         // Setup logic here
         createUserAndRoles()
@@ -66,6 +65,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testGetMetaDataEntryByIdNoProjectAnonymous() {
+        setupData()
         MetaDataEntry entry = mockEntry()
 
         shouldFail(AccessDeniedException) {
@@ -85,6 +85,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testGetMetaDataEntryByIdNoProjectUser() {
+        setupData()
         MetaDataEntry entry = mockEntry()
 
         SpringSecurityUtils.doWithAuth(TESTUSER) {
@@ -102,6 +103,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testGetMetaDataEntryByIdNoProjectOperator() {
+        setupData()
         MetaDataEntry entry = mockEntry()
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -117,6 +119,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testGetMetaDataEntryByIdNoProjectAdmin() {
+        setupData()
         MetaDataEntry entry = mockEntry()
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -132,6 +135,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testGetMetaDataEntryByIdWithProjectNoAclAsAnonymous() {
+        setupData()
         MetaDataEntry entry = mockEntry()
 
         shouldFail(AccessDeniedException) {
@@ -152,6 +156,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testGetMetaDataEntryByIdWithProjectAsUser() {
+        setupData()
         MetaDataEntry entry = mockEntry()
 
         SpringSecurityUtils.doWithAuth(TESTUSER) {
@@ -186,6 +191,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testGetMetaDataEntryByIdWithProjectAsOperator() {
+        setupData()
         MetaDataEntry entry = mockEntry()
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -201,6 +207,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testGetMetaDataEntryByIdWithProjectAsAdmin() {
+        setupData()
         MetaDataEntry entry = mockEntry()
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -216,6 +223,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testUpdateMetaDataEntryNoProjectAsAnonymous() {
+        setupData()
         MetaDataEntry entry = mockEntry()
         shouldFail(AccessDeniedException) {
             doWithAnonymousAuth {
@@ -230,6 +238,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testUpdateMetaDataEntryNoProjectAsUser() {
+        setupData()
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
@@ -244,6 +253,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testUpdateMetaDataEntryNoProjectAsOperator() {
+        setupData()
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
@@ -256,6 +266,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testUpdateMetaDataEntryNoProjectAsAdmin() {
+        setupData()
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth(ADMIN) {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
@@ -268,6 +279,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testUpdateMetaDataEntryWithProjectAsAnonymous() {
+        setupData()
         MetaDataEntry entry = mockEntry()
         shouldFail(AccessDeniedException) {
             doWithAnonymousAuth {
@@ -278,6 +290,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
 
     @Test
     void testUpdateMetaDataEntryPermission() {
+        setupData()
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
@@ -295,6 +308,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testUpdateMetaDataEntryWithProjectAsOperator() {
+        setupData()
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
@@ -307,6 +321,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testUpdateMetaDataEntryWithProjectAsAdmin() {
+        setupData()
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth(ADMIN) {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
@@ -320,6 +335,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testRetrieveChangelogWithoutProject() {
+        setupData()
         MetaDataEntry entry = mockEntry()
         // admin should always be able to see the entry
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -357,6 +373,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testRetrieveChangelogWithProjectNoAcl() {
+        setupData()
         MetaDataEntry entry = mockEntry()
         // admin should always be able to see the entry
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -394,6 +411,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testRetrieveEmptyChangelogWithAcl() {
+        setupData()
         MetaDataEntry entry = mockEntry()
         addUserWithReadAccessToProject(User.findByUsername(TESTUSER), entry.dataFile.project)
         // admin should always be able to see the entry
@@ -422,6 +440,7 @@ class MetaDataServiceTests extends AbstractIntegrationTest implements UserAndRol
      */
     @Test
     void testRetrieveChangelogWithAcl() {
+        setupData()
         MetaDataEntry entry = mockEntry()
         addUserWithReadAccessToProject(User.findByUsername(TESTUSER), entry.dataFile.project)
         // grant read to user and add an update

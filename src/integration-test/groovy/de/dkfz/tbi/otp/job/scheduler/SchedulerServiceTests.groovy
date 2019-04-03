@@ -52,8 +52,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
     boolean originalSchedulerActive
     boolean originalStartupOk
 
-    @Before
-    void setUp() {
+    void setupData() {
         originalSchedulerActive = schedulerService.schedulerActive
         createUserAndRoles()
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -80,6 +79,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testEndOfProcess() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -112,6 +112,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testCompleteProcess() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -178,6 +179,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testConstantParameterPassing() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with three Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -296,6 +298,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testParameterMapping() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with three Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -378,6 +381,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testPassthroughParameters() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -446,6 +450,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testOneToManyParameterMapping() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -526,6 +531,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testCreateProcess() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with one Job Definition
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -562,6 +568,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testCreateProcessWithDisabledScheduler() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with one Job Definition
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -595,6 +602,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testCreateProcessWithParameters() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with one Job Definition
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -658,6 +666,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testCreateProcessWithProcessParameter() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with one Job Definition
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -718,6 +727,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testDecisions() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with one Job Definition
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -790,6 +800,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testFailingEndOfProcess() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with one Job Definition
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -819,6 +830,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testFailingValidation() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
@@ -883,6 +895,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testSuccessfulValidation() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
@@ -950,6 +963,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testRestartProcessingStepInCorrectState() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -1072,6 +1086,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testRestartProcessingStepProcessFinished() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -1107,6 +1122,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testRestartProcessingStepHasUpdates() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -1137,6 +1153,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testRestartProcessingStep() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -1208,6 +1225,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testRestartProcessingStepUpdatesLink() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -1271,6 +1289,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testRestartProcessingStepKeepsLinks() {
+        setupData()
         assertQueueAndRunningToBeEmpty()
         // create the JobExecutionPlan with two Job Definitions
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
@@ -1361,6 +1380,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testRestartProcessingStepKeepsParameters() {
+        setupData()
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0)
         assertNotNull(jep.save())
         JobDefinition jobDefinition1 = createTestJob("test", jep)
@@ -1452,6 +1472,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testRestartProcessingStep_WhenMultiJobResumeTrue() {
+        setupData()
         ProcessingStep step = createFailedProcessingStep()
         schedulerService.restartProcessingStep(step, false, true)
         assertEquals(5, ProcessingStepUpdate.countByProcessingStep(step))
@@ -1464,6 +1485,7 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testRestartProcessingStep_WhenMultiJobResumeFalse() {
+        setupData()
         ProcessingStep step = createFailedProcessingStep()
         schedulerService.restartProcessingStep(step)
         assertEquals(5, ProcessingStepUpdate.countByProcessingStep(step))
@@ -1475,18 +1497,21 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testIsJobResumable_notResumable() {
+        setupData()
         final ProcessingStep processingStep = new ProcessingStep(jobClass: TestJob.class.name)
         assert schedulerService.isJobResumable(processingStep) == false
     }
 
     @Test
     void testIsJobResumable_resumable() {
+        setupData()
         final ProcessingStep processingStep = new ProcessingStep(jobClass: ResumableTestJob.class.name)
         assert schedulerService.isJobResumable(processingStep) == true
     }
 
     @Test
     void testIsJobResumable_resumableSometimesResumable() {
+        setupData()
         final ProcessingStep processingStep = new ProcessingStep(jobClass: ResumableSometimesResumableTestJob.class.name)
         assert schedulerService.isJobResumable(processingStep) == true
     }
@@ -1502,16 +1527,19 @@ class SchedulerServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testIsJobResumable_sometimesResumable_true() {
+        setupData()
         testIsJobResumable_sometimesResumable true
     }
 
     @Test
     void testIsJobResumable_sometimesResumable_false() {
+        setupData()
         testIsJobResumable_sometimesResumable false
     }
 
     @Test
     void testIsJobResumable_sometimesResumable_noRunningJob() {
+        setupData()
         final ProcessingStep processingStep = new ProcessingStep(jobClass: SometimesResumableTestJob.class.name)
         shouldFail RuntimeException, { schedulerService.isJobResumable(processingStep) }
     }

@@ -37,8 +37,7 @@ class SeqTrackTests {
     ReferenceGenomeProjectSeqType referenceGenomeProjectSeqTypeWithSampleType
     SeqTrack seqTrack
 
-    @Before
-    void setup() {
+    void setupData() {
         seqTrack = DomainFactory.createSeqTrack().save(flush: true)
         referenceGenomeProjectSeqTypeWithSampleType = DomainFactory.createReferenceGenomeProjectSeqType(
                 project: seqTrack.project,
@@ -54,6 +53,7 @@ class SeqTrackTests {
 
     @Test
     void testGetConfiguredReferenceGenome_ProjectDefault() {
+        setupData()
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
@@ -62,6 +62,7 @@ class SeqTrackTests {
 
     @Test
     void testGetConfiguredReferenceGenome_SampleTypeSpecific() {
+        setupData()
         seqTrack.sampleType.specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
 
         ReferenceGenome referenceGenome = seqTrack.getConfiguredReferenceGenome()
@@ -70,12 +71,14 @@ class SeqTrackTests {
 
     @Test
     void testLog() {
+        setupData()
         seqTrack.log("Test")
         TestCase.assertContainSame(seqTrack.logMessages*.message, ["Test"])
     }
 
     @Test
     void testLog_Twice() {
+        setupData()
         seqTrack.log("Test")
         seqTrack.log("Test2")
         TestCase.assertContainSame(seqTrack.logMessages*.message, ["Test", "Test2"])
@@ -83,6 +86,7 @@ class SeqTrackTests {
 
     @Test
     void testLog_WrongOrder() {
+        setupData()
         seqTrack.log("Test")
         seqTrack.log("Test2")
         TestCase.assertContainSame(seqTrack.logMessages*.message, ["Test", "Test2"])

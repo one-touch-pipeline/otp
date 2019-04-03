@@ -51,8 +51,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     File outputFolder
 
-    @Before
-    void setUp() {
+    void setupData() {
         createUserAndRoles()
         outputFolder = temporaryFolder.newFolder("outputFolder")
         configService = new TestConfigService([
@@ -68,6 +67,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_moveSample() {
+        setupData()
         DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
@@ -139,6 +139,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_moveIndividual() {
+        setupData()
         DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
@@ -217,6 +218,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_changeMetadataEntry() {
+        setupData()
         Sample sample = DomainFactory.createSample()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
@@ -231,6 +233,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_changeSeqType_withClassChange() {
+        setupData()
         SeqType wgs = DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME.seqTypeName)
         SeqType exome = DomainFactory.createSeqType(name: SeqTypeNames.EXOME.seqTypeName)
         SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: wgs)
@@ -246,6 +249,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_renameSampleIdentifiers() {
+        setupData()
 
         Sample sample = DomainFactory.createSample()
         SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier(sample: sample)
@@ -263,6 +267,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_getSingleSampleForIndividualAndSampleType_singleSample() {
+        setupData()
         Individual individual = DomainFactory.createIndividual()
         SampleType sampleType = DomainFactory.createSampleType()
         Sample sample = DomainFactory.createSample(individual: individual, sampleType: sampleType)
@@ -272,6 +277,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_getSingleSampleForIndividualAndSampleType_noSample() {
+        setupData()
         Individual individual = DomainFactory.createIndividual()
         SampleType sampleType = DomainFactory.createSampleType()
 
@@ -283,6 +289,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_getAndShowSeqTracksForSample() {
+        setupData()
         Sample sample = DomainFactory.createSample()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
 
@@ -291,6 +298,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_getAndValidateAndShowDataFilesForSeqTracks_noDataFile_shouldFail() {
+        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         List<SeqTrack> seqTracks = [seqTrack]
         Map<String, String> dataFileMap = [:]
@@ -302,6 +310,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_getAndValidateAndShowDataFilesForSeqTracks() {
+        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         List<SeqTrack> seqTracks = [seqTrack]
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
@@ -312,6 +321,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_getAndValidateAndShowAlignmentDataFilesForSeqTracks() {
+        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         List<SeqTrack> seqTracks = [seqTrack]
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
@@ -327,6 +337,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void test_collectFileNamesOfDataFiles() {
+        setupData()
         DataFile dataFile = DomainFactory.createDataFile(used: false)
 
         assert [(dataFile): [directFileName: lsdfFilesService.getFileFinalPath(dataFile), vbpFileName: lsdfFilesService.getFileViewByPidPath(dataFile)]] ==
@@ -335,6 +346,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteFastQCInformationFromDataFile() throws Exception {
+        setupData()
         DataFile dataFile = DomainFactory.createDataFile()
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
 
@@ -345,6 +357,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteMetaDataEntryForDataFile() throws Exception {
+        setupData()
         DataFile dataFile = DomainFactory.createDataFile()
         MetaDataEntry metaDataEntry = DomainFactory.createMetaDataEntry(dataFile: dataFile)
 
@@ -355,6 +368,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteConsistencyStatusInformationForDataFile() throws Exception {
+        setupData()
         DataFile dataFile = DomainFactory.createDataFile()
         ConsistencyStatus consistencyStatus = DomainFactory.createConsistencyStatus(dataFile: dataFile)
 
@@ -365,6 +379,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedBamFile() throws Exception {
+        setupData()
         AbstractBamFile abstractBamFile = DomainFactory.createProcessedBamFile()
 
         QualityAssessmentPass qualityAssessmentPass = DomainFactory.createQualityAssessmentPass(processedBamFile: abstractBamFile)
@@ -380,6 +395,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteQualityAssessmentInfoForAbstractBamFile_ProcessedMergedBamFile() throws Exception {
+        setupData()
         AbstractBamFile abstractBamFile = DomainFactory.createProcessedMergedBamFile()
 
         QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: abstractBamFile)
@@ -397,6 +413,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteQualityAssessmentInfoForAbstractBamFile_RoddyBamFile() throws Exception {
+        setupData()
         AbstractBamFile abstractBamFile = DomainFactory.createRoddyBamFile()
 
         QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: abstractBamFile)
@@ -414,6 +431,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteQualityAssessmentInfoForAbstractBamFile_null() throws Exception {
+        setupData()
         AbstractBamFile abstractBamFile = null
 
         final shouldFail = new GroovyTestCase().&shouldFail
@@ -425,6 +443,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteMergingRelatedConnectionsOfBamFile() throws Exception {
+        setupData()
         MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
                 pipeline: DomainFactory.createDefaultOtpPipeline()
         ])
@@ -444,6 +463,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteDataFile() throws Exception {
+        setupData()
         DataFile dataFile = DomainFactory.createDataFile()
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
 
@@ -458,6 +478,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteConnectionFromSeqTrackRepresentingABamFile() throws Exception {
+        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         AlignmentLog alignmentLog = DomainFactory.createAlignmentLog(seqTrack: seqTrack)
         DataFile dataFile = DomainFactory.createDataFile(alignmentLog: alignmentLog)
@@ -470,6 +491,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_ProcessedBamFile() throws Exception {
+        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
         ProcessedSaiFile processedSaiFile = DomainFactory.createProcessedSaiFile(dataFile: dataFile)
@@ -495,6 +517,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_RoddyBamFile() throws Exception {
+        setupData()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         roddyBamFile.workPackage.bamFileInProjectFolder = roddyBamFile
         roddyBamFile.workPackage.save(flush: true)
@@ -508,6 +531,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteSeqScanAndCorrespondingInformation() throws Exception {
+        setupData()
         SeqScan seqScan = DomainFactory.createSeqScan()
         MergingLog mergingLog = DomainFactory.createMergingLog(seqScan: seqScan)
         MergedAlignmentDataFile mergedAlignmentDataFile = DomainFactory.createMergedAlignmentDataFile(mergingLog: mergingLog)
@@ -521,6 +545,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteSeqTrack() throws Exception {
+        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         MergingAssignment mergingAssignment = DomainFactory.createMergingAssignment(seqTrack: seqTrack)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
@@ -534,6 +559,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteSeqTrack_seqTrackIsOnlyLinked() throws Exception {
+        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
         DomainFactory.createMergingAssignment(seqTrack: seqTrack)
         DomainFactory.createDataFile(seqTrack: seqTrack)
@@ -545,6 +571,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteRun() throws Exception {
+        setupData()
         StringBuilder outputStringBuilder = new StringBuilder()
         Run run = DomainFactory.createRun()
         DataFile dataFile = DomainFactory.createDataFile(run: run)
@@ -557,6 +584,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteRunByName() throws Exception {
+        setupData()
         StringBuilder outputStringBuilder = new StringBuilder()
         Run run = DomainFactory.createRun()
         DataFile dataFile = DomainFactory.createDataFile(run: run)
@@ -569,6 +597,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testThrowExceptionInCaseOfExternalMergedBamFileIsAttached() throws Exception {
+        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DomainFactory.createExternallyProcessedMergedBamFile(
                 workPackage: DomainFactory.createExternalMergingWorkPackage(
@@ -585,6 +614,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testThrowExceptionInCaseOfSeqTracksAreOnlyLinked() throws Exception {
+        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(linkedExternally: true)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "seqTracks only linked") {
@@ -595,6 +625,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_EmptyProject() {
+        setupData()
         Project project = DomainFactory.createProject()
 
         shouldFail AssertionError, {
@@ -605,6 +636,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesMissing() {
+        setupData()
         SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         Project project = seqTrack.project
 
@@ -616,6 +648,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesAvailable() {
+        setupData()
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
 
         dataSwapService.deleteProcessingFilesOfProject(project.name, outputFolder.path)
@@ -623,6 +656,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked() {
+        setupData()
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
         markFilesAsLinked(SeqTrack.list())
 
@@ -634,6 +668,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesLinked_Verified() {
+        setupData()
         Project project = deleteProcessingFilesOfProject_NoProcessedData_SetupWithFiles()
         markFilesAsLinked(SeqTrack.list())
 
@@ -642,6 +677,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesWithdrawn() {
+        setupData()
         SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         Project project = seqTrack.project
         markFilesAsWithdrawn([seqTrack])
@@ -653,6 +689,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_NoProcessedData_FastqFilesWithdrawn_IgnoreWithdrawn() {
+        setupData()
         SeqTrack seqTrack = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         Project project = seqTrack.project
         markFilesAsWithdrawn([seqTrack])
@@ -662,6 +699,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_explicitSeqTrack() {
+        setupData()
         SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         createFastqFiles([st])
 
@@ -670,6 +708,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFileSOfProject_NoProcessedData_FastqFilesAvailalbe_explicitSeqTrackDifferentProject_ShouldFail() {
+        setupData()
         SeqTrack st = deleteProcessingFilesOfProject_NoProcessedData_Setup()
         createFastqFiles([st])
 
@@ -759,6 +798,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_PMBF() {
+        setupData()
         ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
 
         File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
@@ -775,6 +815,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_PMBF_notVerified() {
+        setupData()
         ProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_PMBF_Setup()
 
         File processingBamFile = new File(dataProcessingFilesService.getOutputDirectory(bamFile.individual, DataProcessingFilesService.OutputDirectories.MERGING))
@@ -809,6 +850,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_RBF() {
+        setupData()
         RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
 
         File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
@@ -824,6 +866,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_RBF_notVerified() {
+        setupData()
         RoddyBamFile bamFile = deleteProcessingFilesOfProject_RBF_Setup()
 
         File finalBamFile = new File(AbstractMergedBamFileService.destinationDirectory(bamFile))
@@ -868,6 +911,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_RBF_SNV() {
+        setupData()
         AbstractSnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
 
         dataSwapService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder.path, true)
@@ -878,6 +922,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_RBF_SNV_notVerified() {
+        setupData()
         AbstractSnvCallingInstance snvCallingInstance = deleteProcessingFilesOfProject_RBF_SNV_Setup()
 
         dataSwapService.deleteProcessingFilesOfProject(snvCallingInstance.project.name, outputFolder.path)
@@ -918,6 +963,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached() {
+        setupData()
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "external merged bam files", {
@@ -927,6 +973,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_Verified() {
+        setupData()
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
         dataSwapService.deleteProcessingFilesOfProject(bamFile.project.name, outputFolder.path, true)
@@ -936,6 +983,7 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteProcessingFilesOfProject_ExternalBamFilesAttached_nonMergedSeqTrackExists_Verified() {
+        setupData()
         ExternallyProcessedMergedBamFile bamFile = deleteProcessingFilesOfProject_ExternalBamFilesAttached_Setup()
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles([sample: bamFile.sample, seqType: bamFile.seqType])
@@ -957,11 +1005,13 @@ class DataSwapServiceTests implements UserAndRoles {
 
     @Test
     void testDeleteIndividual_SnvWasExecuted() {
+        setupData()
         testDeleteIndividualMethod(DomainFactory.createSnvInstanceWithRoddyBamFiles())
     }
 
     @Test
     void testDeleteIndividual_IndelWasExecuted() {
+        setupData()
         testDeleteIndividualMethod(DomainFactory.createIndelCallingInstanceWithRoddyBamFiles())
     }
 

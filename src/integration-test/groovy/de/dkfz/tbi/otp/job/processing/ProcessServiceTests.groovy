@@ -51,8 +51,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
     @Autowired
     LinkGenerator linkGenerator
 
-    @Before
-    void setUp() {
+    void setupData() {
         createUserAndRoles()
     }
 
@@ -65,6 +64,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetProcessNonExisting() {
+        setupData()
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertNull(processService.getProcess(1))
         }
@@ -75,6 +75,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetProcessAsOperator() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -87,6 +88,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetProcessAsAdmin() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -100,6 +102,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetProcessAsUser() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
 
@@ -119,6 +122,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetAllProcessingStepsSecurity() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
 
@@ -138,6 +142,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testNumberOfProcessingStepsPermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
 
@@ -156,6 +161,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetProcessingStepNonExisting() {
+        setupData()
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertNull(processService.getProcessingStep(1))
         }
@@ -166,6 +172,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetProcessingStepAsOperator() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
@@ -180,6 +187,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetProcessingStepAsAdmin() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
@@ -191,6 +199,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetProcessingStepPermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
@@ -208,6 +217,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetAllUpdatesPermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
@@ -225,6 +235,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testNumberOfUpdatesPermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
@@ -246,6 +257,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetLatestProcessingStepPermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
 
@@ -265,6 +277,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetStatePermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
@@ -287,6 +300,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetErrorPermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
@@ -313,6 +327,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testGetLastUpdatePermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
@@ -335,6 +350,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetLatestProcessingStepUpdatePermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
@@ -353,6 +369,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetFirstUpdatePermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
@@ -371,6 +388,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetProcessingStepDurationPermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
@@ -389,6 +407,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testProcessInformationPermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         StartJobDefinition startJob = new StartJobDefinition(name: "StartJobTest", bean: "testStartJob", plan: plan)
         assertNotNull(startJob.save(flush: true))
@@ -415,6 +434,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
      */
     @Test
     void testRestartProcessingStepPermission() {
+        setupData()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
         JobDefinition job = createTestJob("Test", plan)
@@ -435,11 +455,13 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test(expected = RuntimeException)
     void testGetProcessingErrorStackTraceIdNotFound() {
+        setupData()
         processService.getProcessingErrorStackTrace(1)
     }
 
     @Test(expected = RuntimeException)
     void testGetProcessingErrorStackTraceNoStacktrace() {
+        setupData()
         ProcessingError processingError = mockProcessingError()
         processingError.stackTraceIdentifier = null
         assertNotNull(processingError.save(flush: true))
@@ -448,6 +470,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test(expected = RuntimeException)
     void testGetProcessingErrorStackTraceIdFoundAndPermissionsWrong() {
+        setupData()
         ProcessingError processingError = mockProcessingError()
         SpringSecurityUtils.doWithAuth(TESTUSER) {
             processService.getProcessingErrorStackTrace(processingError.id)
@@ -456,6 +479,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetProcessingErrorStackTracePermissionIsRoleOperator() {
+        setupData()
         ProcessingError processingError = mockProcessingError()
         File stacktraceFile = errorLogService.getStackTracesFile(processingError.stackTraceIdentifier)
         FileUtils.forceMkdir(stacktraceFile.parentFile)
@@ -485,6 +509,7 @@ class ProcessServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testProcessUrl_shouldBeFine() {
+        setupData()
         String serverUrl = linkGenerator.getServerBaseURL()
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
@@ -492,7 +517,6 @@ class ProcessServiceTests extends AbstractIntegrationTest {
         String url = processService.processUrl(process)
         assert "${serverUrl}/processes/process/${process.id}" == url
     }
-
 
 
     private JobExecutionPlan mockPlan(String name = "test") {

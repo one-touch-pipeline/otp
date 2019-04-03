@@ -44,8 +44,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
     OverallQualityAssessmentMerged overallQualityAssessmentMerged
 
 
-    @Before
-    void setUp() {
+    void setupData() {
         createUserAndRoles()
 
         overallQualityAssessmentMerged = DomainFactory.createOverallQualityAssessmentMerged()
@@ -70,6 +69,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     @Test
     void testFindAllByProjectAndSeqType_admin() {
+        setupData()
         List expected = [
             overallQualityAssessmentMerged,
         ]
@@ -82,6 +82,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     @Test
     void testFindAllByProjectAndSeqType_operator() {
+        setupData()
         List expected = [
             overallQualityAssessmentMerged,
         ]
@@ -94,6 +95,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     @Test
     void testFindAllByProjectAndSeqType_userWithAccess() {
+        setupData()
         List expected = [
             overallQualityAssessmentMerged,
         ]
@@ -106,7 +108,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     @Test
     void testFindAllByProjectAndSeqType_userWithoutAccess() {
-
+        setupData()
         SpringSecurityUtils.doWithAuth(TESTUSER) {
             shouldFail(AccessDeniedException) {
                 overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, overallQualityAssessmentMerged.seqType)
@@ -116,6 +118,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     @Test
     void testFindAllByProjectAndSeqType_wrongProject() {
+        setupData()
         List expected = []
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -126,6 +129,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     @Test
     void testFindAllByProjectAndSeqType_wrongSeqType() {
+        setupData()
         List expected = []
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -136,6 +140,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     @Test
     void testFindAllByProjectAndSeqType_notLastQaMergedPassIdentifier() {
+        setupData()
         List expected = []
         DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: overallQualityAssessmentMerged.processedMergedBamFile, identifier: overallQualityAssessmentMerged.qualityAssessmentMergedPass.identifier + 1)
 
@@ -147,6 +152,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     @Test
     void testFindAllByProjectAndSeqType_notLastMergingPassIdentifier() {
+        setupData()
         List expected = []
         DomainFactory.createMergingSet(mergingSet: overallQualityAssessmentMerged.mergingSet, identifier: overallQualityAssessmentMerged.mergingPass.identifier + 1)
 
@@ -158,6 +164,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     @Test
     void testFindAllByProjectAndSeqType_notLastMergingSetIdentifier() {
+        setupData()
         List expected = []
         DomainFactory.createMergingSet(mergingWorkPackage: overallQualityAssessmentMerged.mergingWorkPackage, identifier: overallQualityAssessmentMerged.mergingSet.identifier + 1)
 
@@ -169,6 +176,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     @Test
     void testFindAllByProjectAndSeqType_wrongFileOperationStatus() {
+        setupData()
         List expected = []
         overallQualityAssessmentMerged.processedMergedBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.INPROGRESS
         overallQualityAssessmentMerged.processedMergedBamFile.md5sum = null
@@ -181,6 +189,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     @Test
     void testFindAllByProjectAndSeqType_BamFileIsWithdrawn() {
+        setupData()
         List expected = []
         overallQualityAssessmentMerged.processedMergedBamFile.withdrawn = true
 
@@ -192,6 +201,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
 
     @Test
     void testFindAllByProjectAndSeqType_wrongQualityAssessmentStatus() {
+        setupData()
         List expected = []
         overallQualityAssessmentMerged.processedMergedBamFile.qualityAssessmentStatus = AbstractBamFile.QaProcessingStatus.IN_PROGRESS
 

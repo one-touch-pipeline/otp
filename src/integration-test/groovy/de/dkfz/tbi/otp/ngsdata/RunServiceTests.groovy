@@ -41,13 +41,13 @@ import static org.junit.Assert.*
 class RunServiceTests extends AbstractIntegrationTest {
     RunService runService
 
-    @Before
-    void setUp() {
+    void setupData() {
         createUserAndRoles()
     }
 
     @Test
     void testGetRunWithoutRun() {
+        setupData()
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertNull(runService.getRun(null))
             assertNull(runService.getRun(""))
@@ -58,6 +58,7 @@ class RunServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetRunPermission() {
+        setupData()
         Run run = mockRun("testRun")
         [OPERATOR, ADMIN].each { String username ->
             SpringSecurityUtils.doWithAuth(username) {
@@ -75,6 +76,7 @@ class RunServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetRunByLongAndStringIdentifier() {
+        setupData()
         Run run = mockRun("test")
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(run, runService.getRun(run.id))
@@ -84,6 +86,7 @@ class RunServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetRunByName() {
+        setupData()
         Run run = mockRun("test")
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertNotNull(runService.getRun(run.name))
@@ -92,6 +95,7 @@ class RunServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetRunByNameAsIdentifier() {
+        setupData()
         Run run = mockRun("test")
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(run, runService.getRun("test"))
@@ -106,6 +110,7 @@ class RunServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testRetrieveProcessParametersPermission() {
+        setupData()
         Run run = mockRun("test")
         [OPERATOR, ADMIN].each { String username ->
             SpringSecurityUtils.doWithAuth(username) {
@@ -123,6 +128,7 @@ class RunServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testRetrieveProcessParameterEmpty() {
+        setupData()
         Run run = mockRun("test")
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(runService.retrieveProcessParameters(run).isEmpty())
@@ -131,6 +137,7 @@ class RunServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testRetrieveProcessParameter() {
+        setupData()
         Run run = mockRun("test")
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assert jep.save()
@@ -164,6 +171,7 @@ class RunServiceTests extends AbstractIntegrationTest {
     @Ignore
     @Test
     void testRetrieveSequenceTrackInformationIsEmpty() {
+        setupData()
         assertTrue(runService.retrieveSequenceTrackInformation(null).isEmpty())
         Run run = mockRun("test")
         assertTrue(runService.retrieveSequenceTrackInformation(run).isEmpty())
@@ -205,6 +213,7 @@ class RunServiceTests extends AbstractIntegrationTest {
     @Ignore
     @Test
     void testRetrieveSequenceTrackInformation() {
+        setupData()
         Run run = mockRun("test")
         SeqTrack seqTrack = mockSeqTrack(run, "test", "test")
         SeqTrack seqTrack2 = mockSeqTrack(run, "test", "test2")

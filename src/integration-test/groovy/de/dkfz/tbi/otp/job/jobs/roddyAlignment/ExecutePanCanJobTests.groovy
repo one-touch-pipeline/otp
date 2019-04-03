@@ -53,8 +53,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
-    @Before
-    void setUp() {
+    void setupData() {
         DomainFactory.createRoddyAlignableSeqTypes()
 
         configService = new TestConfigService([
@@ -83,17 +82,17 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
         configService.clean()
     }
 
-
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_BamFileIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.prepareAndReturnWorkflowSpecificCValues(null)
         }.contains("roddyBamFile must not be null")
     }
 
-
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_BaseBamFileNotCorrect_ShouldFail() {
+        setupData()
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(roddyBamFile)
 
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
@@ -112,9 +111,9 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
         }.contains(roddyBamFile.workBamFile.path)
     }
 
-
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_ExomeSeqType_AllFine() {
+        setupData()
         executePanCanJob.bedFileService.metaClass.filePath = { BedFile bedFile ->
             return "BedFilePath"
         }
@@ -142,6 +141,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_WholeGenomeSeqType_NoBaseBamFile_WithFingerPrinting_AllFine() {
+        setupData()
         ReferenceGenome referenceGenome = roddyBamFile.referenceGenome
         referenceGenome.fingerPrintingFileName = "fingerprintingFile"
         assert referenceGenome.save(flush: true)
@@ -167,6 +167,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_WholeGenomeSeqType_NoBaseBamFile_AllFine() {
+        setupData()
 
         List<String> expectedCommand = [
                 "INDEX_PREFIX:${executePanCanJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome).absolutePath}",
@@ -186,6 +187,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_WholeGenomeSeqType_WithBaseBamFile_AllFine() {
+        setupData()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.PROCESSED
@@ -218,6 +220,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificParameter_MustAlwaysReturnAnEmptyString() {
+        setupData()
         assert "" == executePanCanJob.prepareAndReturnWorkflowSpecificParameter(null)
         assert "" == executePanCanJob.prepareAndReturnWorkflowSpecificParameter(roddyBamFile)
     }
@@ -225,6 +228,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testGetFilesToMerge_BamFileIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.getFilesToMerge(null)
         }.contains("roddyBamFile must not be null")
@@ -233,6 +237,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testGetFilesToMerge_WrongCountOfDataFileForSeqTrack_ShouldFail() {
+        setupData()
         DataFile dataFile = DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks as List).first()
         dataFile.delete(flush: true)
 
@@ -244,6 +249,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testGetFilesToMerge_DataFilesAreNotOnFileSystem_ShouldFail() {
+        setupData()
 
         DataFile dataFile1 = DataFile.findBySeqTrackInListAndMateNumber(roddyBamFile.seqTracks as List, 1)
         File file1 = new File(executePanCanJob.lsdfFilesService.getFileViewByPidPath(dataFile1))
@@ -257,6 +263,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testGetFilesToMerge_DataFileHasWrongFileSizeInDatabase_ShouldFail() {
+        setupData()
         DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks as List).each {
             it.fileSize = 12345
             assert it.save(flush: true)
@@ -270,6 +277,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testGetFilesToMerge_AllFine() {
+        setupData()
         List<File> expectedDataFileList = DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks as List).sort {
             it.fileName
         }.collect { new File(lsdfFilesService.getFileViewByPidPath(it)) }
@@ -281,6 +289,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testWorkflowSpecificValidation_workMergedQATargetExtractJsonFileDoesNotExist_ShouldFail() {
+        setupData()
         SeqType exomeSeqType = DomainFactory.createExomeSeqType()
         DomainFactory.changeSeqType(roddyBamFile, exomeSeqType)
 
@@ -295,6 +304,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testWorkflowSpecificValidation_AllFine() {
+        setupData()
         SeqType exomeSeqType = DomainFactory.createExomeSeqType()
         DomainFactory.changeSeqType(roddyBamFile, exomeSeqType)
 
@@ -307,6 +317,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testWorkflowSpecificValidation_RnaBamFile_AllFine() {
+        setupData()
         RoddyBamFile roddyBamFile = RoddyRnaFactory.super.createBamFile()
         assert roddyBamFile.project.save(flush: true)
 
@@ -316,6 +327,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
 
     @Test
     void testWorkflowSpecificValidation_RnaBamFile_ChimericFileDoesNotExist() {
+        setupData()
         RoddyBamFile roddyBamFile = RoddyRnaFactory.super.createBamFile()
         assert roddyBamFile.project.save(flush: true)
 
@@ -336,13 +348,11 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
         createFileAndAddFileSize(dataFile2File, dataFiles[1])
     }
 
-
     private void createFileAndAddFileSize(File file, DataFile dataFile) {
         CreateFileHelper.createFile(file)
         dataFile.fileSize = file.length()
         assert dataFile.save(flush: true)
     }
-
 
     private String fastqFilesAsString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {
         return roddyBamFileToUse.seqTracks.collect { SeqTrack seqTrack ->

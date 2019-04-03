@@ -81,8 +81,7 @@ class AbstractBamFileServiceTests {
             referenceLength: ARBITRARY_UNUSED_VALUE,
     ].asImmutable()
 
-    @Before
-    void setUp() {
+    void setupData() {
 
         Project project = DomainFactory.createProject(
                 name: "project",
@@ -222,11 +221,13 @@ class AbstractBamFileServiceTests {
 
     @Test(expected = IllegalArgumentException)
     void testFindByProcessedMergedBamFileIsNull() {
+        setupData()
         abstractBamFileService.findByProcessedMergedBamFile(null)
     }
 
     @Test
     void testFindByProcessedMergedBamFile() {
+        setupData()
         List<AbstractBamFile> abstractBamFilesExp
         List<AbstractBamFile> abstractBamFilesAct
 
@@ -256,9 +257,9 @@ class AbstractBamFileServiceTests {
         assertEquals(abstractBamFilesExp, abstractBamFilesAct)
     }
 
-
     @Test
     void testAssignedToMergingSet() {
+        setupData()
         assertEquals(processedBamFile.status, AbstractBamFile.State.NEEDS_PROCESSING)
         abstractBamFileService.assignedToMergingSet(processedBamFile)
         assertEquals(processedBamFile.status, AbstractBamFile.State.PROCESSED)
@@ -268,23 +269,27 @@ class AbstractBamFileServiceTests {
 
     @Test(expected = AssertionError)
     void test_calculateCoverageWithN_WhenBamFileIsNull() {
+        setupData()
         abstractBamFileService.calculateCoverageWithN(null)
     }
 
     @Test
     void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile_WholeGenome() {
+        setupData()
         changeStateOfBamFileToHavingPassedQC(processedBamFile)
         assert abstractBamFileService.calculateCoverageWithN(processedBamFile) == EXPECTED_COVERAGE_FOR_COVERAGE_WITH_N_WHOLE_GENOME
     }
 
     @Test
     void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile_Exome() {
+        setupData()
         changeStateOfBamFileToHavingPassedQC(exomeProcessedBamFile)
         assert abstractBamFileService.calculateCoverageWithN(exomeProcessedBamFile) == null
     }
 
     @Test(expected = AssertionError)
     void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile_WholeGenome_AndReferenceGenomeIsNull() {
+        setupData()
         changeStateOfBamFileToHavingPassedQC(processedBamFile)
         processedBamFile.mergingWorkPackage.referenceGenome = null
         abstractBamFileService.calculateCoverageWithN(processedBamFile)
@@ -292,6 +297,7 @@ class AbstractBamFileServiceTests {
 
     @Test(expected = AssertionError)
     void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile_Exome_AndReferenceGenomeIsNull() {
+        setupData()
         changeStateOfBamFileToHavingPassedQC(exomeProcessedBamFile)
         assert referenceGenomeProjectSeqTypeForExome.delete([flush: true])
         abstractBamFileService.calculateCoverageWithN(exomeProcessedBamFile)
@@ -299,12 +305,14 @@ class AbstractBamFileServiceTests {
 
     @Test
     void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile_WholeGenome_AndFileIsNotQualityAssessed() {
+        setupData()
         assert !processedBamFile.isQualityAssessed()
         abstractBamFileService.calculateCoverageWithN(processedBamFile)
     }
 
     @Test
     void test_calculateCoverageWithN_WhenBamFileIsProcessedBamFile_Exome_AndFileIsNotQualityAssessed() {
+        setupData()
         assert !exomeProcessedBamFile.isQualityAssessed()
         assert abstractBamFileService.calculateCoverageWithN(exomeProcessedBamFile) == null
     }
@@ -314,6 +322,7 @@ class AbstractBamFileServiceTests {
 
     @Test
     void test_calculateCoverageWithN_WhenBamFileIsProcessedMergedBamFile_WholeGenome() {
+        setupData()
         mergingSetAssignment = assignToMergingSet(mergingSet, processedBamFile)
         ProcessedMergedBamFile pmbf_WholeGenome = createAndSaveProcessedMergedBamFileAndDependentObjects(mergingSet)
         changeStateOfBamFileToHavingPassedQC(pmbf_WholeGenome)
@@ -322,6 +331,7 @@ class AbstractBamFileServiceTests {
 
     @Test
     void test_calculateCoverageWithN_WhenBamFileIsProcessedMergedBamFile_Exome() {
+        setupData()
         assignToMergingSet(exomeMergingSet, exomeProcessedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects(exomeMergingSet)
         changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
@@ -330,6 +340,7 @@ class AbstractBamFileServiceTests {
 
     @Test(expected = AssertionError)
     void test_calculateCoverageWithN_WhenBamFileIsProcessedMergedBamFile_WholeGenome_AndReferenceGenomeIsNull() {
+        setupData()
         assignToMergingSet(mergingSet, processedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects(mergingSet)
         changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
@@ -339,6 +350,7 @@ class AbstractBamFileServiceTests {
 
     @Test(expected = AssertionError)
     void test_calculateCoverageWithN_WhenBamFileIsProcessedMergedBamFile_Exome_AndReferenceGenomeIsNull() {
+        setupData()
         assignToMergingSet(exomeMergingSet, exomeProcessedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects(exomeMergingSet)
         changeStateOfBamFileToHavingPassedQC(processedMergedBamFile)
@@ -348,6 +360,7 @@ class AbstractBamFileServiceTests {
 
     @Test
     void test_calculateCoverageWithN_WhenBamFileIsProcessedMergedBamFile_WholeGenome_AndFileIsNotQualityAssessed() {
+        setupData()
         assignToMergingSet(mergingSet, processedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects(mergingSet)
         assert !processedMergedBamFile.isQualityAssessed()
@@ -356,6 +369,7 @@ class AbstractBamFileServiceTests {
 
     @Test
     void test_calculateCoverageWithN_WhenBamFileIsProcessedMergedBamFile_Exome_AndFileIsNotQualityAssessed() {
+        setupData()
         assignToMergingSet(exomeMergingSet, exomeProcessedBamFile)
         ProcessedMergedBamFile processedMergedBamFile = createAndSaveProcessedMergedBamFileAndDependentObjects(exomeMergingSet)
         assert !processedMergedBamFile.isQualityAssessed()

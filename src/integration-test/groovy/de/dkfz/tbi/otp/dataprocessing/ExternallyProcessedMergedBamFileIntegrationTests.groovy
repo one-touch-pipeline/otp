@@ -50,8 +50,7 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
 
     TestConfigService configService
 
-    @Before
-    void setUp() {
+    void setupData() {
         configService = new TestConfigService()
 
         project = DomainFactory.createProject(
@@ -112,6 +111,7 @@ class ExternallyProcessedMergedBamFileIntegrationTests {
 
     @Test
     void testGetFile() {
+        setupData()
         String otpFile = bamFile.getBamFile().absolutePath
         String expectedFile = "${configService.getRootPath()}/project-dir/sequencing/seq-type-dir/view-by-pid/patient/sample-type/paired/merged-alignment/nonOTP/analysisImport_REF_GEN/FILE_NAME"
         assert otpFile == expectedFile

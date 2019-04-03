@@ -37,8 +37,7 @@ class SeqScanServiceTests {
     File dataPath
     File mdPath
 
-    @Before
-    void setUp() {
+    void setupData() {
         if(!new File("/tmp/otp/dataPath").isDirectory()) {
             new File("/tmp/otp/dataPath").mkdirs()
             assertTrue(new File("/tmp/otp/dataPath").isDirectory())
@@ -60,6 +59,7 @@ class SeqScanServiceTests {
     @Ignore
     @Test
     void testBuildSeqScans() {
+        setupData()
         Run run = new Run()
         assertFalse(run.validate())
         run.name = "testRun"
@@ -101,6 +101,7 @@ class SeqScanServiceTests {
     @Ignore
     @Test
     void testBuildSeqScan() {
+        setupData()
         Run run = new Run()
         assertFalse(run.validate())
         run.name = "testRun"
@@ -142,6 +143,7 @@ class SeqScanServiceTests {
     @Ignore
     @Test
     void testBuildSeqScanWithReturningSeqScan() {
+        setupData()
         Run run = new Run()
         assertFalse(run.validate())
         run.name = "testRun"
@@ -173,6 +175,7 @@ class SeqScanServiceTests {
     @Ignore
     @Test
     void testFillSeqScan() {
+        setupData()
         Sample sample = new Sample(type: Sample.Type.TUMOR, subType: null)
         Realm realm = new Realm(name: "test", host: "127.0.0.1", port: 12345, timeout: 100, defaultJobSubmissionOptions: "")
         assertNotNull(realm.save())
@@ -195,6 +198,7 @@ class SeqScanServiceTests {
     @Ignore
     @Test
     void testFillInsertSize() {
+        setupData()
         Sample sample = new Sample(type: Sample.Type.TUMOR, subType: null)
         Realm realm = new Realm(name: "test",host: "127.0.0.1", port: 12345, timeout: 100, defaultJobSubmissionOptions: "")
         assertNotNull(realm.save())

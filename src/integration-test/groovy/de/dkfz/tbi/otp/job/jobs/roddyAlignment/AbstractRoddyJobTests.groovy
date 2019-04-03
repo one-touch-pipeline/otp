@@ -91,8 +91,7 @@ class AbstractRoddyJobTests {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
-    @Before
-    void setUp() {
+    void setupData() {
         executeCommandCounter = 0
         validateCounter = 0
 
@@ -176,6 +175,7 @@ newLine"""
 
     @Test
     void testMaybeSubmit_clusterJobsSubmitted() {
+        setupData()
         setUpWorkDirAndMockProcessOutput()
         LogThreadLocal.withThreadLog(System.out) {
             assert NextAction.WAIT_FOR_CLUSTER_JOBS == roddyJob.maybeSubmit()
@@ -186,6 +186,7 @@ newLine"""
 
     @Test
     void testMaybeSubmit_noClusterJobsSubmitted_validateSucceeds() {
+        setupData()
         mockProcessOutput_noClusterJobsSubmitted()
 
         LogThreadLocal.withThreadLog(new NullWriter()) {
@@ -198,6 +199,7 @@ newLine"""
 
     @Test
     void testMaybeSubmit_noClusterJobsSubmitted_validateFails() {
+        setupData()
         mockProcessOutput_noClusterJobsSubmitted()
         roddyJob.metaClass.validate = { ->
             validateCounter++
@@ -220,6 +222,7 @@ newLine"""
 
     @Test
     void testValidate() {
+        setupData()
         roddyJob.validate()
         assert validateCounter == 1
     }
@@ -227,6 +230,7 @@ newLine"""
 
     @Test
     void testExecute_finishedClusterJobsIsNull_MaybeSubmit() {
+        setupData()
         setUpWorkDirAndMockProcessOutput()
         roddyJob.metaClass.maybeSubmit = {
             return NextAction.WAIT_FOR_CLUSTER_JOBS
@@ -241,6 +245,7 @@ newLine"""
 
     @Test
     void testMaybeSubmit_withOutOfMemoryError() {
+        setupData()
         setUpWorkDirAndMockProcessOutputWithOutOfMemoryError()
         LogThreadLocal.withThreadLog(System.out) {
             final shouldFail = new GroovyTestCase().&shouldFail
@@ -253,6 +258,7 @@ newLine"""
 
     @Test
     void testExecute_finishedClusterJobsIsNull_Validate() {
+        setupData()
         roddyJob = [
                 validate: { -> validateCounter++ },
                 failedOrNotFinishedClusterJobs: { Collection<? extends ClusterJobIdentifier> finishedClusterJobs -> [:] },
@@ -281,6 +287,7 @@ newLine"""
 
     @Test
     void testCreateClusterJobObjects_Works() {
+        setupData()
         File workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.roddyExecutionDirectoryNames.add(workRoddyExecutionDir.name)
@@ -353,12 +360,14 @@ newLine"""
 
     @Test
     void testCreateClusterJobObjects_noneSubmitted() {
+        setupData()
         assert roddyJob.createClusterJobObjects(roddyBamFile, realm, OUTPUT_NO_CLUSTER_JOBS_SUBMITTED).empty
         assert ClusterJob.count() == 0
     }
 
     @Test
     void testCreateClusterJobObjects_realmIsNull_fails() {
+        setupData()
 
         assert shouldFail(AssertionError) {
             roddyJob.createClusterJobObjects(roddyBamFile, null, OUTPUT_CLUSTER_JOBS_SUBMITTED)
@@ -369,6 +378,7 @@ newLine"""
 
     @Test
     void testCreateClusterJobObjects_roddyResultIsNull_fails() {
+        setupData()
 
         assert shouldFail(AssertionError) {
             roddyJob.createClusterJobObjects(null, realm, OUTPUT_CLUSTER_JOBS_SUBMITTED)
@@ -379,6 +389,7 @@ newLine"""
 
     @Test
     void testSaveRoddyExecutionStoreDirectory_WhenRoddyResultIsNull_ShouldFail() {
+        setupData()
         shouldFail(AssertionError) {
             roddyJob.saveRoddyExecutionStoreDirectory(null, "")
         }
@@ -386,6 +397,7 @@ newLine"""
 
     @Test
     void testSaveRoddyExecutionStoreDirectory_WhenParsedExecutionStoreDirNotEqualsToExpectedPath_ShouldFail() {
+        setupData()
         setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.metaClass.getWorkExecutionStoreDirectory = {
@@ -399,6 +411,7 @@ newLine"""
 
     @Test
     void testSaveRoddyExecutionStoreDirectory_WhenExecutionStoreDirDoesNotExistOnFileSystem_ShouldFail() {
+        setupData()
         File workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
@@ -412,6 +425,7 @@ newLine"""
 
     @Test
     void testSaveRoddyExecutionStoreDirectory_WhenExecutionStoreDirIsNoDirectory_ShouldFail() {
+        setupData()
         File workRoddyExecutionDir = setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.roddyExecutionDirectoryNames.add(RODDY_EXECUTION_STORE_DIRECTORY_NAME)
@@ -426,6 +440,7 @@ newLine"""
 
     @Test
     void testSaveRoddyExecutionStoreDirectory_WhenLatestExecutionStoreDirIsNotLastElement_ShouldFail() {
+        setupData()
         setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.roddyExecutionDirectoryNames.add("exec_999999_999999999_a_a")
@@ -438,6 +453,7 @@ newLine"""
 
     @Test
     void testSaveRoddyExecutionStoreDirectory_WhenAllFine_ShouldBeOk() {
+        setupData()
         setUpWorkDirAndMockProcessOutput()
 
         roddyJob.saveRoddyExecutionStoreDirectory(roddyBamFile as RoddyResult, stderr)

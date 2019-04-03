@@ -41,14 +41,13 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
 
     AclUtilService aclUtilService
 
-    @Before
-    void setUp() {
+    void setupData() {
         createUserAndRoles()
     }
 
-
     @Test
     void testAlignableSeqTypesByProject_admin_none() {
+        setupData()
         DomainFactory.createAllAlignableSeqTypes()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
 
@@ -58,9 +57,9 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
         }
     }
 
-
     @Test
     void testAlignableSeqTypesByProject_operator_none() {
+        setupData()
         DomainFactory.createAllAlignableSeqTypes()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
 
@@ -70,9 +69,9 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
         }
     }
 
-
     @Test
     void testAlignableSeqTypesByProject_normalUserWithAccess_none() {
+        setupData()
         DomainFactory.createAllAlignableSeqTypes()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         addUserWithReadAccessToProject(User.findByUsername(USER), seqTrack.project)
@@ -82,9 +81,9 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
         }
     }
 
-
     @Test
     void testAlignableSeqTypesByProject_normalUserWithoutAccess_none() {
+        setupData()
         DomainFactory.createDefaultOtpAlignableSeqTypes()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
 
@@ -95,9 +94,9 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
         }
     }
 
-
     @Test
     void testAlignableSeqTypesByProject_operator_one() {
+        setupData()
         List<SeqType> alignableSeqTypes = DomainFactory.createAllAlignableSeqTypes()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DomainFactory.createSeqTrack(sample: seqTrack.sample)
@@ -110,9 +109,9 @@ class SeqTypeServiceTest extends AbstractIntegrationTest {
         }
     }
 
-
     @Test
     void testAlignableSeqTypesByProject_operator_two() {
+        setupData()
         List<SeqType> alignableSeqTypes = DomainFactory.createAllAlignableSeqTypes()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DomainFactory.createSeqTrack(sample: seqTrack.sample)

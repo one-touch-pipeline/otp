@@ -42,8 +42,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
     File mdPath
     SeqType alignableSeqType
 
-    @Before
-    void setUp() {
+    void setupData() {
         dataPath = TestCase.getUniqueNonExistentPath()
         mdPath = TestCase.getUniqueNonExistentPath()
         testData = new TestData()
@@ -58,6 +57,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testDecideAndPrepareForAlignment_noAlignmentDecider_shouldReturnEmptyList() {
+        setupData()
         SeqTrack seqTrack = setupSeqTrackProjectAndDataFile()
 
         Collection<MergingWorkPackage> workPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
@@ -67,6 +67,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testReturnExternallyProcessedMergedBamFiles_InputIsNull_ShouldFail() {
+        setupData()
         shouldFail(IllegalArgumentException) {
             seqTrackService.returnExternallyProcessedMergedBamFiles(null)
         }
@@ -74,6 +75,7 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testReturnExternallyProcessedMergedBamFiles_InputIsEmpty_ShouldFail() {
+        setupData()
         TestCase.shouldFail(AssertionError) {
             seqTrackService.returnExternallyProcessedMergedBamFiles([])
         }
@@ -81,12 +83,14 @@ class SeqTrackServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testReturnExternallyProcessedMergedBamFiles_NoExternalBamFileAttached_AllFine() {
+        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         assert seqTrackService.returnExternallyProcessedMergedBamFiles([seqTrack]).isEmpty()
     }
 
     @Test
     void testReturnExternallyProcessedMergedBamFiles_ExternalBamFileAttached_AllFine() {
+        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         ExternalMergingWorkPackage externalMergingWorkPackage = DomainFactory.createExternalMergingWorkPackage(
                 seqType: seqTrack.seqType,

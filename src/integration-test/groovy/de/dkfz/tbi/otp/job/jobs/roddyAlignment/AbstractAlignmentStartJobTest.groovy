@@ -53,8 +53,7 @@ class AbstractAlignmentStartJobTest {
 
     boolean originalSchedulerActive
 
-    @Before
-    void setUp() {
+    void setupData() {
         originalSchedulerActive = schedulerService.schedulerActive
         schedulerService.schedulerActive = true
     }
@@ -67,6 +66,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testFindProcessableMergingWorkPackages_WhenSeveralMergingWorkPackages_ShouldReturnOrderedMergingWorkPackageList() {
+        setupData()
         MergingWorkPackage tooLowPriority = createMergingWorkPackage()
         tooLowPriority.project.processingPriority = ProcessingPriority.MINIMUM.priority
         assert tooLowPriority.save(flush: true, failOnError: true)
@@ -89,6 +89,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testFindProcessableMergingWorkPackages_WhenMergingWorkPackagesHasNoSeqTracks_ShouldNotReturnThatMergingWorkpackage() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         mwp.seqTracks = null
         mwp.save()
@@ -98,6 +99,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testFindProcessableMergingWorkPackages_WhenRoddyBamFileIsNotProcessedAndNotWithdrawn_ShouldReturnEmptyList() {
+        setupData()
         DomainFactory.createRoddyBamFile([
                 workPackage: createMergingWorkPackage(),
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
@@ -110,6 +112,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testFindProcessableMergingWorkPackages_WhenRoddyBamFileIsNotProcessedButWithdrawn_ShouldReturnMergingWorkPackage() {
+        setupData()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 workPackage: createMergingWorkPackage(),
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
@@ -122,6 +125,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testFindProcessableMergingWorkPackages_WhenRoddyBamFileIsProcessed_ShouldReturnMergingWorkPackage() {
+        setupData()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 workPackage: createMergingWorkPackage(),
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
@@ -133,6 +137,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testIsDataInstallationWFInProgress_WhenSeqTrackInStateFinished_ShouldReturnFalse() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.FINISHED)
 
         assert false == AbstractAlignmentStartJob.isDataInstallationWFInProgress(mwp)
@@ -140,6 +145,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testIsDataInstallationWFInProgress_WhenSeqTrackInProgress_ShouldReturnTrue() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.IN_PROGRESS)
 
         assert AbstractAlignmentStartJob.isDataInstallationWFInProgress(mwp)
@@ -147,6 +153,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testIsDataInstallationWFInProgress_WhenSeqTrackInStateNotStarted_ShouldReturnTrue() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.NOT_STARTED)
 
         assert AbstractAlignmentStartJob.isDataInstallationWFInProgress(mwp)
@@ -154,6 +161,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testFindBamFileInProjectFolder_WhenNoRoddyBamFile_ShouldReturnNull() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
 
         assert null == AbstractAlignmentStartJob.findBamFileInProjectFolder(mwp)
@@ -161,6 +169,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testFindBamFileInProjectFolder_WhenNoRoddyBamFileInProgressOrProcessed_ShouldReturnNull() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 workPackage: mwp,
@@ -181,6 +190,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testFindBamFileInProjectFolder_WhenLatestBamFileIsInProgress_ShouldReturnNull() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile rbf = DomainFactory.createRoddyBamFile([
                 workPackage: mwp,
@@ -201,6 +211,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testFindBamFileInProjectFolder_WhenLatestBamFileNeitherInProgressNorProcessed_ShouldReturnEarlierFile() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 workPackage: mwp,
@@ -221,11 +232,13 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testFindUsableBaseBamFile_WhenMergingWorkPackageHasNoBamFile_ShouldReturnNull() {
+        setupData()
         assert null == testAbstractAlignmentStartJob.findUsableBaseBamFile(DomainFactory.createMergingWorkPackage())
     }
 
     @Test
     void testFindUsableBaseBamFile_WhenBamFileInProjectFolderIsWithdrawn_ShouldReturnNull() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 workPackage: mwp,
@@ -239,6 +252,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testFindUsableBaseBamFile_WhenBamFileInProjectFolderIsUsable_ShouldReturnIt() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile([
                 workPackage: mwp,
@@ -251,6 +265,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testCreateRoddyBamFile_WithoutIndividualConfig_WhenBaseBamFileIsNull() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
         helperTestCreateRoddyBamFile_WhenBaseBamFileIsNull(mwp)
@@ -258,6 +273,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testCreateRoddyBamFile_WithIndividualConfig_WhenBaseBamFileIsNull() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
         RoddyWorkflowConfig config = DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project, individual: mwp.individual])
@@ -267,6 +283,7 @@ class AbstractAlignmentStartJobTest {
     }
 
     RoddyBamFile helperTestCreateRoddyBamFile_WhenBaseBamFileIsNull(MergingWorkPackage mwp) {
+        setupData()
         Collection<SeqTrack> seqTracks = [DomainFactory.createSeqTrackWithDataFiles(mwp)]
         mwp.seqTracks = seqTracks
         mwp.save(flush: true, failOnError: true)
@@ -288,6 +305,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testCreateRoddyBamFile_WhenBaseBamFileIsNotNull() {
+        setupData()
         RoddyBamFile baseBamFile = DomainFactory.createRoddyBamFile()
         MergingWorkPackage mwp = baseBamFile.mergingWorkPackage
         Collection<SeqTrack> additionalSeqTracks = [
@@ -313,6 +331,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testCreateRoddyBamFile_WhenBaseBamFileIsNullAndNoConfigAvailable_ShouldFail() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         DomainFactory.createSeqTrackWithDataFiles(mwp)
         DomainFactory.createRoddyProcessingOptions()
@@ -326,6 +345,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testStartRoddyAlignment_WhenProcessingPriorityIsTooLow_ShouldNotCreateProcess() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         mwp.project.processingPriority = ProcessingPriority.NORMAL.priority - 1 as short
         assert mwp.save(flush: true, failOnError: true)
@@ -341,6 +361,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void testStartRoddyAlignment_WhenEverythingIsOkay_ShouldCreateProcess() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.FINISHED)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
         DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
@@ -358,6 +379,7 @@ class AbstractAlignmentStartJobTest {
 
     @Test
     void executeCallsSetStartedForSeqTracks() {
+        setupData()
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.FINISHED)
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
         DataFile.findAll()*.runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
@@ -370,7 +392,6 @@ class AbstractAlignmentStartJobTest {
 
         assert otrsTicket.alignmentStarted != null
     }
-
 
 
     private void assertRoddyBamFileConsistencyWithMwp(RoddyBamFile rbf, MergingWorkPackage mwp) {

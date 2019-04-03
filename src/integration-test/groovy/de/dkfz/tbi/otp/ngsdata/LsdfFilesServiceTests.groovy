@@ -71,8 +71,7 @@ class LsdfFilesServiceTests {
     FileType fileType
 
 
-    @Before
-    void setUp() {
+    void setupData() {
         fileType = new FileType()
         fileType.type = FileType.Type.SEQUENCE
         fileType.subType = "fastq"
@@ -163,6 +162,7 @@ class LsdfFilesServiceTests {
 
     @Test
     void testGetFileViewByPidRelativeDirectorySeqTrackAboutAlignmentLog() {
+        setupData()
         final String SEQ_TYPE = "OtherThanChipSeq"
         final String SEQ_TYPE_SEQUENCING_DIR = SEQ_TYPE
         SeqType seqType = DomainFactory.createSeqType([name: SEQ_TYPE, dirName:  SEQ_TYPE_SEQUENCING_DIR])
@@ -192,6 +192,7 @@ class LsdfFilesServiceTests {
 
     @Test
     void testGetFileViewByPidRelativeDirectory() {
+        setupData()
         final String SEQ_TYPE = "OtherThanChipSeq"
         final String SEQ_TYPE_SEQUENCING_DIR = SEQ_TYPE
         SeqType seqType = DomainFactory.createSeqType([name: SEQ_TYPE, dirName:  SEQ_TYPE_SEQUENCING_DIR])
@@ -205,6 +206,7 @@ class LsdfFilesServiceTests {
 
     @Test
     void testGetFileViewByPidRelativeDirectoryChipSeq() {
+        setupData()
         final String SEQ_TYPE = SeqTypeNames.CHIP_SEQ.seqTypeName
         final String CHIP_SEQ_SEQUENCING_DIR = "chip_seq_sequencing"
         final String ANTIBODY_TARGET_NAME = "antibody1"
@@ -235,7 +237,7 @@ class LsdfFilesServiceTests {
      */
     @Test
     void testGetFileViewByPidRelativeDirectoryChipSeqUsingSeqTrack() {
-
+        setupData()
         SeqTrack seqTrack = createSeqTrack()
         seqTrack.seqType = DomainFactory.createChipSeqType()
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
@@ -246,6 +248,7 @@ class LsdfFilesServiceTests {
 
     @Test
     void testGetFileViewByPidDirectory() {
+        setupData()
         SeqType seqType = DomainFactory.createSeqType()
         SeqTrack seqTrack = createSeqTrack(seqType: seqType)
         createDataFile(seqTrack, fastqR1Filename)

@@ -41,13 +41,13 @@ class AbstractMaybeSubmitWaitValidateJobTests extends TestCase {
     AbstractMaybeSubmitWaitValidateJob abstractMaybeSubmitWaitValidateJob
     ConfigService configService
 
-    @Before
-    void setUp() {
+    void setupData() {
         abstractMaybeSubmitWaitValidateJob = [:] as AbstractMaybeSubmitWaitValidateJob
     }
 
     @Test
     void testCreateExceptionString() {
+        setupData()
         Realm realm = DomainFactory.createRealm()
         assert realm.save([flush: true, failOnError: true])
 

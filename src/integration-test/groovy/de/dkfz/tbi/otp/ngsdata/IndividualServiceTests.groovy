@@ -44,8 +44,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     IndividualService individualService
     private static long ARBITRARY_TIMESTAMP = 1337
 
-    @Before
-    void setUp() {
+    void setupData() {
         createUserAndRoles()
     }
 
@@ -56,6 +55,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetIndividualByName() {
+        setupData()
         Individual individual = mockIndividual()
         // a user should not be able to get the Individual
         SpringSecurityUtils.doWithAuth(TESTUSER) {
@@ -95,6 +95,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testGetIndividualById() {
+        setupData()
         Individual individual = mockIndividual()
         // a user should not be able to get the Individual
         SpringSecurityUtils.doWithAuth(TESTUSER) {
@@ -139,6 +140,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     @Ignore
     @Test
     void testListIndividualAsAdmin() {
+        setupData()
         // let's create a few Projects and Individuals
         Project project1 = mockProject("test")
         Project project2 = mockProject("test2")
@@ -276,6 +278,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     @Ignore
     @Test
     void testListIndividualAsOperator() {
+        setupData()
         // let's create a few Projects and Individuals
         Project project1 = mockProject("test")
         Project project2 = mockProject("test2")
@@ -413,6 +416,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     @Ignore
     @Test
     void testListIndividualWithFilterAsAdmin() {
+        setupData()
         // let's create a few Projects and Individuals
         Project project1 = mockProject("project")
         Project project2 = mockProject("project1")
@@ -597,6 +601,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     @Ignore
     @Test
     void testListIndividualWithFilterAsOperator() {
+        setupData()
         // let's create a few Projects and Individuals
         Project project1 = mockProject("project")
         Project project2 = mockProject("project1")
@@ -781,6 +786,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     @Ignore
     @Test
     void testListIndividualWithACL() {
+        setupData()
         // let's create a few Projects and Individuals
         Project project1 = mockProject("test")
         Project project2 = mockProject("test2")
@@ -946,6 +952,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
     @Ignore
     @Test
     void testListIndividualWithFilterAndACL() {
+        setupData()
         // let's create a few Projects and Individuals
         Project project1 = mockProject("project")
         Project project2 = mockProject("project1")
@@ -1155,6 +1162,7 @@ class IndividualServiceTests extends AbstractIntegrationTest {
 
     @Test
     void testCreateCommentString_WhenSeveralPropertiesEqual_ShouldJustAddDifferentOnes() {
+        setupData()
         String operation = "operation"
         Map mapA = [a: 1, b: 2, c: 3]
         Map mapB = [a: 1, b: 3, c: 4]
@@ -1172,6 +1180,7 @@ c: 4
 
     @Test
     void testCreateCommentString_WhenCommentWithAdditionalInformation_ShouldReturnCorrectString() {
+        setupData()
         String operation = "operation"
         Map mapA = [a: 1]
         Map mapB = [a: 2]
@@ -1189,6 +1198,7 @@ a: 2
 
     @Test
     void testCreateComment_WhenCommentAlreadyExists_ShouldAddNewComment() {
+        setupData()
         Individual indOld = DomainFactory.createIndividual(comment: DomainFactory.createComment(comment: "old comment"))
         Individual indNew = DomainFactory.createIndividual()
         String operation = "operation"
@@ -1214,6 +1224,7 @@ ${indOld.comment.comment}""" == indNew.comment.comment
 
     @Test
     void testCreateComment_WhenParametersNull_ShouldFail() {
+        setupData()
         TestCase.shouldFail(AssertionError) {
             individualService.createComment(null, null, null)
         }
@@ -1221,6 +1232,7 @@ ${indOld.comment.comment}""" == indNew.comment.comment
 
     @Test
     void testCreateComment_WhenMapsHaveDifferentKeySets_ShouldFail() {
+        setupData()
         TestCase.shouldFail(AssertionError) {
             individualService.createComment(null, [individual: DomainFactory.createIndividual(), a: 1], [individual: DomainFactory.createIndividual()])
         }
@@ -1228,6 +1240,7 @@ ${indOld.comment.comment}""" == indNew.comment.comment
 
     @Test
     void testCreateComment_WhenInputMapsContainNoIndividual_ShouldFail() {
+        setupData()
         TestCase.shouldFail(AssertionError) {
             individualService.createComment("", [property: null], [property: null])
         }

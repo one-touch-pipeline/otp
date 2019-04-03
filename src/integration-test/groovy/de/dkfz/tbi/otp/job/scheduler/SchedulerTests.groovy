@@ -51,8 +51,7 @@ class SchedulerTests extends AbstractIntegrationTest {
     @Autowired
     Scheduler scheduler
 
-    @Before
-    void setup() {
+    void setupData() {
         scheduler.schedulerService.metaClass.executeInNewThread = { Closure job ->
             job()
         }
@@ -67,6 +66,7 @@ class SchedulerTests extends AbstractIntegrationTest {
 
     @Test
     void testNormalJobExecution() {
+        setupData()
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = createTestJob("test", jep)
@@ -116,6 +116,7 @@ class SchedulerTests extends AbstractIntegrationTest {
 
     @Test
     void testNormalEndStateAwareJobExecution() {
+        setupData()
         JobExecutionPlan jep = new JobExecutionPlan(name: "testEndStateAware", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = createTestEndStateAwareJob("testEndStateAware", jep)
@@ -172,6 +173,7 @@ class SchedulerTests extends AbstractIntegrationTest {
 
     @Test
     void testFailingEndStateAwareJobExecution() {
+        setupData()
         JobExecutionPlan jep = new JobExecutionPlan(name: "testFailureEndStateAware", planVersion: 0, startJobBean: "testStartJob")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = createTestEndStateAwareJob("testEndStateAware", jep, null, "testFailureEndStateAwareJob")
@@ -220,11 +222,13 @@ class SchedulerTests extends AbstractIntegrationTest {
 
     @Test
     void testFailingExecutionWithoutRestart() {
+        setupData()
         helperForFailingExecution(/nonTesting/, [ExecutionState.CREATED, ExecutionState.STARTED, ExecutionState.FAILURE])
     }
 
     @Test
     void testFailingExecutionWithRestart() {
+        setupData()
         helperForFailingExecution(Pattern.quote(FailingTestJob.EXCEPTION_MESSAGE), [ExecutionState.CREATED, ExecutionState.STARTED, ExecutionState.FAILURE, ExecutionState.RESTARTED])
     }
 
@@ -270,6 +274,7 @@ class SchedulerTests extends AbstractIntegrationTest {
 
     @Test
     void testMissingOutputParameter() {
+        setupData()
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = createTestJob("test", jep)
@@ -305,6 +310,7 @@ class SchedulerTests extends AbstractIntegrationTest {
 
     @Test
     void testInputAsOutputParameter() {
+        setupData()
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
         assertNotNull(jep.save())
         JobDefinition jobDefinition = new JobDefinition(name: "test", bean: "directTestJob", plan: jep)

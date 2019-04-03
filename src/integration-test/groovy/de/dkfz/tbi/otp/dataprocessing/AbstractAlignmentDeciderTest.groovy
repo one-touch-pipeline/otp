@@ -49,8 +49,7 @@ class AbstractAlignmentDeciderTest {
 
     final shouldFail = new GroovyTestCase().&shouldFail
 
-    @Before
-    void setUp() {
+    void setupData() {
         decider = newDecider()
         decider.trackingService = new TrackingService()
         decider.processingOptionService = new ProcessingOptionService()
@@ -76,6 +75,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testDecideAndPrepareForAlignment_whenEverythingIsOkay_shouldReturnWorkPackages() {
+        setupData()
         SeqTrack seqTrack = buildSeqTrack()
 
         Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
@@ -86,6 +86,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testFindOrSaveWorkPackagesTwice_whenEverythingIsOkay_workPackageShouldContainBothSeqTracks() {
+        setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         SeqTrack seqTrack2 = DomainFactory.createSeqTrack(sample: seqTrack.sample, seqType: seqTrack.seqType, run: DomainFactory.createRun(seqPlatform: seqTrack.seqPlatform))
@@ -101,6 +102,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testDecideAndPrepareForAlignment_noDataFile_shouldReturnEmptyList() {
+        setupData()
         TestData testData = new TestData()
         testData.createObjects()
 
@@ -113,6 +115,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testDecideAndPrepareForAlignment_whenCanPipelineAlignReturnsFalse_shouldReturnEmptyList() {
+        setupData()
         SeqTrack seqTrack = buildSeqTrack()
         seqTrack.seqType = DomainFactory.createSeqType(name: "Invalid")
         seqTrack.save(flush: true, failOnError: true)
@@ -123,6 +126,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testDecideAndPrepareForAlignment_whenWrongReferenceGenome_shouldThrowAssertionError() {
+        setupData()
         SeqTrack seqTrack = buildSeqTrack()
 
         DomainFactory.createMergingWorkPackage(
@@ -139,6 +143,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testDecideAndPrepareForAlignment_whenWrongPipeline_shouldThrowAssertionError() {
+        setupData()
         SeqTrack seqTrack = buildSeqTrack()
 
         DomainFactory.createMergingWorkPackage(
@@ -157,6 +162,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testDecideAndPrepareForAlignment_whenDifferentSeqPlatformGroup_shouldReturnEmptyListAndSendMail() {
+        setupData()
         String prefix = "PRFX"
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
 
@@ -208,6 +214,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testDecideAndPrepareForAlignment_whenDifferentLibraryPreparationKit_shouldReturnEmptyListAndSendMailWithTicket() {
+        setupData()
         SeqTrack seqTrack; MergingWorkPackage workPackage
         (seqTrack, workPackage) = prepareDifferentLibraryPreparationKit()
 
@@ -237,6 +244,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testDecideAndPrepareForAlignment_whenDifferentLibraryPreparationKit_shouldReturnEmptyListAndSendMailWithoutTicket() {
+        setupData()
         SeqTrack seqTrack; MergingWorkPackage workPackage
         (seqTrack, workPackage) = prepareDifferentLibraryPreparationKit()
 
@@ -257,6 +265,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testDecideAndPrepareForAlignment_whenMergingWorkPackageExists_shouldReturnIt() {
+        setupData()
         SeqTrack seqTrack = buildSeqTrack()
 
         MergingWorkPackage workPackage = new MergingWorkPackage(
@@ -278,6 +287,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testDecideAndPrepareForAlignment_callsEnsureConfigurationIsComplete() {
+        setupData()
         SeqTrack st = buildSeqTrack()
         int callCount = 0
         decider = newDecider(
@@ -294,6 +304,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testDecideAndPrepareForAlignment_callsPrepareForAlignment() {
+        setupData()
         SeqTrack st = buildSeqTrack()
         Collection<MergingWorkPackage> calledForMergingWorkPackages = []
         decider = newDecider(
@@ -310,6 +321,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testEnsureConfigurationIsComplete_whenReferenceGenomeNull_shouldThrowRuntimeException() {
+        setupData()
         SeqTrack seqTrack = buildSeqTrack()
 
         exactlyOneElement(ReferenceGenomeProjectSeqType.list()).delete(flush: true)
@@ -321,6 +333,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testEnsureConfigurationIsComplete_whenLibraryPreparationKitIsMissing_shouldThrowRuntimeException() {
+        setupData()
         TestData testData = new TestData()
         testData.createObjects()
 
@@ -337,9 +350,9 @@ class AbstractAlignmentDeciderTest {
         })
     }
 
-
     @Test
     void testCanPipelineAlign_whenEverythingIsOkay_shouldReturnTrue() {
+        setupData()
         TestData testData = new TestData()
         testData.createObjects()
 
@@ -351,6 +364,7 @@ class AbstractAlignmentDeciderTest {
 
     @Test
     void testCanPipelineAlign_whenWrongSeqType_shouldReturnFalse() {
+        setupData()
         TestData testData = new TestData()
         testData.createObjects()
 

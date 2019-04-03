@@ -40,8 +40,7 @@ class SeqPlatformServiceTests {
 
     CheckedLogger checkedLogger
 
-    @Before
-    void setUp() {
+    void setupData() {
         checkedLogger = new CheckedLogger()
         LogThreadLocal.setThreadLog(checkedLogger)
     }
@@ -91,6 +90,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameAndModelAndKitGiven() {
+        setupData()
         def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, kit)
@@ -102,6 +102,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameAndModelGivenAndKitIsNull() {
+        setupData()
         SeqPlatformModelLabel model = createDataFor_findForNameAndModelAndSequencingKit()[0] as SeqPlatformModelLabel
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, null)
@@ -113,6 +114,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameAndKitGivenAndModelIsNull() {
+        setupData()
         SequencingKitLabel kit = createDataFor_findForNameAndModelAndSequencingKit()[1] as SequencingKitLabel
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, null, kit)
@@ -124,6 +126,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameGivenAndModelAndKitIsNull() {
+        setupData()
         createDataFor_findForNameAndModelAndSequencingKit()
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, null, null)
@@ -135,6 +138,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnSeqplatform_PlatformNameInOtherCaseAndModelAndKitGiven() {
+        setupData()
         def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, kit)
@@ -146,6 +150,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnNull_UnknownPlatformNameGiven() {
+        setupData()
         def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit('Some other name', model, kit)
@@ -154,6 +159,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnNull_UnknownModelGiven() {
+        setupData()
         SequencingKitLabel kit = createDataFor_findForNameAndModelAndSequencingKit()[1] as SequencingKitLabel
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, DomainFactory.createSeqPlatformModelLabel(), kit)
@@ -162,6 +168,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldReturnNull_UnknownKitGiven() {
+        setupData()
         SeqPlatformModelLabel model = createDataFor_findForNameAndModelAndSequencingKit()[0] as SeqPlatformModelLabel
 
         SeqPlatform seqPlatform = seqPlatformService.findForNameAndModelAndSequencingKit(PLATFORM_NAME, model, DomainFactory.createSequencingKitLabel())
@@ -170,6 +177,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldFail_PlatformNameIsNull() {
+        setupData()
         def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
 
         TestCase.shouldFail(AssertionError) {
@@ -179,6 +187,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void test_findForNameAndModelAndSequencingKit_shouldFail_PlatformNameIsEmpty() {
+        setupData()
         def (model, kit) = createDataFor_findForNameAndModelAndSequencingKit()
 
         TestCase.shouldFail(AssertionError) {
@@ -188,6 +197,7 @@ class SeqPlatformServiceTests {
 
     @Test
     void testCreateNewSeqPlatform_SeqPlatformExistsAlready_shouldFail() {
+        setupData()
         DomainFactory.createSeqPlatformWithSeqPlatformGroup(
                 name: PLATFORM_NAME,
                 seqPlatformGroups: null,

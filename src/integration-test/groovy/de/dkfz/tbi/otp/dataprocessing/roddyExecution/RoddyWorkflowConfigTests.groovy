@@ -41,14 +41,14 @@ class RoddyWorkflowConfigTests {
 
     RoddyWorkflowConfigService service
 
-    @Before
-    void setUp() {
+    void setupData() {
         service = new RoddyWorkflowConfigService()
         service.fileSystemService = new TestFileSystemService()
     }
 
     @Test
     void testGetLatestForProject_ProjectIsNull_ShouldFail() {
+        setupData()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
         TestCase.shouldFailWithMessageContaining(AssertionError, 'The project is not allowed to be null') {
@@ -58,6 +58,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testGetLatestForProject_SeqTypeIsNull_ShouldFail() {
+        setupData()
         Project project = DomainFactory.createProject()
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
         TestCase.shouldFailWithMessageContaining(AssertionError, 'The seqType is not allowed to be null') {
@@ -67,6 +68,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testGetLatestForProject_PipelineIsNull_ShouldFail() {
+        setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         TestCase.shouldFailWithMessageContaining(AssertionError, 'The pipeline is not allowed to be null') {
@@ -76,6 +78,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testGetLatestForProject_ThereIsNoConfigFileInTheDatabase() {
+        setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
@@ -85,6 +88,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testGetLatestForProject_OneRoddyWorkflowConfigExists() {
+        setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
@@ -99,6 +103,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testGetLatestForProject_OneActiveAndOneObsoleteRoddyWorkflowConfigExists() {
+        setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
@@ -120,6 +125,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testGetLatest_ConfigForIndividualAndDefaultConfigExists() {
+        setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
@@ -142,6 +148,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testGetLatest_ConfigForTwoDifferentIndividualsExists() {
+        setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
@@ -165,6 +172,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testGetLatest_TwoConfigForOneDifferentIndividualExists() {
+        setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
@@ -190,6 +198,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testGetLatestForIndividual_ConfigForIndividualExists() {
+        setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
@@ -207,6 +216,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testGetLatestForIndividual_ConfigForIndividualAndDefaultConfigExists() {
+        setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
@@ -229,6 +239,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testGetLatestForIndividual_OnlyDefaultConfigExists() {
+        setupData()
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
@@ -245,6 +256,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testCreateConfigPerProject_PreviousConfigExists() {
+        setupData()
         Pipeline pipeline = DomainFactory.returnOrCreateAnyPipeline()
         SeqType seqType = DomainFactory.createSeqType(roddyName: TEST_RODDY_SEQ_TYPE_RODDY_NAME)
         Project project = DomainFactory.createProject()
@@ -272,6 +284,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testCreateConfigPerProject_PreviousConfigDoesNotExist() {
+        setupData()
         Project project = DomainFactory.createProject()
         ConfigPerProjectAndSeqType configPerProject = DomainFactory.createRoddyWorkflowConfig(
                 project: project,
@@ -283,6 +296,7 @@ class RoddyWorkflowConfigTests {
 
     @Test
     void testMakeObsolete() {
+        setupData()
         ConfigPerProjectAndSeqType configPerProject = DomainFactory.createRoddyWorkflowConfig()
         assert !configPerProject.obsoleteDate
         service.makeObsolete(configPerProject)

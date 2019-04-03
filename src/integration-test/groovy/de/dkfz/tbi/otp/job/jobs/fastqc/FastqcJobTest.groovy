@@ -52,8 +52,7 @@ class FastqcJobTest {
 
     File testDirectory
 
-    @Before
-    void setUp() {
+    void setupData() {
         testDirectory = TestCase.createEmptyTestDirectory()
 
         seqTrack = DomainFactory.createSeqTrack()
@@ -82,7 +81,6 @@ class FastqcJobTest {
 
     @After
     void tearDown() {
-
         TestCase.removeMetaClass(ClusterJobSchedulerService, fastqcJob.clusterJobSchedulerService)
         TestCase.removeMetaClass(RemoteShellHelper, fastqcJob.remoteShellHelper)
         TestCase.removeMetaClass(LsdfFilesService, fastqcJob.lsdfFilesService)
@@ -98,6 +96,7 @@ class FastqcJobTest {
 
     @Test
     void testMaybeSubmit_FastQcResultsNotAvailable_executesFastQcCommand() {
+        setupData()
         fastqcJob.clusterJobSchedulerService.metaClass.executeJob = { Realm inputRealm, String inputCommand ->
             assert inputCommand.contains("fastqc-0.10.1")
             assert !inputCommand.contains("bzip2 --decompress --keep")
@@ -116,6 +115,7 @@ class FastqcJobTest {
 
     @Test
     void testMaybeSubmit_FastQcResultsNotAvailableAndDatafileIsBzip_executesFastQcCommandForBzip() {
+        setupData()
         dataFile.vbpFileName = dataFile.fileName = 'file.bz2'
         fastqcJob.clusterJobSchedulerService.metaClass.executeJob = { Realm inputRealm, String inputCommand ->
             assert inputCommand.contains("fastqc-0.10.1")
@@ -135,6 +135,7 @@ class FastqcJobTest {
 
     @Test
     void testMaybeSubmit_FastQcResultsAvailable_executesCopyCommand() {
+        setupData()
         long nReads = 100
         String sequenceLength = "90"
 
@@ -172,6 +173,7 @@ class FastqcJobTest {
 
     @Test
     void testValidate_FastqcAreCreatedByClusterJob_shallBeUploadToDB() {
+        setupData()
         long nReads = 100
         String sequenceLength = "90"
 
@@ -192,6 +194,7 @@ class FastqcJobTest {
 
     @Test
     void testValidate_totalSequencesIsSameForAllDataFiles_ShouldPassValidation() {
+        setupData()
         long nReads = 100
         String sequenceLength = "90"
 
@@ -209,6 +212,7 @@ class FastqcJobTest {
 
     @Test
     void testValidate_totalSequencesIsDifferentForAllDataFiles_ShouldFail() {
+        setupData()
         long nReads1 = 100
         long nReads2 = 105
         String sequenceLength = "90"
@@ -230,6 +234,7 @@ class FastqcJobTest {
 
     @Test
     void testValidate_sequenceLengthIsIntegerValueAndIsSameForAllDataFiles_ShouldPassValidation() {
+        setupData()
         String sequenceLength = "100"
         long nReads = 100
 
@@ -247,6 +252,7 @@ class FastqcJobTest {
 
     @Test
     void testValidate_sequenceLengthIsRangeValueAndIsDifferentForAllDataFiles_ShouldPassValidation() {
+        setupData()
         String sequenceLength1 = "0-50"
         String sequenceLength2 = "50-100"
         long nReads = 100
@@ -265,6 +271,7 @@ class FastqcJobTest {
 
     @Test
     void testValidate_sequenceLengthIsDifferentForAllDataFiles_ShouldPassValidation() {
+        setupData()
         String sequenceLength1 = "50"
         String sequenceLength2 = "100"
         long nReads = 100

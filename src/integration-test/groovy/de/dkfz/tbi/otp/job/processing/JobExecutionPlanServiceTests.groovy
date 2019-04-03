@@ -41,8 +41,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
     def jobExecutionPlanService
     def grailsApplication
 
-    @Before
-    void setUp() {
+    void setupData() {
         createUserAndRoles()
     }
 
@@ -53,6 +52,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testWithParentNoParent() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan()
         JobExecutionPlanService service = new JobExecutionPlanService()
         List<JobExecutionPlan> plans = service.withParents(plan)
@@ -62,6 +62,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testWithParentOneParent() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(obsoleted: true)
         JobExecutionPlan plan2 = new JobExecutionPlan(previousPlan: plan)
         JobExecutionPlanService service = new JobExecutionPlanService()
@@ -78,6 +79,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testWithParentManyParent() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(obsoleted: true)
         JobExecutionPlan plan2 = new JobExecutionPlan(previousPlan: plan, obsoleted: true)
         JobExecutionPlan plan3 = new JobExecutionPlan(previousPlan: plan2, obsoleted: true)
@@ -133,6 +135,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testGetAllJobExecutionPlans() {
+        setupData()
         JobExecutionPlanService service = new JobExecutionPlanService()
         assertTrue(service.getJobExecutionPlans().isEmpty())
 
@@ -180,6 +183,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testIsProcessRunningOnePlan() {
+        setupData()
         JobExecutionPlanService service = new JobExecutionPlanService()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false)
         JobExecutionPlan plan2 = new JobExecutionPlan(name: "test2", obsoleted: false)
@@ -206,6 +210,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testIsProcessRunningObsoletedPlan() {
+        setupData()
         JobExecutionPlanService service = new JobExecutionPlanService()
         JobExecutionPlan plan = new JobExecutionPlan(id: 1, name: "testIsProcessRunningObsoletedPlan", obsoleted: true, planVersion: 0, previousPlan: null)
         assertNotNull(plan.save())
@@ -252,6 +257,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testGetLastExecutedProcess() {
+        setupData()
         JobExecutionPlanService service = new JobExecutionPlanService()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
         assertNotNull(plan.save())
@@ -307,6 +313,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testGetLatestUpdatesForPlanInStateFailure() {
+        setupData()
         JobExecutionPlanService service = new JobExecutionPlanService()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
         assertNotNull(plan.save())
@@ -386,6 +393,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
      */
     @Test
     void testEnablePlan() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
         plan = plan.save(flush: true)
         assertNotNull(plan)
@@ -404,6 +412,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testEnablePlanForStartJob() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0)
         plan = plan.save(flush: true)
         StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: plan)
@@ -431,6 +440,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testDisablePlan() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
@@ -449,6 +459,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testDisablePlanForStartJob() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "testGetLastFinishedProcess", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: plan)
@@ -476,6 +487,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testGetPlanSecurity() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
@@ -492,6 +504,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testEnablePlanSecurity() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
@@ -508,6 +521,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testDisablePlanSecurity() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan.save(flush: true)
         assertNotNull(plan)
@@ -524,6 +538,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testGetAllPlansPermission() {
+        setupData()
         int numberOfPlans = 3
         numberOfPlans.times {
             JobExecutionPlan plan = new JobExecutionPlan(name: "test${it}", obsoleted: false, planVersion: 0, enabled: true)
@@ -541,6 +556,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testGetAllProcessesPermission() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan.save(flush: true)
         assertNotNull(plan)
@@ -557,6 +573,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testGetLatestUpdatesForPlanSecurity() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
@@ -573,6 +590,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testIsProcessRunningSecurity() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
@@ -589,6 +607,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testGetProcessCountSecurity() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
@@ -605,6 +624,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testGetLastExecutedProcessSecurity() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
@@ -621,6 +641,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testGetNumberOfProcessesSecurity() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
@@ -637,6 +658,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @Test
     void testPlanInformation() {
+        setupData()
         JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         plan = plan.save(flush: true)
         assertNotNull(plan)
@@ -700,6 +722,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
     @Test
     void "test processCount"() {
         setup:
+        setupData()
         createJepsWithProcesses()
 
         when:
@@ -715,6 +738,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
     @Test
     void "test finishedProcessCount"() {
         setup:
+        setupData()
         createJepsWithProcesses()
 
         when:
@@ -746,6 +770,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
     @Test
     void "test failProcessCount"() {
         setup:
+        setupData()
         // JEP with an obsolete predecessor JEP
         JobExecutionPlan plan1a = DomainFactory.createJobExecutionPlan(name: "a", obsoleted: true, planVersion: 0)
         JobExecutionPlan plan1b = DomainFactory.createJobExecutionPlan(name: "a", planVersion: 1, previousPlan: plan1a)
@@ -804,6 +829,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
     @Test
     void "test lastProcessDate, finds date of newest update with the given state" () {
         setup:
+        setupData()
         // create a JEP with processes, processing states and updates
         Date date = createLastDateStructure("panCanInstallation", ExecutionState.SUCCESS)
 

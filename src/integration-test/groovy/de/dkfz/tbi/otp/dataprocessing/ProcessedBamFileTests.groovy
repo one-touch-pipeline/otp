@@ -36,13 +36,13 @@ class ProcessedBamFileTests {
 
     TestData data = new TestData()
 
-    @Before
-    void setUp() {
+    void setupData() {
         data.createObjects()
     }
 
     @Test
     void test_getOverallQualityAssessment_WhenOnePassExists_ShouldReturnThis() {
+        setupData()
 
         final Long ARBITRARY_IDENTIFIER = 42
 
@@ -54,6 +54,7 @@ class ProcessedBamFileTests {
 
     @Test
     void test_getOverallQualityAssessment_WhenMultiplePassesExists_ShouldReturnLatest() {
+        setupData()
 
         final Long IDENTIFIER_FORMER = 100
         final Long IDENTIFIER_LATER = 200
@@ -69,7 +70,6 @@ class ProcessedBamFileTests {
     }
 
     private ProcessedBamFile createProcessedBamFile() {
-
         AlignmentPass alignmentPass = DomainFactory.createAlignmentPass()
         alignmentPass.save([flush: true])
 
@@ -86,7 +86,6 @@ class ProcessedBamFileTests {
     }
 
     private static OverallQualityAssessment createOverallQualityAssessment(ProcessedBamFile processedBamFile, Long identifier) {
-
         assert processedBamFile: 'processedBamFile must not be null'
 
         QualityAssessmentPass qualityAssessmentPass = new QualityAssessmentPass([

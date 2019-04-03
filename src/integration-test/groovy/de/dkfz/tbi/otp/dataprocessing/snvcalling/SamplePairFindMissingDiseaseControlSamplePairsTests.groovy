@@ -52,8 +52,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
     MergingWorkPackage diseaseMwp
     MergingWorkPackage controlMwp
 
-    @Before
-    void before() {
+    void setupData() {
         wholeGenome = DomainFactory.createWholeGenomeSeqType()
         exome = DomainFactory.createExomeSeqType()
         rna = DomainFactory.createRnaPairedSeqType()
@@ -73,11 +72,13 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testMatch() {
+        setupData()
         assertFindsOne(diseaseMwp, controlMwp)
     }
 
     @Test
     void testDiseaseSeqTypeMismatch() {
+        setupData()
         diseaseMwp.seqType = exome
         assert diseaseMwp.save(flush: true)
         assertFindsNothing()
@@ -87,6 +88,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testControlSeqTypeMismatch() {
+        setupData()
         controlMwp.seqType = exome
         assert controlMwp.save(flush: true)
         assertFindsNothing()
@@ -96,6 +98,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testNotAnalysableSeqType() {
+        setupData()
         diseaseMwp.seqType = rna
         assert diseaseMwp.save(flush: true)
         controlMwp.seqType = rna
@@ -106,6 +109,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testDiseaseIndividualMismatch() {
+        setupData()
         diseaseSample.individual = DomainFactory.createIndividual(project: project)
         assert diseaseSample.save(flush: true)
         assertFindsNothing()
@@ -118,6 +122,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testControlIndividualMismatch() {
+        setupData()
         controlSample.individual = DomainFactory.createIndividual(project: project)
         assert controlSample.save(flush: true)
         assertFindsNothing()
@@ -130,6 +135,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testDiseaseLibPrepKitMismatch_WGS() {
+        setupData()
         diseaseMwp.libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
         diseaseMwp.save(flush: true)
 
@@ -138,6 +144,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testDiseaseLibPrepKitMismatch_Exome() {
+        setupData()
         diseaseMwp.libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
         diseaseMwp.seqType = exome
         diseaseMwp.save(flush: true)
@@ -150,6 +157,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testDiseaseLibPrepKitMismatch_LibPrepKitNull() {
+        setupData()
         diseaseMwp.libraryPreparationKit = null
         diseaseMwp.save(flush: true)
 
@@ -158,18 +166,21 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testDiseaseStppMissing() {
+        setupData()
         diseaseStpp.delete(flush: true)
         assertFindsNothing()
     }
 
     @Test
     void testControlStppMissing() {
+        setupData()
         controlStpp.delete(flush: true)
         assertFindsNothing()
     }
 
     @Test
     void testDiseaseStppProjectMismatch() {
+        setupData()
         diseaseStpp.project = DomainFactory.createProject()
         assert diseaseStpp.save(flush: true)
         assertFindsNothing()
@@ -180,6 +191,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testControlStppProjectMismatch() {
+        setupData()
         controlStpp.project = DomainFactory.createProject()
         assert controlStpp.save(flush: true)
         assertFindsNothing()
@@ -190,6 +202,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testDiseaseStppSampleTypeMismatch() {
+        setupData()
         diseaseStpp.sampleType = DomainFactory.createSampleType()
         assert diseaseStpp.save(flush: true)
         assertFindsNothing()
@@ -200,6 +213,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testControlStppSampleTypeMismatch() {
+        setupData()
         controlStpp.sampleType = DomainFactory.createSampleType()
         assert controlStpp.save(flush: true)
         assertFindsNothing()
@@ -210,6 +224,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testDiseaseStppSampleTypeCategoryIgnored() {
+        setupData()
         diseaseStpp.category = SampleType.Category.IGNORED
         assert diseaseStpp.save(flush: true)
         assertFindsNothing()
@@ -217,6 +232,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testControlStppSampleTypeCategoryIgnored() {
+        setupData()
         controlStpp.category = SampleType.Category.IGNORED
         assert controlStpp.save(flush: true)
         assertFindsNothing()
@@ -224,6 +240,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testBothStppDisease() {
+        setupData()
         controlStpp.category = SampleType.Category.DISEASE
         assert controlStpp.save(flush: true)
         assertFindsNothing()
@@ -231,6 +248,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testBothStppControl() {
+        setupData()
         diseaseStpp.category = SampleType.Category.CONTROL
         assert diseaseStpp.save(flush: true)
         assertFindsNothing()
@@ -238,6 +256,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testMatchingSamplePairAlreadyExists() {
+        setupData()
         DomainFactory.createSamplePair(
                 diseaseMwp,
                 controlMwp,
@@ -247,6 +266,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testSamplePairWithOtherIndividualExists() {
+        setupData()
         Individual otherIndividual = DomainFactory.createIndividual(project: project)
         DomainFactory.createSamplePair(
                 DomainFactory.createMergingWorkPackage(diseaseMwp,
@@ -259,6 +279,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testSamplePairWithOtherSampleType1Exists() {
+        setupData()
         final SampleType sampleType1 = DomainFactory.createSampleType()
         DomainFactory.createSampleTypePerProject(project: project, sampleType: sampleType1, category: SampleType.Category.DISEASE)
         DomainFactory.createSamplePair(
@@ -270,6 +291,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testSamplePairWithOtherSampleType2Exists() {
+        setupData()
         DomainFactory.createSamplePair(
                 diseaseMwp,
                 DomainFactory.createMergingWorkPackage(diseaseMwp, DomainFactory.createSampleType()),
@@ -279,6 +301,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testSamplePairWithOtherSeqTypeExists() {
+        setupData()
         DomainFactory.createSamplePair(
                 DomainFactory.createMergingWorkPackage(diseaseMwp, [seqType: exome]),
                 DomainFactory.createMergingWorkPackage(controlMwp, [seqType: exome]),
@@ -288,6 +311,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testFindTwo() {
+        setupData()
         MergingWorkPackage diseaseExomeMwp = DomainFactory.createMergingWorkPackage(diseaseMwp, [seqType: exome])
         MergingWorkPackage controlExomeMwp = DomainFactory.createMergingWorkPackage(controlMwp, [seqType: exome])
         final List<SamplePair> samplePairs =
@@ -299,6 +323,7 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
 
     @Test
     void testFindNoExternalMergingWorkPackage() {
+        setupData()
         DomainFactory.createExternalMergingWorkPackage([sample: diseaseMwp.sample, seqType: diseaseMwp.seqType])
         DomainFactory.createExternalMergingWorkPackage([sample: controlMwp.sample, seqType: controlMwp.seqType])
 
@@ -314,18 +339,16 @@ class SamplePairFindMissingDiseaseControlSamplePairsTests {
         assert SamplePair.findMissingDiseaseControlSamplePairs().empty
     }
 
-    void assertFindsOne(final MergingWorkPackage mergingWorkPackage1 = diseaseMwp,
-                        final MergingWorkPackage mergingWorkPackage2 = controlMwp) {
+    void assertFindsOne(final MergingWorkPackage mwp1 = diseaseMwp, final MergingWorkPackage mwp2 = controlMwp) {
         assertEqualsAndNotPersisted(
                 exactlyOneElement(SamplePair.findMissingDiseaseControlSamplePairs()),
-                mergingWorkPackage1, mergingWorkPackage2)
+                mwp1, mwp2
+        )
     }
 
-    void assertEqualsAndNotPersisted(final SamplePair samplePair,
-                                     final MergingWorkPackage mergingWorkPackage1,
-                                     final MergingWorkPackage mergingWorkPackage2) {
-        assert samplePair.mergingWorkPackage1 == mergingWorkPackage1 &&
-               samplePair.mergingWorkPackage2 == mergingWorkPackage2 &&
+    void assertEqualsAndNotPersisted(final SamplePair samplePair, final MergingWorkPackage mwp1, final MergingWorkPackage mwp2) {
+        assert samplePair.mergingWorkPackage1 == mwp1 &&
+               samplePair.mergingWorkPackage2 == mwp2 &&
                samplePair.id                  == null
     }
 }

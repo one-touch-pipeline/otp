@@ -61,8 +61,7 @@ class AbstractExecutePanCanJobTests {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
-    @Before
-    void setUp() {
+    void setupData() {
         DomainFactory.createRoddyAlignableSeqTypes()
 
         roddyBamFile = DomainFactory.createRoddyBamFile([
@@ -123,7 +122,6 @@ class AbstractExecutePanCanJobTests {
         abstractExecutePanCanJob.executeRoddyCommandService.metaClass.correctPermissions = { RoddyBamFile bamFile, Realm realm -> }
     }
 
-
     @After
     void tearDown() {
         TestCase.removeMetaClass(ExecuteRoddyCommandService, abstractExecutePanCanJob.executeRoddyCommandService)
@@ -131,30 +129,29 @@ class AbstractExecutePanCanJobTests {
         configService.clean()
     }
 
-
     private String viewByPidString(RoddyBamFile roddyBamFileToUse = roddyBamFile) {
         return roddyBamFileToUse.individual.getViewByPidPathBase(roddyBamFile.seqType).absoluteDataManagementPath.path
     }
 
-
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_RoddyResultIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(null, realm)
         }.contains("roddyResult must not be null")
     }
 
-
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_RealmIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, null)
         }.contains("realm must not be null")
     }
 
-
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_ConfigFileIsNotInFileSystem_ShouldFail() {
+        setupData()
         abstractExecutePanCanJob.executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
         assert configFile.delete()
 
@@ -163,14 +160,15 @@ class AbstractExecutePanCanJobTests {
         }.contains(roddyBamFile.config.configFilePath)
     }
 
-
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_NormalPriority_AllFine() {
+        setupData()
         testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.pluginVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}")
     }
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_MinimalPriority_AllFine() {
+        setupData()
         roddyBamFile.project.processingPriority = ProcessingPriority.MINIMUM.priority
         roddyBamFile.project.save()
         testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.pluginVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}")
@@ -178,6 +176,7 @@ class AbstractExecutePanCanJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_FasttrackPriority_AllFine() {
+        setupData()
         roddyBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
         roddyBamFile.project.save()
         testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.pluginVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-fasttrack")
@@ -185,6 +184,7 @@ class AbstractExecutePanCanJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCommand_OverFasttrackPriority_AllFine() {
+        setupData()
         roddyBamFile.project.processingPriority = (ProcessingPriority.FAST_TRACK.priority + 10) as short
         roddyBamFile.project.save()
         testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.pluginVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-fasttrack")
@@ -213,17 +213,17 @@ workflowSpecificParameter \
         assert expectedCmd == actualCmd
     }
 
-
     @Test
     void testPrepareAndReturnCValues_RoddyResultIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             abstractExecutePanCanJob.prepareAndReturnCValues(null)
         }.contains("roddyResult must not be null")
     }
 
-
     @Test
     void testPrepareAndReturnCValues_NoFastTrack_setUpCorrect() {
+        setupData()
         String expectedCommand = """\
 --cvalues="$workflowSpecificCValues"\
 """
@@ -232,6 +232,7 @@ workflowSpecificParameter \
 
     @Test
     void testGetChromosomeIndexParameterWithMitochondrium_RoddyResultIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             abstractExecutePanCanJob.getChromosomeIndexParameterWithMitochondrium(null)
         }.contains("assert referenceGenome")
@@ -239,14 +240,15 @@ workflowSpecificParameter \
 
     @Test
     void testGetChromosomeIndexParameterWithMitochondrium_NoChromosomeNamesExist_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             abstractExecutePanCanJob.getChromosomeIndexParameterWithMitochondrium(roddyBamFile.referenceGenome)
         }.contains("No chromosome names could be found for reference genome")
     }
 
-
     @Test
     void testGetChromosomeIndexParameterWithMitochondrium_AllFine() {
+        setupData()
         List<String> chromosomeNames = ["1", "4", "3", "X", "5", "M", "2", "Y", "21"]
         List<String> chromosomeNamesExpected = ["1", "2", "3", "4", "5", "21", "X", "Y", "M"]
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
@@ -256,6 +258,7 @@ workflowSpecificParameter \
 
     @Test
     void testGetChromosomeIndexParameterWithoutMitochondrium_RoddyResultIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             abstractExecutePanCanJob.getChromosomeIndexParameterWithoutMitochondrium(null)
         }.contains("assert referenceGenome")
@@ -263,14 +266,15 @@ workflowSpecificParameter \
 
     @Test
     void testGetChromosomeIndexParameterWithoutMitochondrium_NoChromosomeNamesExist_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             abstractExecutePanCanJob.getChromosomeIndexParameterWithoutMitochondrium(roddyBamFile.referenceGenome)
         }.contains("No chromosome names could be found for reference genome")
     }
 
-
     @Test
     void testGetChromosomeIndexParameterWithoutMitochondrium_AllFine() {
+        setupData()
         List<String> chromosomeNames = ["1", "4", "3", "X", "5", "2", "Y", "21"]
         List<String> chromosomeNamesExpected = ["1", "2", "3", "4", "5", "21", "X", "Y"]
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)

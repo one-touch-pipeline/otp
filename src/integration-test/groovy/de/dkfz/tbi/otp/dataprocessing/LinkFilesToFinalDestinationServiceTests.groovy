@@ -52,8 +52,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
-    @Before
-    void setUp() {
+    void setupData() {
         final int numberOfReads = DomainFactory.counter++
 
         roddyBamFile = DomainFactory.createRoddyBamFile()
@@ -100,36 +99,43 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupWorkDirectory_allFine_withTmpFilesAndTmpDirs() {
+        setupData()
         helper_testCleanupWorkDirectory_allFine(1, 1)
     }
 
     @Test
     void testCleanupWorkDirectory_allFine_withTmpFilesAndTmpDirs_WGBS() {
+        setupData()
         helper_testCleanupWorkDirectory_allFine(1, 1, true)
     }
 
     @Test
     void testCleanupWorkDirectory_allFine_withTmpFilesAndNoTmpDirs() {
+        setupData()
         helper_testCleanupWorkDirectory_allFine(1, 0)
     }
 
     @Test
     void testCleanupWorkDirectory_allFine_withNoTmpFilesAndSomeTmpDirs() {
+        setupData()
         helper_testCleanupWorkDirectory_allFine(0, 1)
     }
 
     @Test
     void testCleanupWorkDirectory_allFine_withNoTmpFilesAndNoTmpDirs() {
+        setupData()
         helper_testCleanupWorkDirectory_allFine(0, 0)
     }
 
     @Test
     void testCleanupWorkDirectory_allFine_withManyTmpFilesAndAndManyTmpDirs() {
+        setupData()
         helper_testCleanupWorkDirectory_allFine(2, 3)
     }
 
     @Test
     void testCleanupWorkDirectory_bamFileIsNull_shouldFail() {
+        setupData()
         TestCase.shouldFailWithMessageContaining(AssertionError, "roddyBamFile") {
             linkFilesToFinalDestinationService.cleanupWorkDirectory(null, realm)
         }
@@ -137,14 +143,15 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupWorkDirectory_realmIsNull_shouldFail() {
+        setupData()
         TestCase.shouldFailWithMessageContaining(AssertionError, "realm") {
             linkFilesToFinalDestinationService.cleanupWorkDirectory(roddyBamFile, null)
         }
     }
 
-
     @Test
     void testCleanupWorkDirectory_bamHasOldStructure_shouldFail() {
+        setupData()
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true, failOnError: true)
 
@@ -155,6 +162,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupWorkDirectory_removeDirsThrowsException_shouldFail() {
+        setupData()
         assert roddyBamFile.workDirectory.mkdirs()
         assert new File(roddyBamFile.workDirectory, HelperUtils.uniqueString).createNewFile()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
@@ -170,6 +178,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupWorkDirectory_executeCommandThrowsException_shouldFail() {
+        setupData()
         assert roddyBamFile.workDirectory.mkdirs()
         assert new File(roddyBamFile.workDirectory, HelperUtils.uniqueString).createNewFile()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
@@ -250,6 +259,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testLinkNewResults_allFine() {
+        setupData()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         List<File> linkedFiles = createLinkedFilesList()
@@ -269,6 +279,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testLinkNewResults_methylation_OneLibrary_AllFine() {
+        setupData()
         testLinkNewResults_methylation_setup()
 
         List<File> linkedFiles = createLinkedFilesList()
@@ -280,6 +291,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testLinkNewResults_methylation_TwoLibraries_AllFine() {
+        setupData()
         MergingWorkPackage workPackage = roddyBamFile.mergingWorkPackage
 
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithDataFiles(workPackage, [libraryName: 'library14', normalizedLibraryName: SeqTrack.normalizeLibraryName('library14')])
@@ -302,6 +314,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testLinkNewResults_bamFileIsNull_shouldFail() {
+        setupData()
         TestCase.shouldFailWithMessageContaining(AssertionError, "roddyBamFile") {
             linkFilesToFinalDestinationService.linkNewResults(null, realm)
         }
@@ -309,6 +322,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testLinkNewResults_realmIsNull_shouldFail() {
+        setupData()
         TestCase.shouldFailWithMessageContaining(AssertionError, "realm") {
             linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, null)
         }
@@ -316,6 +330,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testLinkNewResults_bamHasOldStructure_shouldFail() {
+        setupData()
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true, failOnError: true)
 
@@ -361,6 +376,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupOldResults_withBaseBamFile_allFine() {
+        setupData()
         finishOperationStateOfRoddyBamFile(roddyBamFile)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
@@ -394,6 +410,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupOldResults_withBaseBamFileOfOldStructure_allFine() {
+        setupData()
         finishOperationStateOfRoddyBamFile(roddyBamFile)
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true, failOnError: true)
@@ -409,6 +426,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExist_allFine() {
+        setupData()
         DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage, config: roddyBamFile.config)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage, config: roddyBamFile.config)
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(roddyBamFile)
@@ -428,12 +446,14 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure_latestIsOld_allFine() {
+        setupData()
         DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage, workDirectoryName: null, config: roddyBamFile.config)
         helper_testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure(true)
     }
 
     @Test
     void testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldAndNewStructure_latestIsNew_allFine() {
+        setupData()
         DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage, config: roddyBamFile.config)
         helper_testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure(false)
     }
@@ -463,6 +483,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupOldResults_withoutBaseBamFileAndWithoutOtherBamFilesOfTheSameWorkPackage_allFine() {
+        setupData()
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
 
         linkFilesToFinalDestinationService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command ->
@@ -476,6 +497,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupOldResults_bamFileIsNull_shouldFail() {
+        setupData()
         TestCase.shouldFailWithMessageContaining(AssertionError, "roddyBamFile") {
             linkFilesToFinalDestinationService.cleanupOldResults(null, realm)
         }
@@ -483,6 +505,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupOldResults_realmIsNull_shouldFail() {
+        setupData()
         TestCase.shouldFailWithMessageContaining(AssertionError, "realm") {
             linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile, null)
         }
@@ -490,6 +513,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupOldResults_bamHasOldStructure_shouldFail() {
+        setupData()
         roddyBamFile.workDirectoryName = null
         roddyBamFile.save(flush: true, failOnError: true)
 
@@ -500,6 +524,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupOldResults_removeDirsThrowsException_shouldFail() {
+        setupData()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         finishOperationStateOfRoddyBamFile(roddyBamFile)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
@@ -517,6 +542,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testCleanupOldResults_executeCommandThrowsException_shouldFail() {
+        setupData()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         finishOperationStateOfRoddyBamFile(roddyBamFile)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
@@ -534,6 +560,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testExecute_adapterTrimmingRoddyBamFileHasLessNumberOfReadsThenAllSeqTracksTogether_ShouldBeFine() {
+        setupData()
         setUp_allFine()
         roddyBamFile.config.adapterTrimmingNeeded = true
         assert roddyBamFile.config.save(flush: true)
@@ -548,6 +575,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testExecute_roddyBamFileHasLessNumberOfReadsThenAllSeqTracksTogether_ShouldFail() {
+        setupData()
         setUp_allFine()
         RoddyQualityAssessment qa = roddyBamFile.overallQualityAssessment
         qa.pairedRead1--
@@ -561,6 +589,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testExecute_RoddyBamFileIsNotLatestBamFile_ShouldFail() {
+        setupData()
         setUp_allFine()
         roddyBamFile.metaClass.isMostRecentBamFile = { -> false }
 
@@ -571,6 +600,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testExecute_RoddyBamFileHasWrongState_ShouldFail() {
+        setupData()
         setUp_allFine()
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.DECLARED
         roddyBamFile.save(flush: true, failOnError: true)
@@ -582,6 +612,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testExecute_RoddyBamFileHasSecondCandidate_ShouldFail() {
+        setupData()
         setUp_allFine()
         DomainFactory.createRoddyBamFile([
                 workPackage        : roddyBamFile.workPackage,
@@ -600,6 +631,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testExecute_FailInCleanupWorkDirectory_ShouldFail() {
+        setupData()
         setUp_allFine()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
@@ -612,6 +644,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testExecute_FailLinkNewResults_ShouldFail() {
+        setupData()
         setUp_allFine()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
@@ -623,6 +656,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testExecute_FailInCleanupOldResults_ShouldFail() {
+        setupData()
         setUp_allFine()
         final String FAIL_MESSAGE = HelperUtils.uniqueString
         linkFilesToFinalDestinationService.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm -> assert false: FAIL_MESSAGE }
@@ -634,6 +668,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     @Test
     void testExecute_RoddyBamFileIsWithdrawn_ShouldNotBeCopied() {
+        setupData()
         setUp_allFine()
         roddyBamFile.withdrawn = true
         assert roddyBamFile.save(flush: true)

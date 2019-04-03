@@ -43,8 +43,7 @@ class MergingSetServiceTests {
     SeqTrack seqTrack
     SeqTrack seqTrack2
 
-    @Before
-    void setUp() {
+    void setupData() {
         Project project = DomainFactory.createProject(
                         name: "name_1",
                         dirName: "dirName",
@@ -124,11 +123,13 @@ class MergingSetServiceTests {
 
     @Test(expected = AssertionError)
     void testNextIdentifierIdentifierNull() {
+        setupData()
         MergingSet.nextIdentifier(null)
     }
 
     @Test
     void testNextIdentifier() {
+        setupData()
         MergingWorkPackage mergingWorkPackage = createMergingWorkPackage()
         assertEquals(0, MergingSet.nextIdentifier(mergingWorkPackage))
         MergingSet mergingSet = new MergingSet(

@@ -39,8 +39,7 @@ class ProcessStatusServiceTests {
     File dir
     File file
 
-    @Before
-    void setUp() {
+    void setupData() {
         dir = new File(LOG_FILE_DIRECTORY)
         if (!dir.exists()) {
             assertTrue(dir.mkdirs())
@@ -62,38 +61,45 @@ class ProcessStatusServiceTests {
 
     @Test(expected = IllegalArgumentException)
     void testStatusLogFileNull() {
+        setupData()
         processStatusService.statusLogFile(null)
     }
 
     @Test
     void testStatusLogFile() {
+        setupData()
         assertEquals(LOG_FILE, processStatusService.statusLogFile(LOG_FILE_DIRECTORY))
     }
 
     @Test(expected = IllegalArgumentException)
     void testStatusSuccessfulLogFileNull() {
+        setupData()
         processStatusService.statusSuccessful(null, "PreviousJob")
     }
 
     @Test(expected = IllegalArgumentException)
     void testStatusSuccessfulPreviousJobNull() {
+        setupData()
         processStatusService.statusSuccessful(LOG_FILE, null)
     }
 
     @Test(expected = IllegalArgumentException)
     void testStatusSuccessfulNotReadable() {
+        setupData()
         file.setReadable(false)
         processStatusService.statusSuccessful(LOG_FILE, "PreviousJob")
     }
 
     @Test
     void testStatusSuccessful() {
+        setupData()
         file << "PreviousJob\n"
         assertTrue(processStatusService.statusSuccessful(LOG_FILE, "PreviousJob"))
     }
 
     @Test
     void testStatusSuccessfulJobNotInFile() {
+        setupData()
         file << "WrongPreviousTestJob\n"
         assertFalse(processStatusService.statusSuccessful(LOG_FILE, "PreviousJob"))
     }

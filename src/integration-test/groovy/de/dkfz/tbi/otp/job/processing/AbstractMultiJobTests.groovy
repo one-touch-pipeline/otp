@@ -84,8 +84,7 @@ class AbstractMultiJobTests implements UserAndRoles {
     AbstractMultiJob job
     Collection<ClusterJobIdentifier> monitoredJobs
 
-    @Before
-    void before() {
+    void setupData() {
         step = createAndSaveProcessingStep()
         realm = createRealm()
         clusterJob1 = new ClusterJobIdentifier(realm, CLUSTER_JOB_1_ID)
@@ -143,6 +142,7 @@ class AbstractMultiJobTests implements UserAndRoles {
      */
     @Test
     void testSucceedingJobWithoutResuming() {
+        setupData()
         succeedingJob(false)
     }
 
@@ -153,6 +153,7 @@ class AbstractMultiJobTests implements UserAndRoles {
      */
     @Test
     void testSucceedingJobWithResuming() {
+        setupData()
         succeedingJob(true)
     }
 
@@ -339,6 +340,7 @@ class AbstractMultiJobTests implements UserAndRoles {
 
     @Test
     void testFailingJobInPhase1() {
+        setupData()
         String message = HelperUtils.uniqueString
         job = createJob { final int phase, final Collection<? extends ClusterJob> finishedClusterJobs ->
             assert phase == 1
@@ -355,6 +357,7 @@ class AbstractMultiJobTests implements UserAndRoles {
 
     @Test
     void testFailingJobInPhase2() {
+        setupData()
         String message = HelperUtils.uniqueString
         job = createJob { final int phase, final Collection<? extends ClusterJob> finishedClusterJobs ->
             switch (phase) {

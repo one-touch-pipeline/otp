@@ -74,8 +74,7 @@ class ExecuteRoddyCommandServiceTests {
     File applicationIniPath
     File featureTogglesConfigPath
 
-    @Before
-    void setUp() {
+    void setupData() {
         DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
 
         DomainFactory.createProcessingOptionLazy([
@@ -120,6 +119,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testRoddyBaseCommand_RoddyPathIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.roddyBaseCommand(null, CONFIG_NAME, ANALYSIS_ID, ExecuteRoddyCommandService.RoddyInvocationType.EXECUTE)
         }.contains("roddyPath is not allowed to be null")
@@ -127,6 +127,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testRoddyBaseCommand_ConfigNameIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.roddyBaseCommand(roddyPath, null, ANALYSIS_ID, ExecuteRoddyCommandService.RoddyInvocationType.EXECUTE)
         }.contains("configName is not allowed to be null")
@@ -134,6 +135,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testRoddyBaseCommand_AnalysisIdIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, null, ExecuteRoddyCommandService.RoddyInvocationType.EXECUTE)
         }.contains("analysisId is not allowed to be null")
@@ -141,6 +143,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testRoddyBaseCommand_AllFine() {
+        setupData()
         String expectedCmd = "${roddyPath}/roddy.sh rerun ${CONFIG_NAME}.config@${ANALYSIS_ID}"
         String actualCmd = executeRoddyCommandService.roddyBaseCommand(roddyPath, CONFIG_NAME, ANALYSIS_ID, ExecuteRoddyCommandService.RoddyInvocationType.EXECUTE)
         assert expectedCmd == actualCmd
@@ -149,6 +152,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testGetAnalysisIDinConfigFile_InputIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.getAnalysisIDinConfigFile(null)
         }.contains("The input roddyResult must not be null")
@@ -156,6 +160,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testGetAnalysisIDinConfigFile_ObjectDoesNotHaveGetSeqTypeMethod_ShouldFail() {
+        setupData()
         roddyBamFile.metaClass.getSeqType = { -> null }
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.getAnalysisIDinConfigFile(roddyBamFile)
@@ -164,6 +169,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testGetAnalysisIDinConfigFile_SeqTypeWGS() {
+        setupData()
         DomainFactory.createRoddyAlignableSeqTypes()
         roddyBamFile.mergingWorkPackage.seqType = SeqTypeService.wholeGenomePairedSeqType
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
@@ -173,6 +179,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testGetAnalysisIDinConfigFile_SeqTypeEXOME() {
+        setupData()
         DomainFactory.createRoddyAlignableSeqTypes()
         roddyBamFile.mergingWorkPackage.seqType = SeqTypeService.exomePairedSeqType
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
@@ -182,6 +189,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testGetAnalysisIDinConfigFile_DifferentSeqType_ShouldFail() {
+        setupData()
         DomainFactory.createRoddyAlignableSeqTypes()
         roddyBamFile.mergingWorkPackage.seqType = DomainFactory.createSeqType(name: "differentSeqType")
         assert roddyBamFile.mergingWorkPackage.save(flush: true)
@@ -194,6 +202,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_ObjectIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.defaultRoddyExecutionCommand(null, CONFIG_NAME, ANALYSIS_ID, realm)
         }.contains("The input roddyResult is not allowed to be null")
@@ -201,6 +210,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_NameInConfigFileIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, null, ANALYSIS_ID, realm)
         }.contains("The input nameInConfigFile is not allowed to be null")
@@ -208,6 +218,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_AnalysisIDinConfigFileIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, null, realm)
         }.contains("The input analysisIDinConfigFile is not allowed to be null")
@@ -215,6 +226,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_RealmIsNull_ShouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.defaultRoddyExecutionCommand(roddyBamFile, CONFIG_NAME, ANALYSIS_ID, null)
         }.contains("The input realm is not allowed to be null")
@@ -222,6 +234,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_ProcessingOptionRoddyApplicationIniDoesNotExistInFilesystem_ShouldFail() {
+        setupData()
         executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
         assert applicationIniPath.delete()
         assert TestCase.shouldFail(AssertionError) {
@@ -231,6 +244,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_BaseConfigFolderDoesNotExistInFilesystem_ShouldFail() {
+        setupData()
         executeRoddyCommandService.metaClass.createWorkOutputDirectory = { Realm realm, File file -> }
         assert roddyBaseConfigsPath.deleteDir()
         assert TestCase.shouldFail(AssertionError) {
@@ -262,6 +276,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_firstRun_AllFine() {
+        setupData()
         initRoddyModule()
         helperFor_testDefaultRoddyExecutionCommand_AllFine()
 
@@ -270,6 +285,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_restartWithoutDeletedWorkDirectory_AllFine() {
+        setupData()
         initRoddyModule()
         roddyBamFile.roddyExecutionDirectoryNames = [
                 RODDY_EXECUTION_DIR_NAME_1,
@@ -285,6 +301,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testDefaultRoddyExecutionCommand_restartWithDeletedWorkDirectory_AllFine() {
+        setupData()
         initRoddyModule()
         roddyBamFile.roddyExecutionDirectoryNames = [
                 RODDY_EXECUTION_DIR_NAME_1,
@@ -299,6 +316,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testRoddyGetRuntimeConfigCommand_AllFine() {
+        setupData()
         initRoddyModule()
         String expectedCmd =
                 INIT_MODULES +
@@ -316,6 +334,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCreateWorkOutputDirectory_RealmIsNull_ShouldFail() {
+        setupData()
         TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.createWorkOutputDirectory(null, tmpOutputDir)
         }
@@ -323,6 +342,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCreateWorkOutputDirectory_FileIsNull_ShouldFail() {
+        setupData()
         TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.createWorkOutputDirectory(realm, null)
         }
@@ -330,6 +350,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCreateWorkOutputDirectory_DirectoryCreationFailed_ShouldFail() {
+        setupData()
         executeRoddyCommandService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command -> }
         tmpOutputDir.absoluteFile.delete()
         TestCase.shouldFail(AssertionError) {
@@ -339,6 +360,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCreateWorkOutputDirectory_AllFine() {
+        setupData()
         executeRoddyCommandService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command ->
             ['bash', '-c', command].execute().waitFor()
         }
@@ -366,6 +388,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCreateWorkOutputDirectory_DirectoryAlreadyExist_AllFine() {
+        setupData()
         executeRoddyCommandService.remoteShellHelper.metaClass.executeCommand = { Realm realm, String command ->
             ['bash', '-c', command].execute().waitFor()
         }
@@ -390,6 +413,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCorrectPermission_AllOkay() {
+        setupData()
         executeRoddyCommandService.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
                     assert realm1 == realm
@@ -443,6 +467,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCorrectPermission_BamFileIsNull_shouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.correctPermissions(null, realm)
         }.contains('roddyResult')
@@ -450,6 +475,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCorrectGroup_AllFine() {
+        setupData()
         String primaryGroup = TestCase.primaryGroup()
         executeRoddyCommandService.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
@@ -480,6 +506,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCorrectGroup_BamFileIsNull_shouldFail() {
+        setupData()
         assert TestCase.shouldFail(AssertionError) {
             executeRoddyCommandService.correctGroups(null, realm)
         }.contains('roddyResult')
@@ -487,6 +514,7 @@ class ExecuteRoddyCommandServiceTests {
 
     @Test
     void testCorrectPermissionsAndGroups() {
+        setupData()
         String primaryGroup = TestCase.primaryGroup()
         String group = configService.getTestingGroup()
 

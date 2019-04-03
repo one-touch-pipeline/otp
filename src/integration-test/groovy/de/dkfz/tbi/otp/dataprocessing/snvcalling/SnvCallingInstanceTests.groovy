@@ -36,13 +36,13 @@ class SnvCallingInstanceTests {
 
     SamplePair samplePair
 
-    @Before
-    void setUp() {
+    void setupData() {
         samplePair = DomainFactory.createSamplePairWithProcessedMergedBamFiles()
     }
 
     @Test
     void testProcessingStateIsFailed() {
+        setupData()
         def instance = createSnvCallingInstance()
         instance.withdrawn = true
         assert instance.validate()

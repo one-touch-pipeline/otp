@@ -38,8 +38,7 @@ class ReferenceGenomeProjectSeqTypeTests {
     SampleType sampleType
     ReferenceGenome referenceGenome
 
-    @Before
-    void setup() {
+    void setupData() {
         project = DomainFactory.createProject()
         seqType = DomainFactory.createSeqType()
         referenceGenome = DomainFactory.createReferenceGenome()
@@ -61,6 +60,7 @@ class ReferenceGenomeProjectSeqTypeTests {
 
     @Test
     void testUnique_NoDuplication_WithDifferentProjects() {
+        setupData()
         createReferenceGenomeProjectSeqType(null)
         project = DomainFactory.createProject()
 
@@ -70,6 +70,7 @@ class ReferenceGenomeProjectSeqTypeTests {
 
     @Test
     void testUnique_NoDuplication_WithDifferentSeqType() {
+        setupData()
         createReferenceGenomeProjectSeqType(null)
         seqType = DomainFactory.createSeqType()
 
@@ -79,6 +80,7 @@ class ReferenceGenomeProjectSeqTypeTests {
 
     @Test
     void testUnique_NoDuplication_WithAndWithoutSampleType() {
+        setupData()
         createReferenceGenomeProjectSeqType(null)
         sampleType = DomainFactory.createSampleType()
 
@@ -88,6 +90,7 @@ class ReferenceGenomeProjectSeqTypeTests {
 
     @Test
     void testUnique_NoDuplication_WithDifferentSampleType() {
+        setupData()
         sampleType = DomainFactory.createSampleType()
         createReferenceGenomeProjectSeqType(null)
         sampleType = DomainFactory.createSampleType()
@@ -98,6 +101,7 @@ class ReferenceGenomeProjectSeqTypeTests {
 
     @Test
     void testUnique_NoDuplication_WithDeprecatedDateAndWithoutSampleType() {
+        setupData()
         createReferenceGenomeProjectSeqType(new Date())
 
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
@@ -106,6 +110,7 @@ class ReferenceGenomeProjectSeqTypeTests {
 
     @Test
     void testUnique_NoDuplication_WithDeprecatedDateAndSampleType() {
+        setupData()
         sampleType = DomainFactory.createSampleType()
         createReferenceGenomeProjectSeqType(new Date())
 
@@ -115,6 +120,7 @@ class ReferenceGenomeProjectSeqTypeTests {
 
     @Test
     void testUnique_HasDuplication_WithoutSampleType() {
+        setupData()
         createReferenceGenomeProjectSeqType(null)
 
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
@@ -123,6 +129,7 @@ class ReferenceGenomeProjectSeqTypeTests {
 
     @Test
     void testUnique_HasDuplication_WithSampleType() {
+        setupData()
         sampleType = DomainFactory.createSampleType()
         createReferenceGenomeProjectSeqType(null)
 
@@ -132,6 +139,7 @@ class ReferenceGenomeProjectSeqTypeTests {
 
     @Test
     void testProjectIsNull() {
+        setupData()
         project = null
 
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
@@ -140,6 +148,7 @@ class ReferenceGenomeProjectSeqTypeTests {
 
     @Test
     void testSeqTypeIsNull() {
+        setupData()
         seqType = null
 
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)
@@ -148,6 +157,7 @@ class ReferenceGenomeProjectSeqTypeTests {
 
     @Test
     void testReferenceGenomeIsNull() {
+        setupData()
         referenceGenome = null
 
         ReferenceGenomeProjectSeqType newDomain = createReferenceGenomeProjectSeqType(null, false)

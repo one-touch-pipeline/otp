@@ -36,8 +36,7 @@ class ProjectProgressServiceTests {
 
     Run run1, run2, run3
 
-    @Before
-    void setUp() {
+    void setupData() {
         run1 = createRunWithDatafile(5)
         run2 = createRunWithDatafile(7)
         run3 = createRunWithDatafile(8)
@@ -59,6 +58,7 @@ class ProjectProgressServiceTests {
 
     @Test
     void testListOfRuns_NoDataFilesInDateRange() {
+        setupData()
         Date date = new Date(2000, 9, 2)
         Date toDate = new Date(2000, 10, 2)
         List<Run> runs = projectProgressService.getListOfRuns(projects, date, toDate)
@@ -67,6 +67,7 @@ class ProjectProgressServiceTests {
 
     @Test
     void testListOfRuns_AllDataFilesInDateRange() {
+        setupData()
         Date date = new Date(2000, 2, 2)
         Date toDate = new Date(2000, 10, 2)
         List<Run> runs = projectProgressService.getListOfRuns(projects, date, toDate)
@@ -78,6 +79,7 @@ class ProjectProgressServiceTests {
 
     @Test
     void testListOfRuns_OneDataFilesInDateRange() {
+        setupData()
         Date date = new Date(2000, 6, 2)
         Date toDate = new Date(2000, 8, 1)
         List<Run> runs = projectProgressService.getListOfRuns(projects, date, toDate)
@@ -87,6 +89,7 @@ class ProjectProgressServiceTests {
 
     @Test
     void testListOfRuns_ReverseDataRange() {
+        setupData()
         Date date = new Date(2000, 10, 2)
         Date toDate = new Date(2000, 2, 1)
         List<Run> runs = projectProgressService.getListOfRuns(projects, date, toDate)
@@ -95,6 +98,7 @@ class ProjectProgressServiceTests {
 
     @Test
     void testSamples() {
+        setupData()
         List<Project> projects = Project.list()
         Date date = new Date() - 50
         Date toDate = new Date()
@@ -106,6 +110,7 @@ class ProjectProgressServiceTests {
 
     @Test
     void testProject() {
+        setupData()
         List<String> names = Project.list()*.name
         projectProgressService.getProjectsFromNameList(names)
     }

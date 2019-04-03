@@ -54,8 +54,7 @@ class AbstractQualityAssessmentServiceTests {
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
 
-    @Before
-    void setUp() {
+    void setupData() {
         data.createObjects()
 
         data.referenceGenome.with {
@@ -74,6 +73,7 @@ class AbstractQualityAssessmentServiceTests {
 
     @Test
     void test_saveCoverageToRoddyBamFile_ShouldCalculateAndSetCoverage() {
+        setupData()
         final QC_BASES_MAPPED = 320
         final EXPECTED_COVERAGE = 4
         final EXPECTED_COVERAGE_WITH_N = 8
@@ -133,16 +133,19 @@ class AbstractQualityAssessmentServiceTests {
 
     @Test
     void testParseRoddyMergedBamQaStatistics_WholeGenome_allFine() {
+        setupData()
         testParseRoddyMergedBamQaStatistics_allFine("MergedBam", DomainFactory.createWholeGenomeSeqType(), SOME_VALUE_1, null, null)
     }
 
     @Test
     void testParseRoddyMergedBamQaStatistics_Exome_allFine() {
+        setupData()
         testParseRoddyMergedBamQaStatistics_allFine("MergedBam", DomainFactory.createExomeSeqType(), null, SOME_VALUE_1, SOME_VALUE_2)
     }
 
     @Test
     void testParseRoddyQaStatistics_missingChromosome() {
+        setupData()
         RoddyBamFile roddyBamFile = setUpForParseRoddyQaStatistics(DomainFactory.createWholeGenomeSeqType())
         DomainFactory.createReferenceGenomeEntry(
                 referenceGenome: roddyBamFile.referenceGenome,
@@ -157,21 +160,25 @@ class AbstractQualityAssessmentServiceTests {
 
     @Test
     void testParseRoddySingleLaneQaStatistics_WholeGenome_allFine() {
+        setupData()
         testParseRoddyMergedBamQaStatistics_allFine("SingleLane", DomainFactory.createWholeGenomeSeqType(), SOME_VALUE_3, null, null)
     }
 
     @Test
     void testParseRoddySingleLaneQaStatistics_Exome_allFine() {
+        setupData()
         testParseRoddyMergedBamQaStatistics_allFine("SingleLane", DomainFactory.createExomeSeqType(), null, SOME_VALUE_3, null)
     }
 
     @Test
     void testParseRoddyLibraryQaStatistics_WGBS_allFine() {
+        setupData()
         testParseRoddyMergedBamQaStatistics_allFine("Library", DomainFactory.createWholeGenomeBisulfiteSeqType(), SOME_VALUE_4, null, null)
     }
 
     @Test
     void testAssertListContainsAllChromosomeNamesInReferenceGenome_listAreSame_shouldBeFine() {
+        setupData()
         List<String> chromosomeNamesFromRoddyJson = [RoddyQualityAssessment.ALL, '1', '2', '3']
         List<String> chromosomeNamesFromOtp = ['1', '2', '3']
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
@@ -182,6 +189,7 @@ class AbstractQualityAssessmentServiceTests {
 
     @Test
     void testAssertListContainsAllChromosomeNamesInReferenceGenome_OtpListIsSubsetOfRoddyList_shouldBeFine() {
+        setupData()
         List<String> chromosomeNamesFromRoddyJson = [RoddyQualityAssessment.ALL, '1', '2', '3', '4', '5']
         List<String> chromosomeNamesFromOtp = ['1', '2', '3']
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
@@ -192,6 +200,7 @@ class AbstractQualityAssessmentServiceTests {
 
     @Test
     void testAssertListContainsAllChromosomeNamesInReferenceGenome_OtpListIsBiggerThenRoddyList_shouldFail() {
+        setupData()
         List<String> chromosomeNamesFromRoddyJson = [RoddyQualityAssessment.ALL, '1', '2', '3']
         List<String> chromosomeNamesFromOtp = ['1', '2', '3', '4', '5']
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenome()
