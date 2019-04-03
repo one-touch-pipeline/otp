@@ -121,10 +121,10 @@ class TestData {
 
         seqCenter = DomainFactory.createSeqCenter()
 
-        SeqPlatformGroup seqPlatformGroup = new SeqPlatformGroup()
+        SeqPlatformGroup seqPlatformGroup = DomainFactory.createSeqPlatformGroup()
         assert seqPlatformGroup.save(flush: true)
 
-        seqPlatform = new SeqPlatform(name: 'seqPlatform')
+        seqPlatform = DomainFactory.createSeqPlatform(name: 'seqPlatform')
         seqPlatform.addToSeqPlatformGroups(seqPlatformGroup)
         assert seqPlatform.save(flush: true)
 
@@ -133,7 +133,7 @@ class TestData {
 
         runSegment = DomainFactory.createRunSegment()
 
-        softwareTool = new SoftwareTool()
+        softwareTool = DomainFactory.createSoftwareTool()
         softwareTool.programName = "SOLID"
         softwareTool.programVersion = "0.4.8"
         softwareTool.type = SoftwareTool.Type.ALIGNMENT
@@ -155,7 +155,7 @@ class TestData {
     }
 
     static Project createProject(Map properties = [:]) {
-        return new Project([
+        return DomainFactory.createProject([
             name: "project",
             dirName: "dirName",
             qcThresholdHandling: QcThresholdHandling.NO_CHECK,
@@ -164,7 +164,7 @@ class TestData {
 
     @Deprecated
     Individual createIndividual(Map properties = [:]) {
-        return new Individual([
+        return DomainFactory.createIndividual([
             pid: "654321",
             mockPid: "PID",
             mockFullName: "PID",
@@ -174,7 +174,7 @@ class TestData {
     }
 
     static SampleType createSampleType(Map properties = [:]) {
-        return new SampleType([
+        return DomainFactory.createSampleType([
             name: "TUMOR",
             specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
         ] + properties)
@@ -182,7 +182,7 @@ class TestData {
 
     @Deprecated
     Sample createSample(Map properties = [:]) {
-        return new Sample([
+        return DomainFactory.createSample([
             individual: individual,
             sampleType: sampleType,
         ] + properties)
@@ -190,19 +190,17 @@ class TestData {
 
     @Deprecated
     SeqTrack createSeqTrack(Map properties = [:]) {
-        return new SeqTrack([
-            laneId: "123",
+        return DomainFactory.createSeqTrack([
             seqType: seqType,
             sample: sample,
             run: run,
-            seqPlatform: seqPlatform,
             pipelineVersion: softwareTool,
         ] + properties)
     }
 
     @Deprecated
     FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
-        return new FastqcProcessedFile([
+        return DomainFactory.createFastqcProcessedFile([
             fileExists: true,
             contentUploaded: true,
             dataFile: dataFile,
@@ -212,10 +210,10 @@ class TestData {
     @Deprecated
     DataFile createDataFile(SeqTrack seqTrack, RunSegment runSegment, FileType fileType = this.fileType) {
         return createDataFile(
-                seqTrack: seqTrack,
-                runSegment: runSegment,
-                fileType: fileType,
-                )
+            seqTrack: seqTrack,
+            runSegment: runSegment,
+            fileType: fileType,
+        )
     }
 
     @Deprecated
@@ -235,22 +233,21 @@ class TestData {
 
     static ReferenceGenome createReferenceGenome(Map properties = [:]) {
         return DomainFactory.createReferenceGenome([
-                name :"hg19_1_24",
-                path: "referenceGenome",
-                fileNamePrefix: "prefixName",
-                length: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
-                lengthWithoutN: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
-                lengthRefChromosomes: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
-                lengthRefChromosomesWithoutN: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
-                chromosomeSuffix: "",
-                chromosomePrefix: "",
+            name :"hg19_1_24",
+            path: "referenceGenome",
+            fileNamePrefix: "prefixName",
+            length: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
+            lengthWithoutN: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
+            lengthRefChromosomes: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
+            lengthRefChromosomesWithoutN: ARBITRARY_LENGTH_FOR_REFERENCE_GENOME,
+            chromosomeSuffix: "",
+            chromosomePrefix: "",
         ] + properties, false)
     }
 
-
     @Deprecated
     ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Map properties = [:]) {
-        return new ReferenceGenomeProjectSeqType([
+        return DomainFactory.createReferenceGenomeProjectSeqType([
             project: project,
             seqType: seqType,
             referenceGenome: referenceGenome,
@@ -265,7 +262,7 @@ class TestData {
 
     @Deprecated
     Run createRun(Map properties = [:]) {
-        return new Run([
+        return DomainFactory.createRun([
             name: "TestRun",
             seqCenter: seqCenter,
             seqPlatform: seqPlatform,
@@ -274,50 +271,39 @@ class TestData {
 
     @Deprecated
     ExomeSeqTrack createExomeSeqTrack(Run run) {
-        ExomeSeqTrack exomeSeqTrack = new ExomeSeqTrack(
-                laneId: "laneId",
-                run: run,
-                sample: sample,
-                seqType: exomeSeqType,
-                seqPlatform: seqPlatform,
-                pipelineVersion: softwareTool,
-                kitInfoReliability: InformationReliability.KNOWN,
-                libraryPreparationKit: LibraryPreparationKit.buildLazy(),
-                )
-        assertNotNull(exomeSeqTrack.save())
-        return exomeSeqTrack
+        return DomainFactory.createExomeSeqTrack(
+            run: run,
+            sample: sample,
+            seqType: exomeSeqType,
+            pipelineVersion: softwareTool,
+            kitInfoReliability: InformationReliability.KNOWN,
+            libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
+        )
     }
-
 
     static LibraryPreparationKit createLibraryPreparationKit(String name) {
-        LibraryPreparationKit libraryPreparationKit = new LibraryPreparationKit(
-                name: name,
-                shortDisplayName: name,
-                )
-        assertNotNull(libraryPreparationKit.save())
-        return libraryPreparationKit
+        return DomainFactory.createLibraryPreparationKit(
+            name: name,
+            shortDisplayName: name,
+        )
     }
 
-
     static BedFile createBedFile(ReferenceGenome referenceGenome, LibraryPreparationKit libraryPreparationKit) {
-        BedFile bedFile = new BedFile (
-                fileName: "BedFile",
-                targetSize: 10000000,
-                referenceGenome: referenceGenome,
-                libraryPreparationKit: libraryPreparationKit,
-                )
-        assertNotNull(bedFile.save())
-        return bedFile
+        return DomainFactory.createBedFile(
+            fileName: "BedFile",
+            targetSize: 10000000,
+            referenceGenome: referenceGenome,
+            libraryPreparationKit: libraryPreparationKit,
+        )
     }
 
     FileType createFileType(FileType.Type type) {
-        fileType = new FileType(
+        fileType = DomainFactory.createFileType(
                 type: type
                 )
         assertNotNull(fileType.save())
         return fileType
     }
-
 
     static void addKitToExomeSeqTrack(ExomeSeqTrack exomeSeqTrack, LibraryPreparationKit sameLibraryPreparationKit) {
         exomeSeqTrack.libraryPreparationKit = sameLibraryPreparationKit
@@ -327,7 +313,7 @@ class TestData {
 
     @Deprecated
     ProcessedSaiFile createProcessedSaiFile(Map properties = [:]) {
-        return new ProcessedSaiFile([
+        return DomainFactory.createProcessedSaiFile([
             fileExists: true,
             dataFile: dataFile,
         ] + properties)
@@ -337,7 +323,7 @@ class TestData {
      * No default alignment provided, therefore the alignment needs to be passed always or <code>null</code> is used.
      */
     static ProcessedBamFile createProcessedBamFile(Map properties = [:]) {
-        return new ProcessedBamFile([
+        return DomainFactory.createProcessedBamFile([
             type: AbstractBamFile.BamType.SORTED,
             withdrawn: false,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
@@ -346,26 +332,25 @@ class TestData {
     }
 
     static MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
-        final MergingWorkPackage mergingWorkPackage = new MergingWorkPackage([
-                seqPlatformGroup: properties.get('seqPlatformGroup') ?: DomainFactory.createSeqPlatformGroup(),
-                referenceGenome: properties.get('referenceGenome') ?: DomainFactory.createReferenceGenome(),
-                libraryPreparationKit: properties.get('libraryPreparationKit'),
-                statSizeFileName     : properties.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT || properties.pipeline == null ?
-                            DomainFactory.DEFAULT_TAB_FILE_NAME : null,
-                pipeline: properties.get('pipeline') ?: DomainFactory.createPanCanPipeline(),
+        final MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
+            seqPlatformGroup: properties.get('seqPlatformGroup') ?: DomainFactory.createSeqPlatformGroup(),
+            referenceGenome: properties.get('referenceGenome') ?: DomainFactory.createReferenceGenome(),
+            libraryPreparationKit: properties.get('libraryPreparationKit'),
+            statSizeFileName     : properties.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT || properties.pipeline == null ?
+                        DomainFactory.DEFAULT_TAB_FILE_NAME : null,
+            pipeline: properties.get('pipeline') ?: DomainFactory.createPanCanPipeline(),
         ] + properties)
         return mergingWorkPackage
     }
 
     static MergingSet createMergingSet(Map properties = [:]) {
-        return new MergingSet([
+        return DomainFactory.createMergingSet([
             identifier: 0,
         ] + properties)
     }
 
-
     static MergingPass createMergingPass(Map properties = [:]) {
-        return new MergingPass([
+        return DomainFactory.createMergingPass([
             identifier: 0,
             description: "mergingPass",
         ] + properties)
