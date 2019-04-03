@@ -22,8 +22,10 @@
 
 package de.dkfz.tbi.otp
 
+import grails.testing.mixin.integration.Integration
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
@@ -31,9 +33,9 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 import java.nio.file.Files
-import java.time.Duration
 
-class DataFileConsistencyCheckerTests extends WorkflowTestCase {
+@Integration
+class DataFileConsistencyCheckerIntegrationSpec extends Specification {
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -143,18 +145,5 @@ class DataFileConsistencyCheckerTests extends WorkflowTestCase {
 
         expect:
         dataFileConsistencyChecker.setFileExistsForAllDataFiles()
-    }
-
-    @Override
-    List<String> getWorkflowScripts() {
-        return []
-    }
-
-    @Override
-    void loadWorkflow() { }
-
-    @Override
-    Duration getTimeout() {
-        Duration.ofMinutes(5)
     }
 }
