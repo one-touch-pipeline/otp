@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
+import grails.util.Holders
 
 import de.dkfz.tbi.otp.job.plan.*
 
@@ -122,14 +123,14 @@ class PlanValidatorService {
         if (!startJob) {
             return false
         }
-        return grailsApplication.mainContext.containsBean(startJob.bean)
+        return Holders.grailsApplication.mainContext.containsBean(startJob.bean)
     }
 
     private boolean startJobBeanIsStartJob(StartJobDefinition startJob) {
         if (!startJob) {
             return false
         }
-        def startJobBean = grailsApplication.mainContext.getBean(startJob.bean)
+        def startJobBean = Holders.grailsApplication.mainContext.getBean(startJob.bean)
         return (startJobBean instanceof StartJob)
     }
 
@@ -138,11 +139,11 @@ class PlanValidatorService {
     }
 
     private boolean jobBeanExists(JobDefinition job) {
-        return grailsApplication.mainContext.containsBean(job.bean)
+        return Holders.grailsApplication.mainContext.containsBean(job.bean)
     }
 
     private boolean jobBeanIsJob(JobDefinition job) {
-        def jobBean = grailsApplication.mainContext.getBean(job.bean)
+        def jobBean = Holders.grailsApplication.mainContext.getBean(job.bean)
         return (jobBean instanceof Job)
     }
 
@@ -171,7 +172,7 @@ class PlanValidatorService {
             lastJob = lastJob.next
         }
         if (jobBeanExists(lastJob)) {
-            def jobBean = grailsApplication.mainContext.getBean(lastJob.bean)
+            def jobBean = Holders.grailsApplication.mainContext.getBean(lastJob.bean)
             return (jobBean instanceof EndStateAwareJob)
         }
         return false
@@ -197,7 +198,7 @@ class PlanValidatorService {
     }
 
     private boolean validatingJobBeanIsValidatingJob(ValidatingJobDefinition validator) {
-        def jobBean = grailsApplication.mainContext.getBean(validator.bean)
+        def jobBean = Holders.grailsApplication.mainContext.getBean(validator.bean)
         return (jobBean instanceof ValidatingJob)
     }
 
@@ -216,7 +217,7 @@ class PlanValidatorService {
     }
 
     private boolean validatedJobIsNotEndstateAware(ValidatingJobDefinition validator) {
-        def jobBean = grailsApplication.mainContext.getBean(validator.validatorFor.bean)
+        def jobBean = Holders.grailsApplication.mainContext.getBean(validator.validatorFor.bean)
         return !(jobBean instanceof EndStateAwareJob)
     }
 }

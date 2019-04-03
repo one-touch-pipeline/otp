@@ -25,6 +25,7 @@ package de.dkfz.tbi.otp.job.processing
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import grails.util.Holders
 import org.junit.*
 import org.springframework.security.access.AccessDeniedException
 
@@ -38,8 +39,8 @@ import static org.junit.Assert.*
 @Rollback
 @Integration
 class JobExecutionPlanServiceTests implements UserAndRoles {
-    def jobExecutionPlanService
-    def grailsApplication
+
+    JobExecutionPlanService jobExecutionPlanService
 
     void setupData() {
         createUserAndRoles()
@@ -47,7 +48,7 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
     @After
     void tearDown() {
-        (grailsApplication.mainContext.getBean("testSingletonStartJob") as TestSingletonStartJob).setExecutionPlan(null)
+        (Holders.applicationContext.getBean("testSingletonStartJob") as TestSingletonStartJob).setExecutionPlan(null)
     }
 
     @Test
@@ -422,10 +423,8 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
         // get a startJob Instance for the testStartJob and inject the JobExecutionPlan
         TestSingletonStartJob job = null
-        StartJobDefinition.withNewSession {
-            job = grailsApplication.mainContext.getBean("testSingletonStartJob") as TestSingletonStartJob
-            job.setExecutionPlan(plan)
-        }
+        job = Holders.applicationContext.getBean("testSingletonStartJob") as TestSingletonStartJob
+        job.setExecutionPlan(plan)
         assertNotNull(job)
         // everything should be disabled now
         assertFalse(plan.enabled)
@@ -469,10 +468,8 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
 
         // get a startJob Instance for the testStartJob and inject the JobExecutionPlan
         TestSingletonStartJob job = null
-        StartJobDefinition.withNewSession {
-            job = grailsApplication.mainContext.getBean("testSingletonStartJob") as TestSingletonStartJob
-            job.setExecutionPlan(plan)
-        }
+        job = Holders.applicationContext.getBean("testSingletonStartJob") as TestSingletonStartJob
+        job.setExecutionPlan(plan)
         assertNotNull(job)
         // everything should be enabled now
         assertTrue(plan.enabled)
@@ -659,12 +656,11 @@ class JobExecutionPlanServiceTests implements UserAndRoles {
     @Test
     void testPlanInformation() {
         setupData()
-        JobExecutionPlan plan = new JobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
-        plan = plan.save(flush: true)
-        assertNotNull(plan)
+        JobExecutionPlan plan = DomainFactory.createJobExecutionPlan(name: "test", obsoleted: false, planVersion: 0, enabled: true)
         StartJobDefinition startJob = new StartJobDefinition(name: "start", bean: "testStartJob", plan: plan)
         assertNotNull(startJob.save())
         plan.startJob = startJob
+        plan.firstJob = startJob
         assertNotNull(plan.save(flush: true))
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {

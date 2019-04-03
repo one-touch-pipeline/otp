@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.plan
 
+import grails.util.Holders
+
 import de.dkfz.tbi.otp.job.processing.*
 
 /**
@@ -53,7 +55,7 @@ class JobInformation implements Serializable {
      */
     static JobInformation fromJob(JobDefinition job) {
         JobInformation ret = new JobInformation()
-        def bean = job.domainClass.grailsApplication.mainContext.getBean(job.bean)
+        def bean = Holders.grailsApplication.mainContext.getBean(job.bean)
         ret.startJob = (bean instanceof StartJob)
         ret.endStateAware = (bean instanceof EndStateAwareJob)
         ret.bean = job.bean
