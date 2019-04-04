@@ -22,133 +22,169 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.*
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.ngsdata.Individual.Type
 
-import static org.junit.Assert.assertEquals
+class IndividualSpec extends Specification implements DataTest {
 
-@TestMixin(GrailsUnitTestMixin)
-@TestFor(Individual)
-@Mock([Project, Sample])
-@Build([Individual, Realm, SampleType, SeqType])
-class IndividualUnitTests {
+    Class[] getDomainClassesToMock() {[
+            Individual,
+            Project,
+            Realm,
+            Sample,
+            SampleType,
+            SeqType,
+    ]}
+
 
     TestConfigService configService
 
-    @Test
-    void testSaveIndividual_AllCorrect() {
+    void "test validate"() {
+        given:
         Individual individual = createIndividual()
-        assert individual.validate()
+
+        expect:
+        individual.validate()
     }
 
-    @Test
-    void testSaveIndividual_NoPid() {
+    void "test validate, when pid is null"() {
+        given:
         Individual individual = createIndividual()
         individual.pid = null
-        assert !individual.validate()
+
+        expect:
+        !individual.validate()
     }
 
-    @Test
-    void testSaveIndividual_NoMockPid() {
+    void "test validate, when mockPid is null"() {
+        given:
         Individual individual = createIndividual()
         individual.mockPid = null
-        assert !individual.validate()
+
+        expect:
+        !individual.validate()
     }
 
-    @Test
-    void testSaveIndividual_NoMockFullName() {
+    void "test validate, when mockFullName is null"() {
+        given:
         Individual individual = createIndividual()
         individual.mockFullName = null
-        assert !individual.validate()
+
+        expect:
+        !individual.validate()
     }
 
-    @Test
-    void testSaveIndividual_NoInternIdentifier() {
+    void "test validate, when internIdentifier is null"() {
+        given:
         Individual individual = createIndividual()
         individual.internIdentifier = null
-        assert individual.validate()
+
+        expect:
+        individual.validate()
     }
 
-    @Test
-    void testSaveIndividual_NoType() {
+    void "test validate, when type is null"() {
+        given:
         Individual individual = createIndividual()
         individual.type = null
-        assert !individual.validate()
+
+        expect:
+        !individual.validate()
     }
 
-    @Test
-    void testSaveIndividual_NoProject() {
+    void "test validate, when project is null"() {
+        given:
         Individual individual = createIndividual()
         individual.project = null
-        assert !individual.validate()
+
+        expect:
+        !individual.validate()
     }
 
-    @Test
-    void testSaveIndividual_PidNotUnique() {
+    void "test validate, when pid is not unique"() {
+        given:
         Individual individual1 = createIndividual()
         assert individual1.validate()
         assert individual1.save(flush: true)
-
         Individual individual2 = createIndividual()
 
-        shouldFail(AssertionError, { assert individual2.validate() })
+        expect:
+        !individual2.validate()
     }
 
-    @Test
-    void testGetSamples() {
+    void "test getSamples, with one sample"() {
+        given:
         Individual individual = createIndividual()
         assert individual.validate()
         assert individual.save()
 
         Sample sample1 = new Sample(
                 individual: individual,
-                sampleType: SampleType.build(name: "name1")
+                sampleType: DomainFactory.createSampleType(name: "name1")
         )
         assert sample1.save()
 
-        assertEquals([sample1], individual.getSamples())
+        expect:
+        [sample1] == individual.getSamples()
+    }
+
+
+    void "test getSamples, with multiple samples"() {
+        given:
+        Individual individual = createIndividual()
+        assert individual.validate()
+        assert individual.save()
+
+        Sample sample1 = new Sample(
+                individual: individual,
+                sampleType: DomainFactory.createSampleType(name: "name1")
+        )
+        assert sample1.save()
 
         Sample sample2 = new Sample(
                 individual: individual,
-                sampleType: SampleType.build(name: "name2")
+                sampleType: DomainFactory.createSampleType(name: "name2")
         )
         assert sample2.save()
 
-        assertEquals([sample1, sample2], individual.getSamples())
+        expect:
+        [sample1, sample2] == individual.getSamples()
     }
 
-    @Test
-    void testGetViewByPidPathBase() {
-        Individual individual = Individual.build()
+    void "test getViewByPidPathBase"() {
+        given:
+        Individual individual = DomainFactory.createIndividual()
         SeqType seqType = DomainFactory.createSeqType()
         configService = new TestConfigService()
-
         String expectedPath = "${configService.getRootPath()}/${individual.project.dirName}/sequencing/${seqType.dirName}/view-by-pid"
+
+        when:
         String actualPath = individual.getViewByPidPathBase(seqType).absoluteDataManagementPath
 
-        assert expectedPath == actualPath
+        then:
+        expectedPath == actualPath
     }
 
-    @Test
-    void testGetViewByPidPath() {
-        Individual individual = Individual.build()
+    void "test getViewByPidPath"() {
+        given:
+        Individual individual = DomainFactory.createIndividual()
         SeqType seqType = DomainFactory.createSeqType()
         configService = new TestConfigService()
-
         String expectedPath = "${configService.getRootPath()}/${individual.project.dirName}/sequencing/${seqType.dirName}/view-by-pid/${individual.pid}"
+
+        when:
         String actualPath = individual.getViewByPidPath(seqType).absoluteDataManagementPath
 
-        assert expectedPath == actualPath
+        then:
+        expectedPath == actualPath
     }
 
 
-    @Test
-    void testGetResultsPerPidPath() {
+    void "test getResultsPerPidPath"() {
+        given:
         Realm realm = DomainFactory.createRealm()
         assert realm.save()
 
@@ -163,9 +199,12 @@ class IndividualUnitTests {
         configService = new TestConfigService()
 
         String expectedPath = "${configService.getRootPath()}/${project.dirName}/results_per_pid/${individual.pid}"
+
+        when:
         String actualPath = individual.getResultsPerPidPath().absoluteDataManagementPath
 
-        assertEquals(expectedPath, actualPath)
+        then:
+        expectedPath == actualPath
     }
 
 
