@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.domainFactory
 
+import de.dkfz.tbi.otp.InformationReliability
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -80,6 +82,93 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ]
     }
 
+    LibraryPreparationKit createLibraryPreparationKit(Map properties = [:]) {
+        return createDomainObject(LibraryPreparationKit, [
+                name            : "library-preperation-kit-name_${nextId}",
+                shortDisplayName: "library-preperation-kit-short-name_${nextId}",
+                importAlias     : [],
+        ], properties)
+    }
+
+    SoftwareTool createSoftwareTool(Map properties = [:]) {
+        return createDomainObject(SoftwareTool, [
+                programName: "softwareToolProgramName_${nextId}",
+                type       : SoftwareTool.Type.ALIGNMENT,
+        ], properties)
+    }
+
+    SoftwareToolIdentifier createSoftwareToolIdentifier(Map properties = [:]) {
+        return createDomainObject(SoftwareToolIdentifier, [
+                name        : "softwareToolIdentifier_${nextId}",
+                softwareTool: { createSoftwareTool() },
+        ], properties)
+    }
+
+    SeqCenter createSeqCenter(Map properties = [:]) {
+        return createDomainObject(SeqCenter, [
+                name   : "seqCenterName_${nextId}",
+                dirName: "seqCenterDirName_${nextId}",
+        ], properties)
+    }
+
+    AntibodyTarget createAntibodyTarget(Map properties = [:]) {
+        return createDomainObject(AntibodyTarget, [
+                name       : "antibodyTargetName_${nextId}",
+                importAlias: [],
+        ], properties)
+    }
+
+    Run createRun(Map properties = [:]) {
+        return createDomainObject(Run, [
+                name       : "runName_${nextId}",
+                seqCenter  : { createSeqCenter() },
+                seqPlatform: { createSeqPlatformWithSeqPlatformGroup() },
+        ], properties)
+    }
+
+    RunSegment createRunSegment(Map properties = [:]) {
+        return createDomainObject(RunSegment, [
+                importMode: RunSegment.ImportMode.AUTOMATIC,
+        ], properties)
+    }
+
+
+    SeqTrack createSeqTrack(Map properties = [:]) {
+        if (properties.seqType?.hasAntibodyTarget) {
+            return createChipSeqSeqTrack(properties)
+        }
+        if (properties.seqType?.isExome()) {
+            return createExomeSeqTrack(properties)
+        }
+        return createDomainObject(SeqTrack, getSeqTrackProperties(properties) + [
+                seqType: { createSeqType() },
+        ], properties)
+    }
+
+    ExomeSeqTrack createExomeSeqTrack(Map properties = [:]) {
+        return createDomainObject(ExomeSeqTrack, getSeqTrackProperties(properties) + [
+                seqType: { createExomeSeqType() },
+        ], properties)
+    }
+
+    ChipSeqSeqTrack createChipSeqSeqTrack(Map properties = [:]) {
+        return createDomainObject(ChipSeqSeqTrack, getSeqTrackProperties(properties) + [
+                seqType       : { createChipSeqType() },
+                antibodyTarget: { createAntibodyTarget() },
+        ], properties)
+    }
+
+    private Map getSeqTrackProperties(Map properties = [:]) {
+        return [
+                laneId               : "laneId_${nextId}",
+                sample               : { createSample() },
+                pipelineVersion      : { createSoftwareTool() },
+                run                  : { createRun() },
+                kitInfoReliability   : { properties.libraryPreparationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED },
+                normalizedLibraryName: { SeqTrack.normalizeLibraryName(properties.libraryName) },
+        ]
+    }
+
     ReferenceGenome createReferenceGenome(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ReferenceGenome, [
                 name                        : "referencegenome_name${nextId}",
@@ -116,5 +205,69 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 commonName     : 'commonName',
                 scientificName : 'scientificName',
         ], properties, saveAndValidate)
+    }
+
+    SeqPlatform createSeqPlatformWithSeqPlatformGroup(Map properties = [:]) {
+        Set<SeqPlatformGroup> spg = (properties.seqPlatformGroups ?: [createSeqPlatformGroup()]) as Set
+
+        SeqPlatform sp = createSeqPlatform([seqPlatformGroups: spg] + properties)
+
+        sp.seqPlatformGroups.each {
+            sp.addToSeqPlatformGroups(it)
+        }
+        sp.save(flush: true)
+
+        return sp
+    }
+
+    SeqPlatform createSeqPlatform(Map properties = [:]) {
+        return createDomainObject(SeqPlatform, [
+                name                 : "seqPlatform_${nextId}",
+                seqPlatformModelLabel: { createSeqPlatformModelLabel() },
+        ], properties)
+    }
+
+    SeqPlatformModelLabel createSeqPlatformModelLabel(Map properties = [:]) {
+        return createDomainObject(SeqPlatformModelLabel, [
+                name       : "seqPlatformModelLabel_${nextId}",
+                importAlias: [],
+        ], properties)
+    }
+
+    SequencingKitLabel createSequencingKitLabel(Map properties = [:]) {
+        return createDomainObject(SequencingKitLabel, [
+                name       : "SequencingKitLabel__${nextId}",
+                importAlias: [],
+        ], properties)
+    }
+
+    SeqPlatformGroup createSeqPlatformGroup(Map properties = [:]) {
+        return createDomainObject(SeqPlatformGroup, [:], properties)
+    }
+
+    SeqPlatformGroup createSeqPlatformGroupWithMergingCriteria(Map properties = [:]) {
+        return createDomainObject(SeqPlatformGroup, [
+                mergingCriteria: createMergingCriteriaLazy(
+                        useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
+                )
+        ], properties)
+    }
+
+    MergingCriteria createMergingCriteria(Map properties = [:]) {
+        return createDomainObject(MergingCriteria, [
+                project: { createProject() },
+                seqType: { createSeqType() },
+        ], properties)
+    }
+
+    MergingCriteria createMergingCriteriaLazy(Map properties) {
+        if ((properties.get("seqType") as SeqType)?.isWgbs() && !properties.hasProperty("useLibPrepKit")) {
+            properties.put("useLibPrepKit", false)
+        }
+
+        return findOrCreateDomainObject(MergingCriteria, [
+                project: { createProject() },
+                seqType: { createSeqType() },
+        ], properties)
     }
 }

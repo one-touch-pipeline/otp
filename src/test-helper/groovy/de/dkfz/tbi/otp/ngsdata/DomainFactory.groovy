@@ -47,7 +47,6 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.security.User
@@ -1339,80 +1338,54 @@ class DomainFactory {
         return createDomainObject(RunYapsaInstance, map, properties)
     }
 
-
+    @Deprecated
     static AntibodyTarget createAntibodyTarget(Map properties = [:]) {
-        return createDomainObject(AntibodyTarget, [
-                name       : 'antibodyTargetName_' + (counter++),
-                importAlias: [],
-        ], properties)
+        return proxyCore.createAntibodyTarget(properties)
     }
 
+    @Deprecated
     static SeqCenter createSeqCenter(Map seqCenterProperties = [:]) {
-        return createDomainObject(SeqCenter, [
-                name   : 'seqCenterName_' + (counter++),
-                dirName: 'seqCenterDirName_' + (counter++),
-        ], seqCenterProperties)
+        return proxyCore.createSeqCenter(seqCenterProperties)
     }
 
+    @Deprecated
     static SeqPlatform createSeqPlatformWithSeqPlatformGroup(Map seqPlatformProperties = [:]) {
-        Set<SeqPlatformGroup> spg = seqPlatformProperties.seqPlatformGroups as Set ?: [createSeqPlatformGroup()] as Set
-
-        SeqPlatform sp = createSeqPlatform([seqPlatformGroups: spg] + seqPlatformProperties)
-
-        sp.seqPlatformGroups.each {
-            sp.addToSeqPlatformGroups(it)
-        }
-        sp.save(flush: true)
-
-        return sp
+        return proxyCore.createSeqPlatformWithSeqPlatformGroup(seqPlatformProperties)
     }
 
+    @Deprecated
     static SeqPlatform createSeqPlatform(Map seqPlatformProperties = [:]) {
-        return createDomainObject(SeqPlatform, [
-                name                 : 'seqPlatform_' + (counter++),
-                seqPlatformModelLabel: { createSeqPlatformModelLabel() },
-        ], seqPlatformProperties)
+        return proxyCore.createSeqPlatform(seqPlatformProperties)
     }
 
+    @Deprecated
     static SeqPlatformModelLabel createSeqPlatformModelLabel(Map properties = [:]) {
-        return createDomainObject(SeqPlatformModelLabel, [
-                name       : 'seqPlatformModelLabel_' + (counter++),
-                importAlias: [],
-        ], properties)
+        return proxyCore.createSeqPlatformModelLabel(properties)
     }
 
+    @Deprecated
     static SequencingKitLabel createSequencingKitLabel(Map properties = [:]) {
-        return createDomainObject(SequencingKitLabel, [
-                name       : 'SequencingKitLabel_' + (counter++),
-                importAlias: [],
-        ], properties)
+        return proxyCore.createSequencingKitLabel(properties)
     }
 
+    @Deprecated
     static SeqPlatformGroup createSeqPlatformGroup(Map properties = [:]) {
-        return createDomainObject(SeqPlatformGroup, [:], properties)
+        return proxyCore.createSeqPlatformGroup(properties)
     }
 
+    @Deprecated
     static SeqPlatformGroup createSeqPlatformGroupWithMergingCriteria(Map properties = [:]) {
-        return createDomainObject(SeqPlatformGroup, [
-                mergingCriteria: createMergingCriteriaLazy(
-                        useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
-                )
-        ], properties)
-
+        return proxyCore.createSeqPlatformGroupWithMergingCriteria(properties)
     }
 
+    @Deprecated
     static Run createRun(Map runProperties = [:]) {
-        return createDomainObject(Run, [
-                name       : 'runName_' + (counter++),
-                seqCenter  : { createSeqCenter() },
-                seqPlatform: { createSeqPlatformWithSeqPlatformGroup() },
-        ], runProperties)
+        return proxyCore.createRun(runProperties)
     }
 
+    @Deprecated
     static RunSegment createRunSegment(Map runSegmentProperties = [:]) {
-        return createDomainObject(RunSegment, [
-                importMode: RunSegment.ImportMode.AUTOMATIC,
-        ], runSegmentProperties)
+        return proxyCore.createRunSegment(runSegmentProperties)
     }
 
     @Deprecated
@@ -1476,28 +1449,19 @@ class DomainFactory {
         return createSeqType([libraryLayout: LibraryLayout.PAIRED] + seqTypeProperties, saveAndValidate)
     }
 
+    @Deprecated
     static SoftwareTool createSoftwareTool(Map softwareToolProperties = [:]) {
-        return createDomainObject(SoftwareTool, [
-                programName: 'softwareToolProgramName_' + (counter++),
-                type       : SoftwareTool.Type.ALIGNMENT,
-        ], softwareToolProperties)
+        return proxyCore.createSoftwareTool(softwareToolProperties)
     }
 
-
+    @Deprecated
     static SoftwareToolIdentifier createSoftwareToolIdentifier(Map properties = [:]) {
-        return createDomainObject(SoftwareToolIdentifier, [
-                name        : 'softwareToolIdentifier_' + (counter++),
-                softwareTool: { createSoftwareTool() },
-        ], properties)
+        return proxyCore.createSoftwareToolIdentifier(properties)
     }
 
-
+    @Deprecated
     static LibraryPreparationKit createLibraryPreparationKit(Map properties = [:]) {
-        return createDomainObject(LibraryPreparationKit, [
-                name            : "library-preperation-kit-name_${counter++}",
-                shortDisplayName: "library-preperation-kit-short-name_${counter++}",
-                importAlias     : [],
-        ], properties)
+        return proxyCore.createLibraryPreparationKit(properties)
     }
 
     @Deprecated
@@ -1596,29 +1560,19 @@ class DomainFactory {
         ]
     }
 
+    @Deprecated
     static SeqTrack createSeqTrack(Map properties = [:]) {
-        if (properties.seqType?.hasAntibodyTarget) {
-            return createChipSeqSeqTrack(properties)
-        }
-        if (properties.seqType?.isExome()) {
-            return createExomeSeqTrack(properties)
-        }
-        return createDomainObject(SeqTrack, seqTrackProperties(properties) + [
-                seqType: { createSeqType() },
-        ], properties)
+        return proxyCore.createSeqTrack(properties)
     }
 
+    @Deprecated
     static ExomeSeqTrack createExomeSeqTrack(Map properties = [:]) {
-        return createDomainObject(ExomeSeqTrack, seqTrackProperties(properties) + [
-                seqType: { createExomeSeqType() },
-        ], properties)
+        return proxyCore.createExomeSeqTrack(properties)
     }
 
+    @Deprecated
     static ChipSeqSeqTrack createChipSeqSeqTrack(Map properties = [:]) {
-        return createDomainObject(ChipSeqSeqTrack, seqTrackProperties(properties) + [
-                seqType       : { createChipSeqType() },
-                antibodyTarget: { createAntibodyTarget() },
-        ], properties)
+        return proxyCore.createChipSeqSeqTrack(properties)
     }
 
     static FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
@@ -2515,22 +2469,14 @@ class DomainFactory {
     }
 
 
+    @Deprecated
     static MergingCriteria createMergingCriteria(Map properties = [:]) {
-        return createDomainObject(MergingCriteria, [
-                project: { createProject() },
-                seqType: { createSeqType() },
-        ], properties)
+        return proxyCore.createMergingCriteria(properties)
     }
 
+    @Deprecated
     static MergingCriteria createMergingCriteriaLazy(Map properties) {
-        if ((properties.get("seqType") as SeqType)?.isWgbs()) {
-            properties.get("useLibPrepKit") ?: properties.put("useLibPrepKit", false)
-        }
-
-        return findOrCreateDomainObject(MergingCriteria, [
-                project: { createProject() },
-                seqType: { createSeqType() },
-        ], properties)
+        return proxyCore.createMergingCriteriaLazy(properties)
     }
 
     static QcThreshold createQcThreshold(Map properties = [:], boolean saveAndValidate = true) {
