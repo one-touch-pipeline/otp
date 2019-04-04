@@ -22,31 +22,13 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTest {
+import de.dkfz.tbi.TestCase
 
-    Class[] getDomainClassesToMock() {[
-            Project,
-            ProjectCategory,
-            Individual,
-            Realm,
-            Run,
-            SeqTrack,
-            Sample,
-            SampleType,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqType,
-            SoftwareTool,
-            ReferenceGenome,
-            ReferenceGenomeProjectSeqType,
-    ]}
+class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTest {
 
     static final String PROJECT_NAME = "project"
     static final String SEQ_TYPE_NAME = "seqType"
@@ -56,6 +38,92 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
     static final String OTHER_PROJECT_NAME = "otherProject"
     static final String OTHER_SEQ_TYPE_NAME = "otherSeqType"
     static final String OTHER_SAMPLE_TYPE_NAME = "otherSampleType"
+
+    Class[] getDomainClassesToMock() {
+        [
+                Project,
+                ProjectCategory,
+                Individual,
+                Realm,
+                Run,
+                SeqTrack,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqType,
+                SoftwareTool,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+        ]
+    }
+
+
+    void "test validate, when statSizeFileName is correct"() {
+        given:
+        ReferenceGenomeProjectSeqType rpst = DomainFactory.createReferenceGenomeProjectSeqType(
+                [statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME],
+                false,
+        )
+
+        expect:
+        rpst.validate()
+    }
+
+    void "test validate, when statSizeFileName is null"() {
+        given:
+        ReferenceGenomeProjectSeqType rpst = DomainFactory.createReferenceGenomeProjectSeqType(
+                [statSizeFileName: null],
+                false,
+        )
+
+        expect:
+        rpst.validate()
+    }
+
+    void "test validate, when statSizeFileName is blank, should fail"() {
+        given:
+        ReferenceGenomeProjectSeqType rpst = DomainFactory.createReferenceGenomeProjectSeqType(
+                [:],
+                false,
+        )
+        rpst.statSizeFileName = '' //setting empty string does not work via map
+
+        expect:
+        TestCase.assertValidateError(rpst, 'statSizeFileName', 'blank', '')
+    }
+
+    void "test validate, when statSizeFileName contains valid special character"() {
+        given:
+        String name = "File${l}.tab"
+        ReferenceGenomeProjectSeqType rpst = DomainFactory.createReferenceGenomeProjectSeqType(
+                [statSizeFileName: name],
+                false,
+        )
+
+        expect:
+        rpst.validate()
+
+        where:
+        l << "-_.".toCharArray()
+    }
+
+    void "test validate, when statSizeFileName contains invalid special character, should fail"() {
+        given:
+        String name = "File${l}.tab"
+        ReferenceGenomeProjectSeqType rpst = DomainFactory.createReferenceGenomeProjectSeqType(
+                [statSizeFileName: name],
+                false,
+        )
+
+        expect:
+        TestCase.assertAtLeastExpectedValidateError(rpst, 'statSizeFileName', 'matches.invalid', name)
+
+        where:
+        l << "\"',:;%\$§&<>|^§!?=äöüÄÖÜß´`".toCharArray()
+    }
 
 
     @Unroll
@@ -214,4 +282,5 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         RuntimeException e = thrown()
         e.message.contains('the way to fetch the reference genome is not defined')
     }
+
 }

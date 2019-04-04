@@ -1560,12 +1560,12 @@ class DomainFactory {
         ], properties)
     }
 
-    static ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Map properties = [:]) {
+    static ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(ReferenceGenomeProjectSeqType, [
                 project        : { createProject() },
                 seqType        : { createSeqType() },
                 referenceGenome: { createReferenceGenome() },
-        ], properties)
+        ], properties, saveAndValidate)
     }
 
     static ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqTypeLazy(Map properties = [:]) {
