@@ -22,73 +22,74 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestFor
-import org.junit.*
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
-@TestFor(SeqCenterService)
-@Build([
-        SeqCenter
-])
-class SeqCenterServiceUnitTests {
+class SeqCenterServiceSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            SeqCenter,
+    ]}
+
 
     SeqCenterService seqCenterService
 
-    final static String SEQ_CENTER ="SeqCenter"
+    final static String SEQ_CENTER = "SeqCenter"
 
-    final static String DIFFERENT_SEQ_CENTER ="DifferentSeqCenter"
+    final static String DIFFERENT_SEQ_CENTER = "DifferentSeqCenter"
 
     final static String SEQ_CENTER_DIR = "SeqCenterDir"
 
     final static String DIFFERENT_SEQ_CENTER_DIR = "DifferentSeqCenterDir"
 
-    @Before
-    void setUp() throws Exception {
+
+    void setup() throws Exception {
         seqCenterService = new SeqCenterService()
     }
 
 
-    @After
-    void tearDown() throws Exception {
-        seqCenterService = null
+    void "test createSeqCenter"() {
+        expect:
+        seqCenterService.createSeqCenter(SEQ_CENTER, SEQ_CENTER_DIR) ==
+                SeqCenter.findByNameAndDirName(SEQ_CENTER, SEQ_CENTER_DIR)
     }
 
-    @Test
-    void testCreateSeqCenterUsingSeqCenterAndSeqCenterDir() {
-        assertEquals(
-                seqCenterService.createSeqCenter(SEQ_CENTER, SEQ_CENTER_DIR),
-                SeqCenter.findByNameAndDirName(SEQ_CENTER ,SEQ_CENTER_DIR)
-        )
-    }
-
-    @Test
-    void testCreateSeqCenterUsingSeqCenterTwiceAndSeqCenterDir() {
+    void "test createSeqCenter, with existing name, should fail"() {
+        given:
         seqCenterService.createSeqCenter(SEQ_CENTER, SEQ_CENTER_DIR)
-        shouldFail(AssertionError) {
-            seqCenterService.createSeqCenter(SEQ_CENTER, DIFFERENT_SEQ_CENTER_DIR)
-        }
+
+        when:
+        seqCenterService.createSeqCenter(SEQ_CENTER, DIFFERENT_SEQ_CENTER_DIR)
+
+        then:
+        thrown(AssertionError)
     }
 
-    @Test
-    void testCreateSeqCenterUsingSeqCenterAndSeqCenterDirTwice() {
+    void "test createSeqCenter, with existing dir, should fail"() {
+        given:
         seqCenterService.createSeqCenter(SEQ_CENTER, SEQ_CENTER_DIR)
-        shouldFail(AssertionError) {
-            seqCenterService.createSeqCenter(DIFFERENT_SEQ_CENTER, SEQ_CENTER_DIR)
-        }
+
+        when:
+        seqCenterService.createSeqCenter(DIFFERENT_SEQ_CENTER, SEQ_CENTER_DIR)
+
+        then:
+        thrown(AssertionError)
     }
 
-    @Test
-    void testCreateSeqCenterUsingNullAndSeqCenterDir() {
-        shouldFail(AssertionError) {
-            seqCenterService.createSeqCenter(null, SEQ_CENTER_DIR)
-        }
+    void "test createSeqCenter, when seq center is null, should fail"() {
+        when:
+        seqCenterService.createSeqCenter(null, SEQ_CENTER_DIR)
+
+        then:
+        thrown(AssertionError)
     }
 
-    @Test
-    void testCreateSeqCenterUsingSeqCenterAndNull() {
-        shouldFail(AssertionError) {
-            seqCenterService.createSeqCenter(SEQ_CENTER, null)
-        }
+    void "test createSeqCenter, when seq center dir is null, should fail"() {
+        when:
+        seqCenterService.createSeqCenter(SEQ_CENTER, null)
+
+        then:
+        thrown(AssertionError)
     }
 }
 
