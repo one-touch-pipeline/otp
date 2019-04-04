@@ -22,20 +22,22 @@
 
 package de.dkfz.tbi.otp.utils
 
-import grails.buildtestdata.mixin.Build
-import org.codehaus.groovy.runtime.powerassert.PowerAssertionError
-import org.junit.*
+import grails.testing.gorm.DataTest
+import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.Paths
 
-@Build([Realm])
-class LinkFileUtilsUnitTests {
+class LinkFileUtilsSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() { [
+            Realm,
+    ]}
 
     LinkFileUtils linkFileUtils
 
@@ -45,10 +47,9 @@ class LinkFileUtilsUnitTests {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
-    @Before
-    void setUp() {
+    void setup() {
         testDirectory = tmpDir.newFolder()
-        if(!testDirectory.exists()) {
+        if (!testDirectory.exists()) {
             assert testDirectory.mkdirs()
         }
 
@@ -71,82 +72,86 @@ class LinkFileUtilsUnitTests {
         linkFileUtils.remoteShellHelper = remoteShellHelper
     }
 
-    @After
-    void tearDown() {
-        realm = null
-        testDirectory = null
-        linkFileUtils = null
+    void "test createAndValidateLinks, when map is null, should fail"() {
+        when:
+        linkFileUtils.createAndValidateLinks(null, realm)
+
+        then:
+        thrown(AssertionError)
     }
 
+    void "test createAndValidateLinks, when realm is null, should fail"() {
+        when:
+        linkFileUtils.createAndValidateLinks([:], null)
 
-    @Test
-    void testCreateAndValidateLinks_MapIsNull_shouldFail() {
-        TestCase.shouldFail (PowerAssertionError) {
-            linkFileUtils.createAndValidateLinks(null, realm)
-        }
-
+        then:
+        thrown(AssertionError)
     }
 
-    @Test
-    void testCreateAndValidateLinks_RealmIsNull_shouldFail() {
-        TestCase.shouldFail (PowerAssertionError) {
-            linkFileUtils.createAndValidateLinks([:], null)
-        }
-    }
-
-    @Test
-    void testCreateAndValidateLinks_baseDirExist_LinkDoesNotExist() {
+    void "test createAndValidateLinks, when base dir exists and links does not exist"() {
+        given:
         File sourceFile = new File(testDirectory, "sourceFile")
         sourceFile.createNewFile()
         File linkFile = new File(testDirectory, "linkFile")
 
-        linkFileUtils.createAndValidateLinks([(sourceFile):linkFile], realm)
-        assert linkFile.exists()
-        assert Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
+        when:
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
+
+        then:
+        linkFile.exists()
+        Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
     }
 
-    @Test
-    void testCreateAndValidateLinks_baseDirExist_FileExistsInPlaceOfLink() {
+    void "test createAndValidateLinks, when base dir exists and file exists in place of link"() {
+        given:
         String oldContent = "OldContent"
         File sourceFile = new File(testDirectory, "sourceFile")
         sourceFile.createNewFile()
         File linkFile = new File(testDirectory, "linkFile")
         linkFile << oldContent
 
-        linkFileUtils.createAndValidateLinks([(sourceFile):linkFile], realm)
-        assert linkFile.exists()
-        assert linkFile.text != oldContent
-        assert Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
+        when:
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
+
+        then:
+        linkFile.exists()
+        linkFile.text != oldContent
+        Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
     }
 
-    @Test
-    void testCreateAndValidateLinks_baseDirExist_DirectoryExistsInPlaceOfLink() {
+    void "test createAndValidateLinks, when base dir exists and dir exists in place of link"() {
+        given:
         File sourceFile = new File(testDirectory, "sourceFile")
         sourceFile.createNewFile()
         File linkFile = new File(testDirectory, "linkFile")
         assert linkFile.mkdirs()
 
-        linkFileUtils.createAndValidateLinks([(sourceFile):linkFile], realm)
-        assert linkFile.exists() && !linkFile.isDirectory()
-        assert Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
+        when:
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
+
+        then:
+        linkFile.exists() && !linkFile.isDirectory()
+        Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
     }
 
-    @Test
-    void testCreateAndValidateLinks_baseDirDoesNotExist() {
+    void "test createAndValidateLinks, when base dir does not exist"() {
+        given:
         File sourceFile = new File(testDirectory, "sourceFile")
         sourceFile.createNewFile()
         File linkDir = new File(testDirectory, "linkDir")
         assert !linkDir.exists()
         File linkFile = new File(linkDir, "linkFile")
 
-        linkFileUtils.createAndValidateLinks([(sourceFile):linkFile], realm)
-        assert linkFile.exists()
-        assert Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
+        when:
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
+
+        then:
+        linkFile.exists()
+        Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
     }
 
-
-    @Test
-    void testCreateAndValidateLinks_linkCouldNotBeCreated_shouldFail() {
+    void "test createAndValidateLinks, when link can't be created, should fail"() {
+        given:
         File sourceFile = new File(testDirectory, "sourceFile")
         sourceFile.createNewFile()
         File linkFile = new File(testDirectory, "linkFile")
@@ -159,9 +164,10 @@ class LinkFileUtilsUnitTests {
                 }
         ] as RemoteShellHelper
 
-        TestCase.shouldFail(PowerAssertionError) {
-            linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
-        }
-    }
+        when:
+        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
 
+        then:
+        thrown(AssertionError)
+    }
 }
