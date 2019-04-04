@@ -22,21 +22,22 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestFor
-import org.junit.*
+import grails.testing.gorm.DataTest
+import grails.testing.services.ServiceUnitTest
+import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
-@TestFor(BedFileService)
-@Build([
-        BedFile,
-        ProcessingOption,
-])
-class BedFileServiceTests {
+class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitTest<BedFileService> {
+
+    Class[] getDomainClassesToMock() {[
+            BedFile,
+            ProcessingOption,
+    ]}
+
 
     @Rule
     public TemporaryFolder temporaryFolder = new TemporaryFolder()
@@ -44,9 +45,9 @@ class BedFileServiceTests {
     BedFile bedFile
     File referenceGenomesBaseDirectory
 
-    @Before
-    void setUp() {
-        bedFile = BedFile.build([fileName: 'bedFileName'])
+
+    void setup() {
+        bedFile = DomainFactory.createBedFile([fileName: 'bedFileName'])
 
         referenceGenomesBaseDirectory = temporaryFolder.newFolder("reference_genomes", bedFile.referenceGenome.path, "targetRegions")
         referenceGenomesBaseDirectory.mkdirs()
@@ -57,30 +58,29 @@ class BedFileServiceTests {
         service.referenceGenomeService.processingOptionService = new ProcessingOptionService()
     }
 
-    @After
-    void tearDown() {
-        TestCase.removeMetaClass(ReferenceGenomeService, service.referenceGenomeService)
-        bedFile = null
+
+    void "test filePath, when bedFile is null, should fail"() {
+        when:
+        service.filePath(null)
+
+        then:
+        thrown(IllegalArgumentException)
     }
 
-    @Test
-    void test_filePath_WhenBedFileIsNull_ShouldFailWithException() {
-        shouldFail(IllegalArgumentException) { service.filePath(null) }
+    void "test filePath, when bed file does not exist, should fail"() {
+        when:
+        service.filePath(bedFile)
+
+        then:
+        def e = thrown(RuntimeException)
+        e.message.contains("the bedFile can not be read")
     }
 
-    @Test
-    void test_filePath_WhenBedFileDoesNotExist_ShouldFailWithException() {
-        assert shouldFail(RuntimeException) {
-            service.filePath(bedFile)
-        } =~ /the bedFile can not be read/
-    }
-
-    @Test
-    void test_filePath_WhenBedFileExists_ShouldReturnPathToFile() {
-        // setup:
+    void "test filePath, when bed file exists, should return path to file"() {
+        given:
         new File(referenceGenomesBaseDirectory, 'bedFileName').createNewFile()
 
-        // expect:
-        assert service.filePath(bedFile) == "${referenceGenomesBaseDirectory.parentFile.path}/targetRegions/bedFileName" as String
+        expect:
+        service.filePath(bedFile) == "${referenceGenomesBaseDirectory.parentFile.path}/targetRegions/bedFileName" as String
     }
 }
