@@ -50,7 +50,7 @@ and
     )
 """
 
-println IndelCallingInstance.executeQuery(sql).groupBy(
+println IndelCallingInstance.executeQuery(sql.toString()).groupBy(
         [
                 { BamFilePairAnalysis analysis ->
                     analysis.config.pipeline

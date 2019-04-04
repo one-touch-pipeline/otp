@@ -457,8 +457,7 @@ nameStringToList(projectString).each { String projectName ->
 if (allProcessed) {
     output << "\n\n\n==============================\nseqtracks in processing (as defined in header comment)\n==============================\n"
 
-    List<SeqTrack> seqTracks = SeqTrack.executeQuery(
-            """
+    List<SeqTrack> seqTracks = SeqTrack.executeQuery("""
     select
         seqTrack
     from
@@ -493,7 +492,7 @@ if (allProcessed) {
                     )
             )
         )
-    """)
+    """.toString())
 
     //collect waiting SamplePairs
     Closure<GString> needsProcessing = { String property, Pipeline.Type type ->
@@ -586,7 +585,7 @@ if (allProcessed) {
         )
         and ${connectBamFile('1')}
         and ${connectBamFile('2')}
-    """).each { SamplePair samplePair ->
+    """.toString()).each { SamplePair samplePair ->
         [samplePair.mergingWorkPackage1, samplePair.mergingWorkPackage2].each { MergingWorkPackage mergingWorkPackage ->
             seqTracks.addAll(mergingWorkPackage.seqTracks)
         }
@@ -616,7 +615,7 @@ if (allProcessed) {
             join mergingWorkPackage.sample.individual.project project
         where
             mergingWorkPackage.needsProcessing = true
-    """).each {
+    """.toString()).each {
         Collection<SeqTrack> mergeableSeqTracks = it.seqTracks
         if(mergeableSeqTracks) {
             seqTracks += mergeableSeqTracks - (it.seqType.isWgbs() ? ctx.WgbsAlignmentStartJob : ctx.PanCanStartJob).findUsableBaseBamFile(it)?.containedSeqTracks

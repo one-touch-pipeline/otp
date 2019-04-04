@@ -94,14 +94,13 @@ class Individual implements Commentable, Entity {
      * @return List of SeqType for this Individual
      */
     List<SeqType> getSeqTypes() {
-        return SeqType.executeQuery(
-        '''
+        return SeqType.executeQuery("""
 SELECT DISTINCT type from SeqScan scan
 INNER JOIN scan.sample AS sample
 INNER JOIN scan.seqType as type
 WHERE sample.individual = :ind
 order by type.name asc, type.libraryLayout
-        ''', [ind: this])
+        """.toString(), [ind: this])
     }
 
     /**

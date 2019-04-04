@@ -139,7 +139,7 @@ class JobExecutionPlanService {
     Map<Process, ProcessingStepUpdate> getLatestUpdatesForPlan(
             JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, List<ExecutionState> states = []) {
         final List<Long> plans = withParents(plan).collect { it.id }
-        String query = '''
+        String query = """
 SELECT p, max(u.id)
 FROM ProcessingStepUpdate as u
 INNER JOIN u.processingStep as step
@@ -157,7 +157,7 @@ AND u.id IN (
     AND step2.next IS NULL
     GROUP BY p2.id
 )
-'''
+"""
         if (states) {
             query = query + "AND u.state IN (:states)\n"
         }
@@ -169,7 +169,7 @@ AND u.id IN (
         if (states) {
             params.put("states", states)
         }
-        def processes = ProcessingStepUpdate.executeQuery(query, params, [max: max, offset: offset])
+        def processes = ProcessingStepUpdate.executeQuery(query.toString(), params, [max: max, offset: offset])
         List<Long> ids = processes.collect { it[1] }
         List<ProcessingStepUpdate> updates = ids ? ProcessingStepUpdate.findAllByIdInList(ids) : []
         processes.each {
@@ -214,7 +214,7 @@ AND u.id IN (
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Process getLastExecutedProcess(JobExecutionPlan plan) {
         final List<Long> plans = withParents(plan).collect { it.id }
-        String query = '''
+        String query = """
 SELECT p
 FROM ProcessingStepUpdate AS u
 INNER JOIN u.processingStep AS step
@@ -225,9 +225,9 @@ plan.id IN (:planIds)
 AND u.state = 'CREATED'
 AND step.previous IS NULL
 ORDER BY p.id DESC
-'''
+"""
 
-        List result = Process.executeQuery(query, [planIds: plans], [max: 1])
+        List result = Process.executeQuery(query.toString(), [planIds: plans], [max: 1])
         if (result.isEmpty()) {
             return null
         }
@@ -248,7 +248,7 @@ ORDER BY p.id DESC
         if (!states) {
             return plans ? Process.countByJobExecutionPlanInList(plans) : 0
         }
-        String query = '''
+        String query = """
 SELECT COUNT(DISTINCT p.id)
 FROM ProcessingStepUpdate AS u
 INNER JOIN u.processingStep as step
@@ -267,8 +267,8 @@ AND u.id IN (
     AND step2.next IS NULL
     GROUP BY p2.id
 )
-'''
-        return Process.executeQuery(query, [planIds: plans.collect { it.id }, states: states])[0]
+"""
+        return Process.executeQuery(query.toString(), [planIds: plans.collect { it.id }, states: states])[0] as int
     }
 
     /**
@@ -384,7 +384,7 @@ WHERE
 GROUP BY
     plan.name
 """
-        return Process.executeQuery(query, []).collectEntries { e ->
+        return Process.executeQuery(query.toString(), []).collectEntries { e ->
             [e[0], e[1]]
         }
     }

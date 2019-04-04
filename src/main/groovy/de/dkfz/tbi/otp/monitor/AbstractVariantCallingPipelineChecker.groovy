@@ -147,7 +147,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                                 and config.pipeline.type = :pipelineType
                                 and config.obsoleteDate is null
                         )
-                """, [
+                """.toString(), [
                 samplePairs : samplePairs,
                 pipelineType: getPipeline().type,
         ])
@@ -167,7 +167,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                         and analysis.processingState = '${AnalysisProcessingStates.IN_PROGRESS}'
                         and analysis.withdrawn = false
                         and analysis.config.pipeline.type = :pipelineType
-                """, [
+                """.toString(), [
                 samplePairs : samplePairs,
                 pipelineType: getPipeline().type,
         ])
@@ -193,7 +193,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                             where
                                 bamFile.workPackage = bamFile${number}.workPackage
                         )
-                    )"""
+                    )""".toString()
         }
 
         return SamplePair.executeQuery("""
@@ -216,7 +216,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                         bamFile1.coverage < ${minCoverage}
                         or bamFile2.coverage < ${minCoverage}
                     )
-            """, [
+            """.toString(), [
                 samplePair: samplePairs,
         ])
 
@@ -231,7 +231,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                         and analysis.processingState = '${AnalysisProcessingStates.IN_PROGRESS}'
                         and analysis.withdrawn = false
                         and analysis.config.pipeline.type = :pipelineType
-                """, [
+                """.toString(), [
                 samplePairs : samplePairs,
                 pipelineType: getPipeline().type,
         ])
@@ -257,7 +257,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                                 analysis.samplePair = samplePair
                                 and analysis.config.pipeline.type = :pipelineType
                         )
-                """, [
+                """.toString(), [
                 samplePairs : samplePairs,
                 pipelineType: getPipeline().type,
         ])
@@ -285,7 +285,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                                 analysis.samplePair.id
                         )
                         and analysis.config.pipeline.type = :pipelineType
-                """, [
+                """.toString(), [
                 samplePairs : samplePairs,
                 pipelineType: getPipeline().type,
         ])

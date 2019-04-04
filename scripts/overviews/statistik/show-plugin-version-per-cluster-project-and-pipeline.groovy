@@ -66,7 +66,7 @@ group by
 
 """
 
-println IndelCallingInstance.executeQuery(sql).groupBy(
+println IndelCallingInstance.executeQuery(sql.toString()).groupBy(
         [
                 { it[0] },
                 { it[1] },

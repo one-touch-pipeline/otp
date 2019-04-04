@@ -51,7 +51,7 @@ class ProcessParameter implements Entity {
      */
     ProcessParameterObject toObject() {
         if (className) {
-            List resultList = ProcessParameter.executeQuery("FROM " + className + " WHERE id=" + value)
+            List resultList = ProcessParameter.executeQuery("FROM ${className} WHERE id=${value}".toString())
             if (resultList) {
                 return exactlyOneElement(resultList)
             }

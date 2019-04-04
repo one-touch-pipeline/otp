@@ -157,7 +157,7 @@ abstract class AbstractRoddyAlignmentChecker extends PipelinesChecker<SeqTrack> 
                                 and config.pipeline.name = :pipeLineName
                                 and config.obsoleteDate is null
                         )
-                """, [
+                """.toString(), [
                 seqTracks   : seqTracks,
                 pipeLineName: getPipeLineName(),
         ])
@@ -192,7 +192,7 @@ abstract class AbstractRoddyAlignmentChecker extends PipelinesChecker<SeqTrack> 
                             )
                             or seqTrack.seqType in (:seqTypesCanHaveDifferentLibraryPreperationKit)
                         )
-                """, [
+                """.toString(), [
                 seqTracks                                    : seqTracks,
                 pipeLineName                                 : getPipeLineName(),
                 seqTypesCanHaveDifferentLibraryPreperationKit: SeqTypeService.getSeqTypesIgnoringLibraryPreparationKitForMerging(),
@@ -242,7 +242,7 @@ abstract class AbstractRoddyAlignmentChecker extends PipelinesChecker<SeqTrack> 
                             where
                                 bamFile.workPackage = roddyBamFile.workPackage
                         )
-                """, [
+                """.toString(), [
                 mergingWorkPackage: mergingWorkPackages,
                 pipeLineName      : getPipeLineName(),
         ])

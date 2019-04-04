@@ -284,7 +284,7 @@ class SamplePair implements TimeStamped, Entity {
                 WHERE
                   mergingWorkPackage1 = mwp1 AND
                   mergingWorkPackage2 = mwp2)
-            """, [
+            """.toString(), [
                 disease: SampleType.Category.DISEASE,
                 control: SampleType.Category.CONTROL,
                 analysableSeqTypes: SeqTypeService.getAllAnalysableSeqTypes(),

@@ -74,7 +74,7 @@ where
             allChromosomes: RoddyQualityAssessment.ALL,
         ]
 
-        List<AbstractQualityAssessment> qas = AbstractQualityAssessment.executeQuery(HQL, parameters, [readOnly: true])
+        List<AbstractQualityAssessment> qas = AbstractQualityAssessment.executeQuery(HQL.toString(), parameters, [readOnly: true])
         return qas
     }
 
@@ -83,7 +83,7 @@ where
         if (!abstractQualityAssessments) {
             return []
         }
-        final String HQL = '''
+        final String HQL = """
             select distinct
                 referenceGenomeEntry
             from
@@ -93,13 +93,13 @@ where
                 abstractQualityAssessment.qualityAssessmentMergedPass.abstractMergedBamFile.workPackage.referenceGenome = referenceGenomeEntry.referenceGenome
                 and abstractQualityAssessment.id in :abstractQualityAssessmentIds
                 and referenceGenomeEntry.alias in :chromosomeAliases
-        '''
+        """
         Map parameters = [
                 abstractQualityAssessmentIds: abstractQualityAssessments*.id,
                 chromosomeAliases: chromosomeAliases,
         ]
 
-        List<ReferenceGenomeEntry> result = ReferenceGenomeEntry.executeQuery(HQL, parameters, [readOnly: true])
+        List<ReferenceGenomeEntry> result = ReferenceGenomeEntry.executeQuery(HQL.toString(), parameters, [readOnly: true])
         return result
     }
 }

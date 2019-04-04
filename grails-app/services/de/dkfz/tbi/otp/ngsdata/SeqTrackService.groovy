@@ -416,7 +416,7 @@ LIMIT 1
      */
     private def getRunFilesWithTypeAndLane(Run run, FileType.Type type, String lane) {
         MetaDataKey key = MetaDataKey.findByName(MetaDataColumn.LANE_NO.name())
-        def dataFiles = DataFile.executeQuery('''
+        def dataFiles = DataFile.executeQuery("""
 SELECT dataFile FROM MetaDataEntry as entry
 INNER JOIN entry.dataFile as dataFile
 WHERE
@@ -426,7 +426,7 @@ AND dataFile.fileType.type = :type
 AND dataFile.used = false
 AND entry.key = :key
 AND entry.value = :value
-''',
+""".toString(),
                         [run: run, type: type, key: key, value: lane])
         return dataFiles
     }

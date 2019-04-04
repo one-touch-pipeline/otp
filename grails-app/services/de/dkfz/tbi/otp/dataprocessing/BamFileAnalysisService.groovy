@@ -134,7 +134,7 @@ abstract class BamFileAnalysisService implements BamFileAnalysisServiceTrait {
         }
         parameters.putAll(checkReferenceGenomeMap())
 
-        return SamplePair.find(samplePairForProcessing, parameters)
+        return SamplePair.find(samplePairForProcessing.toString(), parameters)
     }
 
     void validateInputBamFiles(final BamFilePairAnalysis analysis) throws Throwable {
