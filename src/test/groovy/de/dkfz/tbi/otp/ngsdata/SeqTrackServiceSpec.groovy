@@ -22,48 +22,198 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.LogMessage
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 
+
 class SeqTrackServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
+    Class[] getDomainClassesToMock() { [
+            ExomeSeqTrack,
             DataFile,
-            FileType,
-            Individual,
             LogMessage,
+            MergingCriteria,
             Pipeline,
-            Project,
-            Realm,
             RoddyWorkflowConfig,
-            Run,
             RunSegment,
-            Sample,
-            SampleType,
             SeqCenter,
-            SeqPlatform,
             SeqPlatformGroup,
-            SeqPlatformModelLabel,
             SeqTrack,
-            SeqType,
-            SoftwareTool,
     ]}
 
-    SeqTrackService service = new SeqTrackService()
+    SeqTrackService seqTrackService
 
-    void setup() {
+
+    void setup() throws Exception {
+        seqTrackService = new SeqTrackService()
         DomainFactory.createPanCanPipeline()
+    }
+
+    void "test mayAlign, when everything is okay, return true"() {
+        given:
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
+                run: DomainFactory.createRun(
+                        seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
+                                seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()])))
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
+
+        expect:
+        SeqTrackService.mayAlign(seqTrack)
+    }
+
+    void "test mayAlign, when data file is withdrawn, return false"() {
+        given:
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([:], [
+                fileWithdrawn: true,
+        ])
+
+        expect:
+        !SeqTrackService.mayAlign(seqTrack)
+    }
+
+    void "test mayAlign, when no data file, return false"() {
+        given:
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+
+        expect:
+        !SeqTrackService.mayAlign(seqTrack)
+    }
+
+    void "test mayAlign, when wrong file type, return false"() {
+        given:
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([:], [
+                fileType: DomainFactory.createFileType(type: FileType.Type.SOURCE),
+        ])
+
+        expect:
+        !SeqTrackService.mayAlign(seqTrack)
+    }
+
+    void "test mayAlign, when run segment must not align, return false"() {
+        given:
+        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        RunSegment runSegment = DomainFactory.createRunSegment(
+                align: false,
+        )
+        DomainFactory.createDataFile(
+                seqTrack: seqTrack,
+                runSegment: runSegment,
+        )
+
+        expect:
+        !SeqTrackService.mayAlign(seqTrack)
+    }
+
+    void "test mayAlign, when exome kit information reliability is UNKNOWN_VERIFIED, return false"() {
+        given:
+        SeqTrack seqTrack = DomainFactory.createExomeSeqTrack(
+                libraryPreparationKit: null,
+                kitInfoReliability: InformationReliability.UNKNOWN_VERIFIED,
+        )
+        DomainFactory.createDataFile(seqTrack: seqTrack)
+
+        expect:
+        !SeqTrackService.mayAlign(seqTrack)
+    }
+
+    void "test mayAlign, when seq platform group is null, return false"() {
+        given:
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([
+                run: DomainFactory.createRun(seqPlatform: DomainFactory.createSeqPlatform()),
+        ])
+        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
+
+        expect:
+        !SeqTrackService.mayAlign(seqTrack)
+    }
+
+    void "test fillBaseCount, when sequence length does not exist, should fail"() {
+        given:
+        String sequenceLength = null
+        Long nReads = 12345689
+        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+
+        when:
+        seqTrackService.fillBaseCount(seqTrack)
+
+        then:
+        thrown(AssertionError)
+    }
+
+    void "test fillBaseCount, when nReads does not exist, should fail"() {
+        given:
+        String sequenceLength = "101"
+        Long nReads = null
+        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+
+        when:
+        seqTrackService.fillBaseCount(seqTrack)
+
+        then:
+        thrown(AssertionError)
+    }
+
+
+    void "test fillBaseCount, when sequence length is single value and library layout single"() {
+        given:
+        String sequenceLength = "101"
+        Long nReads = 12345689
+        Long expectedBasePairs = sequenceLength.toInteger() * nReads
+        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+
+        when:
+        seqTrackService.fillBaseCount(seqTrack)
+
+        then:
+        seqTrack.nBasePairs == expectedBasePairs
+    }
+
+
+    void "test fillBaseCount, when sequence length is single value and library layout paired"() {
+        given:
+        String sequenceLength = "101"
+        Long nReads = 12345689
+        Long expectedBasePairs = sequenceLength.toInteger() * nReads * 2
+        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+        DomainFactory.createSequenceDataFile([nReads: nReads, sequenceLength: sequenceLength, seqTrack: seqTrack])
+        seqTrack.seqType.libraryLayout = LibraryLayout.PAIRED
+
+        when:
+        seqTrackService.fillBaseCount(seqTrack)
+
+        then:
+        seqTrack.nBasePairs == expectedBasePairs
+    }
+
+    void "test fillBaseCount, when sequence length is integer range"() {
+        given:
+        String sequenceLength = "90-100"
+        int meanSequenceLength = sequenceLength.split('-').sum { it.toInteger() } / 2
+        Long nReads = 12345689
+        Long expectedBasePairs = meanSequenceLength * nReads
+        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+
+        when:
+        seqTrackService.fillBaseCount(seqTrack)
+
+        then:
+        seqTrack.nBasePairs == expectedBasePairs
+    }
+
+    private SeqTrack createTestSeqTrack(String sequenceLength, Long nReads) {
+        return DomainFactory.createSeqTrackWithOneDataFile([:], [nReads: nReads, sequenceLength: sequenceLength])
     }
 
 
     void "test determineAndStoreIfFastqFilesHaveToBeLinked, seqTrack is null, should fail"() {
         when:
-        service.determineAndStoreIfFastqFilesHaveToBeLinked(null, true)
+        seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(null, true)
 
         then:
         thrown(AssertionError)
@@ -74,7 +224,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
 
         when:
-        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+        seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
 
         then:
         seqTrack.linkedExternally == true
@@ -85,7 +235,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
 
         when:
-        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, false)
+        seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, false)
 
         then:
         seqTrack.linkedExternally == false
@@ -97,7 +247,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         seqTrack.run.seqCenter.importDirsAllowLinking = []
 
         when:
-        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+        seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
 
         then:
         seqTrack.linkedExternally == false
@@ -108,7 +258,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked("/other_path")
 
         when:
-        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+        seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
 
         then:
         seqTrack.linkedExternally == false
@@ -120,7 +270,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         seqTrack.sample.individual.project.forceCopyFiles = true
 
         when:
-        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+        seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
 
         then:
         seqTrack.linkedExternally == false
@@ -133,7 +283,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         seqTrack.seqType = wgbsSeqType
 
         when:
-        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+        seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
 
         then:
         seqTrack.linkedExternally == false
@@ -149,7 +299,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         seqTrack.seqType = rnaSeqType
 
         when:
-        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+        seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
 
         then:
         seqTrack.linkedExternally == false
@@ -161,7 +311,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         DomainFactory.createRoddyWorkflowConfig([seqType: seqTrack.seqType, individual: seqTrack.individual, adapterTrimmingNeeded: true])
 
         when:
-        service.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+        seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
 
         then:
         seqTrack.linkedExternally == false
@@ -186,7 +336,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
 
     void "test doesImportDirAllowLinking, seqTrack is null, should fail"() {
         when:
-        service.doesImportDirAllowLinking(null)
+        seqTrackService.doesImportDirAllowLinking(null)
 
         then:
         thrown(AssertionError)
@@ -197,7 +347,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage()
 
         expect:
-        true == service.doesImportDirAllowLinking(seqTrack)
+        true == seqTrackService.doesImportDirAllowLinking(seqTrack)
     }
 
     void "test doesImportDirAllowLinking, data files in other linkable dir"() {
@@ -205,7 +355,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage("/link_this")
 
         expect:
-        true == service.doesImportDirAllowLinking(seqTrack)
+        true == seqTrackService.doesImportDirAllowLinking(seqTrack)
     }
 
     void "test doesImportDirAllowLinking, data files in other non linkable dir"() {
@@ -213,7 +363,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage("/link_this_too")
 
         expect:
-        false == service.doesImportDirAllowLinking(seqTrack)
+        false == seqTrackService.doesImportDirAllowLinking(seqTrack)
     }
 
     void "test doesImportDirAllowLinking, data files not in linkable dir"() {
@@ -221,7 +371,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         SeqTrack seqTrack = createDataForAreFilesLocatedOnMidTermStorage("/other_path")
 
         expect:
-        false == service.doesImportDirAllowLinking(seqTrack)
+        false == seqTrackService.doesImportDirAllowLinking(seqTrack)
     }
 
     void "test doesImportDirAllowLinking, seq center doesn't have linkable dir"() {
@@ -232,7 +382,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         seqTrack.run.seqCenter.save(flush: true)
 
         expect:
-        false == service.doesImportDirAllowLinking(seqTrack)
+        false == seqTrackService.doesImportDirAllowLinking(seqTrack)
     }
 
     private SeqTrack createDataForAreFilesLocatedOnMidTermStorage(String path = null) {
