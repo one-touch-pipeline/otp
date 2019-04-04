@@ -28,7 +28,6 @@ import groovy.json.JsonSlurper
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
-
 class SequenceController {
     SeqTrackService seqTrackService
     ProjectService projectService
@@ -62,8 +61,8 @@ class SequenceController {
         // because of that, we just copy all properties into a map
         sequences.each { Sequence seq ->
             Map data = [:]
-            seq.domainClass.persistentProperties.each {
-                data.put(it.name, seq[it.name])
+            seq.getProperties().each {
+                data.put(it.key, it.value)
             }
             // format date
             data.dateCreated = data.dateCreated.format("yyyy-MM-dd")

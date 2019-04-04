@@ -174,6 +174,6 @@ class Sequence implements Serializable {
     }
 
     String getLibraryLayoutDirName() {
-        return libraryLayout.getLibraryLayoutDirName()
+        return libraryLayout.toLowerCase()
     }
 }
