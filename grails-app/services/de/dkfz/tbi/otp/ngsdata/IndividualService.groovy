@@ -301,7 +301,11 @@ class IndividualService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateField(Individual individual, String key, String value) throws ChangelogException, IndividualUpdateException {
-        ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(individual.class.getName())
+        ReferencedClass clazz = ReferencedClass.findByClassName(individual.class.getName())
+        if (!clazz) {
+            clazz = new ReferencedClass(name: individual.class.getName())
+            clazz.save(flush: true)
+        }
         // To check if the key handed over matches the field name
         // value is not used later because the method returns upper case name
         if (!individual.getDomainClass().getFieldName(key)) {
@@ -344,7 +348,7 @@ class IndividualService {
             if (!sampleType) {
                 throw new IndividualCreationException("SampleType could not be found nor created.")
             }
-            Sample sample = Sample.findOrSaveByIndividualAndSampleType(individual, sampleType)
+            Sample sample = createSample(individual, sampleType)
             for (entry in parsedSample.updateEntries) {
                 updateSampleIdentifier(entry.value, entry.key as long)
             }
@@ -362,7 +366,15 @@ class IndividualService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void createSample(Individual individual, String type) {
         SampleType sampleType = createSampleType(type)
-        Sample.findOrSaveByIndividualAndSampleType(individual, sampleType)
+        createSample(individual, sampleType)
+    }
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void createSample(Individual individual, SampleType sampleType) {
+        if (Sample.findByIndividualAndSampleType(individual, sampleType)) {
+            return
+        }
+        Sample sample = new Sample(individual: individual, sampleType: sampleType)
+        sample.save(flush: true)
     }
 
     /**
@@ -372,7 +384,12 @@ class IndividualService {
      * @return the {@link SampleIdentifier}
      */
     private SampleIdentifier createSampleIdentifier(String name, Sample sample) {
-        return SampleIdentifier.findOrSaveByNameAndSample(name, sample)
+        SampleIdentifier sampleIdentifier = SampleIdentifier.findByNameAndSample(name, sample)
+        if (!sampleIdentifier) {
+            sampleIdentifier = new SampleIdentifier(name: name, sample: sample)
+            sampleIdentifier.save(flush: true)
+        }
+        return sampleIdentifier
     }
 
     /**
@@ -397,7 +414,12 @@ class IndividualService {
      * @return the SampleType
      */
     private SampleType createSampleType(String name) {
-        return SampleType.findOrSaveByName(name)
+        SampleType sampleType = SampleType.findByName(name)
+        if (!sampleType) {
+            sampleType = new SampleType(name: name)
+            sampleType.save(flush: true)
+        }
+        return sampleType
     }
     /**
      * show the List of Individual per Project

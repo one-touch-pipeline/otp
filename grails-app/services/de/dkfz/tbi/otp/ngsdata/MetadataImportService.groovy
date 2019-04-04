@@ -358,7 +358,7 @@ class MetadataImportService {
 
     private void importRuns(MetadataValidationContext context, RunSegment runSegment, Collection<Row> metadataFileRows) {
         metadataFileRows.groupBy { it.getCellByColumnTitle(RUN_ID.name()).text }.each { String runName, List<Row> rows ->
-            Run run = Run.findOrSaveWhere(
+            Run run = Run.findWhere(
                     name: runName,
                     seqCenter: exactlyOneElement(SeqCenter.findAllWhere(name: uniqueColumnValue(rows, CENTER_NAME))),
                     seqPlatform: seqPlatformService.findSeqPlatform(
@@ -368,6 +368,19 @@ class MetadataImportService {
                     dateExecuted: Objects.requireNonNull(
                             RunDateParserService.parseDate('yyyy-MM-dd', uniqueColumnValue(rows, RUN_DATE))),
             )
+            if (!run) {
+                run = new Run(
+                        name: runName,
+                        seqCenter: exactlyOneElement(SeqCenter.findAllWhere(name: uniqueColumnValue(rows, CENTER_NAME))),
+                        seqPlatform: seqPlatformService.findSeqPlatform(
+                                uniqueColumnValue(rows, INSTRUMENT_PLATFORM),
+                                uniqueColumnValue(rows, INSTRUMENT_MODEL),
+                                uniqueColumnValue(rows, SEQUENCING_KIT) ?: null),
+                        dateExecuted: Objects.requireNonNull(
+                                RunDateParserService.parseDate('yyyy-MM-dd', uniqueColumnValue(rows, RUN_DATE))),
+                )
+                run.save(flush: true)
+            }
 
             Long timeStarted = System.currentTimeMillis()
             log.debug('seqTracks started')
@@ -411,9 +424,20 @@ class MetadataImportService {
             }
             String libraryName = uniqueColumnValue(rows, CUSTOMER_LIBRARY) ?: ""
             String normalizedLibraryName = SeqTrack.normalizeLibraryName(libraryName)
+            IlseSubmission ilseSubmission
+            if (ilseNumber) {
+                ilseSubmission = IlseSubmission.findWhere(ilseNumber: Integer.parseInt(ilseNumber))
+                if (!ilseSubmission) {
+                    ilseSubmission = new IlseSubmission(ilseNumber: Integer.parseInt(ilseNumber))
+                    ilseSubmission.save(flush: true)
+                }
+            } else {
+                ilseSubmission = null
+            }
+
             Map properties = [
                     laneId: laneId,
-                    ilseSubmission: ilseNumber ? IlseSubmission.findOrSaveWhere(ilseNumber: Integer.parseInt(ilseNumber)) : null,
+                    ilseSubmission: ilseSubmission,
                     // TODO OTP-2050: Use a different fallback value?
                     insertSize: tryParseInt(uniqueColumnValue(rows, INSERT_SIZE), 0),
                     run: run,
@@ -482,9 +506,14 @@ class MetadataImportService {
 
     private static void importMetadataEntries(MetadataValidationContext context, DataFile dataFile, Row row) {
         for (Cell it : context.spreadsheet.header.cells) {
+            MetaDataKey metaDataKey = MetaDataKey.findWhere(name: it.text)
+            if (!metaDataKey) {
+                metaDataKey = new MetaDataKey(name: it.text)
+                metaDataKey.save(flush: true)
+            }
             assert new MetaDataEntry(
                     dataFile: dataFile,
-                    key: MetaDataKey.findOrSaveWhere(name: it.text),
+                    key: metaDataKey,
                     value: row.cells[it.columnIndex].text,
                     source: MetaDataEntry.Source.MDFILE,
             ).save()

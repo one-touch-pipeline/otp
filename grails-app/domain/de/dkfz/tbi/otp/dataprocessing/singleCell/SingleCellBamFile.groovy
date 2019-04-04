@@ -204,10 +204,18 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
     }
 
     QualityAssessmentMergedPass findOrSaveQaPass() {
-        return QualityAssessmentMergedPass.findOrSaveWhere(
+        QualityAssessmentMergedPass assessmentMergedPass = QualityAssessmentMergedPass.findWhere(
                 abstractMergedBamFile: this,
                 identifier: 0,
         )
+        if (!assessmentMergedPass) {
+            assessmentMergedPass = new QualityAssessmentMergedPass(
+                    abstractMergedBamFile: this,
+                    identifier: 0,
+            )
+            assessmentMergedPass.save(flush: true)
+        }
+        return assessmentMergedPass
     }
 
     @Override

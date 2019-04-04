@@ -52,7 +52,11 @@ class MetaDataService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     boolean updateMetaDataEntry(MetaDataEntry entry, String value) throws ChangelogException, MetaDataEntryUpdateException {
-        ReferencedClass clazz = ReferencedClass.findOrSaveByClassName(MetaDataEntry.class.getName())
+        ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
+        if (!clazz) {
+            clazz = new ReferencedClass(name: MetaDataEntry.class.getName())
+            clazz.save(flush: true)
+        }
         ChangeLog changelog = new ChangeLog(
                 rowId: entry.id,
                 referencedClass: clazz,

@@ -560,14 +560,25 @@ class DomainFactory {
             }
         }
 
-        final MergingWorkPackage mergingWorkPackage = MergingWorkPackage.findOrSaveWhere(
+        MergingWorkPackage mergingWorkPackage
+
+        Map<String, Object> mwpProperties = [
                 sample: seqTrack.sample,
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
-                referenceGenome: referenceGenome ?: createReferenceGenomeLazy(),
                 libraryPreparationKit: seqTrack.libraryPreparationKit,
+                referenceGenome: referenceGenome ?: createReferenceGenomeLazy(),
                 pipeline: pipeline ?: createDefaultOtpPipeline(),
-        )
+        ]
+
+        if (referenceGenome && pipeline) {
+            mergingWorkPackage = MergingWorkPackage.findWhere(mwpProperties)
+        }
+
+        if (!mergingWorkPackage) {
+            mergingWorkPackage = DomainFactory.createMergingWorkPackage(mwpProperties)
+        }
+
         return mergingWorkPackage
     }
 

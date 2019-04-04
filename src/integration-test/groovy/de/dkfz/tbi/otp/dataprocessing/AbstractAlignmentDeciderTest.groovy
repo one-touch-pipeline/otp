@@ -62,7 +62,7 @@ class AbstractAlignmentDeciderTest {
         AbstractAlignmentDecider decider = ([
                 prepareForAlignment: { MergingWorkPackage workPackage, SeqTrack seqTrack, boolean forceRealign -> },
                 getPipeline        : {
-                    return Pipeline.findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT)
+                    return findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT)
                 },
         ] + methods) as AbstractAlignmentDecider
         decider.applicationContext = applicationContext
@@ -142,7 +142,7 @@ class AbstractAlignmentDeciderTest {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT),
+                pipeline: findOrSaveByNameAndType(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT),
         )
 
         shouldFail(AssertionError.class, {
@@ -260,7 +260,7 @@ class AbstractAlignmentDeciderTest {
                 seqType: seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
-                pipeline: Pipeline.findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT),
+                pipeline: findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT),
                 statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
         )
         workPackage.save(failOnError: true)
@@ -374,5 +374,13 @@ class AbstractAlignmentDeciderTest {
 
     private void assertSeqTrackProperties(MergingWorkPackage workPackage, SeqTrack seqTrack) {
         assert workPackage.satisfiesCriteria(seqTrack)
+    }
+
+    private static Pipeline findOrSaveByNameAndType(Pipeline.Name name, Pipeline.Type type) {
+        Pipeline pipeline = Pipeline.findByNameAndType(name, type)
+        if (!pipeline) {
+            pipeline = DomainFactory.createPipeline(name, type)
+        }
+        return pipeline
     }
 }
