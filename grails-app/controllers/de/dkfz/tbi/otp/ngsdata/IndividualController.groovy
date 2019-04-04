@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.validation.ValidationException
 import groovy.json.JsonSlurper
 import org.springframework.validation.FieldError
 
@@ -159,6 +160,8 @@ class IndividualController {
             data.put("error", g.message(code: "individual.update.error"))
         } catch (ChangelogException e) {
             data.put("error", g.message(code: "individual.update.changelog.error"))
+        } catch (ValidationException e) {
+            data.put("error", e.message)
         }
         render data as JSON
     }
