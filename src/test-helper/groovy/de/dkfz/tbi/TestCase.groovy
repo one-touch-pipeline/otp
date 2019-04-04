@@ -22,9 +22,7 @@
 
 package de.dkfz.tbi
 
-import org.junit.After
 import org.junit.Assert
-import org.junit.runners.model.MultipleFailureException
 import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
 
@@ -34,7 +32,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.nio.file.Files
-import java.util.concurrent.Callable
 
 import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndWait
 
@@ -55,37 +52,6 @@ class TestCase {
         assert TEST_DIRECTORY.isAbsolute()
     }
     private static boolean cleanTestDirectoryShutdownHookInstalled = false
-
-    final List<Throwable> failures = []
-
-    // Implements OTP-686.
-    /**
-     * Performs an assertion and collects the {@link AssertionError} if the assertion fails. Then
-     * continues regardless of whether the assertion failed or not.
-     * <p>
-     * The collected errors will finally be thrown by {@link #throwFailures()}, which is
-     * automatically called after the test method returns.
-     * <p>
-     * Usage example: <code>assertAndContinue { assert 1 + 1 == 3 }</code>
-     * @see <a href="http://jfunc.sourceforge.net/examples.html#failures">Something similar from JFunc</a>
-     */
-    protected void assertAndContinue(final Callable<Void> closure) {
-        try {
-            if (closure() != null) {
-                throw new Error('The closure passed to assertAndContinue returned a value. ' +
-                        'Did you forget the assert keyword in the closure?')
-            }
-        } catch (final AssertionError error) {
-            failures << error
-        }
-    }
-
-    @After
-    void throwFailures() {
-        if (!failures.empty) {
-            throw new MultipleFailureException(failures)
-        }
-    }
 
     static void assertEquals(final GString expected, final String actual) {
         Assert.assertEquals(expected.toString(), actual)
