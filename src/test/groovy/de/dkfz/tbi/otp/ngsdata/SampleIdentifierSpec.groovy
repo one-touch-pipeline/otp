@@ -22,91 +22,94 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
-import org.junit.Before
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 
-@TestMixin(ControllerUnitTestMixin) // Workaround for Grails bug GRAILS-11136
-@Build([ProcessingOption, SampleIdentifier])
-class SampleIdentifierUnitTest {
+class SampleIdentifierSpec extends Specification implements DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            ProcessingOption,
+            SampleIdentifier,
+    ]}
+
 
     static private String CORRECT_NAME = 'name'
 
     private SampleIdentifier sampleIdentifier
 
 
-
-    @Before
-    void setUp() {
+    void setup() {
         sampleIdentifier = new SampleIdentifier(
             name: CORRECT_NAME,
-            sample: Sample.build())
+            sample: DomainFactory.createSample(),
+        )
         assert sampleIdentifier.validate()
     }
 
 
-
-    @Test
-    void test_validate_fail_nameIsNull() {
+    void "test validate, when name is null, should fail"() {
+        given:
         sampleIdentifier.name = null
 
+        expect:
         TestCase.assertValidateError(sampleIdentifier, 'name', 'nullable', null)
     }
 
-
-    @Test
-    void test_validate_fail_sampleIsNull() {
+    void "test validate, when sample is null, should fail"() {
+        given:
         sampleIdentifier.sample = null
 
+        expect:
         TestCase.assertValidateError(sampleIdentifier, 'sample', 'nullable', null)
     }
 
-
-    @Test
-    void test_validate_fail_nameIsEmpty() {
+    void "test validate, when name is empty, should fail"() {
+        given:
         sampleIdentifier.name = ''
 
+        expect:
         TestCase.assertValidateError(sampleIdentifier, 'name', 'blank', '')
     }
 
-
-    @Test
-    void test_validate_fail_nameIsTooShort() {
+    void "test validate, when name is too short, should fail"() {
+        given:
         final String name = '12'
         sampleIdentifier.name = name
 
+        expect:
         TestCase.assertValidateError(sampleIdentifier, 'name', 'minSize.notmet', name)
     }
 
-
-    @Test
-    void test_validate_fail_nameIsNotUnique() {
+    void "test validate, when name is not unique, should fail"() {
+        given:
         assert sampleIdentifier.save(flush: true)
         SampleIdentifier sampleIdentifier2 = new SampleIdentifier(
             name: CORRECT_NAME,
-            sample: Sample.build())
+            sample: DomainFactory.createSample(),
+        )
 
+        expect:
         TestCase.assertValidateError(sampleIdentifier2, 'name', 'unique', CORRECT_NAME)
     }
 
-    @Test
-    void test_validate_fail_nameStartsWithSpace() {
+    void "test validate, when name start with space, should fail"() {
+        given:
         final String name = ' aname'
         sampleIdentifier.name = name
 
+        expect:
         TestCase.assertValidateError(sampleIdentifier, 'name', 'validator.invalid', name)
     }
 
-    @Test
-    void test_validate_fail_nameEndsWithSpace() {
+    void "test validate, when name ends with space, should fail"() {
+        given:
         final String name = 'aname '
         sampleIdentifier.name = name
 
+        expect:
         TestCase.assertValidateError(sampleIdentifier, 'name', 'validator.invalid', name)
     }
 }
