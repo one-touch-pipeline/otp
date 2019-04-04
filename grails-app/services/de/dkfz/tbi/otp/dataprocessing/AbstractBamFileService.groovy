@@ -22,11 +22,14 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.State
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static org.springframework.util.Assert.notNull
 
+@Transactional
 class AbstractBamFileService {
 
     private static final String QUALITY_ASSESSED_AND_MERGED_QUERY_PART =

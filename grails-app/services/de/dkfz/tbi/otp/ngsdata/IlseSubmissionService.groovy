@@ -22,10 +22,12 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
 
+@Transactional
 class IlseSubmissionService {
 
     CommentService commentService

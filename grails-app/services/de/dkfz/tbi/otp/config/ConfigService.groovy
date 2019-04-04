@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.config
 
+import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import org.springframework.beans.BeansException
 import org.springframework.context.ApplicationContext
@@ -35,6 +36,7 @@ import java.time.ZoneId
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@Transactional
 class ConfigService implements ApplicationContextAware {
 
     protected Map<OtpProperty, String> otpProperties

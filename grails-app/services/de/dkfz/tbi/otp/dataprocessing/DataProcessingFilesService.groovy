@@ -22,12 +22,15 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 import static org.springframework.util.Assert.notNull
 
+@Transactional
 class DataProcessingFilesService {
 
     ConfigService configService

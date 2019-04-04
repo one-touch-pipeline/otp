@@ -22,9 +22,11 @@
 
 package de.dkfz.tbi.otp
 
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.security.access.prepost.PreAuthorize
 
+@Transactional
 class CommentService {
 
     SpringSecurityService springSecurityService

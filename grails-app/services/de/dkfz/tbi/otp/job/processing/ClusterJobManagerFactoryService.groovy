@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.transactions.Transactional
 import groovy.transform.CompileStatic
 import groovy.transform.Synchronized
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import java.time.Duration
 
 @CompileStatic
+@Transactional
 class ClusterJobManagerFactoryService {
     @Autowired
     RemoteShellHelper remoteShellHelper

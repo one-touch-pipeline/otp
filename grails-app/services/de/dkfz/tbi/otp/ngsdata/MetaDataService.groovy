@@ -22,14 +22,14 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.*
 
 import de.dkfz.tbi.otp.utils.ReferencedClass
 import de.dkfz.tbi.otp.utils.StringUtils
 
+@Transactional
 class MetaDataService {
-
-    static transactional = true
 
     /**
      * Retries a MetaDataEntry in an ACL aware manner.

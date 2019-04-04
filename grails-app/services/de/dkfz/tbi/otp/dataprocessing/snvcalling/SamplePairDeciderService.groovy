@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import grails.compiler.GrailsCompileStatic
+import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @GrailsCompileStatic
+@Transactional
 class SamplePairDeciderService {
 
     AbstractMergingWorkPackageService abstractMergingWorkPackageService

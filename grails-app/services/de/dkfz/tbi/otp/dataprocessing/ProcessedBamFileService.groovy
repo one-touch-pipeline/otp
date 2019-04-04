@@ -22,12 +22,15 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import static org.springframework.util.Assert.notNull
 
+@Transactional
 class ProcessedBamFileService {
 
     DataProcessingFilesService dataProcessingFilesService

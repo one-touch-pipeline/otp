@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.tracking
 
+import grails.gorm.transactions.Transactional
 import org.joda.time.*
 import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
@@ -35,6 +36,7 @@ import java.sql.Timestamp
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 
+@Transactional
 class ProcessingTimeStatisticsService {
 
     static final String DATE_FORMAT = "yyyy-MM-dd HH:mm"

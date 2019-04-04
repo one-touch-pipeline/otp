@@ -22,9 +22,12 @@
 
 package de.dkfz.tbi.otp.utils
 
+import grails.gorm.transactions.Transactional
+
 import java.nio.file.Files
 import java.nio.file.Path
 
+@Transactional
 class Md5SumService {
 
     String extractMd5Sum(Path md5Sum) {

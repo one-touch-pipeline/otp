@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.egaSubmission
 
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 
@@ -43,6 +44,7 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_R
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
 @CompileStatic
+@Transactional
 class EgaSubmissionFileService {
 
     CreateNotificationTextService createNotificationTextService

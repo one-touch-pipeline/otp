@@ -26,8 +26,8 @@ import com.github.robtimus.filesystems.sftp.SFTPEnvironment
 import com.github.robtimus.filesystems.sftp.SFTPFileSystemProvider
 import com.jcraft.jsch.IdentityRepository
 import com.jcraft.jsch.agentproxy.*
-import grails.transaction.Transactional
 import grails.core.GrailsApplication
+import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
 import org.springframework.scheduling.annotation.Scheduled

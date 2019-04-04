@@ -22,9 +22,10 @@
 
 package de.dkfz.tbi.otp.notification
 
+import grails.gorm.transactions.Transactional
+import grails.web.mapping.LinkGenerator
 import groovy.text.SimpleTemplateEngine
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
-import grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.NoSuchMessageException
 import org.springframework.context.i18n.LocaleContextHolder
@@ -42,6 +43,7 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.NOTHING_DONE_WONT_DO
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@Transactional
 class CreateNotificationTextService {
 
     @Autowired

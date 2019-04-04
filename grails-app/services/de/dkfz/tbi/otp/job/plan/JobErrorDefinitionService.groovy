@@ -22,9 +22,11 @@
 
 package de.dkfz.tbi.otp.job.plan
 
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.acl.AclUtilService
 import org.springframework.security.access.prepost.PreAuthorize
 
+@Transactional
 class JobErrorDefinitionService {
 
     AclUtilService aclUtilService

@@ -22,12 +22,15 @@
 
 package de.dkfz.tbi.otp.qcTrafficLight
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.TrackingService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
+@Transactional
 class QcTrafficLightNotificationService {
 
 

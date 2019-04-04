@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 
 import static org.springframework.util.Assert.notNull
 
+@Transactional
 class ReferenceGenomeService {
 
     ConfigService configService

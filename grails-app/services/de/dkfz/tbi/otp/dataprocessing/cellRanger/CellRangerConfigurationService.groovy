@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
+import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
 import groovy.transform.Immutable
 import org.springframework.security.access.prepost.PreAuthorize
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@Transactional
 class CellRangerConfigurationService {
 
     SeqType getSeqType() {

@@ -22,12 +22,13 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.*
 
 import de.dkfz.tbi.otp.job.plan.*
 
+@Transactional
 class JobExecutionPlanService {
-    static transactional = true
 
     /**
      * Dependency Injection of Grails Application.

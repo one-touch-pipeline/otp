@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.restarting
 
+import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 
+@Transactional
 class RestartCheckerService {
 
     @Autowired

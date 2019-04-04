@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import com.github.robtimus.filesystems.sftp.SFTPFileSystemProvider
+import grails.gorm.transactions.Transactional
 import grails.util.Environment
 
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
@@ -37,6 +38,7 @@ import java.util.stream.Stream
 /**
  * Helper methods to work with file paths
  */
+@Transactional
 class FileService {
 
     RemoteShellHelper remoteShellHelper

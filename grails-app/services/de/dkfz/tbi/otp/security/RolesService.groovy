@@ -22,8 +22,10 @@
 
 package de.dkfz.tbi.otp.security
 
+import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
+@Transactional
 class RolesService {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

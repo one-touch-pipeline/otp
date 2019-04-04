@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.infrastructure.FileService
 
 import java.nio.file.Files
@@ -29,6 +31,7 @@ import java.nio.file.Path
 
 import static org.springframework.util.Assert.notNull
 
+@Transactional
 class ChecksumFileService {
 
     LsdfFilesService lsdfFilesService

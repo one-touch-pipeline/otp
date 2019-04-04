@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.egaSubmission
 
+import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 import org.hibernate.criterion.CriteriaSpecification
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 
 @CompileStatic
+@Transactional
 class EgaSubmissionService {
 
     SeqTrackService seqTrackService

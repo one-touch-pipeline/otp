@@ -22,10 +22,13 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.transactions.Transactional
+
 /**
  * This Service provides helper-methods to create short cluster scripts.
  * These methods should be written in a generic way so that it is easy to reuse them.
  */
+@Transactional
 class CreateClusterScriptService {
 
     final static String DIRECTORY_PERMISSION = "2750"

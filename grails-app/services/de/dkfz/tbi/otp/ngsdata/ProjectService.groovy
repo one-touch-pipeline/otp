@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.*
@@ -49,6 +50,7 @@ import java.util.regex.Matcher
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@Transactional
 class ProjectService {
 
     static final String PHIX_INFIX = 'PhiX'

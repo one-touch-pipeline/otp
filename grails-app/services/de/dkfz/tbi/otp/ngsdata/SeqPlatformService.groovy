@@ -22,12 +22,14 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import org.springframework.context.annotation.Scope
 import org.springframework.security.access.prepost.PreAuthorize
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Scope("prototype")
+@Transactional
 class SeqPlatformService {
 
     SeqPlatformModelLabelService seqPlatformModelLabelService

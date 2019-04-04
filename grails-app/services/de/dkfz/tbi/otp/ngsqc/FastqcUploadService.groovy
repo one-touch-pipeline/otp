@@ -22,12 +22,15 @@
 
 package de.dkfz.tbi.otp.ngsqc
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 
 /**
  * Service providing methods to parse FastQC files and saving the parsed data to the database
  */
+@Transactional
 class FastqcUploadService {
 
     static final String DATA_FILE_NAME = "fastqc_data.txt"

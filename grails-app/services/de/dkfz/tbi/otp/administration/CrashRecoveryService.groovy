@@ -22,11 +22,13 @@
 
 package de.dkfz.tbi.otp.administration
 
+import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 
+@Transactional
 class CrashRecoveryService {
 
     SchedulerService schedulerService

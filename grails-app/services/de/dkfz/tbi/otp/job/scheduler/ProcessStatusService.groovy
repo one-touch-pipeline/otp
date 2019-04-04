@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.scheduler
 
+import grails.gorm.transactions.Transactional
+
 import static org.springframework.util.Assert.isTrue
 import static org.springframework.util.Assert.notNull
 
@@ -34,6 +36,7 @@ import static org.springframework.util.Assert.notNull
  * @deprecated This service is deprecated by the new {@link JobStatusLoggingService}.
  */
 @Deprecated
+@Transactional
 class ProcessStatusService {
 
     /**

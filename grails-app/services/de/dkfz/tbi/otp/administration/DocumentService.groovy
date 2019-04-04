@@ -23,12 +23,14 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.compiler.GrailsCompileStatic
+import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@Transactional
 @GrailsCompileStatic
 class DocumentService {
 

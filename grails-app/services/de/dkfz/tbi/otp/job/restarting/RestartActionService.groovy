@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.restarting
 
+import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
@@ -35,6 +36,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 
+@Transactional
 class RestartActionService {
 
     static String JOB_NOT_AUTO_RESTARTABLE = 'Could not restart job, because job is not auto-restartable.'

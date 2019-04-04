@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import org.joda.time.DateTime
 import org.springframework.security.access.prepost.*
@@ -29,6 +30,7 @@ import org.springframework.security.access.prepost.*
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.utils.ReferencedClass
 
+@Transactional
 class IndividualService {
     SpringSecurityService springSecurityService
     SampleIdentifierService sampleIdentifierService

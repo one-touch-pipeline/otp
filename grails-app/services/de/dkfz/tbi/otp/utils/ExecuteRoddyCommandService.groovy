@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.utils
 
+import grails.gorm.transactions.Transactional
 import groovy.transform.TupleConstructor
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -32,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
+@Transactional
 class ExecuteRoddyCommandService {
 
     @Autowired

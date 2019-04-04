@@ -22,8 +22,10 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
 import org.springframework.util.Assert
 
+@Transactional
 class ChromosomeQualityAssessmentMergedService {
 
     List<AbstractQualityAssessment> qualityAssessmentMergedForSpecificChromosomes(

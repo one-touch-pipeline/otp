@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.ngsdata.Realm
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.utils.ProcessOutput
 /**
  * This service provides file operations
  */
+@Transactional
 class ExecutionHelperService {
 
     @Autowired

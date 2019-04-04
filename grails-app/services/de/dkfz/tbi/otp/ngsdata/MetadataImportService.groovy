@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import com.jcraft.jsch.JSchException
+import grails.gorm.transactions.Transactional
 import groovy.transform.ToString
 import groovy.transform.TupleConstructor
 import org.springframework.beans.factory.annotation.Autowired
@@ -56,6 +57,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 /**
  * Metadata import 2.0 (OTP-34)
  */
+@Transactional
 class MetadataImportService {
 
     @TupleConstructor

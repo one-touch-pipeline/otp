@@ -22,9 +22,10 @@
 
 package de.dkfz.tbi.otp.administration
 
+import grails.core.GrailsApplication
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.core.GrailsApplication
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.config.ConfigService
@@ -37,9 +38,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * This service is meant for any kind of user management, such as changing password
  * and administrative tasks like enabling/disabling users, etc.
  */
+@Transactional
 class UserService {
-
-    static transactional = true
 
     @SuppressWarnings("GrailsStatelessService")
     GrailsApplication grailsApplication

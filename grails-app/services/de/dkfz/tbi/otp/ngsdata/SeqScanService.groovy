@@ -22,9 +22,12 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.*
+
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
+@Transactional
 @Deprecated
 class SeqScanService {
 

@@ -22,11 +22,13 @@
 
 package de.dkfz.tbi.otp.security
 
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 
 import de.dkfz.tbi.otp.security.AuditLog.Action
 
+@Transactional
 class AuditLogService {
 
     SpringSecurityService springSecurityService

@@ -22,8 +22,11 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.ngsdata.Project
 
+@Transactional
 class WorkflowConfigService {
 
     void createConfigPerProjectAndSeqType(ConfigPerProjectAndSeqType workflowConfig) {

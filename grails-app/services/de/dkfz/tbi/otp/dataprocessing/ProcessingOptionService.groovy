@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.Project
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.singleElement
 
+@Transactional
 class ProcessingOptionService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

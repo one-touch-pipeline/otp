@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
@@ -29,6 +30,7 @@ import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.ngsdata.*
 
+@Transactional
 class MergingCriteriaService {
 
     CommentService commentService

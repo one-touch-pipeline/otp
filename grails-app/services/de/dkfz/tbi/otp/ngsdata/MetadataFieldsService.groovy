@@ -22,10 +22,12 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@Transactional
 abstract class MetadataFieldsService<T> {
 
     T findByNameOrImportAlias(String nameOrImportAlias, Map properties = [:]) {

@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
+import grails.gorm.transactions.Transactional
 import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -36,6 +37,7 @@ import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
 import java.nio.file.*
 
+@Transactional
 class CellRangerService {
 
     @TupleConstructor

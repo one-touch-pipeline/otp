@@ -22,10 +22,12 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
+@Transactional
 class CreateSpeciesService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

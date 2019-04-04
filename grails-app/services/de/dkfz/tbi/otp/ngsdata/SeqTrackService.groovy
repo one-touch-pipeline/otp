@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import groovy.sql.GroovyRowResult
 import groovy.sql.Sql
@@ -43,6 +44,7 @@ import java.text.MessageFormat
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 import static org.springframework.util.Assert.notNull
 
+@Transactional
 class SeqTrackService {
 
     FileTypeService fileTypeService

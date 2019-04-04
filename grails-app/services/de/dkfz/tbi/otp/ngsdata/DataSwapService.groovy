@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 
 import de.dkfz.tbi.otp.CommentService
@@ -36,6 +37,7 @@ import javax.sql.DataSource
 
 import static org.springframework.util.Assert.*
 
+@Transactional
 class DataSwapService {
 
     IndividualService individualService

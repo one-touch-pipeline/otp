@@ -22,12 +22,15 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
+
 import static org.springframework.util.Assert.notNull
 
 /**
  * sort the chromosome identifier
  * the sorting is like this: 1..22 X Y M * 23...1000 A..V
  */
+@Transactional
 class ChromosomeIdentifierSortingService {
 
     final int CHROMOSOME_SIZE = Chromosomes.numberOfNumericChromosomes()

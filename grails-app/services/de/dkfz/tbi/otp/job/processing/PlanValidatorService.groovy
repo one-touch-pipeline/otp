@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.job.plan.*
 
 /**
@@ -35,6 +37,7 @@ import de.dkfz.tbi.otp.job.plan.*
  *
  * The validation does not yet validate plans correctly containing DecisionJobs.
  */
+@Transactional
 class PlanValidatorService {
     static final String NO_STARTJOB = "No StartJob defined for JobExecutionPlan"
     static final String STARTJOB_BEAN_MISSING = "The bean specified as a StartJob does not exist in the Spring context"

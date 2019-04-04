@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.qcTrafficLight
 
+import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
@@ -34,6 +35,7 @@ import de.dkfz.tbi.otp.tracking.TrackingService
 
 import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdLevel.ERROR
 
+@Transactional
 class QcTrafficLightService {
 
     CommentService commentService

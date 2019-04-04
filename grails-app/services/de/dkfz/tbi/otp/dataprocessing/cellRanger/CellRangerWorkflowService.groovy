@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -30,6 +32,7 @@ import java.nio.file.*
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
+@Transactional
 class CellRangerWorkflowService {
 
     FileSystemService fileSystemService

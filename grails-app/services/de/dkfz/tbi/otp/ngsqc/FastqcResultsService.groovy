@@ -22,9 +22,12 @@
 
 package de.dkfz.tbi.otp.ngsqc
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.*
 
+@Transactional
 class FastqcResultsService {
 
     SeqTrackService seqTrackService

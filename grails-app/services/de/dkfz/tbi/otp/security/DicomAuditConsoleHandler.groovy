@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.security
 
+import grails.gorm.transactions.Transactional
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 
@@ -31,6 +32,7 @@ import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
 import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
 
 @Component("dicomAuditConsoleHandler")
+@Transactional
 class DicomAuditConsoleHandler {
     // Hack: The dicomAuditConsolseHandler#log method is a pseudo condition
     // that always returns true and logs the access to the console as side effect.

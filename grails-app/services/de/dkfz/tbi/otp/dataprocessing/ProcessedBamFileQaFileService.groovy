@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.MergedAlignmentDataFileService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -29,6 +31,7 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import static de.dkfz.tbi.otp.ngsdata.LsdfFilesService.getPath
 import static org.springframework.util.Assert.notNull
 
+@Transactional
 class ProcessedBamFileQaFileService {
 
     ConfigService configService

@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.acl.AclUtilService
@@ -41,8 +42,8 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 /**
  * Service providing methods to access information about Processes.
  */
+@Transactional
 class ProcessService {
-    static transactional = true
 
     /** Needed to restart Processing Steps. */
     SchedulerService schedulerService

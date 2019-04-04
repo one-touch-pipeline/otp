@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import org.hibernate.criterion.CriteriaSpecification
 import org.hibernate.sql.JoinType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 
 import java.text.SimpleDateFormat
 
+@Transactional
 abstract class AbstractAnalysisResultsService<T extends BamFilePairAnalysis> {
 
     ProjectService projectService

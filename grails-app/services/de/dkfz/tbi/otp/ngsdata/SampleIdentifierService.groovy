@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -37,6 +38,7 @@ import java.text.MessageFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
+@Transactional
 class SampleIdentifierService {
 
     enum BulkSampleCreationHeader {

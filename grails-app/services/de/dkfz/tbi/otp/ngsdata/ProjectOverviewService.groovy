@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.NoSuchBeanDefinitionException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -36,6 +37,7 @@ import de.dkfz.tbi.otp.utils.ProcessOutput
 import javax.sql.DataSource
 import java.util.regex.Matcher
 
+@Transactional
 class ProjectOverviewService {
 
     ExecuteRoddyCommandService executeRoddyCommandService

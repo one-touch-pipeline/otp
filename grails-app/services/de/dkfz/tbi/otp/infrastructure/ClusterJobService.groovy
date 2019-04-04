@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.infrastructure
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import org.joda.time.*
 
@@ -35,6 +36,7 @@ import javax.sql.DataSource
 
 import static java.util.concurrent.TimeUnit.HOURS
 
+@Transactional
 class ClusterJobService {
 
     DataSource dataSource

@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.compiler.GrailsCompileStatic
+import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import groovy.transform.EqualsAndHashCode
 import org.slf4j.event.Level
@@ -57,6 +58,7 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
  * the <a href="https://github.com/eilslabs/BatchEuphoria">BatchEuphoria</a> library.
  */
 @GrailsCompileStatic
+@Transactional
 class ClusterJobSchedulerService {
 
     static final int WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS = (Environment.getCurrent() == Environment.TEST) ? 0 : 10000

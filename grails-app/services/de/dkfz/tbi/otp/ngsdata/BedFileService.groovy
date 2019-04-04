@@ -22,8 +22,11 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
+
 import static org.springframework.util.Assert.notNull
 
+@Transactional
 class BedFileService {
 
     ReferenceGenomeService referenceGenomeService

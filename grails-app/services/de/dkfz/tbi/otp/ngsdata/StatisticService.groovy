@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
 import org.joda.time.*
 import org.joda.time.format.DateTimeFormat
@@ -29,6 +30,7 @@ import org.joda.time.format.DateTimeFormatter
 
 import javax.sql.DataSource
 
+@Transactional
 class StatisticService {
 
     ProjectService projectService

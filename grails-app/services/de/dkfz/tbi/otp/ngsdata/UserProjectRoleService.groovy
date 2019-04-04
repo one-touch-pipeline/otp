@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import groovy.text.SimpleTemplateEngine
@@ -43,6 +44,7 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 
 import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
 
+@Transactional
 class UserProjectRoleService {
 
     final static String USER_PROJECT_ROLE_REQUIRED = "the input userProjectRole must not be null"

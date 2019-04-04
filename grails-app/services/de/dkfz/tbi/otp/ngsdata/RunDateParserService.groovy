@@ -22,8 +22,11 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
+
 import java.text.SimpleDateFormat
 
+@Transactional
 class RunDateParserService {
 
     Date parseDateFromRunName(String runName) {

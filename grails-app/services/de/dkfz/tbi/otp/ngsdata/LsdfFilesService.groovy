@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
@@ -35,6 +36,7 @@ import java.util.regex.Pattern
 import static de.dkfz.tbi.otp.utils.WaitingFileUtils.waitUntilDoesNotExist
 import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 
+@Transactional
 class LsdfFilesService {
     @Autowired
     RemoteShellHelper remoteShellHelper

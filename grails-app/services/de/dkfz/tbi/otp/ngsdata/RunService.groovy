@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameter
  * This service provides ACL protected access to Runs and the information connected with a given
  * Run. It's main usage is from a controller.
  */
+@Transactional
 class RunService {
     /**
      * Dependency Injection of Spring Security Service - needed for ACL checks

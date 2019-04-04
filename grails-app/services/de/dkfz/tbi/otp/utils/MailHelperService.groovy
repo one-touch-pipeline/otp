@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.utils
 
 import grails.core.GrailsApplication
+import grails.gorm.transactions.Transactional
 import grails.plugins.mail.MailService
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -30,6 +31,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
+@Transactional
 class MailHelperService {
 
     @Autowired

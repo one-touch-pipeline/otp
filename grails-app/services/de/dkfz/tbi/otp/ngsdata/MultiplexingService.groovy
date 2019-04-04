@@ -22,8 +22,11 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
+
 import java.util.regex.Matcher
 
+@Transactional
 class MultiplexingService {
 
     static final String BARCODE_DELIMITER = '_'

@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.administration
 
+import grails.gorm.transactions.Transactional
 import groovy.transform.Immutable
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.ldap.core.AttributesMapper
@@ -38,6 +39,7 @@ import java.util.regex.Matcher
 import static org.springframework.ldap.query.LdapQueryBuilder.query
 
 @SuppressWarnings(["ExplicitCallToAndMethod", "ExplicitCallToOrMethod"])
+@Transactional
 class LdapService implements InitializingBean {
 
     ConfigService configService

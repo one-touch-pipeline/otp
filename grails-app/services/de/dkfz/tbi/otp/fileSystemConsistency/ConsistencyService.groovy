@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.fileSystemConsistency
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus.Status
 import de.dkfz.tbi.otp.ngsdata.DataFile
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
@@ -29,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 /**
  * Service to check for consistency of Database and LSDF
  */
+@Transactional
 class ConsistencyService {
 
     LsdfFilesService lsdfFilesService

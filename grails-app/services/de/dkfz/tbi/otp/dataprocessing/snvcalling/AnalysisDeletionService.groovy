@@ -22,10 +22,13 @@
 
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
 
+@Transactional
 class AnalysisDeletionService {
 
     /**

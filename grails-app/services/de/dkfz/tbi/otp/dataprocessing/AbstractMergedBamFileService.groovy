@@ -22,11 +22,14 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static org.springframework.util.Assert.notNull
 
+@Transactional
 class AbstractMergedBamFileService {
 
     /**

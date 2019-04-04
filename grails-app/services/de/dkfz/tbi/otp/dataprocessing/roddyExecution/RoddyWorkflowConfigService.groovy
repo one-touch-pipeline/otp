@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing.roddyExecution
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -32,6 +34,7 @@ import java.nio.file.Path
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+@Transactional
 class RoddyWorkflowConfigService {
 
     FileSystemService fileSystemService

@@ -22,11 +22,13 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.otp.ngsdata.Project
 
+@Transactional
 class AlignmentDeciderService {
 
     @Autowired

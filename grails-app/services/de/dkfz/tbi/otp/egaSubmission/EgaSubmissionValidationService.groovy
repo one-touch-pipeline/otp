@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.egaSubmission
 
+import grails.gorm.transactions.Transactional
 import groovy.transform.CompileDynamic
 import groovy.transform.CompileStatic
 
@@ -30,6 +31,7 @@ import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.FILE_TYPE
 
 @CompileStatic
+@Transactional
 class EgaSubmissionValidationService {
 
     EgaSubmissionFileService egaSubmissionFileService

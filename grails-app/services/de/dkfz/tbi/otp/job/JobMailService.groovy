@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.job
 
 import grails.core.GrailsApplication
+import grails.gorm.transactions.Transactional
 import org.joda.time.DateTime
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -38,6 +39,7 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 
 import java.text.SimpleDateFormat
 
+@Transactional
 class JobMailService {
 
     MailHelperService mailHelperService

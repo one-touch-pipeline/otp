@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.gorm.transactions.Transactional
 import groovy.json.JsonSlurper
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
@@ -36,6 +37,7 @@ import de.dkfz.tbi.util.spreadsheet.Row
 
 import java.nio.file.*
 
+@Transactional
 class BamMetadataImportService {
 
     @Autowired

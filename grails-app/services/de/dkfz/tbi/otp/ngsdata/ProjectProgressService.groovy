@@ -22,6 +22,10 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+
+import grails.gorm.transactions.Transactional
+
+@Transactional
 class ProjectProgressService {
 
     List<Project> getProjectsFromNameList(List<String> projectNames) {

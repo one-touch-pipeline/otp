@@ -22,11 +22,13 @@
 
 package de.dkfz.tbi.otp.config
 
+import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import groovy.transform.Canonical
 
 import de.dkfz.tbi.otp.dataprocessing.*
 
+@Transactional
 class PropertiesValidationService {
     ConfigService configService
     ProcessingOptionService processingOptionService

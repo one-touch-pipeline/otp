@@ -22,9 +22,9 @@
 
 package de.dkfz.tbi.otp.administration
 
+import grails.core.GrailsApplication
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.ValidationException
-import grails.core.GrailsApplication
 import org.springframework.beans.factory.DisposableBean
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors

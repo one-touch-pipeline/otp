@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.tracking
 
+import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -43,6 +44,7 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.NOTHING
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.PARTLY
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
+@Transactional
 class TrackingService {
 
     private static final List<Integer> MERGING_WORK_PACKAGE_NUMBERS = [1, 2].asImmutable()

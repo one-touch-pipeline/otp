@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.ProcessingException
@@ -38,7 +40,7 @@ import java.util.zip.ZipFile
  * Creates and updates "FastqcDataFile" object.
  * Serves content of fastqc zipped output file.
  */
-
+@Transactional
 class FastqcDataFilesService {
 
     ConfigService configService

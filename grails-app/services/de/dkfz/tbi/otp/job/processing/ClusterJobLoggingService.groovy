@@ -22,10 +22,13 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
+@Transactional
 class ClusterJobLoggingService {
 
     final static CLUSTER_LOG_BASE_DIR = 'clusterLog'

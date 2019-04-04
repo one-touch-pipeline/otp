@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.qcTrafficLight
 
+import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
 import groovy.transform.Canonical
 import org.springframework.security.access.prepost.PreAuthorize
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.FormatHelper
 
+@Transactional
 class QcThresholdService {
 
     def <T extends QcTrafficLightValue> ThresholdColorizer<T> createThresholdColorizer(Project project, SeqType seqType, Class<T> qcClass) {

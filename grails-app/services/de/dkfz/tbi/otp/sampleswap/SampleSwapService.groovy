@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.sampleswap
 
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -31,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 import java.nio.file.Files
 
+@Transactional
 class SampleSwapService {
 
     SpringSecurityService springSecurityService

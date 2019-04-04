@@ -22,8 +22,11 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 
+@Transactional
 class ProcessParameterService {
 
     List<JobExecutionPlan> getAllJobExecutionPlansBySeqTrackAndClass(String seqTrackId, String className) {

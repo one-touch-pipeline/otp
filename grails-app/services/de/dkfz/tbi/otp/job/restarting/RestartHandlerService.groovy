@@ -22,10 +22,13 @@
 
 package de.dkfz.tbi.otp.job.restarting
 
+import grails.gorm.transactions.Transactional
+
 import de.dkfz.tbi.otp.job.plan.JobErrorDefinition
 import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 
+@Transactional
 class RestartHandlerService {
 
     RestartCheckerService restartCheckerService

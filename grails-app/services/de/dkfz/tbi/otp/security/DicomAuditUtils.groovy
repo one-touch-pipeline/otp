@@ -22,8 +22,10 @@
 
 package de.dkfz.tbi.otp.security
 
+import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityUtils
 
+@Transactional
 abstract class DicomAuditUtils {
     static String getRealUserName(String username) {
         if (SpringSecurityUtils.isSwitched()) {
