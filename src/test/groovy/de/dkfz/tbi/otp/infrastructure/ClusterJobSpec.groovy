@@ -22,31 +22,33 @@
 
 package de.dkfz.tbi.otp.infrastructure
 
-import grails.buildtestdata.mixin.Build
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 import static de.dkfz.tbi.otp.utils.HelperUtils.getUniqueString
 
-@Build([
-        ClusterJob,
-])
-class ClusterJobUnitTests {
+class ClusterJobSpec extends Specification implements DataTest {
 
-    @Test
-    void testFindByClusterJobIdentifier() {
-        ClusterJob clusterJob = ClusterJob.build()
+    Class[] getDomainClassesToMock() {[
+            ClusterJob,
+    ]}
+
+    void "test findByClusterJobIdentifier"() {
+        given:
+        ClusterJob clusterJob = DomainFactory.createClusterJob()
         ClusterJobIdentifier identifier = new ClusterJobIdentifier(clusterJob)
-        ClusterJob.build(
+        DomainFactory.createClusterJob(
                 realm: identifier.realm,
                 clusterJobId: getUniqueString(),
         )
-        ClusterJob.build(
-                realm: Realm.build(),
+        DomainFactory.createClusterJob(
+                realm: DomainFactory.createRealm(),
                 clusterJobId: identifier.clusterJobId,
         )
 
-        assert clusterJob.findByClusterJobIdentifier(identifier) == clusterJob
+        expect:
+        clusterJob.findByClusterJobIdentifier(identifier) == clusterJob
     }
 }
