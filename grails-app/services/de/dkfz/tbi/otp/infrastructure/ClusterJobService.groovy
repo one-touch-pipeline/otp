@@ -737,7 +737,7 @@ SELECT
             walltimeData << [it.reads, it.elapsedWalltime, it.xten ? 'blue' : 'black', it.id]
         }
 
-        def xAxisMax = walltimeData ? walltimeData*.get(0).max() : 0
+        def xAxisMax = walltimeData ? walltimeData*.get(0).max() ?: 0 : 0
         def labels = xAxisMax != 0 ? getLabels(xAxisMax, 10) : []
 
         return ["data": walltimeData, "labels": labels, "xMax": xAxisMax]
