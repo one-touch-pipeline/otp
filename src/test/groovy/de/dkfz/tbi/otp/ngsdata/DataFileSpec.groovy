@@ -22,56 +22,62 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestFor
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 
-@Build([
-    FileType,
-    Individual,
-    Project,
-    ProjectCategory,
-    Run,
-    RunSegment,
-    Sample,
-    SampleType,
-    SeqPlatform,
-    SeqTrack,
-    SeqType,
-    SoftwareTool,
-])
-@TestFor(DataFile)
-class DataFileUnitTests {
+class DataFileSpec extends Specification implements DataTest {
 
+    Class[] getDomainClassesToMock() {[
+            DataFile,
+            FileType,
+            Individual,
+            Project,
+            ProjectCategory,
+            Run,
+            RunSegment,
+            Sample,
+            SampleType,
+            SeqPlatform,
+            SeqTrack,
+            SeqType,
+            SoftwareTool,
+    ]}
 
 
     private final static String SEQUENCE_DIRECTORY = '/sequence/'
 
 
+    void "test validate, when mateNumber is whatever and file type is alignment"() {
+        given:
+        FileType fileType = DomainFactory.createFileType([type: FileType.Type.ALIGNMENT])
 
-    @Test
-    void testMateNumberConstraint_Alignment() {
-        FileType fileType = FileType.build([type: FileType.Type.ALIGNMENT])
+        expect:
         DomainFactory.createDataFile(fileType: fileType)
     }
 
-    @Test
-    void testMateNumberConstraint_SequenceButNotFastq() {
-        FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: 'SomeOtherDirectory'])
+    void "test validate, when mateNumber is whatever and file type is sequence (not fastq)"() {
+        given:
+        FileType fileType = DomainFactory.createFileType([type: FileType.Type.SEQUENCE, vbpPath: 'SomeOtherDirectory'])
+
+        expect:
         DomainFactory.createDataFile(fileType: fileType)
     }
 
-    @Test
-    void testMateNumberConstraint_SequenceFastq_OK_ReadIsOne() {
-        FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+    void "test validate, when mateNumber is 1 and file type is sequence (fastq)"() {
+        given:
+        FileType fileType = DomainFactory.createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+
+        expect:
         DomainFactory.createDataFile(fileType: fileType, mateNumber: 1)
     }
 
-    @Test
-    void testMateNumberConstraint_SequenceFastq_OK_ReadIsTwo() {
-        FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+    void "test validate, when mateNumber is 2 and file type is sequence (fastq)"() {
+        given:
+        FileType fileType = DomainFactory.createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+
+        expect:
         DomainFactory.createDataFile(
                 seqTrack: DomainFactory.createSeqTrack(
                         seqType: DomainFactory.createSeqType(libraryLayout: LibraryLayout.PAIRED)
@@ -81,46 +87,51 @@ class DataFileUnitTests {
         )
     }
 
-    @Test
-    void testMateNumberConstraint_SequenceFastq_NoMateNumber() {
-        FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+    void "test validate, when mateNumber is null, should fail"() {
+        given:
+        FileType fileType = DomainFactory.createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
         DataFile dataFile = DomainFactory.createDataFile([fileType: fileType, mateNumber: null], false)
 
+        expect:
         TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", null)
     }
 
-    @Test
-    void testMateNumberConstraint_SequenceFastq_MateNumberIsZero() {
-        FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+    void "test validate, when mateNumber is zero, should fail"() {
+        given:
+        FileType fileType = DomainFactory.createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
         DataFile dataFile = DomainFactory.createDataFile([fileType: fileType, mateNumber: 0], false)
 
+        expect:
         TestCase.assertAtLeastExpectedValidateError(dataFile, "mateNumber", "validator.invalid", 0)
     }
 
-    @Test
-    void testMateNumberConstraint_SequenceFastq_MateNumberIsToBig() {
-        FileType fileType = FileType.build([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+    void "test validate, when mateNumber is too big, should fail"() {
+        given:
+        FileType fileType = DomainFactory.createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
         DataFile dataFile = DomainFactory.createDataFile([fileType: fileType, mateNumber: 3], false)
 
+        expect:
         TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", 3)
     }
 
-    @Test
-    void testSequenceLengthConstraint_WhenSequenceLengthIsANumberAsString_ShouldPassValidation() {
+    void "test validate, when sequenceLength is a number"() {
+        expect:
         DomainFactory.createDataFile(sequenceLength: "123")
     }
 
-    @Test
-    void testSequenceLengthConstraint_WhenSequenceLengthIsARangeAsString_ShouldPassValidation() {
+    void "test validate, when sequenceLength is a range"() {
+        expect:
         DomainFactory.createDataFile(sequenceLength: "123-321")
     }
 
-    @Test
-    void testSequenceLengthConstraint_WhenSequenceLengthIsSomethingElse_ShouldPassValidation() {
+    void "test validate, when sequenceLength is invalid, should fail"() {
+        given:
         DataFile dataFile = DomainFactory.createDataFile([sequenceLength: "!1§2%3&"], false)
 
-        TestCase.shouldFail(RuntimeException) {
-            dataFile.validate()
-        }
+        when:
+        dataFile.validate()
+
+        then:
+        thrown(RuntimeException)
     }
 }
