@@ -90,32 +90,4 @@ class ProcessedBamFileService {
         return "${sampleType}_${runName}_s_${lane}_${layout}${suffix}"
     }
 
-    /**
-     * Checks consistency for {@link #deleteProcessingFiles(ProcessedBamFile)}.
-     *
-     * If there are inconsistencies, details are logged to the thread log (see {@link LogThreadLocal}).
-     *
-     * @return true if there is no serious inconsistency.
-     */
-    boolean checkConsistencyForProcessingFilesDeletion(final ProcessedBamFile bamFile) {
-        notNull bamFile
-        return dataProcessingFilesService.checkConsistencyWithDatabaseForDeletion(bamFile, new File(getFilePath(bamFile)))
-    }
-
-    /**
-     * Deletes the *.bam file, the *.bam.bai file and the *.bam_bwaSampeErrorLog.txt file from the
-     * "processing" directory on the file system. Sets {@link ProcessedBamFile#fileExists} to
-     * <code>false</code> and {@link ProcessedBamFile#deletionDate} to the current time.
-     *
-     * @return The number of bytes that have been freed on the file system.
-     */
-    long deleteProcessingFiles(final ProcessedBamFile bamFile) {
-        notNull bamFile
-        return dataProcessingFilesService.deleteProcessingFiles(
-                bamFile,
-                new File(getFilePath(bamFile)),
-                new File(baiFilePath(bamFile)),
-                new File(bwaSampeErrorLogFilePath(bamFile)),
-        )
-    }
 }
