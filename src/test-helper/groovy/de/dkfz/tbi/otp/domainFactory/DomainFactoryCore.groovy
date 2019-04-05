@@ -147,13 +147,13 @@ trait DomainFactoryCore implements DomainFactoryHelper {
 
     ExomeSeqTrack createExomeSeqTrack(Map properties = [:]) {
         return createDomainObject(ExomeSeqTrack, getSeqTrackProperties(properties) + [
-                seqType: { createExomeSeqType() },
+                seqType: { DomainFactory.createExomeSeqType() },
         ], properties)
     }
 
     ChipSeqSeqTrack createChipSeqSeqTrack(Map properties = [:]) {
         return createDomainObject(ChipSeqSeqTrack, getSeqTrackProperties(properties) + [
-                seqType       : { createChipSeqType() },
+                seqType       : { DomainFactory.createChipSeqType() },
                 antibodyTarget: { createAntibodyTarget() },
         ], properties)
     }
