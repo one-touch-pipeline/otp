@@ -37,8 +37,6 @@ class AbstractQualityAssessmentService {
 
     AbstractBamFileService abstractBamFileService
 
-    ProcessedBamFileQaFileService processedBamFileQaFileService
-
     ReferenceGenomeService referenceGenomeService
 
     void assertListContainsAllChromosomeNamesInReferenceGenome(Collection<String> chromosomeNames, ReferenceGenome referenceGenome) {
