@@ -39,23 +39,6 @@ class CreateJobStateLogFileHelper {
         return JobStateLogFile.getInstance(tempDir)
     }
 
-
-    static void withWorkExecutionDir(TemporaryFolder tmpDir, Closure code, String workExecutionStoreName = "exec_890420_133730004_user_analysis") {
-        File workExecutionDirectory = tmpDir.newFolder(workExecutionStoreName)
-        withWorkExecutionDir(workExecutionDirectory, code)
-    }
-
-    static void withWorkExecutionDir(File workExecutionDirectory, Closure code) {
-        RoddyBamFile.metaClass.getWorkExecutionStoreDirectory = { ->
-            return workExecutionDirectory.parentFile
-        }
-        try {
-            code(workExecutionDirectory)
-        } finally {
-            GroovySystem.metaClassRegistry.removeMetaClass(RoddyBamFile)
-        }
-    }
-
     static LogFileEntry createJobStateLogFileEntry(Map properties = [:]) {
         return new LogFileEntry([
                 clusterJobId: "testJobId",

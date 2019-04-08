@@ -86,7 +86,7 @@ class RoddyBamFileUnitTests {
         ])
         sampleType = roddyBamFile.sampleType
         individual = roddyBamFile.individual
-        configService = new TestConfigService()
+        configService = new TestConfigService(tmpDir.newFolder())
         testDir = "${individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}/${sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
     }
 
@@ -352,10 +352,12 @@ class RoddyBamFileUnitTests {
     }
 
     void helperTestGetLatestWorkExecutionDirectory_WhenAllFine(String roddyExecutionDirName) {
-        CreateJobStateLogFileHelper.withWorkExecutionDir(tmpDir, { File roddyExecutionDir ->
-            roddyBamFile.roddyExecutionDirectoryNames.add(roddyExecutionDirName)
-            assert roddyExecutionDir == roddyBamFile.getLatestWorkExecutionDirectory()
-        }, roddyExecutionDirName)
+        roddyBamFile.roddyExecutionDirectoryNames.add(roddyExecutionDirName)
+
+        File file = new File(roddyBamFile.workExecutionStoreDirectory, roddyExecutionDirName)
+        file.mkdirs()
+
+        assert file == roddyBamFile.getLatestWorkExecutionDirectory()
     }
 
     @Test
