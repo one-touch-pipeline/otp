@@ -22,41 +22,55 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
-import grails.test.mixin.TestFor
-import org.junit.Assert
-import org.junit.Test
+import grails.artefact.Artefact
+import grails.artefact.DomainClass
+import grails.testing.gorm.DataTest
+import grails.validation.Validateable
+import org.grails.core.artefact.DomainClassArtefactHandler
+import org.grails.datastore.gorm.GormEntity
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
-@TestFor(MockAbstractFileSystemBamFile)
-@Mock([MockAbstractFileSystemBamFile])
-class AbstractFileSystemBamFileTests {
+class AbstractFileSystemBamFileSpec extends Specification implements DataTest {
 
-    @Test
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                MockAbstractFileSystemBamFile,
+        ]
+    }
+
     void testSave() {
+        given:
         AbstractFileSystemBamFile bamFile = new MockAbstractFileSystemBamFile()
-        Assert.assertTrue(bamFile.validate())
+
+        when:
+        bamFile.validate()
+
+        then:
+        !bamFile.errors.hasErrors()
+
+        expect:
         bamFile.save(flush: true)
     }
 
-    @Test
-    void testContraints() {
-        // dateCreated is not null
+    void "validate, if dateFromFileSystem is null, then validation should pass"() {
+        given:
         AbstractFileSystemBamFile bamFile = new MockAbstractFileSystemBamFile()
-        bamFile.dateCreated = null
-        // this check must fail but it does not:
-        // probably grails sets value of this filed before the validation
-        Assert.assertTrue(bamFile.validate())
 
+        when:
         // dateFromFileSystem is nullable
         bamFile.dateFromFileSystem = null
-        Assert.assertTrue(bamFile.validate())
+        bamFile.validate()
+
+        then:
+        !bamFile.errors.hasErrors()
     }
 }
 
-
-class MockAbstractFileSystemBamFile extends AbstractFileSystemBamFile {
+@Artefact(DomainClassArtefactHandler.TYPE)
+class MockAbstractFileSystemBamFile extends AbstractFileSystemBamFile implements DomainClass, GormEntity<MockAbstractFileSystemBamFile>, Validateable {
 
     @Override
     MergingWorkPackage getMergingWorkPackage() {
