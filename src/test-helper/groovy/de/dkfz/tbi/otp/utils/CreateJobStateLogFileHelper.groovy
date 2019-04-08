@@ -45,13 +45,6 @@ class CreateJobStateLogFileHelper {
         withWorkExecutionDir(workExecutionDirectory, code)
     }
 
-    static void withJobStateLogFile(TemporaryFolder tmpDir, List<LogFileEntry> listOfLogFileEntryValues, Closure code, String workExecutionDirName = "exec_890420_133730004_user_analysis") {
-        File workExecutionDirectory = tmpDir.newFolder(workExecutionDirName)
-        createJobStateLogFile(workExecutionDirectory, listOfLogFileEntryValues)
-
-        withWorkExecutionDir(workExecutionDirectory, code)
-    }
-
     static void withWorkExecutionDir(File workExecutionDirectory, Closure code) {
         RoddyBamFile.metaClass.getWorkExecutionStoreDirectory = { ->
             return workExecutionDirectory.parentFile
