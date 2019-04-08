@@ -27,7 +27,6 @@ repositories {
 }
 
 dependencies {
-   compile group: 'org.springframework', name: 'spring-core', version: '3.1.0.RELEASE'
    compile group: 'org.codehaus.groovy', name: 'groovy-all', version: '1.8.6'
    testCompile group: 'junit', name: 'junit', version: '4.+'
 }

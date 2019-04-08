@@ -22,9 +22,8 @@
 
 package de.dkfz.tbi.ngstools.bedUtils
 
-import static org.springframework.util.Assert.*
-
 class TargetIntervalsImpl implements TargetIntervals {
+
     private Map<String, MergingIntervalCollection> intervalsPerSequence
 
     /**
@@ -58,13 +57,13 @@ class TargetIntervalsImpl implements TargetIntervals {
      */
     TargetIntervalsImpl(String bedFilePath, List<String> referenceGenomeEntryNames) {
         // bedFilePath checking
-        notNull(bedFilePath, "the bedFilePath parameter can not be null")
+        assert bedFilePath != null : "the bedFilePath parameter can not be null"
         File bedFile = new File(bedFilePath)
-        isTrue(bedFile.canRead(), "can not read the provided bedFile: ${bedFilePath}")
-        isTrue(bedFile.size() > 0, "the provided bedFile is empty: ${bedFilePath}")
+        assert bedFile.canRead() : "can not read the provided bedFile: ${bedFilePath}"
+        assert bedFile.size() > 0 : "the provided bedFile is empty: ${bedFilePath}"
         // referenceGenomeEntryNames
-        notNull(referenceGenomeEntryNames, "the referenceGenomeEntryNames parameter can not be null")
-        isTrue(!referenceGenomeEntryNames.isEmpty(), "the referenceGenomeEntryNames parameter can not be empty")
+        assert referenceGenomeEntryNames != null : "the referenceGenomeEntryNames parameter can not be null"
+        assert !referenceGenomeEntryNames.isEmpty() : "the referenceGenomeEntryNames parameter can not be empty"
         this.bedFilePath = bedFilePath
         this.referenceGenomeEntryNames = referenceGenomeEntryNames
         this.intervalsPerSequence = [:]
@@ -79,13 +78,13 @@ class TargetIntervalsImpl implements TargetIntervals {
     }
 
     private Map<String, List<Interval>> parseBedFile(String bedFilePath) {
-        notNull(bedFilePath, "The input of the method parseBedFile is null")
-        notEmpty(bedFilePath, "The input of the method parseBedFile is empty")
+        assert bedFilePath != null : "The input of the method parseBedFile is null"
+        assert !bedFilePath.isEmpty() : "The input of the method parseBedFile is empty"
         Map<String, List<Interval>> map = [:]
         // to ensure nothing changed between calling TargetIntervalsImpl(...) and parseBedFile(...)
         File bedFile = new File(bedFilePath)
-        isTrue(bedFile.canRead(), "can not read the provided bedFile: ${bedFilePath}")
-        isTrue(bedFile.size() > 0, "the provided bedFile is empty: ${bedFilePath}")
+        assert bedFile.canRead() : "can not read the provided bedFile: ${bedFilePath}"
+        assert bedFile.size() > 0 : "the provided bedFile is empty: ${bedFilePath}"
         bedFile.eachLine { String line, long no ->
             line = line.trim()
             if (line.empty) {
@@ -94,17 +93,17 @@ class TargetIntervalsImpl implements TargetIntervals {
                 List<String> values = line.split('\t')
                 // handle chr name
                 String refSeqName = values[0]
-                notEmpty (refSeqName, "chomosome name can not be empty in the bedFile: ${bedFilePath}")
+                assert !refSeqName.isEmpty() : "chomosome name can not be empty in the bedFile: ${bedFilePath}"
                 // handle start position
                 String startCol = values[1]
-                notEmpty (startCol, "start position can not be empty")
+                assert !startCol.isEmpty() : "start position can not be empty"
                 long start = startCol as long
-                isTrue(start >= 0, "The start point of the interval is out of range")
+                assert start >= 0 : "The start point of the interval is out of range"
                 // handle stop position
                 String endCol = values[2]
-                notEmpty (endCol, "stop position can not be empty")
+                assert !endCol.isEmpty() : "stop position can not be empty"
                 long end = endCol as long
-                isTrue(end >= 0, "The end point of the interval is out of range")
+                assert end >= 0 : "The end point of the interval is out of range"
                 // handle creation of interval and insertion into map
                 Interval interval = null
                 if (start < end) {
@@ -130,19 +129,19 @@ class TargetIntervalsImpl implements TargetIntervals {
      * @param map, a map containing a list of all intervals for each reference genome entry
      */
     private void validateBedFileContent(List<String> refGenomeEntryNames, Map<String, List<Interval>> map) {
-        notNull(refGenomeEntryNames, "The input of the method validateBedFileContent is null")
-        notEmpty(refGenomeEntryNames, "The input of the method validateBedFileContent is empty")
-        notNull(map, "The input of the method validateBedFileContent is null")
-        notEmpty(map, "The input of the method validateBedFileContent is empty")
+        assert refGenomeEntryNames != null : "The input of the method validateBedFileContent is null"
+        assert !refGenomeEntryNames.isEmpty() : "The input of the method validateBedFileContent is empty"
+        assert map != null : "The input of the method validateBedFileContent is null"
+        assert !map.isEmpty() : "The input of the method validateBedFileContent is empty"
         map.keySet().each { String key ->
             if (!refGenomeEntryNames.contains(key)) {
-                throw new IllegalArgumentException("The BED file references entry ${key}, which does not exist in the reference genome.")
+                throw new AssertionError("The BED file references entry ${key}, which does not exist in the reference genome.")
             }
         }
     }
 
     private long calculateBaseCount(Map<String, ? extends Iterable<Interval>> intervalsPerRefSeq) {
-        notNull(intervalsPerRefSeq, "The input of the method calculateBaseCount is null")
+        assert intervalsPerRefSeq != null : "The input of the method calculateBaseCount is null"
 
         return intervalsPerRefSeq*.value.collect { Iterable<Interval> refSeqIntervals ->
             refSeqIntervals.collect { interval ->
@@ -158,7 +157,7 @@ class TargetIntervalsImpl implements TargetIntervals {
      * </p>
      */
     private void createTrees(Map<String, List<Interval>> map) {
-        notNull(map, "The input of the method createTree is null")
+        assert map != null : "The input of the method createTree is null"
         map.each { String refSeqName, List<Interval> intervalList ->
             // initialise our IntervalTree
             def intervalTree = new MergingIntervalCollection()
@@ -170,9 +169,9 @@ class TargetIntervalsImpl implements TargetIntervals {
     }
 
     long getOverlappingBaseCount(String refSeqName, long startPosition, long endPosition) {
-        notNull(refSeqName, "refSeqName in method getOverlappingBaseCount is null")
-        notNull(startPosition, "start in method getOverlappingBaseCount is null")
-        notNull(endPosition, "end in method getOverlappingBaseCount is null")
+        assert refSeqName != null : "refSeqName in method getOverlappingBaseCount is null"
+        assert startPosition != null : "start in method getOverlappingBaseCount is null"
+        assert endPosition != null : "end in method getOverlappingBaseCount is null"
         Interval internalCoordinateInterval = toInternalSystem(startPosition, endPosition)
 
         parseBedFileIfRequired()
@@ -231,8 +230,8 @@ class TargetIntervalsImpl implements TargetIntervals {
     }
 
     boolean containsReference(String refSeqName) {
-        notNull(refSeqName, "The input of the method contains is null")
-        notEmpty(refSeqName, "The input of the method containsReference is empty")
+        assert refSeqName != null : "The input of the method contains is null"
+        assert !refSeqName.isEmpty() : "The input of the method containsReference is empty"
         parseBedFileIfRequired()
         return intervalsPerSequence.containsKey(refSeqName)
     }
@@ -253,8 +252,8 @@ class TargetIntervalsImpl implements TargetIntervals {
      * </p>
      */
     private static Interval toInternalSystem(long start, long end) {
-        isTrue(end != start, "end must not be equal start")
-        isTrue(end > start, "end must be more than start, but start = $start and end = $end")
+        assert end != start : "end must not be equal start"
+        assert end > start, "end must be more than start : but start = $start and end = $end"
         return new Interval(start, end-1)
     }
 }

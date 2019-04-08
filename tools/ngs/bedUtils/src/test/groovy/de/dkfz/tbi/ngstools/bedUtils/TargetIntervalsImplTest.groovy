@@ -67,27 +67,27 @@ class TargetIntervalsImplTest {
      * 3. referenceGenomeEntryNames is empty
      * 4. existing bedFile, referenceGenomeEntryNames with entries, check values are set
      */
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testTargetIntervalsImplCase1a() {
         targetIntervalsImpl = new TargetIntervalsImpl(null, referenceGenomeEntryNames)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testTargetIntervalsImplCase1b() {
         targetIntervalsImpl = new TargetIntervalsImpl(bedFilePath, null)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testTargetIntervalsImplCase2a() {
         targetIntervalsImpl = new TargetIntervalsImpl(new String(""), referenceGenomeEntryNames)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testTargetIntervalsImplCase2b() {
         targetIntervalsImpl = new TargetIntervalsImpl(new String("/tmp/asdsas"), referenceGenomeEntryNames)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testTargetIntervalsImplCase3() {
         List<String> referenceGenomeEntryNames = []
         targetIntervalsImpl = new TargetIntervalsImpl(bedFilePath, referenceGenomeEntryNames)
@@ -108,13 +108,13 @@ class TargetIntervalsImplTest {
      *  - parsed input is used to check correct behaviour
      *    of the unique() method
      */
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testParseBedFilePathEmpty() {
         bedFilePath = ""
         targetIntervalsImpl.parseBedFile(bedFilePath)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testParseBedFileInputNull() {
         bedFilePath = null
         targetIntervalsImpl.parseBedFile(bedFilePath)
@@ -171,7 +171,7 @@ class TargetIntervalsImplTest {
         assertEquals(intervalListExp, intervalListAct)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testParseBedFileNormalOrderIntervalStartEqualsEnd() {
         fileContent += "\nchr1\t301\t301"
         file.withWriter { out ->
@@ -193,7 +193,7 @@ class TargetIntervalsImplTest {
     *	3. if all map.keyset elements are included in refGenomeEntryNames - true
     *	4. if one map.keyset element exists which is not in refGenomeEntryNames - false
     */
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testValidateBedFileContentCase1() {
         Map<String, List<Interval>> map = [
             "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
@@ -203,7 +203,7 @@ class TargetIntervalsImplTest {
         targetIntervalsImpl.validateBedFileContent(null, map)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testValidateBedFileContentCase2() {
         targetIntervalsImpl.validateBedFileContent(referenceGenomeEntryNames, null)
     }
@@ -218,7 +218,7 @@ class TargetIntervalsImplTest {
         targetIntervalsImpl.validateBedFileContent(referenceGenomeEntryNames, map)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testValidateBedFileContentCase4() {
         Map<String, List<Interval>> map = [
             "chr1": [new Interval(0L, 100L), new Interval(150L, 300L)],
@@ -235,7 +235,7 @@ class TargetIntervalsImplTest {
      * 2. non overlaps - check value
      * 3. overlaps - check value
      */
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testCalculateBaseCountCase1() {
         targetIntervalsImpl.calculateBaseCount(null)
     }
@@ -273,7 +273,7 @@ class TargetIntervalsImplTest {
      * 5. target interval not covered at all due chromosome is missing - check value
      */
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testGetOverlappingBaseCountCase1() {
         targetIntervalsImpl.getOverlappingBaseCount(null, 10L, 20L)
     }
@@ -386,7 +386,7 @@ class TargetIntervalsImplTest {
      * 2. reference name in tree (bedFile) - true
      * 3. reference name not in tree - false
      */
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testContainsReferenceCase1() {
         targetIntervalsImpl.containsReference(null)
     }
@@ -427,17 +427,17 @@ class TargetIntervalsImplTest {
         assertEquals(expected.to, output.to)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testToInternalSystemStartEqualsEnd() {
         TargetIntervalsImpl.toInternalSystem(10, 10)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testToInternalSystemEndMoreThanStart() {
         TargetIntervalsImpl.toInternalSystem(10, 1)
     }
 
-    @Test(expected = IllegalArgumentException)
+    @Test(expected = AssertionError)
     void testStartEqualsEnd() {
         fileContent = "chr4\t50\t50"
         file.withWriter { out ->
