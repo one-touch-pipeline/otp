@@ -94,7 +94,7 @@ class ProcessedMergedBamFileTests {
     @Test
     void testSave() {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
-        Assert.assertTrue(bamFile.validate())
+        assert  bamFile.validate()
         bamFile.save(flush: true)
     }
 
@@ -103,7 +103,7 @@ class ProcessedMergedBamFileTests {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass, [
                 numberOfMergedLanes: 3,
         ])
-        Assert.assertTrue(bamFile.validate())
+        assert  bamFile.validate()
         bamFile.save(flush: true)
     }
 
@@ -112,7 +112,7 @@ class ProcessedMergedBamFileTests {
         // mergingPass must not be null
         ProcessedMergedBamFile bamFile = new ProcessedMergedBamFile(
                 type: AbstractBamFile.BamType.SORTED)
-        Assert.assertFalse(bamFile.validate())
+        assert  !bamFile.validate()
     }
 
     @Test
@@ -129,7 +129,7 @@ class ProcessedMergedBamFileTests {
         ProcessedMergedBamFile bamFile = DomainFactory.createProcessedMergedBamFile(mergingPass)
         bamFile.save(flush: true)
 
-        assertTrue(bamFile.isMostRecentBamFile())
+        assert bamFile.isMostRecentBamFile()
 
         MergingPass secondMergingPass = new MergingPass(
                 identifier: 2,
@@ -139,8 +139,8 @@ class ProcessedMergedBamFileTests {
         ProcessedMergedBamFile secondBamFile = DomainFactory.createProcessedMergedBamFile(secondMergingPass)
         secondBamFile.save(flush: true)
 
-        assertFalse(bamFile.isMostRecentBamFile())
-        assertTrue(secondBamFile.isMostRecentBamFile())
+        assert !bamFile.isMostRecentBamFile()
+        assert secondBamFile.isMostRecentBamFile()
 
         MergingSet secondMergingSet = new MergingSet(
                 identifier: 2,
@@ -155,8 +155,8 @@ class ProcessedMergedBamFileTests {
         ProcessedMergedBamFile firstBamFileOfSecondMergingSet = DomainFactory.createProcessedMergedBamFile(firstMergingPassOfSecondMergingSet)
         firstBamFileOfSecondMergingSet.save(flush: true)
 
-        assertFalse(secondBamFile.isMostRecentBamFile())
-        assertTrue(firstBamFileOfSecondMergingSet.isMostRecentBamFile())
+        assert !secondBamFile.isMostRecentBamFile()
+        assert firstBamFileOfSecondMergingSet.isMostRecentBamFile()
     }
 
     @Test
