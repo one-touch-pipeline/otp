@@ -22,63 +22,93 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
-import grails.test.mixin.TestFor
-import org.junit.Test
+import grails.artefact.Artefact
+import grails.artefact.DomainClass
+import grails.testing.gorm.DataTest
+import grails.validation.Validateable
+import org.grails.core.artefact.DomainClassArtefactHandler
+import org.grails.datastore.gorm.GormEntity
+import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 // !! This class is only to test the abstract class ConfigPerProjectAndSeqType
-class ConfigPerProjectAndSeqTypeImpl extends ConfigPerProjectAndSeqType { }
+@Artefact(DomainClassArtefactHandler.TYPE)
+@SuppressWarnings('EmptyClass')
+class ConfigPerProjectAndSeqTypeMock extends ConfigPerProjectAndSeqType implements DomainClass, GormEntity<ConfigPerProjectAndSeqTypeMock>, Validateable {
+}
 
-@TestFor(ConfigPerProjectAndSeqTypeImpl)
-@Mock([Pipeline, Project, ProjectCategory, Realm, SeqType])
-class ConfigPerProjectAndSeqTypeUnitTests {
+class ConfigPerProjectAndSeqTypeSpec extends Specification implements DataTest {
 
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ConfigPerProjectAndSeqTypeMock,
+        ]
+    }
 
-    @Test
     void testSaveWithoutProject_shouldFail() {
-        ConfigPerProjectAndSeqType configPerProject = new ConfigPerProjectAndSeqTypeImpl(
+        given:
+        ConfigPerProjectAndSeqType configPerProject = new ConfigPerProjectAndSeqTypeMock(
                 pipeline: DomainFactory.createIndelPipelineLazy(),
                 seqType: DomainFactory.createSeqType(),
         )
+
+        expect:
         TestCase.assertValidateError(configPerProject, 'project', 'nullable', null)
 
+        when:
         configPerProject.project = DomainFactory.createProject()
-        assertTrue(configPerProject.validate())
+        configPerProject.validate()
+
+        then:
+        !configPerProject.errors.hasErrors()
     }
 
-    @Test
     void testSaveWithObsoleteDate() {
-        ConfigPerProjectAndSeqType configPerProject = new ConfigPerProjectAndSeqTypeImpl(
+        given:
+        ConfigPerProjectAndSeqType configPerProject = new ConfigPerProjectAndSeqTypeMock(
                 project: DomainFactory.createProject(),
                 obsoleteDate: new Date(),
                 pipeline: DomainFactory.createIndelPipelineLazy(),
                 seqType: DomainFactory.createSeqType(),
         )
-        assertTrue(configPerProject.validate())
+
+        when:
+        configPerProject.validate()
+
+        then:
+        !configPerProject.errors.hasErrors()
     }
 
-    @Test
     void testSaveWithReferenceToPreviousConfigWithoutObsolete_shouldFail() {
-        ConfigPerProjectAndSeqType validConfigPerProject = new ConfigPerProjectAndSeqTypeImpl(
+        given:
+        ConfigPerProjectAndSeqType validConfigPerProject = new ConfigPerProjectAndSeqTypeMock(
                 project: DomainFactory.createProject(),
                 seqType: DomainFactory.createSeqType(),
                 pipeline: DomainFactory.createIndelPipelineLazy(),
         )
+
+        expect:
         validConfigPerProject.save()
 
-        ConfigPerProjectAndSeqType newConfigPerProject = new ConfigPerProjectAndSeqTypeImpl(
+        when:
+        ConfigPerProjectAndSeqType newConfigPerProject = new ConfigPerProjectAndSeqTypeMock(
                 project: DomainFactory.createProject(),
                 seqType: DomainFactory.createSeqType(),
                 pipeline: DomainFactory.createIndelPipelineLazy(),
                 previousConfig: validConfigPerProject,
         )
+
+        then:
         TestCase.assertValidateError(newConfigPerProject, 'previousConfig', 'validator.invalid', validConfigPerProject)
 
+        when:
         validConfigPerProject.obsoleteDate = new Date()
-        assertTrue(validConfigPerProject.validate())
-        assertTrue(newConfigPerProject.validate())
+
+        then:
+        validConfigPerProject.validate()
+        newConfigPerProject.validate()
     }
 }
