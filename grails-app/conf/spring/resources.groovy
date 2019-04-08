@@ -37,14 +37,6 @@ beans = {
     if (Environment.getCurrent() == Environment.TEST) {
         // use Class.forName because classes in test-helper are not found in production env
         fileSystemService(Class.forName("de.dkfz.tbi.otp.job.processing.TestFileSystemService"))
-    } else {
-        // proper thread pool
-        xmlns task: "http://www.springframework.org/schema/task"
-        task.executor(id: "taskExecutor", "pool-size": 10)
-        task.scheduler(id: "taskScheduler", "pool-size": 10)
-        if (Environment.getCurrent().getName() != "WORKFLOW_TEST") {
-            task.'annotation-driven'(executor: "taskExecutor", scheduler: "taskScheduler")
-        }
     }
     if (Environment.getCurrent() == Environment.TEST || Environment.getCurrent().getName() == "WORKFLOW_TEST") {
         configService(Class.forName("de.dkfz.tbi.otp.TestConfigService")) {
