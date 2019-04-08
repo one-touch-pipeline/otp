@@ -142,7 +142,7 @@ grails.plugin.springsecurity.printStatusMessages = false
 
 grails.plugin.databasemigration.changelogLocation = 'migrations'
 grails.plugin.databasemigration.changelogFileName = 'migration-wrapper.groovy'
-grails.plugin.databasemigration.updateOnStart = false
+grails.plugin.databasemigration.updateOnStart = true
 grails.plugin.databasemigration.updateOnStartFileName = "migration-wrapper.groovy"
 grails.plugin.databasemigration.excludeObjects = [
         'aggregate_sequences',
@@ -174,9 +174,11 @@ grails.databinding.trimStrings = false
 environments {
     WORKFLOW_TEST {
         grails.mail.disabled=true
+        grails.plugin.databasemigration.updateOnStart = false
     }
     test {
         grails.mail.disabled=true
+        grails.plugin.databasemigration.updateOnStart = false
     }
 
     //seed
