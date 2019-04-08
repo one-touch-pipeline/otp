@@ -22,64 +22,76 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import grails.test.mixin.Mock
-import grails.test.mixin.TestFor
-import org.junit.Assert
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
-@TestFor(PicardMarkDuplicatesMetrics)
-@Mock([MockAbstractBamFile])
-class PicardMarkDuplicatesMetricsTests {
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
 
+class PicardMarkDuplicatesMetricsSpec extends Specification implements DataTest {
 
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                PicardMarkDuplicatesMetrics,
+                ProcessedBamFile,
+                ProcessedMergedBamFile,
+                Realm,
+        ]
+    }
 
-    @Test
     void testMetricsClassEmpty() {
-        AbstractBamFile bamFile = new MockAbstractBamFile()
-        bamFile.save(flush: true)
+        given:
+        AbstractBamFile bamFile = DomainFactory.createProcessedBamFile()
 
+        when:
         PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = new PicardMarkDuplicatesMetrics(
-                        library: "testlibrary",
-                        abstractBamFile: bamFile
-                        )
-        Assert.assertFalse(picardMarkDuplicatesMetrics.validate())
+                library: "testlibrary",
+                abstractBamFile: bamFile
+        )
+
+        then:
+        !picardMarkDuplicatesMetrics.validate()
     }
 
-
-    @Test
     void testLibraryEmpty() {
-        AbstractBamFile bamFile = new MockAbstractBamFile()
-        bamFile.save(flush: true)
+        given:
+        AbstractBamFile bamFile = DomainFactory.createProcessedBamFile()
 
+        when:
         PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = new PicardMarkDuplicatesMetrics(
-                        metricsClass: "testmetricsClass",
-                        abstractBamFile: bamFile
-                        )
-        Assert.assertFalse(picardMarkDuplicatesMetrics.validate())
+                metricsClass: "testmetricsClass",
+                abstractBamFile: bamFile
+        )
+
+        then:
+        !picardMarkDuplicatesMetrics.validate()
     }
 
-
-    @Test
     void testNoBamFile() {
+        when:
         PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = new PicardMarkDuplicatesMetrics(
-                        metricsClass: "testmetricsClass",
-                        library: "testlibrary",
-                        )
-        Assert.assertFalse(picardMarkDuplicatesMetrics.validate())
+                metricsClass: "testmetricsClass",
+                library: "testlibrary",
+        )
+
+        then:
+        !picardMarkDuplicatesMetrics.validate()
     }
 
-
-    @Test
     void testAllCorrect() {
-        AbstractBamFile bamFile = new MockAbstractBamFile()
-        bamFile.save(flush: true)
+        given:
+        AbstractBamFile bamFile = DomainFactory.createProcessedBamFile()
 
+        when:
         PicardMarkDuplicatesMetrics picardMarkDuplicatesMetrics = new PicardMarkDuplicatesMetrics(
-                        metricsClass: "testmetricsClass",
-                        library: "testlibrary",
-                        abstractBamFile: bamFile
-                        )
-        Assert.assertTrue(picardMarkDuplicatesMetrics.validate())
+                metricsClass: "testmetricsClass",
+                library: "testlibrary",
+                abstractBamFile: bamFile
+        )
+
+        then:
+        picardMarkDuplicatesMetrics.validate()
         picardMarkDuplicatesMetrics.save(flush: true)
     }
 }
