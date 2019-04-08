@@ -22,17 +22,19 @@
 
 package de.dkfz.tbi.otp.infrastructure
 
-import org.joda.time.DateTime
+import grails.test.mixin.Mock
 import org.joda.time.LocalDate
 import org.junit.Test
 
-class ClusterJobServiceUnitTests extends GroovyTestCase {
+import de.dkfz.tbi.otp.ngsdata.Realm
+
+@Mock([
+        Realm, //It is necessary to mock a class to have the needed configured GORM
+])
+class ClusterJobServiceUnitTests {
 
     static final LocalDate SDATE_LOCALDATE = new LocalDate()
     static final LocalDate EDATE_LOCALDATE = SDATE_LOCALDATE.plusDays(1)
-    static final DateTime SDATE_DATETIME = SDATE_LOCALDATE.toDateTimeAtStartOfDay()
-    static final DateTime EDATE_DATETIME = EDATE_LOCALDATE.toDateTimeAtStartOfDay()
-
 
     ClusterJobService clusterJobService = new ClusterJobService()
 
