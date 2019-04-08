@@ -47,10 +47,10 @@ class ProcessingThresholdsUnitTests {
                         coverage: coverage,
                         numberOfLanes: numberOfLanes,
                         )
-        assertFalse(processingThresholds.validate())
+        assert  !processingThresholds.validate()
 
         processingThresholds.project = DomainFactory.createProject()
-        assertTrue(processingThresholds.validate())
+        assert processingThresholds.validate()
     }
 
     @Test
@@ -61,10 +61,10 @@ class ProcessingThresholdsUnitTests {
                         coverage: coverage,
                         numberOfLanes: numberOfLanes,
                         )
-        assertFalse(processingThresholds.validate())
+        assert !processingThresholds.validate()
 
         processingThresholds.seqType = new SeqType()
-        assertTrue(processingThresholds.validate())
+        assert processingThresholds.validate()
 
     }
 
@@ -76,10 +76,10 @@ class ProcessingThresholdsUnitTests {
                         coverage: coverage,
                         numberOfLanes: numberOfLanes,
                         )
-        assertFalse(processingThresholds.validate())
+        assert !processingThresholds.validate()
 
         processingThresholds.sampleType = new SampleType()
-        assertTrue(processingThresholds.validate())
+        assert processingThresholds.validate()
     }
 
     @Test
@@ -89,11 +89,11 @@ class ProcessingThresholdsUnitTests {
                         seqType: new SeqType(),
                         sampleType: new SampleType(),
                         )
-        assertFalse(processingThresholds.validate())
+        assert !processingThresholds.validate()
 
         processingThresholds.coverage = coverage
         processingThresholds.numberOfLanes = numberOfLanes
-        assertTrue(processingThresholds.validate())
+        assert processingThresholds.validate()
     }
 
     @Test
@@ -104,7 +104,7 @@ class ProcessingThresholdsUnitTests {
                         sampleType: new SampleType(),
                         coverage: coverage,
                         )
-        assertTrue(processingThresholds.validate())
+        assert processingThresholds.validate()
     }
 
 
@@ -116,7 +116,7 @@ class ProcessingThresholdsUnitTests {
                         sampleType: new SampleType(),
                         coverage: -30.00,
                         )
-        assertFalse(processingThresholds.validate())
+        assert !processingThresholds.validate()
     }
 
     @Test
@@ -127,7 +127,7 @@ class ProcessingThresholdsUnitTests {
                         sampleType: new SampleType(),
                         numberOfLanes: numberOfLanes,
                         )
-        assertTrue(processingThresholds.validate())
+        assert processingThresholds.validate()
     }
 
     @Test
@@ -138,7 +138,7 @@ class ProcessingThresholdsUnitTests {
                         sampleType: new SampleType(),
                         numberOfLanes: -3,
                         )
-        assertFalse(processingThresholds.validate())
+        assert !processingThresholds.validate()
     }
 
     @Test
@@ -150,6 +150,6 @@ class ProcessingThresholdsUnitTests {
                         coverage: coverage,
                         numberOfLanes: numberOfLanes,
                         )
-        assertTrue(processingThresholds.validate())
+        assert processingThresholds.validate()
     }
 }
