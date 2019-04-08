@@ -479,9 +479,9 @@ class DomainFactory {
     }
 
     static void createProcessingOptionForInitRoddyModule() {
-        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, '')
-        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_JAVA, '')
-        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY, '')
+        createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_LOAD_MODULE_LOADER, '')
+        createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_JAVA, '')
+        createProcessingOptionLazy(ProcessingOption.OptionName.COMMAND_ACTIVATION_GROOVY, '')
     }
 
     static MergingPass createMergingPass(Map properties = [:]) {
@@ -909,15 +909,15 @@ class DomainFactory {
     }
 
     static SamplePair createSamplePairWithProcessedMergedBamFiles() {
-        MergingWorkPackage tumorMwp = DomainFactory.createMergingWorkPackage(
+        MergingWorkPackage tumorMwp = createMergingWorkPackage(
                 seqType: createWholeGenomeSeqType(),
-                pipeline: DomainFactory.createDefaultOtpPipeline(),
+                pipeline: createDefaultOtpPipeline(),
                 referenceGenome: createReferenceGenome(name: 'hs37d5')
         )
-        ProcessedMergedBamFile bamFileTumor = DomainFactory.createProcessedMergedBamFile(tumorMwp, getRandomProcessedBamFileProperties() + [coverage: 30.0])
+        ProcessedMergedBamFile bamFileTumor = createProcessedMergedBamFile(tumorMwp, getRandomProcessedBamFileProperties() + [coverage: 30.0])
 
-        ProcessedMergedBamFile bamFileControl = DomainFactory.createProcessedMergedBamFile(
-                DomainFactory.createMergingWorkPackage(bamFileTumor.mergingWorkPackage),
+        ProcessedMergedBamFile bamFileControl = createProcessedMergedBamFile(
+                createMergingWorkPackage(bamFileTumor.mergingWorkPackage),
                 getRandomProcessedBamFileProperties() + [coverage: 30.0])
 
         bamFileTumor.mergingWorkPackage.bamFileInProjectFolder = bamFileTumor
@@ -938,7 +938,7 @@ class DomainFactory {
                 category: SampleType.Category.CONTROL,
         )
 
-        SamplePair samplePair = DomainFactory.createSamplePair(bamFileTumor.mergingWorkPackage, bamFileControl.mergingWorkPackage)
+        SamplePair samplePair = createSamplePair(bamFileTumor.mergingWorkPackage, bamFileControl.mergingWorkPackage)
 
         createRoddyWorkflowConfig(
                 seqType: samplePair.seqType,
@@ -960,16 +960,16 @@ class DomainFactory {
     }
 
     static SamplePair createSamplePairWithExternalProcessedMergedBamFiles(boolean initPipelines = false, Map bamFileProperties = [:]) {
-        ExternalMergingWorkPackage tumorMwp = DomainFactory.createExternalMergingWorkPackage(
+        ExternalMergingWorkPackage tumorMwp = createExternalMergingWorkPackage(
                 seqType: createWholeGenomeSeqType(),
-                pipeline: DomainFactory.createExternallyProcessedPipelineLazy(),
+                pipeline: createExternallyProcessedPipelineLazy(),
         )
 
-        ExternalMergingWorkPackage controlMwp = DomainFactory.createExternalMergingWorkPackage(
+        ExternalMergingWorkPackage controlMwp = createExternalMergingWorkPackage(
                 seqType: tumorMwp.seqType,
                 pipeline: tumorMwp.pipeline,
                 referenceGenome: tumorMwp.referenceGenome,
-                sample: DomainFactory.createSample(
+                sample: createSample(
                         individual: tumorMwp.getIndividual()
                 )
         )
@@ -978,7 +978,7 @@ class DomainFactory {
                 tumorMwp,
                 controlMwp,
         ].each {
-            ExternallyProcessedMergedBamFile bamFile = DomainFactory.createExternallyProcessedMergedBamFile(
+            ExternallyProcessedMergedBamFile bamFile = createExternallyProcessedMergedBamFile(
                     getRandomProcessedBamFileProperties() + [
                             workPackage      : it,
                             coverage         : 30.0,
@@ -993,7 +993,7 @@ class DomainFactory {
         createSampleTypePerProjectForMergingWorkPackage(tumorMwp, SampleType.Category.DISEASE)
         createSampleTypePerProjectForMergingWorkPackage(controlMwp, SampleType.Category.CONTROL)
 
-        SamplePair samplePair = DomainFactory.createSamplePair(tumorMwp, controlMwp)
+        SamplePair samplePair = createSamplePair(tumorMwp, controlMwp)
 
         if (initPipelines) {
             initAnalysisForSamplePair(samplePair)
