@@ -20,6 +20,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
+#######################################################################
+# Script to create a local development database in a docker container
+#
+# by default, loads the most recent database dump in $LATEST_DUMP_LOCATION into the local otp database.
+# to load other dumps, specify a search pattern in $USE_DUMP, like so:
+#    USE_DUMP=<SEARCH> ./bashScripts/postgres/recreateDatabase.sh
+# <SEARCH> can be any substring of a dump-identifier, and is glob-expanded on both ends to find a full dump string.
+# when multiple dumps match the search pattern, the youngest match is taken.
+# recommended search strings are "YYYY-MM-DD", "allData_YYYY-MM-DD" or "YYYY-MM-DD_hh-mm-ss" (or any part/combination thereof)
+#
+# examples:
+#   USE_DUMP=2019-02-12          ./bashScripts/postgres/recreateDatabase.sh
+#   USE_DUMP=allData_2019-02-12  ./bashScripts/postgres/recreateDatabase.sh
+#   USE_DUMP=2019-02-12_09-52-22 ./bashScripts/postgres/recreateDatabase.sh
+
 set -euo pipefail
 
 trap 'error_handler' SIGINT SIGTERM SIGQUIT EXIT
@@ -68,13 +84,22 @@ fi
 # Wait a few seconds for the server to come up. Just in case.
 sleep 10
 
-LATEST_DUMP=`find ${LATEST_DUMP_LOCATION} -maxdepth 1 -name "*.dump" | sort | tail -n 1`
-echo "Latest dump: $LATEST_DUMP"
-du -hs ${LATEST_DUMP}
+# see if USE_DUMP override is present and not-empty.
+if [[ ${USE_DUMP:+foo} ]]; then
+    echo "looking for dump matching '${USE_DUMP}' .."
+    DUMP_TO_LOAD=`ls -dt "${LATEST_DUMP_LOCATION}/"*"${USE_DUMP}"*.dump | head -n1`
+    # aborts here (thanks to set+e) if `ls` doesn't find a matching expansion: "ls: cannot access /ibios/dmdc/otp/postgres/dumps/production/*XXXXXX*.dump: No such file or directory"
+
+    echo " .. found '${DUMP_TO_LOAD}'"
+else
+    DUMP_TO_LOAD=`ls -dt "${LATEST_DUMP_LOCATION}"/*.dump | head -n1`
+    echo "Using default latest dump: $DUMP_TO_LOAD"
+fi
+du -hs ${DUMP_TO_LOAD}
 
 # Work around pg_restore failing due to an option set automatically by Postgres clients >= 9.3
 echo "Loading dump..."
-time pg_restore --username=postgres --host=localhost --dbname=otp --jobs=4 ${LATEST_DUMP} || true
+time pg_restore --username=postgres --host=localhost --dbname=otp --jobs=4 ${DUMP_TO_LOAD} || true
 echo "Dump loaded"
 
 PSQL="psql --username=otp --host=localhost --dbname=otp"
