@@ -22,8 +22,12 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-
+import grails.artefact.Artefact
+import grails.artefact.DomainClass
 import grails.testing.gorm.DataTest
+import grails.validation.Validateable
+import org.grails.core.artefact.DomainClassArtefactHandler
+import org.grails.datastore.gorm.GormEntity
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -32,27 +36,27 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 class BamFilePairAnalysisSpec extends Specification implements DataTest {
 
     Class[] getDomainClassesToMock() {[
             AbstractMergedBamFile,
-            AlignmentPass,
             AceseqInstance,
+            AlignmentPass,
             BamFilePairAnalysis,
             DataFile,
-            ExternalMergingWorkPackage,
             ExternallyProcessedMergedBamFile,
+            ExternalMergingWorkPackage,
             FileType,
-            Individual,
             IndelCallingInstance,
+            Individual,
             LibraryPreparationKit,
             MergingCriteria,
             MergingPass,
             MergingSet,
             MergingSetAssignment,
             MergingWorkPackage,
+            MockBamFilePairAnalysis,
             Pipeline,
             ProcessedBamFile,
             ProcessedMergedBamFile,
@@ -224,8 +228,8 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
 
 }
 
-
-class MockBamFilePairAnalysis extends BamFilePairAnalysis {
+@Artefact(DomainClassArtefactHandler.TYPE)
+class MockBamFilePairAnalysis extends BamFilePairAnalysis implements DomainClass, GormEntity<MockBamFilePairAnalysis>, Validateable {
     @Override
     OtpPath getInstancePath() {
         return new OtpPath("somePath")

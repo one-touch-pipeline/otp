@@ -22,8 +22,12 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-
+import grails.artefact.Artefact
+import grails.artefact.DomainClass
 import grails.testing.gorm.DataTest
+import grails.validation.Validateable
+import org.grails.core.artefact.DomainClassArtefactHandler
+import org.grails.datastore.gorm.GormEntity
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
@@ -32,6 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
 
     Class[] getDomainClassesToMock() {[
+            AbstractMergedBamFile,
             AbstractMergingWorkPackage,
             AntibodyTarget,
             Individual,
@@ -45,6 +50,7 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
             SampleType,
             SeqPlatformGroup,
             SeqType,
+            TestAbstractMergedBamFile,
             TestAbstractMergingWorkPackage,
     ]}
 
@@ -52,16 +58,18 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
     TestAbstractMergingWorkPackage testAMWP2
     TestAbstractMergedBamFile testAMBF
 
-    class TestAbstractMergingWorkPackage extends AbstractMergingWorkPackage {
+
+    @Artefact(DomainClassArtefactHandler.TYPE)
+    class TestAbstractMergingWorkPackage extends AbstractMergingWorkPackage implements DomainClass, GormEntity<TestAbstractMergingWorkPackage>, Validateable {
 
         @Override
         AbstractMergedBamFile getBamFileThatIsReadyForFurtherAnalysis() {
             return null
         }
-
     }
 
-    class TestAbstractMergedBamFile extends AbstractMergedBamFile {
+    @Artefact(DomainClassArtefactHandler.TYPE)
+    class TestAbstractMergedBamFile extends AbstractMergedBamFile implements DomainClass, GormEntity<TestAbstractMergedBamFile>, Validateable {
 
         @Override
         boolean isMostRecentBamFile() {
