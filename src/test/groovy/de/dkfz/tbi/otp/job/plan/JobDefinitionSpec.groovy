@@ -22,44 +22,70 @@
 
 package de.dkfz.tbi.otp.job.plan
 
-import grails.test.mixin.TestFor
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
 
-import static org.junit.Assert.*
+class JobDefinitionSpec extends Specification implements DataTest {
 
-/**
- * See the API for {@link grails.test.mixin.support.GrailsUnitTestMixin} for usage instructions
- */
-@TestMixin(GrailsUnitTestMixin)
-@TestFor(JobDefinition)
-class JobDefinitionTests {
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                JobDefinition,
+        ]
+    }
 
-    @Test
     void testConstraints() {
+        given:
         JobDefinition jobDefinition = new JobDefinition()
-        assertFalse(jobDefinition.validate())
-        assertEquals("nullable", jobDefinition.errors["name"].code)
-        assertEquals("nullable", jobDefinition.errors["bean"].code)
-        assertEquals("nullable", jobDefinition.errors["plan"].code)
 
+        expect:
+        !jobDefinition.validate()
+        "nullable" == jobDefinition.errors["name"].code
+        "nullable" == jobDefinition.errors["bean"].code
+        "nullable" == jobDefinition.errors["plan"].code
+
+        when:
         JobExecutionPlan jobExecutionPlan = new JobExecutionPlan(name: 'some name')
         jobDefinition.plan = jobExecutionPlan
-        assertFalse(jobDefinition.validate())
 
+        then:
+        !jobDefinition.validate()
+
+        when:
         jobDefinition.name = "testDefinition"
-        assertFalse(jobDefinition.validate())
 
+        then:
+        !jobDefinition.validate()
+
+        when:
         jobDefinition.bean = "testBean"
-        assertTrue(jobDefinition.validate())
 
-        JobDefinition previous = new JobDefinition()
+        then:
+        jobDefinition.validate()
+
+        when:
+        JobDefinition previous = new JobDefinition([
+                plan: jobExecutionPlan,
+                bean: 'bean',
+                name: 'name',
+        ])
         jobDefinition.previous = previous
-        assertTrue(jobDefinition.validate())
+        jobDefinition.validate()
 
-        JobDefinition next = new JobDefinition()
+        then:
+        !jobDefinition.errors.hasErrors()
+
+
+        when:
+        JobDefinition next = new JobDefinition([
+                plan: jobExecutionPlan,
+                bean: 'bean',
+                name: 'name',
+        ])
         jobDefinition.next = next
-        assertTrue(jobDefinition.validate())
+        jobDefinition.validate()
+
+        then:
+        !jobDefinition.errors.hasErrors()
     }
 }
