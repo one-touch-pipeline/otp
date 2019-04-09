@@ -32,22 +32,49 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.attribute.PosixFilePermissions
 
-
 class ChecksumFileServiceSpec extends Specification implements DataTest {
-    ChecksumFileService checksumFileService
-    Path file
+
+    final String BAM_FILE_NAME = "bamFileName.merged.mdup.bam"
 
     @Rule
     TemporaryFolder tempFolder = new TemporaryFolder()
 
-    void setup() {
+    ChecksumFileService checksumFileService
+    Path file
+
+
+    void "md5FileName, when call then return md5 file name"() {
+        given:
+        ChecksumFileService checksumFileService = new ChecksumFileService()
+        String expectedFileName = "${BAM_FILE_NAME}.md5sum"
+
+        when:
+        String fileName = checksumFileService.md5FileName(BAM_FILE_NAME)
+
+        then:
+        expectedFileName == fileName
+    }
+
+    void "picardMd5FileName, when call then return picard md5 file name"() {
+        given:
+        ChecksumFileService checksumFileService = new ChecksumFileService()
+        String expectedFileName = "${BAM_FILE_NAME}.md5"
+
+        when:
+        String fileName = checksumFileService.picardMd5FileName(BAM_FILE_NAME)
+
+        then:
+        expectedFileName == fileName
+    }
+
+    private void setupFirstMD5ChecksumFromFile() {
         checksumFileService = new ChecksumFileService()
         file = tempFolder.newFile("asdf.md5").toPath()
     }
 
-
     void "test firstMD5ChecksumFromFile"() {
         given:
+        setupFirstMD5ChecksumFromFile()
         String expectedMd5 = "68b329da9893e34099c7d8ad5cb9c940"
         file << """\
             ${expectedMd5}  opt-test.file
@@ -60,6 +87,7 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
 
     void "test firstMD5ChecksumFromFile with non existing file"() {
         given:
+        setupFirstMD5ChecksumFromFile()
         Files.delete(file)
 
         when:
@@ -71,6 +99,7 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
 
     void "test firstMD5ChecksumFromFile with unreadable file"() {
         given:
+        setupFirstMD5ChecksumFromFile()
         Files.setPosixFilePermissions(file, PosixFilePermissions.fromString("-wx-wx-wx"))
 
         when:
@@ -82,6 +111,7 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
 
     void "test firstMD5ChecksumFromFile with empty file"() {
         when:
+        setupFirstMD5ChecksumFromFile()
         checksumFileService.firstMD5ChecksumFromFile(file)
 
         then:
@@ -91,6 +121,7 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
     @Unroll
     void "test firstMD5ChecksumFromFile with wrong md5sum format, case '#name'"() {
         given:
+        setupFirstMD5ChecksumFromFile()
         file << "${value}  opt-test.file"
 
         when:
@@ -105,4 +136,5 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
         'to long'       | '123456789012345678901234567890123'
         'wrong symbols' | '12345678901234567890123456789xyz'
     }
+
 }
