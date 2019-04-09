@@ -196,7 +196,7 @@ class GroupSpec extends Specification implements DataTest {
 
         then:
         !group.validate()
-        group.errors["role"].code == "validator.invalid"
+        group.errors["role"].code == "nullable"
     }
 
     void "test role unique constraint"() {
