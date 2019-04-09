@@ -874,7 +874,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
-            1 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
+            2 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
             0 * _
         }
         service.seqTypeService = Mock(SeqTypeService) {
