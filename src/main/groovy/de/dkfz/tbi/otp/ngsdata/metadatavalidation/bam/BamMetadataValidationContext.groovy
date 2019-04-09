@@ -100,20 +100,21 @@ class BamMetadataValidationContext extends AbstractMetadataValidationContext {
 
     static void checkFilesInDirectory(Path furtherFile, Problems problems) {
         Stream<Path> stream = null
+        boolean isEmpty = true
         try {
             stream = Files.list(furtherFile)
-            if (stream.count() == 0) {
-                problems.addProblem(Collections.emptySet(), Level.WARNING, "'The folder ${furtherFile}' is empty.")
-            } else {
-                stream.each { Path file ->
-                    if (Files.isRegularFile(file)) {
-                        checkFile(file, problems)
-                    } else if (Files.isDirectory(file)) {
-                        checkFilesInDirectory(file, problems)
-                    } else {
-                        problems.addProblem(Collections.emptySet(), Level.ERROR, "'${file}' is not a file.")
-                    }
+            stream.each { Path file ->
+                isEmpty = false
+                if (Files.isRegularFile(file)) {
+                    checkFile(file, problems)
+                } else if (Files.isDirectory(file)) {
+                    checkFilesInDirectory(file, problems)
+                } else {
+                    problems.addProblem(Collections.emptySet(), Level.ERROR, "'${file}' is not a file.")
                 }
+            }
+            if (isEmpty) {
+                problems.addProblem(Collections.emptySet(), Level.WARNING, "'The folder ${furtherFile}' is empty.")
             }
         } finally {
             stream?.close()
