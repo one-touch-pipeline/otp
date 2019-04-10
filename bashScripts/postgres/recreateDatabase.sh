@@ -32,9 +32,10 @@
 # recommended search strings are "YYYY-MM-DD", "allData_YYYY-MM-DD" or "YYYY-MM-DD_hh-mm-ss" (or any part/combination thereof)
 #
 # examples:
-#   USE_DUMP=2019-02-12          ./bashScripts/postgres/recreateDatabase.sh
-#   USE_DUMP=allData_2019-02-12  ./bashScripts/postgres/recreateDatabase.sh
-#   USE_DUMP=2019-02-12_09-52-22 ./bashScripts/postgres/recreateDatabase.sh
+#   ./bashScripts/postgres/recreateDatabase.sh                # default: loads most recent dump
+#   ./bashScripts/postgres/recreateDatabase.sh 2019-02-12
+#   ./bashScripts/postgres/recreateDatabase.sh allData_2019-02-12
+#   ./bashScripts/postgres/recreateDatabase.sh 2019-02-12_09-52-22
 
 set -eu
 
@@ -86,17 +87,16 @@ fi
 # Wait a few seconds for the server to come up. Just in case.
 sleep 10
 
-# see if USE_DUMP override is present and not-empty.
-if [[ ${USE_DUMP:+foo} ]]; then
-    echo "looking for dump matching '${USE_DUMP}' .."
-    DUMP_TO_LOAD=`ls -dt "${LATEST_DUMP_LOCATION}/"*"${USE_DUMP}"*.dump | head -n1`
+# see if an override parameter is present
+if [ $# -gt 0 ]; then
+    echo "looking for dump matching '$1' .."
+    DUMP_TO_LOAD=$( ls -dt "${LATEST_DUMP_LOCATION}/"*"$1"*.dump | head -n1 )
     # aborts here (thanks to set+e) if `ls` doesn't find a matching expansion: "ls: cannot access /ibios/dmdc/otp/postgres/dumps/production/*XXXXXX*.dump: No such file or directory"
-
-    echo " .. found '${DUMP_TO_LOAD}'"
 else
-    DUMP_TO_LOAD=`ls -dt "${LATEST_DUMP_LOCATION}"/*.dump | head -n1`
-    echo "Using default latest dump: $DUMP_TO_LOAD"
+    echo "looking for most recent dump .."
+    DUMP_TO_LOAD=$( ls -dt "${LATEST_DUMP_LOCATION}"/*.dump | head -n1 )
 fi
+echo " .. found '${DUMP_TO_LOAD}'"
 du -hs "${DUMP_TO_LOAD}"
 
 # Work around pg_restore failing due to an option set automatically by Postgres clients >= 9.3
