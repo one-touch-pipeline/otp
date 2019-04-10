@@ -68,9 +68,6 @@ beans = {
 
     requestDataValueProcessor(CustomRequestDataValueProcessor)
 
-    // Bean for handling logouts with the Dicom audit logger
-    dicomAuditLogoutHandler(DicomAuditLogoutHandler)
-
     // don't use the default locale specific value converter
     [
             Short, Short.TYPE,

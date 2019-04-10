@@ -25,6 +25,7 @@ package de.dkfz.tbi.otp.security
 import grails.gorm.transactions.Transactional
 import org.springframework.security.core.Authentication
 import org.springframework.security.web.authentication.logout.LogoutHandler
+import org.springframework.stereotype.Component
 
 import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
@@ -39,6 +40,7 @@ import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
  * forwarding the logout to the Dicom audit logging framework.
  */
 @Transactional
+@Component
 class DicomAuditLogoutHandler implements LogoutHandler {
     @Override
     void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {

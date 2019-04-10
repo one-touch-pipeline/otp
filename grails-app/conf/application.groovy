@@ -100,8 +100,8 @@ grails.plugin.springsecurity.authority.className = 'de.dkfz.tbi.otp.security.Rol
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
         // restricted access to special pages
         [pattern: "/adminSeed/**"                                        , access: ["denyAll"]],
-        [pattern: "/console/**"                                          , access: ["hasRole('ROLE_ADMIN')"]],
-        [pattern: "/static/console*/**"                                  , access: ["hasRole('ROLE_ADMIN')"]],
+        [pattern: "/console/**"                                          , access: ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"]],
+        [pattern: "/static/console*/**"                                  , access: ["hasRole('ROLE_ADMIN') and @dicomAuditConsoleHandler.log()"]],
         [pattern: "/plugins/**"                                          , access: ["denyAll"]],
         [pattern: "/projectOverview/mmmlIdentifierMapping/**"            , access: ["hasRole('ROLE_MMML_MAPPING')"]],
         [pattern: "/login/impersonate"                                   , access: ["hasRole('ROLE_SWITCH_USER')"]],
@@ -139,6 +139,15 @@ grails.plugin.springsecurity.apf.storeLastUsername = true
 //*/
 
 grails.plugin.springsecurity.printStatusMessages = false
+
+// enable event listeners for logging login processes to the Dicom audit log
+grails.plugin.springsecurity.useSecurityEventListener = true
+// Injection of the Dicom logout handler
+// The way used above (Adding listeners to Spring Security) would be preferred,
+// but Spring doesn't offer an interface for logout, so we had to use a bean.
+grails.plugin.springsecurity.logout.additionalHandlerNames = [
+        'dicomAuditLogoutHandler',
+]
 
 grails.plugin.databasemigration.changelogLocation = 'migrations'
 grails.plugin.databasemigration.changelogFileName = 'migration-wrapper.groovy'
