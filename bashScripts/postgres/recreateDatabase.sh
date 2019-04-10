@@ -36,7 +36,7 @@
 #   USE_DUMP=allData_2019-02-12  ./bashScripts/postgres/recreateDatabase.sh
 #   USE_DUMP=2019-02-12_09-52-22 ./bashScripts/postgres/recreateDatabase.sh
 
-set -euo pipefail
+set -eu
 
 trap 'error_handler' SIGINT SIGTERM SIGQUIT EXIT
 
