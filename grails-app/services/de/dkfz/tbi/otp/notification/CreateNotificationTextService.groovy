@@ -94,12 +94,21 @@ class CreateNotificationTextService {
             phabricatorAlias = "\n!project #\$${project.phabricatorAlias}"
         }
 
+        String faq = ""
+        if (ProcessingOptionService.findOption(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)) {
+            faq = createMessage('notification.template.base.faq', [
+                    faqLink    : processingOptionService.findOptionAsString(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK),
+                    contactMail: processingOptionService.findOptionAsString(OptionName.EMAIL_REPLY_TO),
+            ])
+        }
+
         return createMessage('notification.template.base', [
                 stepInformation      : stepInformation,
                 seqCenterComment     : seqCenterComment,
                 addition             : createMessage("notification.template.${processingStep.name().toLowerCase()}.addition"),
                 phabricatorAlias     : phabricatorAlias,
                 emailSenderSalutation: processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
+                faq                  : faq,
         ])
     }
 

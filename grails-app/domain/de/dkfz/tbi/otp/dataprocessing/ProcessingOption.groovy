@@ -389,6 +389,10 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "", TypeValidators.MULTI_LINE_TEXT,
                 TypeValidators.SEQ_CENTER_NAME
         ),
+        NOTIFICATION_TEMPLATE_FAQ_LINK(
+                "Link to FAQs",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+        ),
 
         // cluster job scheduler
         CLUSTER_SUBMISSIONS_OPTION(

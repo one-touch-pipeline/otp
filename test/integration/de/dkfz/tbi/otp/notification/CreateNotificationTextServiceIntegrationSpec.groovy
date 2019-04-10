@@ -48,6 +48,7 @@ base notification
 stepInformation:${stepInformation}
 seqCenterComment:${seqCenterComment}
 addition:${addition}
+faq:${faq}
 phabricatorAlias:${phabricatorAlias}
 '''
 
@@ -93,6 +94,60 @@ phabricatorAlias:${phabricatorAlias}
 
         expect:
         expected == createNotificationTextService.createOtpLinks(projects, CONTROLLER, ACTION)
+    }
+
+    void "test: notification if faq link is set"() {
+        given:
+        Project project = DomainFactory.createProject()
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK, "some_link")
+        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.EMAIL_REPLY_TO, "a.b@c.de")
+        ProcessingStatus processingStatus = new ProcessingStatus()
+
+
+        CreateNotificationTextService createNotificationTextService = Spy(CreateNotificationTextService) {
+            1 * alignmentNotification(_) >> "something"
+        }
+        createNotificationTextService.processingOptionService = new ProcessingOptionService()
+
+        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
+            1 * getMessageInternal("notification.template.alignment.addition", [], _) >> ""
+            1 * getMessageInternal("notification.template.base.faq", [], _) >> "FAQs"
+            _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
+        }
+
+        when:
+        String message = createNotificationTextService.notification(ticket, processingStatus, ALIGNMENT, project)
+
+        then:
+        message.contains("FAQs")
+    }
+
+    void "test: notification if faq link is not set"() {
+        given:
+        Project project = DomainFactory.createProject()
+        DomainFactory.createProcessingOptionForEmailSenderSalutation()
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        ProcessingStatus processingStatus = new ProcessingStatus()
+
+
+        CreateNotificationTextService createNotificationTextService = Spy(CreateNotificationTextService) {
+            1 * alignmentNotification(processingStatus) >> "something"
+        }
+        createNotificationTextService.processingOptionService = new ProcessingOptionService()
+
+        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
+            1 * getMessageInternal("notification.template.alignment.addition", [], _) >> ""
+            0 * getMessageInternal("notification.template.base.faq", [], _) >> "FAQs"
+            _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
+        }
+
+        when:
+        String message = createNotificationTextService.notification(ticket, processingStatus, ALIGNMENT, project)
+
+        then:
+        !message.contains("FAQs")
     }
 
     @Unroll
@@ -163,6 +218,7 @@ base notification
 stepInformation:${processingStep.toString()}
 seqCenterComment:${expectedSeqCenterComment}
 addition:
+faq:
 phabricatorAlias:
 """
         if (processingStep == INSTALLATION) {
@@ -257,6 +313,7 @@ base notification
 stepInformation:${processingStep.toString()}
 seqCenterComment:${expectedSeqCenterComment}
 addition:
+faq:
 phabricatorAlias:
 """
 

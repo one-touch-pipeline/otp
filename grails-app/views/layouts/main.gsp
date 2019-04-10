@@ -194,6 +194,10 @@
             <a href="https://www.klinikum.uni-heidelberg.de/" target="_blank">Universitätsklinikum Heidelberg</a> |
             <g:link controller="info" action="imprint"><g:message code="info.imprint.link"/></g:link> |
             <g:link controller="privacyPolicy"><g:message code="info.privacyPolicy.link"/></g:link> |
+            <g:set var="faqLink" value="${ProcessingOptionService.findOption(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)}" />
+            <g:if test="${faqLink}">
+                <a href="${faqLink.value}" target="_blank">FAQ</a> |
+            </g:if>
             <g:render template="/templates/version"/>
         </div>
         <div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
