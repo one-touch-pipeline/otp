@@ -41,7 +41,9 @@ set -eu
 trap 'error_handler' SIGINT SIGTERM SIGQUIT EXIT
 
 error_handler() {
+    # don't interfere with 'normal' exit
     [ $? -eq 0 ] && exit
+
     echo "Aborting..."
     stop_and_destroy_container
     exit
@@ -49,7 +51,7 @@ error_handler() {
 
 docker_compose() {
     # Suppress output to mimic the output of the other script
-    docker-compose -f docker/otp/docker-compose.yml $* >/dev/null 2>&1
+    docker-compose -f docker/otp/docker-compose.yml "$@" >/dev/null 2>&1
 }
 
 rebuild_image() {
@@ -95,11 +97,11 @@ else
     DUMP_TO_LOAD=`ls -dt "${LATEST_DUMP_LOCATION}"/*.dump | head -n1`
     echo "Using default latest dump: $DUMP_TO_LOAD"
 fi
-du -hs ${DUMP_TO_LOAD}
+du -hs "${DUMP_TO_LOAD}"
 
 # Work around pg_restore failing due to an option set automatically by Postgres clients >= 9.3
 echo "Loading dump..."
-time pg_restore --username=postgres --host=localhost --dbname=otp --jobs=4 ${DUMP_TO_LOAD} || true
+time pg_restore --username=postgres --host=localhost --dbname=otp --jobs=4 "${DUMP_TO_LOAD}" || true
 echo "Dump loaded"
 
 PSQL="psql --username=otp --host=localhost --dbname=otp"
