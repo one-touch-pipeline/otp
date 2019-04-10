@@ -9,9 +9,6 @@ logs/*
 .nfs*
 
 ### OTP
-## Main application
-web-app/WEB-INF/tld/c.tld
-web-app/WEB-INF/tld/fmt.tld
 ## Independent tools
 tools/*/*/*/build/
 tools/*/*/*/.gradle/
