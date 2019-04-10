@@ -198,7 +198,7 @@
             <g:if test="${faqLink}">
                 <a href="${faqLink.value}" target="_blank">FAQ</a> |
             </g:if>
-            <g:render template="/templates/version"/>
+            ${version}
         </div>
         <div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
     </div>

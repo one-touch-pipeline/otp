@@ -57,6 +57,7 @@ class OptionsInterceptor {
             } catch (IllegalArgumentException e) { }
             model.logo = logo.fileName
 
+            // this file is provided by the gradle-git-properties gradle plugin
             String resourceName = "git.properties"
             ClassLoader loader = Thread.currentThread().getContextClassLoader()
             Properties props = new Properties()

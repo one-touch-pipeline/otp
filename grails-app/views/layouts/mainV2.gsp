@@ -290,7 +290,7 @@ ${assetPath(src: 'v2/otp-favicon.ico')}" type="image/x-icon">
                     <a href="https://www.charite.de/" target="_blank">Charité</a>,
                     <a href="https://www.klinikum.uni-heidelberg.de/" target="_blank">Universitätsklinikum Heidelberg</a>
                 </li>
-                <li class="copyright-grey"><g:render template="/templates/version"/></li>
+                <li class="copyright-grey">${version}</li>
             </ul>
         </div>
     </div>
