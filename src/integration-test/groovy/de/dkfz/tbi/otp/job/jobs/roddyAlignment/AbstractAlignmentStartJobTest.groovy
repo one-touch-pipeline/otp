@@ -95,7 +95,7 @@ class AbstractAlignmentStartJobTest {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         mwp.seqTracks = null
-        mwp.save()
+        mwp.save(flush: true)
 
         assert [] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.MINIMUM)
     }
@@ -414,7 +414,7 @@ class AbstractAlignmentStartJobTest {
         SeqTrack seqTrack = DomainFactory.createSeqTrack(mergingWorkPackage)
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         mergingWorkPackage.seqTracks = [seqTrack]
-        mergingWorkPackage.save()
+        mergingWorkPackage.save(flush: true)
         return mergingWorkPackage
     }
 
@@ -429,7 +429,7 @@ class AbstractAlignmentStartJobTest {
         try {
             JobExecutionPlan jep = DomainFactory.createJobExecutionPlan(enabled: true)
             jep.firstJob = DomainFactory.createJobDefinition(plan: jep)
-            assert jep.save()
+            assert jep.save(flush: true)
             testAbstractAlignmentStartJob.jep = jep
             closure()
         } finally {

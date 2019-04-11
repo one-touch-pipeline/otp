@@ -130,7 +130,7 @@ class SeqTrackServiceTests {
         ).save(flush: true)
 
         Project project = seqTrack.project
-        project.save(failOnError: true)
+        project.save(flush: true)
         return seqTrack
     }
 }

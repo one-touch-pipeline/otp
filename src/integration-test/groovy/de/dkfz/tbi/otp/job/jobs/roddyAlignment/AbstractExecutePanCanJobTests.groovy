@@ -114,7 +114,7 @@ class AbstractExecutePanCanJobTests {
         CreateFileHelper.createFile(configFile)
         RoddyWorkflowConfig config = roddyBamFile.config
         config.configFilePath = configFile.path
-        assert config.save()
+        assert config.save(flush: true)
 
         chromosomeStatSizeFile = abstractExecutePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false)
         CreateFileHelper.createFile(chromosomeStatSizeFile)
@@ -170,7 +170,7 @@ class AbstractExecutePanCanJobTests {
     void testPrepareAndReturnWorkflowSpecificCommand_MinimalPriority_AllFine() {
         setupData()
         roddyBamFile.project.processingPriority = ProcessingPriority.MINIMUM.priority
-        roddyBamFile.project.save()
+        roddyBamFile.project.save(flush: true)
         testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.pluginVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}")
     }
 
@@ -178,7 +178,7 @@ class AbstractExecutePanCanJobTests {
     void testPrepareAndReturnWorkflowSpecificCommand_FasttrackPriority_AllFine() {
         setupData()
         roddyBamFile.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
-        roddyBamFile.project.save()
+        roddyBamFile.project.save(flush: true)
         testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.pluginVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-fasttrack")
     }
 
@@ -186,7 +186,7 @@ class AbstractExecutePanCanJobTests {
     void testPrepareAndReturnWorkflowSpecificCommand_OverFasttrackPriority_AllFine() {
         setupData()
         roddyBamFile.project.processingPriority = (ProcessingPriority.FAST_TRACK.priority + 10) as short
-        roddyBamFile.project.save()
+        roddyBamFile.project.save(flush: true)
         testPrepareAndReturnWorkflowSpecificCommand_AllFineHelper("${roddyBamFile.config.pluginVersion}-${roddyBamFile.seqType.roddyName.toLowerCase()}-fasttrack")
     }
 

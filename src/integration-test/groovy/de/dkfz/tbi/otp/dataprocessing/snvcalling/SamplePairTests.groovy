@@ -95,7 +95,7 @@ class SamplePairTests {
         samplePair.metaClass.getIndividual = { -> return mergingWorkPackage1.individual }
 
         TestCase.shouldFailWithMessageContaining(ValidationException, "individual") {
-            samplePair.save()
+            samplePair.save(flush: true)
         }
     }
 

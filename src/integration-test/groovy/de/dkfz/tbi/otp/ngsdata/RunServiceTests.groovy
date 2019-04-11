@@ -103,7 +103,7 @@ class RunServiceTests implements UserAndRoles {
             assertNotNull(run.save(flush: true))
             assertEquals(run, runService.getRun(run.name))
             Run run2 = new Run(name: "foo", seqCenter: SeqCenter.list().first(), seqPlatform: SeqPlatform.list().first())
-            assertNotNull(run2.save())
+            assertNotNull(run2.save(flush: true))
             assertEquals(run2, runService.getRun(run.name))
         }
     }
@@ -140,15 +140,15 @@ class RunServiceTests implements UserAndRoles {
         setupData()
         Run run = createRun("test")
         JobExecutionPlan jep = new JobExecutionPlan(name: "test", planVersion: 0, startJobBean: "someBean")
-        assert jep.save()
+        assert jep.save(flush: true)
         JobDefinition jobDefinition = createTestJob("test", jep)
         jep.firstJob = jobDefinition
         assert jep.save(flush: true)
 
         Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
-        assert process.save()
+        assert process.save(flush: true)
         ProcessParameter param = new ProcessParameter(value: run.id, className: Run.class.name, process: process)
-        assert param.save()
+        assert param.save(flush: true)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(1, runService.retrieveProcessParameters(run).size())
@@ -156,9 +156,9 @@ class RunServiceTests implements UserAndRoles {
         }
 
         Process process2 = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
-        assert process2.save()
+        assert process2.save(flush: true)
         ProcessParameter param2 = new ProcessParameter(value: run.id, className: Run.class.name, process: process2)
-        assert param2.save()
+        assert param2.save(flush: true)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertEquals(2, runService.retrieveProcessParameters(run).size())
@@ -176,29 +176,29 @@ class RunServiceTests implements UserAndRoles {
 
     private SeqTrack mockSeqTrack(Run run, String pid, String laneId) {
         Realm realm = Realm.findOrCreateByNameAndHostAndPortAndTimeoutAndDefaultJobSubmissionOptions("test", "pbs", 1234, 0, "")
-        assertNotNull(realm.save())
+        assertNotNull(realm.save(flush: true))
         Project project = Project.findOrCreateByNameAndDirNameAndRealm("test", "test", realm)
-        assertNotNull(project.save())
+        assertNotNull(project.save(flush: true))
         Individual individual = Individual.findOrCreateByPidAndMockPidAndMockFullNameAndTypeAndProject(pid, pid, pid, Individual.Type.UNDEFINED, project)
-        assertNotNull(individual.save())
+        assertNotNull(individual.save(flush: true))
         Sample sample = Sample.findOrCreateByIndividualAndType(individual, Sample.Type.UNKNOWN)
-        assertNotNull(sample.save())
+        assertNotNull(sample.save(flush: true))
         SeqType seqType = SeqType.findOrCreateByNameAndDirNameAndLibraryLayout("test", "test", "test")
-        assertNotNull(seqType.save())
+        assertNotNull(seqType.save(flush: true))
         SoftwareTool software = SoftwareTool.findOrCreateByProgramNameAndType("test", SoftwareTool.Type.ALIGNMENT)
-        assertNotNull(software.save())
+        assertNotNull(software.save(flush: true))
         SeqTrack seqTrack = new SeqTrack(run: run, sample: sample, seqType: seqType, seqPlatform: run.seqPlatform, pipelineVersion: software, laneId: laneId)
-        assertNotNull(seqTrack.save())
+        assertNotNull(seqTrack.save(flush: true))
         return seqTrack
     }
 
     private AlignmentLog mockAlignmentLog(SeqTrack seqTrack) {
         SoftwareTool software = SoftwareTool.findOrCreateByProgramNameAndType("test", SoftwareTool.Type.ALIGNMENT)
-        assertNotNull(software.save())
+        assertNotNull(software.save(flush: true))
         AlignmentParams params = AlignmentParams.findOrCreateByPipeline(software)
-        assertNotNull(params.save())
+        assertNotNull(params.save(flush: true))
         AlignmentLog log = AlignmentLog.findOrCreateBySeqTrackAndAlignmentParams(seqTrack, params)
-        assertNotNull(log.save())
+        assertNotNull(log.save(flush: true))
         return log
     }
 
@@ -213,14 +213,14 @@ class RunServiceTests implements UserAndRoles {
     @Deprecated
     private JobDefinition createTestJob(String name, JobExecutionPlan jep, JobDefinition previous = null) {
         JobDefinition jobDefinition = new JobDefinition(name: name, bean: "testJob", plan: jep, previous: previous)
-        assertNotNull(jobDefinition.save())
+        assertNotNull(jobDefinition.save(flush: true))
         ParameterType test = new ParameterType(name: "test", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType test2 = new ParameterType(name: "test2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.OUTPUT)
         ParameterType input = new ParameterType(name: "input", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
         ParameterType input2 = new ParameterType(name: "input2", description: "Test description", jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT)
-        assertNotNull(test.save())
-        assertNotNull(test2.save())
-        assertNotNull(input.save())
+        assertNotNull(test.save(flush: true))
+        assertNotNull(test2.save(flush: true))
+        assertNotNull(input.save(flush: true))
         assertNotNull(input2.save(flush: true))
         return jobDefinition
     }

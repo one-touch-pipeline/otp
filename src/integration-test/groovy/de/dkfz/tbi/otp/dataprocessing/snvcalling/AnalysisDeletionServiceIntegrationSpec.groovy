@@ -135,7 +135,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
                 samplePair: samplePair2,
                 config: snvCallingInstance.config,
         ])
-        assert snvCallingInstance2.save()
+        assert snvCallingInstance2.save(flush: true)
         IndelCallingInstance indelCallingInstance2 = DomainFactory.createIndelCallingInstanceWithSameSamplePair(snvCallingInstance2)
         AceseqInstance aceseqInstance2 = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance2)
         List<File> instancesDirectories = []

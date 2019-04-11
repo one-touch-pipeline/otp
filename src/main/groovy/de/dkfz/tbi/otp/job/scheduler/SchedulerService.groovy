@@ -284,12 +284,12 @@ class SchedulerService {
                 jobExecutionPlan: plan,
                 startJobClass: startJob.class.getName(),
         )
-        if (!process.save()) {
+        if (!process.save(flush: true)) {
             throw new SchedulerPersistencyException("Could not save the process for the JobExecutionPlan ${plan.id}")
         }
         if (processParameter) {
             processParameter.process = process
-            if (!processParameter.save()) {
+            if (!processParameter.save(flush: true)) {
                 throw new SchedulerPersistencyException("Could not save the process parameter for the Process ${process.id}")
             }
         }

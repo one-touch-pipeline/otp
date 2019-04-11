@@ -84,7 +84,7 @@ SamplePair.withTransaction {
                 mergingWorkPackage1: it[0],
                 mergingWorkPackage2: it[1]
         )
-        samplePair.save()
+        samplePair.save(flush: true)
         println samplePair
         return samplePair
     }.size()

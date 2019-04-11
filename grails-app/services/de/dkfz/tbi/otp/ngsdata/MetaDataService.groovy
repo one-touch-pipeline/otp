@@ -54,7 +54,7 @@ class MetaDataService {
     boolean updateMetaDataEntry(MetaDataEntry entry, String value) throws ChangelogException, MetaDataEntryUpdateException {
         ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
         if (!clazz) {
-            clazz = new ReferencedClass(name: MetaDataEntry.class.getName())
+            clazz = new ReferencedClass(className: MetaDataEntry.class.getName())
             clazz.save(flush: true)
         }
         ChangeLog changelog = new ChangeLog(
@@ -66,7 +66,7 @@ class MetaDataService {
                 comment: "-",
                 source: ChangeLog.Source.MANUAL,
         )
-        if (!changelog.save()) {
+        if (!changelog.save(flush: true)) {
             throw new ChangelogException("Creation of changelog failed, errors: " + changelog.errors.toString())
         }
         entry.value = value

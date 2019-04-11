@@ -378,7 +378,7 @@ class SnvCallingServiceIntegrationSpec extends Specification {
                 sampleType1BamFile: bamFile1_1,
                 sampleType2BamFile: bamFile2_1
         )
-        snvCallingInstance.save()
+        snvCallingInstance.save(flush: true)
 
         snvCallingService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
             2 * getExistingBamFilePath(_) >> TestCase.uniqueNonExistentPath
