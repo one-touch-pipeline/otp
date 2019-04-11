@@ -72,7 +72,7 @@ class UserProjectRoleService {
                 project    : project,
                 projectRole: projectRole,
         ] + flags)
-        userProjectRole.save(flush: true, failOnError: true)
+        userProjectRole.save(flush: true)
 
         String studyUID = OtpDicomAuditFactory.generateUID(UniqueIdentifierType.STUDY, String.valueOf(project.id))
         if (flags.enabled && !oldUPR?.enabled) {
@@ -280,7 +280,7 @@ class UserProjectRoleService {
     UserProjectRole updateEnabledStatus(UserProjectRole userProjectRole, boolean enabled) {
         assert userProjectRole: USER_PROJECT_ROLE_REQUIRED
         userProjectRole.enabled = enabled
-        assert userProjectRole.save(flush: true, failOnError: true)
+        assert userProjectRole.save(flush: true)
         if (enabled) {
             notifyProjectAuthoritiesAndUser(userProjectRole.project, userProjectRole.user)
         }
@@ -301,7 +301,7 @@ class UserProjectRoleService {
         assert userProjectRole: USER_PROJECT_ROLE_REQUIRED
         assert newProjectRole: "the input projectRole must not be null"
         userProjectRole.projectRole = newProjectRole
-        assert userProjectRole.save(flush: true, failOnError: true)
+        assert userProjectRole.save(flush: true)
         return userProjectRole
     }
 

@@ -75,7 +75,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         createProject(name: 'testProject', nameInMetadataFiles: 'testProject2', dirName: 'testDir')
         createProject(name: 'testProject3', nameInMetadataFiles: null)
         ProjectGroup projectGroup = new ProjectGroup(name: 'projectGroup')
-        projectGroup.save(flush: true, failOnError: true)
+        projectGroup.save(flush: true)
         DomainFactory.createProjectCategory(name: 'category')
 
         int counter = 0

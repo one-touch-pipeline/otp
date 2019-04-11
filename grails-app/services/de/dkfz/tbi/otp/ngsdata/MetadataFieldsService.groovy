@@ -56,7 +56,7 @@ abstract class MetadataFieldsService<T> {
         checkProperties(properties)
         checkNameAndAliases(name, properties, importAliases)
         T t = clazz.newInstance([name: name, importAlias: importAliases] + properties)
-        assert t.save(flush: true, failOnError: true)
+        assert t.save(flush: true)
         return t
     }
 

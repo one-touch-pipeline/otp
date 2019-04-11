@@ -88,7 +88,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
             File statFile = new File(statDir, DUMMY_STAT_SIZE_FILE_NAME)
             workPackage.refresh()
             workPackage.statSizeFileName = statFile.name
-            workPackage.save(flush: true, failOnError: true)
+            workPackage.save(flush: true)
         }
 
         when:
@@ -102,7 +102,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         SessionUtils.withNewSession {
             workPackage.refresh()
             workPackage.statSizeFileName = getChromosomeStatFileName()
-            workPackage.save(flush: true, failOnError: true)
+            workPackage.save(flush: true)
 
             restartWorkflowFromFailedStep()
         }

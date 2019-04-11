@@ -63,7 +63,7 @@ class ExecuteWgbsAlignmentJobTests {
         roddyBamFile.workPackage.metaClass.seqTracks = SeqTrack.list()
 
         roddyBamFile.referenceGenome.cytosinePositionsIndex = "cytosine_idx.pos.gz"
-        roddyBamFile.referenceGenome.save(flush: true, failOnError: true)
+        roddyBamFile.referenceGenome.save(flush: true)
         File referenceGenomeDirectory = new File("${tmpDir.root}/processing/reference_genomes")
         DomainFactory.createProcessingOptionBasePathReferenceGenome(referenceGenomeDirectory.path)
         cpiFile = CreateFileHelper.createFile(

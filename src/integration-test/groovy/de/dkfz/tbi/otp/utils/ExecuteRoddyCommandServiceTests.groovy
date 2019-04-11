@@ -290,7 +290,7 @@ class ExecuteRoddyCommandServiceTests {
         roddyBamFile.roddyExecutionDirectoryNames = [
                 RODDY_EXECUTION_DIR_NAME_1,
         ]
-        roddyBamFile.save(flush: true, failOnError: true)
+        roddyBamFile.save(flush: true)
         assert roddyBamFile.workDirectory.mkdirs()
 
         helperFor_testDefaultRoddyExecutionCommand_AllFine()
@@ -307,7 +307,7 @@ class ExecuteRoddyCommandServiceTests {
                 RODDY_EXECUTION_DIR_NAME_1,
                 RODDY_EXECUTION_DIR_NAME_2,
         ]
-        roddyBamFile.save(flush: true, failOnError: true)
+        roddyBamFile.save(flush: true)
 
         helperFor_testDefaultRoddyExecutionCommand_AllFine()
 

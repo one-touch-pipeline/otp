@@ -72,20 +72,20 @@ class AbstractAlignmentStartJobTest {
         setupData()
         MergingWorkPackage tooLowPriority = createMergingWorkPackage()
         tooLowPriority.project.processingPriority = ProcessingPriority.MINIMUM.priority
-        assert tooLowPriority.save(flush: true, failOnError: true)
+        assert tooLowPriority.save(flush: true)
 
         MergingWorkPackage lowPriority = createMergingWorkPackage()
         lowPriority.project.processingPriority = ProcessingPriority.NORMAL.priority
-        assert lowPriority.save(flush: true, failOnError: true)
+        assert lowPriority.save(flush: true)
 
         MergingWorkPackage highPriority = createMergingWorkPackage()
         highPriority.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
-        assert highPriority.save(flush: true, failOnError: true)
+        assert highPriority.save(flush: true)
 
         MergingWorkPackage doesNotNeedProcessing = createMergingWorkPackage()
         doesNotNeedProcessing.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
         doesNotNeedProcessing.needsProcessing = false
-        assert doesNotNeedProcessing.save(flush: true, failOnError: true)
+        assert doesNotNeedProcessing.save(flush: true)
 
         assert [highPriority, lowPriority] == testAbstractAlignmentStartJob.findProcessableMergingWorkPackages(ProcessingPriority.NORMAL)
     }
@@ -289,7 +289,7 @@ class AbstractAlignmentStartJobTest {
         setupData()
         Collection<SeqTrack> seqTracks = [DomainFactory.createSeqTrackWithDataFiles(mwp)]
         mwp.seqTracks = seqTracks
-        mwp.save(flush: true, failOnError: true)
+        mwp.save(flush: true)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
         RoddyBamFile rbf = testAbstractAlignmentStartJob.createBamFile(mwp, null)
@@ -317,7 +317,7 @@ class AbstractAlignmentStartJobTest {
                 DomainFactory.createSeqTrackWithDataFiles(mwp),
         ]
         mwp.seqTracks.addAll(additionalSeqTracks)
-        mwp.save(flush: true, failOnError: true)
+        mwp.save(flush: true)
 
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
 
@@ -351,7 +351,7 @@ class AbstractAlignmentStartJobTest {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackage()
         mwp.project.processingPriority = ProcessingPriority.NORMAL.priority - 1 as short
-        assert mwp.save(flush: true, failOnError: true)
+        assert mwp.save(flush: true)
 
         withJobExecutionPlan {
             testAbstractAlignmentStartJob.startAlignment()
@@ -421,7 +421,7 @@ class AbstractAlignmentStartJobTest {
     MergingWorkPackage createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState dataInstallationState) {
         MergingWorkPackage mergingWorkPackage = createMergingWorkPackage()
         mergingWorkPackage.seqTracks = [DomainFactory.createSeqTrackWithDataFiles(mergingWorkPackage, [dataInstallationState: dataInstallationState])]
-        mergingWorkPackage.save(flush: true, failOnError: true)
+        mergingWorkPackage.save(flush: true)
         return mergingWorkPackage
     }
 
@@ -429,7 +429,7 @@ class AbstractAlignmentStartJobTest {
         try {
             JobExecutionPlan jep = DomainFactory.createJobExecutionPlan(enabled: true)
             jep.firstJob = DomainFactory.createJobDefinition(plan: jep)
-            assert jep.save(failOnError: true)
+            assert jep.save()
             testAbstractAlignmentStartJob.jep = jep
             closure()
         } finally {

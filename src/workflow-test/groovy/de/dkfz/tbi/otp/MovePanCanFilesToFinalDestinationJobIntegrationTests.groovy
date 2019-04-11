@@ -78,7 +78,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
                 RoddyBamFile roddyBamFile1 = RoddyBamFile.get(id)
                 roddyBamFile1.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
                 roddyBamFile1.md5sum = null
-                assert roddyBamFile1.save(failOnError: true)
+                assert roddyBamFile1.save()
                 return roddyBamFile1
             }
             movePanCanFilesToFinalDestinationJob.linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm ->

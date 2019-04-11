@@ -193,7 +193,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
         roddyResult.roddyExecutionDirectoryNames.add(directory.name)
 
         assert roddyResult.roddyExecutionDirectoryNames.last() == roddyResult.roddyExecutionDirectoryNames.max()
-        assert roddyResult.save(flush: true, failOnError: true)
+        assert roddyResult.save(flush: true)
     }
 
     File parseRoddyExecutionStoreDirectoryFromRoddyOutput(String roddyOutput) {

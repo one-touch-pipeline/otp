@@ -118,7 +118,7 @@ class DataSwapService {
             }
             assert seqTrack.class == newSeqType.seqTrackClass
             seqTrack.seqType = newSeqType
-            assert seqTrack.save(failOnError: true, flush: true)
+            assert seqTrack.save(flush: true)
         }
         return seqTrack
     }
@@ -673,7 +673,7 @@ chmod 440 ${newDirectFileName}
 
         sample.sampleType = newSampleType
         sample.individual = newIndividual
-        sample.save(flush: true, failOnError: true)
+        sample.save(flush: true)
 
         renameSampleIdentifiers(sample, outputStringBuilder)
 

@@ -534,11 +534,12 @@ AND entry.value = :value
     static void logToSeqTrack(SeqTrack seqTrack, String message, boolean saveInSeqTrack = true) {
         threadLog?.info(MessageFormat.format(message, " " + seqTrack))
         if (saveInSeqTrack) {
+            seqTrack.save(flush: true)
             SeqTrack.withTransaction {
                 LogMessage logMessage = new LogMessage(message: MessageFormat.format(message, ""))
-                logMessage.save(flush: true, failOnError: true)
+                logMessage.save(flush: true)
                 seqTrack.logMessages.add(logMessage)
-                seqTrack.save(flush: true, failOnError: true)
+                seqTrack.save(flush: true)
             }
         }
     }

@@ -193,7 +193,7 @@ class ProjectService {
         project.tumorEntity = projectParams.tumorEntity
         project.species = getSpecies(projectParams.species)
 
-        assert project.save(flush: true, failOnError: true)
+        assert project.save(flush: true)
 
         createProjectDirectoryIfNeeded(project, projectParams)
 
@@ -333,14 +333,14 @@ class ProjectService {
     void configureNoAlignmentDeciderProject(Project project) {
         deprecateAllReferenceGenomesByProject(project)
         project.alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT
-        project.save(flush: true, failOnError: true)
+        project.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configureDefaultOtpAlignmentDecider(Project project, String referenceGenomeName) {
         deprecateAllReferenceGenomesByProject(project)
         project.alignmentDeciderBeanName = AlignmentDeciderBeanName.OTP_ALIGNMENT
-        project.save(flush: true, failOnError: true)
+        project.save(flush: true)
         ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(referenceGenomeName))
         SeqType seqType_wgp = SeqTypeService.getWholeGenomePairedSeqType()
         SeqType seqType_exome = SeqTypeService.getExomePairedSeqType()
@@ -350,7 +350,7 @@ class ProjectService {
             refSeqType.seqType = seqType
             refSeqType.referenceGenome = referenceGenome
             refSeqType.sampleType = null
-            refSeqType.save(flush: true, failOnError: true)
+            refSeqType.save(flush: true)
         }
     }
 
@@ -404,7 +404,7 @@ class ProjectService {
 
         ReferenceGenomeProjectSeqType refSeqType = createReferenceGenomeProjectSeqType(panCanAlignmentConfiguration, referenceGenome)
         refSeqType.statSizeFileName = panCanAlignmentConfiguration.statSizeFileName
-        refSeqType.save(flush: true, failOnError: true)
+        refSeqType.save(flush: true)
 
         alignmentHelper(panCanAlignmentConfiguration, pipeline, RoddyPanCanConfigTemplate.createConfig(panCanAlignmentConfiguration),
                 panCanAlignmentConfiguration.adapterTrimmingNeeded)
@@ -555,7 +555,7 @@ class ProjectService {
             refSeqType.alignmentProperties = alignmentProperties.collect { String key, String value ->
                 new ReferenceGenomeProjectSeqTypeAlignmentProperty(name: key, value: value, referenceGenomeProjectSeqType: refSeqType)
             } as Set
-            refSeqType.save(flush: true, failOnError: true)
+            refSeqType.save(flush: true)
         }
     }
 
@@ -566,7 +566,7 @@ class ProjectService {
             deprecateAllReferenceGenomesByProjectAndSeqType(config.project, config.seqType)
         }
         config.project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
-        config.project.save(flush: true, failOnError: true)
+        config.project.save(flush: true)
     }
 
     private ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(RoddyConfiguration config, ReferenceGenome referenceGenome) {
@@ -836,28 +836,28 @@ echo 'OK'
     private void deprecateAllReferenceGenomesByProject(Project project) {
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndDeprecatedDateIsNull(project)
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
-        referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
+        referenceGenomeProjectSeqTypes*.save(flush: true)
     }
 
     private void deprecateAllReferenceGenomesByProjectAndSeqType(Project project, SeqType seqType) {
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(
                 project, seqType)
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
-        referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
+        referenceGenomeProjectSeqTypes*.save(flush: true)
     }
 
     private void deprecateReferenceGenomeByProjectAndSeqTypeAndNoSampleType(Project project, SeqType seqType) {
         ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType =
                 ReferenceGenomeProjectSeqType.findByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
         referenceGenomeProjectSeqType?.deprecatedDate = new Date()
-        referenceGenomeProjectSeqType?.save(flush: true, failOnError: true)
+        referenceGenomeProjectSeqType?.save(flush: true)
     }
 
     private void deprecateAllReferenceGenomesByProjectAndSeqTypeAndSampleTypes(Project project, SeqType seqType, List<SampleType> sampleTypes) {
         Set<ReferenceGenomeProjectSeqType> referenceGenomeProjectSeqTypes = sampleTypes ?
                 ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeInListAndDeprecatedDateIsNull(project, seqType, sampleTypes) : []
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
-        referenceGenomeProjectSeqTypes*.save(flush: true, failOnError: true)
+        referenceGenomeProjectSeqTypes*.save(flush: true)
     }
 
 

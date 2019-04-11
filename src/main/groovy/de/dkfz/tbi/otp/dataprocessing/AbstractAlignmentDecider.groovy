@@ -54,7 +54,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
             pipeline = new Pipeline(
                     name: pipelineName(seqTrack),
                     type: Pipeline.Type.ALIGNMENT
-            ).save(failOnError: true)
+            ).save(flush: true)
         }
         return pipeline
     }

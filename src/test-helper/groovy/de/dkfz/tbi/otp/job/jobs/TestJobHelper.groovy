@@ -37,7 +37,7 @@ class TestJobHelper {
     static TestJob createTestJobWithProcessingStep(final ProcessParameterObject processParameterValue = null) {
         ProcessingStep processingStep = createAndSaveProcessingStep()
         if (processParameterValue != null) {
-            assert createProcessParameter(processingStep.process, processParameterValue).save(failOnError: true)
+            assert createProcessParameter(processingStep.process, processParameterValue).save()
         }
         TestJob testJob = new TestJob(processingStep, [])
         return testJob

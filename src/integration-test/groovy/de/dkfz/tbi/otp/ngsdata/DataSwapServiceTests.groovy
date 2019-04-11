@@ -498,8 +498,8 @@ class DataSwapServiceTests implements UserAndRoles {
 
         AbstractMergedBamFile processedMergedBamFile = DomainFactory.createProcessedMergedBamFile(mergingPass: mergingPass, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS, workPackage: workPackage)
         workPackage.bamFileInProjectFolder = processedMergedBamFile
-        workPackage.save(flush: true, failOnError: true)
-        alignmentPass.save(flush: true, failOnError: true)
+        workPackage.save(flush: true)
+        alignmentPass.save(flush: true)
 
         dataSwapService.deleteAllProcessingInformationAndResultOfOneSeqTrack(alignmentPass.seqTrack)
 

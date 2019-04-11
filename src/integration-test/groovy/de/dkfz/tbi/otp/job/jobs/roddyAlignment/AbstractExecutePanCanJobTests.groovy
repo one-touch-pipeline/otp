@@ -114,7 +114,7 @@ class AbstractExecutePanCanJobTests {
         CreateFileHelper.createFile(configFile)
         RoddyWorkflowConfig config = roddyBamFile.config
         config.configFilePath = configFile.path
-        assert config.save(failOnError: true)
+        assert config.save()
 
         chromosomeStatSizeFile = abstractExecutePanCanJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false)
         CreateFileHelper.createFile(chromosomeStatSizeFile)

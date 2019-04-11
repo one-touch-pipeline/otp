@@ -66,7 +66,7 @@ trait IsRoddy implements IsPipeline {
                 project: workPackage.project,
                 seqType: workPackage.seqType
         )
-        workPackage.save(flush: true, failOnError: true)
+        workPackage.save(flush: true)
         T bamFile = createDomainObject(clazz, bamFileDefaultProperties(properties, seqTracks, workPackage) +
                 [
                 workDirectoryName           : "${RoddyBamFile.WORK_DIR_PREFIX}_${nextId}",

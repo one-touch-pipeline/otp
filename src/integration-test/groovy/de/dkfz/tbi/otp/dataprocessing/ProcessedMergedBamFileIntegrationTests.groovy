@@ -139,7 +139,7 @@ class ProcessedMergedBamFileIntegrationTests {
         ])
         File expected = new File(bamFile.baseDirectory, bamFile.bamFileName)
         bamFile.mergingWorkPackage.bamFileInProjectFolder = bamFile
-        assert bamFile.mergingWorkPackage.save(flush: true, failOnError: true)
+        assert bamFile.mergingWorkPackage.save(flush: true)
 
         assert expected == bamFile.getPathForFurtherProcessing()
     }

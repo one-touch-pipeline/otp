@@ -213,7 +213,7 @@ class RoddyAlignmentDeciderTest {
                 statSizeFileName: pipeline.name == Pipeline.Name.PANCAN_ALIGNMENT ? DomainFactory.DEFAULT_TAB_FILE_NAME : null,
                 ]
         )
-        workPackage.save(failOnError: true)
+        workPackage.save()
 
         decider.prepareForAlignment(workPackage, seqTrack, false)
 

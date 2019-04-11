@@ -438,7 +438,7 @@ class TrackingServiceIntegrationSpec extends Specification {
                     DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack2] as Set],
             ))
             ((MergingWorkPackage) (abstractMergedBamFile.workPackage)).seqTracks.add(seqTrack2)
-            abstractMergedBamFile.workPackage.save(flush: true, failOnError: true)
+            abstractMergedBamFile.workPackage.save(flush: true)
             ProcessingStatus expectedStatus = [
                     getInstallationProcessingStatus: { -> ALL_DONE },
                     getFastqcProcessingStatus      : { -> ALL_DONE },
@@ -862,7 +862,7 @@ class TrackingServiceIntegrationSpec extends Specification {
             Set<SeqTrack> seqTracks = new HashSet<SeqTrack>(((MergingWorkPackage) (bamFile.workPackage)).seqTracks)
             seqTrack1Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithDataFiles(bamFile.mergingWorkPackage, [:], [fileWithdrawn: true]))
             ((MergingWorkPackage) (bamFile.workPackage)).seqTracks = seqTracks
-            bamFile.workPackage.save(flush: true, failOnError: true)
+            bamFile.workPackage.save(flush: true)
             seqTrack2Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
         }
 

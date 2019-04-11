@@ -46,7 +46,7 @@ class SeqCenterService {
             name: name,
             dirName: dirName
         )
-        assert seqCenter.save(flush: true, failOnError: true)
+        assert seqCenter.save(flush: true)
         return seqCenter
     }
 }

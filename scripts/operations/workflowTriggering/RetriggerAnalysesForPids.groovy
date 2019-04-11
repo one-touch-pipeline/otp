@@ -97,14 +97,14 @@ LogThreadLocal.withThreadLog(System.out, {
                     instanceClass.findAllBySamplePair(samplePair).each { BamFilePairAnalysis instance ->
                         if (instance.processingState == AnalysisProcessingStates.IN_PROGRESS) {
                             instance.withdrawn = true
-                            instance.save(flush: true, failOnError: true)
+                            instance.save(flush: true)
                             actions << "withdraw: ${instance.class.simpleName}:${instance.id}"
                         }
                     }
 
                     actions << "${processingStatusName}: ${samplePair."$processingStatusName"} -> ${SamplePair.ProcessingStatus.NEEDS_PROCESSING}"
                     samplePair."$processingStatusName" = SamplePair.ProcessingStatus.NEEDS_PROCESSING
-                    samplePair.save(flush: true, failOnError: true)
+                    samplePair.save(flush: true)
                 }
                 output << sprintf("  * %-10s : %s", [analysis, actions.join('; ')])
             }

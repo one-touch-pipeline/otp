@@ -138,7 +138,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                         targetSize: 62085295,
                         mergedTargetSize: 62085286,
                 )
-                assert bedFile.save(flush: true, failOnError: true)
+                assert bedFile.save(flush: true)
             }
 
             setPermissionsRecursive(baseDirectory, TEST_DATA_MODE_DIR, TEST_DATA_MODE_FILE)
@@ -186,7 +186,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                 shortDisplayName: "~* xX lPk Xx *~",
                 adapterFile: new File(getInputRootDirectory(), 'adapters/TruSeq3-PE.fa').absolutePath,
                 reverseComplementAdapterSequence: "AATGATACGGCGACCACCGAGATCTACACTCTTTCCCTACACGACGCTCTTCCGATCT",
-        ).save(flush: true, failOnError: true)
+        ).save(flush: true)
 
         MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
                 pipeline: pipeline,
@@ -333,7 +333,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         if (!oldStructure) {
             firstBamFile.workDirectoryName = "${RoddyBamFile.WORK_DIR_PREFIX}_0"
         }
-        assert firstBamFile.save(flush: true, failOnError: true)
+        assert firstBamFile.save(flush: true)
 
 
         Map<File, String> filesWithContent = [:]
@@ -359,7 +359,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
         workPackage.bamFileInProjectFolder = firstBamFile
         workPackage.needsProcessing = false
-        assert workPackage.save(flush: true, failOnError: true)
+        assert workPackage.save(flush: true)
 
         return firstBamFile
     }

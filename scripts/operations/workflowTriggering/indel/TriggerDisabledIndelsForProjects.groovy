@@ -50,7 +50,7 @@ LogThreadLocal.withThreadLog(System.out, {
     SamplePair.withTransaction {
         samplePairs.each {
             it.indelProcessingStatus = SamplePair.ProcessingStatus.NEEDS_PROCESSING
-            println it.save(flush: true, failOnError: true)
+            println it.save(flush: true)
         }
     }
 })

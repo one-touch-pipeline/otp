@@ -453,7 +453,7 @@ echo \$TEMP_DIR
 
         ProcessingOption.findAllByName(OptionName.CLUSTER_SUBMISSIONS_OPTION).each {
             it.value = jobSubmissionOptions
-            it.save(failOnError: true, flush: true)
+            it.save(flush: true)
         }
     }
 

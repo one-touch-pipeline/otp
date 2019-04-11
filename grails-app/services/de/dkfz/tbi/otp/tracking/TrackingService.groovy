@@ -67,7 +67,7 @@ class TrackingService {
                 seqCenterComment: seqCenterComment,
                 automaticNotification: automaticNotification,
         )
-        assert otrsTicket.save(flush: true, failOnError: true)
+        assert otrsTicket.save(flush: true)
         return otrsTicket
     }
 
@@ -89,7 +89,7 @@ class TrackingService {
             } else if (seqCenterComment && !otrsTicket.seqCenterComment.contains(seqCenterComment)) {
                 otrsTicket.seqCenterComment += '\n\n' + seqCenterComment
             }
-            assert otrsTicket.save(flush: true, failOnError: true)
+            assert otrsTicket.save(flush: true)
             return otrsTicket
         } else {
             return createOtrsTicket(ticketNumber, seqCenterComment, automaticNotification)
@@ -103,7 +103,7 @@ class TrackingService {
         otrsTicket.aceseqFinished = null
         otrsTicket.runYapsaFinished = null
         otrsTicket.finalNotificationSent = false
-        assert otrsTicket.save(flush: true, failOnError: true)
+        assert otrsTicket.save(flush: true)
     }
 
     void setStartedForSeqTracks(Collection<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
@@ -304,7 +304,7 @@ class TrackingService {
         }
 
         runSegment.otrsTicket = newOtrsTicket
-        assert runSegment.save(flush: true, failOnError: true)
+        assert runSegment.save(flush: true)
 
         ProcessingStatus status = getProcessingStatus(newOtrsTicket.findAllSeqTracks())
         for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
@@ -317,7 +317,7 @@ class TrackingService {
             newOtrsTicket."${step}Started" = [oldOtrsTicket?."${step}Started", newOtrsTicket."${step}Started"].min()
         }
 
-        assert newOtrsTicket.save(flush: true, failOnError: true)
+        assert newOtrsTicket.save(flush: true)
     }
 
     ProcessingStatus getProcessingStatus(Collection<SeqTrack> seqTracks, SamplePairCreation samplePairCreation = new SamplePairCreation()) {

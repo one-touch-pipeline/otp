@@ -445,7 +445,7 @@ newLine"""
         setUpWorkDirAndMockProcessOutput()
 
         roddyBamFile.roddyExecutionDirectoryNames.add("exec_999999_999999999_a_a")
-        assert roddyBamFile.save(flush: true, failOnError: true)
+        assert roddyBamFile.save(flush: true)
 
         shouldFail(AssertionError) {
             roddyJob.saveRoddyExecutionStoreDirectory(roddyBamFile as RoddyResult, stderr)

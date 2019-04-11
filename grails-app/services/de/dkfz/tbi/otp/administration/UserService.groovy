@@ -88,7 +88,7 @@ class UserService {
         assert newName: "the input newName '${newName}' must not be null"
         assert user: "the input user must not be null"
         user.realName = newName
-        assert user.save(flush: true, failOnError: true)
+        assert user.save(flush: true)
         return user
     }
 
@@ -97,7 +97,7 @@ class UserService {
         assert email: "the input Email '${email}' must not be null"
         assert user: "the input user must not be null"
         user.email = email
-        assert user.save(flush: true, failOnError: true)
+        assert user.save(flush: true)
         return user
     }
 
@@ -105,7 +105,7 @@ class UserService {
     User updateAsperaAccount(User user, String aspera) {
         assert user: "the input user must not be null"
         user.asperaAccount = aspera
-        assert user.save(flush: true, failOnError: true)
+        assert user.save(flush: true)
         return user
     }
 

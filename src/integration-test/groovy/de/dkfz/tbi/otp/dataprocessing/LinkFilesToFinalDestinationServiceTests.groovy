@@ -60,14 +60,14 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
         roddyBamFile.fileSize = -1
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING
         roddyBamFile.roddyExecutionDirectoryNames = ["exec_123456_123456789_test_test"]
-        assert roddyBamFile.save(flush: true, failOnError: true)
+        assert roddyBamFile.save(flush: true)
 
         realm = roddyBamFile.project.realm
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
 
         SeqTrack seqTrack = roddyBamFile.seqTracks.iterator()[0]
         seqTrack.fastqcState = SeqTrack.DataProcessingState.FINISHED
-        assert seqTrack.save(flush: true, failOnError: true)
+        assert seqTrack.save(flush: true)
 
         DataFile.findAllBySeqTrack(seqTrack).each {
             it.nReads = numberOfReads
@@ -156,7 +156,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
     void testCleanupWorkDirectory_bamHasOldStructure_shouldFail() {
         setupData()
         roddyBamFile.workDirectoryName = null
-        roddyBamFile.save(flush: true, failOnError: true)
+        roddyBamFile.save(flush: true)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "isOldStructureUsed") {
             linkFilesToFinalDestinationService.cleanupWorkDirectory(roddyBamFile, realm)
@@ -199,7 +199,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
         if (wgbs) {
             SeqType seqType = roddyBamFile.mergingWorkPackage.seqType
             seqType.name = SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName
-            seqType.save(flush: true, failOnError: true)
+            seqType.save(flush: true)
         }
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
@@ -335,7 +335,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
     void testLinkNewResults_bamHasOldStructure_shouldFail() {
         setupData()
         roddyBamFile.workDirectoryName = null
-        roddyBamFile.save(flush: true, failOnError: true)
+        roddyBamFile.save(flush: true)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "isOldStructureUsed") {
             linkFilesToFinalDestinationService.linkNewResults(roddyBamFile, realm)
@@ -345,7 +345,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
     private void testLinkNewResults_methylation_setup() {
         SeqType seqType = roddyBamFile.mergingWorkPackage.seqType
         seqType.name = SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName
-        seqType.save(flush: true, failOnError: true)
+        seqType.save(flush: true)
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
     }
@@ -416,7 +416,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
         setupData()
         finishOperationStateOfRoddyBamFile(roddyBamFile)
         roddyBamFile.workDirectoryName = null
-        roddyBamFile.save(flush: true, failOnError: true)
+        roddyBamFile.save(flush: true)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
 
@@ -463,7 +463,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
     void helper_testCleanupOldResults_withoutBaseBamFile_butBamFilesOfWorkPackageExistInOldStructure(boolean latestIsOld) {
         roddyBamFile.workDirectoryName = null
-        roddyBamFile.save(flush: true, failOnError: true)
+        roddyBamFile.save(flush: true)
         RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(workPackage: roddyBamFile.workPackage, config: roddyBamFile.config)
         CreateRoddyFileHelper.createRoddyAlignmentFinalResultFiles(roddyBamFile)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile2)
@@ -518,7 +518,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
     void testCleanupOldResults_bamHasOldStructure_shouldFail() {
         setupData()
         roddyBamFile.workDirectoryName = null
-        roddyBamFile.save(flush: true, failOnError: true)
+        roddyBamFile.save(flush: true)
 
         TestCase.shouldFailWithMessageContaining(AssertionError, "isOldStructureUsed") {
             linkFilesToFinalDestinationService.cleanupOldResults(roddyBamFile, realm)
@@ -606,7 +606,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
         setupData()
         setUp_allFine()
         roddyBamFile.fileOperationStatus = AbstractMergedBamFile.FileOperationStatus.DECLARED
-        roddyBamFile.save(flush: true, failOnError: true)
+        roddyBamFile.save(flush: true)
 
         assert TestCase.shouldFail(AssertionError) {
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)

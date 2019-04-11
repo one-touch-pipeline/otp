@@ -193,7 +193,7 @@ assert new Individual(
 \tmockFullName: '${newIndividualName}',
 \ttype: Individual.Type.REAL,
 \tproject: Project.findByName('${newProject.name}'),
-).save(flush: true, failOnError: true) : "Error creating new Individual '${newIndividualName}'"
+).save(flush: true) : "Error creating new Individual '${newIndividualName}'"
 """
                     createdPids << newIndividualName
                 }
@@ -208,7 +208,7 @@ assert new Individual(
 assert new Sample(
 \tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${newIndividualName}')),
 \tsampleType: CollectionUtils.exactlyOneElement(SampleType.findAllByName('${newSampleTypeName}'))
-).save(flush: true, failOnError: true) : "Error creating new Sample '${newIndividualName} ${newSampleTypeName}'"
+).save(flush: true) : "Error creating new Sample '${newIndividualName} ${newSampleTypeName}'"
 """
                     createdSamples << "${newIndividualName} ${newSampleTypeName}".toString()
                     sampleExists = true

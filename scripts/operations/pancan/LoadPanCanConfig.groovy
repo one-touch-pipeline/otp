@@ -117,7 +117,7 @@ LogThreadLocal.withThreadLog(System.out, { Project.withTransaction {
     }
 
     project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
-    assert project.save(flush: true, failOnError: true)
+    assert project.save(flush: true)
 
     println "Config file loaded."
     println "Don't forget to also configure the reference genome (ConfigureReferenceGenome.groovy)."

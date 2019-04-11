@@ -48,7 +48,7 @@ class MergingSetServiceTests {
                         name: "name_1",
                         dirName: "dirName",
                         )
-        assertNotNull(project.save([flush: true, failOnError: true]))
+        assertNotNull(project.save([flush: true]))
 
         Individual individual = new Individual(
                         pid: "pid_1",
@@ -57,18 +57,18 @@ class MergingSetServiceTests {
                         type: Individual.Type.UNDEFINED,
                         project: project
                         )
-        assertNotNull(individual.save([flush: true, failOnError: true]))
+        assertNotNull(individual.save([flush: true]))
 
         SampleType sampleType = new SampleType(
                         name: "name-1"
                         )
-        assertNotNull(sampleType.save([flush: true, failOnError: true]))
+        assertNotNull(sampleType.save([flush: true]))
 
         sample = new Sample(
                         individual: individual,
                         sampleType: sampleType
                         )
-        assertNotNull(sample.save([flush: true, failOnError: true]))
+        assertNotNull(sample.save([flush: true]))
 
         seqType = DomainFactory.createSeqType()
 
@@ -78,21 +78,21 @@ class MergingSetServiceTests {
                         name: "name",
                         dirName: "dirName"
                         )
-        assertNotNull(seqCenter.save([flush: true, failOnError: true]))
+        assertNotNull(seqCenter.save([flush: true]))
 
         Run run = new Run(
                         name: "name",
                         seqCenter: seqCenter,
                         seqPlatform: seqPlatform,
                         )
-        assertNotNull(run.save([flush: true, failOnError: true]))
+        assertNotNull(run.save([flush: true]))
 
         SoftwareTool softwareTool = new SoftwareTool(
                         programName: "name",
                         programVersion: "version",
                         type: Type.ALIGNMENT
                         )
-        assertNotNull(softwareTool.save([flush: true, failOnError: true]))
+        assertNotNull(softwareTool.save([flush: true]))
 
         seqTrack = new SeqTrack(
                         laneId: "laneId",
@@ -102,7 +102,7 @@ class MergingSetServiceTests {
                         seqPlatform: seqPlatform,
                         pipelineVersion: softwareTool
                         )
-        assertNotNull(seqTrack.save([flush: true, failOnError: true]))
+        assertNotNull(seqTrack.save([flush: true]))
         seqTrack2 = new SeqTrack(
                         laneId: "laneId2",
                         run: run,
@@ -111,7 +111,7 @@ class MergingSetServiceTests {
                         seqPlatform: seqPlatform,
                         pipelineVersion: softwareTool
         )
-        assertNotNull(seqTrack2.save([flush: true, failOnError: true]))
+        assertNotNull(seqTrack2.save([flush: true]))
     }
 
     @After
@@ -136,13 +136,13 @@ class MergingSetServiceTests {
                         identifier: 0,
                         mergingWorkPackage: mergingWorkPackage
                         )
-        assertNotNull(mergingSet.save([flush: true, failOnError: true]))
+        assertNotNull(mergingSet.save([flush: true]))
         assertEquals(1, MergingSet.nextIdentifier(mergingWorkPackage))
         MergingSet mergingSet2 = new MergingSet(
                         identifier: 1,
                         mergingWorkPackage: mergingWorkPackage
                         )
-        assertNotNull(mergingSet2.save([flush: true, failOnError: true]))
+        assertNotNull(mergingSet2.save([flush: true]))
         assertEquals(2, MergingSet.nextIdentifier(mergingWorkPackage))
     }
 
@@ -150,7 +150,7 @@ class MergingSetServiceTests {
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqType)
 
         MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(MergingWorkPackage.getMergingProperties(seqTrack) + [pipeline: DomainFactory.createDefaultOtpPipeline()])
-        assertNotNull(mergingWorkPackage.save([flush: true, failOnError: true]))
+        assertNotNull(mergingWorkPackage.save([flush: true]))
         return mergingWorkPackage
     }
 

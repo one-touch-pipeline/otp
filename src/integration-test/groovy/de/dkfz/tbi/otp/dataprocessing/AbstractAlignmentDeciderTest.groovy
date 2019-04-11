@@ -118,7 +118,7 @@ class AbstractAlignmentDeciderTest {
         setupData()
         SeqTrack seqTrack = buildSeqTrack()
         seqTrack.seqType = DomainFactory.createSeqType(name: "Invalid")
-        seqTrack.save(flush: true, failOnError: true)
+        seqTrack.save(flush: true)
 
         Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
         assert workPackages.empty

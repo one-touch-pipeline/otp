@@ -200,7 +200,7 @@ class FastqcJobTest {
 
         dataFile.nReads = nReads
         dataFile.sequenceLength = sequenceLength
-        dataFile.save(flush: true, failOnError: true)
+        dataFile.save(flush: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
         DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, nReads: nReads, sequenceLength: sequenceLength, fileType: dataFile.fileType])
@@ -219,7 +219,7 @@ class FastqcJobTest {
 
         dataFile.nReads = nReads1
         dataFile.sequenceLength = sequenceLength
-        dataFile.save(flush: true, failOnError: true)
+        dataFile.save(flush: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
         DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, nReads: nReads2, sequenceLength: sequenceLength])
@@ -240,7 +240,7 @@ class FastqcJobTest {
 
         dataFile.sequenceLength = sequenceLength
         dataFile.nReads = nReads
-        dataFile.save(flush: true, failOnError: true)
+        dataFile.save(flush: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
         DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength, nReads: nReads, fileType: dataFile.fileType])
@@ -259,7 +259,7 @@ class FastqcJobTest {
 
         dataFile.sequenceLength = sequenceLength1
         dataFile.nReads = nReads
-        dataFile.save(flush: true, failOnError: true)
+        dataFile.save(flush: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
         DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength2, nReads: nReads, fileType: dataFile.fileType])
@@ -278,7 +278,7 @@ class FastqcJobTest {
 
         dataFile.sequenceLength = sequenceLength1
         dataFile.nReads = nReads
-        dataFile.save(flush: true, failOnError: true)
+        dataFile.save(flush: true)
         DomainFactory.createFastqcProcessedFile([dataFile: dataFile])
 
         DataFile dataFile2 = DomainFactory.createDataFile([seqTrack: seqTrack, project: seqTrack.project, run: seqTrack.run, runSegment: runSegment, sequenceLength: sequenceLength2, nReads: nReads, fileType: dataFile.fileType])

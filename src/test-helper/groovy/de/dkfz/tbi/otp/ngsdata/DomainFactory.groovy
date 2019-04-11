@@ -107,7 +107,7 @@ class DomainFactory {
             domain[key] = value
         }
         if (saveAndValidate) {
-            assert domain.save(flush: true, failOnError: true)
+            assert domain.save(flush: true)
         }
         return domain
     }
@@ -794,7 +794,7 @@ class DomainFactory {
             final MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         SeqTrack seqTrack = createSeqTrackWithDataFiles(mergingWorkPackage)
         mergingWorkPackage.seqTracks.add(seqTrack)
-        mergingWorkPackage.save(flush: true, failOnError: true)
+        mergingWorkPackage.save(flush: true)
 
         final ProcessedBamFile bamFile = createProcessedBamFile([
                 alignmentPass          : createAlignmentPass([
@@ -958,7 +958,7 @@ class DomainFactory {
         MergingWorkPackage mwp = new MergingWorkPackage((mergingProperties + []).collectEntries {
             [it, base."${it}"]
         } + properties)
-        assert mwp.save(flush: true, failOnError: true)
+        assert mwp.save(flush: true)
         return mwp
     }
 
@@ -1022,7 +1022,7 @@ class DomainFactory {
                 mergingWorkPackage1: mergingWorkPackage1,
                 mergingWorkPackage2: mergingWorkPackage2,
         ] + properties)
-        return samplePair.save(flush: true, failOnError: true)
+        return samplePair.save(flush: true)
     }
 
     static
@@ -1927,7 +1927,7 @@ class DomainFactory {
         createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
         mergingWorkPackage.addToSeqTracks(seqTrack)
-        mergingWorkPackage.save(flush: true, failOnError: true)
+        mergingWorkPackage.save(flush: true)
 
         assert mergingWorkPackage.satisfiesCriteria(seqTrack)
         return seqTrack

@@ -130,14 +130,14 @@ ReferenceGenome.withTransaction {
                     ReferenceGenomeProjectSeqType.findAllWhere(keyProperties + [deprecatedDate: null]))
             if (oldReferenceGenomeProjectSeqType) {
                 oldReferenceGenomeProjectSeqType.deprecatedDate = new Date()
-                assert oldReferenceGenomeProjectSeqType.save(flush: true, failOnError: true)
+                assert oldReferenceGenomeProjectSeqType.save(flush: true)
                 println "Deprecated ${oldReferenceGenomeProjectSeqType}"
             }
             ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = new ReferenceGenomeProjectSeqType(keyProperties + [
                     referenceGenome: referenceGenome,
                     statSizeFileName: statSizeFileName,
             ])
-            assert referenceGenomeProjectSeqType.save(flush: true, failOnError: true)
+            assert referenceGenomeProjectSeqType.save(flush: true)
             println "Created ${referenceGenomeProjectSeqType}"
         }
     }

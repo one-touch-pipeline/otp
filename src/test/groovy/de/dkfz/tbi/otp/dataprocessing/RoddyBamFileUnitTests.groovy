@@ -391,9 +391,9 @@ class RoddyBamFileUnitTests {
     @Test
     void testGetPathForFurtherProcessing_useOldStructure_shouldReturnFinalDir() {
         roddyBamFile.workDirectoryName = null
-        assert roddyBamFile.save(flush: true, failOnError: true)
+        assert roddyBamFile.save(flush: true)
         roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        assert roddyBamFile.mergingWorkPackage.save(flush: true, failOnError: true)
+        assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         assert roddyBamFile.finalBamFile == roddyBamFile.getPathForFurtherProcessing()
     }
@@ -401,9 +401,9 @@ class RoddyBamFileUnitTests {
     @Test
     void testGetPathForFurtherProcessing_useNewStructure_shouldReturnWorkDir() {
         roddyBamFile.workDirectoryName = 'someDir'
-        assert roddyBamFile.save(flush: true, failOnError: true)
+        assert roddyBamFile.save(flush: true)
         roddyBamFile.mergingWorkPackage.bamFileInProjectFolder = roddyBamFile
-        assert roddyBamFile.mergingWorkPackage.save(flush: true, failOnError: true)
+        assert roddyBamFile.mergingWorkPackage.save(flush: true)
 
         assert roddyBamFile.workBamFile == roddyBamFile.getPathForFurtherProcessing()
     }
@@ -411,7 +411,7 @@ class RoddyBamFileUnitTests {
     @Test
     void testGetPathForFurtherProcessing_useNewStructure_notSetInMergingWorkPackage_shouldThrowException() {
         roddyBamFile.workDirectoryName = 'someDir'
-        assert roddyBamFile.save(flush: true, failOnError: true)
+        assert roddyBamFile.save(flush: true)
         TestCase.shouldFail(IllegalStateException) {
             roddyBamFile.getPathForFurtherProcessing()
         }

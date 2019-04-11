@@ -188,7 +188,7 @@ class QcThresholdService {
             qcThreshold.warningThresholdUpper = warningThresholdUpper
             qcThreshold.errorThresholdUpper = errorThresholdUpper
             qcThreshold.qcProperty2 = property2
-            qcThreshold.save(flush: true, failOnError: true)
+            qcThreshold.save(flush: true)
         } catch (ValidationException e) {
             return e.errors
         }

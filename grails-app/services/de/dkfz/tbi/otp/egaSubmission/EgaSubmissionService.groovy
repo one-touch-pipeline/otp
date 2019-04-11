@@ -49,7 +49,7 @@ class EgaSubmissionService {
                 state: EgaSubmission.State.SELECTION,
                 selectionState: EgaSubmission.SelectionState.SELECT_SAMPLES,
         ])
-        assert submission.save(flush: true, failOnError: true)
+        assert submission.save(flush: true)
 
         return submission
     }

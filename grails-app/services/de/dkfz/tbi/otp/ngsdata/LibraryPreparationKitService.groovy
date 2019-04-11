@@ -33,7 +33,7 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
         assert libraryPreparationKit : "libraryPreparationKit must not be null"
         assert adapterFile : "adapterFile must not be null"
         libraryPreparationKit.adapterFile = adapterFile
-        assert libraryPreparationKit.save(flush: true, failOnError: true)
+        assert libraryPreparationKit.save(flush: true)
         return libraryPreparationKit
     }
 
@@ -42,7 +42,7 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
         assert libraryPreparationKit : "libraryPreparationKit must not be null"
         assert reverseComplementAdapterSequence : "reverseComplementAdapterSequence must not be null"
         libraryPreparationKit.reverseComplementAdapterSequence = reverseComplementAdapterSequence
-        assert libraryPreparationKit.save(flush: true, failOnError: true)
+        assert libraryPreparationKit.save(flush: true)
         return libraryPreparationKit
     }
 

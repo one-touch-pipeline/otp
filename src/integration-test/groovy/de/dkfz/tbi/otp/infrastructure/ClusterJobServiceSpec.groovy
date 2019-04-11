@@ -1674,7 +1674,7 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
         ] + myProps
 
         Realm realm = DomainFactory.createRealm()
-        assert realm.save([flush: true, failOnError: true])
+        assert realm.save([flush: true])
 
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep(props.jobClass)
         assert processingStep
@@ -1689,7 +1689,7 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
             job."${key}" = value
         }
 
-        assert job.save([flush: true, failOnError: true])
+        assert job.save([flush: true])
 
         return job
     }
@@ -1698,7 +1698,7 @@ class ClusterJobServiceSpec extends Specification implements DomainFactoryCore {
         ClusterJob job = createClusterJob(clusterJobProps)
 
         if (!run) {
-            run = DomainFactory.createRun().save([flush: true, failOnError: true])
+            run = DomainFactory.createRun().save([flush: true])
         }
 
         DomainFactory.createProcessParameter(job.processingStep.process, 'de.dkfz.tbi.otp.ngsdata.Run', run.id.toString())

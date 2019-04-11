@@ -69,7 +69,7 @@ trait CellRangerFactory implements IsAlignment {
         }
         Collection<SeqTrack> seqTracks = properties.seqTracks ?: [DomainFactory.createSeqTrackWithDataFiles(workPackage)]
         workPackage.seqTracks = seqTracks
-        workPackage.save(flush: true, failOnError: true)
+        workPackage.save(flush: true)
         SingleCellBamFile bamFile = createDomainObject(SingleCellBamFile, bamFileDefaultProperties(properties, seqTracks, workPackage) +
                 [
                         workDirectoryName  : "singleCell_${nextId}",

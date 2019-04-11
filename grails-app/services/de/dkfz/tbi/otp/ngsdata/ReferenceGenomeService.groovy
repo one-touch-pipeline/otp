@@ -187,7 +187,7 @@ class ReferenceGenomeService {
         )
         referenceGenome.chromosomePrefix = chromosomePrefix
         referenceGenome.chromosomeSuffix = chromosomeSuffix
-        referenceGenome.save(flush: true, failOnError: true)
+        referenceGenome.save(flush: true)
 
 
         fastaEntries.each { entry ->
@@ -198,14 +198,14 @@ class ReferenceGenomeService {
                     lengthWithoutN: entry.lengthWithoutN,
                     classification: entry.classification,
                     referenceGenome: referenceGenome,
-            ).save(flush: true, failOnError: true)
+            ).save(flush: true)
         }
 
         statSizeFileNames.each { String fileName ->
             new StatSizeFileName(
                     name: fileName,
                     referenceGenome: referenceGenome
-            ).save(flush: true, failOnError: true)
+            ).save(flush: true)
         }
     }
 

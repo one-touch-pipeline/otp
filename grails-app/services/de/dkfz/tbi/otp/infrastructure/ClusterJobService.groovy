@@ -102,7 +102,7 @@ class ClusterJobService {
         job.accountName = jobInfo.account
         job.dependencies = jobInfo.parentJobIDs ? jobInfo.parentJobIDs.collect { ClusterJob.findByClusterJobId(it) } : []
 
-        assert job.save(flush: true, failOnError: true)
+        assert job.save(flush: true)
     }
 
     /**
@@ -134,7 +134,7 @@ class ClusterJobService {
         job.nReads = getReadsSum(job)
         job.fileSize = getFileSizesSum(job)
 
-        assert job.save(flush: true, failOnError: true)
+        assert job.save(flush: true)
 
         handleObviouslyFailedClusterJob(job)
     }
@@ -232,7 +232,7 @@ class ClusterJobService {
     void handleObviouslyFailedClusterJob(ClusterJob job) {
         if (job.elapsedWalltime && job.elapsedWalltime <= DURATION_JOB_OBVIOUSLY_FAILED) {
             job.exitStatus = ClusterJob.Status.FAILED
-            job.save(flush: true, failOnError: true)
+            job.save(flush: true)
         }
     }
 
