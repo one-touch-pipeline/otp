@@ -66,7 +66,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 ("${testedProperty}".toString()): testedPropertyValue,
                 // don't create sophiaInstance, otherwise we have to @Mock too many domain classes
                 sophiaInstance     : null,
-        ], false).save(validate: false)
+        ], false).save(flush: true, validate: false)
     }
 
     void "test createThresholdColorizer with no QcThreshold"() {

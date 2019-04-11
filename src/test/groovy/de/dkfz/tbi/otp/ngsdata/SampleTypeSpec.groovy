@@ -97,7 +97,7 @@ class SampleTypeSpec extends Specification implements DataTest, DomainFactoryCor
         SampleType sampleType = new SampleType(
                 name: 'sample_type',
         )
-        sampleType.save(validate: false)
+        sampleType.save(flush: true, validate: false)
 
         when:
         sampleType.validate()

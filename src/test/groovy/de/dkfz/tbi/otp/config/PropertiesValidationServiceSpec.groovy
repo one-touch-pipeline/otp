@@ -62,7 +62,7 @@ class PropertiesValidationServiceSpec extends Specification implements DataTest 
                 value: value,
                 type: type,
         )
-        processingOption.save(validate: false, flush: true)
+        processingOption.save(flush: true, validate: false)
 
         expect:
         propertiesValidationService.validateProcessingOptionName(name, type)?.type == problem

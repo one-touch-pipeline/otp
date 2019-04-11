@@ -282,7 +282,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
     void "test findOrSaveSample, with underscore"() {
         given:
         Sample sample = DomainFactory.createSample()
-        new SampleType(name: 'sampleTypeName_3').save(validate: false)
+        new SampleType(name: 'sampleTypeName_3').save(flush: true, validate: false)
         ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(sample.project.name, sample.individual.pid, "sampleTypeName_3")
 
         when:
@@ -295,7 +295,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
     void "test findOrSaveSampleIdentifier, with underscore"() {
         given:
         Project project = DomainFactory.createProject()
-        new SampleType(name: 'sampleTypeName_3').save(validate: false)
+        new SampleType(name: 'sampleTypeName_3').save(flush: true, validate: false)
         ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(project.name, HelperUtils.uniqueString, "sampleTypeName_3")
 
         when:
