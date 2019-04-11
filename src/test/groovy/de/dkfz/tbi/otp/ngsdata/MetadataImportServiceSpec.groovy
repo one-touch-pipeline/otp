@@ -535,7 +535,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         }
         GroovyMock(SamplePair, global: true)
         1 * SamplePair.findMissingDiseaseControlSamplePairs() >> [samplePair]
-        1 * samplePair.save(_)
+        1 * samplePair.save([flush: true])
 
         File file = new File(new File(TestCase.getUniqueNonExistentPath(), runName1), 'metadata.tsv')
         DirectoryStructure directoryStructure = [

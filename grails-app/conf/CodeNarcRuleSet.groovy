@@ -47,6 +47,7 @@ All the Rules that will be used for OTP
     rule("file:grails-app/codenarcRules/AnnotationsForValidatorsRule.groovy")
     rule("file:grails-app/codenarcRules/AnnotationsForStartJobsRule.groovy")
     rule("file:grails-app/codenarcRules/AnnotationsForJobsRule.groovy")
+    rule("file:grails-app/codenarcRules/ExplicitFlushForSaveRule.groovy")
 
     // rulesets/basic.xml
     AssertWithinFinallyBlock {
