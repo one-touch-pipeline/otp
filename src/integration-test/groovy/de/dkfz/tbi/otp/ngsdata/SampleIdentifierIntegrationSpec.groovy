@@ -27,55 +27,67 @@ import grails.transaction.Rollback
 import grails.validation.ValidationException
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Rollback
 @Integration
 class SampleIdentifierIntegrationSpec extends Specification {
 
     static private String CORRECT_NAME = 'name'
+    static private String INCORRECT_NAME = 'toolong'
 
     private SampleIdentifier sampleIdentifier
 
-    def setup() {
-        sampleIdentifier = new SampleIdentifier(
+    void setupData() {
+        SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
+        sampleIdentifier = DomainFactory.createSampleIdentifier(
                 name: CORRECT_NAME,
-                sample: DomainFactory.createSample())
-        assert sampleIdentifier.validate()
+        )
+    }
+
+    void cleanup() {
+        TestCase.removeMetaClass(SessionUtils)
     }
 
     private void createRegex(final Project project) {
-        assert new ProcessingOption(
+        DomainFactory.createProcessingOptionLazy(
                 name: OptionName.VALIDATOR_SAMPLE_IDENTIFIER_REGEX,
                 project: project,
                 value: '[a-z]{4}',
-                comment: '',
-        ).save(failOnError: true)
+        )
     }
 
-    void test_validate_fail_regexIsSet() {
+    void "validation fails, name does not match project specific regex"() {
+        given:
+        setupData()
         createRegex(sampleIdentifier.sample.project)
-        final String name = 'toolong'
-        sampleIdentifier.name = name
+        sampleIdentifier.name = INCORRECT_NAME
+
+        when:
+        sampleIdentifier.save(flush: true)
+
+        then:
+        thrown(ValidationException)
+    }
+
+    void "validation passes, name does match project specific regex"() {
+        given:
+        setupData()
+        createRegex(sampleIdentifier.sample.project)
 
         expect:
-        TestCase.assertValidateError(sampleIdentifier, 'name', 'validator.invalid', name)
+        sampleIdentifier.save(flush: true)
     }
 
-    void test_validate_pass_regexIsSet() {
-        createRegex(sampleIdentifier.sample.project)
-
-        expect:
-        sampleIdentifier.validate()
-    }
-
-
-    void test_validate_pass_regexIsSetForOtherProject() {
+    void "validation passes, name does not match regex, but it is for a different project"() {
+        given:
+        setupData()
         createRegex(DomainFactory.createProject())
-        final String name = 'toolong'
-        sampleIdentifier.name = name
+        sampleIdentifier.name = INCORRECT_NAME
 
         expect:
-        sampleIdentifier.validate()
+        sampleIdentifier.save(flush: true)
     }
 }

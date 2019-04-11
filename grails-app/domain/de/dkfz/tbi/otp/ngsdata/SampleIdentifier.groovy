@@ -25,6 +25,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 class SampleIdentifier implements Entity {
 
@@ -42,7 +43,7 @@ class SampleIdentifier implements Entity {
                 String regexFromProcessingOption
                 // Using a new session prevents Hibernate from trying to auto-flush this object, which would fail
                 // because it is still in validation.
-                withNewSession { session ->
+                SessionUtils.withNewSession { session ->
                     regexFromProcessingOption = ProcessingOptionService.findOptionSafe(OptionName.VALIDATOR_SAMPLE_IDENTIFIER_REGEX, null, obj.sample?.project)
                 }
                 if (!(val ==~ (regexFromProcessingOption ?: '.+'))) {
