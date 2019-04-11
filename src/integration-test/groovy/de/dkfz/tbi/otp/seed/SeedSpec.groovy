@@ -22,6 +22,8 @@
 
 package de.dkfz.tbi.otp.seed
 
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
 import seedme.SeedService
 import spock.lang.Specification
 
@@ -31,6 +33,8 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+@Rollback
+@Integration
 class SeedSpec extends Specification {
 
     SeedService seedService

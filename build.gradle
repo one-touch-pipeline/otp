@@ -86,7 +86,10 @@ sourceSets {
     }
     main {
         resources {
-            srcDir 'migrations'
+            srcDirs {
+                "migrations"
+                "src/seed"
+            }
         }
     }
 }
@@ -155,8 +158,9 @@ dependencies {
     compile "org.grails.plugins:grails-console:2.1.1"
     compile "org.grails.plugins:mail:2.0.0"
 
-    // allow to create default data
-    //compile "com.bertramlabs.plugins:seed-me:3.1.5"
+    // create default data
+    compile "com.bertramlabs.plugins:seed-me:3.1.6"
+    compile "org.grails:grails-datastore-gorm-async" // seed-me fails without this dependency
 
     compile "org.grails.plugins:database-migration:3.0.4"
     compile 'org.liquibase:liquibase-core:3.5.5'
