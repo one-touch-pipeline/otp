@@ -149,7 +149,7 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
         expect:
         List expect = [
                 url,
-                [seqTrackA.ilseId, seqTrackB.ilseId],
+                [seqTrackA.ilseId as String, seqTrackB.ilseId as String],
                 [projectA.name, projectB.name],
                 [seqTrackA.run.name],
                 [sampleA.displayName, sampleB.displayName],

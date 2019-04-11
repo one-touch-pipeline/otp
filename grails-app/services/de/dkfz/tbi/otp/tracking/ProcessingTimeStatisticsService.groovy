@@ -88,14 +88,10 @@ ${search ? """
         assert ticket : "No OTRS ticket defined."
 
         List<SeqTrack> seqTracks = ticket.findAllSeqTracks() as List
-
-        List<String> ilseIds =      selectDistinctAndOrderByFromSeqTrack(seqTracks, "st.ilseSubmission.ilseNumber")
-        List<String> projectNames = selectDistinctAndOrderByFromSeqTrack(seqTracks, "st.sample.individual.project.name")
-        List<String> sampleNames =  selectDistinctAndOrderByFromSeqTrack(
-                    seqTracks,
-                    ["st.sample.individual.mockFullName", "st.sample.sampleType.name"].join(", ")
-                ).collect { "${it.first()} ${it.last()}" }
-        List<String> runs =         selectDistinctAndOrderByFromSeqTrack(seqTracks, "st.run.name")
+        List<String> ilseIds =      seqTracks.collect { it.ilseSubmission?.ilseNumber as String }.unique().sort()
+        List<String> projectNames = seqTracks.collect { it.sample.individual.project.name }.unique().sort()
+        List<String> sampleNames =  seqTracks.collect { "${it.sample.individual.mockFullName} ${it.sample.sampleType.name}" }.unique().sort()
+        List<String> runs =         seqTracks.collect { it.run.name }.unique().sort()
 
         List data = [
                 ticket.url,
