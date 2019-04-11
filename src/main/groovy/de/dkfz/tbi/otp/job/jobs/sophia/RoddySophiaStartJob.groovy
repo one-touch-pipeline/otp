@@ -46,7 +46,7 @@ class RoddySophiaStartJob extends AbstractBamFilePairAnalysisStartJob implements
         assert bamFilePairAnalysis : "bamFilePairAnalysis must not be null"
         trackingService.setStartedForSeqTracks(bamFilePairAnalysis.getContainedSeqTracks(), OtrsTicket.ProcessingStep.SOPHIA)
         bamFilePairAnalysis.samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-        bamFilePairAnalysis.samplePair.save()
+        bamFilePairAnalysis.samplePair.save(flush: true)
     }
 
     @Override

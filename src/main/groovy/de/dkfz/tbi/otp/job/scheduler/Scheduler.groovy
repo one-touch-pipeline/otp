@@ -240,7 +240,7 @@ class Scheduler {
                     previous: step.latestProcessingStepUpdate,
                     processingStep: step
             )
-            update.save()
+            update.save(flush: true)
             String errorHash = null
             try {
                 errorHash = errorLogService.log(exceptionToBeHandled)
@@ -256,7 +256,7 @@ class Scheduler {
                     processingStepUpdate: update,
                     stackTraceIdentifier: errorHash
             )
-            error.save()
+            error.save(flush: true)
             update.error = error
             if (!update.save(flush: true)) {
                 // TODO: trigger error handling

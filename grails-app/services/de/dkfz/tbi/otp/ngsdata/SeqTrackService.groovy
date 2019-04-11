@@ -356,8 +356,8 @@ LIMIT 1
             alignLog.save(flush: true)
             consumeAlignmentFiles(alignLog, alignFiles, pipeline)
             seqTrack.hasOriginalBam = true
-            alignLog.save()
-            alignParams.save()
+            alignLog.save(flush: true)
+            alignParams.save(flush: true)
         }
         seqTrack.save(flush: true)
     }

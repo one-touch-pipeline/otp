@@ -53,7 +53,7 @@ class ProcessingThresholdsService {
                             coverage: coverage,
                             )
         }
-        processingThresholds.save()
+        processingThresholds.save(flush: true)
         return processingThresholds
     }
 

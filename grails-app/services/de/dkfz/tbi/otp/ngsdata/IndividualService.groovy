@@ -319,7 +319,7 @@ class IndividualService {
                 toValue: value,
                 comment: "-",
                 source: ChangeLog.Source.MANUAL)
-        if (!changelog.save()) {
+        if (!changelog.save(flush: true)) {
             throw new ChangelogException("Creation of changelog failed, errors: " + changelog.errors.toString())
         }
         individual[key] = value

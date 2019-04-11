@@ -336,7 +336,7 @@ class MetadataImportService {
                 otrsTicket: ticketNumber ? trackingService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
                 importMode: importMode,
         )
-        assert runSegment.save()
+        assert runSegment.save(flush: false)
         Long timeStarted = System.currentTimeMillis()
         log.debug('runs stared')
         importRuns(context, runSegment, context.spreadsheet.dataRows)
@@ -348,10 +348,10 @@ class MetadataImportService {
                 md5sum: context.metadataFileMd5sum,
                 runSegment: runSegment,
         )
-        assert metaDataFile.save()
+        assert metaDataFile.save(flush: false)
 
         List<SamplePair> samplePairs = SamplePair.findMissingDiseaseControlSamplePairs()
-        samplePairs*.save()
+        samplePairs*.save(flush: true)
         log.debug('import stopped')
         return metaDataFile
     }
@@ -462,7 +462,7 @@ class MetadataImportService {
             SeqTrack seqTrack = seqType.isExome() ? new ExomeSeqTrack(properties) :
                     seqType.hasAntibodyTarget ? new ChipSeqSeqTrack(properties) :
                             new SeqTrack(properties)
-            assert seqTrack.save()
+            assert seqTrack.save(flush: false)
 
             Long timeStarted = System.currentTimeMillis()
             log.debug("dataFiles started ${index}/${amountOfRows}")
@@ -496,7 +496,7 @@ class MetadataImportService {
                     seqTrack: seqTrack,
                     fileType: FileTypeService.getFileType(file.fileName.toString(), FileType.Type.SEQUENCE),
             )
-            assert dataFile.save()
+            assert dataFile.save(flush: false)
 
             assert new File(LsdfFilesService.getFileInitialPath(dataFile)) == new File(file.toString())
 
@@ -516,7 +516,7 @@ class MetadataImportService {
                     key: metaDataKey,
                     value: row.cells[it.columnIndex].text,
                     source: MetaDataEntry.Source.MDFILE,
-            ).save()
+            ).save(flush: false)
         }
     }
 

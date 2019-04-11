@@ -135,7 +135,7 @@ class BamMetadataImportService {
                         md5sum              : md5sum ?: null,
                         furtherFiles        : [] as Set,
                         insertSizeFile      : insertSizeFile
-                ).save()
+                ).save(flush: true)
 
                 Path bamFileParent = fileSystem.getPath(epmbf.importedFrom).parent
 
@@ -167,8 +167,8 @@ class BamMetadataImportService {
                             insertSizeCV                    : qcValues.all.insertSizeCV,
                             qualityAssessmentMergedPass     : new QualityAssessmentMergedPass([
                                     abstractMergedBamFile   : epmbf,
-                            ]).save(),
-                    ).save()
+                            ]).save(flush: true),
+                    ).save(flush: true)
 
                     if (!epmbf.furtherFiles.find {
                         Path furtherPath = bamFileParent.resolve(it)

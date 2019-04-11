@@ -243,7 +243,7 @@ class CrashRecoveryService {
         createNewProcessingStepUpdate(step, ExecutionState.FINISHED)
         ProcessingStepUpdate update = createNewProcessingStepUpdate(step, ExecutionState.FAILURE)
         ProcessingError error = new ProcessingError(errorMessage: reason, processingStepUpdate: update)
-        error.save()
+        error.save(flush: true)
         update.error = error
         if (!update.save(flush: true)) {
             // TODO: trigger error handling

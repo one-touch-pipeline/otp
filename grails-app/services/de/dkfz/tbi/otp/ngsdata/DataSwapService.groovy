@@ -94,7 +94,7 @@ class DataSwapService {
         List<MetaDataEntry> metaDataEntries = dataFiles ? MetaDataEntry.findAllByValueAndDataFileInListAndKey(oldValue, dataFiles, sampleIdentifierKeys.first()) : []
         metaDataEntries.each {
             it.value = newValue
-            it.save()
+            it.save(flush: true)
         }
     }
 
@@ -259,7 +259,7 @@ newName: ${newDataFileName}
         sampleIdentifiers.each { SampleIdentifier sampleIdentifier ->
             String oldSampleIdentifier = sampleIdentifier.name
             sampleIdentifier.name += postfix
-            sampleIdentifier.save()
+            sampleIdentifier.save(flush: true)
             changeMetadataEntry(sample, MetaDataColumn.SAMPLE_ID.name(), oldSampleIdentifier, sampleIdentifier.name)
         }
     }
@@ -1646,7 +1646,7 @@ chmod 440 ${newDirectFileName}
         }
 
         seqTracks*.sample = newSample
-        notNull(seqTracks*.save())
+        notNull(seqTracks*.save(flush: true))
         seqTracks = seqTracks.collect {
             changeSeqType(it, newSeqType)
         }

@@ -457,7 +457,7 @@ class ProjectService {
                         pipeline: pipeline,
                         programVersion: programVersion,
                         previousConfig: latest,
-                ).save(failOnError: true)
+                ).save(flush: true)
             } catch (ValidationException e) {
                 return e.errors
             }
