@@ -62,6 +62,6 @@ class SamplePairProcessingStatusSpec extends Specification {
                 }
             }
             ret
-        }()
+        }.call()
     }
 }
