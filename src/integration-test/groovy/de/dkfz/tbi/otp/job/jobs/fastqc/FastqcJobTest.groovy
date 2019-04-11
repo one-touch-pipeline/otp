@@ -24,8 +24,8 @@ package de.dkfz.tbi.otp.job.jobs.fastqc
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.apache.commons.logging.impl.NoOpLog
-import org.junit.*
+import org.junit.After
+import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
@@ -62,7 +62,6 @@ class FastqcJobTest {
 
         fastqcJob = applicationContext.getBean('fastqcJob')
         fastqcJob.processingStep = DomainFactory.createAndSaveProcessingStep(FastqcJob.toString(), seqTrack)
-        fastqcJob.log = new NoOpLog()
 
         ProcessingOptionService processingOptionService = new ProcessingOptionService()
         processingOptionService.createOrUpdate(ProcessingOption.OptionName.COMMAND_FASTQC, "fastqc-0.10.1")

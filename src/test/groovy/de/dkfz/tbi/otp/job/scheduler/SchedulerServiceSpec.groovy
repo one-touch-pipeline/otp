@@ -22,8 +22,6 @@
 
 package de.dkfz.tbi.otp.job.scheduler
 
-import grails.testing.gorm.DataTest
-import org.apache.commons.logging.impl.NoOpLog
 import org.slf4j.Logger
 import org.slf4j.helpers.NOPLogger
 import spock.lang.Specification

@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.apache.commons.logging.impl.NoOpLog
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.springframework.beans.factory.annotation.Autowired
@@ -654,7 +653,6 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
         linkFilesToFinalDestinationService.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm ->
             throw new Exception("Should not reach this method")
         }
-        linkFilesToFinalDestinationService.log = new NoOpLog()
 
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
         assert roddyBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING

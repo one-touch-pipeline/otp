@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.job
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.apache.commons.logging.impl.NoOpLog
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -135,7 +134,6 @@ class JobMailServiceIntegrationSpec extends Specification {
                 },
                 jobStatusLoggingService: jobStatusLoggingService,
                 trackingService        : new TrackingService(),
-                log                    : new NoOpLog()
         ])
         jobMailService.processingOptionService = new ProcessingOptionService()
 
