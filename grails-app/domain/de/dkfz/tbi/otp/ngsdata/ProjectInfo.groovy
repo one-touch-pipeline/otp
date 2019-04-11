@@ -30,7 +30,11 @@ class ProjectInfo implements Entity {
     String fileName
     Date dateCreated = new Date()
 
-    static belongsTo = [project: Project]
+    Project project
+
+    static belongsTo = [
+            project: Project,
+    ]
 
     static constraints = {
         fileName(blank: false, unique: 'project', validator: { String val ->

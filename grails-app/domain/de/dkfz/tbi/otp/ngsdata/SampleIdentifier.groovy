@@ -31,7 +31,10 @@ class SampleIdentifier implements Entity {
 
     String name
     Sample sample
-    static belongsTo = [sample: Sample]
+
+    static belongsTo = [
+            sample: Sample,
+    ]
 
     static constraints = {
         name(unique: true, nullable: false, blank: false, minSize: 3,

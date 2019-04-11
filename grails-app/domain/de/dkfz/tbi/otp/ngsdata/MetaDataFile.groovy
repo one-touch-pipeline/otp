@@ -27,7 +27,6 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class MetaDataFile implements Entity {
 
-
     String fileName
     String filePath
     Date dateCreated = null
@@ -38,9 +37,12 @@ class MetaDataFile implements Entity {
      */
     String md5sum
 
+    RunSegment runSegment
+
     static belongsTo = [
-        runSegment : RunSegment,
+        runSegment: RunSegment,
     ]
+
     static constraints = {
         fileName(validator: { OtpPath.isValidPathComponent(it) })
         filePath(validator: { OtpPath.isValidAbsolutePath(it) })

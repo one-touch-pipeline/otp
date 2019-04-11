@@ -38,6 +38,8 @@ class ChromosomeQualityAssessmentMerged extends QaJarQualityAssessment {
      */
     String chromosomeName
 
+    QualityAssessmentMergedPass qualityAssessmentMergedPass
+
     static belongsTo = [
         qualityAssessmentMergedPass: QualityAssessmentMergedPass,
     ]

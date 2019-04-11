@@ -32,7 +32,9 @@ class SampleSubmissionObject implements Entity, SubmissionObject {
     boolean useBamFile = false
     boolean useFastqFile = false
 
-    static belongsTo = [sample: Sample]
+    static belongsTo = [
+            sample: Sample,
+    ]
 
     static constraints = {
         egaAliasName nullable: true, unique: true

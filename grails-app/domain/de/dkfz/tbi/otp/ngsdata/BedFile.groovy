@@ -44,6 +44,9 @@ class BedFile implements Entity {
      */
     long mergedTargetSize
 
+    ReferenceGenome referenceGenome
+    LibraryPreparationKit libraryPreparationKit
+
     /**
      * A BedFile is always associated to a reference genome to know
      * on what coordinate system the regions specified in the BedFile

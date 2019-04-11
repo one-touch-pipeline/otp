@@ -70,15 +70,6 @@ class Project implements Commentable, Entity {
 
     Set<ProjectInfo> projectInfos
 
-    static hasMany = [
-            projectCategories: ProjectCategory,
-            projectInfos: ProjectInfo,
-    ]
-
-    static mappedBy = [
-            projectInfos: "project",
-    ]
-
     Comment comment
 
     String description
@@ -97,9 +88,18 @@ class Project implements Commentable, Entity {
 
     QcThresholdHandling qcThresholdHandling
 
+    static hasMany = [
+            projectCategories: ProjectCategory,
+            projectInfos: ProjectInfo,
+    ]
+
     static belongsTo = [
-            ProjectGroup,
-            Realm,
+            projectGroup: ProjectGroup,
+            realm: Realm,
+    ]
+
+    static mappedBy = [
+            projectInfos: "project",
     ]
 
     static constraints = {

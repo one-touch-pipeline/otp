@@ -31,6 +31,10 @@ import de.dkfz.tbi.otp.utils.Entity
  * {@link MergingSet} and {@link ProcessedBamFile}
  */
 class MergingSetAssignment implements Entity {
+
+    MergingSet mergingSet
+    AbstractBamFile bamFile
+
     static belongsTo = [
         mergingSet: MergingSet,
         bamFile: AbstractBamFile,

@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
  */
 class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessParameterObject {
 
+    MergingPass mergingPass
+
     static belongsTo = [
         mergingPass: MergingPass,
     ]

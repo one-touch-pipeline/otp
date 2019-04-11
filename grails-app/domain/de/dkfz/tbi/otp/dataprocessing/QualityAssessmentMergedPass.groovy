@@ -33,14 +33,15 @@ import de.dkfz.tbi.otp.utils.Entity
  */
 class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
 
-    static belongsTo = [
-            abstractMergedBamFile: AbstractMergedBamFile,
-    ]
     AbstractMergedBamFile abstractMergedBamFile
 
     int identifier
 
     String description
+
+    static belongsTo = [
+            abstractMergedBamFile: AbstractMergedBamFile,
+    ]
 
     static constraints = {
         identifier(unique: 'abstractMergedBamFile', validator: { int val, QualityAssessmentMergedPass obj ->

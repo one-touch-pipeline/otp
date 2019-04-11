@@ -27,7 +27,12 @@ import de.dkfz.tbi.otp.utils.Entity
 class SoftwareToolIdentifier implements Entity {
 
     String name
-    static belongsTo = [softwareTool : SoftwareTool]
+    SoftwareTool softwareTool
+
+    static belongsTo = [
+            softwareTool: SoftwareTool,
+    ]
+
     static constraints = {
         name()
     }

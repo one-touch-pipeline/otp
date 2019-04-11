@@ -31,6 +31,7 @@ class ProjectCategory implements Entity {
     static hasMany = [
             projects: Project,
     ]
+
     static belongsTo = Project
 
     static constraints = {

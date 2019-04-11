@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
  */
 class OverallQualityAssessmentMerged extends QaJarQualityAssessment implements QcTrafficLightValue {
 
+    QualityAssessmentMergedPass qualityAssessmentMergedPass
+
     static belongsTo = [
         qualityAssessmentMergedPass: QualityAssessmentMergedPass,
     ]

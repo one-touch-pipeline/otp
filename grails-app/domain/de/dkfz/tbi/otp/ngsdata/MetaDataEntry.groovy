@@ -50,7 +50,10 @@ class MetaDataEntry implements Entity {
     }
     Source source
 
-    static belongsTo = [dataFile : DataFile, key : MetaDataKey]
+    static belongsTo = [
+            dataFile: DataFile,
+            key: MetaDataKey,
+    ]
 
     static constraints = {
         key(nullable: false)

@@ -29,6 +29,8 @@ class ChipSeqSeqTrack extends SeqTrack {
      */
     String antibody
 
+    AntibodyTarget antibodyTarget
+
     static constraints = {
         antibody(nullable: true)
     }

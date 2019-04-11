@@ -41,6 +41,8 @@ class FastqcProcessedFile implements Entity {
     Date dateCreated = new Date()
     Date dateFromFileSystem = null
 
+    DataFile dataFile
+
     static belongsTo = [
         dataFile: DataFile,
     ]

@@ -49,6 +49,9 @@ class ConsistencyStatus implements Entity {
      */
     Date resolvedDate
 
+    ConsistencyCheck consistencyCheck
+    DataFile dataFile
+
     static constraints = {
         resolvedDate(nullable: true)
     }

@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.utils.Entity
 class StatSizeFileName implements Entity {
 
     String name
+    ReferenceGenome referenceGenome
 
     static constraints = {
         name(unique: 'referenceGenome')

@@ -56,7 +56,9 @@ abstract class BamFilePairAnalysis implements TimeStamped, ProcessParameterObjec
 
     SamplePair samplePair
 
-    static belongsTo = SamplePair
+    static belongsTo = [
+        samplePair: SamplePair,
+    ]
 
     /**
      * The overall processing state of this analysis run.

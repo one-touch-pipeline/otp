@@ -28,8 +28,11 @@ class FileSystemChanges implements Entity {
 
     String command
     boolean executed = false
+    SwapInfo swapInfo
 
-    static belongsTo = [swapInfo: SwapInfo]
+    static belongsTo = [
+            swapInfo: SwapInfo,
+    ]
 
     static mapping = {
         command type: "text"

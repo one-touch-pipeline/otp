@@ -32,7 +32,6 @@ class ReferenceGenomeProjectSeqTypeAlignmentProperty implements Entity {
 
     String value
 
-
     static belongsTo = [
             referenceGenomeProjectSeqType: ReferenceGenomeProjectSeqType,
     ]

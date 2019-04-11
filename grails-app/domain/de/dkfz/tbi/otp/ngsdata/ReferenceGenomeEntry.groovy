@@ -78,6 +78,8 @@ class ReferenceGenomeEntry implements Entity {
      */
     Classification classification = Classification.UNDEFINED
 
+    ReferenceGenome referenceGenome
+
     static belongsTo = [
         referenceGenome: ReferenceGenome,
     ]

@@ -37,6 +37,8 @@ class MergedAlignmentDataFile implements Entity {
     boolean indexFileExists = false
     long fileSize = 0
 
+    MergingLog mergingLog
+
     static belongsTo = [
             mergingLog: MergingLog,
     ]

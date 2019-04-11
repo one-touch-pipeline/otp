@@ -42,6 +42,9 @@ class MergingLog implements Entity {
     }
     Status status = Status.DECLARED
 
+    AlignmentParams alignmentParams
+    SeqScan seqScan
+
     static belongsTo = [
             alignmentParams: AlignmentParams,
             seqScan        : SeqScan,

@@ -31,6 +31,8 @@ import org.hibernate.Hibernate
  */
 class OverallQualityAssessment extends QaJarQualityAssessment {
 
+    QualityAssessmentPass qualityAssessmentPass
+
     static belongsTo = [
         qualityAssessmentPass: QualityAssessmentPass,
     ]

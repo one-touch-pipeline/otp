@@ -35,19 +35,20 @@ class EgaSubmission implements Entity {
     String pubMedId
     State state
     SelectionState selectionState
+    Project project
 
     Set<SampleSubmissionObject> samplesToSubmit = [] as Set<SampleSubmissionObject>
     Set<BamFileSubmissionObject> bamFilesToSubmit = [] as Set<BamFileSubmissionObject>
     Set<DataFileSubmissionObject> dataFilesToSubmit = [] as Set<DataFileSubmissionObject>
 
-    static belongsTo = [
-            project: Project,
-    ]
-
     static hasMany = [
             dataFilesToSubmit : DataFileSubmissionObject,
             bamFilesToSubmit  : BamFileSubmissionObject,
             samplesToSubmit   : SampleSubmissionObject,
+    ]
+
+    static belongsTo = [
+            project: Project,
     ]
 
     static constraints = {

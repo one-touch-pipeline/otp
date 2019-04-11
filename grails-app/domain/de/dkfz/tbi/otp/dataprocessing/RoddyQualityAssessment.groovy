@@ -33,8 +33,6 @@ abstract class RoddyQualityAssessment extends AbstractQualityAssessment {
     // unclear reason. So as a workaround we have an indirect link via QualityAssessmentMergedPass.
     QualityAssessmentMergedPass qualityAssessmentMergedPass
 
-    static belongsTo = QualityAssessmentMergedPass
-
     static final String ALL = "all"
 
     /**
@@ -59,6 +57,10 @@ abstract class RoddyQualityAssessment extends AbstractQualityAssessment {
             return "value must be null for single chromosome ${obj.chromosome}, but is ${val}"
         }
     }
+
+    static belongsTo = [
+            qualityAssessmentMergedPass: QualityAssessmentMergedPass,
+    ]
 
     static constraints = {
         qualityAssessmentMergedPass(validator: {

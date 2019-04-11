@@ -34,6 +34,10 @@ import de.dkfz.tbi.otp.utils.Entity
  */
 abstract class ConfigPerProjectAndSeqType implements TimeStamped, Entity {
 
+    Project project
+
+    SeqType seqType
+
     static belongsTo = [
             project: Project,
             seqType: SeqType,

@@ -39,7 +39,9 @@ class SophiaQc implements Entity, QcTrafficLightValue {
     int rnaContaminatedGenesCount
     boolean rnaDecontaminationApplied
 
-    static belongsTo = [sophiaInstance: SophiaInstance]
+    static belongsTo = [
+            sophiaInstance: SophiaInstance,
+    ]
 
     static constraints = {
         sophiaInstance unique: true

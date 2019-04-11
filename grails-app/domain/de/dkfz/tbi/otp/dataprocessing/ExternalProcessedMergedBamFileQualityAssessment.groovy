@@ -29,8 +29,6 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
  */
 class ExternalProcessedMergedBamFileQualityAssessment extends AbstractQualityAssessment implements SophiaWorkflowQualityAssessment {
 
-    static belongsTo = QualityAssessmentMergedPass
-
     QualityAssessmentMergedPass qualityAssessmentMergedPass
 
     /**
@@ -39,6 +37,10 @@ class ExternalProcessedMergedBamFileQualityAssessment extends AbstractQualityAss
     @QcThresholdEvaluated
     Double insertSizeCV
 
+    static belongsTo = [
+            qualityAssessmentMergedPass: QualityAssessmentMergedPass,
+    ]
+
     static constraints = {
         referenceLength validator: { it == null }
         insertSizeCV nullable: false
@@ -46,5 +48,4 @@ class ExternalProcessedMergedBamFileQualityAssessment extends AbstractQualityAss
         pairedInSequencing nullable: false
         insertSizeMedian nullable: false
     }
-
 }

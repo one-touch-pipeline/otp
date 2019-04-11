@@ -57,12 +57,12 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
 
     String configVersion
 
-    String nameUsedInConfig
-
     /**
      * In general this field should not be used but only in cases where the standard configuration does not fit.
      */
     Individual individual
+
+    String nameUsedInConfig
 
     boolean adapterTrimmingNeeded = false
 

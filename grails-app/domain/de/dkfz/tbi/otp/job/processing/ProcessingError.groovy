@@ -36,15 +36,17 @@ import de.dkfz.tbi.otp.utils.Entity
  * @see ProcessingStepUpdate
  */
 class ProcessingError implements Entity {
-    static belongsTo = [processingStepUpdate: ProcessingStepUpdate]
+
     /**
      * The ProcessingStepUpdate this error has been logged for.
      */
     ProcessingStepUpdate processingStepUpdate
+
     /**
      * The error message which can be shown in the user interface.
      */
     String errorMessage
+
     /**
      * A stack trace identifier to find the corresponding stack trace in a log file.
      * This could be a MD5 sum for example.
@@ -56,6 +58,10 @@ class ProcessingError implements Entity {
     static mapping = {
         errorMessage type: 'text'
     }
+
+    static belongsTo = [
+        processingStepUpdate: ProcessingStepUpdate,
+    ]
 
     static constraints = {
         processingStepUpdate(nullable: false, validator: { val ->

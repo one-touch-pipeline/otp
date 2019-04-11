@@ -50,7 +50,9 @@ class AceseqQc implements Entity, QcTrafficLightValue {
     @QcThresholdEvaluated
     int solutionPossible
 
-    static belongsTo = [aceseqInstance: AceseqInstance]
+    static belongsTo = [
+            aceseqInstance: AceseqInstance,
+    ]
 
     static constraints = {
         number unique: 'aceseqInstance'

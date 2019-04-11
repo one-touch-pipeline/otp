@@ -65,7 +65,6 @@ class ClusterJob implements Entity {
             .toFormatter()
 
     ProcessingStep processingStep
-    static belongsTo = [processingStep: ProcessingStep]
 
     enum Status {
         FAILED, COMPLETED
@@ -236,6 +235,9 @@ class ClusterJob implements Entity {
             dependencies: ClusterJob,
     ]
 
+    static belongsTo = [
+            processingStep: ProcessingStep,
+    ]
 
     static constraints = {
         validated(nullable:false)

@@ -32,7 +32,6 @@ class MergingWorkPackageAlignmentProperty implements Entity {
 
     String value
 
-
     static belongsTo = [
             mergingWorkPackage: MergingWorkPackage,
     ]

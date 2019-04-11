@@ -37,6 +37,9 @@ class AlignmentLog implements Entity {
     }
     Execution executedBy = Execution.UNKNOWN
 
+    AlignmentParams alignmentParams
+    SeqTrack seqTrack
+
     static belongsTo = [
             alignmentParams: AlignmentParams,
             seqTrack       : SeqTrack,

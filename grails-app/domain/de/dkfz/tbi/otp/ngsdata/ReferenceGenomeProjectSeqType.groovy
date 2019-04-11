@@ -57,12 +57,6 @@ class ReferenceGenomeProjectSeqType implements Entity {
      */
     String statSizeFileName
 
-
-    static belongsTo = [
-        project: Project,
-        seqType: SeqType,
-        sampleType: SampleType,
-    ]
     Project project
     SeqType seqType
     SampleType sampleType
@@ -73,6 +67,12 @@ class ReferenceGenomeProjectSeqType implements Entity {
 
     static hasMany = [
             alignmentProperties: ReferenceGenomeProjectSeqTypeAlignmentProperty,
+    ]
+
+    static belongsTo = [
+            project: Project,
+            seqType: SeqType,
+            sampleType: SampleType,
     ]
 
     static constraints = {

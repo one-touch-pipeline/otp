@@ -144,10 +144,10 @@ class SeqTrack implements ProcessParameterObject, Entity {
     List<LogMessage> logMessages = []
 
     static belongsTo = [
-            Run,
-            Sample,
-            SeqType,
-            LibraryPreparationKit,
+            run: Run,
+            sample: Sample,
+            seqType: SeqType,
+            libraryPreparationKit: LibraryPreparationKit,
     ]
 
     static hasMany = [

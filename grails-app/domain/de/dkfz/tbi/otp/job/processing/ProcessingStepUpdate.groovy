@@ -26,28 +26,31 @@ import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.utils.Entity
 
 class ProcessingStepUpdate implements Serializable, Entity {
-    static belongsTo = [processingStep: ProcessingStep]
+
     /**
      * Link to the ProcessingStepUpdate before this one, may be null.
      */
     ProcessingStepUpdate previous
+
     /**
      * The new state of the ProcessingStep set with this update.
      */
     ExecutionState state
+
     /**
      * The date when this update was performed.
      */
     Date date
+
     /**
      * The Processing Step this update belongs to.
      */
     ProcessingStep processingStep
+
     /**
      * The error object in case this update is a failure.
      */
     ProcessingError error
-
 
     static mapping = {
         date index: 'date_idx'
@@ -55,6 +58,9 @@ class ProcessingStepUpdate implements Serializable, Entity {
         processingStep index: 'processing_step_idx'
     }
 
+    static belongsTo = [
+            processingStep: ProcessingStep,
+    ]
 
     static constraints = {
         processingStep(nullable: false)

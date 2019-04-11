@@ -43,7 +43,10 @@ class AlignmentPass implements ProcessParameterObject, Entity {
     MergingWorkPackage workPackage
     AlignmentState alignmentState
 
-    static belongsTo = [MergingWorkPackage, SeqTrack]
+    static belongsTo = [
+            workPackage: MergingWorkPackage,
+            seqTrack: SeqTrack,
+    ]
 
     static constraints = {
         identifier(unique: 'seqTrack')

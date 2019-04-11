@@ -26,16 +26,17 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class Sample implements Entity {
 
+    Individual individual
+    SampleType sampleType
+
     static hasMany = [
-            seqTracks: SeqTrack
+            seqTracks: SeqTrack,
     ]
 
     static belongsTo = [
-        individual : Individual,
-        sampleType : SampleType,
+            individual : Individual,
+            sampleType : SampleType,
     ]
-    Individual individual
-    SampleType sampleType
 
     static constraints = {
         individual(nullable: false)

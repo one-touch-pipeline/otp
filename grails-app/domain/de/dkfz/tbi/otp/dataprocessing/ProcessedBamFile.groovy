@@ -27,6 +27,8 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParameterObject {
 
+    AlignmentPass alignmentPass
+
     static belongsTo = [
         alignmentPass: AlignmentPass,
     ]

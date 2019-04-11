@@ -49,7 +49,9 @@ abstract class AbstractMergingWorkPackage implements Entity {
      */
     AbstractMergedBamFile bamFileInProjectFolder
 
-    static belongsTo = Sample
+    static belongsTo = [
+            sample: Sample,
+    ]
 
     static constraints = {
         bamFileInProjectFolder nullable: true, validator: { val, obj ->

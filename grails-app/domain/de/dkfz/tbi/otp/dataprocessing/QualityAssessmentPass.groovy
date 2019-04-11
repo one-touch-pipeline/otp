@@ -33,6 +33,11 @@ class QualityAssessmentPass implements ProcessParameterObject, Entity {
 
     int identifier
     String description
+    ProcessedBamFile processedBamFile
+
+    static belongsTo = [
+            processedBamFile: ProcessedBamFile,
+    ]
 
     static constraints = {
         identifier(unique: 'processedBamFile')
@@ -76,10 +81,6 @@ class QualityAssessmentPass implements ProcessParameterObject, Entity {
             return maxIdentifier + 1
         }
     }
-
-    static belongsTo = [
-            processedBamFile: ProcessedBamFile,
-    ]
 
     AlignmentPass getAlignmentPass() {
         return processedBamFile.alignmentPass

@@ -45,6 +45,8 @@ class PicardMarkDuplicatesMetrics implements Entity {
     double percent_duplication
     long estimated_library_size
 
+    AbstractBamFile abstractBamFile
+
     static belongsTo = [
         abstractBamFile: AbstractBamFile,
     ]

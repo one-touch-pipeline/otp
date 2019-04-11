@@ -66,7 +66,10 @@ class Individual implements Commentable, Entity {
     Type type
 
     Project project
-    static belongsTo = [project : Project]
+
+    static belongsTo = [
+            project : Project,
+    ]
 
     static constraints = {
         pid(unique: true, nullable: false, validator: { OtpPath.isValidPathComponent(it) })

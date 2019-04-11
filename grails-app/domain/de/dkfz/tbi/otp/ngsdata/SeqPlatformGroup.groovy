@@ -45,8 +45,8 @@ class SeqPlatformGroup implements Entity, CommentableWithHistory {
             seqPlatforms: SeqPlatform,
             comments: Comment,
     ]
-    static belongsTo = SeqPlatform
 
+    static belongsTo = SeqPlatform
 
     static constraints = {
         mergingCriteria nullable: true, validator: { MergingCriteria mergingCriteria1 ->

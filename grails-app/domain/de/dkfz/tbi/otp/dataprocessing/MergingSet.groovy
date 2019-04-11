@@ -71,6 +71,8 @@ class MergingSet implements Entity {
      */
     State status = State.DECLARED
 
+    MergingWorkPackage mergingWorkPackage
+
     static belongsTo = [
             mergingWorkPackage: MergingWorkPackage,
     ]

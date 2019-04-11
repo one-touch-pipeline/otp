@@ -36,6 +36,9 @@ class ProcessedSaiFile implements Entity {
     /** Time stamp of deletion */
     Date deletionDate
 
+    AlignmentPass alignmentPass
+    DataFile dataFile
+
     static belongsTo = [
         alignmentPass: AlignmentPass,
         dataFile: DataFile,
