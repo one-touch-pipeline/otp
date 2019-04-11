@@ -1566,6 +1566,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         DataFile dataFile = DomainFactory.createDataFile()
         dataFile.dateCreated = baseDate.minus(1)
+        dataFile.save(flush: true)
 
         when:
         int projects = projectService.getCountOfProjectsForSpecifiedPeriod(startDate, endDate, [dataFile.project])

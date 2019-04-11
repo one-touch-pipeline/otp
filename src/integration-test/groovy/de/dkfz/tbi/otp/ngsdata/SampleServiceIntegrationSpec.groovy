@@ -41,6 +41,7 @@ class SampleServiceIntegrationSpec extends Specification {
 
         DataFile dataFile = DomainFactory.createDataFile()
         dataFile.dateCreated = baseDate.minus(1)
+        dataFile.save(flush: true)
 
         when:
         int samples = sampleService.getCountOfSamplesForSpecifiedPeriodAndProjects(startDate, endDate, [dataFile.project])
