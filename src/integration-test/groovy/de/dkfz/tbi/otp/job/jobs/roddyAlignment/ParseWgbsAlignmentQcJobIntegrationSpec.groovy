@@ -48,7 +48,7 @@ import de.dkfz.tbi.otp.utils.Principal
 class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
 
     @Autowired
-    GrailsApplicationContext context
+    GrailsApplication grailsApplication
 
     ParseWgbsAlignmentQcJob parseWgbsAlignmentQcJob
 
@@ -81,7 +81,7 @@ class ParseWgbsAlignmentQcJobIntegrationSpec extends Specification {
         assert seqTrack.save(flush: true)
 
         ProcessingStep step = DomainFactory.createAndSaveProcessingStep(ParseWgbsAlignmentQcJob.class.toString(), roddyBamFile)
-        parseWgbsAlignmentQcJob = context.getBean('parseWgbsAlignmentQcJob')
+        parseWgbsAlignmentQcJob = grailsApplication.mainContext.getBean('parseWgbsAlignmentQcJob')
         parseWgbsAlignmentQcJob.processingStep = step
     }
 
