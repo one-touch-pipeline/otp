@@ -110,7 +110,7 @@ class AbstractBamFileServiceSpec extends Specification implements DataTest {
         ProcessedBamFile processedBamFile = createTestDataForHasBeenQualityAssessedAndMerged()
         MergingSetAssignment msa = exactlyOneElement(MergingSetAssignment.findAllByBamFile(processedBamFile))
         msa.bamFile = DomainFactory.createProcessedBamFile(msa.mergingSet.mergingWorkPackage)
-        assert msa.save()
+        assert msa.save(flush: true)
 
         expect:
         !abstractBamFileService.hasBeenQualityAssessedAndMerged(processedBamFile, createdBefore)

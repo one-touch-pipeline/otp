@@ -364,7 +364,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
         roddyBamFile.seqTracks.add(seqTrack)
         roddyBamFile.numberOfMergedLanes++
-        roddyBamFile.save()
+        roddyBamFile.save(flush: true)
 
         AbstractRoddyAlignmentJob abstractRoddyAlignmentJob = Spy(AbstractRoddyAlignmentJob) {
             getConfigService() >> configService
@@ -398,7 +398,7 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(roddyBamFile.mergingWorkPackage)
         roddyBamFile.seqTracks.add(seqTrack)
         roddyBamFile.numberOfMergedLanes++
-        roddyBamFile.save()
+        roddyBamFile.save(flush: true)
 
         roddyBamFile.workBamFile.parentFile.mkdirs()
         roddyBamFile.workBamFile.text = createMinimalSamFile(roddyBamFile.containedSeqTracks*.getReadGroupName())

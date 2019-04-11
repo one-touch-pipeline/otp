@@ -91,7 +91,7 @@ class ConfigPerProjectAndSeqTypeSpec extends Specification implements DataTest {
         )
 
         expect:
-        validConfigPerProject.save()
+        validConfigPerProject.save(flush: true)
 
         when:
         ConfigPerProjectAndSeqType newConfigPerProject = new ConfigPerProjectAndSeqTypeMock(

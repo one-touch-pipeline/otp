@@ -48,10 +48,10 @@ class ParameterMappingSpec extends Specification implements DataTest {
 
         JobDefinition jobDefinition = DomainFactory.createJobDefinition()
         JobDefinition jobDefinition2 = DomainFactory.createJobDefinition()
-        ParameterType type = new ParameterType(jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT, name: 'input1').save()
-        ParameterType type2 = new ParameterType(jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT, name: 'input2').save()
-        ParameterType type3 = new ParameterType(jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.INPUT, name: 'input3').save()
-        ParameterType type4 = new ParameterType(jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.OUTPUT, name: 'input4').save()
+        ParameterType type = new ParameterType(jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT, name: 'input1').save(flush: true)
+        ParameterType type2 = new ParameterType(jobDefinition: jobDefinition, parameterUsage: ParameterUsage.INPUT, name: 'input2').save(flush: true)
+        ParameterType type3 = new ParameterType(jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.INPUT, name: 'input3').save(flush: true)
+        ParameterType type4 = new ParameterType(jobDefinition: jobDefinition2, parameterUsage: ParameterUsage.OUTPUT, name: 'input4').save(flush: true)
 
         expect:
         !mapping.validate()

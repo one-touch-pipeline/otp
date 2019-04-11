@@ -146,7 +146,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
-        ).save()
+        ).save(flush: true)
 
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(epmbfWithMd5sum.getBamFile())
@@ -164,7 +164,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
-        ).save()
+        ).save(flush: true)
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(epmbfWithoutMd5sum.getBamFile())
         importExternallyMergedBamJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
@@ -181,7 +181,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
-        ).save()
+        ).save(flush: true)
 
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(new File(epmbfWithoutMd5sum.importedFrom))
@@ -200,7 +200,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
-        ).save()
+        ).save(flush: true)
 
         createHelperObjects(importProcess)
         File targetBamFile = epmbfWithMd5sum.getBamFile()
@@ -221,7 +221,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
-        ).save()
+        ).save(flush: true)
 
         createHelperObjects(importProcess)
         File targetBamFile = epmbfWithoutMd5sum.getBamFile()
@@ -241,7 +241,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
-        ).save()
+        ).save(flush: true)
 
         epmbfWithoutMd5sum.furtherFiles = [
                 furtherFilePattern,
@@ -295,7 +295,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
-        ).save()
+        ).save(flush: true)
 
         epmbfWithoutMd5sum.furtherFiles = [
                 furtherFilePattern,
@@ -351,7 +351,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
-        ).save()
+        ).save(flush: true)
 
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(epmbfWithMd5sum.getBamFile())
@@ -374,7 +374,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
-        ).save()
+        ).save(flush: true)
 
         createHelperObjects(importProcess)
         File targetBamFile = epmbfWithoutMd5sum.getBamFile()
@@ -400,14 +400,14 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
-        ).save()
+        ).save(flush: true)
 
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(epmbfWithMd5sum.getBamFile())
         CreateFileHelper.createFile(epmbfWithMd5sum.getBaiFile())
 
         epmbfWithMd5sum.maximumReadLength = 123
-        epmbfWithMd5sum.save()
+        epmbfWithMd5sum.save(flush: true)
 
         when:
         importExternallyMergedBamJob.validate()
@@ -420,7 +420,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
-        ).save()
+        ).save(flush: true)
 
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(epmbfWithMd5sum.getBamFile())
@@ -439,7 +439,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         String importedMd5sum = DomainFactory.DEFAULT_MD5_SUM
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithoutMd5sum]
-        ).save()
+        ).save(flush: true)
 
         createHelperObjects(importProcess)
         File targetBamFile = epmbfWithoutMd5sum.getBamFile()
@@ -460,7 +460,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         given:
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [epmbfWithMd5sum]
-        ).save()
+        ).save(flush: true)
 
         createHelperObjects(importProcess)
         CreateFileHelper.createFile(new File("${epmbfWithMd5sum.importedFrom}.md5sum"),

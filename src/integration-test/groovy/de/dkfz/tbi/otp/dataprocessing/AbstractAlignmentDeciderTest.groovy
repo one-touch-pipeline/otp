@@ -107,7 +107,7 @@ class AbstractAlignmentDeciderTest {
         testData.createObjects()
 
         SeqTrack seqTrack = testData.createSeqTrack()
-        seqTrack.save(failOnError: true)
+        seqTrack.save(flush: true)
 
         Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
         assert workPackages.empty
@@ -198,7 +198,7 @@ class AbstractAlignmentDeciderTest {
         SeqTrack seqTrack = buildSeqTrack()
         seqTrack.libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
         seqTrack.kitInfoReliability = InformationReliability.KNOWN
-        seqTrack.save(flush: true, failOnError: true)
+        seqTrack.save(flush: true)
 
         MergingWorkPackage workPackage = DomainFactory.createMergingWorkPackage(
                 sample: seqTrack.sample,
@@ -207,7 +207,7 @@ class AbstractAlignmentDeciderTest {
                 referenceGenome: exactlyOneElement(ReferenceGenome.list()),
                 statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
         )
-        workPackage.save(failOnError: true)
+        workPackage.save(flush: true)
 
         return [seqTrack, workPackage]
     }
@@ -276,7 +276,7 @@ class AbstractAlignmentDeciderTest {
                 pipeline: findOrSaveByNameAndType(Pipeline.Name.PANCAN_ALIGNMENT, Pipeline.Type.ALIGNMENT),
                 statSizeFileName: seqTrack.configuredReferenceGenomeProjectSeqType.statSizeFileName,
         )
-        workPackage.save(failOnError: true)
+        workPackage.save(flush: true)
 
         Collection<MergingWorkPackage> workPackages = decider.decideAndPrepareForAlignment(seqTrack, true)
 
@@ -340,10 +340,10 @@ class AbstractAlignmentDeciderTest {
         SeqTrack seqTrack = testData.createExomeSeqTrack(testData.run)
         seqTrack.libraryPreparationKit = null
         seqTrack.kitInfoReliability = InformationReliability.UNKNOWN_UNVERIFIED
-        seqTrack.save(failOnError: true)
+        seqTrack.save(flush: true)
 
         DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
-        dataFile.save(failOnError: true)
+        dataFile.save(flush: true)
 
         shouldFail(RuntimeException.class, {
             decider.ensureConfigurationIsComplete(seqTrack)
@@ -357,7 +357,7 @@ class AbstractAlignmentDeciderTest {
         testData.createObjects()
 
         SeqTrack seqTrack = testData.createSeqTrack()
-        seqTrack.save(failOnError: true)
+        seqTrack.save(flush: true)
 
         assert decider.canPipelineAlign(seqTrack)
     }
@@ -371,7 +371,7 @@ class AbstractAlignmentDeciderTest {
         SeqType seqType = DomainFactory.createWholeGenomeSeqType(LibraryLayout.MATE_PAIR)
 
         SeqTrack seqTrack = testData.createSeqTrack(seqType: seqType)
-        seqTrack.save(failOnError: true)
+        seqTrack.save(flush: true)
 
         assert !decider.canPipelineAlign(seqTrack)
     }
@@ -382,10 +382,10 @@ class AbstractAlignmentDeciderTest {
         testData.createObjects()
 
         SeqTrack seqTrack = testData.createSeqTrack()
-        seqTrack.save(failOnError: true)
+        seqTrack.save(flush: true)
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
         DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
-        dataFile.save(failOnError: true)
+        dataFile.save(flush: true)
 
         return seqTrack
     }

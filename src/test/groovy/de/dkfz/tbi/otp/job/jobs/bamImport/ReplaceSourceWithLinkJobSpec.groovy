@@ -96,7 +96,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
                 externallyProcessedMergedBamFiles: [epmbf],
                 replaceSourceWithLink: true,
                 triggerAnalysis: true,
-        ).save()
+        ).save(flush: true)
     }
 
     def cleanup() {

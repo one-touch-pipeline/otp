@@ -119,13 +119,13 @@ class IndividualSpec extends Specification implements DataTest {
         given:
         Individual individual = createIndividual()
         assert individual.validate()
-        assert individual.save()
+        assert individual.save(flush: true)
 
         Sample sample1 = new Sample(
                 individual: individual,
                 sampleType: DomainFactory.createSampleType(name: "name1")
         )
-        assert sample1.save()
+        assert sample1.save(flush: true)
 
         expect:
         [sample1] == individual.getSamples()
@@ -136,19 +136,19 @@ class IndividualSpec extends Specification implements DataTest {
         given:
         Individual individual = createIndividual()
         assert individual.validate()
-        assert individual.save()
+        assert individual.save(flush: true)
 
         Sample sample1 = new Sample(
                 individual: individual,
                 sampleType: DomainFactory.createSampleType(name: "name1")
         )
-        assert sample1.save()
+        assert sample1.save(flush: true)
 
         Sample sample2 = new Sample(
                 individual: individual,
                 sampleType: DomainFactory.createSampleType(name: "name2")
         )
-        assert sample2.save()
+        assert sample2.save(flush: true)
 
         expect:
         [sample1, sample2] == individual.getSamples()
@@ -186,7 +186,7 @@ class IndividualSpec extends Specification implements DataTest {
     void "test getResultsPerPidPath"() {
         given:
         Realm realm = DomainFactory.createRealm()
-        assert realm.save()
+        assert realm.save(flush: true)
 
         Project project = DomainFactory.createProject(
                 dirName: "projectDirName",
