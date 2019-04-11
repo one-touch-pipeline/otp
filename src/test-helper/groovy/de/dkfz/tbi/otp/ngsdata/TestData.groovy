@@ -301,7 +301,7 @@ class TestData {
         fileType = DomainFactory.createFileType(
                 type: type
                 )
-        assertNotNull(fileType.save())
+        assertNotNull(fileType.save(flush: true))
         return fileType
     }
 

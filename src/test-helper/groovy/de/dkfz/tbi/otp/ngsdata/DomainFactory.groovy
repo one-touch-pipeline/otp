@@ -2016,16 +2016,16 @@ class DomainFactory {
     @Deprecated
     static ProcessingStep createAndSaveProcessingStep(String jobClass, ProcessParameterObject processParameterObject = null) {
         final JobExecutionPlan jep = new JobExecutionPlan(name: "DontCare" + sprintf('%016X', new Random().nextLong()), planVersion: 0, startJobBean: "DontCare")
-        assert jep.save()
+        assert jep.save(flush: true)
         final JobDefinition jobDefinition = new JobDefinition(name: "DontCare", bean: "DontCare", plan: jep)
-        assert jobDefinition.save()
+        assert jobDefinition.save(flush: true)
         final Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "DontCare")
-        assert process.save()
+        assert process.save(flush: true)
         if (processParameterObject != null) {
             createProcessParameter(process, processParameterObject)
         }
         final ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process, jobClass: jobClass)
-        assert step.save()
+        assert step.save(flush: true)
         final ProcessingStepUpdate update = createProcessingStepUpdate(step, ExecutionState.CREATED)
         assert update.save(flush: true)
         return step
