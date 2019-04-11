@@ -78,7 +78,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
                 RoddyBamFile roddyBamFile1 = RoddyBamFile.get(id)
                 roddyBamFile1.fileOperationStatus = FileOperationStatus.NEEDS_PROCESSING
                 roddyBamFile1.md5sum = null
-                assert roddyBamFile1.save()
+                assert roddyBamFile1.save(flush: true)
                 return roddyBamFile1
             }
             movePanCanFilesToFinalDestinationJob.linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm ->
@@ -97,8 +97,9 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
         exception.message == exceptionMessage
 
         SessionUtils.withNewSession {
-            return RoddyBamFile.get(id).fileOperationStatus == originalFileOperationStatus &&
-                    RoddyBamFile.get(id).mergingWorkPackage.bamFileInProjectFolder == null
+            assert RoddyBamFile.get(id).fileOperationStatus == originalFileOperationStatus
+            assert RoddyBamFile.get(id).mergingWorkPackage.bamFileInProjectFolder == null
+            return true
         }
 
         cleanup:
