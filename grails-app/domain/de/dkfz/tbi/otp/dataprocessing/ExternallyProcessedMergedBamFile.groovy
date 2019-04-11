@@ -174,7 +174,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         maximumReadLength nullable: true, min: 0
     }
 
-    List<BamType> getAllowedTypes() {
-        return BamType.values() + [null]
+    List<AbstractBamFile.BamType> getAllowedTypes() {
+        return AbstractBamFile.BamType.values() + [null]
     }
 }

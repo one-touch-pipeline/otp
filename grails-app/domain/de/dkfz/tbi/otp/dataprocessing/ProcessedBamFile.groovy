@@ -39,8 +39,8 @@ class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParam
         }
     }
 
-    List<BamType> getAllowedTypes() {
-        return [BamType.SORTED]
+    List<AbstractBamFile.BamType> getAllowedTypes() {
+        return [AbstractBamFile.BamType.SORTED]
     }
 
     SeqTrack getSeqTrack() {

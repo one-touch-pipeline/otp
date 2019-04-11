@@ -49,8 +49,8 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         }
     }
 
-    List<BamType> getAllowedTypes() {
-        return [BamType.MDUP]
+    List<AbstractBamFile.BamType> getAllowedTypes() {
+        return [AbstractBamFile.BamType.MDUP]
     }
 
     MergingSet getMergingSet() {
