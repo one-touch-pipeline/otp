@@ -552,6 +552,7 @@ class ProjectService {
                     sampleType: it,
                     referenceGenome: referenceGenome,
             )
+            refSeqType.save(flush: true)
             refSeqType.alignmentProperties = alignmentProperties.collect { String key, String value ->
                 new ReferenceGenomeProjectSeqTypeAlignmentProperty(name: key, value: value, referenceGenomeProjectSeqType: refSeqType)
             } as Set
