@@ -102,7 +102,6 @@ class DataFileConsistencyChecker {
                 or {
                     eq('subType', 'fastq')
                     eq('subType', 'fq.gz')
-                    eq('subType', 'fastq')
                     eq('subType', 'seq')
                 }
             }
@@ -122,7 +121,6 @@ class DataFileConsistencyChecker {
                 or {
                     eq('subType', 'fastq')
                     eq('subType', 'fq.gz')
-                    eq('subType', 'fastq')
                     eq('subType', 'seq')
                 }
             }
