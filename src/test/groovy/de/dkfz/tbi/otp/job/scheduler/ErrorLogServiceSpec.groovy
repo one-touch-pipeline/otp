@@ -22,20 +22,26 @@
 
 package de.dkfz.tbi.otp.job.scheduler
 
+import grails.testing.gorm.DataTest
 import org.apache.commons.io.FileUtils
-import org.junit.*
+import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.ConfigService
 
-import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertTrue
+class ErrorLogServiceSpec extends Specification implements DataTest {
 
-class ErrorLogServiceTests {
+    Class[] getDomainClassesToMock() {[
+
+    ]}
+
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder()
 
     ErrorLogService errorLogService
-    ConfigService configService
 
     File exceptionStoringFile
     File stacktraceFile
@@ -43,60 +49,81 @@ class ErrorLogServiceTests {
     final static String ARBITRARY_STACKTRACE_IDENTIFIER = "689f127e9492f1e242192288ea870f28"
     final static String ERROR_MESSAGE = "Exception"
 
-    @Rule
-    public TemporaryFolder tmpDir = new TemporaryFolder()
-
-    @Before
-    void setUp() {
+    void setupData() {
+        errorLogService = new ErrorLogService()
+        errorLogService.configService = new TestConfigService()
         stacktraceFile = errorLogService.getStackTracesFile(ARBITRARY_STACKTRACE_IDENTIFIER)
         stacktraceFile.parentFile.mkdirs()
     }
 
-    @After
-    void tearDown() {
+    void cleanup() {
         new FileUtils().deleteQuietly(exceptionStoringFile)
         assert stacktraceFile.parentFile.deleteDir()
     }
 
-    @Test
-    void testLog() {
+    void "testLog"() {
+        given:
+        setupData()
+
         File testDirectory = tmpDir.newFolder("otp-test", "stacktraces")
-        configService.metaClass.getStackTracesDirectory = {
-            return testDirectory.absolutePath
+        errorLogService.configService = Mock(TestConfigService) {
+            getStackTracesDirectory() >> { new File(testDirectory.absolutePath) }
         }
-        // To test whether calling log method produces error
-        Exception e = new Exception(ERROR_MESSAGE)
-        String md5SumCalculatedInMethod = errorLogService.log(e)
+
+        when:
+        String md5SumCalculatedInMethod = errorLogService.log(new Exception(ERROR_MESSAGE))
         exceptionStoringFile = new File(testDirectory, md5SumCalculatedInMethod + ".xml")
-        // Test if the file exists
-        assertTrue(exceptionStoringFile.isFile())
-        //Test if the content of the file is correct
         def contentOfFile = new XmlParser().parse(exceptionStoringFile)
-        def timestamps = contentOfFile.timestamp.findAll { it }
-        assertEquals(1, timestamps.size())
-        assertTrue(contentOfFile.@exceptionMessage == ERROR_MESSAGE)
-        TestCase.removeMetaClass(ConfigService, configService)
+
+        then:
+        exceptionStoringFile.isFile()
+        contentOfFile.timestamp.count { it } == 1
+        // @ forces direct access, instead of going over the automatically generated getter
+        contentOfFile.@exceptionMessage == ERROR_MESSAGE
     }
 
-    @Test(expected = RuntimeException)
-    void testLoggedErrorNoFile() {
+    void "testLoggedErrorNoFile"() {
+        given:
+        setupData()
+
+        when:
         errorLogService.loggedError("/.|\test/..")
+
+        then:
+        RuntimeException e = thrown()
+        e.message.contains("is not a file")
     }
 
-    @Test(expected = RuntimeException)
-    void testLoggedErrorNoStackTraceContent() {
+    void "testLoggedErrorNoStackTraceContent"() {
+        given:
+        setupData()
+
+        when:
         stacktraceFile.createNewFile()
         errorLogService.loggedError(ARBITRARY_STACKTRACE_IDENTIFIER)
+
+        then:
+        RuntimeException e = thrown()
+        e.message.contains("The XML file could not be parsed")
     }
 
-    @Test(expected = RuntimeException)
-    void testLoggedErrorWithNoXMLContent() {
-        stacktraceFile << ERROR_MESSAGE
+    void "testLoggedErrorWithNoXMLContent"() {
+        given:
+        setupData()
+
+        when:
+        stacktraceFile << "garbage"
         errorLogService.loggedError(ARBITRARY_STACKTRACE_IDENTIFIER)
+
+        then:
+        RuntimeException e = thrown()
+        e.message.contains("The XML file could not be parsed")
     }
 
-    @Test
-    void testLoggedErrorWithContent() {
+    void "testLoggedErrorWithContent"() {
+        given:
+        setupData()
+
         stacktraceFile << """
 <stacktraceElement exceptionMessage='Testing'>
   <stacktrace>${ERROR_MESSAGE}</stacktrace>
@@ -105,6 +132,8 @@ class ErrorLogServiceTests {
   </timestamp>
 </stacktraceElement>
 """
-        assertEquals(ERROR_MESSAGE, errorLogService.loggedError(ARBITRARY_STACKTRACE_IDENTIFIER))
+
+        expect:
+        ERROR_MESSAGE == errorLogService.loggedError(ARBITRARY_STACKTRACE_IDENTIFIER)
     }
 }
