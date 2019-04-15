@@ -27,6 +27,7 @@ import groovy.transform.TupleConstructor
 @TupleConstructor
 enum QcThresholdHandling {
     NO_CHECK(false, false, false),
+    CHECK_AND_NOT_NOTIFY(true, false, false),
     CHECK_AND_NOTIFY(true, true, false),
     CHECK_NOTIFY_AND_BLOCK(true, true, true),
 
