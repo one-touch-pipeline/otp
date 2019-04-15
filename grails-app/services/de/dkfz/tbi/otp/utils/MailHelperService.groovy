@@ -42,6 +42,7 @@ class MailHelperService {
     ProcessingOptionService processingOptionService
 
     void sendEmail(String emailSubject, String content, String recipient) {
+        assert recipient
         sendEmail(emailSubject, content, Arrays.asList(recipient))
     }
 
