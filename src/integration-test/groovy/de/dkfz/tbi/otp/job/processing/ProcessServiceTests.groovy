@@ -104,10 +104,6 @@ class ProcessServiceTests implements UserAndRoles {
         JobExecutionPlan plan = mockPlan()
         Process process = mockProcess(plan)
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            aclUtilService.addPermission(plan, TESTUSER, BasePermission.READ)
-        }
-
         SpringSecurityUtils.doWithAuth(USER) {
             TestCase.shouldFail(AccessDeniedException) {
                 processService.getProcess(process.id)
