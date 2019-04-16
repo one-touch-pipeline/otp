@@ -368,13 +368,15 @@ class IndividualService {
         SampleType sampleType = createSampleType(type)
         createSample(individual, sampleType)
     }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void createSample(Individual individual, SampleType sampleType) {
-        if (Sample.findByIndividualAndSampleType(individual, sampleType)) {
-            return
+    Sample createSample(Individual individual, SampleType sampleType) {
+        Sample sample = Sample.findByIndividualAndSampleType(individual, sampleType)
+        if (!sample) {
+            sample = new Sample(individual: individual, sampleType: sampleType)
+            sample.save(flush: true)
         }
-        Sample sample = new Sample(individual: individual, sampleType: sampleType)
-        sample.save(flush: true)
+        return sample
     }
 
     /**
