@@ -189,6 +189,7 @@ class JobErrorDefinitionServiceSpec extends Specification {
         given:
         JobErrorDefinition jobErrorDefinition = DomainFactory.createJobErrorDefinition()
         JobErrorDefinitionService service = new JobErrorDefinitionService()
+        JobDefinition jobDefinition = jobDefinitionClosure()
 
         when:
         service.addNewJob(jobErrorDefinition, jobDefinition)
@@ -197,9 +198,9 @@ class JobErrorDefinitionServiceSpec extends Specification {
         jobErrorDefinition.getJobDefinitions().contains(jobDefinition)
 
         where:
-        jobDefinition                                       | _
-        DomainFactory.createJobDefinition(name: "NAME")     | _
-        DomainFactory.createJobDefinition(name: "NEW_NAME") | _
+        jobDefinitionClosure                                      | _
+        ({ DomainFactory.createJobDefinition(name: "NAME") })     | _
+        ({ DomainFactory.createJobDefinition(name: "NEW_NAME") }) | _
     }
 
 }
