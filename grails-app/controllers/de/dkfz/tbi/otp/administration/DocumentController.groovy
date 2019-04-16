@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.FlashMessage
 
 @GrailsCompileStatic
 class DocumentController {
+
     static allowedMethods = [
             manage: "GET",
             upload: "POST",
