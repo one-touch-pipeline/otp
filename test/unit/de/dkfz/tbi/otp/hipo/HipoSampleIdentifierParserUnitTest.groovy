@@ -81,7 +81,7 @@ class HipoSampleIdentifierParserUnitTest {
         sampleName = "H004-ABCD-T1-D1"
         assertNotNull(parser.tryParse(sampleName))
 
-        sampleName = "H004-BPF4-A4-D1"
+        sampleName = "H004-BPF4-D4-D1"
         assertNull(parser.tryParse(sampleName))
 
         sampleName = "P021-EFGH"

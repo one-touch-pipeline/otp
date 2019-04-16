@@ -41,6 +41,7 @@ enum HipoTissueType {
     NORMAL_SORTED_CELLS       ('Z'),
     TUMOR_INTERVAL_DEBULKING_SURGERY ('E'),
     EXTERNAL_CONTROL          ('K'),
+    LYMPH_NODES               ('A'),
 
     final char key
 
