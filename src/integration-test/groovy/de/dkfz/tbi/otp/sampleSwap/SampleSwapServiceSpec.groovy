@@ -45,6 +45,8 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
     @Rule
     TemporaryFolder temporaryFolder
 
+    LsdfFilesService lsdfFilesService
+
     SampleSwapService sampleSwapService
     File testFolder
     SeqTrack seqTrack1
@@ -88,7 +90,7 @@ class SampleSwapServiceSpec extends Specification implements UserAndRoles {
     }
 
     def cleanup() {
-        sampleSwapService.lsdfFilesService = new LsdfFilesService()
+        sampleSwapService.lsdfFilesService = lsdfFilesService
     }
 
     void "test validateInput comment missing, fails"() {
