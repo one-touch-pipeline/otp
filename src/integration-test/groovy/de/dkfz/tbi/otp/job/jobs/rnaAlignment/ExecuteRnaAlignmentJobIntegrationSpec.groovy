@@ -28,6 +28,7 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -36,18 +37,24 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Rollback
 @Integration
 class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements RoddyRnaFactory {
 
-    ExecuteRnaAlignmentJob executeRnaAlignmentJob
+    LsdfFilesService lsdfFilesService
+    ReferenceGenomeService referenceGenomeService
 
     final static String ADAPTER_SEQUENCE1 = "ATGCCCTTGAATC"
 
     @Rule
     TemporaryFolder tmpDir = new TemporaryFolder()
     TestConfigService configService
+
+    void setup() {
+        SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
+    }
 
     void setupData() {
         configService = new TestConfigService([
@@ -57,6 +64,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
     }
 
     void cleanup() {
+        TestCase.removeMetaClass(SessionUtils)
         configService.clean()
     }
 
@@ -64,13 +72,18 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
     void "test prepareAndReturnWorkflowSpecificCValues no adapter sequence available"() {
         given:
         setupData()
-        RnaRoddyBamFile roddyBamFile = setUpForPrepareAndReturnWorkflowSpecificCValues()
+        ExecuteRnaAlignmentJob executeRnaAlignmentJob = new ExecuteRnaAlignmentJob()
         executeRnaAlignmentJob.fileSystemService = new TestFileSystemService()
+        executeRnaAlignmentJob.lsdfFilesService = lsdfFilesService
+        executeRnaAlignmentJob.referenceGenomeService = referenceGenomeService
+
+        RnaRoddyBamFile roddyBamFile = setUpForPrepareAndReturnWorkflowSpecificCValues()
 
         when:
         executeRnaAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
 
         then:
+        true
         AssertionError e = thrown()
         e.message.contains("There is not exactly one reverse complement adapter sequence available for BAM file")
     }
@@ -78,6 +91,10 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
     void "test prepareAndReturnWorkflowSpecificCValues exactly one adapter sequence available"() {
         given:
         setupData()
+        ExecuteRnaAlignmentJob executeRnaAlignmentJob = new ExecuteRnaAlignmentJob()
+        executeRnaAlignmentJob.lsdfFilesService = lsdfFilesService
+        executeRnaAlignmentJob.referenceGenomeService = referenceGenomeService
+
         RnaRoddyBamFile roddyBamFile = setUpForPrepareAndReturnWorkflowSpecificCValues()
         roddyBamFile.containedSeqTracks.each {
             LibraryPreparationKit libraryPreparationKit = it.libraryPreparationKit
@@ -105,7 +122,7 @@ class ExecuteRnaAlignmentJobIntegrationSpec extends Specification implements Rod
 
 
     private RnaRoddyBamFile setUpForPrepareAndReturnWorkflowSpecificCValues() {
-        executeRnaAlignmentJob = new ExecuteRnaAlignmentJob()
+        ExecuteRnaAlignmentJob executeRnaAlignmentJob = new ExecuteRnaAlignmentJob()
         executeRnaAlignmentJob.lsdfFilesService = new LsdfFilesService()
         executeRnaAlignmentJob.referenceGenomeService = new ReferenceGenomeService()
         executeRnaAlignmentJob.referenceGenomeService.configService = configService
