@@ -26,12 +26,14 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ImportProcess
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.ImportExternallyMergedBamStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Rollback
 @Integration
@@ -39,25 +41,32 @@ class ImportExternallyMergedBamStartJobIntegrationSpec extends Specification {
 
     def "execute sets state of importProcess on STARTED"() {
         given:
+        SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
         JobExecutionPlan plan = DomainFactory.createJobExecutionPlan(enabled: true)
         ImportProcess importProcess = new ImportProcess(
                 externallyProcessedMergedBamFiles: [
                         DomainFactory.createExternallyProcessedMergedBamFile(),
                         DomainFactory.createExternallyProcessedMergedBamFile()
                 ]
-        ).save()
+        )
+        importProcess.save(flush: true)
         ImportExternallyMergedBamStartJob importExternallyMergedBamStartJob = new ImportExternallyMergedBamStartJob()
         importExternallyMergedBamStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> null
             _ * isActive() >> true
         }
+
         importExternallyMergedBamStartJob.optionService = new ProcessingOptionService()
         importExternallyMergedBamStartJob.setJobExecutionPlan(plan)
 
         when:
         importExternallyMergedBamStartJob.execute()
+        ImportProcess refreshedImportProcess = ImportProcess.get(importProcess.id)
 
         then:
-        importProcess.state == ImportProcess.State.STARTED
+        refreshedImportProcess.state == ImportProcess.State.STARTED
+
+        cleanup:
+        TestCase.removeMetaClass(SessionUtils)
     }
 }
