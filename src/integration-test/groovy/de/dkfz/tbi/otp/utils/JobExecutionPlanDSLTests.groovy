@@ -46,24 +46,13 @@ class JobExecutionPlanDSLTests {
         }
         JobExecutionPlan jep = JobExecutionPlan.list().last()
         assertFalse(planValidatorService.validate(jep).isEmpty())
+
+        assertEquals(1, JobExecutionPlan.count())
         plan("test2") {
             start("startJob", "testStartJob")
         }
+        assertEquals(2, JobExecutionPlan.count())
         jep = JobExecutionPlan.list().last()
         assertFalse(planValidatorService.validate(jep).isEmpty())
-    }
-
-    @Test
-    void testWatchDog() {
-        assertEquals(0, JobExecutionPlan.count())
-        plan("test") {
-            start("startJob", "testStartJob")
-            job("test", "testJob") {
-                watchdog("testEndStateAwareJob")
-            }
-        }
-        JobExecutionPlan jep = JobExecutionPlan.list().last()
-        def errors = planValidatorService.validate(jep)
-        assertTrue(errors.isEmpty())
     }
 }
