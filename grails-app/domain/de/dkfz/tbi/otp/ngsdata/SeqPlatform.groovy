@@ -38,7 +38,15 @@ class SeqPlatform implements Entity {
     ]
 
     static constraints = {
+        /*
+        The GORM unique constraint is seemingly bugged and does not recognize objects with different attributes as unique
         name(blank: false, unique: ['seqPlatformModelLabel', 'sequencingKitLabel'])
+        Because of this we implemented the same constraint in a custom validator:
+         */
+        name(blank: false, validator: { val, obj ->
+            SeqPlatform seqPlatform = SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabel(val, obj.seqPlatformModelLabel, obj.sequencingKitLabel)
+            return !seqPlatform || seqPlatform == obj
+        })
         seqPlatformModelLabel(nullable: true)
         sequencingKitLabel(nullable: true)
     }
@@ -48,7 +56,7 @@ class SeqPlatform implements Entity {
         return fullName()
     }
 
-    SeqPlatformGroup getSeqPlatformGroup(Project project, SeqType seqType) {
+    SeqPlatformGroup getSeqPlatformGroupForMergingCriteria(Project project, SeqType seqType) {
         if (!(project && seqType)) {
             return null
         }

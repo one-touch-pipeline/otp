@@ -47,7 +47,7 @@ Run.withTransaction {
     assert run.seqPlatform == currentSeqPlatform
 
     SeqTrack.findAllByRun(run).each { SeqTrack st ->
-        assert newSeqPlatform.getSeqPlatformGroup(st.project, st.seqType) == currentSeqPlatform.getSeqPlatformGroup(st.project, st.seqType)
+        assert newSeqPlatform.getSeqPlatformGroupForMergingCriteria(st.project, st.seqType) == currentSeqPlatform.getSeqPlatformGroupForMergingCriteria(st.project, st.seqType)
     }
 
     run.seqPlatform = newSeqPlatform
