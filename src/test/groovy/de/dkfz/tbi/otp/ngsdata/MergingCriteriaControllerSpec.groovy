@@ -22,26 +22,43 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
-import org.springframework.security.access.AccessDeniedException
+import grails.plugin.springsecurity.acl.AclSid
+import grails.testing.gorm.DataTest
+import grails.testing.web.controllers.ControllerUnitTest
 import spock.lang.Specification
-import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.dataprocessing.MergingCriteriaService
+import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class MergingCriteriaControllerIntegrationSpec extends Specification implements UserAndRoles {
+class MergingCriteriaControllerSpec extends Specification implements ControllerUnitTest<MergingCriteriaController>, DataTest {
 
-    MergingCriteriaController controller = new MergingCriteriaController()
+    Class[] getDomainClassesToMock() {[
+            AclSid,
+            MergingCriteria,
+            Project,
+            ProjectRole,
+            Realm,
+            Role,
+            SeqPlatformGroup,
+            SeqPlatformModelLabel,
+            SeqType,
+            User,
+            UserProjectRole,
+            UserRole,
+    ]}
 
-    def setup() {
-        createUserAndRoles()
+    void setupData() {
+        controller.mergingCriteriaService = new MergingCriteriaService()
+        controller.mergingCriteriaService.commentService = Mock(CommentService)
     }
 
     void "test projectAndSeqTypeSpecific, no MergingCriteria exists"() {
         given:
+        setupData()
+
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
@@ -49,9 +66,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
         def model
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            model = controller.projectAndSeqTypeSpecific()
-        }
+        model = controller.projectAndSeqTypeSpecific()
 
         then:
         controller.response.status == 200
@@ -64,6 +79,8 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
 
     void "test projectAndSeqTypeSpecific, MergingCriteria exists"() {
         given:
+        setupData()
+
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(project: project, seqType: seqType)
@@ -72,9 +89,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
         def model
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            model = controller.projectAndSeqTypeSpecific()
-        }
+        model = controller.projectAndSeqTypeSpecific()
 
         then:
         controller.response.status == 200
@@ -83,87 +98,28 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         model.mergingCriteria == mergingCriteria
     }
 
-    void "test projectAndSeqTypeSpecific, fails for user not in project"() {
+    void "test projectAndSeqTypeSpecific"() {
         given:
+        setupData()
+
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
         when:
         controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
-        SpringSecurityUtils.doWithAuth(USER) {
-            controller.projectAndSeqTypeSpecific()
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    @Unroll
-    void "test projectAndSeqTypeSpecific, works users with authorization of #username"() {
-        given:
-        Project project = DomainFactory.createProject()
-        addUserWithReadAccessToProject(User.findByUsername(USER), project)
-        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
-
-        when:
-        controller.params."project.id" = project.id
-        controller.params."seqType.id" = seqType.id
-        SpringSecurityUtils.doWithAuth(username) {
-            controller.projectAndSeqTypeSpecific()
-        }
+        controller.projectAndSeqTypeSpecific()
 
         then:
         controller.response.status == 200
-
-        where:
-        username   | _
-        ADMIN      | _
-        OPERATOR   | _
-        USER       | _
     }
 
-    void "test projectAndSeqTypeSpecific, fails without authentication"() {
+    void "test defaultSeqPlatformGroupConfiguration"() {
         given:
-        Project project = DomainFactory.createProject()
-        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+        setupData()
 
         when:
-        controller.params."project.id" = project.id
-        controller.params."seqType.id" = seqType.id
-        doWithAnonymousAuth {
-            controller.projectAndSeqTypeSpecific()
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    void "test defaultSeqPlatformGroupConfiguration, fails without authentication"() {
-        when:
-        doWithAnonymousAuth {
-            controller.defaultSeqPlatformGroupConfiguration()
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    void "test defaultSeqPlatformGroupConfiguration, fails with wrong authentication"() {
-        when:
-        SpringSecurityUtils.doWithAuth(USER) {
-            controller.defaultSeqPlatformGroupConfiguration()
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    void "test defaultSeqPlatformGroupConfiguration, works for operator"() {
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.defaultSeqPlatformGroupConfiguration()
-        }
+        controller.defaultSeqPlatformGroupConfiguration()
 
         then:
         controller.response.status == 200
@@ -171,6 +127,8 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
 
     void "test update, no MergingCriteria exists"() {
         given:
+        setupData()
+
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
 
@@ -179,9 +137,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         controller.params."seqType.id" = seqType.id
         controller.params.useLibPrepKit = "on"
         controller.params.useSeqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.update()
-        }
+        controller.update()
 
         then:
         controller.response.status == 302
@@ -194,6 +150,8 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
 
     void "test update, MergingCriteria exists"() {
         given:
+        setupData()
+
         Project project = DomainFactory.createProject()
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(project: project, seqType: seqType)
@@ -202,9 +160,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         controller.params."project.id" = project.id
         controller.params."seqType.id" = seqType.id
         controller.params.useSeqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.update()
-        }
+        controller.update()
 
         then:
         controller.response.status == 302
@@ -214,57 +170,10 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
     }
 
-    void "test update, fails with wrong authentication"() {
+    def "test removePlatformFromSeqPlatformGroup, group contains many seqPlatforms"() {
         given:
-        Project project = DomainFactory.createProject()
-        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
+        setupData()
 
-        when:
-        controller.params."project.id" = project.id
-        controller.params."seqType.id" = seqType.id
-        controller.params.useSeqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
-        SpringSecurityUtils.doWithAuth(USER) {
-            controller.update()
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    void "test update, fails without authentication"() {
-        given:
-        Project project = DomainFactory.createProject()
-        SeqType seqType = DomainFactory.createWholeGenomeSeqType()
-
-        when:
-        controller.params."project.id" = project.id
-        controller.params."seqType.id" = seqType.id
-        controller.params.useSeqPlatformGroup = MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
-        doWithAnonymousAuth {
-            controller.update()
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    def "test removePlatformFromSeqPlatformGroup, group contains many seqPlatforms, not authorized"() {
-        given:
-        SeqPlatformGroup group = DomainFactory.createSeqPlatformGroup()
-        SeqPlatform seqPlatform1 = DomainFactory.createSeqPlatform()
-        group.addToSeqPlatforms(seqPlatform1)
-
-        when:
-        doWithAnonymousAuth {
-            controller.removePlatformFromSeqPlatformGroup(group, seqPlatform1)
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    def "test removePlatformFromSeqPlatformGroup, group contains many seqPlatforms, authorized"() {
-        given:
         SeqPlatformGroup group = DomainFactory.createSeqPlatformGroupWithMergingCriteria()
         SeqPlatform seqPlatform1 = DomainFactory.createSeqPlatform()
         SeqPlatform seqPlatform2 = DomainFactory.createSeqPlatform()
@@ -275,9 +184,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         when:
         controller.params."group.id" = group.id
         controller.params."platform.id" = seqPlatform1.id
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.removePlatformFromSeqPlatformGroup()
-        }
+        controller.removePlatformFromSeqPlatformGroup()
 
         then:
         controller.response.status == 302
@@ -286,31 +193,17 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         group.seqPlatforms.contains(seqPlatform2)
     }
 
-    def "test addPlatformToExistingSeqPlatformGroup, not authorized"() {
+    def "test addPlatformToExistingSeqPlatformGroup"() {
         given:
-        SeqPlatformGroup group = DomainFactory.createSeqPlatformGroup()
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        setupData()
 
-        when:
-        doWithAnonymousAuth {
-            controller.addPlatformToExistingSeqPlatformGroup(group, seqPlatform)
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    def "test addPlatformToExistingSeqPlatformGroup, authorized"() {
-        given:
         SeqPlatformGroup group = DomainFactory.createSeqPlatformGroupWithMergingCriteria()
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
 
         when:
         controller.params."group.id" = group.id
         controller.params."platform.id" = seqPlatform.id
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.addPlatformToExistingSeqPlatformGroup(group, seqPlatform)
-        }
+        controller.addPlatformToExistingSeqPlatformGroup(group, seqPlatform)
 
         then:
         controller.response.status == 302
@@ -318,22 +211,10 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         group.seqPlatforms.contains(seqPlatform)
     }
 
-    def "test addPlatformToNewGroup, not authorized"() {
+    def "test addPlatformToNewGroup"() {
         given:
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteria()
+        setupData()
 
-        when:
-        doWithAnonymousAuth {
-            controller.createNewSpecificGroupAndAddPlatform(seqPlatform, mergingCriteria)
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    def "test addPlatformToNewGroup, authorized"() {
-        given:
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
                 useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
@@ -342,9 +223,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         when:
         controller.params."mergingCriteria.id" = mergingCriteria.id
         controller.params."platform.id" = seqPlatform.id
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.createNewSpecificGroupAndAddPlatform(seqPlatform, mergingCriteria)
-        }
+        controller.createNewSpecificGroupAndAddPlatform(seqPlatform, mergingCriteria)
 
         then:
         controller.response.status == 302
@@ -354,27 +233,14 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         SeqPlatformGroup.list().first().mergingCriteria == mergingCriteria
     }
 
-    def "test createNewDefaultGroupAndAddPlatform, not authorized"() {
+    def "test createNewDefaultGroupAndAddPlatform"() {
         given:
+        setupData()
+
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
 
         when:
-        doWithAnonymousAuth {
-            controller.createNewDefaultGroupAndAddPlatform(seqPlatform)
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    def "test createNewDefaultGroupAndAddPlatform, authorized"() {
-        given:
-        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
-
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.createNewDefaultGroupAndAddPlatform(seqPlatform)
-        }
+        controller.createNewDefaultGroupAndAddPlatform(seqPlatform)
 
         then:
         controller.response.status == 302
@@ -384,28 +250,15 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         !SeqPlatformGroup.list().first().mergingCriteria
     }
 
-    def "test deleteSeqPlatformGroup, not authorized"() {
+    def "test deleteSeqPlatformGroup"() {
         given:
-        SeqPlatformGroup seqPlatformGroup = DomainFactory.createSeqPlatformGroup()
+        setupData()
 
-        when:
-        doWithAnonymousAuth {
-            controller.deleteSeqPlatformGroup(seqPlatformGroup)
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    def "test deleteSeqPlatformGroup, authorized"() {
-        given:
         SeqPlatformGroup seqPlatformGroup = DomainFactory.createSeqPlatformGroupWithMergingCriteria()
 
         when:
         controller.params."group.id" = seqPlatformGroup.id
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.deleteSeqPlatformGroup(seqPlatformGroup)
-        }
+        controller.deleteSeqPlatformGroup(seqPlatformGroup)
 
         then:
         controller.response.status == 302
@@ -414,24 +267,10 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         !SeqPlatformGroup.list().first().seqPlatforms
     }
 
-    def "test copyDefaultToSpecific, not authorized"() {
+    def "test copyDefaultToSpecific"() {
         given:
-        SeqPlatformGroup defaultGroup = DomainFactory.createSeqPlatformGroup()
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
-                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
-        )
+        setupData()
 
-        when:
-        SpringSecurityUtils.doWithAuth(USER) {
-            controller.copyDefaultToSpecific(defaultGroup, mergingCriteria)
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    def "test copyDefaultToSpecific, authorized"() {
-        given:
         SeqPlatformGroup defaultGroup = DomainFactory.createSeqPlatformGroup()
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         defaultGroup.addToSeqPlatforms(seqPlatform)
@@ -442,9 +281,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         when:
         controller.params."seqPlatformGroup.id" = defaultGroup.id
         controller.params."mergingCriteria.id" = mergingCriteria.id
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.copyDefaultToSpecific(defaultGroup, mergingCriteria)
-        }
+        controller.copyDefaultToSpecific(defaultGroup, mergingCriteria)
 
         then:
         controller.response.status == 302
@@ -453,23 +290,10 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         SeqPlatformGroup.findByMergingCriteria(mergingCriteria).seqPlatforms == [seqPlatform] as Set
     }
 
-    def "test copyAllDefaultToSpecific, not authorized"() {
+    def "test copyAllDefaultToSpecific"() {
         given:
-        MergingCriteria mergingCriteria = DomainFactory.createMergingCriteriaLazy(
-                useSeqPlatformGroup: MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
-        )
+        setupData()
 
-        when:
-        SpringSecurityUtils.doWithAuth(USER) {
-            controller.copyAllDefaultToSpecific(mergingCriteria)
-        }
-
-        then:
-        thrown(AccessDeniedException)
-    }
-
-    def "test copyAllDefaultToSpecific, authorized"() {
-        given:
         SeqPlatformGroup defaultGroup = DomainFactory.createSeqPlatformGroup()
         SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
         defaultGroup.addToSeqPlatforms(seqPlatform)
@@ -481,9 +305,7 @@ class MergingCriteriaControllerIntegrationSpec extends Specification implements 
         )
 
         when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.copyAllDefaultToSpecific(mergingCriteria)
-        }
+        controller.copyAllDefaultToSpecific(mergingCriteria)
 
         then:
         controller.response.status == 302
