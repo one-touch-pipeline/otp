@@ -25,20 +25,17 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.junit.Before
 import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 
 @Rollback
 @Integration
 class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
-
-    final static String SEQUENCE_LENGTH = "100"
 
     OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
 
@@ -58,15 +55,6 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
         abstractBamFile.workPackage.bamFileInProjectFolder = abstractBamFile
         overallQualityAssessmentMerged.save(flush: true)
     }
-
-
-    private void prepareFindSequenceLengthForOverallQualityAssessmentMerged() {
-        ProcessedBamFile processedBamFile = DomainFactory.assignNewProcessedBamFile(overallQualityAssessmentMerged.mergingSet)
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(processedBamFile.seqTrack)
-        dataFiles*.sequenceLength = SEQUENCE_LENGTH
-        dataFiles*.save(flush:true, failOnError: true)
-    }
-
 
     @Test
     void testFindAllByProjectAndSeqType_admin() {
@@ -155,7 +143,7 @@ class OverallQualityAssessmentMergedServiceTest implements UserAndRoles {
     void testFindAllByProjectAndSeqType_notLastMergingPassIdentifier() {
         setupData()
         List expected = []
-        DomainFactory.createMergingSet(mergingSet: overallQualityAssessmentMerged.mergingSet, identifier: overallQualityAssessmentMerged.mergingPass.identifier + 1)
+        DomainFactory.createMergingPass(mergingSet: overallQualityAssessmentMerged.mergingSet, identifier: overallQualityAssessmentMerged.mergingPass.identifier + 1)
 
         SpringSecurityUtils.doWithAuth(ADMIN) {
             List<OverallQualityAssessmentMerged> result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(overallQualityAssessmentMerged.project, DomainFactory.createSeqType())
