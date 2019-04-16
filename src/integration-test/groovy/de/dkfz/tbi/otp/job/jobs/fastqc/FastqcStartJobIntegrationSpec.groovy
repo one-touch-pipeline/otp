@@ -26,6 +26,7 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.Specification
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
@@ -33,12 +34,21 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Rollback
 @Integration
 class FastqcStartJobIntegrationSpec extends Specification {
 
-    def "execute calls setStartedForSeqTracks"() {
+    void setup() {
+        SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
+    }
+
+    void cleanup() {
+        TestCase.removeMetaClass(SessionUtils)
+    }
+
+    void "execute calls setStartedForSeqTracks"() {
         given:
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()

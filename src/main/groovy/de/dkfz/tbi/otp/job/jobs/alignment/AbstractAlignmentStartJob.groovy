@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Slf4j
 abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements RestartableStartJob {
@@ -40,7 +41,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
     @Override
     @Scheduled(fixedDelay = 60000L)
     void execute() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             startAlignment()
         }
     }

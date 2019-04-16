@@ -25,6 +25,7 @@ package de.dkfz.tbi.otp.alignment
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -32,7 +33,7 @@ class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTes
 
     void "test AlignLanesOnly, no baseBam exist, one lane, all fine"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             createSeqTrack("readGroup1")
         }
 
@@ -48,7 +49,7 @@ class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTes
         given:
         SeqTrack firstSeqTrack
         SeqTrack secondSeqTrack
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             if (setLibrary) {
                 firstSeqTrack = createSeqTrack("readGroup1", [libraryName: "lib1"])
                 secondSeqTrack = createSeqTrack("readGroup2", [libraryName: "lib5"])

@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.MovePanCanFilesToFinalDestinationJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.time.Duration
 
@@ -45,7 +46,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
 
     @Override
     void setup() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             roddyBamFile = DomainFactory.createRoddyBamFile()
             DomainFactory.createRoddyMergedBamQa(roddyBamFile, [
                     pairedRead1: READ_COUNTS,
@@ -71,7 +72,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
         FileOperationStatus originalFileOperationStatus
         String exceptionMessage = HelperUtils.uniqueString
         Long id
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             id = roddyBamFile.id
             movePanCanFilesToFinalDestinationJob.metaClass.getProcessParameterObject = {
                 RoddyBamFile roddyBamFile1 = RoddyBamFile.get(id)
@@ -87,7 +88,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
         }
 
         when:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             movePanCanFilesToFinalDestinationJob.execute()
         }
 
@@ -95,7 +96,7 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
         RuntimeException exception = thrown(RuntimeException)
         exception.message == exceptionMessage
 
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             return RoddyBamFile.get(id).fileOperationStatus == originalFileOperationStatus &&
                     RoddyBamFile.get(id).mergingWorkPackage.bamFileInProjectFolder == null
         }

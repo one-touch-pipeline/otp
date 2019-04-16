@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.dataprocessing.ImportProcess
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
-import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Component("importExternallyMergedBamStartJob")
 @Scope("singleton")
@@ -40,7 +40,7 @@ class ImportExternallyMergedBamStartJob extends AbstractStartJobImpl {
     @Scheduled(fixedDelay = 60000L)
     @Override
     void execute() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
             if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
                 return

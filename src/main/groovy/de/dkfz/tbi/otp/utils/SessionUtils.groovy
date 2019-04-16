@@ -20,30 +20,12 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.job.jobs.fileSystemConsistency
+package de.dkfz.tbi.otp.utils
 
-import groovy.util.logging.Slf4j
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
-
-import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyCheck
-import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.SessionUtils
 
-@Component("dataFileStatusStartJob")
-@Scope("singleton")
-@Slf4j
-class DataFileStatusStartJob extends AbstractStartJobImpl {
-
-    //@Scheduled(cron="0 0 1 * * SAT")
-    @Override
-    void execute() {
-        SessionUtils.withNewSession {
-            ConsistencyCheck consistencyCheck = new ConsistencyCheck()
-            consistencyCheck.save(flush: true)
-            createProcess(consistencyCheck)
-            log.debug "FileSystemConsistencyWorkflow: job started"
-        }
+class SessionUtils {
+    static <T> T withNewSession(Closure<T> closure) {
+        Realm.withNewSession closure
     }
 }

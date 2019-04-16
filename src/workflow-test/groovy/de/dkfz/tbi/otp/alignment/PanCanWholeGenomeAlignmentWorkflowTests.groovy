@@ -26,12 +26,13 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 class PanCanWholeGenomeAlignmentWorkflowTests extends PanCanAlignmentWorkflowTests {
 
     void "test alignLanesOnly, no baseBam exists, one lane, with adapterTrimming, all fine"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             SeqTrack seqTrack = createSeqTrack("readGroup1")
 
             RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(seqTrack.project, seqTrack.seqType, Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT))

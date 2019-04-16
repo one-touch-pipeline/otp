@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
 import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import static de.dkfz.tbi.otp.ngsdata.DomainFactory.createAndSaveProcessingStep
@@ -153,7 +154,7 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
             0 * _
         }
         GroovySpy(Realm, global: true)
-        1 * Realm.withNewSession(_) >> { Closure closure ->
+        1 * SessionUtils.withNewSession(_) >> { Closure closure ->
             return closure.call()
         }
         clusterJobMonitor.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
@@ -247,7 +248,7 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
             0 * _
         }
         GroovySpy(Realm, global: true)
-        1 * Realm.withNewSession(_) >> { Closure closure ->
+        1 * SessionUtils.withNewSession(_) >> { Closure closure ->
             return closure.call()
         }
 

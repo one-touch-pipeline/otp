@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 /**
  * This service is able to track the execution of jobs on the cluster.
@@ -60,7 +61,7 @@ class ClusterJobMonitor {
             return //job system is inactive
         }
 
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             doCheck()
         }
     }

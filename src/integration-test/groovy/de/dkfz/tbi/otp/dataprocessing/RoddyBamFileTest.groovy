@@ -24,15 +24,28 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.junit.Test
+import org.junit.*
+import org.springframework.validation.Errors
+import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 @Rollback
 @Integration
 class RoddyBamFileTest {
+
+    @Before
+    void setup() {
+        SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
+    }
+
+    @After
+    void cleanup() {
+        TestCase.removeMetaClass(SessionUtils)
+    }
 
     @Test
     void testConstraints_allFine() {
@@ -62,7 +75,16 @@ class RoddyBamFileTest {
     void testConstraints_notRoddyPipelineName_shouldFail() {
         RoddyBamFile bamFile = DomainFactory.createRoddyBamFile()
         bamFile.workPackage.pipeline.name = Pipeline.Name.DEFAULT_OTP
-        TestCase.assertValidateError(bamFile, 'workPackage', 'validator.invalid', bamFile.workPackage)
+        bamFile.config.pipeline.name = Pipeline.Name.DEFAULT_OTP
+
+        assert !bamFile.validate()
+        Errors errors = bamFile.errors
+        assert errors.errorCount == 2
+        assert errors.fieldErrorCount == 2
+        List<FieldError> fieldErrors = errors.fieldErrors
+
+        assert fieldErrors*.field == ['config.pipeline', 'workPackage']
+        assert fieldErrors*.rejectedValue == [bamFile.config.pipeline, bamFile.workPackage]
     }
 
     @Test

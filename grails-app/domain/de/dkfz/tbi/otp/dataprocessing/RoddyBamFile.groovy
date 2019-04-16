@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.HasIdentifier
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 /**
  * This bam file is produced by some Roddy alignment workflow.
@@ -113,7 +114,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
             }
         }
 
-        withNewSession { session ->
+        SessionUtils.withNewSession { session ->
             if (baseBamFile) {
                 assertAndTrackOnError !mergingWorkPackage || mergingWorkPackage.satisfiesCriteria(baseBamFile),
                         "the base bam file does not satisfy work package criteria"

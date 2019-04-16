@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.time.Duration
 
@@ -42,7 +43,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
 
     @Override
     void setupData() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             createRunYapsaInput()
             super.setupData()
         }

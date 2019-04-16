@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.FileType.Type
 import de.dkfz.tbi.otp.ngsdata.SeqTrack.DataProcessingState
 import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Scope("singleton")
 @Component
@@ -63,7 +64,7 @@ class DataFileConsistencyChecker {
             Date startDate = new Date()
             try {
                 (0..countDataFiles() / MAX_RESULTS).each {
-                    DataFile.withNewSession {
+                    SessionUtils.withNewSession {
                         DataFile.withTransaction {
                             getFastqDataFiles().each {
                                 String path = lsdfFilesService.getFileFinalPath(it)
@@ -83,7 +84,7 @@ class DataFileConsistencyChecker {
                 }
             } catch (RuntimeException e) {
                 log.error("error ${e.getLocalizedMessage()}", e)
-                ProcessingOption.withNewSession {
+                SessionUtils.withNewSession {
                     String recipientsString = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
                     if (recipientsString) {
                         mailHelperService.sendEmail("Error: DataFileConsistencyChecker.setFileExistsForAllDataFiles() failed", "${e.getLocalizedMessage()}\n${e.getCause()}", recipientsString)

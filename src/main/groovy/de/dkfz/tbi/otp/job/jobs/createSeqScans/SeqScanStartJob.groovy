@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Component("seqScanStartJob")
 @Scope("singleton")
@@ -61,7 +62,7 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
     @Scheduled(fixedDelay=30000L)
     @Override
     void execute() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             if (!hasOpenSlots()) {
                 return
             }

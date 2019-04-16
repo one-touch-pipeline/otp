@@ -28,6 +28,7 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.nio.file.Files
 import java.time.Duration
@@ -39,7 +40,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
     void "testAlignLanesOnly_NoBaseBamExist_OneLane_allFine"() { //TODO seems to be bugged for Single
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             createProjectConfigRna(exactlyOneElement(MergingWorkPackage.findAll()), [:])
             createSeqTrack("readGroup1")
         }
@@ -49,7 +50,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
         then:
         checkWorkPackageState()
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             RoddyBamFile bamFile = exactlyOneElement(RnaRoddyBamFile.findAll())
             checkFirstBamFileState(bamFile, true)
             assertBamFileFileSystemPropertiesSet(bamFile)
@@ -64,7 +65,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
     void "testAlignLanesOnly_withoutArribaProcessing_NoBaseBamExist_OneLane_allFine"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             createProjectConfigRna(exactlyOneElement(MergingWorkPackage.findAll()), [
                     configVersion: "v2_0",
             ], [
@@ -78,7 +79,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
 
         then:
         checkWorkPackageState()
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             RoddyBamFile bamFile = exactlyOneElement(RnaRoddyBamFile.findAll())
             checkFirstBamFileState(bamFile, true)
             assertBamFileFileSystemPropertiesSet(bamFile)

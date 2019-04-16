@@ -76,16 +76,19 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
         DomainFactory.createRoddyMergedBamQa(roddyBamFile, [pairedRead1: numberOfReads, pairedRead2: numberOfReads])
 
         DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
+
+        SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
     }
 
     @After
     void tearDown() {
+        TestCase.removeMetaClass(SessionUtils)
+        TestCase.removeMetaClass(LocalShellHelper)
+        TestCase.removeMetaClass(LinkFileUtils, linkFilesToFinalDestinationService.linkFileUtils)
         TestCase.removeMetaClass(LinkFilesToFinalDestinationService, linkFilesToFinalDestinationService)
         TestCase.removeMetaClass(RemoteShellHelper, linkFilesToFinalDestinationService.remoteShellHelper)
         TestCase.removeMetaClass(ExecuteRoddyCommandService, linkFilesToFinalDestinationService.executeRoddyCommandService)
         TestCase.removeMetaClass(CreateClusterScriptService, linkFilesToFinalDestinationService.lsdfFilesService.createClusterScriptService)
-        TestCase.removeMetaClass(LinkFileUtils, linkFilesToFinalDestinationService.linkFileUtils)
-        GroovySystem.metaClassRegistry.removeMetaClass(LocalShellHelper)
         configService.clean()
     }
 

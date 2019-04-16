@@ -25,6 +25,7 @@ package de.dkfz.tbi.otp
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ImportProcess
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.nio.file.*
 import java.time.Duration
@@ -117,7 +118,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
 
     @Override
     void setup() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             Project project = DomainFactory.createProject(realm: realm)
             createDirectories([new File(ftpDir), project.projectDirectory])
 
@@ -165,7 +166,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
 
     void "testImportProcess_FilesHaveToBeCopied"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             importProcess.refresh()
             importProcess.replaceSourceWithLink = false
             importProcess.save(flush: true)
@@ -178,7 +179,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
         checkThatFileCopyingWasSuccessful(importProcess)
 
         Thread.sleep(1000) //needs a sleep, otherwise the file system cache has not yet the new value
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             importProcess.externallyProcessedMergedBamFiles.each {
                 it.refresh()
                 File baseDirSource = new File(it.importedFrom).parentFile
@@ -207,7 +208,7 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
 
         Thread.sleep(1000) //needs a sleep, otherwise the file system cache has not yet the new value
 
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             importProcess.externallyProcessedMergedBamFiles.each {
                 File baseDirSource = new File(it.importedFrom).parentFile
                 File baseDirTarget = it.importFolder
@@ -228,37 +229,35 @@ class ImportExternallyMergedBamWorkflowTests extends WorkflowTestCase {
     }
 
     protected void checkThatFileCopyingWasSuccessful(ImportProcess impPro) {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             FileSystem fs = fileSystemService.filesystemForBamImport
-            ImportProcess.withNewSession {
-                importProcess = ImportProcess.get(impPro.id)
-                assert importProcess.state == ImportProcess.State.FINISHED
-                assert 2 == importProcess.externallyProcessedMergedBamFiles.size()
+            importProcess = ImportProcess.get(impPro.id)
+            assert importProcess.state == ImportProcess.State.FINISHED
+            assert 2 == importProcess.externallyProcessedMergedBamFiles.size()
 
-                importProcess.externallyProcessedMergedBamFiles.each {
-                    it.refresh()
-                    assert it.fileSize > 0
-                    File baseDirectory = it.importFolder
+            importProcess.externallyProcessedMergedBamFiles.each {
+                it.refresh()
+                assert it.fileSize > 0
+                File baseDirectory = it.importFolder
 
-                    [
-                            it.bamFileName,
-                            it.baiFileName,
-                            ALL_FILES,
-                    ].flatten().each {
-                        checkThatFileExistAndIsNotLink(fs.getPath(baseDirectory.absolutePath, it as String))
-                    }
-
-                    [
-                            DIRECTORY1,
-                            DIRECTORY2,
-                            SUBDIRECTORY21,
-                            SUBDIRECTORY22,
-                    ].each {
-                        checkThatDirectoryExistAndIsNotLink(fs.getPath(baseDirectory.absolutePath, it as String))
-                    }
-
-                    assert it.maximumReadLength == 100
+                [
+                        it.bamFileName,
+                        it.baiFileName,
+                        ALL_FILES,
+                ].flatten().each {
+                    checkThatFileExistAndIsNotLink(fs.getPath(baseDirectory.absolutePath, it as String))
                 }
+
+                [
+                        DIRECTORY1,
+                        DIRECTORY2,
+                        SUBDIRECTORY21,
+                        SUBDIRECTORY22,
+                ].each {
+                    checkThatDirectoryExistAndIsNotLink(fs.getPath(baseDirectory.absolutePath, it as String))
+                }
+
+                assert it.maximumReadLength == 100
             }
         }
     }

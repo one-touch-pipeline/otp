@@ -127,7 +127,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
 
     void setup() {
         doCleanup()
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             setupDirectoriesAndRealm()
 
             sql = new Sql(dataSource)
@@ -196,7 +196,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
     }
 
     void doCleanup() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             JobExecutionPlan.list()*.startJob*.bean.each {
                 ((AbstractStartJobImpl) Holders.applicationContext.getBean(it)).onApplicationEvent(null)
             }
@@ -462,7 +462,7 @@ echo \$TEMP_DIR
      *  either the workflow to finish or the timeout
      */
     protected void execute(int numberOfProcesses = 1, boolean ensureNoFailure = true) {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             schedulerService.startup()
             if (!startJobRunning) {
                 AbstractStartJobImpl startJob = Holders.applicationContext.getBean(JobExecutionPlan.list()?.first()?.startJob?.bean, AbstractStartJobImpl)

@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp
 
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 /*
  * The idea of the test is that with the old jobExecutionPlan the test would fail since the outputParameter "Realm"
@@ -35,7 +36,7 @@ class WorkflowExecutionPlanUpdateTests extends DataInstallationWorkflowTests {
     void "test update of JobExecutionPlan"() {
         given:
         SeqTrack seqTrack
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             seqTrack = createWholeGenomeSetup()
         }
 

@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -33,7 +34,7 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
 
     void "test align lanes only, no BaseBam exists, one lane, all fine"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             createSeqTrack("readGroup1")
         }
 
@@ -49,7 +50,7 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
         SeqTrack firstSeqTrack
         SeqTrack secondSeqTrack
 
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             firstSeqTrack = createSeqTrack("readGroup1")
             secondSeqTrack = createSeqTrack("readGroup2")
         }
@@ -68,7 +69,7 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
         MergingWorkPackage workPackage
         MergingWorkPackage secondMergingWorkPackage
 
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             firstSeqTrack = createSeqTrack("readGroup1")
 
             workPackage = exactlyOneElement(MergingWorkPackage.findAll())
@@ -107,7 +108,7 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
         execute(2)
 
         then:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             workPackage.refresh()
             assert !workPackage.needsProcessing
             secondMergingWorkPackage.refresh()

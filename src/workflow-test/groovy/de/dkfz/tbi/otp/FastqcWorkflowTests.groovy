@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.time.Duration
 import java.util.zip.ZipEntry
@@ -93,7 +94,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
 
     void "test FastQcWorkflow, when FastQc-Data is available"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             setupWorkflow('gz')
             String initialPath = new File(lsdfFilesService.getFileInitialPath(dataFile)).parent
             String fastqcFileName = fastqcDataFilesService.fastqcFileName(dataFile)
@@ -112,7 +113,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     @Unroll
     void "test FastQcWorkflow, when FastQc-Data is not available and extension is #extension"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             setupWorkflow(extension)
         }
 
@@ -132,7 +133,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     }
 
     private void checkExistenceOfResultsFiles() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             ZipFile expectedResult = new ZipFile(expectedFastqc)
             ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputFile(dataFile))
 
@@ -150,7 +151,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     }
 
     private void validateFastqcProcessedFile() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             FastqcProcessedFile fastqcProcessedFile = CollectionUtils.exactlyOneElement(FastqcProcessedFile.all)
 
             assert FastqcProcessedFile.all.size() == 1
@@ -161,7 +162,7 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     }
 
     private void validateFastQcFileContent() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             dataFile.refresh()
             assert null != dataFile.sequenceLength
             assert null != dataFile.nReads

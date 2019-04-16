@@ -24,7 +24,8 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.junit.*
+import org.junit.After
+import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.TestCase
@@ -32,13 +33,13 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.jobs.TestAbstractAlignmentStartJob
 import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
-import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -56,12 +57,14 @@ class AbstractAlignmentStartJobTest {
     void setupData() {
         originalSchedulerActive = schedulerService.schedulerActive
         schedulerService.schedulerActive = true
+        SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
     }
 
     @After
     void tearDown() {
         schedulerService.schedulerActive = originalSchedulerActive
         TestCase.cleanTestDirectory()
+        TestCase.removeMetaClass(SessionUtils)
     }
 
     @Test

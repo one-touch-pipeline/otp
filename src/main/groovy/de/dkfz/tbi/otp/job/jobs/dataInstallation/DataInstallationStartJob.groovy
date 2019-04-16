@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Component("dataInstallationStartJob")
 @Scope("singleton")
@@ -46,7 +47,7 @@ class DataInstallationStartJob extends AbstractStartJobImpl {
     @Scheduled(fixedDelay=5000L)
     @Override
     void execute() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
             if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
                 return

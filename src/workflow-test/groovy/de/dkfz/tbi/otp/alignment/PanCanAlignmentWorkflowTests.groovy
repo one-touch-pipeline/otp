@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.job.jobs.roddyAlignment.PanCanStartJob
 import de.dkfz.tbi.otp.job.processing.Process
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -46,7 +47,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         given:
         RoddyBamFile firstBamFile
         List<SeqTrack> seqTracks
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             firstBamFile = createFirstRoddyBamFile()
             createSeqTrack("readGroup2")
 
@@ -58,12 +59,12 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         }
 
         when:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             panCanStartJob.execute()
         }
 
         then:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             assert 0 == Process.list().size()
             assert 1 == RoddyBamFile.findAll().size()
             checkFirstBamFileState(firstBamFile, true, [
@@ -77,7 +78,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
 
     void "test alignLanesOnly, no baseBam exists, one lane, all fine"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             createSeqTrack("readGroup1")
         }
 
@@ -90,7 +91,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
 
     void "test alignLanesOnly, no baseBam exists, one lane, workflow_1_0_182_1, all fine"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             createSeqTrack("readGroup1")
             MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
             createProjectConfigForQualityControlWorkflow(mergingWorkPackage)
@@ -105,7 +106,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
 
     void "testAlignLanesOnly_NoBaseBamExist_OneLane_bwa_mem_0_7_8_sambamba_0_5_9_allFine"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             createSeqTrack("readGroup1")
             MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
             createProjectConfig(mergingWorkPackage, [
@@ -124,7 +125,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
 
     void "test alignLanesOnly, no baseBam exists, one lane, fastTrack, all fine"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             fastTrackSetup()
         }
 
@@ -138,7 +139,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
 
     void "test alignLanesOnly, no baseBam exists, one lane, with fingerPrinting, all fine"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             createSeqTrack("readGroup1")
             setUpFingerPrintingFile()
         }
@@ -156,7 +157,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         SeqTrack firstSeqTrack
         SeqTrack secondSeqTrack
 
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             firstSeqTrack = createSeqTrack("readGroup1")
             secondSeqTrack = createSeqTrack("readGroup2")
         }
@@ -170,7 +171,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
 
     void "test, alignBaseBam and new lanes, workflow 1_0_182_1, all fine"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
             createProjectConfigForQualityControlWorkflow(mergingWorkPackage)
             createFirstRoddyBamFile(false)
@@ -187,7 +188,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
 
     void "test, alignBaseBam and new lanes, all fine"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             createFirstRoddyBamFile(useOldStructure)
             createSeqTrack("readGroup2")
         }
@@ -207,7 +208,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
     void "test align with withdrawn base, all fine"() {
         given:
         RoddyBamFile roddyBamFile
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             roddyBamFile = createFirstRoddyBamFile()
             roddyBamFile.withdrawn = true
             roddyBamFile.save(flush: true, failOnError: true)
@@ -219,7 +220,7 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
         execute()
 
         then:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             assert !roddyBamFile.workDirectory.exists()
             checkWorkPackageState()
 

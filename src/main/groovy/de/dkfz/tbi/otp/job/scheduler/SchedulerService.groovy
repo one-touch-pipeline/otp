@@ -38,8 +38,8 @@ import de.dkfz.tbi.otp.config.PropertiesValidationService
 import de.dkfz.tbi.otp.job.JobMailService
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExceptionUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.util.concurrent.locks.Lock
@@ -319,12 +319,12 @@ class SchedulerService {
             return
         }
         Job job = null
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             job = doSchedule()
         }
 
         if (job) {
-            executeInNewThread (job) {
+            executeInNewThread(job) {
                 grailsApplication.mainContext.scheduler.executeJob(job)
             }
         }
@@ -332,7 +332,7 @@ class SchedulerService {
 
     protected void executeInNewThread(Job job, Closure closure) {
         task {
-            Realm.withNewSession {
+            SessionUtils.withNewSession {
                 withLoggingContext(job) {
                     closure()
                 }

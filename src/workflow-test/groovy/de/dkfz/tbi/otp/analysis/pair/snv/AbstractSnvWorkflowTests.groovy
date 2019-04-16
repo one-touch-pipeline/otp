@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
@@ -40,7 +41,7 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
 
     void "testWholeWorkflowWithProcessedMergedBamFile"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             setupProcessedMergedBamFile()
             setupData()
         }

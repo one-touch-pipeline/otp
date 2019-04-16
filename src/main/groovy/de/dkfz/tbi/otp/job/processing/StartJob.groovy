@@ -44,7 +44,7 @@ interface StartJob {
     /**
      * This method can be implemented by the StartJob for the checking.
      * The implementing method must be wrapped so that a hibernate session is bound,
-     * e.g. by using withNewSession { }
+     * e.g. by using SessionUtils.withNewSession { }
      *
      * It is recommended to use the {@code @Scheduled} annotation on this method.
      */

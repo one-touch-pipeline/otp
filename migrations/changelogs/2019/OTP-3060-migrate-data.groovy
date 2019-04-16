@@ -23,12 +23,13 @@
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 databaseChangeLog = {
     changeSet(author: "kosnac", id: "OTP-3060-MIGRATION-SQL") {
         grailsChange {
             change {
-                SeqTrack.withNewSession {
+                SessionUtils.withNewSession {
                     SampleIdentifier.createCriteria().list {
                         sample {
                             individual {

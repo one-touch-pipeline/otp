@@ -27,6 +27,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.time.Duration
 
@@ -89,7 +90,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     void "test DataInstallation, files have to be copied #copied"() {
         given:
         SeqTrack seqTrack
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             seqTrack = createWholeGenomeSetup(copied)
         }
 
@@ -108,7 +109,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     void "test ChipSeq DataInstallation"() {
         given:
         ChipSeqSeqTrack seqTrack
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             seqTrack = DomainFactory.createChipSeqSeqTrack()
             createDataFiles(seqTrack)
             seqTrack.project.realm = realm
@@ -125,7 +126,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
     void "test DataInstallation with FastTrack"() {
         given:
         SeqTrack seqTrack
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             seqTrack = createWholeGenomeSetup()
             seqTrack.project.processingPriority = ProcessingPriority.FAST_TRACK.priority
             assert seqTrack.save(flush: true)
@@ -140,7 +141,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
 
 
     protected void checkThatWorkflowWasSuccessful(SeqTrack seqTrack) {
-        SeqTrack.withNewSession {
+        SessionUtils.withNewSession {
             seqTrack.refresh()
             assert seqTrack.dataInstallationState == SeqTrack.DataProcessingState.FINISHED
             assert SeqTrack.DataProcessingState.NOT_STARTED == seqTrack.fastqcState

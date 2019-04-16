@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.job.restarting.RestartActionService
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
+import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import static grails.async.Promises.task
@@ -105,7 +106,7 @@ class ProcessesController {
         Promise failedProcessesPromise = task {
             SecurityContextHolder.context.authentication = auth
             try {
-                Realm.withNewSession {
+                SessionUtils.withNewSession {
                     jobExecutionPlanService.failedProcessCount()
                 }
             } finally {
@@ -116,7 +117,7 @@ class ProcessesController {
         Promise lastSuccessDatesPromise = task {
             SecurityContextHolder.context.authentication = auth
             try {
-                Realm.withNewSession {
+                SessionUtils.withNewSession {
                     jobExecutionPlanService.lastProcessDate(ExecutionState.SUCCESS)
                 }
             } finally {
@@ -126,7 +127,7 @@ class ProcessesController {
         Promise lastFailureDatesPromise = task {
             SecurityContextHolder.context.authentication = auth
             try {
-                Realm.withNewSession {
+                SessionUtils.withNewSession {
                     jobExecutionPlanService.lastProcessDate(ExecutionState.FAILURE)
                 }
             } finally {
@@ -307,7 +308,7 @@ class ProcessesController {
             promiseList << {
                 SecurityContextHolder.context.authentication = auth
                 Map data = [:]
-                Realm.withNewSession {
+                SessionUtils.withNewSession {
                     ProcessingStepUpdate update = processService.getLatestProcessingStepUpdate(step)
                     data.put("step", step)
                     data.put("state", update?.state)

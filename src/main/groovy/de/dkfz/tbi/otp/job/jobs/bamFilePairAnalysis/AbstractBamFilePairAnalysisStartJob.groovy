@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
@@ -49,7 +50,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     @Scheduled(fixedDelay = 60000L)
     @Override
     void execute() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
             if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
                 return

@@ -26,6 +26,7 @@ import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends BamFilePairAnalysis> extends AbstractBamFilePairAnalysisWorkflowTests {
 
@@ -35,7 +36,7 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
 
     void "testWholeWorkflowWithRoddyBamFile"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             setupRoddyBamFile()
             setupData()
         }
@@ -49,7 +50,7 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
 
     void "testWholeWorkflowWithExternalBamFile"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             setupExternalBamFile()
             setupData()
         }
@@ -68,7 +69,7 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
     }
 
     void checkInstance() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             Instance createdInstance = BamFilePairAnalysis.listOrderById().last()
             assert createdInstance.processingState == AnalysisProcessingStates.FINISHED
             assert createdInstance.config == config

@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 /**
  * tests for AbstractRoddyJob using PanCanAlignmentWorkflow
@@ -39,7 +40,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         given:
         RoddyWorkflowConfig config
         String pluginVersion
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             createFirstRoddyBamFile()
             createSeqTrack("readGroup2")
 
@@ -59,7 +60,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         exception.message =~ /Plugin '.*' is not available, available are:/
 
         when:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             config.refresh()
             config.pluginVersion = pluginVersion
             config.save(flush: true)
@@ -75,7 +76,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         String DUMMY_STAT_SIZE_FILE_NAME = "dummy.tab"
         RoddyBamFile firstBamFile
         MergingWorkPackage workPackage
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             firstBamFile = createFirstRoddyBamFile()
             createSeqTrack("readGroup2")
 
@@ -98,7 +99,7 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
         exception.message.contains("Status code: 15")
 
         when:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             workPackage.refresh()
             workPackage.statSizeFileName = getChromosomeStatFileName()
             workPackage.save(flush: true, failOnError: true)

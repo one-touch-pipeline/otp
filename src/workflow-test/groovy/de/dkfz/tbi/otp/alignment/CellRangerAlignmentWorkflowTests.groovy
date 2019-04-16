@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.time.Duration
 
@@ -50,7 +51,7 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
 
     @Override
     void setup() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             Project project = createProject(realm: realm)
             Individual individual = DomainFactory.createIndividual(project: project)
             sample = createSample(individual: individual)
@@ -109,7 +110,7 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
     }
 
     void checkResults() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             SingleCellBamFile singleCellBamFile = CollectionUtils.exactlyOneElement(SingleCellBamFile.all)
 
             assert singleCellBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
@@ -122,7 +123,7 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
 
     void "test CellRanger with one lane"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             SeqTrack seqTrack = createSeqTrack(fastqFiles[0], fastqFiles[1])
             mwp.refresh()
             mwp.seqTracks = [seqTrack]
@@ -138,7 +139,7 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
 
     void "test CellRanger with two lanes"() {
         given:
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             SeqTrack seqTrack1 = createSeqTrack(fastqFiles[0], fastqFiles[1])
             SeqTrack seqTrack2 = createSeqTrack(fastqFiles[2], fastqFiles[3])
             CellRangerMergingWorkPackage crmwp = CellRangerMergingWorkPackage.get(mwp.id)

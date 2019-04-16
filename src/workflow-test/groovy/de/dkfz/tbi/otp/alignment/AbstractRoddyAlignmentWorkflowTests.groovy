@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.time.Duration
@@ -117,7 +118,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
 
     @Override
     void setup() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             String group = configService.getTestingGroup()
             executionHelperService.setGroup(realm, configService.getRootPath() as File, group)
 
@@ -370,7 +371,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             checkDataBaseState_alignBaseBamAndNewLanes()
             RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1)
             checkFileSystemState(latestBamFile)
@@ -422,7 +423,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkAllAfterRoddyClusterJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             checkDataBaseState_alignBaseBamAndNewLanes()
             RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1)
             checkFileSystemState(latestBamFile)
@@ -510,7 +511,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkWorkPackageState() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
             workPackage.refresh()
             assert !workPackage.needsProcessing
@@ -675,7 +676,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void verify_AlignLanesOnly_AllFine() {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             checkWorkPackageState()
 
             RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
@@ -695,7 +696,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     protected void check_alignLanesOnly_NoBaseBamExist_TwoLanes(SeqTrack firstSeqTrack, SeqTrack secondSeqTrack) {
-        Realm.withNewSession {
+        SessionUtils.withNewSession {
             checkWorkPackageState()
 
             RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
