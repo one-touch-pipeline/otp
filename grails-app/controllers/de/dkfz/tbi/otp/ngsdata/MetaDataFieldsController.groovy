@@ -36,7 +36,6 @@ class MetaDataFieldsController implements CheckAndCall {
 
 
     def index() {
-
         List libraryPreparationKits = LibraryPreparationKit.list(sort: "name", order: "asc").collect { LibraryPreparationKit it ->
             [
                     id                              : it.id,
