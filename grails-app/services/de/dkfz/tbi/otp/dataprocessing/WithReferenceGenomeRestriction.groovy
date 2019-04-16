@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 trait WithReferenceGenomeRestriction implements BamFileAnalysisServiceTrait {
 
@@ -39,7 +40,7 @@ trait WithReferenceGenomeRestriction implements BamFileAnalysisServiceTrait {
     Map<String, Object> checkReferenceGenomeMap() {
         List<String> referenceGenomeNames = getReferenceGenomes()
         if (referenceGenomeNames) {
-            return [referenceGenomes: ReferenceGenome.findAllByNameInList(referenceGenomeNames)]
+            return [referenceGenomes: CollectionUtils.notEmpty(ReferenceGenome.findAllByNameInList(referenceGenomeNames))]
         } else {
             return [:]
         }

@@ -22,7 +22,6 @@
 
 package de.dkfz.tbi.otp.job.jobs
 
-import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
@@ -30,7 +29,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 
 @Rollback
-@Integration
 abstract class AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpec extends AbstractBamFilePairAnalysisStartJobIntegrationSpec {
 
     void "don't findSamplePairToProcess when prereq not yet done"() {

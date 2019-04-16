@@ -466,7 +466,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         AssertionError ex = thrown()
-        ex.message.contains("Collection contains 0 elements. Expected 1.")
+        ex.message.contains("Collection contains 0 elements. Expected 1")
     }
 
     @Unroll
@@ -520,7 +520,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         AssertionError ex = thrown()
-        ex.message.contains("Collection contains 0 elements. Expected 1.")
+        ex.message.contains("Collection contains 0 elements. Expected 1")
     }
 
     void "test updateCategory valid project category"() {
@@ -652,7 +652,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         AssertionError exception = thrown()
-        exception.message == "Collection contains 0 elements. Expected 1."
+        exception.message == "Collection contains 0 elements. Expected 1"
     }
 
     void "test configurePanCanAlignmentDeciderProject valid input"() {
@@ -743,7 +743,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         AssertionError exception = thrown()
-        exception.message == "Collection contains 0 elements. Expected 1."
+        exception.message == "Collection contains 0 elements. Expected 1"
     }
 
     void "test configurePanCanAlignmentDeciderProject invalid pluginName input"() {
@@ -1255,12 +1255,12 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                     referenceGenome: DomainFactory.createAceseqReferenceGenome()
             )
             referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeProjectSeqType.referenceGenome, false).mkdirs()
-            SpringSecurityUtils.doWithAuth(ADMIN, {
+            SpringSecurityUtils.doWithAuth(ADMIN) {
                 processingOptionService.createOrUpdate(
                         genomeOption,
                         referenceGenomeProjectSeqType.referenceGenome.name
                 )
-            })
+            }
         }
 
         when:

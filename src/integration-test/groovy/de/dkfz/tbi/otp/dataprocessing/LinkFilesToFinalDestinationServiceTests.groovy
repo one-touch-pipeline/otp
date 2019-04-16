@@ -629,7 +629,7 @@ class LinkFilesToFinalDestinationServiceTests implements DomainFactoryCore {
 
         assert TestCase.shouldFail(AssertionError) {
             linkFilesToFinalDestinationService.prepareRoddyBamFile(roddyBamFile)
-        }.contains('Collection contains 2 elements. Expected 1.')
+        }.contains('Collection contains 2 elements. Expected 1')
     }
 
     @Test

@@ -60,10 +60,20 @@ class CollectionUtils {
         } else if (size == 0 && allowNone) {
             return null
         } else {
-            String defaultMessage = "Collection contains ${size} elements. Expected 1."
+            String defaultMessage = "Collection contains ${size} elements. Expected 1"
             String message = (customErrorMessage ? "${customErrorMessage}\n${defaultMessage}" : defaultMessage)
             throw new AssertionError(message)
         }
+    }
+
+    /**
+     * Ensures that a collection contains one or more elements.
+     * @return The collection if the collection is not empty.
+     * @throws AssertionError if the collection does not contain any elements.
+     */
+    static <T> Collection<T> notEmpty(final Collection<T> collection, String customErrorMessage = null) throws AssertionError {
+        assert !collection.isEmpty() : (customErrorMessage ?: "Collection contains 0 elements. Expected 1 or more")
+        return collection
     }
 
     /**
