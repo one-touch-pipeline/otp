@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -41,10 +42,15 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
     AbstractMergedBamFile bamFile1_1
     AbstractMergedBamFile bamFile2_1
 
+    @Shared
     SnvCallingService snvCallingService
+    @Shared
     IndelCallingService indelCallingService
+    @Shared
     AceseqService aceseqService
+    @Shared
     SophiaService sophiaService
+    @Shared
     RunYapsaService runYapsaService
 
     void setupData() {
@@ -56,6 +62,8 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
         roddyConfig1 = map.roddyConfig
 
         DomainFactory.createAllAnalysableSeqTypes()
+
+        DomainFactory.createReferenceGenomeAndAnalysisProcessingOptions()
     }
 
 
@@ -63,7 +71,6 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
     void "samplePairForProcessing shouldn't find anything for wrong referenceGenome"() {
         given:
         setupData()
-
         samplePair1."${processingStatus}" = ProcessingStatus.NEEDS_PROCESSING
         assert samplePair1.save(flush: true)
         Pipeline pipeline1 = pipeline()
@@ -81,21 +88,14 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
             throw new UnsupportedOperationException("cannot figure out which workflow config to create")
         }
 
-        DomainFactory.createProcessingOptionLazy([
-                name: optionName,
-                type: null,
-                project: null,
-                value: 'foobar',
-        ])
-
         expect:
-        null == service.samplePairForProcessing(ProcessingPriority.NORMAL)
+        null == service().samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
-        processingStatus            | pipeline                                       | service               | optionName
-        "sophiaProcessingStatus"    | { DomainFactory.createSophiaPipelineLazy() }   | this.sophiaService    | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
-        "aceseqProcessingStatus"    | { DomainFactory.createAceseqPipelineLazy() }   | this.aceseqService    | ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
-        "runYapsaProcessingStatus"  | { DomainFactory.createRunYapsaPipelineLazy() } | this.runYapsaService  | ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME
+        processingStatus            | pipeline                                       | service                  | optionName
+        "sophiaProcessingStatus"    | { DomainFactory.createSophiaPipelineLazy() }   | { this.sophiaService }   | ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME
+        "aceseqProcessingStatus"    | { DomainFactory.createAceseqPipelineLazy() }   | { this.aceseqService }   | ProcessingOption.OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME
+        "runYapsaProcessingStatus"  | { DomainFactory.createRunYapsaPipelineLazy() } | { this.runYapsaService } | ProcessingOption.OptionName.PIPELINE_RUNYAPSA_REFERENCE_GENOME
 
     }
 
@@ -135,16 +135,16 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
         ])
 
         expect:
-        !service.samplePairForProcessing(ProcessingPriority.NORMAL)
+        !(service().samplePairForProcessing(ProcessingPriority.NORMAL))
 
         where:
-        processingStatus         | pipeline                                     | service                   | qc
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | this.indelCallingService  | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService        | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService        | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | this.indelCallingService  | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService        | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService        | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        processingStatus         | pipeline                                     | service                 | qc
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | {indelCallingService }  | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED
     }
 
 
@@ -186,15 +186,15 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
         ])
 
         expect:
-        samplePair1 == service.samplePairForProcessing(ProcessingPriority.NORMAL)
+        samplePair1 == service().samplePairForProcessing(ProcessingPriority.NORMAL)
 
         where:
-        processingStatus         | pipeline                                     | service                   | qc
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | this.indelCallingService  | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService        | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService        | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | this.indelCallingService  | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
-        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | this.sophiaService        | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
-        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | this.aceseqService        | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        processingStatus         | pipeline                                     | service                 | qc
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
     }
 }
