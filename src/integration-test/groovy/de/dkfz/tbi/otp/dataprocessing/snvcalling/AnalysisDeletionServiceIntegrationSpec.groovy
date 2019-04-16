@@ -89,7 +89,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         samplePairs = null
     }
 
-    def "delete instance and then delete sample pairs without analysis instances from analysis deletion service with analysis instances finished for control tumor 1"() {
+    void "delete instance and then delete sample pairs without analysis instances from analysis deletion service with analysis instances finished for control tumor 1"() {
         given:
         setupData()
 
@@ -120,7 +120,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         cleanupData()
     }
 
-    def "delete instance and then delete sample pairs without analysis instances from analysis deletion service with analysis instances finished for control tumor 1 and control tumor 2"() {
+    void "delete instance and then delete sample pairs without analysis instances from analysis deletion service with analysis instances finished for control tumor 1 and control tumor 2"() {
         given:
         setupData()
 

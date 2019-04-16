@@ -36,7 +36,7 @@ class ProcessingOptionServiceSpec extends Specification {
     ProcessingOptionService processingOptionService
 
     @Unroll
-    def "test findOptionAsBoolean"() {
+    void "test findOptionAsBoolean"() {
         given:
         DomainFactory.createProcessingOptionLazy(name: ProcessingOption.OptionName.GUI_SHOW_PARTNERS, value: input)
 

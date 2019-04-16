@@ -43,7 +43,7 @@ class ClusterJobManagerFactoryServiceSpec extends Specification implements DataT
 
     final static String SSH_USER = "user"
 
-    def "test getJobManager, get correct manager"(Realm.JobScheduler type, Class managerClass) {
+    void "test getJobManager, get correct manager"(Realm.JobScheduler type, Class managerClass) {
         given:
         ClusterJobManagerFactoryService service = new ClusterJobManagerFactoryService()
         service.configService = Mock(ConfigService) {
@@ -65,7 +65,7 @@ class ClusterJobManagerFactoryServiceSpec extends Specification implements DataT
         Realm.JobScheduler.PBS || PBSJobManager
     }
 
-    def "test getJobManager, get the different manager for the different realm"() {
+    void "test getJobManager, get the different manager for the different realm"() {
         given:
         ClusterJobManagerFactoryService service = new ClusterJobManagerFactoryService()
         service.configService = Mock(ConfigService) {
@@ -84,7 +84,7 @@ class ClusterJobManagerFactoryServiceSpec extends Specification implements DataT
         manager != service.getJobManager(realm2)
     }
 
-    def "test getJobManager, get the same manager for the same realm"() {
+    void "test getJobManager, get the same manager for the same realm"() {
         given:
         ClusterJobManagerFactoryService service = new ClusterJobManagerFactoryService()
         service.configService = Mock(ConfigService) {

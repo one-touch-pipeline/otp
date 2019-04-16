@@ -85,7 +85,7 @@ class SamplePairSpec extends Specification implements DataTest {
     }
 
     @Unroll
-    def "get #analysisName sample pair path"() {
+    void "get #analysisName sample pair path"() {
         given:
         def (String path, SamplePair samplePair, Project project) = setUpForPathTests(analysisName)
         File expectedExtension = new File(path)

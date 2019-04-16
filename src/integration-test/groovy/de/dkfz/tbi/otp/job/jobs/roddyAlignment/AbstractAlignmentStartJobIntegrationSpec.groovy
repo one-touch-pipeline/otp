@@ -38,7 +38,7 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 @Integration
 class AbstractAlignmentStartJobIntegrationSpec extends Specification {
 
-    def "restart creates new Process on new RoddyBamFile"() {
+    void "restart creates new Process on new RoddyBamFile"() {
         given:
         RoddyBamFile failedInstance = DomainFactory.createRoddyBamFile(
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,

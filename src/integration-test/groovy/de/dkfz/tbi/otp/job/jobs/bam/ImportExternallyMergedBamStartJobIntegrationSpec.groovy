@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 @Integration
 class ImportExternallyMergedBamStartJobIntegrationSpec extends Specification {
 
-    def "execute sets state of importProcess on STARTED"() {
+    void "execute sets state of importProcess on STARTED"() {
         given:
         SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
         JobExecutionPlan plan = DomainFactory.createJobExecutionPlan(enabled: true)

@@ -41,7 +41,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 class RunNameInMetadataPathValidatorSpec extends Specification {
 
     @Unroll
-    def "test validate"(boolean containsMultipleRuns, boolean isDataFilesOnGpcfMidTerm, boolean mdFilenameContainsRunName, boolean error) {
+    void "test validate"(boolean containsMultipleRuns, boolean isDataFilesOnGpcfMidTerm, boolean mdFilenameContainsRunName, boolean error) {
         given:
         String data = containsMultipleRuns ? "run1\nrun2\n" : "run1\nrun1\n"
 
@@ -80,7 +80,7 @@ class RunNameInMetadataPathValidatorSpec extends Specification {
 
 
     @Unroll
-    def "validate, when directory structure is DataFilesWithAbsolutePath, then run name does not need to be in path"() {
+    void "validate, when directory structure is DataFilesWithAbsolutePath, then run name does not need to be in path"() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.RUN_ID}\n${runEntry1}\n${runEntry2}",

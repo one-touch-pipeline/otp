@@ -39,7 +39,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 class OnlyOneRunValidatorSpec extends Specification {
 
     @Unroll
-    def "test validate"(boolean containsMultipleRuns, boolean isDataFilesOnGpcfMidTerm, Ilse ilse, boolean error) {
+    void "test validate"(boolean containsMultipleRuns, boolean isDataFilesOnGpcfMidTerm, Ilse ilse, boolean error) {
         given:
         String header = "${MetaDataColumn.RUN_ID}\n"
         String firstData = ""

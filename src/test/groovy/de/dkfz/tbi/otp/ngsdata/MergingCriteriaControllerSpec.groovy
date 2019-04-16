@@ -170,7 +170,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
     }
 
-    def "test removePlatformFromSeqPlatformGroup, group contains many seqPlatforms"() {
+    void "test removePlatformFromSeqPlatformGroup, group contains many seqPlatforms"() {
         given:
         setupData()
 
@@ -193,7 +193,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         group.seqPlatforms.contains(seqPlatform2)
     }
 
-    def "test addPlatformToExistingSeqPlatformGroup"() {
+    void "test addPlatformToExistingSeqPlatformGroup"() {
         given:
         setupData()
 
@@ -211,7 +211,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         group.seqPlatforms.contains(seqPlatform)
     }
 
-    def "test addPlatformToNewGroup"() {
+    void "test addPlatformToNewGroup"() {
         given:
         setupData()
 
@@ -233,7 +233,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         SeqPlatformGroup.list().first().mergingCriteria == mergingCriteria
     }
 
-    def "test createNewDefaultGroupAndAddPlatform"() {
+    void "test createNewDefaultGroupAndAddPlatform"() {
         given:
         setupData()
 
@@ -250,7 +250,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         !SeqPlatformGroup.list().first().mergingCriteria
     }
 
-    def "test deleteSeqPlatformGroup"() {
+    void "test deleteSeqPlatformGroup"() {
         given:
         setupData()
 
@@ -267,7 +267,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         !SeqPlatformGroup.list().first().seqPlatforms
     }
 
-    def "test copyDefaultToSpecific"() {
+    void "test copyDefaultToSpecific"() {
         given:
         setupData()
 
@@ -290,7 +290,7 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
         SeqPlatformGroup.findByMergingCriteria(mergingCriteria).seqPlatforms == [seqPlatform] as Set
     }
 
-    def "test copyAllDefaultToSpecific"() {
+    void "test copyAllDefaultToSpecific"() {
         given:
         setupData()
 

@@ -58,7 +58,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
         analysisPipelines.size() == processingSteps.size()
     }
 
-    def "destination directory of ProcessedMergedBamFile"() {
+    void "destination directory of ProcessedMergedBamFile"() {
         given:
         ProcessedMergedBamFile mergedBamFile = DomainFactory.createProcessedMergedBamFile()
         String destinationExp = expectedMergedAlignmentPath(mergedBamFile)
@@ -70,7 +70,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
         destinationExp == destinationAct
     }
 
-    def "destination directory of RoddyBamFile"() {
+    void "destination directory of RoddyBamFile"() {
         given:
         RoddyBamFile mergedBamFile = DomainFactory.createRoddyBamFile()
         String destinationExp = expectedMergedAlignmentPath(mergedBamFile)
@@ -87,7 +87,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
         return "${pidPath}/${mergedBamFile.sampleType.dirName}/${mergedBamFile.seqType.libraryLayoutDirName}/${MERGED_BAM_FILES_PATH}/"
     }
 
-    def "set SamplePairStatus to need processing while input is null"() {
+    void "set SamplePairStatus to need processing while input is null"() {
         when:
         abstractMergedBamFileService.setSamplePairStatusToNeedProcessing(null)
 
@@ -97,7 +97,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
     }
 
     @Unroll
-    def "set #analysisName samplePairStatus to need processing while samplePair is in state needs processing"() {
+    void "set #analysisName samplePairStatus to need processing while samplePair is in state needs processing"() {
         given:
         SamplePair samplePair = setSamplePairStatusToNeedProcessing_setup(ProcessingStatus.NEEDS_PROCESSING, analysisName)
         AbstractMergedBamFile bamFile = AbstractMergedBamFile.findByWorkPackage(samplePair.mergingWorkPackage2)
@@ -113,7 +113,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
     }
 
     @Unroll
-    def "set #analysisName samplePairStatus to need processing while samplePair is in state no processing needed"() {
+    void "set #analysisName samplePairStatus to need processing while samplePair is in state no processing needed"() {
         given:
         DomainFactory.createAllAnalysableSeqTypes()
         SamplePair samplePair = setSamplePairStatusToNeedProcessing_setup(ProcessingStatus.NO_PROCESSING_NEEDED, analysisName)
@@ -130,7 +130,7 @@ class AbstractMergedBamFileServiceIntegrationSpec extends Specification {
     }
 
     @Unroll
-    def "set #analysisName samplePair status to need processing while other samplePair in state no processing needed"() {
+    void "set #analysisName samplePair status to need processing while other samplePair in state no processing needed"() {
         given:
         SamplePair samplePair1 = setSamplePairStatusToNeedProcessing_setup(ProcessingStatus.NO_PROCESSING_NEEDED, analysisName)
         SamplePair samplePair2 = setSamplePairStatusToNeedProcessing_setup(ProcessingStatus.NEEDS_PROCESSING, analysisName)

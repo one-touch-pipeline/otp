@@ -40,7 +40,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         createUserAndRoles()
     }
 
-    def "test findMergingCriteria, no MergingCriteria exists"() {
+    void "test findMergingCriteria, no MergingCriteria exists"() {
         given:
         setupData()
 
@@ -58,7 +58,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         mergingCriteria.seqType == null
     }
 
-    def "test findMergingCriteria, MergingCriteria exists"() {
+    void "test findMergingCriteria, MergingCriteria exists"() {
         given:
         setupData()
 
@@ -72,7 +72,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         }
     }
 
-    def "test createOrUpdateMergingCriteria, no MergingCriteria exists"() {
+    void "test createOrUpdateMergingCriteria, no MergingCriteria exists"() {
         given:
         setupData()
 
@@ -94,7 +94,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
     }
 
-    def "test createOrUpdateMergingCriteria, MergingCriteria exists"() {
+    void "test createOrUpdateMergingCriteria, MergingCriteria exists"() {
         given:
         setupData()
 
@@ -116,7 +116,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC
     }
 
-    def "test createOrUpdateMergingCriteria, no MergingCriteria exists, seqType Exome"() {
+    void "test createOrUpdateMergingCriteria, no MergingCriteria exists, seqType Exome"() {
         given:
         setupData()
 
@@ -134,7 +134,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
     }
 
 
-    def "test removePlatformFromSeqPlatformGroup, group contains many seqPlatforms"() {
+    void "test removePlatformFromSeqPlatformGroup, group contains many seqPlatforms"() {
         given:
         setupData()
 
@@ -158,7 +158,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
     }
 
 
-    def "test removePlatformFromSeqPlatformGroup, group contains only one seqPlatform"() {
+    void "test removePlatformFromSeqPlatformGroup, group contains only one seqPlatform"() {
         given:
         setupData()
 
@@ -180,7 +180,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
     }
 
 
-    def "test addPlatformToExistingSeqPlatformGroup"() {
+    void "test addPlatformToExistingSeqPlatformGroup"() {
         given:
         setupData()
 
@@ -198,7 +198,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
     }
 
 
-    def "test createNewGroupAndAddPlatform, mergingCriteria is null"() {
+    void "test createNewGroupAndAddPlatform, mergingCriteria is null"() {
         given:
         setupData()
 
@@ -215,7 +215,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
     }
 
 
-    def "test createNewGroupAndAddPlatform, mergingCriteria exists"() {
+    void "test createNewGroupAndAddPlatform, mergingCriteria exists"() {
         given:
         setupData()
 
@@ -236,7 +236,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
     }
 
 
-    def "test deleteSeqPlatformGroup when no seqPlatform is left"() {
+    void "test deleteSeqPlatformGroup when no seqPlatform is left"() {
         given:
         setupData()
 
@@ -255,7 +255,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
     }
 
 
-    def "test deleteSeqPlatformGroup when seqPlatformGroup still contains seqPlatforms"() {
+    void "test deleteSeqPlatformGroup when seqPlatformGroup still contains seqPlatforms"() {
         given:
         setupData()
 
@@ -277,7 +277,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         !seqPlatformGroup.comments.empty
     }
 
-    def "test copyDefaultToSpecific"() {
+    void "test copyDefaultToSpecific"() {
         given:
         setupData()
 
@@ -298,7 +298,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         SeqPlatformGroup.findByMergingCriteria(mergingCriteria).seqPlatforms == [seqPlatform] as Set
     }
 
-    def "test copyAllDefaultToSpecific"() {
+    void "test copyAllDefaultToSpecific"() {
         given:
         setupData()
 
@@ -323,7 +323,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
 
     }
 
-    def "test findSeqPlatformGroupsForProjectAndSeqType"() {
+    void "test findSeqPlatformGroupsForProjectAndSeqType"() {
         given:
         setupData()
 
@@ -339,7 +339,7 @@ class MergingCriteriaServiceSpec extends Specification implements UserAndRoles {
         }
     }
 
-    def "test findDefaultSeqPlatformGroups"() {
+    void "test findDefaultSeqPlatformGroups"() {
         given:
         setupData()
 
