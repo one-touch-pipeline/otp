@@ -152,6 +152,12 @@ class HipoSampleIdentifierParserUnitTest {
 
         sampleName = "H032-PX6D42-T2-B01"
         assertNull(parser.tryParse(sampleName))
+
+        sampleName = "K032-PX6D42-T2-B1"
+        assertNotNull(parser.tryParse(sampleName))
+
+        sampleName = "A032-PX6D42-T2-B1"
+        assertNotNull(parser.tryParse(sampleName))
     }
 
     @Test

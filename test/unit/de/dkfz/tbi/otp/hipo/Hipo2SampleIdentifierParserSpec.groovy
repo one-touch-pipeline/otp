@@ -89,6 +89,12 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
         'S12A-123A-A0-D1'       || 'LYMPH_NODES0'
         'T12A-123A-A12-D1'      || 'LYMPH_NODES12'
 
+        'A12A-123A-T0-D1'       || 'TUMOR0'
+        'B12A-123A-T0-D1'       || 'TUMOR0'
+        'H12A-123A-T0-D1'       || 'TUMOR0'
+        'P12A-123A-T0-D1'       || 'TUMOR0'
+        'K123-123A-T0-D1'       || 'TUMOR0'
+
         'K12A-123ABC-T00-D1'    || 'TUMOR00'
         'K12A-123ABC-T01-D1'    || 'TUMOR01'
         'K12A-123ABC-T10-D1'    || 'TUMOR10'
@@ -117,10 +123,8 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
 
         where:
         identifier << [
-                'H12A-123ABC-T0-D1',
                 'KX2A-123ABC-T0-D1',
                 'K1XA-123ABC-T0-D1',
-                'K123-123ABC-T0-D1',
                 'K12-123ABC-T0-D1',
                 'K1A-123ABC-T0-D1',
                 'K123A-123ABC-T0-D1',
