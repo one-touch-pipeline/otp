@@ -110,7 +110,6 @@ class DataSwapServiceTests implements UserAndRoles {
             )
         }
 
-
         assert scriptFolder.listFiles().length != 0
 
         File alignmentScript = new File(scriptFolder, "restartAli_${script}.groovy")
@@ -135,7 +134,6 @@ class DataSwapServiceTests implements UserAndRoles {
             assert it.getComment().comment == "Attention: Datafile swapped!"
         }
     }
-
 
     @Test
     void test_moveIndividual() {
@@ -214,17 +212,15 @@ class DataSwapServiceTests implements UserAndRoles {
         }
     }
 
-
-
     @Test
     void test_changeMetadataEntry() {
         setupData()
         Sample sample = DomainFactory.createSample()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
-        MetaDataKey metaDataKey = DomainFactory.createMetaDataKeyLazy()
+        MetaDataKey metaDataKey = DomainFactory.createMetaDataKey()
         String newValue = "NEW"
-        MetaDataEntry metaDataEntry = DomainFactory.createMetaDataKeyLazy(key: metaDataKey, dataFile: dataFile)
+        MetaDataEntry metaDataEntry = DomainFactory.createMetaDataEntry(key: metaDataKey, dataFile: dataFile)
 
         dataSwapService.changeMetadataEntry(sample, metaDataKey.name, metaDataEntry.value, newValue)
 
@@ -256,7 +252,7 @@ class DataSwapServiceTests implements UserAndRoles {
         String sampleIdentifierName = sampleIdentifier.name
         SeqTrack seqTrack = DomainFactory.createSeqTrack(sample: sample)
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack)
-        MetaDataKey metaDataKey = DomainFactory.createMetaDataKeyLazy(name: "SAMPLE_ID")
+        MetaDataKey metaDataKey = DomainFactory.createMetaDataKey(name: "SAMPLE_ID")
         DomainFactory.createMetaDataEntry(key: metaDataKey, dataFile: dataFile)
 
         dataSwapService.renameSampleIdentifiers(sample, new StringBuilder())
@@ -746,7 +742,6 @@ class DataSwapServiceTests implements UserAndRoles {
             CreateFileHelper.createFile(new File(lsdfFilesService.getFileViewByPidPath(it)))
         }
     }
-
 
     private void createFastqFiles(AbstractMergedBamFile bamFile) {
         createFastqFiles(bamFile.getContainedSeqTracks() as List)
