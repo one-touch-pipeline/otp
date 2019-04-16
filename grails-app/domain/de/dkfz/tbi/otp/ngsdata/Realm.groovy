@@ -47,7 +47,7 @@ class Realm implements Entity, Serializable {
     String defaultJobSubmissionOptions  // default options for job submission
 
     static constraints = {
-        name unique: true
+        name unique: true, blank: false
         defaultJobSubmissionOptions validator: {
             ClusterJobSubmissionOptionsService.validateJsonString(it)
         }
