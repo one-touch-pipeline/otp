@@ -22,7 +22,9 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.plugin.springsecurity.acl.AclSid
+import grails.testing.gorm.DataTest
+import grails.testing.web.controllers.ControllerUnitTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -30,15 +32,23 @@ import de.dkfz.tbi.otp.ProjectSelection
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.LdapUserDetails
-import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.security.UserAndRoles
+import de.dkfz.tbi.otp.security.*
 
 import static javax.servlet.http.HttpServletResponse.SC_MOVED_TEMPORARILY
 import static javax.servlet.http.HttpServletResponse.SC_OK
 
-class ProjectUserControllerIntegrationSpec extends Specification implements UserAndRoles {
+class ProjectUserControllerSpec extends Specification implements ControllerUnitTest<ProjectUserController>, DataTest, UserAndRoles {
 
-    ProjectUserController controller = new ProjectUserController()
+    Class[] getDomainClassesToMock() {[
+            AclSid,
+            Project,
+            ProjectRole,
+            Realm,
+            Role,
+            User,
+            UserProjectRole,
+            UserRole,
+    ]}
 
     void "test index, sorting of users in different lists"() {
         given:
@@ -52,6 +62,9 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         addUserWithReadAccessToProject(enabledUser, project, true)
         addUserWithReadAccessToProject(disabledUser, project, false)
 
+        controller.userProjectRoleService = Mock(UserProjectRoleService) {
+            getEmailsForNotification(_) >> "emails"
+        }
         controller.projectService = Mock(ProjectService) {
             getAllProjects() >> [project]
         }
@@ -67,9 +80,7 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
 
         when:
         controller.request.method = 'GET'
-        def model = SpringSecurityUtils.doWithAuth(enabledUser.username) {
-            controller.index()
-        }
+        def model = controller.index()
 
         then:
         controller.response.status == SC_OK
@@ -83,8 +94,6 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
 
     void "test addUserToProject, switch between respective functions to add users"() {
         given:
-        createUserAndRoles()
-
         controller.userProjectRoleService = Mock(UserProjectRoleService) {
             addUserToProjectAndNotifyGroupManagementAuthority(_, _, _, _) >> null
             addExternalUserToProject(_, _, _, _) >> null
@@ -102,9 +111,7 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         controller.params.manageUsers = true
         controller.params.manageUsersAndDelegate = true
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.addUserToProject()
-        }
+        controller.addUserToProject()
 
         then:
         controller.response.status == SC_MOVED_TEMPORARILY
@@ -122,8 +129,6 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
     @Unroll
     void "test addUserToProject, catch exceptions caused in either method (#errorMessage)"() {
         given:
-        createUserAndRoles()
-
         controller.userProjectRoleService = Mock(UserProjectRoleService) {
             addUserToProjectAndNotifyGroupManagementAuthority(_, _, _, _) >> { throw new AssertionError("internal") }
             addExternalUserToProject(_, _, _, _) >> { throw new AssertionError("external") }
@@ -142,9 +147,7 @@ class ProjectUserControllerIntegrationSpec extends Specification implements User
         controller.params.manageUsersAndDelegate = true
         controller.params.receivesNotifications = true
 
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            controller.addUserToProject()
-        }
+        controller.addUserToProject()
 
         then:
         controller.response.status == SC_MOVED_TEMPORARILY
