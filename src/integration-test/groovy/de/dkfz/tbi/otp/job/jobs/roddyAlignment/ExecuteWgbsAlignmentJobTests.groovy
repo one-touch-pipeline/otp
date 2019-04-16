@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.dataprocessing.ChromosomeIdentifierSortingService
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
@@ -41,21 +42,21 @@ import de.dkfz.tbi.otp.utils.*
 @Integration
 class ExecuteWgbsAlignmentJobTests {
 
-    @Autowired
-    ExecuteWgbsAlignmentJob executeWgbsAlignmentJob
-
     LsdfFilesService lsdfFilesService
 
     RoddyBamFile roddyBamFile
 
     TestConfigService configService
+    RemoteShellHelper remoteShellHelper
+    ReferenceGenomeService referenceGenomeService
+    ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
 
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
     File cpiFile
 
-    void setupData() {
+    void setupData(ExecuteWgbsAlignmentJob executeWgbsAlignmentJob) {
         roddyBamFile = DomainFactory.createRoddyBamFile()
         SeqType wgbsSeqType = DomainFactory.createWholeGenomeBisulfiteSeqType()
         DomainFactory.changeSeqType(roddyBamFile, wgbsSeqType)
@@ -69,6 +70,11 @@ class ExecuteWgbsAlignmentJobTests {
                 new File("${referenceGenomeDirectory}/${roddyBamFile.referenceGenome.path}",
                         roddyBamFile.referenceGenome.cytosinePositionsIndex)
         )
+
+        executeWgbsAlignmentJob.remoteShellHelper = remoteShellHelper
+        executeWgbsAlignmentJob.lsdfFilesService = lsdfFilesService
+        executeWgbsAlignmentJob.referenceGenomeService = referenceGenomeService
+        executeWgbsAlignmentJob.chromosomeIdentifierSortingService = chromosomeIdentifierSortingService
 
         executeWgbsAlignmentJob.remoteShellHelper.metaClass.executeCommandReturnProcessOutput = { Realm realm, String cmd ->
             LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(cmd)
@@ -84,7 +90,16 @@ class ExecuteWgbsAlignmentJobTests {
                 (OtpProperty.PATH_PROCESSING_ROOT): tmpDir.root.path,
         ])
 
-        prepareDataFilesOnFileSystem(roddyBamFile)
+
+        // prepareDataFilesOnFileSystem
+        assert 1 == roddyBamFile.seqTracks.size()
+        SeqTrack seqTrack = roddyBamFile.seqTracks.iterator().next()
+        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack, [sort: 'mateNumber'])
+        assert 2 == dataFiles.size()
+        File dataFile1File = new File(executeWgbsAlignmentJob.lsdfFilesService.getFileViewByPidPath(dataFiles[0]))
+        createFileAndAddFileSize(dataFile1File, dataFiles[0])
+        File dataFile2File = new File(executeWgbsAlignmentJob.lsdfFilesService.getFileViewByPidPath(dataFiles[1]))
+        createFileAndAddFileSize(dataFile2File, dataFiles[1])
 
         CreateFileHelper.createFile(executeWgbsAlignmentJob.referenceGenomeService.fastaFilePath(roddyBamFile.referenceGenome, false))
         CreateFileHelper.createFile(executeWgbsAlignmentJob.referenceGenomeService.chromosomeStatSizeFile(roddyBamFile.mergingWorkPackage, false))
@@ -92,13 +107,13 @@ class ExecuteWgbsAlignmentJobTests {
 
     @After
     void tearDown() {
-        TestCase.removeMetaClass(RemoteShellHelper, executeWgbsAlignmentJob.remoteShellHelper)
         configService.clean()
     }
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_InputBamIsNull_ShouldFail() {
-        setupData()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
         assert TestCase.shouldFail(AssertionError) {
             executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(null)
         }.contains("roddyBamFile must not be null")
@@ -106,7 +121,8 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_ChromosomeNamesCanNotBeFound_ShouldFail() {
-        setupData()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
         assert TestCase.shouldFail(AssertionError) {
             executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificCValues(roddyBamFile)
         }.contains("No chromosome names could be found for reference genome")
@@ -114,7 +130,8 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_cytosinePositionIndexFilePath() {
-        setupData()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
         List<String> chromosomeNames = ["1", "2", "3", "4", "5", "X", "Y", "M"]
         DomainFactory.createReferenceGenomeEntries(roddyBamFile.referenceGenome, chromosomeNames)
 
@@ -136,7 +153,8 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificCValues_CytosinePositionIndexNotDefined_ShouldThrowException() {
-        setupData()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
         roddyBamFile.referenceGenome.cytosinePositionsIndex = null
         roddyBamFile.referenceGenome.save(flush: true)
 
@@ -150,7 +168,8 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificParameter_InputBamIsNull_ShouldFail() {
-        setupData()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
         assert TestCase.shouldFail(AssertionError) {
             executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificParameter(null)
         }.contains("roddyBamFile must not be null")
@@ -158,7 +177,8 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificParameter_MetadataFileCreationDidNotWork_ParentDirDoesNotExist_ShouldFail() {
-        setupData()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
 
         assert TestCase.shouldFail(AssertionError) {
             executeWgbsAlignmentJob.prepareAndReturnWorkflowSpecificParameter(roddyBamFile)
@@ -167,7 +187,8 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificParameter_MetadataFileCreationDidNotWork_ExitCodeNotNull_ShouldFail() {
-        setupData()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
         File metaDataTableFile = roddyBamFile.workMetadataTableFile
         assert metaDataTableFile.parentFile.mkdirs()
 
@@ -186,7 +207,8 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificParameter_MetadataFileCreationDidNotWork_FileNotAvailable_ShouldFail() {
-        setupData()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
         File metaDataTableFile = roddyBamFile.workMetadataTableFile
         assert metaDataTableFile.parentFile.mkdirs()
 
@@ -205,29 +227,32 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testPrepareAndReturnWorkflowSpecificParameter_LibraryStoredInSeqTrack() {
-        setupData()
-        testPrepareAndReturnWorkflowSpecificParameter("lib1")
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
+        testPrepareAndReturnWorkflowSpecificParameter("lib1", executeWgbsAlignmentJob)
     }
 
     @Test
     void testPrepareAndReturnWorkflowSpecificParameter_NoLibraryStoredInSeqTrack() {
-        setupData()
-        testPrepareAndReturnWorkflowSpecificParameter()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
+        testPrepareAndReturnWorkflowSpecificParameter(executeWgbsAlignmentJob)
     }
 
     @Test
     void testPrepareAndReturnWorkflowSpecificParameter_NoLibraryStoredInSeqTrackAndFileAlreadyExist() {
-        setupData()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
         File metaDataTableFile = roddyBamFile.workMetadataTableFile
         assert metaDataTableFile.parentFile.mkdirs()
         metaDataTableFile.text = 'DUMMY TEXT'
 
-        testPrepareAndReturnWorkflowSpecificParameter()
+        testPrepareAndReturnWorkflowSpecificParameter(executeWgbsAlignmentJob)
 
         assert metaDataTableFile.text != 'DUMMY TEXT'
     }
 
-    void testPrepareAndReturnWorkflowSpecificParameter(String libraryName = null) {
+    void testPrepareAndReturnWorkflowSpecificParameter(String libraryName = null, ExecuteWgbsAlignmentJob executeWgbsAlignmentJob) {
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
             seqTrack.libraryName = libraryName
             seqTrack.normalizedLibraryName = SeqTrack.normalizeLibraryName(libraryName)
@@ -256,7 +281,8 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testWorkflowSpecificValidation_MethylationMergedDirDoesNotExist_ShouldFail() {
-        setupData()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         File methylationMergedDir = new File(roddyBamFile.getWorkMethylationDirectory(), "merged")
         methylationMergedDir.deleteDir()
@@ -268,7 +294,8 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testWorkflowSpecificValidation_MethylationLibraryDirDoesNotExist_ShouldFail() {
-        setupData()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
         roddyBamFile.seqTracks.add(DomainFactory.createSeqTrackWithDataFiles(roddyBamFile.workPackage, [libraryName: "lib1", normalizedLibraryName: "1"]))
         roddyBamFile.numberOfMergedLanes = 2
         MergingCriteria.list()*.useLibPrepKit = false
@@ -285,20 +312,10 @@ class ExecuteWgbsAlignmentJobTests {
 
     @Test
     void testWorkflowSpecificValidation_AllFine() {
-        setupData()
+        ExecuteWgbsAlignmentJob executeWgbsAlignmentJob = new ExecuteWgbsAlignmentJob()
+        setupData(executeWgbsAlignmentJob)
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
         executeWgbsAlignmentJob.workflowSpecificValidation(roddyBamFile)
-    }
-
-    private void prepareDataFilesOnFileSystem(RoddyBamFile bamFile) {
-        assert 1 == bamFile.seqTracks.size()
-        SeqTrack seqTrack = bamFile.seqTracks.iterator().next()
-        List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack, [sort: 'mateNumber'])
-        assert 2 == dataFiles.size()
-        File dataFile1File = new File(executeWgbsAlignmentJob.lsdfFilesService.getFileViewByPidPath(dataFiles[0]))
-        createFileAndAddFileSize(dataFile1File, dataFiles[0])
-        File dataFile2File = new File(executeWgbsAlignmentJob.lsdfFilesService.getFileViewByPidPath(dataFiles[1]))
-        createFileAndAddFileSize(dataFile2File, dataFiles[1])
     }
 
 
