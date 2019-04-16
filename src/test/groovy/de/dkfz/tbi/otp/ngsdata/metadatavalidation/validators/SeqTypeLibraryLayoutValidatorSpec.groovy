@@ -52,7 +52,6 @@ class SeqTypeLibraryLayoutValidatorSpec extends Specification {
     }
 
     void 'validate, when context is MetadataValidationContext, gets expected columns'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
         SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
@@ -65,7 +64,6 @@ class SeqTypeLibraryLayoutValidatorSpec extends Specification {
     }
 
     void 'validate, when column(s) is/are missing, adds error(s)'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${header}
@@ -87,7 +85,6 @@ value1\tvalue2
     }
 
     void 'validate, when combinations are in database, adds no problem'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\t${MetaDataColumn.BASE_MATERIAL}
@@ -105,6 +102,17 @@ SeqType3\t${LibraryLayout.MATE_PAIR}\t\t${SeqType.SINGLE_CELL_DNA}
         SeqType seqType2ll2 = DomainFactory.createSeqType(name: 'SeqType2', dirName: 'NameSeqType2', libraryLayout: LibraryLayout.PAIRED, singleCell: false)
         SeqType seqType3ll3True = DomainFactory.createSeqType(name: 'SeqType3', dirName: 'NameSeqType3', libraryLayout: LibraryLayout.MATE_PAIR, singleCell: true)
         SeqType seqType2Tagll2 = DomainFactory.createSeqType(name: 'SeqType2_TAGMENTATION', dirName: 'SeqType2_TAGMENTATION', libraryLayout: LibraryLayout.PAIRED, singleCell: false)
+
+        Collection<Problem> expectedProblems = [
+                createInfoForSeqType([
+                        seqType1ll1,
+                        seqType1ll2,
+                        seqType2ll1,
+                        seqType2ll2,
+                        seqType3ll3True,
+                        seqType2Tagll2,
+                ]),
+        ]
 
         when:
         SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
@@ -124,7 +132,7 @@ SeqType3\t${LibraryLayout.MATE_PAIR}\t\t${SeqType.SINGLE_CELL_DNA}
         validator.validate(context)
 
         then:
-        context.problems.empty
+        TestCase.assertContainSame(context.problems, expectedProblems)
     }
 
     void 'validate, when precondition are not valid, add no problems'() {
@@ -146,11 +154,15 @@ SeqType1\t${LibraryLayout.SINGLE}\t\twer
             1 * findByNameOrImportAlias('SeqType1', [libraryLayout: LibraryLayout.SINGLE, singleCell: false]) >> seqType
         }
 
+        Collection<Problem> expectedProblems = [
+                createInfoForSeqType([seqType,]),
+        ]
+
         when:
         validator.validate(context)
 
         then:
-        context.problems.empty
+        TestCase.assertContainSame(context.problems, expectedProblems)
     }
 
     void 'validate, when combinations are not in database, adds expected errors'() {
@@ -177,7 +189,6 @@ SeqType2\t${LibraryLayout.PAIRED}\t\t${SeqType.SINGLE_CELL_RNA}
         SeqType seqType3 = DomainFactory.createSeqType(name: 'SeqType3')
         SeqType seqType3Tag =  DomainFactory.createSeqType(name: 'SeqType3_TAGMENTATION')
         DomainFactory.createSeqType(libraryLayout: LibraryLayout.MATE_PAIR)
-
 
         SeqTypeLibraryLayoutValidator validator = new SeqTypeLibraryLayoutValidator()
         validator.seqTypeService = Mock(SeqTypeService) {
@@ -220,13 +231,18 @@ SeqType2\t${LibraryLayout.PAIRED}\t\t${SeqType.SINGLE_CELL_RNA}
                         "The combination of sequencing type 'SeqType3_TAGMENTATION' and library layout '${LibraryLayout.PAIRED}' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database."),
                 new Problem(context.spreadsheet.dataRows[11].cells as Set, Level.ERROR,
                         "The combination of sequencing type 'SeqType2' and library layout '${LibraryLayout.PAIRED}' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database."),
+                createInfoForSeqType([seqType1ll1, seqType2ll2]),
         ]
 
         when:
         validator.validate(context)
 
-
         then:
         TestCase.assertContainSame(context.problems, expectedProblems)
+    }
+
+    private Problem createInfoForSeqType(List<SeqType> seqTypes) {
+        String infoSeqType = "The submission contains following seqTypes:\n- ${seqTypes*.toString().sort().join('\n- ')}"
+        return new Problem([] as Set, Level.INFO, infoSeqType, infoSeqType)
     }
 }

@@ -60,10 +60,12 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
     }
 
     @Override
-    void checkMissingOptionalColumn(AbstractMetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(AbstractMetadataValidationContext context, String columnTitle) {
+    }
 
     @Override
     void validateValueTuples(AbstractMetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+        List<SeqType> seqTypes = []
         valueTuples.each {
             String seqTypeName
             if (context instanceof BamMetadataValidationContext) {
@@ -80,13 +82,25 @@ class SeqTypeLibraryLayoutValidator extends ValueTuplesValidator<AbstractMetadat
             if (seqTypeName &&
                     libraryLayout &&
                     seqTypeService.findByNameOrImportAlias(seqTypeName) &&
-                    SeqType.findByLibraryLayout(libraryLayout) &&
-                    !seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayout, singleCell: isSingleCell])) {
-                if (isSingleCell)
-                    context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayout}' and Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and Single Cell is not registered in the OTP database.")
-                else
-                    context.addProblem(it.cells, Level.ERROR, "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayout}' and without Single Cell is not registered in the OTP database.", "At least one combination of sequencing type and library layout and without Single Cell is not registered in the OTP database.")
+                    SeqType.findByLibraryLayout(libraryLayout)) {
+                SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayout, singleCell: isSingleCell])
+                if (seqType) {
+                    seqTypes << seqType
+                } else {
+                    String msgStart = "The combination of sequencing type '${seqTypeName}' and library layout '${libraryLayout}' and"
+                    String msgDefaultStart = "At least one combination of sequencing type and library layout and"
+                    if (isSingleCell) {
+                        context.addProblem(it.cells, Level.ERROR, "${msgStart} Single Cell is not registered in the OTP database.",
+                                "${msgDefaultStart} Single Cell is not registered in the OTP database.")
+                    } else {
+                        context.addProblem(it.cells, Level.ERROR, "${msgStart} without Single Cell is not registered in the OTP database.",
+                                "${msgDefaultStart} without Single Cell is not registered in the OTP database.")
+                    }
+                }
             }
+        }
+        if (seqTypes) {
+            context.addProblem([] as Set, Level.INFO, "The submission contains following seqTypes:\n- ${seqTypes*.toString().sort().unique().join('\n- ')}")
         }
     }
 }
