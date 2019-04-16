@@ -22,7 +22,6 @@
 
 package de.dkfz.tbi.otp.monitor.alignment
 
-import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 
 import de.dkfz.tbi.TestCase
@@ -33,7 +32,6 @@ import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Rollback
-@Integration
 class PanCanAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentCheckerIntegrationSpec {
 
     @Override

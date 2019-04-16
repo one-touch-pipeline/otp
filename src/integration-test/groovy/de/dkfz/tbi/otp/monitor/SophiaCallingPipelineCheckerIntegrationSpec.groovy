@@ -22,7 +22,6 @@
 
 package de.dkfz.tbi.otp.monitor
 
-import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
@@ -31,8 +30,30 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 @Rollback
-@Integration
 class SophiaCallingPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipelineCheckerIntegrationSpec {
+
+    void "workflowName, should return SophiaWorkflow"() {
+        expect:
+        'SophiaWorkflow' == createVariantCallingPipelineChecker().getWorkflowName()
+    }
+
+    void "processingStateMember, should return sophiaProcessingStatus"() {
+        expect:
+        'sophiaProcessingStatus' == createVariantCallingPipelineChecker().getProcessingStateMember()
+    }
+
+    void "pipelineType, should return Pipeline.Type.SOPHIA"() {
+        given:
+        createPipeLine()
+
+        expect:
+        Pipeline.Type.SOPHIA == createVariantCallingPipelineChecker().getPipeline().type
+    }
+
+    void "bamFilePairAnalysisClass, should return SophiaInstance.class"() {
+        expect:
+        SophiaInstance.class == createVariantCallingPipelineChecker().getBamFilePairAnalysisClass()
+    }
 
     @Override
     AbstractVariantCallingPipelineChecker createVariantCallingPipelineChecker() {
@@ -57,29 +78,5 @@ class SophiaCallingPipelineCheckerIntegrationSpec extends AbstractVariantCalling
     @Override
     BamFilePairAnalysis createAnalysisForCrosschecking(Map properties) {
         return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles(properties)
-    }
-
-
-    void "workflowName, should return SophiaWorkflow"() {
-        expect:
-        'SophiaWorkflow' == createVariantCallingPipelineChecker().getWorkflowName()
-    }
-
-    void "processingStateMember, should return sophiaProcessingStatus"() {
-        expect:
-        'sophiaProcessingStatus' == createVariantCallingPipelineChecker().getProcessingStateMember()
-    }
-
-    void "pipelineType, should return Pipeline.Type.SOPHIA"() {
-        given:
-        createPipeLine()
-
-        expect:
-        Pipeline.Type.SOPHIA == createVariantCallingPipelineChecker().getPipeline().type
-    }
-
-    void "bamFilePairAnalysisClass, should return SophiaInstance.class"() {
-        expect:
-        SophiaInstance.class == createVariantCallingPipelineChecker().getBamFilePairAnalysisClass()
     }
 }

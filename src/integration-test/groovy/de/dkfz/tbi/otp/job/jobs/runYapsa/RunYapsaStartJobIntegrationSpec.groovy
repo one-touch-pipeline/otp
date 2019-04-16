@@ -22,8 +22,6 @@
 
 package de.dkfz.tbi.otp.job.jobs.runYapsa
 
-import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -34,8 +32,6 @@ import de.dkfz.tbi.otp.job.jobs.bamFilePairAnalysis.AbstractBamFilePairAnalysisS
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 
-@Rollback
-@Integration
 class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpec implements WithReferenceGenomeRestrictionSpec {
 
     @Autowired
@@ -95,13 +91,11 @@ class RunYapsaStartJobIntegrationSpec extends AbstractBamFilePairAnalysisStartJo
 
     @Override
     ConfigPerProjectAndSeqType createConfig(SamplePair samplePair, Pipeline pipeline) {
-        return DomainFactory.createRunYapsaConfig(
-                [
+        return DomainFactory.createRunYapsaConfig([
                         project : samplePair.project,
                         seqType : samplePair.seqType,
                         pipeline: pipeline,
-                ]
-        )
+        ])
     }
 
     @Override

@@ -22,15 +22,37 @@
 
 package de.dkfz.tbi.otp.monitor
 
-import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 @Rollback
-@Integration
 class AceseqCallingPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipelineCheckerIntegrationSpec {
+
+
+    void "workflowName, should return ACEseqWorkflow"() {
+        expect:
+        'ACEseqWorkflow' == createVariantCallingPipelineChecker().getWorkflowName()
+    }
+
+    void "processingStateMember, should return aceseqProcessingStatus"() {
+        expect:
+        'aceseqProcessingStatus' == createVariantCallingPipelineChecker().getProcessingStateMember()
+    }
+
+    void "pipelineType, should return Pipeline.Type.ACESEQ"() {
+        given:
+        createPipeLine()
+
+        expect:
+        Pipeline.Type.ACESEQ == createVariantCallingPipelineChecker().getPipeline().type
+    }
+
+    void "bamFilePairAnalysisClass, should return AceseqInstance.class"() {
+        expect:
+        AceseqInstance.class == createVariantCallingPipelineChecker().getBamFilePairAnalysisClass()
+    }
 
     @Override
     AbstractVariantCallingPipelineChecker createVariantCallingPipelineChecker() {
@@ -55,29 +77,5 @@ class AceseqCallingPipelineCheckerIntegrationSpec extends AbstractVariantCalling
     @Override
     BamFilePairAnalysis createAnalysisForCrosschecking(Map properties) {
         return DomainFactory.createRoddySnvInstanceWithRoddyBamFiles(properties)
-    }
-
-
-    void "workflowName, should return ACEseqWorkflow"() {
-        expect:
-        'ACEseqWorkflow' == createVariantCallingPipelineChecker().getWorkflowName()
-    }
-
-    void "processingStateMember, should return aceseqProcessingStatus"() {
-        expect:
-        'aceseqProcessingStatus' == createVariantCallingPipelineChecker().getProcessingStateMember()
-    }
-
-    void "pipelineType, should return Pipeline.Type.ACESEQ"() {
-        given:
-        createPipeLine()
-
-        expect:
-        Pipeline.Type.ACESEQ == createVariantCallingPipelineChecker().getPipeline().type
-    }
-
-    void "bamFilePairAnalysisClass, should return AceseqInstance.class"() {
-        expect:
-        AceseqInstance.class == createVariantCallingPipelineChecker().getBamFilePairAnalysisClass()
     }
 }

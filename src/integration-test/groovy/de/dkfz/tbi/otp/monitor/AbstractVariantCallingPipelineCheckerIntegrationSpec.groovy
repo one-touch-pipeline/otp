@@ -36,44 +36,6 @@ import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 @Integration
 abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Specification {
 
-    abstract AbstractVariantCallingPipelineChecker createVariantCallingPipelineChecker()
-
-    abstract Pipeline createPipeLine()
-
-    abstract BamFilePairAnalysis createAnalysis(Map properties)
-
-    BamFilePairAnalysis createAnalysis() {
-        createAnalysis([:])
-    }
-
-    ConfigPerProjectAndSeqType createConfig(SamplePair samplePair, Map properties = [:]) {
-        DomainFactory.createRoddyWorkflowConfig([
-                pipeline: createPipeLine(),
-                seqType : samplePair.seqType,
-                project : samplePair.project,
-        ] + properties)
-    }
-
-    //for checking with data of other PipeLine
-    abstract Pipeline createPipeLineForCrosschecking()
-
-    //for checking with analysis of other PipeLine
-    abstract BamFilePairAnalysis createAnalysisForCrosschecking(Map properties)
-
-    BamFilePairAnalysis createAnalysisForCrosschecking() {
-        createAnalysisForCrosschecking([:])
-    }
-
-    SamplePair createSamplePair(Map properties = [:]) {
-        return DomainFactory.createSamplePairPanCan([
-                mergingWorkPackage1: DomainFactory.createMergingWorkPackage([
-                        seqType: SeqTypeService.wholeGenomePairedSeqType,
-                        pipeline: DomainFactory.createPanCanPipeline(),
-                ])
-        ] + properties)
-    }
-
-
     void "samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject, when some sample pairs have a config and some not some not, return project and seqtype of sample pairs without config"() {
         given:
         createPipeLine()
@@ -497,5 +459,42 @@ abstract class AbstractVariantCallingPipelineCheckerIntegrationSpec extends Spec
         1 * output.showFinished([finishedAnalysis])
 
         0 * output._
+    }
+
+    abstract AbstractVariantCallingPipelineChecker createVariantCallingPipelineChecker()
+
+    abstract Pipeline createPipeLine()
+
+    abstract BamFilePairAnalysis createAnalysis(Map properties)
+
+    BamFilePairAnalysis createAnalysis() {
+        createAnalysis([:])
+    }
+
+    ConfigPerProjectAndSeqType createConfig(SamplePair samplePair, Map properties = [:]) {
+        DomainFactory.createRoddyWorkflowConfig([
+                pipeline: createPipeLine(),
+                seqType : samplePair.seqType,
+                project : samplePair.project,
+        ] + properties)
+    }
+
+    //for checking with data of other PipeLine
+    abstract Pipeline createPipeLineForCrosschecking()
+
+    //for checking with analysis of other PipeLine
+    abstract BamFilePairAnalysis createAnalysisForCrosschecking(Map properties)
+
+    BamFilePairAnalysis createAnalysisForCrosschecking() {
+        createAnalysisForCrosschecking([:])
+    }
+
+    SamplePair createSamplePair(Map properties = [:]) {
+        return DomainFactory.createSamplePairPanCan([
+                mergingWorkPackage1: DomainFactory.createMergingWorkPackage([
+                        seqType: SeqTypeService.wholeGenomePairedSeqType,
+                        pipeline: DomainFactory.createPanCanPipeline(),
+                ])
+        ] + properties)
     }
 }

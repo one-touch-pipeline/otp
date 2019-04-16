@@ -31,8 +31,11 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 @Rollback
 abstract class AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpec extends AbstractBamFilePairAnalysisStartJobIntegrationSpec {
 
+    void setupData() { }
+
     void "don't findSamplePairToProcess when prereq not yet done"() {
         given:
+        setupData()
         SamplePair samplePair = setupSamplePair()
         setDependencyProcessingStatus(samplePair, SamplePair.ProcessingStatus.NEEDS_PROCESSING)
         samplePair.save(flush: true)
@@ -43,6 +46,7 @@ abstract class AbstractBamFilePairAnalysisStartJobWithDependenciesIntegrationSpe
 
     void "don't findSamplePairToProcess, when at least one prereq still running"() {
         given:
+        setupData()
         SamplePair samplePair = setupSamplePair()
         setDependencyProcessingStatus(samplePair, SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED)
         samplePair.save(flush: true)

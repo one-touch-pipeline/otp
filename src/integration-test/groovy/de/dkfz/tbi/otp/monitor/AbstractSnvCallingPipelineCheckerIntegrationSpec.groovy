@@ -22,15 +22,10 @@
 
 package de.dkfz.tbi.otp.monitor
 
-import grails.testing.mixin.integration.Integration
-import grails.transaction.Rollback
-
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-@Rollback
-@Integration
 abstract class AbstractSnvCallingPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipelineCheckerIntegrationSpec {
 
     @Override
@@ -47,5 +42,4 @@ abstract class AbstractSnvCallingPipelineCheckerIntegrationSpec extends Abstract
     BamFilePairAnalysis createAnalysisForCrosschecking(Map properties) {
         return DomainFactory.createIndelCallingInstanceWithRoddyBamFiles(properties)
     }
-
 }

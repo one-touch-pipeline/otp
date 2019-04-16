@@ -22,7 +22,6 @@
 
 package de.dkfz.tbi.otp.monitor
 
-import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -31,8 +30,30 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 @Rollback
-@Integration
 class RunYapsaPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipelineCheckerIntegrationSpec {
+
+    void "workflowName, should return RunYapsaWorkflow"() {
+        expect:
+        'RunYapsaWorkflow' == createVariantCallingPipelineChecker().getWorkflowName()
+    }
+
+    void "processingStateMember, should return runYapsaProcessingStatus"() {
+        expect:
+        'runYapsaProcessingStatus' == createVariantCallingPipelineChecker().getProcessingStateMember()
+    }
+
+    void "pipelineType, should return Pipeline.Type.MUTATIONAL_SIGNATURE"() {
+        given:
+        createPipeLine()
+
+        expect:
+        Pipeline.Type.MUTATIONAL_SIGNATURE == createVariantCallingPipelineChecker().getPipeline().type
+    }
+
+    void "bamFilePairAnalysisClass, should return RunYapsaInstance.class"() {
+        expect:
+        RunYapsaInstance.class == createVariantCallingPipelineChecker().getBamFilePairAnalysisClass()
+    }
 
     @Override
     AbstractVariantCallingPipelineChecker createVariantCallingPipelineChecker() {
@@ -67,29 +88,5 @@ class RunYapsaPipelineCheckerIntegrationSpec extends AbstractVariantCallingPipel
                 seqType : samplePair.seqType,
                 project : samplePair.project,
         ] + properties)
-    }
-
-
-    void "workflowName, should return RunYapsaWorkflow"() {
-        expect:
-        'RunYapsaWorkflow' == createVariantCallingPipelineChecker().getWorkflowName()
-    }
-
-    void "processingStateMember, should return runYapsaProcessingStatus"() {
-        expect:
-        'runYapsaProcessingStatus' == createVariantCallingPipelineChecker().getProcessingStateMember()
-    }
-
-    void "pipelineType, should return Pipeline.Type.MUTATIONAL_SIGNATURE"() {
-        given:
-        createPipeLine()
-
-        expect:
-        Pipeline.Type.MUTATIONAL_SIGNATURE == createVariantCallingPipelineChecker().getPipeline().type
-    }
-
-    void "bamFilePairAnalysisClass, should return RunYapsaInstance.class"() {
-        expect:
-        RunYapsaInstance.class == createVariantCallingPipelineChecker().getBamFilePairAnalysisClass()
     }
 }
