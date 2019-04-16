@@ -26,7 +26,6 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.junit.*
 import org.junit.rules.TemporaryFolder
-import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
@@ -34,6 +33,7 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
@@ -41,19 +41,27 @@ import de.dkfz.tbi.otp.utils.*
 @Integration
 class ExecutePanCanJobTests implements RoddyRnaFactory {
 
-    @Autowired
     ExecutePanCanJob executePanCanJob
-
-    LsdfFilesService lsdfFilesService
 
     RoddyBamFile roddyBamFile
 
+    LsdfFilesService lsdfFilesService
     TestConfigService configService
+    ReferenceGenomeService referenceGenomeService
+    FileSystemService fileSystemService
+    BedFileService bedFileService
 
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()
 
     void setupData() {
+        executePanCanJob = new ExecutePanCanJob(
+                lsdfFilesService: lsdfFilesService,
+                referenceGenomeService: referenceGenomeService,
+                fileSystemService: fileSystemService,
+                bedFileService: bedFileService,
+        )
+
         DomainFactory.createRoddyAlignableSeqTypes()
 
         configService = new TestConfigService([
@@ -66,6 +74,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
                 fileOperationStatus         : AbstractMergedBamFile.FileOperationStatus.DECLARED,
                 roddyExecutionDirectoryNames: [DomainFactory.DEFAULT_RODDY_EXECUTION_STORE_DIRECTORY],
         ])
+        SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(tmpDir.root, "reference_genomes").path)
 
@@ -79,6 +88,7 @@ class ExecutePanCanJobTests implements RoddyRnaFactory {
     @After
     void tearDown() {
         TestCase.removeMetaClass(BedFileService, executePanCanJob.bedFileService)
+        TestCase.removeMetaClass(SessionUtils)
         configService.clean()
     }
 
