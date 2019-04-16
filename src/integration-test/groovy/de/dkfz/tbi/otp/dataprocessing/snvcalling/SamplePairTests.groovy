@@ -74,7 +74,10 @@ class SamplePairTests {
         )
         assert persistedSamplePair.save(flush: true)
 
-        SamplePair.setSnvProcessingStatus([nonPersistedSamplePair, persistedSamplePair], processingStatus)
+        nonPersistedSamplePair.setSnvProcessingStatus(processingStatus)
+        nonPersistedSamplePair.save(flush: true)
+        persistedSamplePair.setSnvProcessingStatus(processingStatus)
+        persistedSamplePair.save(flush: true)
 
         assert nonPersistedSamplePair.snvProcessingStatus == processingStatus
         assert nonPersistedSamplePair.id
@@ -89,9 +92,11 @@ class SamplePairTests {
         mergingWorkPackage1.sample.individual = DomainFactory.createIndividual()
         assert mergingWorkPackage1.sample.save(flush: true)
 
-        SamplePair.metaClass.getIndividual = { -> return mergingWorkPackage1.individual }
+        samplePair.metaClass.getIndividual = { -> return mergingWorkPackage1.individual }
 
-        TestCase.shouldFailWithMessageContaining(ValidationException, "individual", { samplePair.save() })
+        TestCase.shouldFailWithMessageContaining(ValidationException, "individual") {
+            samplePair.save()
+        }
     }
 
     @Test
@@ -101,7 +106,7 @@ class SamplePairTests {
         mergingWorkPackage1.seqType = DomainFactory.createSeqType()
         assert mergingWorkPackage1.save(flush: true)
 
-        SamplePair.metaClass.getSeqType = { -> return mergingWorkPackage1.seqType }
+        samplePair.metaClass.getSeqType = { -> return mergingWorkPackage1.seqType }
 
         TestCase.shouldFailWithMessageContaining(ValidationException, "seqType") {
             samplePair.save(flush: true)
@@ -152,5 +157,4 @@ class SamplePairTests {
 
         assert latest == latest.samplePair.findLatestSophiaInstance()
     }
-
 }
