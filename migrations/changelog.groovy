@@ -168,6 +168,10 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2019/replace-unique-index-with-unique-constraint.sql')
     }
 
+    changeSet(author: "wieset", id: "OTP-3139") {
+        sqlFile(path: 'changelogs/2019/OTP-3139.sql')
+    }
+
     changeSet(author: "wieset", id: "OTP-2538-SQL") {
         sqlFile(path: 'changelogs/2019/OTP-2538.sql')
     }

@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.ValidationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.*
@@ -40,12 +41,14 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
+import java.text.SimpleDateFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -81,6 +84,7 @@ class ProjectService {
     WorkflowConfigService workflowConfigService
     RoddyWorkflowConfigService roddyWorkflowConfigService
     ProcessingOptionService processingOptionService
+    SpringSecurityService springSecurityService
 
     FileService fileService
 
@@ -198,7 +202,7 @@ class ProjectService {
         createProjectDirectoryIfNeeded(project, projectParams)
 
         if (projectParams.projectInfoFile) {
-            createProjectInfoAndUploadFile(project, projectParams.projectInfoFile)
+            createProjectInfoAndUploadFile(new AddProjectInfoCommand(project: project, projectInfoFile: projectParams.projectInfoFile))
         }
 
         return project
@@ -218,13 +222,16 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void createProjectInfoAndUploadFile(Project project, MultipartFile file) {
-        assert project: "No Project given"
-        assert file: "No File given"
-        assert !file.isEmpty(): "Empty file"
-        assert file.getSize() <= PROJECT_INFO_MAX_SIZE: "Too big"
-        ProjectInfo projectInfo = createProjectInfo(project, file.originalFilename)
-        uploadProjectInfoToProjectFolder(projectInfo, file.getBytes())
+    void createProjectInfoAndUploadFile(AddProjectInfoCommand cmd) throws IOException {
+        assert cmd.project: "No Project given"
+        assert cmd.projectInfoFile: "No File given"
+        assert !cmd.projectInfoFile.isEmpty(): "Empty file"
+        assert cmd.projectInfoFile.getSize() <= PROJECT_INFO_MAX_SIZE: "Too big"
+        ProjectInfo projectInfo = createProjectInfo(cmd.project, cmd.projectInfoFile.originalFilename)
+        if (cmd.recipient && cmd.commissioningUser && cmd.transferDate && cmd.validityDate && cmd.transferMode && cmd.legalBasis) {
+            addAdditionalValuesToProjectInfo(projectInfo, cmd, springSecurityService.getCurrentUser() as User)
+        }
+        uploadProjectInfoToProjectFolder(projectInfo, cmd.projectInfoFile.getBytes())
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -241,6 +248,18 @@ class ProjectService {
         project.addToProjectInfos(projectInfo)
         project.save(flush: true)
         return projectInfo
+    }
+
+    private void addAdditionalValuesToProjectInfo(ProjectInfo projectInfo, AddProjectInfoCommand cmd, User performingUser) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd", Locale.ENGLISH)
+        projectInfo.recipient = cmd.recipient
+        projectInfo.performingUser = performingUser
+        projectInfo.commissioningUser = User.findByUsername(cmd.commissioningUser)
+        projectInfo.transferDate = simpleDateFormat.parse(cmd.transferDate)
+        projectInfo.validityDate = simpleDateFormat.parse(cmd.validityDate)
+        projectInfo.transferMode = cmd.transferMode
+        projectInfo.legalBasis = cmd.legalBasis
+        projectInfo.save(flush: true)
     }
 
     private void uploadProjectInfoToProjectFolder(ProjectInfo projectInfo, byte[] content) {

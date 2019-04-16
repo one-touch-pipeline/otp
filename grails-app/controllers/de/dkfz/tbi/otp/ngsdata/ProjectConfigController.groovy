@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import org.springframework.validation.Errors
 import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.*
@@ -33,10 +34,12 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 import java.sql.Timestamp
+import java.text.ParseException
 import java.text.SimpleDateFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -166,6 +169,7 @@ class ProjectConfigController implements CheckAndCall {
                 qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
                 speciesWithStrain              : project?.speciesWithStrain,
                 allSpeciesWithStrain           : SpeciesWithStrain.list().sort { it.toString() } ?: [],
+                addProjectInfos                : flash?.addProjectInfos,
         ]
     }
 
@@ -261,12 +265,18 @@ class ProjectConfigController implements CheckAndCall {
         withForm {
             if (cmd.hasErrors()) {
                 flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.errorMessage") as String, cmd.errors)
+                flash.addProjectInfos = cmd.values()
             } else {
-                projectService.createProjectInfoAndUploadFile(cmd.project, cmd.projectInfoFile)
+                try {
+                    projectService.createProjectInfoAndUploadFile(cmd)
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e)
+                    flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.exceptionMessage") as String, e.toString())
+                    flash.addProjectInfos = cmd.values()
+                }
             }
-
         }.invalidToken {
-            flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.errorMessage") as String)
+            flash.message = new FlashMessage(g.message(code: "default.invalid.session") as String, '')
         }
         redirect(action: "index")
     }
@@ -306,7 +316,7 @@ class ProjectConfigController implements CheckAndCall {
                 max("dateCreated")
             }
         }
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH)
         return [
                 creationDate    : timestamps[0] ? simpleDateFormat.format(timestamps[0]) : null,
                 lastReceivedDate: timestamps[0] ? simpleDateFormat.format(timestamps[1]) : null,
@@ -355,7 +365,7 @@ class ProjectConfigController implements CheckAndCall {
         }
         thresholdsTable.add(row)
 
-        sampleTypeService.findUsedSampleTypesForProject(project).each() { SampleType sampleType ->
+        sampleTypeService.findUsedSampleTypesForProject(project).each { SampleType sampleType ->
             row = []
             row.add(sampleType.name)
             row.add(sampleType.getCategory(project) ?: SampleType.Category.UNDEFINED)
@@ -373,8 +383,8 @@ class ProjectConfigController implements CheckAndCall {
         return thresholdsTable
     }
 
-    private static List removeEmptyColumns(List list) {
-        list = list.transpose()
+    private static List removeEmptyColumns(List orgList) {
+        List list = orgList.transpose()
         list.removeAll {
             it.findAll { it == null }.size() == (it.size() - 1)
         }
@@ -399,7 +409,7 @@ class ProjectConfigController implements CheckAndCall {
                     it.sampleType?.name,
                     it.referenceGenome.name,
                     it.statSizeFileName ?: "",
-                    adapterTrimming
+                    adapterTrimming,
             ]
         }
         dataToRender.iTotalRecords = data.size()
@@ -478,6 +488,13 @@ class UpdateAnalysisDirectoryCommand implements Serializable {
 class AddProjectInfoCommand implements Serializable {
     MultipartFile projectInfoFile
     Project project
+    String recipient
+    String commissioningUser
+    String transferDate
+    String validityDate
+    String transferMode
+    String legalBasis
+
     static constraints = {
         projectInfoFile(validator: { val, obj ->
             if (val.isEmpty()) {
@@ -493,6 +510,57 @@ class AddProjectInfoCommand implements Serializable {
                 return "The File exceeds the 20mb file size limit "
             }
         })
+        commissioningUser(validator: { val ->
+            if (val && !User.findByUsername(val)) {
+                return "Could not find user with username: ${val}"
+            }
+        })
+        transferDate(validator: { val ->
+            if (val && !isDateParsable(val)) {
+                return "The value '${val}' is not in the expected date format 'yyyy-mm-dd'"
+            }
+        })
+        validityDate(validator: { val ->
+            if (val && !isDateParsable(val)) {
+                return "The value '${val}' is not in the expected date format 'yyyy-mm-dd'"
+            }
+        })
+        recipient(validator: { val, obj, Errors errors ->
+                List<String> elements = [
+                        obj.recipient,
+                        obj.commissioningUser,
+                        obj.transferDate,
+                        obj.validityDate,
+                        obj.transferMode,
+                        obj.legalBasis,
+                                        ]
+            int givenValues = elements.findAll().size()
+            if (givenValues != 0 && givenValues != elements.size()) {
+                errors.reject(null, "Either all or none of the additional values have to be given: " +
+                        "project, recipient, commissioningUser, transferDate, validityDate, transferMode, legalBasis")
+            }
+            return true
+        })
+    }
+
+    static private boolean isDateParsable(String date) {
+        try {
+            new SimpleDateFormat("yyyy-mm-dd", Locale.ENGLISH).parse(date)
+            return true
+        } catch (ParseException e) {
+            return false
+        }
+    }
+
+    Map<String, String> values() {
+        return [
+                recipient        : recipient,
+                commissioningUser: commissioningUser,
+                transferDate     : transferDate,
+                validityDate     : validityDate,
+                transferMode     : transferMode,
+                legalBasis       : legalBasis,
+        ]
     }
 }
 

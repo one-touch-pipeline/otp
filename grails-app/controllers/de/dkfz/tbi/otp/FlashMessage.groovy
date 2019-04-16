@@ -40,6 +40,12 @@ class FlashMessage {
         this.errorList = null
     }
 
+    FlashMessage(String errorMessage, String error) {
+        this.message = errorMessage
+        this.errorObject = null
+        this.errorList = [error]
+    }
+
     FlashMessage(String errorMessage, List<String> errors) {
         this.message = errorMessage
         this.errorObject = null

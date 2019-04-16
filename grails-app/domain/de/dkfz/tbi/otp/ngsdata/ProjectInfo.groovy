@@ -23,11 +23,23 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
+
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 
 class ProjectInfo implements Entity {
 
     String fileName
+
+    String recipient
+    User performingUser
+    User commissioningUser
+    Date transferDate
+    Date validityDate
+    String transferMode
+    String legalBasis
 
     Project project
 
@@ -39,6 +51,14 @@ class ProjectInfo implements Entity {
         fileName(blank: false, unique: 'project', validator: { String val ->
             OtpPath.isValidPathComponent(val)
         })
+        recipient nullable: true
+        performingUser nullable: true
+        commissioningUser nullable: true
+        transferDate nullable: true
+        validityDate nullable: true
+        transferMode nullable: true
+        legalBasis nullable: true
+
     }
 
     static mapping = {
@@ -47,5 +67,22 @@ class ProjectInfo implements Entity {
 
     String getPath() {
         return "${project.getProjectDirectory().toString()}/${ProjectService.PROJECT_INFO}/${fileName}"
+    }
+
+    String getAdditionalInfos() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd" , Locale.ENGLISH)
+        if (recipient) {
+            return [
+                    "recipient: ${recipient}",
+                    "performingUser: ${performingUser.realName}",
+                    "commissioningUser: ${commissioningUser.realName}",
+                    "transferDate: ${dateFormat.format(transferDate)}",
+                    "validityDate: ${dateFormat.format(validityDate)}",
+                    "transferMode: ${transferMode}",
+                    "legalBasis: ${legalBasis}",
+            ].join(" | ")
+        } else {
+            return ""
+        }
     }
 }

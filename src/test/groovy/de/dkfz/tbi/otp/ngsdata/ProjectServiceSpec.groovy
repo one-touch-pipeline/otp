@@ -29,7 +29,11 @@ import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
+import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CollectionUtils
+
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 
 class ProjectServiceSpec extends Specification implements DataTest {
 
@@ -106,5 +110,33 @@ class ProjectServiceSpec extends Specification implements DataTest {
                 config.project, config.seqType))
         newConfig != config
         newConfig.programVersion == "yapsa 1.0"
+    }
+
+    void "test addAdditionalValuesToProjectInfo"() {
+        given:
+        ProjectService projectService = new ProjectService()
+        ProjectInfo projectInfo = DomainFactory.createProjectInfo()
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd", Locale.ENGLISH)
+        User performingUser = DomainFactory.createUser()
+        AddProjectInfoCommand addProjectInfoCommand = new AddProjectInfoCommand([
+                recipient : "recipient",
+                commissioningUser : DomainFactory.createUser().username,
+                transferDate : dateFormat.format(new Date()),
+                validityDate : dateFormat.format(new Date()),
+                transferMode : "transferMode",
+                legalBasis : "transferMode",
+        ])
+
+        when:
+        projectService.addAdditionalValuesToProjectInfo(projectInfo, addProjectInfoCommand, performingUser)
+
+        then:
+        projectInfo.recipient == addProjectInfoCommand.recipient
+        projectInfo.performingUser == performingUser
+        projectInfo.commissioningUser.username == addProjectInfoCommand.commissioningUser
+        dateFormat.format(projectInfo.transferDate) == addProjectInfoCommand.transferDate
+        dateFormat.format(projectInfo.validityDate) == addProjectInfoCommand.validityDate
+        projectInfo.transferMode == addProjectInfoCommand.transferMode
+        projectInfo.legalBasis == addProjectInfoCommand.legalBasis
     }
 }

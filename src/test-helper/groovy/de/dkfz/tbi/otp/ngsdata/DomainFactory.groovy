@@ -2663,4 +2663,11 @@ class DomainFactory {
                 seqCenterDirName       : "seqCenterDirName${counter++}",
         ], properties)
     }
+
+    static ProjectInfo createProjectInfo(Map properties = [:]) {
+        return createDomainObject(ProjectInfo, [
+                fileName: "fileName_${counter++}",
+                project: { createProject() },
+        ], properties)
+    }
 }

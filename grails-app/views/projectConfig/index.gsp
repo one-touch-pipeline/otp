@@ -230,14 +230,35 @@
                         <td id="projectInfo">
                             <g:each var="projectInfo" in="${projectInfos}">
                                 <p>
-                                    <g:message code="projectOverview.projectInfo.creationDate"/>: <g:formatDate date="${projectInfo.dateCreated}" format="yyyy-MM-dd HH:mm:ss" /><br>
-                                    <g:message code="projectOverview.projectInfo.path"/>: <g:link action="download" params='["projectInfo.id": projectInfo.id]'>${projectInfo.getPath()}</g:link>
+                                    <g:message code="projectOverview.projectInfo.creationDate"/> <g:formatDate date="${projectInfo.dateCreated}" format="yyyy-MM-dd HH:mm:ss" /><br>
+                                    <g:message code="projectOverview.projectInfo.path"/> <g:link action="download" params='["projectInfo.id": projectInfo.id]'>${projectInfo.getPath()}</g:link>
+                                    <g:if test="${projectInfo.getAdditionalInfos()}">
+                                        <br><g:message code="projectOverview.projectInfo.additional"/> ${projectInfo.getAdditionalInfos()}
+                                    </g:if>
                                 </p>
                             </g:each>
                             <p>
                             <g:uploadForm action="addProjectInfo" useToken="true">
-                                <input type="file" name="projectInfoFile" id="projectInfoFile" />
+                                <input type="file" name="projectInfoFile" id="projectInfoFile"/>
                                 <input type="hidden" name="project.id" value="${project.id}"/>
+                                <table>
+                                    <tr>
+                                        <th><g:message code="projectOverview.projectInfo.recipient"/></th>
+                                        <th><g:message code="projectOverview.projectInfo.commissioningUser"/></th>
+                                        <th><g:message code="projectOverview.projectInfo.transferDate"/></th>
+                                        <th><g:message code="projectOverview.projectInfo.validityDate"/></th>
+                                        <th><g:message code="projectOverview.projectInfo.transferMode"/></th>
+                                        <th><g:message code="projectOverview.projectInfo.legalBasis"/></th>
+                                    </tr>
+                                    <tr>
+                                        <td><input type="text" value="${addProjectInfos?.recipient }" name="recipient"/></td>
+                                        <td><input type="text" value="${addProjectInfos?.commissioningUser }" name="commissioningUser" placeholder="OTP account"/></td>
+                                        <td><input type="date" value="${addProjectInfos?.transferDate }" class="datePicker" name="transferDate"/></td>
+                                        <td><input type="date" value="${addProjectInfos?.validityDate }" class="datePicker" name="validityDate"/></td>
+                                        <td><input type="text" value="${addProjectInfos?.transferMode }" name="transferMode"/></td>
+                                        <td><input type="text" value="${addProjectInfos?.legalBasis }" name="legalBasis"/></td>
+                                    </tr>
+                                </table>
                                 <g:submitButton name="${g.message(code: "projectOverview.projectInfo.add")}"/>
                             </g:uploadForm>
                             </p>

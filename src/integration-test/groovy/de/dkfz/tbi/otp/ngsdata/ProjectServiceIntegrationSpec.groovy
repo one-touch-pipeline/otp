@@ -1503,7 +1503,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.createProjectInfoAndUploadFile(project, mockMultipartFile)
+            projectService.createProjectInfoAndUploadFile(new AddProjectInfoCommand(project: project, projectInfoFile: mockMultipartFile))
         }
 
         then:
@@ -1525,7 +1525,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.createProjectInfoAndUploadFile(project, mockMultipartFile)
+            projectService.createProjectInfoAndUploadFile(new AddProjectInfoCommand(project: project, projectInfoFile: mockMultipartFile))
             projectInfoContent = projectService.getProjectInfoContent(CollectionUtils.exactlyOneElement(project.projectInfos))
         }
 
@@ -1543,7 +1543,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.createProjectInfoAndUploadFile(project, mockMultipartFile)
+            projectService.createProjectInfoAndUploadFile(new AddProjectInfoCommand(project: project, projectInfoFile: mockMultipartFile))
             ProjectInfo projectInfo = CollectionUtils.exactlyOneElement(project.projectInfos)
             FileSystem fs = projectService.fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
             Path file = fs.getPath(projectInfo.getPath())

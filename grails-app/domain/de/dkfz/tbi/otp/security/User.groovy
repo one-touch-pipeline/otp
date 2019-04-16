@@ -30,6 +30,9 @@ import de.dkfz.tbi.otp.utils.Entity
  */
 class User implements Entity {
 
+    /**
+     * the Ad account
+     */
     String username
     String password
     boolean enabled
