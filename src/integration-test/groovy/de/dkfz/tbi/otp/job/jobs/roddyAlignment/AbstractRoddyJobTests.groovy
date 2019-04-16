@@ -67,13 +67,8 @@ class AbstractRoddyJobTests {
                     "Rerun job ${ALIGN_AND_PAIR_SLIM_JOB_NAME} => ${ALIGN_AND_PAIR_SLIM_PBSID}",
             exitCode: 0,
     )
-    static final ProcessOutput OUTPUT_NO_CLUSTER_JOBS_SUBMITTED = new ProcessOutput(
-            stderr: "Creating the following execution directory to store information about this process:\n" +
-                    "\t${new File(TestCase.uniqueNonExistentPath, RODDY_EXECUTION_STORE_DIRECTORY_NAME)}" +
-                    "${AbstractRoddyJob.NO_STARTED_JOBS_MESSAGE}",
-            stdout: "",
-            exitCode: 0,
-    )
+    // has to be set in setupData because of dependency to AbstractRoddyJob
+    static ProcessOutput OUTPUT_NO_CLUSTER_JOBS_SUBMITTED
 
     final shouldFail = new GroovyTestCase().&shouldFail
 
@@ -99,6 +94,14 @@ class AbstractRoddyJobTests {
 
         realm = roddyBamFile.project.realm
         configService = new TestConfigService()
+
+        OUTPUT_NO_CLUSTER_JOBS_SUBMITTED = new ProcessOutput(
+                stderr: "Creating the following execution directory to store information about this process:\n" +
+                        "\t${new File(TestCase.uniqueNonExistentPath, RODDY_EXECUTION_STORE_DIRECTORY_NAME)}" +
+                        "${AbstractRoddyJob.NO_STARTED_JOBS_MESSAGE}",
+                stdout: "",
+                exitCode: 0,
+        )
 
         roddyJob = [
                 getProcessParameterObject: { -> roddyBamFile },
@@ -227,7 +230,6 @@ newLine"""
         assert validateCounter == 1
     }
 
-
     @Test
     void testExecute_finishedClusterJobsIsNull_MaybeSubmit() {
         setupData()
@@ -265,7 +267,7 @@ newLine"""
         ] as AbstractRoddyJob
 
         Realm realm = DomainFactory.createRealm()
-        assert realm.save([flush: true, failOnError: true])
+        realm.save(flush: true)
 
         ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
         assert processingStep
@@ -283,7 +285,6 @@ newLine"""
         assert executeCommandCounter == 0
         assert validateCounter == 1
     }
-
 
     @Test
     void testCreateClusterJobObjects_Works() {
