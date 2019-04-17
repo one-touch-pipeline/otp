@@ -145,7 +145,7 @@ class RunServiceTests implements UserAndRoles {
         jep.firstJob = jobDefinition
         assert jep.save(flush: true)
 
-        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
+        Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
         assert process.save(flush: true)
         ProcessParameter param = new ProcessParameter(value: run.id, className: Run.class.name, process: process)
         assert param.save(flush: true)
@@ -155,7 +155,7 @@ class RunServiceTests implements UserAndRoles {
             assertEquals(param, runService.retrieveProcessParameters(run).first())
         }
 
-        Process process2 = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerTests")
+        Process process2 = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "de.dkfz.tbi.otp.job.scheduler.SchedulerIntegrationTests")
         assert process2.save(flush: true)
         ProcessParameter param2 = new ProcessParameter(value: run.id, className: Run.class.name, process: process2)
         assert param2.save(flush: true)

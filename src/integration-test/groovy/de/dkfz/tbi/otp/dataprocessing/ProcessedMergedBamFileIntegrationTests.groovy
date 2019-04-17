@@ -165,7 +165,7 @@ class ProcessedMergedBamFileIntegrationTests {
         assert qualityAssessmentMergedPass.save([flush: true])
 
         OverallQualityAssessmentMerged overallQualityAssessmentMerged = new OverallQualityAssessmentMerged(
-                AbstractBamFileServiceTests.ARBITRARY_QA_VALUES + [
+                AbstractBamFileServiceIntegrationTests.ARBITRARY_QA_VALUES + [
                 id                   : identifier,
                 qualityAssessmentMergedPass: qualityAssessmentMergedPass,
         ])

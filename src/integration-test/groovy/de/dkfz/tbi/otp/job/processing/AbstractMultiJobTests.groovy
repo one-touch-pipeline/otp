@@ -23,8 +23,6 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.testing.mixin.integration.Integration
-import org.hibernate.Session
-import org.hibernate.SessionFactory
 import org.junit.After
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -47,7 +45,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
-import static de.dkfz.tbi.otp.job.scheduler.SchedulerTests.assertSucceeded
+import static SchedulerIntegrationTests.assertSucceeded
 import static de.dkfz.tbi.otp.ngsdata.DomainFactory.*
 import static junit.framework.TestCase.assertEquals
 import static junit.framework.TestCase.assertTrue
@@ -355,7 +353,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             }
             assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
             assert atomicPhase.get() == 1
-            SchedulerTests.assertFailed(job, message)
+            SchedulerIntegrationTests.assertFailed(job, message)
         }
     }
 
@@ -404,7 +402,7 @@ class AbstractMultiJobTests implements UserAndRoles {
             assert semaphore.tryAcquire(500, TimeUnit.MILLISECONDS)
             assert atomicPhase.get() == 2
 
-            SchedulerTests.assertFailed(job, message)
+            SchedulerIntegrationTests.assertFailed(job, message)
         }
     }
 }
