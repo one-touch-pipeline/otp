@@ -170,7 +170,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      * </ul>
      */
     protected ProcessingPriority getMinimumProcessingPriorityForOccupyingASlot() {
-        if (!schedulerService.active) {
+        if (!schedulerService.isActive()) {
             return ProcessingPriority.SUPREMUM
         }
         final JobExecutionPlan plan = getJobExecutionPlan()
