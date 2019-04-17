@@ -22,11 +22,10 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import grails.testing.mixin.integration.Integration
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
-import spock.lang.Specification
 
+import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.utils.MailHelperService
@@ -34,8 +33,7 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.nio.file.Files
 
-@Integration
-class DataFileConsistencyCheckerIntegrationSpec extends Specification {
+class DataFileConsistencyCheckerIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation {
 
     @Rule
     TemporaryFolder temporaryFolder

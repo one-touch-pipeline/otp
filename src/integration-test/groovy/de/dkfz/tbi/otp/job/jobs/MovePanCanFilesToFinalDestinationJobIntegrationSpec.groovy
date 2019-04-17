@@ -20,11 +20,12 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp
+package de.dkfz.tbi.otp.job.jobs
 
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
@@ -35,7 +36,7 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.time.Duration
 
-class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestCase {
+class MovePanCanFilesToFinalDestinationJobIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation {
 
     static final int READ_COUNTS = 1
 
@@ -63,10 +64,6 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
         }
     }
 
-    /*
-     * This cannot be tested with an integration test, because integration tests are transactional,
-     * so this must be in the workflow test.
-     */
     void "test transaction-rollback when linking files fails"() {
         given:
         FileOperationStatus originalFileOperationStatus
@@ -105,15 +102,5 @@ class MovePanCanFilesToFinalDestinationJobIntegrationTests extends WorkflowTestC
         cleanup:
         TestCase.removeMetaClass(LinkFilesToFinalDestinationService, movePanCanFilesToFinalDestinationJob.linkFilesToFinalDestinationService)
         TestCase.removeMetaClass(MovePanCanFilesToFinalDestinationJob, movePanCanFilesToFinalDestinationJob)
-    }
-
-    @Override
-    List<String> getWorkflowScripts() {
-        return ["scripts/workflows/PanCanWorkflow.groovy"]
-    }
-
-    @Override
-    Duration getTimeout() {
-        assert false
     }
 }

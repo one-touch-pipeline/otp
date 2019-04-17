@@ -22,12 +22,10 @@
 
 package de.dkfz.tbi.otp.tracking
 
-import grails.testing.mixin.integration.Integration
-import groovy.sql.Sql
-import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
@@ -38,13 +36,10 @@ import de.dkfz.tbi.otp.tracking.TrackingService.SamplePairCreation
 import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.*
 
-import javax.sql.DataSource
-
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Integration
-class TrackingServiceIntegrationSpec extends Specification {
+class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation {
 
     TrackingService trackingService
     MailHelperService mailHelperService
@@ -58,10 +53,6 @@ class TrackingServiceIntegrationSpec extends Specification {
     UserProjectRoleService UserProjectRoleService
 
     List<ProcessingOption> referenceGenomeProcessingOptions
-
-    DataSource dataSource
-    File schemaDump
-    Sql sql
 
     final static String EMAIL = HelperUtils.getRandomEmail()
     final static String PREFIX = "the prefix"
@@ -95,12 +86,6 @@ class TrackingServiceIntegrationSpec extends Specification {
             ],
     ]*.asImmutable().asImmutable()
 
-    void setup() {
-        sql = new Sql(dataSource)
-        schemaDump = new File(TestCase.createEmptyTestDirectory(), "test-database-dump.sql")
-        sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
-    }
-
     void setupData() {
         // Overwrite the autowired service with a new instance for each test, so mocks do not have to be cleaned up
         trackingService = new TrackingService(
@@ -118,14 +103,6 @@ class TrackingServiceIntegrationSpec extends Specification {
             DomainFactory.createAllAnalysableSeqTypes()
 
             referenceGenomeProcessingOptions = DomainFactory.createReferenceGenomeAndAnalysisProcessingOptions()
-        }
-    }
-
-    void cleanup() {
-        TestCase.removeMetaClass(TrackingService, trackingService)
-        if (sql) {
-            sql.execute("DROP ALL OBJECTS")
-            sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])
         }
     }
 
