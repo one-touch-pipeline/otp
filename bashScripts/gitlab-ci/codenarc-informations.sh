@@ -20,17 +20,28 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+LEVEL="1 2 3"
+
+echo ''
 echo "Defined thresholds:"
 cat  build.gradle  | grep -e "maxPriority.Violations" | sed -e "s/ *maxPriority/\tmax priority /g" -e "s/Violations = / violations: /g"
 
+echo ''
 echo "Found violations:"
 head build/reports/codenarc/all.txt | grep -e "^Summary: TotalFiles=" | sed -e "s/ P/\n\tfound priority /g" -e "s/=/ violations: /g" |  grep -v Summary
 
+echo ''
 echo "Count of rules with violations:"
-for p in 1 2 3 4
+for p in $LEVEL
 do
     cat build/reports/codenarc/all.txt | grep Violation | grep -v Summary | grep " P=$p " | awk '{print $2}' | sort -u | wc -l | sed -e "s/^/\trule count of priority $p violations: /"
 done
 
-echo "Rules with violations count (priority in brace):"
-cat build/reports/codenarc/all.txt | grep Violation | grep -v Summary | awk '{print $2"("$3")"}' | sed -e "s/Rule=//" -e "s/P=//g" | sort | uniq -c | sort -k1,1hr
+for p in $LEVEL
+do
+    echo ''
+    echo "Rules of priority $p with violations count:"
+    cat build/reports/codenarc/all.txt | grep Violation | grep -v Summary | grep " P=$p " | awk '{print $2}' | sed -e "s/Rule=//" -e "s/P=//g" | sort | uniq -c | sort -k1,1hr
+done
+
+echo ''
