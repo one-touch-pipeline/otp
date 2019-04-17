@@ -176,26 +176,15 @@ abstract class AbstractRoddyAlignmentChecker extends PipelinesChecker<SeqTrack> 
                         mergingWorkPackage,
                         seqTrack
                     from
-                        MergingWorkPackage mergingWorkPackage,
-                        SeqTrack seqTrack
+                        MergingWorkPackage mergingWorkPackage
+                        join mergingWorkPackage.seqTracks seqTrack
                     where
                         seqTrack in (:seqTracks)
-                        and seqTrack.sample = mergingWorkPackage.sample
-                        and seqTrack.seqType = mergingWorkPackage.seqType
                         and mergingWorkPackage.pipeline.type = '${Pipeline.Type.ALIGNMENT}'
                         and mergingWorkPackage.pipeline.name = :pipeLineName
-                        and (
-                            seqTrack.libraryPreparationKit = mergingWorkPackage.libraryPreparationKit
-                            or (
-                                seqTrack.libraryPreparationKit is null
-                                and mergingWorkPackage.libraryPreparationKit is null
-                            )
-                            or seqTrack.seqType in (:seqTypesCanHaveDifferentLibraryPreperationKit)
-                        )
                 """.toString(), [
                 seqTracks                                    : seqTracks,
-                pipeLineName                                 : getPipeLineName(),
-                seqTypesCanHaveDifferentLibraryPreperationKit: SeqTypeService.getSeqTypesIgnoringLibraryPreparationKitForMerging(),
+                pipeLineName                                 : getPipeLineName()
         ])
 
         List seqTracksWithoutMergingWorkpackage = seqTracks - list.collect {

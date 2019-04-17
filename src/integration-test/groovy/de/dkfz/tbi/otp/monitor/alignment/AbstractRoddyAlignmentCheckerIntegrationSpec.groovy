@@ -98,6 +98,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
                 sample               : seqTrack.sample,
                 libraryPreparationKit: seqTrack.libraryPreparationKit,
                 seqPlatformGroup     : seqTrack.seqPlatformGroup,
+                seqTracks            : [seqTrack] as Set,
         ] + properties)
     }
 
@@ -180,54 +181,29 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
         setupData()
         List<MergingWorkPackage> expectedMergingWorkPackage = []
 
-        List<SeqTrack> seqTracksWrongSeqType = createSeqTracks()
+        List<SeqTrack> seqTracksOtherSeqType = createSeqTracks()
 
         List<SeqTrack> seqTracksCorrect = createSeqTracks().each {
             expectedMergingWorkPackage << createMWP(it)
         }
 
-        List<SeqTrack> seqTracksWrongSample = createSeqTracksWithMergingWorkPackages([
-                sample: DomainFactory.createSample(),
-        ])
-
-        List<SeqTrack> seqTracksWrongSeqtype = createSeqTracksWithMergingWorkPackages([
-                seqType: DomainFactory.createSeqType(),
-        ])
-
-        List<SeqTrack> seqTracksCorrectNoLibraryPreparationKit = createSeqTracks([
-                libraryPreparationKit: null,
-        ]).each {
-            expectedMergingWorkPackage << createMWP(it)
-        }
-
-        List<SeqTrack> seqTrackWrongLibraryPreparationKit = createSeqTracks().each {
-            if (!it.seqType.isWgbs()) {
-                createMWP(it, [
-                        libraryPreparationKit: DomainFactory.createLibraryPreparationKit(),
-                ])
-            }
-        }.findAll()
-
         List<SeqTrack> seqTracksWrongPipeline = createSeqTracksWithMergingWorkPackages([
                 pipeline: createPipeLineForCrosschecking(),
         ])
 
+        List<SeqTrack> seqTracksNoMergingWorkPackage = createSeqTracks()
+
         List<SeqTrack> seqTracks = [
-                seqTracksWrongSeqType,
+                seqTracksOtherSeqType,
                 seqTracksCorrect,
-                seqTracksWrongSample,
-                seqTracksWrongSeqtype,
-                seqTracksCorrectNoLibraryPreparationKit,
-                seqTrackWrongLibraryPreparationKit,
                 seqTracksWrongPipeline,
+                seqTracksNoMergingWorkPackage,
         ].flatten()
 
         List<SeqTrack> expectedSeqTracks = [
-                seqTracksWrongSeqType,
-                seqTracksWrongSample,
-                seqTracksWrongSeqtype,
-                seqTrackWrongLibraryPreparationKit,
+                seqTracksOtherSeqType,
                 seqTracksWrongPipeline,
+                seqTracksNoMergingWorkPackage,
         ].flatten()
 
         when:
