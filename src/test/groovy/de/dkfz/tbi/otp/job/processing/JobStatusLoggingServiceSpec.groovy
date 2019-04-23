@@ -22,12 +22,9 @@
 
 package de.dkfz.tbi.otp.job.processing
 
-import grails.buildtestdata.mixin.Build
-import grails.test.mixin.TestFor
-import grails.test.mixin.TestMixin
-import grails.test.mixin.support.GrailsUnitTestMixin
-import org.junit.After
-import org.junit.Test
+import grails.testing.gorm.DataTest
+import grails.testing.services.ServiceUnitTest
+import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
@@ -38,13 +35,18 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.Realm
 
-/**
- * Unit tests for the {@link JobStatusLoggingService}.
- */
-@TestFor(JobStatusLoggingService)
-@TestMixin(GrailsUnitTestMixin)
-@Build([JobDefinition, JobExecutionPlan, Process, ProcessingOption, ProcessingStep, Realm])
-class JobStatusLoggingServiceUnitTests {
+class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTest<JobStatusLoggingService>, DataTest {
+
+    Class[] getDomainClassesToMock() {[
+            JobDefinition,
+            JobExecutionPlan,
+            Process,
+            ProcessingOption,
+            ProcessingStep,
+            Realm,
+    ]}
+
+
     TestConfigService configService
 
     final static String LOGGING_ROOT_PATH = '/fakeRootPath'
@@ -66,76 +68,97 @@ class JobStatusLoggingServiceUnitTests {
 
     Realm realm
 
-    void setUp() {
+    void setup() {
         realm = DomainFactory.createRealm()
         configService = new TestConfigService([(OtpProperty.PATH_CLUSTER_LOGS_OTP): LOGGING_ROOT_PATH])
         service.configService = configService
         EXPECTED_LOGFILE_PATH = "/fakeRootPath/log/status/joblog_${ARBITRARY_PROCESS_ID}_${ARBITRARY_PBS_ID}_${realm.id}.log"
     }
 
-    @After
-    void tearDown() {
+    void cleanup() {
         configService.clean()
     }
 
-    @Test
-    void testLogFileBaseDirWhenProcessingStepIsNull() {
-        shouldFail IllegalArgumentException, { service.logFileBaseDir(null) }
+
+
+    void "test logFileBaseDir, when processing step is null"() {
+        when:
+        service.logFileBaseDir(null)
+
+        then:
+        thrown(IllegalArgumentException)
     }
 
-    @Test
-    void testLogFileLocationWhenRealmIsNull() {
-        shouldFail IllegalArgumentException, { service.constructLogFileLocation(null, new ProcessingStep()) }
+    void "test constructLogFileLocation, when realm is null"() {
+        when:
+        service.constructLogFileLocation(null, new ProcessingStep())
+
+        then:
+        thrown(IllegalArgumentException)
     }
 
-    @Test
-    void testLogFileLocationWhenProcessingStepIsNull() {
-        shouldFail IllegalArgumentException, { service.constructLogFileLocation(new Realm(), null) }
+    void "test constructLogFileLocation, when processing step is null"() {
+        when:
+        service.constructLogFileLocation(new Realm(), null)
+
+        then:
+        thrown(IllegalArgumentException)
     }
 
-    @Test
-    void testLogFileBaseDir() {
+    void "test logFileBaseDir"() {
+        given:
         ProcessingStep processingStep = createFakeProcessingStep()
-        String actual = service.logFileBaseDir(processingStep)
-        assert EXPECTED_BASE_PATH == actual
+
+        expect:
+        EXPECTED_BASE_PATH == service.logFileBaseDir(processingStep)
     }
 
-    @Test
-    void testLogFileLocationWhenClusterJobIdIsNotPassed() {
-        ProcessingStep processingStep = createFakeProcessingStep()
-        service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
-        service.clusterJobManagerFactoryService.configService = new TestConfigService()
-        service.clusterJobManagerFactoryService.configService.processingOptionService = new ProcessingOptionService()
-        def actual = service.constructLogFileLocation(realm, processingStep)
-        assert "${EXPECTED_BASE_PATH}/joblog_${ARBITRARY_PROCESS_ID}_\$(echo \${PBS_JOBID} | cut -d. -f1)_${realm.id}.log" == actual
-    }
-
-    @Test
-    void testLogFileLocationWhenClusterJobIdIsPassed() {
-        ProcessingStep processingStep = createFakeProcessingStep()
-        def actual = service.constructLogFileLocation(realm, processingStep, ARBITRARY_PBS_ID)
-        assert EXPECTED_LOGFILE_PATH == actual
-    }
-
-    @Test
-    void testConstructMessageWhenProcessingStepIsNull() {
-        shouldFail IllegalArgumentException, { service.constructMessage(realm, null) }
-    }
-
-    @Test
-    void testConstructMessageWhenClusterJobIdIsNotPassed() {
+    void "test constructLogFileLocation, when cluster job ID is not passed"() {
+        given:
         ProcessingStep processingStep = createFakeProcessingStep()
         service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
         service.clusterJobManagerFactoryService.configService = new TestConfigService()
         service.clusterJobManagerFactoryService.configService.processingOptionService = new ProcessingOptionService()
-        def actual = service.constructMessage(realm, processingStep)
-        assert "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},\$(echo \${PBS_JOBID} | cut -d. -f1)" == actual
+
+        expect:
+        service.constructLogFileLocation(realm, processingStep) ==
+                "${EXPECTED_BASE_PATH}/joblog_${ARBITRARY_PROCESS_ID}_\$(echo \${PBS_JOBID} | cut -d. -f1)_${realm.id}.log"
     }
 
-    @Test
-    void testConstructMessageWhenClusterJobIdIsPassed() {
+    void "test constructLogFileLocation, when cluster job ID is passed"() {
+        given:
         ProcessingStep processingStep = createFakeProcessingStep()
-        def actual = service.constructMessage(null, processingStep, ARBITRARY_PBS_ID)
-        assert "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},${ARBITRARY_PBS_ID}" == actual
+
+        expect:
+        EXPECTED_LOGFILE_PATH == service.constructLogFileLocation(realm, processingStep, ARBITRARY_PBS_ID)
+    }
+
+    void "test constructMessage, when processing step is null"() {
+        when:
+        service.constructMessage(realm, null)
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
+    void "test constructMessage, when cluster job ID is not passed"() {
+        given:
+        ProcessingStep processingStep = createFakeProcessingStep()
+        service.clusterJobManagerFactoryService = new ClusterJobManagerFactoryService()
+        service.clusterJobManagerFactoryService.configService = new TestConfigService()
+        service.clusterJobManagerFactoryService.configService.processingOptionService = new ProcessingOptionService()
+
+        expect:
+        service.constructMessage(realm, processingStep) ==
+                "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},\$(echo \${PBS_JOBID} | cut -d. -f1)"
+    }
+
+    void "test constructMessage, when cluster job ID is passed"() {
+        given:
+        ProcessingStep processingStep = createFakeProcessingStep()
+
+        expect:
+        service.constructMessage(null, processingStep, ARBITRARY_PBS_ID) ==
+                "${processingStep.jobExecutionPlan.name},DummyJob,${ARBITRARY_ID},${ARBITRARY_PBS_ID}"
     }
 }
