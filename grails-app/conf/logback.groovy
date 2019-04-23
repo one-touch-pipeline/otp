@@ -20,12 +20,17 @@
  * SOFTWARE.
  */
 
-import ch.qos.logback.classic.joran.*
-import de.dkfz.tbi.otp.config.*
-import grails.util.*
-import org.springframework.boot.logging.logback.*
+import ch.qos.logback.classic.joran.JoranConfigurator
+import grails.util.BuildSettings
+import grails.util.Environment
+import org.springframework.boot.logging.logback.ColorConverter
+import org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter
 
-import java.nio.charset.*
+import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.config.OtpProperty
+
+import java.nio.charset.Charset
+import java.nio.charset.StandardCharsets
 
 conversionRule 'clr', ColorConverter
 conversionRule 'wex', WhitespaceThrowableProxyConverter
@@ -37,11 +42,12 @@ appender('STDOUT', ConsoleAppender) {
         pattern =
                 '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} ' + // Date
                         '%clr(%5p) ' + // Log level
-                        '%clr(---){faint} %clr([%15.15t]){faint} ' + // Thread
+                        '%clr(---){faint} %clr([%25.25t]){faint} ' + // Thread
                         '%clr(%-40.40logger{39}){cyan} %clr(:){faint} ' + // Logger
                         '%m%n%wex' // Message
     }
 }
+
 
 def targetDir = BuildSettings.TARGET_DIR
 if (Environment.isDevelopmentMode() && targetDir != null) {
@@ -54,6 +60,24 @@ if (Environment.isDevelopmentMode() && targetDir != null) {
     }
     logger("StackTrace", ERROR, ['FULL_STACKTRACE'], false)
 }
+
+appender("OTP", RollingFileAppender) {
+    append = true
+    encoder(PatternLayoutEncoder) {
+        charset = Charset.forName('UTF-8')
+        pattern =
+                '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} ' + // Date
+                        '%clr(%5p) ' + // Log level
+                        '%clr(---){faint} %clr([%25.25t]){faint} ' + // Thread
+                        '%clr(%-40.40logger{39}){cyan} %clr(:){faint} ' + // Logger
+                        '%m%n%wex' // Message
+    }
+    rollingPolicy(TimeBasedRollingPolicy) {
+        fileNamePattern = "logs/OTP-%d{yyyy-MM-dd-HH-mm}.log"
+    }
+}
+
+String appenderToUse = Environment.current.name == "PRODUCTION" ? 'OTP' : 'STDOUT'
 
 Properties otpProperties = ConfigService.parsePropertiesFile()
 String jobLogDir = otpProperties.getProperty(OtpProperty.PATH_JOB_LOGS.key) ?: OtpProperty.PATH_JOB_LOGS.defaultValue
@@ -120,14 +144,12 @@ String jobLogConfig = """\
 configurator.doConfigure(new ByteArrayInputStream(jobLogConfig.getBytes(StandardCharsets.UTF_8)))
 
 
-logger("de.dkfz.tbi.otp", DEBUG, ['STDOUT'], false)
-logger("seedme", DEBUG, ['STDOUT'], false)
-logger("liquibase", INFO, ['STDOUT'], false)
-logger("grails.plugin.databasemigration", INFO, ['STDOUT'], false)
-logger("org.hibernate.SQL", ERROR, ['STDOUT'], false)
+logger("de.dkfz.tbi.otp", DEBUG, [appenderToUse], false)
+logger("seedme", DEBUG, [appenderToUse], false)
+logger("liquibase", INFO, [appenderToUse], false)
+logger("grails.plugin.databasemigration", INFO, [appenderToUse], false)
+logger("org.hibernate.SQL", ERROR, [appenderToUse], false)
 
+logger("de.dkfz.roddy.execution.jobs.cluster", DEBUG, [appenderToUse], false)
 
-logger("de.dkfz.roddy.execution.jobs.cluster", DEBUG, ['STDOUT'], false)
-
-
-root(ERROR, ['STDOUT'])
+root(ERROR, [appenderToUse])
