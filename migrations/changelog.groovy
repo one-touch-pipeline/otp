@@ -170,6 +170,10 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2019/replace-unique-index-with-unique-constraint.sql')
     }
 
+    changeSet(author: "wieset", id: "OTP-2538-SQL") {
+        sqlFile(path: 'changelogs/2019/OTP-2538.sql')
+    }
+
     include file: 'changelogs/2019/add-unique-constraints-required-by-migration-plugin.groovy'
 
     include file: 'changelogs/2019/make-anitbody-configureable-in-seqtype.groovy'
