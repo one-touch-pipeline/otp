@@ -98,12 +98,6 @@ class SamplePair implements TimeStamped, Entity {
     }
 
     static constraints = {
-        mergingWorkPackage1 validator: { AbstractMergingWorkPackage val, SamplePair obj, Errors errors ->
-            final SampleType.Category category = val.sampleType.getCategory(obj.project)
-            if (category != SampleType.Category.DISEASE) {
-                errors.reject(null, "Category of mergingWorkPackage1.sampleType is ${category}. Expected ${SampleType.Category.DISEASE}.")
-            }
-        }
         mergingWorkPackage2 unique: 'mergingWorkPackage1', validator: { AbstractMergingWorkPackage val, SamplePair obj, Errors errors ->
             if (val == obj.mergingWorkPackage1) {
                 errors.reject(null, "mergingWorkPackage1 and mergingWorkPackage2 are equal.")
