@@ -81,8 +81,9 @@ class ProcessingStep implements Serializable, Entity {
 
 
     static mapping = {
-        next index: 'next_idx'
-        process index: 'process_idx'
+        next index: 'processing_step_next_idx'
+        previous index: 'processing_step_previous_idx'
+        process index: 'processing_step_process_idx'
     }
 
 

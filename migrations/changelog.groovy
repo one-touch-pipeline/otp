@@ -177,4 +177,9 @@ databaseChangeLog = {
     include file: 'changelogs/2019/create-missing-indexes-in-seqtype.groovy'
 
     include file: 'changelogs/2019/apply-foreign-keys-for-migration-plugin.groovy'
+
+    changeSet(author: "borufka", id: "add-missing-indexes") {
+        sqlFile(path: 'changelogs/2019/add-missing-indexes.sql')
+    }
+
 }

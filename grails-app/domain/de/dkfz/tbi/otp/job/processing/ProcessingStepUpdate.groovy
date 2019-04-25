@@ -53,9 +53,10 @@ class ProcessingStepUpdate implements Serializable, Entity {
     ProcessingError error
 
     static mapping = {
-        date index: 'date_idx'
-        state index: 'state_idx'
-        processingStep index: 'processing_step_idx'
+        date index: 'processing_step_update_date_idx'
+        state index: 'processing_step_update_state_idx'
+        processingStep index: 'processing_step_update_processing_step_idx'
+        error 'processing_step_update_error_idx'
     }
 
     static belongsTo = [
