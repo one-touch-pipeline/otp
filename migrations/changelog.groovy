@@ -182,4 +182,6 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2019/add-missing-indexes.sql')
     }
 
+    include file: 'changelogs/2019/remove-seqplatform-unique-constraint.groovy'
+
 }
