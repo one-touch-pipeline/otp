@@ -86,10 +86,7 @@ sourceSets {
     }
     main {
         resources {
-            srcDirs {
-                "migrations"
-                "src/seed"
-            }
+            srcDirs 'migrations', 'src/seed'
         }
     }
 }
