@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.utils.*
 
 
 String referenceGenomeName = '' //Name of the new Reference Genome
+String statSizeFileName = '' //Name of the stat size file name (Only for PANCAN, depends on referenceGenomeName)
 String pid = ''
 String sampleTypeName = ''
 SeqType seqType
@@ -60,6 +61,7 @@ MergingWorkPackage mergingWorkPackage = CollectionUtils.exactlyOneElement(Mergin
 
 SeqTrack.withTransaction {
     mergingWorkPackage.referenceGenome = referenceGenome
+    mergingWorkPackage.statSizeFileName = statSizeFileName
     mergingWorkPackage.save(flush: true)
 
     assert false
