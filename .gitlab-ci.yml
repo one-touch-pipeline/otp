@@ -38,7 +38,6 @@ variables:
   ARTIFACT_DOWNLOAD_ATTEMPTS: "3"
   GET_SOURCES_ATTEMPTS: "3"
   RESTORE_CACHE_ATTEMPTS: "3"
-  GRADLE_USER_HOME: "/home/grails/gradle"
 
 stages:
   - status start
@@ -105,7 +104,7 @@ compile:
   stage: build
   dependencies: []
   script:
-    - ./gradlew build
+    - ./gradlew classes
 
 # ------------------------------------------------------
 # job tests

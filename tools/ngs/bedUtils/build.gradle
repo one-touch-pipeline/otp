@@ -22,8 +22,10 @@
 
 apply plugin: 'groovy'
 
-repositories {
-    mavenCentral()
+buildscript {
+    repositories {
+        mavenLocal()
+    }
 }
 
 dependencies {

@@ -1,2 +1,8 @@
-include ':bedutils'
-project(':bedutils').projectDir = new File('tools/ngs/bedUtils')
+pluginManagement {
+    repositories {
+        String repoUrl = System.getenv("MAVEN_REPOSITORY_URL")
+        assert repoUrl : "Set the environment variable MAVEN_REPOSITORY_URL"
+        maven { url repoUrl }
+        gradlePluginPortal()
+    }
+}

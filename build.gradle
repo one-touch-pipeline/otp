@@ -24,8 +24,11 @@ import grails.util.Environment
 
 buildscript {
     repositories {
-        mavenLocal()
-        maven { url "https://repo.grails.org/grails/core" }
+        //mavenLocal()
+        String repoUrl = System.getenv("MAVEN_REPOSITORY_URL")
+        assert repoUrl : "Set the environment variable MAVEN_REPOSITORY_URL"
+        maven { url repoUrl }
+        //maven { url "https://repo.grails.org/grails/core" }
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
@@ -51,11 +54,11 @@ apply plugin:"org.grails.grails-gsp"
 apply plugin:"codenarc"
 
 repositories {
-    mavenLocal()
+    //mavenLocal()
     String repoUrl = System.getenv("MAVEN_REPOSITORY_URL")
     assert repoUrl : "Set the environment variable MAVEN_REPOSITORY_URL"
     maven { url repoUrl }
-    maven { url "https://repo.grails.org/grails/core" }
+    //maven { url "https://repo.grails.org/grails/core" }
 }
 
 sourceSets {
@@ -108,7 +111,8 @@ dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.15'
     codenarc 'org.codehaus.groovy:groovy-all:2.4.15' // both groovy versions must be the same; required bc we add runtimeClasspath to codenarcClasspath
 
-    compile(project(':bedutils'))
+    compile 'bedUtils:bedUtils:0.7'
+    compile 'com.github.samtools:htsjdk:2.12.0'
 
     // JDBC
     runtime "org.postgresql:postgresql:42.1.4"

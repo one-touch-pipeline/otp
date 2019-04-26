@@ -68,6 +68,7 @@ class LicenseCheck {
             "logs",
             "out",
             "target",
+            "gradle",
     ].collect { Paths.get(it) }
 
     static List<Path> ignoredFiles = [
