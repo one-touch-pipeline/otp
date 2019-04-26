@@ -145,7 +145,7 @@ $.otp.sequence = {
                                 $("#withdrawn_description").show();
                                 var withdrawnRow = [];
                                 rowData.forEach(function(rowEntry) {
-                                    rowEntry = rowEntry ? "<span class='withdrawn'>" + rowEntry + " </span>" : ""
+                                    rowEntry = rowEntry != null ? "<span class='withdrawn'>" + rowEntry + "</span>" : ""
                                     withdrawnRow.push(rowEntry)
                                 });
                                 rowData = withdrawnRow;
@@ -175,7 +175,8 @@ $.otp.sequence = {
                     contamination.addClass("warning");
                 }
                 var fileExists = $("td:eq(14)", nRow);
-                if (fileExists.text() === "true") {
+                var fileExistsWithdrawn = $("td:eq(14) span", nRow);
+                if (fileExists.text() === "true" || fileExistsWithdrawn.text() === "true") {
                     fileExists.addClass("VALID");
                 } else {
                     fileExists.addClass("false");
