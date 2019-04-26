@@ -101,7 +101,8 @@ du -hs "${DUMP_TO_LOAD}"
 
 # Work around pg_restore failing due to an option set automatically by Postgres clients >= 9.3
 echo "Loading dump..."
-time pg_restore --username=postgres --host=localhost --dbname=otp --jobs=4 "${DUMP_TO_LOAD}" || true
+time pg_restore --username=postgres --host=localhost --dbname=otp --jobs=4 --no-privileges "${DUMP_TO_LOAD}" || true
+
 echo "Dump loaded"
 
 PSQL="psql --username=otp --host=localhost --dbname=otp"
