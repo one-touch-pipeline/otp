@@ -73,7 +73,7 @@ appender("OTP", RollingFileAppender) {
                         '%m%n%wex' // Message
     }
     rollingPolicy(TimeBasedRollingPolicy) {
-        fileNamePattern = "logs/OTP-%d{yyyy-MM-dd-HH-mm}.log"
+        fileNamePattern = "logs/OTP-%d{yyyy-MM-dd}.log"
     }
 }
 
