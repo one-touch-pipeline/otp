@@ -19,7 +19,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-image: otp-tests:3.x.x
+image: otp-tests:3.3.9
 
 # notes:
 ## recursive expansion of variables does not work
