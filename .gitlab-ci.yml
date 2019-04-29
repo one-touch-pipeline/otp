@@ -197,7 +197,6 @@ war:
     - tags
   stage: test
   dependencies: []
-  image: otp-test-migration
   services:
     - postgres:latest
   variables:
@@ -214,8 +213,7 @@ war:
     - echo 'otp.database.username=otp' >> /home/grails/.otp.properties
     - echo 'otp.database.password=otp' >> /home/grails/.otp.properties
   script:
-    - grails compile --non-interactive
-    - grails dbm-update --non-interactive
+    - ./gradlew dbmUpdate
     - bash ./bashScripts/grails-migration-plugin/create-dbm-gorm-diff-without-false-changes.sh testing
     - bash ./bashScripts/grails-migration-plugin/check-for-changelog-file.sh testing
   artifacts:

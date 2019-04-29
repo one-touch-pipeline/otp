@@ -22,12 +22,12 @@
 
 package de.dkfz.tbi.otp
 
-
 import grails.converters.JSON
+import grails.core.GrailsApplication
 import grails.plugin.springsecurity.SecurityFilterPosition
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.util.Environment
-import grails.core.GrailsApplication
+import seedme.SeedService
 
 import de.dkfz.odcf.audit.impl.DicomAuditLogger
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
@@ -41,6 +41,7 @@ class BootStrap {
     GrailsApplication grailsApplication
     PropertiesValidationService propertiesValidationService
     SchedulerService schedulerService
+    SeedService seedService
 
     def init = { servletContext ->
         // load the shutdown service
@@ -62,6 +63,7 @@ class BootStrap {
         }
 
         if ([Environment.PRODUCTION, Environment.DEVELOPMENT].contains(Environment.getCurrent())) {
+            seedService.installSeedData()
             UserService.createFirstAdminUserIfNoUserExists()
         }
 

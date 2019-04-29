@@ -192,12 +192,7 @@ environments {
 
     //seed
     grails.plugin.seed.skipPlugins=true
-    production {
-        grails.plugin.seed.autoSeed=true
-    }
-    development {
-        grails.plugin.seed.autoSeed=true
-    }
+    grails.plugin.seed.autoSeed=false
 }
 
 grails.plugin.console.enabled = true
