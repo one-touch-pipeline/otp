@@ -95,6 +95,7 @@ task workflowTest(type: Test) {
     testClassesDirs = sourceSets.workflowTest.output.classesDirs
     classpath = sourceSets.workflowTest.runtimeClasspath
     reports.html.enabled = false
+    testLogging.showStandardStreams = true
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     shouldRunAfter "integrationTest"
     systemProperty "grails.env", "WORKFLOW_TEST" // change to TEST??
