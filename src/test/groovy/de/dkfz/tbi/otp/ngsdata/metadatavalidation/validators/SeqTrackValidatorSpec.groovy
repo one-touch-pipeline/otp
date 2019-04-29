@@ -42,22 +42,25 @@ import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationConte
 
 class SeqTrackValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Individual,
-            Project,
-            ProjectCategory,
-            Realm,
-            Run,
-            Sample,
-            SampleType,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Individual,
+                Project,
+                ProjectCategory,
+                Realm,
+                Run,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+        ]
+    }
 
     SeqTrackValidator validator = new SeqTrackValidator()
 

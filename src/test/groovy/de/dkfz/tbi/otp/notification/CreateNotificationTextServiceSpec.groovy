@@ -47,50 +47,53 @@ import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 @SuppressWarnings(["ClassSize", "MethodCount"])
 class CreateNotificationTextServiceSpec extends Specification implements AlignmentPipelineFactory, DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            AntibodyTarget,
-            CellRangerConfig,
-            CellRangerMergingWorkPackage,
-            ChipSeqSeqTrack,
-            DataFile,
-            ExomeSeqTrack,
-            FileType,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            MergingWorkPackage,
-            MetaDataEntry,
-            MetaDataKey,
-            OtrsTicket,
-            Pipeline,
-            ProcessingOption,
-            Project,
-            ProjectCategory,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeIndex,
-            ReferenceGenomeProjectSeqType,
-            RnaRoddyBamFile,
-            RoddyBamFile,
-            RoddyWorkflowConfig,
-            Run,
-            RunSegment,
-            Sample,
-            SamplePair,
-            SampleType,
-            SampleTypePerProject,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SingleCellBamFile,
-            SoftwareTool,
-            SoftwareToolIdentifier,
-            ToolName,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                AntibodyTarget,
+                CellRangerConfig,
+                CellRangerMergingWorkPackage,
+                ChipSeqSeqTrack,
+                DataFile,
+                ExomeSeqTrack,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingWorkPackage,
+                MetaDataEntry,
+                MetaDataKey,
+                OtrsTicket,
+                Pipeline,
+                ProcessingOption,
+                Project,
+                ProjectCategory,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeIndex,
+                ReferenceGenomeProjectSeqType,
+                RnaRoddyBamFile,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Run,
+                RunSegment,
+                Sample,
+                SamplePair,
+                SampleType,
+                SampleTypePerProject,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SingleCellBamFile,
+                SoftwareTool,
+                SoftwareToolIdentifier,
+                ToolName,
+        ]
+    }
 
     TestConfigService configService
 
@@ -1186,6 +1189,7 @@ samtoolsProgram: ${data.alignmentInfo.samToolsCommand}"""
     }
 
     @SuppressWarnings("GStringExpressionWithinString")
+    @Override
     PluginAwareResourceBundleMessageSource getMessageSource() {
         return Mock(PluginAwareResourceBundleMessageSource) {
             _ * getMessageInternal("notification.template.installation.base", [], _) >> '''

@@ -38,34 +38,37 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 
 class TrackingServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            DataFile,
-            FileType,
-            IlseSubmission,
-            Individual,
-            OtrsTicket,
-            ProjectRole,
-            MergingWorkPackage,
-            ProcessingOption,
-            Project,
-            ProjectCategory,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeProjectSeqType,
-            Run,
-            RunSegment,
-            Sample,
-            SampleType,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-            User,
-            UserProjectRole,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                DataFile,
+                FileType,
+                IlseSubmission,
+                Individual,
+                OtrsTicket,
+                ProjectRole,
+                MergingWorkPackage,
+                ProcessingOption,
+                Project,
+                ProjectCategory,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                Run,
+                RunSegment,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+                User,
+                UserProjectRole,
+        ]
+    }
 
     private final static String TICKET_NUMBER = "2000010112345678"
     private final static String PREFIX = "the prefix"

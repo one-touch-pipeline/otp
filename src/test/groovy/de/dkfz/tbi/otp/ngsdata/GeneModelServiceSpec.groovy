@@ -32,11 +32,14 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 class GeneModelServiceSpec extends Specification implements DataTest, ServiceUnitTest<GeneModelService> {
 
-    Class[] getDomainClassesToMock() {[
-            GeneModel,
-            ProcessingOption,
-            ReferenceGenome,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                GeneModel,
+                ProcessingOption,
+                ReferenceGenome,
+        ]
+    }
 
     GeneModel geneModel
 

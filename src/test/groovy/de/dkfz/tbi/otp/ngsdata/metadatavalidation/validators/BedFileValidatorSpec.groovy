@@ -43,21 +43,24 @@ import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.OTP_ALIGNM
 
 class BedFileValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            BedFile,
-            Individual,
-            LibraryPreparationKit,
-            Project,
-            ProjectCategory,
-            ProcessingOption,
-            Sample,
-            SampleIdentifier,
-            SampleType,
-            SeqType,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeProjectSeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                BedFile,
+                Individual,
+                LibraryPreparationKit,
+                Project,
+                ProjectCategory,
+                ProcessingOption,
+                Sample,
+                SampleIdentifier,
+                SampleType,
+                SeqType,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+        ]
+    }
 
     static final List<String> HEADER = [
             MetaDataColumn.SEQUENCING_TYPE,

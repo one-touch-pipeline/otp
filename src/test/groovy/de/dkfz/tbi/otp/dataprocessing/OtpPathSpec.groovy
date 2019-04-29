@@ -56,7 +56,7 @@ class OtpPathSpec extends Specification implements DataTest, DomainFactoryCore {
 
     void "getAbsoluteDataProcessingPath, when not absolute, then throw exception"() {
         given:
-        ConfigService configService = new TestConfigService([
+        new TestConfigService([
                 (OtpProperty.PATH_PROCESSING_ROOT): 'processing_root'
         ])
         OtpPath otpPath = new OtpPath(new Project(), 'child')
@@ -71,7 +71,7 @@ class OtpPathSpec extends Specification implements DataTest, DomainFactoryCore {
 
     void "getAbsoluteDataProcessingPath, when absolute, then return absolute file"() {
         given:
-        ConfigService configService = new TestConfigService([
+        new TestConfigService([
                 (OtpProperty.PATH_PROCESSING_ROOT): '/processing_root'
         ])
         OtpPath otpPath = new OtpPath(new Project(), 'child')
@@ -85,7 +85,7 @@ class OtpPathSpec extends Specification implements DataTest, DomainFactoryCore {
 
     void "absoluteDataManagementPath, when not absolute, then throw exception"() {
         given:
-        ConfigService configService = new TestConfigService([
+        new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT): 'root_path'
         ])
         OtpPath otpPath = new OtpPath(new Project(), 'child')
@@ -100,7 +100,7 @@ class OtpPathSpec extends Specification implements DataTest, DomainFactoryCore {
 
     void "absoluteDataManagementPath, when absolute, then return absolute file"() {
         given:
-        ConfigService configService = new TestConfigService([
+        new TestConfigService([
                 (OtpProperty.PATH_PROJECT_ROOT): '/root_path'
         ])
         OtpPath otpPath = new OtpPath(new Project(), 'child')

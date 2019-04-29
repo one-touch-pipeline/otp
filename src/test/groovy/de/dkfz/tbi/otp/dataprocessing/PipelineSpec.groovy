@@ -29,13 +29,15 @@ import spock.lang.Unroll
 
 class PipelineSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Pipeline
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Pipeline
+        ]
+    }
 
     @Unroll
     void "test name type constraint"() {
-
         given:
         Pipeline pipeline = new Pipeline(
                 name: name,

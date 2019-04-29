@@ -30,26 +30,29 @@ import de.dkfz.tbi.TestCase
 
 class RunServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            DataFile,
-            FileType,
-            Individual,
-            MetaDataFile,
-            Project,
-            ProjectCategory,
-            Realm,
-            Run,
-            RunSegment,
-            Sample,
-            SampleType,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                DataFile,
+                FileType,
+                Individual,
+                MetaDataFile,
+                Project,
+                ProjectCategory,
+                Realm,
+                Run,
+                RunSegment,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+        ]
+    }
 
     RunService runService = new RunService()
 

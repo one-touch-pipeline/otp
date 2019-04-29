@@ -45,25 +45,28 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 class ImportExternallyMergedBamJobSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ExternalMergingWorkPackage,
-            ExternallyProcessedMergedBamFile,
-            ImportProcess,
-            Individual,
-            JobDefinition,
-            JobExecutionPlan,
-            Pipeline,
-            Process,
-            ProcessingOption,
-            ProcessingStep,
-            ProcessParameter,
-            Project,
-            Realm,
-            ReferenceGenome,
-            Sample,
-            SampleType,
-            SeqType
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ExternalMergingWorkPackage,
+                ExternallyProcessedMergedBamFile,
+                ImportProcess,
+                Individual,
+                JobDefinition,
+                JobExecutionPlan,
+                Pipeline,
+                Process,
+                ProcessingOption,
+                ProcessingStep,
+                ProcessParameter,
+                Project,
+                Realm,
+                ReferenceGenome,
+                Sample,
+                SampleType,
+                SeqType,
+        ]
+    }
 
     final long PROCESSING_STEP_ID = 1234567
 

@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  * Represents a merged bam file stored on the file system
  * which was processed externally (not in OTP)
  */
+@SuppressWarnings('JavaIoPackageAccess')
 class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
     /**
@@ -174,6 +175,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
         maximumReadLength nullable: true, min: 0
     }
 
+    @Override
     List<AbstractBamFile.BamType> getAllowedTypes() {
         return AbstractBamFile.BamType.values() + [null]
     }

@@ -34,23 +34,26 @@ import de.dkfz.tbi.otp.security.*
 
 class MetaDataFieldsControllerSpec extends Specification implements ControllerUnitTest<MetaDataFieldsController>, DataTest, UserAndRoles {
 
-    Class[] getDomainClassesToMock() {[
-            AclSid,
-            AntibodyTarget,
-            LibraryPreparationKit,
-            Project,
-            ProjectRole,
-            Realm,
-            Role,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformModelLabel,
-            SeqType,
-            SequencingKitLabel,
-            User,
-            UserProjectRole,
-            UserRole,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AclSid,
+                AntibodyTarget,
+                LibraryPreparationKit,
+                Project,
+                ProjectRole,
+                Realm,
+                Role,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformModelLabel,
+                SeqType,
+                SequencingKitLabel,
+                User,
+                UserProjectRole,
+                UserRole,
+        ]
+    }
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -133,7 +136,8 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         given:
         setupData()
 
-        LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit(name: 'LibraryPreparationKit', shortDisplayName: 'LPK', importAlias: ['LibraryPreparationKitImportAlias'])
+        LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit(
+                name: 'LibraryPreparationKit', shortDisplayName: 'LPK', importAlias: ['LibraryPreparationKitImportAlias'])
 
         when:
         controller.params.id = libraryPreparationKit.id
@@ -454,7 +458,8 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         given:
         setupData()
 
-        DomainFactory.createSeqType(name: 'SEQTYPE', dirName: 'seqtype', displayName: 'SEQ TYPE', importAlias: ['importAlias'], libraryLayout: LibraryLayout.SINGLE)
+        DomainFactory.createSeqType(
+                name: 'SEQTYPE', dirName: 'seqtype', displayName: 'SEQ TYPE', importAlias: ['importAlias'], libraryLayout: LibraryLayout.SINGLE)
 
         when:
         controller.params.type = type
@@ -473,7 +478,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         !controller.response.json.success
 
         where:
-        type       | dirName    | displayName | single | paired | mate_pair| singleCell
+        type       | dirName    | displayName | single | paired | mate_pair | singleCell
         ''         | ''         | ''          | false  | false  | false     | false
         ''         | ''         | ''          | true   | false  | false     | false
         'SEQTYPE2' | ''         | ''          | true   | false  | false     | false
@@ -509,9 +514,9 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         then:
         controller.response.status == 200
         controller.response.json.success
-        !single || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.SINGLE,singleCell)
-        !paired || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.PAIRED,singleCell)
-        !mate_pair || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.MATE_PAIR,singleCell)
+        !single || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.SINGLE, singleCell)
+        !paired || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.PAIRED, singleCell)
+        !mate_pair || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.MATE_PAIR, singleCell)
 
         where:
         name       | single | paired | mate_pair | singleCell

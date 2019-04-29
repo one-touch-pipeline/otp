@@ -34,11 +34,14 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<CrashRecoveryService>, DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Parameter,
-            ProcessingError,
-            ProcessingStepUpdate,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Parameter,
+                ProcessingError,
+                ProcessingStepUpdate,
+        ]
+    }
 
 
     static final int COUNT_OF_ELEMENTS = 3
@@ -112,7 +115,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
                                     parameterType.id,
                                     "value: ${processingStep.id} ${parameterType.name}",
                             ]
-                        }
+                        },
                 ]
             }
         }
@@ -246,7 +249,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         ])
         step1.next = step2
         step2.previous = step1
-        assert step1.save()
+        assert step1.save(flush: true)
         List ids = [step1.id]
 
         when:
@@ -454,7 +457,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         ])
         step1.next = step2
         step2.previous = step1
-        assert step1.save()
+        assert step1.save(flush: true)
         List ids = [step1.id]
 
         when:
@@ -632,7 +635,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         ])
         step1.next = step2
         step2.previous = step1
-        assert step1.save()
+        assert step1.save(flush: true)
         List ids = [step1.id]
 
         when:
@@ -740,7 +743,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
         ])
         step1.next = step2
         step2.previous = step1
-        assert step1.save()
+        assert step1.save(flush: true)
         List ids = [step1.id]
 
         when:

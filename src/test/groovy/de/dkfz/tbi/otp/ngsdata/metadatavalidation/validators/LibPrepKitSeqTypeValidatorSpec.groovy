@@ -37,10 +37,13 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            LibraryPreparationKit,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                LibraryPreparationKit,
+                SeqType,
+        ]
+    }
 
     static final String VALID_METADATA =
             "${MetaDataColumn.LIB_PREP_KIT}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\n" +
@@ -51,7 +54,7 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
                     "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\t\n" +
                     "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}\t\n" +
                     "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t\n" +
-                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t\n"+
+                    "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName}\t\n" +
                     "lib_prep_kit\t${LibraryLayout.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\t\n" +
                     "${InformationReliability.UNKNOWN_VERIFIED.rawValue}\t${LibraryLayout.PAIRED}\t${SeqTypeNames.CHIP_SEQ.seqTypeName}\t\n"
 
@@ -62,7 +65,6 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
 
 
     void 'validate, when sequencing type is exome, RNA, WGBS, WGBSTag or ChipSeq and LibPrepKit is valid'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA
@@ -85,7 +87,6 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when sequencing type is exome, RNA, WGBS, WGBSTag or ChipSeq and LibPrepKit is empty, adds error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA +
@@ -131,7 +132,6 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when sequencing type is not exome'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA +
@@ -156,7 +156,6 @@ class LibPrepKitSeqTypeValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when sequencing type is not exome and no libPrepKit column exist, succeeds without problems'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.SEQUENCING_TYPE}
@@ -173,7 +172,6 @@ CHIPSEQ
     }
 
     void 'validate, when sequencing type is exome, RNA, WGS, WGBS or ChipSeq and no libPrepKit column exist, adds one error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}
@@ -218,7 +216,6 @@ ${SeqTypeNames.CHIP_SEQ.seqTypeName}\t${LibraryLayout.PAIRED}
     }
 
     void 'validate, when sequencing type column missing, succeeds without problems'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 

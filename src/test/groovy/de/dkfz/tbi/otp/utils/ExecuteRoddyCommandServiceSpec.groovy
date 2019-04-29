@@ -32,9 +32,12 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class ExecuteRoddyCommandServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ProcessingOption,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ProcessingOption,
+        ]
+    }
 
     void "check activateModulesForRoddyCommand with modules, should return activation commands"() {
         given:

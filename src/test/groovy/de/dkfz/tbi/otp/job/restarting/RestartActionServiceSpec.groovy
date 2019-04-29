@@ -38,12 +38,15 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 
 class RestartActionServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Process,
-            ProcessingStep,
-            ProcessingStepUpdate,
-            JobExecutionPlan,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Process,
+                ProcessingStep,
+                ProcessingStepUpdate,
+                JobExecutionPlan,
+        ]
+    }
 
     void "handleAction, when action is null, does nothing"() {
         given:

@@ -21,13 +21,10 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.ngsdata.AntibodyTarget
-import de.dkfz.tbi.otp.ngsdata.AntibodyTargetService
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.util.spreadsheet.validation.Level
@@ -39,9 +36,12 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class AntibodyTargetValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AntibodyTarget,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AntibodyTarget,
+        ]
+    }
 
     void 'validate, when no ANTIBODY_TARGET column exists in metadata file, succeeds'() {
         given:

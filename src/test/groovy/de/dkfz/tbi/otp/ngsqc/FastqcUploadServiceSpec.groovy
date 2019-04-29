@@ -26,29 +26,24 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.Individual
-import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.RunSegment
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SampleType
+import de.dkfz.tbi.otp.ngsdata.*
 
 class FastqcUploadServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            DataFile,
-            FastqcProcessedFile,
-            FileType,
-            Individual,
-            Project,
-            Realm,
-            RunSegment,
-            Sample,
-            SampleType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                DataFile,
+                FastqcProcessedFile,
+                FileType,
+                Individual,
+                Project,
+                Realm,
+                RunSegment,
+                Sample,
+                SampleType,
+        ]
+    }
 
     FastqcUploadService fastqcUploadService
 
@@ -59,7 +54,7 @@ class FastqcUploadServiceSpec extends Specification implements DataTest {
         fastqcProcessedFile = DomainFactory.createFastqcProcessedFile()
     }
 
-    private spyGetFastQCFileContent(String returnValue) {
+    private void spyGetFastQCFileContent(String returnValue) {
         fastqcUploadService = Spy(FastqcUploadService) {
             getFastQCFileContent(_) >> { return returnValue }
         }
@@ -261,7 +256,7 @@ Sequences flagged as poor quality\t0\t
         String parsedSequenceLength = "101"
 
         fastqcUploadService = Spy(FastqcUploadService) {
-            parseFastQCFile(_, _) >> { [nReads: parsedNReads as String, sequenceLength: parsedSequenceLength] }
+            parseFastQCFile(_, _) >> { [nReads : parsedNReads as String, sequenceLength : parsedSequenceLength] }
         }
 
         fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: DomainFactory.createDataFile(nReads: parsedNReads))

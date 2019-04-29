@@ -35,7 +35,8 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
 import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -46,13 +47,16 @@ class ClusterJobMonitorSpec extends Specification implements DataTest {
 
     ClusterJobMonitor clusterJobMonitor
 
-    Class[] getDomainClassesToMock() {[
-            ClusterJob,
-            Realm,
-            ProcessingStep,
-            ProcessingStepUpdate,
-            JobExecutionPlan,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ClusterJob,
+                Realm,
+                ProcessingStep,
+                ProcessingStepUpdate,
+                JobExecutionPlan,
+        ]
+    }
 
     void setupData() {
         SchedulerService schedulerService = new SchedulerService(

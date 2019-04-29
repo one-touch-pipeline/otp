@@ -29,11 +29,14 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class JobDecisionSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            DecidingJobDefinition,
-            JobDecision,
-            JobExecutionPlan,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                DecidingJobDefinition,
+                JobDecision,
+                JobExecutionPlan,
+        ]
+    }
 
     void "test validate, when jobDefinition, name and description are null, should fail"() {
         given:

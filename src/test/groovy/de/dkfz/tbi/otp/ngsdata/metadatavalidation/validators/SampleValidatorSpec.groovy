@@ -43,16 +43,19 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class SampleValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Individual,
-            ProcessingOption,
-            Project,
-            ProjectCategory,
-            Realm,
-            Sample,
-            SampleIdentifier,
-            SampleType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Individual,
+                ProcessingOption,
+                Project,
+                ProjectCategory,
+                Realm,
+                Sample,
+                SampleIdentifier,
+                SampleType,
+        ]
+    }
 
     static final Pattern PATTERN = Pattern.compile(/^P-([^ ]+)_I-([^ ]+)_S-([^ ]+)$/)
     static final String SAMPLE_Z = "P-X_I-Y_S-Z"
@@ -61,7 +64,6 @@ class SampleValidatorSpec extends Specification implements DataTest {
     SampleValidator validator = withSampleIdentifierService(new SampleValidator())
 
     void 'validate, when identifier is not parseable but in DB, succeeds'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${PROJECT}\nABC")
@@ -75,7 +77,6 @@ class SampleValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when identifiers are neither parseable nor in DB, adds errors and info'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\nABC\nAAA")
@@ -95,7 +96,6 @@ class SampleValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when identifier is not in DB but parseable and project is not in DB, adds error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
@@ -110,7 +110,6 @@ class SampleValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when identifier is not in DB but parseable and project is not in DB but individual is, adds errors'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
@@ -130,7 +129,6 @@ class SampleValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when identifier is not in DB but parseable and individual belongs to different project, adds error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
@@ -147,7 +145,6 @@ class SampleValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when identifier is not in DB but parseable and project is in DB, succeeds'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
@@ -161,7 +158,6 @@ class SampleValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when identifier is in DB and parseable and project is inconsistent, adds warning'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
@@ -177,7 +173,6 @@ class SampleValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when identifier is in DB and parseable and individual is inconsistent, adds warning'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
@@ -193,7 +188,6 @@ class SampleValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when identifier is in DB and parseable and sample type is inconsistent, adds warning'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${PROJECT}\n${SAMPLE_Z}")
@@ -209,7 +203,6 @@ class SampleValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when identifiers belong to different projects, adds warning'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\n" +
@@ -252,7 +245,6 @@ Project 'C':
     }
 
     void 'validate, when all known identifiers belong to the same project, adds no warning about different projects'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\n" +
@@ -275,7 +267,6 @@ Project 'C':
     }
 
     void 'validate, when PROJECT column is missing and all identifiers are known and belong to the same project, adds info'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\n" +
@@ -295,7 +286,6 @@ Project 'C':
     }
 
     void 'validate, when PROJECT column is present and all identifiers are known and belong to the same project, adds no problem'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${PROJECT}\n" +
@@ -310,8 +300,7 @@ Project 'C':
         context.problems.isEmpty()
     }
 
-    private
-    static SampleIdentifier createSampleIdentifier(String sampleIdentifierName, String projectName, String pid, String sampleTypeName) {
+    private static SampleIdentifier createSampleIdentifier(String sampleIdentifierName, String projectName, String pid, String sampleTypeName) {
         return DomainFactory.createSampleIdentifier(
                 sample: DomainFactory.createSample(
                         individual: DomainFactory.createIndividual(

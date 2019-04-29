@@ -40,32 +40,34 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
 class Md5sumUniqueValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            DataFile,
-            ExternallyProcessedMergedBamFile,
-            ExternalMergingWorkPackage,
-            FileType,
-            Individual,
-            Pipeline,
-            Project,
-            ProjectCategory,
-            Realm,
-            ReferenceGenome,
-            Run,
-            RunSegment,
-            Sample,
-            SampleType,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                DataFile,
+                ExternallyProcessedMergedBamFile,
+                ExternalMergingWorkPackage,
+                FileType,
+                Individual,
+                Pipeline,
+                Project,
+                ProjectCategory,
+                Realm,
+                ReferenceGenome,
+                Run,
+                RunSegment,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+        ]
+    }
 
     void 'validate concerning metadata, when column is missing, adds error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 SomeColumn
@@ -83,7 +85,6 @@ SomeValue
     }
 
     void 'validate concerning bam metadata, when column is missing, adds warning'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext("""\
 SomeColumn
@@ -101,7 +102,6 @@ SomeValue
     }
 
     void 'validate, all are fine'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.MD5}
@@ -120,7 +120,6 @@ ${HelperUtils.getRandomMd5sum()}
     }
 
     void 'validate concerning metadata, adds expected errors'() {
-
         given:
         String md5sum1 = HelperUtils.getRandomMd5sum()
         String md5sum2 = HelperUtils.getRandomMd5sum()
@@ -152,7 +151,6 @@ ${md5sum2}
     }
 
     void 'validate concerning bam metadata, adds expected errors'() {
-
         given:
         String md5sum1 = HelperUtils.getRandomMd5sum()
         String md5sum2 = HelperUtils.getRandomMd5sum()

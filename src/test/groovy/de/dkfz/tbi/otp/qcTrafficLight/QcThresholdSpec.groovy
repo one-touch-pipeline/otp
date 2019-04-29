@@ -39,38 +39,41 @@ import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdStrategy.*
 
 class QcThresholdSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            DataFile,
-            FileType,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            MergingWorkPackage,
-            Pipeline,
-            Project,
-            ReferenceGenome,
-            RoddyBamFile,
-            RoddyWorkflowConfig,
-            Run,
-            RunSegment,
-            Sample,
-            SamplePair,
-            SampleType,
-            SampleTypePerProject,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformModelLabel,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SoftwareTool,
-            SophiaInstance,
-            SophiaQc,
-            QcThreshold,
-            SeqType,
-            Realm,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                DataFile,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingWorkPackage,
+                Pipeline,
+                Project,
+                ReferenceGenome,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Run,
+                RunSegment,
+                Sample,
+                SamplePair,
+                SampleType,
+                SampleTypePerProject,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformModelLabel,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SoftwareTool,
+                SophiaInstance,
+                SophiaQc,
+                QcThreshold,
+                SeqType,
+                Realm,
+        ]
+    }
 
     void "test saving QcThreshold with invalid threshold values"() {
         when:

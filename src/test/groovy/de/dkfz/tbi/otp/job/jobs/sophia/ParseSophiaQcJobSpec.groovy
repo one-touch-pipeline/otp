@@ -40,37 +40,40 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightService
 
 class ParseSophiaQcJobSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            DataFile,
-            FileType,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            MergingWorkPackage,
-            Pipeline,
-            Project,
-            QcThreshold,
-            Realm,
-            ReferenceGenome,
-            RoddyBamFile,
-            RoddyWorkflowConfig,
-            Run,
-            RunSegment,
-            Sample,
-            SamplePair,
-            SampleType,
-            SampleTypePerProject,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-            SophiaInstance,
-            SophiaQc
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                DataFile,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingWorkPackage,
+                Pipeline,
+                Project,
+                QcThreshold,
+                Realm,
+                ReferenceGenome,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Run,
+                RunSegment,
+                Sample,
+                SamplePair,
+                SampleType,
+                SampleTypePerProject,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+                SophiaInstance,
+                SophiaQc,
+        ]
+    }
 
     @Rule
     TemporaryFolder temporaryFolder

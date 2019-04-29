@@ -38,38 +38,41 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 class AceseqInstanceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            AceseqInstance,
-            AceseqQc,
-            DataFile,
-            FileType,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            MergingSet,
-            MergingWorkPackage,
-            Pipeline,
-            Project,
-            ProjectCategory,
-            Realm,
-            ReferenceGenome,
-            RoddyBamFile,
-            RoddyWorkflowConfig,
-            Run,
-            RunSegment,
-            Sample,
-            SamplePair,
-            SampleType,
-            SampleTypePerProject,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                AceseqInstance,
+                AceseqQc,
+                DataFile,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingSet,
+                MergingWorkPackage,
+                Pipeline,
+                Project,
+                ProjectCategory,
+                Realm,
+                ReferenceGenome,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Run,
+                RunSegment,
+                Sample,
+                SamplePair,
+                SampleType,
+                SampleTypePerProject,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+        ]
+    }
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -111,7 +114,6 @@ class AceseqInstanceSpec extends Specification implements DataTest {
      * If yes the Tests runs correct if not equal exception is thrown
      */
     void "getAceseqInstancePath, tests if Path is in a valid form"() {
-
         when:
         OtpPath aceseqInstancePath = instance.getInstancePath()
 
@@ -128,7 +130,6 @@ class AceseqInstanceSpec extends Specification implements DataTest {
      */
     @Unroll()
     void "test getPlot with #plot, tests if Path is in a valid form"() {
-
         expect:
         instance.getPlot(plot) == new File(instancePath, "plots/${plot == PlotType.ACESEQ_WG_COVERAGE ? 'control_' : ''}${instance.individual.pid}_${name}")
 
@@ -153,7 +154,6 @@ class AceseqInstanceSpec extends Specification implements DataTest {
      */
     @Unroll()
     void "test getPlots with #plots, tests if Path is in a valid form"() {
-
         given:
         File expectedPath = new File(instancePath, "${instance.individual.pid}_${name}")
 

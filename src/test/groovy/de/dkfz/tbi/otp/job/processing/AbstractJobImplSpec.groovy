@@ -35,15 +35,18 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 
 class AbstractJobImplSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ClusterJob,
-            JobDefinition,
-            JobExecutionPlan,
-            Process,
-            ProcessingStep,
-            ProcessingStepUpdate,
-            Realm,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ClusterJob,
+                JobDefinition,
+                JobExecutionPlan,
+                Process,
+                ProcessingStep,
+                ProcessingStepUpdate,
+                Realm,
+        ]
+    }
 
     AbstractJobImpl abstractJobImpl
     TestConfigService configService

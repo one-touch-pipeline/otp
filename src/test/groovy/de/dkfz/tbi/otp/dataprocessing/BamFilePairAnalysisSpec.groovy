@@ -39,50 +39,53 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class BamFilePairAnalysisSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            AceseqInstance,
-            AlignmentPass,
-            BamFilePairAnalysis,
-            DataFile,
-            ExternallyProcessedMergedBamFile,
-            ExternalMergingWorkPackage,
-            FileType,
-            IndelCallingInstance,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            MergingPass,
-            MergingSet,
-            MergingSetAssignment,
-            MergingWorkPackage,
-            MockBamFilePairAnalysis,
-            Pipeline,
-            ProcessedBamFile,
-            ProcessedMergedBamFile,
-            Project,
-            ProjectCategory,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeProjectSeqType,
-            RoddyBamFile,
-            RoddySnvCallingInstance,
-            RoddyWorkflowConfig,
-            Run,
-            RunSegment,
-            Sample,
-            SamplePair,
-            SampleType,
-            SampleTypePerProject,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-            SophiaInstance,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                AceseqInstance,
+                AlignmentPass,
+                BamFilePairAnalysis,
+                DataFile,
+                ExternallyProcessedMergedBamFile,
+                ExternalMergingWorkPackage,
+                FileType,
+                IndelCallingInstance,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingPass,
+                MergingSet,
+                MergingSetAssignment,
+                MergingWorkPackage,
+                MockBamFilePairAnalysis,
+                Pipeline,
+                ProcessedBamFile,
+                ProcessedMergedBamFile,
+                Project,
+                ProjectCategory,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                RoddyBamFile,
+                RoddySnvCallingInstance,
+                RoddyWorkflowConfig,
+                Run,
+                RunSegment,
+                Sample,
+                SamplePair,
+                SampleType,
+                SampleTypePerProject,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+                SophiaInstance,
+        ]
+    }
 
     void "test constraints when everything is fine, should be valid"() {
         given:
@@ -209,7 +212,10 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
         Pipeline alignmentPipeline = DomainFactory.createPanCanPipeline()
         Pipeline snvPipeline = DomainFactory.createRoddySnvPipelineLazy()
 
-        MergingWorkPackage controlWorkPackage = DomainFactory.createMergingWorkPackage(pipeline: alignmentPipeline, statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME)
+        MergingWorkPackage controlWorkPackage = DomainFactory.createMergingWorkPackage(
+                pipeline: alignmentPipeline,
+                statSizeFileName: DomainFactory.DEFAULT_TAB_FILE_NAME,
+        )
         SamplePair samplePair = DomainFactory.createDisease(controlWorkPackage)
         MergingWorkPackage diseaseWorkPackage = samplePair.mergingWorkPackage1
 

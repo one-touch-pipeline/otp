@@ -31,9 +31,12 @@ import de.dkfz.tbi.TestCase
 
 class ProcessingOptionSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ProcessingOption,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ProcessingOption,
+        ]
+    }
 
     @Unroll
     void "validate #optionName with #value, should be valid"() {

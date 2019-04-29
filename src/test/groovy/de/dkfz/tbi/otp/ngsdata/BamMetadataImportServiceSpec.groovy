@@ -47,22 +47,25 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class BamMetadataImportServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ExternalMergingWorkPackage,
-            ExternallyProcessedMergedBamFile,
-            ExternalProcessedMergedBamFileQualityAssessment,
-            QualityAssessmentMergedPass,
-            ImportProcess,
-            Individual,
-            Project,
-            Pipeline,
-            Realm,
-            ReferenceGenome,
-            Sample,
-            SampleType,
-            SeqType,
-            LibraryPreparationKit,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ExternalMergingWorkPackage,
+                ExternallyProcessedMergedBamFile,
+                ExternalProcessedMergedBamFileQualityAssessment,
+                QualityAssessmentMergedPass,
+                ImportProcess,
+                Individual,
+                Project,
+                Pipeline,
+                Realm,
+                ReferenceGenome,
+                Sample,
+                SampleType,
+                SeqType,
+                LibraryPreparationKit,
+        ]
+    }
 
     @Rule
     TemporaryFolder temporaryFolder
@@ -168,7 +171,8 @@ class BamMetadataImportServiceSpec extends Specification implements DataTest {
         }
 
         when:
-        Map results = service.validateAndImport(metadataFile.toString(), true, context.metadataFileMd5sum, false, true, furtherFiles)
+        Map results = service.validateAndImport(metadataFile.toString(), true, context.metadataFileMd5sum,
+                false, true, furtherFiles)
 
         then:
         results.context.metadataFile == metadataFile

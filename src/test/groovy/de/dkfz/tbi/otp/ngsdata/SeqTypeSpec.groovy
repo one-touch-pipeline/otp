@@ -30,9 +30,12 @@ import de.dkfz.tbi.TestCase
 
 class SeqTypeSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SeqType,
+        ]
+    }
 
     void "test get WGS Paired SeqType, no SeqType in DB, should fail"() {
         when:

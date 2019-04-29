@@ -35,37 +35,40 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFactory, DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            BamFileSubmissionObject,
-            DataFile,
-            DataFileSubmissionObject,
-            FileType,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            MergingWorkPackage,
-            Pipeline,
-            Project,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeProjectSeqType,
-            RoddyBamFile,
-            RoddyWorkflowConfig,
-            Run,
-            RunSegment,
-            Sample,
-            SampleSubmissionObject,
-            SampleType,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-            EgaSubmission,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                BamFileSubmissionObject,
+                DataFile,
+                DataFileSubmissionObject,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingWorkPackage,
+                Pipeline,
+                Project,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Run,
+                RunSegment,
+                Sample,
+                SampleSubmissionObject,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+                EgaSubmission,
+        ]
+    }
 
     private EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
 

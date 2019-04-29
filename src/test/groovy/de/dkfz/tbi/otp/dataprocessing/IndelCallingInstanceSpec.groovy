@@ -32,37 +32,40 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class IndelCallingInstanceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            DataFile,
-            FileType,
-            IndelCallingInstance,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            MergingSet,
-            MergingWorkPackage,
-            Pipeline,
-            Project,
-            ProjectCategory,
-            Realm,
-            ReferenceGenome,
-            RoddyBamFile,
-            RoddyWorkflowConfig,
-            Run,
-            RunSegment,
-            Sample,
-            SamplePair,
-            SampleType,
-            SampleTypePerProject,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                DataFile,
+                FileType,
+                IndelCallingInstance,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingSet,
+                MergingWorkPackage,
+                Pipeline,
+                Project,
+                ProjectCategory,
+                Realm,
+                ReferenceGenome,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Run,
+                RunSegment,
+                Sample,
+                SamplePair,
+                SampleType,
+                SampleTypePerProject,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+        ]
+    }
 
     void testGetIndelInstancePath() {
         given:
@@ -73,8 +76,9 @@ class IndelCallingInstanceSpec extends Specification implements DataTest {
 
         then:
         instance.project == indelInstancePath.project
-        File expectedRelativePath = new File("${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/${instance.individual.pid}/indel_results/" +
-                "${instance.seqType.libraryLayoutDirName}/${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType2BamFile.sampleType.dirName}/${instance.instanceName}")
+        File expectedRelativePath = new File("${instance.project.dirName}/sequencing/${instance.seqType.dirName}/view-by-pid/${instance.individual.pid}/" +
+                "indel_results/${instance.seqType.libraryLayoutDirName}/" +
+                "${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType2BamFile.sampleType.dirName}/${instance.instanceName}")
         expectedRelativePath.path == indelInstancePath.relativePath.path
     }
 

@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
 class SampleTypeSpec extends Specification implements DataTest, DomainFactoryCore {
 
+    @Override
     Class[] getDomainClassesToMock() {
         [
                 SampleType,

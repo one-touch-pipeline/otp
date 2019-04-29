@@ -35,9 +35,12 @@ import java.nio.file.Paths
 
 class LinkFileUtilsSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() { [
-            Realm,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Realm,
+        ]
+    }
 
     LinkFileUtils linkFileUtils
 

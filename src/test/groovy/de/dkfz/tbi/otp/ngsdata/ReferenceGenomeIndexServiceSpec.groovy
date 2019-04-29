@@ -32,12 +32,15 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 class ReferenceGenomeIndexServiceSpec extends Specification implements DataTest, ServiceUnitTest<ReferenceGenomeIndexService> {
 
-    Class[] getDomainClassesToMock() {[
-            ProcessingOption,
-            ReferenceGenome,
-            ReferenceGenomeIndex,
-            ToolName,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ProcessingOption,
+                ReferenceGenome,
+                ReferenceGenomeIndex,
+                ToolName,
+        ]
+    }
 
     ReferenceGenomeIndex referenceGenomeIndex
 

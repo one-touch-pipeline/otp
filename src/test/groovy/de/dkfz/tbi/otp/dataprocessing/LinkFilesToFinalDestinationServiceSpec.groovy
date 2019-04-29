@@ -40,38 +40,41 @@ import java.nio.file.Path
 
 class LinkFilesToFinalDestinationServiceSpec extends Specification implements IsRoddy, DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            Comment,
-            DataFile,
-            FileType,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            MergingWorkPackage,
-            Pipeline,
-            ProcessingOption,
-            Project,
-            ProjectCategory,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeProjectSeqType,
-            RoddyBamFile,
-            RoddyMergedBamQa,
-            RoddyWorkflowConfig,
-            RoddyQualityAssessment,
-            Run,
-            RunSegment,
-            Sample,
-            SampleType,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                Comment,
+                DataFile,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingWorkPackage,
+                Pipeline,
+                ProcessingOption,
+                Project,
+                ProjectCategory,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                RoddyBamFile,
+                RoddyMergedBamQa,
+                RoddyWorkflowConfig,
+                RoddyQualityAssessment,
+                Run,
+                RunSegment,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+        ]
+    }
 
     @SuppressWarnings('JUnitPublicProperty')
     @Rule

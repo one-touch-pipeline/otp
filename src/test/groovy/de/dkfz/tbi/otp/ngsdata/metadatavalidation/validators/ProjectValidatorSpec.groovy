@@ -39,14 +39,16 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class ProjectValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Realm,
-            Project,
-            ProjectCategory,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Realm,
+                Project,
+                ProjectCategory,
+        ]
+    }
 
     void 'validate concerning metadata, when column does not exist, succeeds'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 
@@ -58,7 +60,6 @@ class ProjectValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate concerning bam metadata, when column does not exist, adds error'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext()
         Collection<Problem> expectedProblems = [
@@ -74,7 +75,6 @@ class ProjectValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when column is empty, succeeds'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.PROJECT}\n"
@@ -88,7 +88,6 @@ class ProjectValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when column exist and project is registered in OTP, succeeds'() {
-
         given:
         String PROJECT_NAME = "projectName"
 
@@ -110,7 +109,6 @@ class ProjectValidatorSpec extends Specification implements DataTest {
 
 
     void 'validate concerning metadata, when column exist but project is not registered in OTP, adds problems'() {
-
         given:
         String PROJECT_NAME = "projectName"
 
@@ -130,7 +128,6 @@ class ProjectValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate concerning bam metadata, when column exist but project is not registered in OTP, adds problems'() {
-
         given:
         String PROJECT_NAME = "projectName"
 

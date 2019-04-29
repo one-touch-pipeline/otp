@@ -30,10 +30,13 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class GroupSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Role,
-            Group,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Role,
+                Group,
+        ]
+    }
 
     void "test write project constraint"() {
         given:

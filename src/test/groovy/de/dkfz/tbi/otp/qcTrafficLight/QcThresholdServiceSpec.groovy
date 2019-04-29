@@ -36,13 +36,16 @@ import static de.dkfz.tbi.otp.qcTrafficLight.TableCellValue.WarnColor.*
 
 class QcThresholdServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Project,
-            QcThreshold,
-            Realm,
-            SeqType,
-            SophiaQc,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Project,
+                QcThreshold,
+                Realm,
+                SeqType,
+                SophiaQc,
+        ]
+    }
 
     QcThresholdService qcThresholdService
 

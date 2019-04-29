@@ -33,13 +33,16 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class ProcessingStepSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            JobDefinition,
-            JobExecutionPlan,
-            Process,
-            ProcessingStep,
-            ProcessingStepUpdate,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                JobDefinition,
+                JobExecutionPlan,
+                Process,
+                ProcessingStep,
+                ProcessingStepUpdate,
+        ]
+    }
 
     void "test firstProcessingStepUpdate return first update"() {
         given:
@@ -117,9 +120,9 @@ class ProcessingStepSpec extends Specification implements DataTest {
         step.errors["previous"].code == errorField
 
         where:
-        errorField      |_
-        "process"       |_
-        "jobDefinition" |_
+        errorField      | _
+        "process"       | _
+        "jobDefinition" | _
     }
 
     @Unroll
@@ -147,9 +150,9 @@ class ProcessingStepSpec extends Specification implements DataTest {
         step.errors["next"].code == errorField
 
         where:
-        errorField      |_
-        "process"       |_
-        "jobDefinition" |_
+        errorField      | _
+        "process"       | _
+        "jobDefinition" | _
     }
 
     void "test next and previous of a ProcessingStep can not be the same"() {

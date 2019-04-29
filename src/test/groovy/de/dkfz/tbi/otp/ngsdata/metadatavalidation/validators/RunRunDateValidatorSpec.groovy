@@ -39,16 +39,18 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class RunRunDateValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Run,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Run,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+        ]
+    }
 
     void 'validate adds expected errors'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${RUN_DATE}\t${RUN_ID}\n" +

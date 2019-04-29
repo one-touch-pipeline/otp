@@ -37,14 +37,16 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class InstrumentPlatformValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+        ]
+    }
 
     void 'validate, when column is missing, adds error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "SomeColumn\n" +
@@ -61,7 +63,6 @@ class InstrumentPlatformValidatorSpec extends Specification implements DataTest 
     }
 
     void 'validate adds expected error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.INSTRUMENT_PLATFORM}\n" +

@@ -31,25 +31,28 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class BamFileAnalysisServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            DataFile,
-            FileType,
-            Individual,
-            MergingWorkPackage,
-            Pipeline,
-            Project,
-            Realm,
-            ReferenceGenome,
-            RoddyBamFile,
-            RoddySnvCallingInstance,
-            RoddyWorkflowConfig,
-            RunSegment,
-            Sample,
-            SamplePair,
-            SampleType,
-            SampleTypePerProject,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                DataFile,
+                FileType,
+                Individual,
+                MergingWorkPackage,
+                Pipeline,
+                Project,
+                Realm,
+                ReferenceGenome,
+                RoddyBamFile,
+                RoddySnvCallingInstance,
+                RoddyWorkflowConfig,
+                RunSegment,
+                Sample,
+                SamplePair,
+                SampleType,
+                SampleTypePerProject,
+                SeqType,
+        ]
+    }
 
 
     void "test withdraw"() {

@@ -34,33 +34,36 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class RnaRoddyBamFileSpec extends Specification implements RoddyRnaFactory, DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            DataFile,
-            FileType,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            Pipeline,
-            Project,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeProjectSeqType,
-            RnaRoddyBamFile,
-            RoddyWorkflowConfig,
-            Run,
-            RunSegment,
-            Sample,
-            SampleType,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-            MergingWorkPackage,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                DataFile,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                Pipeline,
+                Project,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                RnaRoddyBamFile,
+                RoddyWorkflowConfig,
+                Run,
+                RunSegment,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+                MergingWorkPackage,
+        ]
+    }
 
     void setup() {
         new TestConfigService()
@@ -69,7 +72,8 @@ class RnaRoddyBamFileSpec extends Specification implements RoddyRnaFactory, Data
     void "test method getCorrespondingWorkChimericBamFile"() {
         given:
         RnaRoddyBamFile roddyBamFile = createBamFile()
-        String testDir = "${roddyBamFile.individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}/${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
+        String testDir = "${roddyBamFile.individual.getViewByPidPath(roddyBamFile.seqType).absoluteDataManagementPath.path}/" +
+                "${roddyBamFile.sampleType.dirName}/${roddyBamFile.seqType.libraryLayoutDirName}/merged-alignment"
         AbstractMergedBamFileService.metaClass.static.destinationDirectory = { AbstractMergedBamFile bamFile -> return testDir }
 
         expect:

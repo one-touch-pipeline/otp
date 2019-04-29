@@ -27,7 +27,8 @@ import org.joda.time.LocalDate
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import org.springframework.context.ApplicationContext
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
@@ -58,37 +59,40 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class MetadataImportServiceSpec extends Specification implements DomainFactoryCore, DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AntibodyTarget,
-            ChipSeqSeqTrack,
-            DataFile,
-            ExomeSeqTrack,
-            FileType,
-            IlseSubmission,
-            Individual,
-            LibraryPreparationKit,
-            MetaDataEntry,
-            MetaDataFile,
-            MetaDataKey,
-            OtrsTicket,
-            Project,
-            ProjectCategory,
-            Realm,
-            Run,
-            RunSegment,
-            ProcessingOption,
-            Sample,
-            SampleIdentifier,
-            SampleType,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-            SoftwareToolIdentifier,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AntibodyTarget,
+                ChipSeqSeqTrack,
+                DataFile,
+                ExomeSeqTrack,
+                FileType,
+                IlseSubmission,
+                Individual,
+                LibraryPreparationKit,
+                MetaDataEntry,
+                MetaDataFile,
+                MetaDataKey,
+                OtrsTicket,
+                Project,
+                ProjectCategory,
+                Realm,
+                Run,
+                RunSegment,
+                ProcessingOption,
+                Sample,
+                SampleIdentifier,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+                SoftwareToolIdentifier,
+        ]
+    }
 
     final static String TICKET_NUMBER = "2000010112345678"
 
@@ -158,7 +162,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
     void "getDirectoryStructureBeanName, when called with AUTO_DETECT_DIRECTORY_STRUCTURE_NAME, returns DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME"() {
         expect:
-        MetadataImportService.getDirectoryStructureBeanName(MetadataImportService.AUTO_DETECT_DIRECTORY_STRUCTURE_NAME) == MetadataImportService.DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME
+        MetadataImportService.getDirectoryStructureBeanName(MetadataImportService.AUTO_DETECT_DIRECTORY_STRUCTURE_NAME) ==
+                MetadataImportService.DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME
     }
 
     void "getDirectoryStructureBeanName, when called with a string != AUTO_DETECT_DIRECTORY_STRUCTURE_NAME, returns that string"() {
@@ -194,7 +199,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         MetadataImportService.PathWithMd5sum pathWithMd5sum = new MetadataImportService.PathWithMd5sum(metadataFile, null)
 
         when:
-        List<ValidateAndImportResult> results = service.validateAndImportWithAuth([pathWithMd5sum], directoryStructureName, align, false, TICKET_NUMBER, null, automaticNotification)
+        List<ValidateAndImportResult> results = service.validateAndImportWithAuth(
+                [pathWithMd5sum], directoryStructureName, align, false, TICKET_NUMBER, null, automaticNotification)
 
         then:
         results[0].context.metadataFile == metadataFile
@@ -222,7 +228,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         }
 
         when:
-        List<ValidateAndImportResult> results = service.validateAndImportWithAuth([pathWithMd5sum], directoryStructureName, false, false, TICKET_NUMBER, null, true)
+        List<ValidateAndImportResult> results = service.validateAndImportWithAuth(
+                [pathWithMd5sum], directoryStructureName, false, false, TICKET_NUMBER, null, true)
 
         then:
         results[0].context.metadataFile == metadataFile
@@ -265,7 +272,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         service.fileSystemService = new TestFileSystemService()
 
         when:
-        List<ValidateAndImportResult> validateAndImportResults = service.validateAndImportWithAuth(pathWithMd5sums, directoryStructureName, true, false, TICKET_NUMBER, null, true)
+        List<ValidateAndImportResult> validateAndImportResults = service.validateAndImportWithAuth(
+                pathWithMd5sums, directoryStructureName, true, false, TICKET_NUMBER, null, true)
 
         then:
         validateAndImportResults*.context == [context1, context2]
@@ -276,9 +284,11 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     void "validateAndImportMultiple when all are valid, returns import results"() {
         given:
         SeqCenter seqCenter = DomainFactory.createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
-        MetadataValidationContext context1 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${seqCenter.autoImportDir}/001111/data/1111_meta.tsv")])
+        MetadataValidationContext context1 = MetadataValidationContextFactory.createContext(
+                [metadataFile: Paths.get("${seqCenter.autoImportDir}/001111/data/1111_meta.tsv")])
         MetaDataFile metadataFile1 = DomainFactory.createMetaDataFile()
-        MetadataValidationContext context2 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${seqCenter.autoImportDir}/002222/data/2222_meta.tsv")])
+        MetadataValidationContext context2 = MetadataValidationContextFactory.createContext(
+                [metadataFile: Paths.get("${seqCenter.autoImportDir}/002222/data/2222_meta.tsv")])
         MetaDataFile metadataFile2 = DomainFactory.createMetaDataFile()
 
         MetadataImportService service = Spy(MetadataImportService) {
@@ -301,9 +311,12 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         SeqCenter seqCenter = DomainFactory.createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
         Problems problems = new Problems()
         problems.addProblem([] as Set, Level.ERROR, "An Error occurred")
-        MetadataValidationContext context1 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${seqCenter.autoImportDir}/001111/data/1111_meta.tsv"), problems: problems])
-        MetadataValidationContext context2 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${seqCenter.autoImportDir}/002222/data/2222_meta.tsv")])
-        MetadataValidationContext context3 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("${seqCenter.autoImportDir}/003333/data/3333_meta.tsv"), problems: problems])
+        MetadataValidationContext context1 = MetadataValidationContextFactory.createContext(
+                [metadataFile: Paths.get("${seqCenter.autoImportDir}/001111/data/1111_meta.tsv"), problems: problems])
+        MetadataValidationContext context2 = MetadataValidationContextFactory.createContext(
+                [metadataFile: Paths.get("${seqCenter.autoImportDir}/002222/data/2222_meta.tsv")])
+        MetadataValidationContext context3 = MetadataValidationContextFactory.createContext(
+                [metadataFile: Paths.get("${seqCenter.autoImportDir}/003333/data/3333_meta.tsv"), problems: problems])
 
         MetadataImportService service = Spy(MetadataImportService) {
             1 * validate(context1.metadataFile, MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME) >> context1
@@ -610,7 +623,7 @@ ${ILSE_NO}                      -             1234          1234          -     
         RunSegment runSegment = RunSegment.findWhere(
                 align: align,
                 otrsTicket: otrsTicket,
-                importMode: importMode
+                importMode: importMode,
         )
         runSegment != null
 

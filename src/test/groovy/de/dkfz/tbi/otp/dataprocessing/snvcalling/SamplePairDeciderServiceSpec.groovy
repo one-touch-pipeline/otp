@@ -34,23 +34,26 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SamplePairDeciderServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergingWorkPackage,
-            ExternalMergingWorkPackage,
-            Individual,
-            LibraryPreparationKit,
-            MergingWorkPackage,
-            Pipeline,
-            Project,
-            Realm,
-            ReferenceGenome,
-            Sample,
-            SamplePair,
-            SampleType,
-            SampleTypePerProject,
-            SeqPlatformGroup,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergingWorkPackage,
+                ExternalMergingWorkPackage,
+                Individual,
+                LibraryPreparationKit,
+                MergingWorkPackage,
+                Pipeline,
+                Project,
+                Realm,
+                ReferenceGenome,
+                Sample,
+                SamplePair,
+                SampleType,
+                SampleTypePerProject,
+                SeqPlatformGroup,
+                SeqType,
+        ]
+    }
 
     @Unroll
     void "findOrCreateSamplePairs(mergingWorkPackage), create SamplePair for #pipelineName1 and #pipelineName2 and #category1"() {
@@ -61,7 +64,7 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest {
         ])
         AbstractMergingWorkPackage mergingWorkPackage2 = DomainFactory.createMergingWorkPackageForPipeline(pipelineName2, [
                 seqType: mergingWorkPackage1.seqType,
-                sample : DomainFactory.createSample([individual: mergingWorkPackage1.individual])
+                sample : DomainFactory.createSample([individual: mergingWorkPackage1.individual]),
         ])
         DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackage1, category1)
         DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackage2, category1.correspondingCategory())

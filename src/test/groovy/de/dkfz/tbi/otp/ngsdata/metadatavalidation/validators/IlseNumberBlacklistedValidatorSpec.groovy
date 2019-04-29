@@ -37,10 +37,13 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class IlseNumberBlacklistedValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Comment,
-            IlseSubmission,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Comment,
+                IlseSubmission,
+        ]
+    }
 
     void 'validate, when column does not exist, succeeds'() {
         given:

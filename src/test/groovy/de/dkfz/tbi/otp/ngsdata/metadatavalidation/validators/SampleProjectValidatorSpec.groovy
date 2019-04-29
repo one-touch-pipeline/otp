@@ -41,16 +41,19 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
 
 class SampleProjectValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Individual,
-            ProcessingOption,
-            Project,
-            ProjectCategory,
-            Realm,
-            Sample,
-            SampleIdentifier,
-            SampleType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Individual,
+                ProcessingOption,
+                Project,
+                ProjectCategory,
+                Realm,
+                Sample,
+                SampleIdentifier,
+                SampleType,
+        ]
+    }
 
     void 'validate adds expected warnings'() {
         given:

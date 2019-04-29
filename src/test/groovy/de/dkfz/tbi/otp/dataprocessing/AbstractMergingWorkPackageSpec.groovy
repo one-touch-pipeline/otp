@@ -35,24 +35,27 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            AbstractMergingWorkPackage,
-            AntibodyTarget,
-            Individual,
-            LibraryPreparationKit,MergingSet,
-            MergingWorkPackage,
-            Pipeline,
-            Project,
-            ProjectCategory,
-            ReferenceGenome,
-            Sample,
-            SampleType,
-            SeqPlatformGroup,
-            SeqType,
-            TestAbstractMergedBamFile,
-            TestAbstractMergingWorkPackage,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                AbstractMergingWorkPackage,
+                AntibodyTarget,
+                Individual,
+                LibraryPreparationKit, MergingSet,
+                MergingWorkPackage,
+                Pipeline,
+                Project,
+                ProjectCategory,
+                ReferenceGenome,
+                Sample,
+                SampleType,
+                SeqPlatformGroup,
+                SeqType,
+                TestAbstractMergedBamFile,
+                TestAbstractMergingWorkPackage,
+        ]
+    }
 
     TestAbstractMergingWorkPackage testAMWP
     TestAbstractMergingWorkPackage testAMWP2
@@ -93,7 +96,6 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
 
         @Override
         void withdraw() {
-
         }
 
         @Override
@@ -108,7 +110,7 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
 
         @Override
         Set<SeqTrack> getContainedSeqTracks() {
-            return null
+            return []
         }
 
         @Override

@@ -43,17 +43,18 @@ import static de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationConte
 
 class DataFileExistenceValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Realm,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Realm,
+        ]
+    }
 
     @Rule
     TemporaryFolder temporaryFolder
 
     void 'validate adds expected problems'() {
-
         given:
-
         File dir = temporaryFolder.root
         temporaryFolder.newFolder('not_a_file')
         temporaryFolder.newFile('empty')

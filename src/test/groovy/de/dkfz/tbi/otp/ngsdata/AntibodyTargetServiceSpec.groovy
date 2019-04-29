@@ -27,12 +27,16 @@ import grails.testing.gorm.DataTest
 
 class AntibodyTargetServiceSpec extends MetadataFieldsServiceSpec<AntibodyTarget> implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AntibodyTarget,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AntibodyTarget,
+        ]
+    }
 
     AntibodyTargetService antibodyTargetService = new AntibodyTargetService()
 
+    @Override
     protected MetadataFieldsService getService() {
         return antibodyTargetService
     }

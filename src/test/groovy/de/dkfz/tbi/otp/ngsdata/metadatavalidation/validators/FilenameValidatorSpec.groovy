@@ -37,12 +37,14 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class FilenameValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            FileType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                FileType,
+        ]
+    }
 
     void 'validate context with errors and warnings'() {
-
         given:
         DomainFactory.createFileType(signature: '_fastq')
         DomainFactory.createFileType(signature: '.fastq')
@@ -71,7 +73,6 @@ class FilenameValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate context without FASTQ_FILE column'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 

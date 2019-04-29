@@ -41,35 +41,38 @@ import java.nio.file.Path
 
 class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactory, DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            CellRangerMergingWorkPackage,
-            CellRangerConfig,
-            DataFile,
-            Individual,
-            LibraryPreparationKit,
-            FileType,
-            MergingCriteria,
-            Pipeline,
-            Project,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeProjectSeqType,
-            ReferenceGenomeIndex,
-            Run,
-            RunSegment,
-            SeqTrack,
-            Sample,
-            SampleType,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqType,
-            SingleCellBamFile,
-            SoftwareTool,
-            ToolName,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                CellRangerMergingWorkPackage,
+                CellRangerConfig,
+                DataFile,
+                Individual,
+                LibraryPreparationKit,
+                FileType,
+                MergingCriteria,
+                Pipeline,
+                Project,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                ReferenceGenomeIndex,
+                Run,
+                RunSegment,
+                SeqTrack,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqType,
+                SingleCellBamFile,
+                SoftwareTool,
+                ToolName,
+        ]
+    }
 
     void "maybeSubmit, when all fine, then send expected script to cluster"() {
         given:
@@ -108,7 +111,9 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
                 "${enableModul} ${singleCellBamFile.mergingWorkPackage.config.programVersion}",
                 "cd ${singleCellBamFile.workDirectory}",
                 "cellranger count ${parameterKey}=${parameterValue} --disable-ui",
-                "md5sum ${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)} | sed -e 's#  ${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)}##' > ${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_MD5SUM_FILE_NAME)}",
+                "md5sum ${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)} | " +
+                        "sed -e 's#  ${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_FILE_NAME)}##' > " +
+                        "${resultDirectory.resolve(SingleCellBamFile.ORIGINAL_BAM_MD5SUM_FILE_NAME)}",
         ].join('\n')
 
         when:

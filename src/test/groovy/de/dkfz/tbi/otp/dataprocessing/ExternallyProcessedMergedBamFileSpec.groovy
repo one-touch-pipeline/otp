@@ -32,9 +32,12 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class ExternallyProcessedMergedBamFileSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ExternallyProcessedMergedBamFile,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ExternallyProcessedMergedBamFile,
+        ]
+    }
 
     private Map createMap() {
         return [

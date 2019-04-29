@@ -32,16 +32,23 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class JobErrorDefinitionSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            JobDefinition,
-            JobErrorDefinition,
-            JobExecutionPlan,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                JobDefinition,
+                JobErrorDefinition,
+                JobExecutionPlan,
+        ]
+    }
 
     def setup() {
         DomainFactory.createJobDefinition()
 
-        JobErrorDefinition jobErrorDefinition = new JobErrorDefinition(errorExpression: "jobErrorDefinition", type: JobErrorDefinition.Type.MESSAGE, action: JobErrorDefinition.Action.STOP)
+        JobErrorDefinition jobErrorDefinition = new JobErrorDefinition(
+                errorExpression: "jobErrorDefinition",
+                type: JobErrorDefinition.Type.MESSAGE,
+                action: JobErrorDefinition.Action.STOP
+        )
         jobErrorDefinition.save(flush: true)
     }
 
@@ -64,7 +71,11 @@ class JobErrorDefinitionSpec extends Specification implements DataTest {
     void 'tries to add JobErrorDefinition, when action = furtherCheck, succeeds'() {
         given:
         JobErrorDefinition jobErrorDefinition = CollectionUtils.exactlyOneElement(JobErrorDefinition.findAll())
-        JobErrorDefinition jobErrorDefinition1 = new JobErrorDefinition(errorExpression: "jobErrorDefinition1", type: JobErrorDefinition.Type.MESSAGE, action: JobErrorDefinition.Action.CHECK_FURTHER)
+        JobErrorDefinition jobErrorDefinition1 = new JobErrorDefinition(
+                errorExpression: "jobErrorDefinition1",
+                type: JobErrorDefinition.Type.MESSAGE,
+                action: JobErrorDefinition.Action.CHECK_FURTHER
+        )
 
         when:
         jobErrorDefinition1.addToCheckFurtherJobErrors(jobErrorDefinition)
@@ -76,7 +87,11 @@ class JobErrorDefinitionSpec extends Specification implements DataTest {
 
     void 'create JobErrorDefinition with invalid errorExpression, should fail'() {
         given:
-        JobErrorDefinition jobErrorDefinition = new JobErrorDefinition(errorExpression: "*", type: JobErrorDefinition.Type.MESSAGE, action: JobErrorDefinition.Action.STOP)
+        JobErrorDefinition jobErrorDefinition = new JobErrorDefinition(
+                errorExpression: "*",
+                type: JobErrorDefinition.Type.MESSAGE,
+                action: JobErrorDefinition.Action.STOP
+        )
 
         when:
         jobErrorDefinition.save(flush: true)

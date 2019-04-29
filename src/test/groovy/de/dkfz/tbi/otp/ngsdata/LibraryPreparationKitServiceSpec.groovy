@@ -29,9 +29,12 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<LibraryPreparationKit> implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            LibraryPreparationKit,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                LibraryPreparationKit,
+        ]
+    }
 
     LibraryPreparationKitService libraryPreparationKitService = new LibraryPreparationKitService()
 
@@ -73,7 +76,8 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         )
 
         then:
-        exactlyOneElement(LibraryPreparationKit.findAllByNameAndShortDisplayNameAndAdapterFileAndReverseComplementAdapterSequence(OTHER_NAME, OTHER_SHORT_DISPLAY_NAME, ADAPTER_FILE, ADAPTER_SEQUENCE))
+        exactlyOneElement(LibraryPreparationKit.findAllByNameAndShortDisplayNameAndAdapterFileAndReverseComplementAdapterSequence(
+                OTHER_NAME, OTHER_SHORT_DISPLAY_NAME, ADAPTER_FILE, ADAPTER_SEQUENCE))
 
         where:
         name | shortDisplayName   | adapterFile  | adapterSequence
@@ -204,6 +208,7 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         adapterSequence << [null, ""]
     }
 
+    @Override
     protected MetadataFieldsService getService() {
         return libraryPreparationKitService
     }

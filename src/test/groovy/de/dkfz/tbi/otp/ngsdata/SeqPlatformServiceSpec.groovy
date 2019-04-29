@@ -27,12 +27,15 @@ import spock.lang.Specification
 
 class SeqPlatformServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SequencingKitLabel,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SequencingKitLabel,
+        ]
+    }
 
     final String PLATFORM_NAME = "platform_name"
 

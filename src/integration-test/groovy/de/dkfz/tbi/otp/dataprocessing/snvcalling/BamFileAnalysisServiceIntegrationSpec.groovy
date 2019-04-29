@@ -139,7 +139,7 @@ class BamFileAnalysisServiceIntegrationSpec extends Specification {
 
         where:
         processingStatus         | pipeline                                     | service                 | qc
-        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | {indelCallingService }  | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
+        "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
         "sophiaProcessingStatus" | { DomainFactory.createSophiaPipelineLazy() } | { sophiaService }       | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
         "aceseqProcessingStatus" | { DomainFactory.createAceseqPipelineLazy() } | { aceseqService }       | AbstractMergedBamFile.QcTrafficLightStatus.REJECTED
         "indelProcessingStatus"  | { DomainFactory.createIndelPipelineLazy() }  | { indelCallingService } | AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED

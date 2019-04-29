@@ -41,9 +41,12 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class BamFilePathValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            FileType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                FileType,
+        ]
+    }
 
     @Shared
     @ClassRule
@@ -51,7 +54,6 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
 
     @Unroll
     void 'validate context with errors'() {
-
         given:
         File wrongFormatFile = temporaryFolder.newFile('test.xls')
         File file = temporaryFolder.newFile('abc.bam')
@@ -100,7 +102,6 @@ class BamFilePathValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when column BAM_FILE_PATH missing, then add expected problem'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "${PROJECT}\t +" +

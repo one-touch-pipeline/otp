@@ -42,17 +42,20 @@ import de.dkfz.tbi.otp.utils.ProcessOutput
 
 class ClusterJobSchedulerServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ClusterJob,
-            JobDefinition,
-            JobExecutionPlan,
-            Process,
-            ProcessingOption,
-            ProcessingStep,
-            ProcessingStepUpdate,
-            Realm,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ClusterJob,
+                JobDefinition,
+                JobExecutionPlan,
+                Process,
+                ProcessingOption,
+                ProcessingStep,
+                ProcessingStepUpdate,
+                Realm,
+                SeqType,
+        ]
+    }
 
     static final String SSHUSER = "user"
 

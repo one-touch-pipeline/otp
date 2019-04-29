@@ -38,14 +38,17 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class RunSeqPlatformValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Run,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SequencingKitLabel,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Run,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SequencingKitLabel,
+        ]
+    }
 
     SeqPlatformModelLabel model1
     SeqPlatformModelLabel model2
@@ -102,7 +105,6 @@ class RunSeqPlatformValidatorSpec extends Specification implements DataTest {
     }
 
     void 'with kit column, validate adds expected problems'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${SEQUENCING_KIT}\t${RUN_ID}\n" +
@@ -157,7 +159,6 @@ class RunSeqPlatformValidatorSpec extends Specification implements DataTest {
     }
 
     void 'without kit column, validate adds expected problems'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${RUN_ID}\n" +

@@ -43,35 +43,38 @@ import java.nio.file.*
 
 class CellRangerServiceSpec extends Specification implements CellRangerFactory, DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            CellRangerMergingWorkPackage,
-            CellRangerConfig,
-            DataFile,
-            Individual,
-            LibraryPreparationKit,
-            FileType,
-            MergingCriteria,
-            Pipeline,
-            Project,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeProjectSeqType,
-            ReferenceGenomeIndex,
-            Run,
-            RunSegment,
-            SeqTrack,
-            Sample,
-            SampleType,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqType,
-            SingleCellBamFile,
-            SoftwareTool,
-            ToolName,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                CellRangerMergingWorkPackage,
+                CellRangerConfig,
+                DataFile,
+                Individual,
+                LibraryPreparationKit,
+                FileType,
+                MergingCriteria,
+                Pipeline,
+                Project,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                ReferenceGenomeIndex,
+                Run,
+                RunSegment,
+                SeqTrack,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqType,
+                SingleCellBamFile,
+                SoftwareTool,
+                ToolName,
+        ]
+    }
 
     @Rule
     TemporaryFolder temporaryFolder

@@ -39,40 +39,43 @@ import de.dkfz.tbi.otp.utils.*
 
 class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            DataFile,
-            FileType,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            MergingWorkPackage,
-            Pipeline,
-            ProcessingOption,
-            Project,
-            ProjectCategory,
-            Sample,
-            SamplePair,
-            SampleType,
-            SampleTypePerProject,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SequencingKitLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-            ReferenceGenome,
-            ReferenceGenomeEntry,
-            ReferenceGenomeProjectSeqType,
-            Realm,
-            RoddyBamFile,
-            RoddySnvCallingInstance,
-            RoddyWorkflowConfig,
-            Run,
-            RunSegment,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                DataFile,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingWorkPackage,
+                Pipeline,
+                ProcessingOption,
+                Project,
+                ProjectCategory,
+                Sample,
+                SamplePair,
+                SampleType,
+                SampleTypePerProject,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SequencingKitLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+                ReferenceGenome,
+                ReferenceGenomeEntry,
+                ReferenceGenomeProjectSeqType,
+                Realm,
+                RoddyBamFile,
+                RoddySnvCallingInstance,
+                RoddyWorkflowConfig,
+                Run,
+                RunSegment,
+        ]
+    }
 
     TestConfigService configService
 
@@ -181,7 +184,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 },
                 snvCallingService         : Mock(SnvCallingService) {
                     1 * validateInputBamFiles(_) >> { }
-                }
+                },
         ])
         RoddySnvCallingInstance roddySnvCallingInstance = DomainFactory.createRoddySnvInstanceWithRoddyBamFiles()
 

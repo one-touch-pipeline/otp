@@ -177,7 +177,7 @@ class FileService {
         Stream<Path> stream = null
         assert ThreadUtils.waitFor({
             try {
-                if (Files.isDirectory(file)){
+                if (Files.isDirectory(file)) {
                     stream = Files.list(file)
                 } else {
                     Files.isReadable(file)
@@ -199,7 +199,7 @@ class FileService {
         Stream<Path> stream = null
         assert ThreadUtils.waitFor({
             try {
-                if (Files.isDirectory(file)){
+                if (Files.isDirectory(file)) {
                     stream = Files.list(file)
                 } else {
                     Files.isReadable(file)

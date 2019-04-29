@@ -27,9 +27,12 @@ import grails.testing.gorm.DataTest
 
 class SequencingKitLabelServiceSpec extends MetadataFieldsServiceSpec<SequencingKitLabel> implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SequencingKitLabel,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SequencingKitLabel,
+        ]
+    }
 
     SequencingKitLabelService sequencingKitLabelService = new SequencingKitLabelService()
 

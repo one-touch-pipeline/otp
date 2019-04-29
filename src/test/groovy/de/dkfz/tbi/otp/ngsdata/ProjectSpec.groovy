@@ -31,16 +31,19 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 
 class ProjectSpec extends Specification implements DomainFactoryCore, DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Project,
-            ProjectCategory,
-            Realm,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Project,
+                ProjectCategory,
+                Realm,
+        ]
+    }
 
     TestConfigService configService
 
     void setup() {
-         configService = new TestConfigService()
+        configService = new TestConfigService()
     }
 
     void cleanup() {

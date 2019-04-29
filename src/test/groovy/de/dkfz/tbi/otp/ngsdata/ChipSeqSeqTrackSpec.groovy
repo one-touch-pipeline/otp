@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
 class ChipSeqSeqTrackSpec extends Specification implements DataTest, DomainFactoryCore {
 
+    @Override
     Class[] getDomainClassesToMock() {
         [
                 ChipSeqSeqTrack,

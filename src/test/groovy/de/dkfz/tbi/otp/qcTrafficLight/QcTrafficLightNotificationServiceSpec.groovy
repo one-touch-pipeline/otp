@@ -39,38 +39,41 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 
 class QcTrafficLightNotificationServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            DataFile,
-            Comment,
-            ExomeSeqTrack,
-            FileType,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            MergingWorkPackage,
-            Pipeline,
-            Project,
-            ProcessingOption,
-            OtrsTicket,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeProjectSeqType,
-            RnaRoddyBamFile,
-            RoddyBamFile,
-            RoddyWorkflowConfig,
-            Run,
-            RunSegment,
-            Sample,
-            SampleType,
-            SeqType,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqCenter,
-            SeqTrack,
-            SoftwareTool,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                DataFile,
+                Comment,
+                ExomeSeqTrack,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingWorkPackage,
+                Pipeline,
+                Project,
+                ProcessingOption,
+                OtrsTicket,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                RnaRoddyBamFile,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Run,
+                RunSegment,
+                Sample,
+                SampleType,
+                SeqType,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqCenter,
+                SeqTrack,
+                SoftwareTool,
+        ]
+    }
 
     @Unroll
     void "test informResultsAreBlocked (#name)"() {

@@ -36,10 +36,13 @@ import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 class PropertiesValidationServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ProcessingOption,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ProcessingOption,
+                SeqType,
+        ]
+    }
 
     static final String INVALID = 'i\nvalid'
     static final String SEQ_TYPE_RODDY_NAME = 'seqTypeRoddyName'

@@ -39,7 +39,9 @@ import de.dkfz.tbi.otp.utils.CreateJobStateLogFileHelper
 
 class AbstractRoddyJobSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
                 ClusterJob,
                 DataFile,
                 FileType,
@@ -54,7 +56,8 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
                 SeqPlatform,
                 SeqPlatformGroup,
                 SoftwareTool,
-    ]}
+        ]
+    }
 
     static final String STATUS_CODE_STARTED = "57427"
     static final String STATUS_CODE_FINISHED = "0"

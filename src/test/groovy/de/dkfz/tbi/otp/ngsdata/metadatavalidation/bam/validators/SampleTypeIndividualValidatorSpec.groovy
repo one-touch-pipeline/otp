@@ -37,16 +37,18 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class SampleTypeIndividualValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Individual,
-            Project,
-            Realm,
-            Sample,
-            SampleType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Individual,
+                Project,
+                Realm,
+                Sample,
+                SampleType,
+        ]
+    }
 
     void 'validate, when column(s) is/are missing, adds error(s)'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext("""\
 ${header}
@@ -67,7 +69,6 @@ value1\tvalue2
     }
 
     void 'validate, when combinations are in database, adds no problem'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext("""\
 ${BamMetadataColumn.SAMPLE_TYPE.name()}\t${BamMetadataColumn.INDIVIDUAL.name()}

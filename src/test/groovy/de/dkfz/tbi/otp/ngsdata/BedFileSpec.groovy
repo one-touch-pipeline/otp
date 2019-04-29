@@ -28,6 +28,7 @@ import spock.lang.Specification
 
 class BedFileSpec extends Specification implements DataTest {
 
+    @Override
     Class[] getDomainClassesToMock() {
         [
                 BedFile,

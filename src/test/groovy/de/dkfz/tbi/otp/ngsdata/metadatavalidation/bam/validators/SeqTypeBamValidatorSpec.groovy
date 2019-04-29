@@ -39,15 +39,18 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class SeqTypeBamValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SeqType,
+        ]
+    }
 
     void 'validate, when column SEQUENCING_TYPE missing, then add expected problem'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
-                "SomeColumn\n"+
+                "SomeColumn\n"
+                        +
                         "SomeValue"
         )
         Collection<Problem> expectedProblems = [
@@ -63,7 +66,6 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when column exist and seqType is registered in OTP, succeeds'() {
-
         given:
         String SEQ_TYPE_NAME = "seqTypeName"
 
@@ -82,7 +84,6 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when column exist but seqType is not registered in OTP, adds problems'() {
-
         given:
         String SEQ_TYPE_NAME = "seqTypeName"
 

@@ -39,6 +39,7 @@ class ProcessedBamFile extends AbstractFileSystemBamFile implements ProcessParam
         }
     }
 
+    @Override
     List<AbstractBamFile.BamType> getAllowedTypes() {
         return [AbstractBamFile.BamType.SORTED]
     }

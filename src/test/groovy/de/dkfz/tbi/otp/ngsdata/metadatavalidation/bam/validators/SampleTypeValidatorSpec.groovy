@@ -39,15 +39,17 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class SampleTypeValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SampleType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SampleType,
+        ]
+    }
 
     void 'validate, when column SAMPLE_TYPE missing, then add expected problem'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
-                "SomeColumn\n"+
+                "SomeColumn\n" +
                         "SomeValue"
         )
         Collection<Problem> expectedProblems = [
@@ -63,7 +65,6 @@ class SampleTypeValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when column exist and sampleType is registered in OTP, succeeds'() {
-
         given:
         String SAMPLE_TYPE_NAME = "sampleTypeName"
 
@@ -82,7 +83,6 @@ class SampleTypeValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when column exist but sampleType is not registered in OTP, adds problems'() {
-
         given:
         String SAMPLE_TYPE_NAME = "sampleTypeName"
 

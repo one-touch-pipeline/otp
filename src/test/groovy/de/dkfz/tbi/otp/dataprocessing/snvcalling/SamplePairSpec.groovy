@@ -32,22 +32,25 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class SamplePairSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ExternalMergingWorkPackage,
-            Individual,
-            LibraryPreparationKit,
-            MergingWorkPackage,
-            Pipeline,
-            Project,
-            Realm,
-            ReferenceGenome,
-            Sample,
-            SamplePair,
-            SampleType,
-            SampleTypePerProject,
-            SeqPlatformGroup,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ExternalMergingWorkPackage,
+                Individual,
+                LibraryPreparationKit,
+                MergingWorkPackage,
+                Pipeline,
+                Project,
+                Realm,
+                ReferenceGenome,
+                Sample,
+                SamplePair,
+                SampleType,
+                SampleTypePerProject,
+                SeqPlatformGroup,
+                SeqType,
+        ]
+    }
 
     List setUpForPathTests(String analysisName) {
         Realm realm = DomainFactory.createRealm()
@@ -81,7 +84,11 @@ class SamplePairSpec extends Specification implements DataTest {
         SamplePair samplePair = DomainFactory.createSamplePair(mergingWorkPackage1,
                 DomainFactory.createMergingWorkPackage(mergingWorkPackage1, sampleType2))
 
-        return ["${project.dirName}/sequencing/${seqType.dirName}/view-by-pid/${individual.pid}/${analysisName.toLowerCase()}_results/paired/tumor_control", samplePair, project]
+        return [
+                "${project.dirName}/sequencing/${seqType.dirName}/view-by-pid/${individual.pid}/${analysisName.toLowerCase()}_results/paired/tumor_control",
+                samplePair,
+                project,
+        ]
     }
 
     @Unroll
@@ -110,7 +117,7 @@ class SamplePairSpec extends Specification implements DataTest {
         AbstractMergingWorkPackage mergingWorkPackage1 = DomainFactory.createMergingWorkPackage(classMWP1)
         AbstractMergingWorkPackage mergingWorkPackage2 = DomainFactory.createMergingWorkPackage(classMWP1, [
                 seqType: mergingWorkPackage1.seqType,
-                sample : DomainFactory.createSample([individual: mergingWorkPackage1.individual])
+                sample : DomainFactory.createSample([individual: mergingWorkPackage1.individual]),
         ])
         DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackage1)
 

@@ -39,16 +39,19 @@ import static javax.servlet.http.HttpServletResponse.SC_OK
 
 class ProjectUserControllerSpec extends Specification implements ControllerUnitTest<ProjectUserController>, DataTest, UserAndRoles {
 
-    Class[] getDomainClassesToMock() {[
-            AclSid,
-            Project,
-            ProjectRole,
-            Realm,
-            Role,
-            User,
-            UserProjectRole,
-            UserRole,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AclSid,
+                Project,
+                ProjectRole,
+                Realm,
+                Role,
+                User,
+                UserProjectRole,
+                UserRole,
+        ]
+    }
 
     void "test index, sorting of users in different lists"() {
         given:

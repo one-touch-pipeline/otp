@@ -34,18 +34,21 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 
 class SeqTrackServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() { [
-            ExomeSeqTrack,
-            DataFile,
-            LogMessage,
-            MergingCriteria,
-            Pipeline,
-            RoddyWorkflowConfig,
-            RunSegment,
-            SeqCenter,
-            SeqPlatformGroup,
-            SeqTrack,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ExomeSeqTrack,
+                DataFile,
+                LogMessage,
+                MergingCriteria,
+                Pipeline,
+                RoddyWorkflowConfig,
+                RunSegment,
+                SeqCenter,
+                SeqPlatformGroup,
+                SeqTrack,
+        ]
+    }
 
     SeqTrackService seqTrackService
 

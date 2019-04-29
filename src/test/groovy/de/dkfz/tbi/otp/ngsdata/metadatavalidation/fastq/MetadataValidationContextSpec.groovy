@@ -40,10 +40,13 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 class MetadataValidationContextSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SeqType,
-            Realm,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SeqType,
+                Realm,
+        ]
+    }
 
     DirectoryStructure directoryStructure = [:] as DirectoryStructure
 

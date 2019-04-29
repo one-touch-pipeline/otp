@@ -31,9 +31,12 @@ import static de.dkfz.tbi.otp.utils.HelperUtils.getUniqueString
 
 class ClusterJobSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ClusterJob,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ClusterJob,
+        ]
+    }
 
     void "test findByClusterJobIdentifier"() {
         given:

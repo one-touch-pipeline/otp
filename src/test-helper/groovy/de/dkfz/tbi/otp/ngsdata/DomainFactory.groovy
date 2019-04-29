@@ -1198,7 +1198,7 @@ class DomainFactory {
         createReferenceGenomeAndAnalysisProcessingOptions("${samplePair.mergingWorkPackage1.referenceGenome.name}, ${samplePair.mergingWorkPackage2.referenceGenome.name}")
     }
 
-    static List<ProcessingOption> createReferenceGenomeAndAnalysisProcessingOptions(String value = null){
+    static List<ProcessingOption> createReferenceGenomeAndAnalysisProcessingOptions(String value = null) {
         if (!value) {
             value = createReferenceGenome().name
         }

@@ -39,15 +39,18 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class ReferenceGenomeValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ReferenceGenome,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ReferenceGenome,
+        ]
+    }
 
     void 'validate, when column REFERENCE_GENOME missing, then add expected problem'() {
 
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
-                "SomeColumn\n"+
+                "SomeColumn\n" +
                         "SomeValue"
         )
         Collection<Problem> expectedProblems = [

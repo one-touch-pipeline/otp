@@ -27,10 +27,13 @@ import spock.lang.Specification
 
 class RunSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SeqPlatformGroup,
-            SeqTrack,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SeqPlatformGroup,
+                SeqTrack,
+        ]
+    }
 
     void "test getSeqType"() {
         given:

@@ -32,15 +32,18 @@ import de.dkfz.tbi.otp.utils.ThreadUtils
 
 class OtrsTicketSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            MetaDataFile,
-            OtrsTicket,
-            Run,
-            RunSegment,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                MetaDataFile,
+                OtrsTicket,
+                Run,
+                RunSegment,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+        ]
+    }
 
     def 'test creation, correct String' () {
         given:

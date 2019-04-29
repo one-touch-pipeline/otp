@@ -37,10 +37,13 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class PipelineVersionValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SoftwareTool,
-            SoftwareToolIdentifier,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SoftwareTool,
+                SoftwareToolIdentifier,
+        ]
+    }
 
     static final String PIPELINE_VERSION = "pipeline version"
 

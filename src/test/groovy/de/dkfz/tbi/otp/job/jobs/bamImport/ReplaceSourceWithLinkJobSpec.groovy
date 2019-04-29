@@ -44,24 +44,27 @@ import java.nio.file.Files
 
 class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ExternalMergingWorkPackage,
-            ExternallyProcessedMergedBamFile,
-            ImportProcess,
-            Individual,
-            JobDefinition,
-            JobExecutionPlan,
-            Pipeline,
-            Process,
-            ProcessingStep,
-            ProcessParameter,
-            Project,
-            Realm,
-            ReferenceGenome,
-            Sample,
-            SampleType,
-            SeqType
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ExternalMergingWorkPackage,
+                ExternallyProcessedMergedBamFile,
+                ImportProcess,
+                Individual,
+                JobDefinition,
+                JobExecutionPlan,
+                Pipeline,
+                Process,
+                ProcessingStep,
+                ProcessParameter,
+                Project,
+                Realm,
+                ReferenceGenome,
+                Sample,
+                SampleType,
+                SeqType,
+        ]
+    }
 
     final long PROCESSING_STEP_ID = 1234567
 
@@ -163,7 +166,7 @@ ln -sf [^ ]+\\/subDirectory\\/file.txt [^ ]+\\/subDirectory\\/file.txt
     private void createHelperObjects() {
         linkingJob = [
                 getProcessParameterObject: { -> importProcess },
-                getProcessingStep        : { -> step }
+                getProcessingStep        : { -> step },
         ] as ReplaceSourceWithLinkJob
 
         CreateFileHelper.createFile(new File("${importProcess.externallyProcessedMergedBamFiles[0].importedFrom}"))
@@ -269,7 +272,7 @@ ln -sf [^ ]+ [^ ]+
         [
                 bamFile.getBamFileName(),
                 bamFile.getBaiFileName(),
-                bamFile.getFurtherFiles().first()
+                bamFile.getFurtherFiles().first(),
         ].each {
             File copied = new File(bamFile.getImportFolder(), it)
             File link = new File(mainDirectory, it)

@@ -27,9 +27,12 @@ import spock.lang.Specification
 
 class SeqCenterServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SeqCenter,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SeqCenter,
+        ]
+    }
 
 
     SeqCenterService seqCenterService

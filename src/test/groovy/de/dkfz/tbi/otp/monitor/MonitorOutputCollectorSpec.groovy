@@ -35,11 +35,14 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class MonitorOutputCollectorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            JobExecutionPlan,
-            Process,
-            ProcessingOption,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                JobExecutionPlan,
+                Process,
+                ProcessingOption,
+        ]
+    }
 
     void "leftShift, added value appear in output"() {
         given:

@@ -22,9 +22,9 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.context.ApplicationContext
 import grails.testing.gorm.DataTest
 import grails.testing.services.ServiceUnitTest
+import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -40,15 +40,18 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
 
     private String HEADER = SampleIdentifierService.BulkSampleCreationHeader.getHeaders(Spreadsheet.Delimiter.COMMA)
 
-    Class[] getDomainClassesToMock() {[
-            Individual,
-            ProcessingOption,
-            Project,
-            Realm,
-            Sample,
-            SampleIdentifier,
-            SampleType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Individual,
+                ProcessingOption,
+                Project,
+                Realm,
+                Sample,
+                SampleIdentifier,
+                SampleType,
+        ]
+    }
 
 
     private ParsedSampleIdentifier makeParsedSampleIdentifier(

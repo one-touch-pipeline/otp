@@ -36,14 +36,17 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class ClusterJobLoggingServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            JobDefinition,
-            JobExecutionPlan,
-            Process,
-            ProcessingStep,
-            ProcessingStepUpdate,
-            Realm,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                JobDefinition,
+                JobExecutionPlan,
+                Process,
+                ProcessingStep,
+                ProcessingStepUpdate,
+                Realm,
+        ]
+    }
 
     TestConfigService configService
 

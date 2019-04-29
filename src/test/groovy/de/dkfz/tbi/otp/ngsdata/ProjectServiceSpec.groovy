@@ -22,28 +22,28 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
-import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class ProjectServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ConfigPerProjectAndSeqType,
-            Pipeline,
-            Project,
-            Realm,
-            RunYapsaConfig,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ConfigPerProjectAndSeqType,
+                Pipeline,
+                Project,
+                Realm,
+                RunYapsaConfig,
+                SeqType,
+        ]
+    }
 
     void "createProject: dirName shouldn't overlap with root path"() {
         given:
@@ -102,7 +102,8 @@ class ProjectServiceSpec extends Specification implements DataTest {
 
         then:
         config.obsoleteDate != null
-        RunYapsaConfig newConfig = CollectionUtils.exactlyOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(config.project, config.seqType))
+        RunYapsaConfig newConfig = CollectionUtils.exactlyOneElement(RunYapsaConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(
+                config.project, config.seqType))
         newConfig != config
         newConfig.programVersion == "yapsa 1.0"
     }

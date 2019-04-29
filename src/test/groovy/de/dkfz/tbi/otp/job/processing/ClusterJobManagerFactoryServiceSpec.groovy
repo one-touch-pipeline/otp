@@ -36,10 +36,13 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 
 class ClusterJobManagerFactoryServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ProcessingOption,
-            Realm
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ProcessingOption,
+                Realm,
+        ]
+    }
 
     final static String SSH_USER = "user"
 

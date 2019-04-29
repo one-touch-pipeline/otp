@@ -34,18 +34,21 @@ import de.dkfz.tbi.otp.security.*
 
 class RunControllerSpec extends Specification implements ControllerUnitTest<RunController>, DataTest, UserAndRoles {
 
-    Class[] getDomainClassesToMock() {[
-            AclSid,
-            SeqPlatformGroup,
-            Role,
-            User,
-            DataFile,
-            UserRole,
-            Run,
-            SeqCenter,
-            MetaDataKey,
-            ProcessParameter,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AclSid,
+                SeqPlatformGroup,
+                Role,
+                User,
+                DataFile,
+                UserRole,
+                Run,
+                SeqCenter,
+                MetaDataKey,
+                ProcessParameter,
+        ]
+    }
 
     void setupData() {
         createUserAndRoles()

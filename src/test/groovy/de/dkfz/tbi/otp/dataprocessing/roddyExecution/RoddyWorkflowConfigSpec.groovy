@@ -35,14 +35,17 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class RoddyWorkflowConfigSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Pipeline,
-            Project,
-            ProjectCategory,
-            Realm,
-            RoddyWorkflowConfig,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Pipeline,
+                Project,
+                ProjectCategory,
+                Realm,
+                RoddyWorkflowConfig,
+                SeqType,
+        ]
+    }
 
     final static String RODDY_NAME = 'roddyName'
     final static String PLUGIN_VERSION = 'pluginVersion:1.1.1'
@@ -121,7 +124,8 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         config.seqType = DomainFactory.createSeqType(name: seqTypeName)
 
         expect:
-        TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'adapterTrimmingNeeded must be set for WGBS, ChipSeq and RNA alignment', config.adapterTrimmingNeeded)
+        TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'adapterTrimmingNeeded must be set for WGBS, ChipSeq and RNA alignment',
+                config.adapterTrimmingNeeded)
 
         where:
         seqTypeName << [SeqTypeNames.RNA, SeqTypeNames.WHOLE_GENOME_BISULFITE, SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION]
@@ -134,7 +138,8 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         config.pipeline = DomainFactory.createPipeline(name, type)
 
         expect:
-        TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'adapterTrimmingNeeded must not be set for non-alignment pipelines', config.adapterTrimmingNeeded)
+        TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'adapterTrimmingNeeded must not be set for non-alignment pipelines',
+                config.adapterTrimmingNeeded)
 
         where:
         type                | name

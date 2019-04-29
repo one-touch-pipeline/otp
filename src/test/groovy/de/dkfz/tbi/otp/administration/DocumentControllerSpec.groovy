@@ -37,14 +37,17 @@ import static javax.servlet.http.HttpServletResponse.*
 
 class DocumentControllerSpec extends Specification implements ControllerUnitTest<DocumentController>, DataTest, UserAndRoles {
 
-    Class[] getDomainClassesToMock() {[
-            AclSid,
-            Document,
-            DocumentType,
-            User,
-            UserRole,
-            Role,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AclSid,
+                Document,
+                DocumentType,
+                User,
+                UserRole,
+                Role,
+        ]
+    }
 
     void setupData() {
         createUserAndRoles()

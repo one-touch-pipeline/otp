@@ -33,10 +33,13 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 
 class BedFileServiceSpec extends Specification implements DataTest, ServiceUnitTest<BedFileService> {
 
-    Class[] getDomainClassesToMock() {[
-            BedFile,
-            ProcessingOption,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                BedFile,
+                ProcessingOption,
+        ]
+    }
 
 
     @Rule

@@ -39,6 +39,7 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
     static final String OTHER_SEQ_TYPE_NAME = "otherSeqType"
     static final String OTHER_SAMPLE_TYPE_NAME = "otherSampleType"
 
+    @Override
     Class[] getDomainClassesToMock() {
         [
                 Project,

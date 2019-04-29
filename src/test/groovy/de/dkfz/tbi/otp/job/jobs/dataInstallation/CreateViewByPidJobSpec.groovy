@@ -36,31 +36,34 @@ import de.dkfz.tbi.otp.utils.LinkFileUtils
 
 class CreateViewByPidJobSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            DataFile,
-            FileType,
-            Individual,
-            JobDefinition,
-            JobExecutionPlan,
-            Process,
-            ProcessingStep,
-            ProcessParameter,
-            Project,
-            ProjectCategory,
-            Realm,
-            Run,
-            RunSegment,
-            Sample,
-            SampleType,
-            SeqCenter,
-            SeqPlatformGroup,
-            SeqPlatform,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-            SoftwareToolIdentifier,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                DataFile,
+                FileType,
+                Individual,
+                JobDefinition,
+                JobExecutionPlan,
+                Process,
+                ProcessingStep,
+                ProcessParameter,
+                Project,
+                ProjectCategory,
+                Realm,
+                Run,
+                RunSegment,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatformGroup,
+                SeqPlatform,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+                SoftwareToolIdentifier,
+        ]
+    }
 
     final long PROCESSING_STEP_ID = 1234567
 
@@ -93,7 +96,10 @@ class CreateViewByPidJobSpec extends Specification implements DataTest {
         File target = new File(createViewByPidJob.lsdfFilesService.getFileViewByPidPath(dataFile))
 
         DomainFactory.createProcessParameter([
-                process: step.process, value: seqTrack.id, className: SeqTrack.class.name])
+                process  : step.process,
+                value    : seqTrack.id,
+                className: SeqTrack.class.name,
+        ])
 
         createViewByPidJob.linkFileUtils = Mock(LinkFileUtils) {
             1 * createAndValidateLinks(_, _) >> { Map<File, File> sourceLinkMap, Realm realm ->

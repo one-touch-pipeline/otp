@@ -36,9 +36,12 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 class LsdfFileServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Realm,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Realm,
+        ]
+    }
 
 
     LsdfFilesService service

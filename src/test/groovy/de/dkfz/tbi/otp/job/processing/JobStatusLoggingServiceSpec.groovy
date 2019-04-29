@@ -37,14 +37,17 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 
 class JobStatusLoggingServiceSpec extends Specification implements ServiceUnitTest<JobStatusLoggingService>, DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            JobDefinition,
-            JobExecutionPlan,
-            Process,
-            ProcessingOption,
-            ProcessingStep,
-            Realm,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                JobDefinition,
+                JobExecutionPlan,
+                Process,
+                ProcessingOption,
+                ProcessingStep,
+                Realm,
+        ]
+    }
 
 
     TestConfigService configService

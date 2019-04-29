@@ -35,10 +35,13 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 
 class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specification implements DataTest, ServiceUnitTest<JobStatusLoggingService> {
 
-    Class[] getDomainClassesToMock() {[
-            ProcessingStep,
-            Realm,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ProcessingStep,
+                Realm,
+        ]
+    }
 
 
     TestConfigService configService
@@ -156,10 +159,13 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specific
                 failedJobOnRealmWithSameLogDirAs1,
         ]
 
-        new File(service.constructLogFileLocation(realm1, processingStep, successfulJobOnRealm1.clusterJobId)).text = service.constructMessage(realm1, processingStep, successfulJobOnRealm1.clusterJobId) + "\n"
-        new File(service.constructLogFileLocation(realm2, processingStep, successfulJobOnRealm2.clusterJobId)).text = "\n" + service.constructMessage(realm2, processingStep, successfulJobOnRealm2.clusterJobId)
+        new File(service.constructLogFileLocation(realm1, processingStep, successfulJobOnRealm1.clusterJobId)).text =
+                service.constructMessage(realm1, processingStep, successfulJobOnRealm1.clusterJobId) + "\n"
+        new File(service.constructLogFileLocation(realm2, processingStep, successfulJobOnRealm2.clusterJobId)).text =
+                "\n" + service.constructMessage(realm2, processingStep, successfulJobOnRealm2.clusterJobId)
         new File(service.constructLogFileLocation(realmWithEmptyLogFile, processingStep, jobOnRealmWithEmptyLogFile.clusterJobId)).text = ''
-        new File(service.constructLogFileLocation(realmWithSameLogDirAs1, processingStep, successfulJobOnRealmWithSameLogDirAs1.clusterJobId)).text = service.constructMessage(realmWithSameLogDirAs1, processingStep, successfulJobOnRealmWithSameLogDirAs1.clusterJobId)
+        new File(service.constructLogFileLocation(realmWithSameLogDirAs1, processingStep, successfulJobOnRealmWithSameLogDirAs1.clusterJobId)).text =
+                service.constructMessage(realmWithSameLogDirAs1, processingStep, successfulJobOnRealmWithSameLogDirAs1.clusterJobId)
     }
 
     void cleanup() {
@@ -201,7 +207,7 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specific
 
     void "test failedOrNotFinishedClusterJobs, with collection of cluster job identifiers"() {
         when:
-        final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs= service.failedOrNotFinishedClusterJobs(processingStep, [
+        final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, [
                 successfulJobOnRealm1,
                 failedJobOnRealm1,
                 successfulJobOnRealm2,
@@ -223,7 +229,7 @@ class JobStatusLoggingServiceFailedOrNotFinishedClusterJobsSpec extends Specific
 
     void "test failedOrNotFinishedClusterJobs, with argument map"() {
         when:
-        final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs= service.failedOrNotFinishedClusterJobs(processingStep, [
+        final Collection<ClusterJobIdentifier> unsuccessfulClusterJobs = service.failedOrNotFinishedClusterJobs(processingStep, [
                 (realm1)                : jobIdsOnRealm1.collect {
                     new ClusterJobIdentifier(realm1, it)
                 },

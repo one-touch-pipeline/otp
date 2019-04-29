@@ -49,6 +49,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         }
     }
 
+    @Override
     List<AbstractBamFile.BamType> getAllowedTypes() {
         return [AbstractBamFile.BamType.MDUP]
     }
@@ -86,7 +87,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
 
     @Override
     Set<SeqTrack> getContainedSeqTracks() {
-        final Set<SeqTrack> seqTracks = mergingSet.containedSeqTracks
+        Set<SeqTrack> seqTracks = mergingSet.containedSeqTracks
         if (seqTracks.empty) {
             throw new IllegalStateException("MergingSet ${mergingSet} is empty.")
         }
@@ -121,6 +122,7 @@ class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessPar
         return "${body}.bai"
     }
 
+    @SuppressWarnings('JavaIoPackageAccess')
     @Override
     protected File getPathForFurtherProcessingNoCheck() {
         return new File(baseDirectory, bamFileName)

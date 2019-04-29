@@ -39,22 +39,24 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 class LibPrepKitAdapterValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Individual,
-            LibraryPreparationKit,
-            Pipeline,
-            ProcessingOption,
-            Project,
-            Realm,
-            RoddyWorkflowConfig,
-            Sample,
-            SampleIdentifier,
-            SampleType,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Individual,
+                LibraryPreparationKit,
+                Pipeline,
+                ProcessingOption,
+                Project,
+                Realm,
+                RoddyWorkflowConfig,
+                Sample,
+                SampleIdentifier,
+                SampleType,
+                SeqType,
+        ]
+    }
 
     void 'validate, when metadata file contains valid data, succeeds'() {
-
         given:
         DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createPanCanPipeline()

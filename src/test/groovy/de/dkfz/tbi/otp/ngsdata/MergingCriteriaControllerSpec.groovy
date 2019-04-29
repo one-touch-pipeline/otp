@@ -35,20 +35,23 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class MergingCriteriaControllerSpec extends Specification implements ControllerUnitTest<MergingCriteriaController>, DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AclSid,
-            MergingCriteria,
-            Project,
-            ProjectRole,
-            Realm,
-            Role,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqType,
-            User,
-            UserProjectRole,
-            UserRole,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AclSid,
+                MergingCriteria,
+                Project,
+                ProjectRole,
+                Realm,
+                Role,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqType,
+                User,
+                UserProjectRole,
+                UserRole,
+        ]
+    }
 
     void setupData() {
         controller.mergingCriteriaService = new MergingCriteriaService()
@@ -188,7 +191,8 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
 
         then:
         controller.response.status == 302
-        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${group.mergingCriteria.project.id}&seqType.id=${group.mergingCriteria.seqType.id}"
+        controller.response.redirectedUrl ==
+                "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${group.mergingCriteria.project.id}&seqType.id=${group.mergingCriteria.seqType.id}"
         !group.seqPlatforms.contains(seqPlatform1)
         group.seqPlatforms.contains(seqPlatform2)
     }
@@ -207,7 +211,8 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
 
         then:
         controller.response.status == 302
-        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${group.mergingCriteria.project.id}&seqType.id=${group.mergingCriteria.seqType.id}"
+        controller.response.redirectedUrl ==
+                "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${group.mergingCriteria.project.id}&seqType.id=${group.mergingCriteria.seqType.id}"
         group.seqPlatforms.contains(seqPlatform)
     }
 
@@ -227,7 +232,8 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
 
         then:
         controller.response.status == 302
-        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${mergingCriteria.project.id}&seqType.id=${mergingCriteria.seqType.id}"
+        controller.response.redirectedUrl ==
+                "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${mergingCriteria.project.id}&seqType.id=${mergingCriteria.seqType.id}"
         SeqPlatformGroup.list().size() == 1
         SeqPlatformGroup.list().first().seqPlatforms.contains(seqPlatform)
         SeqPlatformGroup.list().first().mergingCriteria == mergingCriteria
@@ -262,7 +268,8 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
 
         then:
         controller.response.status == 302
-        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${seqPlatformGroup.mergingCriteria.project.id}&seqType.id=${seqPlatformGroup.mergingCriteria.seqType.id}"
+        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${seqPlatformGroup.mergingCriteria.project.id}&" +
+                "seqType.id=${seqPlatformGroup.mergingCriteria.seqType.id}"
         SeqPlatformGroup.list().size() == 1
         !SeqPlatformGroup.list().first().seqPlatforms
     }
@@ -285,7 +292,8 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
 
         then:
         controller.response.status == 302
-        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${mergingCriteria.project.id}&seqType.id=${mergingCriteria.seqType.id}"
+        controller.response.redirectedUrl ==
+                "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${mergingCriteria.project.id}&seqType.id=${mergingCriteria.seqType.id}"
         SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria).size() == 1
         SeqPlatformGroup.findByMergingCriteria(mergingCriteria).seqPlatforms == [seqPlatform] as Set
     }
@@ -309,7 +317,8 @@ class MergingCriteriaControllerSpec extends Specification implements ControllerU
 
         then:
         controller.response.status == 302
-        controller.response.redirectedUrl == "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${mergingCriteria.project.id}&seqType.id=${mergingCriteria.seqType.id}"
+        controller.response.redirectedUrl ==
+                "/mergingCriteria/projectAndSeqTypeSpecific?project.id=${mergingCriteria.project.id}&seqType.id=${mergingCriteria.seqType.id}"
         SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria).size() == 2
         CollectionUtils.containSame(SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria)*.seqPlatforms, [[seqPlatform] as Set, [seqPlatform1] as Set])
     }

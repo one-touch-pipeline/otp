@@ -33,15 +33,18 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class RestartHandlerServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            JobErrorDefinition,
-            JobDefinition,
-            JobExecutionPlan,
-            Process,
-            ProcessingError,
-            ProcessingStep,
-            ProcessingStepUpdate,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                JobErrorDefinition,
+                JobDefinition,
+                JobExecutionPlan,
+                Process,
+                ProcessingError,
+                ProcessingStep,
+                ProcessingStepUpdate,
+        ]
+    }
 
     @Unroll
     void "test handleRestart"() {

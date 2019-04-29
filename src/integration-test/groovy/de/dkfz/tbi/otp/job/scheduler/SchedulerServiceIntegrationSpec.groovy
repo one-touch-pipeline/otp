@@ -199,7 +199,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
-        ProcessingStepUpdate update = DomainFactory.createProcessingStepUpdate(processingStep: step)
+        DomainFactory.createProcessingStepUpdate(processingStep: step)
 
         expect:
         areQueueAndRunningEmpty()
@@ -261,7 +261,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         process = DomainFactory.createProcess(jobExecutionPlan: jep)
         step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
-        update = DomainFactory.createProcessingStepUpdate(processingStep: step)
+        DomainFactory.createProcessingStepUpdate(processingStep: step)
 
         then:
         areQueueAndRunningEmpty()
@@ -340,7 +340,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
-        ProcessingStepUpdate update = DomainFactory.createProcessingStepUpdate(processingStep: step)
+        DomainFactory.createProcessingStepUpdate(processingStep: step)
 
         expect:
         areQueueAndRunningEmpty()
@@ -407,7 +407,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
-        ProcessingStepUpdate update = DomainFactory.createProcessingStepUpdate(processingStep: step)
+        DomainFactory.createProcessingStepUpdate(processingStep: step)
 
         expect:
         areQueueAndRunningEmpty()
@@ -479,7 +479,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
-        ProcessingStepUpdate update = DomainFactory.createProcessingStepUpdate(processingStep: step)
+        DomainFactory.createProcessingStepUpdate(processingStep: step)
 
         expect:
         areQueueAndRunningEmpty()
@@ -899,7 +899,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep step = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
-        ProcessingStepUpdate update = DomainFactory.createProcessingStepUpdate(processingStep: step)
+        DomainFactory.createProcessingStepUpdate(processingStep: step)
 
         when:
         schedulerService.queue.add(step)
@@ -1408,7 +1408,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         Process process = DomainFactory.createProcess(jobExecutionPlan: jep)
         ProcessingStep firstStep = DomainFactory.createProcessingStep(jobDefinition: jobDefinition, process: process)
 
-        ProcessingStepUpdate update = DomainFactory.createProcessingStepUpdate(
+        DomainFactory.createProcessingStepUpdate(
                 state: ExecutionState.CREATED,
                 previous: null,
                 processingStep: firstStep
@@ -1436,7 +1436,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         fourthStep
 
         when:
-        ProcessingStepUpdate failureUpdate = DomainFactory.createProcessingStepUpdate(
+        DomainFactory.createProcessingStepUpdate(
                 state: ExecutionState.FAILURE,
                 previous: ProcessingStepUpdate.findAllByProcessingStep(secondStep).last(),
                 processingStep: secondStep

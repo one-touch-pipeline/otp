@@ -30,10 +30,13 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 
 class SampleIdentifierSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ProcessingOption,
-            SampleIdentifier,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ProcessingOption,
+                SampleIdentifier,
+        ]
+    }
 
 
     static private String CORRECT_NAME = 'name'

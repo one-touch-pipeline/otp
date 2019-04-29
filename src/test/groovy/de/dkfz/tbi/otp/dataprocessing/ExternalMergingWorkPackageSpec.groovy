@@ -30,18 +30,21 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class ExternalMergingWorkPackageSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            ExternalMergingWorkPackage,
-            Individual,
-            Pipeline,
-            Project,
-            ProjectCategory,
-            Realm,
-            ReferenceGenome,
-            Sample,
-            SampleType,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                ExternalMergingWorkPackage,
+                Individual,
+                Pipeline,
+                Project,
+                ProjectCategory,
+                Realm,
+                ReferenceGenome,
+                Sample,
+                SampleType,
+                SeqType,
+        ]
+    }
 
     void "test constraint, when all fine then no exception should be thrown"() {
         given:

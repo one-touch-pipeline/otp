@@ -39,9 +39,12 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class LibPrepKitValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            LibraryPreparationKit,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                LibraryPreparationKit,
+        ]
+    }
 
     LibPrepKitValidator validator
 
@@ -58,7 +61,6 @@ class LibPrepKitValidatorSpec extends Specification implements DataTest {
 
 
     void 'validate, when metadata file contains valid LibPrepKit'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 VALID_METADATA
@@ -73,7 +75,6 @@ class LibPrepKitValidatorSpec extends Specification implements DataTest {
 
 
     void 'validate, when metadata file contains invalid LibPrepKit, adds error'() {
-
         given:
         String invalid = "totally_invalid_lib_prep_kit"
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
@@ -92,7 +93,6 @@ class LibPrepKitValidatorSpec extends Specification implements DataTest {
 
     @Unroll
     void 'validate, when metadata file column LibPrepKit is #message, adds warning'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.LIB_PREP_KIT}\tother
@@ -117,7 +117,6 @@ ${libPrepKit}\tdef
     }
 
     void 'validate, when metadata file contains no LibPrepKit column, adds one warning'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 

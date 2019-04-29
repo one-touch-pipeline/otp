@@ -33,18 +33,21 @@ import de.dkfz.tbi.otp.utils.*
 
 class ProjectOverviewServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Individual,
-            Pipeline,
-            Project,
-            ProjectCategory,
-            ProcessingOption,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeProjectSeqType,
-            RoddyWorkflowConfig,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Individual,
+                Pipeline,
+                Project,
+                ProjectCategory,
+                ProcessingOption,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                RoddyWorkflowConfig,
+                SeqType,
+        ]
+    }
 
     void "getRoddyAlignmentInformation, throws AssertionError when WorkflowConfig is null"() {
         when:

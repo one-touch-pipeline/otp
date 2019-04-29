@@ -32,24 +32,27 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class TypeValidatorsSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            JobExecutionPlan,
-            JobDefinition,
-            SeqCenter,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                JobExecutionPlan,
+                JobDefinition,
+                SeqCenter,
+                SeqType,
+        ]
+    }
 
-    private static String CENTER_A = 'CenterA'
-    private static String CENTER_B = 'CenterB'
+    private static final String CENTER_A = 'CenterA'
+    private static final String CENTER_B = 'CenterB'
 
-    private static String SEQ_TYPE_RODDY_NAME_A = 'roddyNameA'
-    private static String SEQ_TYPE_RODDY_NAME_B = 'roddyNameB'
+    private static final String SEQ_TYPE_RODDY_NAME_A = 'roddyNameA'
+    private static final String SEQ_TYPE_RODDY_NAME_B = 'roddyNameB'
 
-    private static String SEQ_TYPE_DISPLAY_NAME_A = 'DisplayNameA'
-    private static String SEQ_TYPE_DISPLAY_NAME_B = 'DisplayNameB'
+    private static final String SEQ_TYPE_DISPLAY_NAME_A = 'DisplayNameA'
+    private static final String SEQ_TYPE_DISPLAY_NAME_B = 'DisplayNameB'
 
-    private static String WORKFLOW_NAME_A = 'WorkflowA'
-    private static String WORKFLOW_NAME_B = 'WorkflowB'
+    private static final String WORKFLOW_NAME_A = 'WorkflowA'
+    private static final String WORKFLOW_NAME_B = 'WorkflowB'
 
     @Unroll
     void "check #validator for value '#value' should return '#ret'"() {

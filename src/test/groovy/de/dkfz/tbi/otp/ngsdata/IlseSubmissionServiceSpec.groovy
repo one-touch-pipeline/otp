@@ -34,10 +34,13 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 
 class IlseSubmissionServiceSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Comment,
-            IlseSubmission,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Comment,
+                IlseSubmission,
+        ]
+    }
 
     @Unroll
     void "test getSortedBlacklistedIlseSubmissions single"() {

@@ -30,14 +30,17 @@ import de.dkfz.tbi.otp.ngsdata.Individual.Type
 
 class IndividualSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Individual,
-            Project,
-            Realm,
-            Sample,
-            SampleType,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Individual,
+                Project,
+                Realm,
+                Sample,
+                SampleType,
+                SeqType,
+        ]
+    }
 
 
     TestConfigService configService

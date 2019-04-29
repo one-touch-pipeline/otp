@@ -38,38 +38,41 @@ import de.dkfz.tbi.otp.tracking.TrackingService
 
 class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory, DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            DataFile,
-            Comment,
-            ExomeSeqTrack,
-            FileType,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            MergingWorkPackage,
-            Pipeline,
-            Project,
-            ProcessingOption,
-            OtrsTicket,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeProjectSeqType,
-            RnaRoddyBamFile,
-            RoddyBamFile,
-            RoddyWorkflowConfig,
-            Run,
-            RunSegment,
-            Sample,
-            SampleType,
-            SeqType,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SeqCenter,
-            SeqTrack,
-            SoftwareTool,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                DataFile,
+                Comment,
+                ExomeSeqTrack,
+                FileType,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingWorkPackage,
+                Pipeline,
+                Project,
+                ProcessingOption,
+                OtrsTicket,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeProjectSeqType,
+                RnaRoddyBamFile,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Run,
+                RunSegment,
+                Sample,
+                SampleType,
+                SeqType,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SeqCenter,
+                SeqTrack,
+                SoftwareTool,
+        ]
+    }
 
     QcTrafficLightService qcTrafficLightService
     TestConfigService testConfigService

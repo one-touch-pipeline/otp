@@ -26,9 +26,12 @@ import grails.testing.gorm.DataTest
 
 class SeqPlatformModelLabelServiceSpec extends MetadataFieldsServiceSpec<SeqPlatformModelLabel> implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SeqPlatformModelLabel,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SeqPlatformModelLabel,
+        ]
+    }
 
     SeqPlatformModelLabelService seqPlatformModelLabelService = new SeqPlatformModelLabelService()
 

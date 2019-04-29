@@ -198,9 +198,9 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         jobErrorDefinition.getJobDefinitions().contains(jobDefinition)
 
         where:
-        jobDefinitionClosure                                      | _
-        ({ DomainFactory.createJobDefinition(name: "NAME") })     | _
-        ({ DomainFactory.createJobDefinition(name: "NEW_NAME") }) | _
+        jobDefinitionClosure                                        | _
+        ( { DomainFactory.createJobDefinition(name: "NAME") } )     | _
+        ( { DomainFactory.createJobDefinition(name: "NEW_NAME") } ) | _
     }
 
 }

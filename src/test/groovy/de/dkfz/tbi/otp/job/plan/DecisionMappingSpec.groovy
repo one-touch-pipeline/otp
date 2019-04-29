@@ -29,12 +29,15 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 class DecisionMappingSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            DecisionMapping,
-            JobDecision,
-            JobDefinition,
-            JobExecutionPlan,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                DecisionMapping,
+                JobDecision,
+                JobDefinition,
+                JobExecutionPlan,
+        ]
+    }
 
     void "test validate, when decision and definition are null, should fail"() {
         given:

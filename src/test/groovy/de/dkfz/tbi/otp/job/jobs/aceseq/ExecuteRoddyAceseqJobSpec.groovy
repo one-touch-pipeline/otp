@@ -39,43 +39,46 @@ import de.dkfz.tbi.otp.utils.*
 
 class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            AbstractMergedBamFile,
-            AceseqInstance,
-            AceseqQc,
-            DataFile,
-            FileType,
-            IndelCallingInstance,
-            Individual,
-            LibraryPreparationKit,
-            MergingCriteria,
-            MergingWorkPackage,
-            Pipeline,
-            ProcessingOption,
-            Project,
-            ProjectCategory,
-            Sample,
-            SamplePair,
-            SampleType,
-            SampleTypePerProject,
-            SeqCenter,
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SequencingKitLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-            SophiaInstance,
-            Realm,
-            ReferenceGenome,
-            ReferenceGenomeEntry,
-            ReferenceGenomeProjectSeqType,
-            RoddyBamFile,
-            RoddyWorkflowConfig,
-            Run,
-            RunSegment,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                AbstractMergedBamFile,
+                AceseqInstance,
+                AceseqQc,
+                DataFile,
+                FileType,
+                IndelCallingInstance,
+                Individual,
+                LibraryPreparationKit,
+                MergingCriteria,
+                MergingWorkPackage,
+                Pipeline,
+                ProcessingOption,
+                Project,
+                ProjectCategory,
+                Sample,
+                SamplePair,
+                SampleType,
+                SampleTypePerProject,
+                SeqCenter,
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SequencingKitLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+                SophiaInstance,
+                Realm,
+                ReferenceGenome,
+                ReferenceGenomeEntry,
+                ReferenceGenomeProjectSeqType,
+                RoddyBamFile,
+                RoddyWorkflowConfig,
+                Run,
+                RunSegment,
+        ]
+    }
 
     @Rule
     public TemporaryFolder temporaryFolder
@@ -132,7 +135,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
                     1 * fastaFilePath(_) >> fasta
                     1 * chromosomeLengthFile(_) >> chromosomeLength
                     1 * gcContentFile(_) >> gcContent
-                }
+                },
         ])
 
         ReferenceGenome referenceGenome = DomainFactory.createAceseqReferenceGenome()
@@ -209,7 +212,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
                 },
                 aceseqService             : Mock(AceseqService) {
                     1 * validateInputBamFiles(_) >> { }
-                }
+                },
         ])
 
         DomainFactory.createAceseqQc([:], [:], [:], aceseqInstance)

@@ -37,12 +37,15 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 class SeqPlatformValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SeqPlatform,
-            SeqPlatformGroup,
-            SeqPlatformModelLabel,
-            SequencingKitLabel,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SeqPlatform,
+                SeqPlatformGroup,
+                SeqPlatformModelLabel,
+                SequencingKitLabel,
+        ]
+    }
 
     SeqPlatformModelLabel model1
     SeqPlatformModelLabel model2
@@ -77,7 +80,6 @@ class SeqPlatformValidatorSpec extends Specification implements DataTest {
     }
 
     void 'with kit column, validate adds expected problems'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${SEQUENCING_KIT}\n" +
@@ -130,24 +132,24 @@ class SeqPlatformValidatorSpec extends Specification implements DataTest {
         when:
         SeqPlatformValidator validator = new SeqPlatformValidator()
         validator.seqPlatformService = Mock(SeqPlatformService) {
-            1 *findSeqPlatform("Platform1", "Model1", "Kit1") >> platform_1_1_1
-            1 *findSeqPlatform("Platform1", "Model1ImportAlias", "Kit1") >> platform_1_1_1
-            1 *findSeqPlatform("Platform1", "Model1", "Kit1ImportAlias") >> platform_1_1_1
-            1 *findSeqPlatform("Platform1", "Model1ImportAlias", "Kit1ImportAlias") >> platform_1_1_1
-            1 *findSeqPlatform("Platform2", "Model1", "Kit1") >> null
-            1 *findSeqPlatform("Platform1", "Model2", "Kit1") >> null
-            1 *findSeqPlatform("Platform1", "Model1", "Kit2") >> null
-            1 *findSeqPlatform("Platform1", "Model1", null) >> null
-            1 *findSeqPlatform("Platform3", "Model3", null) >> platform_3_3_X
-            1 *findSeqPlatform("Platform3", "Model3ImportAlias", null) >> platform_3_3_X
-            1 *findSeqPlatform("Platform4", "Model3", null) >> null
-            1 *findSeqPlatform("Platform3", "Model4", null) >> null
-            1 *findSeqPlatform("Platform3", "Model3", "Kit1") >> null
-            1 *findSeqPlatform("Platform5", "Model1", "Kit1") >> null
-            1 *findSeqPlatform("Platform1", "Model5", "Kit1") >> null
-            1 *findSeqPlatform("Platform1", "Model1", "Kit5") >> null
-            1 *findSeqPlatform("Platform5", "Model3", null) >> null
-            1 *findSeqPlatform("Platform3", "Model5", null) >> null
+            1 * findSeqPlatform("Platform1", "Model1", "Kit1") >> platform_1_1_1
+            1 * findSeqPlatform("Platform1", "Model1ImportAlias", "Kit1") >> platform_1_1_1
+            1 * findSeqPlatform("Platform1", "Model1", "Kit1ImportAlias") >> platform_1_1_1
+            1 * findSeqPlatform("Platform1", "Model1ImportAlias", "Kit1ImportAlias") >> platform_1_1_1
+            1 * findSeqPlatform("Platform2", "Model1", "Kit1") >> null
+            1 * findSeqPlatform("Platform1", "Model2", "Kit1") >> null
+            1 * findSeqPlatform("Platform1", "Model1", "Kit2") >> null
+            1 * findSeqPlatform("Platform1", "Model1", null) >> null
+            1 * findSeqPlatform("Platform3", "Model3", null) >> platform_3_3_X
+            1 * findSeqPlatform("Platform3", "Model3ImportAlias", null) >> platform_3_3_X
+            1 * findSeqPlatform("Platform4", "Model3", null) >> null
+            1 * findSeqPlatform("Platform3", "Model4", null) >> null
+            1 * findSeqPlatform("Platform3", "Model3", "Kit1") >> null
+            1 * findSeqPlatform("Platform5", "Model1", "Kit1") >> null
+            1 * findSeqPlatform("Platform1", "Model5", "Kit1") >> null
+            1 * findSeqPlatform("Platform1", "Model1", "Kit5") >> null
+            1 * findSeqPlatform("Platform5", "Model3", null) >> null
+            1 * findSeqPlatform("Platform3", "Model5", null) >> null
         }
         validator.validate(context)
 
@@ -156,7 +158,6 @@ class SeqPlatformValidatorSpec extends Specification implements DataTest {
     }
 
     void 'without kit column, validate adds expected problems'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\n" +

@@ -32,10 +32,13 @@ import de.dkfz.tbi.otp.Comment
 
 class IlseSubmissionSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Comment,
-            IlseSubmission,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Comment,
+                IlseSubmission,
+        ]
+    }
 
     @Unroll
     void "test constraints all fine"() {

@@ -44,9 +44,12 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
 class MetadataFileCopiedValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            SeqCenter,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                SeqCenter,
+        ]
+    }
 
     MetadataFileCopiedValidator metadataFileCopiedValidator
 
@@ -157,7 +160,7 @@ class MetadataFileCopiedValidatorSpec extends Specification implements DataTest 
         problem.message.contains("There is already a file in the seqcenter inbox but it is different from this metadata file.")
     }
 
-    private MetadataValidationContext createContextAndSeqCenter(String contextString, copyMetadataFile = true) {
+    private MetadataValidationContext createContextAndSeqCenter(String contextString, boolean copyMetadataFile = true) {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 contextString,
                 [

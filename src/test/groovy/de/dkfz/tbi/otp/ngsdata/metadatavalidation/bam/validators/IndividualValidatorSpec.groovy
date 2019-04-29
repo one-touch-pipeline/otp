@@ -38,14 +38,16 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class IndividualValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            Individual,
-            Realm,
-            Project,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                Individual,
+                Realm,
+                Project,
+        ]
+    }
 
     void 'validate, when column INDIVIDUAL missing, then add expected problem'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "SomeColumn\n" +
@@ -64,7 +66,6 @@ class IndividualValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when column exist and individual is registered in OTP, succeeds'() {
-
         given:
         String INDIVIDUAL_PID = "individualPid"
 
@@ -83,7 +84,6 @@ class IndividualValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when column exist but individual is not registered in OTP, adds problems'() {
-
         given:
         String INDIVIDUAL_PID = "individualPid"
 

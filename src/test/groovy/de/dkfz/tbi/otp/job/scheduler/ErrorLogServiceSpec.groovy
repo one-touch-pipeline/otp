@@ -28,15 +28,9 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.ConfigService
 
 class ErrorLogServiceSpec extends Specification implements DataTest {
-
-    Class[] getDomainClassesToMock() {[
-
-    ]}
 
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder()

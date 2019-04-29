@@ -38,12 +38,14 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class LibraryPreparationKitValidatorSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            LibraryPreparationKit,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                LibraryPreparationKit,
+        ]
+    }
 
     void 'validate, when library preparation kit is not registered in OTP, then add expected problem'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE}\t${LIBRARY_PREPARATION_KIT}
@@ -63,7 +65,6 @@ EXON\tIndividual1
     }
 
     void 'validate, when library preparation kit is registered in OTP and is EXOME, succeeds'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext("""\
 ${SEQUENCING_TYPE}\t${LIBRARY_PREPARATION_KIT}
@@ -80,7 +81,6 @@ EXON\tIndividual1\t
     }
 
     void 'validate, without library preparation kit but EXOME, adds problems'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "${SEQUENCING_TYPE.name()}\n" +
@@ -101,7 +101,6 @@ EXON\tIndividual1\t
     }
 
     void 'validate, without library preparation kit and without EXOME, succeeds'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "${SEQUENCING_TYPE.name()}\n" +

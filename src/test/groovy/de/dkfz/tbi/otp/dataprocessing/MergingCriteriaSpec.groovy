@@ -31,12 +31,15 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 class MergingCriteriaSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            MergingCriteria,
-            Project,
-            Realm,
-            SeqType,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                MergingCriteria,
+                Project,
+                Realm,
+                SeqType,
+        ]
+    }
 
     void "test that for Exome data LibPrepKit must be true"() {
         expect:
@@ -56,7 +59,8 @@ class MergingCriteriaSpec extends Specification implements DataTest {
         mergingCriteria.seqType = seqType
 
         then:
-        TestCase.assertValidateError(mergingCriteria, "useLibPrepKit", "In case of Exome data, the libraryPreparationKit must be part of the MergingCriteria", false)
+        TestCase.assertValidateError(mergingCriteria, "useLibPrepKit",
+                "In case of Exome data, the libraryPreparationKit must be part of the MergingCriteria", false)
     }
 
     void "test that for WGBS data LibPrepKit must be false"() {
@@ -77,6 +81,7 @@ class MergingCriteriaSpec extends Specification implements DataTest {
         mergingCriteria.seqType = seqType
 
         then:
-        TestCase.assertValidateError(mergingCriteria, "useLibPrepKit", "In case of WGBS data, the libraryPreparationKit must not be part of the MergingCriteria", true)
+        TestCase.assertValidateError(mergingCriteria, "useLibPrepKit",
+                "In case of WGBS data, the libraryPreparationKit must not be part of the MergingCriteria", true)
     }
 }

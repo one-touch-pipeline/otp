@@ -29,21 +29,24 @@ import de.dkfz.tbi.TestCase
 
 class DataFileSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            DataFile,
-            FileType,
-            Individual,
-            Project,
-            ProjectCategory,
-            Run,
-            RunSegment,
-            Sample,
-            SampleType,
-            SeqPlatform,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                DataFile,
+                FileType,
+                Individual,
+                Project,
+                ProjectCategory,
+                Run,
+                RunSegment,
+                Sample,
+                SampleType,
+                SeqPlatform,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+        ]
+    }
 
 
     private final static String SEQUENCE_DIRECTORY = '/sequence/'

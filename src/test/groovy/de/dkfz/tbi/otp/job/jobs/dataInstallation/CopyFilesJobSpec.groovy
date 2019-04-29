@@ -40,31 +40,34 @@ import de.dkfz.tbi.otp.utils.CreateFileHelper
 
 class CopyFilesJobSpec extends Specification implements DataTest {
 
-    Class[] getDomainClassesToMock() {[
-            DataFile,
-            FileType,
-            Individual,
-            JobDefinition,
-            JobExecutionPlan,
-            Process,
-            ProcessingStep,
-            ProcessParameter,
-            Project,
-            ProjectCategory,
-            Realm,
-            Run,
-            RunSegment,
-            Sample,
-            SampleType,
-            SeqCenter,
-            SeqPlatformGroup,
-            SeqPlatform,
-            SeqPlatformModelLabel,
-            SeqTrack,
-            SeqType,
-            SoftwareTool,
-            SoftwareToolIdentifier,
-    ]}
+    @Override
+    Class[] getDomainClassesToMock() {
+        [
+                DataFile,
+                FileType,
+                Individual,
+                JobDefinition,
+                JobExecutionPlan,
+                Process,
+                ProcessingStep,
+                ProcessParameter,
+                Project,
+                ProjectCategory,
+                Realm,
+                Run,
+                RunSegment,
+                Sample,
+                SampleType,
+                SeqCenter,
+                SeqPlatformGroup,
+                SeqPlatform,
+                SeqPlatformModelLabel,
+                SeqTrack,
+                SeqType,
+                SoftwareTool,
+                SoftwareToolIdentifier,
+        ]
+    }
 
     final long PROCESSING_STEP_ID = 1234567
 
@@ -267,7 +270,7 @@ ln -s .* .*
     private SeqTrack createSeqTrack(boolean hasToBeLinked = false) {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
                 [linkedExternally: hasToBeLinked],
-                [initialDirectory: temporaryFolder.newFolder().path]
+                [initialDirectory: temporaryFolder.newFolder().path],
         )
 
         DataFile dataFile = CollectionUtils.exactlyOneElement(seqTrack.dataFiles)
