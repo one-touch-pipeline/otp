@@ -22,14 +22,15 @@
 
 package de.dkfz.tbi.otp.seed
 
+import grails.core.GrailsApplication
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import seedme.SeedService
+import spock.lang.Shared
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.ngsdata.FileType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -38,6 +39,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 class SeedIntegrationSpec extends Specification {
 
     SeedService seedService
+
+    @Shared
+    GrailsApplication grailsApplication
 
     void "seed, ensure that all needed pipeline are created"() {
         when:
@@ -82,5 +86,18 @@ class SeedIntegrationSpec extends Specification {
         type                   | subType | signature
         FileType.Type.SEQUENCE | 'fastq' | '.fastq'
         FileType.Type.SEQUENCE | 'fastq' | '_fastq'
+    }
+
+    void cleanupSpec() {
+        Realm.withNewSession {
+            grailsApplication.domainClasses*.clazz.sort {
+                it.simpleName
+            }.each {
+                Realm.executeUpdate("delete ${it.simpleName} ".toString())
+            }
+            grailsApplication.domainClasses*.clazz.each {
+                assert it.count() == 0
+            }
+        }
     }
 }
