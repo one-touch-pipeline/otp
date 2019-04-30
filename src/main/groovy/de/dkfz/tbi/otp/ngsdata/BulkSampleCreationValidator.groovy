@@ -52,5 +52,11 @@ class BulkSampleCreationValidator extends ValueTuplesValidator<ValidationContext
                 context.addProblem(it.cells, Level.ERROR, "Could not find Project '${projectName}'")
             }
         }
+        List<String> foundHeaders = context.spreadsheet.header.cells*.text
+        List<String> allowedHeaders = SampleIdentifierService.BulkSampleCreationHeader.values()*.name()
+        List<String> unknownHeaders = foundHeaders - allowedHeaders
+        unknownHeaders.each {
+            context.addProblem([] as Set, Level.ERROR, "The column header '${it}' is unknown")
+        }
     }
 }

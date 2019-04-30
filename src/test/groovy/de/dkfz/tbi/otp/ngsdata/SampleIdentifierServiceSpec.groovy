@@ -369,4 +369,17 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         then:
         CollectionUtils.containSame(output, ["Could not find Project 'invalidProject'"])
     }
+
+    void "test createBulkSamples when given unknown HEADER"() {
+        given:
+        SampleIdentifierService sampleIdentifierService = createSampleIdentifierService()
+        List<String> output
+        Project project = createProject()
+
+        when:
+        output = sampleIdentifierService.createBulkSamples("${HEADER},UNKNOWN_HEADER\n${project.name},test,test,test,test", Spreadsheet.Delimiter.COMMA, project)
+
+        then:
+        CollectionUtils.containSame(output, ["The column header 'UNKNOWN_HEADER' is unknown"])
+    }
 }
