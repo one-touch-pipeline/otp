@@ -23,13 +23,15 @@
 package de.dkfz.tbi.otp.analysis.pair.indel
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import workflows.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
 
+import de.dkfz.tbi.otp.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.time.Duration
+
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<IndelCallingInstance> {
 
@@ -56,9 +58,9 @@ abstract class AbstractIndelWorkflowTests extends AbstractRoddyBamFilePairAnalys
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
-                            pluginName       : processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_NAME),
-                            pluginVersion    : processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_VERSION, seqType.roddyName),
-                            baseProjectConfig: processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_INDEL_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName),
+                            pluginName       : processingOptionService.findOptionAsString(PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_NAME),
+                            pluginVersion    : processingOptionService.findOptionAsString(PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_VERSION, seqType.roddyName),
+                            baseProjectConfig: processingOptionService.findOptionAsString(PIPELINE_RODDY_INDEL_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName),
                             configVersion    : 'v1_0',
                             resources        : 't',
                     ])

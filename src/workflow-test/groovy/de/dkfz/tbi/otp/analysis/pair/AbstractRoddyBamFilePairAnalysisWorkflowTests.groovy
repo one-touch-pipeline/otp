@@ -22,27 +22,43 @@
 
 package de.dkfz.tbi.otp.analysis.pair
 
-import org.junit.Test
-
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
-import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.ngsdata.*
 
 abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends BamFilePairAnalysis> extends AbstractBamFilePairAnalysisWorkflowTests {
 
-    @Test
-    void testWholeWorkflowWithRoddyBamFile() {
-        setupRoddyBamFile()
-
-        executeTest()
+    void setupData() {
+        createConfig()
     }
 
-    @Test
-    void testWholeWorkflowWithExternalBamFile() {
-        setupExternalBamFile()
+    void "testWholeWorkflowWithRoddyBamFile"() {
+        given:
+        Realm.withNewSession {
+            setupRoddyBamFile()
+            setupData()
+        }
 
-        executeTest()
+        when:
+        execute()
+
+        then:
+        checkInstance()
+    }
+
+    void "testWholeWorkflowWithExternalBamFile"() {
+        given:
+        Realm.withNewSession {
+            setupExternalBamFile()
+            setupData()
+        }
+
+        when:
+        execute()
+
+        then:
+        checkInstance()
     }
 
 
@@ -51,27 +67,19 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
         return createAndSetup_Bwa06_1K_ReferenceGenome()
     }
 
-
-    void executeTest() {
-        createConfig()
-
-        execute()
-
-        checkInstance()
-    }
-
-
     void checkInstance() {
-        Instance createdInstance = BamFilePairAnalysis.listOrderById().last()
-        assert createdInstance.processingState == AnalysisProcessingStates.FINISHED
-        assert createdInstance.config == config
-        assert createdInstance.sampleType1BamFile == bamFileTumor
-        assert createdInstance.sampleType2BamFile == bamFileControl
+        Realm.withNewSession {
+            Instance createdInstance = BamFilePairAnalysis.listOrderById().last()
+            assert createdInstance.processingState == AnalysisProcessingStates.FINISHED
+            assert createdInstance.config == config
+            assert createdInstance.sampleType1BamFile == bamFileTumor
+            assert createdInstance.sampleType2BamFile == bamFileControl
 
-        filesToCheck(createdInstance).flatten().each {
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(it)
+            filesToCheck(createdInstance).flatten().each { File file ->
+                FileService.ensureFileIsReadableAndNotEmpty(file.toPath())
+            }
+            checkAnalysisSpecific(createdInstance)
         }
-        checkAnalysisSpecific(createdInstance)
     }
 
     abstract List<File> filesToCheck(Instance instance)

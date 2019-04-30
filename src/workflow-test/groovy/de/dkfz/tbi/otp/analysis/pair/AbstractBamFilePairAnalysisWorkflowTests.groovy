@@ -22,7 +22,7 @@
 
 package de.dkfz.tbi.otp.analysis.pair
 
-import workflows.WorkflowTestCase
+import de.dkfz.tbi.otp.WorkflowTestCase
 import de.dkfz.tbi.otp.analysis.pair.bamfiles.BamFileSet
 import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFiles
 
@@ -228,6 +228,7 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
     abstract File getWorkflowData()
 
+    @Override
     File getBamFilePairBaseDirectory() {
         new File(getInputRootDirectory(), 'bamFiles')
     }
@@ -244,7 +245,9 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         bamFileControl.containedSeqTracks*.libraryPreparationKit = kit
         bamFileControl.containedSeqTracks*.save(flush: true)
         bamFileTumor.workPackage.libraryPreparationKit = kit
+        bamFileTumor.workPackage.save(flush: true)
         bamFileControl.workPackage.libraryPreparationKit = kit
+        bamFileControl.workPackage.save(flush: true)
     }
 
     @Override

@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
 import de.dkfz.tbi.otp.tracking.OtrsTicket
@@ -48,7 +49,7 @@ class FastqcStartJob extends AbstractStartJobImpl implements RestartableStartJob
     @Scheduled(fixedDelay=10000L)
     @Override
     void execute() {
-        doWithPersistenceInterceptor {
+        Realm.withNewSession {
             ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
             if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
                 return

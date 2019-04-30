@@ -1767,7 +1767,7 @@ class DomainFactory {
     }
 
     static Map getMergingProperties(MergingWorkPackage mergingWorkPackage) {
-        SeqPlatform seqPlatform = mergingWorkPackage?.seqPlatformGroup?.seqPlatforms?.sort()?.first()
+        SeqPlatform seqPlatform = mergingWorkPackage?.seqPlatformGroup?.seqPlatforms?.sort()?.find()
         if (!seqPlatform) {
             seqPlatform = createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: [mergingWorkPackage.seqPlatformGroup])
         }

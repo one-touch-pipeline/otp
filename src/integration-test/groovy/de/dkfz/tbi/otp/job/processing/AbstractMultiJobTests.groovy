@@ -23,7 +23,6 @@
 package de.dkfz.tbi.otp.job.processing
 
 import org.apache.commons.logging.impl.NoOpLog
-import org.junit.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
@@ -33,11 +32,9 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
-import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
@@ -62,9 +59,6 @@ class AbstractMultiJobTests implements UserAndRoles {
     ClusterJobMonitor clusterJobMonitor
     RestartCheckerService restartCheckerService
     Scheduler scheduler
-
-    @Autowired
-    PersistenceContextUtils persistenceContextUtils
 
     ProcessingStep step
     Realm realm

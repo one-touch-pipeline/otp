@@ -22,13 +22,10 @@
 
 package de.dkfz.tbi.otp.analysis.pair.sophia
 
-import org.junit.Ignore
 import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div128
-
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
-@Ignore
 class WgsSophiaWorkflowTests extends AbstractSophiaWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div128 {
 
     @Override

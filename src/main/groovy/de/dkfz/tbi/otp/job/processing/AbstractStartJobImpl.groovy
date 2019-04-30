@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.tracking.TrackingService
-import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 
 /**
  * Abstract base class for {@link StartJob}s.
@@ -55,25 +54,12 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
     @Autowired
     TrackingService trackingService
 
-    @Autowired
-    PersistenceContextUtils persistenceContextUtils
-
     private JobExecutionPlan plan
     private String beanName
 
     @Override
     void setBeanName(String beanName) {
         this.beanName = beanName
-    }
-
-    /**
-     * @Deprecated Use directly {@link PersistenceContextUtils#doWithPersistenceContext(Closure)}
-     */
-    @Deprecated
-    Object doWithPersistenceInterceptor(final Closure closure) {
-        persistenceContextUtils.doWithPersistenceContext {
-            return closure.call()
-        }
     }
 
     /**

@@ -29,6 +29,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 @Component("seqScanStartJob")
@@ -60,7 +61,7 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
     @Scheduled(fixedDelay=30000L)
     @Override
     void execute() {
-        doWithPersistenceInterceptor {
+        Realm.withNewSession {
             if (!hasOpenSlots()) {
                 return
             }

@@ -25,6 +25,7 @@ package de.dkfz.tbi.otp.utils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
@@ -77,7 +78,7 @@ class LinkFileUtils {
             remoteShellHelper.executeCommand(realm, command.toString())
 
             sourceLinkMap.each { File source, File link ->
-                waitUntilExists(link)
+                FileService.waitUntilExists(link.toPath())
             }
         }
     }

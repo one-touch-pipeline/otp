@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.analysis.pair.indel
 
 import org.junit.Ignore
-import workflows.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div64
+import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div64
 
 import de.dkfz.tbi.otp.ngsdata.*
 

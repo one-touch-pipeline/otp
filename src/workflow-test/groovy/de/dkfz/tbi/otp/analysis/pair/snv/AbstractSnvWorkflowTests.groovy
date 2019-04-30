@@ -23,12 +23,14 @@
 package de.dkfz.tbi.otp.analysis.pair.snv
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import org.junit.Test
-import workflows.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
+import de.dkfz.tbi.otp.dataprocessing.ConfigPerProjectAndSeqType
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.RoddySnvCallingInstance
 import de.dkfz.tbi.otp.ngsdata.*
+
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<RoddySnvCallingInstance> {
 
@@ -36,12 +38,18 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
     ProjectService projectService
     ProcessingOptionService processingOptionService
 
+    void "testWholeWorkflowWithProcessedMergedBamFile"() {
+        given:
+        Realm.withNewSession {
+            setupProcessedMergedBamFile()
+            setupData()
+        }
 
-    @Test
-    void testWholeWorkflowWithProcessedMergedBamFile() {
-        setupProcessedMergedBamFile()
+        when:
+        execute()
 
-        executeTest()
+        then:
+        checkInstance()
     }
 
 
@@ -61,9 +69,9 @@ abstract class AbstractSnvWorkflowTests extends AbstractRoddyBamFilePairAnalysis
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
-                            pluginName       : processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_NAME),
-                            pluginVersion    : processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION, seqType.roddyName),
-                            baseProjectConfig: processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_SNV_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName),
+                            pluginName       : processingOptionService.findOptionAsString(PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_NAME),
+                            pluginVersion    : processingOptionService.findOptionAsString(PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION, seqType.roddyName),
+                            baseProjectConfig: processingOptionService.findOptionAsString(PIPELINE_RODDY_SNV_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName),
                             configVersion    : 'v1_0',
                             resources        : 't',
                     ])

@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyCheck
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
+import de.dkfz.tbi.otp.ngsdata.Realm
 
 @Component("dataFileStatusStartJob")
 @Scope("singleton")
@@ -37,7 +38,7 @@ class DataFileStatusStartJob extends AbstractStartJobImpl {
     //@Scheduled(cron="0 0 1 * * SAT")
     @Override
     void execute() {
-        doWithPersistenceInterceptor {
+        Realm.withNewSession {
             ConsistencyCheck consistencyCheck = new ConsistencyCheck()
             consistencyCheck.save(flush: true)
             createProcess(consistencyCheck)

@@ -23,26 +23,18 @@
 package de.dkfz.tbi.otp.alignment
 
 import groovy.json.JsonOutput
-import org.junit.*
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
-import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.JobSubmissionOption
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import java.time.Duration
 
-@Ignore
-@SuppressWarnings("JUnitTestMethodWithoutAssert")
 class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest implements CellRangerFactory {
-
-    FileSystemService fileSystemService
-    FileService fileService
 
     Sample sample
     SeqType seqType
@@ -56,43 +48,45 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
             "fastqFiles/10x/normal/paired/pbmc_1k_v3_S1_L002_R2_001.fastq.gz",
     ]
 
-    @Before
+    @Override
     void setup() {
-        Project project = createProject(realm: realm)
-        Individual individual = DomainFactory.createIndividual(project: project)
-        sample = createSample(individual: individual)
+        Realm.withNewSession {
+            Project project = createProject(realm: realm)
+            Individual individual = DomainFactory.createIndividual(project: project)
+            sample = createSample(individual: individual)
 
-        seqType = createSeqType()
+            seqType = createSeqType()
 
-        ToolName toolName = createToolName(path: "cellranger")
-        ReferenceGenome referenceGenome = createReferenceGenome(path: "hg_GRCh38")
-        ReferenceGenomeIndex referenceGenomeIndex = createReferenceGenomeIndex(
-                toolName: toolName,
-                path: "1.2.0",
-                referenceGenome: referenceGenome,
-                indexToolVersion: "1.2.0",
-        )
+            ToolName toolName = createToolName(path: "cellranger")
+            ReferenceGenome referenceGenome = createReferenceGenome(path: "hg_GRCh38")
+            ReferenceGenomeIndex referenceGenomeIndex = createReferenceGenomeIndex(
+                    toolName: toolName,
+                    path: "1.2.0",
+                    referenceGenome: referenceGenome,
+                    indexToolVersion: "1.2.0",
+            )
 
-        ConfigPerProjectAndSeqType conf = createConfig(
-                seqType: seqType,
-                project: project,
-                programVersion: "cellranger/3.0.1",
-                referenceGenomeIndex: referenceGenomeIndex,
-        )
+            ConfigPerProjectAndSeqType conf = createConfig(
+                    seqType: seqType,
+                    project: project,
+                    programVersion: "cellranger/3.0.1",
+                    referenceGenomeIndex: referenceGenomeIndex,
+            )
 
-        mwp = createMergingWorkPackage(
-                needsProcessing: true,
-                sample: sample,
-                config: conf,
-                expectedCells: 1000, //according to 10x
-                referenceGenome: referenceGenome,
-        )
+            mwp = createMergingWorkPackage(
+                    needsProcessing: true,
+                    sample: sample,
+                    config: conf,
+                    expectedCells: 1000, //according to 10x
+                    referenceGenome: referenceGenome,
+            )
 
-        setUpRefGenomeDir(mwp, new File(referenceGenomeDirectory, 'hg_GRCh38'))
+            setUpRefGenomeDir(mwp, new File(referenceGenomeDirectory, 'hg_GRCh38'))
 
-        DomainFactory.createMergingCriteriaLazy(project: project, seqType: seqType)
+            DomainFactory.createMergingCriteriaLazy(project: project, seqType: seqType)
 
-        findOrCreatePipeline()
+            findOrCreatePipeline()
+        }
     }
 
     SeqTrack createSeqTrack(String fastq1, String fastq2) {
@@ -115,22 +109,25 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
     }
 
     void checkResults() {
-        SingleCellBamFile singleCellBamFile = CollectionUtils.exactlyOneElement(SingleCellBamFile.all)
+        Realm.withNewSession {
+            SingleCellBamFile singleCellBamFile = CollectionUtils.exactlyOneElement(SingleCellBamFile.all)
 
-        assert singleCellBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
-        assert singleCellBamFile.fileSize
-        assert singleCellBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
-        assert singleCellBamFile.overallQualityAssessment
-        assert singleCellBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+            assert singleCellBamFile.fileOperationStatus == AbstractMergedBamFile.FileOperationStatus.PROCESSED
+            assert singleCellBamFile.fileSize
+            assert singleCellBamFile.qualityAssessmentStatus == AbstractBamFile.QaProcessingStatus.FINISHED
+            assert singleCellBamFile.overallQualityAssessment
+            assert singleCellBamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
+        }
     }
 
-
-    @Test
-    void testCellRanger_withOneLane() {
+    void "test CellRanger with one lane"() {
         given:
-        SeqTrack seqTrack = createSeqTrack(fastqFiles[0], fastqFiles[1])
-        mwp.seqTracks = [seqTrack]
-        mwp.save(flush: true)
+        Realm.withNewSession {
+            SeqTrack seqTrack = createSeqTrack(fastqFiles[0], fastqFiles[1])
+            mwp.refresh()
+            mwp.seqTracks = [seqTrack]
+            mwp.save(flush: true)
+        }
 
         when:
         execute()
@@ -139,13 +136,15 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
         checkResults()
     }
 
-    @Test
-    void testCellRanger_withTwoLanes() {
+    void "test CellRanger with two lanes"() {
         given:
-        SeqTrack seqTrack1 = createSeqTrack(fastqFiles[0], fastqFiles[1])
-        SeqTrack seqTrack2 = createSeqTrack(fastqFiles[2], fastqFiles[3])
-        mwp.seqTracks = [seqTrack1, seqTrack2]
-        mwp.save(flush: true)
+        Realm.withNewSession {
+            SeqTrack seqTrack1 = createSeqTrack(fastqFiles[0], fastqFiles[1])
+            SeqTrack seqTrack2 = createSeqTrack(fastqFiles[2], fastqFiles[3])
+            CellRangerMergingWorkPackage crmwp = CellRangerMergingWorkPackage.get(mwp.id)
+            crmwp.seqTracks = [seqTrack1, seqTrack2]
+            crmwp.save(flush: true)
+        }
 
         when:
         execute()

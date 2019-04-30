@@ -40,7 +40,6 @@ import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.ExceptionUtils
-import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.util.concurrent.locks.Lock
@@ -64,9 +63,6 @@ class SchedulerService {
 
     @Autowired
     JobMailService jobMailService
-
-    @Autowired
-    PersistenceContextUtils persistenceContextUtils
 
     @Autowired
     ProcessService processService
@@ -189,7 +185,7 @@ class SchedulerService {
                 processesToResume.each {
                     Job job = createJob(it)
                     running.add(job)
-                    executeInNewThread {
+                    executeInNewThread (job) {
                         grailsApplication.mainContext.scheduler.executeJob(job)
                     }
                 }
@@ -323,7 +319,7 @@ class SchedulerService {
             return
         }
         Job job = null
-        persistenceContextUtils.doWithPersistenceContext {
+        Realm.withNewSession {
             job = doSchedule()
         }
 
@@ -336,7 +332,7 @@ class SchedulerService {
 
     protected void executeInNewThread(Job job, Closure closure) {
         task {
-            Realm.withNewSession  {
+            Realm.withNewSession {
                 withLoggingContext(job) {
                     closure()
                 }

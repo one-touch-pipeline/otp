@@ -22,14 +22,11 @@
 
 package de.dkfz.tbi.otp.alignment
 
-import org.junit.Ignore
-
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackageAlignmentProperty
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
-@Ignore
 class RnaPairedAlignmentWorkflowTests extends AbstractRnaAlignmentWorkflowTests {
 
     @Override
@@ -37,6 +34,7 @@ class RnaPairedAlignmentWorkflowTests extends AbstractRnaAlignmentWorkflowTests 
         DomainFactory.createRnaPairedSeqType()
     }
 
+    @Override
     void createProjectConfigRna(MergingWorkPackage workPackage, Map configOptions = [:], Map referenceGenomeConfig = [:]) {
         super.createProjectConfigRna(workPackage, configOptions, referenceGenomeConfig)
 

@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.job.processing
 
+import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.OtpRuntimeException
@@ -33,6 +34,7 @@ import de.dkfz.tbi.otp.job.scheduler.*
  * Base class for jobs which submit cluster jobs and wait for them to finish and optionally do other
  * things (for example validation).
  */
+@Slf4j
 abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements SometimesResumableJob, MonitoringJob {
 
     @Autowired
@@ -70,12 +72,11 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
 
     private void startMonitoring() {
         synchronized (lockForJobCollections) {
-            Collection<ClusterJob> monitoredClusterJobs =  ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
-            log.info "Waiting for ${monitoredClusterJobs.size()} cluster jobs to finish: ${monitoredClusterJobs*.clusterJobId.sort()}"
-            ClusterJob.withTransaction {
-                monitoredClusterJobs*.checkStatus = ClusterJob.CheckStatus.CHECKING
-            }
-        }
+                    Collection<ClusterJob> monitoredClusterJobs = ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
+                    log.info "Waiting for ${monitoredClusterJobs.size()} cluster jobs to finish: ${monitoredClusterJobs*.clusterJobId.sort()}"
+                    monitoredClusterJobs*.checkStatus = ClusterJob.CheckStatus.CHECKING
+                    monitoredClusterJobs*.save(flush: true)
+                }
     }
 
     @Override

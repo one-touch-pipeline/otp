@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.TrackingService
-import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 
 class DataInstallationStartJobIntegrationSpec extends IntegrationSpec {
 

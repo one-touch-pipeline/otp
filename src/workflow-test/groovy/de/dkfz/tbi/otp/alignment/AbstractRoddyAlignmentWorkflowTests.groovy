@@ -25,7 +25,6 @@ package de.dkfz.tbi.otp.alignment
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.grails.web.json.JSONObject
-import org.junit.Before
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
@@ -33,19 +32,21 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.time.Duration
 
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndWait
 
 abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest {
 
     //The number of reads of the example fastqc files
-    static final int NUMBER_OF_READS = 1000
+    protected static final int NUMBER_OF_READS = 1000
 
     String getRefGenFileNamePrefix() {
         return 'hs37d5'
@@ -59,7 +60,9 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         return 'hs37d5.fa.chrLenOnlyACGT_realChromosomes.tab'
     }
 
-    protected String getCytosinePositionsIndex() { }
+    protected String getCytosinePositionsIndex() {
+        return null
+    }
 
     // some text to be used to fill in files created on the fly
     protected final static String TEST_CONTENT = 'dummy file, created by OTP'
@@ -76,9 +79,6 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
             'runtimeConfig.xml',
             'versionsInfo.txt',
     ].asImmutable()
-
-    // directory with source test data (e.g. configs, fastq)
-    File baseTestDataDir
 
     // test fastq files grouped by lane
     Map<String, List<File>> testFastqFiles
@@ -115,34 +115,36 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         return Duration.ofHours(60)
     }
 
-    @Before
-    void setUp() {
-        String group = configService.getTestingGroup()
-        executionHelperService.setGroup(realm, configService.getRootPath() as File, group)
+    @Override
+    void setup() {
+        Realm.withNewSession {
+            String group = configService.getTestingGroup()
+            executionHelperService.setGroup(realm, configService.getRootPath() as File, group)
 
-        setUpFilesVariables()
+            setUpFilesVariables()
 
-        MergingWorkPackage workPackage = createWorkPackage()
+            MergingWorkPackage workPackage = createWorkPackage()
 
-        setUpRefGenomeDir(workPackage, refGenDir)
+            setUpRefGenomeDir(workPackage, refGenDir)
 
-        createProjectConfig(workPackage)
+            createProjectConfig(workPackage)
 
-        if (SeqTypeService.getExomePairedSeqType() == findSeqType()) {
-            BedFile bedFile = new BedFile(
-                    referenceGenome: workPackage.referenceGenome,
-                    libraryPreparationKit: workPackage.libraryPreparationKit,
-                    fileName: "TruSeqExomeTargetedRegions_plain.bed",
-                    targetSize: 62085295,
-                    mergedTargetSize: 62085286,
-            )
-            assert bedFile.save(flush: true, failOnError: true)
+            if (SeqTypeService.getExomePairedSeqType() == findSeqType()) {
+                BedFile bedFile = new BedFile(
+                        referenceGenome: workPackage.referenceGenome,
+                        libraryPreparationKit: workPackage.libraryPreparationKit,
+                        fileName: "TruSeqExomeTargetedRegions_plain.bed",
+                        targetSize: 62085295,
+                        mergedTargetSize: 62085286,
+                )
+                assert bedFile.save(flush: true, failOnError: true)
+            }
+
+            setPermissionsRecursive(baseDirectory, TEST_DATA_MODE_DIR, TEST_DATA_MODE_FILE)
+
+            //logging files are also created by the tomcat user, so the group needs write access
+            setPermissionsRecursive(configService.loggingRootPath, '2770', TEST_DATA_MODE_FILE)
         }
-
-        setPermissionsRecursive(baseDirectory, TEST_DATA_MODE_DIR, TEST_DATA_MODE_FILE)
-
-        //logging files are also created by the tomcat user, so the group needs write access
-        setPermissionsRecursive(configService.loggingRootPath, '2770', TEST_DATA_MODE_FILE)
     }
 
     void setUpFilesVariables() {
@@ -191,11 +193,11 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
                 referenceGenome: referenceGenome,
                 needsProcessing: false,
                 statSizeFileName: getChromosomeStatFileName(),
-                libraryPreparationKit: !seqType.isWgbs() ? kit : null,
+                libraryPreparationKit: seqType.isWgbs() ? null : kit,
         )
 
         workPackage.individual.pid = 'pid_4'  // This name is encoded in @RG of the test BAM file
-        workPackage.individual.save()
+        workPackage.individual.save(flush: true)
 
         workPackage.sampleType.name = "CONTROL"
         workPackage.sampleType.save(flush: true)
@@ -215,22 +217,21 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void createProjectConfig(MergingWorkPackage workPackage, Map options = [:]) {
-
         lsdfFilesService.createDirectory(workPackage.project.projectSequencingDirectory, realm)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             projectService.configurePanCanAlignmentDeciderProject(new PanCanAlignmentConfiguration([
                     project          : workPackage.project,
                     seqType          : workPackage.seqType,
-                    pluginName       : processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, workPackage.seqType.roddyName),
-                    pluginVersion    : processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, workPackage.seqType.roddyName),
-                    baseProjectConfig: processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName),
+                    pluginName       : processingOptionService.findOptionAsString(PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, workPackage.seqType.roddyName),
+                    pluginVersion    : processingOptionService.findOptionAsString(PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, workPackage.seqType.roddyName),
+                    baseProjectConfig: processingOptionService.findOptionAsString(PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName),
                     configVersion    : "v1_0",
                     referenceGenome  : workPackage.referenceGenome,
                     statSizeFileName : workPackage.statSizeFileName,
-                    mergeTool        : processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_MERGE_TOOL, workPackage.seqType.roddyName),
-                    bwaMemVersion    : processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_DEFAULT),
-                    sambambaVersion  : processingOptionService.findOptionAsString(OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_DEFAULT),
+                    mergeTool        : processingOptionService.findOptionAsString(PIPELINE_RODDY_ALIGNMENT_DEFAULT_MERGE_TOOL, workPackage.seqType.roddyName),
+                    bwaMemVersion    : processingOptionService.findOptionAsString(PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_DEFAULT),
+                    sambambaVersion  : processingOptionService.findOptionAsString(PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_DEFAULT),
                     resources        : 't',
             ] + options))
         }
@@ -369,11 +370,13 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes() {
-        checkDataBaseState_alignBaseBamAndNewLanes()
-        RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1L)
-        checkFileSystemState(latestBamFile)
+        Realm.withNewSession {
+            checkDataBaseState_alignBaseBamAndNewLanes()
+            RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1)
+            checkFileSystemState(latestBamFile)
 
-        checkQC(latestBamFile)
+            checkQC(latestBamFile)
+        }
     }
 
     void checkQC(RoddyBamFile bamFile) {
@@ -419,17 +422,19 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkAllAfterRoddyClusterJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes() {
-        checkDataBaseState_alignBaseBamAndNewLanes()
-        RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1L)
-        checkFileSystemState(latestBamFile)
+        Realm.withNewSession {
+            checkDataBaseState_alignBaseBamAndNewLanes()
+            RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1)
+            checkFileSystemState(latestBamFile)
+        }
     }
 
     void checkDataBaseState_alignBaseBamAndNewLanes() {
         checkWorkPackageState()
 
         assert 2 == RoddyBamFile.findAll().size()
-        RoddyBamFile firstBamFile = RoddyBamFile.findByIdentifier(0L)
-        RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1L)
+        RoddyBamFile firstBamFile = RoddyBamFile.findByIdentifier(0)
+        RoddyBamFile latestBamFile = RoddyBamFile.findByIdentifier(1)
 
         List<SeqTrack> seqTrackOfFirstBamFile = SeqTrack.findAllByLaneIdInList(["readGroup1"])
 
@@ -446,7 +451,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     void checkFirstBamFileState(RoddyBamFile bamFile, boolean isMostResentBamFile, Map bamFileProperties = [:]) {
         List<SeqTrack> seqTracks = SeqTrack.findAllByLaneIdInList(["readGroup1", "readGroup2"])
         checkBamFileState(bamFile, [
-                identifier         : 0L,
+                identifier         : 0,
                 mostResentBamFile  : isMostResentBamFile,
                 baseBamFile        : null,
                 seqTracks          : seqTracks,
@@ -460,7 +465,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         SeqTrack firstSeqTrack = SeqTrack.findByLaneId("readGroup1")
         SeqTrack secondSeqTrack = SeqTrack.findByLaneId("readGroup2")
         checkBamFileState(latestBamFile, [
-                identifier         : 1L,
+                identifier         : 1,
                 mostResentBamFile  : true,
                 baseBamFile        : firstbamFile,
                 seqTracks          : [secondSeqTrack],
@@ -481,7 +486,7 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         assert null == bamFile.md5sum
         assert !bamFile.fileExists
         assert null == bamFile.dateFromFileSystem
-        assert -1 == bamFile.fileSize
+        assert -1L == bamFile.fileSize
     }
 
     void checkBamFileState(RoddyBamFile bamFile, Map bamFileProperties) {
@@ -505,13 +510,14 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
     }
 
     void checkWorkPackageState() {
-        MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
-        workPackage.refresh()
-        assert false == workPackage.needsProcessing
+        Realm.withNewSession {
+            MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
+            workPackage.refresh()
+            assert !workPackage.needsProcessing
+        }
     }
 
     void checkFileSystemState(RoddyBamFile bamFile) {
-
         //content of the final dir: root
         if (!bamFile.seqType.isRna()) {
             List<File> rootDirs = [
@@ -655,35 +661,31 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         //check that given files exist in the execution store:
         bamFile.workExecutionDirectories.each { executionStore ->
             filesInRoddyExecutionDir.each { String fileName ->
-                lsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(executionStore.absolutePath, fileName))
+                FileService.ensureFileIsReadableAndNotEmpty(new File(executionStore.absolutePath, fileName).toPath())
             }
         }
     }
 
-
     void checkInputIsNotDeleted() {
         List<DataFile> fastqFiles = DataFile.findAll()
         fastqFiles.each { DataFile dataFile ->
-            lsdfFilesService.ensureFileIsReadableAndNotEmpty(lsdfFilesService.getFileFinalPath(dataFile) as File)
-            lsdfFilesService.ensureFileIsReadableAndNotEmpty(lsdfFilesService.getFileViewByPidPath(dataFile) as File)
+            FileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileFinalPath(dataFile) as File).toPath())
+            FileService.ensureFileIsReadableAndNotEmpty((lsdfFilesService.getFileViewByPidPath(dataFile) as File).toPath())
         }
     }
 
+    void verify_AlignLanesOnly_AllFine() {
+        Realm.withNewSession {
+            checkWorkPackageState()
 
-    void executeAndVerify_AlignLanesOnly_AllFine() {
-        // run
-        execute()
+            RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
+            checkFirstBamFileState(bamFile, true)
+            assertBamFileFileSystemPropertiesSet(bamFile)
 
-        // check
-        checkWorkPackageState()
+            checkFileSystemState(bamFile)
 
-        RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
-        checkFirstBamFileState(bamFile, true)
-        assertBamFileFileSystemPropertiesSet(bamFile)
-
-        checkFileSystemState(bamFile)
-
-        checkQC(bamFile)
+            checkQC(bamFile)
+        }
     }
 
     void fastTrackSetup() {
@@ -692,30 +694,17 @@ abstract class AbstractRoddyAlignmentWorkflowTests extends AbstractAlignmentWork
         assert seqTrack.project.save(flush: true)
     }
 
-    //helper
-    protected void alignLanesOnly_NoBaseBamExist_TwoLanes(boolean setLibrary = false) {
-        // prepare
-        SeqTrack firstSeqTrack, secondSeqTrack
-        if (setLibrary) {
-            firstSeqTrack = createSeqTrack("readGroup1", [libraryName: "lib1"])
-            secondSeqTrack = createSeqTrack("readGroup2", [libraryName: "lib5"])
-        } else {
-            firstSeqTrack = createSeqTrack("readGroup1")
-            secondSeqTrack = createSeqTrack("readGroup2")
+    protected void check_alignLanesOnly_NoBaseBamExist_TwoLanes(SeqTrack firstSeqTrack, SeqTrack secondSeqTrack) {
+        Realm.withNewSession {
+            checkWorkPackageState()
+
+            RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
+            checkLatestBamFileState(bamFile, null, [seqTracks: [firstSeqTrack, secondSeqTrack], identifier: 0L,])
+            assertBamFileFileSystemPropertiesSet(bamFile)
+
+            checkFileSystemState(bamFile)
+
+            checkQC(bamFile)
         }
-
-        // run
-        execute()
-
-        // check
-        checkWorkPackageState()
-
-        RoddyBamFile bamFile = exactlyOneElement(RoddyBamFile.findAll())
-        checkLatestBamFileState(bamFile, null, [seqTracks: [firstSeqTrack, secondSeqTrack], identifier: 0L,])
-        assertBamFileFileSystemPropertiesSet(bamFile)
-
-        checkFileSystemState(bamFile)
-
-        checkQC(bamFile)
     }
 }

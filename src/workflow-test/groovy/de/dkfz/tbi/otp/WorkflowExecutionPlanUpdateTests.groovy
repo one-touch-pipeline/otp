@@ -22,27 +22,27 @@
 
 package de.dkfz.tbi.otp
 
-import org.junit.Ignore
-import org.junit.Test
-
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
-
 
 /*
  * The idea of the test is that with the old jobExecutionPlan the test would fail since the outputParameter "Realm"
  * would be missing. Since the test do not fail it is shown that the old jobExecutionPlan was updated to the newer one
  * which provides "Realm" as outputParameter.
  */
-
-@Ignore
 class WorkflowExecutionPlanUpdateTests extends DataInstallationWorkflowTests {
 
-    @Test
-    void testUpdateOfJobExecutionPlan() {
-        SeqTrack seqTrack = createWholeGenomeSetup()
+    void "test update of JobExecutionPlan"() {
+        given:
+        SeqTrack seqTrack
+        Realm.withNewSession {
+            seqTrack = createWholeGenomeSetup()
+        }
 
+        when:
         execute()
 
+        then:
         checkThatWorkflowWasSuccessful(seqTrack)
     }
 

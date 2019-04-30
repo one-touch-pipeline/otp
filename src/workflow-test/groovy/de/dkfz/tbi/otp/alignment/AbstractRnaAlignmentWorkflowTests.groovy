@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.alignment
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityUtils
-import org.junit.Test
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
@@ -33,54 +32,62 @@ import de.dkfz.tbi.otp.ngsdata.*
 import java.nio.file.Files
 import java.time.Duration
 
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
 
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_OneLane_allFine() {
-        createProjectConfigRna(exactlyOneElement(MergingWorkPackage.findAll()), [:])
-        createSeqTrack("readGroup1")
+    void "testAlignLanesOnly_NoBaseBamExist_OneLane_allFine"() { //TODO seems to be bugged for Single
+        given:
+        Realm.withNewSession {
+            createProjectConfigRna(exactlyOneElement(MergingWorkPackage.findAll()), [:])
+            createSeqTrack("readGroup1")
+        }
 
-        // run
+        when:
         execute()
 
-        // check
+        then:
         checkWorkPackageState()
+        Realm.withNewSession {
+            RoddyBamFile bamFile = exactlyOneElement(RnaRoddyBamFile.findAll())
+            checkFirstBamFileState(bamFile, true)
+            assertBamFileFileSystemPropertiesSet(bamFile)
 
-        RoddyBamFile bamFile = exactlyOneElement(RnaRoddyBamFile.findAll())
-        checkFirstBamFileState(bamFile, true)
-        assertBamFileFileSystemPropertiesSet(bamFile)
+            checkFileSystemState(bamFile)
+            checkFileSystemStateRna(bamFile)
 
-        checkFileSystemState(bamFile)
-        checkFileSystemStateRna(bamFile)
-
-        checkQcRna(bamFile)
+            checkQcRna(bamFile)
+            return true
+        }
     }
 
-    @Test
-    void testAlignLanesOnly_withoutArribaProcessing_NoBaseBamExist_OneLane_allFine() {
-        createProjectConfigRna(exactlyOneElement(MergingWorkPackage.findAll()), [
-                configVersion: "v2_0",
-        ], [
-                mouseData: true,
-        ])
-        createSeqTrack("readGroup1")
+    void "testAlignLanesOnly_withoutArribaProcessing_NoBaseBamExist_OneLane_allFine"() {
+        given:
+        Realm.withNewSession {
+            createProjectConfigRna(exactlyOneElement(MergingWorkPackage.findAll()), [
+                    configVersion: "v2_0",
+            ], [
+                    mouseData: true,
+            ])
+            createSeqTrack("readGroup1")
+        }
 
-        // run
+        when:
         execute()
 
-        // check
+        then:
         checkWorkPackageState()
+        Realm.withNewSession {
+            RoddyBamFile bamFile = exactlyOneElement(RnaRoddyBamFile.findAll())
+            checkFirstBamFileState(bamFile, true)
+            assertBamFileFileSystemPropertiesSet(bamFile)
+            checkFileSystemState(bamFile)
+            checkFileSystemStateRna(bamFile)
 
-        RoddyBamFile bamFile = exactlyOneElement(RnaRoddyBamFile.findAll())
-        checkFirstBamFileState(bamFile, true)
-        assertBamFileFileSystemPropertiesSet(bamFile)
-
-        checkFileSystemState(bamFile)
-        checkFileSystemStateRna(bamFile)
-
-        checkQcRna(bamFile)
+            checkQcRna(bamFile)
+            return true
+        }
     }
 
     static void checkFileSystemStateRna(RnaRoddyBamFile bamFile) {
@@ -134,7 +141,7 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
         assert bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.QC_PASSED
     }
 
-
+    @Override
     Pipeline findPipeline() {
         DomainFactory.createRnaPipeline()
     }
@@ -143,7 +150,6 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
     void createProjectConfig(MergingWorkPackage workPackage, Map options = [:]) { }
 
     void createProjectConfigRna(MergingWorkPackage workPackage, Map configOptions = [:], Map referenceGenomeConfig = [:]) {
-
         lsdfFilesService.createDirectory(workPackage.project.projectSequencingDirectory, realm)
 
         GeneModel geneModel = DomainFactory.createGeneModel(
@@ -211,9 +217,9 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
             projectService.configureRnaAlignmentConfig(new RoddyConfiguration([
                     project          : workPackage.project,
                     seqType          : workPackage.seqType,
-                    pluginName       : processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, workPackage.seqType.roddyName),
-                    pluginVersion    : processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, workPackage.seqType.roddyName),
-                    baseProjectConfig: processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName),
+                    pluginName       : processingOptionService.findOptionAsString(PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_NAME, workPackage.seqType.roddyName),
+                    pluginVersion    : processingOptionService.findOptionAsString(PIPELINE_RODDY_ALIGNMENT_DEFAULT_PLUGIN_VERSION, workPackage.seqType.roddyName),
+                    baseProjectConfig: processingOptionService.findOptionAsString(PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG, workPackage.seqType.roddyName),
                     configVersion    : "v1_0",
                     resources        : "t",
             ] + configOptions))
@@ -231,16 +237,16 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
                     ],
             ] + referenceGenomeConfig))
 
-            workPackage.alignmentProperties = ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(workPackage.project, workPackage.seqType, workPackage.sampleType).alignmentProperties.collect {
+            workPackage.alignmentProperties.addAll(ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(workPackage.project, workPackage.seqType, workPackage.sampleType).alignmentProperties.collect {
                 new MergingWorkPackageAlignmentProperty(name: it.name, value: it.value, mergingWorkPackage: workPackage)
-            }
+            })
             workPackage.save(flush: true)
         }
         assert ReferenceGenomeProjectSeqTypeAlignmentProperty.list().size() >= 1
         assert MergingWorkPackageAlignmentProperty.list().size() >= 1
     }
 
-
+    @Override
     void setUpFilesVariables() {
         testFastqFiles = [
                 readGroup1: [

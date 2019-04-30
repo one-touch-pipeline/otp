@@ -49,7 +49,7 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
     @Scheduled(fixedDelay = 60000L)
     @Override
     void execute() {
-        doWithPersistenceInterceptor {
+        Realm.withNewSession {
             ProcessingPriority minPriority = minimumProcessingPriorityForOccupyingASlot
             if (minPriority.priority > ProcessingPriority.MAXIMUM.priority) {
                 return

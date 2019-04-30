@@ -22,9 +22,6 @@
 
 package de.dkfz.tbi.otp.alignment
 
-import org.junit.Ignore
-import org.junit.Test
-
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
@@ -32,22 +29,121 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Ignore
 class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
 
+    void "test align lanes only, no BaseBam exists, one lane, all fine"() {
+        given:
+        Realm.withNewSession {
+            createSeqTrack("readGroup1")
+        }
+
+        when:
+        execute()
+
+        then:
+        verify_AlignLanesOnly_AllFine()
+    }
+
+    void "test align lanes only, no BaseBam exists, two lanes, same antibody, all fine"() {
+        given:
+        SeqTrack firstSeqTrack
+        SeqTrack secondSeqTrack
+
+        Realm.withNewSession {
+            firstSeqTrack = createSeqTrack("readGroup1")
+            secondSeqTrack = createSeqTrack("readGroup2")
+        }
+
+        when:
+        execute()
+
+        then:
+        check_alignLanesOnly_NoBaseBamExist_TwoLanes(firstSeqTrack, secondSeqTrack)
+    }
+
+    void "test align lanes only, no BaseBam exists, two lanes, different antibody, all fine"() {
+        given:
+        SeqTrack firstSeqTrack
+        SeqTrack secondSeqTrack
+        MergingWorkPackage workPackage
+        MergingWorkPackage secondMergingWorkPackage
+
+        Realm.withNewSession {
+            firstSeqTrack = createSeqTrack("readGroup1")
+
+            workPackage = exactlyOneElement(MergingWorkPackage.findAll())
+            secondMergingWorkPackage = DomainFactory.createMergingWorkPackage([
+                    sample               : workPackage.sample,
+                    pipeline             : workPackage.pipeline,
+                    seqType              : workPackage.seqType,
+                    seqPlatformGroup     : workPackage.seqPlatformGroup,
+                    referenceGenome      : workPackage.referenceGenome,
+                    needsProcessing      : false,
+                    statSizeFileName     : workPackage.statSizeFileName,
+                    libraryPreparationKit: workPackage.libraryPreparationKit,
+                    antibodyTarget       : DomainFactory.createAntibodyTarget(),
+            ])
+
+            secondSeqTrack = DomainFactory.createSeqTrackWithDataFiles(secondMergingWorkPackage, [
+                    laneId               : "readGroup2",
+                    fastqcState          : SeqTrack.DataProcessingState.FINISHED,
+                    dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
+                    libraryPreparationKit: exactlyOneElement(LibraryPreparationKit.findAll()),
+                    kitInfoReliability   : InformationReliability.KNOWN,
+            ])
+
+            DataFile.findAllBySeqTrack(secondSeqTrack).eachWithIndex { DataFile dataFile, int index ->
+                dataFile.vbpFileName = dataFile.fileName = "fastq_${workPackage.individual.pid}_${workPackage.sampleType.name}_${secondSeqTrack.laneId}_${index + 1}.fastq.gz"
+                dataFile.nReads = NUMBER_OF_READS
+                dataFile.save(flush: true)
+            }
+            linkFastqFiles(secondSeqTrack, testFastqFiles[secondSeqTrack.laneId])
+
+            secondMergingWorkPackage.needsProcessing = true
+            secondMergingWorkPackage.save(flush: true)
+        }
+
+        when:
+        execute(2)
+
+        then:
+        Realm.withNewSession {
+            workPackage.refresh()
+            assert !workPackage.needsProcessing
+            secondMergingWorkPackage.refresh()
+            assert !secondMergingWorkPackage.needsProcessing
+
+            List<RoddyBamFile> bamFiles = RoddyBamFile.findAll()
+            assert 2 == bamFiles.size()
+            checkLatestBamFileState(bamFiles[0], null, [mergingWorkPackage: workPackage, seqTracks: [firstSeqTrack], containedSeqTracks: [firstSeqTrack], identifier: 0L,])
+            checkLatestBamFileState(bamFiles[1], null, [mergingWorkPackage: secondMergingWorkPackage, seqTracks: [secondSeqTrack], containedSeqTracks: [secondSeqTrack], identifier: 0L,])
+
+            bamFiles.each { RoddyBamFile bamFile ->
+                assertBamFileFileSystemPropertiesSet(bamFile)
+
+                checkFileSystemState(bamFile)
+
+                checkQC(bamFile)
+            }
+            return true
+        }
+    }
+
+    @Override
     String getRefGenFileNamePrefix() {
         return 'hg_GRCh38'
     }
 
+    @Override
     protected String getChromosomeStatFileName() {
         return 'hg_GRCh38.fa.chrLenOnlyACGT.tab'
     }
+
 
     @Override
     protected String getReferenceGenomeSpecificPath() {
         'bwa_hg38'
     }
-
 
     @Override
     SeqType findSeqType() {
@@ -71,79 +167,5 @@ class PanCanChipSeqAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflow
                 ].asImmutable(),
         ].asImmutable()
         refGenDir = new File(referenceGenomeDirectory, 'bwa_hg38')
-    }
-
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_OneLane_allFine() {
-
-        // prepare
-        createSeqTrack("readGroup1")
-
-        executeAndVerify_AlignLanesOnly_AllFine()
-    }
-
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_TwoLanes_SameAntibody_allFine() {
-        alignLanesOnly_NoBaseBamExist_TwoLanes()
-    }
-
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_TwoLanes_DifferentAntibody_allFine() {
-
-        SeqTrack firstSeqTrack = createSeqTrack("readGroup1")
-
-        MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
-        MergingWorkPackage secondMergingWorkPackage = DomainFactory.createMergingWorkPackage([
-                sample               : workPackage.sample,
-                pipeline             : workPackage.pipeline,
-                seqType              : workPackage.seqType,
-                seqPlatformGroup     : workPackage.seqPlatformGroup,
-                referenceGenome      : workPackage.referenceGenome,
-                needsProcessing      : false,
-                statSizeFileName     : workPackage.statSizeFileName,
-                libraryPreparationKit: workPackage.libraryPreparationKit,
-                antibodyTarget       : DomainFactory.createAntibodyTarget()
-        ])
-
-        SeqTrack secondSeqTrack = DomainFactory.createSeqTrackWithDataFiles(secondMergingWorkPackage, [
-                laneId               : "readGroup2",
-                fastqcState          : SeqTrack.DataProcessingState.FINISHED,
-                dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
-                libraryPreparationKit: exactlyOneElement(LibraryPreparationKit.findAll()),
-                kitInfoReliability   : InformationReliability.KNOWN,
-        ])
-
-        DataFile.findAllBySeqTrack(secondSeqTrack).eachWithIndex { DataFile dataFile, int index ->
-            dataFile.vbpFileName = dataFile.fileName = "fastq_${workPackage.individual.pid}_${workPackage.sampleType.name}_${secondSeqTrack.laneId}_${index + 1}.fastq.gz"
-            dataFile.nReads = AbstractRoddyAlignmentWorkflowTests.NUMBER_OF_READS
-            dataFile.save(flush: true)
-        }
-        linkFastqFiles(secondSeqTrack, testFastqFiles.get(secondSeqTrack.laneId))
-
-        secondMergingWorkPackage.needsProcessing = true
-        secondMergingWorkPackage.save(flush: true)
-
-
-        // run
-        execute(2)
-
-        // check
-        workPackage.refresh()
-        assert false == workPackage.needsProcessing
-        secondMergingWorkPackage.refresh()
-        assert false == secondMergingWorkPackage.needsProcessing
-
-        List<RoddyBamFile> bamFiles = RoddyBamFile.findAll()
-        assert 2 == bamFiles.size()
-        checkLatestBamFileState(bamFiles[0], null, [mergingWorkPackage: workPackage, seqTracks: [firstSeqTrack], containedSeqTracks: [firstSeqTrack], identifier: 0L,])
-        checkLatestBamFileState(bamFiles[1], null, [mergingWorkPackage: secondMergingWorkPackage, seqTracks: [secondSeqTrack], containedSeqTracks: [secondSeqTrack], identifier: 0L,])
-
-        bamFiles.each { RoddyBamFile bamFile ->
-            assertBamFileFileSystemPropertiesSet(bamFile)
-
-            checkFileSystemState(bamFile)
-
-            checkQC(bamFile)
-        }
     }
 }

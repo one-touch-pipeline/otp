@@ -23,8 +23,8 @@
 package de.dkfz.tbi.otp.analysis.pair.aceseq
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import workflows.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
 
+import de.dkfz.tbi.otp.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
@@ -32,6 +32,8 @@ import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
 
 import java.time.Duration
+
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 
 abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<AceseqInstance> {
 
@@ -41,11 +43,18 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
     ProcessingOptionService processingOptionService
 
+    @Override
+    void setupData() {
+        Realm.withNewSession {
+            createSophiaInput()
+            super.setupData()
+        }
+    }
 
     @Override
     ConfigPerProjectAndSeqType createConfig() {
         DomainFactory.createProcessingOptionLazy([
-                name   : ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
+                name   : PIPELINE_MIN_COVERAGE,
                 type   : Pipeline.Type.ACESEQ.toString(),
                 project: null,
                 value  : "20",
@@ -64,9 +73,9 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
-                            pluginName       : processingOptionService.findOptionAsString(OptionName.PIPELINE_ACESEQ_DEFAULT_PLUGIN_NAME),
-                            pluginVersion    : processingOptionService.findOptionAsString(OptionName.PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION, seqType.roddyName),
-                            baseProjectConfig: processingOptionService.findOptionAsString(OptionName.PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName),
+                            pluginName       : processingOptionService.findOptionAsString(PIPELINE_ACESEQ_DEFAULT_PLUGIN_NAME),
+                            pluginVersion    : processingOptionService.findOptionAsString(PIPELINE_ACESEQ_DEFAULT_PLUGIN_VERSION, seqType.roddyName),
+                            baseProjectConfig: processingOptionService.findOptionAsString(PIPELINE_ACESEQ_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName),
                             configVersion    : 'v1_0',
                             resources        : 't',
                     ])
@@ -107,19 +116,13 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
 
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstance(samplePair)
         File sophiaInputFile = sophiaInstance.finalAceseqInputFile
-        samplePair.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-        assert samplePair.save(flush: true)
+        SamplePair sp = SamplePair.get(samplePair.id)
+        sp.sophiaProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+        assert sp.save(flush: true)
 
         linkFileUtils.createAndValidateLinks([
                 (sourceSophiaInputFile): sophiaInputFile,
         ], realm)
-    }
-
-
-    void executeTest() {
-        createSophiaInput()
-
-        super.executeTest()
     }
 
 

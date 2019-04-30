@@ -22,24 +22,65 @@
 
 package de.dkfz.tbi.otp.alignment
 
-import org.junit.Ignore
-import org.junit.Test
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Ignore
 class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
 
+    void "test AlignLanesOnly, no baseBam exist, one lane, all fine"() {
+        given:
+        Realm.withNewSession {
+            createSeqTrack("readGroup1")
+        }
+
+        when:
+        execute()
+
+        then:
+        verify_AlignLanesOnly_AllFine()
+    }
+
+    @Unroll
+    void "test AlignLanesOnly, no baseBam exist, two libraries #setLibrary, all fine"() {
+        given:
+        SeqTrack firstSeqTrack
+        SeqTrack secondSeqTrack
+        Realm.withNewSession {
+            if (setLibrary) {
+                firstSeqTrack = createSeqTrack("readGroup1", [libraryName: "lib1"])
+                secondSeqTrack = createSeqTrack("readGroup2", [libraryName: "lib5"])
+            } else {
+                firstSeqTrack = createSeqTrack("readGroup1")
+                secondSeqTrack = createSeqTrack("readGroup2")
+            }
+        }
+
+        when:
+        execute()
+
+        then:
+        check_alignLanesOnly_NoBaseBamExist_TwoLanes(firstSeqTrack, secondSeqTrack)
+
+        where:
+        setLibrary | _
+        true       | _
+        false      | _
+    }
+
+    @Override
     String getRefGenFileNamePrefix() {
         return 'hs37d5_PhiX_Lambda.conv'
     }
 
+    @Override
     protected String getChromosomeStatFileName() {
         return 'hs37d5_PhiX_Lambda.fa.chrLenOnlyACGT.tab'
     }
 
+    @Override
     protected String getCytosinePositionsIndex() {
         return 'hs37d5_PhiX_Lambda.pos.gz'
     }
@@ -74,24 +115,5 @@ class PanCanWgbsAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTes
         return [
                 "scripts/workflows/WgbsAlignmentWorkflow.groovy",
         ]
-    }
-
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_OneLane_allFine() {
-
-        // prepare
-        createSeqTrack("readGroup1")
-
-        executeAndVerify_AlignLanesOnly_AllFine()
-    }
-
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_TwoLibraries_allFine() {
-        alignLanesOnly_NoBaseBamExist_TwoLanes(true)
-    }
-
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_TwoLanes_allFine() {
-        alignLanesOnly_NoBaseBamExist_TwoLanes(false)
     }
 }

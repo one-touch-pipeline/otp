@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 
 /**
  * This service is able to track the execution of jobs on the cluster.
@@ -45,9 +44,6 @@ import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 @Component
 @Slf4j
 class ClusterJobMonitor {
-
-    @Autowired
-    PersistenceContextUtils persistenceContextUtils
 
     @Autowired
     ClusterJobSchedulerService clusterJobSchedulerService
@@ -64,7 +60,7 @@ class ClusterJobMonitor {
             return //job system is inactive
         }
 
-        persistenceContextUtils.doWithPersistenceContext {
+        Realm.withNewSession {
             doCheck()
         }
     }

@@ -23,8 +23,8 @@
 package de.dkfz.tbi.otp.analysis.pair.sophia
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import workflows.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
 
+import de.dkfz.tbi.otp.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.time.Duration
 
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
+
 abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnalysisWorkflowTests<SophiaInstance> {
 
     LsdfFilesService lsdfFilesService
@@ -41,6 +43,14 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
     ProjectService projectService
 
     ProcessingOptionService processingOptionService
+
+    @Override
+    void setupData() {
+        Realm.withNewSession {
+            linkQualityControlFiles()
+            super.setupData()
+        }
+    }
 
     @Override
     ConfigPerProjectAndSeqType createConfig() {
@@ -58,9 +68,9 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
                     new RoddyConfiguration([
                             project          : project,
                             seqType          : seqType,
-                            pluginName       : processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_SOPHIA_DEFAULT_PLUGIN_NAME),
-                            pluginVersion    : processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS, seqType.roddyName),
-                            baseProjectConfig: processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_SOPHIA_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName),
+                            pluginName       : processingOptionService.findOptionAsString(PIPELINE_SOPHIA_DEFAULT_PLUGIN_NAME),
+                            pluginVersion    : processingOptionService.findOptionAsString(PIPELINE_SOPHIA_DEFAULT_PLUGIN_VERSIONS, seqType.roddyName),
+                            baseProjectConfig: processingOptionService.findOptionAsString(PIPELINE_SOPHIA_DEFAULT_BASE_PROJECT_CONFIG, seqType.roddyName),
                             configVersion    : 'v1_0',
                             resources        : 't',
                     ])
@@ -68,13 +78,14 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
         }
     }
 
+
     @Override
     ReferenceGenome createReferenceGenome() {
         ReferenceGenome referenceGenome = super.createReferenceGenome()
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
             processingOptionService.createOrUpdate(
-                    ProcessingOption.OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
+                    PIPELINE_SOPHIA_REFERENCE_GENOME,
                     referenceGenome.name
             )
         }
@@ -96,13 +107,6 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
                     (controlInsertSizeFile): finalControlInsertSizeFile,
             ], realm)
         }
-    }
-
-
-    void executeTest() {
-        linkQualityControlFiles()
-
-        super.executeTest()
     }
 
     @Override

@@ -22,14 +22,12 @@
 
 package de.dkfz.tbi.otp.alignment
 
-import workflows.WorkflowTestCase
-
+import de.dkfz.tbi.otp.WorkflowTestCase
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.*
 
 abstract class AbstractAlignmentWorkflowTest extends WorkflowTestCase {
     LsdfFilesService lsdfFilesService
-
 
     void linkFastqFiles(SeqTrack seqTrack, List<File> testFastqFiles) {
         List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
@@ -40,6 +38,7 @@ abstract class AbstractAlignmentWorkflowTest extends WorkflowTestCase {
             File sourceFastqFile = testFastqFiles[index]
             assert sourceFastqFile.exists()
             dataFile.fileSize = sourceFastqFile.length()
+            dataFile.save(flush: true)
             File linkFastqFile = new File(lsdfFilesService.getFileFinalPath(dataFile))
             sourceLinkMap.put(sourceFastqFile, linkFastqFile)
             File linkViewByPidFastqFile = new File(lsdfFilesService.getFileViewByPidPath(dataFile))

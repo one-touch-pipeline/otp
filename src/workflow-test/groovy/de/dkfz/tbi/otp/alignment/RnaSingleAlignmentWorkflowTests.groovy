@@ -22,14 +22,11 @@
 
 package de.dkfz.tbi.otp.alignment
 
-import org.junit.Ignore
-
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@Ignore
 class RnaSingleAlignmentWorkflowTests extends AbstractRnaAlignmentWorkflowTests {
 
     @Override
@@ -51,7 +48,7 @@ class RnaSingleAlignmentWorkflowTests extends AbstractRnaAlignmentWorkflowTests 
 
         DataFile.findAllBySeqTrack(seqTrack1).eachWithIndex { DataFile dataFile, int index ->
             dataFile.vbpFileName = dataFile.fileName = "fastq_${seqTrack1.individual.pid}_${seqTrack1.sampleType.name}_${seqTrack1.laneId}_${index + 1}.fastq.gz"
-            dataFile.nReads = AbstractRoddyAlignmentWorkflowTests.NUMBER_OF_READS
+            dataFile.nReads = NUMBER_OF_READS
             dataFile.save(flush: true)
         }
 

@@ -55,6 +55,8 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
      */
     Integer maximumReadLength
 
+    Set<String> furtherFiles = [] as Set<String>
+
 
     static hasMany = [
             furtherFiles: String,

@@ -22,13 +22,13 @@
 
 package de.dkfz.tbi.otp.alignment
 
-import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.job.jobs.roddyAlignment.PanCanStartJob
 import de.dkfz.tbi.otp.job.processing.Process
+import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -42,159 +42,204 @@ abstract class PanCanAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkfl
     PanCanStartJob panCanStartJob
 
 
-    @Test
-    void testNoProcessableObjectFound() {
+    void "test no processableObject found"() {
+        given:
+        RoddyBamFile firstBamFile
+        List<SeqTrack> seqTracks
+        Realm.withNewSession {
+            firstBamFile = createFirstRoddyBamFile()
+            createSeqTrack("readGroup2")
 
-        // prepare
-        RoddyBamFile firstBamFile = createFirstRoddyBamFile()
-        createSeqTrack("readGroup2")
+            seqTracks = SeqTrack.findAllByLaneIdInList(["readGroup1"])
 
-        List<SeqTrack> seqTracks = SeqTrack.findAllByLaneIdInList(["readGroup1"])
+            MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
+            workPackage.needsProcessing = false
+            workPackage.save(flush: true, failOnError: true)
+        }
 
-        MergingWorkPackage workPackage = exactlyOneElement(MergingWorkPackage.findAll())
-        workPackage.needsProcessing = false
-        workPackage.save(flush: true, failOnError: true)
+        when:
+        Realm.withNewSession {
+            panCanStartJob.execute()
+        }
 
-        // run
-        panCanStartJob.execute()
-
-        // check
-        assert 0 == Process.list().size()
-        assert 1 == RoddyBamFile.findAll().size()
-        checkFirstBamFileState(firstBamFile, true, [
-                seqTracks         : seqTracks,
-                containedSeqTracks: seqTracks,
-        ])
-        assertBamFileFileSystemPropertiesSet(firstBamFile)
+        then:
+        Realm.withNewSession {
+            assert 0 == Process.list().size()
+            assert 1 == RoddyBamFile.findAll().size()
+            checkFirstBamFileState(firstBamFile, true, [
+                    seqTracks         : seqTracks,
+                    containedSeqTracks: seqTracks,
+            ])
+            assertBamFileFileSystemPropertiesSet(firstBamFile)
+            return true
+        }
     }
 
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_OneLane_allFine() {
+    void "test alignLanesOnly, no baseBam exists, one lane, all fine"() {
+        given:
+        Realm.withNewSession {
+            createSeqTrack("readGroup1")
+        }
 
-        // prepare
-        createSeqTrack("readGroup1")
+        when:
+        execute()
 
-        executeAndVerify_AlignLanesOnly_AllFine()
+        then:
+        verify_AlignLanesOnly_AllFine()
     }
 
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_OneLane_workflow_1_0_182_1_allFine() {
+    void "test alignLanesOnly, no baseBam exists, one lane, workflow_1_0_182_1, all fine"() {
+        given:
+        Realm.withNewSession {
+            createSeqTrack("readGroup1")
+            MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
+            createProjectConfigForQualityControlWorkflow(mergingWorkPackage)
+        }
 
-        // prepare
-        createSeqTrack("readGroup1")
+        when:
+        execute()
 
-        MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
-
-        createProjectConfigForQualityControlWorkflow(mergingWorkPackage)
-
-        executeAndVerify_AlignLanesOnly_AllFine()
+        then:
+        verify_AlignLanesOnly_AllFine()
     }
 
-    private createProjectConfigForQualityControlWorkflow(MergingWorkPackage mergingWorkPackage) {
+    void "testAlignLanesOnly_NoBaseBamExist_OneLane_bwa_mem_0_7_8_sambamba_0_5_9_allFine"() {
+        given:
+        Realm.withNewSession {
+            createSeqTrack("readGroup1")
+            MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
+            createProjectConfig(mergingWorkPackage, [
+                    bwaMemVersion  : "0.7.8",
+                    sambambaVersion: "0.5.9",
+                    configVersion  : "v2_0",
+            ])
+        }
+
+        when:
+        execute()
+
+        then:
+        verify_AlignLanesOnly_AllFine()
+    }
+
+    void "test alignLanesOnly, no baseBam exists, one lane, fastTrack, all fine"() {
+        given:
+        Realm.withNewSession {
+            fastTrackSetup()
+        }
+
+        when:
+        execute()
+
+        then:
+        verify_AlignLanesOnly_AllFine()
+    }
+
+
+    void "test alignLanesOnly, no baseBam exists, one lane, with fingerPrinting, all fine"() {
+        given:
+        Realm.withNewSession {
+            createSeqTrack("readGroup1")
+            setUpFingerPrintingFile()
+        }
+
+        when:
+        execute()
+
+        then:
+        verify_AlignLanesOnly_AllFine()
+    }
+
+
+    void "test alignLanesOnly, no baseBam exists, two lane, all fine"() {
+        given:
+        SeqTrack firstSeqTrack
+        SeqTrack secondSeqTrack
+
+        Realm.withNewSession {
+            firstSeqTrack = createSeqTrack("readGroup1")
+            secondSeqTrack = createSeqTrack("readGroup2")
+        }
+
+        when:
+        execute()
+
+        then:
+        check_alignLanesOnly_NoBaseBamExist_TwoLanes(firstSeqTrack, secondSeqTrack)
+    }
+
+    void "test, alignBaseBam and new lanes, workflow 1_0_182_1, all fine"() {
+        given:
+        Realm.withNewSession {
+            MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
+            createProjectConfigForQualityControlWorkflow(mergingWorkPackage)
+            createFirstRoddyBamFile(false)
+            createSeqTrack("readGroup2")
+        }
+
+        when:
+        execute()
+
+        then:
+        checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes()
+    }
+
+
+    void "test, alignBaseBam and new lanes, all fine"() {
+        given:
+        Realm.withNewSession {
+            createFirstRoddyBamFile(useOldStructure)
+            createSeqTrack("readGroup2")
+        }
+
+        when:
+        execute()
+
+        then:
+        checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes()
+
+        where:
+        useOldStructure | _
+        true            | _
+        false           | _
+    }
+
+    void "test align with withdrawn base, all fine"() {
+        given:
+        RoddyBamFile roddyBamFile
+        Realm.withNewSession {
+            roddyBamFile = createFirstRoddyBamFile()
+            roddyBamFile.withdrawn = true
+            roddyBamFile.save(flush: true, failOnError: true)
+            roddyBamFile.mergingWorkPackage.needsProcessing = true
+            roddyBamFile.mergingWorkPackage.save(flush: true, failOnError: true)
+        }
+
+        when:
+        execute()
+
+        then:
+        Realm.withNewSession {
+            assert !roddyBamFile.workDirectory.exists()
+            checkWorkPackageState()
+
+            List<RoddyBamFile> bamFiles = RoddyBamFile.findAll().sort { it.id }
+            assert 2 == bamFiles.size()
+            assert roddyBamFile == bamFiles.first()
+            assert !bamFiles[1].baseBamFile
+            checkFirstBamFileState(bamFiles[1], true, [identifier: 1])
+            assertBamFileFileSystemPropertiesSet(bamFiles[1])
+            checkFileSystemState(bamFiles[1])
+            return true
+        }
+    }
+
+    private void createProjectConfigForQualityControlWorkflow(MergingWorkPackage mergingWorkPackage) {
         createProjectConfig(mergingWorkPackage, [
                 pluginName       : "QualityControlWorkflows",
                 pluginVersion    : "1.2.182",
                 baseProjectConfig: "otpPanCanAlignmentWorkflow-1.3",
                 configVersion    : "v2_0",
         ])
-    }
-
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_OneLane_bwa_mem_0_7_8_sambamba_0_5_9_allFine() {
-
-        // prepare
-        createSeqTrack("readGroup1")
-
-        MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
-
-        createProjectConfig(mergingWorkPackage, [
-                bwaMemVersion  : "0.7.8",
-                sambambaVersion: "0.5.9",
-                configVersion  : "v2_0",
-        ])
-        executeAndVerify_AlignLanesOnly_AllFine()
-    }
-
-
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_OneLane_FastTrack_allFine() {
-
-        fastTrackSetup()
-
-        executeAndVerify_AlignLanesOnly_AllFine()
-    }
-
-
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_OneLane_WithFingerPrinting_allFine() {
-
-        // prepare
-        createSeqTrack("readGroup1")
-        setUpFingerPrintingFile()
-
-        executeAndVerify_AlignLanesOnly_AllFine()
-    }
-
-
-    @Test
-    void testAlignLanesOnly_NoBaseBamExist_TwoLanes_allFine() {
-        alignLanesOnly_NoBaseBamExist_TwoLanes()
-    }
-
-
-    @Test
-    void testAlignBaseBamAndNewLanes_allFine() {
-        alignBaseBamAndNewLanesHelper(false)
-    }
-
-    @Test
-    void testAlignBaseBamAndNewLanes_workflow_1_0_182_1_allFine() {
-        MergingWorkPackage mergingWorkPackage = exactlyOneElement(MergingWorkPackage.findAll())
-
-        createProjectConfigForQualityControlWorkflow(mergingWorkPackage)
-
-        alignBaseBamAndNewLanesHelper(false)
-    }
-
-    @Test
-    void testAlignBaseBamAndNewLanes_allFine_oldStructure() {
-        alignBaseBamAndNewLanesHelper(true)
-    }
-
-    protected void alignBaseBamAndNewLanesHelper(boolean useOldStructure) {
-        // prepare
-        createFirstRoddyBamFile(useOldStructure)
-        createSeqTrack("readGroup2")
-
-        // run
-        execute()
-
-        // check
-        checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes()
-    }
-
-    @Test
-    void testAlignWithWithdrawnBase_allFine() {
-        // prepare
-        RoddyBamFile roddyBamFile = createFirstRoddyBamFile()
-        roddyBamFile.withdrawn = true
-        roddyBamFile.save(flush: true, failOnError: true)
-        roddyBamFile.mergingWorkPackage.needsProcessing = true
-        roddyBamFile.mergingWorkPackage.save(flush: true, failOnError: true)
-
-        // run
-        execute()
-
-        // check
-        assert !roddyBamFile.workDirectory.exists()
-        checkWorkPackageState()
-
-        List<RoddyBamFile> bamFiles = RoddyBamFile.findAll().sort { it.id }
-        assert 2 == bamFiles.size()
-        assert roddyBamFile == bamFiles.first()
-        assert !bamFiles[1].baseBamFile
-        checkFirstBamFileState(bamFiles[1], true, [identifier: 1])
-        assertBamFileFileSystemPropertiesSet(bamFiles[1])
-        checkFileSystemState(bamFiles[1])
     }
 }

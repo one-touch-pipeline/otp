@@ -22,9 +22,6 @@
 
 package de.dkfz.tbi.otp.alignment
 
-import org.junit.Ignore
-import org.junit.Test
-
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -33,81 +30,83 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 
-import static de.dkfz.tbi.TestCase.shouldFail
-
 /**
  * tests for AbstractRoddyJob using PanCanAlignmentWorkflow
  */
-@Ignore
 class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTests {
 
-    @Test
-    void executeRoddy_roddyCallSucceeds_noClusterJobsSent_RoddyJobFailedAndSuccessfullyRestarted() {
+    void "execute roddy, roddy call succeeds, no cluster jobs sent, roddy job failed and successfully restarted"() {
+        given:
+        RoddyWorkflowConfig config
+        String pluginVersion
+        Realm.withNewSession {
+            createFirstRoddyBamFile()
+            createSeqTrack("readGroup2")
 
-        // prepare
-        createFirstRoddyBamFile()
-        createSeqTrack("readGroup2")
+            config = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAll())
+            pluginVersion = config.pluginVersion
 
-        RoddyWorkflowConfig config = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAll())
-        String pluginVersion = config.pluginVersion
+            // setting not existing plugin must make roddy exit without sending any cluster jobs
+            config.pluginVersion = HelperUtils.getUniqueString()
+            config.save(flush: true)
+        }
 
-        // setting not existing plugin must make roddy exit without sending any cluster jobs
-        config.pluginVersion = HelperUtils.getUniqueString()
-        config.save(flush: true)
+        when:
+        execute()
 
-        // run
-        assert shouldFail(RuntimeException) {
-            execute()
-        } =~ /The project configuration .* could not be found./
+        then:
+        RuntimeException exception = thrown(RuntimeException)
+        exception.message =~ /Plugin '.*' is not available, available are:/
 
-        // repair
-        config.pluginVersion = pluginVersion
-        config.save(flush: true)
+        when:
+        Realm.withNewSession {
+            config.refresh()
+            config.pluginVersion = pluginVersion
+            config.save(flush: true)
+            restartWorkflowFromFailedStep()
+        }
 
-        // run
-        restartWorkflowFromFailedStep()
-
-        // check
+        then:
         checkAllAfterSuccessfulExecution_alignBaseBamAndNewLanes()
     }
 
-    @Test
-    void executeRoddy_roddyCallSucceeds_oneClusterJobFails_RoddyJobFailedAndSuccessfullyRestarted() {
+    void "execute roddy, roddy call succeeds, one clusterJob fails, RoddyJob failed and is successfully restarted"() {
+        given:
         String DUMMY_STAT_SIZE_FILE_NAME = "dummy.tab"
+        RoddyBamFile firstBamFile
+        MergingWorkPackage workPackage
+        Realm.withNewSession {
+            firstBamFile = createFirstRoddyBamFile()
+            createSeqTrack("readGroup2")
 
-        // prepare
+            // create invalid stat file and register it in the database
+            // this will make one of the cluster jobs fail
+            workPackage = firstBamFile.workPackage
+            File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(workPackage.referenceGenome)
+            remoteShellHelper.executeCommand(realm, "chmod g+w ${statDir}")
+            File statFile = new File(statDir, DUMMY_STAT_SIZE_FILE_NAME)
+            workPackage.refresh()
+            workPackage.statSizeFileName = statFile.name
+            workPackage.save(flush: true, failOnError: true)
+        }
 
-        RoddyBamFile firstBamFile = createFirstRoddyBamFile()
-        createSeqTrack("readGroup2")
+        when:
+        execute()
 
-        // create invalid stat file and register it in the database
-        // this will make one of the cluster jobs fail
-        MergingWorkPackage workPackage = firstBamFile.workPackage
-        File statDir = referenceGenomeService.pathToChromosomeSizeFilesPerReference(workPackage.referenceGenome)
-        remoteShellHelper.executeCommand(realm, "chmod g+w ${statDir}")
-        File statFile = new File(statDir, DUMMY_STAT_SIZE_FILE_NAME)
-        workPackage.refresh()
-        workPackage.statSizeFileName = statFile.name
-        workPackage.save(flush: true, failOnError: true)
+        then:
+        RuntimeException exception = thrown(RuntimeException)
+        exception.message.contains("Status code: 15")
 
-        // run
+        when:
+        Realm.withNewSession {
+            workPackage.refresh()
+            workPackage.statSizeFileName = getChromosomeStatFileName()
+            workPackage.save(flush: true, failOnError: true)
 
-        assert shouldFail(RuntimeException) {
-            execute()
-        }.contains("Status code: 15")
+            restartWorkflowFromFailedStep()
+        }
 
-        // repair
-
-        workPackage.refresh()
-        workPackage.statSizeFileName = getChromosomeStatFileName()
-        workPackage.save(flush: true, failOnError: true)
-
-        // run
-
-        restartWorkflowFromFailedStep()
-
-        // check
-
+        then:
         checkAllAfterRoddyClusterJobsRestartAndSuccessfulExecution_alignBaseBamAndNewLanes()
     }
 

@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.ImportExternallyMerged
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.utils.PersistenceContextUtils
 
 class ImportExternallyMergedBamStartJobIntegrationSpec extends IntegrationSpec {
 

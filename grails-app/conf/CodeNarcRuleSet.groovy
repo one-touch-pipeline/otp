@@ -26,6 +26,7 @@ final String INTEGRATION_SPEC = "*IntegrationSpec.groovy"
 final String CONTROLLER = "*Controller.groovy"
 final String SERVICE = "*Service.groovy"
 final String VALIDATOR = "*Validator*"
+final String WORKFLOW_TEST = "*/*workflow-test*/*"
 final int DEFAULT = 1 //Value for rules that we have no explicitly discussed yet
 final int CRITICAL = 1
 final int HIGH = 2
@@ -843,6 +844,7 @@ All the Rules that will be used for OTP
     JUnitLostTest {
         priority = MIDDLE
         doNotApplyToFileNames = SPEC
+        doNotApplyToFileNames = WORKFLOW_TEST
     }
     //JUnitPublicField
     //JUnitPublicNonTestMethod
@@ -859,6 +861,7 @@ All the Rules that will be used for OTP
     JUnitTestMethodWithoutAssert {
         priority = MIDDLE
         doNotApplyToFileNames = SPEC
+        doNotApplyToFileNames = WORKFLOW_TEST
     }
     JUnitUnnecessarySetUp {
         priority = DEFAULT

@@ -23,31 +23,29 @@
 package de.dkfz.tbi.otp
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.test.mixin.TestMixin
-import grails.test.mixin.integration.IntegrationTestMixin
-import grails.util.Environment
+import grails.testing.mixin.integration.Integration
 import grails.util.Holders
 import groovy.json.JsonOutput
 import groovy.sql.Sql
-import groovy.util.logging.Log4j
-import org.hibernate.SessionFactory
-import org.junit.*
+import groovy.util.logging.Slf4j
+import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.scriptTests.GroovyScriptAwareTestCase
+import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import javax.sql.DataSource
+import java.nio.file.FileSystem
 import java.time.Duration
 import java.util.concurrent.*
 
@@ -60,25 +58,22 @@ import static de.dkfz.tbi.otp.utils.LocalShellHelper.executeAndAssertExitCodeAnd
  * To run the workflow tests the preparation steps described in
  * src/docs/guide/testing.md have to be followed.
  */
-@Log4j
-@TestMixin(IntegrationTestMixin)
-abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
+@Slf4j
+@Integration
+abstract class WorkflowTestCase extends Specification implements UserAndRoles, GroovyScriptAwareTestCase {
 
     ErrorLogService errorLogService
     CreateClusterScriptService createClusterScriptService
     RemoteShellHelper remoteShellHelper
     ExecutionHelperService executionHelperService
-    SessionFactory sessionFactory
     DataSource dataSource
     SchedulerService schedulerService
     TestConfigService configService
+    FileSystemService fileSystemService
 
     ReferenceGenomeService referenceGenomeService
 
     LinkFileUtils linkFileUtils
-
-    // The scheduler needs to access the created objects while the test is being executed
-    boolean transactional = false
 
     // permissions to be applied to the source test data
     protected final static String TEST_DATA_MODE_DIR = "2750"
@@ -87,8 +82,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     final static String CHROMOSOME_NAMES_FILE = 'chromosome-names.txt'
 
     // The base directory for this test instance ("local root" directory).
-    private File baseDirectory = null
-
+    protected File baseDirectory = null
 
     String testDataDir
     String ftpDir
@@ -98,8 +92,8 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
     File schemaDump
     Sql sql
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1)
-    private boolean startJobRunning = false
+    final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1)
+    protected boolean startJobRunning = false
 
     /**
      * This method must return a list of relative paths (as strings) to the workflow scripts
@@ -131,92 +125,104 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         ])
     }
 
-    @Before
-    void setUpWorkflowTests() {
-        // NOTE: the following assumptions won't work (they will cause the tests to fail if not true)
-        // before Grails 2.1. This means we can't remove the @Ignore annotations yet, but it will
-        // prevent the tests from being run with wrong settings. (TODO: remove this comments when
-        // we use Grails >2.1)
-        // check whether the correct environment is set
-        Assume.assumeTrue(Environment.current.name == "WORKFLOW_TEST")
-        setupDirectoriesAndRealm()
+    void setup() {
+        doCleanup()
+        Realm.withNewSession {
+            setupDirectoriesAndRealm()
 
-        sql = new Sql(dataSource)
-        schemaDump = new File(TestCase.createEmptyTestDirectory(), "test-database-dump.sql")
-        sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
+            sql = new Sql(dataSource)
+            schemaDump = new File(TestCase.createEmptyTestDirectory(), "test-database-dump.sql")
+            sql.execute("SCRIPT NODATA DROP TO ?", [schemaDump.absolutePath])
 
-        DomainFactory.createAllAlignableSeqTypes()
+            DomainFactory.createAllAlignableSeqTypes()
 
-        DomainFactory.createProcessingOptionForNotificationRecipient()
-        DomainFactory.createProcessingOptionLazy(name :OptionName.OTP_USER_LINUX_GROUP, value: configService.getTestingGroup())
-        DomainFactory.createProcessingOptionLazy(name: OptionName.CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE, value: "fasttrack")
-        DomainFactory.createProcessingOptionLazy(name: OptionName.TICKET_SYSTEM_URL, value: "1234")
-        DomainFactory.createProcessingOptionLazy(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "asdf")
-        DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_FASTQ_IMPORT, value: "")
-        DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_BAM_IMPORT, value: "")
-        DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_PROCESSING_USE_REMOTE, value: "true")
-        DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE, value: "true")
-        DomainFactory.createProcessingOptionLazy(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
-        DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_RECIPIENT_ERRORS, value: HelperUtils.randomEmail)
-        DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_REPLY_TO, value: HelperUtils.randomEmail)
-        DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
-        DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION, value: HelperUtils.randomEmail)
-        DomainFactory.createProcessingOptionLazy(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
+            DomainFactory.createProcessingOptionForNotificationRecipient()
+            DomainFactory.createProcessingOptionLazy(name: OptionName.OTP_USER_LINUX_GROUP, value: configService.getTestingGroup())
+            DomainFactory.createProcessingOptionLazy(name: OptionName.CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE, value: "fasttrack")
+            DomainFactory.createProcessingOptionLazy(name: OptionName.TICKET_SYSTEM_URL, value: "1234")
+            DomainFactory.createProcessingOptionLazy(name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX, value: "asdf")
+            DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_FASTQ_IMPORT, value: "")
+            DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_BAM_IMPORT, value: "")
+            DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_PROCESSING_USE_REMOTE, value: "true")
+            DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE, value: "true")
+            DomainFactory.createProcessingOptionLazy(name: OptionName.REALM_DEFAULT_VALUE, value: realm.name)
+            DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_RECIPIENT_ERRORS, value: HelperUtils.randomEmail)
+            DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_REPLY_TO, value: HelperUtils.randomEmail)
+            DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
+            DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION, value: HelperUtils.randomEmail)
+            DomainFactory.createProcessingOptionLazy(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
 
-        createUserAndRoles()
-        loadWorkflow()
+            createUserAndRoles()
+            loadWorkflow()
 
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            new File("scripts/initializations").listFiles().each { File script ->
-                runScript(script)
+            SpringSecurityUtils.doWithAuth(ADMIN) {
+                new File("scripts/initializations").listFiles().each { File script ->
+                    runScript(script)
+                }
             }
+
+            DomainFactory.createProcessingOptionLazy(
+                    name: OptionName.RODDY_APPLICATION_INI,
+                    value: new File(getInputRootDirectory(), "applicationProperties-test.ini").absolutePath
+            )
+
+
+            assert schedulerService.running.empty
+            assert schedulerService.queue.empty
+            assert !ProcessingStep.list()
+
+            // manually set up scheduled tasks
+            // this is done here so they will be stopped when each test is finished,
+            // otherwise there would be problems with the database being deleted
+            scheduler.scheduleWithFixedDelay({
+                Holders.applicationContext.getBean(ClusterJobMonitor).check()
+            } as Runnable, 0, 10, TimeUnit.SECONDS)
+
+            scheduler.scheduleWithFixedDelay({
+                Holders.applicationContext.getBean(SchedulerService).schedule()
+            } as Runnable, 0, 1, TimeUnit.SECONDS)
         }
-
-        DomainFactory.createProcessingOptionLazy(
-                name: OptionName.RODDY_APPLICATION_INI,
-                value: new File(getInputRootDirectory(), "applicationProperties-test.ini").absolutePath
-        )
-
-
-        assert schedulerService.running.empty
-        assert schedulerService.queue.empty
-        assert !ProcessingStep.list()
-
-        // manually set up scheduled tasks
-        // this is done here so they will be stopped when each test is finished,
-        // otherwise there would be problems with the database being deleted
-        scheduler.scheduleWithFixedDelay({
-            Holders.applicationContext.getBean(ClusterJobMonitor).check()
-        } as Runnable, 0, 10, TimeUnit.SECONDS)
-
-        scheduler.scheduleWithFixedDelay({
-            Holders.applicationContext.getBean(SchedulerService).schedule()
-        } as Runnable, 0, 1, TimeUnit.SECONDS)
     }
 
-
-    @After
-    void tearDownWorkflowTests() {
+    void cleanup() {
         // stop scheduled tasks in SchedulerService and start job
         scheduler.shutdownNow()
         startJobRunning = false
         assert scheduler.awaitTermination(1, TimeUnit.MINUTES)
 
+        doCleanup()
+
+        log.info "Base directory: ${getBaseDirectory()}"
+    }
+
+    void doCleanup() {
+        Realm.withNewSession {
+            JobExecutionPlan.list()*.startJob*.bean.each {
+                ((AbstractStartJobImpl) Holders.applicationContext.getBean(it)).onApplicationEvent(null)
+            }
+        }
+
         schedulerService.running.clear()
         schedulerService.queue.clear()
+
+        fileSystemService.createdFileSystems.each { Realm realm, FileSystem fileSystem ->
+            fileSystem.close()
+        }
+        remoteShellHelper.sessionPerRealm.each { Realm realm, com.jcraft.jsch.Session session ->
+            session.disconnect()
+        }
+        remoteShellHelper.sessionPerRealm = [:]
+        fileSystemService.createdFileSystems = [:]
 
         if (sql) {
             sql.execute("DROP ALL OBJECTS")
             sql.execute("RUNSCRIPT FROM ?", [schemaDump.absolutePath])
         }
-        sessionFactory.currentSession.clear()
         TestCase.cleanTestDirectory()
-
-        println "Base directory: ${getBaseDirectory()}"
     }
 
 
-    private void setupDirectoriesAndRealm() {
+    protected void setupDirectoriesAndRealm() {
         // check whether the wf test root dir is mounted
         // (assume it is mounted if it exists and contains files)
         File rootDirectory = getInputRootDirectory()
@@ -233,9 +239,9 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
                 defaultJobSubmissionOptions: jobSubmissionOptions,
         ]
 
-        realm = DomainFactory.createRealm(realmParams)
+        realm = Realm.list().find() ?: DomainFactory.createRealm(realmParams)
 
-        println "Base directory: ${getBaseDirectory()}"
+        log.debug "Base directory: ${getBaseDirectory()}"
 
         [
                 (OtpProperty.PATH_PROJECT_ROOT)    : "${getBaseDirectory()}/root_path",
@@ -263,7 +269,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         String mkDirs = createClusterScriptService.makeDirs(files, mode)
         assert remoteShellHelper.executeCommand(realm, mkDirs).toInteger() == 0
         files.each {
-            WaitingFileUtils.waitUntilExists(it)
+            FileService.waitUntilExists(it.toPath())
         }
     }
 
@@ -278,19 +284,19 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }.join('\n')
         remoteShellHelper.executeCommand(realm, cmd)
         files.each { File key, String value ->
-            WaitingFileUtils.waitUntilExists(key)
+            FileService.waitUntilExists(key.toPath())
             assert key.text == value + '\n'
         }
     }
 
-    private waitUntilWorkflowFinishes(Duration timeout, int numberOfProcesses = 1) {
-        println "Started to wait (until workflow is finished or timeout)"
-        long lastPrintln = 0L
+    protected void waitUntilWorkflowFinishes(Duration timeout, int numberOfProcesses = 1) {
+        log.debug "Started to wait (until workflow is finished or timeout)"
+        long lastLog = 0L
         int counter = 0
         if (!ThreadUtils.waitFor({
-            if (lastPrintln < System.currentTimeMillis() - 60000L) {
-                println "waiting (${counter++} min) ... "
-                lastPrintln = System.currentTimeMillis()
+            if (lastLog < System.currentTimeMillis() - 60000L) {
+                log.debug "waiting (${counter++} min) ... "
+                lastLog = System.currentTimeMillis()
             }
             return areAllProcessesFinished(numberOfProcesses)
         }, timeout.toMillis(), 1000L)) {
@@ -298,22 +304,22 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }
     }
 
-    private void outputFailureInfoAndThrowException(Collection<ProcessingStepUpdate> failureProcessingStepUpdates) {
+    protected void outputFailureInfoAndThrowException(Collection<ProcessingStepUpdate> failureProcessingStepUpdates) {
         List<String> combinedErrorMessage = []
         failureProcessingStepUpdates.each {
-            println "ProcessingStep ${it.processingStep.id} failed."
+            log.error "ProcessingStep ${it.processingStep.id} failed."
             if (it.error) {
-                println 'Error message:'
-                println it.error.errorMessage
+                log.error 'Error message:'
+                log.error it.error.errorMessage
                 combinedErrorMessage << it.error.errorMessage
                 if (it.error.stackTraceIdentifier) {
-                    println 'Stack trace:'
-                    println errorLogService.loggedError(it.error.stackTraceIdentifier)
+                    log.error 'Stack trace:'
+                    log.error errorLogService.loggedError(it.error.stackTraceIdentifier)
                 } else {
-                    println 'The stackTraceIdentifier property of the ProcessingError is not set.'
+                    log.error 'The stackTraceIdentifier property of the ProcessingError is not set.'
                 }
             } else {
-                println 'The error property of the ProcessingStepUpdate is not set.'
+                log.error 'The error property of the ProcessingStepUpdate is not set.'
             }
         }
         if (!failureProcessingStepUpdates.empty) {
@@ -325,7 +331,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         }
     }
 
-    private void ensureThatWorkflowHasNotFailed(List<ProcessingStepUpdate> existingFailureProcessingStepUpdate = []) {
+    protected void ensureThatWorkflowHasNotFailed(List<ProcessingStepUpdate> existingFailureProcessingStepUpdate = []) {
         Collection<ProcessingStepUpdate> allFailureProcessingStepUpdates = ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE)
         Collection<ProcessingStepUpdate> failureProcessingStepUpdatesAfterRestart = allFailureProcessingStepUpdates - existingFailureProcessingStepUpdate
         outputFailureInfoAndThrowException(failureProcessingStepUpdatesAfterRestart)
@@ -338,7 +344,7 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         assert ClusterJob.all.every { it.jobLog != null }
     }
 
-    private boolean areAllProcessesFinished(int numberOfProcesses) {
+    protected static boolean areAllProcessesFinished(int numberOfProcesses) {
         Collection<Process> processes = Process.list()
         assert processes.size() <= numberOfProcesses
         return processes.size() == numberOfProcesses && processes.every {
@@ -356,7 +362,9 @@ abstract class WorkflowTestCase extends GroovyScriptAwareTestCase {
         // Create the directory like a "singleton", since randomness is involved
         if (!baseDirectory) {
             String mkDirs = """\
-TEMP_DIR=`mktemp -d -p ${getResultRootDirectory().absolutePath} ${getNonQualifiedClassName()}-${System.getProperty('user.name')}-${HelperUtils.formatter.print(new org.joda.time.DateTime())}-XXXXXXXXXXXXXXXX`
+TEMP_DIR=`mktemp -d -p ${getResultRootDirectory().absolutePath} ${this.class.simpleName[0..-6]}-${System.getProperty('user.name')}-${
+                HelperUtils.formatter.print(new org.joda.time.DateTime())
+            }-XXXXXXXXXXXXXXXX`
 chmod g+rwx \$TEMP_DIR
 echo \$TEMP_DIR
 """
@@ -364,14 +372,6 @@ echo \$TEMP_DIR
                     .assertExitCodeZeroAndStderrEmpty().stdout.trim())
         }
         return baseDirectory
-    }
-
-    /**
-     * The general directory for all runs of this workflow test
-     */
-    protected File getWorkflowDirectory() {
-        File workflowDirectory = new File(getInputRootDirectory(), getNonQualifiedClassName())
-        return workflowDirectory
     }
 
     protected File getReferenceGenomeDirectory() {
@@ -390,9 +390,9 @@ echo \$TEMP_DIR
                 chromosomeSuffix: '',
                 chromosomePrefix: '',
         )
-        LsdfFilesService.ensureFileIsReadableAndNotEmpty(source)
+        FileService.ensureFileIsReadableAndNotEmpty(source.toPath())
 
-        ["21","22"].each { String chromosomeName ->
+        ["21", "22"].each { String chromosomeName ->
             DomainFactory.createReferenceGenomeEntry(
                     referenceGenome: referenceGenome,
                     classification: ReferenceGenomeEntry.Classification.CHROMOSOME,
@@ -411,23 +411,6 @@ echo \$TEMP_DIR
 
     ReferenceGenome createAndSetup_Bwa06_1K_ReferenceGenome() {
         return createReferenceGenomeWithFile('bwa06_1KGRef', 'hs37d5')
-    }
-
-    /**
-     * Extracts the non-qualified class name from the test case name.
-     * <p>
-     * Note: This method should not be called directly. It's used only for path construction.
-     *
-     * @return the non-qualified class name.
-     */
-    private getNonQualifiedClassName() {
-        final FIRST_MATCH = 0
-        final FIRST_GROUP = 1
-        def classNameMatcher = (this.class.name =~ /\.?(\w+)Tests$/)
-        if (!classNameMatcher) {
-            throw new Exception("Class name must end with Tests")
-        }
-        return classNameMatcher[FIRST_MATCH][FIRST_GROUP]
     }
 
     /**
@@ -456,10 +439,10 @@ echo \$TEMP_DIR
     /**
      *  Load the workflow and update processing options
      */
-    private void loadWorkflow() {
+    protected void loadWorkflow() {
         setupForLoadingWorkflow()
 
-        assert workflowScripts : 'No workflow script provided.'
+        assert workflowScripts: 'No workflow script provided.'
         SpringSecurityUtils.doWithAuth(ADMIN) {
             JobExecutionPlan.withTransaction {
                 workflowScripts.each { String script ->
@@ -478,57 +461,45 @@ echo \$TEMP_DIR
      *  find the start job and execute it, then wait for
      *  either the workflow to finish or the timeout
      */
-    protected void execute(int numberOfProcesses = 1, ensureNoFailure = true) {
-        schedulerService.startup()
-        if (!startJobRunning) {
-            AbstractStartJobImpl startJob = Holders.applicationContext.getBean(JobExecutionPlan.list()?.first()?.startJob?.bean, AbstractStartJobImpl)
-            assert startJob: 'No start job found.'
+    protected void execute(int numberOfProcesses = 1, boolean ensureNoFailure = true) {
+        Realm.withNewSession {
+            schedulerService.startup()
+            if (!startJobRunning) {
+                AbstractStartJobImpl startJob = Holders.applicationContext.getBean(JobExecutionPlan.list()?.first()?.startJob?.bean, AbstractStartJobImpl)
+                assert startJob: 'No start job found.'
 
-            scheduler.scheduleWithFixedDelay({
-                try {
-                    startJob.execute()
-                } catch (Throwable t) {
-                    println 'Exception in StartJob'
-                    t.printStackTrace(System.out)
-                    throw t
-                }
-            } as Runnable, 0, 5, TimeUnit.SECONDS)
-            startJobRunning = true
-        }
+                scheduler.scheduleWithFixedDelay({
+                    try {
+                        startJob.execute()
+                    } catch (Throwable t) {
+                        log.error 'Exception in StartJob', t
+                        throw t
+                    }
+                } as Runnable, 0, 5, TimeUnit.SECONDS)
+                startJobRunning = true
+            }
 
-        waitUntilWorkflowFinishes(timeout, numberOfProcesses)
-        if (ensureNoFailure) {
-            ensureThatWorkflowHasNotFailed()
+            waitUntilWorkflowFinishes(timeout, numberOfProcesses)
+            if (ensureNoFailure) {
+                ensureThatWorkflowHasNotFailed()
+            }
         }
     }
 
-    protected void restartWorkflowFromFailedStep(ensureNoFailure = true) {
+    protected void restartWorkflowFromFailedStep(boolean ensureNoFailure = true) {
         ProcessingStepUpdate failureStepUpdate = exactlyOneElement(ProcessingStepUpdate.findAllByState(ExecutionState.FAILURE))
         ProcessingStep step = failureStepUpdate.processingStep
         schedulerService.restartProcessingStep(step)
-        println "RESTARTED THE WORKFLOW FROM THE FAILED JOB"
+        log.debug "RESTARTED THE WORKFLOW FROM THE FAILED JOB"
         waitUntilWorkflowFinishes(timeout)
         if (ensureNoFailure) {
             ensureThatWorkflowHasNotFailed([failureStepUpdate])
         }
     }
 
-    /**
-     * Convenience method to persist a domain instance into the database. Assert whether
-     * the operation was successful.
-     *
-     * @param instance the domain instance to persist
-     * @return the instance, or <code>null</code> otherwise.
-     */
-    protected persist(instance) {
-        def saved = instance.save(flush: true)
-        assert saved: "Failed to persist object \"${instance}\" to database!"
-        return saved
-    }
-
     String calculateMd5Sum(File file) {
         assert file: 'file is null'
-        WaitingFileUtils.waitUntilExists(file)
+        FileService.waitUntilExists(file.toPath())
         String md5sum
         LogThreadLocal.withThreadLog(System.out) {
             md5sum = executeAndAssertExitCodeAndErrorOutAndReturnStdout("md5sum ${file}").split(' ')[0]

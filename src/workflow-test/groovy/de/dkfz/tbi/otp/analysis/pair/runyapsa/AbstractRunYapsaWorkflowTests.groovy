@@ -23,8 +23,8 @@
 package de.dkfz.tbi.otp.analysis.pair.runyapsa
 
 import grails.plugin.springsecurity.SpringSecurityUtils
-import workflows.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
 
+import de.dkfz.tbi.otp.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
@@ -38,15 +38,20 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
 
     LsdfFilesService lsdfFilesService
 
-    ProjectService projectService
-
     ProcessingOptionService processingOptionService
 
+    @Override
+    void setupData() {
+        Realm.withNewSession {
+            createRunYapsaInput()
+            super.setupData()
+        }
+    }
 
     @Override
     ConfigPerProjectAndSeqType createConfig() {
         DomainFactory.createProcessingOptionLazy([
-                name   : ProcessingOption.OptionName.PIPELINE_MIN_COVERAGE,
+                name   : OptionName.PIPELINE_MIN_COVERAGE,
                 type   : Pipeline.Type.MUTATIONAL_SIGNATURE.toString(),
                 project: null,
                 value  : "20",
@@ -61,7 +66,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
         lsdfFilesService.createDirectory(project.projectSequencingDirectory, realm)
 
         config = DomainFactory.createRunYapsaConfig([
-                programVersion: processingOptionService.findOptionAsString(ProcessingOption.OptionName.PIPELINE_RUNYAPSA_DEFAULT_VERSION),
+                programVersion: processingOptionService.findOptionAsString(OptionName.PIPELINE_RUNYAPSA_DEFAULT_VERSION),
                 project       : samplePair.project,
                 seqType       : samplePair.seqType,
                 pipeline      : Pipeline.Name.RUN_YAPSA.pipeline,
@@ -98,19 +103,13 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
 
         RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(samplePair)
         File runYapsaInputFile = snvCallingInstance.getResultRequiredForRunYapsa()
-        samplePair.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
-        assert samplePair.save(flush: true)
+        SamplePair sp = SamplePair.get(samplePair.id)
+        sp.snvProcessingStatus = SamplePair.ProcessingStatus.NO_PROCESSING_NEEDED
+        assert sp.save(flush: true)
 
         linkFileUtils.createAndValidateLinks([
                 (sourceSnvCallingInputFile): runYapsaInputFile,
         ], realm)
-    }
-
-
-    void executeTest() {
-        createRunYapsaInput()
-
-        super.executeTest()
     }
 
 

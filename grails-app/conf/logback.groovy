@@ -111,7 +111,7 @@ String jobLogConfig = """\
             <pattern>%date %level %-40.40logger{39} : %msg%n</pattern>
         </encoder>
     </appender>
-    <logger name="de.dkfz.tbi.otp.job.jobs" level="DEBUG" additivity="false">
+    <logger name="de.dkfz.tbi.otp.job.jobs" level="DEBUG" additivity="${Environment.current.name == "WORKFLOW_TEST" ? "true":"false"}">
         <appender-ref ref="JOBS" />
         <appender-ref ref="STARTJOBS" />
     </logger>

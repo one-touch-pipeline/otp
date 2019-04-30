@@ -22,10 +22,11 @@
 
 package de.dkfz.tbi.otp
 
-import org.junit.Ignore
-import org.junit.Test
+import spock.lang.Shared
+import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.FastqcDataFilesService
+import de.dkfz.tbi.otp.dataprocessing.FastqcProcessedFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -33,22 +34,24 @@ import java.time.Duration
 import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
-@Ignore
 class FastqcWorkflowTests extends WorkflowTestCase {
 
-    ProcessingOptionService processingOptionService
     LsdfFilesService lsdfFilesService
     FastqcDataFilesService fastqcDataFilesService
 
-
+    @Shared
     File sourceFastq
+    @Shared
     File expectedFastqc
+    @Shared
     DataFile dataFile
+    @Shared
     SeqCenter seqCenter
+    @Shared
     SeqTrack seqTrack
 
 
-    void setUpWorkFlow(String fileExtension) {
+    void setupWorkflow(String fileExtension) {
         sourceFastq = new File(inputRootDirectory, "fastqFiles/fastqc/input_fastqc.fastq.${fileExtension}")
         expectedFastqc = new File(inputRootDirectory, "fastqFiles/fastqc/asdf_fastqc.zip")
 
@@ -88,82 +91,83 @@ class FastqcWorkflowTests extends WorkflowTestCase {
     }
 
 
-    @Test
-    void testWorkflow_FastQcDataAvailable() {
-        setUpWorkFlow('gz')
-        String initialPath = new File(lsdfFilesService.getFileInitialPath(dataFile)).parent
-        String fastqcFileName = fastqcDataFilesService.fastqcFileName(dataFile)
+    void "test FastQcWorkflow, when FastQc-Data is available"() {
+        given:
+        Realm.withNewSession {
+            setupWorkflow('gz')
+            String initialPath = new File(lsdfFilesService.getFileInitialPath(dataFile)).parent
+            String fastqcFileName = fastqcDataFilesService.fastqcFileName(dataFile)
+            linkFileUtils.createAndValidateLinks([(expectedFastqc): new File("${initialPath}/${fastqcFileName}")], realm)
+        }
 
-        linkFileUtils.createAndValidateLinks([(expectedFastqc): new File("${initialPath}/${fastqcFileName}")], realm)
-
+        when:
         execute()
 
+        then:
         checkExistenceOfResultsFiles()
         validateFastqcProcessedFile()
         validateFastQcFileContent()
     }
 
-    @Test
-    void testWorkflow_FastQcDataNotAvailable() {
-        setUpWorkFlow('gz')
+    @Unroll
+    void "test FastQcWorkflow, when FastQc-Data is not available and extension is #extension"() {
+        given:
+        Realm.withNewSession {
+            setupWorkflow(extension)
+        }
+
+        when:
         execute()
 
+        then:
         checkExistenceOfResultsFiles()
         validateFastqcProcessedFile()
         validateFastQcFileContent()
-    }
 
-    @Test
-    void testWorkflow_FastQcDataNotAvailable_bzip2() {
-        setUpWorkFlow('bz2')
-        execute()
-
-        checkExistenceOfResultsFiles()
-        validateFastqcProcessedFile()
-        validateFastQcFileContent()
-    }
-
-    @Test
-    void testWorkflow_FastQcDataNotAvailable_tar_bzip2() {
-        setUpWorkFlow('tar.bz2')
-        execute()
-
-        checkExistenceOfResultsFiles()
-        validateFastqcProcessedFile()
-        validateFastQcFileContent()
-    }
-
-    private validateFastQcFileContent() {
-        dataFile.refresh()
-        assert null != dataFile.sequenceLength
-        assert null != dataFile.nReads
-        seqTrack.refresh()
-        assert seqTrack.nBasePairs
+        where:
+        extension | _
+        'gz'      | _
+        'bz2'     | _
+        'tar.bz2' | _
     }
 
     private void checkExistenceOfResultsFiles() {
-        ZipFile expectedResult = new ZipFile(expectedFastqc)
-        ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputFile(dataFile))
+        Realm.withNewSession {
+            ZipFile expectedResult = new ZipFile(expectedFastqc)
+            ZipFile actualResult = new ZipFile(fastqcDataFilesService.fastqcOutputFile(dataFile))
 
-        List<String> actualFiles = []
-        actualResult.entries().each { ZipEntry entry ->
-            actualFiles.add(entry.name)
-        }
+            List<String> actualFiles = []
+            actualResult.entries().each { ZipEntry entry ->
+                actualFiles.add(entry.name)
+            }
 
-        expectedResult.entries().each { ZipEntry entry ->
-            assert actualFiles.contains(entry.name)
-            actualFiles.remove(entry.name)
+            expectedResult.entries().each { ZipEntry entry ->
+                assert actualFiles.contains(entry.name)
+                actualFiles.remove(entry.name)
+            }
+            assert actualFiles.isEmpty()
         }
-        assert actualFiles.isEmpty()
     }
 
-    private validateFastqcProcessedFile() {
-        FastqcProcessedFile fastqcProcessedFile = CollectionUtils.exactlyOneElement(FastqcProcessedFile.all)
+    private void validateFastqcProcessedFile() {
+        Realm.withNewSession {
+            FastqcProcessedFile fastqcProcessedFile = CollectionUtils.exactlyOneElement(FastqcProcessedFile.all)
 
-        assert FastqcProcessedFile.all.size() == 1
-        assert fastqcProcessedFile.fileExists
-        assert fastqcProcessedFile.contentUploaded
-        assert fastqcProcessedFile.dataFile == dataFile
+            assert FastqcProcessedFile.all.size() == 1
+            assert fastqcProcessedFile.fileExists
+            assert fastqcProcessedFile.contentUploaded
+            assert fastqcProcessedFile.dataFile == dataFile
+        }
+    }
+
+    private void validateFastQcFileContent() {
+        Realm.withNewSession {
+            dataFile.refresh()
+            assert null != dataFile.sequenceLength
+            assert null != dataFile.nReads
+            seqTrack.refresh()
+            assert seqTrack.nBasePairs
+        }
     }
 
     @Override

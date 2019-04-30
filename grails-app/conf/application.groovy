@@ -19,9 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
-import static java.util.concurrent.TimeUnit.*
-
 endpoints {
     enabled = false
     jmx {
@@ -145,7 +142,7 @@ grails.plugin.springsecurity.printStatusMessages = false
 
 grails.plugin.databasemigration.changelogLocation = 'migrations'
 grails.plugin.databasemigration.changelogFileName = 'migration-wrapper.groovy'
-grails.plugin.databasemigration.updateOnStart = true
+grails.plugin.databasemigration.updateOnStart = false
 grails.plugin.databasemigration.updateOnStartFileName = "migration-wrapper.groovy"
 grails.plugin.databasemigration.excludeObjects = [
         'aggregate_sequences',
