@@ -50,8 +50,6 @@ class SeqScan implements Entity {
     }
     QCState qcState = QCState.NON
 
-    Date dateCreated = new Date()
-
     static belongsTo = [
             sample     : Sample,
             seqType    : SeqType,

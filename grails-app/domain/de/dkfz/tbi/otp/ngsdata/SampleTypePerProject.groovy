@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import groovy.transform.ToString
 
-import de.dkfz.tbi.otp.TimeStamped
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
@@ -34,7 +33,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * This information will be requested via the SNV-GUI.
  */
 @ToString(excludes=['dateCreated', 'lastUpdated'], includePackage = false)
-class SampleTypePerProject implements TimeStamped, Entity {
+class SampleTypePerProject implements Entity {
 
     Project project
 

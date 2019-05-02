@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class SwapInfo implements Entity {
     User user
-    Date dateCreated
     Date dateFinished
     String comment
     String descriptionOfChanges

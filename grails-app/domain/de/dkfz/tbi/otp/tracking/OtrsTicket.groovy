@@ -83,8 +83,6 @@ class OtrsTicket implements Commentable, Entity {
      */
     Date ticketCreated
 
-    Date dateCreated
-
     Date installationStarted
     Date installationFinished
 

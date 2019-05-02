@@ -22,13 +22,13 @@
 
 package de.dkfz.tbi.otp.security
 
-import de.dkfz.tbi.otp.TimeStamped
+
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * Auto generated class by spring security plugin.
  */
-class User implements TimeStamped, Entity {
+class User implements Entity {
 
     String username
     String password
@@ -39,7 +39,6 @@ class User implements TimeStamped, Entity {
     String email
     String realName // with format '<first_name> <last_name>'
     String asperaAccount
-    Date dateCreated
 
     boolean acceptedPrivacyPolicy
 

@@ -41,4 +41,10 @@ trait Entity {
         return (thisClass == otherClass || thisClass.isAssignableFrom(otherClass) || otherClass.isAssignableFrom(thisClass)) &&
                 this.id && other?.id == this.id
     }
+
+    /**
+     * dateCreated and lastUpdated are maintained automatically by Grails
+     */
+    Date dateCreated
+    Date lastUpdated
 }

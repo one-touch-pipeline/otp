@@ -530,7 +530,6 @@ class ProcessingOption implements Entity {
     @SuppressWarnings("GrailsDomainReservedSqlKeywordName")
     String value
     Project project
-    Date dateCreated = new Date()
     Date dateObsoleted
 
     static belongsTo = [

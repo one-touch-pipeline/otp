@@ -39,7 +39,6 @@ class Run implements ProcessParameterObject, Entity {
     String name                      // run name
 
     Date dateExecuted = null
-    Date dateCreated  = new Date()
 
     boolean blacklisted = false      // run is known to be invalid
 
@@ -54,7 +53,6 @@ class Run implements ProcessParameterObject, Entity {
     static constraints = {
         name(blank: false, unique: true, validator: { OtpPath.isValidPathComponent(it) })
         dateExecuted(nullable: true)
-        dateCreated()
     }
 
     @Override

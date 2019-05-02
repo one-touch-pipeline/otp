@@ -38,7 +38,6 @@ class FastqcProcessedFile implements Entity {
     boolean contentUploaded = false
     long fileSize = -1
 
-    Date dateCreated = new Date()
     Date dateFromFileSystem = null
 
     DataFile dataFile

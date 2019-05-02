@@ -46,11 +46,6 @@ abstract class AbstractFileSystemBamFile extends AbstractBamFile {
     boolean fileExists
 
     /**
-     * date of creation of object in the database
-     */
-    Date dateCreated = new Date()
-
-    /**
      * date of last modification of the file on the file system
      */
     Date dateFromFileSystem

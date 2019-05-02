@@ -22,7 +22,6 @@
 
 package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.TimeStamped
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.Entity
@@ -32,7 +31,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * This domain stores the configuration project specific.
  * If the configuration changes, the old database entry is set to obsolete and the new entry refers to the old entry.
  */
-abstract class ConfigPerProjectAndSeqType implements TimeStamped, Entity {
+abstract class ConfigPerProjectAndSeqType implements Entity {
 
     Project project
 

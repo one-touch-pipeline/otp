@@ -29,7 +29,6 @@ import de.dkfz.tbi.otp.utils.Entity
 class ProcessedSaiFile implements Entity {
 
     boolean fileExists
-    Date dateCreated = new Date()
     Date dateFromFileSystem
     long fileSize = -1
 

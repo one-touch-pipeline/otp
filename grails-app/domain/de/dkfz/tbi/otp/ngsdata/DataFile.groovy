@@ -46,7 +46,6 @@ class DataFile implements Commentable, Entity {
     @Deprecated
     Date dateExecuted = null       // when the file was originally produced
     Date dateFileSystem = null     // when the file was created on LSDF
-    Date dateCreated = null        // when the object was created in db
     Date dateLastChecked = null    // when fileExists was last updated
 
     boolean fileWithdrawn = false

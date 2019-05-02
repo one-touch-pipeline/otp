@@ -22,11 +22,10 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.TimeStamped
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 
-class GeneModel implements TimeStamped, Entity {
+class GeneModel implements Entity {
 
     static final String GENE_MODELS = "GENE_MODELS"
     static final String GENE_MODELS_EXCLUDE = "GENE_MODELS_EXCLUDE"

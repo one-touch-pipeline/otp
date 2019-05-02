@@ -29,7 +29,6 @@ class MetaDataFile implements Entity {
 
     String fileName
     String filePath
-    Date dateCreated = null
 
     /**
      * Will only be filled by metadata import 2.0.
@@ -46,8 +45,6 @@ class MetaDataFile implements Entity {
     static constraints = {
         fileName(validator: { OtpPath.isValidPathComponent(it) })
         filePath(validator: { OtpPath.isValidAbsolutePath(it) })
-        runSegment()
-        dateCreated()
         md5sum(nullable: true, matches: /^[0-9a-f]{32}$/)
     }
 

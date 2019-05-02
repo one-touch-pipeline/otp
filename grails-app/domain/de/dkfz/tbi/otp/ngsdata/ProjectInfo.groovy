@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.utils.Entity
 class ProjectInfo implements Entity {
 
     String fileName
-    Date dateCreated = new Date()
 
     Project project
 

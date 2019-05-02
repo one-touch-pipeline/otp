@@ -35,11 +35,6 @@ class ReferenceGenomeProjectSeqType implements Entity {
     static final String TAB_FILE_PATTERN = /[0-9a-zA-Z-_\.]+\.tab/
 
     /**
-     * Date when the object has been created.
-     * To be filled in automatically by GORM.
-     */
-    Date dateCreated
-    /**
      * Is used to track information about
      * reference genomes used in a project for a seqType.
      * If it is null, this reference genome is used for these

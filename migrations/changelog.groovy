@@ -184,4 +184,28 @@ databaseChangeLog = {
 
     include file: 'changelogs/2019/remove-seqplatform-unique-constraint.groovy'
 
+    changeSet(author: "", id: "OTP-3119-update") {
+        sqlFile(path: 'changelogs/2019/OTP-3119-update.sql')
+    }
+    changeSet(author: "", id: "OTP-3119") {
+        sqlFile(path: 'changelogs/2019/OTP-3119.sql')
+    }
+    changeSet(author: "", id: "OTP-3119-abstract-quality-assessment") {
+        sqlFile(path: 'changelogs/2019/OTP-3119-abstract-quality-assessment.sql')
+    }
+    changeSet(author: "", id: "OTP-3119-cluster-job") {
+        sqlFile(path: 'changelogs/2019/OTP-3119-cluster-job.sql')
+    }
+    changeSet(author: "", id: "OTP-3119-meta-data-entry") {
+        sqlFile(path: 'changelogs/2019/OTP-3119-meta-data-entry.sql')
+    }
+    changeSet(author: "", id: "OTP-3119-parameter") {
+        sqlFile(path: 'changelogs/2019/OTP-3119-parameter.sql')
+    }
+    changeSet(author: "", id: "OTP-3119-processing-step") {
+        sqlFile(path: 'changelogs/2019/OTP-3119-processing-step.sql')
+    }
+    changeSet(author: "", id: "OTP-3119-processing-step-update") {
+        sqlFile(path: 'changelogs/2019/OTP-3119-processing-step-update.sql')
+    }
 }

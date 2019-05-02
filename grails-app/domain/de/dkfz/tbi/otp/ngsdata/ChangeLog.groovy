@@ -41,7 +41,6 @@ class ChangeLog implements Entity {
     String fromValue
     String toValue
     String comment
-    Date dateCreated = new Date()
 
     enum Source {
         SYSTEM, MANUAL
@@ -52,11 +51,5 @@ class ChangeLog implements Entity {
         tableName(blank: true)
         // nullable for compatibility with existing objects in Database
         referencedClass(nullable: true)
-        columnName()
-        fromValue()
-        toValue()
-        comment()
-        // nullable for compatibility with existing objects in Database
-        dateCreated(nullable: true)
     }
 }

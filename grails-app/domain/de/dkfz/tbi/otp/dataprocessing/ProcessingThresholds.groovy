@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import groovy.transform.ToString
 
-import de.dkfz.tbi.otp.TimeStamped
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -35,7 +34,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * At least one of the two properties have to be filled in.
  */
 @ToString
-class ProcessingThresholds implements TimeStamped, Entity {
+class ProcessingThresholds implements Entity {
 
     Project project
 
