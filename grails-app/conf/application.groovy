@@ -87,6 +87,10 @@ grails.spring.bean.packages = []
 // whether to disable processing of multi part requests
 grails.web.disable.multipart=false
 
+//max upload size
+grails.controllers.upload.maxFileSize = 10*1024*1024
+grails.controllers.upload.maxRequestSize = 10*1024*1024
+
 // request parameters to mask when logging exceptions
 grails.exceptionresolver.params.exclude = ['password']
 
