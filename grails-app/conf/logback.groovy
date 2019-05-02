@@ -77,7 +77,7 @@ appender("OTP", RollingFileAppender) {
     }
 }
 
-String appenderToUse = Environment.current.name == "PRODUCTION" ? 'OTP' : 'STDOUT'
+String appenderToUse = Environment.current == Environment.PRODUCTION ? 'OTP' : 'STDOUT'
 
 Properties otpProperties = ConfigService.parsePropertiesFile()
 String jobLogDir = otpProperties.getProperty(OtpProperty.PATH_JOB_LOGS.key) ?: OtpProperty.PATH_JOB_LOGS.defaultValue
