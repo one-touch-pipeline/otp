@@ -99,7 +99,11 @@
             <tr>
                 <th><g:message code="otp.blank"/></th>
                 <th><g:message code="workflow.paramater.table.headers.clusterJobName"/></th>
-                <th><g:message code="workflow.paramater.table.headers.clusterJob"/></th>
+                <th>
+                    <span onclick="$.otp.workflows.processingStep.promptClusterJobIds('${clusterJobs*.clusterJobId.join(" ")}')">
+                        <u><g:message code="workflow.paramater.table.headers.clusterJob"/></u>
+                    </span>
+                </th>
                 <th><g:message code="workflow.paramater.table.headers.clusterJobLogFile"/></th>
                 <th><g:message code="workflow.paramater.table.headers.clusterJobDetails"/></th>
                 <th><g:message code="workflow.paramater.table.headers.jobResult"/></th>
@@ -148,8 +152,8 @@
                 'workflow.processingstep.update.table.headers.error'
             ]}" id="processingStepUpdatesList"/>
     </div>
-    <asset:script>
-       $(document).ready(function() {
+    <asset:script  type="text/javascript">
+        $(document).ready(function() {
             $.otp.workflows.processingStep.register('#processingStepUpdatesList', '#inputParametersList', '#outputParametersList', ${step.id});
         });
     </asset:script>

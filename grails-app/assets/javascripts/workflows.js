@@ -809,6 +809,9 @@ $.otp.workflows = {
             $.otp.workflows.processingStep.processingStepUpdates(updatesSelector);
             $.otp.workflows.processingStep.parameters(inputParamSelector, true);
             $.otp.workflows.processingStep.parameters(outputParamSelector, false);
+        },
+        promptClusterJobIds: function (clusterJobIds) {
+            prompt("All cluster job IDs", clusterJobIds);
         }
     }
 };
