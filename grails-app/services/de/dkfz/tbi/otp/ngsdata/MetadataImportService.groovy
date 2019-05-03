@@ -330,6 +330,7 @@ class MetadataImportService {
 
     protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode, String ticketNumber,
                                               String seqCenterComment, boolean automaticNotification) {
+        Long timeImportStarted = System.currentTimeMillis()
         log.debug('import started')
         RunSegment runSegment = new RunSegment(
                 align: align,
@@ -350,9 +351,13 @@ class MetadataImportService {
         )
         assert metaDataFile.save(flush: false)
 
+        Long timeSamplePairCreationStarted = System.currentTimeMillis()
+        log.debug('sample pair stared')
         List<SamplePair> samplePairs = SamplePair.findMissingDiseaseControlSamplePairs()
         samplePairs*.save(flush: true)
-        log.debug('import stopped')
+        log.debug("sample pair stopped:  ${System.currentTimeMillis() - timeSamplePairCreationStarted}")
+
+        log.debug("import stopped ${metaDataFile.fileName}:  ${System.currentTimeMillis() - timeImportStarted}")
         return metaDataFile
     }
 
