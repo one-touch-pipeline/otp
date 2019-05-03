@@ -56,12 +56,12 @@ class BEExecutionServiceAdapter implements BEExecutionService {
 
     @Override
     ExecutionResult execute(Command command) {
-        return execute(command.toString())
+        return execute(command.toBashCommandString())
     }
 
     @Override
     ExecutionResult execute(Command command, boolean b) {
-        return execute(command.toString())
+        return execute(command.toBashCommandString())
     }
 
     @Override
