@@ -36,7 +36,6 @@ import static org.junit.Assert.assertNotNull
 @Integration
 class MergingSetServiceIntegrationTests {
 
-    TestData testData = new TestData()
     Sample sample
     SeqType seqType
     SeqPlatform seqPlatform
@@ -148,10 +147,13 @@ class MergingSetServiceIntegrationTests {
 
     private MergingWorkPackage createMergingWorkPackage() {
         DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqType)
-
-        MergingWorkPackage mergingWorkPackage = testData.createMergingWorkPackage(MergingWorkPackage.getMergingProperties(seqTrack) + [pipeline: DomainFactory.createDefaultOtpPipeline()])
+        MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
+                seqPlatformGroup: seqTrack.seqPlatformGroup,
+                referenceGenome: DomainFactory.createReferenceGenome(),
+                statSizeFileName: null,
+                pipeline: DomainFactory.createDefaultOtpPipeline(),
+        ] + MergingWorkPackage.getMergingProperties(seqTrack))
         assertNotNull(mergingWorkPackage.save([flush: true]))
         return mergingWorkPackage
     }
-
 }

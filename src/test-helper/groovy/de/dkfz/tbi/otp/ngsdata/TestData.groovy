@@ -24,10 +24,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.QaProcessingStatus
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 
 import static org.junit.Assert.assertNotNull
 import static org.junit.Assert.assertTrue
@@ -154,7 +150,8 @@ class TestData {
         assertNotNull(referenceGenomeProjectSeqType.save(flush: true))
     }
 
-    static Project createProject(Map properties = [:]) {
+    @Deprecated
+    private Project createProject(Map properties = [:]) {
         return DomainFactory.createProject([
             name: "project",
             dirName: "dirName",
@@ -163,7 +160,7 @@ class TestData {
     }
 
     @Deprecated
-    Individual createIndividual(Map properties = [:]) {
+    private Individual createIndividual(Map properties = [:]) {
         return DomainFactory.createIndividual([
             pid: "654321",
             mockPid: "PID",
@@ -173,7 +170,8 @@ class TestData {
         ] + properties)
     }
 
-    static SampleType createSampleType(Map properties = [:]) {
+    @Deprecated
+    private SampleType createSampleType(Map properties = [:]) {
         return DomainFactory.createSampleType([
             name: "TUMOR",
             specificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
@@ -181,7 +179,7 @@ class TestData {
     }
 
     @Deprecated
-    Sample createSample(Map properties = [:]) {
+    private Sample createSample(Map properties = [:]) {
         return DomainFactory.createSample([
             individual: individual,
             sampleType: sampleType,
@@ -195,15 +193,6 @@ class TestData {
             sample: sample,
             run: run,
             pipelineVersion: softwareTool,
-        ] + properties)
-    }
-
-    @Deprecated
-    FastqcProcessedFile createFastqcProcessedFile(Map properties = [:]) {
-        return DomainFactory.createFastqcProcessedFile([
-            fileExists: true,
-            contentUploaded: true,
-            dataFile: dataFile,
         ] + properties)
     }
 
@@ -231,6 +220,7 @@ class TestData {
         ] + properties)
     }
 
+    @Deprecated
     static ReferenceGenome createReferenceGenome(Map properties = [:]) {
         return DomainFactory.createReferenceGenome([
             name :"hg19_1_24",
@@ -246,7 +236,7 @@ class TestData {
     }
 
     @Deprecated
-    ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Map properties = [:]) {
+    private ReferenceGenomeProjectSeqType createReferenceGenomeProjectSeqType(Map properties = [:]) {
         return DomainFactory.createReferenceGenomeProjectSeqType([
             project: project,
             seqType: seqType,
@@ -256,12 +246,12 @@ class TestData {
     }
 
     @Deprecated
-    Run createRun(String name) {
+    private Run createRun(String name) {
         return createRun(name: name)
     }
 
     @Deprecated
-    Run createRun(Map properties = [:]) {
+    private Run createRun(Map properties = [:]) {
         return DomainFactory.createRun([
             name: "TestRun",
             seqCenter: seqCenter,
@@ -281,92 +271,12 @@ class TestData {
         )
     }
 
-    static LibraryPreparationKit createLibraryPreparationKit(String name) {
-        return DomainFactory.createLibraryPreparationKit(
-            name: name,
-            shortDisplayName: name,
-        )
-    }
-
-    static BedFile createBedFile(ReferenceGenome referenceGenome, LibraryPreparationKit libraryPreparationKit) {
-        return DomainFactory.createBedFile(
-            fileName: "BedFile",
-            targetSize: 10000000,
-            referenceGenome: referenceGenome,
-            libraryPreparationKit: libraryPreparationKit,
-        )
-    }
-
-    FileType createFileType(FileType.Type type) {
+    @Deprecated
+    private FileType createFileType(FileType.Type type) {
         fileType = DomainFactory.createFileType(
                 type: type
                 )
         assertNotNull(fileType.save(flush: true))
         return fileType
-    }
-
-    static void addKitToExomeSeqTrack(ExomeSeqTrack exomeSeqTrack, LibraryPreparationKit sameLibraryPreparationKit) {
-        exomeSeqTrack.libraryPreparationKit = sameLibraryPreparationKit
-        exomeSeqTrack.kitInfoReliability = InformationReliability.KNOWN
-        assertNotNull(exomeSeqTrack.save(flush: true))
-    }
-
-    @Deprecated
-    ProcessedSaiFile createProcessedSaiFile(Map properties = [:]) {
-        return DomainFactory.createProcessedSaiFile([
-            fileExists: true,
-            dataFile: dataFile,
-        ] + properties)
-    }
-
-    /**
-     * No default alignment provided, therefore the alignment needs to be passed always or <code>null</code> is used.
-     */
-    static ProcessedBamFile createProcessedBamFile(Map properties = [:]) {
-        return DomainFactory.createProcessedBamFile([
-            type: AbstractBamFile.BamType.SORTED,
-            withdrawn: false,
-            qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.NOT_STARTED,
-            status: AbstractBamFile.State.DECLARED,
-        ] + properties)
-    }
-
-    static MergingWorkPackage createMergingWorkPackage(Map properties = [:]) {
-        final MergingWorkPackage mergingWorkPackage = DomainFactory.createMergingWorkPackage([
-            seqPlatformGroup: properties.get('seqPlatformGroup') ?: DomainFactory.createSeqPlatformGroup(),
-            referenceGenome: properties.get('referenceGenome') ?: DomainFactory.createReferenceGenome(),
-            libraryPreparationKit: properties.get('libraryPreparationKit'),
-            statSizeFileName     : properties.pipeline?.name == Pipeline.Name.PANCAN_ALIGNMENT || properties.pipeline == null ?
-                        DomainFactory.DEFAULT_TAB_FILE_NAME : null,
-            pipeline: properties.get('pipeline') ?: DomainFactory.createPanCanPipeline(),
-        ] + properties)
-        return mergingWorkPackage
-    }
-
-    static MergingSet createMergingSet(Map properties = [:]) {
-        return DomainFactory.createMergingSet([
-            identifier: 0,
-        ] + properties)
-    }
-
-    static MergingPass createMergingPass(Map properties = [:]) {
-        return DomainFactory.createMergingPass([
-            identifier: 0,
-            description: "mergingPass",
-        ] + properties)
-    }
-
-    static ProcessedMergedBamFile createProcessedMergedBamFile(Map properties = [:]) {
-        return DomainFactory.createProcessedMergedBamFileWithoutProcessedBamFile(properties.mergingPass, [
-            workPackage: properties.mergingPass.mergingWorkPackage,
-            fileOperationStatus: FileOperationStatus.PROCESSED,
-            md5sum: "12345678901234567890123456789012",
-            type: BamType.MDUP,
-            coverage: 30.0,
-            qualityAssessmentStatus:QaProcessingStatus.NOT_STARTED,
-            status: AbstractBamFile.State.DECLARED,
-            numberOfMergedLanes: 3,
-            fileSize: 100000,
-        ] + properties)
     }
 }

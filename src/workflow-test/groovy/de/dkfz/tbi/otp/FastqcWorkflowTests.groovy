@@ -56,16 +56,16 @@ class FastqcWorkflowTests extends WorkflowTestCase {
         sourceFastq = new File(inputRootDirectory, "fastqFiles/fastqc/input_fastqc.fastq.${fileExtension}")
         expectedFastqc = new File(inputRootDirectory, "fastqFiles/fastqc/asdf_fastqc.zip")
 
-        Project project = Project.build(
+        Project project = DomainFactory.createProject(
                 realm: realm
         )
 
-        Individual individual = Individual.build(
+        Individual individual = DomainFactory.createIndividual(
                 project: project,
                 type: Individual.Type.REAL,
         )
 
-        Sample sample = Sample.build(individual: individual)
+        Sample sample = DomainFactory.createSample(individual: individual)
 
         Run run = DomainFactory.createRun()
 
