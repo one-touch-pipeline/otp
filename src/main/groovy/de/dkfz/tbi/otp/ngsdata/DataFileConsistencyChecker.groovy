@@ -74,7 +74,7 @@ class DataFileConsistencyChecker {
                                 }
                                 it.dateLastChecked = new Date()
                                 try {
-                                    assert it.save(flush: true)
+                                    assert it.save(flush: true, deepValidate: false)
                                 } catch (ValidationException e) {
                                     throw new RuntimeException("Error while saving datafile with id: ${it.id}", e)
                                 }
