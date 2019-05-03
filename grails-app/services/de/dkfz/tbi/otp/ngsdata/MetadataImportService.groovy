@@ -468,6 +468,7 @@ class MetadataImportService {
             log.debug("dataFiles started ${index}/${amountOfRows}")
             importDataFiles(context, runSegment, seqTrack, rows)
             log.debug("dataFiles stopped took: ${System.currentTimeMillis() - timeStarted}")
+            assert seqTrack.save(flush: true) //needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
 
             boolean willBeAligned = seqTrackService.decideAndPrepareForAlignment(seqTrack)
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, willBeAligned)
