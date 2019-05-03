@@ -27,7 +27,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
     <title><g:message code="projectOverview.title" args="[project?.name]"/></title>
-    <asset:javascript src="pages/projectConfig/index/init_description.js"/>
     <asset:javascript src="pages/projectConfig/index/functions.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
@@ -161,13 +160,15 @@
                     </td>
                 </tr>
                 <tr id="descriptionRow">
-                    <td  class="myKey" id="descriptionHeader" style="padding-top: 1em; vertical-align: 1em"><g:message code="projectOverview.description"/> ↓</td>
-                    <td id="descriptionContent" style="height: 3em; overflow: hidden;">
+                    <td  class="myKey" style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="projectOverview.description"/></td>
+                    <td>
+                        <div style="overflow: auto; max-height: 20em;">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="textArea"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateDescription', params: ['project.id': project.id, 'fieldName': 'description'])}"
                                 value="${description}"/>
+                        </div>
                     </td>
                 </tr>
                 <tr>
@@ -569,10 +570,7 @@
         $(function() {
             $.otp.projectConfig.referenceGenome();
             $.otp.projectConfig.asynchronousCallAlignmentInfo();
-            $.otp.initialiseSpecificOverview.toggleDescription();
             $.otp.initCommentBox(${project.id}, "#projectCommentBox");
-            $("#descriptionContent").children().css('height', '3em');
-            $("#descriptionContent").find(':button').css('display', 'block');
         });
     </asset:script>
     </g:if>
