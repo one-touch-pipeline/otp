@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.ngsdata
 
+import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.acl.AclSid
 import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
@@ -60,6 +61,7 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         User enabledUser = DomainFactory.createUser()
         User disabledUser = DomainFactory.createUser()
         User unconnectedUser = DomainFactory.createUser()
+        User currentUser = DomainFactory.createUser()
         String unknownUsername = "unknownUser"
 
         addUserWithReadAccessToProject(enabledUser, project, true)
@@ -80,6 +82,9 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
             getGroupMembersByDistinguishedName(_) >> [enabledUser.username, disabledUser.username, unconnectedUser.username, unknownUsername]
             getLdapUserDetailsByUsername(_) >> new LdapUserDetails()
         }
+        controller.springSecurityService = Mock(SpringSecurityService) {
+            getCurrentUser() >> currentUser
+        }
 
         when:
         controller.request.method = 'GET'
@@ -91,6 +96,7 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         model.enabledProjectUsers.first().user == enabledUser
         model.disabledProjectUsers.size() == 1
         model.disabledProjectUsers.first().user == disabledUser
+        model.currentUser == currentUser
         model.usersWithoutUserProjectRole == [unconnectedUser.username]
         model.unknownUsersWithFileAccess == [unknownUsername]
     }

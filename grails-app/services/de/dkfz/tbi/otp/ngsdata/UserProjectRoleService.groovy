@@ -266,7 +266,7 @@ class UserProjectRoleService {
         return upr
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'MANAGE_USERS')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'MANAGE_USERS') or #upr.user.username == principal.username")
     UserProjectRole toggleReceivesNotifications(UserProjectRole upr) {
         assert upr: USER_PROJECT_ROLE_REQUIRED
         upr.receivesNotifications = !upr.receivesNotifications

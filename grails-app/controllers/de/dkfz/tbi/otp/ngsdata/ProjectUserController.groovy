@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityService
 import groovy.json.JsonBuilder
 import groovy.transform.TupleConstructor
 import org.apache.commons.lang.WordUtils
@@ -41,6 +42,7 @@ class ProjectUserController implements CheckAndCall {
     UserService userService
     UserProjectRoleService userProjectRoleService
     LdapService ldapService
+    SpringSecurityService springSecurityService
 
     def index() {
         List<Project> projects = projectService.getAllProjects()
@@ -91,16 +93,17 @@ class ProjectUserController implements CheckAndCall {
         }
 
         return [
-                projects: projects,
-                project: project,
-                enabledProjectUsers: enabledProjectUsers,
-                disabledProjectUsers: disabledProjectUsers,
+                projects                   : projects,
+                project                    : project,
+                enabledProjectUsers        : enabledProjectUsers,
+                disabledProjectUsers       : disabledProjectUsers,
                 usersWithoutUserProjectRole: usersWithoutUserProjectRole,
-                unknownUsersWithFileAccess: nonDatabaseUsers,
-                availableRoles: ProjectRole.findAll(),
-                hasErrors: params.hasErrors,
-                message: params.message,
-                emails: userProjectRoleService.getEmailsForNotification(project),
+                unknownUsersWithFileAccess : nonDatabaseUsers,
+                availableRoles             : ProjectRole.findAll(),
+                hasErrors                  : params.hasErrors,
+                message                    : params.message,
+                emails                     : userProjectRoleService.getEmailsForNotification(project),
+                currentUser                : springSecurityService.getCurrentUser() as User
         ]
     }
 
