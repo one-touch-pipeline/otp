@@ -118,15 +118,17 @@
                                 </sec:noAccess>
                             </td>
                             <td class="small">
-                                <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
-                                    <otp:editorSwitch
-                                            template="toggle"
-                                            link="${g.createLink(controller: "projectUser", action: "toggleAccessToFiles", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
-                                            value="${userEntry.fileAccess.toBoolean()}"/>
-                                </sec:access>
-                                <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
-                                    <span class="icon-${userEntry.fileAccess}"></span>
-                                </sec:noAccess>
+                                <div class="filesAccessHandler-${userEntry.fileAccess}">
+                                    <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                                        <otp:editorSwitch
+                                                template="toggle"
+                                                link="${g.createLink(controller: "projectUser", action: "toggleAccessToFiles", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
+                                                value="${userEntry.fileAccess.toBoolean()}"/>
+                                    </sec:access>
+                                    <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
+                                        <span></span>
+                                    </sec:noAccess>
+                                </div>
                             </td>
                             <td class="small">
                                 <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">

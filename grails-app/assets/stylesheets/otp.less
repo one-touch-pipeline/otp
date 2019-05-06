@@ -1168,6 +1168,43 @@ td span {
         background: url(error.png) left center no-repeat;
     }
 }
+
+//icons for file access editable
+td div {
+    .background-usage-hint {
+        padding-left: 18px;
+    }
+    &.filesAccessHandler-approved span {
+        .background-usage-hint;
+        background: url(ok.png) left center no-repeat;
+        &.icon-false {
+            background: url(error_grey.png) left center no-repeat;
+        }
+    }
+    &.filesAccessHandler-pendingApproval span {
+        .background-usage-hint;
+        background: url(ok_grey.png) left center no-repeat;
+        &.icon-false {
+            background: url(error.png) left center no-repeat;
+        }
+    }
+    &.filesAccessHandler-pendingDenial span {
+        .background-usage-hint;
+        background: url(error_grey.png) left center no-repeat;
+        &.icon-true {
+            background: url(ok.png) left center no-repeat;
+        }
+    }
+    &.filesAccessHandler-denied span {
+        .background-usage-hint;
+        background: url(error.png) left center no-repeat;
+        &.icon-true {
+            background: url(ok_grey.png) left center no-repeat;
+        }
+    }
+}
+
+
 #otp .addButtonContainer {
     width: 42%;
     float: left;
