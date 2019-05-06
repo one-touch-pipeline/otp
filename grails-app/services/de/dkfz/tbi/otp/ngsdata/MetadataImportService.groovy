@@ -349,7 +349,7 @@ class MetadataImportService {
                 md5sum: context.metadataFileMd5sum,
                 runSegment: runSegment,
         )
-        assert metaDataFile.save(flush: false)
+        assert metaDataFile.save(flush: true)
 
         Long timeSamplePairCreationStarted = System.currentTimeMillis()
         log.debug('sample pair stared')
