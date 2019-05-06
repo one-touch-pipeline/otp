@@ -51,7 +51,8 @@ class Hipo2SampleIdentifierParser implements SampleIdentifierParser {
 
             String sampleTypeDbName = "${HipoTissueType.fromKey(matcher.group('tissueType'))}${matcher.group('tissueNumber')}"
             String analyte = matcher.group('analyte')
-            if (!'DRPAWYEMT'.toCharArray().contains(analyte.charAt(0))) {
+            if (!(analyte.charAt(0) in 'DRPAWYEMT'.toCharArray()) &&
+                    !(analyte.toCharArray().any { it in 'GHJ'.toCharArray() })) {
                 sampleTypeDbName += "-${analyte}"
             }
 

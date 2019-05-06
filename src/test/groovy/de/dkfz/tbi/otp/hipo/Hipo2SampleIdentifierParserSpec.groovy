@@ -71,14 +71,17 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
         'K12A-123ABC-T3-1C02'   || 'TUMOR3-1C02'
         'K12A-123ABC-T3-1C20'   || 'TUMOR3-1C20'
 
-        'K12A-123ABC-T3-G20'    || 'TUMOR3-G20'
-        'K12A-123ABC-T3-H20'    || 'TUMOR3-H20'
+        'K12A-123ABC-T3-G20'    || 'TUMOR3'
+        'K12A-123ABC-T3-H20'    || 'TUMOR3'
+        'K12A-123ABC-T3-J20'    || 'TUMOR3'
 
-        'K12A-123ABC-T3-1G20'   || 'TUMOR3-1G20'
-        'K12A-123ABC-T3-1H20'   || 'TUMOR3-1H20'
+        'K12A-123ABC-T3-1G20'   || 'TUMOR3'
+        'K12A-123ABC-T3-1H20'   || 'TUMOR3'
+        'K12A-123ABC-T3-1J20'   || 'TUMOR3'
 
-        'K12A-123ABC-T3-12H20'  || 'TUMOR3-12H20'
-        'K12A-123ABC-T3-123G20' || 'TUMOR3-123G20'
+        'K12A-123ABC-T3-12H20'  || 'TUMOR3'
+        'K12A-123ABC-T3-123G20' || 'TUMOR3'
+        'K12A-123ABC-T3-1234J20'|| 'TUMOR3'
 
         'K12A-123A-N0-D1'       || 'CONTROL0'
         'K12A-123A-T0-D1'       || 'TUMOR0'
@@ -99,15 +102,16 @@ class Hipo2SampleIdentifierParserSpec extends Specification {
         'K12A-123ABC-T01-D1'    || 'TUMOR01'
         'K12A-123ABC-T10-D1'    || 'TUMOR10'
 
-        'K12A-123ABC-T3-0J00'   || 'TUMOR3-0J00'
-        'K12A-123ABC-T3-1J00'   || 'TUMOR3-1J00'
-        'K12A-123ABC-T3-0J01'   || 'TUMOR3-0J01'
-        'K12A-123ABC-T3-1J02'   || 'TUMOR3-1J02'
-        'K12A-123ABC-T3-1J20'   || 'TUMOR3-1J20'
+        'K12A-123ABC-T3-0J00'   || 'TUMOR3'
+        'K12A-123ABC-T3-1J00'   || 'TUMOR3'
+        'K12A-123ABC-T3-0J01'   || 'TUMOR3'
+        'K12A-123ABC-T3-1J02'   || 'TUMOR3'
+        'K12A-123ABC-T3-1J20'   || 'TUMOR3'
 
         'K12A-123ABC-T0-C1'     || 'TUMOR0-C1'
-        'K12A-123ABC-T0-G1'     || 'TUMOR0-G1'
-        'K12A-123ABC-T0-H1'     || 'TUMOR0-H1'
+        'K12A-123ABC-T0-G1'     || 'TUMOR0'
+        'K12A-123ABC-T0-H1'     || 'TUMOR0'
+        'K12A-123ABC-T0-J1'     || 'TUMOR0'
         'K12A-123ABC-T0-12C3'   || 'TUMOR0-12C3'
 
         'K12A-123ABC-T0-L1'     || 'TUMOR0-L1'
