@@ -22,18 +22,21 @@
 
 package de.dkfz.tbi.otp.tracking
 
-import grails.gorm.transactions.Transactional
-import org.springframework.security.access.prepost.PreAuthorize
+import groovy.transform.TupleConstructor
+import groovy.util.logging.Slf4j
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.Done
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
-import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -44,103 +47,59 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.NOTHING
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.PARTLY
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
-@Transactional
-class TrackingService {
+@Slf4j
+@Component
+class NotificationCreator {
 
     private static final List<Integer> MERGING_WORK_PACKAGE_NUMBERS = [1, 2].asImmutable()
 
-    MailHelperService mailHelperService
-
-    IndelCallingService indelCallingService
-    SnvCallingService snvCallingService
-    SophiaService sophiaService
+    @Autowired
     AceseqService aceseqService
-    RunYapsaService runYapsaService
-    ProcessingOptionService processingOptionService
-    UserProjectRoleService userProjectRoleService
 
+    @Autowired
     CreateNotificationTextService createNotificationTextService
 
-    OtrsTicket createOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
-        OtrsTicket otrsTicket = new OtrsTicket(
-                ticketNumber: ticketNumber,
-                seqCenterComment: seqCenterComment,
-                automaticNotification: automaticNotification,
-        )
-        assert otrsTicket.save(flush: true)
-        return otrsTicket
-    }
+    @Autowired
+    IndelCallingService indelCallingService
 
-    OtrsTicket createOrResetOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
-        OtrsTicket otrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
-        if (otrsTicket) {
-            otrsTicket.installationFinished = null
-            otrsTicket.fastqcFinished = null
-            otrsTicket.alignmentFinished = null
-            otrsTicket.snvFinished = null
-            otrsTicket.indelFinished = null
-            otrsTicket.sophiaFinished = null
-            otrsTicket.aceseqFinished = null
-            otrsTicket.runYapsaFinished = null
-            otrsTicket.finalNotificationSent = false
-            otrsTicket.automaticNotification = automaticNotification
-            if (!otrsTicket.seqCenterComment) {
-                otrsTicket.seqCenterComment = seqCenterComment
-            } else if (seqCenterComment && !otrsTicket.seqCenterComment.contains(seqCenterComment)) {
-                otrsTicket.seqCenterComment += '\n\n' + seqCenterComment
-            }
-            assert otrsTicket.save(flush: true)
-            return otrsTicket
-        } else {
-            return createOtrsTicket(ticketNumber, seqCenterComment, automaticNotification)
-        }
-    }
+    @Autowired
+    MailHelperService mailHelperService
 
-    void resetAnalysisNotification(OtrsTicket otrsTicket) {
-        otrsTicket.snvFinished = null
-        otrsTicket.indelFinished = null
-        otrsTicket.sophiaFinished = null
-        otrsTicket.aceseqFinished = null
-        otrsTicket.runYapsaFinished = null
-        otrsTicket.finalNotificationSent = false
-        assert otrsTicket.save(flush: true)
-    }
+    @Autowired
+    OtrsTicketService otrsTicketService
+
+    @Autowired
+    ProcessingOptionService processingOptionService
+
+    @Autowired
+    RunYapsaService runYapsaService
+
+    @Autowired
+    SnvCallingService snvCallingService
+
+    @Autowired
+    SamplePairService samplePairService
+
+    @Autowired
+    SophiaService sophiaService
+
+    @Autowired
+    UserProjectRoleService userProjectRoleService
+
 
     void setStartedForSeqTracks(Collection<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
-        setStarted(findAllOtrsTickets(seqTracks, true), step)
-    }
-
-    Set<OtrsTicket> findAllOtrsTickets(Collection<SeqTrack> seqTracks, boolean lock = false) {
-        if (!seqTracks) {
-            return [] as Set
-        }
-        //set pessimistic lock does not work together with projection, therefore 2 queries used
-        List<Long> otrsIds = DataFile.createCriteria().listDistinct {
-            'in'('seqTrack', seqTracks)
-            runSegment {
-                isNotNull('otrsTicket')
-                otrsTicket {
-                    projections {
-                        property('id')
-                    }
-                }
-            }
-        }
-        return (otrsIds ? OtrsTicket.findAllByIdInList(otrsIds, [lock: lock]) : []) as Set
+        setStarted(otrsTicketService.findAllOtrsTickets(seqTracks), step)
     }
 
     void setStarted(Collection<OtrsTicket> otrsTickets, OtrsTicket.ProcessingStep step) {
         otrsTickets.unique().each {
-            if (it."${step}Started" == null) {
-                it."${step}Started" = new Date()
-                assert it.save(flush: true)
-            }
+            otrsTicketService.saveStartTimeIfNeeded(it, step)
         }
     }
 
     void processFinished(Set<SeqTrack> seqTracks) {
-        SamplePairCreation samplePairCreation = new SamplePairCreation()
-        Set<OtrsTicket> otrsTickets = findAllOtrsTickets(seqTracks)
+        SamplePairCreation samplePairCreation = new SamplePairCreation(samplePairService)
+        Set<OtrsTicket> otrsTickets = otrsTicketService.findAllOtrsTickets(seqTracks)
         LogThreadLocal.getThreadLog()?.debug("evaluating processFinished for SPD: ${samplePairCreation}; OtrsTickets: ${otrsTickets}; " +
                 "SeqTracks: ${seqTracks*.id}")
         for (OtrsTicket ticket : otrsTickets) {
@@ -148,11 +107,10 @@ class TrackingService {
         }
     }
 
-    void setFinishedTimestampsAndNotify(OtrsTicket ticket, SamplePairCreation samplePairCreation = new SamplePairCreation()) {
+    void setFinishedTimestampsAndNotify(OtrsTicket ticket, SamplePairCreation samplePairCreation = new SamplePairCreation(samplePairService)) {
         if (ticket.finalNotificationSent) {
             return
         }
-        Date now = new Date()
         Set<SeqTrack> seqTracks = ticket.findAllSeqTracks()
         ProcessingStatus status = getProcessingStatus(seqTracks, samplePairCreation)
         boolean anyProcessingStepJustCompleted = false
@@ -160,30 +118,24 @@ class TrackingService {
         for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
             WorkflowProcessingStatus stepStatus = status."${step}ProcessingStatus"
             boolean previousStepFinished = step.dependsOn ? (ticket."${step.dependsOn}Finished" != null) : true
-            ticket.discard()
-            ticket = OtrsTicket.lock(ticket.id)
             if (ticket."${step}Finished" == null && stepStatus.done != NOTHING && !stepStatus.mightDoMore && previousStepFinished) {
                 anyProcessingStepJustCompleted = true
-                ticket."${step}Finished" = now
+                otrsTicketService.saveEndTimeIfNeeded(ticket, step)
                 sendCustomerNotification(ticket, status, step)
                 LogThreadLocal.getThreadLog()?.info("sent customer notification for OTRS Ticket ${ticket.ticketNumber}: ${step}")
             }
-            ticket.save(flush: true)
             if (stepStatus.mightDoMore) {
                 mightDoMore = true
             }
         }
-        ticket.discard()
-        ticket = OtrsTicket.lock(ticket.id)
         if (anyProcessingStepJustCompleted) {
             LogThreadLocal.getThreadLog()?.debug("inside if anythingJustCompleted, sending operator notification")
             sendOperatorNotification(ticket, seqTracks, status, !mightDoMore)
             if (!mightDoMore) {
                 LogThreadLocal.getThreadLog()?.debug("!mightDoMore: marking as finalNotificationSent")
-                ticket.finalNotificationSent = true
+                otrsTicketService.markFinalNotificationSent(ticket)
             }
         }
-        assert ticket.save(flush: true)
     }
 
     void sendCustomerNotification(OtrsTicket ticket, ProcessingStatus status, OtrsTicket.ProcessingStep notificationStep) {
@@ -274,53 +226,8 @@ class TrackingService {
                 "${seqTrack.sampleType.name}, ${seqTrack.seqType.name} ${seqTrack.seqType.libraryLayout}")
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void assignOtrsTicketToRunSegment(String ticketNumber, Long runSegmentId) {
-        RunSegment runSegment = RunSegment.get(runSegmentId)
-        assert runSegment: "No RunSegment found for ${runSegmentId}."
 
-        OtrsTicket oldOtrsTicket = runSegment.otrsTicket
-
-        if (oldOtrsTicket && oldOtrsTicket.ticketNumber == ticketNumber) {
-            return
-        }
-
-        if (OtrsTicket.ticketNumberConstraint(ticketNumber)) {
-            throw new UserException("Ticket number ${ticketNumber} does not pass validation or error while saving. " +
-                    "An OTRS ticket must consist of 16 successive digits.")
-        }
-
-        // assigning a runSegment that belongs to an otrsTicket which consists of several other runSegments is not allowed,
-        // because it is not possible to calculate the right "Started"/"Finished" dates
-        if (oldOtrsTicket && oldOtrsTicket.runSegments.size() != 1) {
-            throw new UserException("Assigning a runSegment that belongs to an OTRS-Ticket which consists of several other runSegments is not allowed.")
-        }
-
-        OtrsTicket newOtrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber)) ?:
-                createOtrsTicket(ticketNumber, null, true)
-
-        if (newOtrsTicket.finalNotificationSent) {
-            throw new UserException("It is not allowed to assign to an finally notified OTRS-Ticket.")
-        }
-
-        runSegment.otrsTicket = newOtrsTicket
-        assert runSegment.save(flush: true)
-
-        ProcessingStatus status = getProcessingStatus(newOtrsTicket.findAllSeqTracks())
-        for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
-            WorkflowProcessingStatus stepStatus = status."${step}ProcessingStatus"
-            if (stepStatus.mightDoMore) {
-                newOtrsTicket."${step}Finished" = null
-            } else {
-                newOtrsTicket."${step}Finished" = [oldOtrsTicket?."${step}Finished", newOtrsTicket."${step}Finished"].max()
-            }
-            newOtrsTicket."${step}Started" = [oldOtrsTicket?."${step}Started", newOtrsTicket."${step}Started"].min()
-        }
-
-        assert newOtrsTicket.save(flush: true)
-    }
-
-    ProcessingStatus getProcessingStatus(Collection<SeqTrack> seqTracks, SamplePairCreation samplePairCreation = new SamplePairCreation()) {
+    ProcessingStatus getProcessingStatus(Collection<SeqTrack> seqTracks, SamplePairCreation samplePairCreation = new SamplePairCreation(samplePairService)) {
         ProcessingStatus status = new ProcessingStatus(seqTracks.collect {
             new SeqTrackProcessingStatus(it,
                     it.dataInstallationState == SeqTrack.DataProcessingState.FINISHED ? ALL_DONE : NOTHING_DONE_MIGHT_DO,
@@ -469,7 +376,7 @@ class TrackingService {
         )
     }
 
-    static def <O> WorkflowProcessingStatus combineStatuses(Iterable<O> objects,
+    static <O> WorkflowProcessingStatus combineStatuses(Iterable<O> objects,
                                                             Closure<WorkflowProcessingStatus> getObjectStatus,
                                                             WorkflowProcessingStatus additionalStatus = null) {
         Done done = additionalStatus?.done
@@ -489,14 +396,16 @@ class TrackingService {
         return WorkflowProcessingStatus.values().find { it.done == done && it.mightDoMore == mightDoMore }
     }
 
+    @TupleConstructor
     static class SamplePairCreation {
+
+        SamplePairService samplePairService
 
         boolean calledCreateMissingDiseaseControlSamplePairs = false
 
         void createMissingDiseaseControlSamplePairs() {
             if (!calledCreateMissingDiseaseControlSamplePairs) {
-                final Collection<SamplePair> samplePairs = SamplePair.findMissingDiseaseControlSamplePairs()
-                samplePairs*.save(flush: true)
+                samplePairService.createMissingDiseaseControlSamplePairs()
                 calledCreateMissingDiseaseControlSamplePairs = true
             }
         }

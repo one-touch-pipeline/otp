@@ -45,7 +45,7 @@ import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFacto
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesOnGpcfMidTerm
 import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.util.spreadsheet.Row
@@ -526,7 +526,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
             findSeqPlatform(seqPlatform2.name, seqPlatform2.seqPlatformModelLabel.name, null) >> seqPlatform2
         }
-        service.trackingService = Mock(TrackingService) {
+        service.otrsTicketService = Mock(OtrsTicketService) {
             createOrResetOtrsTicket(otrsTicket.ticketNumber, null, true) >> otrsTicket
         }
         service.libraryPreparationKitService = Mock(LibraryPreparationKitService) {

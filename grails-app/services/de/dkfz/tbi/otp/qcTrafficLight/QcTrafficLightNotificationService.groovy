@@ -27,14 +27,14 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 @Transactional
 class QcTrafficLightNotificationService {
 
 
-    TrackingService trackingService
+    OtrsTicketService otrsTicketService
 
     CreateNotificationTextService createNotificationTextService
 
@@ -74,7 +74,7 @@ class QcTrafficLightNotificationService {
     }
 
     void informResultsAreBlocked(AbstractMergedBamFile bamFile) {
-        boolean shouldSendEmailToProjectReceiver = trackingService.findAllOtrsTickets(bamFile.containedSeqTracks).find {
+        boolean shouldSendEmailToProjectReceiver = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).find {
             !it.finalNotificationSent && it.automaticNotification
         } as boolean
         List<String> recipients = shouldSendEmailToProjectReceiver ? userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(bamFile.project) : []

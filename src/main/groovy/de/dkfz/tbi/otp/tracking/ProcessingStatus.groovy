@@ -58,35 +58,51 @@ class ProcessingStatus {
     }
 
     WorkflowProcessingStatus getInstallationProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.installationProcessingStatus })
+        return NotificationCreator.combineStatuses(seqTrackProcessingStatuses) {
+            it.installationProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getFastqcProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.fastqcProcessingStatus })
+        return NotificationCreator.combineStatuses(seqTrackProcessingStatuses) {
+            it.fastqcProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getAlignmentProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.alignmentProcessingStatus })
+        return NotificationCreator.combineStatuses(seqTrackProcessingStatuses) {
+            it.alignmentProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getSnvProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.snvProcessingStatus })
+        return NotificationCreator.combineStatuses(seqTrackProcessingStatuses) {
+            it.snvProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getIndelProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.indelProcessingStatus })
+        return NotificationCreator.combineStatuses(seqTrackProcessingStatuses) {
+            it.indelProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getSophiaProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.sophiaProcessingStatus })
+        return NotificationCreator.combineStatuses(seqTrackProcessingStatuses) {
+            it.sophiaProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getAceseqProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.aceseqProcessingStatus })
+        return NotificationCreator.combineStatuses(seqTrackProcessingStatuses) {
+            it.aceseqProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getRunYapsaProcessingStatus() {
-        return TrackingService.combineStatuses(seqTrackProcessingStatuses, { it.runYapsaProcessingStatus })
+        return NotificationCreator.combineStatuses(seqTrackProcessingStatuses) {
+            it.runYapsaProcessingStatus
+        }
     }
 
 

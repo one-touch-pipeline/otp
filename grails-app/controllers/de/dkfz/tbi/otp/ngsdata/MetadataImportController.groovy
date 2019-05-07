@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.user.UserException
 
 import java.nio.file.FileSystem
@@ -54,7 +54,7 @@ class MetadataImportController {
     MetadataImportService metadataImportService
     ProcessingOptionService processingOptionService
     RunService runService
-    TrackingService trackingService
+    OtrsTicketService otrsTicketService
     IlseSubmissionService ilseSubmissionService
 
     FileSystemService fileSystemService
@@ -192,7 +192,7 @@ class MetadataImportController {
         def dataToRender = [:]
 
         try {
-            trackingService.assignOtrsTicketToRunSegment(params.value, params.id as Long)
+            otrsTicketService.assignOtrsTicketToRunSegment(params.value, params.id as Long)
             dataToRender.put("success", true)
         } catch (UserException e) {
             dataToRender.put("error", e.toString())

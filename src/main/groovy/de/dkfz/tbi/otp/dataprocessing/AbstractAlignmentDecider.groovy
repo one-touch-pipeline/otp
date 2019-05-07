@@ -27,7 +27,7 @@ import org.springframework.context.ApplicationContext
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION
@@ -43,7 +43,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     MailHelperService mailHelperService
 
     @Autowired
-    TrackingService trackingService
+    OtrsTicketService otrsTicketService
 
     @Autowired
     ProcessingOptionService processingOptionService
@@ -137,7 +137,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                         body << "    MergingWorkPackage uses the value: ${workPackage[key]}"
                     }
                 }
-                OtrsTicket ticket = atMostOneElement(trackingService.findAllOtrsTickets([seqTrack]))
+                OtrsTicket ticket = atMostOneElement(otrsTicketService.findAllOtrsTickets([seqTrack]))
                 if (ticket) {
                     body << "\nThe corresponding ticket is: ${processingOptionService.findOptionAsString(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}"
                 }

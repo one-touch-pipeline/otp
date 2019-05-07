@@ -32,8 +32,10 @@ class SamplePairProcessingStatusSpec extends Specification {
     @Unroll
     void "getVariantCallingProcessingStatus"() {
         given:
-        SamplePairProcessingStatus status = new SamplePairProcessingStatus(null, values.snv, null, values.indel, null, values.sophia, null, values.aceseq, null, values.runYapsa, null)
-        def result = TrackingService.combineStatuses([values.snv, values.indel, values.sophia, values.aceseq, values.runYapsa], Closure.IDENTITY)
+        SamplePairProcessingStatus status = new SamplePairProcessingStatus(null, values.snv, null, values.indel, null,
+                values.sophia, null, values.aceseq, null, values.runYapsa, null)
+        List<ProcessingStatus.WorkflowProcessingStatus> inputStatuses = [values.snv, values.indel, values.sophia, values.aceseq, values.runYapsa]
+        ProcessingStatus.WorkflowProcessingStatus result = NotificationCreator.combineStatuses(inputStatuses, Closure.IDENTITY)
 
         expect:
         result == status.getVariantCallingProcessingStatus()

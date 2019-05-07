@@ -39,26 +39,38 @@ class SeqTrackProcessingStatus {
     final Collection<MergingWorkPackageProcessingStatus> mergingWorkPackageProcessingStatuses
 
     WorkflowProcessingStatus getAlignmentProcessingStatus() {
-        return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses, { it.alignmentProcessingStatus })
+        return NotificationCreator.combineStatuses(mergingWorkPackageProcessingStatuses) {
+            it.alignmentProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getSnvProcessingStatus() {
-        return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses, { it.snvProcessingStatus })
+        return NotificationCreator.combineStatuses(mergingWorkPackageProcessingStatuses) {
+            it.snvProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getIndelProcessingStatus() {
-        return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses, { it.indelProcessingStatus })
+        return NotificationCreator.combineStatuses(mergingWorkPackageProcessingStatuses) {
+            it.indelProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getSophiaProcessingStatus() {
-        return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses, { it.sophiaProcessingStatus })
+        return NotificationCreator.combineStatuses(mergingWorkPackageProcessingStatuses) {
+            it.sophiaProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getAceseqProcessingStatus() {
-        return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses, { it.aceseqProcessingStatus } )
+        return NotificationCreator.combineStatuses(mergingWorkPackageProcessingStatuses) {
+            it.aceseqProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getRunYapsaProcessingStatus() {
-        return TrackingService.combineStatuses(mergingWorkPackageProcessingStatuses, { it.runYapsaProcessingStatus } )
+        return NotificationCreator.combineStatuses(mergingWorkPackageProcessingStatuses) {
+            it.runYapsaProcessingStatus
+        }
     }
 }

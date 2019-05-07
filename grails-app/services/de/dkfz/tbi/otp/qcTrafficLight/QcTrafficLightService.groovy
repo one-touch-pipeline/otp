@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 
 import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdLevel.ERROR
 
@@ -42,7 +42,7 @@ class QcTrafficLightService {
     ConfigService configService
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
 
-    TrackingService trackingService
+    OtrsTicketService otrsTicketService
 
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#bamFile?.project, 'OTP_READ_ACCESS')")
@@ -54,8 +54,8 @@ class QcTrafficLightService {
         commentService.saveComment(bamFile, comment)
         setQcTrafficLightStatus(bamFile, qcTrafficLightStatus)
         if (bamFile.qcTrafficLightStatus == AbstractMergedBamFile.QcTrafficLightStatus.ACCEPTED) {
-            trackingService.findAllOtrsTickets(bamFile.containedSeqTracks).each {
-                trackingService.resetAnalysisNotification(it)
+            otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).each {
+                otrsTicketService.resetAnalysisNotification(it)
             }
             if (bamFile.seqType.isRna()) {
                 linkFilesToFinalDestinationService.linkNewRnaResults((RnaRoddyBamFile) bamFile, configService.getDefaultRealm())

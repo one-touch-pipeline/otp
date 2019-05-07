@@ -28,11 +28,11 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Rollback
@@ -45,8 +45,8 @@ class DataInstallationStartJobIntegrationSpec extends Specification {
 
         DataInstallationStartJob dataInstallationStartJob = Spy(DataInstallationStartJob)
         dataInstallationStartJob.optionService = new ProcessingOptionService()
-        dataInstallationStartJob.trackingService = new TrackingService()
         dataInstallationStartJob.seqTrackService = new SeqTrackService()
+        dataInstallationStartJob.notificationCreator = new NotificationCreator(otrsTicketService: new OtrsTicketService())
         dataInstallationStartJob.schedulerService = Mock(SchedulerService) {
             1 * createProcess(_, _, _) >> null
             _ * isActive() >> true

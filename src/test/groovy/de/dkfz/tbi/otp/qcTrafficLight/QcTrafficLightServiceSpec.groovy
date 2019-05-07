@@ -22,7 +22,6 @@
 
 package de.dkfz.tbi.otp.qcTrafficLight
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -34,7 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 
 class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory, DataTest {
 
@@ -92,7 +91,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         qcTrafficLightService.commentService = Mock(CommentService) {
             1 * saveComment(roddyBamFile, "comment")
         }
-        qcTrafficLightService.trackingService = Mock(TrackingService) {
+        qcTrafficLightService.otrsTicketService = Mock(OtrsTicketService) {
             otrsCount * findAllOtrsTickets(roddyBamFile.seqTracks) >> []
         }
         qcTrafficLightService.configService = testConfigService
@@ -149,7 +148,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
         qcTrafficLightService.commentService = Mock(CommentService) {
             1 * saveComment(roddyBamFile, "comment")
         }
-        qcTrafficLightService.trackingService = Spy(TrackingService) {
+        qcTrafficLightService.otrsTicketService = Spy(OtrsTicketService) {
             1 * findAllOtrsTickets(roddyBamFile.seqTracks) >> [otrsTicket1, otrsTicket2]
         }
         qcTrafficLightService.configService = testConfigService

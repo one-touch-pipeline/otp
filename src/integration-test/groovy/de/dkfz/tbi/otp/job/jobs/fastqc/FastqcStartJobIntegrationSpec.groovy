@@ -32,8 +32,9 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.NotificationCreator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Rollback
@@ -64,7 +65,7 @@ class FastqcStartJobIntegrationSpec extends Specification {
         fastqcStartJob.seqTrackService = Stub(SeqTrackService) {
             getSeqTrackReadyForFastqcProcessing(_) >> seqTrack
         }
-        fastqcStartJob.trackingService = new TrackingService()
+        fastqcStartJob.notificationCreator = new NotificationCreator(otrsTicketService: new OtrsTicketService())
         fastqcStartJob.setJobExecutionPlan(plan)
 
         when:

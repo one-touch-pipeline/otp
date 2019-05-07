@@ -516,11 +516,9 @@ class DomainFactory {
         ], properties)
     }
 
+    @Deprecated
     static createIlseSubmission(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(IlseSubmission, [
-                ilseNumber: { counter++ % 999000 + 1000 },
-                warning   : false,
-        ], properties, saveAndValidate)
+        return proxyCore.createIlseSubmission(properties, saveAndValidate)
     }
 
     static AlignmentPass createAlignmentPass(Map properties = [:]) {
@@ -1802,43 +1800,14 @@ class DomainFactory {
         }
     }
 
-
+    @Deprecated
     static createFileType(Map properties = [:]) {
-        return createDomainObject(FileType, [
-                type   : FileType.Type.SEQUENCE,
-                vbpPath: "sequence_${counter++}",
-        ], properties)
+        return proxyCore.createFileType(properties)
     }
 
+    @Deprecated
     static DataFile createDataFile(Map properties = [:], boolean saveAndValidate = true) {
-        SeqTrack seqTrack
-        if (properties.containsKey('seqTrack')) {
-            seqTrack = properties.seqTrack
-        } else {
-            seqTrack = createSeqTrack(properties.containsKey('run') ? [run: properties.run] : [:])
-        }
-        return createDomainObject(DataFile, [
-                seqTrack        : seqTrack,
-                project         : seqTrack?.project,
-                run             : seqTrack?.run,
-                runSegment      : { createRunSegment() },
-                fileName        : "DataFileFileName_${counter}_R1.gz",
-                vbpFileName     : "VbpDataFileFileName_${counter}_R1.gz",
-                pathName        : "path_${counter}",
-                initialDirectory: TestCase.getUniqueNonExistentPath().path,
-                md5sum          : { HelperUtils.getRandomMd5sum() },
-                dateExecuted    : new Date(),
-                dateFileSystem  : new Date(),
-                dateCreated     : new Date(),
-                dateLastChecked : new Date(),
-                fileWithdrawn   : false,
-                fileType        : { createFileType() },
-                used            : true,
-                fileExists      : true,
-                fileLinked      : true,
-                fileSize        : counter++,
-                mateNumber      : 1,
-        ], properties, saveAndValidate)
+        return proxyCore.createDataFile(properties, saveAndValidate)
     }
 
     static private Map createRoddyWorkflowConfigMapHelper(Map properties = [:]) {
@@ -1933,17 +1902,9 @@ class DomainFactory {
         return seqTrack
     }
 
+    @Deprecated
     static SeqTrack createSeqTrackWithOneDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
-        SeqTrack seqTrack
-        if (seqTrackProperties.seqType?.name == SeqTypeNames.EXOME.seqTypeName) {
-            seqTrack = createExomeSeqTrack(seqTrackProperties)
-        } else if (seqTrackProperties.seqType?.hasAntibodyTarget) {
-            seqTrack = createChipSeqSeqTrack(seqTrackProperties)
-        } else {
-            seqTrack = createSeqTrack(seqTrackProperties)
-        }
-        createSequenceDataFile(dataFileProperties + [seqTrack: seqTrack])
-        return seqTrack
+        return proxyCore.createSeqTrackWithOneDataFile(seqTrackProperties, dataFileProperties)
     }
 
     static SeqTrack createSeqTrackWithTwoDataFiles(MergingWorkPackage mergingWorkPackage, Map seqTrackProperties = [:], Map dataFileProperties1 = [:], Map dataFileProperties2 = [:]) {
@@ -1969,17 +1930,9 @@ class DomainFactory {
         return seqTrack
     }
 
+    @Deprecated
     static DataFile createSequenceDataFile(final Map properties = [:]) {
-        Map defaultProperties = [
-                dateCreated   : new Date(),  // In unit tests Grails (sometimes) does not automatically set dateCreated.
-                used          : true,
-                sequenceLength: 100,
-        ]
-        if (properties.seqTrack) {
-            defaultProperties.project = properties.seqTrack.project
-            defaultProperties.run = properties.seqTrack.run
-        }
-        return createDataFile(defaultProperties + properties)
+        return proxyCore.createSequenceDataFile(properties)
     }
 
 
@@ -2285,32 +2238,14 @@ class DomainFactory {
         ], properties)
     }
 
+    @Deprecated
     static OtrsTicket createOtrsTicket(Map properties = [:]) {
-        return createDomainObject(OtrsTicket, [
-                ticketNumber: "20000101" + String.format("%08d", counter++),
-        ], properties)
+        return proxyCore.createOtrsTicket(properties)
     }
 
+    @Deprecated
     static OtrsTicket createOtrsTicketWithEndDatesAndNotificationSent(Map properties = [:]) {
-        return createOtrsTicket([
-                installationStarted  : new Date(),
-                installationFinished : new Date(),
-                fastqcStarted        : new Date(),
-                fastqcFinished       : new Date(),
-                alignmentStarted     : new Date(),
-                alignmentFinished    : new Date(),
-                snvStarted           : new Date(),
-                snvFinished          : new Date(),
-                indelStarted         : new Date(),
-                indelFinished        : new Date(),
-                sophiaStarted        : new Date(),
-                sophiaFinished       : new Date(),
-                aceseqStarted        : new Date(),
-                aceseqFinished       : new Date(),
-                runYapsaStarted      : new Date(),
-                runYapsaFinished     : new Date(),
-                finalNotificationSent: true,
-        ] + properties)
+        return proxyCore.createOtrsTicketWithEndDatesAndNotificationSent(properties)
     }
 
     static TumorEntity createTumorEntity(Map properties = [:]) {

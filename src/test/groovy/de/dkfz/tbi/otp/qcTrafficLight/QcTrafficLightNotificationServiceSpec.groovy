@@ -22,7 +22,6 @@
 
 package de.dkfz.tbi.otp.qcTrafficLight
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -34,7 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 class QcTrafficLightNotificationServiceSpec extends Specification implements DataTest {
@@ -94,7 +93,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
 
         QcTrafficLightNotificationService service = new QcTrafficLightNotificationService([
                 processingOptionService: new ProcessingOptionService(),
-                trackingService        : Mock(TrackingService) {
+                otrsTicketService      : Mock(OtrsTicketService) {
                     1 * findAllOtrsTickets(_) >> otrsTickets
                 },
         ])

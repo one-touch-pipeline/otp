@@ -22,12 +22,15 @@
 
 package de.dkfz.tbi.otp.domainFactory
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.HelperUtils
 
+@SuppressWarnings('MethodCount')
 trait DomainFactoryCore implements DomainFactoryHelper {
 
     Project createProject(Map properties = [:], boolean saveAndValidate = true) {
@@ -132,6 +135,55 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ], properties)
     }
 
+    FileType createFileType(Map properties = [:]) {
+        return createDomainObject(FileType, [
+                type   : FileType.Type.SEQUENCE,
+                vbpPath: "sequence_${nextId}",
+        ], properties)
+    }
+
+    DataFile createDataFile(Map properties = [:], boolean saveAndValidate = true) {
+        SeqTrack seqTrack
+        if (properties.containsKey('seqTrack')) {
+            seqTrack = properties.seqTrack
+        } else {
+            seqTrack = createSeqTrack(properties.containsKey('run') ? [run: properties.run] : [:])
+        }
+        return createDomainObject(DataFile, [
+                seqTrack        : seqTrack,
+                project         : seqTrack?.project,
+                run             : seqTrack?.run,
+                runSegment      : { createRunSegment() },
+                fileName        : "DataFileFileName_${nextId}_R1.gz",
+                vbpFileName     : "VbpDataFileFileName_${nextId}_R1.gz",
+                pathName        : "path_${nextId}",
+                initialDirectory: TestCase.getUniqueNonExistentPath().path,
+                md5sum          : { HelperUtils.getRandomMd5sum() },
+                dateExecuted    : new Date(),
+                dateFileSystem  : new Date(),
+                dateCreated     : new Date(),
+                dateLastChecked : new Date(),
+                fileWithdrawn   : false,
+                fileType        : { createFileType() },
+                used            : true,
+                fileExists      : true,
+                fileLinked      : true,
+                fileSize        : nextId,
+                mateNumber      : 1,
+        ], properties, saveAndValidate)
+    }
+
+    DataFile createSequenceDataFile(final Map properties = [:]) {
+        Map defaultProperties = [
+                used          : true,
+                sequenceLength: 100,
+        ]
+        if (properties.seqTrack) {
+            defaultProperties.project = properties.seqTrack.project
+            defaultProperties.run = properties.seqTrack.run
+        }
+        return createDataFile(defaultProperties + properties)
+    }
 
     SeqTrack createSeqTrack(Map properties = [:]) {
         if (properties.seqType?.hasAntibodyTarget) {
@@ -157,6 +209,13 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 antibodyTarget: { createAntibodyTarget() },
         ], properties)
     }
+
+    SeqTrack createSeqTrackWithOneDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {
+        SeqTrack seqTrack = createSeqTrack(seqTrackProperties)
+        createSequenceDataFile(dataFileProperties + [seqTrack: seqTrack])
+        return seqTrack
+    }
+
 
     private Map getSeqTrackProperties(Map properties = [:]) {
         return [
@@ -269,5 +328,40 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 project: { createProject() },
                 seqType: { createSeqType() },
         ], properties)
+    }
+
+    OtrsTicket createOtrsTicket(Map properties = [:]) {
+        return createDomainObject(OtrsTicket, [
+                ticketNumber: "20000101" + String.format("%08d", nextId),
+        ], properties)
+    }
+
+    OtrsTicket createOtrsTicketWithEndDatesAndNotificationSent(Map properties = [:]) {
+        return createOtrsTicket([
+                installationStarted  : new Date(),
+                installationFinished : new Date(),
+                fastqcStarted        : new Date(),
+                fastqcFinished       : new Date(),
+                alignmentStarted     : new Date(),
+                alignmentFinished    : new Date(),
+                snvStarted           : new Date(),
+                snvFinished          : new Date(),
+                indelStarted         : new Date(),
+                indelFinished        : new Date(),
+                sophiaStarted        : new Date(),
+                sophiaFinished       : new Date(),
+                aceseqStarted        : new Date(),
+                aceseqFinished       : new Date(),
+                runYapsaStarted      : new Date(),
+                runYapsaFinished     : new Date(),
+                finalNotificationSent: true,
+        ] + properties)
+    }
+
+    IlseSubmission createIlseSubmission(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(IlseSubmission, [
+                ilseNumber: { nextId % 999000 + 1000 },
+                warning   : false,
+        ], properties, saveAndValidate)
     }
 }

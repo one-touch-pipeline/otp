@@ -41,22 +41,32 @@ class MergingWorkPackageProcessingStatus {
     final Collection<SamplePairProcessingStatus> samplePairProcessingStatuses
 
     WorkflowProcessingStatus getSnvProcessingStatus() {
-        return TrackingService.combineStatuses(samplePairProcessingStatuses, { it.snvProcessingStatus })
+        return NotificationCreator.combineStatuses(samplePairProcessingStatuses) {
+            it.snvProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getIndelProcessingStatus() {
-        return TrackingService.combineStatuses(samplePairProcessingStatuses, { it.indelProcessingStatus })
+        return NotificationCreator.combineStatuses(samplePairProcessingStatuses) {
+            it.indelProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getSophiaProcessingStatus() {
-        return TrackingService.combineStatuses(samplePairProcessingStatuses, { it.sophiaProcessingStatus })
+        return NotificationCreator.combineStatuses(samplePairProcessingStatuses) {
+            it.sophiaProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getAceseqProcessingStatus() {
-        return TrackingService.combineStatuses(samplePairProcessingStatuses, { it.aceseqProcessingStatus })
+        return NotificationCreator.combineStatuses(samplePairProcessingStatuses) {
+            it.aceseqProcessingStatus
+        }
     }
 
     WorkflowProcessingStatus getRunYapsaProcessingStatus() {
-        return TrackingService.combineStatuses(samplePairProcessingStatuses, { it.runYapsaProcessingStatus })
+        return NotificationCreator.combineStatuses(samplePairProcessingStatuses) {
+            it.runYapsaProcessingStatus
+        }
     }
 }

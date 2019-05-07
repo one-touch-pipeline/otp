@@ -58,7 +58,7 @@ abstract class AbstractAlignmentStartJob extends AbstractStartJobImpl implements
                 mergingWorkPackage.needsProcessing = false
                 assert mergingWorkPackage.save(flush: true)
                 AbstractMergedBamFile bamFile = createBamFile(mergingWorkPackage, findUsableBaseBamFile(mergingWorkPackage))
-                trackingService.setStartedForSeqTracks(bamFile.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
+                notificationCreator.setStartedForSeqTracks(bamFile.containedSeqTracks, OtrsTicket.ProcessingStep.ALIGNMENT)
                 createProcess(bamFile)
             }
         }

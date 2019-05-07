@@ -36,7 +36,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 @Rollback
@@ -133,7 +133,7 @@ class JobMailServiceIntegrationSpec extends Specification {
                     processUrl(_) >> 'url'
                 },
                 jobStatusLoggingService: jobStatusLoggingService,
-                trackingService        : new TrackingService(),
+                otrsTicketService      : new OtrsTicketService(),
         ])
         jobMailService.processingOptionService = new ProcessingOptionService()
 

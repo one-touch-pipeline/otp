@@ -24,7 +24,8 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.junit.*
+import org.junit.After
+import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
@@ -32,7 +33,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.MailHelperService
 
@@ -51,7 +52,7 @@ class AbstractAlignmentDeciderIntegrationTests {
 
     void setupData() {
         decider = newDecider()
-        decider.trackingService = new TrackingService()
+        decider.otrsTicketService = new OtrsTicketService()
         decider.processingOptionService = new ProcessingOptionService()
         DomainFactory.createProcessingOptionForNotificationRecipient()
     }

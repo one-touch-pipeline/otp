@@ -23,217 +23,95 @@
 package de.dkfz.tbi.otp.tracking
 
 import grails.testing.gorm.DataTest
-import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
-class TrackingServiceSpec extends Specification implements DataTest {
+class NotificationCreatorSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
         [
                 DataFile,
-                FileType,
-                IlseSubmission,
-                Individual,
-                OtrsTicket,
-                ProjectRole,
-                MergingWorkPackage,
                 ProcessingOption,
-                Project,
-                ProjectCategory,
-                Realm,
-                ReferenceGenome,
-                ReferenceGenomeProjectSeqType,
-                Run,
-                RunSegment,
-                Sample,
-                SampleType,
-                SeqCenter,
-                SeqPlatform,
-                SeqPlatformGroup,
-                SeqPlatformModelLabel,
+                OtrsTicket,
                 SeqTrack,
-                SeqType,
-                SoftwareTool,
-                User,
                 UserProjectRole,
         ]
     }
 
-    private final static String TICKET_NUMBER = "2000010112345678"
     private final static String PREFIX = "the prefix"
 
-    private TrackingService trackingService = new TrackingService()
+    private NotificationCreator notificationCreator = new NotificationCreator()
 
     void setup() {
-        trackingService.processingOptionService = new ProcessingOptionService()
-        trackingService.userProjectRoleService = new UserProjectRoleService()
+        notificationCreator.processingOptionService = new ProcessingOptionService()
+        notificationCreator.userProjectRoleService = new UserProjectRoleService()
     }
 
     @Unroll
-    void 'test createOrResetOtrsTicket, when no OtrsTicket with ticket number exists, creates one'() {
+    void 'setStarted, when otrsTickets are given, then call saveStartTimeIfNeeded for with given #step'() {
         given:
-        OtrsTicket otrsTicket
-        TrackingService trackingService = new TrackingService()
+        OtrsTicket otrsTicket1 = createOtrsTicket()
+        OtrsTicket otrsTicket2 = createOtrsTicket()
+        createOtrsTicket()
+
+        NotificationCreator notificationCreator = new NotificationCreator([
+                otrsTicketService: Mock(OtrsTicketService) {
+                    1 * saveStartTimeIfNeeded(otrsTicket1, step)
+                    1 * saveStartTimeIfNeeded(otrsTicket2, step)
+                }
+        ])
 
         when:
-        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER, comment, true)
+        notificationCreator.setStarted([otrsTicket1, otrsTicket2], step)
 
         then:
-        testTicket(otrsTicket)
-        otrsTicket.seqCenterComment == comment
+        true
 
         where:
-        comment << [
-                null,
-                '',
-                'Some Cooment',
-                'Some\nMultiline\nComment',
-        ]
-    }
-
-    void 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, resets it'() {
-        given:
-        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket([
-                ticketNumber         : TICKET_NUMBER,
-                installationFinished : new Date(),
-                fastqcFinished       : new Date(),
-                alignmentFinished    : new Date(),
-                snvFinished          : new Date(),
-                indelFinished        : new Date(),
-                sophiaFinished       : new Date(),
-                aceseqFinished       : new Date(),
-                runYapsaFinished     : new Date(),
-                finalNotificationSent: true,
-                automaticNotification: true,
-        ])
-        TrackingService trackingService = new TrackingService()
-
-        when:
-        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER, null, true)
-
-        then:
-        testTicket(otrsTicket)
+        step << OtrsTicket.ProcessingStep.values()
     }
 
     @Unroll
-    void 'test createOrResetOtrsTicket, when OtrsTicket with ticket number exists, combine the seq center comment'() {
+    void 'setStartedForSeqTracks, when seqTracks are given, then call for each corresponding OtrsTicket the saveStartTimeIfNeeded with given #step'() {
         given:
-        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket([
-                ticketNumber    : TICKET_NUMBER,
-                seqCenterComment: comment1,
+        OtrsTicket otrsTicket1 = createOtrsTicket()
+        OtrsTicket otrsTicket2 = createOtrsTicket()
+        createOtrsTicket()
+
+        Set<SeqTrack> seqTracks = [createSeqTrack()] as Set
+
+        NotificationCreator notificationCreator = new NotificationCreator([
+                otrsTicketService: Mock(OtrsTicketService) {
+                    1 * findAllOtrsTickets(_) >> ([otrsTicket1, otrsTicket2] as Set)
+                    1 * saveStartTimeIfNeeded(otrsTicket1, step)
+                    1 * saveStartTimeIfNeeded(otrsTicket2, step)
+                },
         ])
-        TrackingService trackingService = new TrackingService()
 
         when:
-        otrsTicket = trackingService.createOrResetOtrsTicket(TICKET_NUMBER, comment2, true)
+        notificationCreator.setStartedForSeqTracks(seqTracks, step)
 
         then:
-        resultComment == otrsTicket.seqCenterComment
+        true
 
         where:
-        comment1     | comment2     || resultComment
-        null         | null         || null
-        'Something'  | null         || 'Something'
-        null         | 'Something'  || 'Something'
-        'Something'  | 'Something'  || 'Something'
-        'Something1' | 'Something2' || 'Something1\n\nSomething2'
-    }
-
-
-    void 'test createOrResetOtrsTicket, when ticket number is null, throws ValidationException'() {
-        given:
-        TrackingService trackingService = new TrackingService()
-
-        when:
-        trackingService.createOrResetOtrsTicket(null, null, true)
-
-        then:
-        ValidationException ex = thrown()
-        ex.message.contains("on field 'ticketNumber': rejected value [null]")
-    }
-
-    void 'test createOrResetOtrsTicket, when ticket number is blank, throws ValidationException'() {
-        given:
-        TrackingService trackingService = new TrackingService()
-
-        when:
-        trackingService.createOrResetOtrsTicket("", null, true)
-
-        then:
-        ValidationException ex = thrown()
-        ex.message.contains("on field 'ticketNumber': rejected value []")
-    }
-
-    void 'test resetAnalysisNotification, when OtrsTicket is rest, then final flag is false and finish date of analysis dates are null'() {
-        given:
-        OtrsTicket otrsTicket = DomainFactory.createOtrsTicketWithEndDatesAndNotificationSent([
-                ticketNumber         : TICKET_NUMBER,
-                automaticNotification: true,
-        ])
-        TrackingService trackingService = new TrackingService()
-
-        when:
-        trackingService.resetAnalysisNotification(otrsTicket)
-
-        then:
-        otrsTicket.snvFinished == null
-        otrsTicket.indelFinished == null
-        otrsTicket.sophiaFinished == null
-        otrsTicket.aceseqFinished == null
-        otrsTicket.runYapsaFinished == null
-        otrsTicket.finalNotificationSent == false
-    }
-
-
-    void 'test setStarted'() {
-        given:
-        TrackingService trackingService = new TrackingService()
-        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
-
-        when:
-        trackingService.setStarted([otrsTicket], step)
-
-        then:
-        otrsTicket."${step}Started" != null
-
-        where:
-        step                                   | _
-        OtrsTicket.ProcessingStep.INSTALLATION | _
-        OtrsTicket.ProcessingStep.FASTQC       | _
-        OtrsTicket.ProcessingStep.ALIGNMENT    | _
-        OtrsTicket.ProcessingStep.SNV          | _
-        OtrsTicket.ProcessingStep.INDEL        | _
-        OtrsTicket.ProcessingStep.ACESEQ       | _
-    }
-
-    void 'test setStarted, twice'() {
-        given:
-        TrackingService trackingService = new TrackingService()
-        OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
-
-        when:
-        trackingService.setStarted([otrsTicket], OtrsTicket.ProcessingStep.INSTALLATION)
-        Date date = otrsTicket.installationStarted
-        trackingService.setStarted([otrsTicket], OtrsTicket.ProcessingStep.INSTALLATION)
-
-        then:
-        date.is(otrsTicket.installationStarted)
+        step << OtrsTicket.ProcessingStep.values()
     }
 
     void 'sendOperatorNotification, when finalNotification is false, sends normal notification with correct subject and content'() {
         given:
-        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        OtrsTicket ticket = createOtrsTicket()
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
         ProcessingStatus status = [
                 getInstallationProcessingStatus: { -> ALL_DONE },
@@ -245,15 +123,15 @@ class TrackingServiceSpec extends Specification implements DataTest {
                 getAceseqProcessingStatus      : { -> NOTHING_DONE_MIGHT_DO },
                 getRunYapsaProcessingStatus    : { -> NOTHING_DONE_WONT_DO },
         ] as ProcessingStatus
-        Run runA = DomainFactory.createRun(name: 'runA')
-        Run runB = DomainFactory.createRun(name: 'runB')
-        Sample sample = DomainFactory.createSample()
-        SeqType seqType = DomainFactory.createSeqType()
+        Run runA = createRun(name: 'runA')
+        Run runB = createRun(name: 'runB')
+        Sample sample = createSample()
+        SeqType seqType = createSeqType()
         String sampleText = "${sample.project.name}, ${sample.individual.pid}, ${sample.sampleType.name}, ${seqType.name} ${seqType.libraryLayout}"
-        IlseSubmission ilseSubmission1 = DomainFactory.createIlseSubmission(ilseNumber: 1234)
-        IlseSubmission ilseSubmission2 = DomainFactory.createIlseSubmission(ilseNumber: 5678)
+        IlseSubmission ilseSubmission1 = createIlseSubmission(ilseNumber: 1234)
+        IlseSubmission ilseSubmission2 = createIlseSubmission(ilseNumber: 5678)
         Closure createInstalledSeqTrack = { Map properties ->
-            DomainFactory.createSeqTrack([dataInstallationState: SeqTrack.DataProcessingState.FINISHED] + properties)
+            createSeqTrack([dataInstallationState: SeqTrack.DataProcessingState.FINISHED] + properties)
         }
         Set<SeqTrack> seqTracks = [
                 createInstalledSeqTrack(sample: sample, seqType: seqType, ilseSubmission: ilseSubmission2, run: runA, laneId: '1'),
@@ -285,7 +163,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         String notificationRecipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(notificationRecipient)
         int callCount = 0
-        trackingService.mailHelperService = new MailHelperService() {
+        notificationCreator.mailHelperService = new MailHelperService() {
             @Override
             void sendEmail(String emailSubject, String content, List<String> recipient) {
                 callCount++
@@ -296,7 +174,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         }
 
         when:
-        trackingService.sendOperatorNotification(ticket, seqTracks, status, false)
+        notificationCreator.sendOperatorNotification(ticket, seqTracks, status, false)
 
         then:
         callCount == 1
@@ -304,72 +182,80 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
     void 'sendOperatorNotification, when finalNotification is true, sends final notification with correct subject'() {
         given:
-        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        OtrsTicket ticket = createOtrsTicket()
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
         String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
-        trackingService.mailHelperService = Mock(MailHelperService) {
+        notificationCreator.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update", _, [recipient])
         }
 
         expect:
-        trackingService.sendOperatorNotification(ticket, [DomainFactory.createSeqTrack()] as Set, new ProcessingStatus(), true)
+        notificationCreator.sendOperatorNotification(ticket, [createSeqTrack()] as Set, new ProcessingStatus(), true)
     }
 
     void 'sendOperatorNotification, when finalNotification is true and project.customFinalNotification is true and has an Ilse Number, sends final notification with correct subject'() {
         given:
-        OtrsTicket ticket = DomainFactory.createOtrsTicket()
-        SeqTrack seqTrack = createSeqTrackforCustomFinalNotification(DomainFactory.createProject(), DomainFactory.createIlseSubmission(), ticket)
+        OtrsTicket ticket = createOtrsTicket()
+        SeqTrack seqTrack = createSeqTrackforCustomFinalNotification(createProject(), createIlseSubmission(), ticket)
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
         String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
         String expectedHeader = "${PREFIX}#${ticket.ticketNumber} Final Processing Status Update [S#${seqTrack.ilseId}] ${seqTrack.individual.pid} " +
                 "(${seqTrack.seqType.displayName})"
-        trackingService.mailHelperService = Mock(MailHelperService) {
+        notificationCreator.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail(expectedHeader, _, [recipient])
         }
 
         expect:
-        trackingService.sendOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
+        notificationCreator.sendOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
     }
 
     void 'sendOperatorNotification, when finalNotification is true and project.customFinalNotification is true for multiple seqTracks, sends final notification with correct subject'() {
         given:
-        OtrsTicket ticket = DomainFactory.createOtrsTicket()
-        Project project = DomainFactory.createProject()
-        SeqTrack seqTrack1 = createSeqTrackforCustomFinalNotification(project, DomainFactory.createIlseSubmission(), ticket)
-        SeqTrack seqTrack2 = createSeqTrackforCustomFinalNotification(project, DomainFactory.createIlseSubmission(), ticket)
-        SeqTrack seqTrack3 = createSeqTrackforCustomFinalNotification(project, DomainFactory.createIlseSubmission(), ticket)
+        OtrsTicket ticket = createOtrsTicket()
+        Project project = createProject()
+        SeqTrack seqTrack1 = createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket)
+        SeqTrack seqTrack2 = createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket)
+        SeqTrack seqTrack3 = createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket)
+        List<SeqTrack> seqTracks = [
+                seqTrack1,
+                seqTrack2,
+                seqTrack3,
+        ]
 
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
         String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
-        String expectedHeader = "${PREFIX}#${ticket.ticketNumber} Final Processing Status Update " +
-                "[S#${seqTrack1.ilseId},${seqTrack2.ilseId},${seqTrack3.ilseId}] ${seqTrack1.individual.pid}, ${seqTrack2.individual.pid}, " +
-                "${seqTrack3.individual.pid} (${seqTrack1.seqType.displayName}, ${seqTrack2.seqType.displayName}, ${seqTrack3.seqType.displayName})"
-        trackingService.mailHelperService = Mock(MailHelperService) {
+        String ilseString = seqTracks*.ilseId.sort().join(',')
+        String pidString = seqTracks*.individual*.pid.sort().join(', ')
+        String seqTypeStringString = seqTracks*.seqType*.displayName.sort().join(', ')
+        String expectedHeader = "${PREFIX}#${ticket.ticketNumber} Final Processing Status Update [S#${ilseString}] ${pidString} (${seqTypeStringString})"
+
+        notificationCreator.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail(expectedHeader, _, [recipient])
         }
 
         expect:
-        trackingService.sendOperatorNotification(ticket, [seqTrack1, seqTrack2, seqTrack3] as Set, new ProcessingStatus(), true)
+        notificationCreator.sendOperatorNotification(ticket, [seqTrack1, seqTrack2, seqTrack3] as Set, new ProcessingStatus(), true)
     }
+
 
     void "getProcessingStatus returns expected status"() {
         given:
-        SeqTrack seqTrack1 = DomainFactory.createSeqTrack([dataInstallationState: st1State])
-        SeqTrack seqTrack2 = DomainFactory.createSeqTrack([dataInstallationState: st2State])
-        SeqTrack seqTrack3 = DomainFactory.createSeqTrack([fastqcState: st1State])
-        SeqTrack seqTrack4 = DomainFactory.createSeqTrack([fastqcState: st2State])
+        SeqTrack seqTrack1 = createSeqTrack([dataInstallationState: st1State])
+        SeqTrack seqTrack2 = createSeqTrack([dataInstallationState: st2State])
+        SeqTrack seqTrack3 = createSeqTrack([fastqcState: st1State])
+        SeqTrack seqTrack4 = createSeqTrack([fastqcState: st2State])
 
         when:
-        ProcessingStatus processingStatus1 = trackingService.getProcessingStatus([seqTrack1, seqTrack2])
+        ProcessingStatus processingStatus1 = notificationCreator.getProcessingStatus([seqTrack1, seqTrack2])
         then:
         TestCase.assertContainSame(processingStatus1.seqTrackProcessingStatuses*.seqTrack, [seqTrack1, seqTrack2])
         processingStatus1.installationProcessingStatus == processingStatus
 
         when:
-        ProcessingStatus processingStatus2 = trackingService.getProcessingStatus([seqTrack3, seqTrack4])
+        ProcessingStatus processingStatus2 = notificationCreator.getProcessingStatus([seqTrack3, seqTrack4])
         then:
         TestCase.assertContainSame(processingStatus2.seqTrackProcessingStatuses*.seqTrack, [seqTrack3, seqTrack4])
         processingStatus2.fastqcProcessingStatus == processingStatus
@@ -390,9 +276,9 @@ ILSe 5678, runA, lane 1, ${sampleText}
 
 
     @Unroll
-    void "testCombineStatuses"() {
+    void "CombineStatuses, when input is #input1 and #input2, then result is #result"() {
         expect:
-        result == TrackingService.combineStatuses([input1, input2], Closure.IDENTITY)
+        result == NotificationCreator.combineStatuses([input1, input2], Closure.IDENTITY)
 
         where:
         input1                    | input2                    || result
@@ -423,31 +309,21 @@ ILSe 5678, runA, lane 1, ${sampleText}
         ALL_DONE                  | ALL_DONE                  || ALL_DONE
     }
 
-    private boolean testTicket(OtrsTicket otrsTicket) {
-        assert otrsTicket.ticketNumber == TICKET_NUMBER
-        assert otrsTicket.installationFinished == null
-        assert otrsTicket.fastqcFinished == null
-        assert otrsTicket.alignmentFinished == null
-        assert otrsTicket.snvFinished == null
-        assert otrsTicket.indelFinished == null
-        assert otrsTicket.aceseqFinished == null
-        assert !otrsTicket.finalNotificationSent
-        return true
-    }
 
     private SeqTrack createSeqTrackforCustomFinalNotification(Project project, IlseSubmission ilseSubmission, OtrsTicket ticket) {
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
+        SeqTrack seqTrack = createSeqTrackWithOneDataFile(
                 [
                         ilseSubmission: ilseSubmission,
-                        sample        : DomainFactory.createSample(
-                                individual: DomainFactory.createIndividual(
+                        sample        : createSample(
+                                individual: createIndividual(
                                         project: project
                                 )
                         ),
                 ],
-                [runSegment: DomainFactory.createRunSegment(otrsTicket: ticket), fileLinked: true])
+                [runSegment: createRunSegment(otrsTicket: ticket), fileLinked: true])
         project.customFinalNotification = true
         project.save(flush: true)
         return seqTrack
     }
+
 }

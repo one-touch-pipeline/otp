@@ -63,7 +63,7 @@ class OtrsTicket implements Commentable, Entity {
         /**
          * Converts UPPER_SNAKE_CASE "ENUM_NAMES" to camelCase "fieldNames".
          *
-         * This is needed by the {@link TrackingService},
+         * This is needed by the {@link NotificationCreator},
          * which does some stringly-typed magic to dynamically determine which field to set.
          */
         @Override

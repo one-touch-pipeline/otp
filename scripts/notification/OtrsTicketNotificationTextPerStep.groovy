@@ -40,7 +40,7 @@ String projectName = ""
 
 //---------------------------------
 
-TrackingService trackingService = ctx.trackingService
+NotificationCreator notificationCreator = ctx.notificationCreator
 CreateNotificationTextService notificationTextService = ctx.createNotificationTextService
 
 OtrsTicket otrsTicket = exactlyOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
@@ -48,6 +48,6 @@ OtrsTicket otrsTicket = exactlyOneElement(OtrsTicket.findAllByTicketNumber(ticke
 Project project = Project.findByName(projectName)
 
 println notificationTextService.notification(otrsTicket,
-        trackingService.getProcessingStatus(otrsTicket.findAllSeqTracks()), processingStep, project)
+        notificationCreator.getProcessingStatus(otrsTicket.findAllSeqTracks()), processingStep, project)
 
 ''

@@ -20,30 +20,15 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.job.jobs
+package de.dkfz.tbi.otp.dataprocessing
 
-import groovy.util.logging.Slf4j
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Scope
-import org.springframework.stereotype.Component
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 
-import de.dkfz.tbi.otp.job.processing.AbstractEndStateAwareJobImpl
-import de.dkfz.tbi.otp.tracking.NotificationCreator
 
-@Component
-@Scope("prototype")
-@Slf4j
-class NotifyProcessFinishedJob extends AbstractEndStateAwareJobImpl implements AutoRestartableJob {
+class SamplePairService {
 
-    @Autowired
-    NotificationCreator notificationCreator
-
-    @Override
-    void execute() throws Exception {
-        log.trace("NotifyProcessFinishedJob: entering notificationCreator.processFinished")
-        notificationCreator.processFinished(processParameterObject.containedSeqTracks)
-        log.trace("NotifyProcessFinishedJob: entering succeed")
-        succeed()
-        log.trace("NotifyProcessFinishedJob: succeeded")
+    void createMissingDiseaseControlSamplePairs() {
+        Collection<SamplePair> samplePairs = SamplePair.findMissingDiseaseControlSamplePairs()
+        samplePairs*.save(flush: true)
     }
 }

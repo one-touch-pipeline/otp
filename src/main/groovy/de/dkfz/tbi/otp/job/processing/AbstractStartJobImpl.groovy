@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.plan.StartJobDefinition
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.NotificationCreator
 
 /**
  * Abstract base class for {@link StartJob}s.
@@ -52,7 +52,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
     SchedulerService schedulerService
 
     @Autowired
-    TrackingService trackingService
+    NotificationCreator notificationCreator
 
     private JobExecutionPlan plan
     private String beanName

@@ -29,19 +29,19 @@ import de.dkfz.tbi.otp.AbstractIntegrationSpecWithoutRollbackAnnotation
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
-import de.dkfz.tbi.otp.tracking.TrackingService.SamplePairCreation
-import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation {
+@SuppressWarnings(['ClassSize', 'MethodCount', 'MethodSize'])
+class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation implements DomainFactoryCore {
 
-    TrackingService trackingService
+    NotificationCreator notificationCreator
     MailHelperService mailHelperService
     IndelCallingService indelCallingService
     SnvCallingService snvCallingService
@@ -51,6 +51,8 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
     CreateNotificationTextService createNotificationTextService
     ProcessingOptionService processingOptionService
     UserProjectRoleService UserProjectRoleService
+    SamplePairService samplePairService
+    OtrsTicketService otrsTicketService
 
     List<ProcessingOption> referenceGenomeProcessingOptions
 
@@ -88,7 +90,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
     void setupData() {
         // Overwrite the autowired service with a new instance for each test, so mocks do not have to be cleaned up
-        trackingService = new TrackingService(
+        notificationCreator = new NotificationCreator(
                 mailHelperService: mailHelperService,
                 indelCallingService: indelCallingService,
                 snvCallingService: snvCallingService,
@@ -98,6 +100,8 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
                 createNotificationTextService: createNotificationTextService,
                 processingOptionService: processingOptionService,
                 userProjectRoleService: userProjectRoleService,
+                samplePairService: samplePairService,
+                otrsTicketService: otrsTicketService,
         )
         SessionUtils.withNewSession {
             DomainFactory.createAllAnalysableSeqTypes()
@@ -106,85 +110,25 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         }
     }
 
+
     void "check that all analyses are provided in the list 'listPairAnalysis'"() {
         given:
         List<OtrsTicket.ProcessingStep> analysisProcessingSteps
         List<OtrsTicket.ProcessingStep> testedProcessingSteps
         setupData()
         SessionUtils.withNewSession {
-
             analysisProcessingSteps = OtrsTicket.ProcessingStep.values() - [
                     OtrsTicket.ProcessingStep.INSTALLATION,
                     OtrsTicket.ProcessingStep.FASTQC,
                     OtrsTicket.ProcessingStep.ALIGNMENT,
             ]
-
             testedProcessingSteps = listPairAnalysis*.analysisType
         }
-
 
         expect:
         TestCase.assertContainSame(analysisProcessingSteps, testedProcessingSteps)
     }
 
-    def 'test findAllOtrsTickets'() {
-        given: "a handfull of tickets and linked and unlinked seqtracks"
-        TrackingService trackingService = new TrackingService()
-        OtrsTicket otrsTicket01, otrsTicket02, otrsTicket03
-        SeqTrack seqTrack1A, seqTrack1B, seqTrack02, seqTrack03, seqTrackOrphanNoDatafile, seqTrackOrphanWithDatafile
-        Set<OtrsTicket> actualBatch, actualSingle, actualOrphanNoDatafile, actualOrphanWithDatafile
-
-        setupData()
-        SessionUtils.withNewSession {
-            // one ticket, with two seqtracks
-            otrsTicket01 = DomainFactory.createOtrsTicket()
-            seqTrack1A = DomainFactory.createSeqTrack()
-            DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket01), seqTrack: seqTrack1A)
-            seqTrack1B = DomainFactory.createSeqTrack()
-            DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket01), seqTrack: seqTrack1B)
-            // one ticket, one seqtrack
-            otrsTicket02 = DomainFactory.createOtrsTicket()
-            seqTrack02 = DomainFactory.createSeqTrack()
-            DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket02), seqTrack: seqTrack02)
-            // another ticket, again one seqtrack
-            otrsTicket03 = DomainFactory.createOtrsTicket()
-            seqTrack03 = DomainFactory.createSeqTrack()
-            DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket03), seqTrack: seqTrack03)
-            // an orphaned seqtrack, no ticket, no datafile
-            seqTrackOrphanNoDatafile = DomainFactory.createSeqTrack()
-            // an orphaned seqtrack, no ticket, but with a datafile
-            seqTrackOrphanWithDatafile = DomainFactory.createSeqTrack()
-            DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(), seqTrack: seqTrackOrphanWithDatafile)
-        }
-
-        when: "looking for seqtrack batches, find all (unique) tickets"
-        SessionUtils.withNewSession {
-            actualBatch = trackingService.findAllOtrsTickets([seqTrack1A, seqTrack02, seqTrack1B])
-        }
-        then:
-        TestCase.assertContainSame(actualBatch, [otrsTicket01, otrsTicket02])
-
-        when: "looking for a single seqtrack, find its ticket"
-        SessionUtils.withNewSession {
-            actualSingle = trackingService.findAllOtrsTickets([seqTrack03])
-        }
-        then:
-        TestCase.assertContainSame(actualSingle, [otrsTicket03])
-
-        when: "looking for orphans without datafiles, find nothing"
-        SessionUtils.withNewSession {
-            actualOrphanNoDatafile = trackingService.findAllOtrsTickets([seqTrackOrphanNoDatafile])
-        }
-        then:
-        TestCase.assertContainSame(actualOrphanNoDatafile, [])
-
-        when: "looking for orphans with datafiles, find nothing"
-        SessionUtils.withNewSession {
-            actualOrphanWithDatafile = trackingService.findAllOtrsTickets([seqTrackOrphanWithDatafile])
-        }
-        then:
-        TestCase.assertContainSame(actualOrphanWithDatafile, [])
-    }
 
     void 'processFinished calls setFinishedTimestampsAndNotify for the tickets of the passed SeqTracks'() {
         given: "tickets with (at least one) fastQC still in progress"
@@ -192,31 +136,31 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         SeqTrack seqTrackA, seqTrackB
         setupData()
         SessionUtils.withNewSession {
-            ticketA = DomainFactory.createOtrsTicket()
-            seqTrackA = DomainFactory.createSeqTrackWithOneDataFile(
+            ticketA = createOtrsTicket()
+            seqTrackA = createSeqTrackWithOneDataFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.IN_PROGRESS,
                     ],
-                    [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketA), fileLinked: true])
+                    [runSegment: createRunSegment(otrsTicket: ticketA), fileLinked: true])
 
-            ticketB = DomainFactory.createOtrsTicket()
-            seqTrackB = DomainFactory.createSeqTrackWithOneDataFile(
+            ticketB = createOtrsTicket()
+            seqTrackB = createSeqTrackWithOneDataFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                     ],
-                    [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketB), fileLinked: true])
-            DomainFactory.createSeqTrackWithOneDataFile(
+                    [runSegment: createRunSegment(otrsTicket: ticketB), fileLinked: true])
+            createSeqTrackWithOneDataFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.IN_PROGRESS,
                     ],
-                    [runSegment: DomainFactory.createRunSegment(otrsTicket: ticketB), fileLinked: true])
+                    [runSegment: createRunSegment(otrsTicket: ticketB), fileLinked: true])
 
             DomainFactory.createProcessingOptionForOtrsTicketPrefix("the prefix")
 
-            trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
                 notification(_, _, _, _) >> 'Something'
             }
             DomainFactory.createProcessingOptionForNotificationRecipient()
@@ -224,7 +168,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when: "running our tracking update"
         SessionUtils.withNewSession {
-            trackingService.processFinished([seqTrackA, seqTrackB] as Set)
+            notificationCreator.processFinished([seqTrackA, seqTrackB] as Set)
             ticketA = OtrsTicket.get(ticketA.id)
             ticketB = OtrsTicket.get(ticketA.id)
         }
@@ -245,24 +189,23 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             // FastQC:       finished timestamp not set, all done,     won't do more
             // Alignment:    finished timestamp not set, nothing done, won't do more
             // SNV:          finished timestamp not set, nothing done, won't do more
-            ticket = DomainFactory.createOtrsTicket(
+            ticket = createOtrsTicket(
                     installationFinished: installationFinished,
                     finalNotificationSent: true,
             )
-            RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
-            DomainFactory.createSeqTrackWithOneDataFile(
+            RunSegment runSegment = createRunSegment(otrsTicket: ticket)
+            createSeqTrackWithOneDataFile(
                     [fastqcState: SeqTrack.DataProcessingState.FINISHED],
                     [runSegment: runSegment, fileLinked: true])
 
-            trackingService.mailHelperService = Mock(MailHelperService) {
+            notificationCreator.mailHelperService = Mock(MailHelperService) {
                 0 * _
             }
         }
 
         when:
         SessionUtils.withNewSession {
-            trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
-            //ticket = OtrsTicket.get(ticket.id)
+            notificationCreator.setFinishedTimestampsAndNotify(ticket, new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
@@ -283,25 +226,25 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             // FastQC:       finished timestamp not set, partly done,  might do more
             // Alignment:    finished timestamp not set, nothing done, won't do more
             // SNV:          finished timestamp not set, nothing done, won't do more
-            ticket = DomainFactory.createOtrsTicket(
+            ticket = createOtrsTicket(
                     installationFinished: installationFinished,
             )
-            RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
-            DomainFactory.createSeqTrackWithOneDataFile(
+            RunSegment runSegment = createRunSegment(otrsTicket: ticket)
+            createSeqTrackWithOneDataFile(
                     [fastqcState: SeqTrack.DataProcessingState.FINISHED],
                     [runSegment: runSegment, fileLinked: true])
-            DomainFactory.createSeqTrackWithOneDataFile(
+            createSeqTrackWithOneDataFile(
                     [fastqcState: SeqTrack.DataProcessingState.IN_PROGRESS],
                     [runSegment: runSegment, fileLinked: true])
 
-            trackingService.mailHelperService = Mock(MailHelperService) {
+            notificationCreator.mailHelperService = Mock(MailHelperService) {
                 0 * _
             }
         }
 
         when:
         SessionUtils.withNewSession {
-            trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
+            notificationCreator.setFinishedTimestampsAndNotify(ticket, new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
@@ -321,9 +264,9 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             // FastQC:       finished timestamp not set, nothing done, might do more
             // Alignment:    finished timestamp not set, nothing done, won't do more
             // SNV:          finished timestamp not set, nothing done, won't do more
-            ticket = DomainFactory.createOtrsTicket()
-            RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
-            SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
+            ticket = createOtrsTicket()
+            RunSegment runSegment = createRunSegment(otrsTicket: ticket)
+            SeqTrack seqTrack = createSeqTrackWithOneDataFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.IN_PROGRESS,
@@ -346,7 +289,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             String expectedEmailSubjectOperator = "${prefix}#${ticket.ticketNumber} Processing Status Update"
             String expectedEmailSubjectCustomer = "[${prefix}#${ticket.ticketNumber}] TO BE SENT: ${seqTrack.project.name} sequencing data installed"
 
-            trackingService.mailHelperService = Mock(MailHelperService) {
+            notificationCreator.mailHelperService = Mock(MailHelperService) {
                 1 * sendEmail(expectedEmailSubjectOperator, _, [otrsRecipient]) >> { String emailSubject, String content, List<String> recipient ->
                     assert content.contains(expectedStatus.toString())
                 }
@@ -354,7 +297,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
                 0 * _
             }
 
-            trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
                 1 * notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION, seqTrack.project) >> notificationText
                 0 * notification(_, _, _, _)
             }
@@ -362,7 +305,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
+            notificationCreator.setFinishedTimestampsAndNotify(ticket, new NotificationCreator.SamplePairCreation(samplePairService))
             ticket = OtrsTicket.get(ticket.id)
         }
 
@@ -383,37 +326,47 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             // FastQC:       finished timestamp not set, all done,     won't do more
             // Alignment:    finished timestamp not set, partly done,  won't do more
             // SNV:          finished timestamp not set, nothing done, won't do more
-            ticket = DomainFactory.createOtrsTicket()
-            RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
-            SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithOneDataFile(
+            ticket = createOtrsTicket()
+            RunSegment runSegment = createRunSegment(otrsTicket: ticket)
+            SeqTrack seqTrack1 = createSeqTrackWithOneDataFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                     ],
-                    [runSegment: runSegment, fileLinked: true])
-            SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithOneDataFile([
-                    sample               : DomainFactory.createSample(individual: DomainFactory.createIndividual(project: seqTrack1.project)),
-                    dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
-                    fastqcState          : SeqTrack.DataProcessingState.FINISHED,
-                    run                  : DomainFactory.createRun(
-                            seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
-                                    seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()],
-                            ),
-                    ),
-            ],
-                    [runSegment: runSegment, fileLinked: true]
+                    [
+                            runSegment: runSegment,
+                            fileLinked: true,
+                    ],
             )
-            DomainFactory.createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
-            DomainFactory.createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
-            AbstractMergedBamFile abstractMergedBamFile = setBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
-                    DomainFactory.createRoddyBamFile([
-                            workPackage: DomainFactory.createMergingWorkPackage(
-                                    MergingWorkPackage.getMergingProperties(seqTrack2) +
-                                            [pipeline: DomainFactory.createPanCanPipeline()]
-                            )
-                    ]),
-                    DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack2] as Set],
-            ))
+            SeqTrack seqTrack2 = createSeqTrackWithOneDataFile(
+                    [
+                            sample               : createSample(individual: createIndividual(project: seqTrack1.project)),
+                            dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
+                            fastqcState          : SeqTrack.DataProcessingState.FINISHED,
+                            run                  : createRun(
+                                    seqPlatform: createSeqPlatformWithSeqPlatformGroup(
+                                            seqPlatformGroups: [createSeqPlatformGroup()],
+                                    ),
+                            ),
+                    ],
+                    [
+                            runSegment: runSegment,
+                            fileLinked: true,
+                    ],
+            )
+            createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
+            createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
+            AbstractMergedBamFile abstractMergedBamFile = setBamFileInProjectFolder(
+                    DomainFactory.createRoddyBamFile(
+                            DomainFactory.createRoddyBamFile([
+                                    workPackage: DomainFactory.createMergingWorkPackage(
+                                            MergingWorkPackage.getMergingProperties(seqTrack2) +
+                                                    [pipeline: DomainFactory.createPanCanPipeline()]
+                                    )
+                            ]),
+                            DomainFactory.randomProcessedBamFileProperties + [seqTracks: [seqTrack2] as Set],
+                    )
+            )
             ((MergingWorkPackage) (abstractMergedBamFile.workPackage)).seqTracks.add(seqTrack2)
             abstractMergedBamFile.workPackage.save(flush: true)
             ProcessingStatus expectedStatus = [
@@ -436,7 +389,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             String expectedEmailSubjectCustomer1 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.INSTALLATION.notificationSubject
             String expectedEmailSubjectCustomer2 = expectedEmailSubjectCustomer + OtrsTicket.ProcessingStep.ALIGNMENT.notificationSubject
 
-            trackingService.mailHelperService = Mock(MailHelperService) {
+            notificationCreator.mailHelperService = Mock(MailHelperService) {
                 1 * sendEmail(expectedEmailSubjectOperator, _, [otrsRecipient]) >> { String emailSubject, String content, List<String> recipient ->
                     assert content.contains(expectedStatus.toString())
                 }
@@ -445,7 +398,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
                 0 * _
             }
 
-            trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
                 1 * notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION, seqTrack1.project) >> notificationText1
                 1 * notification(ticket, _, OtrsTicket.ProcessingStep.ALIGNMENT, seqTrack1.project) >> notificationText2
                 0 * notification(_, _, _, _)
@@ -453,15 +406,19 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         }
         when:
         SessionUtils.withNewSession {
-            trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
+            notificationCreator.setFinishedTimestampsAndNotify(ticket, new NotificationCreator.SamplePairCreation(samplePairService))
             ticket = OtrsTicket.get(ticket.id)
         }
 
         then:
         ticket.installationFinished != null
-        ticket.fastqcFinished == ticket.installationFinished
-        ticket.alignmentFinished == ticket.installationFinished
+        ticket.fastqcFinished != null
+        ticket.alignmentFinished != null
         ticket.snvFinished == null
+        ticket.indelFinished == null
+        ticket.sophiaFinished == null
+        ticket.aceseqFinished == null
+        ticket.runYapsaFinished == null
         ticket.finalNotificationSent
     }
 
@@ -474,28 +431,33 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             // FastQC:       finished timestamp not set, all done,     won't do more
             // Alignment:    finished timestamp not set, partly done,  won't do more
             // SNV:          finished timestamp not set, nothing done, won't do more
-            ticket = DomainFactory.createOtrsTicket()
-            RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
-            SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithOneDataFile(
+            ticket = createOtrsTicket()
+            RunSegment runSegment = createRunSegment(otrsTicket: ticket)
+            SeqTrack seqTrack1 = createSeqTrackWithOneDataFile(
                     [
                             dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
                             fastqcState          : SeqTrack.DataProcessingState.FINISHED,
                     ],
-                    [runSegment: runSegment, fileLinked: true])
-            SeqTrack seqTrack2 = DomainFactory.createSeqTrackWithOneDataFile([
-                    sample               : DomainFactory.createSample(individual: DomainFactory.createIndividual(project: seqTrack1.project)),
-                    dataInstallationState: SeqTrack.DataProcessingState.IN_PROGRESS,
-                    fastqcState          : SeqTrack.DataProcessingState.NOT_STARTED,
-                    run                  : DomainFactory.createRun(
-                            seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
-                                    seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()],
-                            ),
-                    ),
-            ],
-                    [runSegment: runSegment, fileLinked: true]
+                    [runSegment: runSegment, fileLinked: true,],
             )
-            DomainFactory.createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
-            DomainFactory.createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
+            SeqTrack seqTrack2 = createSeqTrackWithOneDataFile(
+                    [
+                            sample               : createSample(individual: createIndividual(project: seqTrack1.project)),
+                            dataInstallationState: SeqTrack.DataProcessingState.IN_PROGRESS,
+                            fastqcState          : SeqTrack.DataProcessingState.NOT_STARTED,
+                            run                  : createRun(
+                                    seqPlatform: createSeqPlatformWithSeqPlatformGroup(
+                                            seqPlatformGroups: [createSeqPlatformGroup()],
+                                    ),
+                            ),
+                    ],
+                    [
+                            runSegment: runSegment,
+                            fileLinked: true,
+                    ],
+            )
+            createMergingCriteriaLazy(project: seqTrack1.project, seqType: seqTrack1.seqType)
+            createMergingCriteriaLazy(project: seqTrack2.project, seqType: seqTrack2.seqType)
 
             setBamFileInProjectFolder(DomainFactory.createRoddyBamFile(
                     DomainFactory.createRoddyBamFile([
@@ -513,18 +475,18 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             String otrsRecipient = HelperUtils.randomEmail
             DomainFactory.createProcessingOptionForNotificationRecipient(otrsRecipient)
 
-            trackingService.mailHelperService = Mock(MailHelperService) {
+            notificationCreator.mailHelperService = Mock(MailHelperService) {
                 0 * _
             }
 
-            trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
                 0 * notification(_, _, _, _)
             }
         }
 
         when:
         SessionUtils.withNewSession {
-            trackingService.setFinishedTimestampsAndNotify(ticket, new SamplePairCreation())
+            notificationCreator.setFinishedTimestampsAndNotify(ticket, new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
@@ -532,30 +494,35 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         ticket.alignmentFinished == null
         ticket.fastqcFinished == null
         ticket.snvFinished == null
+        ticket.indelFinished == null
+        ticket.sophiaFinished == null
+        ticket.aceseqFinished == null
+        ticket.runYapsaFinished == null
         !ticket.finalNotificationSent
     }
 
     private static final String OTRS_RECIPIENT = HelperUtils.randomEmail
 
     @Unroll
-    void 'sendCustomerNotification sends expected notification'(int dataCase, boolean automaticNotification, OtrsTicket.ProcessingStep notificationStep, List<String> recipients, String subject) {
+    void 'sendCustomerNotification sends expected notification'(int dataCase, boolean automaticNotification, OtrsTicket.ProcessingStep notificationStep,
+                                                                List<String> recipients, String subject) {
         given:
         OtrsTicket ticket
         ProcessingStatus status
         setupData()
         SessionUtils.withNewSession {
             UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
-                    project: DomainFactory.createProject(name: 'Project1'),
+                    project: createProject(name: 'Project1'),
                     user: DomainFactory.createUser(email: EMAIL),
             )
-            Sample sample1 = DomainFactory.createSample(
-                    individual: DomainFactory.createIndividual(
+            Sample sample1 = createSample(
+                    individual: createIndividual(
                             project: userProjectRole.project,
                     )
             )
-            Sample sample2 = DomainFactory.createSample(
-                    individual: DomainFactory.createIndividual(
-                            project: DomainFactory.createProject(
+            Sample sample2 = createSample(
+                    individual: createIndividual(
+                            project: createProject(
                                     name: 'Project2',
                             )
                     )
@@ -565,66 +532,66 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             switch (dataCase) {
                 case 1:
                     seqTracks = [
-                            DomainFactory.createSeqTrack(sample: sample1),
+                            createSeqTrack(sample: sample1),
                     ]
                     break
                 case 2:
                     seqTracks = [
-                            DomainFactory.createSeqTrack(sample: sample1),
+                            createSeqTrack(sample: sample1),
                     ]
                     break
                 case 3:
                     seqTracks = [
-                            DomainFactory.createSeqTrack(sample: sample1),
-                            DomainFactory.createSeqTrack(
+                            createSeqTrack(sample: sample1),
+                            createSeqTrack(
                                     sample: sample1,
-                                    ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234),
+                                    ilseSubmission: createIlseSubmission(ilseNumber: 1234),
                             ),
                     ]
                     break
                 case 4:
                     seqTracks = [
-                            DomainFactory.createSeqTrack(sample: sample1),
+                            createSeqTrack(sample: sample1),
                     ]
                     break
                 case 5:
                     seqTracks = [
-                            DomainFactory.createSeqTrack(sample: sample2),
+                            createSeqTrack(sample: sample2),
                     ]
                     break
                 case 6:
-                    IlseSubmission ilse = DomainFactory.createIlseSubmission(ilseNumber: 9876)
+                    IlseSubmission ilse = createIlseSubmission(ilseNumber: 9876)
                     seqTracks = [
-                            DomainFactory.createSeqTrack(
+                            createSeqTrack(
                                     sample: sample2,
                                     ilseSubmission: ilse,
                             ),
-                            DomainFactory.createSeqTrack(
+                            createSeqTrack(
                                     sample: sample2,
                                     ilseSubmission: ilse,
                             ),
-                            DomainFactory.createSeqTrack(
+                            createSeqTrack(
                                     sample: sample2,
-                                    ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234),
+                                    ilseSubmission: createIlseSubmission(ilseNumber: 1234),
                             ),
-                            DomainFactory.createSeqTrack(sample: sample2),
+                            createSeqTrack(sample: sample2),
                     ]
             }
 
-            ticket = DomainFactory.createOtrsTicket(automaticNotification: automaticNotification)
+            ticket = createOtrsTicket(automaticNotification: automaticNotification)
             status = new ProcessingStatus(seqTracks.collect { new SeqTrackProcessingStatus(it) })
             String prefix = HelperUtils.uniqueString
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
-            subject = "[${prefix}#${ticket.ticketNumber}] ${subject}"
+            String finalSubject = "[${prefix}#${ticket.ticketNumber}] ${subject}"
             int callCount = recipients.isEmpty() ? 0 : 1
             String content = HelperUtils.randomEmail
             DomainFactory.createProcessingOptionForNotificationRecipient(OTRS_RECIPIENT)
 
-            trackingService.mailHelperService = Mock(MailHelperService) {
-                callCount * sendEmail(subject, content, recipients)
+            notificationCreator.mailHelperService = Mock(MailHelperService) {
+                callCount * sendEmail(finalSubject, content, recipients)
                 0 * sendEmail(_, _, _)
             }
-            trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
                 Project project = exactlyOneElement(seqTracks*.project.unique())
                 callCount * notification(ticket, _, notificationStep, project) >> {
                     OtrsTicket ticket1, ProcessingStatus status1, OtrsTicket.ProcessingStep processingStep, Project project1 ->
@@ -636,7 +603,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         expect:
         SessionUtils.withNewSession {
-            trackingService.sendCustomerNotification(ticket, status, notificationStep)
+            notificationCreator.sendCustomerNotification(ticket, status, notificationStep)
             return true
         }
 
@@ -656,15 +623,15 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         ProcessingStatus status
         setupData()
         SessionUtils.withNewSession {
-            ticket = DomainFactory.createOtrsTicket()
+            ticket = createOtrsTicket()
             status = new ProcessingStatus([1, 2].collect { int index ->
                 UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
                         user: DomainFactory.createUser(email: "project${index}@test.com"),
-                        project: DomainFactory.createProject(name: "Project_X${index}"),
+                        project: createProject(name: "Project_X${index}"),
                 )
-                new SeqTrackProcessingStatus(DomainFactory.createSeqTrack(
-                        sample: DomainFactory.createSample(
-                                individual: DomainFactory.createIndividual(
+                new SeqTrackProcessingStatus(createSeqTrack(
+                        sample: createSample(
+                                individual: createIndividual(
                                         project: userProjectRole.project,
                                 )
                         )
@@ -674,15 +641,16 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
             DomainFactory.createProcessingOptionForNotificationRecipient(OTRS_RECIPIENT)
 
-            trackingService.mailHelperService = Mock(MailHelperService) {
+            notificationCreator.mailHelperService = Mock(MailHelperService) {
                 1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X1 sequencing data installed",
                         'Project_X1', ['project1@test.com', OTRS_RECIPIENT])
                 1 * sendEmail("[${prefix}#${ticket.ticketNumber}] Project_X2 sequencing data installed",
                         'Project_X2', ['project2@test.com', OTRS_RECIPIENT])
                 0 * sendEmail(_, _, _)
             }
-            trackingService.createNotificationTextService = Mock(CreateNotificationTextService) {
-                notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION, _) >> { OtrsTicket ticket1, ProcessingStatus status1, OtrsTicket.ProcessingStep processingStep, Project project ->
+            notificationCreator.createNotificationTextService = Mock(CreateNotificationTextService) {
+                notification(ticket, _, OtrsTicket.ProcessingStep.INSTALLATION, _) >> { OtrsTicket ticket1, ProcessingStatus status1,
+                                                                                        OtrsTicket.ProcessingStep processingStep, Project project ->
                     return project.name
                 }
             }
@@ -690,7 +658,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         expect:
         SessionUtils.withNewSession {
-            trackingService.sendCustomerNotification(ticket, status, OtrsTicket.ProcessingStep.INSTALLATION)
+            notificationCreator.sendCustomerNotification(ticket, status, OtrsTicket.ProcessingStep.INSTALLATION)
             return true
         }
     }
@@ -701,15 +669,15 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         ProcessingStatus status
         setupData()
         SessionUtils.withNewSession {
-            ticket = DomainFactory.createOtrsTicket()
+            ticket = createOtrsTicket()
             status = new ProcessingStatus([1, 2].collect { int index ->
                 UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
                         user: DomainFactory.createUser(email: "project${index}@test.com"),
-                        project: DomainFactory.createProject(name: "Project_X${index}"),
+                        project: createProject(name: "Project_X${index}"),
                 )
-                new SeqTrackProcessingStatus(DomainFactory.createSeqTrack(
-                        sample: DomainFactory.createSample(
-                                individual: DomainFactory.createIndividual(
+                new SeqTrackProcessingStatus(createSeqTrack(
+                        sample: createSample(
+                                individual: createIndividual(
                                         project: userProjectRole.project,
                                 )
                         ),
@@ -720,18 +688,17 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
             DomainFactory.createProcessingOptionForNotificationRecipient(OTRS_RECIPIENT)
 
-            trackingService.mailHelperService = Mock(MailHelperService) {
+            notificationCreator.mailHelperService = Mock(MailHelperService) {
                 0 * sendEmail(_, _, _)
             }
         }
 
         expect:
         SessionUtils.withNewSession {
-            trackingService.sendCustomerNotification(ticket, status, OtrsTicket.ProcessingStep.INSTALLATION)
+            notificationCreator.sendCustomerNotification(ticket, status, OtrsTicket.ProcessingStep.INSTALLATION)
             return true
         }
     }
-
 
 
     private static SeqTrackProcessingStatus createSeqTrackProcessingStatus(SeqTrack seqTrack) {
@@ -748,7 +715,8 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         expect:
         SessionUtils.withNewSession {
-            trackingService.fillInMergingWorkPackageProcessingStatuses([]).empty
+            assert notificationCreator.fillInMergingWorkPackageProcessingStatuses([]).empty
+            return true
         }
     }
 
@@ -758,14 +726,14 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         ProcessingStatus processingStatus
         setupData()
         SessionUtils.withNewSession {
-            seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile([:], [fileWithdrawn: true]))
+            seqTrackStatus = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile([:], [fileWithdrawn: true]))
             processingStatus = createProcessingStatus(seqTrackStatus)
         }
 
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
+            notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
         }
 
         then:
@@ -788,17 +756,18 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
+            notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
         }
 
         then:
         SessionUtils.withNewSession {
             MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrackStatus.mergingWorkPackageProcessingStatuses)
-            return  mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage &&
-                    mwpStatus.completeProcessableBamFileInProjectFolder == bamFile &&
-                    mwpStatus.alignmentProcessingStatus == ALL_DONE &&
-                    seqTrackStatus.alignmentProcessingStatus == ALL_DONE &&
-                    createProcessingStatus(seqTrackStatus).alignmentProcessingStatus == ALL_DONE
+            assert mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
+            assert mwpStatus.completeProcessableBamFileInProjectFolder == bamFile
+            assert mwpStatus.alignmentProcessingStatus == ALL_DONE
+            assert seqTrackStatus.alignmentProcessingStatus == ALL_DONE
+            assert createProcessingStatus(seqTrackStatus).alignmentProcessingStatus == ALL_DONE
+            return true
         }
     }
 
@@ -814,17 +783,18 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
+            notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
         }
 
         then:
         SessionUtils.withNewSession {
             MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrackStatus.mergingWorkPackageProcessingStatuses)
-            return  mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage &&
-                    mwpStatus.completeProcessableBamFileInProjectFolder == null &&
-                    mwpStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO &&
-                    seqTrackStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO &&
-                    createProcessingStatus(seqTrackStatus).alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            assert mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
+            assert mwpStatus.completeProcessableBamFileInProjectFolder == null
+            assert mwpStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            assert seqTrackStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            assert createProcessingStatus(seqTrackStatus).alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            return true
         }
     }
 
@@ -845,19 +815,20 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status])
+            notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status])
         }
 
         then:
         SessionUtils.withNewSession {
             MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrack2Status.mergingWorkPackageProcessingStatuses)
-            return  seqTrack1Status.mergingWorkPackageProcessingStatuses.isEmpty() &&
-                    seqTrack1Status.alignmentProcessingStatus == NOTHING_DONE_WONT_DO &&
-                    mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage &&
-                    mwpStatus.completeProcessableBamFileInProjectFolder == bamFile &&
-                    mwpStatus.alignmentProcessingStatus == ALL_DONE &&
-                    seqTrack2Status.alignmentProcessingStatus == ALL_DONE &&
-                    createProcessingStatus(seqTrack1Status, seqTrack2Status).alignmentProcessingStatus == PARTLY_DONE_WONT_DO_MORE
+            assert seqTrack1Status.mergingWorkPackageProcessingStatuses.isEmpty()
+            assert seqTrack1Status.alignmentProcessingStatus == NOTHING_DONE_WONT_DO
+            assert mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
+            assert mwpStatus.completeProcessableBamFileInProjectFolder == bamFile
+            assert mwpStatus.alignmentProcessingStatus == ALL_DONE
+            assert seqTrack2Status.alignmentProcessingStatus == ALL_DONE
+            assert createProcessingStatus(seqTrack1Status, seqTrack2Status).alignmentProcessingStatus == PARTLY_DONE_WONT_DO_MORE
+            return true
         }
     }
 
@@ -867,13 +838,13 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         ProcessingStatus processingStatus
         setupData()
         SessionUtils.withNewSession {
-            seqTrackStatus = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile())
+            seqTrackStatus = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile())
             processingStatus = createProcessingStatus(seqTrackStatus)
         }
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
+            notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
         }
 
         then:
@@ -896,17 +867,18 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
+            notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrackStatus])
         }
 
         then:
         SessionUtils.withNewSession {
             MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrackStatus.mergingWorkPackageProcessingStatuses)
-            return  mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage &&
-                    mwpStatus.completeProcessableBamFileInProjectFolder == null &&
-                    mwpStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO &&
-                    seqTrackStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO &&
-                    createProcessingStatus(seqTrackStatus).alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            assert mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
+            assert mwpStatus.completeProcessableBamFileInProjectFolder == null
+            assert mwpStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            assert seqTrackStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            assert createProcessingStatus(seqTrackStatus).alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            return true
         }
     }
 
@@ -919,24 +891,25 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         SessionUtils.withNewSession {
             bamFile = createBamFileInProjectFolder(DomainFactory.randomProcessedBamFileProperties)
             seqTrack1Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
-            seqTrack2Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile())
+            seqTrack2Status = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile())
         }
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status])
+            notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status])
         }
 
         then:
         SessionUtils.withNewSession {
             MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrack1Status.mergingWorkPackageProcessingStatuses)
-            return  mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage &&
-                    mwpStatus.completeProcessableBamFileInProjectFolder == bamFile &&
-                    mwpStatus.alignmentProcessingStatus == ALL_DONE &&
-                    seqTrack1Status.alignmentProcessingStatus == ALL_DONE &&
-                    seqTrack2Status.mergingWorkPackageProcessingStatuses.isEmpty() &&
-                    seqTrack2Status.alignmentProcessingStatus == NOTHING_DONE_WONT_DO &&
-                    createProcessingStatus(seqTrack1Status, seqTrack2Status).alignmentProcessingStatus == PARTLY_DONE_WONT_DO_MORE
+            assert mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
+            assert mwpStatus.completeProcessableBamFileInProjectFolder == bamFile
+            assert mwpStatus.alignmentProcessingStatus == ALL_DONE
+            assert seqTrack1Status.alignmentProcessingStatus == ALL_DONE
+            assert seqTrack2Status.mergingWorkPackageProcessingStatuses.isEmpty()
+            assert seqTrack2Status.alignmentProcessingStatus == NOTHING_DONE_WONT_DO
+            assert createProcessingStatus(seqTrack1Status, seqTrack2Status).alignmentProcessingStatus == PARTLY_DONE_WONT_DO_MORE
+            return true
         }
     }
 
@@ -948,24 +921,25 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         SessionUtils.withNewSession {
             bamFile = DomainFactory.createProcessedMergedBamFile()
             seqTrack1Status = createSeqTrackProcessingStatus(bamFile.containedSeqTracks.first())
-            seqTrack2Status = createSeqTrackProcessingStatus(DomainFactory.createSeqTrackWithOneDataFile())
+            seqTrack2Status = createSeqTrackProcessingStatus(createSeqTrackWithOneDataFile())
         }
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status])
+            notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status])
         }
 
         then:
         SessionUtils.withNewSession {
             MergingWorkPackageProcessingStatus mwpStatus = exactlyOneElement(seqTrack1Status.mergingWorkPackageProcessingStatuses)
-            return  mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage &&
-                    mwpStatus.completeProcessableBamFileInProjectFolder == null &&
-                    mwpStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO &&
-                    seqTrack1Status.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO &&
-                    seqTrack2Status.mergingWorkPackageProcessingStatuses.isEmpty() &&
-                    seqTrack2Status.alignmentProcessingStatus == NOTHING_DONE_WONT_DO &&
-                    createProcessingStatus(seqTrack1Status, seqTrack2Status).alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            assert mwpStatus.mergingWorkPackage == bamFile.mergingWorkPackage
+            assert mwpStatus.completeProcessableBamFileInProjectFolder == null
+            assert mwpStatus.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            assert seqTrack1Status.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            assert seqTrack2Status.mergingWorkPackageProcessingStatuses.isEmpty()
+            assert seqTrack2Status.alignmentProcessingStatus == NOTHING_DONE_WONT_DO
+            assert createProcessingStatus(seqTrack1Status, seqTrack2Status).alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            return true
         }
     }
 
@@ -986,7 +960,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status, seqTrack3Status])
+            notificationCreator.fillInMergingWorkPackageProcessingStatuses([seqTrack1Status, seqTrack2Status, seqTrack3Status])
         }
 
         then:
@@ -994,16 +968,17 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             MergingWorkPackageProcessingStatus mwp1Status = exactlyOneElement(seqTrack1Status.mergingWorkPackageProcessingStatuses)
             MergingWorkPackageProcessingStatus mwp2Status = exactlyOneElement(seqTrack2Status.mergingWorkPackageProcessingStatuses)
 
-            return  mwp1Status.mergingWorkPackage == bamFile1.mergingWorkPackage &&
-                    mwp1Status.completeProcessableBamFileInProjectFolder == null &&
-                    mwp1Status.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO &&
-                    seqTrack1Status.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO &&
-                    mwp2Status.mergingWorkPackage == bamFile2.mergingWorkPackage &&
-                    mwp2Status.completeProcessableBamFileInProjectFolder == bamFile2 &&
-                    mwp2Status.alignmentProcessingStatus == ALL_DONE &&
-                    seqTrack2Status.alignmentProcessingStatus == ALL_DONE &&
-                    exactlyOneElement(seqTrack3Status.mergingWorkPackageProcessingStatuses).is(mwp1Status) &&
-                    createProcessingStatus(seqTrack1Status, seqTrack2Status).alignmentProcessingStatus == PARTLY_DONE_MIGHT_DO_MORE
+            assert mwp1Status.mergingWorkPackage == bamFile1.mergingWorkPackage
+            assert mwp1Status.completeProcessableBamFileInProjectFolder == null
+            assert mwp1Status.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            assert seqTrack1Status.alignmentProcessingStatus == NOTHING_DONE_MIGHT_DO
+            assert mwp2Status.mergingWorkPackage == bamFile2.mergingWorkPackage
+            assert mwp2Status.completeProcessableBamFileInProjectFolder == bamFile2
+            assert mwp2Status.alignmentProcessingStatus == ALL_DONE
+            assert seqTrack2Status.alignmentProcessingStatus == ALL_DONE
+            assert exactlyOneElement(seqTrack3Status.mergingWorkPackageProcessingStatuses).is(mwp1Status)
+            assert createProcessingStatus(seqTrack1Status, seqTrack2Status).alignmentProcessingStatus == PARTLY_DONE_MIGHT_DO_MORE
+            return true
         }
     }
 
@@ -1026,7 +1001,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         setupData()
 
         expect:
-        trackingService.fillInSamplePairStatuses([], new SamplePairCreation())
+        notificationCreator.fillInSamplePairStatuses([], new NotificationCreator.SamplePairCreation(samplePairService))
     }
 
     void "fillInSamplePairStatuses, no SP, returns NOTHING_DONE_WONT_DO"() {
@@ -1040,18 +1015,19 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
+            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
         SessionUtils.withNewSession {
-            mwpStatus.samplePairProcessingStatuses.isEmpty()
-            mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
-            mwpStatus.indelProcessingStatus == NOTHING_DONE_WONT_DO
-            mwpStatus.sophiaProcessingStatus == NOTHING_DONE_WONT_DO
-            mwpStatus.aceseqProcessingStatus == NOTHING_DONE_WONT_DO
-            mwpStatus.runYapsaProcessingStatus == NOTHING_DONE_WONT_DO
-            createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
+            assert mwpStatus.samplePairProcessingStatuses.isEmpty()
+            assert mwpStatus.snvProcessingStatus == NOTHING_DONE_WONT_DO
+            assert mwpStatus.indelProcessingStatus == NOTHING_DONE_WONT_DO
+            assert mwpStatus.sophiaProcessingStatus == NOTHING_DONE_WONT_DO
+            assert mwpStatus.aceseqProcessingStatus == NOTHING_DONE_WONT_DO
+            assert mwpStatus.runYapsaProcessingStatus == NOTHING_DONE_WONT_DO
+            assert createSeqTrackProcessingStatus(mwpStatus).snvProcessingStatus == NOTHING_DONE_WONT_DO
+            return true
         }
     }
 
@@ -1076,7 +1052,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             analysisInstance = BamFilePairAnalysis.get(analysisInstance.id)
             analysisInstance.withdrawn = true
             analysisInstance.save(flush: true)
-            trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
+            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
@@ -1112,17 +1088,18 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
+            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
         SessionUtils.withNewSession {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-            return  samplePairStatus.samplePair == analysisInstance.samplePair &&
-                    samplePairStatus."${pairAnalysis.completeCallingInstance}" == null &&
-                    samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO &&
-                    mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO &&
-                    createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
+            assert samplePairStatus.samplePair == analysisInstance.samplePair
+            assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+            assert samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
+            assert mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
+            assert createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
+            return true
         }
 
         where:
@@ -1168,17 +1145,17 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
+            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
         SessionUtils.withNewSession {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-            assert  samplePairStatus.samplePair == analysisInstance.samplePair
-            assert  samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
-            assert  samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
-            assert  mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
-            assert  createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert samplePairStatus.samplePair == analysisInstance.samplePair
+            assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+            assert samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
             return true
         }
 
@@ -1213,17 +1190,18 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
+            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
         SessionUtils.withNewSession {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-            return  samplePairStatus.samplePair == analysisInstance.samplePair &&
-                    samplePairStatus.completeAceseqInstance == null &&
-                    samplePairStatus.aceseqProcessingStatus == NOTHING_DONE_WONT_DO &&
-                    mwpStatus.aceseqProcessingStatus == NOTHING_DONE_WONT_DO &&
-                    createSeqTrackProcessingStatus(mwpStatus).aceseqProcessingStatus == NOTHING_DONE_WONT_DO
+            assert samplePairStatus.samplePair == analysisInstance.samplePair
+            assert samplePairStatus.completeAceseqInstance == null
+            assert samplePairStatus.aceseqProcessingStatus == NOTHING_DONE_WONT_DO
+            assert mwpStatus.aceseqProcessingStatus == NOTHING_DONE_WONT_DO
+            assert createSeqTrackProcessingStatus(mwpStatus).aceseqProcessingStatus == NOTHING_DONE_WONT_DO
+            return true
         }
     }
 
@@ -1243,17 +1221,18 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
+            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
         SessionUtils.withNewSession {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-            return  samplePairStatus.samplePair == analysisInstance.samplePair &&
-                    samplePairStatus."${pairAnalysis.completeCallingInstance}" == null &&
-                    samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO &&
-                    mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO &&
-                    createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert samplePairStatus.samplePair == analysisInstance.samplePair
+            assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+            assert samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            return true
         }
 
         where:
@@ -1278,17 +1257,18 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
+            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
         SessionUtils.withNewSession {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-            return  samplePairStatus.samplePair == analysisInstance.samplePair &&
-                    samplePairStatus."${pairAnalysis.completeCallingInstance}" == analysisInstance &&
-                    samplePairStatus."${pairAnalysis.processingStatus}" == ALL_DONE &&
-                    mwpStatus."${pairAnalysis.processingStatus}" == ALL_DONE &&
-                    createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == ALL_DONE
+            assert samplePairStatus.samplePair == analysisInstance.samplePair
+            assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == analysisInstance
+            assert samplePairStatus."${pairAnalysis.processingStatus}" == ALL_DONE
+            assert mwpStatus."${pairAnalysis.processingStatus}" == ALL_DONE
+            assert createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == ALL_DONE
+            return true
         }
 
         where:
@@ -1310,17 +1290,18 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
+            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
         SessionUtils.withNewSession {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-            return  samplePairStatus.samplePair == analysisInstance.samplePair
-                    samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
-                    samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
-                    mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
-                    createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert samplePairStatus.samplePair == analysisInstance.samplePair
+            assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+            assert samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            return true
         }
 
         where:
@@ -1346,17 +1327,18 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInSamplePairStatuses([mwpStatus], new SamplePairCreation())
+            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
         SessionUtils.withNewSession {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwpStatus.samplePairProcessingStatuses)
-            samplePairStatus.samplePair == analysisInstance.samplePair
-            samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
-            samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
-            mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
-            createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert samplePairStatus.samplePair == analysisInstance.samplePair
+            assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+            assert samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert mwpStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert createSeqTrackProcessingStatus(mwpStatus)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            return true
         }
 
         where:
@@ -1384,19 +1366,20 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairCreation())
+            notificationCreator.fillInSamplePairStatuses([mwp1Status, mwp2Status], new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
         SessionUtils.withNewSession {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
-            return  samplePairStatus.samplePair == analysisInstance.samplePair &&
-                    samplePairStatus."${pairAnalysis.completeCallingInstance}" == analysisInstance &&
-                    samplePairStatus."${pairAnalysis.processingStatus}" == ALL_DONE &&
-                    mwp1Status."${pairAnalysis.processingStatus}" == ALL_DONE &&
-                    mwp2Status.samplePairProcessingStatuses.isEmpty() &&
-                    mwp2Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO &&
-                    createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalysis.processingStatus}" == PARTLY_DONE_WONT_DO_MORE
+            assert samplePairStatus.samplePair == analysisInstance.samplePair
+            assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == analysisInstance
+            assert samplePairStatus."${pairAnalysis.processingStatus}" == ALL_DONE
+            assert mwp1Status."${pairAnalysis.processingStatus}" == ALL_DONE
+            assert mwp2Status.samplePairProcessingStatuses.isEmpty()
+            assert mwp2Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
+            assert createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalysis.processingStatus}" == PARTLY_DONE_WONT_DO_MORE
+            return true
         }
 
         where:
@@ -1420,20 +1403,21 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairCreation())
+            notificationCreator.fillInSamplePairStatuses([mwp1Status, mwp2Status], new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
         SessionUtils.withNewSession {
             SamplePairProcessingStatus samplePairStatus = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
 
-            return  mwp1Status.samplePairProcessingStatuses.isEmpty() &&
-                    mwp1Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO &&
-                    samplePairStatus.samplePair == analysisInstance.samplePair &&
-                    samplePairStatus."${pairAnalysis.completeCallingInstance}" == null &&
-                    samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO &&
-                    mwp2Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO &&
-                    createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert mwp1Status.samplePairProcessingStatuses.isEmpty()
+            assert mwp1Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_WONT_DO
+            assert samplePairStatus.samplePair == analysisInstance.samplePair
+            assert samplePairStatus."${pairAnalysis.completeCallingInstance}" == null
+            assert samplePairStatus."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert mwp2Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            return true
         }
 
         where:
@@ -1462,7 +1446,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         when:
         SessionUtils.withNewSession {
-            trackingService.fillInSamplePairStatuses([mwp1Status, mwp2Status], new SamplePairCreation())
+            notificationCreator.fillInSamplePairStatuses([mwp1Status, mwp2Status], new NotificationCreator.SamplePairCreation(samplePairService))
         }
 
         then:
@@ -1470,15 +1454,16 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
             SamplePairProcessingStatus samplePair1Status = exactlyOneElement(mwp1Status.samplePairProcessingStatuses)
             SamplePairProcessingStatus samplePair2Status = exactlyOneElement(mwp2Status.samplePairProcessingStatuses)
 
-            return  samplePair1Status.samplePair == analysisInstance.samplePair &&
-                    samplePair1Status."${pairAnalysis.completeCallingInstance}" == analysisInstance &&
-                    samplePair1Status."${pairAnalysis.processingStatus}" == ALL_DONE &&
-                    mwp1Status."${pairAnalysis.processingStatus}" == ALL_DONE &&
-                    samplePair2Status.samplePair == analysisInstance2.samplePair &&
-                    samplePair2Status."${pairAnalysis.completeCallingInstance}" == null &&
-                    samplePair2Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO &&
-                    mwp2Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO &&
-                    createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalysis.processingStatus}" == PARTLY_DONE_MIGHT_DO_MORE
+            assert samplePair1Status.samplePair == analysisInstance.samplePair
+            assert samplePair1Status."${pairAnalysis.completeCallingInstance}" == analysisInstance
+            assert samplePair1Status."${pairAnalysis.processingStatus}" == ALL_DONE
+            assert mwp1Status."${pairAnalysis.processingStatus}" == ALL_DONE
+            assert samplePair2Status.samplePair == analysisInstance2.samplePair
+            assert samplePair2Status."${pairAnalysis.completeCallingInstance}" == null
+            assert samplePair2Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert mwp2Status."${pairAnalysis.processingStatus}" == NOTHING_DONE_MIGHT_DO
+            assert createSeqTrackProcessingStatus(mwp1Status, mwp2Status)."${pairAnalysis.processingStatus}" == PARTLY_DONE_MIGHT_DO_MORE
+            return true
         }
 
         where:
@@ -1498,173 +1483,6 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         return bamFile
     }
 
-    void "assignOtrsTicketToRunSegment, no RunSegment for runSegementId, throws AssertionError "() {
-        given:
-        setupData()
-
-        when:
-        SessionUtils.withNewSession {
-            trackingService.assignOtrsTicketToRunSegment("", 1)
-        }
-
-        then:
-        AssertionError error = thrown()
-        error.message.contains("No RunSegment found")
-    }
-
-    void "assignOtrsTicketToRunSegment, new ticketNumber equals old ticketNumber, returns true"() {
-        given:
-        setupData()
-
-        OtrsTicket otrsTicket
-        RunSegment runSegment
-
-        SessionUtils.withNewSession {
-            otrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345678')
-            runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
-        }
-
-        expect:
-        SessionUtils.withNewSession {
-            trackingService.assignOtrsTicketToRunSegment(otrsTicket.ticketNumber, runSegment.id)
-            return true
-        }
-    }
-
-    void "assignOtrsTicketToRunSegment, new ticketNumber does not pass custom validation, throws UserException"() {
-        given:
-        setupData()
-
-        OtrsTicket otrsTicket
-        RunSegment runSegment
-
-        SessionUtils.withNewSession {
-            otrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345678')
-            runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
-        }
-
-        when:
-        SessionUtils.withNewSession {
-            trackingService.assignOtrsTicketToRunSegment('abc', runSegment.id)
-        }
-
-        then:
-        UserException error = thrown()
-        error.message.contains("does not pass validation or error while saving.")
-    }
-
-    void "assignOtrsTicketToRunSegment, old OtrsTicket consists of several other RunSegements, throws UserException"() {
-        given:
-        setupData()
-
-        OtrsTicket otrsTicket
-        RunSegment runSegment
-
-        SessionUtils.withNewSession {
-            otrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345678')
-            runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
-            DomainFactory.createRunSegment(otrsTicket: otrsTicket)
-        }
-
-        when:
-        SessionUtils.withNewSession {
-            trackingService.assignOtrsTicketToRunSegment('2000010112345679', runSegment.id)
-        }
-
-        then:
-        UserException error = thrown()
-        error.message.contains("Assigning a runSegment that belongs to an OTRS-Ticket which consists of several other runSegments is not allowed.")
-    }
-
-    void "assignOtrsTicketToRunSegment, new OtrsTicket final notification already sent, throws UserException"() {
-        given:
-        setupData()
-
-        OtrsTicket oldOtrsTicket
-        RunSegment runSegment
-        OtrsTicket newOtrsTicket
-
-        SessionUtils.withNewSession {
-            oldOtrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345678')
-            runSegment = DomainFactory.createRunSegment(otrsTicket: oldOtrsTicket)
-            newOtrsTicket = DomainFactory.createOtrsTicket(ticketNumber: '2000010112345679', finalNotificationSent: true)
-        }
-
-        when:
-        SessionUtils.withNewSession {
-            trackingService.assignOtrsTicketToRunSegment(newOtrsTicket.ticketNumber, runSegment.id)
-        }
-
-        then:
-        UserException error = thrown()
-        error.message.contains("It is not allowed to assign to an finally notified OTRS-Ticket.")
-    }
-
-    void "assignOtrsTicketToRunSegment, adjust ProcessingStatus of new OtrsTicket"() {
-        given:
-        setupData()
-
-        OtrsTicket newOtrsTicket
-        RunSegment runSegment
-
-        Date minDate = new Date().minus(1)
-        Date maxDate = new Date().plus(1)
-
-        SessionUtils.withNewSession {
-            OtrsTicket oldOtrsTicket = DomainFactory.createOtrsTicket(
-                    ticketNumber: '2000010112345678',
-                    installationStarted: minDate,
-                    installationFinished: minDate,
-                    fastqcStarted: maxDate,
-                    fastqcFinished: maxDate,
-                    alignmentStarted: null,
-                    alignmentFinished: maxDate,
-                    snvStarted: null,
-                    snvFinished: null
-            )
-            runSegment = DomainFactory.createRunSegment(otrsTicket: oldOtrsTicket)
-            newOtrsTicket = DomainFactory.createOtrsTicket(
-                    ticketNumber: '2000010112345679',
-                    installationStarted: maxDate,
-                    installationFinished: maxDate,
-                    fastqcStarted: minDate,
-                    fastqcFinished: minDate,
-                    alignmentStarted: minDate,
-                    alignmentFinished: null,
-                    snvStarted: null,
-                    snvFinished: null
-            )
-
-            trackingService.metaClass.getProcessingStatus = { Set<SeqTrack> set ->
-                return [
-                        getInstallationProcessingStatus: { -> ALL_DONE },
-                        getFastqcProcessingStatus      : { -> ALL_DONE },
-                        getAlignmentProcessingStatus   : { -> PARTLY_DONE_MIGHT_DO_MORE },
-                        getSnvProcessingStatus         : { -> NOTHING_DONE_MIGHT_DO },
-                ] as ProcessingStatus
-            }
-        }
-
-        when:
-        SessionUtils.withNewSession {
-            trackingService.assignOtrsTicketToRunSegment(newOtrsTicket.ticketNumber, runSegment.id)
-        }
-
-        then:
-        SessionUtils.withNewSession {
-            newOtrsTicket = OtrsTicket.get(newOtrsTicket.id)
-            assert minDate.getTime() == newOtrsTicket.installationStarted.getTime()
-            assert maxDate.getTime() == newOtrsTicket.installationFinished.getTime()
-            assert minDate.getTime() == newOtrsTicket.fastqcStarted.getTime()
-            assert maxDate.getTime() == newOtrsTicket.fastqcFinished.getTime()
-            assert minDate.getTime() == newOtrsTicket.alignmentStarted.getTime()
-            assert null == newOtrsTicket.alignmentFinished
-            assert null == newOtrsTicket.snvStarted
-            assert null == newOtrsTicket.snvFinished
-            return true
-        }
-    }
-
 
     void "fillInMergingWorkPackageProcessingStatuses, when a SeqTrack is added manually to an existing MergingWorkPackage, then find the MergingWorkPackage for this SeqTrack"() {
         given: "two seqtracks, with different merging properties, but manually combined in the same MergingWorkPackage"
@@ -1675,11 +1493,11 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         SessionUtils.withNewSession {
             // shared
-            Sample sharedSample = DomainFactory.createSample()
-            SeqType sharedSeqType = DomainFactory.createSeqType()
+            Sample sharedSample = createSample()
+            SeqType sharedSeqType = createSeqType()
 
             // seqtrack A
-            SeqPlatformGroup groupA = DomainFactory.createSeqPlatformGroup()
+            SeqPlatformGroup groupA = createSeqPlatformGroup()
             SeqTrack seqTrackA = createSeqTrack(sharedSample, sharedSeqType, groupA)
             new SeqTrackProcessingStatus(seqTrackA,
                     ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
@@ -1687,7 +1505,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
                     []
             )
             // seqtrack B
-            SeqPlatformGroup groupB = DomainFactory.createSeqPlatformGroup()
+            SeqPlatformGroup groupB = createSeqPlatformGroup()
             SeqTrack seqTrackB = createSeqTrack(sharedSample, sharedSeqType, groupB)
             statusB = new SeqTrackProcessingStatus(seqTrackB,
                     ProcessingStatus.WorkflowProcessingStatus.PARTLY_DONE_MIGHT_DO_MORE,
@@ -1695,7 +1513,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
                     []
             )
             // "existing" merge group
-            DomainFactory.createMergingCriteriaLazy(project: sharedSample.project, seqType: sharedSeqType)
+            createMergingCriteriaLazy(project: sharedSample.project, seqType: sharedSeqType)
             mergePackageA = DomainFactory.createMergingWorkPackage([
                     libraryPreparationKit: null, // irrelevant for this test, don't even need to mock it
                     sample               : sharedSample,
@@ -1712,12 +1530,13 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         when: "looking for B"
         List<MergingWorkPackageProcessingStatus> statuses
         SessionUtils.withNewSession {
-            statuses = trackingService.fillInMergingWorkPackageProcessingStatuses([statusB])
+            statuses = notificationCreator.fillInMergingWorkPackageProcessingStatuses([statusB])
         }
 
         then: "we should find A's merging package"
         SessionUtils.withNewSession {
-            statuses*.mergingWorkPackage == [mergePackageA]
+            assert statuses*.mergingWorkPackage == [mergePackageA]
+            return true
         }
     }
 
@@ -1730,11 +1549,11 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
 
         SessionUtils.withNewSession {
             // shared
-            Sample sharedSample = DomainFactory.createSample()
-            SeqType sharedSeqType = DomainFactory.createSeqType()
+            Sample sharedSample = createSample()
+            SeqType sharedSeqType = createSeqType()
 
             // seqtrack A
-            SeqPlatformGroup groupA = DomainFactory.createSeqPlatformGroup()
+            SeqPlatformGroup groupA = createSeqPlatformGroup()
             SeqTrack seqTrackA = createSeqTrack(sharedSample, sharedSeqType, groupA)
             new SeqTrackProcessingStatus(seqTrackA,
                     ProcessingStatus.WorkflowProcessingStatus.ALL_DONE,
@@ -1749,7 +1568,7 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
                     []
             )
             // "existing" merge group
-            DomainFactory.createMergingCriteriaLazy(project: sharedSample.project, seqType: sharedSeqType)
+            createMergingCriteriaLazy(project: sharedSample.project, seqType: sharedSeqType)
             MergingWorkPackage mergePackageA = DomainFactory.createMergingWorkPackage([
                     libraryPreparationKit: null, // irrelevant for this test, don't even need to mock it
                     sample               : sharedSample,
@@ -1766,22 +1585,23 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         when: "looking for B"
         List<MergingWorkPackageProcessingStatus> statuses
         SessionUtils.withNewSession {
-            statuses = trackingService.fillInMergingWorkPackageProcessingStatuses([statusB])
+            statuses = notificationCreator.fillInMergingWorkPackageProcessingStatuses([statusB])
         }
 
         then: "we should not find a merging package"
         SessionUtils.withNewSession {
-            return statuses.empty
+            assert statuses.empty
+            return true
         }
     }
 
 
-    private SeqTrack createSeqTrack(Sample sample, SeqType seqType, SeqPlatformGroup groupA) {
-        SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile([
+    SeqTrack createSeqTrack(Sample sample, SeqType seqType, SeqPlatformGroup groupA) {
+        SeqTrack seqTrackA = createSeqTrackWithOneDataFile([
                 sample : sample,
                 seqType: seqType,
-                run    : DomainFactory.createRun(
-                        seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
+                run    : createRun(
+                        seqPlatform: createSeqPlatformWithSeqPlatformGroup(
                                 seqPlatformGroups: [groupA],
                         ),
                 ),
@@ -1798,30 +1618,30 @@ class TrackingServiceIntegrationSpec extends AbstractIntegrationSpecWithoutRollb
         SeqTrack seqTrack
 
         SessionUtils.withNewSession {
-            ticket = DomainFactory.createOtrsTicket()
-            userProjectRole = DomainFactory.createUserProjectRole(project: DomainFactory.createProject(customFinalNotification: true))
-            seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
+            ticket = createOtrsTicket()
+            userProjectRole = DomainFactory.createUserProjectRole(project: createProject(customFinalNotification: true))
+            seqTrack = createSeqTrackWithOneDataFile(
                     [
                             ilseSubmission: null,
-                            sample        : DomainFactory.createSample(
-                                    individual: DomainFactory.createIndividual(
+                            sample        : createSample(
+                                    individual: createIndividual(
                                             project: userProjectRole.project
                                     )
                             ),
                     ],
-                    [runSegment: DomainFactory.createRunSegment(otrsTicket: ticket), fileLinked: true])
+                    [runSegment: createRunSegment(otrsTicket: ticket), fileLinked: true])
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
             String recipient = HelperUtils.randomEmail
             DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
             String expectedHeader = "${PREFIX}#${ticket.ticketNumber} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})"
-            trackingService.mailHelperService = Mock(MailHelperService) {
+            notificationCreator.mailHelperService = Mock(MailHelperService) {
                 1 * sendEmail(expectedHeader, _, [userProjectRole.user.email, recipient])
             }
         }
 
         expect:
         SessionUtils.withNewSession {
-            trackingService.sendOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
+            notificationCreator.sendOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
             return true
         }
     }

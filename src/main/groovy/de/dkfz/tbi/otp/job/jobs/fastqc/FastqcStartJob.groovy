@@ -33,10 +33,8 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.processing.AbstractStartJobImpl
 import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqTrackService
-import de.dkfz.tbi.otp.ngsdata.SoftwareTool
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.SessionUtils
 
@@ -60,7 +58,7 @@ class FastqcStartJob extends AbstractStartJobImpl implements RestartableStartJob
             SeqTrack.withTransaction {
                 SeqTrack seqTrack = seqTrackService.getSeqTrackReadyForFastqcProcessing(minPriority)
                 if (seqTrack) {
-                    trackingService.setStartedForSeqTracks(seqTrack.containedSeqTracks, OtrsTicket.ProcessingStep.FASTQC)
+                    notificationCreator.setStartedForSeqTracks(seqTrack.containedSeqTracks, OtrsTicket.ProcessingStep.FASTQC)
                     log.debug "Creating fastqc process for seqTrack ${seqTrack}"
                     seqTrackService.setFastqcInProgress(seqTrack)
                     createProcess(seqTrack)

@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.infrastructure.ClusterJobIdentifier
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 import java.text.SimpleDateFormat
@@ -50,7 +50,7 @@ class JobMailService {
 
     JobStatusLoggingService jobStatusLoggingService
 
-    TrackingService trackingService
+    OtrsTicketService otrsTicketService
 
     ProcessingOptionService processingOptionService
 
@@ -76,7 +76,7 @@ class JobMailService {
         }
         Collection<SeqTrack> seqTracks = object.containedSeqTracks
         String ilseNumbers = seqTracks*.ilseSubmission*.ilseNumber.unique().sort().join(', ')
-        Collection<String> openTickets = seqTracks ? trackingService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
+        Collection<String> openTickets = seqTracks ? otrsTicketService.findAllOtrsTickets(seqTracks).findAll { OtrsTicket otrsTicket ->
             !otrsTicket.finalNotificationSent
         }*.getUrl() : []
 

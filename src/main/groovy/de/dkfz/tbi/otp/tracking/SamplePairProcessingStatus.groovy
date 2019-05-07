@@ -54,7 +54,7 @@ class SamplePairProcessingStatus {
     final RunYapsaInstance completeRunYapsaInstance
 
     WorkflowProcessingStatus getVariantCallingProcessingStatus() {
-        return TrackingService.combineStatuses([
+        return NotificationCreator.combineStatuses([
                 snvProcessingStatus,
                 indelProcessingStatus,
                 sophiaProcessingStatus,

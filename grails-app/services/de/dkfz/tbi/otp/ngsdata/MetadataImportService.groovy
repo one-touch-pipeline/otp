@@ -41,7 +41,7 @@ import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
-import de.dkfz.tbi.otp.tracking.TrackingService
+import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.util.spreadsheet.*
 import de.dkfz.tbi.util.spreadsheet.validation.Level
@@ -72,7 +72,7 @@ class MetadataImportService {
 
     SampleIdentifierService sampleIdentifierService
     SeqTrackService seqTrackService
-    TrackingService trackingService
+    OtrsTicketService otrsTicketService
     FileSystemService fileSystemService
     SeqPlatformService seqPlatformService
     @Autowired
@@ -334,7 +334,7 @@ class MetadataImportService {
         log.debug('import started')
         RunSegment runSegment = new RunSegment(
                 align: align,
-                otrsTicket: ticketNumber ? trackingService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
+                otrsTicket: ticketNumber ? otrsTicketService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
                 importMode: importMode,
         )
         assert runSegment.save(flush: false)
