@@ -162,7 +162,7 @@ $(function() {
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
             dataType: 'json',
-            data: {value: $("select option:selected", container).text()},
+            data: { value: $("select option:selected", container).attr("value") },
             success: function (data) {
                 if (data.success) {
                     $.otp.infoMessage("Data stored successfully");
