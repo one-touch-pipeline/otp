@@ -253,7 +253,9 @@ task codenarcAll(type: CodeNarc) {
         html.enabled = true
     }
     sourceSets.each { SourceSet s ->
-        source(s.allGroovy.getSrcDirs())
+        if (s.name != "script") {
+            source(s.allGroovy.getSrcDirs())
+        }
     }
 
     group = LifecycleBasePlugin.VERIFICATION_GROUP
@@ -261,9 +263,11 @@ task codenarcAll(type: CodeNarc) {
 
 tasks.withType(CodeNarc) {
     sourceSets.each { SourceSet s ->
-        codenarcClasspath += s.runtimeClasspath  // required for ast transformations -> too many dependencies, because of this line we have to
-        // set groovy dependency explicitly
-        compilationClasspath += s.runtimeClasspath //too many dependencies for codenarc tasks except all
+        if (s.name != "script") {
+            codenarcClasspath += s.runtimeClasspath  // required for ast transformations -> too many dependencies, because of this line we have to
+            // set groovy dependency explicitly
+            compilationClasspath += s.runtimeClasspath //too many dependencies for codenarc tasks except all
+        }
     }
 }
 
