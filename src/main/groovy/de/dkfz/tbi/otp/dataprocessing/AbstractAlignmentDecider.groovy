@@ -158,13 +158,14 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                             statSizeFileName: referenceGenomeProjectSeqType.statSizeFileName,
                             pipeline        : pipeline,
                     ])
+            workPackage.save(flush: true)
             workPackage.alignmentProperties = referenceGenomeProjectSeqType.alignmentProperties?.collect { ReferenceGenomeProjectSeqTypeAlignmentProperty alignmentProperty ->
                 new MergingWorkPackageAlignmentProperty(name: alignmentProperty.name, value: alignmentProperty.value, mergingWorkPackage: workPackage)
             } as Set
         }
 
         workPackage.addToSeqTracks(seqTrack)
-        assert workPackage.save(flush: true)
+        workPackage.save(flush: true)
 
         return [workPackage]
     }
