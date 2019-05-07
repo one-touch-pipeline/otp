@@ -152,7 +152,7 @@ div.tableBlock {
     }
 .statisticTableTitle {
     margin-bottom: -10px;
-    }
+}
 .microHeader {
     color: #aaaaaa;
     font-weight: bold;
@@ -343,7 +343,7 @@ select {
 }
 select[multiple] {
     vertical-align: auto;
-      color: #1E90FF;
+    color: #1E90FF;
 }
 textarea {
     width: 250px;
@@ -621,7 +621,7 @@ td {
 }
 
 .indel-table-header th{
-   border-left: 1px solid;
+    border-left: 1px solid;
 }
 
 /* PAGINATION */
@@ -691,8 +691,8 @@ td {
     }
 }
 .add {
-       height: 25px;
-       width: 25px;
+    height: 25px;
+    width: 25px;
 }
 div.edit-switch-text {
     p {
@@ -1003,7 +1003,7 @@ body {
     border: 5px solid #CCCCCC;
     padding: 0.1em 0.3em;
     th { color:#FFFFFF;
-     }
+    }
     tr.odd {
         background-color: #A5D3FF;
     }
@@ -1011,7 +1011,7 @@ body {
         background-color: #F3FAFF;
     }
     .dataTables_wrapper.no-footer .dataTables_scrollBody {
-    border-bottom: 1px solid #B4B5B6;
+        border-bottom: 1px solid #B4B5B6;
     }
 }
 
@@ -1063,7 +1063,7 @@ body {
     border-bottom: none;
 }
 #otp .otpDataTables .dataTables_wrapper .dataTables_info {
-     padding-top: 2.55em;
+    padding-top: 2.55em;
 }
 #otp .otpDataTables.alignmentQualityOverviewTable {
     td:nth-child(2) {
@@ -1600,9 +1600,8 @@ td div {
 }
 
 #processOverview:not(*:root) {
-  margin-top: 0px;
+    margin-top: 0px;
 }
-
 
 #processOverview  td:nth-child(3) {
     max-width: 400px;
@@ -2035,5 +2034,39 @@ div.log {
     .scrollable {
         overflow: auto;
         max-height: 12em;
+    }
+}
+
+.species-with-strain-grid-wrapper {
+    table {
+        width: auto;
+    }
+    .scrollable {
+        overflow: auto;
+        max-height: 20em;
+    }
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 12px;
+
+    .grid-element {
+        border: 1px solid black;
+        background-color: #efefef;
+        padding: 10px;
+    }
+
+    .form-and-listing-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-gap: 12px;
+        .form {
+            grid-row: 1;
+            grid-column: 1;
+        }
+        .listing {
+            grid-row: 1;
+            grid-column: 2;
+        }
     }
 }

@@ -201,14 +201,16 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.species"/></td>
+                    <td class="myKey"><g:message code="projectOverview.speciesWithStrain"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
-                                link="${g.createLink(controller: "projectConfig", action: "updateSpecies", params: ['project.id': project.id, 'fieldName': 'species'])}"
-                                values="${allSpecies}"
-                                value="${species}"/>
+                                link="${g.createLink(controller: "projectConfig", action: "updateSpeciesWithStrain", params: ['project.id': project.id, 'fieldName': 'speciesWithStrain'])}"
+                                optionKey="id"
+                                noSelection="${['': 'None']}"
+                                values="${allSpeciesWithStrain}"
+                                value="${speciesWithStrain}"/>
                     </td>
                 </tr>
                 <tr>

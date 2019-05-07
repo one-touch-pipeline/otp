@@ -20,42 +20,30 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.ngsdata.taxonomy
 
+import grails.gorm.transactions.Transactional
+import grails.validation.ValidationException
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
-import de.dkfz.tbi.otp.FlashMessage
+@Transactional
+class SpeciesService {
 
-class CreateSpeciesController {
+    CommonNameService commonNameService
 
-    CreateSpeciesService createSpeciesService
-
-    static allowedMethods = [
-            index : "GET",
-            create: "POST",
-    ]
-
-    def index() {
-        return [
-                commonName    : flash.commonName ?: '',
-                scientificName: flash.scientificName ?: '',
-        ]
-    }
-
-    def create(CreateSpeciesCommand cmd) {
-        Errors errors = createSpeciesService.createSpecies(cmd.commonName, cmd.scientificName)
-        if (errors) {
-            flash.message = new FlashMessage(g.message(code: "create.species.fail") as String, errors)
-            flash.commonName = cmd.commonName
-            flash.scientificName = cmd.scientificName
-        } else {
-            flash.message = new FlashMessage(g.message(code: "create.species.succ") as String)
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors createSpeciesAndCommonName(String name, String scientificName) {
+        try {
+            Species.withTransaction {
+                new Species(
+                        commonName: commonNameService.findOrSaveCommonName(name),
+                        scientificName: scientificName
+                ).save(flush: true)
+            }
+        } catch (ValidationException e) {
+            return e.errors
         }
-        redirect(action: 'index')
+        return null
     }
-}
-
-class CreateSpeciesCommand {
-    String commonName
-    String scientificName
 }

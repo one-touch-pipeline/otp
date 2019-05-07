@@ -20,29 +20,42 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.ngsdata.taxonomy
 
-import de.dkfz.tbi.otp.utils.Entity
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.testing.mixin.integration.Integration
+import grails.transaction.Rollback
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.validation.Errors
+import spock.lang.Specification
 
-class Species implements Entity {
-    String commonName
-    String scientificName
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
+import de.dkfz.tbi.otp.security.UserAndRoles
 
-    static constraints = {
-        commonName(unique: false, validator: { String val ->
-            if (val && val==~/.*(\(|\)).*/) {
-                return 'Contains invalid characters'
-            }
-        })
-        scientificName(unique: true, validator: { String val ->
-            if (val && val==~/.*(\(|\)).*/) {
-                return 'Contains invalid characters'
-            }
-        })
+@Rollback
+@Integration
+class StrainServiceSpec extends Specification implements UserAndRoles, TaxonomyFactory {
+
+    private static final String NAME = "strain"
+
+    @Autowired
+    StrainService strainService
+
+    void setupData() {
+        createUserAndRoles()
     }
 
-    @Override
-    String toString() {
-        return "${commonName} (${scientificName})"
+    void "createStrain, all fine"() {
+        given:
+        setupData()
+        Errors errors
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            errors = strainService.createStrain(NAME)
+        }
+
+        then:
+        errors == null
     }
 }

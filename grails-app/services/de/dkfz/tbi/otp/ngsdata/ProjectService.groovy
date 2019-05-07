@@ -39,13 +39,13 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
-import java.util.regex.Matcher
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -191,7 +191,7 @@ class ProjectService {
         project.unixGroup = projectParams.unixGroup
         project.costCenter = projectParams.costCenter
         project.tumorEntity = projectParams.tumorEntity
-        project.species = getSpecies(projectParams.species)
+        project.speciesWithStrain = projectParams.speciesWithStrain
 
         assert project.save(flush: true)
 
@@ -274,7 +274,7 @@ class ProjectService {
         ProcessingPriority processingPriority
         TumorEntity tumorEntity
         MultipartFile projectInfoFile
-        String species
+        SpeciesWithStrain speciesWithStrain
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -300,27 +300,12 @@ class ProjectService {
                 "sampleIdentifierParserBeanName",
                 "qcThresholdHandling",
                 "unixGroup",
-                "forceCopyFiles"
+                "forceCopyFiles",
+                "speciesWithStrain",
         ].contains(fieldName)
 
         project."${fieldName}" = fieldValue
         project.save(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateSpecies(String fieldName, Project project) {
-        project.species = getSpecies(fieldName)
-        project.save(flush: true)
-    }
-
-    Species getSpecies(String speciesToStringName) {
-        Matcher matcher = speciesToStringName =~ /.*\((?<scientificName>.*)\)/
-        matcher.matches()
-        try {
-            return Species.findByScientificName(matcher.group('scientificName'))
-        } catch (IllegalStateException t) {
-            return null
-        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")

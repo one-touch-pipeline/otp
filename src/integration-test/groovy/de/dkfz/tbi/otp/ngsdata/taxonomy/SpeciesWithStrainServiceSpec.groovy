@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.ngsdata.taxonomy
 
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
@@ -29,51 +29,31 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.Errors
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.domainFactory.taxonomy.TaxonomyFactory
 import de.dkfz.tbi.otp.security.UserAndRoles
 
 @Rollback
 @Integration
-class CreateSpeciesServiceIntegrationSpec extends Specification implements UserAndRoles {
+class SpeciesWithStrainServiceSpec extends Specification implements UserAndRoles, TaxonomyFactory {
 
     @Autowired
-    CreateSpeciesService createSpeciesService
+    SpeciesWithStrainService speciesWithStrainService
 
     void setupData() {
         createUserAndRoles()
     }
 
-    void "test createSpecies, all fine"() {
+    void "createSpeciesWithStrain, all fine"() {
         given:
         setupData()
         Errors errors
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = createSpeciesService.createSpecies('test', 'test')
+            errors = speciesWithStrainService.createSpeciesWithStrain(createSpecies(), createStrain())
         }
 
         then:
         errors == null
     }
-
-    void "test createSpecies add expected errors, returns errors"() {
-        given:
-        setupData()
-        Errors errors
-
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            errors = createSpeciesService.createSpecies(commonName, scientificName)
-        }
-
-        then:
-        errors.allErrors*.codes*.contains('Contains invalid characters')
-
-        where:
-        commonName | scientificName
-        'test('    | 'test'
-        'test'     | 'test)'
-        'test('    | 'test)'
-    }
-
 }

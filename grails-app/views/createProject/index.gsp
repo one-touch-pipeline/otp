@@ -89,8 +89,8 @@
                 <td><g:select class="criteria" name='tumorName' from='${tumorEntities}' value="${cmd.tumorEntity}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="createProject.species"/></td>
-                <td><g:select class="criteria" name='species' from='${species}' value="${cmd.species}"/></td>
+                <td class="myKey"><g:message code="createProject.speciesWithStrain"/></td>
+                <td><g:select class="criteria" name='speciesWithStrain' from='${allSpeciesWithStrains}' value="${cmd.speciesWithStrain}" optionKey="id" noSelection="${['': 'None']}"/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.category"/></td>

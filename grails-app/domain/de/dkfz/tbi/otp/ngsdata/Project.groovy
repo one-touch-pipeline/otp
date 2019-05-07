@@ -25,6 +25,7 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -41,7 +42,7 @@ class Project implements Commentable, Entity {
         UNKNOWN,
     }
 
-    Species species
+    SpeciesWithStrain speciesWithStrain
 
     Snv snv = Snv.UNKNOWN
 
@@ -149,7 +150,7 @@ class Project implements Commentable, Entity {
 
         tumorEntity(nullable: true)
 
-        species(nullable : true)
+        speciesWithStrain(nullable : true)
     }
 
     @Override

@@ -259,13 +259,6 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ], properties, saveAndValidate)
     }
 
-    Species createSpecies(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(Species, [
-                commonName     : 'commonName',
-                scientificName : 'scientificName',
-        ], properties, saveAndValidate)
-    }
-
     SeqPlatform createSeqPlatformWithSeqPlatformGroup(Map properties = [:]) {
         Set<SeqPlatformGroup> spg = (properties.seqPlatformGroups ?: [createSeqPlatformGroup()]) as Set
 

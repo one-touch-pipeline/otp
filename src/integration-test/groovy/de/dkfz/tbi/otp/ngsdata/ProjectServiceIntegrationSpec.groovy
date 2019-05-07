@@ -1581,32 +1581,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         null            | null          || 1
     }
 
-    void "test getSpecies with correct input, return correct output"() {
-        given:
-        setupData()
-        Species species = createSpecies()
-        Species output
-
-        when:
-        output = projectService.getSpecies(species.toString())
-
-        then:
-        output == species
-    }
-
-    void "test getSpecies with wrong input, returns null"() {
-        given:
-        setupData()
-        Species species = createSpecies()
-        Species output
-
-        when:
-        output = projectService.getSpecies(species.scientificName)
-
-        then:
-        !output
-    }
-
     private File makeStatFile(ReferenceGenome referenceGenome, String statFileName) {
         File statDirectory = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
         assert statDirectory.exists() || statDirectory.mkdirs()

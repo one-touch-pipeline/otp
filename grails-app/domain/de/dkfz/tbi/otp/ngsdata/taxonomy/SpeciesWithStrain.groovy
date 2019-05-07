@@ -20,27 +20,21 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.ngsdata.taxonomy
 
-import grails.gorm.transactions.Transactional
-import grails.validation.ValidationException
-import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.validation.Errors
+import de.dkfz.tbi.otp.utils.Entity
 
-@Transactional
-class CreateSpeciesService {
+class SpeciesWithStrain implements Entity {
+    Species species
+    Strain strain
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Errors createSpecies(String commonName, String scientificName) {
-        Species species = new Species(
-                commonName: commonName,
-                scientificName: scientificName
-        )
-        try {
-            species.save(flush: true)
-        } catch (ValidationException e) {
-            return e.errors
-        }
-        return null
+    static constraints = {
+        species(nullable: false)
+        strain(nullable: false, unique: ['species'])
+    }
+
+    @Override
+    String toString() {
+        return "${species} [${strain.name}]"
     }
 }

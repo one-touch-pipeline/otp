@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
+import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
@@ -163,8 +164,8 @@ class ProjectConfigController implements CheckAndCall {
                 cellRangerOverview             : cellRangerOverview,
                 qcThresholdHandling            : project?.qcThresholdHandling,
                 qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
-                species                        : project?.species,
-                allSpecies                     : ['No Species'] + Species.list().sort { it.toString() } ?: [],
+                speciesWithStrain              : project?.speciesWithStrain,
+                allSpeciesWithStrain           : SpeciesWithStrain.list().sort { it.toString() } ?: [],
         ]
     }
 
@@ -195,8 +196,8 @@ class ProjectConfigController implements CheckAndCall {
         checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
     }
 
-    JSON updateSpecies(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateSpecies(cmd.value, cmd.project) })
+    JSON updateSpeciesWithStrain(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(SpeciesWithStrain.get(cmd.value), cmd.fieldName, cmd.project) })
     }
 
     JSON updatePhabricatorAlias(UpdateProjectCommand cmd) {

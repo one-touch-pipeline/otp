@@ -214,4 +214,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2019/add-additional-indexes.groovy'
+
+    changeSet(author: "kosnac", id: "OTP-3128-SQL") {
+        sqlFile(path: 'changelogs/2019/OTP-3128.sql')
+    }
 }
