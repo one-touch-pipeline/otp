@@ -22,57 +22,77 @@
 
 package operations.datacorrection
 
-import de.dkfz.tbi.otp.Comment
+import org.hibernate.sql.JoinType
+
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
- * Correct the set library preparation kit in seqTracks, metadata and MergingWorkPackages
- * for the given ilse numbers and seqType.
+ * Correct the set library preparation kit in seqTracks, metadata and MergingWorkPackages if it used there.
+ * The seqtracks can be selected about ilse, project or pid and filtered by seqType
  */
 
+
+//---------------------------
+//input
 
 String libPrepKit = '' //new lib prep kit
-
-List<Long> ilseNumbers = []
-
-SeqType seqType = null //SeqTypeService.
-/*
-getWholeGenomePairedSeqType()
-getExomePairedSeqType()
-getWholeGenomeBisulfitePairedSeqType()
-getWholeGenomeBisulfiteTagmentationPairedSeqType()
-getRnaPairedSeqType()
-getChipSeqPairedSeqType()
-getRnaSingleSeqType()
-get10xSingleCellRnaSeqType()
-getSingleSeqType()
- */
 
 String commentInfo = '' //some additional Information about the change, perhaps link to OTRS ticket
 
 
+Collection<SeqTrack> seqTrackList = SeqTrack.withCriteria {
+    or {
+        sample {
+            individual {
+                or {
+                    'in'('mockPid', [
+                            '',
+                    ])
+                    project {
+                        'in'('name', [
+                                '',
+                        ])
+                    }
+                }
+            }
+        }
+        ilseSubmission(JoinType.LEFT_OUTER_JOIN.getJoinTypeValue()) {
+            'in'('ilseNumber', [
+                    -1,
+            ])
+        }
+    }
+    'in'('seqType', [
+            //SeqTypeService.wholeGenomePairedSeqType,
+            //SeqTypeService.exomePairedSeqType,
+            //SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+            //SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
+            //SeqTypeService.rnaPairedSeqType,
+            //SeqTypeService.chipSeqPairedSeqType,
+    ])
+}
+
+
 //---------------------------
+//ensure keeping of import of disabled code
 
-assert libPrepKit
-assert commentInfo
+SeqTypeService seqTypeService
 
 
-LibraryPreparationKit libraryPreparationKit = CollectionUtils.exactlyOneElement(LibraryPreparationKit.findAllByName(libPrepKit))
+//-----------------------------
+assert libPrepKit : 'No lib prep kit is provided'
+assert commentInfo: 'No comment is provided'
+assert seqTrackList :' No seq tracks found'
+
+LibraryPreparationKit libraryPreparationKit = CollectionUtils.exactlyOneElement(LibraryPreparationKit.findAllByName(libPrepKit), "Lib prep '${libPrepKit}' not found")
 
 MetaDataKey key = CollectionUtils.exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.LIB_PREP_KIT.name()))
 
 CommentService commentService = ctx.commentService
-
-List<SeqTrack> seqTrackList = SeqTrack.createCriteria().list {
-    ilseSubmission {
-        'in'('ilseNumber', ilseNumbers)
-    }
-    eq('seqType', seqType)
-}
 
 
 SeqTrack.withTransaction {
@@ -81,7 +101,15 @@ SeqTrack.withTransaction {
         seqTrack.libraryPreparationKit = libraryPreparationKit
         seqTrack.kitInfoReliability = InformationReliability.KNOWN
         DataFile.findAllBySeqTrack(seqTrack).each {
-            MetaDataEntry entry = CollectionUtils.exactlyOneElement(MetaDataEntry.findAllByDataFileAndKey(it, key))
+            MetaDataEntry entry = CollectionUtils.atMostOneElement(MetaDataEntry.findAllByDataFileAndKey(it, key))
+            if (!entry) {
+                entry = new MetaDataEntry(
+                        key: key,
+                        dataFile: it,
+                        value: '',
+                )
+            }
+
             String oldComment = it.comment?.comment ?: ''
             String newComment = "Correct ${entry.value} to ${libPrepKit},\n${commentInfo}".trim()
             String combinedComment = (oldComment ? "$oldComment\n\n" : '') + newComment
@@ -90,25 +118,22 @@ SeqTrack.withTransaction {
             entry.value = libPrepKit
             commentService.saveComment(it, combinedComment)
         }
-        List<RoddyBamFile> rbf = RoddyBamFile.createCriteria().list {
-            seqTracks {
-                eq('id', seqTrack.id)
-            }
-        }
 
         /*
-            WGBS can, for experimental reasons, have lanes with different libPrepKits, that still need to be
-            merged. This is OK as long as they all end up using the same Adapter File. The WGBS-alignment for
-            unique(MWP*.seqTracks*.libraryPreparationKit*.adapterfile)
-        */
-        if (!seqType.isWgbs()) {
-            rbf*.mergingWorkPackage.unique().each { MergingWorkPackage workPackage ->
+         * Update MergingWorkPackages only, if mergingCriteria use lib prep kit
+         */
+        if (!CollectionUtils.exactlyOneElement(MergingCriteria.findAllByProjectAndSeqType(seqTrack.project, seqTrack.seqType)).useLibPrepKit) {
+            RoddyBamFile.createCriteria().list {
+                seqTracks {
+                    eq('id', seqTrack.id)
+                }
+            }*.mergingWorkPackage.unique().each { MergingWorkPackage workPackage ->
                 println "    $workPackage  ${workPackage.libraryPreparationKit}"
                 workPackage.libraryPreparationKit = libraryPreparationKit
             }
         }
     }
 
-    assert false
+    assert false: 'Only for debug'
 }
 
