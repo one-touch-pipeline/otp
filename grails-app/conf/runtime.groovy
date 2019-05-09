@@ -34,6 +34,7 @@ Properties otpProperties = ConfigService.parsePropertiesFile()
 environments {
     development {
         grails.logging.jul.usebridge = true
+        grails.serverURL = "http://localhost:8080"
     }
     production {
         grails.logging.jul.usebridge = false
