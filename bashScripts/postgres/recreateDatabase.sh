@@ -110,5 +110,7 @@ echo "Disabling workflows plans"
 ${PSQL} --command "update job_execution_plan set enabled='f' where enabled='t';"
 echo "Marking all not finished workflows as finished"
 ${PSQL} --command "UPDATE public.process SET finished='true' WHERE finished='false';"
+echo "Marking all cluster jobs as finished"
+${PSQL} --command "UPDATE public.cluster_job SET check_status = 'FINISHED' WHERE check_status != 'FINISHED';"
 
 echo ""
