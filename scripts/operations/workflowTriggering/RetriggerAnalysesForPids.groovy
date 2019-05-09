@@ -95,7 +95,8 @@ LogThreadLocal.withThreadLog(System.out, {
                     actions << "${processingStatusName} is ${SamplePair.ProcessingStatus.DISABLED} -> ignore"
                 } else {
                     instanceClass.findAllBySamplePair(samplePair).each { BamFilePairAnalysis instance ->
-                        if (instance.processingState == AnalysisProcessingStates.IN_PROGRESS) {
+                        // only withdraw instances IN_PROGRESS (still running or failed), keep FINISHED
+                        if (instance.processingState == AnalysisProcessingStates.IN_PROGRESS && !instance.withdrawn) {
                             instance.withdrawn = true
                             instance.save(flush: true)
                             actions << "withdraw: ${instance.class.simpleName}:${instance.id}"
