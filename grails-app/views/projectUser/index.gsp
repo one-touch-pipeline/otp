@@ -69,7 +69,7 @@
                 <g:each in="${enabledProjectUsers}" var="userEntry">
                     <tr>
                         <td>
-                            <img class="ldapThumbnail" src="data:image/png;base64,${userEntry.thumbnailPhoto}" alt=""/>
+                            <img class="ldapThumbnail" src="data:image/png;base64,${userEntry.thumbnailPhoto}" alt=" "/>
                         </td>
                         <td>
                             <g:if test="${userEntry.inLdap}">
