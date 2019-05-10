@@ -212,4 +212,6 @@ databaseChangeLog = {
     changeSet(author: "", id: "OTP-3119-processing-step-update") {
         sqlFile(path: 'changelogs/2019/OTP-3119-processing-step-update.sql')
     }
+
+    include file: 'changelogs/2019/add-additional-indexes.groovy'
 }

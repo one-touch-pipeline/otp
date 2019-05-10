@@ -163,5 +163,8 @@ order by type.name asc, type.libraryLayout
 
     static mapping = {
         project index: "individual_project_idx"
+        pid index: "individual_pid_idx"
+        mockPid index: "individual_mock_pid_idx"
+        mockFullName index: "individual_mock_full_name_idx"
     }
 }

@@ -113,6 +113,11 @@ class SampleType implements Entity {
         // TODO: OTP-1122: unique constraint for dirName
     }
 
+    static mapping = {
+        name index: "sample_type_name_idx"
+    }
+
+
     String getDirName() {
         return name.toLowerCase()
     }

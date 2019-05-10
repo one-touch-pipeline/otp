@@ -73,5 +73,6 @@ class Sample implements Entity {
 
     static mapping = {
         sampleType index: "sample_sample_type_idx"
+        individual index: "sample_individual_idx"
     }
 }
