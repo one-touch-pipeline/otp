@@ -188,8 +188,7 @@ war:
     - sha256sum "$WAR_FILE" | tee "$WAR_FILE.sha256"
     - git rev-parse HEAD | tee "$WAR_FILE.gitrev"
 
-#TODO after OTP-3110
-.test migration:
+test migration:
   <<: *cache_template
   only:
     - branches
