@@ -142,8 +142,6 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2019/OTP-3052-rename-project-copy-file-flag.sql')
     }
 
-    include file: 'changelogs/2019/OTP-3060-migrate-data.groovy'
-
     include file: 'changelogs/2019/OTP-3075.groovy'
 
     changeSet(author: "borufka", id: "OTP-3075-SQL") {
