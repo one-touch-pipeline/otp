@@ -20,6 +20,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
+if [ ! -f build/reports/codenarc/all.txt ]
+then
+    echo ''
+    echo "file build/reports/codenarc/all.txt does not exist"
+    echo ''
+    exit -1
+fi
+
 LEVEL="1 2 3"
 
 echo ''
