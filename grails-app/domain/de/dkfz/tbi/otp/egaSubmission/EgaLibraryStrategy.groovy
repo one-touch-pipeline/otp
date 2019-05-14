@@ -31,7 +31,7 @@ class EgaLibraryStrategy implements Entity {
     String libraryStrategyEgaName
 
     static hasMany = [
-            seqType: SeqType,
+            seqTypes: SeqType,
     ]
 
     static constraints = {

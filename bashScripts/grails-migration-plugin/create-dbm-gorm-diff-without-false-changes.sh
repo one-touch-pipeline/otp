@@ -44,7 +44,12 @@ tables="(job_error_definition_job_error_definition)|(aceseq_instance_roddy_execu
 (sophia_instance_roddy_execution_directory_names)|(swap_info_seq_track)|(seq_platform_model_label_import_alias)|(seq_type_import_alias)|\
 (sequencing_kit_label_import_alias)|(antibody_target_import_alias)|(library_preparation_kit_import_alias)|(seq_center_import_dirs_allow_linking)|\
 (ega_submission_bam_file_submission_object)|(ega_submission_data_file_submission_object)|(ega_submission_sample_submission_object)|\
-(cluster_job_cluster_job)|(job_definition_parameter)"
+(cluster_job_cluster_job)|(job_definition_parameter)|\
+(ega_library_selection_library_preparation_kit)|\
+(ega_library_source_seq_type)|\
+(ega_library_strategy_seq_type)|\
+(ega_platform_model_seq_platform_model_label)\
+"
 
 perl -0pi -e "${prefix}.*file_system_changes_idx${suffix}" $changelogPath
 perl -0pi -e "${prefix}((dropPrimaryKey)|(dropNotNullConstraint)|(dropUniqueConstraint)|(dropForeignKeyConstraint)).*ableName: \"(${tables})\"${suffix}" $changelogPath
