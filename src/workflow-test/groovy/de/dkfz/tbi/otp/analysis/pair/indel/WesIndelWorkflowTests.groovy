@@ -22,12 +22,10 @@
 
 package de.dkfz.tbi.otp.analysis.pair.indel
 
-import org.junit.Ignore
-import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div32
 
+import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div32
 import de.dkfz.tbi.otp.ngsdata.*
 
-@Ignore
 class WesIndelWorkflowTests extends AbstractIndelWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div32 {
 
     @Override
