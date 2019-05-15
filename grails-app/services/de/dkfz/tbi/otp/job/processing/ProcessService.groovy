@@ -189,7 +189,8 @@ class ProcessService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ProcessingStep getLatestProcessingStep(Process process) {
-        return ProcessingStep.findByProcessAndNextIsNull(process)
+        return ProcessingStep.findByProcessAndNextIsNull(process, [sort: "id", order: "desc"])
+
     }
 
     /**

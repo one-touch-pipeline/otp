@@ -35,6 +35,7 @@ import org.springframework.security.access.AccessDeniedException
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.scheduler.ErrorLogService
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.UserAndRoles
 
 import static org.junit.Assert.*
@@ -263,6 +264,23 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
             TestCase.shouldFail(AccessDeniedException) {
                 processService.getLatestProcessingStep(process)
             }
+        }
+    }
+
+    @Test
+    void testGetLatestProcessingStep() {
+        setupData()
+        Process process = DomainFactory.createProcess()
+
+        ProcessingStep processingStep = DomainFactory.createProcessingStep([
+                process: process,
+        ])
+        RestartedProcessingStep restartedProcessingStep = DomainFactory.createRestartedProcessingStep([
+                original: processingStep,
+        ])
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            processService.getLatestProcessingStep(process) == restartedProcessingStep
         }
     }
 
