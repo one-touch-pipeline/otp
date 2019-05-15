@@ -74,4 +74,9 @@ class CellRangerStartJob extends AbstractAlignmentStartJob implements Restartabl
                 "and ${mergingWorkPackage.pipeline}"
         return config
     }
+
+    @Override
+    RoddyBamFile findUsableBaseBamFile(MergingWorkPackage mergingWorkPackage) {
+        return null
+    }
 }
