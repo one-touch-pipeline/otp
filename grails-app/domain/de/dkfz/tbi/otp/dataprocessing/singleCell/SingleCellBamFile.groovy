@@ -227,4 +227,11 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
             }
         } as CellRangerQualityAssessment
     }
+
+    @Override
+    String toString() {
+        String latest = isMostRecentBamFile() ? ' (latest)' : ''
+        String withdrawn = withdrawn ? ' (withdrawn)' : ''
+        return "SCBF ${id}: ${identifier}${latest}${withdrawn} ${qcTrafficLightStatus ?: 'ACCEPTED'} ${mergingWorkPackage.toStringWithoutIdAndPipeline()}"
+    }
 }
