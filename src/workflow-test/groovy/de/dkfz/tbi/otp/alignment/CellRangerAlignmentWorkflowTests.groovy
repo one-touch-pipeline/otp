@@ -78,7 +78,7 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
                     needsProcessing: true,
                     sample: sample,
                     config: conf,
-                    expectedCells: 1000, //according to 10x
+                    expectedCells: 0, // modified in individual tests
                     referenceGenome: referenceGenome,
             )
 
@@ -127,6 +127,8 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
             SeqTrack seqTrack = createSeqTrack(fastqFiles[0], fastqFiles[1])
             mwp.refresh()
             mwp.seqTracks = [seqTrack]
+            mwp.expectedCells = null
+            mwp.enforcedCells = 1000
             mwp.save(flush: true)
         }
 
@@ -144,6 +146,8 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
             SeqTrack seqTrack2 = createSeqTrack(fastqFiles[2], fastqFiles[3])
             CellRangerMergingWorkPackage crmwp = CellRangerMergingWorkPackage.get(mwp.id)
             crmwp.seqTracks = [seqTrack1, seqTrack2]
+            mwp.expectedCells = 1000 //according to 10x
+            mwp.enforcedCells = null
             crmwp.save(flush: true)
         }
 

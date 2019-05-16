@@ -210,11 +210,14 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         missingFile << SingleCellBamFile.CREATED_RESULT_FILES_AND_DIRS
     }
 
-    void "createCellRangerParameters, if singleCellBamFile given without enforcedCells cells, then return map of parameters without FORCE_CELLS"() {
+    @Unroll
+    void "createCellRangerParameters, adds EXPECT_CELLS and FORCE_CELLS parameters depending on respective fields in singleCellBamFile (expect=#expectedKey)"() {
         given:
         final File indexFile = new File(TestCase.uniqueNonExistentPath, 'someIndex')
 
         SingleCellBamFile singleCellBamFile = createBamFile()
+        singleCellBamFile.mergingWorkPackage.expectedCells = expectedCells
+        singleCellBamFile.mergingWorkPackage.enforcedCells = enforcedCells
 
         CellRangerService cellRangerService = new CellRangerService([
                 referenceGenomeIndexService: Mock(ReferenceGenomeIndexService) {
@@ -230,42 +233,21 @@ class CellRangerServiceSpec extends Specification implements CellRangerFactory, 
         Map<String, String> map = cellRangerService.createCellRangerParameters(singleCellBamFile)
 
         then:
-        CellRangerParameters.values().each {
-            assert map.containsKey(it.parameterName) == it.required
-        }
         map[CellRangerParameters.ID.parameterName] == singleCellBamFile.singleCellSampleName
         map[CellRangerParameters.FASTQ.parameterName] == singleCellBamFile.sampleDirectory.absolutePath
         map[CellRangerParameters.TRANSCRIPTOME.parameterName] == indexFile.absolutePath
         map[CellRangerParameters.SAMPLE.parameterName] == singleCellBamFile.singleCellSampleName
-        map[CellRangerParameters.EXPECT_CELLS.parameterName] == singleCellBamFile.mergingWorkPackage.expectedCells.toString()
         map[CellRangerParameters.LOCAL_CORES.parameterName] ==~ /\d+/
         map[CellRangerParameters.LOCAL_MEM.parameterName] ==~ /\d+/
+
+        map[setKey.parameterName] == "5000"
+        !map.containsKey(unsetKey.parameterName)
+
+        where:
+        expectedCells | enforcedCells | setKey                            | unsetKey
+        5000          | null          | CellRangerParameters.EXPECT_CELLS | CellRangerParameters.FORCE_CELLS
+        null          | 5000          | CellRangerParameters.FORCE_CELLS  | CellRangerParameters.EXPECT_CELLS
     }
-
-    void "createCellRangerParameters, if singleCellBamFile given with enforcedCells cells, then return map of parameters including FORCE_CELLS"() {
-        given:
-        final File indexFile = new File(TestCase.uniqueNonExistentPath, 'someIndex')
-
-        SingleCellBamFile singleCellBamFile = createBamFile()
-        singleCellBamFile.mergingWorkPackage.enforcedCells = 5
-
-        CellRangerService cellRangerService = new CellRangerService([
-                referenceGenomeIndexService: Mock(ReferenceGenomeIndexService) {
-                    1 * getFile(_) >> indexFile
-                },
-                processingOptionService    : Mock(ProcessingOptionService) {
-                    1 * findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_COUNT) >> '15'
-                    1 * findOptionAsString(ProcessingOption.OptionName.PIPELINE_CELLRANGER_CORE_MEM) >> '60'
-                },
-        ])
-
-        when:
-        Map<String, String> map = cellRangerService.createCellRangerParameters(singleCellBamFile)
-
-        then:
-        map[CellRangerParameters.FORCE_CELLS.parameterName] == singleCellBamFile.mergingWorkPackage.enforcedCells.toString()
-    }
-
 
     @Unroll
     void "finishCellRangerWorkflow, if bam state is #state, then do necessary work and update database"() {

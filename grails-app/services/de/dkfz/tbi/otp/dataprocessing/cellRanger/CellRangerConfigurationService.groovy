@@ -95,13 +95,7 @@ class CellRangerConfigurationService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    Errors createMergingWorkPackage(
-            int expectedCells,
-            Integer enforcedCells,
-            Project project,
-            Individual individual1,
-            SampleType sampleType
-    ) {
+    Errors createMergingWorkPackage(Integer expectedCells, Integer enforcedCells, Project project, Individual individual1, SampleType sampleType) {
         List<Sample> samples = new ArrayList(getSamples(project, individual1, sampleType).selectedSamples)
 
         CellRangerConfig config = getWorkflowConfig(project)

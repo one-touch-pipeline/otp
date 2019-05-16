@@ -30,9 +30,9 @@ enum CellRangerParameters {
     FASTQ('--fastqs', true),
     TRANSCRIPTOME('--transcriptome', true),
     SAMPLE('--sample', true),
-    EXPECT_CELLS('--expect-cells', true),
     LOCAL_CORES('--localcores', true),
     LOCAL_MEM('--localmem', true),
+    EXPECT_CELLS('--expect-cells', false),
     FORCE_CELLS('--force-cells', false),
 
     final String parameterName

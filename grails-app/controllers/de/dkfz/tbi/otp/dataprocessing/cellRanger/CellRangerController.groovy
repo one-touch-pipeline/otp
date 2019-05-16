@@ -22,6 +22,7 @@
 
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
+import grails.databinding.BindUsing
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.*
@@ -38,6 +39,8 @@ class CellRangerController {
             index : "GET",
             create: "POST",
     ]
+
+    static final List<String> ALLOWED_CELL_TYPE = ["expected", "enforced"]
 
     def index(CellRangerSelectionCommand cmd) {
         List<Project> projects = projectService.getAllProjects()
@@ -89,10 +92,20 @@ class CellRangerController {
             redirect(action: "index")
             return
         }
-
+        Integer expectedCells, enforcedCells
+        switch (cmd.expectedOrEnforcedCells) {
+            case "expected":
+                expectedCells = cmd.expectedOrEnforcedCellsValue
+                break
+            case "enforced":
+                enforcedCells = cmd.expectedOrEnforcedCellsValue
+                break
+            default:
+                throw new UnsupportedOperationException("expectedOrEnforcedCells must be one of ${ALLOWED_CELL_TYPE}")
+        }
         Errors errors = cellRangerConfigurationService.createMergingWorkPackage(
-                cmd.expectedCells,
-                cmd.enforcedCells,
+                expectedCells,
+                enforcedCells,
                 cmd.project,
                 cmd.individual,
                 cmd.sampleType
@@ -117,7 +130,13 @@ class CellRangerSelectionCommand {
 }
 
 class CellRangerConfigurationCommand extends CellRangerSelectionCommand {
-    int expectedCells
-    Integer enforcedCells
+    String expectedOrEnforcedCells
+
+    @BindUsing({ obj, source ->
+        String value = source['expectedOrEnforcedCellsValue']
+        value?.isInteger() ? value.toInteger() : null
+    })
+    Integer expectedOrEnforcedCellsValue
+
     Project project
 }

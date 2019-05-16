@@ -148,10 +148,12 @@ class CellRangerService {
                 (CellRangerParameters.FASTQ.parameterName)        : singleCellBamFile.sampleDirectory.absolutePath,
                 (CellRangerParameters.TRANSCRIPTOME.parameterName): indexFile.absolutePath,
                 (CellRangerParameters.SAMPLE.parameterName)       : singleCellBamFile.singleCellSampleName,
-                (CellRangerParameters.EXPECT_CELLS.parameterName) : workPackage.expectedCells.toString(),
                 (CellRangerParameters.LOCAL_CORES.parameterName)  : localCores,
                 (CellRangerParameters.LOCAL_MEM.parameterName)    : localMem,
         ]
+        if (workPackage.expectedCells) {
+            parameters[CellRangerParameters.EXPECT_CELLS.parameterName] = workPackage.expectedCells.toString()
+        }
         if (workPackage.enforcedCells) {
             parameters[CellRangerParameters.FORCE_CELLS.parameterName] = workPackage.enforcedCells.toString()
         }

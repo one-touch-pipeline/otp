@@ -42,10 +42,12 @@ trait CellRangerFactory implements IsAlignment {
         SeqType seqType = properties.seqType ?: createSeqType()
         Sample sample = properties.sample ?: createSample()
         return createDomainObject(CellRangerMergingWorkPackage, baseMergingWorkPackageProperties(properties) + [
-                seqType : seqType,
-                pipeline: pipeline,
-                sample  : sample,
-                config  : {
+                seqType      : seqType,
+                pipeline     : pipeline,
+                sample       : sample,
+                expectedCells: 5000,
+                enforcedCells: null,
+                config       : {
                     findOrCreateConfig([
                             pipeline: pipeline,
                             seqType : seqType,

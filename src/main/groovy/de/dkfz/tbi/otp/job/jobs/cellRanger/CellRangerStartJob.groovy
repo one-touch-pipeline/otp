@@ -56,7 +56,7 @@ class CellRangerStartJob extends AbstractAlignmentStartJob implements Restartabl
                 identifier: identifier,
                 workDirectoryName: [
                         "${mergingWorkPackage.referenceGenome.name}",
-                        "expectedCells_${mergingWorkPackage.expectedCells}",
+                        "expectedCells_${mergingWorkPackage.expectedCells ?: '-'}",
                         "forcedCells_${mergingWorkPackage.enforcedCells ?: '-'}",
                         "programVersion_${mergingWorkPackage.config.programVersion.replace("/", "-")}",
                 ].join('_'),

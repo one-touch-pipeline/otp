@@ -33,64 +33,84 @@
     <g:render template="/templates/messages"/>
     <g:if test="${projects}">
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
-        <br><br><br><br><br>
+        <br><br><br><br>
 
         <g:if test="${configExists}">
             <p>
-                Select:
+                <h3>${g.message(code: "cellRanger.select")}</h3>
                 <g:form action="index" method="GET">
                     <g:select name="sampleType.id" from="${allSampleTypes}" optionKey="id" value="${sampleType?.id}"
-                              noSelection="${[(""): "All"]}"/>
+                              noSelection="${[(""): "All Sample Types"]}"/>
                     <g:select name="individual.id" from="${allIndividuals}" optionKey="id" value="${individual?.id}"
-                              noSelection="${[(""): "All"]}"/>
+                              noSelection="${[(""): "All Individuals"]}"/>
                     <g:submitButton name="Submit"/>
                 </g:form>
             </p>
 
             <g:if test="${samples}">
                 <g:form action="create">
-                    <input type="hidden" name="project.id" value="${project?.id}"/>
-                    <input type="hidden" name="sampleType.id" value="${sampleType?.id}"/>
-                    <input type="hidden" name="individual.id" value="${individual?.id}"/>
-                    <table>
-                        <tr>
-                            <th>${g.message(code: "cellRanger.sampleType")}</th>
-                            <th>${g.message(code: "cellRanger.individual")}</th>
-                            <th>${g.message(code: "cellRanger.expectedCells")}</th>
-                            <th>${g.message(code: "cellRanger.enforcedCells")}</th>
-                            <th></th>
-                        </tr>
-                        <g:each in="${mwps}" var="mwp">
-                            <tr>
-                                <td>${mwp.sampleType} (${mwp})</td>
-                                <td>${mwp.individual}</td>
-                                <td>${mwp.expectedCells}</td>
-                                <td>${mwp.enforcedCells}</td>
-                                <td></td>
-                            </tr>
-                        </g:each>
-                        <tr>
-                            <td><ul>
+                    <h3>${g.message(code: "cellRanger.header.create")}:</h3>
+                    <div class="cell-ranger-creation-grid-wrapper">
+                        <input type="hidden" name="project.id" value="${project?.id}"/>
+                        <input type="hidden" name="sampleType.id" value="${sampleType?.id}"/>
+                        <input type="hidden" name="individual.id" value="${individual?.id}"/>
+                        <div>
+                            <strong>${g.message(code: "cellRanger.create.selectedSampleTypes")}:</strong>
+                            <ul class="scrollable">
                                 <g:each in="${selectedSampleTypes}" var="sampleType">
                                     <li>${sampleType}</li>
                                 </g:each>
-                            </ul></td>
-                            <td><ul>
+                            </ul>
+                        </div>
+                        <div>
+                            <strong>${g.message(code: "cellRanger.create.selectedIndividuals")}:</strong>
+                            <ul class="scrollable">
                                 <g:each in="${selectedIndividuals}" var="individual">
                                     <li>${individual}</li>
                                 </g:each>
-                            </ul></td>
-                            <td><label>${g.message(code: "cellRanger.expectedCells")}:
-                                <input name="expectedCells"/>
+                            </ul>
+                        </div>
+                        <div>
+                            <strong>${g.message(code: "cellRanger.create.expectedOrEnforcedCells")}:</strong><br><br>
+                            <label>
+                                <g:radio name="expectedOrEnforcedCells" value="expected" checked="true"/>
+                                ${g.message(code: "cellRanger.expectedCells")}
                             </label>
-                            </td>
-                            <td><label>${g.message(code: "cellRanger.enforcedCells")}:
-                                <input name="enforcedCells"/>
-                            </label></td>
-                            <td><g:submitButton name="Save"/></td>
-                        </tr>
-                    </table>
+                            <br>
+                            <label>
+                                <g:radio name="expectedOrEnforcedCells" value="enforced"/>
+                                ${g.message(code: "cellRanger.enforcedCells")}
+                            </label>
+                            <br><br>
+                            <label>
+                                ${g.message(code: "cellRanger.value")}:<br>
+                                <input name="expectedOrEnforcedCellsValue"/>
+                            </label>
+                        </div>
+                        <div>
+                            <g:submitButton name="Create"/>
+                        </div>
+                    </div>
                 </g:form>
+                <h3>${g.message(code: "cellRanger.header.processes")}:</h3>
+                <table>
+                    <tr>
+                        <th>${g.message(code: "cellRanger.sampleType")}</th>
+                        <th>${g.message(code: "cellRanger.individual")}</th>
+                        <th>${g.message(code: "cellRanger.expectedCells")}</th>
+                        <th>${g.message(code: "cellRanger.enforcedCells")}</th>
+                        <th>${g.message(code: "cellRanger.processingStatus")}</th>
+                    </tr>
+                    <g:each in="${mwps}" var="mwp">
+                        <tr>
+                            <td>${mwp.sampleType} (${mwp})</td>
+                            <td>${mwp.individual}</td>
+                            <td>${mwp.expectedCells}</td>
+                            <td>${mwp.enforcedCells}</td>
+                            <td>${mwp.bamFileInProjectFolder ? mwp.bamFileInProjectFolder.fileOperationStatus : "N/A"}</td>
+                        </tr>
+                    </g:each>
+                </table>
             </g:if>
             <g:else>
             <p>

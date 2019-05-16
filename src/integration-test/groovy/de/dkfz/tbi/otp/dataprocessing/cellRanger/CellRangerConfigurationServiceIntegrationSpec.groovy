@@ -27,6 +27,7 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.springframework.validation.Errors
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
@@ -84,7 +85,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         samples.selectedSamples == [sample]
     }
 
-    void "test getSamples for whole project "() {
+    void "test getSamples for whole project"() {
         given:
         setupData()
 
@@ -98,13 +99,14 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         samples.selectedSamples == [sample, sample2]
     }
 
-    void "test createMergingWorkPackage"() {
+    @Unroll
+    void "test createMergingWorkPackage (expectedCells=#expectedCells, enforcedCells=#enforcedCells)"() {
         given:
         setupData()
 
         when:
         Errors errors = SpringSecurityUtils.doWithAuth(ADMIN) {
-            cellRangerConfigurationService.createMergingWorkPackage(1, 2, project, individual, sampleType)
+            cellRangerConfigurationService.createMergingWorkPackage(expectedCells, enforcedCells, project, individual, sampleType)
         }
 
         then:
@@ -112,11 +114,16 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         CellRangerMergingWorkPackage mwp = CollectionUtils.exactlyOneElement(CellRangerMergingWorkPackage.all)
         mwp.sample == sample
         mwp.seqTracks == [seqTrack] as Set
-        mwp.expectedCells == 1
-        mwp.enforcedCells == 2
+        mwp.expectedCells == expectedCells
+        mwp.enforcedCells == enforcedCells
         mwp.project == project
         mwp.seqType == seqType
         mwp.individual == individual
+
+        where:
+        expectedCells | enforcedCells
+        5000          | null
+        null          | 5000
     }
 
     void "test createMergingWorkPackage for whole project"() {
@@ -125,7 +132,7 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
 
         when:
         Errors errors = SpringSecurityUtils.doWithAuth(ADMIN) {
-            cellRangerConfigurationService.createMergingWorkPackage(1, 2, project, null, null)
+            cellRangerConfigurationService.createMergingWorkPackage(1, null, project, null, null)
         }
 
         then:

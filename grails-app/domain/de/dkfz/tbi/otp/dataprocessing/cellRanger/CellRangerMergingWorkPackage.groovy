@@ -27,9 +27,11 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class CellRangerMergingWorkPackage extends MergingWorkPackage {
 
-    int expectedCells
+    Integer expectedCells
     Integer enforcedCells
     CellRangerConfig config
+
+    private final static MUTUAL_EXCLUSIVITY_ERROR = "expectedCells and enforcedCells are mutually exclusive"
 
     static constraints = {
         sample(validator: { val, obj ->
@@ -43,7 +45,16 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
                 return "The CellRangerMergingWorkPackage must be unique for one sample and seqType, expectedCells and enforcedCells"
             }
         })
-        enforcedCells(nullable: true)
+        expectedCells(nullable: true, validator: { val, obj ->
+            if (!(val == null ^ obj.enforcedCells == null)) {
+                return MUTUAL_EXCLUSIVITY_ERROR
+            }
+        })
+        enforcedCells(nullable: true, validator: { val, obj ->
+            if (!(val == null ^ obj.expectedCells == null)) {
+                return MUTUAL_EXCLUSIVITY_ERROR
+            }
+        })
         config(nullable: true)
     }
 
