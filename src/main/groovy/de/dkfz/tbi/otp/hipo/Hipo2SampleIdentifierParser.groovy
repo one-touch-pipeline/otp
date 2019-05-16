@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifierParser
 
+import java.text.NumberFormat
 import java.util.regex.Matcher
 
 @Component
@@ -34,9 +35,30 @@ class Hipo2SampleIdentifierParser implements SampleIdentifierParser {
 
     private final static String PID = "(?<pid>(?<project>[A-Z][0-9]{2}[A-Z0-9])-[A-Z0-9]{4}([A-Z0-9]{2})?)"
     private final static String TISSUE = "(?<tissueType>[${HipoTissueType.values()*.key.join('')}])(?<tissueNumber>[0-9]{1,2})"
-    private final static String ANALYTE = "(?<analyte>[DRPAWYTBMSE][0-9]|[0-9]*[CGHLJ][0-9]{1,2})"
 
-    static String REGEX = /^${PID}-${TISSUE}-${ANALYTE}$/
+    //ignore analyte part
+    private final static String ANALYTE_CHARS_SINGLE_CELL_IGNORE = 'GHJS'
+
+    //ignore analyte part
+    private final static String ANALYTE_CHAR_CHIP_SEQ = 'C'
+
+    //use only the digits, formatting to two letters
+    private final static String ANALYTE_CHARS_USE_ONLY_NUMBER = 'ABDELMPRTWY'
+
+
+    private final static String ANALYTE_CHARS_ALLOW_DIGIT_BEFORE_CHAR =
+            ANALYTE_CHARS_SINGLE_CELL_IGNORE + ANALYTE_CHAR_CHIP_SEQ
+
+    private final static String ANALYTE_PATTERN_NO_DIGIT_BEFORE =
+            "(?<analyteCharOnlyNumber>[${ANALYTE_CHARS_USE_ONLY_NUMBER}])(?<analyteDigit>[0-9]{1,2})"
+
+    private final static String ANALYTE_PATTERN_ALLOW_DIGIT_BEFORE =
+            "[0-9]*(?<analyteSkip>[${ANALYTE_CHARS_ALLOW_DIGIT_BEFORE_CHAR}])[0-9]{1,2}"
+
+    private final static String ANALYTE_PATTERN =
+            "(?<analyte>${ANALYTE_PATTERN_NO_DIGIT_BEFORE}|${ANALYTE_PATTERN_ALLOW_DIGIT_BEFORE})"
+
+    static final String REGEX = /^${PID}-${TISSUE}-${ANALYTE_PATTERN}$/
 
     @Override
     boolean tryParsePid(String pid) {
@@ -49,17 +71,26 @@ class Hipo2SampleIdentifierParser implements SampleIdentifierParser {
         if (matcher.matches()) {
             String projectNumber = matcher.group('project')
 
-            String sampleTypeDbName = "${HipoTissueType.fromKey(matcher.group('tissueType'))}${matcher.group('tissueNumber')}"
-            String analyte = matcher.group('analyte')
-            if (!(analyte.charAt(0) in 'DRPAWYEMT'.toCharArray()) &&
-                    !(analyte.toCharArray().any { it in 'GHJ'.toCharArray() })) {
-                sampleTypeDbName += "-${analyte}"
+            String baseSampleTypeName = "${HipoTissueType.fromKey(matcher.group('tissueType'))}${matcher.group('tissueNumber')}"
+            String analyteCharOnlyNumber = matcher.group('analyteCharOnlyNumber')
+            String analyteSkip = matcher.group('analyteSkip')
+            String analyteDigit = matcher.group('analyteDigit')
+
+            String realSampleTypeName = null
+            if (analyteCharOnlyNumber && ANALYTE_CHARS_USE_ONLY_NUMBER.contains(analyteCharOnlyNumber)) {
+                NumberFormat numberFormat = NumberFormat.getIntegerInstance()
+                numberFormat.setMinimumIntegerDigits(2)
+                realSampleTypeName = "${baseSampleTypeName}-${numberFormat.format(analyteDigit.toLong())}"
+            } else if (analyteSkip && ANALYTE_CHARS_ALLOW_DIGIT_BEFORE_CHAR.contains(analyteSkip)) {
+                realSampleTypeName = baseSampleTypeName
+            } else {
+                assert false: 'may not occur'
             }
 
             return new DefaultParsedSampleIdentifier(
                     "hipo_${projectNumber}",
                     matcher.group('pid'),
-                    sampleTypeDbName,
+                    realSampleTypeName,
                     sampleIdentifier,
             )
         }
@@ -68,7 +99,7 @@ class Hipo2SampleIdentifierParser implements SampleIdentifierParser {
 
     @Override
     String tryParseCellPosition(String sampleIdentifier) {
-        Matcher matcher = sampleIdentifier =~ /^.*-${ANALYTE}$/
+        Matcher matcher = sampleIdentifier =~ /^.*-${ANALYTE_PATTERN}$/
         if (matcher.matches()) {
             return matcher.group('analyte')
         }
