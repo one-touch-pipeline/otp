@@ -20,14 +20,11 @@
  * SOFTWARE.
  */
 
+
 import groovy.transform.CompileStatic
 
 import java.nio.charset.MalformedInputException
-import java.nio.file.FileVisitResult
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.SimpleFileVisitor
+import java.nio.file.*
 import java.nio.file.attribute.BasicFileAttributes
 
 @CompileStatic
@@ -58,17 +55,24 @@ class LicenseCheck {
 
             "grails-app/assets/lib",
             "misc/fonts",
+            "misc/logo",
             "scripts/gitchangelog",
 
-            "misc/logo",
-
             ".git",
+            ".gradle",
+            ".groovy",
             ".idea",
+            ".settings",
             ".slcache",
+
+            "build",
+            "gradle",
             "logs",
             "out",
             "target",
-            "gradle",
+
+            "tools/ngs/bedUtils/.gradle",
+            "tools/ngs/bedUtils/build",
     ].collect { Paths.get(it) }
 
     static List<Path> ignoredFiles = [
@@ -78,6 +82,20 @@ class LicenseCheck {
             "scripts/ReferenceGenome/README.txt",
             "scripts/rollout/readme.txt",
             "tools/ngs/bedUtils/testdata/test.bed",
+
+            ".project",
+            ".classpath",
+            "otp-grailsPlugins.iml",
+            "otp.iml",
+
+            "gradle.properties",
+            "settings.gradle",
+            "src/main/webapp/WEB-INF/web.xml",
+
+            "gradlew.bat",
+            "gradlew",
+            "grailsw.bat",
+            "grailsw",
     ].collect { Paths.get(it) }
 
 
