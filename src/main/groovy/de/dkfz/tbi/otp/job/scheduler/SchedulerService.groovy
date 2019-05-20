@@ -906,8 +906,13 @@ class SchedulerService {
     }
 
     Job getJobForProcessingStep(ProcessingStep processingStep) {
-        running.find {
-            it.processingStep == processingStep
+        lock.lock()
+        try {
+            running.find {
+                it.processingStep == processingStep
+            }
+        } finally {
+            lock.unlock()
         }
     }
 
