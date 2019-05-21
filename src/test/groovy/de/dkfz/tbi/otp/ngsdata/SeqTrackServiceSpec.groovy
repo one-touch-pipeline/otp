@@ -292,6 +292,21 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         seqTrack.linkedExternally == false
     }
 
+    void "test determineAndStoreIfFastqFilesHaveToBeLinked, seqTrack has indexFile, has to be copied"() {
+        given:
+        SeqTrack seqTrack = createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked()
+        DomainFactory.createDataFile([
+                seqTrack: seqTrack,
+                indexFile: true,
+        ])
+
+        when:
+        seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, true)
+
+        then:
+        seqTrack.linkedExternally == false
+    }
+
     void "test determineAndStoreIfFastqFilesHaveToBeLinked, RNA data, has to be copied"() {
         given:
         DomainFactory.createRnaPipeline()

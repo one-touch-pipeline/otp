@@ -209,7 +209,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
     void "test getMaximalReadLength method, when sequenceLength is not set, should fail"() {
         given:
-        roddyBamFile.seqTracks*.dataFiles.flatten().each {
+        roddyBamFile.seqTracks*.dataFilesWhereIndexFileIsFalse.flatten().each {
             it.sequenceLength = null
             assert it.save(flush: true)
         }
@@ -224,7 +224,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
     void "test getMaximalReadLength method, only one value available for sequenceLength, should return this value"() {
         when:
-        roddyBamFile.seqTracks*.dataFiles.flatten().each { DataFile dataFile ->
+        roddyBamFile.seqTracks*.dataFilesWhereIndexFileIsFalse.flatten().each { DataFile dataFile ->
             dataFile.sequenceLength = 100
             assert dataFile.save(flush: true)
         }
@@ -235,7 +235,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
     void "test getMaximalReadLength method, two values available for sequenceLength, should return higher value"() {
         when:
-        roddyBamFile.seqTracks*.dataFiles.flatten().each { DataFile dataFile ->
+        roddyBamFile.seqTracks*.dataFilesWhereIndexFileIsFalse.flatten().each { DataFile dataFile ->
             dataFile.sequenceLength = 100
             assert dataFile.save(flush: true)
         }

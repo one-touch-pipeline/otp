@@ -229,17 +229,6 @@ class SeqTrackService {
         return true
     }
 
-
-    private boolean fastqcReady(SeqTrack track) {
-        List<DataFile> files = DataFile.findAllBySeqTrack(track)
-        for (DataFile file in files) {
-            if (!fileTypeService.fastqcReady(file)) {
-                return false
-            }
-        }
-        return true
-    }
-
     /**
      * returns the most high prioritized, oldest alignable {@link SeqTrack} waiting for fastqc if possible,
      * otherwise the most high prioritized, oldest {@link SeqTrack} waiting for fastqc.
@@ -319,7 +308,7 @@ LIMIT 1
 
     void fillBaseCount(SeqTrack seqTrack) {
         long basePairs = 0
-        DataFile.findAllBySeqTrack(seqTrack).each { DataFile file ->
+        seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile file ->
             assert (file.sequenceLength && file.nReads): "The sequence length or nReads for datafile ${file} are not provided."
             basePairs += file.meanSequenceLength * file.nReads
         }
@@ -476,16 +465,24 @@ AND entry.value = :value
         boolean importDirAllowsLinking = doesImportDirAllowLinking(seqTrack)
         boolean projectAllowsLinking = !seqTrack.project.forceCopyFiles
         boolean seqTypeAllowsLinking = seqTrack.seqType.seqTypeAllowsLinking()
+        boolean hasIndexFiles = hasIndexFiles(seqTrack)
         boolean adapterTrimming = RoddyWorkflowConfig.getLatestForIndividual(seqTrack.individual, seqTrack.seqType,
                 Pipeline.findByName(seqTrack.seqType.isRna() ?
                         Pipeline.Name.RODDY_RNA_ALIGNMENT : Pipeline.Name.PANCAN_ALIGNMENT))?.adapterTrimmingNeeded ?: false
-        boolean link = willBeAligned  && importDirAllowsLinking && projectAllowsLinking && seqTypeAllowsLinking && !adapterTrimming
+        boolean link = willBeAligned  && importDirAllowsLinking && projectAllowsLinking && seqTypeAllowsLinking && !hasIndexFiles && !adapterTrimming
         seqTrack.log("Fastq files{0} will be ${link ? "linked" : "copied"}, because " +
                 "willBeAligned=${willBeAligned}, importDirAllowsLinking=${importDirAllowsLinking}, projectAllowsLinking=${projectAllowsLinking}, " +
-                "seqTypeAllowsLinking=${seqTypeAllowsLinking}, needs adapter trimming=${adapterTrimming}")
+                "seqTypeAllowsLinking=${seqTypeAllowsLinking}, needs adapter trimming=${adapterTrimming}, hasIndexFiles=${hasIndexFiles}")
         if (link) {
             seqTrack.linkedExternally = true
             assert seqTrack.save(flush: true)
+        }
+    }
+
+    private boolean hasIndexFiles(SeqTrack seqTrack) {
+        assert seqTrack: "The input seqTrack for doesImportDirAllowLinking must not be null"
+        return seqTrack.dataFiles.find {
+            it.indexFile
         }
     }
 

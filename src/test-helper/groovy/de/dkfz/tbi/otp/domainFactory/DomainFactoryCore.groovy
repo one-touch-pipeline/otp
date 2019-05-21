@@ -170,6 +170,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 fileLinked      : true,
                 fileSize        : nextId,
                 mateNumber      : 1,
+                indexFile       : false,
         ], properties, saveAndValidate)
     }
 

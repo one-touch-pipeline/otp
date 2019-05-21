@@ -113,7 +113,7 @@
                     <td class="${file.fileExists}">lsdf</td>
                     <td class="${file.fileLinked}">view-by-pid</td>
                     <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
-                    <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : '&nbsp;' }</td>
+                    <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : ' ' }</td>
                     <td>
                         <g:if test="${fastqcLinks.get(file.id)}">
                             <g:link controller="fastqcResults" action="show" id="${file.id}"><g:message code="run.show.fastqc"/></g:link>
@@ -132,7 +132,7 @@
                         <td class="${file.fileExists}">lsdf</td>
                         <td class="${file.fileLinked}">view-by-pid</td>
                         <td>${String.format("%.1f GB", file.fileSize/1e9)}</td>
-                        <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : '&nbsp;' }</td>
+                        <td>${file.dateFileSystem ? (new Date(file.dateFileSystem.getTime())).format("yyyy-MM-dd") : ' ' }</td>
                         <td>&nbsp;</td>
                     </tr>
                 </g:each>

@@ -40,7 +40,6 @@ class MateNumberLibraryLayoutValidatorSpec extends Specification {
 
     @Unroll
     void 'validate, when column(s) is/are missing, adds error(s)'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${header}
@@ -69,6 +68,15 @@ ${MetaDataColumn.MATE}\t${MetaDataColumn.LIBRARY_LAYOUT}
 1\t${LibraryLayout.MATE_PAIR}
 2\t${LibraryLayout.MATE_PAIR}
 1\t${LibraryLayout.SINGLE}
+i1\t${LibraryLayout.PAIRED}
+i2\t${LibraryLayout.PAIRED}
+i3\\t${LibraryLayout.PAIRED}
+i1\t${LibraryLayout.MATE_PAIR}
+i2\t${LibraryLayout.MATE_PAIR}
+i3\\t${LibraryLayout.MATE_PAIR}
+i1\t${LibraryLayout.SINGLE}
+i2\\t${LibraryLayout.SINGLE}
+i3\\t${LibraryLayout.SINGLE}
 """)
 
         when:
@@ -79,7 +87,6 @@ ${MetaDataColumn.MATE}\t${MetaDataColumn.LIBRARY_LAYOUT}
     }
 
     void 'validate, adds expected errors'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.MATE}\t${MetaDataColumn.LIBRARY_LAYOUT}
@@ -89,6 +96,8 @@ ${MetaDataColumn.MATE}\t${MetaDataColumn.LIBRARY_LAYOUT}
 2\t${LibraryLayout.SINGLE}
 -1\t${LibraryLayout.PAIRED}
 abc\t${LibraryLayout.PAIRED}
+ijk\t${LibraryLayout.PAIRED}
+i\t${LibraryLayout.PAIRED}
 """)
 
         Collection<Problem> expectedProblems = [

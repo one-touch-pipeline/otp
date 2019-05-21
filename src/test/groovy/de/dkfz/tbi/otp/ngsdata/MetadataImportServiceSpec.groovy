@@ -553,7 +553,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         File file = new File(new File(TestCase.getUniqueNonExistentPath(), runName1), 'metadata.tsv')
         DirectoryStructure directoryStructure = [
                 getRequiredColumnTitles: { [FASTQ_FILE.name()] },
-                getDataFilePath: { MetadataValidationContext context, ValueTuple valueTuple ->
+                getDataFilePath        : { MetadataValidationContext context, ValueTuple valueTuple ->
                     return Paths.get(file.parent, valueTuple.getValue(FASTQ_FILE.name()))
                 },
         ] as DirectoryStructure
@@ -675,6 +675,7 @@ ${ILSE_NO}                      -             1234          1234          -     
                 md5sum     : md5a,
                 project    : sample2.project,
                 mateNumber : 1,
+                indexFile  : false,
                 seqTrack   : seqTrack1,
         ])
         dataFile1 != null
@@ -688,7 +689,6 @@ ${ILSE_NO}                      -             1234          1234          -     
         )
 
         if (includeOptional) {
-
             // seqTrack2
             SeqTrack seqTrack2 = ExomeSeqTrack.findWhere(
                     laneId: '1_barcode8',
@@ -707,6 +707,7 @@ ${ILSE_NO}                      -             1234          1234          -     
                     md5sum     : md5b,
                     project    : sample1.project,
                     mateNumber : 1,
+                    indexFile  : false,
                     seqTrack   : seqTrack2,
             ])
             assert DataFile.findWhere(commonRun1DataFileProperties + [
@@ -715,6 +716,7 @@ ${ILSE_NO}                      -             1234          1234          -     
                     md5sum     : md5c,
                     project    : sample1.project,
                     mateNumber : 2,
+                    indexFile  : false,
                     seqTrack   : seqTrack2,
             ])
 
@@ -738,6 +740,7 @@ ${ILSE_NO}                      -             1234          1234          -     
                     md5sum     : md5d,
                     project    : sample2.project,
                     mateNumber : 1,
+                    indexFile  : false,
                     seqTrack   : seqTrack3,
             ])
             assert DataFile.findWhere(commonRun1DataFileProperties + [
@@ -746,6 +749,7 @@ ${ILSE_NO}                      -             1234          1234          -     
                     md5sum     : md5e,
                     project    : sample2.project,
                     mateNumber : 2,
+                    indexFile  : false,
                     seqTrack   : seqTrack3,
             ])
 
@@ -769,6 +773,7 @@ ${ILSE_NO}                      -             1234          1234          -     
                     md5sum     : md5f,
                     project    : sample1.project,
                     mateNumber : 1,
+                    indexFile  : false,
                     seqTrack   : seqTrack4,
             ])
 
@@ -790,6 +795,7 @@ ${ILSE_NO}                      -             1234          1234          -     
                     md5sum     : md5g,
                     project    : sample2.project,
                     mateNumber : 1,
+                    indexFile  : false,
                     seqTrack   : seqTrack5,
             ])
 
@@ -811,6 +817,7 @@ ${ILSE_NO}                      -             1234          1234          -     
                     md5sum     : md5h,
                     project    : sample2.project,
                     mateNumber : 1,
+                    indexFile  : false,
                     seqTrack   : seqTrack6,
             ])
 
@@ -832,6 +839,7 @@ ${ILSE_NO}                      -             1234          1234          -     
                     md5sum     : md5i,
                     project    : sample2.project,
                     mateNumber : 1,
+                    indexFile  : false,
                     seqTrack   : seqTrack7,
             ])
         }
@@ -893,7 +901,7 @@ ${ILSE_NO}                      -             1234          1234          -     
         service.seqTypeService = Mock(SeqTypeService) {
             1 * findByNameOrImportAlias(seqTypeWithAntibodyTarget.name, [
                     libraryLayout: seqTypeWithAntibodyTarget.libraryLayout,
-                    singleCell: seqTypeWithAntibodyTarget.singleCell,
+                    singleCell   : seqTypeWithAntibodyTarget.singleCell,
             ]) >> seqTypeWithAntibodyTarget
             0 * _
         }
@@ -1008,6 +1016,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
                 vbpFileName: fastq1,
                 md5sum     : md5sum1,
                 mateNumber : 1,
+                indexFile  : false,
         ])
         dataFile1 != null
 
@@ -1016,8 +1025,228 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
                 vbpFileName: fastq2,
                 md5sum     : md5sum2,
                 mateNumber : 2,
+                indexFile  : false,
         ])
         dataFile2 != null
+    }
+
+    @SuppressWarnings(["MethodSize", "AbcMetric"])
+    void "importMetadataFile imports correctly data index files"() {
+        given:
+        String runName = 'run'
+        Date date = new LocalDate(2000, 1, 1).toDate()
+        String dateString = date.format("yyyy-MM-dd")
+        String fastq1 = "fastq_r1.gz"
+        String fastq2 = "fastq_r2.gz"
+        String fastqIndex1 = "fastq_i1.gz"
+        String fastqIndex2 = "fastq_i2.gz"
+        String md5sum1 = HelperUtils.randomMd5sum
+        String md5sum2 = HelperUtils.randomMd5sum
+        String md5sumIndex1 = HelperUtils.randomMd5sum
+        String md5sumIndex2 = HelperUtils.randomMd5sum
+
+        SeqType seqType = DomainFactory.createSeqTypePaired()
+        SeqCenter seqCenter = DomainFactory.createSeqCenter()
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatform()
+        SampleIdentifier sampleIdentifier = DomainFactory.createSampleIdentifier()
+        SoftwareToolIdentifier softwareToolIdentifier = DomainFactory.createSoftwareToolIdentifier([
+                softwareTool: DomainFactory.createSoftwareTool([
+                        type: SoftwareTool.Type.BASECALLING,
+                ]),
+        ])
+        FileType fileType = DomainFactory.createFileType(
+                type: FileType.Type.SEQUENCE,
+                signature: '_',
+        )
+
+        MetadataImportService service = new MetadataImportService()
+        service.sampleIdentifierService = Mock(SampleIdentifierService) {
+            0 * _
+        }
+        service.seqTrackService = Mock(SeqTrackService) {
+            1 * decideAndPrepareForAlignment(!null)
+            1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
+        }
+        service.seqPlatformService = Mock(SeqPlatformService) {
+            2 * findSeqPlatform(seqPlatform.name, seqPlatform.seqPlatformModelLabel.name, null) >> seqPlatform
+            0 * _
+        }
+        service.seqTypeService = Mock(SeqTypeService) {
+            1 * findByNameOrImportAlias(seqType.name, [
+                    libraryLayout: seqType.libraryLayout,
+                    singleCell   : seqType.singleCell,
+            ]) >> seqType
+            0 * _
+        }
+
+        GroovyMock(SamplePair, global: true)
+        1 * SamplePair.findMissingDiseaseControlSamplePairs() >> []
+
+        File file = new File(new File(TestCase.uniqueNonExistentPath, runName), 'metadata.tsv')
+        DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
+            _ * getRequiredColumnTitles() >> [FASTQ_FILE.name()]
+            _ * getDataFilePath(_, _) >> { MetadataValidationContext context, Row row ->
+                return Paths.get(file.parent, row.getCellByColumnTitle(FASTQ_FILE.name()).text)
+            }
+        }
+
+        Map baseData = [
+                (RUN_ID)             : runName,
+                (CENTER_NAME)        : seqCenter,
+                (INSTRUMENT_PLATFORM): seqPlatform.name,
+                (INSTRUMENT_MODEL)   : seqPlatform.seqPlatformModelLabel.name,
+                (RUN_DATE)           : dateString,
+                (LANE_NO)            : '1',
+                (SEQUENCING_TYPE)    : seqType.name,
+                (LIBRARY_LAYOUT)     : seqType.libraryLayout,
+                (SAMPLE_ID)          : sampleIdentifier.name,
+                (PIPELINE_VERSION)   : softwareToolIdentifier.name,
+        ].asImmutable()
+
+        Map fastqData1 = [
+                (FASTQ_FILE): fastq1,
+                (MD5)       : md5sum1,
+                (MATE)      : '1',
+        ] + baseData
+
+        Map fastqData2 = [
+                (FASTQ_FILE): fastq2,
+                (MD5)       : md5sum2,
+                (MATE)      : '2',
+        ] + baseData
+
+        Map fastqIndexData1 = [
+                (FASTQ_FILE): fastqIndex1,
+                (MD5)       : md5sumIndex1,
+                (MATE)      : 'i1',
+        ] + baseData
+
+        Map fastqIndexData2 = [
+                (FASTQ_FILE): fastqIndex2,
+                (MD5)       : md5sumIndex2,
+                (MATE)      : 'i2',
+        ] + baseData
+
+        List<String> keys = fastqData1.keySet().toList()
+        StringBuilder builder = new StringBuilder()
+        builder << keys.join('\t') << '\n'
+        [
+                fastqData1,
+                fastqData2,
+                fastqIndexData1,
+                fastqIndexData2,
+        ].each { Map map ->
+            builder << keys.collect {
+                map[it]
+            }.join('\t') << '\n'
+        }
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                builder.toString(),
+                [
+                        metadataFile      : file.toPath(),
+                        directoryStructure: directoryStructure,
+                ]
+        )
+
+        when:
+        MetaDataFile result = service.importMetadataFile(context, false, RunSegment.ImportMode.MANUAL, null, null, false)
+
+        then:
+        // runs
+        Run.count == 1
+        Run run = Run.findWhere(
+                name: runName,
+                seqCenter: seqCenter,
+                seqPlatform: seqPlatform,
+        )
+        run != null
+        run.dateExecuted == date
+
+        // runSegment
+        RunSegment.count == 1
+        RunSegment runSegment = RunSegment.findWhere(
+                align: false,
+                otrsTicket: null,
+                importMode: RunSegment.ImportMode.MANUAL
+        )
+        runSegment != null
+
+        // metadataFile
+        MetaDataFile.count == 1
+        MetaDataFile metadataFile = MetaDataFile.findWhere(
+                fileName: file.name,
+                filePath: file.parent,
+                md5sum: context.metadataFileMd5sum,
+                runSegment: runSegment,
+        )
+        result == metadataFile
+
+        SeqTrack.count == 1
+        DataFile.count == 4
+        MetaDataKey.count == context.spreadsheet.header.cells.size()
+        MetaDataEntry.count == context.spreadsheet.header.cells.size() * DataFile.count
+
+        // seqTrack1
+        SeqTrack seqTrack = SeqTrack.findWhere(
+                laneId: '1',
+                insertSize: 0,
+                run: run,
+                sample: sampleIdentifier.sample,
+                seqType: seqType,
+                pipelineVersion: softwareToolIdentifier.softwareTool,
+                kitInfoReliability: InformationReliability.UNKNOWN_UNVERIFIED,
+                libraryPreparationKit: null,
+        )
+        seqTrack.ilseId == null
+        seqTrack.class == SeqTrack
+
+        Map commonRunDataFileProperties = [
+                pathName    : '',
+                used        : true,
+                runSegment  : runSegment,
+                fileType    : fileType,
+                dateExecuted: date,
+                run         : run,
+                project     : sampleIdentifier.project,
+                seqTrack    : seqTrack,
+        ]
+
+        DataFile dataFile1 = DataFile.findWhere(commonRunDataFileProperties + [
+                fileName   : fastq1,
+                vbpFileName: fastq1,
+                md5sum     : md5sum1,
+                mateNumber : 1,
+                indexFile  : false,
+        ])
+        dataFile1 != null
+
+        DataFile dataFile2 = DataFile.findWhere(commonRunDataFileProperties + [
+                fileName   : fastq2,
+                vbpFileName: fastq2,
+                md5sum     : md5sum2,
+                mateNumber : 2,
+                indexFile  : false,
+        ])
+        dataFile2 != null
+
+        DataFile dataFileIndex1 = DataFile.findWhere(commonRunDataFileProperties + [
+                fileName   : fastqIndex1,
+                vbpFileName: fastqIndex1,
+                md5sum     : md5sumIndex1,
+                mateNumber : 1,
+                indexFile  : true,
+        ])
+        dataFileIndex1 != null
+
+        DataFile dataFileIndex2 = DataFile.findWhere(commonRunDataFileProperties + [
+                fileName   : fastqIndex2,
+                vbpFileName: fastqIndex2,
+                md5sum     : md5sumIndex2,
+                mateNumber : 2,
+                indexFile  : true,
+        ])
+        dataFileIndex2 != null
     }
 
     void "extractBarcode, when both BARCODE and FASTQ_FILE columns are missing, returns null"() {
@@ -1152,9 +1381,9 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
     }
 
 
-    void "extractMateNumber, when LIBRARY_LAYOUT and FASTQ_FILE columns are missing, returns null"() {
+    void "extractMateNumber, when MATE columns is missing, returns null"() {
         given:
-        Row row = MetadataValidationContextFactory.createContext().spreadsheet.dataRows[0]
+        Row row = MetadataValidationContextFactory.createContext("something\nsomething").spreadsheet.dataRows[0]
 
         when:
         ExtractedValue result = MetadataImportService.extractMateNumber(row)
@@ -1163,70 +1392,26 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         result == null
     }
 
-    void "extractMateNumber, when LIBRARY_LAYOUT column is missing and mate number cannot be extracted from filename, returns null"() {
+    @Unroll
+    void "extractMateNumber, when MATE value is '#value', then return ExtractedValue with that value"() {
         given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\nfile.fastq.gz").spreadsheet.dataRows[0]
+        Row row = MetadataValidationContextFactory.createContext("${MATE}\tsomething\n${value}\tsomething").spreadsheet.dataRows[0]
 
         when:
         ExtractedValue result = MetadataImportService.extractMateNumber(row)
 
         then:
-        result == null
-    }
-
-    void "extractMateNumber, when library layout is not SINGLE and FASTQ_FILE column is missing, returns null"() {
-        given:
-        Row row = MetadataValidationContextFactory.createContext("${LIBRARY_LAYOUT}\nTRIPLE").spreadsheet.dataRows[0]
-
-        when:
-        ExtractedValue result = MetadataImportService.extractMateNumber(row)
-
-        then:
-        result == null
-    }
-
-    void "extractMateNumber, when library layout is not SINGLE and mate number cannot be extracted from filename, returns null"() {
-        given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${LIBRARY_LAYOUT}\nfile.fastq.gz\tTRIPLE").spreadsheet.dataRows[0]
-
-        when:
-        ExtractedValue result = MetadataImportService.extractMateNumber(row)
-
-        then:
-        result == null
-    }
-
-    void "extractMateNumber, when the mate number in the filename does not match the number in the mate cell, return the number from the mate cell"(String filename, String mateNumber) {
-        given:
-        Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${MATE}\n${filename}\t${mateNumber}").spreadsheet.dataRows[0]
-
-        when:
-        ExtractedValue result = MetadataImportService.extractMateNumber(row)
-
-        then:
-        result.value == mateNumber
-        result.cells == [row.getCellByColumnTitle(MATE.name())] as Set
+        result.value == value
 
         where:
-        filename                || mateNumber
-        's_101202_7_2.fastq.gz' || '1'
-        's_101202_7_1.fastq.gz' || '2'
-    }
-
-    void "extractMateNumber, when mateNumber can not be parsed to int, return null"(String mateNumber) {
-        given:
-        Row row = MetadataValidationContextFactory.createContext("${MATE}\t\n${mateNumber}\t").spreadsheet.dataRows[0]
-
-        when:
-        ExtractedValue result = MetadataImportService.extractMateNumber(row)
-
-        then:
-        result == null
-
-        where:
-        mateNumber | _
-        ''         | _
-        'abc'      | _
+        value << [
+                '',
+                '1',
+                '2',
+                'i1',
+                'i2',
+                'something',
+        ]
     }
 
     void "copyMetaDataFileIfRequested, if data not on midterm, do nothing"() {
@@ -1258,7 +1443,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         ProcessingOptionService processingOptionService = new ProcessingOptionService()
         DomainFactory.createDefaultRealmWithProcessingOption()
         MetadataImportService service = Spy(MetadataImportService) {
-                1 * getIlseFolder(_, _) >> (returnValidPath ? target : null)
+            1 * getIlseFolder(_, _) >> (returnValidPath ? target : null)
         }
         service.configService = new ConfigService()
         service.fileService = new FileService()

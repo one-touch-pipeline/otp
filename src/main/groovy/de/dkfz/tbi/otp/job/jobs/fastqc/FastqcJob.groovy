@@ -108,7 +108,7 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
         final SeqTrack seqTrack = getProcessParameterObject()
 
         File finalDir = new File(fastqcDataFilesService.fastqcOutputDirectory(seqTrack))
-        DataFile.findAllBySeqTrack(seqTrack).each { DataFile dataFile ->
+        seqTrack.dataFiles.each { DataFile dataFile ->
             lsdfFilesService.ensureFileIsReadableAndNotEmpty(new File("${finalDir}/${fastqcDataFilesService.fastqcFileName(dataFile)}"))
         }
 
@@ -120,7 +120,9 @@ class FastqcJob extends AbstractOtpJob implements AutoRestartableJob {
                 fastqcDataFilesService.updateFastqcProcessedFile(fastqc)
                 fastqcDataFilesService.setFastqcProcessedFileUploaded(fastqc)
             }
-            assert files*.nReads.unique().size() == 1
+            assert files.findAll {
+                !it.indexFile
+            }*.nReads.unique().size() == 1
             seqTrackService.setFastqcFinished(seqTrack)
             seqTrackService.fillBaseCount(seqTrack)
             setnBasesInClusterJobForFastqc(processingStep)

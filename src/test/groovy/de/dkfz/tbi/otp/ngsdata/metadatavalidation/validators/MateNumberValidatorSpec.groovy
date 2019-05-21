@@ -22,7 +22,9 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
+
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
@@ -34,7 +36,6 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 class MateNumberValidatorSpec extends Specification {
 
     void 'validate, when column is missing, adds no error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 SomeColumn
@@ -48,13 +49,12 @@ SomeValue
         context.problems.empty
     }
 
-    void 'validate, all are fine'() {
-
+    @Unroll
+    void 'validate, when value is "#value", then validation should not return an error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.MATE}
-1
-2
+${value}
 """)
 
         when:
@@ -62,37 +62,46 @@ ${MetaDataColumn.MATE}
 
         then:
         context.problems.empty
+
+        where:
+        value << [
+                '1',
+                '2',
+                '3',
+                'i1',
+                'I1',
+                'i2',
+                'I2',
+                'i3',
+                'I3',
+        ]
     }
 
-    void 'validate, adds expected errors'() {
-
+    @Unroll
+    void 'validate, when value is "#value", then adds expected errors'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.MATE}
-
--1
-0
-1
-2
-3
-4
-abc
+${value}
 """)
 
         when:
         new MateNumberValidator().validate(context)
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
-                        "The mate number must be provided and must be a positive integer (value >= 1)."),
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "The mate number ('-1') must be a positive integer (value >= 1).", "At least one mate number is not a positive integer number."),
-                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
-                        "The mate number ('0') must be a positive integer (value >= 1).", "At least one mate number is not a positive integer number."),
-                new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
-                        "The mate number ('abc') must be a positive integer (value >= 1).", "At least one mate number is not a positive integer number."),
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR, message, summaryMessage),
         ]
 
         then:
         TestCase.assertContainSame(expectedProblems, context.problems)
+
+        where:
+        value  || message                                                                 | summaryMessage
+        ''     || MateNumberValidator.ERROR_NOT_PROVIDED                                  | MateNumberValidator.ERROR_NOT_PROVIDED
+        '-1'   || "The mate number ('-1') ${MateNumberValidator.ALLOWED_VALUE_POSTFIX}"   | MateNumberValidator.ERROR_INVALID_VALUE_SUMMARY
+        '0'    || "The mate number ('0') ${MateNumberValidator.ALLOWED_VALUE_POSTFIX}"    | MateNumberValidator.ERROR_INVALID_VALUE_SUMMARY
+        'abc'  || "The mate number ('abc') ${MateNumberValidator.ALLOWED_VALUE_POSTFIX}"  | MateNumberValidator.ERROR_INVALID_VALUE_SUMMARY
+        'i'    || "The mate number ('i') ${MateNumberValidator.ALLOWED_VALUE_POSTFIX}"    | MateNumberValidator.ERROR_INVALID_VALUE_SUMMARY
+        'I'    || "The mate number ('I') ${MateNumberValidator.ALLOWED_VALUE_POSTFIX}"    | MateNumberValidator.ERROR_INVALID_VALUE_SUMMARY
+        '123i' || "The mate number ('123i') ${MateNumberValidator.ALLOWED_VALUE_POSTFIX}" | MateNumberValidator.ERROR_INVALID_VALUE_SUMMARY
     }
 }

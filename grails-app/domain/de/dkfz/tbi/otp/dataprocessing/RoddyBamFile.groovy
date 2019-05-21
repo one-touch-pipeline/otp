@@ -457,6 +457,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     @Override
     Integer getMaximalReadLength() {
-        return getSeqTracks()*.dataFiles.flatten().max { it.meanSequenceLength }.meanSequenceLength
+        return getSeqTracks()*.dataFilesWhereIndexFileIsFalse.flatten().max { it.meanSequenceLength }.meanSequenceLength
     }
 }

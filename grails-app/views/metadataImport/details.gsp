@@ -132,6 +132,9 @@
                         <g:each in="${seqTrack.dataFiles}" var="dataFile">
                             <li>
                                 <g:message code="metadataImport.details.mateNumber" />
+                                <g:if test="${dataFile.indexFile}">
+                                    <g:message code="metadataImport.details.indexNumber" />
+                                </g:if>
                                 ${dataFile.mateNumber}:
                                 <g:link controller="dataFile" action="showDetails" id="${dataFile.id}">
                                     ${dataFile.fileName}

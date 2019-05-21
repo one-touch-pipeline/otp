@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.ProcessOutput
+import de.dkfz.tbi.otp.utils.SessionUtils
 import de.dkfz.tbi.otp.utils.WaitingFileUtils
 
 import java.util.concurrent.Semaphore
@@ -66,7 +67,11 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     // Running job r150428_104246480_stds_snvCallingMetaScript => 3504988
     static final Pattern roddyOutputPattern = Pattern.compile(/^\s*(?:Running|Rerun)\sjob\s(.*_(\S+))\s=>\s(\S+)\s*$/)
 
-    private static final Semaphore roddyMemoryUsage = new Semaphore((int)ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_EXECUTED_RODDY_PROCESSES, null, null), true)
+    private static final Semaphore roddyMemoryUsage = {
+        SessionUtils.withNewSession {
+            new Semaphore((int) ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_EXECUTED_RODDY_PROCESSES, null, null), true)
+        }
+    }()
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {

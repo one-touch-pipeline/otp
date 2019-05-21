@@ -279,7 +279,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     Long getNReads() {
         Long nReads = 0
         Boolean isNull = false
-        DataFile.findAllBySeqTrack(this).each {
+        dataFilesWhereIndexFileIsFalse.each {
             if (it.nReads == null) {
                 isNull = true
             } else {
@@ -290,7 +290,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
     }
 
     String getSequenceLength() {
-        return exactlyOneElement(DataFile.findAllBySeqTrack(this)*.sequenceLength.unique())
+        return exactlyOneElement(dataFilesWhereIndexFileIsFalse*.sequenceLength.unique())
     }
 
     @Override
@@ -320,6 +320,11 @@ class SeqTrack implements ProcessParameterObject, Entity {
         return DataFile.findAllBySeqTrack(this)
     }
 
+    List<DataFile> getDataFilesWhereIndexFileIsFalse() {
+        return DataFile.findAllBySeqTrackAndIndexFile(this, false)
+    }
+
+
     /**
      * @deprecated Can't use save in a domain object, use SeqTrackService.logToSeqTrack() instead
      */
@@ -330,11 +335,11 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     String getReadGroupName() {
         if (seqType.libraryLayout == LibraryLayout.SINGLE) {
-            DataFile dataFile = exactlyOneElement(getDataFiles())
+            DataFile dataFile = exactlyOneElement(dataFilesWhereIndexFileIsFalse)
             String fileNameWithoutExtension = dataFile.vbpFileName.split(/\./).first()
             return "${RUN_PREFIX}${run.name}_${fileNameWithoutExtension}"
         } else {
-            List<DataFile> dataFiles = getDataFiles()
+            List<DataFile> dataFiles = dataFilesWhereIndexFileIsFalse
             assert dataFiles.size() == 2
             // if the names of datafile1 and datafile2 of one seqTrack are the same, something strange happened -> should fail
             assert dataFiles[0].vbpFileName != dataFiles[1].vbpFileName

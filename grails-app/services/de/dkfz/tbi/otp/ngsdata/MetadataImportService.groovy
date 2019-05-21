@@ -92,6 +92,8 @@ class MetadataImportService {
     static final String DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME = 'dataFilesInSameDirectory'
     static final String MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME = 'dataFilesOnGpcfMidTerm'
 
+    static final String MATE_NUMBER_EXPRESSION = /^(?<index>i|I)?(?<number>[1-9]\d*)$/
+
 
     /**
      * @return A collection of descriptions of the validations which are performed
@@ -115,7 +117,8 @@ class MetadataImportService {
     /**
      * @param directoryStructureName As returned by {@link #getSupportedDirectoryStructures()}
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")  // TODO: OTP-1908: Relax this restriction
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    // TODO: OTP-1908: Relax this restriction
     MetadataValidationContext validateWithAuth(File metadataFile, String directoryStructureName) {
         FileSystem fs = fileSystemService.getFilesystemForFastqImport()
         return validate(fs.getPath(metadataFile.path), directoryStructureName)
@@ -214,7 +217,7 @@ class MetadataImportService {
         }
     }
 
-    static  List<SeqCenter> getSeqCenters(MetadataValidationContext context) {
+    static List<SeqCenter> getSeqCenters(MetadataValidationContext context) {
         List<String> centerNames = context.spreadsheet.dataRows*.getCellByColumnTitle(CENTER_NAME.name())?.text
         return centerNames ? SeqCenter.findAllByNameInList(centerNames) : []
     }
@@ -395,10 +398,11 @@ class MetadataImportService {
     }
 
     private void importSeqTracks(MetadataValidationContext context, RunSegment runSegment, Run run, Collection<Row> runRows) {
-        int amountOfRows = runRows.size() / 2
-        runRows.groupBy {
+        Map<String, List<Row>> runsGroupedByLane = runRows.groupBy {
             MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
-        }.eachWithIndex { String laneId, List<Row> rows, int index ->
+        }
+        int amountOfRows = runsGroupedByLane.size()
+        runsGroupedByLane.eachWithIndex { String laneId, List<Row> rows, int index ->
             String projectName = uniqueColumnValue(rows, PROJECT)
             Project project = Project.getByNameOrNameInMetadataFiles(projectName)
             String ilseNumber = uniqueColumnValue(rows, ILSE_NO)
@@ -441,18 +445,18 @@ class MetadataImportService {
             }
 
             Map properties = [
-                    laneId: laneId,
-                    ilseSubmission: ilseSubmission,
+                    laneId               : laneId,
+                    ilseSubmission       : ilseSubmission,
                     // TODO OTP-2050: Use a different fallback value?
-                    insertSize: tryParseInt(uniqueColumnValue(rows, INSERT_SIZE), 0),
-                    run: run,
-                    sample: (atMostOneElement(SampleIdentifier.findAllWhere(name: sampleIdString)) ?:
+                    insertSize           : tryParseInt(uniqueColumnValue(rows, INSERT_SIZE), 0),
+                    run                  : run,
+                    sample               : (atMostOneElement(SampleIdentifier.findAllWhere(name: sampleIdString)) ?:
                             sampleIdentifierService.parseAndFindOrSaveSampleIdentifier(sampleIdString, project)).sample,
-                    seqType: seqType,
-                    pipelineVersion: SoftwareToolService.getBaseCallingTool(pipelineVersionString).softwareTool,
-                    kitInfoReliability: kitInfoReliability,
+                    seqType              : seqType,
+                    pipelineVersion      : SoftwareToolService.getBaseCallingTool(pipelineVersionString).softwareTool,
+                    kitInfoReliability   : kitInfoReliability,
                     libraryPreparationKit: libraryPreparationKit,
-                    libraryName: libraryName,
+                    libraryName          : libraryName,
                     normalizedLibraryName: normalizedLibraryName,
             ]
             if (seqType.hasAntibodyTarget) {
@@ -481,12 +485,22 @@ class MetadataImportService {
     }
 
     private static void importDataFiles(MetadataValidationContext context, RunSegment runSegment, SeqTrack seqTrack, Collection<Row> seqTrackRows) {
-        Map<Integer, Collection<Row>> seqTrackRowsByMateNumber = seqTrackRows.groupBy { Integer.valueOf(extractMateNumber(it).value) }
-        assert seqTrackRows.size() == seqTrack.seqType.libraryLayout.mateCount
+        Map<String, Collection<Row>> seqTrackRowsByMateNumber = seqTrackRows.groupBy {
+            extractMateNumber(it).value
+        }
+        assert seqTrackRowsByMateNumber.findAll {
+            !it.key.toUpperCase(Locale.ENGLISH).startsWith('I')
+        }.size() == seqTrack.seqType.libraryLayout.mateCount
 
-        seqTrackRowsByMateNumber.each { Integer mateNumber, List<Row> rows ->
+        seqTrackRowsByMateNumber.each { String mateNumber, List<Row> rows ->
+            Matcher matcher = mateNumber =~ MATE_NUMBER_EXPRESSION
+            assert matcher
             Row row = exactlyOneElement(rows)
+
             Path file = context.directoryStructure.getDataFilePath(context, row)
+            String mate = matcher.group('number')
+            boolean indexFile = matcher.group('index')
+
             DataFile dataFile = new DataFile(
                     pathName: '',
                     fileName: file.fileName.toString(),
@@ -496,7 +510,8 @@ class MetadataImportService {
                     project: seqTrack.project,
                     dateExecuted: seqTrack.run.dateExecuted,
                     used: true,
-                    mateNumber: mateNumber,
+                    mateNumber: mate,
+                    indexFile: indexFile,
                     run: seqTrack.run,
                     runSegment: runSegment,
                     seqTrack: seqTrack,
@@ -529,14 +544,6 @@ class MetadataImportService {
     private static Integer tryParseInt(String string, Integer fallbackValue) {
         try {
             return Integer.valueOf(string?.trim())
-        } catch (NumberFormatException e) {
-            return fallbackValue
-        }
-    }
-
-    private static Long tryParseLong(String string, Long fallbackValue) {
-        try {
-            return Long.valueOf(string?.trim())
         } catch (NumberFormatException e) {
             return fallbackValue
         }
@@ -579,15 +586,8 @@ class MetadataImportService {
 
     static ExtractedValue extractMateNumber(Row row) {
         Cell mateNumberCell = row.getCellByColumnTitle(MATE.name())
-        int mateNumber
-
         if (mateNumberCell) {
-            try {
-                mateNumber = (mateNumberCell.text).toInteger()
-            } catch (NumberFormatException ignored) {
-                return null
-            }
-            return new ExtractedValue(Integer.toString(mateNumber), [mateNumberCell] as Set)
+            return new ExtractedValue(mateNumberCell.text, [mateNumberCell] as Set)
         }
         return null
     }
@@ -606,6 +606,7 @@ class MetadataImportService {
 }
 
 @TupleConstructor
+@ToString(includePackage=false, includeNames=true)
 class ExtractedValue {
 
     final String value
@@ -614,7 +615,6 @@ class ExtractedValue {
      * The cells the value has been extracted from
      */
     final Set<Cell> cells
-
 }
 
 @TupleConstructor
@@ -630,8 +630,8 @@ class ValidateAndImportResult {
 
 @TupleConstructor
 class MultiImportFailedException extends RuntimeException {
+
     final List<MetadataValidationContext> failedValidations
 
     final List<Path> allPaths
-
 }

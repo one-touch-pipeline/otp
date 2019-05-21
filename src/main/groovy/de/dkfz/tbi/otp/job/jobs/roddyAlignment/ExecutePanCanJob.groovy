@@ -83,7 +83,7 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
         List<File> vbpDataFiles = []
 
         roddyBamFile.seqTracks.each { SeqTrack seqTrack ->
-            List<DataFile> dataFiles = DataFile.findAllBySeqTrack(seqTrack)
+            List<DataFile> dataFiles = DataFile.findAllBySeqTrackAndIndexFile(seqTrack, false)
             assert seqTrack.seqType.libraryLayout.mateCount == dataFiles.size()
             dataFiles.sort { it.mateNumber }.each { DataFile dataFile ->
                 String pathName = lsdfFilesService.getFileViewByPidPath(dataFile)

@@ -34,9 +34,19 @@ import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 @Component
 class MateNumberValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
+    static final private String MATE_NUMBER_EXPRESSION = /^(i|I)?[1-9]\d*$/
+
+    static final String ALLOWED_VALUE_POSTFIX = "must be a positive integer (value >= 1), which may be prefixed by an 'I'/'i' to indicate, that it is an index file"
+
+    static final String ERROR_NOT_PROVIDED = "The mate number must be provided and ${ALLOWED_VALUE_POSTFIX}"
+
+    static final String ERROR_INVALID_VALUE_SUMMARY = "At least one mate number is not a positive integer number, probably prefixed by an 'I'/'i'"
+
     @Override
     Collection<String> getDescriptions() {
-        return ['The mate number is a positive integer (value >=1).']
+        return [
+                ERROR_NOT_PROVIDED,
+        ]
     }
 
     @Override
@@ -45,14 +55,15 @@ class MateNumberValidator extends SingleValueValidator<MetadataValidationContext
     }
 
     @Override
-    void checkColumn(MetadataValidationContext context) { }
+    void checkColumn(MetadataValidationContext context) {
+    }
 
     @Override
     void validateValue(MetadataValidationContext context, String mateNumber, Set<Cell> cells) {
         if (!mateNumber) {
-            context.addProblem(cells, Level.ERROR, "The mate number must be provided and must be a positive integer (value >= 1).")
-        } else if (!mateNumber.isInteger() || mateNumber.toInteger() < 1) {
-            context.addProblem(cells, Level.ERROR, "The mate number ('${mateNumber}') must be a positive integer (value >= 1).","At least one mate number is not a positive integer number.")
+            context.addProblem(cells, Level.ERROR, ERROR_NOT_PROVIDED)
+        } else if (!(mateNumber ==~ MATE_NUMBER_EXPRESSION)) {
+            context.addProblem(cells, Level.ERROR, "The mate number ('${mateNumber}') ${ALLOWED_VALUE_POSTFIX}", ERROR_INVALID_VALUE_SUMMARY)
         }
     }
 }

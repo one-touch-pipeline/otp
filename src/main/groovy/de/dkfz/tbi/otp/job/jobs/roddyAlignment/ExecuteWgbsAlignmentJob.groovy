@@ -80,7 +80,7 @@ class ExecuteWgbsAlignmentJob extends AbstractRoddyAlignmentJob implements AutoR
 
         builder << HEADER
 
-        builder << DataFile.findAllBySeqTrackInList(roddyBamFile.seqTracks as List).sort { it.mateNumber }.collect { DataFile dataFile ->
+        builder << DataFile.findAllBySeqTrackInListAndIndexFile(roddyBamFile.seqTracks as List, false).sort { it.mateNumber }.collect { DataFile dataFile ->
             File file = new File(lsdfFilesService.getFileViewByPidPath(dataFile))
             LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
             assert dataFile.fileSize == file.length()

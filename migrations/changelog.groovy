@@ -224,4 +224,6 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2019/addNotificationFlagsToProject.groovy'
+
+    include file: 'changelogs/2019/OTP-3149-index-files.groovy'
 }

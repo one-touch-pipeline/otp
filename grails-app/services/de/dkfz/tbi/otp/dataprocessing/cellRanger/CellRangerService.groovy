@@ -101,7 +101,7 @@ class CellRangerService {
             it.id
         }.withIndex(1).collect { SeqTrack seqTrack, int laneCounter ->
             String formattedLaneNumber = String.valueOf(laneCounter).padLeft(3, '0')
-            seqTrack.dataFiles.each { DataFile dataFile ->
+            seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile dataFile ->
                 String fileName = "${sampleName}_S1_L${formattedLaneNumber}_R${dataFile.mateNumber}_${formattedLaneNumber}.fastq.gz"
                 Path link = sampleDirectory.resolve(fileName)
                 Path target = fileSystem.getPath(lsdfFilesService.getFileViewByPidPath(dataFile))

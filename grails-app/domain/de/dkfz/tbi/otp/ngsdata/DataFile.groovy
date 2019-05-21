@@ -83,6 +83,8 @@ class DataFile implements Commentable, Entity {
 
     Integer mateNumber
 
+    boolean indexFile = false
+
     Comment comment
 
     /** @deprecated OTP-2311: Redundant with seqTrack.run  */
@@ -183,7 +185,7 @@ class DataFile implements Commentable, Entity {
     }
 
     String getReadName() {
-        return "R${mateNumber}"
+        return "${indexFile ? 'I' : 'R'}${mateNumber}"
     }
 
     static mapping = {
