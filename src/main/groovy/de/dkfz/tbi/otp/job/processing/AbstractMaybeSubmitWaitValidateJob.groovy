@@ -49,18 +49,19 @@ abstract class AbstractMaybeSubmitWaitValidateJob extends AbstractMultiJob {
         }
     }
 
-    protected String createExceptionString(Map<ClusterJobIdentifier,
-            String> failedClusterJobs, Collection<? extends ClusterJobIdentifier> finishedClusterJobs) {
-        """
-${failedClusterJobs.size()} of ${finishedClusterJobs.size()} cluster jobs failed:
+    @SuppressWarnings("AssignCollectionSort")
+    protected String createExceptionString(Map<ClusterJobIdentifier, String> failedClusterJobs, Collection<? extends ClusterJobIdentifier> finishedClusterJobs) {
+        Comparator sortByClusterJobId = { ClusterJobIdentifier identifier1, ClusterJobIdentifier identifier2 ->
+            identifier1.clusterJobId <=> identifier2.clusterJobId
+        } as Comparator
 
-${
-    failedClusterJobs.sort(
-            { ClusterJobIdentifier identifier1, ClusterJobIdentifier identifier2 -> identifier1.clusterJobId <=> identifier2.clusterJobId } as Comparator
-    ).collect { ClusterJobIdentifier clusterJobIdentifier, String reason ->
-        "${clusterJobIdentifier}: ${reason}\n${"Log file: ${ClusterJob.findByClusterJobIdentifier(clusterJobIdentifier).jobLog}" }\n"
-    }.join("\n")
-}"""
+        String failedJobsOfTotalJobs = "${failedClusterJobs.size()} of ${finishedClusterJobs.size()} cluster jobs failed:"
+
+        List<String> failedClusterJobsDetails = failedClusterJobs.sort(sortByClusterJobId).collect { ClusterJobIdentifier clusterJobIdentifier, String reason ->
+            "${clusterJobIdentifier}: ${reason}\n${"Log file: ${ClusterJob.findByClusterJobIdentifier(clusterJobIdentifier, processingStep).jobLog}" }\n"
+        }
+
+        return "\n${failedJobsOfTotalJobs}\n\n${failedClusterJobsDetails.join("\n")}"
     }
 
     @Override
@@ -73,7 +74,7 @@ ${
         return failedOrNotFinishedClusterJobs(
                 ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
         ).collect { ClusterJobIdentifier identifier, String error ->
-            return ClusterJob.findByClusterJobIdentifier(identifier)
+            return ClusterJob.findByClusterJobIdentifier(identifier, processingStep)
         }
     }
 

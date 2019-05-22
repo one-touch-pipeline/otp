@@ -40,9 +40,12 @@ class AbstractMaybeSubmitWaitValidateJobIntegrationTests extends TestCase {
     ClusterJobService clusterJobService
     AbstractMaybeSubmitWaitValidateJob abstractMaybeSubmitWaitValidateJob
     ConfigService configService
+    ProcessingStep processingStep
 
     void setupData() {
         abstractMaybeSubmitWaitValidateJob = [:] as AbstractMaybeSubmitWaitValidateJob
+        processingStep = DomainFactory.createProcessingStep()
+        abstractMaybeSubmitWaitValidateJob.setProcessingStep(processingStep)
     }
 
     @Test
@@ -50,9 +53,6 @@ class AbstractMaybeSubmitWaitValidateJobIntegrationTests extends TestCase {
         setupData()
         Realm realm = DomainFactory.createRealm()
         assert realm.save([flush: true])
-
-        ProcessingStep processingStep = DomainFactory.createAndSaveProcessingStep()
-        assert processingStep
 
         ClusterJob clusterJob1 = clusterJobService.createClusterJob(realm, "1111", configService.getSshUser(), processingStep)
         clusterJob1.jobLog = "/test-job1.log"

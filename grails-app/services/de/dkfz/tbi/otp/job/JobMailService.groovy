@@ -84,7 +84,7 @@ class JobMailService {
         List<ClusterJobIdentifier> clusterJobIdentifiers = ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
         Collection<ClusterJobIdentifier> clusterJobIdentifiersToCheck = jobStatusLoggingService.failedOrNotFinishedClusterJobs(step, clusterJobIdentifiers)
         Collection<ClusterJob> clusterJobsToCheck = clusterJobIdentifiersToCheck.collect {
-            ClusterJob.findByClusterJobIdentifier(it)
+            ClusterJob.findByClusterJobIdentifier(it, step)
         }
 
         int restartedStepCount = restartCount(step)

@@ -233,7 +233,7 @@ abstract class AbstractJobImpl implements Job {
                 sendStep,
                 ClusterJobIdentifier.asClusterJobIdentifierList(clusterJobs)
         ).collect { ClusterJobIdentifier identifier ->
-            return ClusterJob.findByClusterJobIdentifier(identifier)
+            return ClusterJob.findByClusterJobIdentifier(identifier, sendStep)
         }
     }
 }

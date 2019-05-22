@@ -396,10 +396,11 @@ class ClusterJob implements Entity {
         return value ? HH_MM_SS.print(new Period(value.getMillis())) : NOT_AVAILABLE
     }
 
-    static ClusterJob findByClusterJobIdentifier(ClusterJobIdentifier identifier) {
+    static ClusterJob findByClusterJobIdentifier(ClusterJobIdentifier identifier, ProcessingStep processingStep) {
         return exactlyOneElement(findAllWhere(
                 realm: identifier.realm,
                 clusterJobId: identifier.clusterJobId,
+                processingStep: processingStep,
         ))
     }
 

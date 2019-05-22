@@ -48,8 +48,8 @@ class ClusterJobIdentifier {
         this(identifier.realm, identifier.clusterJobId)
     }
 
-    ClusterJobIdentifier(final ClusterJob identifier) {
-        this(identifier.realm, identifier.clusterJobId)
+    ClusterJobIdentifier(final ClusterJob clusterJob) {
+        this(clusterJob.realm, clusterJob.clusterJobId)
     }
 
     @Override

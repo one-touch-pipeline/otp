@@ -51,7 +51,7 @@ class AbstractJobImplSpec extends Specification implements DataTest {
     AbstractJobImpl abstractJobImpl
     TestConfigService configService
 
-    Map processingStepHierarchy
+    Map<String, ProcessingStep> processingStepHierarchy
 
     void setup() {
         processingStepHierarchy = createProcessingStepWithHierarchy()
@@ -105,7 +105,7 @@ class AbstractJobImplSpec extends Specification implements DataTest {
         [clusterJobSend] == abstractJobImpl.failedOrNotFinishedClusterJobs()
     }
 
-    private Map createProcessingStepWithHierarchy() {
+    private Map<String, ProcessingStep> createProcessingStepWithHierarchy() {
         ProcessingStep send = DomainFactory.createProcessingStepWithUpdates()
 
         ProcessingStep wait = DomainFactory.createProcessingStep(process: send.process, previous: send)
@@ -115,7 +115,7 @@ class AbstractJobImplSpec extends Specification implements DataTest {
         DomainFactory.createProcessingStepWithUpdates(validate)
 
         return [
-                send : send,
+                send: send,
                 wait: wait,
                 validate: validate,
         ]

@@ -52,6 +52,6 @@ class ClusterJobSpec extends Specification implements DataTest {
         )
 
         expect:
-        clusterJob.findByClusterJobIdentifier(identifier) == clusterJob
+        clusterJob.findByClusterJobIdentifier(identifier, clusterJob.processingStep) == clusterJob
     }
 }
