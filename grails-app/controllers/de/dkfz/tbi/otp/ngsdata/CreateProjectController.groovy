@@ -65,7 +65,7 @@ class CreateProjectController {
                         processingPriority: cmd.processingPriority,
                         tumorEntity: cmd.tumorEntity,
                         projectInfoFile: cmd.projectInfoFile,
-                        speciesWithStrain: SpeciesWithStrain.get(cmd.speciesWithStrain),
+                        speciesWithStrain: cmd.speciesWithStrain,
                 )
                 Project project = projectService.createProject(projectParams)
                 projectSelectionService.setSelectedProject([project], project.name)
@@ -102,7 +102,7 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     QcThresholdHandling qcThresholdHandling
     TumorEntity tumorEntity
     List<String> projectCategories = [].withLazyDefault { new String() }
-    long speciesWithStrain
+    SpeciesWithStrain speciesWithStrain
     MultipartFile projectInfoFile
     String description
     String submit

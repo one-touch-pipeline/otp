@@ -33,10 +33,6 @@ ALTER TABLE species_with_strain
 ALTER TABLE species_with_strain
     ADD CONSTRAINT FK_species_with_strain_id__strain FOREIGN KEY (strain_id) REFERENCES strain(id);
 
-
-ALTER TABLE project
-    ADD COLUMN strain_id bigint;
-
 CREATE TABLE common_name (
     id bigint NOT NULL PRIMARY KEY,
     version bigint NOT NULL,
@@ -51,3 +47,9 @@ ALTER TABLE species
 
 ALTER TABLE species
     ADD COLUMN common_name_id bigint;
+
+ALTER TABLE species
+    ADD CONSTRAINT FK_species__common_name_id FOREIGN KEY (common_name_id) REFERENCES common_name(id);
+
+ALTER TABLE species
+    ALTER COLUMN common_name_id SET NOT NULL;
