@@ -27,7 +27,9 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.LibraryLayout
 import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.util.spreadsheet.validation.Level
@@ -39,12 +41,20 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class SeqTypeBamValidatorSpec extends Specification implements DataTest {
 
+    SeqTypeBamValidator service
+
     @Override
     Class[] getDomainClassesToMock() {
         [
                 SeqType,
         ]
     }
+
+    void setup() {
+        service = new SeqTypeBamValidator()
+        service.seqTypeService = new SeqTypeService()
+    }
+
 
     void 'validate, when column SEQUENCING_TYPE missing, then add expected problem'() {
         given:
@@ -59,7 +69,7 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
         ]
 
         when:
-        new SeqTypeBamValidator().validate(context)
+        service.validate(context)
 
         then:
         containSame(context.problems, expectedProblems)
@@ -77,7 +87,33 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
         DomainFactory.createSeqType([name: SEQ_TYPE_NAME])
 
         when:
-        new SeqTypeBamValidator().validate(context)
+        service.validate(context)
+
+        then:
+        context.problems.empty
+    }
+
+    void 'validate, when column exist and seqType is registered in OTP as import alias, succeeds'() {
+        given:
+        String SEQ_TYPE_NAME = "seqTypeName"
+
+        BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
+                "${SEQUENCING_TYPE}\n" +
+                        "${SEQ_TYPE_NAME}\n"
+        )
+
+        DomainFactory.createDomainWithImportAlias(SeqType,
+                [
+                        importAlias: [SEQ_TYPE_NAME],
+                        displayName  : SEQ_TYPE_NAME,
+                        dirName      : "seqTypeDirName",
+                        roddyName    : null,
+                        libraryLayout: LibraryLayout.SINGLE,
+                        singleCell   : false,
+        ])
+
+        when:
+        service.validate(context)
 
         then:
         context.problems.empty
@@ -93,7 +129,7 @@ class SeqTypeBamValidatorSpec extends Specification implements DataTest {
         )
 
         when:
-        new SeqTypeBamValidator().validate(context)
+        service.validate(context)
 
         then:
         Problem problem = exactlyOneElement(context.problems)

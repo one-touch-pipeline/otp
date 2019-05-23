@@ -47,6 +47,8 @@ class BamMetadataImportService {
 
     FileSystemService fileSystemService
 
+    SeqTypeService seqTypeService
+
     /**
      * @return A collection of descriptions of the validations which are performed
      */
@@ -112,7 +114,7 @@ class BamMetadataImportService {
                 }
                 assert sample: "No sample found for ${_individual} and ${_sampleType} in ${_project}"
 
-                SeqType seqType = SeqType.findByNameAndLibraryLayoutAndSingleCell(_seqType, libraryLayout, false)
+                SeqType seqType = seqTypeService.findByNameOrImportAlias(_seqType, [libraryLayout: LibraryLayout.findByName(libraryLayout), singleCell: false])
                 assert seqType : "No seqtype found for ${_seqType}, ${libraryLayout} and bulk"
 
                 ReferenceGenome referenceGenome = ReferenceGenome.findByName(_referenceGenome)

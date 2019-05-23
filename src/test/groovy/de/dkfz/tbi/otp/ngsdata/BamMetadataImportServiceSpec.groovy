@@ -166,6 +166,7 @@ class BamMetadataImportServiceSpec extends Specification implements DataTest {
             getBeansOfType(BamMetadataValidator) >> [:]
         }
         service.fileSystemService = new TestFileSystemService()
+        service.seqTypeService = new SeqTypeService()
         service.samplePairDeciderService = Mock(SamplePairDeciderService) {
             1 * findOrCreateSamplePairs(_)
         }
