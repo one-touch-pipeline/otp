@@ -152,6 +152,7 @@ grails.plugin.springsecurity.logout.additionalHandlerNames = [
         'dicomAuditLogoutHandler',
 ]
 
+//databasemigration configuration
 grails.plugin.databasemigration.changelogLocation = 'migrations'
 grails.plugin.databasemigration.changelogFileName = 'migration-wrapper.groovy'
 grails.plugin.databasemigration.updateOnStart = true
@@ -162,6 +163,15 @@ grails.plugin.databasemigration.excludeObjects = [
         'sequences',
         'seed_me_checksum',
 ]
+environments {
+    WORKFLOW_TEST {
+        grails.plugin.databasemigration.updateOnStart = false
+    }
+    test {
+        grails.plugin.databasemigration.updateOnStart = false
+    }
+}
+
 
 // WARNING: This setting (same as this entire application.groovy) has no effect on unit tests. See:
 // * OTP-1126
@@ -182,22 +192,27 @@ grails.databinding.convertEmptyStringsToNull = false
 grails.databinding.trimStrings = false
 
 
-//disable mail sending for tests
+//configure mail sending: disable mail sending for tests
 environments {
     WORKFLOW_TEST {
         grails.mail.disabled=true
-        grails.plugin.databasemigration.updateOnStart = false
     }
     test {
         grails.mail.disabled=true
-        grails.plugin.databasemigration.updateOnStart = false
     }
-
-    //seed
-    grails.plugin.seed.skipPlugins=true
-    grails.plugin.seed.autoSeed=false
 }
 
+//configure seed
+grails.plugin.seed.skipPlugins=true
+grails.plugin.seed.autoSeed=false
+environments {
+    production {
+        //since the check if it is deployed in a war fail, the plugin needs the path relative to the working directory
+        grails.plugin.seed.root="webapps/${appName}/WEB-INF/classes/seed"
+    }
+}
+
+//configure groovy web console
 grails.plugin.console.enabled = true
 environments {
     production {

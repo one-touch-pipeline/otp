@@ -89,7 +89,7 @@ sourceSets {
     }
     main {
         resources {
-            srcDirs 'migrations', 'src/seed'
+            srcDirs 'migrations'
         }
     }
 
@@ -267,6 +267,10 @@ tasks.withType(CodeNarc) {
             compilationClasspath += s.runtimeClasspath //too many dependencies for codenarc tasks except all
         }
     }
+}
+
+processResources {
+    from('src/seed') {into 'seed'}
 }
 
 war {
