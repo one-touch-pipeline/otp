@@ -93,7 +93,8 @@ class ExecuteRoddySophiaJob extends AbstractExecutePanCanJob<SophiaInstance> imp
         cValues.add("possibleControlSampleNamePrefixes:${bamFileControl.sampleType.dirName}")
         cValues.add("controlDefaultReadLength:${controlDefaultReadLength}")
         cValues.add("tumorDefaultReadLength:${tumorDefaultReadLength}")
-        cValues.add("selectSampleExtractionMethod:version_2")
+
+        cValues.addAll(getSampleExtractionVersion2RoddyParameters())
 
         return cValues
     }

@@ -143,7 +143,17 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
         return "CHROMOSOME_INDICES:( ${sortedList.join(' ')} )"
     }
 
-
+    /**
+     * Parameters so Roddy properly parses sample type names containing '_'
+     */
+    protected static List<String> getSampleExtractionVersion2RoddyParameters() {
+        return [
+                "selectSampleExtractionMethod:version_2",
+                "matchExactSampleName:true",
+                "allowSampleTerminationWithIndex:false",
+                "useLowerCaseFilenameForSampleExtraction:false",
+        ]
+    }
 
 
     protected abstract List<String> prepareAndReturnWorkflowSpecificCValues(R roddyResult)

@@ -148,6 +148,10 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 "VCF_NORMAL_HEADER_COL:${bamFileControl.sampleType.dirName}",
                 "VCF_TUMOR_HEADER_COL:${bamFileDisease.sampleType.dirName}",
                 "SEQUENCE_TYPE:${bamFileDisease.seqType.roddyName}",
+                "selectSampleExtractionMethod:version_2",
+                "matchExactSampleName:true",
+                "allowSampleTerminationWithIndex:false",
+                "useLowerCaseFilenameForSampleExtraction:false",
         ]
 
         when:
@@ -240,8 +244,11 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 "VCF_TUMOR_HEADER_COL:${bamFileDisease.sampleType.dirName}",
                 "SEQUENCE_TYPE:${bamFileDisease.seqType.roddyName}",
                 "EXOME_CAPTURE_KIT_BEDFILE:${bedFile}",
+                "selectSampleExtractionMethod:version_2",
+                "matchExactSampleName:true",
+                "allowSampleTerminationWithIndex:false",
+                "useLowerCaseFilenameForSampleExtraction:false",
         ]
-
 
         when:
         List<String> returnedList = job.prepareAndReturnWorkflowSpecificCValues(indelCallingInstance)

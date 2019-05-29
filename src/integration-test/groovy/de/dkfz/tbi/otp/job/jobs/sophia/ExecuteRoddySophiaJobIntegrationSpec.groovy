@@ -104,6 +104,9 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
                 "controlDefaultReadLength:${bamFileControl.getMaximalReadLength()}",
                 "tumorDefaultReadLength:${bamFileDisease.getMaximalReadLength()}",
                 "selectSampleExtractionMethod:version_2",
+                "matchExactSampleName:true",
+                "allowSampleTerminationWithIndex:false",
+                "useLowerCaseFilenameForSampleExtraction:false",
         ]
 
         when:

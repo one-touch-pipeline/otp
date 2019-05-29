@@ -76,10 +76,18 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                 pipeline: DomainFactory.createPanCanPipeline(),
                 referenceGenome: createReferenceGenome()
         )
-        bamFileTumor = DomainFactory.createRoddyBamFile([workPackage: tumorMwp] + createProcessMergedBamFileProperties())
+        MergingWorkPackage controlMwp = DomainFactory.createMergingWorkPackage(
+                seqType: tumorMwp.seqType,
+                pipeline: tumorMwp.pipeline,
+                referenceGenome: tumorMwp.referenceGenome,
+                sample: DomainFactory.createSample([
+                        individual: tumorMwp.individual,
+                ]),
+        )
 
+        bamFileTumor = DomainFactory.createRoddyBamFile([workPackage: tumorMwp] + createProcessMergedBamFileProperties())
         bamFileControl = DomainFactory.createRoddyBamFile(createProcessMergedBamFileProperties() + [
-                workPackage: DomainFactory.createMergingWorkPackage(tumorMwp),
+                workPackage: DomainFactory.createMergingWorkPackage(controlMwp),
                 config     : bamFileTumor.config,
         ])
 
@@ -121,6 +129,15 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
                         individual: tumorMwp.individual,
                 ]),
         )
+        /*
+        Some versions of Roddy have trouble parsing the sample type from the bam file name when it contains '_'.
+        This is checked for in the SampleType constraints, but only upon creation, not modification.
+
+        Note that Indel is unaffected by this change, as it uses its own sample types, defined in its own subclass.
+        This has to be done because Indel checks the sample types in the header of the bam file.
+         */
+        controlMwp.sampleType.name = 'control_test'
+        controlMwp.sampleType.save(flush: true)
 
         bamFileTumor = DomainFactory.createExternallyProcessedMergedBamFile([
                 workPackage      : tumorMwp,
@@ -139,8 +156,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
 
 
     private void commonBamFileSetup() {
-        adaptSampleTypes()
-
         individual = bamFileTumor.individual
         project = individual.project
         sampleTypeControl = bamFileControl.sampleType
@@ -164,8 +179,6 @@ abstract class AbstractBamFilePairAnalysisWorkflowTests extends WorkflowTestCase
         createThresholds()
         setupBamFilesInFileSystem()
     }
-
-    void adaptSampleTypes() { }
 
 
     void createSampleTypeCategories() {
