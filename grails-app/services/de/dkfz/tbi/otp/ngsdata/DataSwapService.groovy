@@ -1382,7 +1382,7 @@ ln -s '${newDirectFileName}' \\
                 log << "\n=====================================================\n"
             }
 
-            bashScriptToMoveFiles << "#rm -rf ${roddyBamFiles[0].baseDirectory}\n"
+            bashScriptToMoveFiles << "#rm -rf ${roddyBamFiles*.baseDirectory.unique().join(" ")}\n"
 
             seqTrackList.each { SeqTrack seqTrack ->
                 dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, enableChecks).get("dirsToDelete")
