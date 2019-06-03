@@ -34,7 +34,7 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
     @Override
     DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {
         Matcher matcher = sampleIdentifier =~ REGEX
-        if (matcher && checkSampleIdentifierConsistency(findSampleIdentifiersByPidAndTissueTypeKey(matcher.group('pid'), matcher.group('tissueTypeKey')))) {
+        if (matcher) {
             return new DefaultParsedSampleIdentifier(
                     'INFORM',
                     matcher.group('pid'),
@@ -55,46 +55,36 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
         return null
     }
 
-    private Collection<SampleIdentifier> findSampleIdentifiersByPidAndTissueTypeKey(String pid, String tissueTypeKey) {
-        Collection<SampleIdentifier> result = SampleIdentifier.createCriteria().list {
-            sample {
-                individual {
-                    eq("pid", pid)
-                }
-            }
-        }.findAll {
-            Matcher matcher = it.name =~ REGEX
-            return matcher.matches() && (matcher.group('tissueTypeKey') == tissueTypeKey)
-        }
-        return result
-    }
-
-    private boolean checkSampleIdentifierConsistency(Collection<SampleIdentifier> sampleIdentifiers) {
-        return sampleIdentifiers.every {
-            return buildSampleTypeDbName(it.name =~ REGEX) == it.sampleType.name
-        }
-    }
-
     private String buildSampleTypeDbName(Matcher matcher) {
         assert matcher.matches()
-        String tissueType = "${InformTissueType.fromKey(matcher.group('tissueTypeKey'))}"
+        List<String> tissueType = []
+        tissueType << InformTissueType.fromKey(matcher.group('tissueTypeKey'))
 
-        if (matcher.group('sampleTypeNumber') != 'X') {
-            tissueType += "0${matcher.group('sampleTypeNumber')}"
+        if (matcher.group('sampleTypeNumber') == 'X') {
+            tissueType << "0X"
+        } else {
+            tissueType << "${matcher.group('sampleTypeNumber')}".padLeft(2,'0')
         }
-        return tissueType
+        tissueType << matcher.group('sampleTypeOrderNumber')
+        tissueType << '-'
+        tissueType << matcher.group('orderNumber').padLeft(2,'0')
+
+        return tissueType.join('')
     }
 
-    private static getPidRegex() {
+    private static String getPidRegex() {
         String treatingCenterId = "([0-9]{3})"
         String patientId = "([0-9]{3})"
         return "(I${treatingCenterId}_${patientId})"
     }
 
     private static String createRegex() {
-        String sampleTypeNumber = "(?<sampleTypeNumber>([0-9X]))"
-        String tissueTypeKey = "(?<tissueTypeKey>([TMCFL]))"
-        String sampleId = "(${sampleTypeNumber}${tissueTypeKey}[0-9]_[DRPI][0-9])"
+        String sampleTypeNumber = "(?<sampleTypeNumber>(([0-9]{1,2})|X))"
+        String tissueTypeKey = "(?<tissueTypeKey>([${InformTissueType.values()*.key.join('')}]))"
+        String sampleTypeOrderNumber = "(?<sampleTypeOrderNumber>([0-9]))"
+        String orderNumber = "(?<orderNumber>([0-9]{1,2}))"
+
+        String sampleId = "(${sampleTypeNumber}${tissueTypeKey}${sampleTypeOrderNumber}_[DRPI]${orderNumber})"
         return "^" +
                 "(?<pid>${getPidRegex()})_" +
                 "${sampleId}" +

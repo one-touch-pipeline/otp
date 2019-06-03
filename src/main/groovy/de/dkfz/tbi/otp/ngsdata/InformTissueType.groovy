@@ -28,6 +28,7 @@ enum InformTissueType {
     CONTROL                   ('C'),
     FFPE                      ('F'),
     PLASMA                    ('L'),
+    OTHER                     ('X'),
 
     final char key
 
