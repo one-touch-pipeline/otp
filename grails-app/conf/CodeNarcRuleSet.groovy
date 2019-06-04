@@ -27,6 +27,7 @@ final String CONTROLLER = "*Controller.groovy"
 final String SERVICE = "*Service.groovy"
 final String VALIDATOR = "*Validator*"
 final String WORKFLOW_TEST = "*/*workflow-test*/*"
+final String JUNIT_TEST_REG_EXPRESSION = "(.*/workflow-test/.*)|(.*Spec.groovy)"
 final int DEFAULT = 1 //Value for rules that we have no explicitly discussed yet
 final int CRITICAL = 1
 final int HIGH = 2
@@ -570,8 +571,7 @@ All the Rules that will be used for OTP
     LineLength {
         priority = HIGH
         length = 160
-        doNotApplyToFileNames = TEST
-        doNotApplyToFileNames = VALIDATOR
+        doNotApplyToFilesMatching = "(.*/.*test.*/.*)|(.*Validator.*)"
     }
     LineLength {
         priority = LOW
@@ -844,8 +844,7 @@ All the Rules that will be used for OTP
     }
     JUnitLostTest {
         priority = MIDDLE
-        doNotApplyToFileNames = SPEC
-        doNotApplyToFileNames = WORKFLOW_TEST
+        doNotApplyToFilesMatching = JUNIT_TEST_REG_EXPRESSION
     }
     //JUnitPublicField
     //JUnitPublicNonTestMethod
@@ -861,8 +860,7 @@ All the Rules that will be used for OTP
     }
     JUnitTestMethodWithoutAssert {
         priority = MIDDLE
-        doNotApplyToFileNames = SPEC
-        doNotApplyToFileNames = WORKFLOW_TEST
+        doNotApplyToFilesMatching = JUNIT_TEST_REG_EXPRESSION
     }
     JUnitUnnecessarySetUp {
         priority = DEFAULT
