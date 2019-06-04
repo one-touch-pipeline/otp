@@ -32,7 +32,7 @@ final int DEFAULT = 1 //Value for rules that we have no explicitly discussed yet
 final int CRITICAL = 1
 final int HIGH = 2
 final int MIDDLE = 3
-final int LOW = 4
+final int LOW = 3
 
 
 ruleset {
