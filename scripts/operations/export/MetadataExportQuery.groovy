@@ -27,6 +27,10 @@ import org.hibernate.sql.JoinType
 /**
  * This script exports the Fastq metadata entries for a selection of fastq files.
  * output is written to ${ScriptOutputPath}/export/
+ *
+ * WARNING: the MetaDataEntries represent the raw, unedited data that we received during data installation workflow.
+ * They are NOT updated when sampleswaps or data corrections are done.
+ * Thus, you are likely to get outdated data with this export script.
  */
 
 
@@ -76,8 +80,8 @@ File done_flag = new File(output_dir, "${output_name}.done")
 
 
 // metadata columns of interest: everything normally in a metadata file we receive.
-List<String> wanted_columns = MetaDataColumn.values()
-List<MetaDataKey> keys = MetaDataKey.findAllByNameInList(wanted_columns)
+List<MetaDataColumn> wanted_columns = MetaDataColumn.values()
+List<MetaDataKey> keys = MetaDataKey.findAllByNameInList(wanted_columns*.name())
 
 // get metadata columns for our datafiles
 List<MetaDataEntry> metaDataEntries = MetaDataEntry.createCriteria().list {
@@ -96,7 +100,7 @@ output.withPrintWriter { w ->
     w.write("\n")
 
     // combine entries per datafile into a single line.
-    Map<String, String> line_buffer = new HashMap<String, String>()
+    Map<String, String> line_buffer = new HashMap()
     DataFile previous_fastq
 
     for (MetaDataEntry mde : metaDataEntries) {
@@ -125,16 +129,17 @@ output.withPrintWriter { w ->
 
 
 
-private void writeln(Map<String, String> line_buffer, DataFile the_file, PrintWriter w, List<String> wanted_columns) {
+private void writeln(Map<String, String> line_buffer, DataFile the_file, PrintWriter w, List<MetaDataColumn> wanted_columns) {
     line = []
 
     // emit the column values in header-order
-    wanted_columns.each { String header ->
+    wanted_columns.each { MetaDataColumn header ->
         // full path instead of filename for FastQ; other properties as-is
-        if (header == "FASTQ_FILE") {
+        if (header == MetaDataColumn.FASTQ_FILE) {
+            // view-by-pid path probably won't exist anymore if data was withdrawn. This is good because you'll notice it missing.
             line << ctx.lsdfFilesService.getFileViewByPidPath(the_file)
         } else {
-            line << line_buffer.getOrDefault(header, "")
+            line << line_buffer.getOrDefault(header.toString(), "")
         }
     }
 
