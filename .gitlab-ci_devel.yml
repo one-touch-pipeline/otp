@@ -29,7 +29,6 @@ image: otp-tests:3.3.9
 variables:
   GRADLE_OPTS: '-Xms4g -Xms1g'
   ARTIFACTS_BASE_DIRECTORY: 'artifacts'
-  WAR_DIRECTORY: $ARTIFACTS_BASE_DIRECTORY/war
   GRADLE_CACHES: $CI_PROJECT_DIR/.gradle/caches
   GRADLE_WRAPPER: $CI_PROJECT_DIR/.gradle/wrapper
   PREPARE_GRADLE_CACHE1: "mkdir -p $CI_PROJECT_DIR/.gradle/caches $CI_PROJECT_DIR/.gradle/wrapper"
@@ -104,31 +103,15 @@ codenarc:
 
 war:
   <<: *base_template
-  artifacts:
-    <<: *artifacts_template
-    paths:
-      - $ARTIFACTS_BASE_DIRECTORY
   before_script:
     - $PREPARE_GRADLE_CACHE1
     - $PREPARE_GRADLE_CACHE2
     - $PREPARE_GRADLE_CACHE3
     - bashScripts/gitlab-ci/update-Gradle-source.sh
-    - export CI_COMMIT_REF_NAME
-    - export CI_COMMIT_SHA
     - mkdir -p logs/jobs
   script:
     - set -e -o pipefail
-
-    - echo $WAR_DIRECTORY
-    - export WAR_FILE=$WAR_DIRECTORY/otp.war
-
     - ./gradlew war
-
-    - mkdir -p $WAR_DIRECTORY
-    - mv build/libs/otp.war $WAR_DIRECTORY
-    - md5sum "$WAR_FILE" | tee "$WAR_FILE.md5"
-    - sha256sum "$WAR_FILE" | tee "$WAR_FILE.sha256"
-    - git rev-parse HEAD | tee "$WAR_FILE.gitrev"
 
 test migration:
   <<: *base_template
