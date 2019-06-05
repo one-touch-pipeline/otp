@@ -73,7 +73,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
         }
 
         if (cmd.copy) {
-            projectService.copyPanCanAlignmentXml(cmd.basedProject, cmd.seqType, cmd.project)
+            projectService.copyPanCanAlignmentXml(cmd.basedProject, cmd.project, cmd.seqType)
             flash.message = new FlashMessage(g.message(code: "configurePipeline.copy.success") as String)
             redirect(controller: "projectConfig")
         }
@@ -107,7 +107,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
         result << [
                 projects                : projects,
-                pipeline                : pipeline,
 
                 referenceGenome         : referenceGenome,
                 referenceGenomes        : referenceGenomes,
@@ -197,7 +196,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
 
         result << [
                 projects                : projects,
-                pipeline                : pipeline,
                 toolNames               : getToolNames(),
 
                 referenceGenome         : referenceGenome,

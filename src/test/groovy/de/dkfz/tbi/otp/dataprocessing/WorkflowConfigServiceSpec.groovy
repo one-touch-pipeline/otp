@@ -20,42 +20,52 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.job.processing
+package de.dkfz.tbi.otp.dataprocessing
 
-import de.dkfz.tbi.otp.ngsdata.Realm
+import grails.testing.gorm.DataTest
+import spock.lang.Specification
+import spock.lang.Unroll
 
-import java.nio.file.FileSystem
-import java.nio.file.FileSystems
-
-class TestFileSystemService extends FileSystemService {
+class WorkflowConfigServiceSpec extends Specification implements DataTest {
 
     @Override
-    FileSystem getRemoteFileSystemOnDefaultRealm() throws Throwable {
-        return FileSystems.default
+    Class[] getDomainClassesToMock() {
+        []
     }
 
-    @Override
-    FileSystem getRemoteFileSystem(Realm realm) throws Throwable {
-        return FileSystems.default
+    @Unroll
+    void "getNextConfigVersion uses v1_0 when config=#prev"() {
+        given:
+        WorkflowConfigService workflowConfigService = new WorkflowConfigService()
+
+        when:
+        String nextVersion = workflowConfigService.getNextConfigVersion(prev)
+
+        then:
+        nextVersion == "v1_0"
+
+        where:
+        prev << [null, ""]
     }
 
-    @Override
-    FileSystem getFilesystemForProcessingForRealm(Realm realm) throws Throwable {
-        return FileSystems.default
-    }
+    @Unroll
+    void "getNextConfigVersion increases the version properly (#active -> #expect)"() {
+        given:
+        WorkflowConfigService workflowConfigService = new WorkflowConfigService()
 
-    @Override
-    FileSystem getFilesystemForConfigFileChecksForRealm(Realm realm) throws Throwable {
-        return FileSystems.default
-    }
+        when:
+        String nextVersion = workflowConfigService.getNextConfigVersion(active)
 
-    @Override
-    FileSystem getFilesystemForFastqImport() throws Throwable {
-        return FileSystems.default
-    }
+        then:
+        nextVersion == expect
 
-    @Override
-    FileSystem getFilesystemForBamImport() throws Throwable {
-        return FileSystems.default
+        where:
+        active   | expect
+        "v1_0"   | "v1_1"
+        "v2_0"   | "v2_1"
+        "vA_0"   | "vA_1"
+        "v4_9"   | "v4_10"
+        "v1_2_3" | "v1_3"
+        "1_2"    | "1_3"
     }
 }

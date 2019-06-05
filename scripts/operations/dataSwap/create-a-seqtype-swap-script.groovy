@@ -109,7 +109,7 @@ StringBuilder log = new StringBuilder()
 String swapLabel = "${swapLabel}"
 final Path SCRIPT_OUTPUT_DIRECTORY = ctx.configService.getScriptOutputPath().toPath().resolve('sample_swap').resolve(swapLabel)
 ctx.fileService.createDirectoryRecursively(SCRIPT_OUTPUT_DIRECTORY)
-ctx.fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, ctx.fileService.GROUP_WRITABLE_EXECUTABLE_PERMISSION)
+ctx.fileService.setPermission(SCRIPT_OUTPUT_DIRECTORY, ctx.fileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
 
 boolean linkedFilesVerified = false
 

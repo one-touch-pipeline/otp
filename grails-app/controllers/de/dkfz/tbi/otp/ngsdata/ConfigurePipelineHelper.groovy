@@ -26,6 +26,7 @@ import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.WorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -36,6 +37,7 @@ trait ConfigurePipelineHelper {
 
     ProjectSelectionService projectSelectionService
     FileSystemService fileSystemService
+    WorkflowConfigService workflowConfigService
 
     Map checkErrorsIfSubmitted(ConfigurePipelineSubmitCommand cmd, Pipeline pipeline) {
         boolean hasErrors = false
@@ -79,17 +81,10 @@ trait ConfigurePipelineHelper {
     }
 
     Map getValues(Project project, SeqType seqType, Pipeline pipeline) {
-        String configVersion = CollectionUtils.atMostOneElement(
-                RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(
-                        project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1]))?.configVersion
-        if (configVersion) {
-            Set<String> versions = configVersion.split("_")
-            final int MAIN_CONFIG_VERSION_INDEX = 0
-            final int SUB_CONFIG_VERSION_INDEX = 1
-            configVersion = versions[MAIN_CONFIG_VERSION_INDEX] + "_" + (versions[SUB_CONFIG_VERSION_INDEX].toInteger() + 1)
-        } else {
-            configVersion = "v1_0"
-        }
+        List<RoddyWorkflowConfig> latestConfig = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(
+                project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1]
+        )
+        String configVersion = workflowConfigService.getNextConfigVersion(CollectionUtils.atMostOneElement(latestConfig)?.configVersion)
 
         String latestRoddyConfig = ""
         RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
@@ -98,10 +93,11 @@ trait ConfigurePipelineHelper {
             latestRoddyConfig = fs.getPath(config.configFilePath).text
         }
         return [
-                project        : project,
-                seqType        : seqType,
-                config         : configVersion,
-                lastRoddyConfig: latestRoddyConfig,
+                project          : project,
+                seqType          : seqType,
+                pipeline         : pipeline,
+                nextConfigVersion: configVersion,
+                lastRoddyConfig  : latestRoddyConfig,
         ]
     }
 }

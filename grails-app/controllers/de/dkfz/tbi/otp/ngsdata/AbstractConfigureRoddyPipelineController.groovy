@@ -50,8 +50,6 @@ abstract class AbstractConfigureRoddyPipelineController extends AbstractConfigur
         String pluginVersion = getDefaultPluginVersion(cmd.seqType.roddyName)
         String baseProjectConfig = getDefaultBaseProjectConfig(cmd.seqType.roddyName)
         result << [
-                pipeline                : getPipeline(),
-
                 pluginName              : pluginName,
                 defaultPluginName       : pluginName,
 

@@ -107,6 +107,13 @@ class FileSystemService {
         return fileSystem
     }
 
+    FileSystem getRemoteFileSystemOnDefaultRealm() throws Throwable {
+        String realmName = processingOptionService.findOptionAsString(REALM_DEFAULT_VALUE)
+        Realm realm = Realm.findByName(realmName)
+        assert realm: "Default realm could not be resolved"
+        return getFilesystem(realm)
+    }
+
     FileSystem getRemoteFileSystem(Realm realm) throws Throwable {
         assert realm
         return getFilesystem(realm)

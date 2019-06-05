@@ -63,9 +63,9 @@ class FileService {
     ].toSet().asImmutable()
 
     /**
-     * Owner and Group read/write (750)
+     * Owner and Group read/write (770)
      */
-    static final Set<PosixFilePermission> GROUP_WRITABLE_EXECUTABLE_PERMISSION = [
+    static final Set<PosixFilePermission> OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION = [
             PosixFilePermission.OWNER_READ,
             PosixFilePermission.OWNER_WRITE,
             PosixFilePermission.OWNER_EXECUTE,
@@ -344,10 +344,10 @@ class FileService {
             Files.delete(p)
         }
 
-        Files.createFile(p, PosixFilePermissions.asFileAttribute(FileService.GROUP_WRITABLE_EXECUTABLE_PERMISSION))
+        Files.createFile(p, PosixFilePermissions.asFileAttribute(FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION))
         // system default umasks prevent 'dangerous' group permissions like group-writable directly upon file creation,
         // set permissions AGAIN to teach 'umask' a lesson who is boss!
-        Files.setPosixFilePermissions(p, FileService.GROUP_WRITABLE_EXECUTABLE_PERMISSION)
+        Files.setPosixFilePermissions(p, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
         return p
     }
 

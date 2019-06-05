@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.*
 import org.springframework.validation.Errors
 import org.springframework.web.multipart.MultipartFile
+import sun.nio.fs.UnixUserPrincipals
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -46,8 +47,7 @@ import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.nio.file.*
-import java.nio.file.attribute.PosixFileAttributes
-import java.nio.file.attribute.PosixFilePermission
+import java.nio.file.attribute.*
 import java.text.SimpleDateFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -583,73 +583,107 @@ class ProjectService {
         )
     }
 
-    private void alignmentHelper(RoddyConfiguration alignmentConfiguration, Pipeline pipeline, String xmlConfig, boolean adapterTrimmingNeeded) {
-        File projectDirectory = alignmentConfiguration.project.getProjectDirectory()
+    private void alignmentHelper(RoddyConfiguration configuration, Pipeline pipeline, String xmlConfig, boolean adapterTrimmingNeeded) {
+        File projectDirectory = configuration.project.getProjectDirectory()
         assert projectDirectory.exists()
 
         File configFilePath = RoddyWorkflowConfig.getStandardConfigFile(
-                alignmentConfiguration.project,
+                configuration.project,
                 pipeline.name,
-                alignmentConfiguration.seqType,
-                alignmentConfiguration.pluginVersion,
-                alignmentConfiguration.configVersion,
+                configuration.seqType,
+                configuration.pluginVersion,
+                configuration.configVersion,
         )
         File configDirectory = configFilePath.parentFile
 
-        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), alignmentConfiguration.project)
+        executeScript(getScriptBash(configDirectory, xmlConfig, configFilePath), configuration.project)
 
         roddyWorkflowConfigService.importProjectConfigFile(
-                alignmentConfiguration.project,
-                alignmentConfiguration.seqType,
-                "${alignmentConfiguration.pluginName}:${alignmentConfiguration.pluginVersion}",
+                configuration.project,
+                configuration.seqType,
+                roddyWorkflowConfigService.formatPluginVersion(configuration.pluginName, configuration.pluginVersion),
                 pipeline,
                 configFilePath.path,
-                alignmentConfiguration.configVersion,
+                configuration.configVersion,
                 adapterTrimmingNeeded,
         )
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void copyPanCanAlignmentXml(Project basedProject, SeqType seqType, Project project) {
-        ReferenceGenomeProjectSeqType refSeqType = ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(basedProject, seqType)
-        assert refSeqType
+    private ReferenceGenomeProjectSeqType copyReferenceGenomeProjectSeqType(Project baseProject, Project targetProject, SeqType seqType) {
+        ReferenceGenomeProjectSeqType baseRefGenSeqType = ReferenceGenomeProjectSeqType.getConfiguredReferenceGenomeProjectSeqType(baseProject, seqType)
+        assert baseRefGenSeqType
 
-        deprecateAllReferenceGenomesByProjectAndSeqType(project, seqType)
+        deprecateAllReferenceGenomesByProjectAndSeqType(targetProject, seqType)
 
-        ReferenceGenomeProjectSeqType refSeqType1 = new ReferenceGenomeProjectSeqType()
-        refSeqType1.project = project
-        refSeqType1.seqType = refSeqType.seqType
-        refSeqType1.referenceGenome = refSeqType.referenceGenome
-        refSeqType1.sampleType = refSeqType.sampleType
-        refSeqType1.statSizeFileName = refSeqType.statSizeFileName
-        refSeqType1.save(flush: true)
-
-        File projectDirectory = project.getProjectDirectory()
-        assert projectDirectory.exists()
-
-        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
-                Pipeline.Type.ALIGNMENT,
-                Pipeline.Name.PANCAN_ALIGNMENT,
-        ))
-
-        RoddyWorkflowConfig roddyWorkflowConfigBasedProject = RoddyWorkflowConfig.getLatestForProject(basedProject, seqType, pipeline)
-        File configFilePathBasedProject = new File(roddyWorkflowConfigBasedProject.configFilePath)
-        File configDirectory = RoddyWorkflowConfig.getStandardConfigDirectory(project, roddyWorkflowConfigBasedProject.pipeline.name)
-
-        executeScript(getCopyBashScript(configDirectory, configFilePathBasedProject, executionHelperService.getGroup(projectDirectory)), project)
-
-        File configFilePath = new File(configDirectory, configFilePathBasedProject.name)
-        roddyWorkflowConfigService.importProjectConfigFile(
-                project,
-                roddyWorkflowConfigBasedProject.seqType,
-                roddyWorkflowConfigBasedProject.pluginVersion,
-                roddyWorkflowConfigBasedProject.pipeline,
-                configFilePath.path,
-                roddyWorkflowConfigBasedProject.configVersion,
-                roddyWorkflowConfigBasedProject.adapterTrimmingNeeded,
+        ReferenceGenomeProjectSeqType refGenProjectSeqType = new ReferenceGenomeProjectSeqType(
+            project: targetProject,
+            seqType: baseRefGenSeqType.seqType,
+            referenceGenome: baseRefGenSeqType.referenceGenome,
+            sampleType: baseRefGenSeqType.sampleType,
+            statSizeFileName: baseRefGenSeqType.statSizeFileName,
         )
-        project.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
-        project.save(flush: true)
+        refGenProjectSeqType.save(flush: true)
+        return refGenProjectSeqType
+    }
+
+    /**
+     * Parses the version from the String stored in the plugin version
+     * e.g. AlignmentWorkflow:1.2.3 -> 1.2.3
+     * It assumes a single ':' as the separator, the version being the
+     * second field of the split. This complies with the Roddy convention.
+     */
+    private static String parseVersionFromPluginVersionString(String pluginVersion) {
+        return pluginVersion.split(":")[1]
+    }
+
+    private static void adaptConfigurationNameInRoddyConfigFile(Path file, String oldName, String newName) {
+        file.text = file.text.replaceFirst(oldName, newName)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void copyPanCanAlignmentXml(Project baseProject, Project targetProject, SeqType seqType) {
+        copyReferenceGenomeProjectSeqType(baseProject, targetProject, seqType)
+
+        Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT))
+
+        FileSystem remoteFileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+
+        RoddyWorkflowConfig baseProjectRoddyConfig = RoddyWorkflowConfig.getLatestForProject(baseProject, seqType, pipeline)
+        RoddyWorkflowConfig targetProjectConfig = RoddyWorkflowConfig.getLatestForProject(targetProject, seqType, pipeline)
+
+        Path targetConfigDirectory = fileService.toPath(RoddyWorkflowConfig.getStandardConfigDirectory(targetProject, pipeline.name), remoteFileSystem)
+
+        fileService.createDirectoryRecursively(targetConfigDirectory)
+
+        String nextConfigVersion = workflowConfigService.getNextConfigVersion(targetProjectConfig?.configVersion)
+        String pluginVersion = parseVersionFromPluginVersionString(baseProjectRoddyConfig.pluginVersion)
+        String configFileName = RoddyWorkflowConfig.getConfigFileName(pipeline.name, seqType, pluginVersion, nextConfigVersion)
+
+        Path baseProjectConfigFile = remoteFileSystem.getPath(baseProjectRoddyConfig.configFilePath)
+        Path targetProjectConfigFile = remoteFileSystem.getPath(targetConfigDirectory.toString(), configFileName)
+        assert Files.notExists(targetProjectConfigFile): "A file with the planned filename already exists (${targetProjectConfigFile})"
+
+        Files.copy(baseProjectConfigFile, targetProjectConfigFile)
+
+        fileService.setPermission(targetProjectConfigFile, FileService.OWNER_AND_GROUP_READ_WRITE_EXECUTE_PERMISSION)
+
+        String nameUsedInConfig = RoddyWorkflowConfig.getNameUsedInConfig(pipeline.name, seqType, baseProjectRoddyConfig.pluginVersion, nextConfigVersion)
+        adaptConfigurationNameInRoddyConfigFile(targetProjectConfigFile, baseProjectRoddyConfig.nameUsedInConfig, nameUsedInConfig)
+
+        fileService.setPermission(targetProjectConfigFile, FileService.DEFAULT_FILE_PERMISSION)
+
+        roddyWorkflowConfigService.importProjectConfigFile(
+                targetProject,
+                baseProjectRoddyConfig.seqType,
+                baseProjectRoddyConfig.pluginVersion,
+                baseProjectRoddyConfig.pipeline,
+                targetProjectConfigFile.toString(),
+                nextConfigVersion,
+                baseProjectRoddyConfig.adapterTrimmingNeeded,
+        )
+
+        targetProject.alignmentDeciderBeanName = AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
+        targetProject.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -726,7 +760,7 @@ class ProjectService {
         return roddyWorkflowConfigService.importProjectConfigFile(
                 configuration.project,
                 configuration.seqType,
-                "${configuration.pluginName}:${configuration.pluginVersion}",
+                roddyWorkflowConfigService.formatPluginVersion(configuration.pluginName, configuration.pluginVersion),
                 pipeline,
                 configFilePath.path,
                 configuration.configVersion,

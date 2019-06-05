@@ -71,7 +71,7 @@ class RoddyWorkflowConfigService {
         assert project : "The project is not allowed to be null"
         assert seqType : "The seqType is not allowed to be null"
         assert pipeline : "The pipeline is not allowed to be null"
-        assert pluginVersionToUse:"The pluginVersionToUse is not allowed to be null"
+        assert pluginVersionToUse: "The pluginVersionToUse is not allowed to be null"
         assert configFilePath : "The configFilePath is not allowed to be null"
         assert configVersion : "The configVersion is not allowed to be null"
 
@@ -109,6 +109,9 @@ class RoddyWorkflowConfigService {
         assert configPerProjectAndSeqType.save(flush: true)
     }
 
+    String formatPluginVersion(String pluginName, String pluginVersion) {
+        return (String) "${pluginName}:${pluginVersion}"
+    }
 
     void validateConfig(RoddyWorkflowConfig config) {
         FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(config.project.realm)

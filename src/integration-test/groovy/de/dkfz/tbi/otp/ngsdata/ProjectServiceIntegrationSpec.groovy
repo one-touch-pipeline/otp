@@ -48,6 +48,7 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.*
 
+import java.nio.channels.Pipe
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
@@ -1084,97 +1085,163 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 1
     }
 
-    void "test copyPanCanAlignmentXml valid input, no reference genome configured already"() {
+    void "copyPanCanAlignmentXml, target project has no previous config"() {
         given:
         setupData()
-        List<Project, SeqType, Project> setupOutput = createValidInputForCopyPanCanAlignmentXml()
-        Project basedProject = setupOutput[0]
-        SeqType seqType = setupOutput[1]
-        Project project = setupOutput[2]
+        Map<String, Object> setup = setupValidInputForCopyPanCanAlignmentXml()
+        Project baseProject = setup['baseProject'] as Project
+        Project targetProject = setup['targetProject'] as Project
+        SeqType seqType = setup['seqType'] as SeqType
+
+        expect: "No previous config or RGPST for targetProject"
+        [] == RoddyWorkflowConfig.findAllByProjectAndSeqType(targetProject, seqType)
+        [] == ReferenceGenomeProjectSeqType.findAllByProjectAndSeqType(targetProject, seqType)
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.copyPanCanAlignmentXml(basedProject, seqType, project)
+            projectService.copyPanCanAlignmentXml(baseProject, targetProject, seqType)
         }
 
-        then:
-        validateCopyPanCanAlignmentXml(project, seqType)
+        then: "RoddyWorkflowConfig created for target project"
+        RoddyWorkflowConfig targetConfig = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAllByProjectAndSeqType(targetProject, seqType))
+        targetConfig.configVersion == "v1_0"
+
+        and: "target project uses PanCan AlignmentDecider"
+        targetProject.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
+
+        and: "file has been copied and adapted"
+        Path targetConfigFile = Paths.get(targetConfig.configFilePath)
+        Files.exists(targetConfigFile)
+        targetConfigFile.text == FileContentHelper.createXmlContentForRoddyWorkflowConfig(targetConfig.getNameUsedInConfig())
+        Files.getPosixFilePermissions(targetConfigFile) == fileService.DEFAULT_FILE_PERMISSION
     }
 
-    void "test copyPanCanAlignmentXml valid input, reference genome configured already"() {
+    void "copyPanCanAlignmentXml, target project has been configured before"() {
         given:
         setupData()
-        List setupOutput = createValidInputForCopyPanCanAlignmentXml()
-        Project basedProject = setupOutput[0]
-        SeqType seqType = setupOutput[1]
-        Project project = setupOutput[2]
-        ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
-                project: project,
+        Map<String, Object> setup = setupValidInputForCopyPanCanAlignmentXml()
+        Project baseProject = setup['baseProject'] as Project
+        Project targetProject = setup['targetProject'] as Project
+        SeqType seqType = setup['seqType'] as SeqType
+        Pipeline pipeline = setup['pipeline'] as Pipeline
+
+        RoddyWorkflowConfig targetWorkflowConfig = DomainFactory.createRoddyWorkflowConfig(
+                project: targetProject,
+                seqType: seqType,
+                pipeline: pipeline,
+                configVersion: "v1_2",
+        )
+
+        ReferenceGenomeProjectSeqType targetRefGenProjectSeqType = DomainFactory.createReferenceGenomeProjectSeqType(
+                project: targetProject,
                 seqType: seqType
         )
 
+        expect: "target project has already been configured once"
+        [targetWorkflowConfig] == RoddyWorkflowConfig.findAllByProjectAndSeqType(targetProject, seqType)
+        [targetRefGenProjectSeqType] == ReferenceGenomeProjectSeqType.findAllByProjectAndSeqType(targetProject, seqType)
+
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.copyPanCanAlignmentXml(basedProject, seqType, project)
+            projectService.copyPanCanAlignmentXml(baseProject, targetProject, seqType)
         }
 
-        then:
-        validateCopyPanCanAlignmentXml(project, seqType)
-        assert referenceGenomeProjectSeqType.deprecatedDate
+        then: "there are multiple deprecated WorkflowConfigs, but only one active"
+        RoddyWorkflowConfig.findAllByProject(targetProject).size() > 1
+        RoddyWorkflowConfig targetConfig = CollectionUtils.exactlyOneElement(RoddyWorkflowConfig.findAllByProjectAndObsoleteDateIsNull(targetProject))
+        targetConfig.configVersion == "v1_3"
+
+        and: "target project uses PanCan AlignmentDecider"
+        targetProject.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
+
+        and: "file has been copied and adapted"
+        Path targetConfigFile = Paths.get(targetConfig.configFilePath)
+        Files.exists(targetConfigFile)
+        targetConfigFile.text == FileContentHelper.createXmlContentForRoddyWorkflowConfig(targetConfig.getNameUsedInConfig())
+        Files.getPosixFilePermissions(targetConfigFile) == fileService.DEFAULT_FILE_PERMISSION
     }
 
+    void "adaptConfigurationNameInRoddyConfigFile, replaces name used in config properly"() {
+        given:
+        String oldName = "oldNameUsedInConfig"
+        String newName = "newNameUsedInConfig"
 
-    private List createValidInputForCopyPanCanAlignmentXml() {
+        Path configFile = temporaryFolder.newFile().toPath()
+        CreateFileHelper.createRoddyWorkflowConfig(configFile.toFile(), oldName)
+
+        when:
+        projectService.adaptConfigurationNameInRoddyConfigFile(configFile, oldName, newName)
+
+        then:
+        configFile.text == FileContentHelper.createXmlContentForRoddyWorkflowConfig(newName)
+    }
+
+    void "copyReferenceGenomeProjectSeqType, deprecates all RGPSTs of SeqType and copies values of base RGPST"() {
+        given:
+        SeqType seqType = DomainFactory.createSeqType()
+        ReferenceGenomeProjectSeqType baseRGPST = DomainFactory.createReferenceGenomeProjectSeqType(seqType: seqType)
+
+        Project targetProject = DomainFactory.createProject()
+        DomainFactory.createReferenceGenomeProjectSeqType(project: targetProject, seqType: seqType)
+
+        when:
+        ReferenceGenomeProjectSeqType targetRGPST = projectService.copyReferenceGenomeProjectSeqType(baseRGPST.project, targetProject, seqType)
+
+        then:
+        targetRGPST.project == targetProject
+        targetRGPST.seqType == baseRGPST.seqType
+        targetRGPST.referenceGenome == baseRGPST.referenceGenome
+        targetRGPST.sampleType == baseRGPST.sampleType
+        targetRGPST.statSizeFileName == baseRGPST.statSizeFileName
+
+        and: "The only active ReferenceGenomeProjectSeqType is the one we just created"
+        targetRGPST == CollectionUtils.exactlyOneElement(ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndDeprecatedDateIsNull(targetProject, seqType))
+    }
+
+    private Map<String, Object> setupValidInputForCopyPanCanAlignmentXml() {
         SeqType seqType = DomainFactory.createExomeSeqType()
-        Project project = Project.findByName("testProjectAlignment")
 
-        Realm realm = project.realm
-        Project basedProject = createProject(name: 'basedTestProjectAlignment', realm: realm)
+        Realm realm = DomainFactory.createRealm()
+        Project baseProject = createProject(realm: realm)
+        Project targetProject = createProject(realm: realm)
 
-        File tempFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_PAIRED_1.1.51_v1_0.xml")
-        CreateFileHelper.createRoddyWorkflowConfig(tempFile, "PANCAN_ALIGNMENT_WES_PAIRED_pluginVersion:1.1.51_v1_0")
+        String pluginName = "pluginVersion"
+        String pluginVersion = "1.1.51"
+        String configVersion = "v1_2"
 
-        Pipeline pipeline = CollectionUtils.exactlyOneElement(Pipeline.findAllByTypeAndName(
-                Pipeline.Type.ALIGNMENT,
-                Pipeline.Name.PANCAN_ALIGNMENT,
-        ))
+        File baseXmlConfigFile = temporaryFolder.newFile("PANCAN_ALIGNMENT_WES_PAIRED_${pluginVersion}_${configVersion}.xml")
+        CreateFileHelper.createRoddyWorkflowConfig(baseXmlConfigFile, "PANCAN_ALIGNMENT_WES_PAIRED_${pluginName}:${pluginVersion}_${configVersion}")
+
+        Pipeline pipeline = Pipeline.findByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT)
+        assert pipeline: "Pipeline could not be found"
 
         DomainFactory.createRoddyWorkflowConfig(
-                project: basedProject,
+                project: baseProject,
                 seqType: seqType,
                 pipeline: pipeline,
-                configFilePath: tempFile,
-                pluginVersion: 'pluginVersion:1.1.51',
-                configVersion: 'v1_0',
+                configFilePath: baseXmlConfigFile,
+                pluginVersion: "${pluginName}:${pluginVersion}",
+                configVersion: configVersion,
         )
 
         DomainFactory.createReferenceGenomeProjectSeqType(
-                project: basedProject,
+                project: baseProject,
                 seqType: seqType,
         )
 
-        File projectDirectory = basedProject.getProjectDirectory()
-        assert projectDirectory.exists() || projectDirectory.mkdirs()
+        File baseProjectDirectory = baseProject.getProjectDirectory()
+        assert baseProjectDirectory.exists() || baseProjectDirectory.mkdirs()
 
-        File projectDirectory1 = project.getProjectDirectory()
-        assert projectDirectory1.exists() || projectDirectory1.mkdirs()
+        File targetProjectDirectory = targetProject.getProjectDirectory()
+        assert targetProjectDirectory.exists() || targetProjectDirectory.mkdirs()
 
-        return [basedProject, seqType, project]
+        return [
+                "baseProject"  : baseProject,
+                "targetProject": targetProject,
+                "seqType"      : seqType,
+                "pipeline"     : pipeline,
+        ]
     }
-
-    private void validateCopyPanCanAlignmentXml(Project project, SeqType seqType) {
-        List<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineInListAndPluginVersionAndObsoleteDateIsNull(
-                project,
-                seqType,
-                Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT),
-                "pluginVersion:1.1.51"
-        )
-        assert roddyWorkflowConfigs.size() == 1
-        File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
-        assert roddyWorkflowConfig.exists()
-        assert project.alignmentDeciderBeanName == AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT
-    }
-
 
     void "test configureDefaultOtpAlignmentDecider to configureNoAlignmentDeciderProject"() {
         given:

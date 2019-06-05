@@ -74,7 +74,7 @@
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="configurePipeline.config"/></td>
-                    <td><g:textField name="config" value="${config}"/></td>
+                    <td><g:textField name="config" value="${nextConfigVersion}"/></td>
                     <td>-</td>
                     <td><g:message code="configurePipeline.config.info"/></td>
                 </tr>
