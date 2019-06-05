@@ -156,7 +156,7 @@ class NotificationCreator {
             Set<IlseSubmission> ilseSubmissions = seqTracks*.ilseSubmission.findAll() as Set
 
             List<String> recipients = []
-            if (ticket.automaticNotification) {
+            if (ticket.automaticNotification && project.processingNotification) {
                 recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project)
             }
             StringBuilder subject = new StringBuilder("[${processingOptionService.findOptionAsString(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}] ")

@@ -55,14 +55,17 @@
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.creationDate"/></td>
                     <td id="creation-date">${creationDate}</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.lastDate"/></td>
                     <td id="last-received-date">${lastReceivedDate}</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.directory"/></td>
                     <td id="projectDirectory">${directory}</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.analysisDirectory"/></td>
@@ -72,6 +75,7 @@
                             link="${g.createLink(controller: 'projectConfig', action: 'updateAnalysisDirectory', params: ['project.id': project.id])}"
                             value="${analysisDirectory}"/>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.processingPriority"/></td>
@@ -83,6 +87,7 @@
                                 values="${processingPriorities}"
                                 value="${processingPriority ?: ""}"/>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.category"/></td>
@@ -93,6 +98,7 @@
                                 availableValues="${projectCategories}"
                                 selectedValues="${project ? project.projectCategories*.name : ""}"/>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.nameInMetadata"/></td>
@@ -102,10 +108,12 @@
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateNameInMetadataFiles', params: ['project.id': project.id])}"
                                 value="${nameInMetadata}"/>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.group"/></td>
                     <td id="group">${projectGroup}</td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.sampleParser"/></td>
@@ -117,6 +125,7 @@
                                 values="${sampleIdentifierParserBeanNames}"
                                 value="${sampleIdentifierParserBeanName}"/>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.qcThresholdHandling"/></td>
@@ -128,6 +137,7 @@
                                 values="${qcThresholdHandlingDropdown}"
                                 value="${qcThresholdHandling}"/>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.forceCopyFiles"/></td>
@@ -139,6 +149,7 @@
                                 values="${["true","false"]}"
                                 value="${forceCopyFiles}"/>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.fingerPrinting"/></td>
@@ -150,6 +161,7 @@
                                 values="${["true","false"]}"
                                 value="${fingerPrinting}"/>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.phabricatorAlias"/></td>
@@ -158,10 +170,11 @@
                                 link="${g.createLink(controller: 'projectConfig', action: 'updatePhabricatorAlias', params: ['project.id': project.id])}"
                                 value="${project?.phabricatorAlias}"/>
                     </td>
+                    <td></td>
                 </tr>
                 <tr id="descriptionRow">
                     <td  class="myKey" style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="projectOverview.description"/></td>
-                    <td>
+                    <td colspan="2">
                         <div style="overflow: auto; max-height: 20em;">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -179,6 +192,7 @@
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateUnixGroup', params: ['project.id': project.id, 'fieldName': 'unixGroup'])}"
                                 value="${unixGroup}"/>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.costCenter"/></td>
@@ -188,6 +202,7 @@
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateCostCenter', params: ['project.id': project.id, 'fieldName': 'costCenter'])}"
                                 value="${costCenter}"/>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.tumorEntity"/></td>
@@ -199,6 +214,7 @@
                                 values="${tumorEntities}"
                                 value="${tumorEntity}"/>
                     </td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.speciesWithStrain"/></td>
@@ -212,6 +228,31 @@
                                 values="${allSpeciesWithStrain}"
                                 value="${speciesWithStrain}"/>
                     </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.processingNotification.message"/></td>
+                    <td id="processingNotification">
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateProcessingNotification", id: project.id)}"
+                                values="${["true","false"]}"
+                                value="${processingNotification}"/>
+                    </td>
+                    <td><g:message code="projectOverview.processingNotification.message.detail"/></td>
+                </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.qcTrafficLightNotification.message"/></td>
+                    <td id="qcTrafficLightNotification">
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateQcTrafficLightNotification", id: project.id)}"
+                                values="${["true","false"]}"
+                                value="${qcTrafficLightNotification}"/>
+                    </td>
+                    <td><g:message code="projectOverview.qcTrafficLightNotification.message.detail"/></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="projectOverview.customFinalNotification.message"/></td>
@@ -223,11 +264,12 @@
                                 values="${["true","false"]}"
                                 value="${customFinalNotification}"/>
                     </td>
+                    <td><g:message code="projectOverview.customFinalNotification.message.detail"/></td>
                 </tr>
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <tr>
                         <td class="myKey"><g:message code="projectOverview.projectInfos"/></td>
-                        <td id="projectInfo">
+                        <td id="projectInfo" colspan="2">
                             <g:each var="projectInfo" in="${projectInfos}">
                                 <p>
                                     <g:message code="projectOverview.projectInfo.creationDate"/> <g:formatDate date="${projectInfo.dateCreated}" format="yyyy-MM-dd HH:mm:ss" /><br>

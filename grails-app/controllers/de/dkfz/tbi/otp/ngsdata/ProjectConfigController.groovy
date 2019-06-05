@@ -153,6 +153,8 @@ class ProjectConfigController implements CheckAndCall {
                 forceCopyFiles                 : project?.forceCopyFiles,
                 fingerPrinting                 : project?.fingerPrinting,
                 description                    : project?.description,
+                processingNotification         : project?.processingNotification,
+                qcTrafficLightNotification     : project?.qcTrafficLightNotification,
                 customFinalNotification        : project?.customFinalNotification,
                 projectCategories              : ProjectCategory.listOrderByName()*.name,
                 unixGroup                      : project?.unixGroup,
@@ -296,6 +298,22 @@ class ProjectConfigController implements CheckAndCall {
         assert id
         Project project = Project.get(id)
         projectService.updateFingerPrinting(project, value.toBoolean())
+        Map map = [success: true]
+        render map as JSON
+    }
+
+    JSON updateProcessingNotification(Long id, String value) {
+        assert id
+        Project project = Project.get(id)
+        projectService.updateProcessingNotification(project, value.toBoolean())
+        Map map = [success: true]
+        render map as JSON
+    }
+
+    JSON updateQcTrafficLightNotification(Long id, String value) {
+        assert id
+        Project project = Project.get(id)
+        projectService.updateQcTrafficLightNotification(project, value.toBoolean())
         Map map = [success: true]
         render map as JSON
     }

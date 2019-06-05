@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.qcTrafficLight
 
 import grails.testing.gorm.DataTest
@@ -82,6 +81,9 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         final String LINK = 'LINK'
 
         AbstractMergedBamFile bamFile = DomainFactory.createRoddyBamFile([:])
+        bamFile.project.qcTrafficLightNotification = qcTrafficLightNotification
+        bamFile.project.save(flush: true)
+
         String emailSenderSalutation = DomainFactory.createProcessingOptionForEmailSenderSalutation().value
         DomainFactory.createProcessingOptionForNotificationRecipient()
         Set<OtrsTicket> otrsTickets = [
@@ -103,7 +105,6 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                 assert properties.size() == 1
                 assert properties['bamFile'] == bamFile
                 return HEADER
-
             }
             1 * createMessage('notification.template.alignment.qcTrafficBlockedMessage', _) >> { String templateName, Map properties ->
                 assert properties.size() == 3
@@ -134,10 +135,11 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         service.informResultsAreBlocked(bamFile)
 
         where:
-        name                                         | finalNotificationSent | automaticNotification | emails    | subjectHeader  || recipientsCount
-        'without userProjectRole'                    | false                 | true                  | []        | 'TO BE SENT: ' || 1
-        'with userProjectRole'                       | false                 | true                  | ['email'] | ''             || 2
-        'ticket has already send final notification' | true                  | true                  | ['email'] | 'TO BE SENT: ' || 1
-        'ticket has disabled automaticNotification'  | false                 | false                 | ['email'] | 'TO BE SENT: ' || 1
+        name                                          | finalNotificationSent | automaticNotification | qcTrafficLightNotification | emails    | subjectHeader  || recipientsCount
+        'without userProjectRole'                     | false                 | true                  | true                       | []        | 'TO BE SENT: ' || 1
+        'with userProjectRole'                        | false                 | true                  | true                       | ['email'] | ''             || 2
+        'ticket has already send final notification'  | true                  | true                  | true                       | ['email'] | 'TO BE SENT: ' || 1
+        'ticket has disabled automaticNotification'   | false                 | false                 | true                       | ['email'] | 'TO BE SENT: ' || 1
+        'project has disabled automatic notification' | false                 | true                  | false                      | ['email'] | 'TO BE SENT: ' || 1
     }
 }

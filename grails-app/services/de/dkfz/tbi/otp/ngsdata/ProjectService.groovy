@@ -877,6 +877,19 @@ echo 'OK'
         project.customFinalNotification = value
         assert project.save(flush: true)
     }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateProcessingNotification(Project project, boolean value) {
+        project.processingNotification = value
+        assert project.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateQcTrafficLightNotification(Project project, boolean value) {
+        project.qcTrafficLightNotification = value
+        assert project.save(flush: true)
+    }
+
 }
 
 trait ProjectSeqTypeConfiguration {

@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.qcTrafficLight
 
 import grails.gorm.transactions.Transactional
@@ -33,7 +32,6 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 @Transactional
 class QcTrafficLightNotificationService {
 
-
     OtrsTicketService otrsTicketService
 
     CreateNotificationTextService createNotificationTextService
@@ -43,7 +41,6 @@ class QcTrafficLightNotificationService {
     UserProjectRoleService userProjectRoleService
 
     MailHelperService mailHelperService
-
 
     private String createResultsAreBlockedSubject(AbstractMergedBamFile bamFile, boolean toBeSent) {
         StringBuilder subject = new StringBuilder()
@@ -61,7 +58,6 @@ class QcTrafficLightNotificationService {
         return subject.toString()
     }
 
-
     private String createResultsAreBlockedMessage(AbstractMergedBamFile bamFile) {
         return createNotificationTextService.createMessage(
                 "notification.template.alignment.qcTrafficBlockedMessage",
@@ -74,9 +70,11 @@ class QcTrafficLightNotificationService {
     }
 
     void informResultsAreBlocked(AbstractMergedBamFile bamFile) {
-        boolean shouldSendEmailToProjectReceiver = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).find {
+        boolean projectNotification = bamFile.project.qcTrafficLightNotification
+        boolean ticketNotification = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).find {
             !it.finalNotificationSent && it.automaticNotification
         } as boolean
+        boolean shouldSendEmailToProjectReceiver = projectNotification && ticketNotification
         List<String> recipients = shouldSendEmailToProjectReceiver ? userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(bamFile.project) : []
         String subject = createResultsAreBlockedSubject(bamFile, recipients.empty)
         String content = createResultsAreBlockedMessage(bamFile)

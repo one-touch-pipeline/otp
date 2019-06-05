@@ -222,4 +222,6 @@ databaseChangeLog = {
     changeSet(author: "kosnac", id: "OTP-3128-SQL") {
         sqlFile(path: 'changelogs/2019/OTP-3128.sql')
     }
+
+    include file: 'changelogs/2019/addNotificationFlagsToProject.groovy'
 }

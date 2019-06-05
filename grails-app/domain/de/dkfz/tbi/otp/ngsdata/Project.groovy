@@ -67,6 +67,23 @@ class Project implements Commentable, Entity {
 
     boolean fingerPrinting = true
 
+    /**
+     * flag to send  processing notification to end users.
+     *
+     * The mail is send nevertheless to the ticketing system.
+     */
+    boolean processingNotification = true
+
+    /**
+     * flag to send qcTrafficLight notification to end users.
+     *
+     * The mail is send nevertheless to the ticketing system.
+     */
+    boolean qcTrafficLightNotification = true
+
+    /**
+     * flag to send final notification.
+     */
     boolean customFinalNotification = false
 
     Set<ProjectInfo> projectInfos

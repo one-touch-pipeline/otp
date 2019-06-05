@@ -504,15 +504,15 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
     private static final String OTRS_RECIPIENT = HelperUtils.randomEmail
 
     @Unroll
-    void 'sendCustomerNotification sends expected notification'(int dataCase, boolean automaticNotification, OtrsTicket.ProcessingStep notificationStep,
-                                                                List<String> recipients, String subject) {
+    void 'sendCustomerNotification sends expected notification'(int dataCase, boolean automaticNotification, boolean processingNotification,
+                                                                OtrsTicket.ProcessingStep notificationStep, List<String> recipients, String subject) {
         given:
         OtrsTicket ticket
         ProcessingStatus status
         setupData()
         SessionUtils.withNewSession {
             UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
-                    project: createProject(name: 'Project1'),
+                    project: createProject(name: 'Project1', processingNotification: processingNotification),
                     user: DomainFactory.createUser(email: EMAIL),
             )
             Sample sample1 = createSample(
@@ -576,6 +576,12 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                             ),
                             createSeqTrack(sample: sample2),
                     ]
+                    break
+                case 7:
+                    seqTracks = [
+                            createSeqTrack(sample: sample1),
+                    ]
+                    break
             }
 
             ticket = createOtrsTicket(automaticNotification: automaticNotification)
@@ -608,13 +614,14 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
 
         where:
-        dataCase | automaticNotification | notificationStep                       | recipients              | subject
-        1        | true                  | OtrsTicket.ProcessingStep.INSTALLATION | [EMAIL, OTRS_RECIPIENT] | 'Project1 sequencing data installed'
-        2        | false                 | OtrsTicket.ProcessingStep.INSTALLATION | [OTRS_RECIPIENT]        | 'TO BE SENT: Project1 sequencing data installed'
-        3        | true                  | OtrsTicket.ProcessingStep.INSTALLATION | [EMAIL, OTRS_RECIPIENT] | '[S#1234] Project1 sequencing data installed'
-        4        | true                  | OtrsTicket.ProcessingStep.FASTQC       | []                      | null
-        5        | true                  | OtrsTicket.ProcessingStep.ALIGNMENT    | [OTRS_RECIPIENT]        | 'TO BE SENT: Project2 sequencing data aligned'
-        6        | true                  | OtrsTicket.ProcessingStep.SNV          | [OTRS_RECIPIENT]        | 'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called'
+        dataCase | automaticNotification | processingNotification | notificationStep                       | recipients              | subject
+        1        | true                  | true                   | OtrsTicket.ProcessingStep.INSTALLATION | [EMAIL, OTRS_RECIPIENT] | 'Project1 sequencing data installed'
+        2        | false                 | true                   | OtrsTicket.ProcessingStep.INSTALLATION | [OTRS_RECIPIENT]        | 'TO BE SENT: Project1 sequencing data installed'
+        3        | true                  | true                   | OtrsTicket.ProcessingStep.INSTALLATION | [EMAIL, OTRS_RECIPIENT] | '[S#1234] Project1 sequencing data installed'
+        4        | true                  | true                   | OtrsTicket.ProcessingStep.FASTQC       | []                      | null
+        5        | true                  | true                   | OtrsTicket.ProcessingStep.ALIGNMENT    | [OTRS_RECIPIENT]        | 'TO BE SENT: Project2 sequencing data aligned'
+        6        | true                  | true                   | OtrsTicket.ProcessingStep.SNV          | [OTRS_RECIPIENT]        | 'TO BE SENT: [S#1234,9876] Project2 sequencing data SNV-called'
+        7        | true                  | false                  | OtrsTicket.ProcessingStep.INSTALLATION | [OTRS_RECIPIENT]        | 'TO BE SENT: Project1 sequencing data installed'
     }
 
     void 'sendCustomerNotification, with multiple projects, sends multiple notifications'() {
