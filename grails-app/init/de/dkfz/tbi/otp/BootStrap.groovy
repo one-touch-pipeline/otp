@@ -49,6 +49,11 @@ class BootStrap {
 
         propertiesValidationService.validateStartUpProperties()
 
+        if ([Environment.PRODUCTION, Environment.DEVELOPMENT].contains(Environment.getCurrent())) {
+            seedService.installSeedData()
+            UserService.createFirstAdminUserIfNoUserExists()
+        }
+
         if (configService.isJobSystemEnabled()) {
             // startup the scheduler
             log.info("JobSystem is enabled")
@@ -60,11 +65,6 @@ class BootStrap {
         if (Environment.isDevelopmentMode()) {
             // adds the backdoor filter allowing a developer to login without password only in development mode
             SpringSecurityUtils.clientRegisterFilter('backdoorFilter', SecurityFilterPosition.SECURITY_CONTEXT_FILTER.order + 10)
-        }
-
-        if ([Environment.PRODUCTION, Environment.DEVELOPMENT].contains(Environment.getCurrent())) {
-            seedService.installSeedData()
-            UserService.createFirstAdminUserIfNoUserExists()
         }
 
         JSON.registerObjectMarshaller(Enum, { Enum e -> e.name() })
