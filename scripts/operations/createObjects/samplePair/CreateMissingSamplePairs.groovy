@@ -33,7 +33,10 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 //work area
 
 SamplePair.withTransaction {
-    println SamplePair.findMissingDiseaseControlSamplePairs().join('\n')
+    List<SamplePair> samplePairs = SamplePair.findMissingDiseaseControlSamplePairs()
+    samplePairs*.save(flush: true)
+
+    println samplePairs.join('\n')
 
     assert false: "DEBUG: transaction intentionally failed to rollback changes"
 }
