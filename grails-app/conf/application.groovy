@@ -208,7 +208,7 @@ grails.plugin.seed.autoSeed=false
 environments {
     production {
         //since the check if it is deployed in a war fail, the plugin needs the path relative to the working directory
-        grails.plugin.seed.root="webapps/${appName}/WEB-INF/classes/seed"
+        grails.plugin.seed.root="webapps/otp/WEB-INF/classes/seed"
     }
 }
 
@@ -216,6 +216,6 @@ environments {
 grails.plugin.console.enabled = true
 environments {
     production {
-        grails.plugin.console.baseUrl="/${appName}/console"
+        grails.plugin.console.baseUrl="/otp/console"
     }
 }
