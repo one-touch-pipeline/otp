@@ -122,6 +122,7 @@
                                     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                                         <otp:editorSwitch
                                                 template="toggle"
+                                                tooltip="${g.message(code: "${userEntry.fileAccess.toolTipKey}")}"
                                                 link="${g.createLink(controller: "projectUser", action: "toggleAccessToFiles", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
                                                 value="${userEntry.fileAccess.toBoolean()}"/>
                                     </sec:access>
@@ -153,7 +154,7 @@
                         </g:if>
                         <g:else>
                             <td class="small"><span class="icon-${userEntry.otpAccess}"></span></td>
-                            <td class="small"><span class="icon-${userEntry.fileAccess}"></span></td>
+                            <td class="small"><span class="icon-${userEntry.fileAccess}" title="${g.message(code: "${userEntry.fileAccess.toolTipKey}")}"></span></td>
                             <td class="small"><span class="icon-${userEntry.manageUsers}"></span></td>
                             <sec:access expression="hasRole('ROLE_OPERATOR')">
                                 <td class="large"><span class="icon-${userEntry.manageUsersAndDelegate}"></span></td>

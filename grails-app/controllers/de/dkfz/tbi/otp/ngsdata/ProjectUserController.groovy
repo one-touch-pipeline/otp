@@ -170,7 +170,14 @@ class ProjectUserController implements CheckAndCall {
     }
 
     JSON toggleAccessToFiles(ToggleValueCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userProjectRoleService.toggleAccessToFiles(cmd.userProjectRole) })
+        checkErrorAndCallMethod(cmd, {
+            userProjectRoleService.toggleAccessToFiles(cmd.userProjectRole)
+        }, {
+            LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(cmd.userProjectRole.user.username)
+            UserEntry userEntry = new UserEntry(cmd.userProjectRole.user, cmd.userProjectRole.project, ldapUserDetails)
+            userEntry.fileAccess.toolTipKey
+            [tooltip: g.message(code: userEntry.fileAccess.toolTipKey)]
+        })
     }
 
     JSON toggleManageUsers(ToggleValueCommand cmd) {
@@ -204,7 +211,12 @@ class ProjectUserController implements CheckAndCall {
 
 @TupleConstructor
 enum PermissionStatus {
-    APPROVED, PENDING_APPROVAL, PENDING_DENIAL, DENIED
+    APPROVED("projectUser.table.fileAccess.approval.tooltip"),
+    PENDING_APPROVAL("projectUser.table.fileAccess.pending.approval.tooltip"),
+    PENDING_DENIAL("projectUser.table.fileAccess.pending.denial.tooltip"),
+    DENIED("projectUser.table.fileAccess.denial.tooltip")
+
+    final String toolTipKey
 
     @Override
     String toString() {

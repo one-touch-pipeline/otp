@@ -28,5 +28,5 @@
         <button class="toggle"><g:message code="default.button.toggle.label"/></button><br>
         <button class="cancel"><g:message code="default.button.cancel.label"/></button>
     </p>
-    <p class="edit-switch-label"><span class="wordBreak icon-${value}"></span><button class="edit js-edit">&nbsp;</button></p>
+    <p class="edit-switch-label" title="${tooltip ?: ''}"><span class="wordBreak icon-${value}"></span><button class="edit js-edit">&nbsp;</button></p>
 </div>

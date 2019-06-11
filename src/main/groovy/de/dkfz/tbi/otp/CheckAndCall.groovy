@@ -27,13 +27,13 @@ import org.springframework.validation.FieldError
 
 trait CheckAndCall {
 
-    void checkErrorAndCallMethod(Serializable cmd, Closure method) {
+    void checkErrorAndCallMethod(Serializable cmd, Closure method, Closure additionalSuccessReturnValues = { [:] }) {
         Map data
         if (cmd.hasErrors()) {
             data = getErrorData(cmd.errors.getFieldError())
         } else {
             method()
-            data = [success: true]
+            data = [success: true] + additionalSuccessReturnValues()
         }
         render data as JSON
     }

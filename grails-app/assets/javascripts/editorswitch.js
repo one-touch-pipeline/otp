@@ -335,6 +335,9 @@ $(function() {
                     $.each(["label", "editor"], function () {
                         $("p.edit-switch-"+this+" span", outerContainer).removeClass("icon-"+orgVal).addClass("icon-"+invVal);
                     });
+                    if (data.tooltip) {
+                        $("p.edit-switch-label", outerContainer)[0].title = data.tooltip;
+                    }
                     $("input:hidden[name=value]", container).attr("value", invVal);
                 } else {
                     $.otp.warningMessage(data.error);
