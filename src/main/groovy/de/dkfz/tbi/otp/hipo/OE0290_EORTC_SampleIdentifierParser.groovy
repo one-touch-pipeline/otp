@@ -24,10 +24,10 @@ package de.dkfz.tbi.otp.hipo
 import org.springframework.stereotype.Component
 
 @Component
-class Hipo2SampleIdentifierParser extends AbstractHipo2SampleIdentifierParser {
+class OE0290_EORTC_SampleIdentifierParser extends AbstractHipo2SampleIdentifierParser {
 
     @Override
     String createProjectName(String projectNumber) {
-        return "hipo_${projectNumber}"
+        return projectNumber == "M002" ? "OE0290_EORTC" : null
     }
 }

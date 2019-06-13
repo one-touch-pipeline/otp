@@ -21,13 +21,28 @@
  */
 package de.dkfz.tbi.otp.hipo
 
-import org.springframework.stereotype.Component
+import spock.lang.Unroll
 
-@Component
-class Hipo2SampleIdentifierParser extends AbstractHipo2SampleIdentifierParser {
+@SuppressWarnings('JUnitPublicProperty')
+class OE0290_EORTC_SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParserSpec {
 
-    @Override
-    String createProjectName(String projectNumber) {
-        return "hipo_${projectNumber}"
+    OE0290_EORTC_SampleIdentifierParser parser = new OE0290_EORTC_SampleIdentifierParser()
+
+    String validProjectPart = "M002"
+
+    String projectName = "OE0290_EORTC"
+
+    @Unroll
+    void 'tryParse for projectPart, when identifier is #identifier, returns null'() {
+        expect:
+        parser.tryParse(identifier) == null
+
+        where:
+        identifier << [
+                //invalid project
+                'K12K-123ABC-N0-D1',
+                'M02-123ABC-N0-D1',
+                'M002B-123ABC-N0-D1',
+        ]
     }
 }

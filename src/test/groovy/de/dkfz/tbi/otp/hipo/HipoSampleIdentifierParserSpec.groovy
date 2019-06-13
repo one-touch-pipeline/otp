@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.hipo
 
 import spock.lang.Specification
@@ -27,6 +26,7 @@ import spock.lang.Unroll
 
 class HipoSampleIdentifierParserSpec extends Specification {
 
+    @SuppressWarnings('JUnitPublicProperty')
     HipoSampleIdentifierParser parser = new HipoSampleIdentifierParser()
 
     @Unroll

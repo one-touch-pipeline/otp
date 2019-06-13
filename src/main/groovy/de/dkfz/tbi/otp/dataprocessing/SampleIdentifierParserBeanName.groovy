@@ -31,6 +31,7 @@ enum SampleIdentifierParserBeanName {
     HIPO('hipoSampleIdentifierParser', 'HIPO'),
     HIPO2('hipo2SampleIdentifierParser', 'HIPO2'),
     INFORM('informSampleIdentifierParser', 'INFORM'),
+    OE0290_EORTC('OE0290_EORTC_SampleIdentifierParser', 'OE0290_EORTC'),
 
     final String beanName
     final String displayName

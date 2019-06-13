@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.hipo
 
 import org.junit.Test
@@ -28,8 +27,10 @@ import static junit.framework.TestCase.*
 
 class HipoSampleIdentifierParserUnitTest {
 
+    @SuppressWarnings('JUnitPublicProperty')
     HipoSampleIdentifierParser parser = new HipoSampleIdentifierParser()
 
+    @SuppressWarnings(['MethodSize', 'AbcMetric'])
     @Test
     void testTryParse() {
         String sampleName = "H004-ABCD-T1"
@@ -63,7 +64,6 @@ class HipoSampleIdentifierParserUnitTest {
         assertEquals(sampleName, identifier.fullSampleName)
         assertEquals(sampleName, identifier.toString())
 
-
         sampleName = "H035-IJKLMM-B1-D1"
         identifier = parser.tryParse(sampleName)
         assertNotNull(identifier)
@@ -74,7 +74,6 @@ class HipoSampleIdentifierParserUnitTest {
         assertEquals("D1", identifier.analyteTypeAndNumber)
         assertEquals(sampleName, identifier.fullSampleName)
         assertEquals(sampleName, identifier.toString())
-
 
         // Not testing sampleTypeDbName here because there is a dedicated test method for it.
 
