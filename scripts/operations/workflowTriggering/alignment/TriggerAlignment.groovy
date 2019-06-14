@@ -60,12 +60,13 @@ LogThreadLocal.withThreadLog(System.out, {
                 }
             }
             'in'('seqType', [
-                    SeqTypeService.wholeGenomePairedSeqType,
-                    SeqTypeService.exomePairedSeqType,
-                    SeqTypeService.wholeGenomeBisulfitePairedSeqType,
-                    SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
-                    SeqTypeService.rnaPairedSeqType,
-                    SeqTypeService.chipSeqPairedSeqType,
+                    //SeqTypeService.wholeGenomePairedSeqType,
+                    //SeqTypeService.exomePairedSeqType,
+                    //SeqTypeService.wholeGenomeBisulfitePairedSeqType,
+                    //SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
+                    //SeqTypeService.rnaPairedSeqType,
+                    //SeqTypeService.rnaSingleSeqType,
+                    //SeqTypeService.chipSeqPairedSeqType,
             ])
         }
 
