@@ -32,6 +32,7 @@ import de.dkfz.roddy.config.JobLog
 import de.dkfz.roddy.config.ResourceSet
 import de.dkfz.roddy.execution.jobs.*
 import de.dkfz.roddy.tools.BufferValue
+import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
@@ -235,6 +236,9 @@ class ClusterJobSchedulerService {
 
         try {
             jobInfo = jobManager.queryExtendedJobStateById([beJobID]).get(beJobID)
+            if (jobInfo?.jobState == JobState.UNKNOWN) {
+                throw new OtpException("Jobstate is ${JobState.UNKNOWN}")
+            }
         } catch (Throwable e) {
             threadLog?.warn("Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId}, try again", e)
             Thread.sleep(WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS)
