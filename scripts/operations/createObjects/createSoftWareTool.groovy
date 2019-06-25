@@ -19,15 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import org.grails.plugins.web.taglib.ApplicationTagLib
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
-import org.codehaus.groovy.grails.plugins.web.taglib.*
+
+
+//****************************************
+// input
 
 String programName = ''
 String programVersion = ''
 
+
 //****************************************
+//work area
 
 assert programName : 'Please provide a program name'
 assert programVersion : 'Please provide a program version'
