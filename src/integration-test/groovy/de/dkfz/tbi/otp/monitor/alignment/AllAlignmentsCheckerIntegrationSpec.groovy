@@ -29,6 +29,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -36,13 +37,13 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 @Rollback
 @Integration
-class AllRoddyAlignmentsCheckerIntegrationSpec extends Specification implements RoddyRnaFactory {
+class AllAlignmentsCheckerIntegrationSpec extends Specification implements RoddyRnaFactory {
 
 
     void "handle, if SeqTracks given, then return finished RoddyBamFile, call Roddy alignments workflows with correct seqTracks and output SeqTypes not supported by any workflow"() {
         given:
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
-        AllRoddyAlignmentsChecker checker = new AllRoddyAlignmentsChecker()
+        AllAlignmentsChecker checker = new AllAlignmentsChecker()
 
         SeqTrack wrongSeqType = DomainFactory.createSeqTrack()
 
@@ -54,6 +55,15 @@ class AllRoddyAlignmentsCheckerIntegrationSpec extends Specification implements 
                     )
             )
         }
+        DomainFactory.createCellRangerAlignableSeqTypes().collect {
+                DomainFactory.createSeqTrack(
+                        DomainFactory.proxyCellRanger.createMergingWorkPackage(
+                            seqType: it,
+                            pipeline: AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.findOrCreatePipeline(),
+                    )
+            )
+        }
+
         RnaRoddyBamFile rnaRoddyBamFile = createBamFile([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
         ])
@@ -70,7 +80,7 @@ class AllRoddyAlignmentsCheckerIntegrationSpec extends Specification implements 
         List<RoddyBamFile> result = checker.handle(seqTracks, output)
 
         then:
-        1 * output.showUniqueList(AllRoddyAlignmentsChecker.HEADER_NOT_SUPPORTED_SEQTYPES, [wrongSeqType], _)
+        1 * output.showUniqueList(AllAlignmentsChecker.HEADER_NOT_SUPPORTED_SEQTYPES, [wrongSeqType], _)
 
         then:
         1 * output.showWorkflow('PanCanWorkflow')
@@ -84,7 +94,7 @@ class AllRoddyAlignmentsCheckerIntegrationSpec extends Specification implements 
 
     void "handle, if no SeqTracks given, then return empty list and do not create output"() {
         MonitorOutputCollector output = Mock(MonitorOutputCollector)
-        AllRoddyAlignmentsChecker checker = new AllRoddyAlignmentsChecker()
+        AllAlignmentsChecker checker = new AllAlignmentsChecker()
 
         when:
         List<RoddyBamFile> result = checker.handle([], output)

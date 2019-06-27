@@ -29,26 +29,28 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Rollback
 @Integration
-abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specification {
+abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
 
-    AbstractRoddyAlignmentChecker checker
+    AbstractAlignmentChecker checker
 
     List<SeqType> seqTypes
 
 
     void setupData() {
         DomainFactory.createRoddyAlignableSeqTypes()
-        checker = createRoddyAlignmentChecker()
+        DomainFactory.createCellRangerAlignableSeqTypes()
+        checker = createAlignmentChecker()
         seqTypes = checker.seqTypes
     }
 
 
-    abstract AbstractRoddyAlignmentChecker createRoddyAlignmentChecker()
+    abstract AbstractAlignmentChecker createAlignmentChecker()
 
     abstract Pipeline createPipeLine()
 
@@ -112,20 +114,20 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
     }
 
 
-    RoddyBamFile createRoddyBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
+    AbstractMergedBamFile createBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         DomainFactory.createRoddyBamFile([
                 workPackage: mergingWorkPackage,
         ] + properties)
     }
 
-    List<RoddyBamFile> createRoddyBamFiles(Map roddyProperties = [:], mergingWorkPackageProperties = [:]) {
+    List<AbstractMergedBamFile> createBamFiles(Map bamProperties = [:], Map mergingWorkPackageProperties = [:]) {
         createMergingWorkPackages(mergingWorkPackageProperties).collect {
-            createRoddyBamFile(it, roddyProperties)
+            createBamFile(it, bamProperties)
         }
     }
 
 
-    void "seqTracksWithoutCorrespondingRoddyAlignmentConfig, when some SamplePairs have a Config and some not some not, return Project and SeqType of SamplePairs without Config"() {
+    void "test getSeqTracksWithoutCorrespondingAlignmentConfig, when some SamplePairs have a Config and some not some not, return Project and SeqType of SamplePairs without Config"() {
         given:
         setupData()
         List<SeqTrack> seqTracksWithoutConfig = createSeqTracks()
@@ -142,7 +144,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
         List<SeqTrack> seqTracksCorrectConfig2 = createSeqTracksWithConfig()
 
-        List<SeqTrack> seqTracksAreObsolate = createSeqTracksWithConfig([
+        List<SeqTrack> seqTracksAreObsolete = createSeqTracksWithConfig([
                 obsoleteDate: new Date(),
         ])
 
@@ -156,7 +158,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
                 seqTracksWrongProject,
                 seqTracksWrongSeqType,
                 seqTracksCorrectConfig2,
-                seqTracksAreObsolate,
+                seqTracksAreObsolete,
                 seqTracksWrongPipeline,
         ].flatten()
 
@@ -164,12 +166,12 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
                 seqTracksWithoutConfig,
                 seqTracksWrongProject,
                 seqTracksWrongSeqType,
-                seqTracksAreObsolate,
+                seqTracksAreObsolete,
                 seqTracksWrongPipeline,
         ].flatten()
 
         when:
-        List returnValue = checker.seqTracksWithoutCorrespondingRoddyAlignmentConfig(seqTracks)
+        List returnValue = checker.getSeqTracksWithoutCorrespondingAlignmentConfig(seqTracks)
 
         then:
         TestCase.assertContainSame(expected, returnValue)
@@ -216,32 +218,30 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
 
     @Unroll
-    void "roddyBamFileForMergingWorkPackage, when some mergingWorkPackages have BamFiles and some not, return the correct BamFiles (case showFinished=#showFinished, showWithdrawn=#showWithdrawn)"() {
+    void "test getBamFileForMergingWorkPackage, when some mergingWorkPackages have BamFiles and some not, return the correct BamFiles (case showFinished=#showFinished, showWithdrawn=#showWithdrawn)"() {
         given:
         setupData()
-        int expectedSize = checker.seqTypes.size() * count
-        List<RoddyBamFile> expected = []
+        List<AbstractMergedBamFile> expected = []
 
         List<MergingWorkPackage> mergingWorkPackages = AbstractMergedBamFile.FileOperationStatus.values().collect { AbstractMergedBamFile.FileOperationStatus state ->
-            [true, false].collect { boolean withDrawnRoddyBamFile ->
-                createRoddyBamFiles([
+            [true, false].collect { boolean withDrawnBamFile ->
+                createBamFiles([
                         fileOperationStatus: state,
-                        withdrawn          : withDrawnRoddyBamFile,
-                ]).collect { RoddyBamFile roddyBamFile ->
-                    if ((showWithdrawn || !roddyBamFile.withdrawn) &&
-                            (showFinished || roddyBamFile.fileOperationStatus != AbstractMergedBamFile.FileOperationStatus.PROCESSED)) {
-                        expected << roddyBamFile
+                        withdrawn          : withDrawnBamFile,
+                ]).collect { AbstractMergedBamFile bamFile ->
+                    if ((showWithdrawn || !bamFile.withdrawn) &&
+                            (showFinished || bamFile.fileOperationStatus != AbstractMergedBamFile.FileOperationStatus.PROCESSED)) {
+                        expected.add(bamFile)
                     }
-                    roddyBamFile.mergingWorkPackage
+                    bamFile.mergingWorkPackage
                 }
             }
         }.flatten()
 
         when:
-        List<RoddyBamFile> returnValue = checker.roddyBamFileForMergingWorkPackage(mergingWorkPackages, showFinished, showWithdrawn)
+        List<AbstractMergedBamFile> returnValue = checker.getBamFileForMergingWorkPackage(mergingWorkPackages, showFinished, showWithdrawn)
 
         then:
-        expected.size() == expectedSize
         TestCase.assertContainSame(expected, returnValue)
 
         where:
@@ -253,7 +253,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
     }
 
 
-    void "handle, if SeqTracks given, then return finished RoddyBamFile and create output for the others cases"() {
+    void "handle, if SeqTracks given, then return finished BamFile and create output for the others cases"() {
         given:
         setupData()
         String workflowName = checker.workflowName
@@ -266,7 +266,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
         List<SeqTrack> noMergingWorkPackage = createSeqTracksWithConfig()
 
-        List<RoddyBamFile> oldInstanceRunning = createRoddyBamFiles([
+        List<AbstractMergedBamFile> oldInstanceRunning = createBamFiles([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
         ], [
                 needsProcessing: true,
@@ -278,13 +278,13 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
                     needsProcessing: true,
             ])
         }
-        List<RoddyBamFile> finishedRoddyBamFilesWithNeedsProcessing = createRoddyBamFiles([
+        List<AbstractMergedBamFile> finishedBamFilesWithNeedsProcessing = createBamFiles([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
         ], [
                 needsProcessing: true,
         ])
-        waiting.addAll(finishedRoddyBamFilesWithNeedsProcessing*.mergingWorkPackage)
-        mergingWorkPackageWaiting.addAll(finishedRoddyBamFilesWithNeedsProcessing*.containedSeqTracks.flatten())
+        waiting.addAll(finishedBamFilesWithNeedsProcessing*.mergingWorkPackage)
+        mergingWorkPackageWaiting.addAll(finishedBamFilesWithNeedsProcessing*.containedSeqTracks.flatten())
 
         List<MergingWorkPackage> mergingWorkPackagesWithoutBam = []
         List<SeqTrack> mergingWorkPackageWithoutBam = createSeqTracksWithConfig().each {
@@ -293,31 +293,31 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
             ])
         }
 
-        List<RoddyBamFile> roddyBamFilesDeclared = createRoddyBamFiles([
+        List<AbstractMergedBamFile> bamFilesDeclared = createBamFiles([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
         ], [
                 needsProcessing: false,
         ])
 
-        List<RoddyBamFile> roddyBamFilesNeedsProcessing = createRoddyBamFiles([
+        List<AbstractMergedBamFile> bamFilesNeedsProcessing = createBamFiles([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING,
         ], [
                 needsProcessing: false,
         ])
 
-        List<RoddyBamFile> roddyBamFilesInProgress = createRoddyBamFiles([
+        List<AbstractMergedBamFile> bamFilesInProgress = createBamFiles([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
         ], [
                 needsProcessing: false,
         ])
 
-        List<RoddyBamFile> roddyBamFilesProcessed = createRoddyBamFiles([
+        List<AbstractMergedBamFile> bamFilesProcessed = createBamFiles([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
         ], [
                 needsProcessing: false,
         ])
 
-        List<RoddyBamFile> roddyBamFilesWithdrawn = createRoddyBamFiles([
+        List<AbstractMergedBamFile> bamFilesWithdrawn = createBamFiles([
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.DECLARED,
                 withdrawn          : true,
         ], [
@@ -332,18 +332,22 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
                 mergingWorkPackageWithoutBam,
                 [
                         oldInstanceRunning,
-                        roddyBamFilesDeclared,
-                        roddyBamFilesNeedsProcessing,
-                        roddyBamFilesInProgress,
-                        roddyBamFilesProcessed,
-                        roddyBamFilesWithdrawn,
+                        bamFilesDeclared,
+                        bamFilesNeedsProcessing,
+                        bamFilesInProgress,
+                        bamFilesProcessed,
+                        bamFilesWithdrawn,
                 ].flatten()*.containedSeqTracks,
         ].flatten()
 
-        List<RoddyBamFile> finishedRoddyBamFiles = roddyBamFilesProcessed
+        seqTracks.each() {
+            DomainFactory.createReferenceGenomeProjectSeqTypeLazy(project: it.project, seqType: it.seqType)
+        }
+
+        List<AbstractMergedBamFile> finishedBamFiles = bamFilesProcessed
 
         when:
-        List<RoddyBamFile> result = checker.handle(seqTracks, output)
+        List<AbstractMergedBamFile> result = checker.handle(seqTracks, output)
 
         then:
         1 * output.showWorkflow(workflowName)
@@ -352,8 +356,8 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
         1 * output.showUniqueNotSupportedSeqTypes([wrongSeqType], _)
 
         then:
-        1 * checker.seqTracksWithoutCorrespondingRoddyAlignmentConfig(_)
-        1 * output.showUniqueList(AbstractRoddyAlignmentChecker.HEADER_NO_CONFIG, noConfigs, _)
+        1 * checker.getSeqTracksWithoutCorrespondingAlignmentConfig(_)
+        1 * output.showUniqueList(AbstractAlignmentChecker.HEADER_NO_CONFIG, noConfigs, _)
 
         then:
         1 * checker.filter(_, _) >> { List<SeqTrack> seqTrackList, MonitorOutputCollector monitorOutputCollector ->
@@ -362,35 +366,35 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
 
         then:
         1 * checker.mergingWorkPackageForSeqTracks(_)
-        1 * output.showList(AbstractRoddyAlignmentChecker.HEADER_NO_MERGING_WORK_PACKAGE, noMergingWorkPackage)
+        1 * output.showList(AbstractAlignmentChecker.HEADER_NO_MERGING_WORK_PACKAGE, noMergingWorkPackage)
 
         then:
-        1 * checker.roddyBamFileForMergingWorkPackage(_, false, false)
-        1 * output.showList(AbstractRoddyAlignmentChecker.HEADER_OLD_INSTANCE_RUNNING, oldInstanceRunning)
+        1 * checker.getBamFileForMergingWorkPackage(_, false, false)
+        1 * output.showList(AbstractAlignmentChecker.HEADER_OLD_INSTANCE_RUNNING, oldInstanceRunning)
 
         then:
         1 * output.showWaiting(waiting)
 
         then:
-        1 * checker.roddyBamFileForMergingWorkPackage(_, true, true)
-        1 * output.showList(AbstractRoddyAlignmentChecker.HEADER_MWP_WITH_WITHDRAWN_BAM, roddyBamFilesWithdrawn*.mergingWorkPackage)
-        1 * output.showList(AbstractRoddyAlignmentChecker.HEADER_MWP_WITHOUT_BAM, mergingWorkPackagesWithoutBam)
+        1 * checker.getBamFileForMergingWorkPackage(_, true, true)
+        1 * output.showList(AbstractAlignmentChecker.HEADER_MWP_WITH_WITHDRAWN_BAM, bamFilesWithdrawn*.mergingWorkPackage)
+        1 * output.showList(AbstractAlignmentChecker.HEADER_MWP_WITHOUT_BAM, mergingWorkPackagesWithoutBam)
 
         then:
-        1 * output.showRunningWithHeader(AbstractRoddyAlignmentChecker.HEADER_RUNNING_DECLARED, workflowName, roddyBamFilesDeclared + oldInstanceRunning)
+        1 * output.showRunningWithHeader(AbstractAlignmentChecker.HEADER_RUNNING_DECLARED, workflowName, bamFilesDeclared + oldInstanceRunning)
 
         then:
-        1 * output.showRunningWithHeader(AbstractRoddyAlignmentChecker.HEADER_RUNNING_NEEDS_PROCESSING, workflowName, roddyBamFilesNeedsProcessing)
+        1 * output.showRunningWithHeader(AbstractAlignmentChecker.HEADER_RUNNING_NEEDS_PROCESSING, workflowName, bamFilesNeedsProcessing)
 
         then:
-        1 * output.showRunningWithHeader(AbstractRoddyAlignmentChecker.HEADER_RUNNING_IN_PROGRESS, workflowName, roddyBamFilesInProgress)
+        1 * output.showRunningWithHeader(AbstractAlignmentChecker.HEADER_RUNNING_IN_PROGRESS, workflowName, bamFilesInProgress)
 
         then:
-        1 * output.showFinished(roddyBamFilesProcessed)
+        1 * output.showFinished(bamFilesProcessed)
         0 * output._
 
         then:
-        finishedRoddyBamFiles == result
+        finishedBamFiles == result
     }
 
 
@@ -401,7 +405,7 @@ abstract class AbstractRoddyAlignmentCheckerIntegrationSpec extends Specificatio
         checker = Spy(checker.class)
 
         when:
-        List<RoddyBamFile> result = checker.handle([], output)
+        List<AbstractMergedBamFile> result = checker.handle([], output)
 
         then:
         0 * output._

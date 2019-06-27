@@ -186,4 +186,12 @@ trait CellRangerFactory implements IsAlignment {
             CreateFileHelper.createFile(new File(new File(resultDir, it), 'dummyFile'))
         }
     }
+
+    CellRangerConfig createCellRangerConfig(Map proper) {
+        return createDomainObject(CellRangerConfig, [
+                programVersion:  "${nextId}",
+                referenceGenomeIndex: { createReferenceGenomeIndex() },
+        ] + proper, [:])
+    }
+
 }

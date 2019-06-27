@@ -27,11 +27,11 @@ import de.dkfz.tbi.otp.monitor.PipelinesChecker
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
-class AllRoddyAlignmentsChecker extends PipelinesChecker<SeqTrack> {
+class AllAlignmentsChecker extends PipelinesChecker<SeqTrack> {
 
 
     static final String HEADER_NOT_SUPPORTED_SEQTYPES =
-            'The following SeqTypes are unsupported by any Roddy alignment workflow supported by OTP'
+            'The following SeqTypes are unsupported by any alignment workflow supported by OTP'
 
 
     @Override
@@ -45,13 +45,14 @@ class AllRoddyAlignmentsChecker extends PipelinesChecker<SeqTrack> {
             it.seqType
         }
 
-        List<AbstractRoddyAlignmentChecker> checkers = [
+        List<AbstractAlignmentChecker> checkers = [
                 new PanCanAlignmentChecker(),
                 new WgbsRoddyAlignmentChecker(),
                 new RnaRoddyAlignmentChecker(),
+                new CellRangerAlignmentChecker(),
         ]
 
-        Map<AbstractRoddyAlignmentChecker, List<SeqTrack>> seqTracksPerChecker = checkers.collectEntries { AbstractRoddyAlignmentChecker checker ->
+        Map<AbstractAlignmentChecker, List<SeqTrack>> seqTracksPerChecker = checkers.collectEntries { AbstractAlignmentChecker checker ->
             [
                     (checker): checker.seqTypes.collect { SeqType seqType ->
                         seqTracksBySeqType.remove(seqType)
@@ -65,7 +66,7 @@ class AllRoddyAlignmentsChecker extends PipelinesChecker<SeqTrack> {
             "${seqTrack.seqType.displayNameWithLibraryLayout}"
         }
 
-        return seqTracksPerChecker.collect { AbstractRoddyAlignmentChecker checker, List<SeqTrack> seqTrackList ->
+        return seqTracksPerChecker.collect { AbstractAlignmentChecker checker, List<SeqTrack> seqTrackList ->
             checker.handle(seqTrackList, output)
         }.flatten().findAll()
     }

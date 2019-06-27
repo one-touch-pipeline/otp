@@ -145,77 +145,6 @@ Closure<List<String>> nameStringToList = { String nameString ->
     return list
 }
 
-
-Closure<List<SeqTrack>> seqTracksWithReferenceGenome = { List<SeqTrack> seqTracks ->
-    if (!seqTracks) {
-        return []
-    }
-    Map mapSpecificReferenceGenomeType = seqTracks.groupBy {
-        return it.sampleType.specificReferenceGenome == SampleType.SpecificReferenceGenome.UNKNOWN
-    }
-    if (mapSpecificReferenceGenomeType[true]) {
-        output << "${INDENT}${mapSpecificReferenceGenomeType[true].size()} lanes removed, because the used sampleType has not defined the type of reference genome (Project or sample type specific): ${mapSpecificReferenceGenomeType[true]*.sampleType*.name.unique().sort()}}"
-    }
-    Map mapNoReferenceGenome = (mapSpecificReferenceGenomeType[false] ?: [:]).groupBy {
-        return !it.configuredReferenceGenome
-    }
-    if (mapNoReferenceGenome[true]) {
-        output << "${INDENT}${mapNoReferenceGenome[true].size()} lanes removed, because the used project(s) has/have no reference genome(s): ${mapNoReferenceGenome[true]*.project.unique().sort {it.name}}"
-    }
-    return mapNoReferenceGenome[false] ?: []
-}
-
-Closure<List<SeqTrack>> exomeSeqTracksWithEnrichmentKit = { List<SeqTrack> seqTracks ->
-    if (!seqTracks) {
-        return []
-    }
-
-    Map map = seqTracks.groupBy { !it.libraryPreparationKit }
-    if (map[true]) {
-        output << "${INDENT}${map[true].size()} lanes removed, because no library preparationKit kit is set."
-        output << output.prefix(output.objectsToStrings(map[true], {
-            DataFile dataFile = DataFile.findBySeqTrack(it)
-            MetaDataEntry libPreKitEntry = MetaDataEntry.findByDataFileAndKey(dataFile, libPrepKitKey)
-            MetaDataEntry enrichmentKitEntry = MetaDataEntry.findByDataFileAndKey(dataFile, enrichmentKitKey)
-            MetaDataEntry commentEntry = MetaDataEntry.findByDataFileAndKey(dataFile, commentKey)
-            if (!it.libraryPreparationKit) {
-                if (libPreKitEntry?.value) {
-                    outputSeqTrack <<"""addKitToSeqTrack("${it.run.name}", "${it.laneId}", "${libPreKitEntry.value}") //${it.sample}, libprep kit"""
-                } else if (enrichmentKitEntry?.value) {
-                    outputSeqTrack <<"""addKitToSeqTrack("${it.run.name}", "${it.laneId}", "${enrichmentKitEntry.value}") //${it.sample}, enrichment kit"""
-                } else if (commentEntry?.value) {
-                    outputSeqTrack <<"""addKitToSeqTrack("${it.run.name}", "${it.laneId}", "${commentEntry.value}") //${it.sample}, comment"""
-                } else {
-                    outputSeqTrack <<"""//enrichment kit missed for ${it.run.name}  ${it.laneId}   ${it.sample}"""
-                }
-            }
-            "${it}  ${!it.libraryPreparationKit ? "lib kit: ${libPreKitEntry?.value}, enrichment kit: ${enrichmentKitEntry?.value}, comment: ${commentEntry}":''}"
-        }).join('\n'), "${INDENT}${INDENT}")
-    }
-    return map[false] ?: []
-}
-
-Closure<List<SeqTrack>> exomeSeqTracksWithBedFile = { List<SeqTrack> seqTracks ->
-    if (!seqTracks) {
-        return []
-    }
-
-    Map<Boolean, List<SeqTrack>> seqTrackGroupedByHasReferenceBedFile = seqTracks.groupBy {
-        ReferenceGenome referenceGenome = it.configuredReferenceGenome
-        BedFile bedFile = BedFile.findByReferenceGenomeAndLibraryPreparationKit(referenceGenome, it.libraryPreparationKit)
-        bedFile as Boolean
-    }
-
-    if (seqTrackGroupedByHasReferenceBedFile[false]) {
-        List<GString> seqTrackWithoutReferenceBedFile = seqTrackGroupedByHasReferenceBedFile[false].collect {
-            "${it.project.name} ${it.seqType.name}"
-        }.unique().sort()
-        output << "${INDENT}${seqTrackGroupedByHasReferenceBedFile[false].size()} lanes removed, because no bedfile is defined for: ${ seqTrackWithoutReferenceBedFile.join(', ')}"
-        output << output.prefix(output.objectsToStrings(seqTrackGroupedByHasReferenceBedFile[false]).join('\n'), "${INDENT}${INDENT}")
-    }
-    return seqTrackGroupedByHasReferenceBedFile[true] ?: []
-}
-
 Closure<List<SeqTrack>> findNotWithdrawn = { List<SeqTrack> seqTracks ->
     Map<Boolean, List<SeqTrack>> map = seqTracks.groupBy {
         DataFile.findAllBySeqTrackAndFileWithdrawn(it, true) as Boolean
@@ -225,33 +154,6 @@ Closure<List<SeqTrack>> findNotWithdrawn = { List<SeqTrack> seqTracks ->
     }
     return map[false]
 }
-
-Closure<List<SeqTrack>> findAlignable = { List<SeqTrack> seqTracks ->
-    Map<Boolean, List<SeqTrack>> groupAfterAlignable = seqTracks.groupBy({alignableSeqtypes.contains(it.seqType) })
-
-    output << "\n\n"
-
-    if (groupAfterAlignable[false]) {
-        output << "count of lanes OTP can not align: ${groupAfterAlignable[false].size()}"
-    }
-
-    if (groupAfterAlignable[true]) {
-        output << "count of lanes OTP can align: ${groupAfterAlignable[true].size()}"
-    } else {
-        output << "no lanes left of SeqTypes which OTP could align"
-        return []
-    }
-
-    List<SeqTrack> seqTracksWithConfiguredReferenceGenome = seqTracksWithReferenceGenome(groupAfterAlignable[true])
-
-    Map<Boolean, List<SeqTrack>> groupAfterExome = seqTracksWithConfiguredReferenceGenome.groupBy({exomePaired == it.seqType })
-
-    List<SeqTrack> seqTracksToReturn = groupAfterExome[false] ?: []
-    seqTracksToReturn.addAll(exomeSeqTracksWithBedFile(exomeSeqTracksWithEnrichmentKit(groupAfterExome[true] ?: [])))
-
-    return seqTracksToReturn
-}
-
 
 Closure handleStateMap = { Map map, String workflow, Closure objectToCheck = {it} ->
     output.showWorkflow(workflow)
@@ -319,36 +221,10 @@ Closure showSeqTracks = { Collection<SeqTrack> seqTracks ->
         return
     }
 
-    //filter for alignable seq tracks
-    List<SeqTrack> seqTracksToAlign = findAlignable(seqTracksNotWithdrawnFinishedFastqcWorkflow)
-    if (!seqTracksToAlign) {
-        output << "No alignable seq tracks left, stop"
-        return
-    }
-
     output << "\n"
 
-    Map<AlignmentDeciderBeanName, Collection<SeqTrack>> seqTracksByAlignmentDeciderBeanName = seqTracksToAlign.groupBy { it.project.alignmentDeciderBeanName }
-
-    seqTracksByAlignmentDeciderBeanName.keySet().sort().each {
-        int amount = seqTracksByAlignmentDeciderBeanName[it].size()
-        switch(it) {
-            case AlignmentDeciderBeanName.OTP_ALIGNMENT:
-                output << "${amount} SeqTracks use the default OTP alignment"
-                break
-            case AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT:
-                output << "${amount} SeqTracks use the Pan-Cancer alignment"
-                break
-            case AlignmentDeciderBeanName.NO_ALIGNMENT:
-                output << "${amount} SeqTracks are not configured to be aligned by OTP"
-                break
-            default:
-                throw new RuntimeException("Unknown alignment decider: ${it}. Please inform maintainer (Stefan or Jan)")
-        }
-    }
-
     Collection<RoddyBamFile> bamFilesFinishedAlignment =
-            new AllRoddyAlignmentsChecker().handle(seqTracksByAlignmentDeciderBeanName[AlignmentDeciderBeanName.PAN_CAN_ALIGNMENT], output)
+            new AllAlignmentsChecker().handle(seqTracksNotWithdrawnFinishedFastqcWorkflow, output)
 
     if (!bamFilesFinishedAlignment) {
         return

@@ -30,10 +30,10 @@ import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
 @Rollback
-class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentCheckerIntegrationSpec {
+class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIntegrationSpec {
 
     @Override
-    AbstractRoddyAlignmentChecker createRoddyAlignmentChecker() {
+    AbstractAlignmentChecker createAlignmentChecker() {
         return new WgbsRoddyAlignmentChecker()
     }
 
@@ -50,12 +50,12 @@ class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentChe
 
     void "workflowName, should return WgbsAlignmentWorkflow"() {
         expect:
-        'WgbsAlignmentWorkflow' == createRoddyAlignmentChecker().getWorkflowName()
+        'WgbsAlignmentWorkflow' == createAlignmentChecker().getWorkflowName()
     }
 
     void "pipeLineName, should return PANCAN_ALIGNMENT"() {
         expect:
-        Pipeline.Name.PANCAN_ALIGNMENT == createRoddyAlignmentChecker().getPipeLineName()
+        Pipeline.Name.PANCAN_ALIGNMENT == createAlignmentChecker().getPipeLineName()
     }
 
     void "seqTypes, should return WGBS and WGBS_TAG"() {
@@ -66,6 +66,6 @@ class WgbsRoddyAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentChe
         ]
 
         expect:
-        TestCase.assertContainSame(seqTypes, createRoddyAlignmentChecker().getSeqTypes())
+        TestCase.assertContainSame(seqTypes, createAlignmentChecker().getSeqTypes())
     }
 }

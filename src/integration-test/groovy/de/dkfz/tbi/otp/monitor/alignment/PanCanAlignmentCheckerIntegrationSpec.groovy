@@ -32,10 +32,10 @@ import de.dkfz.tbi.otp.monitor.MonitorOutputCollector
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Rollback
-class PanCanAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentCheckerIntegrationSpec {
+class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIntegrationSpec {
 
     @Override
-    AbstractRoddyAlignmentChecker createRoddyAlignmentChecker() {
+    AbstractAlignmentChecker createAlignmentChecker() {
         return new PanCanAlignmentChecker()
     }
 
@@ -52,12 +52,12 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentChecke
 
     void "workflowName, should return PanCanWorkflow"() {
         expect:
-        'PanCanWorkflow' == createRoddyAlignmentChecker().getWorkflowName()
+        'PanCanWorkflow' == createAlignmentChecker().getWorkflowName()
     }
 
     void "pipeLineName, should return PANCAN_ALIGNMENT"() {
         expect:
-        Pipeline.Name.PANCAN_ALIGNMENT == createRoddyAlignmentChecker().getPipeLineName()
+        Pipeline.Name.PANCAN_ALIGNMENT == createAlignmentChecker().getPipeLineName()
     }
 
     void "seqTypes, should return WGS and WES"() {
@@ -69,7 +69,7 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractRoddyAlignmentChecke
         ]
 
         expect:
-        TestCase.assertContainSame(seqTypes, createRoddyAlignmentChecker().getSeqTypes())
+        TestCase.assertContainSame(seqTypes, createAlignmentChecker().getSeqTypes())
     }
 
 

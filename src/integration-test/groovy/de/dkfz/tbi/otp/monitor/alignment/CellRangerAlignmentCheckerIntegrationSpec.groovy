@@ -26,49 +26,69 @@ import grails.transaction.Rollback
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
 @Rollback
-class RnaRoddyAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIntegrationSpec implements RoddyRnaFactory {
+class CellRangerAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIntegrationSpec implements CellRangerFactory {
 
     @Override
     AbstractAlignmentChecker createAlignmentChecker() {
-        return new RnaRoddyAlignmentChecker()
+        return new CellRangerAlignmentChecker()
     }
 
     @Override
     Pipeline createPipeLine() {
-        return RoddyRnaFactory.super.findOrCreatePipeline()
+        return CellRangerFactory.super.findOrCreatePipeline()
     }
 
     @Override
     Pipeline createPipeLineForCrosschecking() {
-        return DomainFactory.createPanCanPipeline()
+        return DomainFactory.createRoddyRnaPipeline()
     }
 
     @Override
-    RoddyBamFile createBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
+    AbstractMergedBamFile createBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         createBamFile([
                 workPackage: mergingWorkPackage,
         ] + properties)
     }
 
-
-    void "workflowName, should return RnaAlignmentWorkflow"() {
-        expect:
-        'RnaAlignmentWorkflow' == createAlignmentChecker().getWorkflowName()
+    @Override
+    MergingWorkPackage createMWP(Map properties = [:]) {
+        return createMergingWorkPackage([
+                pipeline: createPipeLine(),
+                seqType : seqTypes.first(),
+        ] + properties)
     }
 
-    void "pipeLineName, should return RODDY_RNA_ALIGNMENT"() {
-        expect:
-        Pipeline.Name.RODDY_RNA_ALIGNMENT == createAlignmentChecker().getPipeLineName()
+    @Override
+    List<SeqTrack> createSeqTracksWithConfig(Map configProperties = [:], Map seqTrackProperties = [:]) {
+        createSeqTracks(seqTrackProperties).each {
+            createCellRangerConfig([
+                    seqType: it.seqType,
+                    project: it.project,
+                    pipeline: createPipeLine(),
+            ] +  configProperties)
+        }
     }
 
-    void "seqTypes, should return RNA"() {
+
+    void "workflowName, should return CellRangerWorkflow"() {
+        expect:
+        'CellRangerWorkflow' == createAlignmentChecker().getWorkflowName()
+    }
+
+    void "pipeLineName, should return CELL_RANGER"() {
+        expect:
+        Pipeline.Name.CELL_RANGER == createAlignmentChecker().getPipeLineName()
+    }
+
+    void "seqTypes, should return single cell"() {
         given:
-        List<SeqType> seqTypes = DomainFactory.createRnaAlignableSeqTypes()
+        List<SeqType> seqTypes = DomainFactory.createCellRangerAlignableSeqTypes()
 
         expect:
         TestCase.assertContainSame(seqTypes, createAlignmentChecker().getSeqTypes())

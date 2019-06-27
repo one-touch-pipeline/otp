@@ -26,20 +26,19 @@ import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
-class RnaRoddyAlignmentChecker extends AbstractRoddyAlignmentChecker {
-
+class CellRangerAlignmentChecker extends AbstractAlignmentChecker {
     @Override
     String getWorkflowName() {
-        return 'RnaAlignmentWorkflow'
+        return "CellRangerWorkflow"
     }
 
     @Override
     Pipeline.Name getPipeLineName() {
-        return Pipeline.Name.RODDY_RNA_ALIGNMENT
+        return Pipeline.Name.CELL_RANGER
     }
 
     @Override
     List<SeqType> getSeqTypes() {
-        return SeqTypeService.rnaAlignableSeqTypes
+        return SeqTypeService.cellRangerAlignableSeqTypes
     }
 }
