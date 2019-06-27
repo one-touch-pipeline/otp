@@ -72,6 +72,7 @@ Collection<SeqTrack> seqTrackList = SeqTrack.withCriteria {
             //SeqTypeService.wholeGenomeBisulfitePairedSeqType,
             //SeqTypeService.wholeGenomeBisulfiteTagmentationPairedSeqType,
             //SeqTypeService.rnaPairedSeqType,
+            //SeqTypeService.rnaSingleSeqType,
             //SeqTypeService.chipSeqPairedSeqType,
     ])
 }
@@ -122,7 +123,8 @@ SeqTrack.withTransaction {
         /*
          * Update MergingWorkPackages only, if mergingCriteria use lib prep kit
          */
-        if (!CollectionUtils.exactlyOneElement(MergingCriteria.findAllByProjectAndSeqType(seqTrack.project, seqTrack.seqType)).useLibPrepKit) {
+        MergingCriteria mergingCriteria = CollectionUtils.atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(seqTrack.project, seqTrack.seqType))
+        if (mergingCriteria && mergingCriteria.useLibPrepKit) {
             RoddyBamFile.createCriteria().list {
                 seqTracks {
                     eq('id', seqTrack.id)
