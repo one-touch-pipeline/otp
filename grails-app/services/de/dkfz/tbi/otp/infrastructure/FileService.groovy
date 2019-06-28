@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.infrastructure
 
 import com.github.robtimus.filesystems.sftp.SFTPFileSystemProvider
@@ -120,9 +119,7 @@ class FileService {
     @SuppressWarnings('JavaIoPackageAccess')
     File toFile(Path path) {
         assert path.isAbsolute()
-        new File(File.separator + path.collect { Path part ->
-            part.toString()
-        }.join(File.separator))
+        new File(File.separator + path*.toString().join(File.separator))
     }
 
     /**
@@ -164,7 +161,6 @@ class FileService {
             assert stream.count() != 0
         } finally {
             stream?.close()
-
         }
     }
 
@@ -290,9 +286,8 @@ class FileService {
                     if (exception == null) {
                         Files.delete(directory)
                         return FileVisitResult.CONTINUE
-                    } else {
-                        throw exception
                     }
+                    throw exception
                 }
             })
         }
@@ -354,10 +349,14 @@ class FileService {
     /**
      * Create a link from linkPath to existingPath.
      *
-     * The destination has to exist, the link may not exist. Both parameters have to be absolute.
+     * The destination has to exist, the link may only exist if option {@link CreateLinkOption#DELETE_EXISTING_FILE} is given.
+     * Both parameters have to be absolute.
      * Missing parent directories are created automatically with the {@link #DEFAULT_DIRECTORY_PERMISSION}.
      *
      * By default a relative link is created, by passing {@link CreateLinkOption#ABSOLUTE} an absolute link is created.
+     *
+     * If {@link CreateLinkOption#DELETE_EXISTING_FILE} is given and the link exist and is of type symbolic link or regularfile, it will be deleted
+     * and the link is recreated.
      *
      * If the existingPath is a directory, linkPath will be a link to that directory,
      * if the existingPath is a regular file, linkPath will a link to that file,
@@ -365,20 +364,32 @@ class FileService {
      *
      * @param linkPath the path of the link
      * @param existingPath the exiting path the link point to
+     * @param realm the realm to use for remote access
+     * @param options Option to adapt the behavior, see {@link CreateLinkOption}
      */
+    @SuppressWarnings('Instanceof')
     void createLink(Path linkPath, Path existingPath, Realm realm, CreateLinkOption... options) {
         assert linkPath
         assert existingPath
         assert linkPath.absolute
         assert existingPath.absolute
         assert Files.exists(existingPath)
-        assert !Files.exists(linkPath)
+        if (options.contains(CreateLinkOption.DELETE_EXISTING_FILE)) {
+            assert !Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS) || Files.isRegularFile(linkPath, LinkOption.NOFOLLOW_LINKS) ||
+                    Files.isSymbolicLink(linkPath)
+        } else {
+            assert !Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS)
+        }
         assert linkPath.fileSystem == existingPath.fileSystem
         //SimpleAbstractPath doesn't take special meaning of "." and ".." into consideration
         assert linkPath.every { it.toString() != ".." && it.toString() != "." }
 
         if (linkPath == existingPath) {
             return
+        }
+
+        if (options.contains(CreateLinkOption.DELETE_EXISTING_FILE) && Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS)) {
+            Files.delete(linkPath)
         }
 
         Path existing = (options.contains(CreateLinkOption.ABSOLUTE)) ?
@@ -437,7 +448,7 @@ class FileService {
     private void correctPathPermissionRecursiveInternal(Path path) {
         if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
             Stream<Path> stream = null
-            try  {
+            try {
                 stream = Files.list(path)
                 stream.each {
                     correctPathPermissionRecursiveInternal(it)
@@ -472,6 +483,8 @@ class FileService {
 enum CreateLinkOption {
     /** Create an absolute link instead of a relative link */
     ABSOLUTE,
+    /** If a regular file or a link exist, delete it. For directories it will still fail. */
+    DELETE_EXISTING_FILE,
 
     private CreateLinkOption() { }
 }

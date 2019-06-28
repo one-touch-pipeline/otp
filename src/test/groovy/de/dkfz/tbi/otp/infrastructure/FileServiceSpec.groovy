@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.testing.gorm.DataTest
@@ -30,7 +29,7 @@ import spock.lang.*
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
-@SuppressWarnings('MethodCount')
+@SuppressWarnings(['MethodCount', 'ClassSize', 'JUnitPublicProperty'])
 class FileServiceSpec extends Specification implements DataTest {
 
     static final String SOME_CONTENT = 'SomeContent'
@@ -42,7 +41,6 @@ class FileServiceSpec extends Specification implements DataTest {
 
     @Rule
     TemporaryFolder temporaryFolder
-
 
     void "setPermission, if directory does not exist, but the parent directory exists, then create directory"() {
         given:
@@ -63,7 +61,6 @@ class FileServiceSpec extends Specification implements DataTest {
 
     //----------------------------------------------------------------------------------------------------
     // test for createDirectoryRecursively
-
 
     void "createDirectoryRecursively, if directory does not exist, but the parent directory exists, then create directory"() {
         given:
@@ -166,7 +163,6 @@ class FileServiceSpec extends Specification implements DataTest {
     //----------------------------------------------------------------------------------------------------
     // test for deleteDirectoryRecursively
 
-
     void "deleteDirectoryRecursively, if path does not exist, then do nothing"() {
         given:
         Path filePath = temporaryFolder.newFolder().toPath()
@@ -264,7 +260,6 @@ class FileServiceSpec extends Specification implements DataTest {
     //----------------------------------------------------------------------------------------------------
     // test for createFileWithContent using characters
 
-
     void "createFileWithContent, if file does not exist, then create file with given context"() {
         given:
         Path basePath = temporaryFolder.newFolder().toPath()
@@ -306,7 +301,6 @@ class FileServiceSpec extends Specification implements DataTest {
         'only one component' | new File('path').toPath()
         'relative path'      | new File('relative/path').toPath()
     }
-
 
     void "createFileWithContent, if file already exists, then throw assertion"() {
         given:
@@ -356,7 +350,6 @@ class FileServiceSpec extends Specification implements DataTest {
 
     //----------------------------------------------------------------------------------------------------
     // test for createFileWithContent using bytes
-
 
     void "createFileWithContent (byte), if file does not exist, then create file with given context"() {
         given:
@@ -431,7 +424,6 @@ class FileServiceSpec extends Specification implements DataTest {
     //----------------------------------------------------------------------------------------------------
     // test for createLink
 
-
     void "createLink, if input is valid, then create link"() {
         given:
         Path basePath = temporaryFolder.newFolder().toPath()
@@ -460,7 +452,7 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         AssertionError e = thrown()
-        e.getMessage().contains(message)
+        e.message.contains(message)
 
         where:
         type                   | fileName          | linkName    || message
@@ -469,7 +461,7 @@ class FileServiceSpec extends Specification implements DataTest {
         'file is not absolute' | 'tmp'             | '/somthing' || 'existingPath.absolute'
         'link is not absolute' | '/tmp'            | 'somthing'  || 'linkPath.absolute'
         'file does not exist'  | '/somthingTarget' | '/somthing' || 'Files.exists(existingPath)'
-        'link does exist'      | '/tmp'            | '/tmp'      || '!Files.exists(linkPath)'
+        'link does exist'      | '/tmp'            | '/tmp'      || '!Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS)'
     }
 
     void "createRelativeLink, if input is valid, then create link"() {
@@ -489,7 +481,6 @@ class FileServiceSpec extends Specification implements DataTest {
         link.parent.resolve(Files.readSymbolicLink(link)).normalize() == file
     }
 
-
     @Unroll
     void "createRelativeLink, if input is #type, then throw an assertion"() {
         given:
@@ -501,7 +492,7 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         AssertionError e = thrown()
-        e.getMessage().contains(message)
+        e.message.contains(message)
 
         where:
         type                   | fileName          | linkName    || message
@@ -510,12 +501,82 @@ class FileServiceSpec extends Specification implements DataTest {
         'file is not absolute' | 'tmp'             | '/somthing' || 'existingPath.absolute'
         'link is not absolute' | '/tmp'            | 'somthing'  || 'linkPath.absolute'
         'file does not exist'  | '/somthingTarget' | '/somthing' || 'Files.exists(existingPath)'
-        'link does exist'      | '/tmp'            | '/tmp'      || '!Files.exists(linkPath)'
+        'link does exist'      | '/tmp'            | '/tmp'      || '!Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS)'
+    }
+
+    @Unroll
+    void "createRelativeLink, if linkPath already exist as '#name' and DELETE_EXISTING_FILE is given, then delete it and create link"() {
+        given:
+        Path basePath = temporaryFolder.newFolder().toPath()
+        Path file = basePath.resolve('file')
+        Path link = basePath.resolve('link')
+
+        file.text = 'text'
+
+        callback(link)
+
+        when:
+        fileService.createLink(link, file, null, CreateLinkOption.DELETE_EXISTING_FILE)
+
+        then:
+        Files.isSymbolicLink(link)
+        !Files.readSymbolicLink(link).isAbsolute()
+        link.parent.resolve(Files.readSymbolicLink(link)).normalize() == file
+
+        where:
+        name            | callback
+        'file'          | { Path p -> p.text = 'File' }
+        'link'          | { Path p -> Files.createSymbolicLink(p, Paths.get('test')) }
+    }
+
+    @Unroll
+    void "createRelativeLink, if linkPath already exist and is dir and DELETE_EXISTING_FILE is given, then fail with assert"() {
+        given:
+        Path basePath = temporaryFolder.newFolder().toPath()
+        Path file = basePath.resolve('file')
+        Path link = basePath.resolve('link')
+
+        file.text = 'text'
+
+        Files.createDirectory(link)
+
+        when:
+        fileService.createLink(link, file, null, CreateLinkOption.DELETE_EXISTING_FILE)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('!Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS)')
+    }
+
+    @Unroll
+    void "createRelativeLink, if linkPath already exist as '#name' and DELETE_EXISTING_FILE is not given, then fail with assert"() {
+        given:
+        Path basePath = temporaryFolder.newFolder().toPath()
+        Path file = basePath.resolve('file')
+        Path link = basePath.resolve('link')
+
+        file.text = 'text'
+
+        callback(link)
+
+        when:
+        fileService.createLink(link, file, null)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('!Files.exists(linkPath, LinkOption.NOFOLLOW_LINKS)')
+
+        where:
+        name            | callback
+        'file'          | { Path p -> p.text = 'File' }
+        'link'          | { Path p -> Files.createSymbolicLink(p, Paths.get('test')) }
+        'dir'           | { Path p -> Files.createDirectory(p) }
+        'dir with file' | { Path p -> Files.createDirectory(p); p.resolve('child').text = 'ChildFile' }
+        'dir with dir'  | { Path p -> Files.createDirectories(p.resolve('child')) }
     }
 
     //----------------------------------------------------------------------------------------------------
     // test for moveFile
-
 
     void "moveFile, if input is valid, then move file"() {
         given:
@@ -544,7 +605,7 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         AssertionError e = thrown()
-        e.getMessage().contains(message)
+        e.message.contains(message)
 
         where:
         type                      | oldFileName       | newFileName || message
@@ -558,7 +619,6 @@ class FileServiceSpec extends Specification implements DataTest {
 
     //----------------------------------------------------------------------------------------------------
     // test for correctPathPermissionRecursive
-
 
     void "correctPathPermissionRecursive, correct permission of output folder"() {
         given:
@@ -666,7 +726,6 @@ class FileServiceSpec extends Specification implements DataTest {
     //----------------------------------------------------------------------------------------------------
     //test for isFileReadableAndNotEmpty
 
-
     void "ensureFileIsReadableAndNotEmpty, if file exists and has content, then return without error"() {
         given:
         Path path = temporaryFolder.newFile().toPath()
@@ -725,7 +784,6 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         thrown(AssertionError)
-
     }
 
     void "ensureFileIsReadableAndNotEmpty, if path is a link to a folder, then throw an assertion"() {
@@ -751,7 +809,6 @@ class FileServiceSpec extends Specification implements DataTest {
         then:
         thrown(AssertionError)
     }
-
 
     void "ensureDirIsReadableAndNotEmpty, if directory exists and has content, then return without error"() {
         given:
@@ -789,7 +846,6 @@ class FileServiceSpec extends Specification implements DataTest {
         thrown(AssertionError)
     }
 
-
     void "ensureDirIsReadableAndNotEmpty, if directory does not exist, then throw an assertion"() {
         given:
         Path path = temporaryFolder.newFolder().toPath()
@@ -811,7 +867,6 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         thrown(AssertionError)
-
     }
 
     void "ensureDirIsReadableAndNotEmpty, if path is a link to a file, then throw an assertion"() {
@@ -840,7 +895,6 @@ class FileServiceSpec extends Specification implements DataTest {
 
     //----------------------------------------------------------------------------------------------------
     // test for ensureDirIsReadable
-
 
     void "ensureDirIsReadable, if directory exists and has content, then return without error"() {
         given:
@@ -878,7 +932,6 @@ class FileServiceSpec extends Specification implements DataTest {
         thrown(AssertionError)
     }
 
-
     void "ensureDirIsReadable, if directory does not exist, then throw an assertion"() {
         given:
         Path path = temporaryFolder.newFolder().toPath()
@@ -900,7 +953,6 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         thrown(AssertionError)
-
     }
 
     void "ensureDirIsReadable, if path is a link to a file, then throw an assertion"() {

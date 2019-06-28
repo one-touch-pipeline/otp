@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,6 +27,7 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ChromosomeIdentifierSortingService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
+import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
@@ -63,7 +63,6 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     @Autowired
     ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
 
-
     protected Path linkBamFileInWorkDirectory(AbstractMergedBamFile abstractMergedBamFile, File workDirectory) {
         Realm realm = abstractMergedBamFile.realm
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
@@ -76,18 +75,19 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
 
         Path linkBamFile = workDirectoryPath.resolve(bamFileName)
         Path linkBaiFile = workDirectoryPath.resolve(baiFileName)
-        fileService.createLink(linkBamFile, targetFileBam, realm)
-        fileService.createLink(linkBaiFile, targetFileBai, realm)
+        fileService.createLink(linkBamFile, targetFileBam, realm, CreateLinkOption.DELETE_EXISTING_FILE)
+        fileService.createLink(linkBaiFile, targetFileBai, realm, CreateLinkOption.DELETE_EXISTING_FILE)
         return linkBamFile
     }
 
+    @SuppressWarnings('JavaIoPackageAccess')
     @Override
     protected String prepareAndReturnWorkflowSpecificCommand(R roddyResult, Realm realm) throws Throwable {
         assert roddyResult: "roddyResult must not be null"
         assert realm: "realm must not be null"
 
         String analysisIDinConfigFile = executeRoddyCommandService.getAnalysisIDinConfigFile(roddyResult)
-        String nameInConfigFile = roddyResult.config.getNameUsedInConfig()
+        String nameInConfigFile = roddyResult.config.nameUsedInConfig
 
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(new File(roddyResult.config.configFilePath))
 
@@ -110,13 +110,11 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
         return "--additionalImports=${pluginVersion}-${seqType}${fasttrack}"
     }
 
-
     String prepareAndReturnCValues(R roddyResult) {
         assert roddyResult: "roddyResult must not be null"
         List<String> cValues = prepareAndReturnWorkflowSpecificCValues(roddyResult)
         return "--cvalues=\"${cValues.join(',').replace('$', '\\$')}\""
     }
-
 
     String getChromosomeIndexParameterWithMitochondrium(ReferenceGenome referenceGenome) {
         assert referenceGenome
@@ -129,7 +127,6 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
 
         return "CHROMOSOME_INDICES:( ${sortedList.join(' ')} )"
     }
-
 
     String getChromosomeIndexParameterWithoutMitochondrium(ReferenceGenome referenceGenome) {
         assert referenceGenome
@@ -154,7 +151,6 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
                 "useLowerCaseFilenameForSampleExtraction:false",
         ]
     }
-
 
     protected abstract List<String> prepareAndReturnWorkflowSpecificCValues(R roddyResult)
 
