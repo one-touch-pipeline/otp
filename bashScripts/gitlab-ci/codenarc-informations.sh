@@ -54,3 +54,7 @@ do
 done
 
 echo ''
+echo "Show level 1 violations"
+cat build/reports/codenarc/all.txt  | grep -e "^File: " -e " P=1 " | grep -B 1 "Violation:" | sed -e "s/--//"
+
+echo ''
