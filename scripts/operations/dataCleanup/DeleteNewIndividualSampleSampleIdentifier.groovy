@@ -21,44 +21,59 @@
  */
 
 /**
- * Delete NEW Individual/Sample/Sample Identifier
+ * Delete Individual and handle associated objects.
  * Only use this script if the domain object is totally new and no data is connected to it at all!
+ *
+ * Associated objects are: Sample, SampleIdentifier and ClusterJob.
+ * Sample and SampleIdentifier are fully deleted and ClusterJobs lose their association to Individual
  */
 
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.ngsdata.*
 
 String pid = ''
+assert pid: "Enter the PID of the individual"
 
+Individual individual = Individual.findByPid(pid)
+assert individual: "Could not find an Individual for PID ${pid}"
 
-Individual indi = Individual.findByPid(pid)
-println "patient " +  indi
+List<String> output = []
 
-def samples = Sample.findAllByIndividual(indi)
-println "samples " + samples
+List<ClusterJob> clusterJobs = ClusterJob.findAllByIndividual(individual)
 
-samples.each { sample ->
-    def sampleIndis = SampleIdentifier.findAllBySample(sample)
-    List<SeqTrack> seqTracks = SeqTrack.findAllBySample(sample)
-    assert !seqTracks || DataFile.findAllBySeqTrackInList(seqTracks).isEmpty() : "DataFile loaded for ${sample}"
-    println "sampleIndis " + sampleIndis
-}
-
+List<Sample> samples = Sample.findAllByIndividual(individual)
+Map<Sample, List<SampleIdentifier>> sampleIdentifiersPerSample = SampleIdentifier.findAllBySampleInList(samples).groupBy { it.sample }
+Map<Sample, List<SeqTrack>> seqTracksPerSample = SeqTrack.findAllBySampleInList(samples).groupBy { it.sample }
 
 Individual.withTransaction() {
-    samples.each { sample ->
-        def sampleIndis = SampleIdentifier.findAllBySample(sample)
-        sampleIndis.each { it.delete(flush: true) }
+    output << "Individual: ${individual.id}: ${individual}"
+
+    // ClusterJobs are associated with Individual for statistical purposes. We do not delete them, but remove the association.
+    output << "  - ClusterJobs:"
+    clusterJobs.each { ClusterJob clusterJob ->
+        output << "    * ${clusterJob.id}: ${clusterJob.clusterJobId} ${clusterJob.clusterJobName}"
+        clusterJob.individual = null
+        clusterJob.save(flush: true)
     }
-    samples.each { it.delete(flush: true) }
-    indi.delete(flush: true)
+
+    output << "  - Samples with Identifiers:"
+    samples.each { Sample sample ->
+        List<SampleIdentifier> sampleIdentifiers = sampleIdentifiersPerSample[sample]
+
+        output << "    * ${sample.id}: ${sample.sampleType.name} ${sampleIdentifiers.collect { it.name }}"
+
+        sampleIdentifiers*.delete(flush: true)
+
+        List<SeqTrack> seqTracks = seqTracksPerSample[sample]
+        assert !seqTracks || DataFile.findAllBySeqTrackInList(seqTracks).isEmpty(): "Found data for Sample ${sample}. Take care of the data before deleting the individual"
+
+        sample.delete(flush: true)
+    }
+
+    individual.delete(flush: true)
+
+    println(output.join("\n"))
+    assert false: "Debug"
 }
 
-
-
-indi = Individual.findById(indi.id)
-println "patient " +  indi
-
-samples.each {
-    println 'sample ' + Sample.findById(it.id)
-}
 ''
