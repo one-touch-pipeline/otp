@@ -61,5 +61,13 @@ class SampleTypeService {
 
         return sampleTypes.unique().sort { it.name }
     }
+
+
+    List<SeqTrack> getSeqTracksWithoutSampleCategory(List<SeqTrack> seqTracks) {
+        return seqTracks.findAll { SeqTrack seqTrack ->
+            SampleTypePerProject stp = SampleTypePerProject.findWhere(project: seqTrack.project, sampleType: seqTrack.sampleType)
+            (stp == null || stp.category == SampleType.Category.UNDEFINED)
+        }
+    }
 }
 

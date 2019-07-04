@@ -35,9 +35,8 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -76,12 +75,14 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                 MetaDataFile,
                 MetaDataKey,
                 OtrsTicket,
+                Pipeline,
+                ProcessingOption,
                 Project,
                 ProjectCategory,
                 Realm,
+                RoddyWorkflowConfig,
                 Run,
                 RunSegment,
-                ProcessingOption,
                 Sample,
                 SampleIdentifier,
                 SampleType,
@@ -518,7 +519,9 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             return identifier
         }
 
-        MetadataImportService service = new MetadataImportService()
+        MetadataImportService service = Spy( MetadataImportService) {
+            notifyAboutUnsetConfig(_) >> null
+        }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             parseAndFindOrSaveSampleIdentifier(parse, _) >> createSampleIdentifierForSample2(parse)
             parseAndFindOrSaveSampleIdentifier(scParse, _) >> createSampleIdentifierForSample2(scParse)
@@ -893,7 +896,9 @@ ${ILSE_NO}                      -             1234          1234          -     
                 signature: '_',
         )
 
-        MetadataImportService service = new MetadataImportService()
+        MetadataImportService service = Spy( MetadataImportService) {
+            notifyAboutUnsetConfig(_) >> null
+        }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             0 * _
         }
@@ -1070,7 +1075,9 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
                 signature: '_',
         )
 
-        MetadataImportService service = new MetadataImportService()
+        MetadataImportService service = Spy( MetadataImportService) {
+            notifyAboutUnsetConfig(_) >> null
+        }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             0 * _
         }
@@ -1594,5 +1601,20 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         input    || output
         '1234'   || FileSystems.default.getPath("/test/SEQ_FACILITY/001/001234")
         '123456' || FileSystems.default.getPath("/test/SEQ_FACILITY/123/123456")
+    }
+
+    void "test getConfiguredSeqTracks"() {
+        given:
+        MetadataImportService service = new MetadataImportService()
+        SeqTrack seqTrackWithWorkflowConfig = DomainFactory.createSeqTrack()
+        SeqTrack seqTrackWithoutWorkflowConfig = DomainFactory.createSeqTrack()
+
+        DomainFactory.createRoddyWorkflowConfig(
+                project: seqTrackWithWorkflowConfig.project,
+                seqType: seqTrackWithWorkflowConfig.seqType,
+        )
+
+        expect:
+        [seqTrackWithWorkflowConfig] == service.getSeqTracksWithConfiguredAlignment([seqTrackWithWorkflowConfig, seqTrackWithoutWorkflowConfig])
     }
 }

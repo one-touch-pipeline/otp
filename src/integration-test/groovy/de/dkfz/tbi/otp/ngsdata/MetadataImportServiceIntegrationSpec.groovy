@@ -27,8 +27,12 @@ import grails.transaction.Rollback
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInSameDirectory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.Md5sumFormatValidator
+import de.dkfz.tbi.otp.tracking.OtrsTicket
+import de.dkfz.tbi.otp.utils.MailHelperService
 
 @Rollback
 @Integration
@@ -54,5 +58,41 @@ class MetadataImportServiceIntegrationSpec extends Specification {
     void 'getDirectoryStructure, when called with bean name, returns bean'() {
         expect:
         metadataImportService.getDirectoryStructure(MetadataImportService.DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME) instanceof DataFilesInSameDirectory
+    }
+
+    void "test notifyAboutUnsetConfig"() {
+        given:
+        MetadataImportService service = Spy(MetadataImportService) {
+            getSeqTracksWithConfiguredAlignment(_) >> null
+        }
+        OtrsTicket ticket = DomainFactory.createOtrsTicket()
+        SeqTrack st1 = DomainFactory.createSeqTrack()
+        SeqTrack st2 = DomainFactory.createSeqTrack()
+
+        service.sampleTypeService = Mock(SampleTypeService) {
+            getSeqTracksWithoutSampleCategory(_) >> [st1]
+        }
+        service.processingThresholdsService = Mock(ProcessingThresholdsService) {
+            getSeqTracksWithoutProcessingThreshold(_) >> [st2]
+        }
+        service.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmail(_, _, _)  >> { String subject, String body, String recipient ->
+                assert subject.contains("threshold")
+                assert subject.contains("category")
+                assert body.contains(st1.sampleType.displayName)
+                assert body.contains(st2.sampleType.displayName)
+                assert body.contains(st2.seqType.displayName)
+                assert recipient == "operator"
+            }
+        }
+        service.processingOptionService = Mock(ProcessingOptionService) {
+            findOptionAsString(_) >> "operator"
+        }
+
+        when:
+        service.notifyAboutUnsetConfig(ticket)
+
+        then:
+        true
     }
 }

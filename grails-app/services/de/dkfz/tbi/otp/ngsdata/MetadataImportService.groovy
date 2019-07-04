@@ -32,10 +32,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
-import de.dkfz.tbi.otp.dataprocessing.SamplePairService
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -89,6 +86,8 @@ class MetadataImportService {
     FileService fileService
     AntibodyTargetService antibodyTargetService
     SamplePairDeciderService samplePairDeciderService
+    ProcessingThresholdsService processingThresholdsService
+    SampleTypeService sampleTypeService
 
     static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
@@ -350,6 +349,8 @@ class MetadataImportService {
         importRuns(context, runSegment, context.spreadsheet.dataRows)
         log.debug("runs stopped took: ${System.currentTimeMillis() - timeStarted}")
 
+        notifyAboutUnsetConfig(runSegment.otrsTicket)
+
         MetaDataFile metaDataFile = new MetaDataFile(
                 fileName: context.metadataFile.fileName.toString(),
                 filePath: context.metadataFile.parent.toString(),
@@ -366,6 +367,47 @@ class MetadataImportService {
 
         log.debug("import stopped ${metaDataFile.fileName}:  ${System.currentTimeMillis() - timeImportStarted}")
         return metaDataFile
+    }
+
+    protected void notifyAboutUnsetConfig(OtrsTicket ticket) {
+        List<SeqTrack> configured = getSeqTracksWithConfiguredAlignment(ticket.findAllSeqTracks().toList())
+
+        List<SeqTrack> withoutCategory = sampleTypeService.getSeqTracksWithoutSampleCategory(configured)
+        List<SeqTrack> withoutThreshold = processingThresholdsService.getSeqTracksWithoutProcessingThreshold(configured)
+
+        if (withoutCategory || withoutThreshold) {
+            StringBuilder subject = new StringBuilder()
+            String prefix = processingOptionService.findOptionAsString(ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX)
+            subject.append("[${prefix}#${ticket.ticketNumber}] ")
+            subject.append("Configuration missing for ")
+            subject.append([withoutCategory ? "category" : "", withoutThreshold ? "threshold" : ""].findAll().join(" and "))
+
+            String body = ""
+            if (withoutCategory) {
+                body += "\nNo category set for:\n"
+                body += "${withoutCategory.collect { "${it.project} - ${it.sampleType.displayName}" }.unique().join(";\n")}\n"
+            }
+            if (withoutThreshold) {
+                body += "\nNo threshold set for:\n"
+                body += "${withoutThreshold.collect { "${it.project} - ${it.sampleType.displayName} - ${it.seqType.displayName}" }.unique().join(";\n")}\n"
+            }
+
+            mailHelperService.sendEmail(
+                    subject.toString(),
+                    body,
+                    processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_RECIPIENT_ERRORS)
+            )
+        }
+    }
+
+    protected List<SeqTrack> getSeqTracksWithConfiguredAlignment(List<SeqTrack> seqTracks) {
+        seqTracks.findAll { SeqTrack seqTrack ->
+            ConfigPerProjectAndSeqType.findAllByProjectAndSeqTypeAndPipelineInListAndObsoleteDateIsNull(
+                    seqTrack.project,
+                    seqTrack.seqType,
+                    Pipeline.findAllByTypeInList(Pipeline.Type.values().findAll { it == Pipeline.Type.ALIGNMENT})
+            )
+        }
     }
 
     private void importRuns(MetadataValidationContext context, RunSegment runSegment, Collection<Row> metadataFileRows) {

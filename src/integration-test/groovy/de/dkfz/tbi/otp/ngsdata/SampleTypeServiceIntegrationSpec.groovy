@@ -127,4 +127,15 @@ class SampleTypeServiceIntegrationSpec extends Specification {
         then:
         ret == [externalMergingWorkPackage.sampleType]
     }
+
+    void "test getSeqTracksWithoutSampleCategory"() {
+        given:
+        SeqTrack st1 = DomainFactory.createSeqTrack()
+        SeqTrack st2 = DomainFactory.createSeqTrack()
+        DomainFactory.createSampleTypePerProject(project: st2.project, sampleType: st2.sampleType)
+        SampleTypeService service = new SampleTypeService()
+
+        expect:
+        [st1] == service.getSeqTracksWithoutSampleCategory([st1, st2])
+    }
 }

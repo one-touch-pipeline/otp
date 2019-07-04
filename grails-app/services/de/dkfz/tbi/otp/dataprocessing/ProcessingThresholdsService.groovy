@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 class ProcessingThresholdsService {
 
     /**
-     * @return List of ProcessingThresolds for an project
+     * @return List of ProcessingThresholds for an project
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<ProcessingThresholds> findByProject(Project project) {
@@ -60,5 +60,12 @@ class ProcessingThresholdsService {
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     ProcessingThresholds findByProjectAndSampleTypeAndSeqType(Project project, SampleType sampleType, SeqType seqType) {
         return ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(project, sampleType, seqType)
+    }
+
+    List<SeqTrack> getSeqTracksWithoutProcessingThreshold(List<SeqTrack> seqTracks) {
+        seqTracks.findAll { SeqTrack seqTrack ->
+            (seqTrack.seqType in SeqTypeService.allAnalysableSeqTypes &&
+                    !findByProjectAndSampleTypeAndSeqType(seqTrack.project, seqTrack.sampleType, seqTrack.seqType))
+        }
     }
 }
