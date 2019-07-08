@@ -326,7 +326,7 @@ mv '${old}' \\
             it.fileName = it.vbpFileName = dataFileMap[it.fileName]
             if (it.mateNumber == null && it.fileWithdrawn && it.fileType && it.fileType.type == FileType.Type.SEQUENCE && it.fileType.vbpPath == "/sequence/") {
                 log << "\n====> set mate number for withdrawn data file"
-                assert it.seqTrack.seqType.libraryLayout == LibraryLayout.SINGLE: "library layout it not ${LibraryLayout.SINGLE}"
+                assert it.seqTrack.seqType.libraryLayout == LibraryLayout.SINGLE: "library layout is not ${LibraryLayout.SINGLE}"
                 it.mateNumber = 1
             }
             it.save(flush: true)
@@ -488,6 +488,10 @@ ln -s '${newDirectFileName}' \\
         oldIndividual.mockPid = newPid
         oldIndividual.mockFullName = newPid
         oldIndividual.save(flush: true)
+
+        bashScriptToMoveFiles << "\n\n################ move data files ################\n"
+        bashScriptToMoveFiles << renameDataFiles(dataFiles, newProject, dataFileMap, oldDataFileNameMap, sameLsdf, log)
+
         samples.each { Sample sample ->
             SampleType newSampleType = SampleType.findByName(sampleTypeMap.get(sample.sampleType.name))
             log << "\n    change ${sample.sampleType.name} to ${newSampleType.name}"
@@ -495,9 +499,6 @@ ln -s '${newDirectFileName}' \\
             sample.sampleType = newSampleType
             sample.save(flush: true)
         }
-
-        bashScriptToMoveFiles << "\n\n################ move data files ################\n"
-        bashScriptToMoveFiles << renameDataFiles(dataFiles, newProject, dataFileMap, oldDataFileNameMap, sameLsdf, log)
 
         bashScriptToMoveFiles << "\n\n\n ################ move fastq files ################ \n"
         samples = Sample.findAllByIndividual(oldIndividual)
@@ -668,10 +669,10 @@ ln -s '${newDirectFileName}' \\
         sample.individual = newIndividual
         sample.save(flush: true)
 
-        renameSampleIdentifiers(sample, log)
-
         bashScriptToMoveFiles << "################ move data files ################ \n"
         bashScriptToMoveFiles << renameDataFiles(dataFiles, newProject, dataFileMap, oldDataFileNameMap, sameLsdf, log)
+
+        renameSampleIdentifiers(sample, log)
 
         List<String> newFastqcFileNames = fastqDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
 
