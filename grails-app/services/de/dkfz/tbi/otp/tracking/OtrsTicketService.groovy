@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.tracking
 
 import grails.gorm.transactions.Transactional
+import org.hibernate.*
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -32,11 +33,19 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 @Transactional
 class OtrsTicketService {
 
+    /**
+     * helper do get pessimistic lock for ticket and wait till 10 seconds therefore
+     */
+    private void lockTicket(OtrsTicket ticket) {
+        OtrsTicket.withSession { Session s ->
+            s.refresh(ticket, new LockOptions(LockMode.PESSIMISTIC_WRITE).setTimeOut(10000))
+        }
+    }
+
     void saveStartTimeIfNeeded(OtrsTicket ticket, OtrsTicket.ProcessingStep step) {
         String property = "${step}Started"
         if (ticket[property] == null) {
-            ticket.lock()
-            ticket.refresh()
+            lockTicket(ticket)
             if (ticket[property] == null) {
                 ticket[property] = new Date()
                 ticket.save(flush: true)
@@ -47,8 +56,7 @@ class OtrsTicketService {
     void saveEndTimeIfNeeded(OtrsTicket ticket, OtrsTicket.ProcessingStep step) {
         String property = "${step}Finished"
         if (ticket[property] == null) {
-            ticket.lock()
-            ticket.refresh()
+            lockTicket(ticket)
             if (ticket[property] == null) {
                 ticket[property] = new Date()
                 ticket.save(flush: true)
@@ -57,8 +65,7 @@ class OtrsTicketService {
     }
 
     void markFinalNotificationSent(OtrsTicket ticket) {
-        ticket.lock()
-        ticket.refresh()
+        lockTicket(ticket)
         ticket.finalNotificationSent = true
         ticket.save(flush: true)
     }
