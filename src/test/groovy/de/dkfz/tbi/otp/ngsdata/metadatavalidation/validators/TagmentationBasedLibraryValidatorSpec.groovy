@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import spock.lang.Specification
@@ -38,8 +37,9 @@ class TagmentationBasedLibraryValidatorSpec extends Specification {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\n" +
-                        "1\n" +
                         "0\n" +
+                        "1\n" +
+                        "2\n" +
                         "True\n" +
                         "TRUE\n" +
                         "true\n" +
@@ -48,11 +48,14 @@ class TagmentationBasedLibraryValidatorSpec extends Specification {
                         "test\n" +
                         "\n")
         Collection<Problem> expectedProblems = [
-
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
-                        "The tagmentation based library column value should be '1', 'true', 'false' or an empty string instead of '0'.", "The tagmentation based library column value should be '1', 'true', 'false' or an empty string."),
-                new Problem(context.spreadsheet.dataRows[7].cells as Set, Level.ERROR,
-                        "The tagmentation based library column value should be '1', 'true', 'false' or an empty string instead of 'test'.", "The tagmentation based library column value should be '1', 'true', 'false' or an empty string."),
+                new Problem(context.spreadsheet.dataRows[2].cells as Set, Level.ERROR,
+                        "The tagmentation based library column value should be '${TagmentationBasedLibraryValidator.ALLOWED_VALUES.join("', '")}' " +
+                                "instead of '2'.",
+                        "The tagmentation based library column value should be '${TagmentationBasedLibraryValidator.ALLOWED_VALUES.join("', '")}'."),
+                new Problem(context.spreadsheet.dataRows[8].cells as Set, Level.ERROR,
+                        "The tagmentation based library column value should be '${TagmentationBasedLibraryValidator.ALLOWED_VALUES.join("', '")}' " +
+                                "instead of 'test'.",
+                        "The tagmentation based library column value should be '${TagmentationBasedLibraryValidator.ALLOWED_VALUES.join("', '")}'."),
         ]
 
         when:

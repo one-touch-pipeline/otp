@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import org.springframework.stereotype.Component
@@ -34,6 +33,14 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_BASED_LIBRARY
 
 @Component
 class TagmentationBasedLibraryValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+
+    static final List<String> ALLOWED_VALUES = [
+            '',
+            '0',
+            '1',
+            'true',
+            'false',
+    ].asImmutable()
 
     @Override
     Collection<String> getDescriptions() {
@@ -52,8 +59,10 @@ class TagmentationBasedLibraryValidator extends SingleValueValidator<MetadataVal
 
     @Override
     void validateValue(MetadataValidationContext context, String tagmentationBasedLibrary, Set<Cell> cells) {
-        if (!(tagmentationBasedLibrary.toLowerCase() in ["", "1", "true", "false"])) {
-           context.addProblem(cells, Level.ERROR, "The tagmentation based library column value should be '1', 'true', 'false' or an empty string instead of '${tagmentationBasedLibrary}'.", "The tagmentation based library column value should be '1', 'true', 'false' or an empty string.")
+        if (!(tagmentationBasedLibrary.toLowerCase() in ALLOWED_VALUES)) {
+            context.addProblem(cells, Level.ERROR,
+                    "The tagmentation based library column value should be '${ALLOWED_VALUES.join("', '")}' instead of '${tagmentationBasedLibrary}'.",
+                    "The tagmentation based library column value should be '${ALLOWED_VALUES.join("', '")}'.")
         }
     }
 }
