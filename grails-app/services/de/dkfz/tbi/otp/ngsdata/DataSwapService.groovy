@@ -516,8 +516,8 @@ ln -s '${newDirectFileName}' \\
         }
 
         bashScriptToMoveFiles << "\n\n\n ################ delete old Individual ################ \n"
-        bashScriptToMoveFiles << "# rm -rf '${oldProject.projectSequencingDirectory}/*/view-by-pid/${oldPid}/' \n"
-        bashScriptToMoveFiles << "# rm -rf '${processingPathToOldIndividual}'\n"
+        bashScriptToMoveFiles << "# rm -rf ${oldProject.projectSequencingDirectory}/*/view-by-pid/${oldPid}/\n"
+        bashScriptToMoveFiles << "# rm -rf ${processingPathToOldIndividual}\n"
 
         individualService.createComment("Individual swap", [
                 individual: oldIndividual,
