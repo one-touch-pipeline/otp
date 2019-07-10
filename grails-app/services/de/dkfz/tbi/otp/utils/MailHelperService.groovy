@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.utils
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
+import grails.plugins.mail.MailMessageBuilder
 import grails.plugins.mail.MailService
 import org.springframework.beans.factory.annotation.Autowired
 
@@ -51,23 +52,53 @@ class MailHelperService {
     }
 
     void sendEmail(String emailSubject, String content, List<String> recipients) {
-        sendEmail(emailSubject, content, recipients, processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_REPLY_TO))
+        sendEmail(emailSubject, content, recipients, defaultReplyToAdress)
+    }
+
+    void sendEmail(String emailSubject, String content, List<String> recipients, List<String> ccs) {
+        sendEmail(emailSubject, content, recipients, ccs, [], defaultReplyToAdress)
     }
 
     void sendEmail(String emailSubject, String content, List<String> recipients, String replyToAddress) {
+        sendEmail(emailSubject, content, recipients, [], [], replyToAddress)
+    }
+
+    void sendEmail(String emailSubject, String content, List<String> recipients, List<String> ccs, List<String> bccs, String replyToAddress) {
         assert emailSubject
         assert content
         assert recipients
-        assert recipients.every { it.contains('@') }
-        log.info "Send email: subject: '${emailSubject}', to: '${recipients}', content: '${content}'"
+        [recipients, ccs, bccs].each {
+            assert it.every(isValidMail)
+        }
+
+        log.info """
+            Send email:
+            to: '${recipients}'
+            cc: '${ccs}'
+            bcc: '${bccs}'
+            subject: '${emailSubject}'
+            content:
+            ${content}
+        """.stripIndent().toString()
+
         if (configService.otpSendsMails()) {
             mailService.sendMail {
                 from processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER)
                 replyTo replyToAddress
                 to recipients
+                if (ccs) { cc ccs }
+                if (bccs) { bcc bccs }
                 subject emailSubject
                 body content
             }
         }
+    }
+
+    private static Closure<Boolean> isValidMail = { String mail ->
+        return mail.contains("@")
+    }
+
+    String getDefaultReplyToAdress() {
+        return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_REPLY_TO)
     }
 }

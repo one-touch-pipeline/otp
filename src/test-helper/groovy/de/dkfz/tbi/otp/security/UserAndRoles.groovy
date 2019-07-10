@@ -33,8 +33,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.switchuser.SwitchUserFilter
 import org.springframework.security.web.authentication.switchuser.SwitchUserGrantedAuthority
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Principal
 
 import static org.junit.Assert.assertNotNull
@@ -47,6 +46,8 @@ trait UserAndRoles {
     final static String OPERATOR = "operator"
     final static String TESTUSER = "testuser"
     final static String USER = "user"
+
+    ProjectRole BIOINFORMATICIAN, PI, SUBMITTER
 
     /**
      * Creates four users and their roles:
@@ -68,6 +69,12 @@ trait UserAndRoles {
             assertNotNull(new AclSid(sid: user.username, principal: true).save(flush: true))
             it == ADMIN ? UserRole.create(user, adminRole) : ""
             it == OPERATOR ? UserRole.create(user, operatorRole) : ""
+        }
+    }
+
+    void createAllBasicProjectRoles() {
+        ProjectRole.ALL_BASIC_PROJECT_ROLES.each { String name ->
+            this[name] = DomainFactory.createProjectRole(name: name)
         }
     }
 

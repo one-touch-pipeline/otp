@@ -39,7 +39,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  */
 
 // ProjectRole to use for the new UserProjectRoles
-ProjectRole projectRole = ProjectRole.findByName("BIOINFORMATICIAN")
+ProjectRole projectRole = ProjectRole.findByName(ProjectRole.Basic.BIOINFORMATICIAN.name())
 // UserProjectRole flags
 boolean enabled = true
 boolean accessToOtp = true

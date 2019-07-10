@@ -61,11 +61,12 @@ class UserProjectRoleService {
     private UserProjectRole createUserProjectRole(User user, Project project, ProjectRole projectRole, Map flags = [:]) {
         assert user: "the user must not be null"
         assert project: "the project must not be null"
+        assert !UserProjectRole.findByUserAndProject(user, project): "User '${user.username ?: user.realName}' is already part of project '${project.name}'"
 
-        def requestor = springSecurityService?.principal?.hasProperty("username") ? springSecurityService.principal.username : springSecurityService?.principal
+        String requester = springSecurityService?.principal?.hasProperty("username") ? springSecurityService.principal.username : springSecurityService?.principal
         UserProjectRole oldUPR = UserProjectRole.findByUserAndProject(user, project)
-        List grantedPermissions = getPermissionDiff(true, flags, oldUPR)
-        List revokedPermissions = getPermissionDiff(false, flags, oldUPR)
+        List<OtpPermissionCode> grantedPermissions = getPermissionDiff(true, flags, oldUPR)
+        List<OtpPermissionCode> revokedPermissions = getPermissionDiff(false, flags, oldUPR)
 
         UserProjectRole userProjectRole = new UserProjectRole([
                 user       : user,
@@ -76,16 +77,16 @@ class UserProjectRoleService {
 
         String studyUID = OtpDicomAuditFactory.generateUID(UniqueIdentifierType.STUDY, String.valueOf(project.id))
         if (flags.enabled && !oldUPR?.enabled) {
-            DicomAuditLogger.logUserActivated(EventOutcomeIndicator.SUCCESS, getRealUserName(requestor), user.username, studyUID)
+            DicomAuditLogger.logUserActivated(EventOutcomeIndicator.SUCCESS, getRealUserName(requester), user.username, studyUID)
         } else if (!flags.enabled && oldUPR?.enabled) {
-            DicomAuditLogger.logUserDeactivated(EventOutcomeIndicator.SUCCESS, getRealUserName(requestor), user.username, studyUID)
+            DicomAuditLogger.logUserDeactivated(EventOutcomeIndicator.SUCCESS, getRealUserName(requester), user.username, studyUID)
         }
 
         if (grantedPermissions) {
-            DicomAuditLogger.logPermissionGranted(EventOutcomeIndicator.SUCCESS, getRealUserName(requestor), user.username, studyUID, *grantedPermissions)
+            DicomAuditLogger.logPermissionGranted(EventOutcomeIndicator.SUCCESS, getRealUserName(requester), user.username, studyUID, *grantedPermissions)
         }
         if (revokedPermissions) {
-            DicomAuditLogger.logPermissionRevoked(EventOutcomeIndicator.SUCCESS, getRealUserName(requestor), user.username, studyUID, *revokedPermissions)
+            DicomAuditLogger.logPermissionRevoked(EventOutcomeIndicator.SUCCESS, getRealUserName(requester), user.username, studyUID, *revokedPermissions)
         }
         return userProjectRole
     }
@@ -102,15 +103,15 @@ class UserProjectRoleService {
         if (!user) {
             user = userService.createUser(ldapUserDetails.cn, ldapUserDetails.mail, ldapUserDetails.realName)
         }
-        UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
-        assert !userProjectRole: "User '${user.username}' is already part of project '${project.name}'"
-        userProjectRole = createUserProjectRole(user, project, projectRole, flags)
+
+        UserProjectRole userProjectRole = createUserProjectRole(user, project, projectRole, flags)
 
         if (userProjectRole.accessToFiles) {
             requestToAddUserToUnixGroupIfRequired(userProjectRole)
         }
+
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
-        notifyProjectAuthoritiesAndUser(project, user)
+        notifyProjectAuthoritiesAndUser(userProjectRole)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
@@ -121,11 +122,11 @@ class UserProjectRoleService {
         if (!user) {
             user = userService.createUser(null, email, realName)
         }
-        UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
-        assert !userProjectRole: "User '${user.realName}' is already part of project '${project.name}'"
-        userProjectRole = createUserProjectRole(user, project, projectRole)
+
+        UserProjectRole userProjectRole = createUserProjectRole(user, project, projectRole)
+
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.realName} for ${userProjectRole.project.name}")
-        notifyProjectAuthoritiesAndUser(project, user)
+        notifyProjectAuthoritiesAndUser(userProjectRole)
     }
 
     private void requestToAddUserToUnixGroupIfRequired(UserProjectRole userProjectRole) {
@@ -196,21 +197,48 @@ class UserProjectRoleService {
         ADD, REMOVE
     }
 
-    private void notifyProjectAuthoritiesAndUser(Project project, User user) {
-        List<User> projectAuthorities = UserProjectRole.findAllByProjectAndProjectRoleAndEnabled(
-                project,
-                ProjectRole.findByName("PI"),
-                true
-        )*.user
-        List<String> allMails = (projectAuthorities*.email + user.email).unique()
-        String subject = createMessage("projectUser.notification.newProjectMember.subject", [projectName: project.name])
-        String body = createMessage("projectUser.notification.newProjectMember.body", [
-                projectName   : project.name,
-                userIdentifier: user.realName ?: user.username,
-        ])
-        mailHelperService.sendEmail(subject, body, allMails)
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
-                "Notified project authorities (${projectAuthorities*.realName.join(", ")}) and user (${user.username})")
+    private void notifyProjectAuthoritiesAndUser(UserProjectRole userProjectRole) {
+        User executingUser = User.findByUsername(springSecurityService.authentication.principal.username as String)
+
+        String projectRoleName = userProjectRole.projectRole.name
+        String projectName = userProjectRole.project.name
+
+        List<Role> administrativeRoles = Role.findAllByAuthorityInList(Role.ADMINISTRATIVE_ROLES)
+
+        boolean userIsSubmitter = projectRoleName == ProjectRole.Basic.SUBMITTER.name()
+        boolean executingUserIsAdministrativeUser = UserRole.findByUserAndRoleInList(executingUser, administrativeRoles)
+
+        String subject = createMessage("projectUser.notification.newProjectMember.subject", [projectName: projectName])
+
+        String body
+        if (userIsSubmitter && executingUserIsAdministrativeUser) {
+            String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
+            body = createMessage("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter" ,[
+                userIdentifier       : userProjectRole.user.realName ?: userProjectRole.user.username,
+                projectRole          : projectRoleName,
+                projectName          : projectName,
+                supportTeamName      : supportTeamName,
+                supportTeamSalutation: supportTeamName,
+            ])
+        } else {
+            body = createMessage("projectUser.notification.newProjectMember.body.userManagerAddedMember" ,[
+                userIdentifier: userProjectRole.user.realName ?: userProjectRole.user.username,
+                projectRole   : projectRoleName,
+                projectName   : projectName,
+                executingUser : executingUser.realName ?: executingUser.username,
+            ])
+        }
+
+        Project project = userProjectRole.project
+        List<User> projectAuthorities = getProjectAuthorities(project)
+        List<User> userManagers = getUserManagers(project)
+
+        List<String> recipients = (projectAuthorities + userManagers)*.email.unique()
+        if (recipients) {
+            mailHelperService.sendEmail(subject, body, recipients, [userProjectRole.user.email])
+            auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
+                    "Notified project authorities (${projectAuthorities*.realName.join(", ")}) and user (${userProjectRole.user.username})")
+        }
     }
 
     private String getFlagChangeLogMessage(String flagName, boolean newStatus, String username, String projectName) {
@@ -282,7 +310,7 @@ class UserProjectRoleService {
         userProjectRole.enabled = enabled
         assert userProjectRole.save(flush: true)
         if (enabled) {
-            notifyProjectAuthoritiesAndUser(userProjectRole.project, userProjectRole.user)
+            notifyProjectAuthoritiesAndUser(userProjectRole)
         }
         if (userProjectRole.accessToFiles) {
             if (enabled) {
@@ -319,6 +347,7 @@ class UserProjectRoleService {
         }
         return ''
     }
+
     /**
      * returns the number of all users of specified projects.
      * If start and end date are set then only users which are created at given time period are returned for specified projects.
@@ -370,6 +399,18 @@ class UserProjectRoleService {
                 }
             }
         } ?: []
+    }
+
+    private static List<User> getUserManagers(Project project) {
+        return UserProjectRole.findAllByProjectAndManageUsersAndEnabled(project, true, true)*.user
+    }
+
+    private static List<User> getProjectAuthorities(Project project) {
+        return UserProjectRole.findAllByProjectAndProjectRoleInListAndEnabled(
+                project,
+                ProjectRole.findAllByNameInList(ProjectRole.AUTHORITY_PROJECT_ROLES),
+                true
+        )*.user
     }
 
     List<OtpPermissionCode> getPermissionDiff(boolean added, Map flags, UserProjectRole oldUPR) {

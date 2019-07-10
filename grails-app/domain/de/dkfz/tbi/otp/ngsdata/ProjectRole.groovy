@@ -26,9 +26,48 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class ProjectRole implements Entity {
 
+    /**
+     * The set of essential ProjectRoles.
+     *
+     * These project roles are required to exist and are seeded into the database.
+     * The names of the enum values have to be an exact match to the way they are
+     * stored in the database.
+     * It is possible and common to add more ProjectRoles than the ones given here.
+     *
+     * Other roles, that are not listed in Basic are not enforced and should be
+     * used exclusively for informational purposes.
+     *
+     * Do not assign any kind of behaviour to roles other than the Basic ProjectRoles.
+     */
+    static enum Basic {
+        BIOINFORMATICIAN, PI, SUBMITTER
+
+        static List<Basic> asList() {
+            return values() as List<Basic>
+        }
+    }
+
+    static final List<String> ALL_BASIC_PROJECT_ROLES = asImmutableStringList(Basic.asList())
+
+    /**
+     * Roles given to users that are authority figures for the project.
+     *
+     * This means they are eligible to be contacted for questions regarding the project
+     * and can be taken as a trustworthy source, regarding the management, direction
+     * and legal paperwork of the project. They are to be notified about changes to
+     * the mentioned topics.
+     */
+    static final List<String> AUTHORITY_PROJECT_ROLES = asImmutableStringList([
+            Basic.PI,
+    ])
+
     String name
 
     static constraints = {
         name(blank: false, unique: true)
+    }
+
+    private static List<String> asImmutableStringList(List<Basic> list) {
+        return list*.toString().asImmutable()
     }
 }
