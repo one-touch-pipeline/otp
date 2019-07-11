@@ -59,6 +59,7 @@ stages:
     - $PREPARE_GRADLE_CACHE2
     - $PREPARE_GRADLE_CACHE3
     - bashScripts/gitlab-ci/update-Gradle-source.sh
+    - bashScripts/gitlab-ci/use-local-repository.sh
 
 .abstract_trigger: &trigger_template
   image: centos:7
@@ -168,6 +169,7 @@ war:
     - $PREPARE_GRADLE_CACHE2
     - $PREPARE_GRADLE_CACHE3
     - bashScripts/gitlab-ci/update-Gradle-source.sh
+    - bashScripts/gitlab-ci/use-local-repository.sh
     - export CI_COMMIT_REF_NAME
     - export CI_COMMIT_SHA
     - mkdir -p logs/jobs
@@ -193,6 +195,7 @@ test migration:
     - $PREPARE_GRADLE_CACHE2
     - $PREPARE_GRADLE_CACHE3
     - bashScripts/gitlab-ci/update-Gradle-source.sh
+    - bashScripts/gitlab-ci/use-local-repository.sh
     - echo 'otp.database.server=postgres' >> /home/grails/.otp.properties
     - echo 'otp.database.port=5432' >> /home/grails/.otp.properties
     - echo 'otp.database.database=otp' >> /home/grails/.otp.properties

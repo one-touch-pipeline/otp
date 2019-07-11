@@ -24,11 +24,8 @@ import grails.util.Environment
 
 buildscript {
     repositories {
-        //mavenLocal()
-        String repoUrl = System.getenv("MAVEN_REPOSITORY_URL")
-        assert repoUrl : "Set the environment variable MAVEN_REPOSITORY_URL"
-        maven { url repoUrl }
-        //maven { url "https://repo.grails.org/grails/core" }
+        mavenLocal()
+        maven { url "https://repo.grails.org/grails/core" }
     }
     dependencies {
         classpath "org.grails:grails-gradle-plugin:$grailsVersion"
@@ -54,11 +51,9 @@ apply plugin:"org.grails.grails-gsp"
 apply plugin:"codenarc"
 
 repositories {
-    //mavenLocal()
-    String repoUrl = System.getenv("MAVEN_REPOSITORY_URL")
-    assert repoUrl : "Set the environment variable MAVEN_REPOSITORY_URL"
-    maven { url repoUrl }
-    //maven { url "https://repo.grails.org/grails/core" }
+    mavenLocal()
+    maven { url "https://repo.grails.org/grails/core" }
+    maven { url "https://jitpack.io" }
 }
 
 sourceSets {
@@ -120,19 +115,18 @@ dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.15'
     codenarc 'org.codehaus.groovy:groovy-all:2.4.15' // both groovy versions must be the same; required bc we add runtimeClasspath to codenarcClasspath
 
-    compile 'bedUtils:bedUtils:0.7'
-    compile 'com.github.samtools:htsjdk:2.12.0'
+    compile(project(':bedutils'))
 
     // JDBC
     runtime "org.postgresql:postgresql:42.1.4"
 
     // Dicom Audit Logging
     if (Environment.isDevelopmentMode()) {
-        compile "de.dkfz.odcf:DicomAuditImpl:1.1-nop"
+        compile "com.gitlab.one-touch-pipeline:dicom-audit-trail-impl:v1.1.0-NOP"
     } else {
-        compile "de.dkfz.odcf:DicomAuditImpl:1.1"
+        compile "com.gitlab.one-touch-pipeline:dicom-audit-trail-impl:1.1.0"
     }
-    compile "de.dkfz.odcf:DicomAudit:1.2"
+    compile "com.gitlab.one-touch-pipeline:dicom-audit-trail:1.2.0"
 
     // bioinformatics tools
     // ngstools
