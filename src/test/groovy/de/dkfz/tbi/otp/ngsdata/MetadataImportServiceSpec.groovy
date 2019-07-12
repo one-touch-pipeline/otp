@@ -35,9 +35,11 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
@@ -456,6 +458,9 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         def (md5a, md5b, md5c, md5d, md5e, md5f, md5g, md5h, md5i) = (1..9).collect { HelperUtils.getRandomMd5sum() }
 
+        int seqTrackCount = includeOptional ? 7 : 1
+        int dataFileCount = includeOptional ? 9 : 1
+
         String scMaterial = SeqType.SINGLE_CELL_DNA
 
         SeqCenter seqCenter = DomainFactory.createSeqCenter(name: center1)
@@ -546,6 +551,10 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             findByNameOrImportAlias(target1) >> antibodyTarget1
             findByNameOrImportAlias(target2) >> antibodyTarget2
         }
+        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
+            seqTrackCount * findOrCreateSamplePairs([]) >> []
+            0 * _
+        }
         GroovyMock(SamplePair, global: true)
         1 * SamplePair.findMissingDiseaseControlSamplePairs() >> [samplePair]
         1 * samplePair.save([flush: true])
@@ -593,8 +602,6 @@ ${ILSE_NO}                      -             1234          1234          -     
                 lines.collect { it*.replaceFirst(/^-$/, '').join('\t') }.join('\n'),
                 [metadataFile: file.toPath(), directoryStructure: directoryStructure]
         )
-        int seqTrackCount = includeOptional ? 7 : 1
-        int dataFileCount = includeOptional ? 9 : 1
 
         when:
         MetaDataFile result = service.importMetadataFile(context, align, importMode, otrsTicket.ticketNumber, null, otrsTicket.automaticNotification)
@@ -844,7 +851,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             ])
         }
 
-        seqTrackCount * service.seqTrackService.decideAndPrepareForAlignment(!null)
+        seqTrackCount * service.seqTrackService.decideAndPrepareForAlignment(!null) >> []
         seqTrackCount * service.seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
 
         cleanup:
@@ -891,7 +898,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             0 * _
         }
         service.seqTrackService = Mock(SeqTrackService) {
-            1 * decideAndPrepareForAlignment(!null)
+            1 * decideAndPrepareForAlignment(!null) >> []
             1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
@@ -907,6 +914,10 @@ ${ILSE_NO}                      -             1234          1234          -     
         }
         service.antibodyTargetService = Mock(AntibodyTargetService) {
             findByNameOrImportAlias(antibodyTarget.name) >> antibodyTarget
+        }
+        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
+            1 * findOrCreateSamplePairs([]) >> []
+            0 * _
         }
 
         GroovyMock(SamplePair, global: true)
@@ -1064,7 +1075,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
             0 * _
         }
         service.seqTrackService = Mock(SeqTrackService) {
-            1 * decideAndPrepareForAlignment(!null)
+            1 * decideAndPrepareForAlignment(!null) >> []
             1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
@@ -1076,6 +1087,10 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
                     libraryLayout: seqType.libraryLayout,
                     singleCell   : seqType.singleCell,
             ]) >> seqType
+            0 * _
+        }
+        service.samplePairDeciderService = Mock(SamplePairDeciderService) {
+            1 * findOrCreateSamplePairs([]) >> []
             0 * _
         }
 

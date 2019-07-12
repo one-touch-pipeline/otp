@@ -32,9 +32,12 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
+import de.dkfz.tbi.otp.dataprocessing.SamplePairService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
@@ -85,6 +88,7 @@ class MetadataImportService {
     ProcessingOptionService processingOptionService
     FileService fileService
     AntibodyTargetService antibodyTargetService
+    SamplePairDeciderService samplePairDeciderService
 
     static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
@@ -479,8 +483,10 @@ class MetadataImportService {
             log.debug("dataFiles stopped took: ${System.currentTimeMillis() - timeStarted}")
             assert seqTrack.save(flush: true) //needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
 
-            boolean willBeAligned = seqTrackService.decideAndPrepareForAlignment(seqTrack)
-            seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, willBeAligned)
+            Collection<MergingWorkPackage> mergingWorkPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
+            seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, !mergingWorkPackages.empty)
+            samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
+
         }
     }
 
