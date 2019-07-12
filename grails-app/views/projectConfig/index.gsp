@@ -266,6 +266,18 @@
                     </td>
                     <td><g:message code="projectOverview.customFinalNotification.message.detail"/></td>
                 </tr>
+                <tr>
+                    <td class="myKey"><g:message code="projectOverview.closed"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'projectConfig', action: "updateClosed", params: ['project.id': project.id, 'fieldName': 'closed'])}"
+                                values="${["true","false"]}"
+                                value="${closed}"/>
+                    </td>
+                    <td></td>
+                </tr>
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <tr>
                         <td class="myKey"><g:message code="projectOverview.projectInfos"/></td>

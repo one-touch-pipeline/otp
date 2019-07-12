@@ -39,7 +39,7 @@ class ProjectValidator extends SingleValueValidator<AbstractMetadataValidationCo
 
     @Override
     Collection<String> getDescriptions() {
-        return ["The project is registered in OTP or the column ${MetaDataColumn.PROJECT} does not exist."]
+        return ["The project is registered in OTP or the column ${MetaDataColumn.PROJECT} does not exist.",]
     }
 
     @Override
@@ -56,7 +56,7 @@ class ProjectValidator extends SingleValueValidator<AbstractMetadataValidationCo
 
     @Override
     void validateValue(AbstractMetadataValidationContext context, String projectName, Set<Cell> cells) {
-        if (!(CollectionUtils.atMostOneElement(Project.findAllByNameOrNameInMetadataFiles(projectName, projectName)))) {
+        if (!CollectionUtils.atMostOneElement(Project.findAllByNameOrNameInMetadataFiles(projectName, projectName))) {
             def level
             if (context instanceof BamMetadataValidationContext) {
                 level = Level.ERROR

@@ -145,5 +145,4 @@ class ProjectValidatorSpec extends Specification implements DataTest {
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("The project '${PROJECT_NAME}' is not registered in OTP.")
     }
-
 }

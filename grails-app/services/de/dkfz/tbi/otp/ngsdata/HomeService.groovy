@@ -42,7 +42,7 @@ class HomeService {
                 }
                 order ("seqTypeDisplayName")
             }
-            queryMap[projectName] = seq.toListString().replace("[", "").replace("]", "")
+            queryMap[projectName] = seq.join(", ")
         }
         return queryMap
     }

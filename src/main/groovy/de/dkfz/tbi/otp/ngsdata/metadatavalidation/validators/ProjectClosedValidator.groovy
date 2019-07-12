@@ -1,0 +1,76 @@
+/*
+ * Copyright 2011-2019 The OTP authors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+
+package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
+
+import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
+import de.dkfz.tbi.util.spreadsheet.validation.*
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+
+@Component
+class ProjectClosedValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
+
+
+    @Override
+    Collection<String> getDescriptions() {
+        return [
+                "The project is not closed.",
+        ]
+    }
+    @Override
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        []
+    }
+
+    @Override
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        return [PROJECT, SAMPLE_ID]*.name()
+    }
+
+    @Override
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    }
+
+    @Override
+    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+        valueTuples.each { it ->
+            String sampleId = it.getValue(SAMPLE_ID.name())
+            String projectName = it.getValue(PROJECT.name())
+            Project projectFromProjectColumn = atMostOneElement(Project.findAllByNameOrNameInMetadataFiles(projectName, projectName))
+            SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
+
+            Project project = sampleIdentifier?.project ?: projectFromProjectColumn
+            if (project && project.closed) {
+                context.addProblem(it.cells, Level.ERROR, "The project '${project.name}' is closed.", "At least one project is closed.")
+            }
+        }
+    }
+}

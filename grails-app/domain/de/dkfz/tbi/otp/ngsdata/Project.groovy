@@ -86,6 +86,8 @@ class Project implements Commentable, Entity {
      */
     boolean customFinalNotification = false
 
+    boolean closed = false
+
     Set<ProjectInfo> projectInfos
 
     Comment comment
@@ -181,6 +183,10 @@ class Project implements Commentable, Entity {
         name index: "project_name_idx"
         dirAnalysis type: "text"
         description type: "text"
+    }
+
+    String getDisplayName() {
+        "${name}${closed ? " (closed)" : ""}"
     }
 
     File getProjectDirectory() {

@@ -43,7 +43,6 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class ProjectConfigController implements CheckAndCall {
 
@@ -172,11 +171,11 @@ class ProjectConfigController implements CheckAndCall {
                 speciesWithStrain              : project?.speciesWithStrain,
                 allSpeciesWithStrain           : SpeciesWithStrain.list().sort { it.toString() } ?: [],
                 addProjectInfos                : flash?.addProjectInfos,
+                closed                         : project?.closed,
         ]
     }
 
-    JSON getAlignmentInfo() {
-        Project project = exactlyOneElement(Project.findAllByName(params.project, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
+    JSON getAlignmentInfo(Project project) {
         Map<String, AlignmentInfo> alignmentInfo = null
         String alignmentError = null
         try {
@@ -257,6 +256,12 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     JSON updateCopyFiles(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd, {
+            projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, cmd.project)
+        })
+    }
+
+    JSON updateClosed(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, cmd.project)
         })
@@ -410,7 +415,7 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     JSON dataTableSourceReferenceGenome(DataTableCommand cmd) {
-        Project project = projectService.getProjectByName(params.project)
+        Project project = projectService.getProject(params.project as Long)
         Map dataToRender = cmd.dataToRender()
         List data = projectOverviewService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it ->
             String adapterTrimming = ""

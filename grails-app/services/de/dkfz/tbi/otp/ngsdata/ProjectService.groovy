@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.*
 import org.springframework.validation.Errors
 import org.springframework.web.multipart.MultipartFile
-import sun.nio.fs.UnixUserPrincipals
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -40,14 +39,16 @@ import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfigService
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.job.processing.*
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.nio.file.*
-import java.nio.file.attribute.*
+import java.nio.file.attribute.PosixFileAttributes
+import java.nio.file.attribute.PosixFilePermission
 import java.text.SimpleDateFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -74,7 +75,6 @@ class ProjectService {
     @Autowired
     RemoteShellHelper remoteShellHelper
     ReferenceGenomeService referenceGenomeService
-    ExecutionHelperService executionHelperService
     ReferenceGenomeIndexService referenceGenomeIndexService
     GeneModelService geneModelService
     SophiaService sophiaService
@@ -321,6 +321,7 @@ class ProjectService {
                 "unixGroup",
                 "forceCopyFiles",
                 "speciesWithStrain",
+                "closed",
         ].contains(fieldName)
 
         project."${fieldName}" = fieldValue

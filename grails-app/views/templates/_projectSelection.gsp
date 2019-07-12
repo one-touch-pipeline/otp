@@ -27,5 +27,5 @@
     <g:hiddenField name="type" value="PROJECT"/>
     <g:hiddenField name="redirect" value="${request.forwardURI - request.contextPath}"/>
     <g:select class="criteria" id="project" name='id' autocomplete="off"
-              from='${projects}' value='${project?.id}' optionKey='id' optionValue='name' onChange='submit();' />
+              from='${projects}' value='${project?.id}' optionKey='id' optionValue='displayName' onChange='submit();' />
 </form>

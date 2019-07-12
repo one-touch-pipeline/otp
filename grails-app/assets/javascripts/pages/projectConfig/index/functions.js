@@ -48,7 +48,7 @@ $.otp.projectConfig = {
             fnServerData: function (sSource, aoData, fnCallback) {
                 aoData.push({
                     name: "project",
-                    value: $('#project').find('option:selected').text()
+                    value: $('#project').find('option:selected').val()
                 });
                 $.ajax({
                     "dataType": 'json',
@@ -98,7 +98,7 @@ $.otp.projectConfig = {
             url: $.otp.createLink({
                 controller: 'projectConfig',
                 action: 'getAlignmentInfo',
-                parameters: {project: $('#project').find('option:selected').text()}
+                parameters: { "project.id": $('#project').find('option:selected').val() }
             }),
             dataType: 'json',
             success: function (data) {
