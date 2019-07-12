@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.qcTrafficLight
 
 import grails.gorm.transactions.Transactional
@@ -27,10 +26,11 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerWorkflowService
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
-import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 
 import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdLevel.ERROR
@@ -42,8 +42,35 @@ class QcTrafficLightService {
     ConfigService configService
     LinkFilesToFinalDestinationService linkFilesToFinalDestinationService
 
+    CellRangerWorkflowService cellRangerWorkflowService
+
     OtrsTicketService otrsTicketService
 
+    SeqTypeService seqTypeService
+
+    @Lazy
+    Map<SeqType, Closure<Void>> qcHandlerMap = initQcHandlerMap()
+
+    private Map<SeqType, Closure<Void>> initQcHandlerMap() {
+        Map<SeqType, Closure<Void>> map = [:]
+        Realm realm = configService.defaultRealm
+        addToQcHandler(map, SeqTypeService.panCanAlignableSeqTypes) { AbstractBamFile roddyBamFile ->
+            linkFilesToFinalDestinationService.linkNewResults((RoddyBamFile)roddyBamFile, realm)
+        }
+        addToQcHandler(map, SeqTypeService.rnaAlignableSeqTypes) { AbstractBamFile roddyBamFile ->
+            linkFilesToFinalDestinationService.linkNewRnaResults((RnaRoddyBamFile)roddyBamFile, realm)
+        }
+        addToQcHandler(map, SeqTypeService.cellRangerAlignableSeqTypes) { AbstractBamFile roddyBamFile ->
+            cellRangerWorkflowService.linkResultFiles((SingleCellBamFile)roddyBamFile)
+        }
+        return map.asImmutable()
+    }
+
+    private void addToQcHandler(Map<SeqType, Closure<Void>> map, List<SeqType> seqTypes, Closure<Void> linkResultClosure) {
+        seqTypes.each {
+            map[it] = linkResultClosure
+        }
+    }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#bamFile?.project, 'OTP_READ_ACCESS')")
     void setQcTrafficLightStatusWithComment(AbstractMergedBamFile bamFile, AbstractMergedBamFile.QcTrafficLightStatus qcTrafficLightStatus, String comment) {
@@ -57,11 +84,9 @@ class QcTrafficLightService {
             otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).each {
                 otrsTicketService.resetAnalysisNotification(it)
             }
-            if (bamFile.seqType.isRna()) {
-                linkFilesToFinalDestinationService.linkNewRnaResults((RnaRoddyBamFile) bamFile, configService.getDefaultRealm())
-            } else {
-                linkFilesToFinalDestinationService.linkNewResults(bamFile, configService.getDefaultRealm())
-            }
+            Closure<Void> qcHandler = qcHandlerMap[bamFile.seqType]
+            assert qcHandler
+            qcHandler(bamFile)
         }
     }
 
@@ -77,7 +102,7 @@ class QcTrafficLightService {
             return
         }
 
-        Project project = bamFile.getProject()
+        Project project = bamFile.project
 
         if (!project.qcThresholdHandling.checksThreshold) {
             setQcTrafficLightStatus(bamFile, AbstractMergedBamFile.QcTrafficLightStatus.UNCHECKED)

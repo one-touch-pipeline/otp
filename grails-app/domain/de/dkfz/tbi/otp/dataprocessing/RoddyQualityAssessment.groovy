@@ -24,14 +24,13 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import org.hibernate.Hibernate
 
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 
-abstract class RoddyQualityAssessment extends AbstractQualityAssessment {
+abstract class RoddyQualityAssessment extends AbstractQualityAssessment implements QualityAssessmentWithMergedPass {
 
     // We could also link directly to RoddyBamFile, but then Grails fails to start up the application context for an
     // unclear reason. So as a workaround we have an indirect link via QualityAssessmentMergedPass.
-    QualityAssessmentMergedPass qualityAssessmentMergedPass
 
     static final String ALL = "all"
 
@@ -103,8 +102,7 @@ abstract class RoddyQualityAssessment extends AbstractQualityAssessment {
         return chromosome
     }
 
-    ReferenceGenome getReferenceGenome() {
-        return qualityAssessmentMergedPass.referenceGenome
+    RoddyBamFile getBamFile() {
+        return roddyBamFile
     }
-
 }

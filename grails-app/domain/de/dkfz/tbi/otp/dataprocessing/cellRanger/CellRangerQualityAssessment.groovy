@@ -19,17 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
-import de.dkfz.tbi.otp.dataprocessing.QualityAssessmentMergedPass
+import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 
-class CellRangerQualityAssessment extends AbstractQualityAssessment implements QcTrafficLightValue {
+class CellRangerQualityAssessment extends AbstractQualityAssessment implements QualityAssessmentWithMergedPass, QcTrafficLightValue {
 
-    QualityAssessmentMergedPass qualityAssessmentMergedPass
+    Integer getExpectedCells() {
+        return ((CellRangerMergingWorkPackage) qualityAssessmentMergedPass.mergingWorkPackage).expectedCells
+    }
+
+    Integer getEnforcedCells() {
+        return ((CellRangerMergingWorkPackage) qualityAssessmentMergedPass.mergingWorkPackage).enforcedCells
+    }
 
     /**
      * The number of barcodes associated with cell-containing partitions,
@@ -155,5 +161,9 @@ class CellRangerQualityAssessment extends AbstractQualityAssessment implements Q
 
     static constraints = {
         referenceLength validator: { it == null }
+    }
+
+    SingleCellBamFile getBamFile() {
+        return qualityAssessmentMergedPass.abstractMergedBamFile as SingleCellBamFile
     }
 }

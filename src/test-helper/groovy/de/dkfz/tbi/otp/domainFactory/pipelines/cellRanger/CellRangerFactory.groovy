@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -107,20 +106,20 @@ trait CellRangerFactory implements IsAlignment {
         ]
     }
 
+    @SuppressWarnings('GetterMethodCouldBeProperty')
     @Override
     Class getConfigPerProjectAndSeqTypeClass() {
         return CellRangerConfig
     }
 
-    AbstractQualityAssessment createQa(AbstractMergedBamFile abstractMergedBamFile, Map properties = [:]) {
-        createDomainObject(CellRangerQualityAssessment, getDefaultValuesForAbstractQualityAssessment() + [
-                qualityAssessmentMergedPass: DomainFactory.createQualityAssessmentMergedPass(
-                        abstractMergedBamFile: abstractMergedBamFile
-                ),
-        ] + getQaValuesProperties(), properties
-        )
+    @SuppressWarnings('GetterMethodCouldBeProperty')
+    @Override
+    Class getQaClass() {
+        return CellRangerQualityAssessment
     }
 
+    @SuppressWarnings('DuplicateNumberLiteral')
+    @Override
     Map getQaValuesProperties() {
         return [
                 referenceLength                          : null,
@@ -176,7 +175,6 @@ trait CellRangerFactory implements IsAlignment {
         return [csvData.keySet().join(","), csvData.values().collect { "\"${it}\"" }.join(",")].join("\n")
     }
 
-
     @SuppressWarnings('JavaIoPackageAccess')
     void createResultFiles(SingleCellBamFile singleCellBamFile) {
         File resultDir = singleCellBamFile.resultDirectory
@@ -188,5 +186,4 @@ trait CellRangerFactory implements IsAlignment {
             CreateFileHelper.createFile(new File(new File(resultDir, it), 'dummyFile'))
         }
     }
-
 }

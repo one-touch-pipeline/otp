@@ -19,12 +19,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Transactional
@@ -32,7 +32,6 @@ class OverallQualityAssessmentMergedService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     List<AbstractQualityAssessment> findAllByProjectAndSeqType(Project project, SeqType seqType) {
-
         String maxQualityAssessmentMergedPassIdentifier = """
 select
     max(identifier)
@@ -42,7 +41,7 @@ where
     qualityAssessmentMergedPass.abstractMergedBamFile = abstractMergedBamFile
 """
 
-        String HQL = """
+        final String HQL = """
             select
                 abstractQualityAssessment
             from
@@ -59,8 +58,10 @@ where
                 and abstractMergedBamFile.qualityAssessmentStatus = :qualityAssessmentStatus
                 and abstractMergedBamFile.withdrawn = false
                 and (
-                    abstractQualityAssessment.class = :overallQualityAssessmentMergedClass
-                    or (
+                    abstractQualityAssessment.class in (
+                        :overallQualityAssessmentMergedClass,
+                        :cellRangerQualityAssessmentClass
+                    ) or (
                         abstractQualityAssessment.class in (:roddyMergedBamQaClass)
                         and abstractQualityAssessment.chromosome = :allChromosomes
                     )
@@ -71,8 +72,9 @@ where
             seqType: seqType,
             fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED,
             qualityAssessmentStatus: AbstractBamFile.QaProcessingStatus.FINISHED,
-            overallQualityAssessmentMergedClass: OverallQualityAssessmentMerged.getName(),
-            roddyMergedBamQaClass: [RoddyMergedBamQa.getName(), RnaQualityAssessment.getName()],
+            overallQualityAssessmentMergedClass: OverallQualityAssessmentMerged.name,
+            cellRangerQualityAssessmentClass: CellRangerQualityAssessment.name,
+            roddyMergedBamQaClass: [RoddyMergedBamQa.name, RnaQualityAssessment.name],
             allChromosomes: RoddyQualityAssessment.ALL,
         ]
 

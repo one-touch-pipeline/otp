@@ -45,7 +45,7 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
 
     static constraints = {
         identifier(unique: 'abstractMergedBamFile', validator: { int val, QualityAssessmentMergedPass obj ->
-            return val == 0 || !(RoddyBamFile.isAssignableFrom(Hibernate.getClass(obj.abstractMergedBamFile)))
+            return val == 0 || (ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(obj.abstractMergedBamFile)))
         })
         description(nullable: true)
     }

@@ -91,25 +91,4 @@ trait IsPipeline implements DomainFactoryCore {
                 },
         ]
     }
-
-    Map<String, ?> getDefaultValuesForAbstractQualityAssessment() {
-        return [
-                qcBasesMapped                  : 0,
-                totalReadCounter               : 0,
-                qcFailedReads                  : 0,
-                duplicates                     : 0,
-                totalMappedReadCounter         : 0,
-                pairedInSequencing             : 0,
-                pairedRead1                    : 0,
-                pairedRead2                    : 0,
-                properlyPaired                 : 0,
-                withItselfAndMateMapped        : 0,
-                withMateMappedToDifferentChr   : 0,
-                withMateMappedToDifferentChrMaq: 0,
-                singletons                     : 0,
-                insertSizeMedian               : 0,
-                insertSizeSD                   : 0,
-                referenceLength                : 1,
-        ].asImmutable()
-    }
 }

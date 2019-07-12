@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.qcTrafficLight
 
 import grails.testing.gorm.DataTest
@@ -35,6 +34,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 
+@SuppressWarnings('JUnitPublicProperty')
 class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory, DataTest {
 
     @Override
@@ -79,6 +79,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
     @Unroll
     void "test setQcTrafficLightStatusWithComment valid input (is rna: #rna, qcStatus: #qcStatus), succeeds"() {
         given:
+        DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile roddyBamFile = rna ? RoddyRnaFactory.super.createBamFile() : DomainFactory.createRoddyBamFile()
         DomainFactory.createDefaultRealmWithProcessingOption()
         testConfigService = new TestConfigService()
@@ -115,6 +116,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
 
     void "test setQcTrafficLightStatusWithComment invalid input, fails"() {
         given:
+        DomainFactory.createAllAlignableSeqTypes()
         qcTrafficLightService = new QcTrafficLightService()
 
         when:
@@ -133,6 +135,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
 
     void "test setQcTrafficLightStatusWithComment set analysis of otrs to not sent"() {
         given:
+        DomainFactory.createAllAlignableSeqTypes()
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
                 qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.REJECTED,
         ])

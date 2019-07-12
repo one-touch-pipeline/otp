@@ -19,48 +19,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.dataprocessing
 
-import org.hibernate.Hibernate
-
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 
-/**
- * To be extended later on
- * Class to represent the data for the entire set of chromosomes (1 to 22, X, Y and M) as one
- * for merged bam file
- */
-class OverallQualityAssessmentMerged extends QaJarQualityAssessment implements QualityAssessmentWithMergedPass, QcTrafficLightValue {
+trait QualityAssessmentWithMergedPass {
 
-    static belongsTo = [
-        qualityAssessmentMergedPass: QualityAssessmentMergedPass,
-    ]
+    QualityAssessmentMergedPass qualityAssessmentMergedPass
 
-    static constraints = {
-        qualityAssessmentMergedPass(validator: {
-            ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(it.abstractMergedBamFile))
-        })
+    ReferenceGenome getReferenceGenome() {
+        return qualityAssessmentMergedPass.referenceGenome
     }
 
-    static mapping = {
-        qualityAssessmentMergedPass index: "abstract_quality_assessment_quality_assessment_merged_pass_idx"
+    Project getProject() {
+        return qualityAssessmentMergedPass.project
     }
 
-    MergingPass getMergingPass() {
-        return qualityAssessmentMergedPass.mergingPass
+    Individual getIndividual() {
+        return qualityAssessmentMergedPass.individual
     }
 
-    MergingSet getMergingSet() {
-        return qualityAssessmentMergedPass.mergingSet
+    SampleType getSampleType() {
+        return qualityAssessmentMergedPass.sampleType
     }
 
-    ProcessedMergedBamFile getProcessedMergedBamFile() {
-        return qualityAssessmentMergedPass.abstractMergedBamFile as ProcessedMergedBamFile
+    MergingWorkPackage getMergingWorkPackage() {
+        return qualityAssessmentMergedPass.mergingWorkPackage
     }
 
-    ProcessedMergedBamFile getBamFile() {
-        return processedMergedBamFile
+    SeqType getSeqType() {
+        return qualityAssessmentMergedPass.seqType
     }
 }

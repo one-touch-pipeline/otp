@@ -19,38 +19,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.dataprocessing
 
-import org.hibernate.Hibernate
+import grails.plugin.springsecurity.SpringSecurityUtils
+import grails.transaction.Rollback
 
-import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-/**
- * Class to represent chromosomes that will be considered independently (1 to 22, X, Y and M)
- * for merged bam files
- */
-class ChromosomeQualityAssessmentMerged extends QaJarQualityAssessment implements QualityAssessmentWithMergedPass {
+@Rollback
+class OverallQualityAssessmentMergedServiceForProcessedMergedBamFilesIntegrationSpec extends AbstractOverallQualityAssessmentMergedServiceIntegrationSpec {
 
-    /**
-     * Name of the {@link ReferenceGenomeEntry} used in the BAM file where the data to identify the chromosome is read from
-     * (depends on the reference used to align the reads)
-     */
-    String chromosomeName
-
-    static belongsTo = [
-        qualityAssessmentMergedPass: QualityAssessmentMergedPass,
-    ]
-
-    static constraints = {
-        qualityAssessmentMergedPass(validator: {
-            ProcessedMergedBamFile.isAssignableFrom(Hibernate.getClass(it.abstractMergedBamFile))
-        })
+    @Override
+    AbstractQualityAssessment createQualityAssessment() {
+        return DomainFactory.createOverallQualityAssessmentMerged()
     }
 
-    static mapping = {
-        chromosomeName index: "abstract_quality_assessment_chromosome_name_idx"
-        //qualityAssessmentMergedPass is defined in OverallQualityAssessmentMerged
+    void "findAllByProjectAndSeqType, when last pass has no qa, then return empty list"() {
+        given:
+        setupData()
+        List<OverallQualityAssessmentMerged> result
+        DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: qualityAssessment.bamFile, identifier: qualityAssessment.qualityAssessmentMergedPass.identifier + 1)
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            result = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(qualityAssessment.project, qualityAssessment.seqType)
+        }
+
+        then:
+        result == []
     }
 }
-

@@ -27,9 +27,8 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 /**
  * Keeps all needed QA parameters for external processed merged BAM files at the moment only for Sophia
  */
-class ExternalProcessedMergedBamFileQualityAssessment extends AbstractQualityAssessment implements SophiaWorkflowQualityAssessment {
-
-    QualityAssessmentMergedPass qualityAssessmentMergedPass
+class ExternalProcessedMergedBamFileQualityAssessment extends AbstractQualityAssessment
+        implements QualityAssessmentWithMergedPass, SophiaWorkflowQualityAssessment {
 
     /**
      * insert size

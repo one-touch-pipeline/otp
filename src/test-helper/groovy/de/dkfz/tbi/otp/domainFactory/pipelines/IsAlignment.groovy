@@ -22,6 +22,47 @@
 
 package de.dkfz.tbi.otp.domainFactory.pipelines
 
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+
 trait IsAlignment implements IsPipeline {
 
+    Map<String, ?> getDefaultValuesForAbstractQualityAssessment() {
+        return [
+                qcBasesMapped                  : 0,
+                totalReadCounter               : 0,
+                qcFailedReads                  : 0,
+                duplicates                     : 0,
+                totalMappedReadCounter         : 0,
+                pairedInSequencing             : 0,
+                pairedRead1                    : 0,
+                pairedRead2                    : 0,
+                properlyPaired                 : 0,
+                withItselfAndMateMapped        : 0,
+                withMateMappedToDifferentChr   : 0,
+                withMateMappedToDifferentChrMaq: 0,
+                singletons                     : 0,
+                insertSizeMedian               : 0,
+                insertSizeSD                   : 0,
+                referenceLength                : 1,
+        ].asImmutable()
+    }
+
+    abstract Map getQaValuesProperties()
+
+    abstract Class getQaClass()
+
+    AbstractQualityAssessment createQa(Map properties = [:]) {
+        return createQa(createBamFile(), properties)
+    }
+
+    AbstractQualityAssessment createQa(AbstractMergedBamFile abstractMergedBamFile, Map properties = [:]) {
+        createDomainObject(qaClass, defaultValuesForAbstractQualityAssessment + [
+                qualityAssessmentMergedPass: DomainFactory.createQualityAssessmentMergedPass(
+                        abstractMergedBamFile: abstractMergedBamFile
+                ),
+        ] + qaValuesProperties, properties
+        )
+    }
 }

@@ -19,23 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
 import org.springframework.util.Assert
 
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
+
 @Transactional
 class ChromosomeQualityAssessmentMergedService {
 
+    @SuppressWarnings('Instanceof')
     List<AbstractQualityAssessment> qualityAssessmentMergedForSpecificChromosomes(
             List<String> chromosomes, List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses) {
         Assert.notNull(chromosomes, 'Parameter "chromosomes" may not be null')
         Assert.notNull(qualityAssessmentMergedPasses, 'Parameter "qualityAssessmentMergedPasses" may not be null')
 
         qualityAssessmentMergedPasses*.abstractMergedBamFile.each { AbstractMergedBamFile abstractMergedBamFile ->
-            assert (abstractMergedBamFile instanceof RoddyBamFile || abstractMergedBamFile instanceof ProcessedMergedBamFile)
+            assert (abstractMergedBamFile instanceof RoddyBamFile || abstractMergedBamFile instanceof ProcessedMergedBamFile ||
+                    abstractMergedBamFile instanceof SingleCellBamFile)
         }
+
+        //For SingleCellBamFile no chromosome specific values available, so it can be ignored
 
         List<QualityAssessmentMergedPass> roddyFilePasses = qualityAssessmentMergedPasses.findAll {
             it.abstractMergedBamFile instanceof RoddyBamFile

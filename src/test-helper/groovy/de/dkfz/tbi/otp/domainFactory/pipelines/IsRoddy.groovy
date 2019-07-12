@@ -45,7 +45,7 @@ trait IsRoddy implements IsPipeline {
         return createRoddyBamFile(properties, RoddyBamFile)
     }
 
-    private <T> T createRoddyBamFile(Map properties = [:], Class<T> clazz) {
+    public <T> T createRoddyBamFile(Map properties = [:], Class<T> clazz) {
         MergingWorkPackage workPackage = properties.workPackage
         if (!workPackage) {
             workPackage = createMergingWorkPackage()
@@ -59,7 +59,7 @@ trait IsRoddy implements IsPipeline {
         return createRoddyBamFile(properties, workPackage, clazz)
     }
 
-    private <T> T createRoddyBamFile(Map properties = [:], MergingWorkPackage workPackage, Class<T> clazz) {
+    public <T> T createRoddyBamFile(Map properties = [:], MergingWorkPackage workPackage, Class<T> clazz) {
         Collection<SeqTrack> seqTracks = properties.seqTracks ?: [DomainFactory.createSeqTrackWithDataFiles(workPackage)]
         workPackage.seqTracks = seqTracks
         DomainFactory.createMergingCriteriaLazy(

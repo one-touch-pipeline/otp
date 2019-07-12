@@ -19,10 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna
 
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
@@ -44,7 +43,7 @@ trait RoddyRnaFactory implements IsAlignment, IsRoddy {
                 dirName      : 'rna_sequencing',
                 roddyName    : 'RNA',
                 libraryLayout: LibraryLayout.PAIRED,
-                singleCell   : false
+                singleCell   : false,
         ]
     }
 
@@ -53,8 +52,20 @@ trait RoddyRnaFactory implements IsAlignment, IsRoddy {
         return findOrCreatePipeline(Pipeline.Name.RODDY_RNA_ALIGNMENT, Pipeline.Type.ALIGNMENT)
     }
 
+    @SuppressWarnings('DuplicateNumberLiteral')
+    @Override
     Map getQaValuesProperties() {
         return [
+                chromosome                       : RoddyQualityAssessment.ALL,
+                genomeWithoutNCoverageQcBases    : null,
+                insertSizeCV                     : null,
+                insertSizeMedian                 : null,
+                pairedRead1                      : null,
+                pairedRead2                      : null,
+                percentageMatesOnDifferentChr    : null,
+                referenceLength                  : null,
+                properlyPairedPercentage         : 0,
+                singletonsPercentage             : 0,
                 alternativeAlignments            : 0,
                 baseMismatchRate                 : 0.0123456789,
                 chimericPairs                    : 0,
@@ -105,7 +116,14 @@ trait RoddyRnaFactory implements IsAlignment, IsRoddy {
         ]
     }
 
-    String getQaFileContent(Map properties = [:]) {
+    @SuppressWarnings('GetterMethodCouldBeProperty')
+    @Override
+    Class getQaClass() {
+        return RnaQualityAssessment
+    }
+
+    @SuppressWarnings('GetterMethodCouldBeProperty')
+    String getQaFileContent() {
         return """\
 {
   "all": {

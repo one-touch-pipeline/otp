@@ -175,6 +175,29 @@ $.otp.alignmentQualityOverviewTable = {
                                     "kit",
                                     "dateFromFileSystem",
                                 ]);
+                            } else if (seqType === '10x_scRNA PAIRED singleCell') {
+                                columnNames = columnNames.concat([
+                                    'expectedCells',
+                                    'enforcedCells',
+                                    'estimatedNumberOfCells',
+                                    'meanReadsPerCell',
+                                    'medianGenesPerCell',
+                                    'numberOfReads',
+                                    'validBarcodes',
+                                    'sequencingSaturation',
+                                    'q30BasesInBarcode',
+                                    'q30BasesInRnaRead',
+                                    'q30BasesInUmi',
+                                    'readsMappedConfidentlyToIntergenicRegions',
+                                    'readsMappedConfidentlyToIntronicRegions',
+                                    'readsMappedConfidentlyToExonicRegions',
+                                    'readsMappedConfidentlyToTranscriptome',
+                                    'fractionReadsInCells',
+                                    'totalGenesDetected',
+                                    'medianUmiCountsPerCell',
+                                    "kit",
+                                    "dateFromFileSystem",
+                                ]);
                             } else {
                                 columnNames = columnNames.concat([
                                     "kit",

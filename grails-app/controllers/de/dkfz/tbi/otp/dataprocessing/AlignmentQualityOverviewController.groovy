@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.dataprocessing
 
 import grails.converters.JSON
@@ -27,6 +26,7 @@ import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.otp.ProjectSelection
 import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -34,13 +34,12 @@ import de.dkfz.tbi.otp.utils.FormatHelper
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-
 class AlignmentQualityOverviewController {
 
     static final String CHR_X_HG19 = 'chrX'
     static final String CHR_Y_HG19 = 'chrY'
 
-    private static final List<String> chromosomes = [Chromosomes.CHR_X.alias, Chromosomes.CHR_Y.alias, CHR_X_HG19, CHR_Y_HG19].asImmutable()
+    private static final List<String> CHROMOSOMES = [Chromosomes.CHR_X.alias, Chromosomes.CHR_Y.alias, CHR_X_HG19, CHR_Y_HG19].asImmutable()
 
     private static final List<String> HEADER_WHOLE_GENOME = [
             'alignment.quality.individual',
@@ -107,13 +106,40 @@ class AlignmentQualityOverviewController {
             'alignment.quality.date',
     ].asImmutable()
 
-    private static final List<String> supportedSeqTypes = [
+    private static final List<String> HEADER_CELL_RANGER = [
+            'alignment.quality.individual',
+            'alignment.quality.sampleType',
+            'alignment.quality.qcStatus',
+            'alignment.quality.cell.ranger.cells.expected',
+            'alignment.quality.cell.ranger.cells.enforced',
+            'alignment.quality.cell.ranger.estimatedNumberOfCells',
+            'alignment.quality.cell.ranger.meanReadsPerCell',
+            'alignment.quality.cell.ranger.medianGenesPerCell',
+            'alignment.quality.cell.ranger.numberOfReads',
+            'alignment.quality.cell.ranger.validBarcodes',
+            'alignment.quality.cell.ranger.sequencingSaturation',
+            'alignment.quality.cell.ranger.q30BasesInBarcode',
+            'alignment.quality.cell.ranger.q30BasesInRnaRead',
+            'alignment.quality.cell.ranger.q30BasesInUmi',
+            'alignment.quality.cell.ranger.readsMappedConfidentlyToIntergenicRegions',
+            'alignment.quality.cell.ranger.readsMappedConfidentlyToIntronicRegions',
+            'alignment.quality.cell.ranger.readsMappedConfidentlyToExonicRegions',
+            'alignment.quality.cell.ranger.readsMappedConfidentlyToTranscriptome',
+            'alignment.quality.cell.ranger.fractionReadsInCells',
+            'alignment.quality.cell.ranger.totalGenesDetected',
+            'alignment.quality.cell.ranger.medianUmiCountsPerCell',
+            'alignment.quality.kit',
+            'alignment.quality.date',
+    ]
+
+    private static final List<String> SUPPORTED_SEQ_TYPES = [
             SeqTypeNames.WHOLE_GENOME.seqTypeName,
             SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName,
             SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName,
             SeqTypeNames.CHIP_SEQ.seqTypeName,
             SeqTypeNames.EXOME.seqTypeName,
             SeqTypeNames.RNA.seqTypeName,
+            SeqTypeNames._10X_SCRNA.seqTypeName,
     ].asImmutable()
 
     OverallQualityAssessmentMergedService overallQualityAssessmentMergedService
@@ -136,17 +162,17 @@ class AlignmentQualityOverviewController {
             if (project) {
                 projectSelectionService.setSelectedProject([project], project.name)
                 redirect(controller: controllerName, action: actionName)
-                return
+                return [:]
             }
         }
 
-        List<Project> projects = projectService.getAllProjects()
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
+        List<Project> projects = projectService.allProjects
+        ProjectSelection selection = projectSelectionService.selectedProject
 
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
         List<SeqType> seqTypes = seqTypeService.alignableSeqTypesByProject(project).findAll {
-            it.name in supportedSeqTypes
+            it.name in SUPPORTED_SEQ_TYPES
         }
 
         SeqType seqType = (cmd.seqType && seqTypes.contains(cmd.seqType)) ? cmd.seqType : seqTypes[0]
@@ -168,6 +194,9 @@ class AlignmentQualityOverviewController {
             case SeqTypeNames.RNA.seqTypeName:
                 header = HEADER_RNA
                 break
+            case SeqTypeNames._10X_SCRNA.seqTypeName:
+                header = HEADER_CELL_RANGER
+                break
             default:
                 throw new RuntimeException("How should ${seqType.naturalId} be handled")
         }
@@ -182,12 +211,12 @@ class AlignmentQualityOverviewController {
     }
 
     JSON changeQcStatus(QcStatusCommand cmd) {
-        def dataToRender = [:]
+        Map dataToRender = [:]
 
         if (cmd.hasErrors()) {
-            FieldError error = cmd.errors.getFieldError()
+            FieldError error = cmd.errors.fieldError
             dataToRender.put("success", false)
-            dataToRender.put("error", "'${error.getRejectedValue()}' is not a valid value for '${error.getField()}'. Error code: '${error.code}'")
+            dataToRender.put("error", "'${error.rejectedValue}' is not a valid value for '${error.field}'. Error code: '${error.code}'")
         } else {
             qcTrafficLightService.setQcTrafficLightStatusWithComment(
                     cmd.abstractBamFile,
@@ -199,7 +228,7 @@ class AlignmentQualityOverviewController {
         render dataToRender as JSON
     }
 
-
+    @SuppressWarnings(['AbcMetric', 'CyclomaticComplexity', 'MethodSize'])
     JSON dataTableSource(DataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
         Long projectName = params.project as Long
@@ -216,9 +245,8 @@ class AlignmentQualityOverviewController {
         Project project = projectService.getProject(projectName)
         SeqType seqType = SeqType.get(seqTypeName)
 
-
         List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
-        List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(chromosomes,
+        List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(CHROMOSOMES,
                 dataOverall*.qualityAssessmentMergedPass)
         Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY
         chromosomeMapXY = dataChromosomeXY.groupBy([
@@ -232,13 +260,12 @@ class AlignmentQualityOverviewController {
         }
 
         Map<Long, Map<String, List<ReferenceGenomeEntry>>> chromosomeLengthForChromosome =
-                overallQualityAssessmentMergedService.findChromosomeLengthForQualityAssessmentMerged(chromosomes, dataOverall).
-                        groupBy({ it.referenceGenome.id }, { it.alias })
+                overallQualityAssessmentMergedService.findChromosomeLengthForQualityAssessmentMerged(CHROMOSOMES, dataOverall).
+                        groupBy([{ it.referenceGenome.id }, { it.alias }])
 
         dataToRender.iTotalRecords = dataOverall.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         dataToRender.aaData = dataOverall.collect { AbstractQualityAssessment it ->
-
             QualityAssessmentMergedPass qualityAssessmentMergedPass = it.qualityAssessmentMergedPass
             AbstractMergedBamFile abstractMergedBamFile = qualityAssessmentMergedPass.abstractMergedBamFile
             Set<SeqTrack> seqTracks = abstractMergedBamFile.mergingWorkPackage.seqTracks
@@ -362,6 +389,29 @@ class AlignmentQualityOverviewController {
                     ]
                     break
 
+                case SeqTypeNames._10X_SCRNA.seqTypeName:
+                    qcKeys += [
+                            'expectedCells',
+                            'enforcedCells',
+                            'estimatedNumberOfCells',
+                            'meanReadsPerCell',
+                            'medianGenesPerCell',
+                            'numberOfReads',
+                            'validBarcodes',
+                            'sequencingSaturation',
+                            'q30BasesInBarcode',
+                            'q30BasesInRnaRead',
+                            'q30BasesInUmi',
+                            'readsMappedConfidentlyToIntergenicRegions',
+                            'readsMappedConfidentlyToIntronicRegions',
+                            'readsMappedConfidentlyToExonicRegions',
+                            'readsMappedConfidentlyToTranscriptome',
+                            'fractionReadsInCells',
+                            'totalGenesDetected',
+                            'medianUmiCountsPerCell',
+                    ]
+                    break
+
                 default:
                     throw new RuntimeException("How should ${seqTypeName} be handled")
             }
@@ -383,11 +433,13 @@ class AlignmentQcCommand {
     SeqType seqType
 }
 
+@SuppressWarnings('SerializableClassMustDefineSerialVersionUID')
 class QcStatusCommand implements Serializable {
     String comment
     AbstractBamFile abstractBamFile
     String newValue
 
+    @SuppressWarnings('Instanceof')
     static constraints = {
         comment(blank: false, nullable: false, validator: { val, obj ->
             if (val == obj.abstractBamFile?.comment?.comment) {
@@ -395,7 +447,7 @@ class QcStatusCommand implements Serializable {
             }
         })
         abstractBamFile(nullable: false, validator: { val, obj ->
-            if (!(val instanceof RoddyBamFile)) {
+            if (!((val instanceof RoddyBamFile) || (val instanceof SingleCellBamFile))) {
                 return "${val} is an invalid Value."
             }
         })
