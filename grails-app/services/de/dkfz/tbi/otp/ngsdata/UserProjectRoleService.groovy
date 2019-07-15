@@ -107,7 +107,7 @@ class UserProjectRoleService {
         UserProjectRole userProjectRole = createUserProjectRole(user, project, projectRole, flags)
 
         if (userProjectRole.accessToFiles) {
-            requestToAddUserToUnixGroupIfRequired(userProjectRole)
+            sendFileAccessNotifications(userProjectRole)
         }
 
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
@@ -127,6 +127,38 @@ class UserProjectRoleService {
 
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.realName} for ${userProjectRole.project.name}")
         notifyProjectAuthoritiesAndUser(userProjectRole)
+    }
+
+    private void sendFileAccessNotifications(UserProjectRole userProjectRole) {
+        notifyUsersAboutFileAccessChange(userProjectRole)
+        requestToAddUserToUnixGroupIfRequired(userProjectRole)
+    }
+
+    private void notifyUsersAboutFileAccessChange(UserProjectRole userProjectRole) {
+        User requester = User.findByUsername(springSecurityService.authentication.principal.username as String)
+        Project project = userProjectRole.project
+        User user = userProjectRole.user
+
+        String subject = createMessage("projectUser.notification.fileAccessChange.subject", [
+            projectName: project.name,
+        ])
+
+        String clusterName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME)
+        String clusterAdministrationEmail = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION)
+        String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
+        String body = createMessage("projectUser.notification.fileAccessChange.body", [
+                username                  : user.realName,
+                requester                 : requester.realName,
+                projectName               : project.name,
+                dirAnalysis               : project.dirAnalysis,
+                clusterName               : clusterName,
+                clusterAdministrationEmail: clusterAdministrationEmail,
+                supportTeamSalutation     : supportTeamName,
+        ])
+
+        List<String> ccs = getUniqueProjectAuthoritiesAndUserManagers(project)*.email.sort()
+
+        mailHelperService.sendEmail(subject, body, user.email, ccs)
     }
 
     private void requestToAddUserToUnixGroupIfRequired(UserProjectRole userProjectRole) {
@@ -187,7 +219,7 @@ class UserProjectRoleService {
                 requesterUserDetail   : requesterUserDetail,
         ])
         String email = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION)
-        mailHelperService.sendEmail(subject, body, email, requester.email)
+        mailHelperService.sendEmail(subject, body, email)
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
                 "Sent mail to ${email} to ${formattedAction} ${userProjectRole.user.username} ${conjunction} ${userProjectRole.project.name} " +
                         "at the request of ${requester.username + switchedUserAnnotation}")
@@ -229,15 +261,12 @@ class UserProjectRoleService {
             ])
         }
 
-        Project project = userProjectRole.project
-        List<User> projectAuthorities = getProjectAuthorities(project)
-        List<User> userManagers = getUserManagers(project)
-
-        List<String> recipients = (projectAuthorities + userManagers)*.email.unique()
+        List<User> projectAuthoritiesAndUserManagers = getUniqueProjectAuthoritiesAndUserManagers(userProjectRole.project)
+        List<String> recipients = projectAuthoritiesAndUserManagers*.email.unique().sort()
         if (recipients) {
             mailHelperService.sendEmail(subject, body, recipients, [userProjectRole.user.email])
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,
-                    "Notified project authorities (${projectAuthorities*.realName.join(", ")}) and user (${userProjectRole.user.username})")
+                    "Notified project authorities (${projectAuthoritiesAndUserManagers*.realName.join(", ")}) and user (${userProjectRole.user.username})")
         }
     }
 
@@ -263,7 +292,7 @@ class UserProjectRoleService {
         upr.accessToFiles = !upr.accessToFiles
         assert upr.save(flush: true)
         if (upr.accessToFiles) {
-            requestToAddUserToUnixGroupIfRequired(upr)
+            sendFileAccessNotifications(upr)
         } else {
             requestToRemoveUserFromUnixGroupIfRequired(upr)
         }
@@ -314,7 +343,7 @@ class UserProjectRoleService {
         }
         if (userProjectRole.accessToFiles) {
             if (enabled) {
-                requestToAddUserToUnixGroupIfRequired(userProjectRole)
+                sendFileAccessNotifications(userProjectRole)
             } else {
                 requestToRemoveUserFromUnixGroupIfRequired(userProjectRole)
             }
@@ -399,6 +428,10 @@ class UserProjectRoleService {
                 }
             }
         } ?: []
+    }
+
+    private static List<User> getUniqueProjectAuthoritiesAndUserManagers(Project project) {
+        return (getUserManagers(project) + getProjectAuthorities(project)).unique()
     }
 
     private static List<User> getUserManagers(Project project) {

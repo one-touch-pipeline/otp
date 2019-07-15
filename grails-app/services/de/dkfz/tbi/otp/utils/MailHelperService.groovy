@@ -55,6 +55,10 @@ class MailHelperService {
         sendEmail(emailSubject, content, recipients, defaultReplyToAdress)
     }
 
+    void sendEmail(String emailSubject, String content, String recipient, List<String> ccs) {
+        sendEmail(emailSubject, content, Arrays.asList(recipient), ccs)
+    }
+
     void sendEmail(String emailSubject, String content, List<String> recipients, List<String> ccs) {
         sendEmail(emailSubject, content, recipients, ccs, [], defaultReplyToAdress)
     }

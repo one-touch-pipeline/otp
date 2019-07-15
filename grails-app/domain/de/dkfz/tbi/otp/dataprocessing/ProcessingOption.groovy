@@ -383,7 +383,11 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "OTP team", TypeValidators.SINGLE_LINE_TEXT
         ),
         EMAIL_LINUX_GROUP_ADMINISTRATION(
-                "The mail of the responsible entity to add users to linux groups",
+                "Email address of the entity responsible for adding users to linux groups",
+                Necessity.REQUIRED, null, TypeValidators.MAIL
+        ),
+        EMAIL_CLUSTER_ADMINISTRATION(
+                "Email address of the entity managing the cluster",
                 Necessity.REQUIRED, null, TypeValidators.MAIL
         ),
 
@@ -472,6 +476,12 @@ class ProcessingOption implements Entity {
         GUI_LOGO(
                 "Location specific logo",
                 Necessity.OPTIONAL, "NONE", TypeValidators.INSTANCE_LOGO
+        ),
+
+        //naming
+        CLUSTER_NAME(
+                "The common name to refer to the cluster OTP uses",
+                Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
         ),
 
         private final String description
