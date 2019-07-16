@@ -117,7 +117,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest {
 
         then:
         def e = thrown(AssertionError)
-        e.message =~ /(?i)not found\./
+        e.message =~ /(?i)on local filesystem is not accessible or does not exist\./
     }
 
     void "test isFileReadableAndNotEmpty, when file is not a regular file"() {

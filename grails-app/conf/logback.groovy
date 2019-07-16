@@ -77,6 +77,24 @@ appender("OTP", RollingFileAppender) {
     }
 }
 
+appender("WAIT_TO_FILE_SYSTEM", RollingFileAppender) {
+    append = true
+    encoder(PatternLayoutEncoder) {
+        charset = Charset.forName('UTF-8')
+        pattern =
+                '%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} ' + // Date
+                        '%clr(%5p) ' + // Log level
+                        '%clr(---){faint} %clr([%25.25t]){faint} ' + // Thread
+                        '%clr(%-40.40logger{39}){cyan} %clr(:){faint} ' + // Logger
+                        '%m%n%wex' // Message
+    }
+    rollingPolicy(TimeBasedRollingPolicy) {
+        fileNamePattern = "logs/WAIT_TO_FILE_SYSTEM-%d{yyyy-MM-dd}.log"
+        maxHistory = 7
+        totalSizeCap = '1GB'
+    }
+}
+
 String appenderToUse = Environment.current == Environment.PRODUCTION ? 'OTP' : 'STDOUT'
 
 Properties otpProperties = ConfigService.parsePropertiesFile()
@@ -144,6 +162,7 @@ String jobLogConfig = """\
 configurator.doConfigure(new ByteArrayInputStream(jobLogConfig.getBytes(StandardCharsets.UTF_8)))
 
 
+logger("de.dkfz.tbi.otp.infrastructure.FileService.WAITING", DEBUG, ['WAIT_TO_FILE_SYSTEM'], false)
 logger("de.dkfz.tbi.otp", DEBUG, [appenderToUse], false)
 logger("seedme", DEBUG, [appenderToUse], false)
 logger("liquibase", INFO, [appenderToUse], false)

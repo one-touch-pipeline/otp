@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.dataprocessing
 
 import de.dkfz.tbi.otp.config.TypeValidators
@@ -352,6 +351,10 @@ class ProcessingOption implements Entity {
                 "Use remote (true) or local (false) filesystem for config file checks",
                 Necessity.REQUIRED, null, TypeValidators.BOOLEAN
         ),
+        FILESYSTEM_TIMEOUT(
+            "The amount of time (im minutes) the FileService allows the filesystem until a given commands times out",
+            Necessity.OPTIONAL, "0", TypeValidators.POSITIVE_NUMBER
+        ),
         //realm
         REALM_DEFAULT_VALUE(
                 "The default realm",
@@ -471,7 +474,6 @@ class ProcessingOption implements Entity {
                 Necessity.OPTIONAL, "NONE", TypeValidators.INSTANCE_LOGO
         ),
 
-
         private final String description
         private final Necessity necessity
         private final String defaultValue
@@ -548,9 +550,8 @@ class ProcessingOption implements Entity {
             }
             if (obj.name.validatorForType) {
                 return obj.name.validatorForType.validate(val)
-            } else {
-                return (val == null)
             }
+            return (val == null)
         })
         project(nullable: true)
         dateObsoleted(nullable: true)

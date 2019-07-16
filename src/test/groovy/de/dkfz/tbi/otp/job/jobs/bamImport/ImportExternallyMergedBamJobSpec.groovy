@@ -434,7 +434,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
         then:
         def e = thrown(ProcessingException)
-        e.message.contains("epmbfWithMd5sum.bam.maxReadLength not found")
+        e.message.contains("epmbfWithMd5sum.bam.maxReadLength on local filesystem is not accessible or does not exist.")
     }
 
     void "test validate when everything is not equal"() {
@@ -476,7 +476,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
         then:
         ProcessingException processingException = thrown()
         processingException.message.contains("Copying of target")
-        processingException.message.contains("not found")
+        processingException.message.contains("on local filesystem is not accessible or does not exist.")
     }
 
     private void createHelperObjects(ImportProcess importProcess) {

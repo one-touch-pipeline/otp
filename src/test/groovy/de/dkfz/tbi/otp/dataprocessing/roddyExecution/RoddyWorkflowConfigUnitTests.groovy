@@ -296,7 +296,7 @@ class RoddyWorkflowConfigUnitTests {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         RoddyWorkflowConfigService service = createService()
 
-        TestCase.shouldFailWithMessageContaining(AssertionError, 'not found.') {
+        TestCase.shouldFailWithMessageContaining(AssertionError, 'on local filesystem is not accessible or does not exist.') {
             service.validateConfig(roddyWorkflowConfig)
         }
     }

@@ -263,7 +263,7 @@ ln -s .* .*
         then:
         ProcessingException processingException = thrown()
         processingException.message.contains("Copying or linking of targetFile")
-        processingException.message.contains("not found")
+        processingException.message.contains("on local filesystem is not accessible or does not exist.")
     }
 
 

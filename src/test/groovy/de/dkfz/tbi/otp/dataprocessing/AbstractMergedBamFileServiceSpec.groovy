@@ -93,7 +93,7 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
         where:
         failCase                           || exception
         'exceptionInFurtherProcessingPath' || 'getPathForFurtherProcessing fail'
-        'fileNotExist'                     || 'not found.. Expression: de.dkfz.tbi.otp.utils.ThreadUtils.waitFor'
+        'fileNotExist'                     || 'on local filesystem is not accessible or does not exist. Expression: de.dkfz.tbi.otp.utils.ThreadUtils.waitFor'
         'invalidMd5sum'                    || 'assert bamFile.getMd5sum()'
         'fileSizeZero'                     || 'assert bamFile.getFileSize()'
         'fileSizeWrong'                    || 'assert file.length() == bamFile.getFileSize()'

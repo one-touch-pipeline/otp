@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp
 
 import spock.lang.Shared
@@ -31,10 +30,10 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 
 import java.time.Duration
 
+@SuppressWarnings('JUnitPublicProperty')
 class DataInstallationWorkflowTests extends WorkflowTestCase {
 
     LsdfFilesService lsdfFilesService
-
 
     // files to be processed by the tests
     @Shared
@@ -61,14 +60,15 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         File softLinkFastqR1Filepath = new File("${ftpDir}/${fastqR1Filename}")
         File softLinkFastqR2Filepath = new File("${ftpDir}/${fastqR2Filename}")
 
-        createDirectoriesString([ftpDir])
-        linkFileUtils.createAndValidateLinks(
-                [
-                        (new File(fastqR1Filepath)): softLinkFastqR1Filepath,
-                        (new File(fastqR2Filepath)): softLinkFastqR2Filepath,
-                ], realm)
+        SessionUtils.withNewSession {
+            createDirectoriesString([ftpDir])
+            linkFileUtils.createAndValidateLinks(
+                    [
+                            (new File(fastqR1Filepath)): softLinkFastqR1Filepath,
+                            (new File(fastqR2Filepath)): softLinkFastqR2Filepath,
+                    ], realm)
+        }
     }
-
 
     DataFile createDataFile(SeqTrack seqTrack, Integer mateNumber, String fastqFilename, String fastqFilepath) {
         return DomainFactory.createDataFile([
@@ -139,7 +139,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         checkThatWorkflowWasSuccessful(seqTrack)
     }
 
-
     protected void checkThatWorkflowWasSuccessful(SeqTrack seqTrack) {
         SessionUtils.withNewSession {
             seqTrack.refresh()
@@ -158,7 +157,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
             }.each {
                 assert new File(it).exists()
             }
-
         }
     }
 
@@ -166,7 +164,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         createDataFile(seqTrack, 1, fastqR1Filename, fastqR1Filepath)
         createDataFile(seqTrack, 2, fastqR2Filename, fastqR2Filepath)
     }
-
 
     protected SeqTrack createWholeGenomeSetup(boolean linkedExternally = false) {
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
@@ -176,7 +173,6 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         assert seqTrack.project.save(flush: true)
         return seqTrack
     }
-
 
     @Override
     List<String> getWorkflowScripts() {

@@ -96,7 +96,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
 
         then:
         def e = thrown(AssertionError)
-        e.message.contains("not found")
+        e.message.contains("on local filesystem is not accessible or does not exist.")
     }
 
     void "test failedOrNotFinishedClusterJobs, when job state log file does not exist, should fail"() {

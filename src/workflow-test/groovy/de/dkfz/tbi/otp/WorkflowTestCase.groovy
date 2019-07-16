@@ -151,6 +151,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
             DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION, value: HelperUtils.randomEmail)
             DomainFactory.createProcessingOptionLazy(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
+            DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_TIMEOUT, value: 2)
 
             createUserAndRoles()
             loadWorkflow()

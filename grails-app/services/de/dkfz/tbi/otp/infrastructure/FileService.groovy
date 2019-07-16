@@ -24,9 +24,13 @@ package de.dkfz.tbi.otp.infrastructure
 import com.github.robtimus.filesystems.sftp.SFTPFileSystemProvider
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.StaticApplicationContextWrapper
 import de.dkfz.tbi.otp.utils.ThreadUtils
 
 import java.nio.file.*
@@ -39,6 +43,13 @@ import java.util.stream.Stream
  */
 @Transactional
 class FileService {
+
+    /**
+     * Special logger for logging of errors during waiting.
+     * Since that can produce much output, it should go to its own logging file. Therefore, a special name is used.
+     */
+    @SuppressWarnings('LoggerForDifferentClass')
+    static final Logger WAIT_LOG = LoggerFactory.getLogger("${FileService.name}.WAITING")
 
     RemoteShellHelper remoteShellHelper
 
@@ -116,7 +127,7 @@ class FileService {
      * This method is necessary because the {@link Path#toFile} method is not supported on Paths not backed
      * by the default FileSystemProvider, such as {@link com.github.robtimus.filesystems.sftp.SFTPPath}s.
      */
-    @SuppressWarnings('JavaIoPackageAccess')
+    @SuppressWarnings(['JavaIoPackageAccess', 'UnnecessaryCollectCall'])
     File toFile(Path path) {
         assert path.isAbsolute()
         new File(File.separator + path*.toString().join(File.separator))
@@ -182,28 +193,18 @@ class FileService {
      * Waits until the specified file system object exists or the specified timeout elapsed.
      */
     static void waitUntilExists(Path file) {
-        Stream<Path> stream = null
-        assert ThreadUtils.waitFor({
-            try {
-                if (Files.isDirectory(file)) {
-                    stream = Files.list(file)
-                } else {
-                    Files.isReadable(file)
-                }
-            } catch (NoSuchFileException ignored) {
-            } catch (AccessDeniedException ignored) {
-            } finally {
-                stream?.close()
-                stream = null
-            }
-            Files.exists(file)
-        }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES): "${file} not found."
+        waitForPath(file, true)
     }
 
     /**
      * Waits until the specified file system object does not exist or the specified timeout elapsed.
      */
     static void waitUntilDoesNotExist(Path file) {
+        waitForPath(file, false)
+    }
+
+    private static void waitForPath(Path file, boolean shouldExist) {
+        long timeoutInMs = timeout.toMillis()
         Stream<Path> stream = null
         assert ThreadUtils.waitFor({
             try {
@@ -212,19 +213,22 @@ class FileService {
                 } else {
                     Files.isReadable(file)
                 }
-            } catch (AccessDeniedException ignored) {
-            } catch (NoSuchFileException ignored) {
-                return true
+            } catch (NoSuchFileException | AccessDeniedException logged) {
+                WAIT_LOG.debug('Exception during waiting', logged)
             } finally {
                 stream?.close()
                 stream = null
             }
-            !Files.exists(file)
-        }, timeout.toMillis(), MILLIS_BETWEEN_RETRIES): "${file} still exists."
+            Files.exists(file) == shouldExist
+        }, timeoutInMs, MILLIS_BETWEEN_RETRIES):
+                "${file} on ${file.fileSystem == FileSystems.default ? 'local' : 'remote' } filesystem " +
+                        "${shouldExist ? 'is not accessible or does not exist' : 'still exists'}"
     }
 
     private static Duration getTimeout() {
-        (Environment.current == Environment.TEST) ? Duration.ZERO : Duration.ofMinutes(2)
+        return (Environment.current == Environment.TEST) ? Duration.ZERO : Duration.ofMinutes(
+                StaticApplicationContextWrapper.context.processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.FILESYSTEM_TIMEOUT)
+        )
     }
 
     /**

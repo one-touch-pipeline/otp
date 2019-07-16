@@ -119,7 +119,7 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
 
         then:
         AssertionError e = thrown()
-        e.message.contains("${indelCallingInstance."${notAvailable}"} not found")
+        e.message.contains("${indelCallingInstance."${notAvailable}"} on local filesystem is not accessible or does not exist.")
 
         where:
         available            | notAvailable
