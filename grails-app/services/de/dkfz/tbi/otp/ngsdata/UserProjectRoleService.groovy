@@ -211,13 +211,16 @@ class UserProjectRoleService {
                 role    : requesterUserProjectRole ? requesterUserProjectRole.projectRole.name : "Non-Project-User",
         ])
 
+        List<Project> otherProjectsOfUnixGroup = Project.findAllByUnixGroup(userProjectRole.project.unixGroup) - userProjectRole.project
         String body = createMessage("projectUser.notification.addToUnixGroup.body", [
                 projectName           : userProjectRole.project,
                 projectUnixGroup      : userProjectRole.project.unixGroup,
+                projectList           : (otherProjectsOfUnixGroup*.name.sort() ?: ["None"]).join(", "),
                 requestedAction       : action,
                 affectedUserUserDetail: affectedUserUserDetail,
                 requesterUserDetail   : requesterUserDetail,
         ])
+
         String email = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION)
         mailHelperService.sendEmail(subject, body, email)
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_SENT_MAIL,

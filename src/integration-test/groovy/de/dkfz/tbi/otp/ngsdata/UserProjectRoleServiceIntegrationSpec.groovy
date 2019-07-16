@@ -159,7 +159,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
                 "${requesterUserProjectRole.user.username}\n${formattedAction}\n${userProjectRole.user.username}\n${conjunction}\n${userProjectRole.project.name}",
-                "${userProjectRole.project.name}\n${userProjectRole.project.unixGroup}\n${operatorAction}\n${affectedUserUserDetail}\n${requesterUserDetail}",
+                "${userProjectRole.project.name}\n${userProjectRole.project.unixGroup}\nNone\n${operatorAction}\n${affectedUserUserDetail}\n${requesterUserDetail}",
                 EMAIL_LINUX_GROUP_ADMINISTRATION,
         )
 
@@ -189,7 +189,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, EMAIL_LINUX_GROUP_ADMINISTRATION)
+        1 * userProjectRoleService.mailHelperService.sendEmail(_, { it.contains(projectList) }, EMAIL_LINUX_GROUP_ADMINISTRATION)
     }
 
     @Unroll
@@ -216,7 +216,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
                 "${switchedUser.username}\n${formattedAction}\n${userProjectRole.user.username}\n${conjunction}\n${userProjectRole.project.name}",
-                "${userProjectRole.project.name}\n${userProjectRole.project.unixGroup}\n${operatorAction}\n${affectedUserUserDetail}\n${requesterUserDetail}",
+                "${userProjectRole.project.name}\n${userProjectRole.project.unixGroup}\nNone\n${operatorAction}\n${affectedUserUserDetail}\n${requesterUserDetail}",
                 EMAIL_LINUX_GROUP_ADMINISTRATION,
         )
 
@@ -1009,7 +1009,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                     '''${requester}\n${action}\n${username}\n${conjunction}\n${projectName}'''
 
             _ * getMessageInternal("projectUser.notification.addToUnixGroup.body", [], _) >>
-                    '''${projectName}\n${projectUnixGroup}\n${requestedAction}\n${affectedUserUserDetail}\n${requesterUserDetail}'''
+                    '''${projectName}\n${projectUnixGroup}\n${projectList}\n${requestedAction}\n${affectedUserUserDetail}\n${requesterUserDetail}'''
 
             _ * getMessageInternal("projectUser.notification.addToUnixGroup.userDetail", [], _) >>
                     '''${realName}\n${username}\n${email}\n${role}'''
