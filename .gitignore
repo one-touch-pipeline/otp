@@ -8,13 +8,6 @@ logs/*
 ## Stale NFS handles
 .nfs*
 
-### OTP
-## Independent tools
-tools/*/*/*/build/
-tools/*/*/*/.gradle/
-tools/*/*/build/
-tools/*/*/.gradle/
-
 ### Grails
 .groovy/*
 .asscache

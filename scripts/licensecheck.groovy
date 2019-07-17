@@ -70,9 +70,6 @@ class LicenseCheck {
             "logs",
             "out",
             "target",
-
-            "tools/ngs/bedUtils/.gradle",
-            "tools/ngs/bedUtils/build",
     ].collect { Paths.get(it) }
 
     static List<Path> ignoredFiles = [
@@ -81,7 +78,6 @@ class LicenseCheck {
             "NOTICE.txt",
             "scripts/ReferenceGenome/README.txt",
             "scripts/rollout/readme.txt",
-            "tools/ngs/bedUtils/testdata/test.bed",
 
             ".project",
             ".classpath",

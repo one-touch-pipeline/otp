@@ -1,2 +1,0 @@
-include ':bedutils'
-project(':bedutils').projectDir = new File('tools/ngs/bedUtils')

@@ -115,8 +115,6 @@ dependencies {
     compile 'org.codehaus.groovy:groovy-all:2.4.15'
     codenarc 'org.codehaus.groovy:groovy-all:2.4.15' // both groovy versions must be the same; required bc we add runtimeClasspath to codenarcClasspath
 
-    compile(project(':bedutils'))
-
     // JDBC
     runtime "org.postgresql:postgresql:42.1.4"
 
@@ -129,10 +127,9 @@ dependencies {
     compile "com.gitlab.one-touch-pipeline:dicom-audit-trail:1.2.0"
 
     // bioinformatics tools
-    // ngstools
     compile "com.google.code.gson:gson:2.2.4"
     compile "com.github.broadinstitute:picard:1.134"
-
+    compile "com.gitlab.one-touch-pipeline:bedutils:0.0.8"
     compile 'com.github.samtools:htsjdk:2.12.0'
 
     // general dependencies
