@@ -71,7 +71,7 @@
                     id="selectSamplesTable" />
             </div>
             <g:hiddenField name="submission.id" value="${submissionId}" />
-            <g:submitButton name="next" value="Confirm"/>
+            <g:submitButton name="next" value="${message(code: 'egaSubmission.selectSamples.next')}"/>
         </g:form>
         <asset:script>
             $(function() {

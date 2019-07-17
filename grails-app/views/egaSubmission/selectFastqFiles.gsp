@@ -25,7 +25,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
-    <title><g:message code="egaSubmission.selectFastqFiles.title"/></title>
+    <title><g:message code="egaSubmission.selectFiles.fastqTitle"/></title>
     <asset:javascript src="pages/egaSubmission/datatable.js"/>
     <asset:javascript src="pages/egaSubmission/selectFastqFiles/scripts.js"/>
 </head>
@@ -36,13 +36,13 @@
     </g:link>
     <g:render template="/templates/messages"/>
     <div>
-        <h3><g:message code="egaSubmission.selectFastqFiles.title"/></h3>
+        <h3><g:message code="egaSubmission.selectFiles.fastqTitle"/></h3>
         <p>
             <g:uploadForm action="dataFilesListFileUploadForm">
                 <div class="dialog">
                     <input type="file" name="file" id="file"/>
                     <g:hiddenField name="submission.id" value="${submission.id}"/>
-                    <g:submitButton name="upload" value="Upload FASTQ meta file" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
+                    <g:submitButton name="upload" value="${message(code: 'egaSubmission.uploadCsv')}" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
                 </div>
             </g:uploadForm>
         </p>
@@ -58,7 +58,7 @@
                         <th><g:message code="egaSubmission.individual"/></th>
                         <th><g:message code="egaSubmission.seqType"/></th>
                         <th><g:message code="egaSubmission.sampleType"/></th>
-                        <th><g:message code="egaSubmission.alias"/></th>
+                        <th><g:message code="egaSubmission.sampleAlias"/></th>
                         <th><g:message code="egaSubmission.selectFiles.seqCenter"/></th>
                         <th><g:message code="egaSubmission.selectFiles.run"/></th>
                         <th><g:message code="egaSubmission.selectFiles.lane"/></th>
@@ -96,9 +96,10 @@
                     </tbody>
                 </table>
                 <p>
-                    <g:submitButton name="saveSelection" value="Confirm with file selection" disabled="${hasDataFiles}"/>
-                    <g:submitButton name="download" value="Download" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
-                    <g:submitButton name="saveAliases" value="Confirm with aliases" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
+                    <g:submitButton name="saveSelection" value="${message(code: 'egaSubmission.selectFiles.saveSelection')}" disabled="${hasDataFiles}"/>
+                    >>
+                    <g:submitButton name="saveAliases" value="${message(code: 'egaSubmission.selectFiles.saveAliases')}" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
+                    <g:submitButton name="download" value="${message(code: 'egaSubmission.downloadCsv')}" disabled="${!hasDataFiles || dataFilesHasFileAliases}"/>
                 </p>
             </g:form>
         </div>

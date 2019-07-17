@@ -38,14 +38,14 @@
             <g:img file="info.png"/>
         </g:link>
         <div class="buttons">
-            <g:link action="newSubmission" params="[id: project.id]"><g:message code="egaSubmission.newSubmission"/></g:link>
+            <g:link action="newSubmission" params="[id: project.id]"><g:message code="egaSubmission.overview.newSubmission"/></g:link>
         </div>
-        <h3><g:message code="egaSubmission.submissionHeader"/></h3>
+        <h3><g:message code="egaSubmission.overview.header"/></h3>
         <table>
             <tr>
-                <th><g:message code="egaSubmission.submissionID"/></th>
+                <th><g:message code="egaSubmission.overview.submissionID"/></th>
                 <th><g:message code="egaSubmission.submissionName"/></th>
-                <th><g:message code="egaSubmission.submissionState"/></th>
+                <th><g:message code="egaSubmission.overview.submissionState"/></th>
                 <th></th>
             </tr>
             <g:each in="${submissions}">
@@ -60,11 +60,11 @@
                             value="${it.state}"/></td>
                     <td>
                         <g:if test="${it.state == de.dkfz.tbi.otp.egaSubmission.EgaSubmission.State.SELECTION}">
-                            <g:link action="editSubmission" params="['id': it.id]"><g:message code="egaSubmission.submissionEdit"/></g:link>
+                            <g:link action="editSubmission" params="['id': it.id]"><g:message code="egaSubmission.overview.continue"/></g:link>
                         </g:if><g:else>
-                            <g:link action="sampleMetadata" params="['id': it.id]"><g:message code="egaSubmission.sampleMetadata"/></g:link>
+                            <g:link action="sampleMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.sampleMetadata"/></g:link>
                             |
-                            <g:link action="experimentalMetadata" params="['id': it.id]"><g:message code="egaSubmission.experimentalMetadata"/></g:link>
+                            <g:link action="experimentalMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.experimentalMetadata"/></g:link>
                         </g:else>
                     </td>
                 </tr>

@@ -25,12 +25,12 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
-    <title><g:message code="egaSubmission.sampleMetadata.title"/></title>
+    <title><g:message code="egaSubmission.experimentalMetadata.title"/></title>
     <asset:javascript src="pages/egaSubmission/datatable.js"/>
 </head>
 <body>
 <div class="body">
-    <h3><g:message code="egaSubmission.sampleMetadata.title"/></h3>
+    <h3><g:message code="egaSubmission.experimentalMetadata.title"/></h3>
     <div class="otpDataTables">
         <table id="dataTable">
             <thead>

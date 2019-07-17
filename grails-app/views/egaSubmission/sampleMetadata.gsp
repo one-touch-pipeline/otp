@@ -39,7 +39,7 @@
                     <th><g:message code="egaSubmission.individual"/></th>
                     <th><g:message code="egaSubmission.sampleMetadata.egaPid"/></th>
                     <th><g:message code="egaSubmission.sampleType"/></th>
-                    <th><g:message code="egaSubmission.alias"/></th>
+                    <th><g:message code="egaSubmission.sampleAlias"/></th>
                     <th><g:message code="egaSubmission.seqType"/></th>
                     <th><g:message code="egaSubmission.sampleMetadata.gender"/></th>
                     <th><g:message code="egaSubmission.sampleMetadata.phenotype"/></th>

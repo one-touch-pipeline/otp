@@ -207,7 +207,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     def helpPage() { }
 
     def newSubmissionForm(NewSubmissionControllerSubmitCommand cmd) {
-        if (cmd.submit == "Submit") {
+        if (cmd.submit) {
             if (cmd.hasErrors()) {
                 flash.message = new FlashMessage(ERROR_TITLE, cmd.errors)
                 flash.cmd = cmd
@@ -228,7 +228,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     def selectSamplesForm(SelectSamplesControllerSubmitCommand cmd) {
-        if (cmd.next == "Confirm") {
+        if (cmd.next) {
             cmd.sampleAndSeqType.findAll().each {
                 String[] sampleAndSeqType = it.split("-")
 
@@ -278,7 +278,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
 
-        if (cmd.csv == "Download CSV") {
+        if (cmd.csv) {
             String content = egaSubmissionFileService.generateCsvFile(cmd.sampleObjectId, cmd.egaSampleAlias, cmd.fileType)
             response.contentType = CSV.mimeType
             response.setHeader("Content-disposition", "filename=sample_information.csv")
@@ -286,7 +286,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
 
-        if (cmd.next == "Confirm") {
+        if (cmd.next) {
             Map validateMap = egaSubmissionValidationService.validateSampleInformationFormInput(cmd.sampleObjectId, cmd.egaSampleAlias, cmd.fileType)
 
             if (validateMap.hasErrors) {
@@ -300,7 +300,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             }
         }
 
-        if (cmd.back == "Back to selection") {
+        if (cmd.back) {
             flash.samplesWithSeqType = egaSubmissionService.deleteSampleSubmissionObjects(cmd.submission)
             redirect(action: "editSubmission", params: ['id': cmd.submission.id])
         }
@@ -312,12 +312,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
 
-        if (cmd.saveSelection == "Confirm with file selection") {
-            saveDataFileSelection(cmd)
-            return
-        }
-
-        if (cmd.download == "Download") {
+        if (cmd.download) {
             String content = egaSubmissionFileService.generateDataFilesCsvFile(cmd.submission)
             response.contentType = CSV.mimeType
             response.setHeader("Content-disposition", "filename=fastq_files_information.csv")
@@ -325,7 +320,12 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
 
-        if (cmd.saveAliases == "Confirm with aliases") {
+        if (cmd.saveSelection) {
+            saveDataFileSelection(cmd)
+            return
+        }
+
+        if (cmd.saveAliases) {
             if (cmd.egaFileAlias.isEmpty()) {
                 pushError("No file aliases are configured.", cmd.submission, true)
             } else {
@@ -385,7 +385,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
 
-        if (cmd.upload == "Upload FASTQ meta file") {
+        if (cmd.upload) {
             Spreadsheet spreadsheet = readFile(cmd)
             if (spreadsheet) {
                 Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
@@ -412,7 +412,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
 
-        if (cmd.upload == "Upload BAM meta file") {
+        if (cmd.upload) {
             Spreadsheet spreadsheet = readFile(cmd)
             if (spreadsheet) {
                 Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
@@ -449,13 +449,13 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
 
-        if (cmd.saveSelection == "Confirm with file selection") {
+        if (cmd.saveSelection) {
             egaSubmissionService.createBamFileSubmissionObjects(cmd.submission)
             redirect(action: "editSubmission", params: ['id': cmd.submission.id])
             return
         }
 
-        if (cmd.saveAliases == "Confirm with aliases") {
+        if (cmd.saveAliases) {
             if (cmd.egaFileAlias) {
                 Map errors = egaSubmissionValidationService.validateAliases(cmd.egaFileAlias)
                 if (errors.hasErrors) {
@@ -478,7 +478,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
 
-        if (cmd.download == "Download") {
+        if (cmd.download) {
             String content = egaSubmissionFileService.generateBamFilesCsvFile(cmd.submission)
             response.contentType = CSV.mimeType
             response.setHeader("Content-disposition", "filename=bam_files_information.csv")
@@ -492,7 +492,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             return
         }
 
-        if (cmd.download == "Download") {
+        if (cmd.download) {
             String content = egaSubmissionFileService.generateSampleMetadataCsvFile(cmd.submission)
             response.contentType = CSV.mimeType
             response.setHeader("Content-disposition", "filename=sample_metadata.csv")

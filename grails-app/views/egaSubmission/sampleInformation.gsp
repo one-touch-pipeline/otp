@@ -42,7 +42,7 @@
                 <div class="dialog">
                     <input type="file" name="file" id="file"/>
                     <g:hiddenField name="submission.id" value="${submissionId}"/>
-                    <g:submitButton name="upload" value="Upload"/>
+                    <g:submitButton name="upload" value="${message(code: 'egaSubmission.uploadCsv')}"/>
                 </div>
             </g:uploadForm>
         </p>
@@ -55,7 +55,7 @@
                         <th><g:message code="egaSubmission.individual"/></th>
                         <th><g:message code="egaSubmission.seqType"/></th>
                         <th><g:message code="egaSubmission.sampleType"/></th>
-                        <th><g:message code="egaSubmission.alias"/></th>
+                        <th><g:message code="egaSubmission.sampleAlias"/></th>
                         <th title="<g:message code="egaSubmission.sampleInformation.fastqInfo"/>"><g:message code="egaSubmission.fastq"/></th>
                         <th title="<g:message code="egaSubmission.sampleInformation.bamInfo"/>"><g:message code="egaSubmission.bam"/></th>
                     </tr>
@@ -72,16 +72,18 @@
                             <td>${seqType}</td>
                             <td>${sampleType}</td>
                             <td><g:textField name="egaSampleAlias[${i}]" size="50" value="${egaSampleAliases.get(key)}"/></td>
-                            <td><g:radio name="fileType[${i}]" value="FASTQ" checked="${selectedFastqs.get(key)}" disabled="${!existingFastqs.get(it)}"/></td>
-                            <td><g:radio name="fileType[${i}]" value="BAM" checked="${selectedBams.get(key)}" disabled="${!existingBams.get(it)}"/></td>
+                            <td><g:radio name="fileType[${i}]" value="${message(code: 'egaSubmission.fastq')}"
+                                         checked="${selectedFastqs.get(key)}" disabled="${!existingFastqs.get(it)}"/></td>
+                            <td><g:radio name="fileType[${i}]" value="${message(code: 'egaSubmission.bam')}"
+                                         checked="${selectedBams.get(key)}" disabled="${!existingBams.get(it)}"/></td>
                         </tr>
                     </g:each>
                 </tbody>
             </table>
             <p>
-                <g:submitButton name="back" value="Back to selection"/>&nbsp;
-                <g:submitButton name="csv" value="Download CSV"/>&nbsp;
-                <g:submitButton name="next" value="Confirm"/>
+                <g:submitButton name="back" value="${message(code: 'egaSubmission.sampleInformation.back')}"/>&nbsp;
+                <g:submitButton name="csv" value="${message (code: 'egaSubmission.downloadCsv')}"/>&nbsp;
+                <g:submitButton name="next" value="${message(code: 'egaSubmission.sampleInformation.next')}"/>
             </p>
         </g:form>
         </div>

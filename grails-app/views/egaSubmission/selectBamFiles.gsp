@@ -25,7 +25,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
-    <title><g:message code="egaSubmission.selectBamFiles.title"/></title>
+    <title><g:message code="egaSubmission.selectFiles.bamTitle"/></title>
     <asset:javascript src="pages/egaSubmission/datatable.js"/>
 </head>
 <body>
@@ -35,13 +35,13 @@
     </g:link>
     <g:render template="/templates/messages"/>
     <div>
-        <h3><g:message code="egaSubmission.selectBamFiles.title"/></h3>
+        <h3><g:message code="egaSubmission.selectFiles.bamTitle"/></h3>
         <p>
             <g:uploadForm action="bamFilesListFileUploadForm">
                 <div class="dialog">
                     <input type="file" name="file" id="file"/>
                     <g:hiddenField name="submission.id" value="${submission.id}"/>
-                    <g:submitButton name="upload" value="Upload BAM meta file" disabled="${!hasFiles || bamFilesHasFileAliases}"/>
+                    <g:submitButton name="upload" value="${message(code: 'egaSubmission.uploadCsv')}" disabled="${!hasFiles || bamFilesHasFileAliases}"/>
                 </div>
             </g:uploadForm>
         </p>
@@ -57,7 +57,7 @@
                         <th><g:message code="egaSubmission.individual"/></th>
                         <th><g:message code="egaSubmission.seqType"/></th>
                         <th><g:message code="egaSubmission.sampleType"/></th>
-                        <th><g:message code="egaSubmission.alias"/></th>
+                        <th><g:message code="egaSubmission.sampleAlias"/></th>
                         <th><g:message code="egaSubmission.selectFiles.filenameAlias"/></th>
                         <th><g:message code="egaSubmission.selectFiles.filename"/></th>
                         <th><g:message code="egaSubmission.selectFiles.intern"/></th>
@@ -68,7 +68,7 @@
                         <g:set var="internally" value="${!(it[0] instanceof ExternallyProcessedMergedBamFile)}"/>
                         <tr>
                             <g:if test="${!hasFiles}">
-                                %{--TODO this is prepared for multible bam files. At the moment only intern processed bam files should be selectable--}%
+                                %{--TODO this is prepared for multiple bam files. At the moment only intern processed bam files should be selectable--}%
                                 <td><g:checkBox name="selectBox[${i}]" disabled="${/*TODO !internally*/true}" checked="${internally}"/></td>
                             </g:if>
                             <td>${it[0].individual.displayName}</td>
@@ -89,9 +89,10 @@
                     </tbody>
                 </table>
                 <p>
-                    <g:submitButton name="saveSelection" value="Confirm with file selection" disabled="${hasFiles}"/>
-                    <g:submitButton name="download" value="Download" disabled="${!hasFiles || bamFilesHasFileAliases}"/>
-                    <g:submitButton name="saveAliases" value="Confirm with aliases" disabled="${!hasFiles || bamFilesHasFileAliases}"/>
+                    <g:submitButton name="saveSelection" value="${message(code: 'egaSubmission.selectFiles.saveSelection')}" disabled="${hasFiles}"/>
+                    >>
+                    <g:submitButton name="saveAliases" value="${message(code: 'egaSubmission.selectFiles.saveAliases')}" disabled="${!hasFiles || bamFilesHasFileAliases}"/>
+                    <g:submitButton name="download" value="${message(code: 'egaSubmission.downloadCsv')}" disabled="${!hasFiles || bamFilesHasFileAliases}"/>
                 </p>
             </g:form>
         </div>
