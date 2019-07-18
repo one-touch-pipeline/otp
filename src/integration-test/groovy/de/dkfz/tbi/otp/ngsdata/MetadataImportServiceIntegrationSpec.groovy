@@ -90,7 +90,7 @@ class MetadataImportServiceIntegrationSpec extends Specification {
         }
 
         when:
-        service.notifyAboutUnsetConfig(ticket)
+        service.notifyAboutUnsetConfig([st1, st2], ticket)
 
         then:
         true

@@ -519,7 +519,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         }
 
         MetadataImportService service = Spy( MetadataImportService) {
-            notifyAboutUnsetConfig(_) >> null
+            notifyAboutUnsetConfig(_, _) >> null
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             parseAndFindOrSaveSampleIdentifier(parse, _) >> createSampleIdentifierForSample2(parse)
@@ -900,7 +900,7 @@ ${ILSE_NO}                      -             1234          1234          -     
         )
 
         MetadataImportService service = Spy( MetadataImportService) {
-            notifyAboutUnsetConfig(_) >> null
+            notifyAboutUnsetConfig(_, _) >> null
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             0 * _
@@ -1082,7 +1082,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         )
 
         MetadataImportService service = Spy( MetadataImportService) {
-            notifyAboutUnsetConfig(_) >> null
+            notifyAboutUnsetConfig(_, _) >> null
         }
         service.sampleIdentifierService = Mock(SampleIdentifierService) {
             0 * _

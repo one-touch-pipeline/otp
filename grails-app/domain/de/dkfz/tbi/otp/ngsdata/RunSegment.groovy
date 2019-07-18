@@ -33,6 +33,10 @@ import de.dkfz.tbi.otp.utils.Entity
  */
 class RunSegment implements Entity {
 
+    Set<DataFile> dataFiles
+    static hasMany = [
+            dataFiles: DataFile,
+    ]
 
     /**
      * This flag specifies if the lanes, which are in this {@link RunSegment} shall be aligned automatically.

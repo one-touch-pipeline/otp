@@ -350,7 +350,7 @@ class MetadataImportService {
         log.debug("runs stopped took: ${System.currentTimeMillis() - timeStarted}")
 
         //TODO OTP3242: Problem with Role Operator
-        //notifyAboutUnsetConfig(runSegment.otrsTicket)
+        //notifyAboutUnsetConfig(runSegment.dataFiles*.seqTrack as List, runSegment.otrsTicket)
 
         MetaDataFile metaDataFile = new MetaDataFile(
                 fileName: context.metadataFile.fileName.toString(),
@@ -370,16 +370,18 @@ class MetadataImportService {
         return metaDataFile
     }
 
-    protected void notifyAboutUnsetConfig(OtrsTicket ticket) {
-        List<SeqTrack> configured = getSeqTracksWithConfiguredAlignment(ticket.findAllSeqTracks().toList())
+    protected void notifyAboutUnsetConfig(List<SeqTrack> seqTracks, OtrsTicket ticket) {
+        List<SeqTrack> configured = getSeqTracksWithConfiguredAlignment(seqTracks.unique())
 
         List<SeqTrack> withoutCategory = sampleTypeService.getSeqTracksWithoutSampleCategory(configured)
         List<SeqTrack> withoutThreshold = processingThresholdsService.getSeqTracksWithoutProcessingThreshold(configured)
 
         if (withoutCategory || withoutThreshold) {
             StringBuilder subject = new StringBuilder()
-            String prefix = processingOptionService.findOptionAsString(ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX)
-            subject.append("[${prefix}#${ticket.ticketNumber}] ")
+            if (ticket) {
+                String prefix = processingOptionService.findOptionAsString(ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX)
+                subject.append("[${prefix}#${ticket.ticketNumber}] ")
+            }
             subject.append("Configuration missing for ")
             subject.append([withoutCategory ? "category" : "", withoutThreshold ? "threshold" : ""].findAll().join(" and "))
 
