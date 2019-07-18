@@ -405,7 +405,7 @@ class MetadataImportService {
             ConfigPerProjectAndSeqType.findAllByProjectAndSeqTypeAndPipelineInListAndObsoleteDateIsNull(
                     seqTrack.project,
                     seqTrack.seqType,
-                    Pipeline.findAllByTypeInList(Pipeline.Type.values().findAll { it == Pipeline.Type.ALIGNMENT})
+                    Pipeline.findAllByTypeInList(Pipeline.Type.values().findAll { it == Pipeline.Type.ALIGNMENT })
             )
         }
     }
