@@ -75,10 +75,10 @@ $.otp.projectOverviewTable = {
                                 }
                             });
                             var projectName = $('#project').find('option:selected').text();
-                            if (projectName !== "MMML" &&
-                                projectName !== "MMML_XP" &&
-                                projectName !== "MMML_RARE_LYMPHOMA_XP" &&
-                                projectName !== "MMML_RARE_LYMPHOMA_EXOMES") {
+                            if (projectName !== "ICGC_MMML" &&
+                                projectName !== "ICGC_MMML_XP" &&
+                                projectName !== "ICGC_MMML_RARE_LYMPHOMA_XP" &&
+                                projectName !== "ICGC_MMML_RARE_LYMPHOMA_EXOMES") {
                                 row[2] = $.otp.createLinkMarkup({
                                     controller: 'individual',
                                     action: 'show',

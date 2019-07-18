@@ -52,10 +52,10 @@ class ProjectOverviewService {
 
 
     static final Collection PROJECT_TO_HIDE_SAMPLE_IDENTIFIER = [
-            "MMML",
-            "MMML_XP",
-            "MMML_RARE_LYMPHOMA_XP",
-            "MMML_RARE_LYMPHOMA_EXOMES",
+            "ICGC_MMML",
+            "ICGC_MMML_XP",
+            "ICGC_MMML_RARE_LYMPHOMA_XP",
+            "ICGC_MMML_RARE_LYMPHOMA_EXOMES",
     ].asImmutable()
 
     /**
