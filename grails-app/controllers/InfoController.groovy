@@ -32,13 +32,13 @@ import de.dkfz.tbi.otp.ngsdata.StatisticService
 /*
  * show information about OTP
  */
-@GrailsCompileStatic
 class InfoController {
     DocumentService documentService
     StatisticService statisticService
     ProjectService projectService
     ProcessingOptionService processingOptionService
 
+    @GrailsCompileStatic
     def about() {
         String aboutOtp = processingOptionService.findOptionAsString(OptionName.GUI_ABOUT_OTP)
         return [
@@ -46,6 +46,7 @@ class InfoController {
         ]
     }
 
+    @GrailsCompileStatic
     def imprint() {
         String imprint = processingOptionService.findOptionAsString(OptionName.GUI_IMPRINT)
         return [
@@ -53,16 +54,20 @@ class InfoController {
         ]
     }
 
+    @GrailsCompileStatic
     def numbers() {
         return [
                 projects: projectService.getProjectCount()
         ]
     }
 
+    @GrailsCompileStatic
     def faq() { }
 
+    @GrailsCompileStatic
     def contact() { }
 
+    @GrailsCompileStatic
     def partners() { }
 
     def templates() {
@@ -70,7 +75,6 @@ class InfoController {
                 availableTemplates: documentService.listDocuments(),
         ]
     }
-
 
     JSON projectCountPerDate() {
         List data = statisticService.projectDateSortAfterDate(null)

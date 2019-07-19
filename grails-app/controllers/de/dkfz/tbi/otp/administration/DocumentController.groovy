@@ -22,13 +22,10 @@
 
 package de.dkfz.tbi.otp.administration
 
-import grails.compiler.GrailsCompileStatic
-import groovy.transform.CompileDynamic
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.FlashMessage
 
-@GrailsCompileStatic
 class DocumentController {
 
     static allowedMethods = [
@@ -54,7 +51,6 @@ class DocumentController {
         ]
     }
 
-    @CompileDynamic
     def upload(UploadCommand cmd) {
         withForm {
             Errors errors = documentService.updateDocument(cmd.documentType, cmd.content, cmd.formatType)
@@ -84,7 +80,6 @@ class DocumentController {
         }
     }
 
-    @CompileDynamic
     def createDocumentType(CreateTypeCommand cmd) {
         withForm {
             Errors errors = documentService.createDocumentType(cmd.title, cmd.description)
@@ -99,7 +94,6 @@ class DocumentController {
         redirect(action: "manage")
     }
 
-    @CompileDynamic
     def delete(DeleteCommand cmd) {
         withForm {
             Errors errors = documentService.deleteDocumentType(cmd.documentType)

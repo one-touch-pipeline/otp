@@ -231,6 +231,15 @@ All the Rules that will be used for OTP
     JavadocEmptyVersionTag {
         priority = DEFAULT
     }
+    JavadocMissingExceptionDescription {
+        priority = DEFAULT
+    }
+    JavadocMissingParamDescription {
+        priority = LOW
+    }
+    JavadocMissingThrowsDescription {
+        priority = LOW
+    }
 
     // rulesets/concurrency.xml
     BusyWait {
@@ -313,6 +322,7 @@ All the Rules that will be used for OTP
     }
 
     // rulesets/convention.xml
+    // CompileStatic //not currently needed since 99% of all Classes are Compile Dynamic
     ConfusingTernary {
         priority = HIGH
     }

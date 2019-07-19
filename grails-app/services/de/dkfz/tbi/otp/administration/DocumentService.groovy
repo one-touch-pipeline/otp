@@ -25,6 +25,7 @@ package de.dkfz.tbi.otp.administration
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
+import groovy.transform.CompileDynamic
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
@@ -34,11 +35,13 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 @GrailsCompileStatic
 class DocumentService {
 
+    @CompileDynamic
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<DocumentType> listDocumentTypes() {
         DocumentType.all
     }
 
+    @CompileDynamic
     List<Document> listDocuments() {
         Document.all.sort {
             it.documentType.title
