@@ -29,6 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 
 import java.nio.file.Files
 

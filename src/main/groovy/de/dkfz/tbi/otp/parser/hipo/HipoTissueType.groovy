@@ -20,27 +20,40 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.parser.hipo
 
-interface ParsedSampleIdentifier {
+/**
+ * Tissue types as defined by the HIPO project.
+ */
+enum HipoTissueType {
+    TUMOR                     ('T'),
+    METASTASIS                ('M'),
+    SPHERE                    ('S'),
+    XENOGRAFT                 ('X'),
+    BLOOD                     ('B'),
+    CONTROL                   ('N'),
+    CELL                      ('C'),
+    INVASIVE_MARGINS          ('I'),
+    PATIENT_DERIVED_CULTURE   ('P'),
+    CULTURE_DERIVED_XENOGRAFT ('Q'),
+    PLASMA                    ('L'),
+    BUFFY_COAT                ('F'),
+    NORMAL_SORTED_CELLS       ('Z'),
+    TUMOR_INTERVAL_DEBULKING_SURGERY ('E'),
+    EXTERNAL_CONTROL          ('K'),
+    LYMPH_NODES               ('A'),
+
+    final char key
+
+    private HipoTissueType(String key) {
+        this.key = key
+    }
 
     /**
-     * @see Project#name
+     * Returns the corresponding {@link HipoTissueType} for a key or <code>null</code> if no
+     * {@link HipoTissueType} with that key exists.
      */
-    String getProjectName()
-
-    /**
-     * @see Individual#pid
-     */
-    String getPid()
-
-    /**
-     * @see SampleType#name
-     */
-    String getSampleTypeDbName()
-
-    /**
-     * @see SampleIdentifier#name
-     */
-    String getFullSampleName()
+    static HipoTissueType fromKey(String key) {
+        return values().find { it.key == key }
+    }
 }

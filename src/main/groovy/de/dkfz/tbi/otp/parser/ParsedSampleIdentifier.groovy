@@ -19,15 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.hipo
 
-import org.springframework.stereotype.Component
+package de.dkfz.tbi.otp.parser
 
-@Component
-class Hipo2SampleIdentifierParser extends AbstractHipo2SampleIdentifierParser {
+import de.dkfz.tbi.otp.ngsdata.*
 
-    @Override
-    String createProjectName(String projectNumber) {
-        return "hipo_${projectNumber}"
-    }
+interface ParsedSampleIdentifier {
+
+    /**
+     * @see Project#name
+     */
+    String getProjectName()
+
+    /**
+     * @see Individual#pid
+     */
+    String getPid()
+
+    /**
+     * @see SampleType#name
+     */
+    String getSampleTypeDbName()
+
+    /**
+     * @see SampleIdentifier#name
+     */
+    String getFullSampleName()
 }

@@ -20,13 +20,16 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.parser
 
-interface SampleIdentifierParser {
+import groovy.transform.Immutable
 
-    ParsedSampleIdentifier tryParse(String sampleIdentifier)
+@Immutable
+class DefaultParsedSampleIdentifier implements ParsedSampleIdentifier {
 
-    boolean tryParsePid(String pid)
+    String projectName
+    String pid
+    String sampleTypeDbName
+    String fullSampleName
 
-    String tryParseCellPosition(String sampleIdentifier)
 }

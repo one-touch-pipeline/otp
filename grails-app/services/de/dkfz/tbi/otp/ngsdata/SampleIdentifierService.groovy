@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.validation.ObjectError
 
-import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.parser.*
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 import de.dkfz.tbi.util.spreadsheet.validation.Problem

@@ -25,8 +25,6 @@ package de.dkfz.tbi.otp.parser
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.ngsdata.DefaultParsedSampleIdentifier
-
 class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
 
     SimpleProjectIndividualSampleTypeParser simpleProjectIndividualSampleTypeParser = new SimpleProjectIndividualSampleTypeParser()

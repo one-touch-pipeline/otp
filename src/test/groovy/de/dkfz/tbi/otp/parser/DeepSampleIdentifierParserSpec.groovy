@@ -20,7 +20,7 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.parser
 
 import spock.lang.Specification
 import spock.lang.Unroll

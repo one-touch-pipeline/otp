@@ -19,41 +19,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.parser.hipo
 
-package de.dkfz.tbi.otp.hipo
+import spock.lang.Unroll
 
-/**
- * Tissue types as defined by the HIPO project.
- */
-enum HipoTissueType {
-    TUMOR                     ('T'),
-    METASTASIS                ('M'),
-    SPHERE                    ('S'),
-    XENOGRAFT                 ('X'),
-    BLOOD                     ('B'),
-    CONTROL                   ('N'),
-    CELL                      ('C'),
-    INVASIVE_MARGINS          ('I'),
-    PATIENT_DERIVED_CULTURE   ('P'),
-    CULTURE_DERIVED_XENOGRAFT ('Q'),
-    PLASMA                    ('L'),
-    BUFFY_COAT                ('F'),
-    NORMAL_SORTED_CELLS       ('Z'),
-    TUMOR_INTERVAL_DEBULKING_SURGERY ('E'),
-    EXTERNAL_CONTROL          ('K'),
-    LYMPH_NODES               ('A'),
+@SuppressWarnings('JUnitPublicProperty')
+class OE0290_EORTC_SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParserSpec {
 
-    final char key
+    OE0290_EORTC_SampleIdentifierParser parser = new OE0290_EORTC_SampleIdentifierParser()
 
-    private HipoTissueType(String key) {
-        this.key = key
-    }
+    String validProjectPart = "M002"
 
-    /**
-     * Returns the corresponding {@link HipoTissueType} for a key or <code>null</code> if no
-     * {@link HipoTissueType} with that key exists.
-     */
-    static HipoTissueType fromKey(String key) {
-        return values().find { it.key == key }
+    String projectName = "OE0290_EORTC"
+
+    @Unroll
+    void 'tryParse for projectPart, when identifier is #identifier, returns null'() {
+        expect:
+        parser.tryParse(identifier) == null
+
+        where:
+        identifier << [
+                //invalid project
+                'K12K-123ABC-N0-D1',
+                'M02-123ABC-N0-D1',
+                'M002B-123ABC-N0-D1',
+        ]
     }
 }

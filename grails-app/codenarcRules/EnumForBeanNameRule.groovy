@@ -28,7 +28,7 @@ import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
-import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 
 import java.lang.reflect.Modifier
 

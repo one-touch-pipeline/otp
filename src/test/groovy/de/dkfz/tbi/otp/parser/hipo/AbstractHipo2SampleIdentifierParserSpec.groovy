@@ -19,13 +19,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.hipo
+package de.dkfz.tbi.otp.parser.hipo
 
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.ngsdata.ParsedSampleIdentifier
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifierParser
+import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
+import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
 abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
 

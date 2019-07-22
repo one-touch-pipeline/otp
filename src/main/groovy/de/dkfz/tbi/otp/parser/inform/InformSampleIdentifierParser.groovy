@@ -20,9 +20,12 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.parser.inform
 
 import org.springframework.stereotype.Component
+
+import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
+import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
 import java.util.regex.Matcher
 

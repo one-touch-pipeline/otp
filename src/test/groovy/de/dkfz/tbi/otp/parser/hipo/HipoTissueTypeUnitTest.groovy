@@ -20,27 +20,18 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.parser.hipo
 
-enum InformTissueType {
-    TUMOR                     ('T'),
-    METASTASIS                ('M'),
-    CONTROL                   ('C'),
-    FFPE                      ('F'),
-    PLASMA                    ('L'),
-    OTHER                     ('X'),
+import org.junit.Test
 
-    final char key
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertNull
 
-    private InformTissueType(String key) {
-        this.key = key
+class HipoTissueTypeUnitTest {
+
+    @Test
+    void testFromKey() {
+        assertEquals(HipoTissueType.BLOOD, HipoTissueType.fromKey("B"))
+        assertNull(HipoTissueType.fromKey("-"))
     }
-    static InformTissueType fromKey(String key) {
-        InformTissueType informTissueType = values().find { it.key == key }
-        if (informTissueType == null) {
-            throw new IllegalArgumentException()
-        }
-        return informTissueType
-    }
-
 }

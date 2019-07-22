@@ -20,11 +20,13 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.parser.inform
 
 
 import spock.lang.Specification
 import spock.lang.Unroll
+
+import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 
 class InformSampleIdentifierParserSpec extends Specification {
 

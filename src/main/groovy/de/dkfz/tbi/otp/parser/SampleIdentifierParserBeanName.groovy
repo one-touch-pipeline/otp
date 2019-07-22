@@ -19,30 +19,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.hipo
 
-import spock.lang.Unroll
+package de.dkfz.tbi.otp.parser
 
-@SuppressWarnings('JUnitPublicProperty')
-class OE0290_EORTC_SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParserSpec {
+import groovy.transform.TupleConstructor
 
-    OE0290_EORTC_SampleIdentifierParser parser = new OE0290_EORTC_SampleIdentifierParser()
+@TupleConstructor
+enum SampleIdentifierParserBeanName {
+    NO_PARSER('', 'No Parser'),
+    DEEP('deepSampleIdentifierParser', 'DEEP'),
+    HIPO('hipoSampleIdentifierParser', 'HIPO'),
+    HIPO2('hipo2SampleIdentifierParser', 'HIPO2'),
+    INFORM('informSampleIdentifierParser', 'INFORM'),
+    OE0290_EORTC('OE0290_EORTC_SampleIdentifierParser', 'OE0290_EORTC'),
+    SIMPLE('simpleProjectIndividualSampleTypeParser', 'Simple'),
 
-    String validProjectPart = "M002"
-
-    String projectName = "OE0290_EORTC"
-
-    @Unroll
-    void 'tryParse for projectPart, when identifier is #identifier, returns null'() {
-        expect:
-        parser.tryParse(identifier) == null
-
-        where:
-        identifier << [
-                //invalid project
-                'K12K-123ABC-N0-D1',
-                'M02-123ABC-N0-D1',
-                'M002B-123ABC-N0-D1',
-        ]
-    }
+    final String beanName
+    final String displayName
 }

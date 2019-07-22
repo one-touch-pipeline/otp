@@ -20,14 +20,14 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.hipo
+package de.dkfz.tbi.otp.parser.hipo
 
 import groovy.transform.TupleConstructor
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.ParsedSampleIdentifier
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifierParser
+import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
+import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
 import java.util.regex.Matcher
 

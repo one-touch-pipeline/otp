@@ -19,11 +19,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.hipo
+package de.dkfz.tbi.otp.parser.hipo
 
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.ngsdata.ParsedSampleIdentifier
+import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 
 @SuppressWarnings('JUnitPublicProperty')
 class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParserSpec {

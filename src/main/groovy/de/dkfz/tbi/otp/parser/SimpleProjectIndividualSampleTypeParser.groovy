@@ -24,9 +24,6 @@ package de.dkfz.tbi.otp.parser
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.DefaultParsedSampleIdentifier
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifierParser
-
 import java.util.regex.Matcher
 
 @Component

@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.hipo
+package de.dkfz.tbi.otp.parser.hipo
 
 import spock.lang.Specification
 import spock.lang.Unroll

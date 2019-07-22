@@ -26,9 +26,8 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.junit.Test
 
-import de.dkfz.tbi.otp.dataprocessing.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.hipo.HipoSampleIdentifierParser
 
 @Rollback
 @Integration

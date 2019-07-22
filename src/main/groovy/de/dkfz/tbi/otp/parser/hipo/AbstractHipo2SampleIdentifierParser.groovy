@@ -19,10 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.hipo
+package de.dkfz.tbi.otp.parser.hipo
 
-import de.dkfz.tbi.otp.ngsdata.DefaultParsedSampleIdentifier
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifierParser
+import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
+import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
 import java.text.NumberFormat
 import java.util.regex.Matcher
