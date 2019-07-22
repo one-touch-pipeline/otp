@@ -22,7 +22,6 @@
 
 package de.dkfz.tbi.otp
 
-import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.utils.SessionUtils
 

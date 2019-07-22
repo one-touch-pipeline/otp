@@ -468,6 +468,8 @@ echo \$TEMP_DIR
         SessionUtils.withNewSession {
             setUnixGroup()
             schedulerService.startup()
+            assert schedulerService.isStartupOk()
+            assert schedulerService.isActive()
             if (!startJobRunning) {
                 AbstractStartJobImpl startJob = Holders.applicationContext.getBean(JobExecutionPlan.list()?.first()?.startJob?.bean, AbstractStartJobImpl)
                 assert startJob: 'No start job found.'
@@ -491,7 +493,7 @@ echo \$TEMP_DIR
     }
 
     private void setUnixGroup() {
-        String unixGroup = TestCase.primaryGroup()
+        String unixGroup = configService.getWorkflowProjectUnixGroup()
         Project.list().each {
             it.unixGroup = unixGroup
             it.save(flush: true)

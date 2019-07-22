@@ -78,6 +78,7 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         DomainFactory.createRoddyProcessingOptions(temporaryFolder.newFolder())
 
         SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
+        roddyBamFile.project.unixGroup = configService.getWorkflowProjectUnixGroup()
     }
 
     @After

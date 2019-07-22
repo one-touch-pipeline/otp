@@ -122,7 +122,7 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         ExecuteRoddyAceseqJob job = new ExecuteRoddyAceseqJob([
                 configService         : configService,
                 linkFileUtils         : Mock(LinkFileUtils) {
-                    1 * createAndValidateLinks(_, _) >> { Map<File, File> sourceLinkMap, Realm realm ->
+                    1 * createAndValidateLinks(_, _, _) >> { Map<File, File> sourceLinkMap, Realm realm, String unixGroup ->
                         CreateFileHelper.createFile(aceseqInstance.instancePath.absoluteDataManagementPath, sophiaInstance.finalAceseqInputFile.name)
                     }
                 },

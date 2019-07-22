@@ -31,7 +31,7 @@ trait SeqTypeAndInputBamFilesHCC1187Div implements SeqTypeAndInputBamFiles {
                 "tumor_HCC1187-div${div}_merged.mdup.bam",
                 "tumor_HCC1187-div${div}_merged.mdup.bam.bai",
                 "blood_HCC1187-div${div}_merged.mdup.bam",
-                "blood_HCC1187-div${div}_merged.mdup.bam.bai "
+                "blood_HCC1187-div${div}_merged.mdup.bam.bai"
         )
     }
 }

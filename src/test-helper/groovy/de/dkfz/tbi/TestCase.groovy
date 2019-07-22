@@ -216,8 +216,4 @@ class TestCase {
             return executeAndWait(command).assertExitCodeZeroAndStderrEmpty()
         }
     }
-
-    static String primaryGroup() {
-        return executeAndWait("id -g -n").assertExitCodeZeroAndStderrEmpty().stdout.trim()
-    }
 }

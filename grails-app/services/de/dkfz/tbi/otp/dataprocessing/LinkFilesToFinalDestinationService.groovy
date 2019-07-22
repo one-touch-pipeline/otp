@@ -181,17 +181,17 @@ class LinkFilesToFinalDestinationService {
         }
 
         //create the collected links
-        linkFileUtils.createAndValidateLinks(linkMapSourceLink, realm)
+        linkFileUtils.createAndValidateLinks(linkMapSourceLink, realm, roddyBamFile.project.unixGroup)
     }
 
     void linkNewRnaResults(RnaRoddyBamFile roddyBamFile, Realm realm) {
         File baseDirectory = roddyBamFile.getBaseDirectory()
-        Map links = roddyBamFile.workDirectory.listFiles().findAll {
+        Map<File, File> links = roddyBamFile.workDirectory.listFiles().findAll {
             !it.name.startsWith(".")
         }.collectEntries { File source ->
             [(source): new File(baseDirectory, source.name)]
         }
-        linkFileUtils.createAndValidateLinks(links, realm)
+        linkFileUtils.createAndValidateLinks(links, realm, roddyBamFile.project.unixGroup)
     }
 
     void cleanupWorkDirectory(RoddyBamFile roddyBamFile, Realm realm) {

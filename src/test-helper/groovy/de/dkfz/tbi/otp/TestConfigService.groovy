@@ -29,6 +29,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.ngsdata.Realm
+import de.dkfz.tbi.otp.utils.LocalShellHelper
 
 @SuppressWarnings('JavaIoPackageAccess')
 class TestConfigService extends ConfigService {
@@ -54,6 +55,7 @@ class TestConfigService extends ConfigService {
                         OtpProperty.TEST_WORKFLOW_INPUT_DIR,
                         OtpProperty.TEST_WORKFLOW_RESULT_DIR,
                         OtpProperty.TEST_TESTING_GROUP,
+                        OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP,
                 ]
             }
         } else {
@@ -103,7 +105,8 @@ class TestConfigService extends ConfigService {
 
     String getTestingGroup() {
         String testingGroup = getAndAssertValue(OtpProperty.TEST_TESTING_GROUP)
-        assert testingGroup != TestCase.primaryGroup(): "'${OtpProperty.TEST_TESTING_GROUP.key}' does not differ from your primary group"
+        assert testingGroup != getWorkflowProjectUnixGroup():"'${OtpProperty.TEST_TESTING_GROUP.key}' with value '${testingGroup}' does not differ from " +
+                "'${OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP ? OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP.key : 'your primary group'}' with value '${getWorkflowProjectUnixGroup()}'"
         return testingGroup
     }
 
@@ -125,6 +128,10 @@ class TestConfigService extends ConfigService {
 
     File getWorkflowTestResultRootDir() {
         return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RESULT_DIR))
+    }
+
+    String getWorkflowProjectUnixGroup() {
+        return otpProperties.get(OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP) ?: LocalShellHelper.executeAndWait("id -g -n").assertExitCodeZeroAndStderrEmpty().stdout.trim()
     }
 
 

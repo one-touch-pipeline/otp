@@ -58,7 +58,7 @@ class CreateViewByPidJob extends AbstractEndStateAwareJobImpl implements AutoRes
         Map map = seqTrack.dataFiles.collectEntries { DataFile dataFile ->
             linkDataFile(dataFile)
         }
-        linkFileUtils.createAndValidateLinks(map, realm)
+        linkFileUtils.createAndValidateLinks(map, realm, seqTrack.project.unixGroup)
 
         seqTrack.dataFiles*.fileLinked = true
         seqTrack.dataFiles*.dateLastChecked = new Date()

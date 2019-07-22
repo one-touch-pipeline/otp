@@ -230,7 +230,6 @@ class SchedulerService {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     boolean isStartupOk() {
         return startupOk
     }

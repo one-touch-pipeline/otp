@@ -476,7 +476,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
     @Test
     void testCorrectGroup_AllFine() {
         setupData()
-        String primaryGroup = TestCase.primaryGroup()
+        String primaryGroup = configService.getWorkflowProjectUnixGroup()
         executeRoddyCommandService.remoteShellHelper = [
                 executeCommandReturnProcessOutput: { Realm realm1, String cmd ->
                     assert realm1 == realm
@@ -515,7 +515,7 @@ class ExecuteRoddyCommandServiceIntegrationTests {
     @Test
     void testCorrectPermissionsAndGroups() {
         setupData()
-        String primaryGroup = TestCase.primaryGroup()
+        String primaryGroup = configService.getWorkflowProjectUnixGroup()
         String group = configService.getTestingGroup()
 
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)

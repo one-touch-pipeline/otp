@@ -101,7 +101,7 @@ class CreateViewByPidJobSpec extends Specification implements DataTest {
         ])
 
         createViewByPidJob.linkFileUtils = Mock(LinkFileUtils) {
-            1 * createAndValidateLinks(_, _) >> { Map<File, File> sourceLinkMap, Realm realm ->
+            1 * createAndValidateLinks(_, _, _) >> { Map<File, File> sourceLinkMap, Realm realm, String unixGroup ->
                 assert sourceLinkMap.size() == 1
                 assert sourceLinkMap.containsKey(source)
                 assert sourceLinkMap.containsValue(target)

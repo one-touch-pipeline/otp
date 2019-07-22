@@ -28,6 +28,7 @@ import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.jobs.AutoRestartableJob
 import de.dkfz.tbi.otp.job.processing.*
@@ -73,17 +74,36 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
 
         NextAction returnValue
 
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(realm)
+
         seqTrack.dataFiles.each { DataFile dataFile ->
             File sourceFile = new File(lsdfFilesService.getFileInitialPath(dataFile))
             File targetFile = new File(lsdfFilesService.getFileFinalPath(dataFile))
+
             String md5SumFileName = checksumFileService.md5FileName(dataFile)
 
+            Path sourcePath = fileService.toPath(sourceFile, fileSystem)
+            Path targetPath = fileService.toPath(targetFile, fileSystem)
+            fileService.createDirectoryRecursivelyAndSetPermissionsViaBash(targetPath.parent, realm, seqTrack.project.unixGroup)
+
             if (seqTrack.linkedExternally) {
-                String cmd = getScript(sourceFile, targetFile,"ln -s")
-                remoteShellHelper.executeCommand(realm, cmd)
+                fileService.createLink(targetPath, sourcePath, realm, CreateLinkOption.DELETE_EXISTING_FILE)
                 returnValue = NextAction.SUCCEED
             } else {
-                String cmd = getScript(sourceFile, targetFile,"cp", "md5sum ${targetFile.name} > ${md5SumFileName}", "chmod 440 ${targetFile} ${md5SumFileName}")
+                String cmd = """
+#for debug kerberos problem
+klist || true
+
+cd ${targetFile.parent}
+if [ -e "${targetFile.path}" ]; then
+    echo "File ${targetFile.path} already exists."
+    rm ${targetFile.path}*
+fi
+cp ${sourceFile} ${targetFile}
+md5sum ${targetFile.name} > ${md5SumFileName}
+chgrp ${seqTrack.project.unixGroup} ${targetFile} ${md5SumFileName}
+chmod 440 ${targetFile} ${md5SumFileName}
+"""
                 clusterJobSchedulerService.executeJob(realm, cmd)
                 returnValue = NextAction.WAIT_FOR_CLUSTER_JOBS
             }
@@ -92,24 +112,6 @@ class CopyFilesJob extends AbstractOtpJob implements AutoRestartableJob {
             validate()
         }
         return returnValue
-    }
-
-    private String getScript(File sourceFile, File targetFile, String copyOrLinkCommand, String calculateMd5 = "", String changeMode = "") {
-        return """
-#for debug kerberos problem
-klist || true
-
-
-mkdir -p -m 2750 ${targetFile.parent}
-cd ${targetFile.parent}
-if [ -e "${targetFile.path}" ]; then
-    echo "File ${targetFile.path} already exists."
-    rm ${targetFile.path}*
-fi
-${copyOrLinkCommand} ${sourceFile} ${targetFile}
-${calculateMd5}
-${changeMode}
-"""
     }
 
     @Override

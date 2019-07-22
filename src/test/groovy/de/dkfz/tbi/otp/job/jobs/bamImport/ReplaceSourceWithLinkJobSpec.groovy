@@ -40,7 +40,9 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
+import java.nio.file.FileSystems
 import java.nio.file.Files
+import java.nio.file.Path
 
 class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
@@ -70,7 +72,6 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
     ReplaceSourceWithLinkJob linkingJob
     ProcessingStep step
-    RemoteShellHelper remoteShellHelper
 
     ImportProcess importProcess
 
@@ -110,40 +111,28 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
         given:
         createHelperObjects()
         ExternallyProcessedMergedBamFile bamFile = importProcess.externallyProcessedMergedBamFiles[0]
+        File sourceBam = new File(bamFile.importedFrom)
+        File sourceBai = new File(sourceBam.parentFile, bamFile.baiFileName)
+        File sourceFurtherFile = new File(new File(new File(bamFile.getImportedFrom()).parentFile, bamFile.furtherFiles.first()), 'file.txt')
+        File targetFurtherFile = new File(new File(bamFile.importFolder, bamFile.furtherFiles.first()), 'file.txt')
         [
-                new File(bamFile.getImportedFrom()),
-                new File("${bamFile.getImportedFrom()}.bai"),
-                new File(new File(new File(bamFile.getImportedFrom()).parentFile, bamFile.furtherFiles.first()), 'file.txt'),
-                bamFile.getBamFile(),
-                bamFile.getBaiFile(),
-                new File(new File(bamFile.getImportFolder(), bamFile.furtherFiles.first()), 'file.txt'),
+                sourceBam,
+                sourceBai,
+                sourceFurtherFile,
+                bamFile.bamFile,
+                bamFile.baiFile,
+                targetFurtherFile,
         ].each {
-            CreateFileHelper.createFile(it)
-        }
-        linkingJob.linkFileUtils.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommand(_, _) >> { Realm realm, String command ->
-                assert command ==~ """\
-umask 027; mkdir --parents --mode 2750 [^ ]+ [^ ]+ &>\\/dev\\/null; echo \\\$\\?
-ln -sf [^ ]+.bam [^ ]+.bam
-ln -sf [^ ]+.bam.bai [^ ]+.bam.bai
-ln -sf [^ ]+\\/subDirectory\\/file.txt [^ ]+\\/subDirectory\\/file.txt
-"""
-                return LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
-            }
-            0 * _
-        }
-        linkingJob.linkFileUtils.lsdfFilesService.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommand(_, _) >> { Realm realm, String command ->
-                assert command ==~ "rm -rf [^ ]+.bam [^ ]+.bam.bai [^ ]+\\/subDirectory\\/file.txt &>\\/dev\\/null\necho \\\$\\?"
-                return LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
-            }
-            0 * _
+            CreateFileHelper.createFile(it, HelperUtils.randomMd5sum)
         }
 
         when:
         linkingJob.execute()
 
         then:
+        sourceBam.toPath().toRealPath() == bamFile.bamFile.toPath()
+        sourceBai.toPath().toRealPath() == bamFile.baiFile.toPath()
+        sourceFurtherFile.toPath().toRealPath() == targetFurtherFile.toPath()
         importProcess.state == ImportProcess.State.FINISHED
     }
 
@@ -180,11 +169,12 @@ ln -sf [^ ]+\\/subDirectory\\/file.txt [^ ]+\\/subDirectory\\/file.txt
         ])
 
         linkingJob.configService = configService
-        linkingJob.remoteShellHelper = new RemoteShellHelper()
         linkingJob.linkFileUtils = new LinkFileUtils()
-        linkingJob.linkFileUtils.lsdfFilesService = new LsdfFilesService()
-        linkingJob.linkFileUtils.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
-        linkingJob.linkFileUtils.createClusterScriptService = new CreateClusterScriptService()
+        linkingJob.linkFileUtils.fileService = new FileService()
+        linkingJob.linkFileUtils.fileSystemService = Mock(FileSystemService) {
+            _ * getRemoteFileSystem(_) >> FileSystems.default
+            0 * _
+        }
         linkingJob.fileSystemService = new TestFileSystemService()
         linkingJob.fileService = new FileService()
     }
@@ -228,26 +218,6 @@ ln -sf [^ ]+\\/subDirectory\\/file.txt [^ ]+\\/subDirectory\\/file.txt
         link1.parentFile.mkdirs()
         Files.createSymbolicLink(link1.toPath(), targetOfLink1.toPath())
 
-        linkingJob.linkFileUtils.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommand(_, _) >> { Realm realm, String command ->
-                assert command ==~ """\
-umask 027; mkdir --parents --mode 2750 [^ ]+ [^ ]+ &>\\/dev\\/null; echo \\\$\\?
-ln -sf [^ ]+.bam [^ ]+.bam
-ln -sf [^ ]+.bam.bai [^ ]+.bam.bai
-ln -sf [^ ]+ [^ ]+
-"""
-                return LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
-            }
-            0 * _
-        }
-        linkingJob.linkFileUtils.lsdfFilesService.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommand(_, _) >> { Realm realm, String command ->
-                assert command ==~ "rm -rf [^ ]+.bam [^ ]+.bam.bai [^ ]+ &>\\/dev\\/null\necho \\\$\\?"
-                return LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
-            }
-            0 * _
-        }
-
         when:
         linkingJob.execute()
 
@@ -268,6 +238,10 @@ ln -sf [^ ]+ [^ ]+
     void "test execute when everything files already linked, do not delete copied files"() {
         given:
         createHelperObjects()
+        linkingJob.linkFileUtils = Mock (LinkFileUtils) {
+            0 * _
+        }
+
         ExternallyProcessedMergedBamFile bamFile = importProcess.externallyProcessedMergedBamFiles[0]
         [
                 bamFile.getBamFileName(),
@@ -279,13 +253,6 @@ ln -sf [^ ]+ [^ ]+
             CreateFileHelper.createFile(copied)
             link.delete()
             Files.createSymbolicLink(link.toPath(), copied.toPath())
-        }
-
-        linkingJob.linkFileUtils.remoteShellHelper = Mock(RemoteShellHelper) {
-            0 * _
-        }
-        linkingJob.linkFileUtils.lsdfFilesService.remoteShellHelper = Mock(RemoteShellHelper) {
-            0 * _
         }
 
         when:

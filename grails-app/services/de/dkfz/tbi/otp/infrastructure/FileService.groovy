@@ -246,6 +246,33 @@ class FileService {
     }
 
     /**
+     * Create the requested directory (absolute path) and all missing parent directories. The group and permissions are set via bash.
+     *
+     * It won't fail if the directory already exist, but then the group and permissions are not changed.
+     */
+    void createDirectoryRecursivelyAndSetPermissionsViaBash(Path path, Realm realm, String groupString = '', String permissions = '2750') {
+        assert path
+        assert path.isAbsolute()
+
+        createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path, realm, groupString, permissions)
+    }
+
+    private void createDirectoryRecursivelyAndSetPermissionsViaBashInternal(Path path, Realm realm, String groupString, String permissions) {
+        if (Files.exists(path)) {
+            assert Files.isDirectory(path): "The path ${path} already exist, but is not a directory"
+        } else {
+            createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path.parent, realm, groupString, permissions)
+
+            Files.createDirectory(path)
+
+            remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
+            if (groupString) {
+                remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp ${groupString} ${path}").assertExitCodeZeroAndStderrEmpty()
+            }
+        }
+    }
+
+    /**
      * Create the requested directory (absolute path) and all missing parent directories with the permission defined in {@link #DEFAULT_DIRECTORY_PERMISSION}.
      *
      * It won't fail if the directory already exist, but then the permissions are not changed.

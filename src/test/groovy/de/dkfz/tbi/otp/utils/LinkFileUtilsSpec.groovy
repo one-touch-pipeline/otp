@@ -27,7 +27,9 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -58,21 +60,11 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
 
         realm = DomainFactory.createRealm()
 
-        RemoteShellHelper remoteShellHelper = [
-                executeCommand: { Realm realm, String command ->
-                    String stdout = LocalShellHelper.executeAndAssertExitCodeAndErrorOutAndReturnStdout(command)
-                    assert stdout ==~ /^0?\s*$/
-                    return stdout
-                }
-        ] as RemoteShellHelper
-
         linkFileUtils = new LinkFileUtils()
-        linkFileUtils.createClusterScriptService = new CreateClusterScriptService()
-        linkFileUtils.lsdfFilesService = new LsdfFilesService()
-        linkFileUtils.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
-        linkFileUtils.lsdfFilesService.remoteShellHelper = remoteShellHelper
-
-        linkFileUtils.remoteShellHelper = remoteShellHelper
+        linkFileUtils.fileSystemService = Mock(FileSystemService) {
+            _ * getRemoteFileSystem(_) >>  testDirectory.toPath().fileSystem
+        }
+        linkFileUtils.fileService = new FileService()
     }
 
     void "test createAndValidateLinks, when map is null, should fail"() {
@@ -145,32 +137,18 @@ class LinkFileUtilsSpec extends Specification implements DataTest {
         assert !linkDir.exists()
         File linkFile = new File(linkDir, "linkFile")
 
+        linkFileUtils.fileService.remoteShellHelper = Mock(RemoteShellHelper) {
+            1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+                command ==~ "chmod 2750 ${linkDir.toString()}"
+                return new ProcessOutput(command, '', 0)
+            }
+        }
+
         when:
         linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
 
         then:
         linkFile.exists()
         Paths.get(sourceFile.absolutePath) == Paths.get(linkFile.absolutePath).toRealPath()
-    }
-
-    void "test createAndValidateLinks, when link can't be created, should fail"() {
-        given:
-        File sourceFile = new File(testDirectory, "sourceFile")
-        sourceFile.createNewFile()
-        File linkFile = new File(testDirectory, "linkFile")
-
-        linkFileUtils.lsdfFilesService = new LsdfFilesService()
-        linkFileUtils.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
-        linkFileUtils.lsdfFilesService.remoteShellHelper = [
-                executeCommand: { Realm realm, String command ->
-                    assert this.realm == realm
-                }
-        ] as RemoteShellHelper
-
-        when:
-        linkFileUtils.createAndValidateLinks([(sourceFile): linkFile], realm)
-
-        then:
-        thrown(AssertionError)
     }
 }

@@ -91,7 +91,7 @@ class ReplaceSourceWithLinkJob extends AbstractEndStateAwareJobImpl {
                 }
 
                 if (filteredMap) {
-                    linkFileUtils.createAndValidateLinks(filteredMap, realm)
+                    linkFileUtils.createAndValidateLinks(filteredMap, realm, epmbf.project.unixGroup)
                 }
             }
         }

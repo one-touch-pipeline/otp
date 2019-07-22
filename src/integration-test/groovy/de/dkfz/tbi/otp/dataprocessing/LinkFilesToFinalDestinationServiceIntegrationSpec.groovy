@@ -35,12 +35,16 @@ import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightCheckService
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightNotificationService
 import de.dkfz.tbi.otp.utils.*
+
+import java.nio.file.FileSystems
 
 @Rollback
 @Integration
@@ -65,9 +69,11 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         service.lsdfFilesService = new LsdfFilesService()
         service.lsdfFilesService.createClusterScriptService = new CreateClusterScriptService()
         service.lsdfFilesService.remoteShellHelper = remoteShellHelper
-        service.linkFileUtils.createClusterScriptService = new CreateClusterScriptService()
-        service.linkFileUtils.lsdfFilesService = service.lsdfFilesService
-        service.linkFileUtils.remoteShellHelper = remoteShellHelper
+        service.linkFileUtils.fileService = new FileService()
+        service.linkFileUtils.fileSystemService = Mock(FileSystemService) {
+            _ * getRemoteFileSystem(_) >> FileSystems.default
+            0 * _
+        }
         service.executeRoddyCommandService = new ExecuteRoddyCommandService()
         service.executeRoddyCommandService.remoteShellHelper = service.remoteShellHelper
 
@@ -168,7 +174,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
             1 * correctPermissionsAndGroups(_, _) >> { RoddyResult roddyResult, Realm realm -> }
         }
         linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils) {
-            1 * createAndValidateLinks(_, _) >> { Map<File, File> sourceLinkMap, Realm realm -> }
+            1 * createAndValidateLinks(_, _, _) >> { Map<File, File> sourceLinkMap, Realm realm, String unixGroup -> }
         }
         linkFilesToFinalDestinationService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
             1 * setSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile -> }
@@ -202,7 +208,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
             1 * correctPermissionsAndGroups(_, _) >> { RoddyResult roddyResult, Realm realm -> }
         }
         linkFilesToFinalDestinationService.linkFileUtils = Mock(LinkFileUtils) {
-            0 * createAndValidateLinks(_, _) >> { Map<File, File> sourceLinkMap, Realm realm -> }
+            0 *  createAndValidateLinks(_, _, _) >> { Map<File, File> sourceLinkMap, Realm realm, String unixGroup -> }
         }
         linkFilesToFinalDestinationService.abstractMergedBamFileService = Mock(AbstractMergedBamFileService) {
             1 * setSamplePairStatusToNeedProcessing(_) >> { RoddyBamFile roddyBamFile -> }

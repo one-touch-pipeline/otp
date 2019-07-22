@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CreateFileHelper
+import de.dkfz.tbi.otp.utils.ProcessOutput
 
 class CopyFilesJobSpec extends Specification implements DataTest {
 
@@ -134,15 +135,13 @@ class CopyFilesJobSpec extends Specification implements DataTest {
 
     void "test maybe submit when file has to be copied and not exists already"() {
         given:
-        createSeqTrack()
+        copyFilesJob.fileService.remoteShellHelper = getRemoteShellHelper(createSeqTrack())
         copyFilesJob.clusterJobSchedulerService = Mock(ClusterJobSchedulerService) {
             1 * executeJob(_, _) >> { Realm realm, String command ->
                 assert command ==~ """
 #for debug kerberos problem
 klist \\|\\| true
 
-
-mkdir -p -m 2750 .*
 cd .*
 if \\[ -e ".*" \\]; then
     echo "File .* already exists."
@@ -150,6 +149,7 @@ if \\[ -e ".*" \\]; then
 fi
 cp .* .*
 md5sum .* > .*
+chgrp .* .* .*
 chmod 440 .* .*
 """
             }
@@ -162,63 +162,30 @@ chmod 440 .* .*
 
     void "test maybe submit when file has to be linked and not exists already"() {
         given:
-        SeqTrack seqTrack = createSeqTrack(true)
-        copyFilesJob.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommand(_, _) >> { Realm realm, String command ->
-                assert command ==~ """
-#for debug kerberos problem
-klist \\|\\| true
-
-
-mkdir -p -m 2750 .*
-cd .*
-if \\[ -e ".*" \\]; then
-    echo "File .* already exists."
-    rm .*
-fi
-ln -s .* .*
-
-
-"""
-                DataFile dataFile = CollectionUtils.exactlyOneElement(seqTrack.dataFiles)
-                CreateFileHelper.createFile(new File(copyFilesJob.lsdfFilesService.getFileFinalPath(dataFile)))
-            }
-        }
+        copyFilesJob.fileService.remoteShellHelper = getRemoteShellHelper(createSeqTrack(true))
 
         expect:
         NextAction.SUCCEED == copyFilesJob.maybeSubmit()
     }
-
 
     void "test maybe submit when file has to be linked and exists already"() {
         given:
         SeqTrack seqTrack = createSeqTrack(true)
-        DataFile dataFile = CollectionUtils.exactlyOneElement(seqTrack.dataFiles)
-        CreateFileHelper.createFile(new File(copyFilesJob.lsdfFilesService.getFileFinalPath(dataFile)))
-        copyFilesJob.remoteShellHelper = Mock(RemoteShellHelper) {
-            1 * executeCommand(_, _) >> { Realm realm, String command ->
-                assert command ==~ """
-#for debug kerberos problem
-klist \\|\\| true
-
-
-mkdir -p -m 2750 .*
-cd .*
-if \\[ -e ".*" \\]; then
-    echo "File .* already exists."
-    rm .*
-fi
-ln -s .* .*
-
-
-"""
-            }
-        }
+        copyFilesJob.fileService.remoteShellHelper = getRemoteShellHelper(seqTrack)
+        CollectionUtils.exactlyOneElement(seqTrack.dataFiles)
 
         expect:
         NextAction.SUCCEED == copyFilesJob.maybeSubmit()
     }
 
+    private RemoteShellHelper getRemoteShellHelper(seqTrack) {
+        Mock(RemoteShellHelper) {
+            12 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+                assert command ==~ "(chmod 2750|chgrp ${seqTrack.project.unixGroup}) .*/${seqTrack.project.dirName}(/.*)?"
+                return new ProcessOutput(command, '', 0)
+            }
+        }
+    }
 
     void "test validate when everything is valid"() {
         given:
