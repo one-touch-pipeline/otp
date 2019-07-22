@@ -256,7 +256,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         and: "notification for unix group administration was sent"
         (fileAccess && hasLdapGroup && !newEnabledStatus ? 1 : 0) * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("REMOVE") }, EMAIL_LINUX_GROUP_ADMINISTRATION)
-        (fileAccess && !hasLdapGroup && newEnabledStatus ? 1 : 0) * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("ADD")}, EMAIL_LINUX_GROUP_ADMINISTRATION)
+        (fileAccess && !hasLdapGroup && newEnabledStatus ? 1 : 0) * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("ADD") }, EMAIL_LINUX_GROUP_ADMINISTRATION)
 
         and: "notification for user managers regarding file access was sent"
         (newEnabledStatus && fileAccess ? 1 : 0) * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, userProjectRole.user.email, _ as List<String>)
