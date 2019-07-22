@@ -193,6 +193,10 @@ class ConfigService implements ApplicationContextAware {
         }
     }
 
+    String getAutoImportSecret() {
+        return otpProperties.get(OtpProperty.CONFIG_AUTO_IMPORT_SECRET) ?: ''
+    }
+
     String getDicomInstanceName() {
         return otpProperties.get(OtpProperty.CONFIG_DICOM_INSTANCE_NAME)
     }

@@ -26,8 +26,16 @@ import grails.converters.JSON
 import grails.validation.Validateable
 import groovy.transform.Immutable
 import groovy.transform.TupleConstructor
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
 
 import de.dkfz.tbi.otp.FlashMessage
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -58,6 +66,8 @@ class MetadataImportController {
     IlseSubmissionService ilseSubmissionService
 
     FileSystemService fileSystemService
+
+    ConfigService configService
 
     def index(MetadataImportControllerSubmitCommand cmd) {
         boolean isValidated = false
@@ -201,8 +211,28 @@ class MetadataImportController {
         render dataToRender as JSON
     }
 
-    def autoImport() {
-        render text: doAutoImport(params.ticketNumber, params.ilseNumbers), contentType: "text/plain"
+    def autoImport(String secret) {
+        String expectedSecret = configService.autoImportSecret
+        if (!secret || !expectedSecret || secret != expectedSecret) {
+            render text: 'authentication failed', contentType: "text/plain"
+            return
+        }
+        Authentication authentication = SecurityContextHolder.context.authentication
+        boolean needAuthentication = !authentication || !authentication.isAuthenticated()
+        try {
+            if (needAuthentication) {
+                List<GrantedAuthority> authorities = [
+                        new SimpleGrantedAuthority(Role.ROLE_OPERATOR),
+                ]
+                UserDetails userDetails = new User('TicketSystem', "", authorities)
+                SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
+            }
+            render text: doAutoImport(params.ticketNumber, params.ilseNumbers), contentType: "text/plain"
+        } finally {
+            if (needAuthentication) {
+                SecurityContextHolder.clearContext()
+            }
+        }
     }
 
     private StringBuilder doAutoImport(String otrsTicketNumber, String ilseNumbers) {
