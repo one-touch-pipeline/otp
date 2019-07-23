@@ -42,7 +42,6 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest {
         [
                 ProcessingOption,
                 Project,
-                ProjectCategory,
                 Realm,
                 SampleIdentifier,
         ]
