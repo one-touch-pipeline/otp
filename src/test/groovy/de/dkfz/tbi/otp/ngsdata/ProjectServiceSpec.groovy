@@ -56,15 +56,18 @@ class ProjectServiceSpec extends Specification implements DataTest {
                         (OtpProperty.PATH_PROJECT_ROOT): "/some/nested/root/path",
                 ])
         ])
+        CreateProjectSubmitCommand cmd = new CreateProjectSubmitCommand (
+                name                          : "project",
+                projectPrefix                 : "projectPrefix",
+                unixGroup                     : "unixGroup",
+                directory                     : dirName,
+                projectType                   : Project.ProjectType.SEQUENCING,
+                storageUntil                  : new Date(),
+                qcThresholdHandling           : QcThresholdHandling.CHECK_AND_NOTIFY,
+        )
 
         when:
-        projectService.createProject(
-                'project',
-                dirName,
-                new Realm(),
-                ['category'],
-                QcThresholdHandling.CHECK_AND_NOTIFY
-        )
+        projectService.createProject(cmd)
 
         then:
         AssertionError err = thrown()
@@ -116,7 +119,7 @@ class ProjectServiceSpec extends Specification implements DataTest {
         given:
         ProjectService projectService = new ProjectService()
         ProjectInfo projectInfo = DomainFactory.createProjectInfo()
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd", Locale.ENGLISH)
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
         User performingUser = DomainFactory.createUser()
         AddProjectInfoCommand addProjectInfoCommand = new AddProjectInfoCommand([
                 recipient : "recipient",

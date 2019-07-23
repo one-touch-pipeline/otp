@@ -77,7 +77,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         createProject(name: 'testProject3', nameInMetadataFiles: null)
         ProjectGroup projectGroup = new ProjectGroup(name: 'projectGroup')
         projectGroup.save(flush: true)
-        DomainFactory.createProjectCategory(name: 'category')
 
         int counter = 0
         Realm realm = DomainFactory.createDefaultRealmWithProcessingOption()
@@ -137,20 +136,21 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         Project project
-        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: name,
-                dirName: dirName,
-                dirAnalysis: dirAnalysis,
-                realm: configService.getDefaultRealm(),
+                directory: dirName,
+                projectPrefix: 'projectPrefix',
+                analysisDirectory: dirAnalysis,
                 sampleIdentifierParserBeanName: sampleIdentifierParserBeanName,
                 qcThresholdHandling: qcThresholdHandling,
-                categoryNames: categoryNames,
                 unixGroup: unixGroup,
                 projectGroup: projectGroup,
                 nameInMetadataFiles: nameInMetadataFiles,
                 forceCopyFiles: forceCopyFiles,
                 description: description,
                 processingPriority: processingPriority,
+                projectType: Project.ProjectType.SEQUENCING,
+                storageUntil: new Date(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -162,7 +162,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         project.dirAnalysis == dirAnalysis
         project.sampleIdentifierParserBeanName == sampleIdentifierParserBeanName
         project.qcThresholdHandling == qcThresholdHandling
-        project.projectCategories == categoryNames.collect { ProjectCategory.findByName(it) } as Set
         project.unixGroup == unixGroup
         project.projectGroup == ProjectGroup.findByName(projectGroup)
         project.nameInMetadataFiles == nameInMetadataFiles
@@ -171,13 +170,13 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         project.processingPriority == processingPriority.priority
 
         where:
-        name      | dirName | dirAnalysis | projectGroup   | nameInMetadataFiles | forceCopyFiles | description   | categoryNames | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
-        'project' | 'dir'   | ''          | ''             | 'project'           | true           | 'description' | ["category"]  | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
-        'project' | 'dir'   | ''          | ''             | null                | true           | ''            | ["category"]  | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM    | QcThresholdHandling.CHECK_AND_NOTIFY
-        'project' | 'dir'   | ''          | 'projectGroup' | 'project'           | true           | 'description' | ["category"]  | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO      | QcThresholdHandling.NO_CHECK
-        'project' | 'dir'   | ''          | ''             | 'project'           | false          | ''            | ["category"]  | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.HIPO2     | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
-        'project' | 'dir'   | ''          | ''             | 'project'           | true           | 'description' | ["category"]  | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP      | QcThresholdHandling.CHECK_AND_NOTIFY
-        'project' | 'dir'   | '/dirA'     | ''             | 'project'           | true           | 'description' | []            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.NO_CHECK
+        name      | dirName | dirAnalysis | projectGroup   | nameInMetadataFiles | forceCopyFiles | description   | processingPriority            | sampleIdentifierParserBeanName           | qcThresholdHandling
+        'project' | 'dir'   | ''          | ''             | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
+        'project' | 'dir'   | ''          | ''             | null                | true           | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.INFORM    | QcThresholdHandling.CHECK_AND_NOTIFY
+        'project' | 'dir'   | ''          | 'projectGroup' | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.HIPO      | QcThresholdHandling.NO_CHECK
+        'project' | 'dir'   | ''          | ''             | 'project'           | false          | ''            | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.HIPO2     | QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK
+        'project' | 'dir'   | ''          | ''             | 'project'           | true           | 'description' | ProcessingPriority.NORMAL     | SampleIdentifierParserBeanName.DEEP      | QcThresholdHandling.CHECK_AND_NOTIFY
+        'project' | 'dir'   | '/dirA'     | ''             | 'project'           | true           | 'description' | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.NO_CHECK
     }
 
     void "test createProject if directory is created"() {
@@ -187,12 +186,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         Project project
-        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
-                dirName: 'dir',
-                dirAnalysis: '/dirA',
-                realm: configService.getDefaultRealm(),
-                categoryNames: ['category'],
+                directory: 'dir',
+                projectPrefix: 'projectPrefix',
+                analysisDirectory: '/dirA',
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -201,6 +199,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
+                projectType: Project.ProjectType.SEQUENCING,
+                storageUntil: new Date(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -225,12 +225,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String group = configService.getTestingGroup()
 
         when:
-        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: name,
-                dirName: dirName,
-                dirAnalysis: '/dirA',
-                realm: configService.getDefaultRealm(),
-                categoryNames: ['category'],
+                directory: dirName,
+                projectPrefix: 'projectPrefix',
+                analysisDirectory: '/dirA',
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: nameInMetadataFiles,
@@ -239,6 +238,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
+                projectType: Project.ProjectType.SEQUENCING,
+                storageUntil: new Date(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -255,7 +256,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         'testProject2' | 'dir'       | 'project'           || 'this name is already used in another project as nameInMetadataFiles entry'                | 'on field \'name\': rejected value [testProject2]'
         'project'      | 'dir'       | 'testProject'       || 'this nameInMetadataFiles is already used in another project as name entry'                | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
         'project'      | 'dir'       | 'testProject2'      || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
-        'project'      | 'dir'       | ''                  || 'blank'                                                                                    | 'on field \'nameInMetadataFiles\': rejected value []'
         'project'      | 'testDir'   | ''                  || 'unique'                                                                                   | 'on field \'dirName\': rejected value [testDir]'
         'project'      | '/abs/path' | 'project'           || 'custom validation'                                                                        | "on field 'dirName': rejected value [/abs/path];"
     }
@@ -263,12 +263,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test createProject invalid unix group"() {
         when:
         setupData()
-        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
-                dirName: 'dir',
-                dirAnalysis: '/dirA',
-                realm: configService.getDefaultRealm(),
-                categoryNames: ['category'],
+                directory: 'dir',
+                projectPrefix: 'projectPrefix',
+                analysisDirectory: '/dirA',
                 unixGroup: 'invalidValue',
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -277,6 +276,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
+                projectType: Project.ProjectType.SEQUENCING,
+                storageUntil: new Date(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -293,12 +294,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String group = configService.getTestingGroup()
 
         when:
-        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
-                dirName: 'dir',
-                dirAnalysis: 'invalidDirA',
-                realm: configService.getDefaultRealm(),
-                categoryNames: ['category'],
+                directory: 'dir',
+                projectPrefix: 'projectPrefix',
+                analysisDirectory: 'invalidDirA',
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -306,6 +306,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 description: '',
                 processingPriority: ProcessingPriority.NORMAL,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
+                projectType: Project.ProjectType.SEQUENCING,
+                storageUntil: new Date(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -333,12 +335,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() != group
 
         when:
-        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
-                dirName: 'dir',
-                dirAnalysis: '/dirA',
-                realm: configService.getDefaultRealm(),
-                categoryNames: ['category'],
+                directory: 'dir',
+                projectPrefix: 'projectPrefix',
+                analysisDirectory: '/dirA',
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -347,6 +348,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 processingPriority: ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
+                projectType: Project.ProjectType.SEQUENCING,
+                storageUntil: new Date(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -380,12 +383,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectDirectory.exists()
 
         when:
-        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
-                dirName: 'dir',
-                dirAnalysis: '/dirA',
-                realm: configService.getDefaultRealm(),
-                categoryNames: ['category'],
+                directory: 'dir',
+                projectPrefix: 'projectPrefix',
+                analysisDirectory: '/dirA',
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -395,6 +397,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 projectInfoFile: mockMultipartFile,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
+                projectType: Project.ProjectType.SEQUENCING,
+                storageUntil: new Date(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -442,102 +446,100 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ''             || 'blank'                                                                                    | 'on field \'nameInMetadataFiles\': rejected value []'
     }
 
-    void "test createProject invalid project category should fail"() {
+    void "test createProject without project type should fail"() {
         given:
         setupData()
         String group = configService.getTestingGroup()
 
         when:
-        ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
+        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
-                dirName: 'dir',
-                dirAnalysis: '/dirA',
-                realm: configService.getDefaultRealm(),
-                categoryNames: ['invalid category'],
+                directory: 'dir',
+                projectPrefix: 'projectPrefix',
+                analysisDirectory: '/dirA',
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: 'project',
                 forceCopyFiles: true,
                 description: '',
+                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 processingPriority: ProcessingPriority.NORMAL,
+                storageUntil: new Date(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
         }
 
         then:
-        AssertionError ex = thrown()
-        ex.message.contains("Collection contains 0 elements. Expected 1")
+        ValidationException ex = thrown()
+        ex.message.contains("'projectType': rejected value [null]")
+    }
+
+    void "test createProject without storage date should fail"() {
+        given:
+        setupData()
+        String group = configService.getTestingGroup()
+
+        when:
+        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
+                name: 'project',
+                directory: 'dir',
+                projectPrefix: 'projectPrefix',
+                analysisDirectory: '/dirA',
+                unixGroup: group,
+                projectGroup: '',
+                nameInMetadataFiles: 'project',
+                forceCopyFiles: true,
+                description: '',
+                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
+                processingPriority: ProcessingPriority.NORMAL,
+                projectType: Project.ProjectType.SEQUENCING,
+        )
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.createProject(projectParams)
+        }
+
+        then:
+        ValidationException ex = thrown()
+        ex.message.contains("'storageUntil': rejected value [null]")
     }
 
     @Unroll
-    void "test updatePhabricatorAlias valid alias and valid user #username"() {
+    void "test updateProjectPrefix valid alias and valid user #username"() {
         given:
         setupData()
-        String phabricatorAlias = "some alias"
+        String projectPrefix = "prefix"
         Project project = Project.findByName("testProject")
         addUserWithReadAccessToProject(User.findByUsername(USER), project)
 
         when:
         SpringSecurityUtils.doWithAuth(username) {
-            projectService.updatePhabricatorAlias(phabricatorAlias, project)
+            projectService.updateProjectField(projectPrefix,'projectPrefix', project)
         }
 
         then:
-        project.phabricatorAlias == phabricatorAlias
+        project.projectPrefix == projectPrefix
 
         where:
         username | _
         ADMIN    | _
         OPERATOR | _
-        USER     | _
     }
 
-    void "test updatePhabricatorAlias valid alias and invalide user"() {
+    void "test updateProjectPrefix valid alias and invalid user"() {
         given:
         setupData()
-        String phabricatorAlias = "some alias"
+        String projectPrefix = "prefix"
         Project project = Project.findByName("testProject")
 
         when:
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            projectService.updatePhabricatorAlias(phabricatorAlias, project)
+            projectService.updateProjectField(projectPrefix,'projectPrefix', project)
         }
 
         then:
         org.springframework.security.access.AccessDeniedException e = thrown()
         e.message.contains("Access is denied")
-    }
-
-    void "test updateCategory invalid project category should fail"() {
-        given:
-        setupData()
-        Project project = Project.findByName("testProject")
-
-        when:
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.updateCategory(['not available'], project)
-        }
-
-        then:
-        AssertionError ex = thrown()
-        ex.message.contains("Collection contains 0 elements. Expected 1")
-    }
-
-    void "test updateCategory valid project category"() {
-        given:
-        setupData()
-        Project project = Project.findByName("testProject")
-        ProjectCategory projectCategory = DomainFactory.createProjectCategory(name: 'valid category')
-
-        when:
-        assert !project.projectCategories
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.updateCategory([projectCategory.name], project)
-        }
-
-        then:
-        project.projectCategories == [projectCategory] as Set
     }
 
     void "test updateAnalysisDirectory valid name"() {
@@ -585,6 +587,51 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         project.tumorEntity == tumorEntity
+    }
+
+    void "test updateSubsequentApplication valid name"() {
+        given:
+        setupData()
+        Project project = Project.findByName("testProject")
+        String subsequentApplication = "subsequentApplication"
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.updateProjectField(subsequentApplication, "subsequentApplication", project)
+        }
+
+        then:
+        project.subsequentApplication == subsequentApplication
+    }
+
+    void "test updateConnectedProjects valid name"() {
+        given:
+        setupData()
+        Project project = Project.findByName("testProject")
+        String connectedProjects = "connectedProjects"
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.updateProjectField(connectedProjects, "connectedProjects", project)
+        }
+
+        then:
+        project.connectedProjects == connectedProjects
+    }
+
+    void "test updateInternalNotes valid name"() {
+        given:
+        setupData()
+        Project project = Project.findByName("testProject")
+        String internalNotes = "internalNotes"
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.updateProjectField(internalNotes, "internalNotes", project)
+        }
+
+        then:
+        project.internalNotes == internalNotes
     }
 
     void "test configureNoAlignmentDeciderProject"() {

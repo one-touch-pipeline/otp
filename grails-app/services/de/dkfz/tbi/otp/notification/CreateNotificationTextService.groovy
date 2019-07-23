@@ -90,12 +90,6 @@ class CreateNotificationTextService {
             seqCenterComment = "${prefix}${seqCenterComment}${suffix}"
         }
 
-        //TODO talk to research group which steps should be included
-        String phabricatorAlias = ""
-        if (project.phabricatorAlias && processingStep == INSTALLATION) {
-            phabricatorAlias = "\n!project #\$${project.phabricatorAlias}"
-        }
-
         String faq = ""
         if (ProcessingOptionService.findOption(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)) {
             faq = createMessage('notification.template.base.faq', [
@@ -108,7 +102,6 @@ class CreateNotificationTextService {
                 stepInformation      : stepInformation,
                 seqCenterComment     : seqCenterComment,
                 addition             : createMessage("notification.template.${processingStep.name().toLowerCase()}.addition"),
-                phabricatorAlias     : phabricatorAlias,
                 emailSenderSalutation: processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
                 faq                  : faq,
         ])

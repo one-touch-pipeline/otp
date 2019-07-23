@@ -38,7 +38,6 @@ import de.dkfz.tbi.otp.utils.HelperUtils
         Individual,
         Pipeline,
         Project,
-        ProjectCategory,
         Realm,
         RoddyWorkflowConfig,
         SeqType,

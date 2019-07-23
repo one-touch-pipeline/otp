@@ -179,6 +179,31 @@ $(function() {
         $("p.edit-switch-label", outerContainer).show();
     });
 
+    $("div.edit-switch-date p.edit-switch-editor button.save").click(function () {
+        "use strict";
+        var container, outerContainer;
+        container = $(this).parent();
+        outerContainer = container.parent();
+        $.ajax({
+            url: $("input:hidden[name=target]", container).val(),
+            dataType: 'json',
+            data: { value: $('input[type="date"]', container).val() },
+            success: function (data) {
+                if (data.success) {
+                    $.otp.infoMessage("Data stored successfully");
+                    $("p.edit-switch-label span", outerContainer).text($('input[type="date"]', container).val());
+                } else {
+                    $.otp.warningMessage(data.error);
+                }
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
+            }
+        });
+        $("p.edit-switch-editor", outerContainer).hide();
+        $("p.edit-switch-label", outerContainer).show();
+    });
+
     /*jslint unparam: true */
     $("div.edit-switch-checkboxes p.edit-switch-editor button.save").click(function () {
         "use strict";

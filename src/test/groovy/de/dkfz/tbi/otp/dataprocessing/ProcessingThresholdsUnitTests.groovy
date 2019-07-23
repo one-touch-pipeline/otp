@@ -32,7 +32,12 @@ import de.dkfz.tbi.otp.ngsdata.*
  * See the API for {@link grails.test.mixin.domain.DomainClassUnitTestMixin} for usage instructions
  */
 @TestFor(ProcessingThresholds)
-@Mock([Project, ProjectCategory, Realm, SeqType, SampleType])
+@Mock([
+        Project,
+        Realm,
+        SeqType,
+        SampleType
+])
 class ProcessingThresholdsUnitTests {
 
     Double coverage = 30.00

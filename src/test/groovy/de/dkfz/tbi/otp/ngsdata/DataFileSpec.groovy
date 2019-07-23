@@ -36,7 +36,6 @@ class DataFileSpec extends Specification implements DataTest {
                 FileType,
                 Individual,
                 Project,
-                ProjectCategory,
                 Run,
                 RunSegment,
                 Sample,

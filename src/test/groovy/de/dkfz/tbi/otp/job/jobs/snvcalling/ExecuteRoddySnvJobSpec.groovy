@@ -52,7 +52,6 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 Pipeline,
                 ProcessingOption,
                 Project,
-                ProjectCategory,
                 Sample,
                 SamplePair,
                 SampleType,

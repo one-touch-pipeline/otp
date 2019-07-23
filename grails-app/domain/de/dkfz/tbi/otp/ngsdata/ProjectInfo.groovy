@@ -70,7 +70,7 @@ class ProjectInfo implements Entity {
     }
 
     String getAdditionalInfos() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd" , Locale.ENGLISH)
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd" , Locale.ENGLISH)
         if (recipient) {
             return [
                     "recipient: ${recipient}",

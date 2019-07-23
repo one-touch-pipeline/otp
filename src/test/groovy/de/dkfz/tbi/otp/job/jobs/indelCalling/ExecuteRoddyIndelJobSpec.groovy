@@ -56,7 +56,6 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 MergingWorkPackage,
                 Pipeline,
                 Project,
-                ProjectCategory,
                 ProcessingOption,
                 Sample,
                 SamplePair,

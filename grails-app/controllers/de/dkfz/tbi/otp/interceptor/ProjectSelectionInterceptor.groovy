@@ -75,18 +75,6 @@ class ProjectSelectionInterceptor {
             }
             model.availableProjectsWithoutGroup = availableProjectsWithoutGroup
 
-            // projects in categories
-            Map<String, List<ProjectSelectionCommand>> availableProjectsInCategories = [:]
-            allProjects.each { Project project ->
-                project.projectCategories.each { ProjectCategory category ->
-                    if (!availableProjectsInCategories.get(category.name)) {
-                        String displayName = messageSource.getMessage("header.projectSelection.allGroupOrCategory", [category.name].toArray(), LocaleContextHolder.getLocale())
-                        availableProjectsInCategories.put(category.name, [new ProjectSelectionCommand(displayName: displayName, type: ProjectSelectionCommand.Type.CATEGORY, id: category.id)])
-                    }
-                    availableProjectsInCategories.get(category.name).add(new ProjectSelectionCommand(displayName: project.name, type: ProjectSelectionCommand.Type.PROJECT, id: project.id))
-                }
-            }
-            model.availableProjectsInCategories = availableProjectsInCategories
         }
         true
     }

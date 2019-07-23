@@ -48,7 +48,6 @@ class CreateViewByPidJobSpec extends Specification implements DataTest {
                 ProcessingStep,
                 ProcessParameter,
                 Project,
-                ProjectCategory,
                 Realm,
                 Run,
                 RunSegment,

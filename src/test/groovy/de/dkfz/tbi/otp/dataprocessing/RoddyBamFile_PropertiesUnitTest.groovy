@@ -38,7 +38,6 @@ import de.dkfz.tbi.otp.ngsdata.*
         MergingWorkPackage,
         Pipeline,
         Project,
-        ProjectCategory,
         Realm,
         ReferenceGenome,
         RoddyBamFile,

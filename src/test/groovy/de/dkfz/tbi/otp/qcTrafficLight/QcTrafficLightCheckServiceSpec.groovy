@@ -49,7 +49,6 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
                 Pipeline,
                 ProcessingOption,
                 Project,
-                ProjectCategory,
                 Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,

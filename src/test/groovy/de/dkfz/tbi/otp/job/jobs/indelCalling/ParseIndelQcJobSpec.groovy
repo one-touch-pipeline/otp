@@ -59,7 +59,6 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
                 ProcessingOption,
                 ProcessingStep,
                 Project,
-                ProjectCategory,
                 QcThreshold,
                 Sample,
                 SamplePair,

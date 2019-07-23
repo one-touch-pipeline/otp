@@ -47,7 +47,6 @@ class SeqTrackValidatorSpec extends Specification implements DataTest {
         [
                 Individual,
                 Project,
-                ProjectCategory,
                 Realm,
                 Run,
                 Sample,

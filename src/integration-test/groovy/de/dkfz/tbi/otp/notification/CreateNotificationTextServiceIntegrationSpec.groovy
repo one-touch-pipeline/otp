@@ -53,7 +53,6 @@ stepInformation:${stepInformation}
 seqCenterComment:${seqCenterComment}
 addition:${addition}
 faq:${faq}
-phabricatorAlias:${phabricatorAlias}
 '''
 
     CreateNotificationTextService createNotificationTextService
@@ -221,11 +220,7 @@ stepInformation:${processingStep.toString()}
 seqCenterComment:${expectedSeqCenterComment}
 addition:
 faq:
-phabricatorAlias:
 """
-        if (processingStep == INSTALLATION) {
-            expected = expected + "!project #\$${project.phabricatorAlias}\n"
-        }
 
         when:
         String message = createNotificationTextService.notification(ticket, processingStatus, processingStep, project)
@@ -315,7 +310,6 @@ stepInformation:${processingStep.toString()}
 seqCenterComment:${expectedSeqCenterComment}
 addition:
 faq:
-phabricatorAlias:
 """
 
         when:

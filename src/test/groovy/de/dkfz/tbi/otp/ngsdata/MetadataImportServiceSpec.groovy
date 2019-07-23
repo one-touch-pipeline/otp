@@ -78,7 +78,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                 Pipeline,
                 ProcessingOption,
                 Project,
-                ProjectCategory,
                 Realm,
                 RoddyWorkflowConfig,
                 Run,

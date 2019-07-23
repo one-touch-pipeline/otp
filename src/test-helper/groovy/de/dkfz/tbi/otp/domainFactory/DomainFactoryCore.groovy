@@ -36,11 +36,14 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     Project createProject(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(Project, [
                 name                          : "project_${nextId}",
-                phabricatorAlias              : "phabricatorAlias_${nextId}",
+                projectPrefix                 : "projectPrefix_${nextId}",
                 dirName                       : "projectDirName_${nextId}",
+                projectType                   : Project.ProjectType.SEQUENCING,
+                storageUntil                  : new Date(),
                 realm                         : { DomainFactory.createRealm() },
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling           : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
+                unixGroup                     : "unixGroup_${nextId}"
         ], properties, saveAndValidate)
     }
 

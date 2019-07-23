@@ -54,7 +54,7 @@ class ProjectUserController implements CheckAndCall {
 
         ProjectSelection selection = projectSelectionService.getSelectedProject()
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
-        project = exactlyOneElement(Project.findAllByName(project.name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
+        project = exactlyOneElement(Project.findAllByName(project.name, [fetch: [projectGroup: 'join']]))
 
         List<User> projectUsers = UserProjectRole.findAllByProject(project)*.user
         List<String> nonDatabaseUsers = []

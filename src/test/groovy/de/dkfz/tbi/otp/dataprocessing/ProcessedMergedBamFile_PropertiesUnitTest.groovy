@@ -39,7 +39,6 @@ import de.dkfz.tbi.otp.ngsdata.*
         SeqTrack,
         SampleType,
         Pipeline,
-        ProjectCategory,
         Project,
         ProcessedMergedBamFile,
         Individual,

@@ -35,7 +35,6 @@ class ProjectSpec extends Specification implements DomainFactoryCore, DataTest {
     Class[] getDomainClassesToMock() {
         [
                 Project,
-                ProjectCategory,
                 Realm,
         ]
     }

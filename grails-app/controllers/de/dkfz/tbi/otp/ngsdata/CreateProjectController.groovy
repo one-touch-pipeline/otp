@@ -27,9 +27,13 @@ import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.config.ConfigService
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.searchability.Keyword
+
+import java.text.SimpleDateFormat
 
 class CreateProjectController {
 
@@ -38,7 +42,7 @@ class CreateProjectController {
     ProjectGroupService projectGroupService
     ProjectSelectionService projectSelectionService
 
-    def index(CreateProjectControllerSubmitCommand cmd) {
+    def index(CreateProjectSubmitCommand cmd) {
         String message
         boolean hasErrors
         if (cmd.submit == "Submit") {
@@ -47,28 +51,7 @@ class CreateProjectController {
                 FieldError errors = cmd.errors.getFieldError()
                 message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
             } else {
-                ProjectService.ProjectParams projectParams = new ProjectService.ProjectParams(
-                        name: cmd.name,
-                        phabricatorAlias: cmd.phabricatorAlias,
-                        dirName: cmd.directory,
-                        dirAnalysis: cmd.analysisDirectory,
-                        realm: configService.getDefaultRealm(),
-                        categoryNames: cmd.projectCategories,
-                        unixGroup: cmd.unixGroup,
-                        projectGroup: cmd.projectGroup,
-                        sampleIdentifierParserBeanName: cmd.sampleIdentifierParserBeanName,
-                        qcThresholdHandling: cmd.qcThresholdHandling,
-                        nameInMetadataFiles: cmd.nameInMetadataFiles,
-                        forceCopyFiles: cmd.forceCopyFiles,
-                        fingerPrinting: cmd.fingerPrinting,
-                        costCenter: cmd.costCenter,
-                        description: cmd.description,
-                        processingPriority: cmd.processingPriority,
-                        tumorEntity: cmd.tumorEntity,
-                        projectInfoFile: cmd.projectInfoFile,
-                        speciesWithStrain: cmd.speciesWithStrain,
-                )
-                Project project = projectService.createProject(projectParams)
+                Project project = projectService.createProject(cmd)
                 projectSelectionService.setSelectedProject([project], project.name)
                 redirect(controller: "projectConfig")
             }
@@ -81,8 +64,12 @@ class CreateProjectController {
             defaultQcThresholdHandling: QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
             processingPriorities: ProcessingPriority.displayPriorities,
             defaultProcessingPriority: ProcessingPriority.NORMAL,
+            defaultDate: "3000-01-01",
+            projectTypes: Project.ProjectType.values(),
+            defaultProjectType: Project.ProjectType.SEQUENCING,
             allSpeciesWithStrains: SpeciesWithStrain.list().sort { it.toString() },
-            projectCategories: ProjectCategory.listOrderByName(),
+            keywords: Keyword.listOrderByName() ?: [],
+            projects: Project.listOrderByName(),
             message: message,
             cmd: cmd,
             hasErrors: hasErrors,
@@ -90,9 +77,9 @@ class CreateProjectController {
     }
 }
 
-class CreateProjectControllerSubmitCommand implements Serializable {
+class CreateProjectSubmitCommand implements Serializable {
     String name
-    String phabricatorAlias
+    String projectPrefix
     String directory
     String analysisDirectory
     String nameInMetadataFiles
@@ -102,7 +89,6 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     SampleIdentifierParserBeanName sampleIdentifierParserBeanName
     QcThresholdHandling qcThresholdHandling
     TumorEntity tumorEntity
-    List<String> projectCategories = [].withLazyDefault { new String() }
     SpeciesWithStrain speciesWithStrain
     MultipartFile projectInfoFile
     String description
@@ -110,6 +96,14 @@ class CreateProjectControllerSubmitCommand implements Serializable {
     ProcessingPriority processingPriority
     boolean forceCopyFiles
     boolean fingerPrinting = true
+    Set<Keyword> keywords
+    Date endDate
+    Date storageUntil
+    Project.ProjectType projectType
+    String connectedProjects
+    String subsequentApplication
+    String organisationUnit
+    String internalNotes
 
     static constraints = {
         name(blank: false, validator: { val, obj ->
@@ -120,7 +114,6 @@ class CreateProjectControllerSubmitCommand implements Serializable {
                 return 'A project with \'' + val + '\' as nameInMetadataFiles exists already'
             }
         })
-        phabricatorAlias(nullable: true)
         directory(blank: false, validator: { val, obj ->
             if (Project.findByDirName(val)) {
                 return 'This path \'' + val + '\' is used by another project already'
@@ -163,6 +156,12 @@ class CreateProjectControllerSubmitCommand implements Serializable {
             }
         })
         speciesWithStrain(nullable: true)
+        keywords(nullable: true)
+        endDate(nullable: true)
+        connectedProjects(nullable: true)
+        subsequentApplication(nullable: true)
+        organisationUnit(nullable: true)
+        internalNotes(nullable: true)
     }
 
     void setName(String name) {
@@ -196,5 +195,27 @@ class CreateProjectControllerSubmitCommand implements Serializable {
         } else {
             this.projectInfoFile = null
         }
+    }
+
+    void setKeywordNames(String keywordNames) {
+        keywords = []
+        keywordNames.split(",")*.trim().findAll().each { String name ->
+            Keyword keyword = Keyword.findOrSaveByName(name)
+            keywords.add(keyword)
+        }
+    }
+
+    void setConnectedProjectNames(String connectedProjectNames) {
+        connectedProjects = connectedProjectNames.split(",")*.trim().findAll().join(",")
+    }
+
+    void setEndDateInput(String endDate) {
+        if (endDate) {
+            this.endDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(endDate)
+        }
+    }
+
+    void setStorageUntilInput(String storageUntil) {
+        this.storageUntil = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(storageUntil)
     }
 }

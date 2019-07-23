@@ -40,7 +40,6 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         [
                 Pipeline,
                 Project,
-                ProjectCategory,
                 Realm,
                 RoddyWorkflowConfig,
                 SeqType,

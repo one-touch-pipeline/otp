@@ -48,7 +48,6 @@ import static de.dkfz.tbi.TestCase.shouldFail
         RoddyBamFile,
         SampleType,
         Pipeline,
-        ProjectCategory,
         Project,
         Individual,
         Sample,

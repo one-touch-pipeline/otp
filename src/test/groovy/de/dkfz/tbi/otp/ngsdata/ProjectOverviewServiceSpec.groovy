@@ -39,7 +39,6 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
                 Individual,
                 Pipeline,
                 Project,
-                ProjectCategory,
                 ProcessingOption,
                 Realm,
                 ReferenceGenome,

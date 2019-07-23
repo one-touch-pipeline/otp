@@ -28,7 +28,6 @@ import grails.validation.ValidationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.*
 import org.springframework.validation.Errors
-import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -41,8 +40,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
-import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
@@ -94,7 +92,7 @@ class ProjectService {
      */
     @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject, 'OTP_READ_ACCESS')")
     List<Project> getAllProjects() {
-        return Project.list(sort: "name", order: "asc", fetch: [projectCategories: 'join', projectGroup: 'join'])
+        return Project.list(sort: "name", order: "asc", fetch: [projectGroup: 'join'])
     }
 
     int getProjectCount() {
@@ -150,57 +148,44 @@ class ProjectService {
         })
     }
 
-    /**
-     * Creates a Project and grants permissions to Groups which have read/write privileges for Projects.
-     * @param name
-     * @param dirName
-     * @param realm
-     * @return The created project
-     */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Project createProject(String name, String dirName, Realm realm, List<String> categoryNames, QcThresholdHandling qcThresholdHandling) {
-        // check that our dirName is relative to the configured data root.
+    Project createProject(CreateProjectSubmitCommand projectParams) {
+        assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
         Path rootPath = configService.getRootPath().toPath()
         List<String> rootPathElements = rootPath.toList()*.toString()
-        assert rootPathElements.every { !dirName.startsWith("${it}${File.separator}") }:
-                "project directory (${dirName}) contains (partial) data processing root path (${rootPath})"
+        assert rootPathElements.every { !projectParams.directory.startsWith("${it}${File.separator}") }:
+                "project directory (${projectParams.directory}) contains (partial) data processing root path (${rootPath})"
 
-        Project project = new Project(
-                name: name,
-                dirName: dirName,
-                realm: realm,
-                projectCategories: categoryNames.collect { exactlyOneElement(ProjectCategory.findAllByName(it)) },
-                qcThresholdHandling: qcThresholdHandling,
-        )
-
-        project = project.save(flush: true)
-        assert (project != null)
-
-        return project
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Project createProject(ProjectParams projectParams) {
-        assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
-        Project project = createProject(
-                projectParams.name, projectParams.dirName, projectParams.realm, projectParams.categoryNames, projectParams.qcThresholdHandling)
-        project.phabricatorAlias = projectParams.phabricatorAlias ?: null
-        project.dirAnalysis = projectParams.dirAnalysis
-        project.processingPriority = projectParams.processingPriority.priority
-        project.forceCopyFiles = projectParams.forceCopyFiles
-        project.fingerPrinting = projectParams.fingerPrinting
-        project.nameInMetadataFiles = projectParams.nameInMetadataFiles
-        project.setProjectGroup(ProjectGroup.findByName(projectParams.projectGroup))
-        project.sampleIdentifierParserBeanName = projectParams.sampleIdentifierParserBeanName
-        project.description = projectParams.description
-        project.unixGroup = projectParams.unixGroup
-        project.costCenter = projectParams.costCenter
-        project.tumorEntity = projectParams.tumorEntity
-        project.speciesWithStrain = projectParams.speciesWithStrain
-
+        Project project = new Project([
+                name: projectParams.name,
+                dirName: projectParams.directory,
+                projectPrefix: projectParams.projectPrefix,
+                realm: configService.getDefaultRealm(),
+                qcThresholdHandling: projectParams.qcThresholdHandling,
+                projectType: projectParams.projectType,
+                storageUntil: projectParams.storageUntil,
+                projectGroup: ProjectGroup.findByName(projectParams.projectGroup),
+                dirAnalysis: projectParams.analysisDirectory,
+                processingPriority: projectParams.processingPriority.priority,
+                forceCopyFiles: projectParams.forceCopyFiles,
+                fingerPrinting: projectParams.fingerPrinting,
+                nameInMetadataFiles: projectParams.nameInMetadataFiles,
+                sampleIdentifierParserBeanName: projectParams.sampleIdentifierParserBeanName,
+                description: projectParams.description,
+                unixGroup: projectParams.unixGroup,
+                costCenter: projectParams.costCenter,
+                tumorEntity: projectParams.tumorEntity,
+                speciesWithStrain: projectParams.speciesWithStrain,
+                endDate: projectParams.endDate,
+                keywords: projectParams.keywords,
+                subsequentApplication: projectParams.subsequentApplication,
+                connectedProjects: projectParams.connectedProjects,
+                internalNotes: projectParams.internalNotes,
+                organisationUnit: projectParams.organisationUnit,
+        ])
         assert project.save(flush: true)
 
-        createProjectDirectoryIfNeeded(project, projectParams)
+        createProjectDirectoryIfNeeded(project)
 
         if (projectParams.projectInfoFile) {
             createProjectInfoAndUploadFile(new AddProjectInfoCommand(project: project, projectInfoFile: projectParams.projectInfoFile))
@@ -209,15 +194,15 @@ class ProjectService {
         return project
     }
 
-    private void createProjectDirectoryIfNeeded(Project project, ProjectParams projectParams) {
+    private void createProjectDirectoryIfNeeded(Project project) {
         File projectDirectory = project.getProjectDirectory()
         if (projectDirectory.exists()) {
             PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
-            if (attrs.group().toString() == projectParams.unixGroup) {
+            if (attrs.group().toString() == project.unixGroup) {
                 return
             }
         }
-        executeScript(buildCreateProjectDirectory(projectParams.unixGroup, projectDirectory), project)
+        executeScript(buildCreateProjectDirectory(project.unixGroup, projectDirectory), project)
         FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
         FileService.waitUntilExists(fs.getPath(projectDirectory.absolutePath))
     }
@@ -252,7 +237,7 @@ class ProjectService {
     }
 
     private void addAdditionalValuesToProjectInfo(ProjectInfo projectInfo, AddProjectInfoCommand cmd, User performingUser) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-mm-dd", Locale.ENGLISH)
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
         projectInfo.recipient = cmd.recipient
         projectInfo.performingUser = performingUser
         projectInfo.commissioningUser = User.findByUsername(cmd.commissioningUser)
@@ -275,37 +260,6 @@ class ProjectService {
         ] as Set)
     }
 
-    static class ProjectParams {
-        String name
-        String phabricatorAlias
-        String dirName
-        String dirAnalysis
-        Realm realm
-        List<String> categoryNames
-        String unixGroup
-        String projectGroup
-        String nameInMetadataFiles
-        boolean forceCopyFiles
-        boolean fingerPrinting
-        String costCenter
-        String description
-        SampleIdentifierParserBeanName sampleIdentifierParserBeanName
-        QcThresholdHandling qcThresholdHandling
-        ProcessingPriority processingPriority
-        TumorEntity tumorEntity
-        MultipartFile projectInfoFile
-        SpeciesWithStrain speciesWithStrain
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateCategory(List<String> categoryNames, Project project) {
-        updateProjectField(
-                categoryNames.collect { exactlyOneElement(ProjectCategory.findAllByName(it)) },
-                "projectCategories",
-                project
-        )
-    }
-
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     <T> void updateProjectField(T fieldValue, String fieldName, Project project) {
         assert fieldName && [
@@ -314,7 +268,6 @@ class ProjectService {
                 "dirAnalysis",
                 "nameInMetadataFiles",
                 "processingPriority",
-                "projectCategories",
                 "snv",
                 "tumorEntity",
                 "sampleIdentifierParserBeanName",
@@ -323,15 +276,26 @@ class ProjectService {
                 "forceCopyFiles",
                 "speciesWithStrain",
                 "closed",
+                "projectPrefix",
+                "projectType",
+                "connectedProjects",
+                "subsequentApplication",
+                "organisationUnit",
+                "internalNotes",
         ].contains(fieldName)
 
         project."${fieldName}" = fieldValue
         project.save(flush: true)
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    void updatePhabricatorAlias(String value, Project project) {
-        project.phabricatorAlias = value ?: null
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateProjectFieldDate(String fieldValue, String fieldName, Project project) {
+        assert fieldName && [
+                "endDate",
+                "storageUntil",
+        ].contains(fieldName)
+
+        project."${fieldName}" = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(fieldValue)
         project.save(flush: true)
     }
 
@@ -339,6 +303,17 @@ class ProjectService {
     void configureNoAlignmentDeciderProject(Project project) {
         deprecateAllReferenceGenomesByProject(project)
         project.alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT
+        project.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateKeywords(String value, Project project) {
+        project.keywords = []
+        value.split(",")*.trim().findAll().each { String name ->
+            Keyword keyword = Keyword.findOrSaveByName(name)
+            project.addToKeywords(keyword)
+        }
+
         project.save(flush: true)
     }
 

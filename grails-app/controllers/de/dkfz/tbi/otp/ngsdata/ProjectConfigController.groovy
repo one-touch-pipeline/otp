@@ -68,7 +68,7 @@ class ProjectConfigController implements CheckAndCall {
 
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
-        project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [projectCategories: 'join', projectGroup: 'join']]))
+        project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [projectGroup: 'join']]))
         Map<String, String> dates = getDates(project)
 
         List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
@@ -123,8 +123,6 @@ class ProjectConfigController implements CheckAndCall {
                 project                        : project,
                 creationDate                   : dates.creationDate,
                 lastReceivedDate               : dates.lastReceivedDate,
-                comment                        : project?.comment,
-                nameInMetadata                 : project?.nameInMetadataFiles ?: '',
                 seqTypeMergingCriteria         : seqTypeMergingCriteria,
                 roddySeqTypes                  : SeqTypeService.getRoddyAlignableSeqTypes().sort {
                     it.displayNameWithLibraryLayout
@@ -137,7 +135,6 @@ class ProjectConfigController implements CheckAndCall {
                 sophiaSeqTypes                 : sophia.getSeqTypes(),
                 aceseqSeqTypes                 : aceseq.getSeqTypes(),
                 runYapsaSeqTypes               : runYapsa.getSeqTypes(),
-                snv                            : project?.snv,
                 thresholdsTable                : thresholdsTable,
                 snvConfigTable                 : snvConfigTable,
                 indelConfigTable               : indelConfigTable,
@@ -146,30 +143,15 @@ class ProjectConfigController implements CheckAndCall {
                 runYapsaConfigTable            : runYapsaConfigTable,
                 snvDropDown                    : Project.Snv.values(),
                 directory                      : projectDirectory ?: '',
-                analysisDirectory              : project?.dirAnalysis ?: '',
-                projectGroup                   : project?.projectGroup,
-                sampleIdentifierParserBeanName : project?.sampleIdentifierParserBeanName,
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
-                forceCopyFiles                 : project?.forceCopyFiles,
-                fingerPrinting                 : project?.fingerPrinting,
-                description                    : project?.description,
-                processingNotification         : project?.processingNotification,
-                qcTrafficLightNotification     : project?.qcTrafficLightNotification,
-                customFinalNotification        : project?.customFinalNotification,
-                projectCategories              : ProjectCategory.listOrderByName()*.name,
-                unixGroup                      : project?.unixGroup,
-                costCenter                     : project?.costCenter,
                 tumorEntities                  : TumorEntity.list().sort(),
-                tumorEntity                    : project?.tumorEntity,
+                projectTypes                   : Project.ProjectType.values(),
                 processingPriority             : ProcessingPriority.getByPriorityNumber(project?.processingPriority),
                 processingPriorities           : ProcessingPriority.displayPriorities,
                 checkSophiaReferenceGenome     : checkSophiaReferenceGenome,
                 checkAceseqReferenceGenome     : checkAceseqReferenceGenome,
-                projectInfos                   : project?.projectInfos,
                 cellRangerOverview             : cellRangerOverview,
-                qcThresholdHandling            : project?.qcThresholdHandling,
                 qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
-                speciesWithStrain              : project?.speciesWithStrain,
                 allSpeciesWithStrain           : SpeciesWithStrain.list().sort { it.toString() } ?: [],
                 addProjectInfos                : flash?.addProjectInfos,
                 closed                         : project?.closed,
@@ -190,46 +172,26 @@ class ProjectConfigController implements CheckAndCall {
         render map as JSON
     }
 
-    JSON updateDescription(UpdateProjectCommand cmd) {
+    JSON updateProjectField(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
     }
 
-    JSON updateUnixGroup(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
-    }
-
-    JSON updateCostCenter(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
-    }
-
-    JSON updateSpeciesWithStrain(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(SpeciesWithStrain.get(cmd.value), cmd.fieldName, cmd.project) })
-    }
-
-    JSON updatePhabricatorAlias(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updatePhabricatorAlias(cmd.value, cmd.project) })
-    }
-
-    JSON updateAnalysisDirectory(UpdateAnalysisDirectoryCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
-            projectService.updateProjectField(cmd.analysisDirectory, "dirAnalysis", cmd.project)
-        })
-    }
-
-    JSON updateNameInMetadataFiles(UpdateNameInMetadataCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
-            projectService.updateProjectField(cmd.newNameInMetadata, "nameInMetadataFiles", cmd.project)
-        })
-    }
-
-    JSON updateCategory(UpdateCategoryCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateCategory(cmd.value, cmd.project) })
+    JSON updateProjectFieldDate(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectFieldDate(cmd.value, cmd.fieldName, cmd.project) })
     }
 
     JSON updateProcessingPriority(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd, {
             projectService.updateProjectField(ProcessingPriority.valueOf(cmd.value).priority, cmd.fieldName, cmd.project)
         })
+    }
+
+    JSON updateSpeciesWithStrain(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(SpeciesWithStrain.get(cmd.value), cmd.fieldName, cmd.project) })
+    }
+
+    JSON updateKeywords(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd, { projectService.updateKeywords(cmd.value, cmd.project) })
     }
 
     JSON updateTumorEntity(UpdateProjectCommand cmd) {
@@ -470,45 +432,6 @@ class UpdateProjectCommand implements Serializable {
     }
 }
 
-class UpdateNameInMetadataCommand implements Serializable {
-    String newNameInMetadata
-    Project project
-    static constraints = {
-        newNameInMetadata(nullable: true, validator: { val, obj ->
-            Project projectByNameInMetadata = Project.findByNameInMetadataFiles(val)
-            if (val && projectByNameInMetadata && projectByNameInMetadata != obj.project) {
-                return '\'' + val + '\' exists already in another project as nameInMetadataFiles entry'
-            }
-            if (val != obj.project.name && Project.findByName(val)) {
-                return '\'' + val + '\' is used in another project as project name'
-            }
-        })
-    }
-
-    void setValue(String value) {
-        this.newNameInMetadata = value?.trim()?.replaceAll(" +", " ")
-        if (this.newNameInMetadata == "") {
-            this.newNameInMetadata = null
-        }
-    }
-}
-
-class UpdateAnalysisDirectoryCommand implements Serializable {
-    String analysisDirectory
-    Project project
-    static constraints = {
-        analysisDirectory(nullable: true, validator: { String val ->
-            if (!OtpPath.isValidAbsolutePath(val)) {
-                return 'Is not an absolute Path'
-            }
-        })
-    }
-
-    void setValue(String value) {
-        this.analysisDirectory = value
-    }
-}
-
 class AddProjectInfoCommand implements Serializable {
     MultipartFile projectInfoFile
     Project project
@@ -541,12 +464,12 @@ class AddProjectInfoCommand implements Serializable {
         })
         transferDate(validator: { val ->
             if (val && !isDateParsable(val)) {
-                return "The value '${val}' is not in the expected date format 'yyyy-mm-dd'"
+                return "The value '${val}' is not in the expected date format 'yyyy-MM-dd'"
             }
         })
         validityDate(validator: { val ->
             if (val && !isDateParsable(val)) {
-                return "The value '${val}' is not in the expected date format 'yyyy-mm-dd'"
+                return "The value '${val}' is not in the expected date format 'yyyy-MM-dd'"
             }
         })
         recipient(validator: { val, obj, Errors errors ->
@@ -569,7 +492,7 @@ class AddProjectInfoCommand implements Serializable {
 
     static private boolean isDateParsable(String date) {
         try {
-            new SimpleDateFormat("yyyy-mm-dd", Locale.ENGLISH).parse(date)
+            new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date)
             return true
         } catch (ParseException e) {
             return false

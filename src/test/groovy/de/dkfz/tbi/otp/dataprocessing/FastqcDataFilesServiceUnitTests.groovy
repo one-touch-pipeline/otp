@@ -32,7 +32,25 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 import static org.junit.Assert.assertEquals
 
-@Mock([DataFile, FastqcProcessedFile, FileType, Individual, Project, ProjectCategory, Realm, Run, RunSegment, Sample, SampleType, SeqCenter, SeqPlatform, SeqPlatformGroup, SeqPlatformModelLabel, SeqTrack, SeqType, SoftwareTool])
+@Mock([
+        DataFile,
+        FastqcProcessedFile,
+        FileType,
+        Individual,
+        Project,
+        Realm,
+        Run,
+        RunSegment,
+        Sample,
+        SampleType,
+        SeqCenter,
+        SeqPlatform,
+        SeqPlatformGroup,
+        SeqPlatformModelLabel,
+        SeqTrack,
+        SeqType,
+        SoftwareTool
+])
 @TestFor(FastqcDataFilesService)
 class FastqcDataFilesServiceUnitTests {
 

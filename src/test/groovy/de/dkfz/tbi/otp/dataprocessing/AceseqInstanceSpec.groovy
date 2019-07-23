@@ -53,7 +53,6 @@ class AceseqInstanceSpec extends Specification implements DataTest {
                 MergingWorkPackage,
                 Pipeline,
                 Project,
-                ProjectCategory,
                 Realm,
                 ReferenceGenome,
                 RoddyBamFile,

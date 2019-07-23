@@ -163,6 +163,8 @@ class OtpTagLib {
                 return "/templates/editorSwitchTextArea"
             case "toggle":
                 return "/templates/editorSwitchToggle"
+            case "date":
+                return "/templates/editorSwitchDate"
             default:
                 return "/templates/editorSwitch"
         }

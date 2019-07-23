@@ -43,7 +43,6 @@ import static org.junit.Assert.*
 @Mock([
         ProcessingOption,
         Project,
-        ProjectCategory,
         Realm,
         ReferenceGenome,
         ReferenceGenomeEntry,

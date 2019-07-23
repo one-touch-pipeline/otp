@@ -54,7 +54,6 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
                 Pipeline,
                 ProcessingOption,
                 Project,
-                ProjectCategory,
                 Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,

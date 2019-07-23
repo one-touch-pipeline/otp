@@ -1544,12 +1544,6 @@ class DomainFactory {
         return proxyCore.createProject(projectProperties, saveAndValidate)
     }
 
-    static ProjectCategory createProjectCategory(Map projectProperties = [:]) {
-        return createDomainObject(ProjectCategory, [
-                name: 'projectCategory_' + (counter++),
-        ], projectProperties)
-    }
-
     static UserProjectRole createUserProjectRole(Map userProjectRoleProperties = [:]) {
         return createDomainObject(UserProjectRole, [
                 user                  : { createUser() },

@@ -38,7 +38,6 @@ class RunServiceSpec extends Specification implements DataTest {
                 Individual,
                 MetaDataFile,
                 Project,
-                ProjectCategory,
                 Realm,
                 Run,
                 RunSegment,

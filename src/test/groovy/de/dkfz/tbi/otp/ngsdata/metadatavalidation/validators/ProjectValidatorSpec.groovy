@@ -44,7 +44,6 @@ class ProjectValidatorSpec extends Specification implements DataTest {
         [
                 Realm,
                 Project,
-                ProjectCategory,
         ]
     }
 

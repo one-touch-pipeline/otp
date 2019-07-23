@@ -43,7 +43,6 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
     Class[] getDomainClassesToMock() {
         [
                 Project,
-                ProjectCategory,
                 Individual,
                 Realm,
                 Run,

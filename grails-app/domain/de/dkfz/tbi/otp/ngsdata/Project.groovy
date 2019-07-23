@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -43,12 +44,21 @@ class Project implements Commentable, Entity {
         UNKNOWN,
     }
 
+    enum ProjectType {
+        SEQUENCING,
+        DATA_MANAGEMENT,
+    }
+
     SpeciesWithStrain speciesWithStrain
 
     Snv snv = Snv.UNKNOWN
 
     String name
-    String phabricatorAlias
+    String projectPrefix
+    String subsequentApplication
+    String connectedProjects
+    String internalNotes
+    String organisationUnit
     String dirName
     Realm realm
     String dirAnalysis
@@ -109,9 +119,15 @@ class Project implements Commentable, Entity {
 
     QcThresholdHandling qcThresholdHandling
 
+    Date endDate
+
+    Date storageUntil
+
+    ProjectType projectType
+
     static hasMany = [
-            projectCategories: ProjectCategory,
             projectInfos: ProjectInfo,
+            keywords: Keyword
     ]
 
     static belongsTo = [
@@ -131,7 +147,7 @@ class Project implements Commentable, Entity {
             }
         })
 
-        phabricatorAlias(nullable: true, unique: true, blank: false)
+        projectPrefix(unique: true, blank: false)
 
         dirName(blank: false, unique: true, validator: { String val ->
             OtpPath.isValidRelativePath(val)
@@ -164,13 +180,21 @@ class Project implements Commentable, Entity {
 
         description(nullable: true)
 
-        unixGroup(nullable: true)
-
         costCenter(nullable: true)
 
         tumorEntity(nullable: true)
 
         speciesWithStrain(nullable : true)
+
+        endDate(nullable: true)
+
+        organisationUnit(nullable: true)
+
+        connectedProjects(nullable: true)
+
+        subsequentApplication(nullable: true)
+
+        internalNotes(nullable: true)
     }
 
     @Override
@@ -184,6 +208,7 @@ class Project implements Commentable, Entity {
         name index: "project_name_idx"
         dirAnalysis type: "text"
         description type: "text"
+        internalNotes type: "text"
     }
 
     String getDisplayName() {
@@ -208,5 +233,9 @@ class Project implements Commentable, Entity {
             return findByNameOrNameInMetadataFiles(name, name)
         }
         return null
+    }
+
+    String listAllKeywords() {
+        return keywords*.name.sort().join(",")
     }
 }

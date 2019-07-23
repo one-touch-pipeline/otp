@@ -48,7 +48,6 @@ class SampleProjectValidatorSpec extends Specification implements DataTest {
                 Individual,
                 ProcessingOption,
                 Project,
-                ProjectCategory,
                 Realm,
                 Sample,
                 SampleIdentifier,

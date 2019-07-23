@@ -140,16 +140,6 @@ ${assetPath(src: 'v2/otp-favicon.ico')}" type="image/x-icon">
                                                     </ul>
                                                 </li>
                                             </g:if>
-                                            <li role="separator" class="divider"></li>
-                                            <g:each in="${availableProjectsInCategories.entrySet()}" var="subGroup">
-                                                <li class="dropdown-submenu"><a href="#">${subGroup.key}</a>
-                                                    <ul class="dropdown-menu">
-                                                        <g:each in="${subGroup.value}" var="item">
-                                                            <li><g:link controller="projectSelection" action="select" params="${[id: item.id, type: item.type, redirect: request.forwardURI - request.contextPath]}">${item.displayName}</g:link></li>
-                                                        </g:each>
-                                                    </ul>
-                                                </li>
-                                            </g:each>
                                         </ul>
                                     </div>
                                 </form>

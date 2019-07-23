@@ -46,10 +46,6 @@ class ProjectSelectionController {
                 projects = Project.findAllByProjectGroup(ProjectGroup.get(id))
                 displayName = ProjectGroup.get(id).name
                 break
-            case ProjectSelectionCommand.Type.CATEGORY:
-                projects = ProjectCategory.get(id).projects as List
-                displayName = ProjectCategory.get(id).name
-                break
             case ProjectSelectionCommand.Type.ALL:
                 projects = Project.all
                 displayName = g.message(code: "header.projectSelection.allProjects")

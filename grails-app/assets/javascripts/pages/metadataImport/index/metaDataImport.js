@@ -36,5 +36,16 @@ $.otp.metaDataImport = {
     addNewFieldAndButton: function() {
         $(".input-fields-wrap").append('<div><input name="paths" style="width:1000px" value="" type="text"> ' +
             '<button class="remove_field">-</button></div>');
+    },
+
+    addNewField: function() {
+        $(".add-button").on("click", function (e) {
+            e.preventDefault();
+            if (e.currentTarget.classList.contains("keywords-button")) {
+                $("#input-fields-keywords").append('<input type="text" list="keywordList" name="keywordNames" size="130"/>');
+            } else if (e.currentTarget.classList.contains("connected-projects-button")) {
+                $("#input-fields-connected-projects").append('<input type="text" list="projectList" name="connectedProjectNames" size="130"/>');
+            }
+        });
     }
 };

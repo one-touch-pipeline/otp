@@ -48,7 +48,6 @@ import de.dkfz.tbi.otp.utils.*
         Pipeline,
         ProcessingOption,
         Project,
-        ProjectCategory,
         Sample,
         SampleType,
         SeqCenter,

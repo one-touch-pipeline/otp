@@ -46,7 +46,6 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
                 MergingWorkPackage,
                 Pipeline,
                 Project,
-                ProjectCategory,
                 ReferenceGenome,
                 Sample,
                 SampleType,

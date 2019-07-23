@@ -53,7 +53,6 @@ class BedFileValidatorSpec extends Specification implements DataTest {
                 Individual,
                 LibraryPreparationKit,
                 Project,
-                ProjectCategory,
                 ProcessingOption,
                 Sample,
                 SampleIdentifier,

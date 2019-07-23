@@ -42,7 +42,6 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         [
                 DataFile,
                 MergingWorkPackage,
-                ProjectCategory,
                 Realm,
                 SeqTrack,
         ]

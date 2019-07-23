@@ -63,7 +63,6 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
                 ProcessedBamFile,
                 ProcessedMergedBamFile,
                 Project,
-                ProjectCategory,
                 Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,

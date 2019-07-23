@@ -20,26 +20,29 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.searchability
 
+import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.utils.Entity
 
-class ProjectCategory implements Entity {
+class Keyword implements Entity {
 
     String name
 
+    static belongsTo = Project
     static hasMany = [
             projects: Project,
     ]
 
-    static belongsTo = Project
-
     static constraints = {
-        name(nullable: false, blank: false, unique: true)
+        name(blank: false, unique: true)
     }
 
-    @Override
-    String toString() {
-        return name
+    static Keyword findOrSaveByName(String name) {
+        Keyword keyword = findByName(name)
+        if (!keyword) {
+            keyword = new Keyword([name: name]).save(flush:true)
+        }
+        return keyword
     }
 }

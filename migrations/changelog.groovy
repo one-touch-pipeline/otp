@@ -230,4 +230,11 @@ databaseChangeLog = {
     changeSet(author: "", id: "OTP-2980-SQL") {
         sqlFile(path: 'changelogs/2019/OTP-2980.sql')
     }
+
+    changeSet(author: "wieset", id: "OTP-3176-PROJECT-PREFIX") {
+        sqlFile(path: 'changelogs/2019/OTP-3176-project-prefix.sql')
+    }
+    changeSet(author: "wieset", id: "OTP-3176-UPDATE-PROJECT") {
+        sqlFile(path: 'changelogs/2019/OTP-3176-update-project.sql')
+    }
 }
