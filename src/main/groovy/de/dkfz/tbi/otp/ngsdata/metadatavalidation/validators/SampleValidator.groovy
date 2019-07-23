@@ -65,6 +65,7 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
         Collection<String> missingIdentifiersWithProject = []
+        Collection<String> parsedSampleIdentifiers = []
 
         Map<String, Collection<ValueTuple>> byProjectName = valueTuples.groupBy {
             String sampleId = it.getValue(SAMPLE_ID.name())
@@ -80,12 +81,18 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
                 missingIdentifiersWithProject.add("${projectName}\t${pid}\t${sampleType}\t${sampleId}")
             }
             if (parsedIdentifier && !sampleIdentifier) {
+                boolean error = false
                 if (!atMostOneElement(Project.findAllByName(parsedIdentifier.projectName))) {
                     context.addProblem(it.cells, Level.ERROR, "Sample identifier '${sampleId}' is not registered in OTP. It looks like it belongs to project '${parsedIdentifier.projectName}', but no project with that name is registered in OTP.", "At least one sample identifier is not registered in OTP. It looks like it belongs to a project not registered in OTP.")
+                    error = true
                 }
                 Individual individual = atMostOneElement(Individual.findAllByPid(parsedIdentifier.pid))
                 if (individual && individual.project.name != parsedIdentifier.projectName) {
                     context.addProblem(it.cells, Level.ERROR, "Sample identifier '${sampleId}' is not registered in OTP. It looks like it belongs to project '${parsedIdentifier.projectName}' and individual '${parsedIdentifier.pid}', but individual '${parsedIdentifier.pid}' is already registered in OTP with project '${individual.project.name}'.", "At least one sample identifier is not registered in OTP. It looks like it belongs to a specific project and individual, but this individual is already registered in OTP with another project.")
+                    error = true
+                }
+                if (!error) {
+                    parsedSampleIdentifiers.add("${parsedIdentifier.projectName}\t${parsedIdentifier.pid}\t${parsedIdentifier.sampleTypeDbName}\t${parsedIdentifier.fullSampleName}")
                 }
             }
             if (parsedIdentifier && sampleIdentifier) {
@@ -101,7 +108,14 @@ class SampleValidator extends ValueTuplesValidator<MetadataValidationContext> im
             }
             return sampleIdentifier?.project?.name ?: parsedIdentifier?.projectName
         }
-        if (!missingIdentifiersWithProject.isEmpty()) {
+
+        if (parsedSampleIdentifiers) {
+            context.addProblem(Collections.emptySet(), Level.INFO, "The following Samples will be created:\n" +
+                    "${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n" +
+                    "${parsedSampleIdentifiers.sort().join('\n')}")
+        }
+
+        if (missingIdentifiersWithProject) {
             context.addProblem(Collections.emptySet(), Level.INFO, "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\n" +
                     "${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n" +
                     "${missingIdentifiersWithProject.sort().join('\n')}")

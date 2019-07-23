@@ -61,6 +61,8 @@ class SampleValidatorSpec extends Specification implements DataTest {
     static final String SAMPLE_Z = "P-X_I-Y_S-Z"
     static final String SAMPLE_N = "P-B_I-M_S-N"
 
+    static final String PARSED_SAMPLETYPE_PID = "The following Samples will be created:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n"
+
     SampleValidator validator = withSampleIdentifierService(new SampleValidator())
 
     void 'validate, when identifier is not parseable but in DB, succeeds'() {
@@ -154,7 +156,9 @@ class SampleValidatorSpec extends Specification implements DataTest {
         validator.validate(context)
 
         then:
-        context.problems.isEmpty()
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.INFO
+        problem.message == "${PARSED_SAMPLETYPE_PID}X\tY\tZ\tP-X_I-Y_S-Z"
     }
 
     void 'validate, when identifier is in DB and parseable and project is inconsistent, adds warning'() {
@@ -235,6 +239,7 @@ Project 'C':
                 new Problem(Collections.emptySet(), Level.INFO,
                         "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\n" +
                                 "${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tSampleA"),
+                new Problem(Collections.emptySet(), Level.INFO, "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N\nC\tM\tN\tP-C_I-M_S-N"),
         ]
 
         when:
@@ -257,6 +262,7 @@ Project 'C':
                         "Sample identifier 'SampleA' is neither registered in OTP nor matches a pattern known to OTP.", "At least one sample identifier is neither registered in OTP nor matches a pattern known to OTP."),
                 new Problem(Collections.emptySet(), Level.INFO,
                         "All sample identifiers which are neither registered in OTP nor match a pattern known to OTP:\n${SampleIdentifierService.BulkSampleCreationHeader.getHeaders()}\n\t\t\tSampleA"),
+                new Problem(Collections.emptySet(), Level.INFO, "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N"),
         ]
 
         when:
@@ -276,6 +282,7 @@ Project 'C':
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells + context.spreadsheet.dataRows[1].cells as Set, Level.INFO,
                         "All sample identifiers belong to project 'B'."),
+                new Problem(Collections.emptySet(), Level.INFO, "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N"),
         ]
 
         when:
@@ -297,7 +304,10 @@ Project 'C':
         validator.validate(context)
 
         then:
-        context.problems.isEmpty()
+
+        Problem problem = exactlyOneElement(context.problems)
+        problem.level == Level.INFO
+        problem.message == "${PARSED_SAMPLETYPE_PID}B\tM\tN\tP-B_I-M_S-N"
     }
 
     private static SampleIdentifier createSampleIdentifier(String sampleIdentifierName, String projectName, String pid, String sampleTypeName) {
