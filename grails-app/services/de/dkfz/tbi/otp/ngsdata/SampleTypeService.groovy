@@ -64,10 +64,18 @@ class SampleTypeService {
 
 
     List<SeqTrack> getSeqTracksWithoutSampleCategory(List<SeqTrack> seqTracks) {
-        return seqTracks.findAll { SeqTrack seqTrack ->
-            SampleTypePerProject stp = SampleTypePerProject.findWhere(project: seqTrack.project, sampleType: seqTrack.sampleType)
+        List<SeqType> analysableSeqTypes = SeqTypeService.allAnalysableSeqTypes
+        return seqTracks.findAll {
+            it.seqType in analysableSeqTypes
+        }.groupBy { SeqTrack seqTrack->
+            [
+                    seqTrack.project,
+                    seqTrack.sampleType,
+            ]
+        }.findAll { Map.Entry<List, List> entry ->
+            SampleTypePerProject stp = SampleTypePerProject.findWhere(project: entry.key[0], sampleType: entry.key[1])
             (stp == null || stp.category == SampleType.Category.UNDEFINED)
-        }
+        }.values().flatten()
     }
 }
 

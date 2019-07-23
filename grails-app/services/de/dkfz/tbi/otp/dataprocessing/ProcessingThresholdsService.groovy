@@ -63,8 +63,9 @@ class ProcessingThresholdsService {
     }
 
     List<SeqTrack> getSeqTracksWithoutProcessingThreshold(List<SeqTrack> seqTracks) {
+        List<SeqType> analysableSeqTypes = SeqTypeService.allAnalysableSeqTypes
         seqTracks.findAll { SeqTrack seqTrack ->
-            (seqTrack.seqType in SeqTypeService.allAnalysableSeqTypes &&
+            (seqTrack.seqType in analysableSeqTypes &&
                     !findByProjectAndSampleTypeAndSeqType(seqTrack.project, seqTrack.sampleType, seqTrack.seqType))
         }
     }

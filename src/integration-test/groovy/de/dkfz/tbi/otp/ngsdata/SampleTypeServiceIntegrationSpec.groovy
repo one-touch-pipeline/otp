@@ -27,17 +27,18 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ExternalMergingWorkPackage
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
 @Rollback
 @Integration
-class SampleTypeServiceIntegrationSpec extends Specification {
+class SampleTypeServiceIntegrationSpec extends Specification implements DomainFactoryCore {
 
 
     void "findUsedSampleTypesForProject, if project is empty, return nothing"() {
         given:
         SampleTypeService service = new SampleTypeService()
 
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         DomainFactory.createAllAnalysableSeqTypes()
 
         when:
@@ -52,7 +53,7 @@ class SampleTypeServiceIntegrationSpec extends Specification {
         SampleTypeService service = new SampleTypeService()
 
         DomainFactory.createAllAnalysableSeqTypes()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        SeqTrack seqTrack = createSeqTrack()
 
         when:
         List ret = service.findUsedSampleTypesForProject(seqTrack.project)
@@ -66,7 +67,7 @@ class SampleTypeServiceIntegrationSpec extends Specification {
         SampleTypeService service = new SampleTypeService()
 
         List<SeqType> seqTypes = DomainFactory.createAllAnalysableSeqTypes()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack([
+        SeqTrack seqTrack = createSeqTrack([
                 seqType: seqTypes.first()
         ])
 
@@ -113,7 +114,7 @@ class SampleTypeServiceIntegrationSpec extends Specification {
         SampleTypeService service = new SampleTypeService()
 
         List<SeqType> seqTypes = DomainFactory.createAllAnalysableSeqTypes()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack([
+        SeqTrack seqTrack = createSeqTrack([
                 seqType: seqTypes.first()
         ])
         ExternalMergingWorkPackage externalMergingWorkPackage = DomainFactory.createExternalMergingWorkPackage([
@@ -130,12 +131,18 @@ class SampleTypeServiceIntegrationSpec extends Specification {
 
     void "test getSeqTracksWithoutSampleCategory"() {
         given:
-        SeqTrack st1 = DomainFactory.createSeqTrack()
-        SeqTrack st2 = DomainFactory.createSeqTrack()
+        SeqType seqType = DomainFactory.createAllAnalysableSeqTypes().first()
+        SeqTrack st1 = createSeqTrack([
+                seqType: seqType,
+        ])
+        SeqTrack st2 = createSeqTrack([
+                seqType: seqType,
+        ])
+        SeqTrack st3 = createSeqTrack()
         DomainFactory.createSampleTypePerProject(project: st2.project, sampleType: st2.sampleType)
         SampleTypeService service = new SampleTypeService()
 
         expect:
-        [st1] == service.getSeqTracksWithoutSampleCategory([st1, st2])
+        [st1] == service.getSeqTracksWithoutSampleCategory([st1, st2, st3])
     }
 }
