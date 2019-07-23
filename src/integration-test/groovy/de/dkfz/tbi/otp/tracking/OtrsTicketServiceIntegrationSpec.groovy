@@ -81,9 +81,10 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
         OtrsTicket otrsTicket = createOtrsTicket()
 
         when:
-        otrsTicketService.saveEndTimeIfNeeded(otrsTicket, step)
+        boolean saved = otrsTicketService.saveEndTimeIfNeeded(otrsTicket, step)
 
         then:
+        saved
         otrsTicket["${step}Finished"]
 
         where:
@@ -100,9 +101,10 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
         ])
 
         when:
-        otrsTicketService.saveEndTimeIfNeeded(otrsTicket, step)
+        boolean saved = otrsTicketService.saveEndTimeIfNeeded(otrsTicket, step)
 
         then:
+        !saved
         otrsTicket["${step}Finished"] == date
 
         where:

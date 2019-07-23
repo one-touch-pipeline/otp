@@ -53,15 +53,17 @@ class OtrsTicketService {
         }
     }
 
-    void saveEndTimeIfNeeded(OtrsTicket ticket, OtrsTicket.ProcessingStep step) {
+    boolean saveEndTimeIfNeeded(OtrsTicket ticket, OtrsTicket.ProcessingStep step) {
         String property = "${step}Finished"
         if (ticket[property] == null) {
             lockTicket(ticket)
             if (ticket[property] == null) {
                 ticket[property] = new Date()
                 ticket.save(flush: true)
+                return true
             }
         }
+        return false
     }
 
     void markFinalNotificationSent(OtrsTicket ticket) {

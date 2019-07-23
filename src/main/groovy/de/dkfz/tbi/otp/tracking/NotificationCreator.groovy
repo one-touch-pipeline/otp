@@ -120,9 +120,10 @@ class NotificationCreator {
             boolean previousStepFinished = step.dependsOn ? (ticket."${step.dependsOn}Finished" != null) : true
             if (ticket."${step}Finished" == null && stepStatus.done != NOTHING && !stepStatus.mightDoMore && previousStepFinished) {
                 anyProcessingStepJustCompleted = true
-                otrsTicketService.saveEndTimeIfNeeded(ticket, step)
-                sendCustomerNotification(ticket, status, step)
-                LogThreadLocal.getThreadLog()?.info("sent customer notification for OTRS Ticket ${ticket.ticketNumber}: ${step}")
+                if (otrsTicketService.saveEndTimeIfNeeded(ticket, step)) {
+                    sendCustomerNotification(ticket, status, step)
+                    LogThreadLocal.getThreadLog()?.info("sent customer notification for OTRS Ticket ${ticket.ticketNumber}: ${step}")
+                }
             }
             if (stepStatus.mightDoMore) {
                 mightDoMore = true
