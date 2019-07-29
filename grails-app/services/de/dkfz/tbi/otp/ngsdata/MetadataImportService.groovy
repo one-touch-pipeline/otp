@@ -349,8 +349,7 @@ class MetadataImportService {
         importRuns(context, runSegment, context.spreadsheet.dataRows)
         log.debug("runs stopped took: ${System.currentTimeMillis() - timeStarted}")
 
-        //TODO OTP3242: Problem with Role Operator
-        //notifyAboutUnsetConfig(runSegment.dataFiles*.seqTrack as List, runSegment.otrsTicket)
+        notifyAboutUnsetConfig(runSegment.dataFiles*.seqTrack as List, runSegment.otrsTicket)
 
         MetaDataFile metaDataFile = new MetaDataFile(
                 fileName: context.metadataFile.fileName.toString(),
@@ -530,9 +529,7 @@ class MetadataImportService {
 
             Collection<MergingWorkPackage> mergingWorkPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, !mergingWorkPackages.empty)
-
-            //TODO OTP3242: Problem with Role Operator
-            //samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
+            samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
 
         }
     }
