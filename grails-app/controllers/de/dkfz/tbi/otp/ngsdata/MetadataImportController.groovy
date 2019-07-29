@@ -219,20 +219,16 @@ class MetadataImportController {
             return
         }
         Authentication authentication = SecurityContextHolder.context.authentication
-        boolean needAuthentication = !authentication || !authentication.isAuthenticated()
+
         try {
-            if (needAuthentication) {
-                List<GrantedAuthority> authorities = [
-                        new SimpleGrantedAuthority(Role.ROLE_OPERATOR),
-                ]
-                UserDetails userDetails = new User('TicketSystem', "", authorities)
-                SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
-            }
+            List<GrantedAuthority> authorities = [
+                    new SimpleGrantedAuthority(Role.ROLE_OPERATOR),
+            ]
+            UserDetails userDetails = new User('TicketSystem', "", authorities)
+            SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
             render text: doAutoImport(params.ticketNumber, params.ilseNumbers), contentType: "text/plain"
         } finally {
-            if (needAuthentication) {
-                SecurityContextHolder.clearContext()
-            }
+            SecurityContextHolder.context.authentication = authentication
         }
     }
 
