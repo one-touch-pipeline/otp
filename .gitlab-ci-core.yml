@@ -19,58 +19,66 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-image: otp-tests:3.3.9
+image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
+
 
 # notes:
 ## recursive expansion of variables does not work
-## having multiple commends in one variable does not work
+## having multiple commands in one variable does not work
 ## putting the expire time to a variable does not work
-
 variables:
   GRADLE_OPTS: '-Xms4g -Xms1g'
   ARTIFACTS_BASE_DIRECTORY: 'artifacts'
   GRADLE_CACHES: $CI_PROJECT_DIR/.gradle/caches
   GRADLE_WRAPPER: $CI_PROJECT_DIR/.gradle/wrapper
-  PREPARE_GRADLE_CACHE1: "mkdir -p $CI_PROJECT_DIR/.gradle/caches $CI_PROJECT_DIR/.gradle/wrapper"
-  PREPARE_GRADLE_CACHE2: "ln -s $CI_PROJECT_DIR/.gradle/caches /home/grails/.gradle/caches"
-  PREPARE_GRADLE_CACHE3: "ln -s $CI_PROJECT_DIR/.gradle/wrapper /home/grails/.gradle/wrapper"
   ARTIFACT_DOWNLOAD_ATTEMPTS: "3"
   GET_SOURCES_ATTEMPTS: "3"
   RESTORE_CACHE_ATTEMPTS: "3"
 
-stages:
-  - all
 
 #----------------------------
 # templates
 #----------------------------
 
-.abstract base: &base_template
-  stage: all
+.abstract_base_template:
+  image: registry.gitlab.com/one-touch-pipeline/otp/otp-gitlab-ci
+  stage: test
   dependencies: []
   only:
     - branches
+    - tags
   cache:
-    key: "${CI_PROJECT_PATH_SLUG}-cache"
+    key: "${CI_PROJECT_PATH_SLUG}-cache2"
     paths:
       - $GRADLE_CACHES
       - $GRADLE_WRAPPER
   artifacts: &artifacts_template
-    expire_in: 1 week
+    expire_in: 4 week
   before_script:
-    - $PREPARE_GRADLE_CACHE1
-    - $PREPARE_GRADLE_CACHE2
-    - $PREPARE_GRADLE_CACHE3
-    - bashScripts/gitlab-ci/update-Gradle-source.sh
-    - bashScripts/gitlab-ci/use-local-repository.sh
+    - set -e
+    - bashScripts/gitlab-ci/init.sh
 
-#----------------------------
-# jobs
-#----------------------------
+
+# ------------------------------------------------------
+# jobs stage compile
+# ------------------------------------------------------
+
+compile:
+  extends: .abstract_base_template
+  stage: build
+  dependencies: []
+  script:
+    - ./gradlew classes
+
+
+# ------------------------------------------------------
+# jobs stage tests
+# ------------------------------------------------------
 
 unit tests:
-  <<: *base_template
+  extends: .abstract_base_template
   script:
+    - set -e
     - ./gradlew test
   artifacts:
     <<: *artifacts_template
@@ -79,9 +87,11 @@ unit tests:
       - build/reports/tests
     when: always
 
+
 integration tests:
-  <<: *base_template
+  extends: .abstract_base_template
   script:
+    - set -e
     - ./gradlew integrationTest
   artifacts:
     <<: *artifacts_template
@@ -90,11 +100,16 @@ integration tests:
       - build/reports/tests
     when: always
 
+
 codenarc:
-  <<: *base_template
+  extends: .abstract_base_template
+  only:
+    - branches
   script:
+    - set -e
     - ./gradlew codenarcAll
   after_script:
+    - set -e
     - bashScripts/gitlab-ci/codenarc-informations.sh
   artifacts:
     <<: *artifacts_template
@@ -102,21 +117,16 @@ codenarc:
       - build/reports/codenarc
     when: always
 
+
 war:
-  <<: *base_template
-  before_script:
-    - $PREPARE_GRADLE_CACHE1
-    - $PREPARE_GRADLE_CACHE2
-    - $PREPARE_GRADLE_CACHE3
-    - bashScripts/gitlab-ci/update-Gradle-source.sh
-    - bashScripts/gitlab-ci/use-local-repository.sh
-    - mkdir -p logs/jobs
+  extends: .abstract_base_template
   script:
-    - set -e -o pipefail
+    - set -e
     - ./gradlew war
 
+
 test migration:
-  <<: *base_template
+  extends: .abstract_base_template
   services:
     - postgres:latest
   variables:
@@ -124,17 +134,15 @@ test migration:
     POSTGRES_USER: otp
     POSTGRES_PASSWORD: otp
   before_script:
-    - $PREPARE_GRADLE_CACHE1
-    - $PREPARE_GRADLE_CACHE2
-    - $PREPARE_GRADLE_CACHE3
-    - bashScripts/gitlab-ci/update-Gradle-source.sh
-    - bashScripts/gitlab-ci/use-local-repository.sh
-    - echo 'otp.database.server=postgres' >> /home/grails/.otp.properties
-    - echo 'otp.database.port=5432' >> /home/grails/.otp.properties
-    - echo 'otp.database.database=otp' >> /home/grails/.otp.properties
-    - echo 'otp.database.username=otp' >> /home/grails/.otp.properties
-    - echo 'otp.database.password=otp' >> /home/grails/.otp.properties
+    - set -e
+    - bashScripts/gitlab-ci/init.sh
+    - echo 'otp.database.server=postgres' >> $HOME/.otp.properties
+    - echo 'otp.database.port=5432' >> $HOME/.otp.properties
+    - echo 'otp.database.database=otp' >> $HOME/.otp.properties
+    - echo 'otp.database.username=otp' >> $HOME/.otp.properties
+    - echo 'otp.database.password=otp' >> $HOME/.otp.properties
   script:
+    - set -e
     - ./gradlew dbmUpdate
     - bash ./bashScripts/grails-migration-plugin/create-dbm-gorm-diff-without-false-changes.sh testing
     - bash ./bashScripts/grails-migration-plugin/check-for-changelog-file.sh testing
@@ -144,13 +152,11 @@ test migration:
       - migrations/changelogs/*/testing.groovy
     when: on_failure
 
+
 generate_changelog:
-  stage: all
-  dependencies: []
-  only:
-    - branches
-  image: otp-generate-changelog
+  extends: .abstract_base_template
   script:
+    - set -e
     - mkdir -p $ARTIFACTS_BASE_DIRECTORY
     - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
     - echo $LATEST_TAG

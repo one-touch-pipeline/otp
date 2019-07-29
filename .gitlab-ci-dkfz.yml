@@ -1,0 +1,87 @@
+---
+# Copyright 2011-2019 The OTP authors
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
+# A dkfz specific ci, which additional jobs for trigger the deployment
+
+
+include:
+  - local: '.gitlab-ci-core.yml'
+
+
+stages:
+  - build
+  - test
+  - trigger deployment
+
+
+# ------------------------------------------------------
+# jobs stage trigger deployment
+# ------------------------------------------------------
+
+.abstract_trigger_deployment:
+  image: centos:7
+  stage: trigger deployment
+  dependencies: []
+  script:
+    - if [[ ! -v DEPLOY_PIPELINE_TOKEN || ! -v DEPLOY_PIPELINE_BRANCH || ! -v DEPLOY_PIPELINE_URL ]] ; then exit 0 ; fi
+    - curl -X POST
+      -F token=$DEPLOY_PIPELINE_TOKEN
+      -F ref=$DEPLOY_PIPELINE_BRANCH
+      -F "variables[TRIGGER_CI_PIPELINE_ID]=$CI_PIPELINE_ID"
+      -F "variables[TRIGGER_CI_JOB_ID]=$CI_JOB_ID"
+      -F "variables[TRIGGER_CI_COMMIT_REF_NAME]=$CI_COMMIT_REF_NAME"
+      -F "variables[TRIGGER_CI_COMMIT_TAG]=$CI_COMMIT_TAG"
+      -F "variables[TRIGGER_CI_COMMIT_SHA]=$CI_COMMIT_SHA"
+      -F "variables[TRIGGER_CI_COMMIT_TITLE]=$CI_COMMIT_TITLE"
+      -F "variables[TRIGGER_CI_COMMIT_DESCRIPTION]=$CI_COMMIT_DESCRIPTION"
+      -F "variables[TRIGGER_CASE]=$TRIGGER_CASE"
+      -F "variables[TRIGGER_PIPELINE_STATE]=$TRIGGER_PIPELINE_STATE"
+      $DEPLOY_PIPELINE_URL
+    - echo send
+
+
+trigger master:
+  extends: .abstract_trigger_deployment
+  only:
+    - /^master$/
+  variables:
+    GIT_STRATEGY: none
+    TRIGGER_CASE: master
+
+
+trigger release:
+  extends: .abstract_trigger_deployment
+  only:
+    - /^v\d+\.\d+\.\d+$/
+  variables:
+    GIT_STRATEGY: none
+    TRIGGER_CASE: release
+
+
+trigger release failed:
+  extends: .abstract_trigger_deployment
+  only:
+    - /^v\d+\.\d+\.\d+$/
+  when: on_failure
+  variables:
+    GIT_STRATEGY: none
+    TRIGGER_CASE: release_failed

@@ -1,5 +1,3 @@
-#!/bin/bash
-
 # Copyright 2011-2019 The OTP authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -20,10 +18,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+FROM azul/zulu-openjdk-centos:8
+MAINTAINER OTP Developers <otp-devel@dkfz-heidelberg.de>
 
-#Since there are a proxy problem on the gitlab ci, it is not possible to load the data from outside.
-#Therefore a local source needs to be used.
+# Install dependencies
+RUN yum -y update && \
+    yum -y install \
+        git \
+        install \
+        postgresql.x86_64 \
+        python-mako.noarch \
+        unzip && \
+    yum clean all
 
-sed -i \
-    -e "s#distributionUrl=https\\\://downloads.gradle.org/distributions/gradle-4.9-all.zip#distributionUrl=file\\\:/data/gradle/gradle-current.zip#" \
-    gradle/wrapper/gradle-wrapper.properties
+# Configure system via environment variables
+ENV JAVA_HOME   /usr/lib/jvm/zulu-8
+ENV GRADLE_USER_HOME /home/otp/.gradle
+
+# User management
+RUN useradd --system --create-home --shell /bin/bash otp
+RUN groupadd othergroup
+RUN usermod --append --groups othergroup otp
+
+USER otp
+WORKDIR /home/otp
+
+# OTP needs the USER environment variable to be defined.
+ENV USER otp

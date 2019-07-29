@@ -20,44 +20,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+set -ev
 
-# Create a gradle configuration file to use a local maven repository
+#create link of maven cache to place were gitlab ci allows caching
+mkdir -p $GRADLE_CACHES $GRADLE_WRAPPER $HOME/.gradle
+ln -s $GRADLE_CACHES $HOME/.gradle/caches
+ln -s $GRADLE_WRAPPER $HOME/.gradle/wrapper
 
-if [[ ! -z "${MAVEN_REPOSITORY_URL}" ]]; then
+#needed log dir
+mkdir -p logs/jobs
 
-    echo "The local maven repository will be configured in ~/.gradle/init.d/repo.gradle"
+#add required otp properties
+echo 'otp.testing.group=othergroup' >> $HOME/.otp.properties
 
-    mkdir -p ~/.gradle/init.d/
+#set proxy if given
+`dirname $0`/use-proxy.sh
 
-(
-cat << EOF
-settingsEvaluated { settings ->
-    settings.pluginManagement {
-        repositories {
-            maven {
-                url '${MAVEN_REPOSITORY_URL}'
-            }
-        }
-    }
-}
-
-allprojects {
-    repositories {
-        maven {
-            url '${MAVEN_REPOSITORY_URL}'
-        }
-    }
-    buildscript.repositories {
-        maven {
-            url '${MAVEN_REPOSITORY_URL}'
-        }
-    }
-}
-EOF
-) > ~/.gradle/init.d/repo.gradle
-
-else
-
-    echo "The local maven repository won't be configured in ~/.gradle/init.d/repo.gradle"
-
-fi
+#set local repository
+`dirname $0`/use-local-repository.sh

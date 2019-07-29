@@ -20,44 +20,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+set -e
 
-# Create a gradle configuration file to use a local maven repository
+#set proxy if given
 
-if [[ ! -z "${MAVEN_REPOSITORY_URL}" ]]; then
+if [[ ! -z "${PROXY_HOST}" && ! -z "${PROXY_PORT}" ]]
+then
+    echo "The proxy will be configured in ~/.gradle/gradle.properties"
 
-    echo "The local maven repository will be configured in ~/.gradle/init.d/repo.gradle"
-
-    mkdir -p ~/.gradle/init.d/
-
-(
-cat << EOF
-settingsEvaluated { settings ->
-    settings.pluginManagement {
-        repositories {
-            maven {
-                url '${MAVEN_REPOSITORY_URL}'
-            }
-        }
-    }
-}
-
-allprojects {
-    repositories {
-        maven {
-            url '${MAVEN_REPOSITORY_URL}'
-        }
-    }
-    buildscript.repositories {
-        maven {
-            url '${MAVEN_REPOSITORY_URL}'
-        }
-    }
-}
+    cat << EOF >> $HOME/.gradle/gradle.properties
+systemProp.http.proxyHost=${PROXY_HOST}
+systemProp.http.proxyPort=${PROXY_PORT}
+systemProp.https.proxyHost=${PROXY_HOST}
+systemProp.https.proxyPort=${PROXY_PORT}
 EOF
-) > ~/.gradle/init.d/repo.gradle
 
 else
 
-    echo "The local maven repository won't be configured in ~/.gradle/init.d/repo.gradle"
+    echo "The proxy won't be configured in ~/.gradle/gradle.properties"
 
 fi
