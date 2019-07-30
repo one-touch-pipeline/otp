@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.domainFactory.pipelines
 
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -48,7 +47,12 @@ trait IsRoddy implements IsPipeline {
     public <T> T createRoddyBamFile(Map properties = [:], Class<T> clazz) {
         MergingWorkPackage workPackage = properties.workPackage
         if (!workPackage) {
-            workPackage = createMergingWorkPackage()
+            Map workPackageProperties = properties.seqTracks ?
+                    [
+                            seqType: properties.seqTracks.first().seqType,
+                            sample : properties.seqTracks.first().sample,
+                    ] : [:]
+            workPackage = createMergingWorkPackage(workPackageProperties)
             DomainFactory.createReferenceGenomeProjectSeqType(
                     referenceGenome: workPackage.referenceGenome,
                     project: workPackage.project,
@@ -60,13 +64,15 @@ trait IsRoddy implements IsPipeline {
     }
 
     public <T> T createRoddyBamFile(Map properties = [:], MergingWorkPackage workPackage, Class<T> clazz) {
+        createMergingCriteriaLazy(
+                project: workPackage.project,
+                seqType: workPackage.seqType,
+        )
+
         Collection<SeqTrack> seqTracks = properties.seqTracks ?: [DomainFactory.createSeqTrackWithDataFiles(workPackage)]
         workPackage.seqTracks = seqTracks
-        DomainFactory.createMergingCriteriaLazy(
-                project: workPackage.project,
-                seqType: workPackage.seqType
-        )
         workPackage.save(flush: true)
+
         T bamFile = createDomainObject(clazz, bamFileDefaultProperties(properties, seqTracks, workPackage) +
                 [
                 workDirectoryName           : "${RoddyBamFile.WORK_DIR_PREFIX}_${nextId}",
@@ -101,6 +107,7 @@ trait IsRoddy implements IsPipeline {
         return DomainFactory.createRoddyWorkflowConfigMapHelper(properties)
     }
 
+    @SuppressWarnings('GetterMethodCouldBeProperty')
     @Override
     Class getConfigPerProjectAndSeqTypeClass() {
         return RoddyWorkflowConfig

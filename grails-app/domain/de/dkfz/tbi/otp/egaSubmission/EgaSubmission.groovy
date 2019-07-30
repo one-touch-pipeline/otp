@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.egaSubmission
 
 import de.dkfz.tbi.otp.ngsdata.Project
@@ -42,9 +41,9 @@ class EgaSubmission implements Entity {
     Set<DataFileSubmissionObject> dataFilesToSubmit = [] as Set<DataFileSubmissionObject>
 
     static hasMany = [
-            dataFilesToSubmit : DataFileSubmissionObject,
-            bamFilesToSubmit  : BamFileSubmissionObject,
-            samplesToSubmit   : SampleSubmissionObject,
+            dataFilesToSubmit: DataFileSubmissionObject,
+            bamFilesToSubmit : BamFileSubmissionObject,
+            samplesToSubmit  : SampleSubmissionObject,
     ]
 
     static belongsTo = [
@@ -101,4 +100,8 @@ class EgaSubmission implements Entity {
         OTHER,
     }
 
+    @Override
+    String toString() {
+        return "EgaSubmission ${id}: ${submissionName} in ${project.name}"
+    }
 }

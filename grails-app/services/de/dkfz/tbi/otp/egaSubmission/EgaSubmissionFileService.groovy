@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.gorm.transactions.Transactional
@@ -37,8 +36,7 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
-import java.nio.file.FileSystem
-import java.nio.file.Path
+import java.nio.file.*
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
@@ -49,6 +47,7 @@ class EgaSubmissionFileService {
 
     CreateNotificationTextService createNotificationTextService
     EgaSubmissionService egaSubmissionService
+    EgaFileContentService egaFileContentService
     FileService fileService
     FileSystemService fileSystemService
     LsdfFilesService lsdfFilesService
@@ -225,33 +224,45 @@ class EgaSubmissionFileService {
         return "${contentHeader}\n${contentBody}"
     }
 
-    void generateFilesToUploadFile(EgaSubmission submission) {
+    private Path createPathForSubmission(EgaSubmission submission) {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(submission.project.realm)
-        Path path = fileSystem.getPath("${submission.project.projectDirectory}/submission/${submission.id}/filesToUpload.tsv")
-        StringBuilder out = new StringBuilder()
-        User user = springSecurityService.getCurrentUser() as User
+        return fileSystem.getPath(submission.project.projectDirectory.absolutePath, 'submission', submission.id.toString())
+    }
 
-        submission.dataFilesToSubmit.each {
-            out.append("${lsdfFilesService.getFileFinalPath(it.dataFile)}\t")
-            out.append("${it.egaAliasName}\n")
+    void createFilesForUpload(EgaSubmission submission) {
+        Path basePath = createPathForSubmission(submission)
+
+        Map<String, String> filesToCreate = [:]
+        filesToCreate << egaFileContentService.createFilesToUploadFileContent(submission)
+        filesToCreate << egaFileContentService.createSingleFastqFileMapping(submission)
+        filesToCreate << egaFileContentService.createPairedFastqFileMapping(submission)
+        filesToCreate << egaFileContentService.createBamFileMapping(submission)
+
+        filesToCreate.each {
+            Path path = basePath.resolve(it.key)
+            Files.deleteIfExists(path)
+            fileService.createFileWithContent(path, it.value)
         }
+    }
 
-        submission.bamFilesToSubmit.each {
-            out.append("${it.bamFile.getPathForFurtherProcessing()}\t")
-            out.append("${it.egaAliasName}\n")
-        }
+    void sendEmail(EgaSubmission submission) {
+        Path basePath = createPathForSubmission(submission)
+        User user = springSecurityService.currentUser as User
 
-        fileService.createFileWithContent(path, out.toString())
-
-        String subject = "New EGA submission ${submission.id}"
+        String subject = "New ${submission}"
         String content = createNotificationTextService.createMessage('egaSubmission.template.base', [
-                user: user.realName,
-                project: submission.project.name,
-                submission: submission.id,
+                user         : user.realName,
+                project      : submission.project.name,
+                submission   : submission.id,
                 numberOfFiles: submission.dataFilesToSubmit.size() + submission.bamFilesToSubmit.size(),
-                path: path,
+                path         : basePath,
         ])
         mailHelperService.sendEmail(subject, content, [processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)], user.email)
+    }
+
+    void prepareSubmissionForUpload(EgaSubmission submission) {
+        createFilesForUpload(submission)
+        sendEmail(submission)
         submission.state = EgaSubmission.State.FILE_UPLOAD_STARTED
         submission.save(flush: true)
     }
@@ -296,8 +307,8 @@ class EgaSubmissionFileService {
     }
 
     static List<String> getIdentifierKey(Row row) {
-        return  [row.getCellByColumnTitle(INDIVIDUAL.value).text,
-                 row.getCellByColumnTitle(SAMPLE_TYPE.value).text,
-                 row.getCellByColumnTitle(SEQ_TYPE.value).text]
+        return [row.getCellByColumnTitle(INDIVIDUAL.value).text,
+                row.getCellByColumnTitle(SAMPLE_TYPE.value).text,
+                row.getCellByColumnTitle(SEQ_TYPE.value).text]
     }
 }

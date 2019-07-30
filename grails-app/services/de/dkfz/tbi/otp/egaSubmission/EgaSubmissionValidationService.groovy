@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.gorm.transactions.Transactional
@@ -156,7 +155,7 @@ class EgaSubmissionValidationService {
         }
 
         if (!(fileTypes.unique().size() > 2)) {
-            return EgaSubmissionService.FileType.collect { it.toString() }.containsAll(fileTypes)
+            return EgaSubmissionService.FileType.values()*.toString().containsAll(fileTypes)
         }
         return false
     }

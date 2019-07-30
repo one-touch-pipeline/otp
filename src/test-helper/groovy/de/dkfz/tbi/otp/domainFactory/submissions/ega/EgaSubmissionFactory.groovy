@@ -23,21 +23,20 @@
 package de.dkfz.tbi.otp.domainFactory.submissions.ega
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsPipeline
 import de.dkfz.tbi.otp.egaSubmission.*
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
-trait EgaSubmissionFactory implements IsRoddy, DomainFactoryCore {
+trait EgaSubmissionFactory implements IsPipeline, DomainFactoryCore {
 
-    EgaSubmission createSubmission(Map properties = [:]) {
+    EgaSubmission createEgaSubmission(Map properties = [:]) {
         return createDomainObject(EgaSubmission, [
                 project       : { createProject() },
-                egaBox        : "egaBox",
-                submissionName: "submissionName",
-                studyName     : "studyName",
+                egaBox        : "egaBox_${nextId}",
+                submissionName: "submissionName_${nextId}",
+                studyName     : "studyName_${nextId}",
                 studyType     : EgaSubmission.StudyType.CANCER_GENOMICS,
-                studyAbstract : "studyAbstract",
-                pubMedId      : "pubMedId",
+                studyAbstract : "studyAbstract_${nextId}",
+                pubMedId      : "pubMedId_${nextId}",
                 state         : EgaSubmission.State.SELECTION,
                 selectionState: EgaSubmission.SelectionState.SELECT_SAMPLES,
         ], properties)
@@ -45,25 +44,25 @@ trait EgaSubmissionFactory implements IsRoddy, DomainFactoryCore {
 
     BamFileSubmissionObject createBamFileSubmissionObject(Map properties = [:]) {
         return createDomainObject(BamFileSubmissionObject, [
-                egaAliasName: "bam_file_alias",
-                bamFile: { createBamFile() },
+                egaAliasName          : "bam_file_alias_${nextId}",
+                bamFile               : { createBamFile() },
                 sampleSubmissionObject: { createSampleSubmissionObject() },
         ], properties)
     }
 
-    DataFileSubmissionObject createDataFileSubmissionObject (Map properties = [:]) {
-        return createDomainObject(DataFileSubmissionObject , [
-                egaAliasName: "data_file_alias",
-                dataFile: { DomainFactory.createDataFile() },
+    DataFileSubmissionObject createDataFileSubmissionObject(Map properties = [:]) {
+        return createDomainObject(DataFileSubmissionObject, [
+                egaAliasName          : "data_file_alias_${nextId}",
+                dataFile              : { createDataFile() },
                 sampleSubmissionObject: { createSampleSubmissionObject() },
         ], properties)
     }
 
     SampleSubmissionObject createSampleSubmissionObject(Map properties = [:]) {
         return createDomainObject(SampleSubmissionObject, [
-                egaAliasName: "sample_alias${nextId}",
-                sample: { createSample() },
-                seqType: { createSeqType() },
+                egaAliasName: "sample_alias_${nextId}",
+                sample      : { createSample() },
+                seqType     : { createSeqType() },
         ], properties)
     }
 }

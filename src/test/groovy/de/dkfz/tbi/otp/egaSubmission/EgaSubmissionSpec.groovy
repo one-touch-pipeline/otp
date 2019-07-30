@@ -19,20 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.egaSubmission
-
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class EgaSubmissionSpec extends Specification implements EgaSubmissionFactory, DataTest {
+class EgaSubmissionSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -71,7 +70,7 @@ class EgaSubmissionSpec extends Specification implements EgaSubmissionFactory, D
 
     void "test link Submission and files"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject()
         DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()

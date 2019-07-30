@@ -19,9 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi
 
+import grails.validation.Validateable
 import org.junit.Assert
 import org.springframework.validation.Errors
 import org.springframework.validation.FieldError
@@ -58,7 +58,7 @@ class TestCase {
     }
 
     static String createUniqueString() {
-        return HelperUtils.getUniqueString()
+        return HelperUtils.uniqueString
     }
 
     static File getUniqueNonExistentPath() {
@@ -106,6 +106,10 @@ class TestCase {
         return true
     }
 
+    static <S, T> boolean assertContainSame(final Map<? extends S, ? extends T> m1, final Map<? extends S, ? extends T> m2) {
+        return assertContainSame(m1.entrySet().toSet(), m2.entrySet().toSet())
+    }
+
     /**
      * Helper to check that a validation failed for the given constraint on the given field with the given value.
      * The assert fails if
@@ -123,7 +127,8 @@ class TestCase {
      * @param failedConstraint the name of the constraint the check fails for
      * @param rejectedValue the value which is rejected by the check
      */
-    static void assertValidateError(def objectToCheck, String failedField, String failedConstraint, def rejectedValue) {
+    @SuppressWarnings(['NoDef', 'MethodParameterTypeRequired'])
+    static void assertValidateError(def objectToCheck, String failedField, String failedConstraint, Object rejectedValue) {
         assert !objectToCheck.validate()
         Errors errors = objectToCheck.errors
         assert errors.errorCount == 1
@@ -134,7 +139,8 @@ class TestCase {
         assert fieldError.rejectedValue == rejectedValue
     }
 
-    static void assertAtLeastExpectedValidateError(def objectToCheck, String failedField, String failedConstraint, def rejectedValue) {
+    @SuppressWarnings(['NoDef', 'MethodParameterTypeRequired'])
+    static void assertAtLeastExpectedValidateError(def objectToCheck, String failedField, String failedConstraint, Object rejectedValue) {
         assert !objectToCheck.validate()
         assert objectToCheck.errors.fieldErrors.any {
             it.field == failedField && it.code == failedConstraint && it.rejectedValue == rejectedValue
@@ -166,15 +172,14 @@ class TestCase {
     }
 
     @Deprecated
-    static shouldFailWithMessage(Class clazz, String pattern, Closure code) {
+    static void shouldFailWithMessage(Class clazz, String pattern, Closure code) {
         assert shouldFail(clazz, code) ==~ pattern
     }
 
     @Deprecated
-    static shouldFailWithMessageContaining(Class clazz, String messagePart, Closure code) {
+    static void shouldFailWithMessageContaining(Class clazz, String messagePart, Closure code) {
         assert shouldFail(clazz, code).contains(messagePart)
     }
-
 
     static void checkDirectoryContentHelper(File baseDir, List<File> expectedDirs, List<File> expectedFiles = [], List<File> expectedLinks = []) {
         expectedDirs.each {

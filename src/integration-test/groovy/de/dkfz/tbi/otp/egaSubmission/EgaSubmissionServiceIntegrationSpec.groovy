@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.testing.mixin.integration.Integration
@@ -29,15 +28,16 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.SeqType
 
 @Rollback
 @Integration
-class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSubmissionFactory {
+class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSubmissionFactory, IsRoddy {
 
-    EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
+    private final EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
 
     @Unroll
     void "test check file types with bam file"() {
@@ -56,7 +56,7 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
             sampleSubmissionObject = createSampleSubmissionObject()
         }
 
-        EgaSubmission submission = createSubmission(
+        EgaSubmission submission = createEgaSubmission(
                 project: roddyBamFile.project
         )
         submission.addToSamplesToSubmit(sampleSubmissionObject)
@@ -78,7 +78,7 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
 
     void "test create bam file submission objects"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         RoddyBamFile bamFile = createBamFile()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
                 sample: bamFile.sample,
@@ -103,7 +103,7 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
                 seqType: seqType
         )
         sampleSubmissionObject.sample.refresh()
-        EgaSubmission submission = createSubmission(
+        EgaSubmission submission = createEgaSubmission(
                 samplesToSubmit: [sampleSubmissionObject]
         )
 

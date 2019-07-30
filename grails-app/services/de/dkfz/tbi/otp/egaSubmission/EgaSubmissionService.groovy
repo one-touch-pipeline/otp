@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.gorm.transactions.Transactional
@@ -170,13 +169,12 @@ class EgaSubmissionService {
                 DataFile file = it.dataFile
                 [file, submission.samplesToSubmit.find { it.sample == file.seqTrack.sample && it.seqType == file.seqType }.egaAliasName]
             }.sort { it[1] }
-        } else {
-            return submission.samplesToSubmit.findAll { it.useFastqFile }.collectMany {
-                seqTrackService.getSequenceFilesForSeqTrack(SeqTrack.findBySampleAndSeqType(it.sample, it.seqType))
-            }.collect { DataFile file ->
-                [file, submission.samplesToSubmit.find { it.sample == file.seqTrack.sample && it.seqType == file.getSeqType() }.egaAliasName]
-            }.sort { it[1] }
         }
+        return submission.samplesToSubmit.findAll { it.useFastqFile }.collectMany {
+            seqTrackService.getSequenceFilesForSeqTrack(SeqTrack.findBySampleAndSeqType(it.sample, it.seqType))
+        }.collect { DataFile file ->
+            [file, submission.samplesToSubmit.find { it.sample == file.seqTrack.sample && it.seqType == file.seqType }.egaAliasName]
+        }.sort { it[1] }
     }
 
     @CompileDynamic
@@ -186,13 +184,12 @@ class EgaSubmissionService {
                 AbstractMergedBamFile file = it.bamFile
                 [file, submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType }.egaAliasName]
             }.sort { it[1] }
-        } else {
-            return submission.samplesToSubmit.findAll { it.useBamFile }.collectMany {
-                getAbstractMergedBamFiles(it)
-            }.collect { AbstractMergedBamFile file ->
-                [file, submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType }.egaAliasName]
-            }.sort { it[1] }
         }
+        return submission.samplesToSubmit.findAll { it.useBamFile }.collectMany {
+            getAbstractMergedBamFiles(it)
+        }.collect { AbstractMergedBamFile file ->
+            [file, submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType }.egaAliasName]
+        }.sort { it[1] }
     }
 
     void updateBamFileSubmissionObjects(List<String> fileIds, List<String> egaFileAliases, EgaSubmission submission) {
@@ -226,12 +223,14 @@ class EgaSubmissionService {
                 DataFileSubmissionObject dataFileSubmissionObject = new DataFileSubmissionObject(
                         dataFile: DataFile.findByFileName(filename[i]),
                         sampleSubmissionObject: SampleSubmissionObject.findByEgaAliasName(egaSampleAlias[i])
-                ).save(flush: true)
+                ).save(flush: false)
                 submission.addToDataFilesToSubmit(dataFileSubmissionObject)
             }
+            submission.save(flush: true)
         }
     }
 
+    @SuppressWarnings('Instanceof')
     @CompileDynamic
     void createBamFileSubmissionObjects(EgaSubmission submission) {
         getBamFilesAndAlias(submission).each {
@@ -241,9 +240,10 @@ class EgaSubmissionService {
                 BamFileSubmissionObject bamFileSubmissionObject = new BamFileSubmissionObject(
                         bamFile: bamFile,
                         sampleSubmissionObject: SampleSubmissionObject.findByEgaAliasName(egaSampleAlias),
-                ).save(flush: true)
+                ).save(flush: false)
                 submission.addToBamFilesToSubmit(bamFileSubmissionObject)
             }
+            submission.save(flush: true)
         }
     }
 
@@ -317,7 +317,7 @@ class EgaSubmissionService {
                     property('libraryLayout', 'libraryLayout')
                     property('displayName', 'displayName')
                 }
-                property('libraryPreparationKit','libraryPreparationKit')
+                property('libraryPreparationKit', 'libraryPreparationKit')
             }
         }.unique()
     }

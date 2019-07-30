@@ -19,9 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.egaSubmission
-
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
@@ -29,11 +27,12 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
-class EgaSubmissionValidationServiceSpec extends Specification implements EgaSubmissionFactory, DataTest {
+class EgaSubmissionValidationServiceSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -70,11 +69,11 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         ]
     }
 
-    private EgaSubmissionValidationService egaSubmissionValidationService = new EgaSubmissionValidationService()
+    private final EgaSubmissionValidationService egaSubmissionValidationService = new EgaSubmissionValidationService()
 
     void "test validate rows"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject()
         submission.addToSamplesToSubmit(sampleSubmissionObject1)
         SampleSubmissionObject sampleSubmissionObject2 = createSampleSubmissionObject()
@@ -92,7 +91,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
 
     void "test validate rows with less rows"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject()
         submission.addToSamplesToSubmit(sampleSubmissionObject1)
         submission.addToSamplesToSubmit(createSampleSubmissionObject())
@@ -110,7 +109,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
 
     void "test validate rows with wrong samples"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject()
         submission.addToSamplesToSubmit(sampleSubmissionObject1)
         List<String> sampleObjectId = [createSampleSubmissionObject().id as String]
@@ -150,7 +149,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
 
         then:
         map.hasErrors == hasErrors
-        !map.errors ?: map.errors.contains(errorMessages)
+        map.errors.empty || map.errors.contains(errorMessages)
 
         where:
         aliases            | fileType                                                                 || hasErrors | errorMessages

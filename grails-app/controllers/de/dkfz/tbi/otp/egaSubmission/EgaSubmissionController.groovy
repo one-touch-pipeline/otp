@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.converters.JSON
@@ -339,9 +338,11 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     }
                     flash.egaFileAliases = egaFileAliases
                 } else {
-                    egaSubmissionService.updateDataFileSubmissionObjects(cmd.filename, cmd.egaFileAlias, cmd.submission)
-                    if (cmd.submission.selectionState != EgaSubmission.SelectionState.SELECT_BAM_FILES) {
-                        egaSubmissionFileService.generateFilesToUploadFile(cmd.submission)
+                    EgaSubmission.withTransaction {
+                        egaSubmissionService.updateDataFileSubmissionObjects(cmd.filename, cmd.egaFileAlias, cmd.submission)
+                        if (cmd.submission.selectionState != EgaSubmission.SelectionState.SELECT_BAM_FILES) {
+                            egaSubmissionFileService.prepareSubmissionForUpload(cmd.submission)
+                        }
                     }
                     flash.message = new FlashMessage("SAVED")
                     redirect(action: "editSubmission", params: ['id': cmd.submission.id])
@@ -461,8 +462,10 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     }
                     flash.egaFileAliases = egaFileAliases
                 } else {
-                    egaSubmissionService.updateBamFileSubmissionObjects(cmd.fileId, cmd.egaFileAlias, cmd.submission)
-                    egaSubmissionFileService.generateFilesToUploadFile(cmd.submission)
+                    EgaSubmission.withTransaction {
+                        egaSubmissionService.updateBamFileSubmissionObjects(cmd.fileId, cmd.egaFileAlias, cmd.submission)
+                        egaSubmissionFileService.prepareSubmissionForUpload(cmd.submission)
+                    }
                     redirect(action: "editSubmission", params: ['id': cmd.submission.id])
                 }
             } else {

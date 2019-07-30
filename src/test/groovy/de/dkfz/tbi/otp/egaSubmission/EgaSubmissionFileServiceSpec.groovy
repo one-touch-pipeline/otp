@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.plugin.springsecurity.SpringSecurityService
@@ -29,9 +28,9 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.TestConfigService
-import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -42,11 +41,12 @@ import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
-import java.nio.file.FileSystems
+import java.nio.file.FileSystem
+import java.nio.file.Path
 
 import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnName.*
 
-class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissionFactory, DataTest {
+class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -55,6 +55,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 BamFileSubmissionObject,
                 DataFile,
                 DataFileSubmissionObject,
+                EgaSubmission,
                 FileType,
                 Individual,
                 LibraryPreparationKit,
@@ -79,15 +80,14 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 SeqTrack,
                 SeqType,
                 SoftwareTool,
-                EgaSubmission,
         ]
     }
 
-    private EgaSubmissionFileService egaSubmissionFileService = new EgaSubmissionFileService()
+    private final EgaSubmissionFileService egaSubmissionFileService = new EgaSubmissionFileService()
 
+    @SuppressWarnings('JUnitPublicProperty')
     @Rule
     TemporaryFolder temporaryFolder
-
 
     void "test generate csv content file"() {
         given:
@@ -136,13 +136,14 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         then:
         egaSampleAliases.size() == 2
         fastqs*.value == [true, false]
-        bams*.value  == [false, true]
+        bams*.value == [false, true]
     }
 
+    @SuppressWarnings('AbcMetric')
     void "test generate data files csv file"() {
         given:
         egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         DataFile dataFile = DomainFactory.createDataFile()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
                 sample: dataFile.seqTrack.sample,
@@ -154,10 +155,12 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 sampleSubmissionObject: sampleSubmissionObject
         )
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
-        String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([[
-                dataFile,
-                sampleSubmissionObject.egaAliasName
-        ]]).get(dataFile.fileName + dataFile.run)
+        String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([
+                [
+                        dataFile,
+                        sampleSubmissionObject.egaAliasName,
+                ],
+        ]).get(dataFile.fileName + dataFile.run)
 
         when:
         String content = egaSubmissionFileService.generateDataFilesCsvFile(submission)
@@ -190,7 +193,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
     void "test generate bam files csv file"() {
         given:
         egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         RoddyBamFile roddyBamFile = createBamFile()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
                 sample: roddyBamFile.sample,
@@ -202,10 +205,12 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 sampleSubmissionObject: sampleSubmissionObject,
         )
         submission.addToBamFilesToSubmit(bamFileSubmissionObject)
-        String bamFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForBamFiles([[
-                roddyBamFile,
-                sampleSubmissionObject.egaAliasName
-        ]]).get(roddyBamFile.bamFileName + sampleSubmissionObject.egaAliasName)
+        String bamFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForBamFiles([
+                [
+                        roddyBamFile,
+                        sampleSubmissionObject.egaAliasName,
+                ],
+        ]).get(roddyBamFile.bamFileName + sampleSubmissionObject.egaAliasName)
 
         when:
         String content = egaSubmissionFileService.generateBamFilesCsvFile(submission)
@@ -228,7 +233,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
     void "test read ega file aliases from file with data file"() {
         given:
         egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         DataFile dataFile = DomainFactory.createDataFile()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
                 sample: dataFile.seqTrack.sample,
@@ -242,10 +247,12 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
         String content = egaSubmissionFileService.generateDataFilesCsvFile(submission)
         Spreadsheet spreadsheet = new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
-        String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([[
-                dataFile,
-                sampleSubmissionObject.egaAliasName
-        ]]).get(dataFile.fileName + dataFile.run)
+        String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([
+                [
+                        dataFile,
+                        sampleSubmissionObject.egaAliasName,
+                ],
+        ]).get(dataFile.fileName + dataFile.run)
 
         when:
         Map fileAliases = egaSubmissionFileService.readEgaFileAliasesFromFile(spreadsheet, false)
@@ -257,7 +264,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
     void "test read ega file aliases from file with bam file"() {
         given:
         egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         RoddyBamFile roddyBamFile = createBamFile()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
                 sample: roddyBamFile.sample,
@@ -271,10 +278,12 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         submission.addToBamFilesToSubmit(bamFileSubmissionObject)
         String content = egaSubmissionFileService.generateBamFilesCsvFile(submission)
         Spreadsheet spreadsheet = new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
-        String bamFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForBamFiles([[
-                roddyBamFile,
-                sampleSubmissionObject.egaAliasName
-        ]]).get(roddyBamFile.bamFileName + sampleSubmissionObject.egaAliasName)
+        String bamFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForBamFiles([
+                [
+                        roddyBamFile,
+                        sampleSubmissionObject.egaAliasName
+                ],
+        ]).get(roddyBamFile.bamFileName + sampleSubmissionObject.egaAliasName)
 
         when:
         Map fileAliases = egaSubmissionFileService.readEgaFileAliasesFromFile(spreadsheet, true)
@@ -283,21 +292,62 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         fileAliases.get(bamFileSubmissionObject.bamFile.bamFileName + bamFileSubmissionObject.sampleSubmissionObject.egaAliasName) == bamFileAlias
     }
 
-    void "test generate filesToUpload file"() {
+    void "createFilesForUpload, when submission is given, then create all expected files"() {
         given:
-        new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().absolutePath,
-        ])
-        BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject()
-        EgaSubmission submission = createSubmission()
-        bamFileSubmissionObject.bamFile.workPackage.bamFileInProjectFolder = bamFileSubmissionObject.bamFile
-        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
-        DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject()
-        submission.addToSamplesToSubmit(sampleSubmissionObject)
-        submission.addToDataFilesToSubmit(dataFileSubmissionObject)
-        submission.addToBamFilesToSubmit(bamFileSubmissionObject)
+        new TestConfigService()
 
-        String emailSubject = "New EGA submission ${submission.id}"
+        Path basePath = temporaryFolder.newFolder().toPath()
+        EgaSubmission egaSubmission = createEgaSubmission()
+
+        egaSubmissionFileService.egaFileContentService = Mock(EgaFileContentService) {
+            1 * createFilesToUploadFileContent(egaSubmission) >> [
+                    mapping: 'mappingContent',
+            ]
+            1 * createSingleFastqFileMapping(egaSubmission) >> [
+                    fastqSingle1: 'contentFastqSingle1',
+                    fastqSingle2: 'contentFastqSingle2',
+            ]
+            1 * createPairedFastqFileMapping(egaSubmission) >> [
+                    fastqPaired1: 'contentFastqPaired1',
+                    fastqPaired2: 'contentFastqPaired2',
+            ]
+            1 * createBamFileMapping(egaSubmission) >> [
+                    bam1: 'contentBam1',
+                    bam2: 'contentBam2',
+            ]
+            0 * _
+        }
+        egaSubmissionFileService.fileSystemService = Mock(FileSystemService) {
+            1 * getRemoteFileSystem(_) >> Mock(FileSystem) {
+                1 * getPath(*_) >> basePath
+            }
+        }
+        egaSubmissionFileService.fileService = Mock(FileService) {
+            1 * createFileWithContent(basePath.resolve('mapping'), 'mappingContent')
+            1 * createFileWithContent(basePath.resolve('fastqSingle1'), 'contentFastqSingle1')
+            1 * createFileWithContent(basePath.resolve('fastqSingle2'), 'contentFastqSingle2')
+            1 * createFileWithContent(basePath.resolve('fastqPaired1'), 'contentFastqPaired1')
+            1 * createFileWithContent(basePath.resolve('fastqPaired2'), 'contentFastqPaired2')
+            1 * createFileWithContent(basePath.resolve('bam1'), 'contentBam1')
+            1 * createFileWithContent(basePath.resolve('bam2'), 'contentBam2')
+        }
+
+        when:
+        egaSubmissionFileService.createFilesForUpload(egaSubmission)
+
+        then:
+        noExceptionThrown()
+    }
+
+    @SuppressWarnings('UnnecessaryObjectReferences')
+    void "sendEmail, when submission is given, then send email"() {
+        given:
+        new TestConfigService()
+
+        Path basePath = temporaryFolder.newFolder().toPath()
+        EgaSubmission egaSubmission = createEgaSubmission()
+
+        String emailSubject = "New ${egaSubmission}"
         String content = "some content"
         String recipient = "a.b@c.de"
         User user = new User(
@@ -305,35 +355,82 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 email: "ua.ub@uc.ude",
         )
 
-        egaSubmissionFileService.lsdfFilesService = Mock(LsdfFilesService) {
-            1 * getFileFinalPath(_) >> "someFastqPath"
+        egaSubmissionFileService.fileSystemService = Mock(FileSystemService) {
+            1 * getRemoteFileSystem(_) >> Mock(FileSystem) {
+                1 * getPath(*_) >> basePath
+            }
         }
-
-        egaSubmissionFileService.processingOptionService = Mock (ProcessingOptionService) {
-            1 * findOptionAsString(_) >> recipient
-        }
-
-        egaSubmissionFileService.fileSystemService = Mock (FileSystemService) {
-            1 * getRemoteFileSystem(_) >> FileSystems.default
-        }
-
-        egaSubmissionFileService.springSecurityService = Mock (SpringSecurityService) {
+        egaSubmissionFileService.springSecurityService = Mock(SpringSecurityService) {
             1 * getCurrentUser() >> user
         }
-
+        egaSubmissionFileService.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsString(_) >> recipient
+        }
+        egaSubmissionFileService.createNotificationTextService = Mock(CreateNotificationTextService) {
+            1 * createMessage(_, _) >> content
+        }
         egaSubmissionFileService.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail(emailSubject, content, [recipient], user.email)
         }
 
-        egaSubmissionFileService.fileService = Mock (FileService) {
-            1 * createFileWithContent(_, _)
-        }
+        when:
+        egaSubmissionFileService.sendEmail(egaSubmission)
 
-        egaSubmissionFileService.createNotificationTextService = Mock (CreateNotificationTextService) {
+        then:
+        noExceptionThrown()
+    }
+
+    @SuppressWarnings('UnnecessaryObjectReferences')
+    void "prepareSubmissionForUpload, when submission is given, then files are created, email is send state is changed to FILE_UPLOAD_STARTED"() {
+        given:
+        new TestConfigService()
+
+        Path basePath = temporaryFolder.newFolder().toPath()
+        EgaSubmission egaSubmission = createEgaSubmission([
+                samplesToSubmit : [createSampleSubmissionObject()] as Set,
+                bamFilesToSubmit: [createBamFileSubmissionObject()] as Set,
+        ])
+
+        String emailSubject = "New ${egaSubmission}"
+        String content = "some content"
+        String recipient = "a.b@c.de"
+        User user = new User(
+                realName: "Real Name",
+                email: "ua.ub@uc.ude",
+        )
+
+        egaSubmissionFileService.fileSystemService = Mock(FileSystemService) {
+            2 * getRemoteFileSystem(_) >> Mock(FileSystem) {
+                2 * getPath(*_) >> basePath
+            }
+        }
+        egaSubmissionFileService.egaFileContentService = Mock(EgaFileContentService) {
+            1 * createFilesToUploadFileContent(egaSubmission) >> [:]
+            1 * createSingleFastqFileMapping(egaSubmission) >> [:]
+            1 * createPairedFastqFileMapping(egaSubmission) >> [:]
+            1 * createBamFileMapping(egaSubmission) >> [:]
+            0 * _
+        }
+        egaSubmissionFileService.fileService = Mock(FileService) {
+            _ * createFileWithContent(_, _)
+        }
+        egaSubmissionFileService.springSecurityService = Mock(SpringSecurityService) {
+            1 * getCurrentUser() >> user
+        }
+        egaSubmissionFileService.processingOptionService = Mock(ProcessingOptionService) {
+            1 * findOptionAsString(_) >> recipient
+        }
+        egaSubmissionFileService.createNotificationTextService = Mock(CreateNotificationTextService) {
             1 * createMessage(_, _) >> content
         }
+        egaSubmissionFileService.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmail(emailSubject, content, [recipient], user.email)
+        }
 
-        expect:
-        egaSubmissionFileService.generateFilesToUploadFile(submission)
+        when:
+        egaSubmissionFileService.prepareSubmissionForUpload(egaSubmission)
+
+        then:
+        egaSubmission.state == EgaSubmission.State.FILE_UPLOAD_STARTED
     }
 }

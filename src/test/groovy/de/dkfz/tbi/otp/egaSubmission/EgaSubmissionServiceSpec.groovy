@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.testing.gorm.DataTest
@@ -29,11 +28,12 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFactory, DataTest {
+class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFactory, IsRoddy, DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -70,8 +70,9 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         ]
     }
 
-    private EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
+    private final EgaSubmissionService egaSubmissionService = new EgaSubmissionService()
 
+    @SuppressWarnings('UnnecessaryObjectReferences')
     @Unroll
     void "test create submission all valid"() {
         given:
@@ -133,7 +134,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test update state all fine"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
         BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject(
                 sampleSubmissionObject: sampleSubmissionObject,
@@ -155,7 +156,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test update state without files"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
 
         when:
         egaSubmissionService.updateSubmissionState(submission, EgaSubmission.State.FILE_UPLOAD_STARTED)
@@ -167,7 +168,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test save submission object all fine"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         Sample sample = createSample()
         SeqType seqType = createSeqType()
 
@@ -183,7 +184,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
     @Unroll
     void "test save submission object"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
 
         when:
         egaSubmissionService.saveSampleSubmissionObject(submission, sample(), seqType())
@@ -200,7 +201,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test update submission object all fine"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
 
         when:
@@ -214,7 +215,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test remove sample submission objects"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject()
         submission.addToSamplesToSubmit(sampleSubmissionObject)
 
@@ -244,7 +245,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
                 seqType: seqTrack.seqType,
         )
 
-        EgaSubmission submission = createSubmission(
+        EgaSubmission submission = createEgaSubmission(
                 project: seqTrack.project
         )
         submission.addToSamplesToSubmit(sampleSubmissionObject)
@@ -265,7 +266,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test get bam files and alias"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         RoddyBamFile bamFile = createBamFile()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
                 sample: bamFile.sample,
@@ -288,7 +289,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test create data file submission objects"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         List<Boolean> selectBox = [true, null]
         List<String> filenames = [DomainFactory.createDataFile().fileName, DomainFactory.createDataFile().fileName]
         List<String> egaSampleAliases = [
@@ -305,7 +306,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test update data file submission objects"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         List<String> egaFileAliases = ["someMagicAlias"]
         DataFile dataFile = DomainFactory.createDataFile()
         List<String> fileNames = [dataFile.fileName]
@@ -323,7 +324,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test update bam file submission objects"() {
         given:
-        EgaSubmission submission = createSubmission()
+        EgaSubmission submission = createEgaSubmission()
         List<String> egaFileAliases = ["someMagicAlias"]
         RoddyBamFile roddyBamFile = createBamFile()
         List<String> fileIds = [roddyBamFile.id.toString()]
