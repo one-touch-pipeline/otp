@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures
 
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
@@ -40,7 +41,8 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 class DataFilesOnGpcfMidTermSpec extends Specification {
 
-    void test(String fileName, boolean valid) {
+    @Unroll
+    void "getDataFilePath, when file is #fileName, then check is #valid"() {
         given:
         File directory = TestCase.uniqueNonExistentPath
         DirectoryStructure directoryStructure = new DataFilesOnGpcfMidTerm()
@@ -60,7 +62,7 @@ class DataFilesOnGpcfMidTermSpec extends Specification {
 
         then:
         if (valid) {
-            assert dataFilePath == Paths.get(directory.path, "run_name/asdf/fastq/asdf_R1.fastq.gz")
+            assert dataFilePath == Paths.get(directory.path, "run_name/asdf/fastq/${fileName}")
             assert context.problems.isEmpty()
         } else {
             assert dataFilePath == null
@@ -73,6 +75,10 @@ class DataFilesOnGpcfMidTermSpec extends Specification {
         where:
         fileName            | valid
         'asdf_R1.fastq.gz'  | true
+        'asdf_R2.fastq.gz'  | true
+        'asdf_I1.fastq.gz'  | true
+        'asdf_I2.fastq.gz'  | true
+        'asdf_I3.fastq.gz'  | true
         'asdf_R1.fastq'     | false
         '**asdf**.fastq.gz' | false
         '.._R1.fastq.gz'    | false

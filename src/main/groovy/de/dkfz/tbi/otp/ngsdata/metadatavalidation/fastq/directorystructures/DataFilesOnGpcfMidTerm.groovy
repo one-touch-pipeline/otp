@@ -56,7 +56,7 @@ class DataFilesOnGpcfMidTerm implements DirectoryStructure {
     Path getDataFilePath(MetadataValidationContext context, ValueTuple valueTuple) {
         String fileName = valueTuple.getValue(FASTQ_FILE.name())
         String runId = valueTuple.getValue(RUN_ID.name())
-        Matcher matcher = fileName =~ /^(.*)_R[12]\.fastq\.gz$/
+        Matcher matcher = fileName =~ /^(.*)_((R[12])|([Ii]\d+))\.fastq\.gz$/
         if (!OtpPath.isValidPathComponent(fileName) || !OtpPath.isValidPathComponent(runId) || !matcher || !OtpPath.isValidPathComponent(matcher.group(1))) {
             context.addProblem(valueTuple.cells, Level.ERROR, "Cannot construct a valid GPCF midterm storage path from run name '${runId}' and filename '${fileName}'.", "Cannot construct a valid GPCF midterm storage path for all rows.")
             return null
