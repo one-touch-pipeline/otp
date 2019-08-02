@@ -72,7 +72,7 @@ class EgaSubmissionServiceIntegrationSpec extends Specification implements EgaSu
         withFile     | withdrawn | result | status
         true         | false     | true   | AbstractMergedBamFile.FileOperationStatus.PROCESSED
         false        | false     | false  | AbstractMergedBamFile.FileOperationStatus.PROCESSED
-        true         | true      | false  | AbstractMergedBamFile.FileOperationStatus.PROCESSED
+        true         | true      | true   | AbstractMergedBamFile.FileOperationStatus.PROCESSED
         true         | false     | false  | AbstractMergedBamFile.FileOperationStatus.INPROGRESS
     }
 

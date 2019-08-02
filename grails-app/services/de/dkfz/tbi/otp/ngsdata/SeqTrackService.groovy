@@ -287,6 +287,17 @@ LIMIT 1
         return filteredFiles
     }
 
+    List<DataFile> getSequenceFilesForSeqTrackIncludingWithdrawn(SeqTrack seqTrack) {
+        List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
+        List<DataFile> filteredFiles = []
+        files.each {
+            if (fileTypeService.isSequenceDataFile(it)) {
+                filteredFiles.add(it)
+            }
+        }
+        return filteredFiles
+    }
+
     void fillBaseCount(SeqTrack seqTrack) {
         long basePairs = 0
         seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile file ->

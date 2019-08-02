@@ -38,10 +38,14 @@ class FileTypeService {
         if (dataFile.fileWithdrawn) {
             return false
         }
-        if (dataFile.fileType.type != FileType.Type.SEQUENCE) {
+        if (!isSequenceDataFile(dataFile)) {
             return false
         }
         return true
+    }
+
+    boolean isSequenceDataFile(DataFile dataFile) {
+        return dataFile.fileType.type == FileType.Type.SEQUENCE
     }
 
     List<FileType> alignmentSequenceTypes() {

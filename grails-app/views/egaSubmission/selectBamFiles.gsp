@@ -54,6 +54,7 @@
                         <g:if test="${!hasFiles}">
                             <th></th>
                         </g:if>
+                        <th></th>
                         <th><g:message code="egaSubmission.individual"/></th>
                         <th><g:message code="egaSubmission.seqType"/></th>
                         <th><g:message code="egaSubmission.sampleType"/></th>
@@ -66,11 +67,18 @@
                     <tbody>
                     <g:each status="i" in="${bamFileList}" var="it">
                         <g:set var="internally" value="${!(it[0] instanceof ExternallyProcessedMergedBamFile)}"/>
-                        <tr>
+                        <tr class="${it[0].withdrawn ? "withdrawn " : ""}">
                             <g:if test="${!hasFiles}">
                                 %{--TODO this is prepared for multiple bam files. At the moment only intern processed bam files should be selectable--}%
                                 <td><g:checkBox name="selectBox[${i}]" disabled="${/*TODO !internally*/true}" checked="${internally}"/></td>
                             </g:if>
+                            <td>
+                                <g:if test="${it[0].withdrawn}">
+                                    <span title="${g.message(code: "egaSubmission.withdrawn.tooltip")}">
+                                        <img src="${assetPath(src: 'warning.png')}"/> ${g.message(code: "egaSubmission.withdrawn")}
+                                    </span>
+                                </g:if>
+                            </td>
                             <td>${it[0].individual.displayName}</td>
                             <td>${it[0].seqType.toString()}</td>
                             <td>${it[0].sampleType.displayName}</td>

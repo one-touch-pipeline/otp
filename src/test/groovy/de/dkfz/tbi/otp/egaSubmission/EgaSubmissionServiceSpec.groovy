@@ -261,7 +261,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         withDataFile | withdrawn | result
         true         | false     | true
         false        | false     | false
-        true         | true      | false
+        true         | true      | true
     }
 
     void "test get bam files and alias"() {

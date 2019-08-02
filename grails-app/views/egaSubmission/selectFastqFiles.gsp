@@ -55,6 +55,7 @@
                         <g:if test="${!hasDataFiles}">
                             <th></th>
                         </g:if>
+                        <th></th>
                         <th><g:message code="egaSubmission.individual"/></th>
                         <th><g:message code="egaSubmission.seqType"/></th>
                         <th><g:message code="egaSubmission.sampleType"/></th>
@@ -70,10 +71,17 @@
                     </thead>
                     <tbody>
                         <g:each status="i" in="${dataFileList}" var="it">
-                            <tr>
+                            <tr class="${it[0].fileWithdrawn ? "withdrawn " : ""}">
                                 <g:if test="${!hasDataFiles}">
                                     <td><g:checkBox name="selectBox[${i}]" checked="true" value="${true}" data-group="group${it[0].run }${it[0].seqTrack.laneId}"/></td>
                                 </g:if>
+                                <td>
+                                    <g:if test="${it[0].fileWithdrawn}">
+                                        <span title="${g.message(code: "egaSubmission.withdrawn.tooltip")}">
+                                            <img src="${assetPath(src: 'warning.png')}"/> ${g.message(code: "egaSubmission.withdrawn")}
+                                        </span>
+                                    </g:if>
+                                </td>
                                 <td>${it[0].individual.displayName}</td>
                                 <td>${it[0].seqType.toString()}</td>
                                 <td>${it[0].sampleType.displayName}</td>

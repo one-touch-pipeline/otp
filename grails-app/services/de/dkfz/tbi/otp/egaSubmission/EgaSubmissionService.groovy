@@ -93,9 +93,7 @@ class EgaSubmissionService {
         Map<SampleSubmissionObject, Boolean> map = [:]
 
         submission.samplesToSubmit.each {
-            List<DataFile> dataFiles = SeqTrack.findBySampleAndSeqType(it.sample, it.seqType).dataFiles.findAll {
-                !it.fileWithdrawn
-            }
+            List<DataFile> dataFiles = SeqTrack.findBySampleAndSeqType(it.sample, it.seqType).dataFiles
             if (dataFiles.empty) {
                 map.put(it, false)
             } else {
@@ -169,7 +167,7 @@ class EgaSubmissionService {
             dataFiles = submission.dataFilesToSubmit*.dataFile
         } else {
             dataFiles = submission.samplesToSubmit.findAll { it.useFastqFile }.collectMany {
-                seqTrackService.getSequenceFilesForSeqTrack(SeqTrack.findBySampleAndSeqType(it.sample, it.seqType))
+                seqTrackService.getSequenceFilesForSeqTrackIncludingWithdrawn(SeqTrack.findBySampleAndSeqType(it.sample, it.seqType))
             }
         }
 
@@ -219,7 +217,6 @@ class EgaSubmissionService {
                 eq('sample', sampleSubmissionObject.sample)
                 eq('seqType', sampleSubmissionObject.seqType)
             }
-            eq('withdrawn', false)
             eq('fileOperationStatus', AbstractMergedBamFile.FileOperationStatus.PROCESSED)
         }.findAll {
             it.isMostRecentBamFile()
