@@ -349,6 +349,7 @@ class MetadataImportService {
         importRuns(context, runSegment, context.spreadsheet.dataRows)
         log.debug("runs stopped took: ${System.currentTimeMillis() - timeStarted}")
 
+        runSegment.refresh()
         notifyAboutUnsetConfig(runSegment.dataFiles*.seqTrack as List, runSegment.otrsTicket)
 
         MetaDataFile metaDataFile = new MetaDataFile(
