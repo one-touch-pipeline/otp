@@ -158,7 +158,7 @@ generate_changelog:
   script:
     - set -e
     - mkdir -p $ARTIFACTS_BASE_DIRECTORY
-    - LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+    - LATEST_TAG=$(git describe --abbrev=0 --tags --match "v*.*.*" HEAD^)
     - echo $LATEST_TAG
     - git config gitchangelog.rc-path scripts/gitchangelog/gitchangelog.rc.reference
     - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> $ARTIFACTS_BASE_DIRECTORY/CHANGELOG.txt
