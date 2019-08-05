@@ -31,9 +31,6 @@
 <body>
     <div class="body">
         <otp:autoRefresh/>
-        <div id="plan-dsl-dialog" title="DSL for Workflow ${name}" style="display: none">
-            <textarea readonly="readonly" cols="200" rows="100"></textarea>
-        </div>
         <h1><g:message code="processes.plan.title" args="${ [state ?: "all", name] }" /></h1>
         <div>
             <g:img dir="assets/status" file="${enabled ? 'green.png' : 'grey.png'}" style="vertical-align: middle"/>
@@ -55,9 +52,6 @@
                     <button id="disable-workflow-button" style="${enabled ? '' : 'display: none;'}"><g:message code="processes.plan.disableWorkflow"/></button>
                 </sec:ifAllGranted>
             </g:if>
-        </div>
-        <div>
-            <button id="generate-dsl"><g:message code="processes.plan.generatePlanMarkup"/></button>
         </div>
         <div id="workflowOverview">
             <div class="otpDataTables">
