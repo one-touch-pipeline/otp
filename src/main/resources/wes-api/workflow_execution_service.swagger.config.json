@@ -1,0 +1,7 @@
+{
+  "library": "resttemplate",
+  "dateLibrary": "java8",
+  "modelPackage": "io.swagger.client.wes.model",
+  "apiPackage": "io.swagger.client.wes.api",
+  "invokerPackage": "io.swagger.client.wes"
+}

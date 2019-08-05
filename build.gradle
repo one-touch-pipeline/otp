@@ -41,6 +41,7 @@ plugins {
     id "com.gorylenko.gradle-git-properties" version "2.0.0"
     id "com.github.monosoul.markdown.page.generator" version "2.1.0.1"
     id "com.gradle.build-scan" version "1.16"
+    id 'org.hidetake.swagger.generator' version '2.18.1'
 }
 
 buildScan {
@@ -110,6 +111,20 @@ sourceSets {
     }
 }
 
+swaggerSources {
+    wes {
+        inputFile = file("${sourceSets.main.resources.srcDirs[0]}/wes-api/workflow_execution_service.swagger.yaml")
+        code {
+            language = 'java'
+            configFile = file("${sourceSets.main.resources.srcDirs[0]}/wes-api/workflow_execution_service.swagger.config.json")
+            dependsOn validation
+        }
+    }
+}
+compileJava.dependsOn swaggerSources.wes.code
+sourceSets.main.java.srcDir "${swaggerSources.wes.code.outputDir}/src/main/java"
+sourceSets.main.resources.srcDir "${swaggerSources.wes.code.outputDir}/src/main/resources"
+
 task workflowTest(type: Test) {
     testClassesDirs = sourceSets.workflowTest.output.classesDirs
     classpath = sourceSets.workflowTest.runtimeClasspath
@@ -121,6 +136,9 @@ task workflowTest(type: Test) {
 }
 
 dependencies {
+    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.4.3' // swagger 2.x codegen
+    implementation 'io.swagger:swagger-annotations:1.6.0'
+
     integrationTestCompile sourceSets.testHelper.output
     integrationTestRuntime sourceSets.testHelper.output
 

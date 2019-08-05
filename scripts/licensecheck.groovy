@@ -94,6 +94,9 @@ class LicenseCheck {
             "grailsw.bat",
             "grailsw",
 
+            "src/main/resources/wes-api/workflow_execution_service.swagger.config.json",
+            "src/main/resources/wes-api/workflow_execution_service.swagger.yaml",
+
             "workflows/cwl/dataInstallation/cromwell/config.conf",
             "workflows/cwl/dataInstallation/wes-service-with-cromwell/config.conf",
     ].collect { Paths.get(it) }
