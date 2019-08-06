@@ -21,7 +21,7 @@
  */
 
 /*jslint continue: true */
-/*global $, Graph */
+/*global $ */
 $.otp.workflows = {
     /**
      * Creates the HTML markup for the status image.
@@ -161,143 +161,6 @@ $.otp.workflows = {
             action: 'redo.png'
         });
         return '<a id="restartProcessingStepLink" onclick="$.otp.workflows.restartProcessingStep(' + id + ', \'' + dataTable + '\');" href="#" title="Restart" ><img src="' + imageLink + '"/></a>';
-    },
-    planGraph: {
-        render: function (r, n) {
-            "use strict";
-            var element, textElement, i, param, addNewline, attr, parameters;
-            parameters = "";
-            addNewline = false;
-            if (n.constantParameters.length > 0) {
-                parameters = "Constant Parameters:\n";
-            }
-            for (i = 0; i < n.constantParameters.length; i += 1) {
-                if (addNewline) {
-                    parameters += "\n";
-                }
-                param = n.constantParameters[i];
-                parameters += param.type.name + ": " + param.value;
-                addNewline = true;
-            }
-            if (n.inputParameters.length > 0) {
-                if (addNewline) {
-                    parameters += "\n";
-                }
-                parameters = "Input Parameters:\n";
-                addNewline = false;
-            }
-            for (i = 0; i < n.inputParameters.length; i += 1) {
-                if (addNewline) {
-                    parameters += "\n";
-                }
-                param = n.inputParameters[i];
-                parameters += param.type.name + ": ";
-                if (param.value) {
-                    parameters += param.value;
-                }
-                addNewline = true;
-            }
-            if (n.outputParameters.length > 0) {
-                if (addNewline) {
-                    parameters += "\n";
-                }
-                parameters = "Output Parameters:\n";
-                addNewline = false;
-            }
-            for (i = 0; i < n.outputParameters.length; i += 1) {
-                if (addNewline) {
-                    parameters += "\n";
-                }
-                param = n.outputParameters[i];
-                parameters += param.type.name + ": ";
-                if (param.value) {
-                    parameters += param.value;
-                }
-                addNewline = true;
-            }
-            attr = {
-                'stroke-width': '1px',
-                'fill': '#feb',
-                'title': parameters
-            };
-            if (n.startJob) {
-                // start jobs are green ellipse
-                element = r.ellipse(n.point[0], n.point[1], 75, 25);
-                attr.fill = 'green';
-            } else if (n.endStateAware) {
-                // end state aware jobs are ellipse
-                element = r.ellipse(n.point[0], n.point[1], 75, 25);
-            } else {
-                // normal jobs are rects
-                element = r.rect(n.point[0] - 75, n.point[1] - 25, 150, 50);
-            }
-            textElement = r.text(n.point[0], n.point[1], (n.label || n.id));
-            if (n.processingStep !== undefined && n.processingStep !== null) {
-                if (n.failed) {
-                    attr.fill = 'red';
-                } else if (n.succeeded) {
-                    attr.fill = 'lightgreen';
-                } else if (n.finished) {
-                    attr.fill = 'lightblue';
-                }
-                textElement.attr({
-                    href: $.otp.createLink({
-                        controller: 'processes',
-                        action: 'processingStep',
-                        id: n.processingStep
-                    })
-                });
-            }
-            element.attr(attr);
-            return r.set().push(element, textElement);
-        },
-        testEdgeValid: function (data, c) {
-            "use strict";
-            var j, fromValid, toValid;
-            fromValid = false;
-            toValid = false;
-            for (j = 0; j < data.jobs.length; j += 1) {
-                if (j === 0 && data.jobs[j].id === c.from) {
-                    fromValid = true;
-                    continue;
-                }
-                if (data.jobs[j].id === c.from) {
-                    fromValid = data.jobs[j].processingStep !== null;
-                }
-                if (data.jobs[j].id === c.to) {
-                    toValid = data.jobs[j].processingStep !== null;
-                }
-            }
-            return fromValid && toValid;
-        },
-        /**
-         * Renders a graph representing a JobExecutionPlan or Process.
-         * @param idName Name of the element id where to render the graph to
-         * @param data JSON data structure containing jobs and connections
-         */
-        setup: function (idName, data) {
-            "use strict";
-            var i, g, job, c, layouter, renderer;
-            g = new Graph();
-            g.edgeFactory.template.style.directed = true;
-            for (i = 0; i < data.jobs.length; i += 1) {
-                job = data.jobs[i];
-                job.render = $.otp.workflows.planGraph.render;
-                job.label = job.name;
-                g.addNode(job.id, job);
-            }
-            for (i = 0; i < data.connections.length; i += 1) {
-                c = data.connections[i];
-                g.addEdge(c.from, c.to, {
-                    stroke: $.otp.workflows.planGraph.testEdgeValid(data, c) ? "red" : "black"
-                });
-            }
-            layouter = new Graph.Layout.Spring(g);
-            layouter.layout();
-            renderer = new Graph.Renderer.Raphael(idName, g, $("#" + idName).parent().width() - 20, 600);
-            renderer.draw();
-            $("#" + idName).data("graph", {layouter: layouter, renderer: renderer});
-        }
     },
     /**
      * Generates the JobExecutionPlan DSL for the given plan.
@@ -605,28 +468,6 @@ $.otp.workflows = {
                 image.attr("src", image.attr("src").replace("green", "grey"));
             });
         });
-        $("#show-visualization").click(function () {
-            $("#plan-visualization").show();
-            $("#hide-visualization").show();
-            $(this).hide();
-            if ($("#plan-visualization").data("graph")) {
-                $("#plan-visualization").data("graph").layouter.layout();
-                $("#plan-visualization").data("graph").renderer.draw();
-                return;
-            }
-            $.getJSON($.otp.createLink({
-                controller: 'processes',
-                action: 'planVisualization',
-                id: planId
-            }), function (data) {
-                $.otp.workflows.planGraph.setup("plan-visualization", data);
-            });
-        });
-        $("#hide-visualization").click(function () {
-            $("#plan-visualization").hide();
-            $("#show-visualization").show();
-            $(this).hide();
-        });
         $("#generate-dsl").click(function () {
             $.getJSON($.otp.createLink({
                 controller: 'processes',
@@ -697,28 +538,6 @@ $.otp.workflows = {
         ],
             undefined,
             270);
-        $("#show-visualization").click(function () {
-            $("#process-visualization").show();
-            $("#hide-visualization").show();
-            $(this).hide();
-            if ($("#process-visualization").data("graph")) {
-                $("#process-visualization").data("graph").layouter.layout();
-                $("#process-visualization").data("graph").renderer.draw();
-                return;
-            }
-            $.getJSON($.otp.createLink({
-                controller: 'processes',
-                action: 'processVisualization',
-                id: processId
-            }), function (data) {
-                $.otp.workflows.planGraph.setup("process-visualization", data);
-            });
-        });
-        $("#hide-visualization").click(function () {
-            $("#process-visualization").hide();
-            $("#show-visualization").show();
-            $(this).hide();
-        });
     },
     processingStep: {
         processingStepId: null,

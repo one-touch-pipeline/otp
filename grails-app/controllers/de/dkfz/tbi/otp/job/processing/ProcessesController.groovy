@@ -336,11 +336,6 @@ class ProcessesController {
         render dataToRender as JSON
     }
 
-    def processVisualization() {
-        Process process = processService.getProcess(params.id as long)
-        render processService.processInformation(process) as JSON
-    }
-
     def restartWithProcess(Process process) {
         StringBuilder stringBuilder = new StringBuilder()
         LogThreadLocal.withThreadLog(stringBuilder) {

@@ -57,9 +57,6 @@
             </g:if>
         </div>
         <div>
-            <div id="plan-visualization" style="display: none"></div>
-            <button id="show-visualization"><g:message code="processes.plan.showPlanVisualization"/></button>
-            <button id="hide-visualization" style="display: none"><g:message code="processes.plan.hidePlanVisualization"/></button>
             <button id="generate-dsl"><g:message code="processes.plan.generatePlanMarkup"/></button>
         </div>
         <div id="workflowOverview">

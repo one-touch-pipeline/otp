@@ -70,11 +70,6 @@
                     ${parameter.text}
                 </p>
             </g:if>
-            <div>
-                <div id="process-visualization" style="display: none"></div>
-                <button id="show-visualization"><g:message code="processes.process.showProcessVisualization"/></button>
-                <button id="hide-visualization" style="display: none"><g:message code="processes.process.hideProcessVisualization"/></button>
-            </div>
         </div>
         <div id="processCommentBox" class="commentBoxContainer">
             <div id="commentLabel">Comment:</div>
