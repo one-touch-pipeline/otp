@@ -150,8 +150,10 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_REPLY_TO, value: HelperUtils.randomEmail)
             DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
             DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION, value: HelperUtils.randomEmail)
+            DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_CLUSTER_ADMINISTRATION, value: HelperUtils.randomEmail)
             DomainFactory.createProcessingOptionLazy(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
             DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_TIMEOUT, value: 2)
+            DomainFactory.createProcessingOptionLazy(name: OptionName.CLUSTER_NAME, value: 'CLUSTER NAME')
 
             createUserAndRoles()
             loadWorkflow()
@@ -464,6 +466,7 @@ echo \$TEMP_DIR
      */
     protected void execute(int numberOfProcesses = 1, boolean ensureNoFailure = true) {
         SessionUtils.withNewSession {
+            setUnixGroup()
             schedulerService.startup()
             if (!startJobRunning) {
                 AbstractStartJobImpl startJob = Holders.applicationContext.getBean(JobExecutionPlan.list()?.first()?.startJob?.bean, AbstractStartJobImpl)
@@ -484,6 +487,14 @@ echo \$TEMP_DIR
             if (ensureNoFailure) {
                 ensureThatWorkflowHasNotFailed()
             }
+        }
+    }
+
+    private void setUnixGroup() {
+        String unixGroup = TestCase.primaryGroup()
+        Project.list().each {
+            it.unixGroup = unixGroup
+            it.save(flush: true)
         }
     }
 
