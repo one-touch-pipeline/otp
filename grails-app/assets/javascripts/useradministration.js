@@ -199,58 +199,5 @@ $.otp.userAdministration.editUser = {
     register: function () {
         "use strict";
         $("#edit-user-form").submit(this.submitUserForm);
-        $("#create-new-group").click(function () {
-            var object = $.otp.userAdministration.editUser.newGroupDialog;
-            object.showDialog.call(object);
-        });
-    }
-};
-
-$.otp.userAdministration.create = {
-    register: function () {
-        "use strict";
-        $("#create-user-form").validate({
-            rules: {
-                username: {
-                    required: true
-                },
-                email: {
-                    required: true,
-                    email: true
-                }
-            },
-            highlight: function (element, errorClass, validClass) {
-                $(element).addClass(errorClass);
-                $(element).parent().next().addClass(errorClass);
-                $(element).parent().next().removeClass(validClass);
-            },
-            unhighlight: function (element, errorClass, validClass) {
-                $(element).removeClass(errorClass);
-                $(element).parent().next().addClass(validClass);
-                $(element).parent().next().removeClass(errorClass);
-                $(element).removeAttr("title");
-            },
-            submitHandler: function (form) {
-                $(form).ajaxSubmit({
-                    success: function (data) {
-                        var validator, i;
-                        if (data.success === true) {
-                            $.otp.infoMessage("New User with Id " + data.user.id + " created.");
-                        } else if (data.errors) {
-                            for (i = 0; i < data.errors.errors.length; i += 1) {
-                                validator = $("#create-user-form").validate().settings;
-                                validator.highlight($("#create-user-form input[name=" + data.errors.errors[i].field + "]"), validator.errorClass, validator.validClass);
-                                $.otp.warningMessage(data.errors.errors[i].message);
-                            }
-                        }
-                    }
-                });
-            },
-            errorPlacement: function (error, element) {
-                $(element).parent().next().attr("title", error.text());
-                $(element).attr("title", error.text());
-            }
-        });
-        $("#create-user-form").valid();
     }
 };

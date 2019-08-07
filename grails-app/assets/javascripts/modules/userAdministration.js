@@ -20,5 +20,4 @@
  * SOFTWARE.
  */
 
-//= require jqueryValidation
 //= require ../useradministration.js

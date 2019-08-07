@@ -22,7 +22,6 @@
 
 //= require jquery/jquery.js
 //= require jquery-ui/js/jquery-ui.js
-//= require jquery-form/jquery.form.js
 //= require jqueryDatatables
 //= require /webjars/select2/4.0.7/js/select2.js
 //= require ../otp

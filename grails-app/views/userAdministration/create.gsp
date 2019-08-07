@@ -26,14 +26,15 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title><g:message code="user.administration.createUser"/></title>
-        <asset:javascript src="modules/userAdministration"/>
     </head>
 <body>
     <div class="body">
+        <g:render template="/templates/messages"/>
+
         <ul>
             <li class="button"><g:link action="index"><g:message code="user.administration.backToOverview"/></g:link></li>
         </ul>
-        <form id="create-user-form" action="createUser">
+        <g:form id="create-user-form" action="createUser">
         <table class="form">
             <tbody>
                 <tr>
@@ -57,12 +58,7 @@
         <div class="buttons">
             <input type="submit" value="${g.message(code: 'user.administration.createUser')}"/>
         </div>
-        </form>
+        </g:form>
     </div>
-    <asset:script type="text/javascript">
-        $(function () {
-            $.otp.userAdministration.create.register();
-        });
-    </asset:script>
 </body>
 </html>

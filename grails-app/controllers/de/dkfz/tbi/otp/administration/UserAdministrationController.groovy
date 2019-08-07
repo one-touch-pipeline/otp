@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.administration
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
+import grails.validation.ValidationException
 import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -41,6 +42,13 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
  */
 @Secured('ROLE_ADMIN')
 class UserAdministrationController {
+
+    static allowedMethods = [
+            index: "GET",
+            create: "GET",
+            createUSer: "POST",
+    ]
+
     /**
      * Dependency Injection of RemoteUserService
      */
@@ -68,21 +76,25 @@ class UserAdministrationController {
 
     def createUser(CreateUserCommand cmd) {
         if (cmd.hasErrors()) {
-            render cmd as JSON
-            return
-        }
-        List<Role> roles = cmd.role ? Role.findAllByIdInList(cmd.role) : []
-        Map data = [
-                success: true,
-                user: userService.createUser(
+            flash.message = new FlashMessage(g.message(code: "user.administration.create.failure") as String, cmd.errors)
+        } else {
+            try {
+                List<Role> roles = cmd.role ? Role.findAllByIdInList(cmd.role) : []
+                userService.createUser(
                         cmd.username,
                         cmd.email,
                         cmd.realName,
                         roles,
                         cmd.group,
-                ).sanitizedUserMap()
-        ]
-        render data as JSON
+                )
+                flash.message = new FlashMessage(g.message(code: "user.administration.create.success") as String)
+            } catch (ValidationException e) {
+                flash.message = new FlashMessage(g.message(code: "user.administration.create.failure") as String, e.errors)
+            } catch (Exception e) {
+                flash.message = new FlashMessage(g.message(code: "user.administration.create.failure") as String, e.message)
+            }
+        }
+        redirect(action: "create")
     }
 
     /**
