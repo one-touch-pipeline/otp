@@ -65,8 +65,8 @@
                     codes="${[
                             '',
                             'egaSubmission.individual',
+                            'egaSubmission.seqType',
                             'egaSubmission.sampleType',
-                            'egaSubmission.seqType'
                     ]}"
                     id="selectSamplesTable" />
             </div>

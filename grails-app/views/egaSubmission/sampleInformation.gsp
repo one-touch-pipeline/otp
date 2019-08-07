@@ -53,8 +53,8 @@
                 <thead>
                     <tr>
                         <th><g:message code="egaSubmission.individual"/></th>
-                        <th><g:message code="egaSubmission.sampleType"/></th>
                         <th><g:message code="egaSubmission.seqType"/></th>
+                        <th><g:message code="egaSubmission.sampleType"/></th>
                         <th><g:message code="egaSubmission.alias"/></th>
                         <th title="<g:message code="egaSubmission.sampleInformation.fastqInfo"/>"><g:message code="egaSubmission.fastq"/></th>
                         <th title="<g:message code="egaSubmission.sampleInformation.bamInfo"/>"><g:message code="egaSubmission.bam"/></th>
@@ -63,14 +63,14 @@
                 <tbody>
                     <g:each status="i" in="${sampleSubmissionObjects}" var="it">
                         <g:set var="individual" value="${it.sample.individual.displayName}" />
-                        <g:set var="sampleType" value="${it.sample.sampleType.displayName}" />
                         <g:set var="seqType" value="${it.seqType.toString()}" />
+                        <g:set var="sampleType" value="${it.sample.sampleType.displayName}" />
                         <g:set var="key" value="${[individual, sampleType, seqType]}" />
                         <tr>
                             <g:hiddenField name="sampleObjectId[${i}]" value="${it.id}"/>
                             <td>${individual}</td>
-                            <td>${sampleType}</td>
                             <td>${seqType}</td>
+                            <td>${sampleType}</td>
                             <td><g:textField name="egaSampleAlias[${i}]" size="50" value="${egaSampleAliases.get(key)}"/></td>
                             <td><g:radio name="fileType[${i}]" value="FASTQ" checked="${selectedFastqs.get(key)}" disabled="${!existingFastqs.get(it)}"/></td>
                             <td><g:radio name="fileType[${i}]" value="BAM" checked="${selectedBams.get(key)}" disabled="${!existingBams.get(it)}"/></td>

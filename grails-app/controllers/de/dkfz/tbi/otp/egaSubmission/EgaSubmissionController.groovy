@@ -148,7 +148,11 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
         return [
                 submissionId           : submission.id,
-                sampleSubmissionObjects: submission.samplesToSubmit.sort { getIdentifierKeyFromSampleSubmissionObject(it) },
+                sampleSubmissionObjects: submission.samplesToSubmit.sort { a, b ->
+                    a.sample.individual.displayName <=> b.sample.individual.displayName ?:
+                    a.seqType.toString() <=> b.seqType.toString() ?:
+                    a.sample.sampleType.displayName <=> b.sample.sampleType.displayName
+                },
                 egaSampleAliases       : egaSampleAliases,
                 existingFastqs         : existingFastqs,
                 existingBams           : existingBams,
@@ -526,7 +530,9 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         List data = []
         List<List> sampleSeqType = egaSubmissionService.getSampleAndSeqType(project)
 
-        sampleSeqType.each {
+        sampleSeqType.sort { a,b ->
+            a[1] <=> b[1] ?: a[3].toString() <=> b[3].toString() ?: a[2] <=> b[2]
+        }.each {
             long sampleId = it[0]
             String individualPid = it[1]
             String sampleTypeName = it[2]
@@ -535,8 +541,8 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             data.add([
                 "${sampleId}-${seqType.id}",
                 individualPid,
-                sampleTypeName,
                 seqType.toString(),
+                sampleTypeName,
             ])
         }
 
@@ -549,8 +555,8 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     List<String> getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
         return [
                 sampleSubmissionObject.sample.individual.displayName,
-                sampleSubmissionObject.sample.sampleType.displayName,
                 sampleSubmissionObject.seqType.toString(),
+                sampleSubmissionObject.sample.sampleType.displayName,
         ]
     }
 }

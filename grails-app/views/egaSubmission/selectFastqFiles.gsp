@@ -56,8 +56,8 @@
                             <th></th>
                         </g:if>
                         <th><g:message code="egaSubmission.individual"/></th>
-                        <th><g:message code="egaSubmission.sampleType"/></th>
                         <th><g:message code="egaSubmission.seqType"/></th>
+                        <th><g:message code="egaSubmission.sampleType"/></th>
                         <th><g:message code="egaSubmission.alias"/></th>
                         <th><g:message code="egaSubmission.selectFiles.seqCenter"/></th>
                         <th><g:message code="egaSubmission.selectFiles.run"/></th>
@@ -75,8 +75,8 @@
                                     <td><g:checkBox name="selectBox[${i}]" checked="true" value="${true}" data-group="group${it[0].run }${it[0].seqTrack.laneId}"/></td>
                                 </g:if>
                                 <td>${it[0].individual.displayName}</td>
-                                <td>${it[0].sampleType.displayName}</td>
                                 <td>${it[0].seqType.toString()}</td>
+                                <td>${it[0].sampleType.displayName}</td>
                                 <td>${it[1]}<g:hiddenField name="egaSampleAlias[${i}]" value="${it[1]}"/></td>
                                 <td>${it[0].run.seqCenter}</td>
                                 <td>${it[0].run}<g:hiddenField name="runName[${i}]" value="${it[0].run.name}"/></td>

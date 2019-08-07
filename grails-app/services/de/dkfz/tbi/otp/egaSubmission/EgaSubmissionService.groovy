@@ -164,32 +164,42 @@ class EgaSubmissionService {
 
     @CompileDynamic
     List<List> getDataFilesAndAlias(EgaSubmission submission) {
+        List<DataFile> dataFiles
         if (submission.dataFilesToSubmit) {
-            return submission.dataFilesToSubmit.collect {
-                DataFile file = it.dataFile
-                [file, submission.samplesToSubmit.find { it.sample == file.seqTrack.sample && it.seqType == file.seqType }.egaAliasName]
-            }.sort { it[1] }
+            dataFiles = submission.dataFilesToSubmit*.dataFile
+        } else {
+            dataFiles = submission.samplesToSubmit.findAll { it.useFastqFile }.collectMany {
+                seqTrackService.getSequenceFilesForSeqTrack(SeqTrack.findBySampleAndSeqType(it.sample, it.seqType))
+            }
         }
-        return submission.samplesToSubmit.findAll { it.useFastqFile }.collectMany {
-            seqTrackService.getSequenceFilesForSeqTrack(SeqTrack.findBySampleAndSeqType(it.sample, it.seqType))
-        }.collect { DataFile file ->
+
+        return dataFiles.collect { DataFile file ->
             [file, submission.samplesToSubmit.find { it.sample == file.seqTrack.sample && it.seqType == file.seqType }.egaAliasName]
-        }.sort { it[1] }
+        }.sort { a, b ->
+            a[0].individual.displayName <=> b[0].individual.displayName ?:
+            a[0].seqType.toString() <=> b[0].seqType.toString() ?:
+            a[0].sampleType.displayName <=> b[0].sampleType.displayName
+        }
     }
 
     @CompileDynamic
     List<List> getBamFilesAndAlias(EgaSubmission submission) {
+        List<AbstractMergedBamFile> bamFiles
         if (submission.bamFilesToSubmit) {
-            return submission.bamFilesToSubmit.collect {
-                AbstractMergedBamFile file = it.bamFile
-                [file, submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType }.egaAliasName]
-            }.sort { it[1] }
+            bamFiles = submission.bamFilesToSubmit*.bamFile
+        } else {
+            bamFiles = submission.samplesToSubmit.findAll { it.useBamFile }.collectMany {
+                getAbstractMergedBamFiles(it)
+            }
         }
-        return submission.samplesToSubmit.findAll { it.useBamFile }.collectMany {
-            getAbstractMergedBamFiles(it)
-        }.collect { AbstractMergedBamFile file ->
+
+        return bamFiles.collect { AbstractMergedBamFile file ->
             [file, submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType }.egaAliasName]
-        }.sort { it[1] }
+        }.sort { a, b ->
+            a[0].individual.displayName <=> b[0].individual.displayName ?:
+            a[0].seqType.toString() <=> b[0].seqType.toString() ?:
+            a[0].sampleType.displayName <=> b[0].sampleType.displayName
+        }
     }
 
     void updateBamFileSubmissionObjects(List<String> fileIds, List<String> egaFileAliases, EgaSubmission submission) {

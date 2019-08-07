@@ -55,8 +55,8 @@
                             <th></th>
                         </g:if>
                         <th><g:message code="egaSubmission.individual"/></th>
-                        <th><g:message code="egaSubmission.sampleType"/></th>
                         <th><g:message code="egaSubmission.seqType"/></th>
+                        <th><g:message code="egaSubmission.sampleType"/></th>
                         <th><g:message code="egaSubmission.alias"/></th>
                         <th><g:message code="egaSubmission.selectFiles.filenameAlias"/></th>
                         <th><g:message code="egaSubmission.selectFiles.filename"/></th>
@@ -72,8 +72,8 @@
                                 <td><g:checkBox name="selectBox[${i}]" disabled="${/*TODO !internally*/true}" checked="${internally}"/></td>
                             </g:if>
                             <td>${it[0].individual.displayName}</td>
-                            <td>${it[0].sampleType.displayName}</td>
                             <td>${it[0].seqType.toString()}</td>
+                            <td>${it[0].sampleType.displayName}</td>
                             <td>${it[1]}<g:hiddenField name="egaSampleAlias[${i}]" value="${it[1]}"/></td>
                             <g:if test="${bamFilesHasFileAliases}">
                                 <td>${bamFileSubmissionObject.find {
