@@ -565,3 +565,7 @@ $.otp.tableButtons = [
         footer: false
     }
 ];
+
+$(document).ready(function() {
+    $('#project').select2();
+});

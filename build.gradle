@@ -207,6 +207,9 @@ dependencies {
     testRuntime "net.sourceforge.htmlunit:htmlunit:2.18"
 
     testCompile "org.grails:grails-test-mixins:3.3.0"
+
+    // JS libraries
+    compile 'org.webjars:select2:4.0.7'
 }
 
 bootRun {
