@@ -69,13 +69,10 @@ class ExecuteRunYapsaJob extends AbstractOtpJob implements AutoRestartableJob {
 
         String moduleLoader = processingOptionService.findOptionAsString(COMMAND_LOAD_MODULE_LOADER)
         String rActivation = processingOptionService.findOptionAsString(COMMAND_ACTIVATION_R)
-        String rCommand = processingOptionService.findOptionAsString(COMMAND_R)
         String runYapsaActivationPrefix = processingOptionService.findOptionAsString(COMMAND_ENABLE_MODULE)
-        String runYapsaCommand = processingOptionService.findOptionAsString(COMMAND_RUN_YAPSA)
 
         List<String> runYapsaCall = []
-        runYapsaCall << rCommand
-        runYapsaCall << configService.getToolsPath().getAbsolutePath() + "/" + runYapsaCommand
+        runYapsaCall << "runYAPSA.R"
         runYapsaCall << "-i ${instance.samplePair.findLatestSnvCallingInstance().getResultRequiredForRunYapsa()}"
         runYapsaCall << "-o ${outputDirectory.absolutePath}"
         if (instance.seqType == SeqTypeService.wholeGenomePairedSeqType) {

@@ -252,10 +252,12 @@ class ProcessingOption implements Entity {
                 "command to enable the module containing R (executed in Bash, may be empty if not required)",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
         ),
+        @Deprecated
         COMMAND_R(
                 "command for R",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
         ),
+        @Deprecated
         COMMAND_RUN_YAPSA(
                 "command for runYAPSA",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT

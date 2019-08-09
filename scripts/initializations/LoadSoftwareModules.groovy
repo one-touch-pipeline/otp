@@ -43,6 +43,3 @@ processingOptionService.createOrUpdate(COMMAND_SAMTOOLS, 'samtools')
 processingOptionService.createOrUpdate(COMMAND_ACTIVATION_SAMTOOLS, 'module load samtools/1.2')
 
 processingOptionService.createOrUpdate(COMMAND_ACTIVATION_R, "module load R/3.4.0")
-processingOptionService.createOrUpdate(COMMAND_R, "Rscript")
-
-processingOptionService.createOrUpdate(COMMAND_RUN_YAPSA, "YAPSA/runYAPSA_46140a6/runYAPSA.R")

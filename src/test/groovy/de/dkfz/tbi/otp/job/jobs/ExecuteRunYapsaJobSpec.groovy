@@ -96,14 +96,6 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
                 name: COMMAND_ENABLE_MODULE,
                 value: "load",
         )
-        DomainFactory.createProcessingOptionLazy(
-                name: COMMAND_R,
-                value: "r",
-        )
-        DomainFactory.createProcessingOptionLazy(
-                name: COMMAND_RUN_YAPSA,
-                value: "yapsa",
-        )
 
         ConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): "/root", (OtpProperty.PATH_TOOLS): "/tools"])
 
@@ -118,7 +110,6 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
         job.referenceGenomeService = Mock(ReferenceGenomeService) {
             fastaFilePath(_) >> { ReferenceGenome referenceGenome ->
                 return new File("/reference/genome.fa")
-
             }
         }
         job.processingOptionService = new ProcessingOptionService()
@@ -132,7 +123,7 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
 
             mkdir -p -m 2755 /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/mutational_signatures_results/paired/sampletypename-\\d+_sampletypename-\\d+/instance-\\d+
 
-            r ${configService.getToolsPath()}/yapsa -i /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/snv_results/paired/sampletypename-\\d+_sampletypename-\\d+/instance-\\d+/snvs_pid_\\d+_somatic_snvs_conf_8_to_10.vcf -o /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/mutational_signatures_results/paired/sampletypename-\\d+_sampletypename-\\d+/instance-\\d+ -s WGS -r /reference/genome.fa -v
+            runYAPSA.R -i /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/snv_results/paired/sampletypename-\\d+_sampletypename-\\d+/instance-\\d+/snvs_pid_\\d+_somatic_snvs_conf_8_to_10.vcf -o /root/projectDirName_\\d+/sequencing/whole_genome_sequencing/view-by-pid/pid_\\d+/mutational_signatures_results/paired/sampletypename-\\d+_sampletypename-\\d+/instance-\\d+ -s WGS -r /reference/genome.fa -v
 
             """.stripIndent()
 
