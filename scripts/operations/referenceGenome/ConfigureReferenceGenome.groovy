@@ -24,14 +24,16 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 
-Project project = exactlyOneElement(Project.findAllByName(''))
+Project project = Project.findByName('')
+assert project: "no project given"
+
 Collection<SeqType> seqTypes = [
         //SeqTypeService.getWholeGenomePairedSeqType(),
         //SeqTypeService.getExomePairedSeqType(),
         //SeqTypeService.getWholeGenomeBisulfitePairedSeqType(),
         //SeqTypeService.getWholeGenomeBisulfiteTagmentationPairedSeqType(),
-        //SeqTypeService.getRnaPairedSeqType(),
 ]
+
 Collection<SampleType> sampleTypes = [
         //null,
         //exactlyOneElement(SampleType.findAllByName('')),
@@ -114,6 +116,15 @@ String refGenName = ''
  */
 String statSizeFileName = ''
 
+
+
+//RNA should not be configured over this script. Use the GUI instead!
+List<SeqType> blackListedSeqTypes = [
+        SeqTypeService.getRnaPairedSeqType(),
+        SeqTypeService.getRnaSingleSeqType(),
+]
+
+assert !(seqTypes.any { it in blackListedSeqTypes }): "Blacklisted seqTypes selected, cant continue!"
 
 ReferenceGenome.withTransaction {
     assert refGenName
