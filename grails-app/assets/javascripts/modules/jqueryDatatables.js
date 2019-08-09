@@ -20,9 +20,9 @@
  * SOFTWARE.
  */
 
-//=require dataTable/jquery.dataTables.js
-//=require dataTable/dataTables.fixedColumns.js
-//=require dataTable/dataTables.fixedHeader.js
+//=require /webjars/datatables/1.10.7/js/jquery.dataTables.js
+//=require /webjars/datatables-fixedcolumns/3.0.2/js/dataTables.fixedColumns.js
+//=require /webjars/datatables-fixedheader/2.1.2/js/dataTables.fixedHeader.js
+//=require /webjars/datatables-buttons/1.3.1-1/js/dataTables.buttons.js
+//=require /webjars/datatables-buttons/1.3.1-1/js/buttons.html5.js
 //=require dataTable/dataTables.scroller.js
-//=require dataTable/dataTables.buttons.js
-//=require dataTable/buttons.html5.js

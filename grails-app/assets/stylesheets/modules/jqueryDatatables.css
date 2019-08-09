@@ -21,10 +21,10 @@
  */
 
 /*
-*= require dataTable/jquery.dataTables.css
-*= require dataTable/jquery.dataTables_themeroller.css
-*= require dataTable/dataTables.fixedColumns.css
-*= require dataTable/dataTables.fixedHeader.css
+*= require /webjars/datatables/1.10.7/css/jquery.dataTables.css
+*= require /webjars/datatables/1.10.7/css/jquery.dataTables_themeroller.css
+*= require /webjars/datatables-fixedcolumns/3.0.2/css/dataTables.fixedColumns.css
+*= require /webjars/datatables-fixedheader/2.1.2/css/dataTables.fixedHeader.css
+*= require /webjars/datatables-buttons/1.3.1-1/css/buttons.dataTables.css
 *= require dataTable/dataTables.scroller.css
-*= require dataTable/buttons.dataTables.css
 */
