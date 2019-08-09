@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class SampleSubmissionObject implements Entity, SubmissionObject {
 
+    Sample sample
     SeqType seqType
     boolean useBamFile = false
     boolean useFastqFile = false

@@ -30,7 +30,7 @@
 </head>
 <body>
 <div class="body">
-    <h3><g:message code="egaSubmission.experimentalMetadata.title"/></h3>
+    <h3><g:message code="egaSubmission.experimentalMetadata.header"/></h3>
     <div class="otpDataTables">
         <table id="dataTable">
             <thead>
@@ -56,7 +56,7 @@
                     <td>${it.libraryLayout}</td>
                     <td><g:message code="egaSubmission.unknown"/></td>
                     <td><g:message code="egaSubmission.unknown"/></td>
-                    <td>${it.seqType}</td>
+                    <td>${it.displayName}</td>
                     <td>${it.libraryPreparationKit}</td>
                 </tr>
             </g:each>

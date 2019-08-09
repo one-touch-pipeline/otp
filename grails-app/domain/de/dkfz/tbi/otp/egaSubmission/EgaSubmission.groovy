@@ -41,9 +41,9 @@ class EgaSubmission implements Entity {
     Set<DataFileSubmissionObject> dataFilesToSubmit = [] as Set<DataFileSubmissionObject>
 
     static hasMany = [
-            dataFilesToSubmit: DataFileSubmissionObject,
-            bamFilesToSubmit : BamFileSubmissionObject,
             samplesToSubmit  : SampleSubmissionObject,
+            bamFilesToSubmit : BamFileSubmissionObject,
+            dataFilesToSubmit: DataFileSubmissionObject,
     ]
 
     static belongsTo = [
@@ -52,14 +52,14 @@ class EgaSubmission implements Entity {
 
     static constraints = {
         pubMedId nullable: true
-        dataFilesToSubmit validator: { val, obj ->
-            return (val || obj.state == State.SELECTION || !obj.bamFilesToSubmit?.isEmpty())
+        samplesToSubmit validator: { val, obj ->
+            return (val || obj.state == State.SELECTION)
         }
         bamFilesToSubmit validator: { val, obj ->
             return (val || obj.state == State.SELECTION || !obj.dataFilesToSubmit?.isEmpty())
         }
-        samplesToSubmit validator: { val, obj ->
-            return (val || obj.state == State.SELECTION)
+        dataFilesToSubmit validator: { val, obj ->
+            return (val || obj.state == State.SELECTION || !obj.bamFilesToSubmit?.isEmpty())
         }
     }
 

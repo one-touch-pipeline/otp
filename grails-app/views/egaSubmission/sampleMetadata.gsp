@@ -30,7 +30,7 @@
 </head>
 <body>
 <div class="body">
-    <h3><g:message code="egaSubmission.sampleMetadata.title"/></h3>
+    <h3><g:message code="egaSubmission.sampleMetadata.header"/></h3>
     <div class="otpDataTables">
         <table id="dataTable">
             <thead>
@@ -45,7 +45,7 @@
                     <th><g:message code="egaSubmission.sampleMetadata.phenotype"/></th>
                     <th><g:message code="egaSubmission.sampleMetadata.case"/></th>
                     <th><g:message code="egaSubmission.sampleMetadata.organism"/></th>
-                    <th><g:message code="egaSubmission.sampleMetadata.title1"/></th>
+                    <th><g:message code="egaSubmission.sampleMetadata.titleColumn"/></th>
                     <th><g:message code="egaSubmission.sampleMetadata.description"/></th>
                     <th><g:message code="egaSubmission.sampleMetadata.bioSampleId"/></th>
                     <th><g:message code="egaSubmission.sampleMetadata.cellLine"/></th>
