@@ -190,12 +190,17 @@ class EgaSubmissionService {
         }
 
         return bamFiles.collect { AbstractMergedBamFile file ->
-           def producedByOtp = !(file instanceof ExternallyProcessedMergedBamFile)
-           def withdrawn = file.withdrawn
-
+            boolean producedByOtp = !(file instanceof ExternallyProcessedMergedBamFile)
+            boolean withdrawn = file.withdrawn
+            // For normal BAMs created by OTP, there is only one file and the decision was made on the previous page (disabled and checked)
+            // Withdrawn BAMs can be submitted (enabled but unchecked by default) but the user should explicitly confirm that they want to submit "bad data"
+            // Imported BAMs are not supported (disabled and unchecked), regardless of withdrawn state.
             new BamFileAndSampleAlias(
                     file,
                     submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType }.egaAliasName,
+                    producedByOtp && withdrawn,
+                    producedByOtp && !withdrawn,
+                    producedByOtp,
             )
         }.sort()
     }
@@ -344,6 +349,9 @@ class DataFileAndSampleAlias implements Comparable<DataFileAndSampleAlias> {
 class BamFileAndSampleAlias implements Comparable<BamFileAndSampleAlias> {
     AbstractMergedBamFile bamFile
     String sampleAlias
+    boolean selectionEditable
+    boolean defaultSelectionState
+    boolean producedByOtp
 
     @Override
     int compareTo(BamFileAndSampleAlias other) {

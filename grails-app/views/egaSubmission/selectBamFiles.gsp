@@ -66,15 +66,12 @@
                     </thead>
                     <tbody>
                     <g:each status="i" in="${bamFileList}" var="it">
-                        <g:set var="producedByOtp" value="${!(it.bamFile instanceof ExternallyProcessedMergedBamFile)}"/>
-                        <g:set var="withdrawn" value="${it.bamFile.withdrawn}"/>
-                        <tr class="${withdrawn ? "withdrawn " : ""}">
+                        <tr class="${it.bamFile.withdrawn ? "withdrawn " : ""}">
                             <g:if test="${!hasFiles}">
-                                %{--TODO this is prepared for multiple bam files. At the moment only intern processed bam files should be selectable--}%
-                                <td><g:checkBox name="selectBox[${i}]" disabled="${/*TODO !producedByOtp*/true}" checked="${producedByOtp}"/></td>
+                                <td><g:checkBox name="selectBox[${i}]" disabled="${!(it.selectionEditable)}" checked="${it.defaultSelectionState}"/></td>
                             </g:if>
                             <td>
-                                <g:if test="${withdrawn}">
+                                <g:if test="${it.bamFile.withdrawn}">
                                     <span title="${g.message(code: "egaSubmission.withdrawn.tooltip")}">
                                         <img src="${assetPath(src: 'warning.png')}"/> ${g.message(code: "egaSubmission.withdrawn")}
                                     </span>
@@ -92,7 +89,7 @@
                                 <td><g:textField name="egaFileAlias[${i}]" size="50" value="${egaFileAliases?.getAt(it.bamFile.bamFileName + it.sampleAlias)}" disabled="${!hasFiles}"/></td>
                             </g:else>
                             <td>${it.bamFile.bamFileName}<g:hiddenField name="fileId[${i}]" value="${it.bamFile.id}"/></td>
-                            <td>${producedByOtp? "Yes" : "No"}</td>
+                            <td>${it.producedByOtp? "Yes" : "No"}</td>
                         </tr>
                     </g:each>
                     </tbody>
