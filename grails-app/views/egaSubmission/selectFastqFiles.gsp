@@ -71,34 +71,34 @@
                     </thead>
                     <tbody>
                         <g:each status="i" in="${dataFileList}" var="it">
-                            <tr class="${it[0].fileWithdrawn ? "withdrawn " : ""}">
+                            <tr class="${it.dataFile.fileWithdrawn ? "withdrawn " : ""}">
                                 <g:if test="${!hasDataFiles}">
-                                    <td><g:checkBox name="selectBox[${i}]" checked="true" value="${true}" data-group="group${it[0].run }${it[0].seqTrack.laneId}"/></td>
+                                    <td><g:checkBox name="selectBox[${i}]" checked="true" value="${true}" data-group="group${it.dataFile.run }${it.dataFile.seqTrack.laneId}"/></td>
                                 </g:if>
                                 <td>
-                                    <g:if test="${it[0].fileWithdrawn}">
+                                    <g:if test="${it.dataFile.fileWithdrawn}">
                                         <span title="${g.message(code: "egaSubmission.withdrawn.tooltip")}">
                                             <img src="${assetPath(src: 'warning.png')}"/> ${g.message(code: "egaSubmission.withdrawn")}
                                         </span>
                                     </g:if>
                                 </td>
-                                <td>${it[0].individual.displayName}</td>
-                                <td>${it[0].seqType.toString()}</td>
-                                <td>${it[0].sampleType.displayName}</td>
-                                <td>${it[1]}<g:hiddenField name="egaSampleAlias[${i}]" value="${it[1]}"/></td>
-                                <td>${it[0].run.seqCenter}</td>
-                                <td>${it[0].run}<g:hiddenField name="runName[${i}]" value="${it[0].run.name}"/></td>
-                                <td>${it[0].seqTrack.laneId}</td>
-                                <td>${it[0].seqTrack.normalizedLibraryName}</td>
-                                <td>${it[0].seqTrack.ilseId}</td>
+                                <td>${it.dataFile.individual.displayName}</td>
+                                <td>${it.dataFile.seqType.toString()}</td>
+                                <td>${it.dataFile.sampleType.displayName}</td>
+                                <td>${it.sampleAlias}<g:hiddenField name="egaSampleAlias[${i}]" value="${it.sampleAlias}"/></td>
+                                <td>${it.dataFile.run.seqCenter}</td>
+                                <td>${it.dataFile.run}<g:hiddenField name="runName[${i}]" value="${it.dataFile.run.name}"/></td>
+                                <td>${it.dataFile.seqTrack.laneId}</td>
+                                <td>${it.dataFile.seqTrack.normalizedLibraryName}</td>
+                                <td>${it.dataFile.seqTrack.ilseId}</td>
                                 <g:if test="${dataFilesHasFileAliases}">
                                     <td>${dataFileSubmissionObject.find {
-                                        dataFileSubmissionObject -> dataFileSubmissionObject.dataFile == it[0]
+                                        dataFileSubmissionObject -> dataFileSubmissionObject.dataFile == it.dataFile
                                     }.egaAliasName}</td>
                                 </g:if><g:else>
-                                    <td><g:textField name="egaFileAlias[${i}]" size="50" value="${egaFileAliases?.getAt(it[0].fileName + it[0].run)}" disabled="${!hasDataFiles}"/></td>
+                                    <td><g:textField name="egaFileAlias[${i}]" size="50" value="${egaFileAliases?.getAt(it.dataFile.fileName + it.dataFile.run)}" disabled="${!hasDataFiles}"/></td>
                                 </g:else>
-                                <td>${it[0].fileName}<g:hiddenField name="filename[${i}]" value="${it[0].fileName}"/></td>
+                                <td>${it.dataFile.fileName}<g:hiddenField name="filename[${i}]" value="${it.dataFile.fileName}"/></td>
                             </tr>
                         </g:each>
                     </tbody>

@@ -22,8 +22,7 @@
 package de.dkfz.tbi.otp.egaSubmission
 
 import grails.gorm.transactions.Transactional
-import groovy.transform.CompileDynamic
-import groovy.transform.CompileStatic
+import groovy.transform.*
 import org.hibernate.criterion.CriteriaSpecification
 import org.springframework.security.access.prepost.PreAuthorize
 
@@ -161,7 +160,7 @@ class EgaSubmissionService {
     }
 
     @CompileDynamic
-    List<List> getDataFilesAndAlias(EgaSubmission submission) {
+    List<DataFileAndSampleAlias> getDataFilesAndAlias(EgaSubmission submission) {
         List<DataFile> dataFiles
         if (submission.dataFilesToSubmit) {
             dataFiles = submission.dataFilesToSubmit*.dataFile
@@ -172,16 +171,15 @@ class EgaSubmissionService {
         }
 
         return dataFiles.collect { DataFile file ->
-            [file, submission.samplesToSubmit.find { it.sample == file.seqTrack.sample && it.seqType == file.seqType }.egaAliasName]
-        }.sort { a, b ->
-            a[0].individual.displayName <=> b[0].individual.displayName ?:
-            a[0].seqType.toString() <=> b[0].seqType.toString() ?:
-            a[0].sampleType.displayName <=> b[0].sampleType.displayName
-        }
+            new DataFileAndSampleAlias(
+                    file,
+                    submission.samplesToSubmit.find { it.sample == file.seqTrack.sample && it.seqType == file.seqType }.egaAliasName
+            )
+        }.sort()
     }
 
     @CompileDynamic
-    List<List> getBamFilesAndAlias(EgaSubmission submission) {
+    List<BamFileAndSampleAlias> getBamFilesAndAlias(EgaSubmission submission) {
         List<AbstractMergedBamFile> bamFiles
         if (submission.bamFilesToSubmit) {
             bamFiles = submission.bamFilesToSubmit*.bamFile
@@ -192,12 +190,14 @@ class EgaSubmissionService {
         }
 
         return bamFiles.collect { AbstractMergedBamFile file ->
-            [file, submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType }.egaAliasName]
-        }.sort { a, b ->
-            a[0].individual.displayName <=> b[0].individual.displayName ?:
-            a[0].seqType.toString() <=> b[0].seqType.toString() ?:
-            a[0].sampleType.displayName <=> b[0].sampleType.displayName
-        }
+           def producedByOtp = !(file instanceof ExternallyProcessedMergedBamFile)
+           def withdrawn = file.withdrawn
+
+            new BamFileAndSampleAlias(
+                    file,
+                    submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType }.egaAliasName,
+            )
+        }.sort()
     }
 
     void updateBamFileSubmissionObjects(List<String> fileIds, List<String> egaFileAliases, EgaSubmission submission) {
@@ -241,12 +241,10 @@ class EgaSubmissionService {
     @CompileDynamic
     void createBamFileSubmissionObjects(EgaSubmission submission) {
         getBamFilesAndAlias(submission).each {
-            AbstractMergedBamFile bamFile = it[0] as AbstractMergedBamFile
-            String egaSampleAlias = it[1] as String
-            if (!(bamFile instanceof ExternallyProcessedMergedBamFile)) {
+            if (!(it.bamFile instanceof ExternallyProcessedMergedBamFile)) {
                 BamFileSubmissionObject bamFileSubmissionObject = new BamFileSubmissionObject(
-                        bamFile: bamFile,
-                        sampleSubmissionObject: SampleSubmissionObject.findByEgaAliasName(egaSampleAlias),
+                        bamFile: it.bamFile,
+                        sampleSubmissionObject: SampleSubmissionObject.findByEgaAliasName(it.sampleAlias),
                 ).save(flush: false)
                 submission.addToBamFilesToSubmit(bamFileSubmissionObject)
             }
@@ -274,44 +272,42 @@ class EgaSubmissionService {
         }.unique()
     }
 
-    Map generateDefaultEgaAliasesForDataFiles(List<List> dataFilesAndAliases) {
-        Map<String, String> aliasNames = [:]
+    Map generateDefaultEgaAliasesForDataFiles(List<DataFileAndSampleAlias> dataFilesAndAliases) {
+        Map<String, String> dataFileAliases = [:]
 
         dataFilesAndAliases.each {
-            DataFile dataFile = it[0] as DataFile
-            String runNameWithoutDate = dataFile.run.name.replaceAll("(?<!\\d)((?:20)?[0-2]\\d)-?(0\\d|1[012])-?([0-2]\\d|3[01])[-_]", "")
+            String runNameWithoutDate = it.dataFile.run.name.replaceAll("(?<!\\d)((?:20)?[0-2]\\d)-?(0\\d|1[012])-?([0-2]\\d|3[01])[-_]", "")
             List aliasNameHelper = [
-                    dataFile.seqType.displayName,
-                    dataFile.seqType.libraryLayout,
-                    it[1],
-                    dataFile.seqTrack.normalizedLibraryName,
+                    it.dataFile.seqType.displayName,
+                    it.dataFile.seqType.libraryLayout,
+                    it.sampleAlias,
+                    it.dataFile.seqTrack.normalizedLibraryName,
                     runNameWithoutDate,
-                    dataFile.seqTrack.laneId,
-                    "R${dataFile.mateNumber}",
+                    it.dataFile.seqTrack.laneId,
+                    "R${it.dataFile.mateNumber}",
             ].findAll()
             String aliasName = "${aliasNameHelper.join("_")}.fastq.gz"
-            aliasNames.put(dataFile.fileName + dataFile.run, aliasName)
+            dataFileAliases.put(it.dataFile.fileName + it.dataFile.run, aliasName)
         }
 
-        return aliasNames
+        return dataFileAliases
     }
 
-    Map generateDefaultEgaAliasesForBamFiles(List<List> bamFilesAndAliases) {
-        Map<String, String> aliasNames = [:]
+    Map generateDefaultEgaAliasesForBamFiles(List<BamFileAndSampleAlias> bamFilesAndSampleAliases) {
+        Map<String, String> bamFileAliases = [:]
 
-        bamFilesAndAliases.each {
-            AbstractMergedBamFile bamFile = it[0] as AbstractMergedBamFile
+        bamFilesAndSampleAliases.each {
             List aliasNameHelper = [
-                    bamFile.seqType.displayName,
-                    bamFile.seqType.libraryLayout,
-                    it[1],
-                    bamFile.md5sum,
+                    it.bamFile.seqType.displayName,
+                    it.bamFile.seqType.libraryLayout,
+                    it.sampleAlias,
+                    it.bamFile.md5sum,
             ].findAll()
             String aliasName = "${aliasNameHelper.join("_")}.bam"
-            aliasNames.put(bamFile.bamFileName + it[1], aliasName)
+            bamFileAliases.put(it.bamFile.bamFileName + it.sampleAlias, aliasName)
         }
 
-        return aliasNames
+        return bamFileAliases
     }
 
     @CompileDynamic
@@ -327,5 +323,32 @@ class EgaSubmissionService {
                 property('libraryPreparationKit', 'libraryPreparationKit')
             }
         }.unique()
+    }
+}
+
+@Canonical
+class DataFileAndSampleAlias implements Comparable<DataFileAndSampleAlias> {
+    DataFile dataFile
+    String sampleAlias
+
+    @Override
+    int compareTo(DataFileAndSampleAlias other) {
+        return this.dataFile.individual.displayName <=> other.dataFile.individual.displayName ?:
+                this.dataFile.seqType.toString() <=> other.dataFile.seqType.toString() ?:
+                        this.dataFile.sampleType.displayName <=> other.dataFile.sampleType.displayName
+    }
+
+}
+
+@Canonical
+class BamFileAndSampleAlias implements Comparable<BamFileAndSampleAlias> {
+    AbstractMergedBamFile bamFile
+    String sampleAlias
+
+    @Override
+    int compareTo(BamFileAndSampleAlias other) {
+        return this.bamFile.individual.displayName <=> other.bamFile.individual.displayName ?:
+                this.bamFile.seqType.toString() <=> other.bamFile.seqType.toString() ?:
+                        this.bamFile.sampleType.displayName <=> other.bamFile.sampleType.displayName
     }
 }

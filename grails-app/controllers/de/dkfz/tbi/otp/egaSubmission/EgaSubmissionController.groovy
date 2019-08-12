@@ -162,7 +162,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     Map selectFastqFiles(EgaSubmission submission) {
-        List dataFilesAndAliasList = egaSubmissionService.getDataFilesAndAlias(submission)
+        List<DataFileAndSampleAlias> dataFilesAndAliasList = egaSubmissionService.getDataFilesAndAlias(submission)
         Map egaFileAliases = flash.egaFileAliases ?: egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndAliasList)
 
         return [
@@ -176,7 +176,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     Map selectBamFiles(EgaSubmission submission) {
-        List bamFilesAndAliasList = egaSubmissionService.getBamFilesAndAlias(submission)
+        List<BamFileAndSampleAlias> bamFilesAndAliasList = egaSubmissionService.getBamFilesAndAlias(submission)
         Map egaFileAliases = flash.egaFileAliases ?: egaSubmissionService.generateDefaultEgaAliasesForBamFiles(bamFilesAndAliasList)
 
         return [

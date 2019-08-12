@@ -283,8 +283,8 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         List bamFilesAndAlias = egaSubmissionService.getBamFilesAndAlias(submission)
 
         then:
-        bamFilesAndAlias*.get(0) == [bamFile]
-        bamFilesAndAlias*.get(1) == [sampleSubmissionObject.egaAliasName]
+        bamFilesAndAlias*.bamFile == [bamFile]
+        bamFilesAndAlias*.sampleAlias == [sampleSubmissionObject.egaAliasName]
     }
 
     void "test create data file submission objects"() {
@@ -351,7 +351,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         )
 
         String alias = "someAlias"
-        List dataFilesAndAliases = [[dataFile, alias]]
+        List dataFilesAndAliases = [new DataFileAndSampleAlias(dataFile, alias)]
         List aliasNameHelper = [
                 dataFile.seqType.displayName,
                 dataFile.seqType.libraryLayout,
@@ -389,7 +389,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         RoddyBamFile bamFile = createBamFile()
 
         String alias = "someAlias"
-        List bamFilesAndAliases = [[bamFile, alias]]
+        List bamFilesAndAliases = [new BamFileAndSampleAlias(bamFile, alias)]
         List aliasNameHelper = [
                 bamFile.seqType.displayName,
                 bamFile.seqType.libraryLayout,

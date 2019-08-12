@@ -156,10 +156,10 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         )
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
         String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([
-                [
+                new DataFileAndSampleAlias(
                         dataFile,
                         sampleSubmissionObject.egaAliasName,
-                ],
+                ),
         ]).get(dataFile.fileName + dataFile.run)
 
         when:
@@ -206,10 +206,10 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         )
         submission.addToBamFilesToSubmit(bamFileSubmissionObject)
         String bamFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForBamFiles([
-                [
+                new BamFileAndSampleAlias(
                         roddyBamFile,
                         sampleSubmissionObject.egaAliasName,
-                ],
+                ),
         ]).get(roddyBamFile.bamFileName + sampleSubmissionObject.egaAliasName)
 
         when:
@@ -248,10 +248,10 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         String content = egaSubmissionFileService.generateDataFilesCsvFile(submission)
         Spreadsheet spreadsheet = new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
         String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([
-                [
+                new DataFileAndSampleAlias(
                         dataFile,
                         sampleSubmissionObject.egaAliasName,
-                ],
+                ),
         ]).get(dataFile.fileName + dataFile.run)
 
         when:
@@ -279,10 +279,10 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         String content = egaSubmissionFileService.generateBamFilesCsvFile(submission)
         Spreadsheet spreadsheet = new Spreadsheet(content, Spreadsheet.Delimiter.COMMA)
         String bamFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForBamFiles([
-                [
+                new BamFileAndSampleAlias(
                         roddyBamFile,
                         sampleSubmissionObject.egaAliasName
-                ],
+                ),
         ]).get(roddyBamFile.bamFileName + sampleSubmissionObject.egaAliasName)
 
         when:

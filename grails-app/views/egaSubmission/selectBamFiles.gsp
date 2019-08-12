@@ -66,32 +66,33 @@
                     </thead>
                     <tbody>
                     <g:each status="i" in="${bamFileList}" var="it">
-                        <g:set var="internally" value="${!(it[0] instanceof ExternallyProcessedMergedBamFile)}"/>
-                        <tr class="${it[0].withdrawn ? "withdrawn " : ""}">
+                        <g:set var="producedByOtp" value="${!(it.bamFile instanceof ExternallyProcessedMergedBamFile)}"/>
+                        <g:set var="withdrawn" value="${it.bamFile.withdrawn}"/>
+                        <tr class="${withdrawn ? "withdrawn " : ""}">
                             <g:if test="${!hasFiles}">
                                 %{--TODO this is prepared for multiple bam files. At the moment only intern processed bam files should be selectable--}%
-                                <td><g:checkBox name="selectBox[${i}]" disabled="${/*TODO !internally*/true}" checked="${internally}"/></td>
+                                <td><g:checkBox name="selectBox[${i}]" disabled="${/*TODO !producedByOtp*/true}" checked="${producedByOtp}"/></td>
                             </g:if>
                             <td>
-                                <g:if test="${it[0].withdrawn}">
+                                <g:if test="${withdrawn}">
                                     <span title="${g.message(code: "egaSubmission.withdrawn.tooltip")}">
                                         <img src="${assetPath(src: 'warning.png')}"/> ${g.message(code: "egaSubmission.withdrawn")}
                                     </span>
                                 </g:if>
                             </td>
-                            <td>${it[0].individual.displayName}</td>
-                            <td>${it[0].seqType.toString()}</td>
-                            <td>${it[0].sampleType.displayName}</td>
-                            <td>${it[1]}<g:hiddenField name="egaSampleAlias[${i}]" value="${it[1]}"/></td>
+                            <td>${it.bamFile.individual.displayName}</td>
+                            <td>${it.bamFile.seqType.toString()}</td>
+                            <td>${it.bamFile.sampleType.displayName}</td>
+                            <td>${it.sampleAlias}<g:hiddenField name="egaSampleAlias[${i}]" value="${it.sampleAlias}"/></td>
                             <g:if test="${bamFilesHasFileAliases}">
                                 <td>${bamFileSubmissionObject.find {
-                                    bamFileSubmissionObject -> bamFileSubmissionObject.bamFile == it[0]
+                                    bamFileSubmissionObject -> bamFileSubmissionObject.bamFile == it.bamFile
                                 }.egaAliasName}</td>
                             </g:if><g:else>
-                                <td><g:textField name="egaFileAlias[${i}]" size="50" value="${egaFileAliases?.getAt(it[0].bamFileName + it[1])}" disabled="${!hasFiles}"/></td>
+                                <td><g:textField name="egaFileAlias[${i}]" size="50" value="${egaFileAliases?.getAt(it.bamFile.bamFileName + it.sampleAlias)}" disabled="${!hasFiles}"/></td>
                             </g:else>
-                            <td>${it[0].bamFileName}<g:hiddenField name="fileId[${i}]" value="${it[0].id}"/></td>
-                            <td>${internally? "Yes" : "No"}</td>
+                            <td>${it.bamFile.bamFileName}<g:hiddenField name="fileId[${i}]" value="${it.bamFile.id}"/></td>
+                            <td>${producedByOtp? "Yes" : "No"}</td>
                         </tr>
                     </g:each>
                     </tbody>

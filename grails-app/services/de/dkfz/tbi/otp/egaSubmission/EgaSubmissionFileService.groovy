@@ -25,7 +25,6 @@ import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import groovy.transform.CompileStatic
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -157,8 +156,8 @@ class EgaSubmissionFileService {
     String generateDataFilesCsvFile(EgaSubmission submission) {
         StringBuilder contentBody = new StringBuilder()
 
-        List<List> dataFilesAndAlias = egaSubmissionService.getDataFilesAndAlias(submission)
-        Map dataFileAliases = egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndAlias)
+        List<DataFileAndSampleAlias> dataFilesAndSampleAliases = egaSubmissionService.getDataFilesAndAlias(submission)
+        Map dataFileFileAliases = egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndSampleAliases)
 
         submission.dataFilesToSubmit.sort { it.sampleSubmissionObject.egaAliasName }.each {
             contentBody.append([
@@ -171,7 +170,7 @@ class EgaSubmissionFileService {
                     it.dataFile.seqTrack.laneId,
                     it.dataFile.seqTrack.normalizedLibraryName ?: "N/A",
                     it.dataFile.seqTrack.ilseId ?: "N/A",
-                    dataFileAliases.get(it.dataFile.fileName + it.dataFile.run),
+                    dataFileFileAliases.get(it.dataFile.fileName + it.dataFile.run),
                     it.dataFile.fileName,
             ].join(",") + "\n")
         }
@@ -196,19 +195,18 @@ class EgaSubmissionFileService {
     String generateBamFilesCsvFile(EgaSubmission submission) {
         StringBuilder contentBody = new StringBuilder()
 
-        List<List> bamFilesAndAlias = egaSubmissionService.getBamFilesAndAlias(submission)
-        bamFilesAndAlias.sort { it[1] as String }
-        Map bamFileAliases = egaSubmissionService.generateDefaultEgaAliasesForBamFiles(bamFilesAndAlias)
+        List<BamFileAndSampleAlias> bamFilesAndSampleAliases = egaSubmissionService.getBamFilesAndAlias(submission)
+        bamFilesAndSampleAliases.sort { it.sampleAlias }
+        Map bamFileFileAliases = egaSubmissionService.generateDefaultEgaAliasesForBamFiles(bamFilesAndSampleAliases)
 
-        bamFilesAndAlias.each {
-            AbstractMergedBamFile bamFile = it[0] as AbstractMergedBamFile
+        bamFilesAndSampleAliases.each {
             contentBody.append([
-                    bamFile.individual.displayName,
-                    bamFile.sampleType.displayName,
-                    bamFile.seqType.toString(),
-                    it[1],
-                    bamFileAliases.get(bamFile.bamFileName + it[1]),
-                    bamFile.bamFileName,
+                    it.bamFile.individual.displayName,
+                    it.bamFile.sampleType.displayName,
+                    it.bamFile.seqType.toString(),
+                    it.sampleAlias,
+                    bamFileFileAliases.get(it.bamFile.bamFileName + it.sampleAlias),
+                    it.bamFile.bamFileName,
             ].join(",") + "\n")
         }
 
