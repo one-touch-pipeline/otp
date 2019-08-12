@@ -26,6 +26,7 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -35,7 +36,7 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class ProjectClosedValidatorSpec extends Specification implements DataTest {
+class ProjectClosedValidatorSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -49,7 +50,7 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest {
 
     void 'validate metadata, when project column exist but project is not closed'() {
         given:
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.PROJECT}\n" +
                         "${project.name}\n"
@@ -59,12 +60,12 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest {
         new ProjectClosedValidator().validate(context)
 
         then:
-        context.problems.isEmpty()
+        context.problems.empty
     }
 
     void 'validate metadata, when project column exist but project is closed, add problem'() {
         given:
-        Project project = DomainFactory.createProject([closed: true])
+        Project project = createProject([closed: true])
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.PROJECT}\n" +
                         "${project.name}\n"
@@ -111,9 +112,8 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest {
         new ProjectClosedValidator().validate(context)
 
         then:
-        context.problems.isEmpty()
+        context.problems.empty
     }
-
 
     void 'validate metadata, when sample ID is unknown and project does not exist'() {
         given:
@@ -126,6 +126,20 @@ class ProjectClosedValidatorSpec extends Specification implements DataTest {
         new ProjectClosedValidator().validate(context)
 
         then:
-        context.problems.isEmpty()
+        context.problems.empty
+    }
+
+    void 'validate metadata, when project column does not exist, then add no problems'() {
+        given:
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(
+                "someColumn\n" +
+                        "someValue\n"
+        )
+
+        when:
+        new ProjectClosedValidator().validate(context)
+
+        then:
+        context.problems.empty
     }
 }

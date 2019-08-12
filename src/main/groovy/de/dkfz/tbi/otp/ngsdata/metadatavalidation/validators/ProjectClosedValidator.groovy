@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import org.springframework.stereotype.Component
@@ -27,7 +26,6 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
@@ -36,8 +34,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
-class ProjectClosedValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator, BamMetadataValidator {
-
+class ProjectClosedValidator extends ValueTuplesValidator<ValidationContext> implements MetadataValidator, BamMetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
@@ -45,25 +42,26 @@ class ProjectClosedValidator extends ValueTuplesValidator<MetadataValidationCont
                 "The project is not closed.",
         ]
     }
+
     @Override
-    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+    List<String> getRequiredColumnTitles(ValidationContext context) {
         []
     }
 
     @Override
-    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+    List<String> getOptionalColumnTitles(ValidationContext context) {
         return [PROJECT, SAMPLE_ID]*.name()
     }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    void checkMissingOptionalColumn(ValidationContext context, String columnTitle) {
     }
 
     @Override
-    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+    void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { it ->
             String sampleId = it.getValue(SAMPLE_ID.name())
-            String projectName = it.getValue(PROJECT.name())
+            String projectName = it.getValue(PROJECT.name()) ?: ''
             Project projectFromProjectColumn = atMostOneElement(Project.findAllByNameOrNameInMetadataFiles(projectName, projectName))
             SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
 

@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.Row
+import de.dkfz.tbi.util.spreadsheet.validation.Level
 
 import java.nio.file.*
 
@@ -68,7 +69,15 @@ class BamMetadataImportService {
                 fileSystem,
         )
         if (context.spreadsheet) {
-            bamMetadataValidators*.validate(context)
+            bamMetadataValidators.each {
+                try {
+                    it.validate(context)
+                } catch (Throwable e) {
+                    String message = "Exception occured in validator '${it.class.simpleName}': ${e.message}"
+                    log.error(message, e)
+                    context.addProblem([] as Set, Level.ERROR, message)
+                }
+            }
         }
         return context
     }
@@ -115,28 +124,28 @@ class BamMetadataImportService {
                 assert sample: "No sample found for ${_individual} and ${_sampleType} in ${_project}"
 
                 SeqType seqType = seqTypeService.findByNameOrImportAlias(_seqType, [libraryLayout: LibraryLayout.findByName(libraryLayout), singleCell: false])
-                assert seqType : "No seqtype found for ${_seqType}, ${libraryLayout} and bulk"
+                assert seqType: "No seqtype found for ${_seqType}, ${libraryLayout} and bulk"
 
                 ReferenceGenome referenceGenome = ReferenceGenome.findByName(_referenceGenome)
                 assert referenceGenome: "no reference genom found for ${_referenceGenome}"
 
                 ExternalMergingWorkPackage emwp = new ExternalMergingWorkPackage(
-                        referenceGenome         : referenceGenome,
-                        sample                  : sample,
-                        seqType                 : seqType,
-                        pipeline                : Pipeline.findByNameAndType(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT),
-                        libraryPreparationKit   : LibraryPreparationKit.findByName(libraryPreparationKit)
+                        referenceGenome: referenceGenome,
+                        sample: sample,
+                        seqType: seqType,
+                        pipeline: Pipeline.findByNameAndType(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT),
+                        libraryPreparationKit: LibraryPreparationKit.findByName(libraryPreparationKit)
                 )
-                assert emwp.save(flush:true)
+                assert emwp.save(flush: true)
 
                 ExternallyProcessedMergedBamFile epmbf = new ExternallyProcessedMergedBamFile(
-                        workPackage         : emwp,
-                        importedFrom        : bamFilePath,
-                        fileName            : getNameFromPath(bamFilePath),
-                        coverage            : coverage ? Double.parseDouble(coverage) : null,
-                        md5sum              : md5sum ?: null,
-                        furtherFiles        : [] as Set,
-                        insertSizeFile      : insertSizeFile
+                        workPackage: emwp,
+                        importedFrom: bamFilePath,
+                        fileName: getNameFromPath(bamFilePath),
+                        coverage: coverage ? Double.parseDouble(coverage) : null,
+                        md5sum: md5sum ?: null,
+                        furtherFiles: [] as Set,
+                        insertSizeFile: insertSizeFile
                 ).save(flush: true)
 
                 Path bamFileParent = fileSystem.getPath(epmbf.importedFrom).parent
@@ -144,7 +153,7 @@ class BamMetadataImportService {
                 furtherFiles.findAll().findAll { String path ->
                     Files.exists(bamFileParent.resolve(path))
                 }.each {
-                        epmbf.furtherFiles.add(it)
+                    epmbf.furtherFiles.add(it)
                 }
 
                 if (insertSizeFile) {
@@ -163,12 +172,12 @@ class BamMetadataImportService {
                     def qcValues = new JsonSlurper().parse(qualityControlFilePath.bytes)
 
                     new ExternalProcessedMergedBamFileQualityAssessment(
-                            properlyPaired                  : qcValues.all.properlyPaired,
-                            pairedInSequencing              : qcValues.all.pairedInSequencing,
-                            insertSizeMedian                : qcValues.all.insertSizeMedian,
-                            insertSizeCV                    : qcValues.all.insertSizeCV,
-                            qualityAssessmentMergedPass     : new QualityAssessmentMergedPass([
-                                    abstractMergedBamFile   : epmbf,
+                            properlyPaired: qcValues.all.properlyPaired,
+                            pairedInSequencing: qcValues.all.pairedInSequencing,
+                            insertSizeMedian: qcValues.all.insertSizeMedian,
+                            insertSizeCV: qcValues.all.insertSizeCV,
+                            qualityAssessmentMergedPass: new QualityAssessmentMergedPass([
+                                    abstractMergedBamFile: epmbf,
                             ]).save(flush: true),
                     ).save(flush: true)
 
@@ -181,14 +190,14 @@ class BamMetadataImportService {
                 }
 
                 emwp.bamFileInProjectFolder = null
-                assert epmbf.save(flush:true)
+                assert epmbf.save(flush: true)
                 importProcess.externallyProcessedMergedBamFiles.add(epmbf)
             }
 
             importProcess.state = ImportProcess.State.NOT_STARTED
             importProcess.replaceSourceWithLink = replaceWithLink
             importProcess.triggerAnalysis = triggerAnalysis
-            assert importProcess.save(flush:true)
+            assert importProcess.save(flush: true)
 
             if (importProcess.triggerAnalysis) {
                 samplePairDeciderService.findOrCreateSamplePairs(importProcess.externallyProcessedMergedBamFiles*.workPackage)
@@ -199,9 +208,9 @@ class BamMetadataImportService {
         }
 
         return [
-                context : context,
+                context      : context,
                 importProcess: importProcess,
-                project : outputProject,
+                project      : outputProject,
         ]
     }
 
