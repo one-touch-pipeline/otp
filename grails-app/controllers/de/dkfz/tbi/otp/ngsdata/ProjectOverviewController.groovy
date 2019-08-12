@@ -63,7 +63,7 @@ class ProjectOverviewController {
 
     /**
      * The basic data for the page projectOverview/laneOverview.
-     * The table content are retrieved asynchrony from {@link #dataTableSourceLaneOverview} via JavaScript.
+     * The table content are retrieved asynchronously from {@link #dataTableSourceLaneOverview} via JavaScript.
      */
     Map laneOverview() {
         String projectName = params.project
@@ -120,9 +120,8 @@ class ProjectOverviewController {
      * The available seqTypes are depend on the selected Project.
      */
     JSON dataTableSourceLaneOverview(DataTableCommand cmd) {
-
         boolean anythingWithdrawn = false
-        Project project = projectService.getProjectByName(params.project)
+        Project project = projectService.getProject(Long.valueOf(params.projectId as String))
 
         List<SeqType> seqTypes = projectOverviewService.seqTypeByProject(project)
         boolean hideSampleIdentifier = ProjectOverviewService.hideSampleIdentifier(project)

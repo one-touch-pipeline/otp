@@ -46,8 +46,8 @@ $.otp.projectOverviewTable = {
             bDeferRender : true,
             fnServerData : function (sSource, aoData, fnCallback) {
                 aoData.push({
-                    name : "project",
-                    value : $('#project').find('option:selected').text()
+                    name : "projectId",
+                    value : $('#project').find('option:selected').val()
                 });
                 $.ajax({
                     "dataType" : 'json',

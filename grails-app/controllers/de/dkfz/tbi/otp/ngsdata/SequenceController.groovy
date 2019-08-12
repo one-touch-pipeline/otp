@@ -41,7 +41,7 @@ class SequenceController {
             seqTypes: new TreeSet(seqTypes.collect { it.displayName }),
             libraryLayouts: new TreeSet(seqTypes.collect { it.libraryLayout }),
             seqCenters: SeqCenter.list(sort: "name", order: "asc"),
-            libaryPreparationKits: LibraryPreparationKit.list(sort: "shortDisplayName", order: "asc").shortDisplayName,
+            libraryPreparationKits: LibraryPreparationKit.list(sort: "shortDisplayName", order: "asc").shortDisplayName,
         ]
     }
 

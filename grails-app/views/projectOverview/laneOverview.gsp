@@ -120,7 +120,7 @@
                 </tfoot>
             </table>
         </div>
-    <asset:script>
+    <asset:script type="text/javascript">
         $(function() {
             $.otp.projectOverviewTable.registerLaneOverviewId();
             $('.dataTables_scrollBody').height($('.body').height()-265);

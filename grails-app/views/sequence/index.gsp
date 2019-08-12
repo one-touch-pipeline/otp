@@ -63,7 +63,7 @@
                         <input class="criteria" type="text" name="ilseIdSearch" style="display: none"/>
                         <g:select class="criteria" name="libraryLayoutSelection" from="${libraryLayouts}" style="display: none"/>
                         <g:select class="criteria" name="singleCell" from="[true, false]" style="display: none"/>
-                        <g:select class="criteria" name="libraryPreparationKitSelection" from="${libaryPreparationKits}" style="display: none"/>
+                        <g:select class="criteria" name="libraryPreparationKitSelection" from="${libraryPreparationKits}" style="display: none"/>
                         <g:select class="criteria" name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
                         <input class="criteria" type="text" name="runSearch" style="display: none" placeholder="min. 3 characters"/>
                     </td>
