@@ -129,9 +129,9 @@ class SeqTrackService {
     }
 
     Closure filteringClosure = { SequenceFiltering filtering ->
-        'in'('projectName', projectService.getAllProjects().collect { it.name })
+        'in'('projectId', projectService.getAllProjects().collect { it.id })
         if (filtering.project) {
-            'in'('projectName', filtering.project)
+            'in'('projectId', filtering.project)
         }
         if (filtering.individual) {
             or {

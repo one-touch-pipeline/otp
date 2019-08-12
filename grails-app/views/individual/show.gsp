@@ -84,7 +84,7 @@
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="individual.show.details.project"/></td>
-                    <td class="myValue"><g:link controller="projectOverview" action="index" params="[project: ind.project]">${ind.project}</g:link></td>
+                    <td class="myValue"><g:link controller="projectOverview" action="index" params="[project: ind.project]">${ind.project.displayName}</g:link></td>
                 </tr>
             </table>
         </div>
@@ -156,7 +156,7 @@
         </g:form>
     </div>
 </body>
-<asset:script>
+<asset:script type="text/javascript">
     $(function() {
         $.otp.growBodyInit(240);
         $.otp.initCommentBox(${ind.id}, "#individualCommentBox");

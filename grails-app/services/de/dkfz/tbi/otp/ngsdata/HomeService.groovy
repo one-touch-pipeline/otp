@@ -29,21 +29,29 @@ import grails.gorm.transactions.Transactional
 class HomeService {
     ProjectService projectService
 
-    Map projectQuery() {
-        List<String> projectNames = projectService.getAllProjects()*.name
+    Map<String, Map<String, String>> projectQuery() {
+        List<Map<String, String>> projectData = projectService.getAllProjects().collect { Project project ->
+            return [
+                    "name": project.name,
+                    "displayName": project.displayName,
+            ]
+        }
 
-        Map queryMap = [:]
-
-        projectNames.each { String projectName ->
-            List seq = Sequence.createCriteria().listDistinct {
-                eq("projectName", projectName)
+        projectData.collectEntries() { Map<String, String> project ->
+            List<Sequence> seq = Sequence.createCriteria().listDistinct {
+                eq("projectName", project['name'])
                 projections {
                     groupProperty("seqTypeDisplayName")
                 }
                 order ("seqTypeDisplayName")
             }
-            queryMap[projectName] = seq.join(", ")
+
+            return [
+                    (project['name']): [
+                            "displayName": project['displayName'],
+                            "seqTypes"   : seq.join(", "),
+                    ]
+            ]
         }
-        return queryMap
     }
 }

@@ -204,7 +204,7 @@ enum SequenceSortColumn {
  * Class describing the various filtering to do on WorkPackage.
  */
 class SequenceFiltering {
-    List<String> project = []
+    List<Long> project = []
     List<String> individual = []
     List<Long> sampleType = []
     List<String> seqType = []
@@ -226,8 +226,8 @@ class SequenceFiltering {
         slurper.parseText(json).each {
             switch (it.type) {
                 case "projectSelection":
-                    if (it.value) {
-                        filtering.project << it.value
+                    if (it.value.isLong()) {
+                        filtering.project << (it.value as Long)
                         filtering.enabled = true
                     }
                     break

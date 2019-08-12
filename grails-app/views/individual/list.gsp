@@ -57,7 +57,7 @@
                     </select>
                 </td>
                 <td class="value">
-                    <g:select class="criteria" name="projectSelection" from="${projects}" optionValue="name" optionKey="id" style="display: none"/>
+                    <g:select class="criteria" name="projectSelection" from="${projects}" optionValue="displayName" optionKey="id" style="display: none"/>
                     <input class="criteria" type="text" name="pidSearch" style="display: none" placeholder="min. 3 characters"/>
                     <input class="criteria" type="text" name="mockFullNameSearch" style="display: none" placeholder="min. 3 characters"/>
                     <input class="criteria" type="text" name="mockPidSearch" style="display: none" placeholder="min. 3 characters"/>

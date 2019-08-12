@@ -28,7 +28,6 @@ class HomeController {
     ProjectGroupService projectGroupService
 
     Map index() {
-
         Map queryResult = homeService.projectQuery()
         return [
                 projectQuery: queryResult,

@@ -38,7 +38,7 @@
 
         <div class="otpDataTables projectUserTable enabled">
             <h3>
-                <g:message code="projectUser.activeUsers" args="[project.name]"/>
+                <g:message code="projectUser.activeUsers" args="[project.displayName]"/>
             </h3>
             <table>
                 <tr>

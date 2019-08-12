@@ -1,8 +1,4 @@
-<!doctype html>
-<html>
-<head>
-    <meta name="layout" content="main"/>
-    <title>%{--
+%{--
   - Copyright 2011-2019 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,8 +19,11 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
-
-<g:message code="otp.welcome.title"/></title>
+<!doctype html>
+<html>
+<head>
+    <meta name="layout" content="main"/>
+    <title><g:message code="otp.welcome.title"/></title>
     <asset:javascript src="modules/graph"/>
     <asset:javascript src="pages/home/index/projectOverview.js"/>
 </head>
@@ -43,10 +42,10 @@
             </table>
             <div class="table-body-box" style="margin-top:-10px;">
                 <table>
-                    <g:each var="row" in="${projectQuery}">
+                    <g:each var="entry" in="${projectQuery}">
                         <tr>
-                            <td><b><g:link controller="projectOverview" action="index" params="[project: row.key]">${row.key}</g:link></b></td>
-                            <td><b>${row.value}</b><td>
+                            <td><b><g:link controller="projectOverview" action="index" params="[project: entry.key]">${entry.value['displayName']}</g:link></b></td>
+                            <td><b>${entry.value['seqTypes']}</b><td>
                         </tr>
                     </g:each>
                 </table>
@@ -57,8 +56,7 @@
         <h3><g:message code="home.pageTitle.graph"/></h3>
         <form class="blue_label" id="projectsGroupbox">
             <span class="blue_label"><g:message code="home.projectGroupFilter"/> :</span>
-            <g:select class="criteria" id="projectGroup_select" name='projectGroup_select'
-                    from='${projectGroups}' value='${projectGroup}'></g:select>
+            <g:select class="criteria" id="projectGroup_select" name='projectGroup_select' from='${projectGroups}' value='projectGroup' />
         </form>
         <div class="homeGraph" style="clear: both;" >
             <div style="float: left; margin-top: 20px; border: 25px solid #E1F1FF;">
