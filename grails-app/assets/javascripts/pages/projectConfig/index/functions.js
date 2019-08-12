@@ -155,5 +155,11 @@ $.otp.projectConfig = {
                 '<tr><td style=\' padding: 5px; white-space: nowrap;\'>' + samtools + '</td><td>' + value.samToolsCommand + '</td><td></td></tr>' +
                 '<tr><td style=\' padding: 5px; white-space: nowrap;\'>' + roddyPipelineVersion + '</td><td>' + value.pluginVersion + '</td><td></td></tr>');
         });
+    },
+
+    confirmDtaDelete: function(event) {
+        if (!window.confirm('Are you sure that the DTA data should be marked as deleted?')) {
+            event.preventDefault();
+        }
     }
 };

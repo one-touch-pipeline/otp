@@ -238,6 +238,8 @@ databaseChangeLog = {
         sqlFile(path: 'changelogs/2019/OTP-3176-update-project.sql')
     }
 
+    include file: 'changelogs/2019/OTP-3220-improve-dta.groovy'
+
     changeSet(author: "borufka", id: "changeNameProjectType") {
         sqlFile(path: 'changelogs/2019/changeNameProjectType.sql')
     }

@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
@@ -31,15 +30,38 @@ import java.text.SimpleDateFormat
 
 class ProjectInfo implements Entity {
 
+    enum TransferMode {
+        ASPERA,
+        HARD_DISK,
+        INTERNAL,
+    }
+
+    enum LegalBasis {
+        DTA,
+        PROBAND,
+        COOPERATION,
+        UNKNOWN,
+    }
+
     String fileName
 
-    String recipient
     User performingUser
-    User commissioningUser
+
+    String recipientInstitution
+    String recipientPerson
+    String recipientAccount
+
     Date transferDate
     Date validityDate
-    String transferMode
-    String legalBasis
+    Date deletionDate
+
+    TransferMode transferMode
+    LegalBasis legalBasis
+
+    String dtaId
+    String requester
+    String ticketID
+    String comment
 
     Project project
 
@@ -51,38 +73,55 @@ class ProjectInfo implements Entity {
         fileName(blank: false, unique: 'project', validator: { String val ->
             OtpPath.isValidPathComponent(val)
         })
-        recipient nullable: true
+        recipientInstitution nullable: true
+        recipientPerson nullable: true
+        recipientAccount nullable: true
         performingUser nullable: true
-        commissioningUser nullable: true
         transferDate nullable: true
         validityDate nullable: true
+        deletionDate nullable: true
         transferMode nullable: true
         legalBasis nullable: true
-
+        dtaId nullable: true
+        requester nullable: true
+        ticketID nullable: true
+        comment nullable: true
     }
 
     static mapping = {
         fileName type: "text"
+        comment type: "text"
     }
 
     String getPath() {
-        return "${project.getProjectDirectory().toString()}/${ProjectService.PROJECT_INFO}/${fileName}"
+        return "${project.projectDirectory.toString()}/${ProjectService.PROJECT_INFO}/${fileName}"
+    }
+
+    boolean hasAdditionalInfos() {
+        recipientInstitution || recipientPerson || recipientAccount || performingUser ||
+                transferDate || validityDate || deletionDate ||
+                transferMode || legalBasis || dtaId || requester ||
+                ticketID || comment
     }
 
     String getAdditionalInfos() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd" , Locale.ENGLISH)
-        if (recipient) {
+        if (recipientInstitution) {
             return [
-                    "recipient: ${recipient}",
+                    "recipientInstitution: ${recipientInstitution}",
+                    "recipientPerson: ${recipientPerson}",
+                    "recipientAccount: ${recipientAccount}",
                     "performingUser: ${performingUser.realName}",
-                    "commissioningUser: ${commissioningUser.realName}",
-                    "transferDate: ${dateFormat.format(transferDate)}",
-                    "validityDate: ${dateFormat.format(validityDate)}",
+                    "transferDate: ${transferDate ? dateFormat.format(transferDate) : '-'}",
+                    "validityDate: ${validityDate ? dateFormat.format(validityDate) : '-'}",
+                    "deletionDate: ${deletionDate ? dateFormat.format(deletionDate) : '-'}",
                     "transferMode: ${transferMode}",
                     "legalBasis: ${legalBasis}",
+                    "requester: ${requester}",
+                    "ticketID: ${ticketID}",
+                    "comment: ${comment}",
             ].join(" | ")
-        } else {
-            return ""
         }
+        return ""
     }
 }

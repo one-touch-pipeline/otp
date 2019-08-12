@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.plugin.springsecurity.SpringSecurityUtils
@@ -53,6 +52,7 @@ import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
 
+@SuppressWarnings(['ClassSize', 'MethodCount', 'JUnitPublicProperty'])
 @Rollback
 @Integration
 class ProjectServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
@@ -71,8 +71,18 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     @Rule
     TemporaryFolder temporaryFolder
 
-    void setupData() {
+    void baseSetupData() {
         createUserAndRoles()
+        configService = new TestConfigService([
+                (OtpProperty.PATH_PROJECT_ROOT)   : temporaryFolder.newFolder().path,
+                (OtpProperty.PATH_PROCESSING_ROOT): temporaryFolder.newFolder().path,
+        ])
+        configService.processingOptionService = new ProcessingOptionService()
+    }
+
+    void setupData() {
+        baseSetupData()
+
         createProject(name: 'testProject', nameInMetadataFiles: 'testProject2', dirName: 'testDir')
         createProject(name: 'testProject3', nameInMetadataFiles: null)
         ProjectGroup projectGroup = new ProjectGroup(name: 'projectGroup')
@@ -80,12 +90,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         int counter = 0
         Realm realm = DomainFactory.createDefaultRealmWithProcessingOption()
-
-        configService = new TestConfigService([
-                (OtpProperty.PATH_PROJECT_ROOT)   : temporaryFolder.newFolder().path,
-                (OtpProperty.PATH_PROCESSING_ROOT): temporaryFolder.newFolder().path,
-        ])
-        configService.processingOptionService = new ProcessingOptionService()
 
         createProject(name: 'testProjectAlignment', realm: realm)
         createReferenceGenome(name: 'testReferenceGenome')
@@ -119,10 +123,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 value: "sambamba",
         ])
 
-        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.getRootPath(), "reference_genome").path)
+        DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.rootPath, "reference_genome").path)
     }
 
-    def cleanup() {
+    void cleanup() {
         projectService.remoteShellHelper = remoteShellHelper
         projectService.roddyWorkflowConfigService = roddyWorkflowConfigService
         projectService.fileService = fileService
@@ -132,7 +136,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test createProject valid input"() {
         given:
         setupData()
-        String unixGroup = configService.getTestingGroup()
+        String unixGroup = configService.testingGroup
 
         when:
         Project project
@@ -182,7 +186,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test createProject if directory is created"() {
         given:
         setupData()
-        String group = configService.getTestingGroup()
+        String group = configService.testingGroup
 
         when:
         Project project
@@ -208,11 +212,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         File projectDirectory = LsdfFilesService.getPath(
-                configService.getRootPath().absolutePath,
+                configService.rootPath.absolutePath,
                 project.dirName,
         )
         assert projectDirectory.exists()
-        PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
         attrs.group().toString() == group
         TestCase.assertContainSame(attrs.permissions(),
                 [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_EXECUTE])
@@ -222,7 +226,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test createProject invalid input ('#name', '#dirName', '#nameInMetadataFiles')"() {
         given:
         setupData()
-        String group = configService.getTestingGroup()
+        String group = configService.testingGroup
 
         when:
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
@@ -248,7 +252,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         then:
         ValidationException ex = thrown()
         ex.message.contains(errorName) && ex.message.contains(errorLocaction)
-
 
         where:
         name           | dirName     | nameInMetadataFiles || errorName                                                                                  | errorLocaction
@@ -291,7 +294,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test createProject with invalid dirAnalysis"() {
         given:
         setupData()
-        String group = configService.getTestingGroup()
+        String group = configService.testingGroup
 
         when:
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
@@ -321,9 +324,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test createProject valid input, when directory with wrong unix group already exists"() {
         given:
         setupData()
-        String group = configService.getTestingGroup()
+        String group = configService.testingGroup
         File projectDirectory = LsdfFilesService.getPath(
-                configService.getRootPath().absolutePath,
+                configService.rootPath.absolutePath,
                 "/dir",
         )
 
@@ -332,7 +335,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         projectDirectory.exists()
-        Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() != group
+        Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group().toString() != group
 
         when:
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
@@ -356,14 +359,14 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() == group
+        Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group().toString() == group
     }
 
     void "test createProject valid input, when directory with correct unix group already exists and project file, then do not create the directory and upload file"() {
         given:
         setupData()
         File projectDirectory = LsdfFilesService.getPath(
-                configService.getRootPath().absolutePath,
+                configService.rootPath.absolutePath,
                 "/dir",
         )
         projectService.remoteShellHelper = Mock(RemoteShellHelper) {
@@ -377,7 +380,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         new File("${projectDirectory}").mkdirs()
-        String group = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString()
+        String group = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group().toString()
 
         then:
         projectDirectory.exists()
@@ -405,7 +408,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS).group().toString() == group
+        Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group().toString() == group
     }
 
     void "test updateNameInMetadata valid input"() {
@@ -449,7 +452,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test createProject without project type should fail"() {
         given:
         setupData()
-        String group = configService.getTestingGroup()
+        String group = configService.testingGroup
 
         when:
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
@@ -478,7 +481,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test createProject without storage date should fail"() {
         given:
         setupData()
-        String group = configService.getTestingGroup()
+        String group = configService.testingGroup
 
         when:
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
@@ -514,7 +517,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         SpringSecurityUtils.doWithAuth(username) {
-            projectService.updateProjectField(projectPrefix,'projectPrefix', project)
+            projectService.updateProjectField(projectPrefix, 'projectPrefix', project)
         }
 
         then:
@@ -534,7 +537,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            projectService.updateProjectField(projectPrefix,'projectPrefix', project)
+            projectService.updateProjectField(projectPrefix, 'projectPrefix', project)
         }
 
         then:
@@ -724,7 +727,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         roddyWorkflowConfigs.size() == 1
         File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
         roddyWorkflowConfig.exists()
-        PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
         TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
     }
 
@@ -752,7 +755,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 "${configuration2.pluginName}:${configuration2.pluginVersion}"
         )
         roddyWorkflowConfigs.size() == 2
-        roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == 1
+        roddyWorkflowConfigs.findAll { it.obsoleteDate == null }.size() == 1
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == 1
     }
 
@@ -774,7 +777,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         then:
         Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.list()
         roddyWorkflowConfigs.size() == count
-        roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == count
+        roddyWorkflowConfigs.findAll { it.obsoleteDate == null }.size() == count
         ReferenceGenomeProjectSeqType.findAllByDeprecatedDateIsNull().size() == count
     }
 
@@ -901,7 +904,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         exception.message ==~ /Invalid merge tool: 'invalidMergeTool',.*/
     }
 
-
     void "test configurePanCanAlignmentDeciderProject invalid sambamba version input"() {
         given:
         setupData()
@@ -1007,7 +1009,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 configVersion: 'v1_0',
         )
         File projectDirectory = LsdfFilesService.getPath(
-                configService.getRootPath().path,
+                configService.rootPath.path,
                 configuration.project.dirName,
         )
         assert projectDirectory.mkdirs()
@@ -1026,7 +1028,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ))
         File roddyWorkflowConfigFile = new File(roddyWorkflowConfig.configFilePath)
         roddyWorkflowConfigFile.exists()
-        PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfigFile.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfigFile.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
         TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
     }
 
@@ -1050,7 +1052,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         )
         configuration.project == referenceGenomeProjectSeqType.project
         configuration.seqType == referenceGenomeProjectSeqType.seqType
-        null == referenceGenomeProjectSeqType.sampleType
+        referenceGenomeProjectSeqType.sampleType == null
         configuration.referenceGenome == referenceGenomeProjectSeqType.referenceGenome.name
         TestCase.assertContainSame(entries, referenceGenomeProjectSeqType.alignmentProperties*.name)
 
@@ -1159,7 +1161,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         and: "file has been copied and adapted"
         Path targetConfigFile = Paths.get(targetConfig.configFilePath)
         Files.exists(targetConfigFile)
-        targetConfigFile.text == FileContentHelper.createXmlContentForRoddyWorkflowConfig(targetConfig.getNameUsedInConfig())
+        targetConfigFile.text == FileContentHelper.createXmlContentForRoddyWorkflowConfig(targetConfig.nameUsedInConfig)
         Files.getPosixFilePermissions(targetConfigFile) == fileService.DEFAULT_FILE_PERMISSION
     }
 
@@ -1204,7 +1206,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         and: "file has been copied and adapted"
         Path targetConfigFile = Paths.get(targetConfig.configFilePath)
         Files.exists(targetConfigFile)
-        targetConfigFile.text == FileContentHelper.createXmlContentForRoddyWorkflowConfig(targetConfig.getNameUsedInConfig())
+        targetConfigFile.text == FileContentHelper.createXmlContentForRoddyWorkflowConfig(targetConfig.nameUsedInConfig)
         Files.getPosixFilePermissions(targetConfigFile) == fileService.DEFAULT_FILE_PERMISSION
     }
 
@@ -1276,10 +1278,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 seqType: seqType,
         )
 
-        File baseProjectDirectory = baseProject.getProjectDirectory()
+        File baseProjectDirectory = baseProject.projectDirectory
         assert baseProjectDirectory.exists() || baseProjectDirectory.mkdirs()
 
-        File targetProjectDirectory = targetProject.getProjectDirectory()
+        File targetProjectDirectory = targetProject.projectDirectory
         assert targetProjectDirectory.exists() || targetProjectDirectory.mkdirs()
 
         return [
@@ -1295,7 +1297,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         setupData()
         Project project = Project.findByName("testProjectAlignment")
         ReferenceGenome referenceGenome = ReferenceGenome.findByName("testReferenceGenome")
-
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -1320,12 +1321,12 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                     referenceGenome: DomainFactory.createAceseqReferenceGenome()
             )
             referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenomeProjectSeqType.referenceGenome, false).mkdirs()
-            SpringSecurityUtils.doWithAuth(ADMIN, {
+            SpringSecurityUtils.doWithAuth(ADMIN) {
                 processingOptionService.createOrUpdate(
                         genomeOption,
                         referenceGenomeProjectSeqType.referenceGenome.name
                 )
-            })
+            }
         }
 
         when:
@@ -1343,7 +1344,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         roddyWorkflowConfigs.size() == 1
         File roddyWorkflowConfig = new File(roddyWorkflowConfigs.configFilePath.first())
         roddyWorkflowConfig.exists()
-        PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        PosixFileAttributes attributes = Files.readAttributes(roddyWorkflowConfig.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
         TestCase.assertContainSame(attributes.permissions(), [PosixFilePermission.OWNER_READ, PosixFilePermission.GROUP_READ])
 
         where:
@@ -1390,7 +1391,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 "${configuration2.pluginName}:${configuration2.pluginVersion}"
         )
         roddyWorkflowConfigs.size() == 2
-        roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == 1
+        roddyWorkflowConfigs.findAll { it.obsoleteDate == null }.size() == 1
 
         where:
         analysisName | service       | genomeOption
@@ -1408,11 +1409,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 seqType: SeqTypeService.exomePairedSeqType,
         ])
         File projectDirectory = LsdfFilesService.getPath(
-                configService.getRootPath().absolutePath,
+                configService.rootPath.absolutePath,
                 configuration.project.dirName,
         )
         assert projectDirectory.exists() || projectDirectory.mkdirs()
-
 
         RoddyConfiguration configuration2 = createRoddySnvConfiguration([
                 configVersion: 'v1_1',
@@ -1456,7 +1456,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         then:
         Set<RoddyWorkflowConfig> roddyWorkflowConfigs = RoddyWorkflowConfig.list()
         roddyWorkflowConfigs.size() == configurations.size()
-        roddyWorkflowConfigs.findAll({ it.obsoleteDate == null }).size() == configurations.size()
+        roddyWorkflowConfigs.findAll { it.obsoleteDate == null }.size() == configurations.size()
 
         where:
         analysisName << [
@@ -1621,21 +1621,20 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         }
 
         then:
-        Path projectInfoFile = Paths.get("${project.getProjectDirectory()}/${projectService.PROJECT_INFO}/${FILE_NAME}")
-        PosixFileAttributes attrs = Files.readAttributes(projectInfoFile, PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+        Path projectInfoFile = Paths.get("${project.projectDirectory}/${projectService.PROJECT_INFO}/${FILE_NAME}")
+        PosixFileAttributes attrs = Files.readAttributes(projectInfoFile, PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
 
         projectInfoFile.bytes == CONTENT
         TestCase.assertContainSame(attrs.permissions(), [PosixFilePermission.OWNER_READ])
     }
 
-    void "test copyprojectInfoToProjectFolder, succeeds"() {
+    void "test copyProjectInfoToProjectFolder, succeeds"() {
         given:
         setupData()
         Project project = createProject()
         byte[] projectInfoContent = []
         MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
         mockMultipartFile.originalFilename = FILE_NAME
-
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -1647,7 +1646,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectInfoContent == CONTENT
     }
 
-    void "test copyprojectInfoToProjectFolder, when no file exists, returns []"() {
+    void "test copyProjectInfoToProjectFolder, when no file exists, returns []"() {
         given:
         setupData()
         Project project = createProject()
@@ -1660,7 +1659,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
             projectService.createProjectInfoAndUploadFile(new AddProjectInfoCommand(project: project, projectInfoFile: mockMultipartFile))
             ProjectInfo projectInfo = CollectionUtils.exactlyOneElement(project.projectInfos)
             FileSystem fs = projectService.fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
-            Path file = fs.getPath(projectInfo.getPath())
+            Path file = fs.getPath(projectInfo.path)
             Files.delete(file)
 
             projectInfoContent = projectService.getProjectInfoContent(CollectionUtils.exactlyOneElement(project.projectInfos))
@@ -1670,16 +1669,158 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectInfoContent == [] as byte[]
     }
 
+    private AddProjectDtaCommand createAddProjectDtaCommand() {
+        return new AddProjectDtaCommand([
+                project             : createProject(),
+                projectInfoFile     : new MockMultipartFile(FILE_NAME, FILE_NAME, null, CONTENT),
+                recipientInstitution: "recipientInstitution_${nextId}",
+                recipientPerson     : "recipientPerson_${nextId}",
+                recipientAccount    : "recipientAccount_${nextId}",
+                transferDate        : new Date(),
+                validityDate        : new Date(),
+                transferMode        : ProjectInfo.TransferMode.ASPERA,
+                legalBasis          : ProjectInfo.LegalBasis.DTA,
+                dtaId               : "dtaId_${nextId}",
+                requester           : "requester_${nextId}",
+                ticketID            : "ticket_${nextId}",
+                comment             : "comment_${nextId}",
+        ])
+    }
+
+    void "createProjectDtaInfoAndUploadFile, succeeds"() {
+        given:
+        baseSetupData()
+        AddProjectDtaCommand cmd = createAddProjectDtaCommand()
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.createProjectDtaInfoAndUploadFile(cmd)
+        }
+
+        then:
+        Path projectInfoFile = Paths.get(cmd.project.projectDirectory.absolutePath, ProjectService.PROJECT_INFO, FILE_NAME)
+        PosixFileAttributes attrs = Files.readAttributes(projectInfoFile, PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
+
+        projectInfoFile.bytes == CONTENT
+        TestCase.assertContainSame(attrs.permissions(), [PosixFilePermission.OWNER_READ])
+
+        cmd.project.refresh()
+        cmd.project.projectInfos.size() == 1
+
+        ProjectInfo projectInfo = cmd.project.projectInfos.first()
+        projectInfo.project
+        projectInfo.fileName
+        projectInfo.recipientInstitution
+        projectInfo.recipientPerson
+        projectInfo.recipientAccount
+        projectInfo.transferDate
+        projectInfo.validityDate
+        projectInfo.legalBasis
+        projectInfo.dtaId
+        projectInfo.requester
+        projectInfo.performingUser
+        projectInfo.ticketID
+        projectInfo.comment
+    }
+
+    @Unroll
+    void "createProjectDtaInfoAndUploadFile, when #property is '#value', then succeed"() {
+        given:
+        baseSetupData()
+        AddProjectDtaCommand cmd = createAddProjectDtaCommand()
+        cmd[property] = value
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.createProjectDtaInfoAndUploadFile(cmd)
+        }
+
+        then:
+        noExceptionThrown()
+
+        where:
+        property           | value
+        'recipientAccount' | null
+        'recipientAccount' | ''
+        'validityDate'     | null
+        'dtaId'            | null
+        'dtaId'            | ''
+        'ticketID'         | null
+        'ticketID'         | ''
+        'comment'          | null
+        'comment'          | ''
+    }
+
+    @Unroll
+    void "createProjectDtaInfoAndUploadFile, when #property is '#value', then fail"() {
+        given:
+        baseSetupData()
+        AddProjectDtaCommand cmd = createAddProjectDtaCommand()
+        cmd[property] = value
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.createProjectDtaInfoAndUploadFile(cmd)
+        }
+
+        then:
+        AssertionError e = thrown()
+        e.message =~ /.*${property}.*${constraint}.*/
+
+        where:
+        property               | value || constraint
+        'project'              | null  || 'nullable'
+        'projectInfoFile'      | null  || 'nullable'
+        'recipientInstitution' | null  || 'nullable'
+        'recipientInstitution' | ''    || 'blank'
+        'recipientPerson'      | null  || 'nullable'
+        'recipientPerson'      | ''    || 'blank'
+        'transferDate'         | null  || 'nullable'
+        'legalBasis'           | null  || 'nullable'
+        'requester'            | null  || 'nullable'
+        'requester'            | ''    || 'blank'
+    }
+
+    void "markDtaDataAsDeleted, when delete date is not yet set, then set date"() {
+        given:
+        baseSetupData()
+        ProjectInfoCommand cmd = new ProjectInfoCommand(projectInfo: DomainFactory.createProjectInfo())
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.markDtaDataAsDeleted(cmd)
+        }
+
+        then:
+        ProjectInfo.get(cmd.projectInfo.id).deletionDate
+    }
+
+    void "markDtaDataAsDeleted, when delete date is already set, then throw assertion"() {
+        given:
+        baseSetupData()
+        ProjectInfoCommand cmd = new ProjectInfoCommand(projectInfo: DomainFactory.createProjectInfo([
+                deletionDate: new Date(),
+        ]))
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.markDtaDataAsDeleted(cmd)
+        }
+
+        then:
+        thrown(AssertionError)
+    }
+
     @Unroll
     void "test getCountOfProjectsForSpecifiedPeriod for given date"() {
         given:
         setupData()
         Date baseDate = new Date(0, 0, 10)
-        Date startDate = startDateOffset  == null ? null : baseDate.minus(startDateOffset)
-        Date endDate = endDateOffset == null ? null : baseDate.minus(endDateOffset)
+        Date startDate = startDateOffset == null ? null : baseDate - startDateOffset
+        Date endDate = endDateOffset == null ? null : baseDate - endDateOffset
 
         DataFile dataFile = DomainFactory.createDataFile()
-        dataFile.dateCreated = baseDate.minus(1)
+        dataFile.dateCreated = baseDate - 1
         dataFile.save(flush: true)
 
         when:
@@ -1719,7 +1860,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 adapterTrimmingNeeded: true,
         ] + properties)
         File projectDirectory = LsdfFilesService.getPath(
-                configService.getRootPath().absolutePath,
+                configService.rootPath.absolutePath,
                 configuration.project.dirName,
         )
         assert projectDirectory.exists() || projectDirectory.mkdirs()
@@ -1744,7 +1885,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 mouseData           : true,
         ] + properties)
         File projectDirectory = LsdfFilesService.getPath(
-                configService.getRootPath().absolutePath,
+                configService.rootPath.absolutePath,
                 configuration.project.dirName,
         )
         assert projectDirectory.exists() || projectDirectory.mkdirs()
@@ -1765,6 +1906,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         return configuration
     }
 
+    @SuppressWarnings('UnusedPrivateMethod')
+    //method name is constructed at runtime
     private RoddyConfiguration createRoddyIndelConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : Project.findByName("testProjectAlignment"),
@@ -1778,6 +1921,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         return configuration
     }
 
+    @SuppressWarnings('UnusedPrivateMethod')
+    //method name is constructed at runtime
     private RoddyConfiguration createRoddySophiaConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : Project.findByName("testProjectAlignment"),
@@ -1791,6 +1936,8 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         return configuration
     }
 
+    @SuppressWarnings('UnusedPrivateMethod')
+    //method name is constructed at runtime
     private RoddyConfiguration createRoddyAceseqConfiguration(Map properties = [:]) {
         RoddyConfiguration configuration = new RoddyConfiguration([
                 project          : Project.findByName("testProjectAlignment"),
@@ -1804,9 +1951,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         return configuration
     }
 
-    private checkProjectDirectory(RoddyConfiguration configuration) {
+    private void checkProjectDirectory(RoddyConfiguration configuration) {
         File projectDirectory = LsdfFilesService.getPath(
-                configService.getRootPath().absolutePath,
+                configService.rootPath.absolutePath,
                 configuration.project.dirName,
         )
         assert projectDirectory.exists() || projectDirectory.mkdirs()

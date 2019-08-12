@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
@@ -53,8 +52,11 @@ import java.text.SimpleDateFormat
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+@SuppressWarnings('MethodCount')
 @Transactional
 class ProjectService {
+
+    static final long FACTOR_1024 = 1024
 
     static final String PHIX_INFIX = 'PhiX'
 
@@ -68,8 +70,7 @@ class ProjectService {
     static final String RUN_FEATURE_COUNTS_DEXSEQ = "RUN_FEATURE_COUNTS_DEXSEQ"
 
     static final String PROJECT_INFO = "projectInfo"
-    static final Long PROJECT_INFO_MAX_SIZE = 20 * 1024 * 1024
-
+    static final Long PROJECT_INFO_MAX_SIZE = 20 * FACTOR_1024 * FACTOR_1024
 
     @Autowired
     RemoteShellHelper remoteShellHelper
@@ -102,6 +103,7 @@ class ProjectService {
     /**
      * return the number of projects for specified period if given
      */
+    @SuppressWarnings('NestedBlockDepth')
     int getCountOfProjectsForSpecifiedPeriod(Date startDate = null, Date endDate = null, List<Project> projects) {
         return DataFile.createCriteria().get {
             projections {
@@ -143,24 +145,24 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Project> getAllProjectsWithConfigFile(SeqType seqType, Pipeline pipeline) {
-        return RoddyWorkflowConfig.findAllBySeqTypeAndPipelineAndObsoleteDateIsNullAndIndividualIsNull(seqType, pipeline)*.project.unique().sort({
+        return RoddyWorkflowConfig.findAllBySeqTypeAndPipelineAndObsoleteDateIsNullAndIndividualIsNull(seqType, pipeline)*.project.unique().sort {
             it.name.toUpperCase()
-        })
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Project createProject(CreateProjectSubmitCommand projectParams) {
         assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
-        Path rootPath = configService.getRootPath().toPath()
+        Path rootPath = configService.rootPath.toPath()
         List<String> rootPathElements = rootPath.toList()*.toString()
-        assert rootPathElements.every { !projectParams.directory.startsWith("${it}${File.separator}") }:
+        assert rootPathElements.every { !projectParams.directory.startsWith("${it}${File.separator}") } :
                 "project directory (${projectParams.directory}) contains (partial) data processing root path (${rootPath})"
 
         Project project = new Project([
                 name: projectParams.name,
                 dirName: projectParams.directory,
                 projectPrefix: projectParams.projectPrefix,
-                realm: configService.getDefaultRealm(),
+                realm: configService.defaultRealm,
                 qcThresholdHandling: projectParams.qcThresholdHandling,
                 projectType: projectParams.projectType,
                 storageUntil: projectParams.storageUntil,
@@ -195,9 +197,9 @@ class ProjectService {
     }
 
     private void createProjectDirectoryIfNeeded(Project project) {
-        File projectDirectory = project.getProjectDirectory()
+        File projectDirectory = project.projectDirectory
         if (projectDirectory.exists()) {
-            PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes.class, LinkOption.NOFOLLOW_LINKS)
+            PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
             if (attrs.group().toString() == project.unixGroup) {
                 return
             }
@@ -209,22 +211,37 @@ class ProjectService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void createProjectInfoAndUploadFile(AddProjectInfoCommand cmd) throws IOException {
-        assert cmd.project: "No Project given"
-        assert cmd.projectInfoFile: "No File given"
-        assert !cmd.projectInfoFile.isEmpty(): "Empty file"
-        assert cmd.projectInfoFile.getSize() <= PROJECT_INFO_MAX_SIZE: "Too big"
+        cmd.validate()
+        assert !cmd.errors.hasErrors()
         ProjectInfo projectInfo = createProjectInfo(cmd.project, cmd.projectInfoFile.originalFilename)
-        if (cmd.recipient && cmd.commissioningUser && cmd.transferDate && cmd.validityDate && cmd.transferMode && cmd.legalBasis) {
-            addAdditionalValuesToProjectInfo(projectInfo, cmd, springSecurityService.getCurrentUser() as User)
-        }
-        uploadProjectInfoToProjectFolder(projectInfo, cmd.projectInfoFile.getBytes())
+        uploadProjectInfoToProjectFolder(projectInfo, cmd.projectInfoFile.bytes)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void createProjectDtaInfoAndUploadFile(AddProjectDtaCommand cmd) throws IOException {
+        cmd.validate()
+        assert !cmd.errors.hasErrors()
+        ProjectInfo projectInfo = createProjectInfo(cmd.project, cmd.projectInfoFile.originalFilename)
+        addAdditionalValuesToProjectInfo(projectInfo, cmd, springSecurityService.currentUser as User)
+        uploadProjectInfoToProjectFolder(projectInfo, cmd.projectInfoFile.bytes)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void markDtaDataAsDeleted(ProjectInfoCommand cmd) throws IOException {
+        cmd.validate()
+        assert !cmd.errors.hasErrors()
+        ProjectInfo projectInfo = cmd.projectInfo
+        assert !projectInfo.deletionDate
+        projectInfo.refresh()
+        projectInfo.deletionDate = new Date()
+        projectInfo.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     byte[] getProjectInfoContent(ProjectInfo projectInfo) {
         assert projectInfo: "No ProjectInfo given"
         FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
-        Path file = fs.getPath(projectInfo.getPath())
+        Path file = fs.getPath(projectInfo.path)
 
         return Files.exists(file) ? file.bytes : []
     }
@@ -236,21 +253,17 @@ class ProjectService {
         return projectInfo
     }
 
-    private void addAdditionalValuesToProjectInfo(ProjectInfo projectInfo, AddProjectInfoCommand cmd, User performingUser) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH)
-        projectInfo.recipient = cmd.recipient
+    private void addAdditionalValuesToProjectInfo(ProjectInfo projectInfo, AddProjectDtaCommand cmd, User performingUser) {
         projectInfo.performingUser = performingUser
-        projectInfo.commissioningUser = User.findByUsername(cmd.commissioningUser)
-        projectInfo.transferDate = simpleDateFormat.parse(cmd.transferDate)
-        projectInfo.validityDate = simpleDateFormat.parse(cmd.validityDate)
-        projectInfo.transferMode = cmd.transferMode
-        projectInfo.legalBasis = cmd.legalBasis
+        cmd.values().each {
+            projectInfo[it.key] = it.value
+        }
         projectInfo.save(flush: true)
     }
 
     private void uploadProjectInfoToProjectFolder(ProjectInfo projectInfo, byte[] content) {
         FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
-        Path projectDirectory = fs.getPath(projectInfo.project.getProjectDirectory().toString())
+        Path projectDirectory = fs.getPath(projectInfo.project.projectDirectory.toString())
         Path projectInfoDirectory = projectDirectory.resolve(PROJECT_INFO)
 
         Path file = projectInfoDirectory.resolve(projectInfo.fileName)
@@ -323,9 +336,9 @@ class ProjectService {
         project.alignmentDeciderBeanName = AlignmentDeciderBeanName.OTP_ALIGNMENT
         project.save(flush: true)
         ReferenceGenome referenceGenome = exactlyOneElement(ReferenceGenome.findAllByName(referenceGenomeName))
-        SeqType seqType_wgp = SeqTypeService.getWholeGenomePairedSeqType()
-        SeqType seqType_exome = SeqTypeService.getExomePairedSeqType()
-        [seqType_wgp, seqType_exome].each { seqType ->
+        SeqType seqTypeWgp = SeqTypeService.wholeGenomePairedSeqType
+        SeqType seqTypeExome = SeqTypeService.exomePairedSeqType
+        [seqTypeWgp, seqTypeExome].each { seqType ->
             ReferenceGenomeProjectSeqType refSeqType = new ReferenceGenomeProjectSeqType()
             refSeqType.project = project
             refSeqType.seqType = seqType
@@ -335,6 +348,7 @@ class ProjectService {
         }
     }
 
+    @SuppressWarnings('JavaIoPackageAccess')
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void configurePanCanAlignmentDeciderProject(PanCanAlignmentConfiguration panCanAlignmentConfiguration) {
         deprecatedReferenceGenomeProjectSeqTypeAndSetDecider(panCanAlignmentConfiguration)
@@ -353,14 +367,14 @@ class ProjectService {
         assert panCanAlignmentConfiguration.configVersion ==~ RoddyWorkflowConfig.CONFIG_VERSION_PATTERN:
                 "configVersion '${panCanAlignmentConfiguration.configVersion}' has not expected pattern: ${RoddyWorkflowConfig.CONFIG_VERSION_PATTERN}"
 
-        if (!panCanAlignmentConfiguration.seqType.isWgbs()) {
+        if (panCanAlignmentConfiguration.seqType.wgbs) {
+            panCanAlignmentConfiguration.adapterTrimmingNeeded = true
+        } else {
             List<String> allBwaMemVersions = processingOptionService.findOptionAsList(OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE)
             assert panCanAlignmentConfiguration.bwaMemVersion in allBwaMemVersions:
                     "Invalid bwa_mem version: '${panCanAlignmentConfiguration.bwaMemVersion}', possible values: ${allBwaMemVersions}"
-        } else {
-            panCanAlignmentConfiguration.adapterTrimmingNeeded = true
         }
-        if (panCanAlignmentConfiguration.seqType.isChipSeq()) {
+        if (panCanAlignmentConfiguration.seqType.chipSeq) {
             panCanAlignmentConfiguration.adapterTrimmingNeeded = true
         }
         if (panCanAlignmentConfiguration.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA) {
@@ -561,7 +575,7 @@ class ProjectService {
     }
 
     private void alignmentHelper(RoddyConfiguration configuration, Pipeline pipeline, String xmlConfig, boolean adapterTrimmingNeeded) {
-        File projectDirectory = configuration.project.getProjectDirectory()
+        File projectDirectory = configuration.project.projectDirectory
         assert projectDirectory.exists()
 
         File configFilePath = RoddyWorkflowConfig.getStandardConfigFile(
@@ -623,7 +637,7 @@ class ProjectService {
 
         Pipeline pipeline = exactlyOneElement(Pipeline.findAllByTypeAndName(Pipeline.Type.ALIGNMENT, Pipeline.Name.PANCAN_ALIGNMENT))
 
-        FileSystem remoteFileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        FileSystem remoteFileSystem = fileSystemService.remoteFileSystemOnDefaultRealm
 
         RoddyWorkflowConfig baseProjectRoddyConfig = RoddyWorkflowConfig.getLatestForProject(baseProject, seqType, pipeline)
         RoddyWorkflowConfig targetProjectConfig = RoddyWorkflowConfig.getLatestForProject(targetProject, seqType, pipeline)
@@ -720,7 +734,7 @@ class ProjectService {
             xmlConfig = roddyConfigTemplate.createConfig(configuration, pipeline.name)
         }
 
-        File projectDirectory = configuration.project.getProjectDirectory()
+        File projectDirectory = configuration.project.projectDirectory
         assert projectDirectory.exists()
 
         File configFilePath = RoddyWorkflowConfig.getStandardConfigFile(
@@ -744,44 +758,45 @@ class ProjectService {
         )
     }
 
+    @SuppressWarnings('Indentation')//auto format and codenarc does not match
     Result<ReferenceGenome, String> checkReferenceGenomeForAceseq(Project project, SeqType seqType) {
         return Result.ofNullable(project, "project must not be null")
                 .map { Project p ->
-            ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
-                    project, seqType)
-        }
-        .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
+                    ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
+                            project, seqType)
+                }
+                .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
                 .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }
                 .ensure({ ReferenceGenome referenceGenome -> referenceGenome in aceseqService.checkReferenceGenomeMap()['referenceGenomes'] },
-                "Reference genome is not compatible with ACESeq.")
+                        "Reference genome is not compatible with ACESeq.")
                 .ensure({ ReferenceGenome referenceGenome ->
-            referenceGenome.knownHaplotypesLegendFileX &&
-                    referenceGenome.knownHaplotypesLegendFile &&
-                    referenceGenome.knownHaplotypesFileX &&
-                    referenceGenome.knownHaplotypesFile &&
-                    referenceGenome.geneticMapFileX &&
-                    referenceGenome.geneticMapFile &&
-                    referenceGenome.gcContentFile &&
-                    referenceGenome.mappabilityFile &&
-                    referenceGenome.replicationTimeFile
-        }, "The selected reference genome is not configured for CNV (from ACEseq) (files are missing).")
+                    referenceGenome.knownHaplotypesLegendFileX &&
+                            referenceGenome.knownHaplotypesLegendFile &&
+                            referenceGenome.knownHaplotypesFileX &&
+                            referenceGenome.knownHaplotypesFile &&
+                            referenceGenome.geneticMapFileX &&
+                            referenceGenome.geneticMapFile &&
+                            referenceGenome.gcContentFile &&
+                            referenceGenome.mappabilityFile &&
+                            referenceGenome.replicationTimeFile
+                }, "The selected reference genome is not configured for CNV (from ACEseq) (files are missing).")
     }
 
-
+    @SuppressWarnings('Indentation')//auto format and codenarc does not match
     Result<ReferenceGenome, String> checkReferenceGenomeForSophia(Project project, SeqType seqType) {
         return Result.ofNullable(project, "project must not be null")
                 .map { Project p ->
-            ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
-                    project, seqType)
-        }
-        .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
+                    ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
+                            project, seqType)
+                }
+                .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
                 .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }
                 .ensure({ ReferenceGenome referenceGenome -> referenceGenome in sophiaService.checkReferenceGenomeMap()['referenceGenomes'] },
-                "Reference genome is not compatible with SOPHIA.")
+                        "Reference genome is not compatible with SOPHIA.")
     }
 
     private String getScriptBash(File configDirectory, String xmlConfig, File configFilePath) {
-        String md5 = HelperUtils.getRandomMd5sum()
+        String md5 = HelperUtils.randomMd5sum
         String createConfigDirectory = ''
 
         if (!configDirectory.exists()) {
@@ -799,26 +814,6 @@ ${xmlConfig.replaceAll(/\$/, /\\\$/)}
 ${md5}
 
 chmod 0440 ${configFilePath}
-
-"""
-    }
-
-    private String getCopyBashScript(File configDirectory, File configFilePathBasedProject, String unixGroup) {
-        String createConfigDirectory = ''
-
-        if (!configDirectory.exists()) {
-            createConfigDirectory = """\
-mkdir -p -m 2750 ${configDirectory}
-"""
-        }
-
-        return """\
-
-${createConfigDirectory}
-
-cp -a ${configFilePathBasedProject} ${configDirectory}/
-
-chgrp ${unixGroup} ${configDirectory}/*
 
 """
     }
@@ -875,7 +870,6 @@ echo 'OK'
         referenceGenomeProjectSeqTypes*.deprecatedDate = new Date()
         referenceGenomeProjectSeqTypes*.save(flush: true)
     }
-
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateFingerPrinting(Project project, boolean value) {

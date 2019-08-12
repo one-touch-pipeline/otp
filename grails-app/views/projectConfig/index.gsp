@@ -20,18 +20,19 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ page contentType="text/html;charset=UTF-8" %>
 <%@ page import="de.dkfz.tbi.otp.ngsdata.Project.Snv" %>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="layout" content="main" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
     <title><g:message code="projectOverview.title" args="[project?.name]"/></title>
     <asset:javascript src="pages/projectConfig/index/functions.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
+
 <body>
-    <div class="body">
+<div class="body">
     <g:render template="/templates/messages"/>
     <g:if test="${projects}">
         <div id="projectCommentBox" class="commentBoxContainer">
@@ -42,15 +43,17 @@
             </sec:ifNotGranted>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <textarea id="commentBox">${comment?.comment}</textarea>
+
                 <div id="commentButtonArea">
-                    <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save" /></button>
-                    <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
+                    <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save"/></button>
+                    <button id="cancelComment" disabled><g:message code="commentBox.cancel"/></button>
                 </div>
             </sec:ifAllGranted>
             <div id="commentDateLabel">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')}</div>
+
             <div id="commentAuthorLabel">${comment?.author}</div>
         </div>
-        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
         <div id="projectOverviewDates">
             <table>
                 <tr>
@@ -97,7 +100,7 @@
                     <td></td>
                 </tr>
                 <tr id="descriptionRow">
-                    <td  class="myKey" style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="projectOverview.description"/></td>
+                    <td class="myKey" style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="projectOverview.description"/></td>
                     <td colspan="2">
                         <div style="overflow: auto; max-height: 20em;">
                             <otp:editorSwitch
@@ -203,7 +206,7 @@
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateCopyFiles', params: ['project.id': project.id, 'fieldName': 'forceCopyFiles'])}"
-                                values="${["true","false"]}"
+                                values="${["true", "false"]}"
                                 value="${project.forceCopyFiles}"/>
                     </td>
                     <td></td>
@@ -219,7 +222,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td  class="myKey"><g:message code="projectOverview.endDate"/></td>
+                    <td class="myKey"><g:message code="projectOverview.endDate"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -230,7 +233,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td  class="myKey"><g:message code="projectOverview.storageUntil"/></td>
+                    <td class="myKey"><g:message code="projectOverview.storageUntil"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -298,7 +301,7 @@
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateFingerPrinting', id: project.id)}"
-                                values="${["true","false"]}"
+                                values="${["true", "false"]}"
                                 value="${project.fingerPrinting}"/>
                     </td>
                     <td></td>
@@ -310,7 +313,7 @@
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProcessingNotification', id: project.id)}"
-                                values="${["true","false"]}"
+                                values="${["true", "false"]}"
                                 value="${project.processingNotification}"/>
                     </td>
                     <td><g:message code="projectOverview.processingNotification.message.detail"/></td>
@@ -322,7 +325,7 @@
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateQcTrafficLightNotification', id: project.id)}"
-                                values="${["true","false"]}"
+                                values="${["true", "false"]}"
                                 value="${project.qcTrafficLightNotification}"/>
                     </td>
                     <td><g:message code="projectOverview.qcTrafficLightNotification.message.detail"/></td>
@@ -334,7 +337,7 @@
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateCustomFinalNotification', id: project.id)}"
-                                values="${["true","false"]}"
+                                values="${["true", "false"]}"
                                 value="${project.customFinalNotification}"/>
                     </td>
                     <td><g:message code="projectOverview.customFinalNotification.message.detail"/></td>
@@ -346,14 +349,15 @@
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
                                 link="${g.createLink(controller: 'projectConfig', action: "updateClosed", params: ['project.id': project.id, 'fieldName': 'closed'])}"
-                                values="${["true","false"]}"
+                                values="${["true", "false"]}"
                                 value="${closed}"/>
                     </td>
                     <td></td>
                 </tr>
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <tr>
-                        <td  class="myKey" style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="projectOverview.internalNotes"/></td>
+                        <td class="myKey" style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message
+                                code="projectOverview.internalNotes"/></td>
                         <td colspan="2">
                             <div style="overflow: auto; max-height: 20em;">
                                 <otp:editorSwitch
@@ -364,64 +368,139 @@
                             </div>
                         </td>
                     </tr>
-
                     <tr>
                         <td class="myKey"><g:message code="projectOverview.projectInfos"/></td>
                         <td id="projectInfo" colspan="2">
-                            <g:each var="projectInfo" in="${project.projectInfos}">
-                                <p>
-                                    <g:message code="projectOverview.projectInfo.creationDate"/> <g:formatDate date="${projectInfo.dateCreated}" format="yyyy-MM-dd HH:mm:ss" /><br>
-                                    <g:message code="projectOverview.projectInfo.path"/> <g:link action="download" params='["projectInfo.id": projectInfo.id]'>${projectInfo.getPath()}</g:link>
-                                    <g:if test="${projectInfo.getAdditionalInfos()}">
-                                        <br><g:message code="projectOverview.projectInfo.additional"/> ${projectInfo.getAdditionalInfos()}
+                            <g:each var="projectInfo" in="${project.projectInfos.sort { [it.recipientInstitution == null, it.id] }}">
+                                <div style="margin-top: 1em">
+                                    <g:message code="projectOverview.projectInfo.creationDate"/>
+                                    <g:formatDate date="${projectInfo.dateCreated}" format="yyyy-MM-dd"/>
+                                    <br><g:message code="projectOverview.projectInfo.path"/>
+                                    <g:link action="download" params='["projectInfo.id": projectInfo.id]'>${projectInfo.getPath()}</g:link>
+                                    <g:if test="${projectInfo.hasAdditionalInfos()}">
+                                        <br><g:message code="projectOverview.projectInfo.additional"/> ${projectInfo.additionalInfos}
+                                        <g:if test="${!projectInfo.deletionDate}">
+                                            <g:uploadForm action="markDtaDataAsDeleted" useToken="true" style="display: inline"
+                                                          onSubmit="\$.otp.projectConfig.confirmDtaDelete(event);">
+                                                |
+                                                <input type="hidden" name="projectInfo.id" value="${projectInfo.id}"/>
+                                                <g:submitButton name="${g.message(code: "projectOverview.projectInfo.markDtaDataAsDeleted")}"/>
+                                            </g:uploadForm>
+                                        </g:if>
                                     </g:if>
-                                </p>
+                                </div>
                             </g:each>
-                            <p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="myKey"><g:message code="projectOverview.projectInfos.upload.info"/></td>
+                        <td>
                             <g:uploadForm action="addProjectInfo" useToken="true">
-                                <input type="file" name="projectInfoFile" id="projectInfoFile"/>
                                 <input type="hidden" name="project.id" value="${project.id}"/>
-                                <table>
+                                <input type="file" name="projectInfoFile" required="true">
+                                <g:submitButton name="${g.message(code: "projectOverview.projectInfo.add")}"/>
+                            </g:uploadForm>
+                        </td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="myKey"><g:message code="projectOverview.projectInfos.upload.dta"/></td>
+                        <td colspan="2">
+                            <g:uploadForm action="addProjectDta" useToken="true">
+                                <input type="hidden" name="project.id" value="${project.id}"/>
+                                <table class="project-info-input">
                                     <tr>
-                                        <th><g:message code="projectOverview.projectInfo.recipient"/></th>
-                                        <th><g:message code="projectOverview.projectInfo.commissioningUser"/></th>
-                                        <th><g:message code="projectOverview.projectInfo.transferDate"/></th>
-                                        <th><g:message code="projectOverview.projectInfo.validityDate"/></th>
-                                        <th><g:message code="projectOverview.projectInfo.transferMode"/></th>
-                                        <th><g:message code="projectOverview.projectInfo.legalBasis"/></th>
+                                        <td><g:message code="projectOverview.projectInfo.path"/></td>
+                                        <td><input type="file" name="projectInfoFile" required="true"/></td>
                                     </tr>
                                     <tr>
-                                        <td><input type="text" value="${addProjectInfos?.recipient }" name="recipient"/></td>
-                                        <td><input type="text" value="${addProjectInfos?.commissioningUser }" name="commissioningUser" placeholder="OTP account"/></td>
-                                        <td><input type="date" value="${addProjectInfos?.transferDate }" class="datePicker" name="transferDate"/></td>
-                                        <td><input type="date" value="${addProjectInfos?.validityDate }" class="datePicker" name="validityDate"/></td>
-                                        <td><input type="text" value="${addProjectInfos?.transferMode }" name="transferMode"/></td>
-                                        <td><input type="text" value="${addProjectInfos?.legalBasis }" name="legalBasis"/></td>
+                                        <td><g:message code="projectOverview.projectInfo.recipient.institution"/></td>
+                                        <td><input type="text" value="${addProjectInfos?.recipientInstitution}" name="recipientInstitution" required="true"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><g:message code="projectOverview.projectInfo.recipient.person"/></td>
+                                        <td><input type="text" value="${addProjectInfos?.recipientPerson}" name="recipientPerson" required="true"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><g:message code="projectOverview.projectInfo.recipient.account"/></td>
+                                        <td><input type="text" value="${addProjectInfos?.recipientAccount}" name="recipientAccount"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><g:message code="projectOverview.projectInfo.transferDate"/></td>
+                                        <td><input type="date" value="${addProjectInfos?.transferDate?.format("yyyy-MM-dd")}" name="transferDateInput"
+                                                   required="true"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><g:message code="projectOverview.projectInfo.validityDate"/></td>
+                                        <td><input type="date" value="${addProjectInfos?.validityDate?.format("yyyy-MM-dd")}" name="validityDateInput"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><g:message code="projectOverview.projectInfo.transferMode"/></td>
+                                        <td>
+                                            <g:select name="transferMode"
+                                                      noSelection="['': '']"
+                                                      from="${transferModes}"
+                                                      value="${addProjectInfos?.transferMode}"
+                                                      class="dropDown"
+                                                      required="true"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><g:message code="projectOverview.projectInfo.legalBasis"/></td>
+                                        <td>
+                                            <g:select name="legalBasis"
+                                                      noSelection="['': '']"
+                                                      from="${legalBasis}"
+                                                      value="${addProjectInfos?.legalBasis}"
+                                                      class="dropDown"
+                                                      required="true"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><g:message code="projectOverview.projectInfo.dtaId"/></td>
+                                        <td><input type="text" value="${addProjectInfos?.dtaId}" name="dtaId"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><g:message code="projectOverview.projectInfo.requester"/></td>
+                                        <td><input type="text" value="${addProjectInfos?.requester}" name="requester" required="true"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><g:message code="projectOverview.projectInfo.ticketID"/></td>
+                                        <td><input type="text" value="${addProjectInfos?.ticketID}" name="ticketID"/></td>
+                                    </tr>
+                                    <tr>
+                                        <td><g:message code="projectOverview.projectInfo.comment"/></td>
+                                        <td><input type="text" value="${addProjectInfos?.comment}" name="comment"/></td>
                                     </tr>
                                 </table>
                                 <g:submitButton name="${g.message(code: "projectOverview.projectInfo.add")}"/>
                             </g:uploadForm>
-                            </p>
                         </td>
                     </tr>
                 </sec:ifAllGranted>
             </table>
         </div>
+
         <h2>${g.message(code: 'projectOverview.alignmentInformation.title')}</h2>
+
         <div>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <h3><g:message code="projectOverview.alignmentInformation.configureRoddy"/></h3>
+
                 <div class="show_button">
                     <ul>
                         <g:each in="${roddySeqTypes}" var="seqType">
                             <li>
                                 <g:if test="${seqType.isRna()}">
-                                    <g:link controller='configurePipeline' action='rnaAlignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                    <g:link controller='configurePipeline' action='rnaAlignment' params='["project.id": project.id, "seqType.id": seqType.id]'
+                                            class="configure">
                                         ${seqType.displayNameWithLibraryLayout}
                                     </g:link>
                                 </g:if>
                                 <g:else>
-                                    <g:link controller='configurePipeline' action='alignment' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                    <g:link controller='configurePipeline' action='alignment' params='["project.id": project.id, "seqType.id": seqType.id]'
+                                            class="configure">
                                         ${seqType.displayNameWithLibraryLayout}
                                     </g:link>
                                 </g:else>
@@ -432,7 +511,7 @@
             </sec:ifAllGranted>
             <div id="alignment_info">
                 <table style="visibility: hidden" id="alignment_info_table">
-                     <tr>
+                    <tr>
                         <th>${g.message(code: 'projectOverview.alignmentInformation.tool')}</th>
                         <th>${g.message(code: 'projectOverview.alignmentInformation.version')}</th>
                         <th>${g.message(code: 'projectOverview.alignmentInformation.arguments')}</th>
@@ -441,6 +520,7 @@
                 </table>
             </div>
         </div>
+
         <div>
             <h3>${g.message(code: 'projectOverview.mergingCriteria')}</h3>
             <table>
@@ -467,14 +547,17 @@
                 </g:each>
             </table>
         </div>
+
         <div>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <h3><g:message code="projectOverview.alignmentInformation.configureCellRanger"/></h3>
+
                 <div class="show_button">
                     <ul>
                         <g:each in="${cellRangerSeqTypes}" var="seqType">
                             <li>
-                                <g:link controller='configureCellRangerPipeline' action='index' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                                <g:link controller='configureCellRangerPipeline' action='index' params='["project.id": project.id, "seqType.id": seqType.id]'
+                                        class="configure">
                                     ${seqType.displayNameWithLibraryLayout}
                                 </g:link>
                             </li>
@@ -507,25 +590,30 @@
             </sec:ifAllGranted>
         </div>
         <br>
+
         <div class="otpDataTables">
-        <h3>${g.message(code: 'projectOverview.listReferenceGenome.title')}</h3>
+            <h3>${g.message(code: 'projectOverview.listReferenceGenome.title')}</h3>
             <otp:dataTable
-                codes="${[
-                    'projectOverview.index.referenceGenome.sequenceTypeName',
-                    'projectOverview.index.referenceGenome.sampleTypeName',
-                    'projectOverview.index.referenceGenome',
-                    'projectOverview.index.statSizeFile',
-                    'projectOverview.index.adapterTrimming',
-                ] }"
-                id="listReferenceGenome" />
+                    codes="${[
+                            'projectOverview.index.referenceGenome.sequenceTypeName',
+                            'projectOverview.index.referenceGenome.sampleTypeName',
+                            'projectOverview.index.referenceGenome',
+                            'projectOverview.index.statSizeFile',
+                            'projectOverview.index.adapterTrimming',
+                    ]}"
+                    id="listReferenceGenome"/>
         </div>
         <br>
+
         <h2>${g.message(code: 'projectOverview.analysis.title')}</h2>
+
         <div>
             <h3>${g.message(code: 'projectOverview.qc.thresholds')}</h3>
+
             <div>
                 <g:link controller="qcThreshold" action="projectConfiguration">${g.message(code: 'projectOverview.qc.link')}</g:link>
             </div>
+
             <h3>${g.message(code: 'projectOverview.analysis.thresholds')}</h3>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <ul>
@@ -556,6 +644,7 @@
                 ${g.message(code: 'projectOverview.analysis.noThresholds')}
             </g:else>
         </div>
+
         <div>
             <h3>${g.message(code: 'projectOverview.snv.title')}</h3>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
@@ -599,6 +688,7 @@
             </table>
             <br>
         </div>
+
         <div>
             <h3>${g.message(code: 'projectOverview.indel.title')}</h3>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
@@ -629,6 +719,7 @@
             </table>
             <br>
         </div>
+
         <div>
             <h3>${g.message(code: 'projectOverview.sophia.title')}</h3>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
@@ -644,7 +735,7 @@
                             <g:else>
                                 ${seqType.displayNameWithLibraryLayout}: ${checkSophiaReferenceGenome[seqType]}
                             </g:else>
-                            </li>
+                        </li>
                     </g:each>
                 </ul>
             </sec:ifAllGranted>
@@ -664,6 +755,7 @@
             </table>
             <br>
         </div>
+
         <div>
             <h3>${g.message(code: 'projectOverview.aceseq.title')}</h3>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
@@ -699,6 +791,7 @@
             </table>
             <br>
         </div>
+
         <div>
             <h3>${g.message(code: 'projectOverview.runYapsa.title')}</h3>
             <sec:ifAllGranted roles="ROLE_OPERATOR">
@@ -706,7 +799,8 @@
                 <ul>
                     <g:each in="${runYapsaSeqTypes}" var="seqType">
                         <li>
-                            <g:link controller='configureRunYapsaPipeline' action='index' params='["project.id": project.id, "seqType.id": seqType.id]' class="configure">
+                            <g:link controller='configureRunYapsaPipeline' action='index' params='["project.id": project.id, "seqType.id": seqType.id]'
+                                    class="configure">
                                 ${seqType.displayNameWithLibraryLayout}
                             </g:link>
                         </li>
@@ -729,17 +823,17 @@
             </table>
             <br>
         </div>
-    <asset:script>
-        $(function() {
-            $.otp.projectConfig.referenceGenome();
-            $.otp.projectConfig.asynchronousCallAlignmentInfo();
-            $.otp.initCommentBox(${project.id}, "#projectCommentBox");
+        <asset:script>
+            $(function() {
+                $.otp.projectConfig.referenceGenome();
+                $.otp.projectConfig.asynchronousCallAlignmentInfo();
+                $.otp.initCommentBox(${project.id}, "#projectCommentBox");
         });
-    </asset:script>
+        </asset:script>
     </g:if>
     <g:else>
         <h3><g:message code="default.no.project"/></h3>
     </g:else>
-    </div>
+</div>
 </body>
 </html>

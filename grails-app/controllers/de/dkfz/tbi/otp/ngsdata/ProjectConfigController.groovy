@@ -19,11 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
-import org.springframework.validation.Errors
+import grails.validation.Validateable
 import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.*
@@ -35,12 +34,10 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
-import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 import java.sql.Timestamp
-import java.text.ParseException
 import java.text.SimpleDateFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -57,14 +54,14 @@ class ProjectConfigController implements CheckAndCall {
     ConfigService configService
 
     Map index() {
-        List<Project> projects = projectService.getAllProjects()
+        List<Project> projects = projectService.allProjects
         if (!projects) {
             return [
                     projects: projects,
             ]
         }
 
-        ProjectSelection selection = projectSelectionService.getSelectedProject()
+        ProjectSelection selection = projectSelectionService.selectedProject
 
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
@@ -75,7 +72,6 @@ class ProjectConfigController implements CheckAndCall {
         Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqTypeService.allAlignableSeqTypes.collectEntries { SeqType seqType ->
             [(seqType): mergingCriteria.find { it.seqType == seqType }]
         }.sort { Map.Entry<SeqType, MergingCriteria> it -> it.key.displayNameWithLibraryLayout }
-
 
         List<Map> cellRangerOverview = SeqTypeService.cellRangerAlignableSeqTypes.sort {
             it.name
@@ -102,18 +98,18 @@ class ProjectConfigController implements CheckAndCall {
         List aceseqConfigTable = createAnalysisConfigTable(project, aceseq)
         List runYapsaConfigTable = createAnalysisConfigTable(project, runYapsa)
 
-        Map<SeqType, String> checkSophiaReferenceGenome = sophia.getSeqTypes().collectEntries {
-            [(it): projectService.checkReferenceGenomeForSophia(project, it).getError()]
+        Map<SeqType, String> checkSophiaReferenceGenome = sophia.seqTypes.collectEntries {
+            [(it): projectService.checkReferenceGenomeForSophia(project, it).error]
         }
-        Map<SeqType, String> checkAceseqReferenceGenome = aceseq.getSeqTypes().collectEntries {
-            [(it): projectService.checkReferenceGenomeForAceseq(project, it).getError()]
+        Map<SeqType, String> checkAceseqReferenceGenome = aceseq.seqTypes.collectEntries {
+            [(it): projectService.checkReferenceGenomeForAceseq(project, it).error]
         }
 
         File projectDirectory
 
         if (project) {
             projectDirectory = LsdfFilesService.getPath(
-                    configService.getRootPath().path,
+                    configService.rootPath.path,
                     project.dirName,
             )
         }
@@ -124,17 +120,17 @@ class ProjectConfigController implements CheckAndCall {
                 creationDate                   : dates.creationDate,
                 lastReceivedDate               : dates.lastReceivedDate,
                 seqTypeMergingCriteria         : seqTypeMergingCriteria,
-                roddySeqTypes                  : SeqTypeService.getRoddyAlignableSeqTypes().sort {
+                roddySeqTypes                  : SeqTypeService.roddyAlignableSeqTypes.sort {
                     it.displayNameWithLibraryLayout
                 },
-                cellRangerSeqTypes             : SeqTypeService.getCellRangerAlignableSeqTypes().sort {
+                cellRangerSeqTypes             : SeqTypeService.cellRangerAlignableSeqTypes.sort {
                     it.displayNameWithLibraryLayout
                 },
-                snvSeqTypes                    : snv.getSeqTypes(),
-                indelSeqTypes                  : indel.getSeqTypes(),
-                sophiaSeqTypes                 : sophia.getSeqTypes(),
-                aceseqSeqTypes                 : aceseq.getSeqTypes(),
-                runYapsaSeqTypes               : runYapsa.getSeqTypes(),
+                snvSeqTypes                    : snv.seqTypes,
+                indelSeqTypes                  : indel.seqTypes,
+                sophiaSeqTypes                 : sophia.seqTypes,
+                aceseqSeqTypes                 : aceseq.seqTypes,
+                runYapsaSeqTypes               : runYapsa.seqTypes,
                 thresholdsTable                : thresholdsTable,
                 snvConfigTable                 : snvConfigTable,
                 indelConfigTable               : indelConfigTable,
@@ -155,9 +151,12 @@ class ProjectConfigController implements CheckAndCall {
                 allSpeciesWithStrain           : SpeciesWithStrain.list().sort { it.toString() } ?: [],
                 addProjectInfos                : flash?.addProjectInfos,
                 closed                         : project?.closed,
+                transferModes                  : ProjectInfo.TransferMode.values(),
+                legalBasis                     : ProjectInfo.LegalBasis.values(),
         ]
     }
 
+    @SuppressWarnings('CatchThrowable')
     JSON getAlignmentInfo(Project project) {
         Map<String, AlignmentInfo> alignmentInfo = null
         String alignmentError = null
@@ -173,76 +172,123 @@ class ProjectConfigController implements CheckAndCall {
     }
 
     JSON updateProjectField(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project) })
+        checkErrorAndCallMethod(cmd) {
+            projectService.updateProjectField(cmd.value, cmd.fieldName, cmd.project)
+        }
     }
 
     JSON updateProjectFieldDate(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectFieldDate(cmd.value, cmd.fieldName, cmd.project) })
+        checkErrorAndCallMethod(cmd) {
+            projectService.updateProjectFieldDate(cmd.value, cmd.fieldName, cmd.project)
+        }
     }
 
     JSON updateProcessingPriority(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(ProcessingPriority.valueOf(cmd.value).priority, cmd.fieldName, cmd.project)
-        })
+        }
     }
 
     JSON updateSpeciesWithStrain(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateProjectField(SpeciesWithStrain.get(cmd.value), cmd.fieldName, cmd.project) })
+        checkErrorAndCallMethod(cmd) {
+            projectService.updateProjectField(SpeciesWithStrain.get(cmd.value), cmd.fieldName, cmd.project)
+        }
     }
 
     JSON updateKeywords(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, { projectService.updateKeywords(cmd.value, cmd.project) })
+        checkErrorAndCallMethod(cmd) {
+            projectService.updateKeywords(cmd.value, cmd.project)
+        }
     }
 
     JSON updateTumorEntity(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(TumorEntity.findByName(cmd.value), cmd.fieldName, cmd.project)
-        })
+        }
     }
 
     JSON updateSnv(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(Project.Snv.valueOf(cmd.value), cmd.fieldName, cmd.project)
-        })
+        }
     }
 
     JSON updateSampleIdentifierParserBeanName(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(SampleIdentifierParserBeanName.valueOf(cmd.value), cmd.fieldName, cmd.project)
-        })
+        }
     }
 
     JSON updateQcThresholdHandling(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(QcThresholdHandling.valueOf(cmd.value), cmd.fieldName, cmd.project)
-        })
+        }
     }
 
     JSON updateCopyFiles(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, cmd.project)
-        })
+        }
     }
 
     JSON updateClosed(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, cmd.project)
-        })
+        }
     }
 
-
+    @SuppressWarnings('CatchException')
     def addProjectInfo(AddProjectInfoCommand cmd) {
+        withForm {
+            if (cmd.hasErrors()) {
+                flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.errorMessage") as String, cmd.errors)
+            } else {
+                try {
+                    projectService.createProjectInfoAndUploadFile(cmd)
+                } catch (Exception e) {
+                    log.error(e.message, e)
+                    flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.exceptionMessage") as String, e.toString())
+                    flash.addProjectInfos = cmd.values()
+                }
+            }
+        }.invalidToken {
+            flash.message = new FlashMessage(g.message(code: "default.invalid.session") as String, '')
+        }
+        redirect(action: "index")
+    }
+
+    @SuppressWarnings('CatchException')
+    def addProjectDta(AddProjectDtaCommand cmd) {
         withForm {
             if (cmd.hasErrors()) {
                 flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.errorMessage") as String, cmd.errors)
                 flash.addProjectInfos = cmd.values()
             } else {
                 try {
-                    projectService.createProjectInfoAndUploadFile(cmd)
+                    projectService.createProjectDtaInfoAndUploadFile(cmd)
                 } catch (Exception e) {
-                    log.error(e.getMessage(), e)
+                    log.error(e.message, e)
                     flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.exceptionMessage") as String, e.toString())
                     flash.addProjectInfos = cmd.values()
+                }
+            }
+        }.invalidToken {
+            flash.message = new FlashMessage(g.message(code: "default.invalid.session") as String, '')
+        }
+        redirect(action: "index")
+    }
+
+    @SuppressWarnings('CatchException')
+    def markDtaDataAsDeleted(ProjectInfoCommand cmd) {
+        withForm {
+            if (cmd.hasErrors()) {
+                flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.errorMessage") as String, cmd.errors)
+            } else {
+                try {
+                    projectService.markDtaDataAsDeleted(cmd)
+                } catch (Exception e) {
+                    log.error(e.message, e)
+                    flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.exceptionMessage") as String, e.toString())
                 }
             }
         }.invalidToken {
@@ -258,7 +304,7 @@ class ProjectConfigController implements CheckAndCall {
     JSON saveProjectComment(CommentCommand cmd) {
         Project project = projectService.getProject(cmd.id)
         commentService.saveComment(project, cmd.comment)
-        def dataToRender = [date: project.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: project.comment.author]
+        Map dataToRender = [date: project.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: project.comment.author]
         render dataToRender as JSON
     }
 
@@ -313,7 +359,7 @@ class ProjectConfigController implements CheckAndCall {
     static List<List<String>> createAnalysisConfigTable(Project project, Pipeline pipeline) {
         List<List<String>> table = []
         table.add(["", "Config created", "Version"])
-        pipeline.getSeqTypes().each { SeqType seqType ->
+        pipeline.seqTypes.each { SeqType seqType ->
             List<String> row = []
             row.add(seqType.displayNameWithLibraryLayout)
             SnvConfig snvConfig = atMostOneElement(SnvConfig.findAllByProjectAndSeqTypeAndObsoleteDateIsNull(project, seqType))
@@ -340,7 +386,7 @@ class ProjectConfigController implements CheckAndCall {
 
     private List<List<String>> createThresholdTable(Project project) {
         List<List<String>> thresholdsTable = []
-        List<SeqType> seqTypes = SeqTypeService.getAllAnalysableSeqTypes()
+        List<SeqType> seqTypes = SeqTypeService.allAlignableSeqTypes
 
         List row = []
         row.add(message(code: "projectOverview.analysis.sampleType"))
@@ -383,12 +429,12 @@ class ProjectConfigController implements CheckAndCall {
         List data = projectOverviewService.listReferenceGenome(project).collect { ReferenceGenomeProjectSeqType it ->
             String adapterTrimming = ""
             if (!it.sampleType) {
-                adapterTrimming = it.seqType.isWgbs() ?:
-                            RoddyWorkflowConfig.getLatestForProject(
-                                    project,
-                                    it.seqType,
-                                    Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
-                            )?.adapterTrimmingNeeded
+                adapterTrimming = it.seqType.wgbs ?:
+                        RoddyWorkflowConfig.getLatestForProject(
+                                project,
+                                it.seqType,
+                                Pipeline.findByName(Pipeline.Name.PANCAN_ALIGNMENT)
+                        )?.adapterTrimmingNeeded
             }
             return [
                     it.seqType.displayNameWithLibraryLayout,
@@ -404,7 +450,7 @@ class ProjectConfigController implements CheckAndCall {
         render dataToRender as JSON
     }
 
-    def download(DownloadProjectInfoCommand cmd) {
+    def download(ProjectInfoCommand cmd) {
         if (cmd.hasErrors()) {
             response.sendError(404)
             return
@@ -418,11 +464,10 @@ class ProjectConfigController implements CheckAndCall {
             flash.message = new FlashMessage("No file '${cmd.projectInfo.fileName}' found.")
             redirect(action: "index")
         }
-
     }
 }
 
-class UpdateProjectCommand implements Serializable {
+class UpdateProjectCommand implements Validateable {
     Project project
     String value
     String fieldName
@@ -432,90 +477,88 @@ class UpdateProjectCommand implements Serializable {
     }
 }
 
-class AddProjectInfoCommand implements Serializable {
+class AddProjectInfoCommand implements Validateable {
     MultipartFile projectInfoFile
+
     Project project
-    String recipient
-    String commissioningUser
-    String transferDate
-    String validityDate
-    String transferMode
-    String legalBasis
 
     static constraints = {
+        project nullable: false
         projectInfoFile(validator: { val, obj ->
-            if (val.isEmpty()) {
+            if (val.empty) {
                 return "File is empty"
             }
             if (!OtpPath.isValidPathComponent(val.originalFilename)) {
-                return "Invalid fileName"
+                return "Invalid file name"
             }
             if (ProjectInfo.findAllByProjectAndFileName(obj.project, val.originalFilename).size() != 0) {
-                return "A ProjectInfo with this fileName already exists"
+                return "A ProjectInfo with this file name already exists"
             }
-            if (val.getSize() > ProjectService.PROJECT_INFO_MAX_SIZE) {
-                return "The File exceeds the 20mb file size limit "
+            if (val.size > ProjectService.PROJECT_INFO_MAX_SIZE) {
+                return "The file exceeds the 20mb file size limit"
             }
-        })
-        commissioningUser(validator: { val ->
-            if (val && !User.findByUsername(val)) {
-                return "Could not find user with username: ${val}"
-            }
-        })
-        transferDate(validator: { val ->
-            if (val && !isDateParsable(val)) {
-                return "The value '${val}' is not in the expected date format 'yyyy-MM-dd'"
-            }
-        })
-        validityDate(validator: { val ->
-            if (val && !isDateParsable(val)) {
-                return "The value '${val}' is not in the expected date format 'yyyy-MM-dd'"
-            }
-        })
-        recipient(validator: { val, obj, Errors errors ->
-                List<String> elements = [
-                        obj.recipient,
-                        obj.commissioningUser,
-                        obj.transferDate,
-                        obj.validityDate,
-                        obj.transferMode,
-                        obj.legalBasis,
-                                        ]
-            int givenValues = elements.findAll().size()
-            if (givenValues != 0 && givenValues != elements.size()) {
-                errors.reject(null, "Either all or none of the additional values have to be given: " +
-                        "project, recipient, commissioningUser, transferDate, validityDate, transferMode, legalBasis")
-            }
-            return true
         })
     }
+}
 
-    static private boolean isDateParsable(String date) {
-        try {
-            new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(date)
-            return true
-        } catch (ParseException e) {
-            return false
+class AddProjectDtaCommand extends AddProjectInfoCommand {
+    String recipientInstitution
+    String recipientPerson
+    String recipientAccount
+
+    Date transferDate
+    Date validityDate
+
+    ProjectInfo.TransferMode transferMode
+    ProjectInfo.LegalBasis legalBasis
+    String dtaId
+
+    String requester
+    String ticketID
+    String comment
+
+    static constraints = {
+        recipientInstitution blank: false
+        recipientPerson blank: false
+        recipientAccount nullable: true
+
+        validityDate nullable: true
+
+        dtaId nullable: true
+        requester blank: false
+        ticketID nullable: true
+        comment nullable: true
+    }
+
+    void setTransferDateInput(String transferDate) {
+        if (transferDate) {
+            this.transferDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(transferDate)
+        }
+    }
+
+    void setValidityDateInput(String validityDate) {
+        if (validityDate) {
+            this.validityDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(validityDate)
         }
     }
 
     Map<String, String> values() {
         return [
-                recipient        : recipient,
-                commissioningUser: commissioningUser,
-                transferDate     : transferDate,
-                validityDate     : validityDate,
-                transferMode     : transferMode,
-                legalBasis       : legalBasis,
+                recipientInstitution: recipientInstitution,
+                recipientPerson     : recipientPerson,
+                recipientAccount    : recipientAccount,
+                transferDate        : transferDate,
+                validityDate        : validityDate,
+                transferMode        : transferMode,
+                legalBasis          : legalBasis,
+                dtaId               : dtaId,
+                requester           : requester,
+                ticketID            : ticketID,
+                comment             : comment,
         ]
     }
 }
 
-class UpdateCategoryCommand implements Serializable {
-    List<String> value = [].withLazyDefault { new String() }
-    Project project
-}
-
-class DownloadProjectInfoCommand implements Serializable {
+class ProjectInfoCommand implements Validateable {
     ProjectInfo projectInfo
 }
