@@ -46,7 +46,7 @@ class Project implements Commentable, Entity {
 
     enum ProjectType {
         SEQUENCING,
-        DATA_MANAGEMENT,
+        USER_MANAGEMENT,
     }
 
     SpeciesWithStrain speciesWithStrain
