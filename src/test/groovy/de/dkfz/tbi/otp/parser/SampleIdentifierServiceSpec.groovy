@@ -55,11 +55,12 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
     }
 
 
-    private ParsedSampleIdentifier makeParsedSampleIdentifier(
+    private static DefaultParsedSampleIdentifier makeParsedSampleIdentifier(
             String projectName = HelperUtils.uniqueString,
             String pid = HelperUtils.uniqueString,
             String sampleTypeDbName = HelperUtils.uniqueString,
-            String fullSampleName = HelperUtils.uniqueString) {
+            String fullSampleName = HelperUtils.uniqueString
+    ) {
         return new DefaultParsedSampleIdentifier(projectName, pid, sampleTypeDbName, fullSampleName)
     }
 
@@ -87,7 +88,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         e.message == "Project ${identifier.projectName} does not exist."
     }
 
-    private void findOrSaveIndividual(ParsedSampleIdentifier identifier) {
+    private void callAndAssertFindOrSaveIndividual(ParsedSampleIdentifier identifier) {
         Individual result = service.findOrSaveIndividual(identifier)
 
         assert result.pid == identifier.pid
@@ -101,7 +102,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(individual.project.name, individual.pid)
 
         expect:
-        findOrSaveIndividual(identifier)
+        callAndAssertFindOrSaveIndividual(identifier)
     }
 
     void "test findOrSaveIndividual, individual doesn't exist, should create it"() {
@@ -110,7 +111,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(project.name)
 
         expect:
-        findOrSaveIndividual(identifier)
+        callAndAssertFindOrSaveIndividual(identifier)
     }
 
     void "test findOrSaveIndividual, individual exists in other project, should fail"() {
@@ -198,7 +199,61 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         findOrSaveSample(identifier)
     }
 
-    private void findOrSaveSampleIdentifier(ParsedSampleIdentifier identifier) {
+    private SampleIdentifier getSampleIdentifier(String projectName, String pid, String sampleTypeName) {
+        return DomainFactory.createSampleIdentifier(
+                sample: createSample(
+                        individual: createIndividual(
+                                pid: pid,
+                                project: createProject(name: projectName),
+                        ),
+                        sampleType: createSampleType(name: sampleTypeName),
+                )
+        )
+    }
+
+    void "parsedIdentifierMatchesFoundIdentifier, matching identifiers"() {
+        given:
+        String projectName = "projectName"
+        String pid = "pid"
+        String sampleTypeName = "sampleTypeName"
+        DefaultParsedSampleIdentifier parsedIdentifier = makeParsedSampleIdentifier(projectName, pid, sampleTypeName)
+        SampleIdentifier foundIdentifier = getSampleIdentifier(projectName, pid, sampleTypeName)
+
+        when:
+        boolean result = service.parsedIdentifierMatchesFoundIdentifier(parsedIdentifier, foundIdentifier)
+
+        then:
+        result
+    }
+
+    void "parsedIdentifierMatchesFoundIdentifier, mismatching identifiers"() {
+        given:
+        String projectName = "projectName"
+        String pid = "pid"
+        String sampleTypeName = "sampleTypeName"
+
+        DefaultParsedSampleIdentifier parsedIdentifier = makeParsedSampleIdentifier(
+                projectName + suffix[0],
+                pid + suffix[1],
+                sampleTypeName + suffix[2],
+        )
+        SampleIdentifier foundIdentifier = getSampleIdentifier(projectName, pid, sampleTypeName)
+
+        when:
+        boolean result = service.parsedIdentifierMatchesFoundIdentifier(parsedIdentifier, foundIdentifier)
+
+        then:
+        !result
+
+        where:
+        suffix << [
+                ["a", "", ""],
+                ["", "b", ""],
+                ["", "", "c"],
+        ]
+    }
+
+    private void callAndAssertFindOrSaveSampleIdentifier(ParsedSampleIdentifier identifier) {
         SampleIdentifier result = service.findOrSaveSampleIdentifier(identifier)
 
         assert result.name == identifier.fullSampleName
@@ -219,7 +274,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         )
 
         expect:
-        findOrSaveSampleIdentifier(identifier)
+        callAndAssertFindOrSaveSampleIdentifier(identifier)
     }
 
     void "test findOrSaveSampleIdentifier, when sample identifier does not exist, should create it"() {
@@ -228,7 +283,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(project.name)
 
         expect:
-        findOrSaveSampleIdentifier(identifier)
+        callAndAssertFindOrSaveSampleIdentifier(identifier)
     }
 
     void "test findOrSaveSampleIdentifier, when sample identifier belongs to other sample, should fail"() {
@@ -259,30 +314,6 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         Project.count() == 0
     }
 
-    void "test findOrSaveSampleIdentifier, should replace underscore"() {
-        given:
-        Project project = DomainFactory.createProject()
-        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(project.name, HelperUtils.uniqueString, "sampleTypeName_3")
-
-        when:
-        SampleIdentifier result = service.findOrSaveSampleIdentifier(identifier)
-
-        then:
-        result.sampleType.name == "sampleTypeName-3"
-    }
-
-    void "test findOrSaveSample, should replace underscore"() {
-        given:
-        Sample sample = DomainFactory.createSample()
-        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(sample.project.name, sample.individual.pid, "sampleTypeName_3")
-
-        when:
-        Sample result = service.findOrSaveSample(identifier)
-
-        then:
-        result.sampleType.name == "sampleTypeName-3"
-    }
-
     void "test findOrSaveSample, with underscore"() {
         given:
         Sample sample = DomainFactory.createSample()
@@ -311,7 +342,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
 
     private SampleIdentifierService createSampleIdentifierService() {
         SampleIdentifierService sampleIdentifierService = Spy(SampleIdentifierService) {
-            findOrSaveSampleIdentifier(_) >> { }
+            callAndAssertFindOrSaveSampleIdentifier(_) >> { }
         }
         sampleIdentifierService.applicationContext = Mock(ApplicationContext) {
             getBean(_) >> {
@@ -319,6 +350,22 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
             }
         }
         return sampleIdentifierService
+    }
+
+    void "getSanitizedSampleTypeDbName, converts underscores to dashes"() {
+        given:
+        SampleIdentifierService sampleIdentifierService = createSampleIdentifierService()
+
+        when:
+        String result = sampleIdentifierService.getSanitizedSampleTypeDbName(input)
+
+        then:
+        result == expected
+
+        where:
+        input        | expected
+        "sin_gle"    | "sin-gle"
+        "mul_ti_ple" | "mul-ti-ple"
     }
 
     @Unroll
@@ -382,5 +429,25 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
 
         then:
         CollectionUtils.containSame(output, ["The column header 'UNKNOWN_HEADER' is unknown"])
+    }
+
+    @Unroll
+    void "sanitizeCharacterDelimitedText, common cases with all delimiters (delimiter=#delimiter)"() {
+        given:
+        SampleIdentifierService sampleIdentifierService = createSampleIdentifierService()
+
+        String d = delimiter.delimiter.toString()
+
+        String input = " front${d}back ${d}mid dle${d} m u l t i ${d}  consec  utive\n new line front${d} new line middle ${d}new line back \na${d}b${d}c"
+        String expected = "front${d}back${d}mid dle${d}m u l t i${d}consec utive\nnew line front${d}new line middle${d}new line back\na${d}b${d}c"
+
+        when:
+        String result = sampleIdentifierService.sanitizeCharacterDelimitedText(input, delimiter)
+
+        then:
+        result == expected
+
+        where:
+        delimiter << Spreadsheet.Delimiter.values()
     }
 }

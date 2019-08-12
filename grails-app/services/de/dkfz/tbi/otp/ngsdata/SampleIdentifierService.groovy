@@ -94,6 +94,10 @@ class SampleIdentifierService {
         return sampleIdentifierParser.tryParseCellPosition(sampleIdentifier)
     }
 
+    static String getSanitizedSampleTypeDbName(String sampleTypeDbName) {
+        return sampleTypeDbName.replaceAll('_', '-')
+    }
+
     List<String> createBulkSamples(String sampleText, Spreadsheet.Delimiter delimiter, Project project) {
         Spreadsheet spreadsheet = new Spreadsheet(sampleText, delimiter)
         List<String> output = []
@@ -108,13 +112,13 @@ class SampleIdentifierService {
             for (Row row : spreadsheet.dataRows) {
                 String projectName = row.getCellByColumnTitle(BulkSampleCreationHeader.PROJECT.name())?.text?.trim() ?: project.name
 
-                ParsedSampleIdentifier s = new DefaultParsedSampleIdentifier(
+                ParsedSampleIdentifier identifier = new DefaultParsedSampleIdentifier(
                         projectName: projectName,
                         pid: row.getCellByColumnTitle(BulkSampleCreationHeader.PID.name()).text.trim(),
-                        sampleTypeDbName: row.getCellByColumnTitle(BulkSampleCreationHeader.SAMPLE_TYPE.name()).text.trim(),
+                        sampleTypeDbName: getSanitizedSampleTypeDbName(row.getCellByColumnTitle(BulkSampleCreationHeader.SAMPLE_TYPE.name()).text.trim()),
                         fullSampleName: row.getCellByColumnTitle(BulkSampleCreationHeader.SAMPLE_IDENTIFIER.name()).text.trim(),
                 )
-                findOrSaveSampleIdentifier(s)
+                findOrSaveSampleIdentifier(identifier)
             }
         } catch (ValidationException e) {
             e.errors.allErrors.each { ObjectError err ->
@@ -130,44 +134,50 @@ class SampleIdentifierService {
         return applicationContext.getBean(BulkSampleCreationValidator)
     }
 
+    static boolean parsedIdentifierMatchesFoundIdentifier(ParsedSampleIdentifier parsedIdentifier, SampleIdentifier foundIdentifier) {
+        return  foundIdentifier.project.name == parsedIdentifier.projectName &&
+                foundIdentifier.individual.pid == parsedIdentifier.pid &&
+                foundIdentifier.sampleType.name == parsedIdentifier.sampleTypeDbName
+    }
+
     SampleIdentifier findOrSaveSampleIdentifier(ParsedSampleIdentifier identifier) {
-        SampleIdentifier result = atMostOneElement(SampleIdentifier.findAllByName(identifier.fullSampleName))
-        if (result) {
-            if (result.project.name != identifier.projectName ||
-                    result.individual.pid != identifier.pid ||
-                    (result.sampleType.name != identifier.sampleTypeDbName && result.sampleType.name != identifier.sampleTypeDbName.replace('_', '-'))) {
-                throw new RuntimeException("A sample identifier ${identifier.fullSampleName} already exists, " +
-                        "but belongs to sample ${result.sample} in project ${result.project.name} which does not match the expected properties")
+        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(identifier.fullSampleName))
+        if (sampleIdentifier) {
+            if (!parsedIdentifierMatchesFoundIdentifier(identifier, sampleIdentifier)) {
+                throw new RuntimeException(
+                        "A sample identifier ${identifier.fullSampleName} already exists, " +
+                        "but belongs to sample ${sampleIdentifier.sample} in project " +
+                        "${sampleIdentifier.project.name} which does not match the expected properties"
+                )
             }
         } else {
             Sample sample = findOrSaveSample(identifier)
-            result = new SampleIdentifier(
+            sampleIdentifier = new SampleIdentifier(
                     sample: sample,
                     name: identifier.fullSampleName,
             )
-            result.save(flush: true)
+            sampleIdentifier.save(flush: true)
         }
-        return result
+        return sampleIdentifier
     }
 
     Sample findOrSaveSample(ParsedSampleIdentifier identifier) {
-        String sampleTypeWithoutUnderscore = identifier.sampleTypeDbName.replace('_', '-')
-        Sample sample = Sample.findWhere(
-                individual: findOrSaveIndividual(identifier),
-                sampleType: SampleType.findWhere(name: identifier.sampleTypeDbName) ?: SampleType.findWhere(
-                        name: sampleTypeWithoutUnderscore) ?: createSampleTypeXenograftDepending(sampleTypeWithoutUnderscore),
-        )
+        Individual individual = findOrSaveIndividual(identifier)
+
+        String newSampleTypeName = identifier.sampleTypeDbName
+
+        SampleType sampleType = atMostOneElement(SampleType.findAllByName(newSampleTypeName).unique())
+        if (!sampleType) {
+            sampleType = createSampleTypeXenograftDepending(identifier.sampleTypeDbName)
+        }
+
+        Sample sample = Sample.findByIndividualAndSampleType(individual, sampleType)
         if (!sample) {
-            sample = new Sample(
-                    individual: findOrSaveIndividual(identifier),
-                    sampleType: SampleType.findWhere(name: identifier.sampleTypeDbName) ?: SampleType.findWhere(
-                            name: sampleTypeWithoutUnderscore) ?: createSampleTypeXenograftDepending(sampleTypeWithoutUnderscore),
-            )
+            sample = new Sample(individual: individual, sampleType: sampleType)
             sample.save(flush: true)
         }
         return sample
     }
-
 
     SampleType createSampleTypeXenograftDepending(String sampleTypeName) {
         boolean xenograft = sampleTypeName.toUpperCase(Locale.ENGLISH).startsWith(XENOGRAFT) ||
@@ -183,26 +193,27 @@ class SampleIdentifierService {
         return sampleType
     }
 
-
     Individual findOrSaveIndividual(ParsedSampleIdentifier identifier) {
-        Individual result = atMostOneElement(Individual.findAllByPid(identifier.pid))
-        if (result) {
-            if (result.project.name != identifier.projectName) {
-                throw new RuntimeException("An individual with PID ${result.pid} already exists, " +
-                        "but belongs to project ${result.project.name} instead of ${identifier.projectName}")
+        Individual individual = atMostOneElement(Individual.findAllByPid(identifier.pid))
+        if (individual) {
+            if (individual.project.name != identifier.projectName) {
+                throw new RuntimeException(
+                        "An individual with PID ${individual.pid} already exists, but belongs " +
+                        "to project ${individual.project.name} instead of ${identifier.projectName}"
+                )
 
             }
         } else {
-            result = new Individual(
+            individual = new Individual(
                     pid: identifier.pid,
                     mockPid: identifier.pid,
                     mockFullName: identifier.pid,
                     project: findProject(identifier),
                     type: Individual.Type.REAL
             )
-            assert result.save(flush: true)
+            assert individual.save(flush: true)
         }
-        return result
+        return individual
     }
 
     Project findProject(ParsedSampleIdentifier identifier) {
@@ -212,5 +223,24 @@ class SampleIdentifierService {
         } else {
             throw new RuntimeException("Project ${identifier.projectName} does not exist.")
         }
+    }
+
+    /**
+     * Sanitizes a character delimited text.
+     *
+     * The sanitation includes trimming the entire string, combining consecutive
+     * spaces into one and removing spaces around delimiters and newlines.
+     *
+     * @param text to be sanitized
+     * @param delimiter which separates columns
+     * @return sanitized text
+     */
+    String sanitizeCharacterDelimitedText(String text, Spreadsheet.Delimiter delimiter) {
+        String columnDelimiter = delimiter.delimiter.toString()
+        return text
+                .trim()
+                .replaceAll(/ *${columnDelimiter} */, columnDelimiter)
+                .replaceAll(/ +/, " ")
+                .replaceAll(/ *\n */, "\n")
     }
 }

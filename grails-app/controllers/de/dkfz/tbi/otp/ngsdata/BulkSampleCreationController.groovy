@@ -29,7 +29,7 @@ import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 class BulkSampleCreationController {
 
     static allowedMethods = [
-            index: "GET",
+            index : "GET",
             upload: "POST",
             submit: "POST",
     ]
@@ -40,7 +40,6 @@ class BulkSampleCreationController {
     ProjectSelectionService projectSelectionService
 
     Map index() {
-
         List<Project> projects = projectService.allProjects
         ProjectSelection selection = projectSelectionService.selectedProject
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
@@ -64,16 +63,15 @@ class BulkSampleCreationController {
         flash.sampleText = cmd.sampleText
         flash.delimiter = cmd.delimiter
 
-
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage("Error", cmd.errors)
         } else {
             Realm.withTransaction { status ->
                 List<String> errors = sampleIdentifierService.createBulkSamples(
-                                cmd.sampleText.replaceAll(/ *${cmd.delimiter.delimiter.toString()} */,cmd.delimiter.delimiter.toString()),
-                                cmd.delimiter,
-                                cmd.project
-                        )
+                        sampleIdentifierService.sanitizeCharacterDelimitedText(cmd.sampleText, cmd.delimiter),
+                        cmd.delimiter,
+                        cmd.project
+                )
 
                 if (errors) {
                     status.setRollbackOnly()
