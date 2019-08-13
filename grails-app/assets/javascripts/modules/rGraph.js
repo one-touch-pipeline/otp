@@ -20,16 +20,16 @@
  * SOFTWARE.
  */
 
-//= require rgraph/RGraph.common.core.js
-//= require rgraph/RGraph.common.annotate.js
-//= require rgraph/RGraph.common.dynamic.js
-//= require rgraph/RGraph.common.effects.js
-//= require rgraph/RGraph.common.key.js
-//= require rgraph/RGraph.common.resizing.js
-//= require rgraph/RGraph.common.tooltips.js
-//= require rgraph/RGraph.common.zoom.js
-//= require rgraph/RGraph.bar.js
-//= require rgraph/RGraph.hbar.js
-//= require rgraph/RGraph.line.js
-//= require rgraph/RGraph.pie.js
-//= require rgraph/RGraph.scatter.js
+//= require /webjars/rgraph/4.66-stable/RGraph.common.core.js
+//= require /webjars/rgraph/4.66-stable/RGraph.common.annotate.js
+//= require /webjars/rgraph/4.66-stable/RGraph.common.dynamic.js
+//= require /webjars/rgraph/4.66-stable/RGraph.common.effects.js
+//= require /webjars/rgraph/4.66-stable/RGraph.common.key.js
+//= require /webjars/rgraph/4.66-stable/RGraph.common.resizing.js
+//= require /webjars/rgraph/4.66-stable/RGraph.common.tooltips.js
+//= require /webjars/rgraph/4.66-stable/RGraph.common.zoom.js
+//= require /webjars/rgraph/4.66-stable/RGraph.bar.js
+//= require /webjars/rgraph/4.66-stable/RGraph.hbar.js
+//= require /webjars/rgraph/4.66-stable/RGraph.line.js
+//= require /webjars/rgraph/4.66-stable/RGraph.pie.js
+//= require /webjars/rgraph/4.66-stable/RGraph.scatter.js

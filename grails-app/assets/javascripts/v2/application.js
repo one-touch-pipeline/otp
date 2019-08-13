@@ -20,6 +20,6 @@
  * SOFTWARE.
  */
 
-//= require jquery/jquery.js
-//= require bootstrap/js/bootstrap.js
+//= require /webjars/jquery/1.11.1/jquery.js
+//= require /webjars/bootstrap/3.3.5/js/bootstrap.js
 //= require otp

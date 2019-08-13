@@ -21,7 +21,7 @@
  */
 
 /*
-*= require bootstrap/css/bootstrap.css
+*= require /webjars/bootstrap/3.3.5/css/bootstrap.css
 *= require general-layout
 *= require header
 *= require login

@@ -20,6 +20,6 @@
  * SOFTWARE.
  */
 
-//= require rgraph/RGraph.common.core.js
-//= require rgraph/RGraph.bar.js
-//= require rgraph/RGraph.pie.js
+//= require /webjars/rgraph/4.66-stable/RGraph.common.core.js
+//= require /webjars/rgraph/4.66-stable/RGraph.bar.js
+//= require /webjars/rgraph/4.66-stable/RGraph.pie.js
