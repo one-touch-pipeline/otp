@@ -79,7 +79,7 @@
             </div>
         </div>
         <div class="otpDataTables">
-            <table id="laneOverviewId"  data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}" data-workflow-size="${pipelines.size()}">
+            <table id="laneOverviewId"  data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}" data-workflow-size="${pipelines.size()}" data-seq-type-size="${seqTypes.size()}">
                 <thead>
                     <tr>
                         <th></th>
@@ -123,7 +123,7 @@
     <asset:script type="text/javascript">
         $(function() {
             $.otp.projectOverviewTable.registerLaneOverviewId();
-            $('.dataTables_scrollBody').height($('.body').height()-265);
+            $('.dataTables_scrollBody').height($('.body').height()-150);
         });
     </asset:script>
     </g:if>

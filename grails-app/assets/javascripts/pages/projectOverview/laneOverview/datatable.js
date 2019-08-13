@@ -104,9 +104,10 @@ $.otp.projectOverviewTable = {
         });
 
         $.otp.dataTableFilter.register($('#searchCriteriaTable'), oTableLaneOverview, false, function () {
-            var tableSize = $('#laneOverviewId').find('thead > tr > th').size(),
-                ignoredColumns = parseInt($('#laneOverviewId').data('ignore-filter-columns')),
+            var ignoredColumns = parseInt($('#laneOverviewId').data('ignore-filter-columns')),
                 workflowSize = parseInt($('#laneOverviewId').data('workflow-size')),
+                seqTypeSize = parseInt($('#laneOverviewId').data('seq-type-size')),
+                tableSize = seqTypeSize * (workflowSize + 1) + ignoredColumns,
                 result = [],
                 i;
 
