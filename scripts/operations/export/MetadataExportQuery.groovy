@@ -77,7 +77,7 @@ File output_dir = new File(ConfigService.getInstance().getScriptOutputPath(), "e
 File output =    new File(output_dir, "${output_name}.csv")
 File done_flag = new File(output_dir, "${output_name}.done")
 
-
+println("going to write output to ${output}")
 
 // metadata columns of interest: everything normally in a metadata file we receive.
 List<MetaDataColumn> wanted_columns = MetaDataColumn.values()
