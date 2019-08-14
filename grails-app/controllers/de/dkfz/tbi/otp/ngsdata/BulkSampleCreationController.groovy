@@ -45,12 +45,15 @@ class BulkSampleCreationController {
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
         return [
-                projects: projects,
-                project: project,
-                delimiters: Spreadsheet.Delimiter.values(),
-                header: SampleIdentifierService.BulkSampleCreationHeader.values(),
-                sampleText: flash.sampleText ?: flash.sampleText ?: SampleIdentifierService.BulkSampleCreationHeader.getHeaders(Spreadsheet.Delimiter.COMMA),
-                delimiter: flash.delimiter,
+                projects                : projects,
+                project                 : project,
+                delimiters              : Spreadsheet.Delimiter.values(),
+                delimiter               : flash.delimiter,
+                header                  : SampleIdentifierService.BulkSampleCreationHeader.values(),
+                sampleText              : flash.sampleText ?: SampleIdentifierService.BulkSampleCreationHeader.getHeaders(Spreadsheet.Delimiter.COMMA),
+                createMissingSampleTypes: flash.createMissingSampleTypes,
+                referenceGenomeSources  : SampleType.SpecificReferenceGenome.values(),
+                referenceGenomeSource   : flash.referenceGenomeSource,
         ]
     }
 
@@ -62,15 +65,18 @@ class BulkSampleCreationController {
     def submit(CreateBulkSampleCreationCommand cmd) {
         flash.sampleText = cmd.sampleText
         flash.delimiter = cmd.delimiter
+        flash.createMissingSampleTypes = cmd.createMissingSampleTypes
+        flash.referenceGenomeSource = cmd.referenceGenomeSource
 
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage("Error", cmd.errors)
         } else {
             Realm.withTransaction { status ->
                 List<String> errors = sampleIdentifierService.createBulkSamples(
-                        sampleIdentifierService.sanitizeCharacterDelimitedText(cmd.sampleText, cmd.delimiter),
+                        sampleIdentifierService.removeExcessWhitespaceFromCharacterDelimitedText(cmd.sampleText, cmd.delimiter),
                         cmd.delimiter,
-                        cmd.project
+                        cmd.project,
+                        cmd.referenceGenomeSource,
                 )
 
                 if (errors) {
@@ -89,6 +95,16 @@ class CreateBulkSampleCreationCommand {
     Spreadsheet.Delimiter delimiter
     Project project
     String sampleText
+    Boolean createMissingSampleTypes
+    SampleType.SpecificReferenceGenome referenceGenomeSource
+
+    static constraints = {
+        referenceGenomeSource(nullable: true, validator: { val, obj ->
+            if (!(obj.createMissingSampleTypes ^ val == null)) {
+                return "SampleType creation and source have to be defined together"
+            }
+        })
+    }
 }
 
 class UploadCSVCommand {

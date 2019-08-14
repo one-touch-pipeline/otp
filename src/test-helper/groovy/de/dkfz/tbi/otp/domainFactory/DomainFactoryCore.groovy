@@ -71,6 +71,13 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ], properties, saveAndValidate)
     }
 
+    SampleIdentifier createSampleIdentifier(Map properties = [:]) {
+        return createDomainObject(SampleIdentifier, [
+                sample: { createSample() },
+                name  : "sampleIdentifierName_${nextId}",
+        ], properties)
+    }
+
     SeqType createSeqType(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(SeqType, getCustomSeqTypeProperties(properties), properties, saveAndValidate)
     }

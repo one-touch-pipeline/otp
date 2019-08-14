@@ -52,10 +52,7 @@ class SampleIdentifierService {
         }
     }
 
-    static final String XENOGRAFT = "XENOGRAFT"
-    static final String CULTURE = "PATIENT-DERIVED-CULTURE"
-    static final String ORGANOID = "ORGANOID"
-
+    static final List<String> XENOGRAFT_SAMPLE_TYPE_PREFIXES = ["XENOGRAFT", "PATIENT-DERIVED-CULTURE", "PATIENT_DERIVED_CULTURE", "ORGANOID"]
 
     @Autowired
     ApplicationContext applicationContext
@@ -66,9 +63,9 @@ class SampleIdentifierService {
 
     SampleIdentifier parseAndFindOrSaveSampleIdentifier(String sampleIdentifier, Project project) {
         ParsedSampleIdentifier identifier = parseSampleIdentifier(sampleIdentifier, project)
-
         if (identifier) {
-            return findOrSaveSampleIdentifier(identifier)
+            SampleType.SpecificReferenceGenome specificReferenceGenome = deriveSpecificReferenceGenome(identifier.sampleTypeDbName)
+            return findOrSaveSampleIdentifierWithSanitizedIdentifier(identifier, specificReferenceGenome)
         } else {
             return null
         }
@@ -84,6 +81,27 @@ class SampleIdentifierService {
         return sampleIdentifierParser.tryParse(sampleIdentifier)
     }
 
+    /**
+     * Derives the SpecificReferenceGenome to use based on some information.
+     *
+     * This function encapsulates the knowledge on how to derive the SpecificReferenceGenome from
+     * the given information, which is required for the automatic SampleType creation during the
+     * import.
+     *
+     * @param sampleTypeName
+     * @return the derived SpecificReferenceGenome
+     */
+    SampleType.SpecificReferenceGenome deriveSpecificReferenceGenome(String sampleTypeName) {
+        String uppercase = sampleTypeName.toUpperCase(Locale.ENGLISH)
+        boolean isXenograft = XENOGRAFT_SAMPLE_TYPE_PREFIXES.any { uppercase.startsWith(it) }
+
+        if (isXenograft) {
+            return SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+        } else {
+            return SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        }
+    }
+
     String parseCellPosition(String sampleIdentifier, Project project) {
         if (!project || project.sampleIdentifierParserBeanName == SampleIdentifierParserBeanName.NO_PARSER) {
             return null
@@ -94,11 +112,7 @@ class SampleIdentifierService {
         return sampleIdentifierParser.tryParseCellPosition(sampleIdentifier)
     }
 
-    static String getSanitizedSampleTypeDbName(String sampleTypeDbName) {
-        return sampleTypeDbName.replaceAll('_', '-')
-    }
-
-    List<String> createBulkSamples(String sampleText, Spreadsheet.Delimiter delimiter, Project project) {
+    List<String> createBulkSamples(String sampleText, Spreadsheet.Delimiter delimiter, Project project, SampleType.SpecificReferenceGenome specificReferenceGenome) {
         Spreadsheet spreadsheet = new Spreadsheet(sampleText, delimiter)
         List<String> output = []
         ValidationContext context = new ValidationContext(spreadsheet)
@@ -108,24 +122,25 @@ class SampleIdentifierService {
             return problems*.message
         }
 
-        try {
-            for (Row row : spreadsheet.dataRows) {
-                String projectName = row.getCellByColumnTitle(BulkSampleCreationHeader.PROJECT.name())?.text?.trim() ?: project.name
-
-                ParsedSampleIdentifier identifier = new DefaultParsedSampleIdentifier(
-                        projectName: projectName,
-                        pid: row.getCellByColumnTitle(BulkSampleCreationHeader.PID.name()).text.trim(),
-                        sampleTypeDbName: getSanitizedSampleTypeDbName(row.getCellByColumnTitle(BulkSampleCreationHeader.SAMPLE_TYPE.name()).text.trim()),
-                        fullSampleName: row.getCellByColumnTitle(BulkSampleCreationHeader.SAMPLE_IDENTIFIER.name()).text.trim(),
+        for (Row row : spreadsheet.dataRows) {
+            Closure<String> getCell = { BulkSampleCreationHeader header ->
+                return row.getCellByColumnTitle(header.name())?.text?.trim()
+            }
+            try {
+                DefaultParsedSampleIdentifier identifier = new DefaultParsedSampleIdentifier(
+                        projectName     : getCell(BulkSampleCreationHeader.PROJECT) ?: project.name,
+                        pid             : getCell(BulkSampleCreationHeader.PID),
+                        sampleTypeDbName: getCell(BulkSampleCreationHeader.SAMPLE_TYPE),
+                        fullSampleName  : getCell(BulkSampleCreationHeader.SAMPLE_IDENTIFIER),
                 )
-                findOrSaveSampleIdentifier(identifier)
+                findOrSaveSampleIdentifierWithSanitizedIdentifier(identifier, specificReferenceGenome)
+            } catch (ValidationException e) {
+                e.errors.allErrors.each { ObjectError err ->
+                    output << "${MessageFormat.format(err.defaultMessage, err.arguments)}: ${err.code}"
+                }
+            } catch (RuntimeException e) {
+                output << e.message
             }
-        } catch (ValidationException e) {
-            e.errors.allErrors.each { ObjectError err ->
-                output << "${MessageFormat.format(err.defaultMessage, err.arguments)}: ${err.code}"
-            }
-        } catch (RuntimeException e) {
-            output << e.message
         }
         return output
     }
@@ -134,13 +149,30 @@ class SampleIdentifierService {
         return applicationContext.getBean(BulkSampleCreationValidator)
     }
 
-    static boolean parsedIdentifierMatchesFoundIdentifier(ParsedSampleIdentifier parsedIdentifier, SampleIdentifier foundIdentifier) {
+    private static boolean parsedIdentifierMatchesFoundIdentifier(ParsedSampleIdentifier parsedIdentifier, SampleIdentifier foundIdentifier) {
         return  foundIdentifier.project.name == parsedIdentifier.projectName &&
                 foundIdentifier.individual.pid == parsedIdentifier.pid &&
                 foundIdentifier.sampleType.name == parsedIdentifier.sampleTypeDbName
     }
 
-    SampleIdentifier findOrSaveSampleIdentifier(ParsedSampleIdentifier identifier) {
+    static String getSanitizedSampleTypeDbName(String sampleTypeDbName) {
+        return sampleTypeDbName.replaceAll('_', '-')
+    }
+
+    DefaultParsedSampleIdentifier sanitizeParsedSampleIdentifier(ParsedSampleIdentifier identifier) {
+        return new DefaultParsedSampleIdentifier(
+                projectName     : identifier.getProjectName(),
+                pid             : identifier.getPid(),
+                sampleTypeDbName: getSanitizedSampleTypeDbName(identifier.getSampleTypeDbName()),
+                fullSampleName  : identifier.getFullSampleName(),
+        )
+    }
+
+    SampleIdentifier findOrSaveSampleIdentifierWithSanitizedIdentifier(ParsedSampleIdentifier identifier, SampleType.SpecificReferenceGenome specificReferenceGenome) {
+        return findOrSaveSampleIdentifier(sanitizeParsedSampleIdentifier(identifier), specificReferenceGenome)
+    }
+
+    SampleIdentifier findOrSaveSampleIdentifier(ParsedSampleIdentifier identifier, SampleType.SpecificReferenceGenome specificReferenceGenome) {
         SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(identifier.fullSampleName))
         if (sampleIdentifier) {
             if (!parsedIdentifierMatchesFoundIdentifier(identifier, sampleIdentifier)) {
@@ -151,7 +183,7 @@ class SampleIdentifierService {
                 )
             }
         } else {
-            Sample sample = findOrSaveSample(identifier)
+            Sample sample = findOrSaveSample(identifier, specificReferenceGenome)
             sampleIdentifier = new SampleIdentifier(
                     sample: sample,
                     name: identifier.fullSampleName,
@@ -161,15 +193,9 @@ class SampleIdentifierService {
         return sampleIdentifier
     }
 
-    Sample findOrSaveSample(ParsedSampleIdentifier identifier) {
+    Sample findOrSaveSample(ParsedSampleIdentifier identifier, SampleType.SpecificReferenceGenome specificReferenceGenome) {
         Individual individual = findOrSaveIndividual(identifier)
-
-        String newSampleTypeName = identifier.sampleTypeDbName
-
-        SampleType sampleType = atMostOneElement(SampleType.findAllByName(newSampleTypeName).unique())
-        if (!sampleType) {
-            sampleType = createSampleTypeXenograftDepending(identifier.sampleTypeDbName)
-        }
+        SampleType sampleType = findOrSaveSampleType(identifier.sampleTypeDbName, specificReferenceGenome)
 
         Sample sample = Sample.findByIndividualAndSampleType(individual, sampleType)
         if (!sample) {
@@ -179,17 +205,19 @@ class SampleIdentifierService {
         return sample
     }
 
-    SampleType createSampleTypeXenograftDepending(String sampleTypeName) {
-        boolean xenograft = sampleTypeName.toUpperCase(Locale.ENGLISH).startsWith(XENOGRAFT) ||
-                sampleTypeName.toUpperCase(Locale.ENGLISH).startsWith(CULTURE) ||
-                sampleTypeName.toUpperCase(Locale.ENGLISH).startsWith(ORGANOID)
-        SampleType.SpecificReferenceGenome specificReferenceGenome =
-                xenograft ? SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC : SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        SampleType sampleType = new SampleType(
-                name: sampleTypeName,
-                specificReferenceGenome: specificReferenceGenome,
-        )
-        assert sampleType.save(flush: true)
+    SampleType findOrSaveSampleType(String sampleTypeName, SampleType.SpecificReferenceGenome specificReferenceGenome) {
+        SampleType sampleType = atMostOneElement(SampleType.findAllByName(sampleTypeName))
+        if (!sampleType) {
+            if (specificReferenceGenome == null) {
+                throw new RuntimeException("SampleType '${sampleTypeName}' does not exist")
+            } else {
+                sampleType = new SampleType(
+                        name: sampleTypeName,
+                        specificReferenceGenome: specificReferenceGenome,
+                )
+                assert sampleType.save(flush: true)
+            }
+        }
         return sampleType
     }
 
@@ -201,7 +229,6 @@ class SampleIdentifierService {
                         "An individual with PID ${individual.pid} already exists, but belongs " +
                         "to project ${individual.project.name} instead of ${identifier.projectName}"
                 )
-
             }
         } else {
             individual = new Individual(
@@ -235,7 +262,7 @@ class SampleIdentifierService {
      * @param delimiter which separates columns
      * @return sanitized text
      */
-    String sanitizeCharacterDelimitedText(String text, Spreadsheet.Delimiter delimiter) {
+    String removeExcessWhitespaceFromCharacterDelimitedText(String text, Spreadsheet.Delimiter delimiter) {
         String columnDelimiter = delimiter.delimiter.toString()
         return text
                 .trim()
