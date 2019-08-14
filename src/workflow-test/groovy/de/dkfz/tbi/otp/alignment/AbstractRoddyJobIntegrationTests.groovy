@@ -31,6 +31,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 
+import java.time.Duration
+
 /**
  * tests for AbstractRoddyJob using PanCanAlignmentWorkflow
  */
@@ -125,4 +127,10 @@ class AbstractRoddyJobIntegrationTests extends AbstractRoddyAlignmentWorkflowTes
                 libraryLayout: LibraryLayout.PAIRED,
         ))
     }
+
+    @Override
+    Duration getTimeout() {
+        return Duration.ofMinutes(60)
+    }
+
 }

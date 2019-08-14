@@ -40,6 +40,9 @@ environments {
         grails.logging.jul.usebridge = false
         grails.serverURL = otpProperties.getProperty(OtpProperty.CONFIG_SERVER_URL.key)
     }
+    WORKFLOW_TEST {
+        grails.serverURL = "http://localhost"
+    }
     test {
         grails.serverURL = "http://test.otp.de"
     }
