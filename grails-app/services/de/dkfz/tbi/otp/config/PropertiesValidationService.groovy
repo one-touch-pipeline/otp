@@ -66,13 +66,17 @@ class PropertiesValidationService {
     OptionProblem validateProcessingOptionName(ProcessingOption.OptionName name, String type) {
         String existingOption = processingOptionService.findOptionAsString(name, type)
 
+        if (name.isDeprecated()) {
+            return null
+        }
+
         if (name.necessity == Necessity.REQUIRED && existingOption == null) {
             return new OptionProblem("Option '${name.name()}' with type '${type}' is not set", OptionProblem.ProblemType.MISSING)
         }
         if ((!name.validatorForType && type != null) || (name.validatorForType && !name.validatorForType?.validate(type))) {
             return new OptionProblem("Type '${type}' is invalid for '${name.name()}'", OptionProblem.ProblemType.TYPE_INVALID)
         }
-        if (!name.isDeprecated() && !name.validatorForValue.validate(existingOption)) {
+        if (!name.validatorForValue.validate(existingOption)) {
             return new OptionProblem("Value '${existingOption}' is invalid for '${name.name()}', type '${type}'", OptionProblem.ProblemType.VALUE_INVALID)
         }
         return null

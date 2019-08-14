@@ -85,6 +85,11 @@ class PropertiesValidationServiceSpec extends Specification implements DataTest 
 
     void "test validateProcessingOptionName, when option is missing"() {
         expect:
-        propertiesValidationService.validateProcessingOptionName(PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION, SEQ_TYPE_RODDY_NAME).type == OptionProblem.ProblemType.MISSING
+        propertiesValidationService.validateProcessingOptionName(name, SEQ_TYPE_RODDY_NAME)?.type == problem
+
+        where:
+        name                                      || problem
+        PIPELINE_RODDY_SNV_DEFAULT_PLUGIN_VERSION || OptionProblem.ProblemType.MISSING
+        PIPELINE_RODDY_ALIGNMENT_BWA_PATHS        || null
     }
 }
