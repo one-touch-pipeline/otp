@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.job.plan
 
 import grails.converters.JSON
+import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.CheckAndCall
 
@@ -47,25 +48,27 @@ class JobErrorDefinitionController implements CheckAndCall {
     }
 
     JSON addJobErrorDefinition(UpdateJobErrorDefinitionCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             jobErrorDefinitionService.addErrorExpression(cmd.typeSelect, cmd.actionSelect, cmd.errorExpression, cmd.basedJobErrorDefinition)
-        })
+        }
     }
 
     JSON addNewJobErrorDefinition(UpdateNewJobErrorDefinitionCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             jobErrorDefinitionService.addErrorExpressionFirstLevel(JobErrorDefinition.Type.MESSAGE, cmd.actionSelect, cmd.errorExpression)
-        })
+        }
     }
 
     JSON updateErrorExpression(UpdateErrorExpressionCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             jobErrorDefinitionService.updateErrorExpression(cmd.jobErrorDefinition, cmd.errorExpression)
-        })
+        }
     }
 
     JSON addNewJob(UpdateAddNewJobCommand cmd) {
-        checkErrorAndCallMethod(cmd, { jobErrorDefinitionService.addNewJob(cmd.jobErrorDefinition, cmd.jobDefinition) })
+        checkErrorAndCallMethod(cmd) {
+            jobErrorDefinitionService.addNewJob(cmd.jobErrorDefinition, cmd.jobDefinition)
+        }
     }
 
     private List getAllJobDefinitions() {
@@ -81,12 +84,12 @@ class JobErrorDefinitionController implements CheckAndCall {
     }
 }
 
-class UpdateNewJobErrorDefinitionCommand implements Serializable {
+class UpdateNewJobErrorDefinitionCommand implements Validateable {
     String errorExpression
     String actionSelect
 }
 
-class UpdateJobErrorDefinitionCommand implements Serializable {
+class UpdateJobErrorDefinitionCommand implements Validateable {
     String level
     String errorExpression
     String typeSelect
@@ -94,7 +97,7 @@ class UpdateJobErrorDefinitionCommand implements Serializable {
     JobErrorDefinition basedJobErrorDefinition
 }
 
-class UpdateErrorExpressionCommand implements Serializable {
+class UpdateErrorExpressionCommand implements Validateable {
     String errorExpression
     JobErrorDefinition jobErrorDefinition
 
@@ -103,7 +106,7 @@ class UpdateErrorExpressionCommand implements Serializable {
     }
 }
 
-class UpdateAddNewJobCommand implements Serializable {
+class UpdateAddNewJobCommand implements Validateable {
     JobErrorDefinition jobErrorDefinition
     JobDefinition jobDefinition
 

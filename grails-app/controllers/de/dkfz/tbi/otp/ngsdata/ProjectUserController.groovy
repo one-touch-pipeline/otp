@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
+import grails.validation.Validateable
 import groovy.json.JsonBuilder
 import groovy.transform.TupleConstructor
 import org.apache.commons.lang.WordUtils
@@ -162,11 +163,15 @@ class ProjectUserController implements CheckAndCall {
     }
 
     JSON updateProjectRole(UpdateProjectRoleCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userProjectRoleService.updateProjectRole(cmd.userProjectRole, ProjectRole.findByName(cmd.newRole)) })
+        checkErrorAndCallMethod(cmd) {
+            userProjectRoleService.updateProjectRole(cmd.userProjectRole, ProjectRole.findByName(cmd.newRole))
+        }
     }
 
     JSON toggleAccessToOtp(ToggleValueCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userProjectRoleService.toggleAccessToOtp(cmd.userProjectRole) })
+        checkErrorAndCallMethod(cmd) {
+            userProjectRoleService.toggleAccessToOtp(cmd.userProjectRole)
+        }
     }
 
     JSON toggleAccessToFiles(ToggleValueCommand cmd) {
@@ -181,23 +186,33 @@ class ProjectUserController implements CheckAndCall {
     }
 
     JSON toggleManageUsers(ToggleValueCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userProjectRoleService.toggleManageUsers(cmd.userProjectRole) })
+        checkErrorAndCallMethod(cmd) {
+            userProjectRoleService.toggleManageUsers(cmd.userProjectRole)
+        }
     }
 
     JSON toggleManageUsersAndDelegate(ToggleValueCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userProjectRoleService.toggleManageUsersAndDelegate(cmd.userProjectRole) })
+        checkErrorAndCallMethod(cmd) {
+            userProjectRoleService.toggleManageUsersAndDelegate(cmd.userProjectRole)
+        }
     }
 
     JSON toggleReceivesNotifications(ToggleValueCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userProjectRoleService.toggleReceivesNotifications(cmd.userProjectRole) })
+        checkErrorAndCallMethod(cmd) {
+            userProjectRoleService.toggleReceivesNotifications(cmd.userProjectRole)
+        }
     }
 
     JSON updateName(UpdateUserRealNameCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userService.updateRealName(cmd.user, cmd.newName) })
+        checkErrorAndCallMethod(cmd) {
+            userService.updateRealName(cmd.user, cmd.newName)
+        }
     }
 
     JSON updateEmail(UpdateUserEmailCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userService.updateEmail(cmd.user, cmd.newEmail) })
+        checkErrorAndCallMethod(cmd) {
+            userService.updateEmail(cmd.user, cmd.newEmail)
+        }
     }
 
     JSON getUserSearchSuggestions(UserSearchSuggestionsCommand cmd) {
@@ -270,7 +285,7 @@ class UserEntry {
     }
 }
 
-class UpdateUserRealNameCommand implements Serializable {
+class UpdateUserRealNameCommand implements Validateable {
     User user
     String newName
     static constraints = {
@@ -285,7 +300,7 @@ class UpdateUserRealNameCommand implements Serializable {
     }
 }
 
-class UpdateUserEmailCommand implements Serializable {
+class UpdateUserEmailCommand implements Validateable {
     User user
     String newEmail
     static constraints = {
@@ -302,11 +317,11 @@ class UpdateUserEmailCommand implements Serializable {
     }
 }
 
-class ToggleValueCommand implements Serializable {
+class ToggleValueCommand implements Validateable {
     UserProjectRole userProjectRole
 }
 
-class SwitchEnabledStatusCommand implements Serializable {
+class SwitchEnabledStatusCommand implements Validateable {
     UserProjectRole userProjectRole
     boolean enabled
 
@@ -323,7 +338,7 @@ class SwitchEnabledStatusCommand implements Serializable {
     }
 }
 
-class UpdateProjectRoleCommand implements Serializable {
+class UpdateProjectRoleCommand implements Validateable {
     UserProjectRole userProjectRole
     String newRole
     static constraints = {

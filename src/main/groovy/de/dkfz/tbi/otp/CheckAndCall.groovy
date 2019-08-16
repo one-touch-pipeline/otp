@@ -23,11 +23,12 @@
 package de.dkfz.tbi.otp
 
 import grails.converters.JSON
+import grails.validation.Validateable
 import org.springframework.validation.FieldError
 
 trait CheckAndCall {
 
-    void checkErrorAndCallMethod(Serializable cmd, Closure method, Closure additionalSuccessReturnValues = { [:] }) {
+    void checkErrorAndCallMethod(Validateable cmd, Closure method, Closure<Map> additionalSuccessReturnValues = { [:] }) {
         Map data
         if (cmd.hasErrors()) {
             data = getErrorData(cmd.errors.getFieldError())

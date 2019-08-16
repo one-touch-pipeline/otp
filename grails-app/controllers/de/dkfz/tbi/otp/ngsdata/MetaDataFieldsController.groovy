@@ -23,6 +23,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
@@ -108,38 +109,41 @@ class MetaDataFieldsController implements CheckAndCall {
     }
 
     JSON createLibraryPreparationKit(CreateLibraryPreparationKitCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
-            libraryPreparationKitService.create(cmd.name,
-                    [
-                            shortDisplayName                : cmd.shortDisplayName,
-                            adapterFile                     : cmd.adapterFile,
-                            reverseComplementAdapterSequence: cmd.reverseComplementAdapterSequence,
-                    ])
-        })
+        checkErrorAndCallMethod(cmd) {
+            libraryPreparationKitService.create(cmd.name, [
+                    shortDisplayName                : cmd.shortDisplayName,
+                    adapterFile                     : cmd.adapterFile,
+                    reverseComplementAdapterSequence: cmd.reverseComplementAdapterSequence,
+            ])
+        }
     }
 
     JSON addAdapterFileToLibraryPreparationKit(AddAdapterFileToLibraryPreparationKitCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             libraryPreparationKitService.addAdapterFileToLibraryPreparationKit(cmd.libraryPreparationKit, cmd.adapterFile)
-        })
+        }
     }
 
     JSON addAdapterSequenceToLibraryPreparationKit(AddAdapterSequenceToLibraryPreparationKitCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             libraryPreparationKitService.addAdapterSequenceToLibraryPreparationKit(cmd.libraryPreparationKit, cmd.reverseComplementAdapterSequence)
-        })
+        }
     }
 
     JSON createAntibodyTarget(CreateAntibodyTargetCommand cmd) {
-        checkErrorAndCallMethod(cmd, { antibodyTargetService.create(cmd.name) })
+        checkErrorAndCallMethod(cmd) { antibodyTargetService.create(cmd.name) }
     }
 
     JSON createSeqCenter(CreateSeqCenterCommand cmd) {
-        checkErrorAndCallMethod(cmd, { seqCenterService.createSeqCenter(cmd.name, cmd.dirName) })
+        checkErrorAndCallMethod(cmd) {
+            seqCenterService.createSeqCenter(cmd.name, cmd.dirName)
+        }
     }
 
     JSON createSeqPlatform(CreateSeqPlatformCommand cmd) {
-        checkErrorAndCallMethod(cmd, { seqPlatformService.createNewSeqPlatform(cmd.platform, cmd.model, cmd.kit) })
+        checkErrorAndCallMethod(cmd) {
+            seqPlatformService.createNewSeqPlatform(cmd.platform, cmd.model, cmd.kit)
+        }
     }
 
     JSON createSeqPlatformModelLabelImportAlias(CreateSeqPlatformModelLabelImportAliasCommand cmd) {
@@ -163,34 +167,36 @@ class MetaDataFieldsController implements CheckAndCall {
     }
 
     JSON createSeqType(CreateSeqTypeCommand cmd) {
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             seqTypeService.createMultiple(cmd.type, cmd.getLibraryLayouts(), [
                     dirName: cmd.dirName,
                     displayName: cmd.displayName,
                     singleCell: cmd.singleCell,
                     hasAntibodyTarget: cmd.hasAntibodyTarget,
             ])
-        })
+        }
     }
 
     JSON createLayout(CreateLayoutCommand cmd) {
         SeqType seqType = seqTypeService.findByNameOrImportAlias(cmd.name, [singleCell: cmd.singleCell])
-        checkErrorAndCallMethod(cmd, {
+        checkErrorAndCallMethod(cmd) {
             seqTypeService.createMultiple(seqType.name, cmd.getLibraryLayouts(), [
                     dirName: seqType.dirName,
                     displayName: seqType.displayName,
                     singleCell: cmd.singleCell,
                     hasAntibodyTarget: seqType.hasAntibodyTarget,
             ], seqType.importAlias.toList())
-        })
+        }
     }
 
     void createImportAlias(CreateImportAliasCommand cmd) {
-        checkErrorAndCallMethod(cmd, { cmd.service.addNewAlias(cmd.id, cmd.importAlias) })
+        checkErrorAndCallMethod(cmd) {
+            cmd.service.addNewAlias(cmd.id, cmd.importAlias)
+        }
     }
 }
 
-class CreateLibraryPreparationKitCommand implements Serializable {
+class CreateLibraryPreparationKitCommand implements Validateable {
     String name
     String shortDisplayName
     String adapterFile
@@ -232,7 +238,7 @@ class CreateLibraryPreparationKitCommand implements Serializable {
     }
 }
 
-class AddAdapterFileToLibraryPreparationKitCommand implements Serializable {
+class AddAdapterFileToLibraryPreparationKitCommand implements Validateable {
     String adapterFile
     LibraryPreparationKit libraryPreparationKit
     static constraints = {
@@ -249,7 +255,7 @@ class AddAdapterFileToLibraryPreparationKitCommand implements Serializable {
     }
 }
 
-class AddAdapterSequenceToLibraryPreparationKitCommand implements Serializable {
+class AddAdapterSequenceToLibraryPreparationKitCommand implements Validateable {
     String reverseComplementAdapterSequence
     LibraryPreparationKit libraryPreparationKit
     static constraints = {
@@ -258,7 +264,7 @@ class AddAdapterSequenceToLibraryPreparationKitCommand implements Serializable {
     }
 }
 
-class CreateAntibodyTargetCommand implements Serializable {
+class CreateAntibodyTargetCommand implements Validateable {
     String name
     AntibodyTargetService antibodyTargetService
 
@@ -278,7 +284,7 @@ class CreateAntibodyTargetCommand implements Serializable {
     }
 }
 
-class CreateSeqCenterCommand implements Serializable {
+class CreateSeqCenterCommand implements Validateable {
     String name
     String dirName
     static constraints = {
@@ -303,7 +309,7 @@ class CreateSeqCenterCommand implements Serializable {
     }
 }
 
-class CreateSeqPlatformCommand implements Serializable {
+class CreateSeqPlatformCommand implements Validateable {
     SeqPlatformService seqPlatformService
     String platform
     String model
@@ -338,7 +344,7 @@ class CreateSeqPlatformCommand implements Serializable {
     }
 }
 
-abstract class CreateImportAliasCommand implements Serializable {
+abstract class CreateImportAliasCommand implements Validateable {
     abstract MetadataFieldsService getService()
     Long id
     String importAlias
@@ -403,7 +409,7 @@ class CreateLibraryPreparationKitImportAliasCommand extends CreateImportAliasCom
     }
 }
 
-abstract class CreateWithLayoutCommand implements Serializable {
+abstract class CreateWithLayoutCommand implements Validateable {
     SeqTypeService seqTypeService
     boolean single
     boolean paired
