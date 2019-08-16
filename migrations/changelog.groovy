@@ -243,4 +243,8 @@ databaseChangeLog = {
     changeSet(author: "borufka", id: "changeNameProjectType") {
         sqlFile(path: 'changelogs/2019/changeNameProjectType.sql')
     }
+
+    changeSet(author: "strubelp", id: "otp-147") {
+        sqlFile(path: 'changelogs/2019/otp-147.sql')
+    }
 }

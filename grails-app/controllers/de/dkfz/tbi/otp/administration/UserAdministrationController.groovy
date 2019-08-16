@@ -79,7 +79,6 @@ class UserAdministrationController {
                         cmd.username,
                         cmd.email,
                         cmd.realName,
-                        cmd.asperaAccount,
                         roles,
                         cmd.group,
                 ).sanitizedUserMap()
@@ -142,7 +141,7 @@ class UserAdministrationController {
             flash.message = new FlashMessage("An error occurred", [cmd.errors.getFieldError().code])
         } else {
             flash.message = new FlashMessage("User ${cmd.user.username} successfully edited")
-            userService.editUser(cmd.user, cmd.email, cmd.realName, cmd.asperaAccount)
+            userService.editUser(cmd.user, cmd.email, cmd.realName)
         }
         redirect(action: "show", params: ['user.id': cmd.user.id] )
     }

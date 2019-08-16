@@ -32,7 +32,6 @@ class EditUserCommand implements Validateable {
     User user
     String email
     String realName
-    String asperaAccount
 
     static constraints = {
         email(nullable: false, blank: false, email: true, validator: { val, obj ->
@@ -42,7 +41,6 @@ class EditUserCommand implements Validateable {
             }
         })
         realName(blank: false)
-        asperaAccount(blank: true, nullable: true)
     }
 
     void setEmail(String email) {
@@ -51,9 +49,5 @@ class EditUserCommand implements Validateable {
 
     void setRealName(String realName) {
         this.realName = realName?.trim()?.replaceAll(" +", " ")
-    }
-
-    void setAsperaAccount(String asperaAccount) {
-        this.asperaAccount = asperaAccount?.trim()?.replaceAll(" +", " ") ?: null
     }
 }

@@ -68,20 +68,6 @@ class UserServiceIntegrationSpec extends Specification implements UserAndRoles {
         thrown(AssertionError)
     }
 
-    void "test updateAsperaAccount valid input"() {
-        given:
-        setupData()
-        User user = User.findByUsername(TESTUSER)
-
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userService.updateAsperaAccount(user, "newUser")
-        }
-
-        then:
-        user.asperaAccount == "newUser"
-    }
-
     void "test updateRealName valid input"() {
         given:
         setupData()

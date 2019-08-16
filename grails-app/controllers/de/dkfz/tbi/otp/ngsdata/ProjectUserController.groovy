@@ -200,10 +200,6 @@ class ProjectUserController implements CheckAndCall {
         checkErrorAndCallMethod(cmd, { userService.updateEmail(cmd.user, cmd.newEmail) })
     }
 
-    JSON updateAspera(UpdateUserAsperaCommand cmd) {
-        checkErrorAndCallMethod(cmd, { userService.updateAsperaAccount(cmd.user, cmd.newAspera) })
-    }
-
     JSON getUserSearchSuggestions(UserSearchSuggestionsCommand cmd) {
         render new JsonBuilder(ldapService.getListOfLdapUserDetailsByUsernameOrMailOrRealName(cmd.searchString, 20)) as JSON
     }
@@ -303,21 +299,6 @@ class UpdateUserEmailCommand implements Serializable {
     }
     void setValue(String value) {
         this.newEmail = value?.trim()?.replaceAll(" +", " ")
-    }
-}
-
-class UpdateUserAsperaCommand implements Serializable {
-    User user
-    String newAspera
-    static constraints = {
-        newAspera(blank: true, nullable: true, validator: { val, obj ->
-            if (val == obj.user?.asperaAccount) {
-                return 'No Change'
-            }
-        })
-    }
-    void setValue(String value) {
-        this.newAspera = value?.trim()?.replaceAll(" +", " ") ?: null
     }
 }
 

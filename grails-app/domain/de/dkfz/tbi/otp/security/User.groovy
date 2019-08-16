@@ -41,7 +41,6 @@ class User implements Entity {
     boolean passwordExpired
     String email
     String realName // with format '<first_name> <last_name>'
-    String asperaAccount
 
     boolean acceptedPrivacyPolicy
 
@@ -50,7 +49,6 @@ class User implements Entity {
         password(blank: false)
         email(nullable: false, unique: true, email: true)
         realName(nullable: true, blank: false)
-        asperaAccount(blank: false, nullable: true)
     }
 
     static mapping = {

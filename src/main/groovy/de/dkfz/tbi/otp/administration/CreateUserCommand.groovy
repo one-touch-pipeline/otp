@@ -31,7 +31,6 @@ class CreateUserCommand implements Validateable {
     String username
     String email
     String realName
-    String asperaAccount
     List<Long> role
     List<Long> group
 
@@ -41,7 +40,6 @@ class CreateUserCommand implements Validateable {
         })
         email(email: true)
         realName(blank: false, nullable: true)
-        asperaAccount(nullable: true)
         role(nullable: true, validator: { value ->
             boolean valid = true
             value.each { id ->

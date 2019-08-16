@@ -55,7 +55,6 @@
                         <th title="${g.message(code: 'projectUser.table.manageUsersAndDelegate.tooltip')}"><g:message code="projectUser.table.manageUsersAndDelegate"/></th>
                     </sec:access>
                     <th title="${g.message(code: 'projectUser.table.receivesNotifications.tooltip')}"><g:message code="projectUser.table.receivesNotifications"/></th>
-                    <th><g:message code="projectUser.table.asperaAccount"/></th>
                     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                         <th><g:message code="projectUser.table.projectAccess"/></th>
                     </sec:access>
@@ -171,12 +170,6 @@
                                 <span class="icon-${userEntry.receivesNotifications}"></span>
                             </sec:noAccess>
                         </td>
-                        <td>
-                            <otp:editorSwitch
-                                    roles="ROLE_OPERATOR"
-                                    link="${g.createLink(controller: 'projectUser', action: 'updateAspera', params: ["user.id": userEntry.user.id])}"
-                                    value="${userEntry.user.asperaAccount}"/>
-                        </td>
                         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                             <td>
                                 <g:form action="switchEnabledStatus" params='["userProjectRole.id": userEntry.userProjectRole.id, "enabled": userEntry.userProjectRole.enabled]'>
@@ -207,7 +200,6 @@
                     <th><g:message code="projectUser.table.department"/></th>
                     <th><g:message code="projectUser.table.mail"/></th>
                     <th><g:message code="projectUser.table.role"/></th>
-                    <th><g:message code="projectUser.table.asperaAccount"/></th>
                     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                         <th><g:message code="projectUser.table.projectAccess"/></th>
                     </sec:access>
@@ -246,12 +238,6 @@
                                 value="${userEntry.user.email}"/>
                     </td>
                     <td>${userEntry.projectRoleName}</td>
-                    <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectUser', action: 'updateAspera', params: ["user.id": userEntry.user.id])}"
-                                value="${userEntry.user.asperaAccount}"/>
-                    </td>
                     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                         <td>
                             <g:form action="switchEnabledStatus" params='["userProjectRole.id": userEntry.userProjectRole.id, "enabled": userEntry.userProjectRole.enabled]'>

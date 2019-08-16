@@ -133,8 +133,7 @@ $.otp.userAdministration.editUser = {
                 user: $("#edit-user-userid").val(),
                 username: $("#edit-user-username").val(),
                 email: $("#edit-user-email").val(),
-                realName: $("#edit-user-realname").val(),
-                asperaAccount: $("#edit-user-asperaaccount").val()
+                realName: $("#edit-user-realname").val()
             },
             success: function (data) {
                 if (data.error) {

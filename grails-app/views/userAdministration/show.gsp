@@ -51,10 +51,6 @@
                         <td><g:message code="user.administration.ui.realName"/></td>
                         <td><span><input type="text" id="edit-user-realname" name="realName" value="${user.realName}"/></span></td>
                     </tr>
-                    <tr>
-                        <td><g:message code="user.administration.ui.asperaAccount"/></td>
-                        <td><span><input type="text" id="edit-user-asperaaccount" name="asperaAccount" value="${user.asperaAccount}"/></span></td>
-                    </tr>
                     </tbody>
                 </table>
                 <div class="buttons">

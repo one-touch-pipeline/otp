@@ -49,10 +49,9 @@ class UserService {
 
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void editUser(User user, String email, String realName, String asperaAccount) {
+    void editUser(User user, String email, String realName) {
         updateEmail(user, email)
         updateRealName(user, realName)
-        updateAsperaAccount(user, asperaAccount)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -66,7 +65,7 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(null, 'ADD_USER')")
-    User createUser(String username, String email, String realName, String asperaAccount = null, List<Role> roles = [], List<Long> groups = []) {
+    User createUser(String username, String email, String realName, List<Role> roles = [], List<Long> groups = []) {
         User user = new User(username: username,
                              email: email,
                              enabled: true,
@@ -74,8 +73,7 @@ class UserService {
                              accountLocked: false,
                              passwordExpired: false,
                              password: "*",
-                             realName: realName,
-                             asperaAccount: asperaAccount)
+                             realName: realName)
         user = user.save(flush: true)
         roles.each { Role role ->
             addRoleToUser(user, role)
@@ -97,14 +95,6 @@ class UserService {
         assert email: "the input Email '${email}' must not be null"
         assert user: "the input user must not be null"
         user.email = email
-        assert user.save(flush: true)
-        return user
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    User updateAsperaAccount(User user, String aspera) {
-        assert user: "the input user must not be null"
-        user.asperaAccount = aspera
         assert user.save(flush: true)
         return user
     }
@@ -235,7 +225,6 @@ No user exists yet, create user ${currentUser} with admin rights.
                         passwordExpired: false,
                         password       : "*", //need for plugin, but unused in OTP
                         realName       : currentUser,
-                        asperaAccount  : null,
                 ]).save(flush: true)
 
                 [Role.ROLE_ADMIN].each {
