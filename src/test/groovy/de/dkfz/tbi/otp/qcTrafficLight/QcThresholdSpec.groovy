@@ -22,17 +22,16 @@
 
 package de.dkfz.tbi.otp.qcTrafficLight
 
-
 import grails.testing.gorm.DataTest
 import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
+import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.qcTrafficLight.QcThreshold.ThresholdStrategy.*
@@ -43,6 +42,7 @@ class QcThresholdSpec extends Specification implements DataTest {
     Class[] getDomainClassesToMock() {
         [
                 AbstractMergedBamFile,
+                CellRangerQualityAssessment,
                 DataFile,
                 FileType,
                 Individual,
@@ -67,8 +67,6 @@ class QcThresholdSpec extends Specification implements DataTest {
                 SeqPlatformModelLabel,
                 SeqTrack,
                 SoftwareTool,
-                SophiaInstance,
-                SophiaQc,
                 QcThreshold,
                 SeqType,
                 Realm,
@@ -82,7 +80,7 @@ class QcThresholdSpec extends Specification implements DataTest {
                 warningThresholdUpper: wtu,
                 errorThresholdLower: etl,
                 errorThresholdUpper: etu,
-                qcClass: SophiaQc.name,
+                qcClass: CellRangerQualityAssessment.name,
         )
 
         then:
@@ -121,24 +119,24 @@ class QcThresholdSpec extends Specification implements DataTest {
     void "test saving QcThreshold when comparing to other value"() {
         when:
         QcThreshold threshold = DomainFactory.createQcThreshold([
-                qcProperty1          : "controlMassiveInvPrefilteringLevel",
+                qcProperty1          : "estimatedNumberOfCells",
                 compare              : compare,
                 warningThresholdLower: 30,
                 warningThresholdUpper: 40,
                 errorThresholdLower  : 10,
                 errorThresholdUpper  : 50,
                 qcProperty2          : property2,
-                qcClass              : SophiaQc.name,
+                qcClass              : CellRangerQualityAssessment.name,
         ], false)
 
         then:
         threshold.validate() == valid
 
         where:
-        compare                        | property2                            || valid
-        DIFFERENCE_WITH_OTHER_PROPERTY | "rnaContaminatedGenesCount"          || true
-        DIFFERENCE_WITH_OTHER_PROPERTY | "controlMassiveInvPrefilteringLevel" || false
-        DIFFERENCE_WITH_OTHER_PROPERTY | null                                 || false
+        compare                        | property2                || valid
+        DIFFERENCE_WITH_OTHER_PROPERTY | "medianGenesPerCell"     || true
+        DIFFERENCE_WITH_OTHER_PROPERTY | "estimatedNumberOfCells" || false
+        DIFFERENCE_WITH_OTHER_PROPERTY | null                     || false
     }
 
     @SuppressWarnings('SpaceAfterOpeningBrace')
@@ -148,10 +146,10 @@ class QcThresholdSpec extends Specification implements DataTest {
 
         when:
         QcThreshold qcThreshold1 = DomainFactory.createQcThreshold(
-                qcClass: SophiaQc.name,
+                qcClass: CellRangerQualityAssessment.name,
                 project: project(),
                 seqType: seqType,
-                qcProperty1: "controlMassiveInvPrefilteringLevel",
+                qcProperty1: "estimatedNumberOfCells",
         )
         DomainFactory.createQcThreshold(
                 project: qcThreshold1.project,
@@ -174,15 +172,18 @@ class QcThresholdSpec extends Specification implements DataTest {
     @Unroll
     void "test qcPassed method with compare mode toThreshold"() {
         given:
-        SophiaQc qc = DomainFactory.createSophiaQc(controlMassiveInvPrefilteringLevel: 25)
+        CellRangerQualityAssessment qc = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
+                estimatedNumberOfCells: 25,
+        ], false)
+
         QcThreshold threshold = DomainFactory.createQcThreshold(
-                qcProperty1: "controlMassiveInvPrefilteringLevel",
+                qcProperty1: "estimatedNumberOfCells",
                 warningThresholdLower: wtl,
                 warningThresholdUpper: wtu,
                 errorThresholdLower: etl,
                 errorThresholdUpper: etu,
                 compare: ABSOLUTE_LIMITS,
-                qcClass: SophiaQc.name,
+                qcClass: CellRangerQualityAssessment.name,
         )
 
         expect:
@@ -206,16 +207,20 @@ class QcThresholdSpec extends Specification implements DataTest {
     @Unroll
     void "test qcPassed method with compare mode toQcProperty2"() {
         given:
-        SophiaQc qc = DomainFactory.createSophiaQc(controlMassiveInvPrefilteringLevel: control, tumorMassiveInvFilteringLevel: tumor)
+        CellRangerQualityAssessment qc = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
+                estimatedNumberOfCells: control,
+                meanReadsPerCell: tumor,
+        ], false)
+
         QcThreshold threshold = DomainFactory.createQcThreshold(
-                qcProperty1: "controlMassiveInvPrefilteringLevel",
-                qcProperty2: "tumorMassiveInvFilteringLevel",
+                qcProperty1: "estimatedNumberOfCells",
+                qcProperty2: "meanReadsPerCell",
                 warningThresholdLower: 20,
                 warningThresholdUpper: 30,
                 errorThresholdLower: 10,
                 errorThresholdUpper: 40,
                 compare: DIFFERENCE_WITH_OTHER_PROPERTY,
-                qcClass: SophiaQc.name,
+                qcClass: CellRangerQualityAssessment.name,
         )
 
 
@@ -234,15 +239,19 @@ class QcThresholdSpec extends Specification implements DataTest {
     @Unroll
     void "test qcPassed method with compare mode toThresholdFactorExternalValue"() {
         given:
-        SophiaQc qc = DomainFactory.createSophiaQc(controlMassiveInvPrefilteringLevel: 50)
+        CellRangerQualityAssessment qc = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
+                estimatedNumberOfCells: 50,
+        ], false)
+
+
         QcThreshold threshold = DomainFactory.createQcThreshold(
-                qcProperty1: "controlMassiveInvPrefilteringLevel",
+                qcProperty1: "estimatedNumberOfCells",
                 warningThresholdLower: wtl,
                 warningThresholdUpper: wtu,
                 errorThresholdLower: etl,
                 errorThresholdUpper: etu,
                 compare: RATIO_TO_EXTERNAL_VALUE,
-                qcClass: SophiaQc.name,
+                qcClass: CellRangerQualityAssessment.name,
         )
         double externalValue = 2
 
@@ -261,15 +270,19 @@ class QcThresholdSpec extends Specification implements DataTest {
     @Unroll
     void "test qcPassed method with compare mode toThresholdFactorExternalValue if factor is #externalValue"() {
         given:
-        SophiaQc qc = DomainFactory.createSophiaQc(controlMassiveInvPrefilteringLevel: 50)
+        CellRangerQualityAssessment qc = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
+                estimatedNumberOfCells: 50,
+        ], false)
+
+
         QcThreshold threshold = DomainFactory.createQcThreshold(
-                qcProperty1: "controlMassiveInvPrefilteringLevel",
+                qcProperty1: "estimatedNumberOfCells",
                 warningThresholdLower: 20,
                 warningThresholdUpper: 30,
                 errorThresholdLower: 10,
                 errorThresholdUpper: 40,
                 compare: RATIO_TO_EXTERNAL_VALUE,
-                qcClass: SophiaQc.name,
+                qcClass: CellRangerQualityAssessment.name,
         )
 
         expect:

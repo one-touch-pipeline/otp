@@ -29,8 +29,12 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
+import de.dkfz.tbi.otp.dataprocessing.LinkFilesToFinalDestinationService
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.ngsdata.QcThresholdHandling
 import de.dkfz.tbi.otp.utils.Principal
@@ -43,8 +47,8 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
 
     QcTrafficLightService qcTrafficLightService
 
-    AceseqInstance instance
-    AceseqQc aceseqQc
+    SingleCellBamFile bamFile
+    CellRangerQualityAssessment cellRangerQualityAssessment
 
     void setupData() {
         qcTrafficLightService = new QcTrafficLightService()
@@ -54,171 +58,171 @@ class QcTrafficLightServiceIntegrationSpec extends Specification implements Doma
         }
         qcTrafficLightService.linkFilesToFinalDestinationService = new LinkFilesToFinalDestinationService()
 
-        instance = DomainFactory.createAceseqInstanceWithRoddyBamFiles()
-        ["solutionPossible", "tcc", "goodnessOfFit", "ploidy"].each { String property ->
+        bamFile = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createBamFile()
+        ["totalReadCounter", "qcBasesMapped", "allBasesMapped", "onTargetMappedBases"].each { String property ->
             DomainFactory.createQcThreshold(
                     qcProperty1: property,
-                    seqType: instance.seqType,
-                    qcClass: AceseqQc.name,
+                    seqType: bamFile.seqType,
+                    qcClass: CellRangerQualityAssessment.name,
                     errorThresholdLower: 2,
                     warningThresholdLower: 4,
                     warningThresholdUpper: 6,
                     errorThresholdUpper: 8,
             )
         }
-        aceseqQc = DomainFactory.createAceseqQc([solutionPossible: 5, goodnessOfFit: 5], [:], [:], instance)
+        //
+        cellRangerQualityAssessment = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(bamFile, [
+                totalReadCounter: 5, allBasesMapped: 5,
+        ])
     }
 
     @Unroll
-    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling (tcc = #tcc & ploidy = #ploidy --> #resultStatus)"() {
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling (qcBasesMapped = #qcBasesMapped & onTargetMappedBases = #onTargetMappedBases --> #resultStatus)"() {
         given:
         setupData()
 
-        aceseqQc.tcc = tcc
-        aceseqQc.ploidy = ploidy
+        cellRangerQualityAssessment.qcBasesMapped = qcBasesMapped
+        cellRangerQualityAssessment.onTargetMappedBases = onTargetMappedBases
 
         when:
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance.sampleType1BamFile, aceseqQc)
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, cellRangerQualityAssessment)
 
         then:
-        instance.sampleType1BamFile.qcTrafficLightStatus == resultStatus
+        bamFile.qcTrafficLightStatus == resultStatus
 
         where:
-        tcc | ploidy || resultStatus
-        5   | 5      || QC_PASSED
-        7   | 5      || QC_PASSED
-        7   | 7      || QC_PASSED
-        9   | 5      || BLOCKED
-        9   | 9      || BLOCKED
+        qcBasesMapped | onTargetMappedBases || resultStatus
+        5             | 5                   || QC_PASSED
+        7             | 5                   || QC_PASSED
+        7             | 7                   || QC_PASSED
+        9             | 5                   || BLOCKED
+        9             | 9                   || BLOCKED
     }
 
     @Unroll
-    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, use project specific (tcc = #tcc --> #resultStatus)"() {
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, use project specific (qcBasesMapped = #qcBasesMapped --> #resultStatus)"() {
         given:
         setupData()
 
-        aceseqQc.tcc = tcc
-        aceseqQc.ploidy = 5
+        cellRangerQualityAssessment.qcBasesMapped = qcBasesMapped
+        cellRangerQualityAssessment.onTargetMappedBases = 5
 
         DomainFactory.createQcThreshold(
-                qcProperty1: 'tcc',
-                seqType: instance.seqType,
-                qcClass: AceseqQc.name,
+                qcProperty1: 'qcBasesMapped',
+                seqType: bamFile.seqType,
+                qcClass: CellRangerQualityAssessment.name,
                 errorThresholdLower: 12,
                 warningThresholdLower: 14,
                 warningThresholdUpper: 16,
                 errorThresholdUpper: 18,
-                project: instance.project,
+                project: bamFile.project,
         )
         when:
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance.sampleType1BamFile, aceseqQc)
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, cellRangerQualityAssessment)
 
         then:
-        instance.sampleType1BamFile.qcTrafficLightStatus == resultStatus
+        bamFile.qcTrafficLightStatus == resultStatus
 
         where:
-        tcc || resultStatus
-        3   || BLOCKED
-        5   || BLOCKED
-        7   || BLOCKED
-        11  || BLOCKED
-        13  || QC_PASSED
-        15  || QC_PASSED
-        17  || QC_PASSED
-        19  || BLOCKED
+        qcBasesMapped || resultStatus
+        3             || BLOCKED
+        5             || BLOCKED
+        7             || BLOCKED
+        11            || BLOCKED
+        13            || QC_PASSED
+        15            || QC_PASSED
+        17            || QC_PASSED
+        19            || BLOCKED
     }
 
     @Unroll
-    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, do not use project specific of other project (tcc = #tcc --> #resultStatus)"() {
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, do not use project specific of other project (qcBasesMapped = #qcBasesMapped --> #resultStatus)"() {
         given:
         setupData()
 
-        aceseqQc.tcc = tcc
-        aceseqQc.ploidy = 5
+        cellRangerQualityAssessment.qcBasesMapped = qcBasesMapped
+        cellRangerQualityAssessment.onTargetMappedBases = 5
 
-        QcThreshold qcThreshold = QcThreshold.findByQcProperty1('tcc')
+        QcThreshold qcThreshold = QcThreshold.findByQcProperty1('qcBasesMapped')
         qcThreshold.project = createProject()
         qcThreshold.save(flush: true)
 
         when:
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance.sampleType1BamFile, aceseqQc)
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, cellRangerQualityAssessment)
 
         then:
-        instance.sampleType1BamFile.qcTrafficLightStatus == resultStatus
+        bamFile.qcTrafficLightStatus == resultStatus
 
         where:
-        tcc || resultStatus
-        0   || QC_PASSED
-        5   || QC_PASSED
-        9   || QC_PASSED
+        qcBasesMapped || resultStatus
+        0             || QC_PASSED
+        5             || QC_PASSED
+        9             || QC_PASSED
     }
 
     @Unroll
-    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, once blocked files do not get unblocked (tcc = #tcc & ploidy = #ploidy --> #resultStatus)"() {
+    void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, once blocked files do not get unblocked (qcBasesMapped = #qcBasesMapped & onTargetMappedBases = #onTargetMappedBases --> #resultStatus)"() {
         given:
         setupData()
 
-        aceseqQc.tcc = tcc
-        aceseqQc.ploidy = ploidy
-        AbstractMergedBamFile bamFile = instance.sampleType1BamFile
+        cellRangerQualityAssessment.qcBasesMapped = qcBasesMapped
+        cellRangerQualityAssessment.onTargetMappedBases = onTargetMappedBases
 
         when:
-        instance.sampleType1BamFile.qcTrafficLightStatus = BLOCKED
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, aceseqQc)
-        boolean thresholdExceeded = qcTrafficLightService.qcValuesExceedErrorThreshold(bamFile, aceseqQc)
+        bamFile.qcTrafficLightStatus = BLOCKED
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, cellRangerQualityAssessment)
+        boolean thresholdExceeded = qcTrafficLightService.qcValuesExceedErrorThreshold(bamFile, cellRangerQualityAssessment)
 
         then:
         thresholdExceeded == exceedingExpected
-        instance.sampleType1BamFile.qcTrafficLightStatus == BLOCKED
+        bamFile.qcTrafficLightStatus == BLOCKED
 
         where:
-        tcc | ploidy || exceedingExpected
-        5   | 5      || false
-        9   | 9      || true
+        qcBasesMapped | onTargetMappedBases || exceedingExpected
+        5             | 5                   || false
+        9             | 9                   || true
     }
 
     void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, NO_CHECK causes UNCHECKED regardless of thresholds"() {
         given:
         setupData()
 
-        [instance.sampleType1BamFile, instance.sampleType2BamFile].each {
-            it.individual.project = createProject(qcThresholdHandling: QcThresholdHandling.NO_CHECK)
-        }
-        aceseqQc.tcc = tcc
-        aceseqQc.ploidy = 5
+        bamFile.individual.project = createProject(qcThresholdHandling: QcThresholdHandling.NO_CHECK)
+
+        cellRangerQualityAssessment.qcBasesMapped = qcBasesMapped
+        cellRangerQualityAssessment.onTargetMappedBases = 5
 
         when:
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance.sampleType1BamFile, aceseqQc)
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, cellRangerQualityAssessment)
 
         then:
-        instance.sampleType1BamFile.qcTrafficLightStatus == UNCHECKED
+        bamFile.qcTrafficLightStatus == UNCHECKED
 
         where:
-        tcc << [0, 2, 4, 5, 6, 8, 10]
+        qcBasesMapped << [0, 2, 4, 5, 6, 8, 10]
     }
 
     void "setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling, CHECK_AND_NOTIFY only causes AUTO_ACCEPTED if the threshold would fail"() {
         given:
         setupData()
 
-        [instance.sampleType1BamFile, instance.sampleType2BamFile].each {
-            it.individual.project = createProject(qcThresholdHandling: QcThresholdHandling.CHECK_AND_NOTIFY)
-        }
-        aceseqQc.tcc = tcc
-        aceseqQc.ploidy = 5
+        bamFile.individual.project = createProject(qcThresholdHandling: QcThresholdHandling.CHECK_AND_NOTIFY)
+
+        cellRangerQualityAssessment.qcBasesMapped = qcBasesMapped
+        cellRangerQualityAssessment.onTargetMappedBases = 5
 
         when:
-        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(instance.sampleType1BamFile, aceseqQc)
+        qcTrafficLightService.setQcTrafficLightStatusBasedOnThresholdAndProjectSpecificHandling(bamFile, cellRangerQualityAssessment)
 
         then:
-        instance.sampleType1BamFile.qcTrafficLightStatus == expectedStatus
+        bamFile.qcTrafficLightStatus == expectedStatus
 
         where:
-        tcc || expectedStatus
-        0   || AUTO_ACCEPTED
-        3   || QC_PASSED
-        5   || QC_PASSED
-        7   || QC_PASSED
-        10  || AUTO_ACCEPTED
+        qcBasesMapped || expectedStatus
+        0             || AUTO_ACCEPTED
+        3             || QC_PASSED
+        5             || QC_PASSED
+        7             || QC_PASSED
+        10            || AUTO_ACCEPTED
     }
 }

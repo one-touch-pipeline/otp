@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.administration.DocumentType
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
@@ -2601,11 +2602,11 @@ class DomainFactory {
 
     static QcThreshold createQcThreshold(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(QcThreshold, [
-                qcProperty1          : "controlMassiveInvPrefilteringLevel",
+                qcProperty1          : "estimatedNumberOfCells",
                 warningThresholdUpper: counter++,
                 errorThresholdUpper  : counter++,
                 compare              : QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass              : SophiaQc.name,
+                qcClass              : CellRangerQualityAssessment.name,
                 seqType              : createSeqType(),
         ], properties, saveAndValidate)
     }

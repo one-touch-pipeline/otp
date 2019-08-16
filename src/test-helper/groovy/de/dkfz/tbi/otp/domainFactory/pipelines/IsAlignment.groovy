@@ -57,12 +57,11 @@ trait IsAlignment implements IsPipeline {
         return createQa(createBamFile(), properties)
     }
 
-    AbstractQualityAssessment createQa(AbstractMergedBamFile abstractMergedBamFile, Map properties = [:]) {
+    AbstractQualityAssessment createQa(AbstractMergedBamFile abstractMergedBamFile, Map properties = [:], boolean saveAndValidate = true) {
         createDomainObject(qaClass, defaultValuesForAbstractQualityAssessment + [
                 qualityAssessmentMergedPass: DomainFactory.createQualityAssessmentMergedPass(
                         abstractMergedBamFile: abstractMergedBamFile
                 ),
-        ] + qaValuesProperties, properties
-        )
+        ] + qaValuesProperties, properties, saveAndValidate)
     }
 }

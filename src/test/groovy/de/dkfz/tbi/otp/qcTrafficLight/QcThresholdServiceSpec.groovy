@@ -22,14 +22,14 @@
 
 package de.dkfz.tbi.otp.qcTrafficLight
 
-
 import grails.testing.gorm.DataTest
 import org.grails.datastore.mapping.validation.ValidationErrors
 import org.springframework.validation.Errors
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaQc
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
+import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.qcTrafficLight.TableCellValue.WarnColor.*
@@ -39,43 +39,88 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
     @Override
     Class[] getDomainClassesToMock() {
         [
+                CellRangerQualityAssessment,
                 Project,
                 QcThreshold,
                 Realm,
                 SeqType,
-                SophiaQc,
         ]
     }
 
     QcThresholdService qcThresholdService
 
     String testedProperty
-    int testedPropertyValue
+    Long testedPropertyValue
 
     Project project
     SeqType seqType
-    SophiaQc sophiaQc
+    CellRangerQualityAssessment cellRangerQualityAssessment
     QcThreshold qcThreshold
+
+    List<String> availableThresholdProperties = [
+            "allBasesMapped",
+            "duplicates",
+            "estimatedNumberOfCells",
+            "fractionReadsInCells",
+            "insertSizeMedian",
+            "insertSizeSD",
+            "meanReadsPerCell",
+            "medianGenesPerCell",
+            "medianUmiCountsPerCell",
+            "numberOfReads",
+            "onTargetMappedBases",
+            "onTargetRatio",
+            "pairedInSequencing",
+            "pairedRead1",
+            "pairedRead2",
+            "percentDiffChr",
+            "percentDuplicates",
+            "percentMappedReads",
+            "percentProperlyPaired",
+            "percentSingletons",
+            "properlyPaired",
+            "q30BasesInBarcode",
+            "q30BasesInRnaRead",
+            "q30BasesInUmi",
+            "qcBasesMapped",
+            "qcFailedReads",
+            "readsMappedAntisenseToGene",
+            "readsMappedConfidentlyToExonicRegions",
+            "readsMappedConfidentlyToGenome",
+            "readsMappedConfidentlyToIntergenicRegions",
+            "readsMappedConfidentlyToIntronicRegions",
+            "readsMappedConfidentlyToTranscriptome",
+            "readsMappedToGenome",
+            "referenceLength",
+            "sequencingSaturation",
+            "singletons",
+            "totalGenesDetected",
+            "totalMappedReadCounter",
+            "totalReadCounter",
+            "validBarcodes",
+            "withItselfAndMateMapped",
+            "withMateMappedToDifferentChr",
+            "withMateMappedToDifferentChrMaq",
+    ]
+
 
     def setup() {
         qcThresholdService = new QcThresholdService()
 
-        testedProperty = "controlMassiveInvPrefilteringLevel"
+        testedProperty = "referenceLength"
         testedPropertyValue = 15
 
         project = DomainFactory.createProject()
         seqType = DomainFactory.createWholeGenomeSeqType()
-        sophiaQc = DomainFactory.createSophiaQc([
+        cellRangerQualityAssessment = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createQa(null, [
                 ("${testedProperty}".toString()): testedPropertyValue,
-                // don't create sophiaInstance, otherwise we have to @Mock too many domain classes
-                sophiaInstance     : null,
-        ], false).save(flush: true, validate: false)
+        ], false)
     }
 
     void "test createThresholdColorizer with no QcThreshold"() {
         when:
-        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, sophiaQc.class)
-        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], sophiaQc)
+        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, cellRangerQualityAssessment.class)
+        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], cellRangerQualityAssessment)
 
         then:
         result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), OKAY, null, null)
@@ -91,12 +136,12 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 10,
                 errorThresholdUpper: 20,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: sophiaQc.class.name,
+                qcClass: cellRangerQualityAssessment.class.name,
         )
 
         when:
-        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, sophiaQc.class)
-        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], sophiaQc)
+        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, cellRangerQualityAssessment.class)
+        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], cellRangerQualityAssessment)
 
         then:
         result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), WARNING, null, null)
@@ -120,13 +165,13 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                     warningThresholdUpper: l - 1 == i ? 10 : 99,
                     errorThresholdUpper: l - 1 == i ? 20 : 100,
                     compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                    qcClass: sophiaQc.class.name,
+                    qcClass: cellRangerQualityAssessment.class.name,
             )
         }
 
         when:
-        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, sophiaQc.class)
-        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], sophiaQc)
+        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, cellRangerQualityAssessment.class)
+        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], cellRangerQualityAssessment)
 
         then:
         result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), thresholdLevel, null, null)
@@ -147,13 +192,13 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 errorThresholdLower: etl,
                 errorThresholdUpper: etu,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: sophiaQc.class.name,
+                qcClass: cellRangerQualityAssessment.class.name,
                 seqType: seqType,
         )
 
         when:
-        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, sophiaQc.class)
-        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], sophiaQc)
+        QcThresholdService.ThresholdColorizer thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, cellRangerQualityAssessment.class)
+        Map<String, TableCellValue> result = thresholdColorizer.colorize([testedProperty], cellRangerQualityAssessment)
 
         then:
         result.get(testedProperty) == new TableCellValue(testedPropertyValue.toString(), thresholdLevel, null, null)
@@ -182,19 +227,15 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: sophiaQc.class.name,
+                qcClass: cellRangerQualityAssessment.class.name,
         )
 
         expect:
         qcThresholdService.getClassesWithProperties() == [
                 new ClassWithThreshold(
-                        clasz: SophiaQc,
+                        clasz: CellRangerQualityAssessment,
                         existingThresholds: [threshold],
-                        availableThresholdProperties: [
-                                "controlMassiveInvPrefilteringLevel",
-                                "rnaContaminatedGenesCount",
-                                "tumorMassiveInvFilteringLevel",
-                        ]
+                        availableThresholdProperties: availableThresholdProperties
                 ),
         ]
 
@@ -211,7 +252,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: sophiaQc.class.name,
+                qcClass: cellRangerQualityAssessment.class.name,
                 seqType: seqType,
         )
 
@@ -222,7 +263,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: sophiaQc.class.name,
+                qcClass: cellRangerQualityAssessment.class.name,
                 project: project,
                 seqType: seqType,
         )
@@ -230,15 +271,11 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
         expect:
         qcThresholdService.getClassesWithPropertiesForProjectAndSeqTypes(project, [seqType]) == [
                 new ClassWithThresholds(
-                        clasz: SophiaQc,
+                        clasz: CellRangerQualityAssessment,
                         existingThresholds: [
                                 new BothQcThresholds(seqType, testedProperty, threshold, threshold2),
                         ],
-                        availableThresholdProperties: [
-                                "controlMassiveInvPrefilteringLevel",
-                                "rnaContaminatedGenesCount",
-                                "tumorMassiveInvFilteringLevel",
-                        ]
+                        availableThresholdProperties: availableThresholdProperties
                 ),
         ]
     }
@@ -254,34 +291,30 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: sophiaQc.class.name,
+                qcClass: cellRangerQualityAssessment.class.name,
                 seqType: seqType,
         )
 
         QcThreshold threshold2 = DomainFactory.createQcThreshold(
-                qcProperty1: "tumorMassiveInvFilteringLevel",
+                qcProperty1: "qcBasesMapped",
                 errorThresholdLower: 1,
                 warningThresholdLower: 2,
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: sophiaQc.class.name,
+                qcClass: cellRangerQualityAssessment.class.name,
                 seqType: seqType,
         )
 
         expect:
         qcThresholdService.getClassesWithPropertiesForProjectAndSeqTypes(project, [seqType]) == [
                 new ClassWithThresholds(
-                        clasz: SophiaQc,
+                        clasz: CellRangerQualityAssessment,
                         existingThresholds: [
+                                new BothQcThresholds(seqType, "qcBasesMapped", threshold2, null),
                                 new BothQcThresholds(seqType, testedProperty, threshold, null),
-                                new BothQcThresholds(seqType, "tumorMassiveInvFilteringLevel", threshold2, null),
                         ],
-                        availableThresholdProperties: [
-                                "controlMassiveInvPrefilteringLevel",
-                                "rnaContaminatedGenesCount",
-                                "tumorMassiveInvFilteringLevel",
-                        ]
+                        availableThresholdProperties: availableThresholdProperties
                 ),
         ]
     }
@@ -292,7 +325,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
         when:
         qcThresholdService.createThreshold(
                 null,
-                SophiaQc.simpleName,
+                CellRangerQualityAssessment.simpleName,
                 testedProperty,
                 seqType,
                 QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
@@ -309,7 +342,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
         QcThreshold threshold = all.first()
         threshold.qcProperty1 == testedProperty
         threshold.project == null
-        threshold.qcClass == SophiaQc.name
+        threshold.qcClass == CellRangerQualityAssessment.name
         threshold.seqType == seqType
         threshold.compare == QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS
         threshold.errorThresholdLower == 1
@@ -328,7 +361,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: sophiaQc.class.name,
+                qcClass: cellRangerQualityAssessment.class.name,
         )
 
         when:
@@ -339,7 +372,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 7,
                 8,
                 9,
-                "rnaContaminatedGenesCount",
+                "estimatedNumberOfCells",
         )
         qcThreshold = QcThreshold.get(qcThreshold.id)
 
@@ -351,8 +384,8 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
         qcThreshold.warningThresholdUpper == 8
         qcThreshold.errorThresholdUpper == 9
         qcThreshold.compare == QcThreshold.ThresholdStrategy.DIFFERENCE_WITH_OTHER_PROPERTY
-        qcThreshold.qcClass == sophiaQc.class.name
-        qcThreshold.qcProperty2 == "rnaContaminatedGenesCount"
+        qcThreshold.qcClass == cellRangerQualityAssessment.class.name
+        qcThreshold.qcProperty2 == "estimatedNumberOfCells"
     }
 
     void "test updateThreshold, with validation error"() {
@@ -364,7 +397,7 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                 warningThresholdUpper: 3,
                 errorThresholdUpper: 4,
                 compare: QcThreshold.ThresholdStrategy.ABSOLUTE_LIMITS,
-                qcClass: sophiaQc.class.name,
+                qcClass: cellRangerQualityAssessment.class.name,
         )
 
         expect:
