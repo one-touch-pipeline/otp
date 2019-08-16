@@ -68,6 +68,15 @@ trigger master:
     TRIGGER_CASE: master
 
 
+trigger demo:
+  extends: .abstract_trigger_deployment
+  only:
+    - /^demo\/.*$/
+  variables:
+    GIT_STRATEGY: none
+    TRIGGER_CASE: demo
+
+
 trigger release:
   extends: .abstract_trigger_deployment
   only:
