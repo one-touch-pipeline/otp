@@ -352,6 +352,32 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         e.message.contains('can not be resolved to a user via LDAP')
     }
 
+    void "addUserToProjectAndNotifyGroupManagementAuthority, when there is already an external user with the email address, throws assertion exception"() {
+        given:
+        setupData()
+
+        User user = DomainFactory.createUser(username: null)
+        Project project = createProject()
+        ProjectRole projectRole = DomainFactory.createProjectRole()
+        LdapUserDetails ldapUserDetails = new LdapUserDetails(
+                cn: 'username',
+                realName: user.realName,
+                mail: user.email,
+        )
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            getLdapUserDetailsByUsername(_) >> ldapUserDetails
+        }
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(project, projectRole, SEARCH, [:])
+        }
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message.contains("There is already an external user with email '${user.email}'")
+    }
+
     @Unroll
     void "addUserToProjectAndNotifyGroupManagementAuthority, send mail only for users with access to files (accessToFiles=#accessToFiles)"() {
         given:
@@ -446,7 +472,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         setupData()
 
         ProjectRole projectRole = DomainFactory.createProjectRole()
-        User user = DomainFactory.createUser()
+        User user = DomainFactory.createUser(username: null)
         Project project = createProject()
 
         DomainFactory.createUserProjectRole(
@@ -462,6 +488,35 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, _ as List<String>, _ as List<String>)
+    }
+
+    void "addExternalUserToProject, when user with different attributes already exists, throws error"() {
+        given:
+        setupData()
+
+        ProjectRole projectRole = DomainFactory.createProjectRole()
+        User user = DomainFactory.createUser(username: ldap ? 'right name' : null)
+        Project project = createProject()
+
+        DomainFactory.createUserProjectRole(
+                project: project,
+                user: User.findByUsername(OPERATOR),
+                manageUsers: true,
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.addExternalUserToProject(project, 'wrong name', user.email, projectRole)
+        }
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message.contains("The given email address '${user.email}' is already registered for ${ldap ? "LDAP user '${user.username}'": "external user '${user.realName}'"}")
+
+        where:
+        ldap  | _
+        true  | _
+        false | _
     }
 
     void "notifyProjectAuthoritiesAndUser, sends mail, direct recipients: authorities and user managers, CC: affected user"() {

@@ -284,7 +284,7 @@
                             </tr>
                         </sec:access>
                         <tr>
-                            <td><g:message code="projectUser.addMember.user"/></td>
+                            <td><g:message code="projectUser.addMember.username"/></td>
                             <td><input id="search" name="searchString" type="text" class="inputField ldapUser autocompleted" autocomplete="off" placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}"></td>
                         </tr>
                         <tr>
