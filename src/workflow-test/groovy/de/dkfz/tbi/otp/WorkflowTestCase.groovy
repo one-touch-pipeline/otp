@@ -184,6 +184,14 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             scheduler.scheduleWithFixedDelay({
                 Holders.applicationContext.getBean(SchedulerService).schedule()
             } as Runnable, 0, 1, TimeUnit.SECONDS)
+
+            scheduler.scheduleWithFixedDelay({
+                Holders.applicationContext.getBean(RemoteShellHelper).keepAlive()
+            } as Runnable, 0, 60, TimeUnit.SECONDS)
+
+            scheduler.scheduleWithFixedDelay({
+                Holders.applicationContext.getBean(FileSystemService).keepAlive()
+            } as Runnable, 0, 60, TimeUnit.SECONDS)
         }
     }
 
