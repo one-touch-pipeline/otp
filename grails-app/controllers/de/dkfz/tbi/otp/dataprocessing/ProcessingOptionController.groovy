@@ -94,7 +94,7 @@ class ProcessingOptionController {
 
     def update(ProcessingOptionCommand cmd) {
         try {
-            processingOptionService.createOrUpdate(cmd.optionName, cmd.value, cmd.type != "" ? cmd.type : null)
+            processingOptionService.createOrUpdate(cmd.optionName, cmd.value, cmd.type == "" ? null : cmd.type)
             flash.message = new FlashMessage(g.message(code: "processingOption.store.success") as String)
         } catch (ValidationException e) {
             flash.message = new FlashMessage(g.message(code: "processingOption.store.failure") as String, e.errors)

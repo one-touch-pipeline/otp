@@ -173,7 +173,7 @@ class ClusterJobJobTypeSpecificController {
     private List parseParams() {
         LocalDate startDate = LocalDate.parse(params.from)
         LocalDate endDate = LocalDate.parse(params.to)
-        SeqType seqType = (params.seqType != "null") ? SeqType.get(Long.parseLong(params.seqType)) : null
+        SeqType seqType = (params.seqType == "null") ? null : SeqType.get(Long.parseLong(params.seqType))
 
         return [startDate, endDate, seqType]
     }

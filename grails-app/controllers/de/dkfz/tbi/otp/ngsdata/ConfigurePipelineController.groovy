@@ -363,7 +363,7 @@ class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCom
             obj.seqType.isWgbs() ? true : val != null
         })
         sambambaVersion(nullable: true, validator: { val, obj ->
-            obj.mergeTool != MergeConstants.MERGE_TOOL_SAMBAMBA ? true : val != null
+            obj.mergeTool == MergeConstants.MERGE_TOOL_SAMBAMBA ? val != null : true
         })
     }
 }

@@ -324,7 +324,7 @@ All the Rules that will be used for OTP
     // rulesets/convention.xml
     // CompileStatic //not currently needed since 99% of all Classes are Compile Dynamic
     ConfusingTernary {
-        priority = HIGH
+        priority = CRITICAL
     }
     CouldBeElvis {
         priority = HIGH

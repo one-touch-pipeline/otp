@@ -67,8 +67,8 @@ class SampleSwapController {
                 libPrepKits    : [""] + LibraryPreparationKit.list(sort: "name", order: "asc").collect { it.name },
                 libraryLayouts : LibraryLayout.findAll()*.toString(),
                 antibodyTargets: [""] + AntibodyTarget.list(sort: "name", order: "asc").collect { it.name },
-                holdProcessing : cmd.submit != "Submit" ? true : cmd.holdProcessing,
-                comment        : cmd.submit != "Submit" ? "" : cmd.comment,
+                holdProcessing : cmd.submit == "Submit" ? cmd.holdProcessing : true,
+                comment        : cmd.submit == "Submit" ? cmd.comment : "",
         ] + ((cmd.submit == "Submit") ? sampleSwapService.validateInput(
                 handleSubmit(params, individual) + [comment: cmd.comment]) : getOriginalData(individual))
     }
