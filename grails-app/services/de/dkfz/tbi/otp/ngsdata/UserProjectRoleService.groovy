@@ -100,10 +100,12 @@ class UserProjectRoleService {
         assert ldapUserDetails.mail: "Could not get a mail for this user via LDAP"
 
         User user = User.findByUsernameOrEmail(ldapUserDetails.cn, ldapUserDetails.mail)
+
         if (!user) {
             user = userService.createUser(ldapUserDetails.cn, ldapUserDetails.mail, ldapUserDetails.realName)
         } else {
             assert user.username: "There is already an external user with email '${user.email}'"
+            assert user.username == ldapUserDetails.cn: "The given email address '${user.email}' is already registered for LDAP user '${user.username}'"
         }
 
         UserProjectRole userProjectRole = createUserProjectRole(user, project, projectRole, flags)

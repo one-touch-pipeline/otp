@@ -425,6 +425,31 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         accessToFiles << [true, false]
     }
 
+    void "addUserToProjectAndNotifyGroupManagementAuthority, email is already in use by another internal user"() {
+        given:
+        setupData()
+
+        User user = DomainFactory.createUser()
+        LdapUserDetails ldapUserDetails = new LdapUserDetails(
+                cn: "something_else",
+                realName: user.realName,
+                mail: user.email,
+        )
+
+        userProjectRoleService.ldapService = Mock(LdapService) {
+            getLdapUserDetailsByUsername(_) >> ldapUserDetails
+        }
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.addUserToProjectAndNotifyGroupManagementAuthority(createProject(), DomainFactory.createProjectRole(), SEARCH)
+        }
+
+        then:
+        AssertionError e = thrown()
+        e.message.startsWith("The given email address '${user.email}' is already registered for LDAP user '${user.username}'")
+    }
+
     void "addExternalUserToProject, create User if non is found for realName or email"() {
         given:
         setupData()
