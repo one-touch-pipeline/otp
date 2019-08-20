@@ -1124,7 +1124,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     UnnecessaryNullCheckBeforeInstanceOf {
-        priority = HIGH
+        priority = CRITICAL
     }
     UnnecessaryObjectReferences {
         priority = LOW

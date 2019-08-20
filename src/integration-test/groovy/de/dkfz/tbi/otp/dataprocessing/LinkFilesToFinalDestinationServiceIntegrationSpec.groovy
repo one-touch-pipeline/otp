@@ -151,7 +151,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         assert roddyBamFile.md5sum == DomainFactory.DEFAULT_MD5_SUM
         assert roddyBamFile.fileSize > 0
         assert roddyBamFile.fileExists
-        assert roddyBamFile.dateFromFileSystem != null && roddyBamFile.dateFromFileSystem instanceof Date
+        assert roddyBamFile.dateFromFileSystem instanceof Date
     }
 
 
