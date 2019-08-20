@@ -623,7 +623,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     SpaceAroundClosureArrow {
-        priority = HIGH
+        priority = CRITICAL
     }
     SpaceAroundMapEntryColon {
         characterBeforeColonRegex = /.*/

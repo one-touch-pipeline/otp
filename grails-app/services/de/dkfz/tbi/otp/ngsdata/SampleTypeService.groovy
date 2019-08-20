@@ -66,7 +66,7 @@ class SampleTypeService {
         List<SeqType> analysableSeqTypes = SeqTypeService.allAnalysableSeqTypes
         return seqTracks.findAll {
             it.seqType in analysableSeqTypes
-        }.groupBy { SeqTrack seqTrack->
+        }.groupBy { SeqTrack seqTrack ->
             [
                     seqTrack.project,
                     seqTrack.sampleType,
