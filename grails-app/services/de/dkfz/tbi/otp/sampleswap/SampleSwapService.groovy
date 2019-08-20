@@ -44,7 +44,7 @@ class SampleSwapService {
         assert seqTrack
         Map dataFiles = [:]
         DataFile.findAllBySeqTrack(seqTrack, [sort: "fileName", order: "asc"]).each {
-            dataFiles.put("${it.id}", it.fileName)
+            dataFiles.put((it.id), it.fileName)
         }
 
         return [

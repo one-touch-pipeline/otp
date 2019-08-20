@@ -669,7 +669,7 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         seqTrack1.individual.project = DomainFactory.createProject(name: "hipo059", realm: realm)
         seqTrack1.individual.pid = "H059-ABCDEF"
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: validFileName.name, initialDirectory: "${testFolder.absolutePath}/linked")
-        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [files: ["${dataFile.id}": "invalidFileName"]], 1)
+        SampleSwapData sampleSwapData1 = createSampleSwapData(seqTrack1, [files: [(dataFile.id): "invalidFileName"]], 1)
 
         sampleSwapService.lsdfFilesService = Mock(LsdfFilesService) {
             1 * getFileFinalPath(_) >> "${validFileName.absolutePath}"
@@ -703,7 +703,7 @@ class SampleSwapServiceIntegrationSpec extends Specification implements UserAndR
         seqTrack1.individual.project = DomainFactory.createProject(name: "hipo059", realm: realm)
         seqTrack1.individual.pid = "H059-ABCDEF"
         DataFile dataFile = DomainFactory.createDataFile(seqTrack: seqTrack1, fileName: invalidFileName.name, initialDirectory: "${testFolder.absolutePath}/linked")
-        SampleSwapData sampleSwapData = createSampleSwapData(seqTrack1, [pid: "H059-ABCDEG", files: ["${dataFile.id}": "H059-ABCDEG_filename"]], 1)
+        SampleSwapData sampleSwapData = createSampleSwapData(seqTrack1, [pid: "H059-ABCDEG", files: [(dataFile.id): "H059-ABCDEG_filename"]], 1)
 
         sampleSwapService.lsdfFilesService = Mock(LsdfFilesService) {
             1 * getFileFinalPath(_) >> "${invalidFileName.absolutePath}"

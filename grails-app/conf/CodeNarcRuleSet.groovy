@@ -782,7 +782,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     GStringAsMapKey {
-        priority = HIGH
+        priority = CRITICAL
     }
     GStringExpressionWithinString {
         priority = CRITICAL
