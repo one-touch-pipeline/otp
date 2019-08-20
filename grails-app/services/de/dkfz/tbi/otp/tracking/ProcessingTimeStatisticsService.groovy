@@ -138,11 +138,6 @@ ${search ? """
         return data
     }
 
-    private static List selectDistinctAndOrderByFromSeqTrack(List seqTracks, String property) {
-        return SeqTrack.executeQuery("SELECT DISTINCT ${property} FROM SeqTrack AS st WHERE st IN (:seqTracks) ORDER BY ${property}",
-                [seqTracks: seqTracks]) as List<String>
-    }
-
     static String getFormattedPeriod(Date d1, Date d2) {
         if (!d1 || !d2) {
             return ""

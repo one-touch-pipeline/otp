@@ -116,11 +116,6 @@ class JobStateLogFile {
         return logFileEntries.get(clusterJobId)?."${property}"
     }
 
-    // only used for tests
-    private boolean isEmpty() {
-        return file.length() == 0
-    }
-
     @Immutable
     @EqualsAndHashCode
     @ToString(includeNames = true)

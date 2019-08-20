@@ -703,16 +703,4 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         roddyBamFile.fileSize = 1000
         assert roddyBamFile.save(flush: true)
     }
-
-    private RoddyBamFile createBamFileSetupAndReturnBamFileToWorkOn() {
-        finishOperationStateOfRoddyBamFile(roddyBamFile)
-        RoddyBamFile roddyBamFile2 = DomainFactory.createRoddyBamFile(roddyBamFile)
-
-        assert roddyBamFile.workDirectory.mkdirs()
-        roddyBamFile2.workMd5sumFile << "${HelperUtils.randomMd5sum}\n"
-        roddyBamFile2.workBamFile << "some content"
-        roddyBamFile2.workBaiFile << "some content"
-        return roddyBamFile2
-    }
-
 }

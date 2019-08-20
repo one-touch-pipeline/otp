@@ -218,45 +218,6 @@ ${jobId}.host.long-doma  someUser    fast     r160224_18005293    --      1     
         result == clusterJobId
     }
 
-
-    private List createDataFor_retrieveAndSaveJobInformationAfterJobStarted(int queryExtendedJobStateByIdCallCount, boolean calledAmendClusterJob) {
-        String clusterId = 1234
-        Realm realm = new Realm()
-        ClusterJob job = new ClusterJob([
-                clusterJobId: clusterId,
-                realm       : realm,
-        ])
-
-        int amendClusterJobCallCount = calledAmendClusterJob ? 1 : 0
-
-        int counter = 0
-        ClusterJobSchedulerService clusterJobSchedulerService = new ClusterJobSchedulerService([
-                clusterJobManagerFactoryService: Mock(ClusterJobManagerFactoryService) {
-                    1 * getJobManager(realm) >> {
-                        return Mock(BatchEuphoriaJobManager) {
-                            queryExtendedJobStateByIdCallCount * queryExtendedJobStateById(_) >> { List<BEJobID> jobIds ->
-                                assert jobIds.size() == 1
-                                counter++
-                                if (queryExtendedJobStateByIdCallCount == counter && calledAmendClusterJob) {
-                                    return [(new BEJobID(clusterId)): new GenericJobInfo(null, null, null, null, null)]
-                                } else {
-                                    throw new RuntimeException()
-                                }
-                            }
-                        }
-                    }
-                },
-                clusterJobService              : Mock(ClusterJobService) {
-                    amendClusterJobCallCount * amendClusterJob(_, _)
-                }
-        ])
-        return [
-                job,
-                clusterJobSchedulerService,
-        ]
-    }
-
-
     @Unroll
     void "retrieveAndSaveJobInformationAfterJobStarted, #name"() {
         given:

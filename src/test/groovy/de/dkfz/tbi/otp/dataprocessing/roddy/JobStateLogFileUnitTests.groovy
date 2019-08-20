@@ -255,7 +255,7 @@ class JobStateLogFileUnitTests {
     void testIsEmpty_WhenFileIsEmpty_ShouldReturnTrue() {
         JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tmpDir.root, [])
 
-        assert jobStateLogFile.isEmpty()
+        assert jobStateLogFile.file.length() == 0
     }
 
     @Test
@@ -266,6 +266,6 @@ class JobStateLogFileUnitTests {
         ]
         )
 
-        assertFalse(jobStateLogFile.isEmpty())
+        assert jobStateLogFile.file.length() != 0
     }
 }

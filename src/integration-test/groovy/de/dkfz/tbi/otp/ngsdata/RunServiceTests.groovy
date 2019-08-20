@@ -173,34 +173,6 @@ class RunServiceTests implements UserAndRoles {
         )
     }
 
-    private SeqTrack mockSeqTrack(Run run, String pid, String laneId) {
-        Realm realm = Realm.findOrCreateByNameAndHostAndPortAndTimeoutAndDefaultJobSubmissionOptions("test", "pbs", 1234, 0, "")
-        assertNotNull(realm.save(flush: true))
-        Project project = Project.findOrCreateByNameAndDirNameAndRealm("test", "test", realm)
-        assertNotNull(project.save(flush: true))
-        Individual individual = Individual.findOrCreateByPidAndMockPidAndMockFullNameAndTypeAndProject(pid, pid, pid, Individual.Type.UNDEFINED, project)
-        assertNotNull(individual.save(flush: true))
-        Sample sample = Sample.findOrCreateByIndividualAndType(individual, Sample.Type.UNKNOWN)
-        assertNotNull(sample.save(flush: true))
-        SeqType seqType = SeqType.findOrCreateByNameAndDirNameAndLibraryLayout("test", "test", "test")
-        assertNotNull(seqType.save(flush: true))
-        SoftwareTool software = SoftwareTool.findOrCreateByProgramNameAndType("test", SoftwareTool.Type.ALIGNMENT)
-        assertNotNull(software.save(flush: true))
-        SeqTrack seqTrack = new SeqTrack(run: run, sample: sample, seqType: seqType, seqPlatform: run.seqPlatform, pipelineVersion: software, laneId: laneId)
-        assertNotNull(seqTrack.save(flush: true))
-        return seqTrack
-    }
-
-    private AlignmentLog mockAlignmentLog(SeqTrack seqTrack) {
-        SoftwareTool software = SoftwareTool.findOrCreateByProgramNameAndType("test", SoftwareTool.Type.ALIGNMENT)
-        assertNotNull(software.save(flush: true))
-        AlignmentParams params = AlignmentParams.findOrCreateByPipeline(software)
-        assertNotNull(params.save(flush: true))
-        AlignmentLog log = AlignmentLog.findOrCreateBySeqTrackAndAlignmentParams(seqTrack, params)
-        assertNotNull(log.save(flush: true))
-        return log
-    }
-
     /**
      * Creates a JobDefinition for the testJob.
      * @param name Name of the JobDefinition

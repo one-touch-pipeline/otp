@@ -297,7 +297,7 @@ class SamplesParser {
     List<String> newEntries = []
     String type
 
-    private SamplesParser modifySamplesFromJSON(String json) {
+    SamplesParser modifySamplesFromJSON(String json) {
         if (!json) {
             return null
         }
@@ -319,7 +319,7 @@ class SamplesParser {
         return samplesParser
     }
 
-    private List<SamplesParser> insertSamplesFromJSON(String json) {
+    List<SamplesParser> insertSamplesFromJSON(String json) {
         if (!json) {
             return null
         }

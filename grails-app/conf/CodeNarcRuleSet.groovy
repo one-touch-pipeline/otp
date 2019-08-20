@@ -1182,7 +1182,7 @@ All the Rules that will be used for OTP
         priority = HIGH
     }
     UnusedPrivateMethod {
-        priority = HIGH
+        priority = CRITICAL
     }
     UnusedPrivateMethodParameter {
         priority = CRITICAL

@@ -1737,7 +1737,7 @@ class DomainFactory {
         ], properties)
     }
 
-    private static Map<String, ?> baseMergingWorkPackageProperties(Map properties) {
+    static Map<String, ?> baseMergingWorkPackageProperties(Map properties) {
         [
                 libraryPreparationKit: { properties.seqType?.isWgbs() ? null : createLibraryPreparationKit() },
                 sample               : { createSample() },
