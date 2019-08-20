@@ -46,6 +46,7 @@ class CreateNotificationTextServiceIntegrationSpec extends Specification {
     static final String CONTROLLER = 'controller'
     static final String ACTION = 'action'
     static final String NOTE = "Testnote\nwith wordwrap"
+    @SuppressWarnings('GStringExpressionWithinString')
     static final String NOTIFICATION_MESSAGE = '''
 base notification
 stepInformation:${stepInformation}

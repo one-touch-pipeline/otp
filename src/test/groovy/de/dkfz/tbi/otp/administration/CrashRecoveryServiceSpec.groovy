@@ -173,7 +173,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
                 Parameter parameter = processingStep.output.find { Parameter parameter ->
                     parameter.type == parameterType
                 }
-                assert parameter: 'Could not found any parameter for ${parameterType} in ${step}'
+                assert parameter
                 assert parameter.value == "value: ${processingStep.id} ${parameterType.name}"
             }
         }
@@ -383,7 +383,7 @@ class CrashRecoveryServiceSpec extends Specification implements ServiceUnitTest<
                 Parameter parameter = processingStep.output.find { Parameter parameter ->
                     parameter.type == parameterType
                 }
-                assert parameter: 'Could not found any parameter for ${parameterType} in ${step}'
+                assert parameter
                 assert parameter.value == "value: ${processingStep.id} ${parameterType.name}"
             }
         }

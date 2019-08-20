@@ -84,6 +84,7 @@ abstract class AbstractAceseqWorkflowTests extends AbstractRoddyBamFilePairAnaly
     }
 
     @Override
+    @SuppressWarnings('GStringExpressionWithinString')
     ReferenceGenome createReferenceGenome() {
         ReferenceGenome referenceGenome = super.createReferenceGenome()
 

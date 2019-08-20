@@ -785,7 +785,7 @@ All the Rules that will be used for OTP
         priority = HIGH
     }
     GStringExpressionWithinString {
-        priority = HIGH
+        priority = CRITICAL
     }
     GetterMethodCouldBeProperty {
         priority = LOW

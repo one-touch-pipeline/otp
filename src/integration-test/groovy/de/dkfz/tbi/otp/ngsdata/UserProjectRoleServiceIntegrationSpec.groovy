@@ -1082,6 +1082,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         projectAuthorities == expectedUsers
     }
 
+    @SuppressWarnings('GStringExpressionWithinString')
     PluginAwareResourceBundleMessageSource getMessageSource() {
         return Mock(PluginAwareResourceBundleMessageSource) {
             _ * getMessageInternal("projectUser.notification.addToUnixGroup.subject", [], _) >>
