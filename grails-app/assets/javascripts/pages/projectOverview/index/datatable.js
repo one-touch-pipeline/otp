@@ -25,7 +25,7 @@
 
 $.otp.projectOverviewTable = {
     /*
-     * The function return only the passed value.
+     * This function returns the passed value without modifying it.
      * It can be used for not modified output.
      */
     returnParameterUnchanged: function (json) {
@@ -105,7 +105,7 @@ $.otp.projectOverviewTable = {
 
     register: function () {
         "use strict";
-        var oTable1 = $.otp.projectOverviewTable.registerDataTable(
+        $.otp.projectOverviewTable.registerDataTable(
             '#projectOverviewTable',
             $.otp.createLink({
                 controller: 'projectOverview',
@@ -126,7 +126,7 @@ $.otp.projectOverviewTable = {
                 return json;
             }
         );
-        var oTable2 = $.otp.projectOverviewTable.registerDataTable(
+        $.otp.projectOverviewTable.registerDataTable(
             '#patientsAndSamplesGBCountPerProject',
             $.otp.createLink({
                 controller: 'projectOverview',
@@ -134,7 +134,7 @@ $.otp.projectOverviewTable = {
             }),
             $.otp.projectOverviewTable.returnParameterUnchanged
         );
-        var oTable4 = $.otp.projectOverviewTable.registerDataTable(
+        $.otp.projectOverviewTable.registerDataTable(
             '#sampleTypeNameCountBySample',
             $.otp.createLink({
                 controller: 'projectOverview',
@@ -142,7 +142,7 @@ $.otp.projectOverviewTable = {
             }),
             $.otp.projectOverviewTable.returnParameterUnchanged
         );
-        var oTable5 = $.otp.projectOverviewTable.registerDataTable(
+        $.otp.projectOverviewTable.registerDataTable(
             "#centerNameRunId",
             $.otp.createLink({
                 controller: 'projectOverview',
@@ -151,21 +151,5 @@ $.otp.projectOverviewTable = {
             $.otp.projectOverviewTable.returnParameterUnchanged
         );
         $.otp.projectOverviewTable.updatePatientCount();
-        $('#project').change(function () {
-            var oSettings1 = oTable1.fnSettings();
-            oSettings1.oFeatures.bServerSide = true;
-            oTable1.fnDraw();
-            var oSettings2 = oTable2.fnSettings();
-            oSettings2.oFeatures.bServerSide = true;
-            oTable2.fnDraw();
-            var oSettings4 = oTable4.fnSettings();
-            oSettings4.oFeatures.bServerSide = true;
-            oTable4.fnDraw();
-            var oSettings5 = oTable5.fnSettings();
-            oSettings5.oFeatures.bServerSide = true;
-            oTable5.fnDraw();
-            $.otp.graph.project.init();
-            $.otp.projectOverviewTable.updatePatientCount();
-        });
     }
 };
