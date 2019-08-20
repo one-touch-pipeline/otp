@@ -280,7 +280,7 @@ class ProcessesController {
     }
 
     boolean showRestartButton(Process process) {
-        return (RestartableStartJob.isAssignableFrom(Class.forName(process.getStartJobClass())) &&
+        return (RestartableStartJob.isAssignableFrom(ClassLoader.getSystemClassLoader().loadClass(process.getStartJobClass())) &&
                 !Process.findByRestarted(process))
     }
 

@@ -243,7 +243,7 @@ class ProcessingStep implements Serializable, Entity {
     }
 
     boolean belongsToMultiJob() {
-        Class jobClass = Class.forName(jobClass, true, getClass().getClassLoader())
+        Class jobClass = ClassLoader.getSystemClassLoader().loadClass(jobClass)
         return AbstractMultiJob.isAssignableFrom(jobClass)
     }
 
