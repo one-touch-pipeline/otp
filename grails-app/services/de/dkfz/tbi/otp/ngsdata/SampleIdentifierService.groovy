@@ -65,7 +65,7 @@ class SampleIdentifierService {
         ParsedSampleIdentifier identifier = parseSampleIdentifier(sampleIdentifier, project)
         if (identifier) {
             SampleType.SpecificReferenceGenome specificReferenceGenome = deriveSpecificReferenceGenome(identifier.sampleTypeDbName)
-            return findOrSaveSampleIdentifierWithSanitizedIdentifier(identifier, specificReferenceGenome)
+            return findOrSaveSampleIdentifier(identifier, specificReferenceGenome)
         } else {
             return null
         }
@@ -133,7 +133,7 @@ class SampleIdentifierService {
                         sampleTypeDbName: getCell(BulkSampleCreationHeader.SAMPLE_TYPE),
                         fullSampleName  : getCell(BulkSampleCreationHeader.SAMPLE_IDENTIFIER),
                 )
-                findOrSaveSampleIdentifierWithSanitizedIdentifier(identifier, specificReferenceGenome)
+                findOrSaveSampleIdentifier(identifier, specificReferenceGenome)
             } catch (ValidationException e) {
                 e.errors.allErrors.each { ObjectError err ->
                     output << "${MessageFormat.format(err.defaultMessage, err.arguments)}: ${err.code}"
@@ -166,10 +166,6 @@ class SampleIdentifierService {
                 sampleTypeDbName: getSanitizedSampleTypeDbName(identifier.getSampleTypeDbName()),
                 fullSampleName  : identifier.getFullSampleName(),
         )
-    }
-
-    SampleIdentifier findOrSaveSampleIdentifierWithSanitizedIdentifier(ParsedSampleIdentifier identifier, SampleType.SpecificReferenceGenome specificReferenceGenome) {
-        return findOrSaveSampleIdentifier(sanitizeParsedSampleIdentifier(identifier), specificReferenceGenome)
     }
 
     SampleIdentifier findOrSaveSampleIdentifier(ParsedSampleIdentifier identifier, SampleType.SpecificReferenceGenome specificReferenceGenome) {
@@ -208,14 +204,18 @@ class SampleIdentifierService {
     SampleType findOrSaveSampleType(String sampleTypeName, SampleType.SpecificReferenceGenome specificReferenceGenome) {
         SampleType sampleType = atMostOneElement(SampleType.findAllByName(sampleTypeName))
         if (!sampleType) {
-            if (specificReferenceGenome == null) {
-                throw new RuntimeException("SampleType '${sampleTypeName}' does not exist")
-            } else {
-                sampleType = new SampleType(
-                        name: sampleTypeName,
-                        specificReferenceGenome: specificReferenceGenome,
-                )
-                assert sampleType.save(flush: true)
+            String sanitizedSampleTypeDbName = getSanitizedSampleTypeDbName(sampleTypeName)
+            sampleType = atMostOneElement(SampleType.findAllByName(sanitizedSampleTypeDbName))
+            if (!sampleType) {
+                if (specificReferenceGenome == null) {
+                    throw new RuntimeException("SampleType '${sampleTypeName}' does not exist")
+                } else {
+                    sampleType = new SampleType(
+                            name: sanitizedSampleTypeDbName,
+                            specificReferenceGenome: specificReferenceGenome,
+                    )
+                    assert sampleType.save(flush: true)
+                }
             }
         }
         return sampleType

@@ -195,6 +195,42 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         callAndAssertFindOrSaveSample(identifier, null)
     }
 
+    void "test findOrSaveSample, when requested sample type with underscore exist, then use it and create sample with it"() {
+        given:
+        Project project = createProject()
+        SampleType sampleType = createSampleType()
+        sampleType.name = 'underscore_test'
+        sampleType.save(flush: true)
+
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(
+                projectName     : project.name,
+                pid             : HelperUtils.uniqueString,
+                sampleTypeDbName: sampleType.name,
+        )
+
+        expect:
+        callAndAssertFindOrSaveSample(identifier, null)
+    }
+
+    void "test findOrSaveSample, when requested sample type with underscore does not exist, should create it with minus instead of underscore"() {
+        given:
+        Project project = createProject()
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(
+                projectName     : project.name,
+                pid             : HelperUtils.uniqueString,
+                sampleTypeDbName: 'underscore_test',
+        )
+
+        when:
+        Sample result = service.findOrSaveSample(identifier, SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT)
+
+        then:
+        result.sampleType.name == 'underscore-test'
+        result.individual.pid == identifier.pid
+        result.project.name == identifier.projectName
+        containSame(Sample.list(), [result])
+    }
+
     void "findOrSaveSampleType, non existing sample type name is created with given specificReferenceGenome"() {
         given:
         String sampleTypeName = "to-be-created"
