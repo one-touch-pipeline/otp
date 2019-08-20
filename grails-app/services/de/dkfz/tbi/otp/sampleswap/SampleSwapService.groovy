@@ -111,6 +111,7 @@ class SampleSwapService {
         return data
     }
 
+    @SuppressWarnings('DeadCode')
     void doSwap(Map data) {
         throw new UnsupportedOperationException("This Method is not yet implemented")
         SwapInfo swapInfo = new SwapInfo(user: springSecurityService.getCurrentUser(), comment: data.comment, descriptionOfChanges: "")

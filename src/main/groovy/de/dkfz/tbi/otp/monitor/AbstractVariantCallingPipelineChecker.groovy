@@ -218,22 +218,6 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
             """.toString(), [
                 samplePair: samplePairs,
         ])
-
-
-        return SamplePair.executeQuery("""
-                    select
-                        analysis
-                    from
-                        ${getBamFilePairAnalysisClass().simpleName} analysis
-                    where
-                        analysis.samplePair in (:samplePairs)
-                        and analysis.processingState = '${AnalysisProcessingStates.IN_PROGRESS}'
-                        and analysis.withdrawn = false
-                        and analysis.config.pipeline.type = :pipelineType
-                """.toString(), [
-                samplePairs : samplePairs,
-                pipelineType: getPipeline().type,
-        ])
     }
 
     List<SamplePair> samplePairsWithoutAnalysis(List<SamplePair> samplePairs) {

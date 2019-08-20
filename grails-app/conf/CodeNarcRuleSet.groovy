@@ -91,7 +91,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     DeadCode {
-        priority = HIGH
+        priority = CRITICAL
     }
     DoubleNegative {
         priority = DEFAULT
