@@ -31,6 +31,7 @@ import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.SampleLibraryValidator
 import de.dkfz.tbi.otp.utils.HelperUtils
 
@@ -69,7 +70,7 @@ class MetadataValidationContextSpec extends Specification implements DataTest {
                 "").replaceAll(' ', '\t').getBytes(MetadataValidationContext.CHARSET)
 
         when:
-        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure)
+        MetadataValidationContext context = MetadataValidationContext.createFromFile(file, directoryStructure, "")
 
         then:
         context.spreadsheet.dataRows.size() == 4

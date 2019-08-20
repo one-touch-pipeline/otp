@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DataFilesWithAbsolutePath
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesOnGpcfMidTerm
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 
@@ -49,7 +49,7 @@ class RunNameInMetadataPathValidatorSpec extends Specification {
                 "${MetaDataColumn.RUN_ID}\n" + data,
                 [
                         metadataFile: mdFilenameContainsRunName ? Paths.get("run1"): Paths.get("whatever"),
-                        directoryStructure: isDataFilesOnGpcfMidTerm ? new DataFilesOnGpcfMidTerm() : [:],
+                        directoryStructure: isDataFilesOnGpcfMidTerm ? new DataFilesInGpcfSpecificStructure() : [:],
                 ],
         )
 

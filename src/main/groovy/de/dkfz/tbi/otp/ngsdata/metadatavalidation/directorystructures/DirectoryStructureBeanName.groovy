@@ -22,33 +22,18 @@
 
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures
 
-import org.springframework.stereotype.Component
+import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.util.spreadsheet.validation.Level
-import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
+@TupleConstructor
+enum DirectoryStructureBeanName {
+    SAME_DIRECTORY('dataFilesInSameDirectory', 'data files in same directory as metadata file'),
+    GPCF_SPECIFIC('dataFilesInGpcfSpecificStructure', 'data files in GPCF specific structure'),
+    ABSOLUTE_PATH('dataFilesWithAbsolutePath', 'data files given by absolute path'),
 
-import java.nio.file.Path
+    final String beanName
+    final String displayName
 
-import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
-
-@Component
-class DataFilesWithAbsolutePath implements DirectoryStructure {
-
-    @Override
-    List<String> getRequiredColumnTitles() {
-        return [FASTQ_FILE.name()]
-    }
-
-    @Override
-    Path getDataFilePath(MetadataValidationContext context, ValueTuple valueTuple) {
-        String fileName = valueTuple.getValue(FASTQ_FILE.name())
-        if (OtpPath.isValidAbsolutePath(fileName)) {
-            return fileSystem.getPath(fileName)
-        } else {
-            context.addProblem(valueTuple.cells, Level.ERROR, "'${fileName}' is not a valid absolute path.", "At least one file path is not a valid absolute path.")
-            return null
-        }
+    static String findByBeanName(String bean) {
+        values().find { it.beanName == bean }
     }
 }

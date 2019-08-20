@@ -148,10 +148,10 @@
                 </td>
             </tr>
             <tr>
-                <td><g:message code="metadataImport.directory"/></td>
+                <td><g:message code="metadataImport.directoryStructure"/></td>
                 <td>
-                    <g:set var="active" value="${cmd.directory ?: directoryStructures.keySet().first()}"/>
-                    <g:radioGroup name="directory" labels="${directoryStructures.values()}" values="${directoryStructures.keySet()}" value="${active}">
+                    <g:set var="active" value="${cmd.directoryStructure ?: directoryStructures.first().name()}"/>
+                    <g:radioGroup name="directoryStructure" labels="${directoryStructures*.displayName}" values="${directoryStructures*.name()}" value="${active}">
                         <label>
                             ${it.radio}
                             <g:message code="${it.label}"/>

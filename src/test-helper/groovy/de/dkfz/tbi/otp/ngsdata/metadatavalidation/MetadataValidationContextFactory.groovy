@@ -23,7 +23,7 @@
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.DirectoryStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
@@ -46,6 +46,7 @@ class MetadataValidationContextFactory {
                 properties.spreadsheet ?: new Spreadsheet(properties.document ?: 'I am header!\nI am data!'),
                 properties.problems ?: new Problems(),
                 properties.directoryStructure ?: [:] as DirectoryStructure,
+                properties.directoryStructureDescription ?: "",
                 properties.content ?: ''.bytes
         )
 

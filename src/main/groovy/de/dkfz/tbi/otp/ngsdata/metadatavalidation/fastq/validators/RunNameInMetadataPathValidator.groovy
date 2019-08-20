@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DataFilesWithAbsolutePath
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesOnGpcfMidTerm
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 
@@ -47,7 +47,7 @@ class RunNameInMetadataPathValidator implements MetadataValidator {
         List<String> runNames = runCells.text.unique()
 
         if (runNames.size() == 1 &&
-                !(context.directoryStructure instanceof DataFilesOnGpcfMidTerm) &&
+                !(context.directoryStructure instanceof DataFilesInGpcfSpecificStructure) &&
                 !(context.directoryStructure instanceof DataFilesWithAbsolutePath) &&
                 !context.metadataFile.toString().contains(runNames.first()) ) {
             context.addProblem(runCells as Set, Level.WARNING,

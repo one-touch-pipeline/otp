@@ -28,6 +28,7 @@ import org.codenarc.rule.AbstractAstVisitor
 import org.codenarc.rule.AbstractAstVisitorRule
 
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 
 import java.lang.reflect.Modifier
@@ -49,6 +50,7 @@ class EnumForBeanNameVisitor extends AbstractAstVisitor {
     Map<String, List<String>> properties = [
             'SampleIdentifierParser': SampleIdentifierParserBeanName.values()*.beanName as List,
             'AlignmentDecider'      : AlignmentDeciderBeanName.values()*.beanName as List,
+            'DirectoryStructure'    : DirectoryStructureBeanName.values()*.beanName as List,
     ]
 
     @Override

@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesOnGpcfMidTerm
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 
@@ -48,7 +48,7 @@ class OnlyOneRunValidator implements MetadataValidator {
 
         if (runNames.size() > 1 &&
                 !(ilsen.size() == 1 && ilsen != [""] && ilsen != [null] &&
-                        context.directoryStructure instanceof DataFilesOnGpcfMidTerm)
+                        context.directoryStructure instanceof DataFilesInGpcfSpecificStructure)
         ) {
             context.addProblem(runCells as Set, Level.WARNING,
                     "Metadata file contains data from more than one run.")

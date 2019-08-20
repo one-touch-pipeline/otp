@@ -25,7 +25,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.DirectoryStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
@@ -37,12 +37,7 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
 
 @Component
-class DataFilesOnGpcfMidTerm implements DirectoryStructure {
-
-    @Override
-    String getDescription() {
-        return 'data files on GPCF ILSe MidTerm'
-    }
+class DataFilesInGpcfSpecificStructure implements DirectoryStructure {
 
     @Override
     List<String> getRequiredColumnTitles() {

@@ -43,8 +43,10 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesOnGpcfMidTerm
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.HelperUtils
@@ -123,7 +125,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     void "validate creates context and calls validators"() {
         given:
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
-        String directoryStructureName = HelperUtils.uniqueString
+        DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
 
         File testDirectory = TestCase.createEmptyTestDirectory()
         Path metadataFile = testDirectory.toPath().resolve('metadata.tsv')
@@ -145,7 +147,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                                     }
                             ] as MetadataValidator,
                     ]
-            getBean(directoryStructureName, DirectoryStructure) >> directoryStructure
+            getBean(directoryStructureName.beanName, DirectoryStructure) >> directoryStructure
         }
 
         when:
@@ -162,23 +164,12 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         testDirectory.deleteDir()
     }
 
-    void "getDirectoryStructureBeanName, when called with AUTO_DETECT_DIRECTORY_STRUCTURE_NAME, returns DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME"() {
-        expect:
-        MetadataImportService.getDirectoryStructureBeanName(MetadataImportService.AUTO_DETECT_DIRECTORY_STRUCTURE_NAME) ==
-                MetadataImportService.DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME
-    }
-
-    void "getDirectoryStructureBeanName, when called with a string != AUTO_DETECT_DIRECTORY_STRUCTURE_NAME, returns that string"() {
-        expect:
-        MetadataImportService.getDirectoryStructureBeanName('abcdef') == 'abcdef'
-    }
-
     @Unroll
     void "validateAndImportWithAuth, when there are no problems, calls importMetadataFile and returns created MetaDataFile"() {
         given:
         SeqCenter seqCenter = DomainFactory.createSeqCenter(autoImportable: true, autoImportDir: "/auto-import-dir")
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
-        String directoryStructureName = HelperUtils.uniqueString
+        DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
 
         File testDirectory = TestCase.createEmptyTestDirectory()
         File runDirectory = new File(testDirectory, 'run')
@@ -196,7 +187,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         }
         service.applicationContext = Mock(ApplicationContext) {
             getBeansOfType(MetadataValidator) >> [:]
-            getBean(directoryStructureName, DirectoryStructure) >> directoryStructure
+            getBean(directoryStructureName.beanName, DirectoryStructure) >> directoryStructure
         }
         MetadataImportService.PathWithMd5sum pathWithMd5sum = new MetadataImportService.PathWithMd5sum(metadataFile, null)
 
@@ -219,14 +210,14 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     void "validateAndImportWithAuth, when there are errors, returns null as metadataFile"() {
         given:
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
-        String directoryStructureName = HelperUtils.uniqueString
+        DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
 
         Path metadataFile = Paths.get('relative_path')
         MetadataImportService.PathWithMd5sum pathWithMd5sum = new MetadataImportService.PathWithMd5sum(metadataFile, null)
 
         MetadataImportService service = new MetadataImportService()
         service.applicationContext = Mock(ApplicationContext) {
-            getBean(directoryStructureName, DirectoryStructure) >> directoryStructure
+            getBean(directoryStructureName.beanName, DirectoryStructure) >> directoryStructure
         }
 
         when:
@@ -241,7 +232,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     void "validateAndImportWithAuth, validate all before import the first"() {
         given:
         DirectoryStructure directoryStructure = [:] as DirectoryStructure
-        String directoryStructureName = HelperUtils.uniqueString
+        DirectoryStructureBeanName directoryStructureName = DirectoryStructureBeanName.SAME_DIRECTORY
         DomainFactory.createSeqCenter(autoImportable: false)
         MetadataValidationContext context1 = MetadataValidationContextFactory.createContext([metadataFile: Paths.get("import1_meta.tsv")])
         MetaDataFile metadataFile1 = DomainFactory.createMetaDataFile()
@@ -269,7 +260,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             0 * importMetadataFile(*_)
         }
         service.applicationContext = Mock(ApplicationContext) {
-            getBean(directoryStructureName, DirectoryStructure) >> directoryStructure
+            getBean(directoryStructureName.beanName, DirectoryStructure) >> directoryStructure
         }
         service.fileSystemService = new TestFileSystemService()
 
@@ -294,8 +285,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         MetaDataFile metadataFile2 = DomainFactory.createMetaDataFile()
 
         MetadataImportService service = Spy(MetadataImportService) {
-            1 * validate(context1.metadataFile, MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME) >> context1
-            1 * validate(context2.metadataFile, MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME) >> context2
+            1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context1
+            1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context2
             1 * importMetadataFile(context1, true, RunSegment.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile1
             1 * importMetadataFile(context2, true, RunSegment.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile2
         }
@@ -321,9 +312,9 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                 [metadataFile: Paths.get("${seqCenter.autoImportDir}/003333/data/3333_meta.tsv"), problems: problems])
 
         MetadataImportService service = Spy(MetadataImportService) {
-            1 * validate(context1.metadataFile, MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME) >> context1
-            1 * validate(context2.metadataFile, MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME) >> context2
-            1 * validate(context3.metadataFile, MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME) >> context3
+            1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context1
+            1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context2
+            1 * validate(context3.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context3
             1 * importMetadataFile(context2, true, RunSegment.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> DomainFactory.createMetaDataFile()
         }
 
@@ -1477,7 +1468,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 content,
                 [
-                        directoryStructure: new DataFilesOnGpcfMidTerm(),
+                        directoryStructure: new DataFilesInGpcfSpecificStructure(),
                         content           : (contextContent ?: content).bytes,
                         metadataFile      : file,
                 ]

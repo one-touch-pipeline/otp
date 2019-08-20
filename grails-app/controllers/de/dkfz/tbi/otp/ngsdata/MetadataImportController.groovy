@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.security.Role
 import de.dkfz.tbi.otp.tracking.OtrsTicket
@@ -79,7 +80,7 @@ class MetadataImportController {
             metadataValidationContexts = flash.mvc
         } else if (cmd.paths) {
             cmd.paths.each { path ->
-                MetadataValidationContext mvc = metadataImportService.validateWithAuth(new File(path), cmd.directory)
+                MetadataValidationContext mvc = metadataImportService.validateWithAuth(new File(path), cmd.directoryStructure)
                 metadataValidationContexts.add(mvc)
                 if (mvc.maximumProblemLevel.intValue() > problems) {
                     problems = mvc.maximumProblemLevel.intValue()
@@ -89,7 +90,7 @@ class MetadataImportController {
         }
 
         return [
-                directoryStructures   : metadataImportService.getSupportedDirectoryStructures(),
+                directoryStructures   : DirectoryStructureBeanName.values(),
                 cmd                   : cmd,
                 paths                 : cmd.paths ?: [""],
                 contexts              : metadataValidationContexts,
@@ -110,7 +111,7 @@ class MetadataImportController {
                 return new MetadataImportService.PathWithMd5sum(fs.getPath(it.first), cmd.md5.get(it.second))
             }
             List<ValidateAndImportResult> validateAndImportResults = metadataImportService.validateAndImportWithAuth(
-                    pathWithMd5sums, cmd.directory, cmd.align, cmd.ignoreWarnings, cmd.ticketNumber,
+                    pathWithMd5sums, cmd.directoryStructure, cmd.align, cmd.ignoreWarnings, cmd.ticketNumber,
                     cmd.seqCenterComment, cmd.automaticNotification
             )
             metadataValidationContexts = validateAndImportResults*.context
@@ -133,7 +134,7 @@ class MetadataImportController {
         flash.mvc = metadataValidationContexts
         redirect(action: "index", params: [
                 paths                : cmd.paths,
-                directory            : cmd.directory,
+                directoryStructure   : cmd.directoryStructure,
                 ticketNumber         : cmd.ticketNumber,
                 seqCenterComment     : cmd.seqCenterComment,
                 align                : cmd.align,
@@ -262,7 +263,7 @@ class MetadataImportController {
                     params: [
                             'ticketNumber': otrsTicketNumber,
                             'paths'       : e.allPaths,
-                            'directory'   : MetadataImportService.MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME,
+                            'directoryStructure'   : DirectoryStructureBeanName.GPCF_SPECIFIC,
                     ])
             )
         }
@@ -344,7 +345,7 @@ class MetadataImportControllerSubmitCommand implements Serializable {
     ProcessingOptionService processingOptionService
 
     List<String> paths
-    String directory
+    DirectoryStructureBeanName directoryStructure
     List<String> md5
     String submit
     String ticketNumber
@@ -355,7 +356,7 @@ class MetadataImportControllerSubmitCommand implements Serializable {
 
     static constraints = {
         paths(nullable: true)
-        directory(nullable: true)
+        directoryStructure(nullable: true)
         md5(nullable: true)
         submit(nullable: true)
         seqCenterComment(nullable: true, validator: { val, obj ->

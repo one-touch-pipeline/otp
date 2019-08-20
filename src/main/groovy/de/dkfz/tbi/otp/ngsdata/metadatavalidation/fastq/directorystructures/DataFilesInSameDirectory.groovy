@@ -25,7 +25,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.DirectoryStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
@@ -36,11 +36,6 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
 
 @Component
 class DataFilesInSameDirectory implements DirectoryStructure {
-
-    @Override
-    String getDescription() {
-        return 'data files in same directory as metadata file'
-    }
 
     @Override
     List<String> getRequiredColumnTitles() {

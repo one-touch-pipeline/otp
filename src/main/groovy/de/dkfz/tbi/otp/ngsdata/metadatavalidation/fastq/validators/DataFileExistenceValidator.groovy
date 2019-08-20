@@ -58,7 +58,7 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
         Closure addDirectoryStructureInfo = {
             if (!directoryStructureInfoAdded) {
                 context.addProblem(Collections.emptySet(), Level.INFO,
-                        "Using directory structure '${context.directoryStructure.description}'. If this is incorrect, please select the correct one.")
+                        "Using directory structure '${context.directoryStructureDescription}'. If this is incorrect, please select the correct one.")
                 directoryStructureInfoAdded = true
             }
         }

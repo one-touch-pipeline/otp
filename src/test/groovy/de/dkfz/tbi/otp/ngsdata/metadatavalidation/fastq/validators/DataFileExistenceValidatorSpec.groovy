@@ -29,7 +29,7 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.ngsdata.Realm
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.DirectoryStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.util.spreadsheet.Cell
@@ -61,7 +61,6 @@ class DataFileExistenceValidatorSpec extends Specification implements DataTest {
         CreateFileHelper.createFile(new File(dir, 'not_empty'))
 
         DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
-            getDescription() >> 'test directory structure'
             getRequiredColumnTitles() >> ['FILENAME']
             getDataFilePath(_, _) >> { MetadataValidationContext context, ValueTuple valueTuple ->
                 Matcher matcher = valueTuple.getValue('FILENAME') =~ /^(.+) .$/
@@ -87,7 +86,7 @@ class DataFileExistenceValidatorSpec extends Specification implements DataTest {
                         "not_found3 A\n" +
                         "not_found3 B\n" +
                         "not_found3 B\n",
-                [directoryStructure: directoryStructure]
+                [directoryStructure: directoryStructure, directoryStructureDescription: 'test directory structure']
         )
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(),

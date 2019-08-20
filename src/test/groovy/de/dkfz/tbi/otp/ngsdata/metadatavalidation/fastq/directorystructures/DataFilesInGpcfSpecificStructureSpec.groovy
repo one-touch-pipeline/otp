@@ -27,7 +27,7 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.DirectoryStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -39,13 +39,13 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_ID
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class DataFilesOnGpcfMidTermSpec extends Specification {
+class DataFilesInGpcfSpecificStructureSpec extends Specification {
 
     @Unroll
     void "getDataFilePath, when file is #fileName, then check is #valid"() {
         given:
         File directory = TestCase.uniqueNonExistentPath
-        DirectoryStructure directoryStructure = new DataFilesOnGpcfMidTerm()
+        DirectoryStructure directoryStructure = new DataFilesInGpcfSpecificStructure()
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${FASTQ_FILE}\t${RUN_ID}\n" +

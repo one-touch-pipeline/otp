@@ -39,6 +39,8 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
@@ -91,10 +93,6 @@ class MetadataImportService {
 
     static int MAX_ILSE_NUMBER_RANGE_SIZE = 20
 
-    static final String AUTO_DETECT_DIRECTORY_STRUCTURE_NAME = ''
-    static final String DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME = 'dataFilesInSameDirectory'
-    static final String MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME = 'dataFilesOnGpcfMidTerm'
-
     static final String MATE_NUMBER_EXPRESSION = /^(?<index>i|I)?(?<number>[1-9]\d*)$/
 
 
@@ -105,32 +103,18 @@ class MetadataImportService {
         return (Collection<String>) metadataValidators.sum { it.descriptions }
     }
 
-    /**
-     * @return Names (keys) and descriptions (values) of directory structures
-     */
-    Map<String, String> getSupportedDirectoryStructures() {
-        Map<String, String> directoryStructures = new TreeMap<String, String>()
-        directoryStructures.put(AUTO_DETECT_DIRECTORY_STRUCTURE_NAME, 'detect automatically')
-        applicationContext.getBeansOfType(DirectoryStructure).each { String name, DirectoryStructure directoryStructure ->
-            directoryStructures.put(name, directoryStructure.description)
-        }
-        return directoryStructures
-    }
-
-    /**
-     * @param directoryStructureName As returned by {@link #getSupportedDirectoryStructures()}
-     */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     // TODO: OTP-1908: Relax this restriction
-    MetadataValidationContext validateWithAuth(File metadataFile, String directoryStructureName) {
+    MetadataValidationContext validateWithAuth(File metadataFile, DirectoryStructureBeanName directoryStructure) {
         FileSystem fs = fileSystemService.getFilesystemForFastqImport()
-        return validate(fs.getPath(metadataFile.path), directoryStructureName)
+        return validate(fs.getPath(metadataFile.path), directoryStructure)
     }
 
-    MetadataValidationContext validate(Path metadataFile, String directoryStructureName) {
+    MetadataValidationContext validate(Path metadataFile, DirectoryStructureBeanName directoryStructure) {
         MetadataValidationContext context = MetadataValidationContext.createFromFile(
                 metadataFile,
-                getDirectoryStructure(getDirectoryStructureBeanName(directoryStructureName)),
+                getDirectoryStructure(directoryStructure),
+                directoryStructure.displayName,
         )
         if (context.spreadsheet) {
             Long hash = System.currentTimeMillis()
@@ -145,16 +129,15 @@ class MetadataImportService {
     }
 
     /**
-     * @param directoryStructureName As returned by {@link #getSupportedDirectoryStructures()}
      * @param previousValidationMd5sum May be {@code null}
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<ValidateAndImportResult> validateAndImportWithAuth(List<PathWithMd5sum> metadataPaths, String directoryStructureName, boolean align,
+    List<ValidateAndImportResult> validateAndImportWithAuth(List<PathWithMd5sum> metadataPaths, DirectoryStructureBeanName directoryStructure, boolean align,
                                                             boolean ignoreWarnings, String ticketNumber, String seqCenterComment,
                                                             boolean automaticNotification) {
         try {
             Map<MetadataValidationContext, String> contexts = metadataPaths.collectEntries { PathWithMd5sum pathWithMd5sum ->
-                return [(validate(pathWithMd5sum.path, directoryStructureName)): pathWithMd5sum.md5sum]
+                return [(validate(pathWithMd5sum.path, directoryStructure)): pathWithMd5sum.md5sum]
             }
             List<ValidateAndImportResult> results = contexts.collect { context, md5sum ->
                 return importHelperMethod(context, align, RunSegment.ImportMode.MANUAL, ignoreWarnings, md5sum, ticketNumber, seqCenterComment,
@@ -229,13 +212,13 @@ class MetadataImportService {
         FileSystem fs = fileSystemService.getFilesystemForFastqImport()
         return validateAndImportMultiple(otrsTicketNumber,
                 parseIlseNumbers(ilseNumbers).collect { getMetadataFilePathForIlseNumber(it, fs) },
-                MIDTERM_ILSE_DIRECTORY_STRUCTURE_BEAN_NAME
+                DirectoryStructureBeanName.GPCF_SPECIFIC
         )
     }
 
-    List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, List<Path> metadataFiles, String directoryStructureName) {
+    List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, List<Path> metadataFiles, DirectoryStructureBeanName directoryStructure) {
         List<MetadataValidationContext> contexts = metadataFiles.collect {
-            return validate(it, directoryStructureName)
+            return validate(it, directoryStructure)
         }
         List<ValidateAndImportResult> results = contexts.collect {
             return importHelperMethod(it, true, RunSegment.ImportMode.AUTOMATIC, false, null, otrsTicketNumber,
@@ -305,16 +288,8 @@ class MetadataImportService {
         return applicationContext.getBeansOfType(MetadataValidator).values().sort { it.getClass().name }
     }
 
-    protected static String getDirectoryStructureBeanName(String directoryStructureName) {
-        if (directoryStructureName == AUTO_DETECT_DIRECTORY_STRUCTURE_NAME) {
-            return DATA_FILES_IN_SAME_DIRECTORY_BEAN_NAME
-        } else {
-            return directoryStructureName
-        }
-    }
-
-    protected DirectoryStructure getDirectoryStructure(String directoryStructureBeanName) {
-        DirectoryStructure directoryStructure = applicationContext.getBean(directoryStructureBeanName, DirectoryStructure)
+    protected DirectoryStructure getDirectoryStructure(DirectoryStructureBeanName name) {
+        DirectoryStructure directoryStructure = applicationContext.getBean(name.beanName, DirectoryStructure)
         directoryStructure.setFileSystem(fileSystemService?.getFilesystemForFastqImport())
         return directoryStructure
     }

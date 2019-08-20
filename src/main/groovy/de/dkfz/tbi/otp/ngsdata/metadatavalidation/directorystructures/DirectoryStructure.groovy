@@ -20,8 +20,9 @@
  * SOFTWARE.
  */
 
-package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq
+package de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures
 
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
@@ -29,8 +30,6 @@ import de.dkfz.tbi.util.spreadsheet.validation.ValueTuple
 import java.nio.file.*
 
 trait DirectoryStructure {
-
-    abstract String getDescription()
 
     /**
      * The titles of the columns which the paths are constructed from
