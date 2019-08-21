@@ -39,6 +39,7 @@ import de.dkfz.tbi.otp.security.UserAndRoles
 
 import static org.junit.Assert.*
 
+@Deprecated
 @Rollback
 @Integration
 class ProcessServiceIntegrationTests implements UserAndRoles {
@@ -394,25 +395,6 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
         SpringSecurityUtils.doWithAuth(USER) {
             TestCase.shouldFail(AccessDeniedException) {
                 processService.getFirstUpdate(step)
-            }
-        }
-    }
-
-    @Test
-    void testGetProcessingStepDurationPermission() {
-        setupData()
-        JobExecutionPlan plan = mockPlan()
-        Process process = mockProcess(plan)
-        JobDefinition job = createTestJob("Test", plan)
-        ProcessingStep step = mockProcessingStep(process, job)
-        mockProcessingStepUpdate(step)
-
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            assertNull(processService.getProcessingStepDuration(step))
-        }
-        SpringSecurityUtils.doWithAuth(USER) {
-            TestCase.shouldFail(AccessDeniedException) {
-                processService.getProcessingStepDuration(step)
             }
         }
     }

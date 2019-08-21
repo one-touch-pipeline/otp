@@ -189,7 +189,6 @@ class ProcessService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     ProcessingStep getLatestProcessingStep(Process process) {
         return ProcessingStep.findByProcessAndNextIsNull(process, [sort: "id", order: "desc"])
-
     }
 
     /**
@@ -278,39 +277,39 @@ class ProcessService {
     }
 
     /**
-     * Calculates the duration between the start and finish event. This means it ignores the
-     * created event as well as finished and success.
+     * Calculates the duration the ProcessingStep was running for.
+     *
+     * If the ProcessingStep is not yet finished, it calculates the time relative to the @date
+     * parameter. A ProcessingStep is considered finished if the last update is either FINISHED,
+     * SUCCESS or RESTARTED.
+     *
+     * If there are no updates yet, return 0.
+     *
      * @param step The processing step for which the duration has to be calculated
      * @return The duration between the started and finished event for this ProcessingStep
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Long getProcessingStepDuration(ProcessingStep step) {
-        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)
+    Long getProcessingStepDuration(ProcessingStep step, Date date = new Date()) {
+        List<ProcessingStepUpdate> updates = ProcessingStepUpdate.findAllByProcessingStep(step)?.sort { it.date }
         if (updates.isEmpty()) {
-            throw new IllegalArgumentException("ProcessingStep has no updates")
+            return 0
         }
-        updates = updates.sort { it.id }
-        Date startDate = null
-        Date finishDate = null
-        // find the finished
-        for (ProcessingStepUpdate update in updates) {
-            if (update.state == ExecutionState.STARTED) {
-                startDate = update.date
-                continue
-            }
-            if (update.state == ExecutionState.FINISHED) {
-                finishDate = update.date
-                break
-            }
-            if (update.state == ExecutionState.FAILURE) {
-                finishDate = update.date
-                // no break as there could be another finish afterwards due to manual restart
-            }
+
+        List<ExecutionState> nonProcessingStates = [
+                ExecutionState.FAILURE,
+                ExecutionState.FINISHED,
+                ExecutionState.SUCCESS,
+                ExecutionState.RESTARTED,
+        ]
+
+        Long lastProcessingTime
+        ProcessingStepUpdate lastUpdate = updates.last()
+        if (lastUpdate.state in nonProcessingStates) {
+            lastProcessingTime = lastUpdate.date.time
+        } else {
+            lastProcessingTime = date.time
         }
-        if (finishDate) {
-            return finishDate.time - startDate.time
-        }
-        return null
+        return lastProcessingTime - updates.first().date.time
     }
 
     /**
