@@ -242,8 +242,13 @@ codenarc {
     maxPriority3Violations = 7350
 }
 
+task showCodenarcHTMLFile(type: Exec) {
+    commandLine 'echo', "File can be found under: file://${project.projectDir}/build/reports/codenarc/all.html"
+}
+
 task codenarcAll(type: CodeNarc) {
     mustRunAfter clean
+    finalizedBy showCodenarcHTMLFile
     reports {
         text.enabled = true
         html.enabled = true
