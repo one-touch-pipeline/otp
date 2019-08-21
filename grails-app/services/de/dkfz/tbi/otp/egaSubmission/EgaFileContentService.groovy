@@ -34,15 +34,27 @@ class EgaFileContentService {
 
     static final String UPLOAD_FILE_NAME = 'filesToUpload.tsv'
 
+    /** EGA-specified header for single-end fastq tables. */
     static final String HEADER_FASTQ_SINGLE_FILE = 'Sample alias,Fastq File,Checksum,Unencrypted checksum'
 
+    /** EGA-specified header for paired-end fastq tables. */
     static final String HEADER_FASTQ_PAIRED_FILE =
             'Sample alias,First Fastq File,First Checksum,First Unencrypted checksum,Second Fastq File,Second Checksum,Second Unencrypted checksum'
 
+    /** EGA-specified header for bam tables. */
     static final String HEADER_BAM_FILE = 'Sample alias,BAM File,Checksum,Unencrypted checksum'
 
     LsdfFilesService lsdfFilesService
 
+    /**
+     * Creates the mapping file of internal path to EGA name, as needed for ega-cluster-cryptor encryption.
+     *
+     * A list of all data files and bams in this submission, listing:
+     * /absolute/path/to/selected/file.ext<TAB>public-filename-for-ega.ext
+     *
+     * @see https://github.com/DKFZ-ODCF/ega-cluster-cryptor
+     * @return a map of filename -> file-content-as-string
+     */
     Map<String, String> createFilesToUploadFileContent(EgaSubmission submission) {
         log.debug("creating mapping file for ${submission}")
         StringBuilder out = new StringBuilder()
@@ -60,6 +72,18 @@ class EgaFileContentService {
         ]
     }
 
+    /**
+     * Collects all the EGA-relevant experimental information for a datafile, to enable grouping by protocol during submission.
+     *
+     * An EGA "experiment" describes what was done to a sample in the lab and how it was sequenced.
+     * Each "experiment" is a distinct combination of these parameters.
+     * When registering file metadata in the EGA submitter portal, this can be batched per experiment and file-layout,
+     * to avoid redundantly entering the same information over and over again.
+     *
+     * Elements unknown to OTP are replaced with "unspecified"
+     *
+     * @return a string of underscore-separated experiment components, as far as known to OTP.
+     */
     String createKeyForFastq(DataFileSubmissionObject dataFileSubmissionObject) {
         DataFile dataFile = dataFileSubmissionObject.dataFile
         SeqTrack seqTrack = dataFile.seqTrack
@@ -73,6 +97,22 @@ class EgaFileContentService {
         ].join('-').replace(' ', '_')
     }
 
+    /**
+     * Collects all the EGA-relevant experimental information for a bamfile, to enable grouping by protocol during submission.
+     *
+     * An EGA "experiment" describes what was done to a sample in the lab and how it was sequenced.
+     * Each "experiment" is a distinct combination of these parameters.
+     * When registering file metadata in the EGA submitter portal, this can be batched per experiment and file-layout,
+     * to avoid redundantly entering the same information over and over again.
+     *
+     * Elements unknown to OTP are replaced with "unspecified"
+     *
+     * Since bamfiles can contain multiple merged fastq, which may or may not be sequenced in exactly the same way,
+     * this key can become quite verbose for bamfiles: it lists all distinct library preparation kits and sequencing platforms
+     * that were used for its constituent fastqs.
+     *
+     * @return a string of underscore-separated experiment components, as far as known to OTP.
+     */
     String createKeyForBamFile(BamFileSubmissionObject bamFileSubmissionObject) {
         AbstractBamFile bamFile = bamFileSubmissionObject.bamFile
         Set<SeqTrack> seqTracks = bamFile.containedSeqTracks
@@ -98,6 +138,17 @@ class EgaFileContentService {
         ].flatten().join('-').replace(' ', '_')
     }
 
+    /**
+     * Prepares run-registration tables for single-end samples in this submission, one table per experimental protocol.
+     *
+     * These tables allow one to "link files and samples" in the EGA submitter portal, and represent the mapping
+     * between a biological sample, the experimental protocol applied to that sample, and the resulting data file(s).
+     *
+     * This method prepares the single-fastq section of this submission, according to EGA's 'samples-one-fastq-file-single' template
+     *
+     * @param egaSubmission a fully populated submission object
+     * @return a map of table-filename -> file-content-as-string.
+     */
     Map<String, String> createSingleFastqFileMapping(EgaSubmission egaSubmission) {
         log.debug("creating single fastq mappings for ${egaSubmission}")
         Map<String, String> fileFileContent = [:]
@@ -121,6 +172,17 @@ class EgaFileContentService {
         return fileFileContent
     }
 
+    /**
+     * Prepares run-registration tables for paired-end samples in this submission, one table per experimental protocol.
+     *
+     * These tables allow one to "link files and samples" in the EGA submitter portal, and represent the mapping
+     * between a biological sample, the experimental protocol applied to that sample, and the resulting data file(s).
+     *
+     * This method prepares the paired-fastq section of this submission, according to EGA's 'samples-two-fastq-files-paired' template.
+     *
+     * @param egaSubmission a fully populated submission object
+     * @return a map of table-filename -> file-content-as-string.
+     */
     Map<String, String> createPairedFastqFileMapping(EgaSubmission egaSubmission) {
         log.debug("creating paired fastq mappings for ${egaSubmission}")
         Map<String, String> fileFileContent = [:]
@@ -153,6 +215,17 @@ class EgaFileContentService {
         return fileFileContent
     }
 
+    /**
+     * Prepares run-registration tables for bam samples in this submission, one table per experimental protocol.
+     *
+     * These tables allow one to "link files and samples" in the EGA submitter portal, and represent the mapping
+     * between a biological sample, the experimental protocol applied to that sample, and the resulting data file(s).
+     *
+     * This method prepares the bam section of this submission, according to EGA's 'samples-bam' template.
+     *
+     * @param egaSubmission a fully populated submission object
+     * @return a map of table-filename -> file-content-as-string.
+     */
     Map<String, String> createBamFileMapping(EgaSubmission egaSubmission) {
         log.debug("creating bam mappings for ${egaSubmission}")
         Map<String, String> fileFileContent = [:]
