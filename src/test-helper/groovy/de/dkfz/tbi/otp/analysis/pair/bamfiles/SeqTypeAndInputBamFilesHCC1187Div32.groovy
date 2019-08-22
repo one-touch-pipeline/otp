@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package de.dkfz.tbi.otp.analysis.pair.bamfiles
 
 trait SeqTypeAndInputBamFilesHCC1187Div32 implements SeqTypeAndInputBamFilesHCC1187Div {

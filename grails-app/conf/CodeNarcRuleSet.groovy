@@ -541,7 +541,7 @@ All the Rules that will be used for OTP
 
     // rulesets/formatting.xml
     BlankLineBeforePackage {
-        priority = LOW
+        priority = CRITICAL
     }
     BlockEndsWithBlankLine {
         priority = LOW
