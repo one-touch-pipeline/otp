@@ -21,36 +21,42 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
+import de.dkfz.tbi.otp.ngsdata.SequencingKitLabelService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesWithAbsolutePath
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
-class RunNameInMetadataPathValidator implements MetadataValidator {
+class SequencingKitValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+
+    @Autowired
+    SequencingKitLabelService sequencingKitLabelService
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the metadata file contains exactly one run and it is not imported from midterm or use absolute paths, " +
-                "the path of the metadata file should contain the run name.",]
+        return ['The sequencing kit, if provided, is registered in the OTP database.']
     }
 
     @Override
-    void validate(MetadataValidationContext context) {
-        List<Cell> runCells = context.spreadsheet.dataRows.collect { it.getCell(context.spreadsheet.getColumn(MetaDataColumn.RUN_ID.name())) }
-        List<String> runNames = runCells.text.unique()
+    String getColumnTitle(MetadataValidationContext context) {
+        return MetaDataColumn.SEQUENCING_KIT.name()
+    }
 
-        if (runNames.size() == 1 &&
-                !(context.directoryStructure instanceof DataFilesInGpcfSpecificStructure) &&
-                !(context.directoryStructure instanceof DataFilesWithAbsolutePath) &&
-                !context.metadataFile.toString().contains(runNames.first()) ) {
-            context.addProblem(runCells as Set, Level.WARNING,
-                    "The path of the metadata file should contain the run name.")
+    @Override
+    void checkColumn(MetadataValidationContext context) {
+        addWarningForMissingOptionalColumn(context, MetaDataColumn.SEQUENCING_KIT.name())
+    }
+
+    @Override
+    void validateValue(MetadataValidationContext context, String sequencingKitLabelNameOrAlias, Set<Cell> cells) {
+        if (!sequencingKitLabelNameOrAlias.empty && !sequencingKitLabelService.findByNameOrImportAlias(sequencingKitLabelNameOrAlias)) {
+            context.addProblem(cells, Level.ERROR, "Sequencing kit '${sequencingKitLabelNameOrAlias}' is not registered in the OTP database.","At least one sequencing kit is not registered in the OTP database.")
         }
     }
 }

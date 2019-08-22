@@ -23,34 +23,46 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesWithAbsolutePath
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.TAGMENTATION_BASED_LIBRARY
 
 @Component
-class RunNameInMetadataPathValidator implements MetadataValidator {
+class TagmentationBasedLibraryValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+
+    static final List<String> ALLOWED_VALUES = [
+            '',
+            '0',
+            '1',
+            'true',
+            'false',
+    ].asImmutable()
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the metadata file contains exactly one run and it is not imported from midterm or use absolute paths, " +
-                "the path of the metadata file should contain the run name.",]
+        return ['The tagmentation based library value is registered in the OTP database.']
     }
 
     @Override
-    void validate(MetadataValidationContext context) {
-        List<Cell> runCells = context.spreadsheet.dataRows.collect { it.getCell(context.spreadsheet.getColumn(MetaDataColumn.RUN_ID.name())) }
-        List<String> runNames = runCells.text.unique()
+    String getColumnTitle(MetadataValidationContext context) {
+        return TAGMENTATION_BASED_LIBRARY.name()
+    }
 
-        if (runNames.size() == 1 &&
-                !(context.directoryStructure instanceof DataFilesInGpcfSpecificStructure) &&
-                !(context.directoryStructure instanceof DataFilesWithAbsolutePath) &&
-                !context.metadataFile.toString().contains(runNames.first()) ) {
-            context.addProblem(runCells as Set, Level.WARNING,
-                    "The path of the metadata file should contain the run name.")
+    @Override
+    void checkColumn(MetadataValidationContext context) {
+        addWarningForMissingOptionalColumn(context, TAGMENTATION_BASED_LIBRARY.name())
+    }
+
+    @Override
+    void validateValue(MetadataValidationContext context, String tagmentationBasedLibrary, Set<Cell> cells) {
+        if (!(tagmentationBasedLibrary.toLowerCase() in ALLOWED_VALUES)) {
+            context.addProblem(cells, Level.ERROR,
+                    "The tagmentation based library column value should be '${ALLOWED_VALUES.join("', '")}' instead of '${tagmentationBasedLibrary}'.",
+                    "The tagmentation based library column value should be '${ALLOWED_VALUES.join("', '")}'.")
         }
     }
 }

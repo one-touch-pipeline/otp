@@ -26,31 +26,43 @@ import org.springframework.stereotype.Component
 import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesWithAbsolutePath
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
 
 @Component
-class RunNameInMetadataPathValidator implements MetadataValidator {
+class MateNumberValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+
+    static final private String MATE_NUMBER_EXPRESSION = /^(i|I)?[1-9]\d*$/
+
+    static final String ALLOWED_VALUE_POSTFIX = "must be a positive integer (value >= 1), which may be prefixed by an 'I'/'i' to indicate, that it is an index file"
+
+    static final String ERROR_NOT_PROVIDED = "The mate number must be provided and ${ALLOWED_VALUE_POSTFIX}"
+
+    static final String ERROR_INVALID_VALUE_SUMMARY = "At least one mate number is not a positive integer number, probably prefixed by an 'I'/'i'"
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the metadata file contains exactly one run and it is not imported from midterm or use absolute paths, " +
-                "the path of the metadata file should contain the run name.",]
+        return [
+                ERROR_NOT_PROVIDED,
+        ]
     }
 
     @Override
-    void validate(MetadataValidationContext context) {
-        List<Cell> runCells = context.spreadsheet.dataRows.collect { it.getCell(context.spreadsheet.getColumn(MetaDataColumn.RUN_ID.name())) }
-        List<String> runNames = runCells.text.unique()
+    String getColumnTitle(MetadataValidationContext context) {
+        return MetaDataColumn.MATE.name()
+    }
 
-        if (runNames.size() == 1 &&
-                !(context.directoryStructure instanceof DataFilesInGpcfSpecificStructure) &&
-                !(context.directoryStructure instanceof DataFilesWithAbsolutePath) &&
-                !context.metadataFile.toString().contains(runNames.first()) ) {
-            context.addProblem(runCells as Set, Level.WARNING,
-                    "The path of the metadata file should contain the run name.")
+    @Override
+    void checkColumn(MetadataValidationContext context) {
+    }
+
+    @Override
+    void validateValue(MetadataValidationContext context, String mateNumber, Set<Cell> cells) {
+        if (!mateNumber) {
+            context.addProblem(cells, Level.ERROR, ERROR_NOT_PROVIDED)
+        } else if (!(mateNumber ==~ MATE_NUMBER_EXPRESSION)) {
+            context.addProblem(cells, Level.ERROR, "The mate number ('${mateNumber}') ${ALLOWED_VALUE_POSTFIX}", ERROR_INVALID_VALUE_SUMMARY)
         }
     }
 }

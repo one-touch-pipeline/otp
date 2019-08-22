@@ -23,34 +23,41 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesWithAbsolutePath
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BARCODE
 
 @Component
-class RunNameInMetadataPathValidator implements MetadataValidator {
+class BarcodeValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
+
+    final static String MUST_REGEX = /^[0-9a-zA-Z\-\+\.]*$/
+    final static String SHOULD_REGEX = /^[ACGT]{6,8}|[ACGT]{6,8}\-[ACGT]{6,8}|[0-9]{3}$/
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the metadata file contains exactly one run and it is not imported from midterm or use absolute paths, " +
-                "the path of the metadata file should contain the run name.",]
+        return ["Barcodes should match the regular expression '${SHOULD_REGEX}'."]
     }
 
     @Override
-    void validate(MetadataValidationContext context) {
-        List<Cell> runCells = context.spreadsheet.dataRows.collect { it.getCell(context.spreadsheet.getColumn(MetaDataColumn.RUN_ID.name())) }
-        List<String> runNames = runCells.text.unique()
+    String getColumnTitle(MetadataValidationContext context) {
+        return BARCODE.name()
+    }
 
-        if (runNames.size() == 1 &&
-                !(context.directoryStructure instanceof DataFilesInGpcfSpecificStructure) &&
-                !(context.directoryStructure instanceof DataFilesWithAbsolutePath) &&
-                !context.metadataFile.toString().contains(runNames.first()) ) {
-            context.addProblem(runCells as Set, Level.WARNING,
-                    "The path of the metadata file should contain the run name.")
+    @Override
+    void checkColumn(MetadataValidationContext context) {
+        addWarningForMissingOptionalColumn(context, BARCODE.name(), "OTP will try to parse the barcodes from the filenames.")
+    }
+
+    @Override
+    void validateValue(MetadataValidationContext context, String barcode, Set<Cell> cells) {
+        if (!(barcode ==~ MUST_REGEX)) {
+            context.addProblem(cells, Level.ERROR, "'${barcode}' is not a well-formed barcode. It must match the regular expression '${MUST_REGEX}'. It should match the regular expression '${SHOULD_REGEX}'.","At least one barcode is not a well-formed barcode.")
+        } else if (!(barcode ==~ SHOULD_REGEX) && !barcode.empty) {
+            context.addProblem(cells, Level.WARNING, "The barcode '${barcode}' has an unusual format. It should match the regular expression '${SHOULD_REGEX}'.", "At least one barcode has an unusual format.")
         }
     }
 }

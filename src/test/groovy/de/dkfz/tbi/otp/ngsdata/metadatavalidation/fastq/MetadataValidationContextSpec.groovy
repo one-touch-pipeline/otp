@@ -31,7 +31,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators.SampleLibraryValidator
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators.SampleLibraryValidator
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 import java.nio.file.Path

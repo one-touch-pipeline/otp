@@ -23,34 +23,37 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesWithAbsolutePath
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.LANE_NO
 
 @Component
-class RunNameInMetadataPathValidator implements MetadataValidator {
+class LaneNumberValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the metadata file contains exactly one run and it is not imported from midterm or use absolute paths, " +
-                "the path of the metadata file should contain the run name.",]
+        return [
+                'The lane number should be a single digit in the range of 1 to 8.',
+        ]
     }
 
     @Override
-    void validate(MetadataValidationContext context) {
-        List<Cell> runCells = context.spreadsheet.dataRows.collect { it.getCell(context.spreadsheet.getColumn(MetaDataColumn.RUN_ID.name())) }
-        List<String> runNames = runCells.text.unique()
+    String getColumnTitle(MetadataValidationContext context) {
+        return LANE_NO.name()
+    }
 
-        if (runNames.size() == 1 &&
-                !(context.directoryStructure instanceof DataFilesInGpcfSpecificStructure) &&
-                !(context.directoryStructure instanceof DataFilesWithAbsolutePath) &&
-                !context.metadataFile.toString().contains(runNames.first()) ) {
-            context.addProblem(runCells as Set, Level.WARNING,
-                    "The path of the metadata file should contain the run name.")
+    @Override
+    void validateValue(MetadataValidationContext context, String laneNumber, Set<Cell> cells) {
+        if (laneNumber.empty) {
+            context.addProblem(cells, Level.ERROR, "The lane number must not be empty.")
+        } else if (!(laneNumber ==~ /^[0-9a-zA-Z]+$/)) {
+            context.addProblem(cells, Level.ERROR, "'${laneNumber}' is not a well-formed lane number. It must contain only digits (0 to 9) and/or letters (a to z, A to Z). It should be a single digit in the range from 1 to 8.", "At least one lane number is not well-formed.")
+        } else if (!(laneNumber ==~ /^[1-8]$/)) {
+            context.addProblem(cells, Level.WARNING, "'${laneNumber}' is not a well-formed lane number. It should be a single digit in the range from 1 to 8.", "At least one lane number is not well-formed.")
         }
     }
 }

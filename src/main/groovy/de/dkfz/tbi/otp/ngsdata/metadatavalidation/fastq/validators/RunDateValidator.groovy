@@ -21,36 +21,44 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
+import org.joda.time.IllegalFieldValueException
+import org.joda.time.LocalDate
+import org.joda.time.format.ISODateTimeFormat
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesWithAbsolutePath
 import de.dkfz.tbi.util.spreadsheet.Cell
 import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.SingleValueValidator
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.RUN_DATE
 
 @Component
-class RunNameInMetadataPathValidator implements MetadataValidator {
+class RunDateValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the metadata file contains exactly one run and it is not imported from midterm or use absolute paths, " +
-                "the path of the metadata file should contain the run name.",]
+        return [
+                "The run date has the yyyy-MM-dd format.",
+                "The run date must not be from the future.",
+        ]
     }
 
     @Override
-    void validate(MetadataValidationContext context) {
-        List<Cell> runCells = context.spreadsheet.dataRows.collect { it.getCell(context.spreadsheet.getColumn(MetaDataColumn.RUN_ID.name())) }
-        List<String> runNames = runCells.text.unique()
+    String getColumnTitle(MetadataValidationContext context) {
+        return RUN_DATE.name()
+    }
 
-        if (runNames.size() == 1 &&
-                !(context.directoryStructure instanceof DataFilesInGpcfSpecificStructure) &&
-                !(context.directoryStructure instanceof DataFilesWithAbsolutePath) &&
-                !context.metadataFile.toString().contains(runNames.first()) ) {
-            context.addProblem(runCells as Set, Level.WARNING,
-                    "The path of the metadata file should contain the run name.")
+    @Override
+    void validateValue(MetadataValidationContext context, String runDate, Set<Cell> cells) {
+        try {
+            LocalDate date = ISODateTimeFormat.date().parseLocalDate(runDate)
+            if (date > LocalDate.now().plusDays(1)) {
+                context.addProblem(cells, Level.ERROR, "The run date '${runDate}' must not be from the future.", "No run date may be from the future.")
+            }
+        } catch (IllegalFieldValueException | IllegalArgumentException e) {
+            context.addProblem(cells, Level.ERROR, "The format of the run date '${runDate}' is invalid, it must match yyyy-MM-dd.", "The format of at least one run date is invalid, it must match yyyy-MM-dd.")
         }
     }
 }

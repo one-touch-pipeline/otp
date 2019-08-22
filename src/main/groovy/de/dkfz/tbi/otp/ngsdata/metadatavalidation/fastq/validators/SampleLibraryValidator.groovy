@@ -23,34 +23,43 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.MetaDataColumn
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesInGpcfSpecificStructure
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.directorystructures.DataFilesWithAbsolutePath
-import de.dkfz.tbi.util.spreadsheet.Cell
-import de.dkfz.tbi.util.spreadsheet.validation.Level
+import de.dkfz.tbi.util.spreadsheet.validation.*
+
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.CUSTOMER_LIBRARY
+import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
 
 @Component
-class RunNameInMetadataPathValidator implements MetadataValidator {
+class SampleLibraryValidator extends ValueTuplesValidator<MetadataValidationContext> implements MetadataValidator {
+
+    final String LIB = "lib"
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the metadata file contains exactly one run and it is not imported from midterm or use absolute paths, " +
-                "the path of the metadata file should contain the run name.",]
+        return ["If '${LIB}' is contained in the ${SAMPLE_ID} then the library should be given."]
     }
 
     @Override
-    void validate(MetadataValidationContext context) {
-        List<Cell> runCells = context.spreadsheet.dataRows.collect { it.getCell(context.spreadsheet.getColumn(MetaDataColumn.RUN_ID.name())) }
-        List<String> runNames = runCells.text.unique()
+    List<String> getRequiredColumnTitles(MetadataValidationContext context) {
+        return [SAMPLE_ID]*.name()
+    }
 
-        if (runNames.size() == 1 &&
-                !(context.directoryStructure instanceof DataFilesInGpcfSpecificStructure) &&
-                !(context.directoryStructure instanceof DataFilesWithAbsolutePath) &&
-                !context.metadataFile.toString().contains(runNames.first()) ) {
-            context.addProblem(runCells as Set, Level.WARNING,
-                    "The path of the metadata file should contain the run name.")
+    @Override
+    List<String> getOptionalColumnTitles(MetadataValidationContext context) {
+        return [CUSTOMER_LIBRARY]*.name()
+    }
+
+    @Override
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
+
+    @Override
+    void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
+        valueTuples.each { ValueTuple valueTuple ->
+            String sample = valueTuple.getValue(SAMPLE_ID.name())
+            if (sample.toLowerCase(Locale.ENGLISH).contains(LIB) && !valueTuple.getValue(CUSTOMER_LIBRARY.name())) {
+                context.addProblem(valueTuple.cells, Level.WARNING, "For sample '${sample}' which contains 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.", "For samples which contain 'lib', there should be a value in the ${CUSTOMER_LIBRARY} column.")
+            }
         }
     }
 }
