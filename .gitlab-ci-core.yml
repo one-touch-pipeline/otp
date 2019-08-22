@@ -125,6 +125,17 @@ war:
     - ./gradlew war
 
 
+create doc:
+  extends: .abstract_base_template
+  script:
+    - set -e
+    - ./gradlew generateHtml
+  artifacts:
+    <<: *artifacts_template
+    paths:
+      - build/docs
+
+
 test migration:
   extends: .abstract_base_template
   services:
@@ -171,3 +182,23 @@ generate_changelog:
     paths:
       - $ARTIFACTS_BASE_DIRECTORY
     when: on_success
+
+
+# ------------------------------------------------------
+# jobs stage public doc
+# ------------------------------------------------------
+
+# This must only run on the master branch to deploy the only pages site
+# https://docs.gitlab.com/ee/user/project/pages/introduction.html#gitlab-ciyml-for-a-repository-where-theres-also-actual-code
+pages:
+  extends: .abstract_base_template
+  stage: public doc
+  dependencies:
+    - create doc
+  script:
+    - mv build/docs public
+  artifacts:
+    paths:
+      - public
+  only:
+    - master

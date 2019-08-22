@@ -38,6 +38,7 @@ buildscript {
 
 plugins {
     id "com.gorylenko.gradle-git-properties" version "2.0.0"
+    id "com.github.monosoul.markdown.page.generator" version "2.1.0.1"
 }
 
 group "de.dkfz.tbi"
@@ -278,4 +279,42 @@ processResources {
 
 war {
     archiveName = 'otp.war'
+}
+
+
+/* Documentation Tasks */
+
+task ensureDocsBuildDirs {
+    doLast {
+        mkdir "$buildDir/docs/users"
+        mkdir "$buildDir/docs/images"
+    }
+}
+
+task copyCss(type: Copy) {
+    from "docs/css"
+    into "$buildDir/docs/css"
+}
+
+task copyHtml(type: Copy) {
+    from "docs/html/"
+    into "$buildDir/docs"
+}
+
+generateHtml {
+    dependsOn(ensureDocsBuildDirs)
+    dependsOn(copyHtml)
+    dependsOn(copyCss)
+
+    pegdownExtensions = "TABLES, TOC"
+    ext.encoding = "UTF-8"
+    recursiveInput = true
+    inputEncoding = ext.encoding
+    outputEncoding = ext.encoding
+    inputDirectory = new File("docs/users")
+    outputDirectory = new File(buildDir, "docs/users")
+
+    transformRelativeMarkdownLinks = true
+    headerHtmlFile = new File("docs/support/header.html")
+    footerHtmlFile = new File("docs/support/footer.html")
 }

@@ -25,3 +25,4 @@ include:
 stages:
   - build
   - test
+  - public doc
