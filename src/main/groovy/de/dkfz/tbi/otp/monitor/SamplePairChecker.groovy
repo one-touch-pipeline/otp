@@ -56,15 +56,15 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
     static final String BLOCKED_HAS_REJECTED_QC_STATE = "bam file has rejected qc state"
 
     @Override
-    List<SamplePair> handle(List<AbstractMergedBamFile> bamFiles, MonitorOutputCollector output) {
-        if (!bamFiles) {
+    List<SamplePair> handle(List<AbstractMergedBamFile> bamFilesInput, MonitorOutputCollector output) {
+        if (!bamFilesInput) {
             return []
         }
         output.showWorkflow("Sample pairs", false)
 
         List<SeqType> supportedSeqTypes = SeqTypeService.allAnalysableSeqTypes
 
-        Map bamFileOfSupportedSeqType = bamFiles.groupBy {
+        Map bamFileOfSupportedSeqType = bamFilesInput.groupBy {
             supportedSeqTypes.contains(it.seqType)
         }
 
@@ -74,7 +74,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
             })
         }
 
-        bamFiles = bamFileOfSupportedSeqType[true] ?: []
+        List<AbstractMergedBamFile> bamFiles = bamFileOfSupportedSeqType[true] ?: []
 
         List<AbstractMergedBamFile> unknownDiseaseStatus = bamFilesWithoutCategory(bamFiles)
         output.showUniqueList(HEADER_UNKNOWN_DISEASE_STATUS, unknownDiseaseStatus, {

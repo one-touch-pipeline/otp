@@ -58,7 +58,7 @@ class SoftwareToolService {
     SoftwareTool updateSoftwareTool(Long id, String version) {
         SoftwareTool softwareTool = getSoftwareTool(id)
         softwareTool.programVersion = version
-        return assertSave(softwareTool)
+        return softwareTool.save(flush: true)
     }
 
 
@@ -75,8 +75,8 @@ class SoftwareToolService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SoftwareToolIdentifier updateSoftwareToolIdentifier(Long id, String alias) {
         SoftwareToolIdentifier softwareToolIdentifier = getSoftwareToolIdentifier(id)
-        softwareToolIdentifier.name = alias;
-        return assertSave(softwareToolIdentifier)
+        softwareToolIdentifier.name = alias
+        return softwareToolIdentifier.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -85,14 +85,6 @@ class SoftwareToolService {
                 name: alias,
                 softwareTool: softwareTool
                 )
-        return assertSave(softwareToolIdentifier)
-    }
-
-    private def assertSave(def object) {
-        object = object.save(flush: true)
-        if (!object) {
-            throw new SavingException(object.toString())
-        }
-        return object
+        return softwareToolIdentifier.save(flush: true)
     }
 }

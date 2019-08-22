@@ -46,11 +46,11 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
     static final String PROBLEMS_UNEXPECTED_SEQ_TRACKS = "bam file contains unexpected seqtracks"
 
     @Override
-    List handle(List<SamplePair> samplePairs, MonitorOutputCollector output) {
-        if (!samplePairs) {
+    List handle(List<SamplePair> samplePairsInput, MonitorOutputCollector output) {
+        if (!samplePairsInput) {
             return []
         }
-        samplePairs = samplePairs.unique()
+        List<SamplePair> samplePairs = samplePairsInput
 
         output.showWorkflow(getWorkflowName())
 
@@ -66,12 +66,12 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
             })
         }
 
-        samplePairs = samplePairSupportedSeqType[true] ?: []
+        List<SamplePair> samplePairsWithSupportedSeqTypes = samplePairSupportedSeqType[true] ?: []
 
-        List<SamplePair> noConfig = samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(samplePairs)
+        List<SamplePair> noConfig = samplePairWithoutCorrespondingConfigForPipelineAndSeqTypeAndProject(samplePairsWithSupportedSeqTypes)
         output.showUniqueList(HEADER_NO_CONFIG, noConfig, { SamplePair samplePair -> "${samplePair.project} ${samplePair.seqType.name} ${samplePair.seqType.libraryLayout}" })
 
-        List<SamplePair> samplePairsWithConfig = samplePairs - noConfig
+        List<SamplePair> samplePairsWithConfig = samplePairsWithSupportedSeqTypes - noConfig
 
         Map processingStateMap = samplePairsWithConfig.groupBy {
             it[getProcessingStateMember()]

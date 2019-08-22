@@ -27,9 +27,6 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 @Transactional
 abstract class DicomAuditUtils {
     static String getRealUserName(String username) {
-        if (SpringSecurityUtils.isSwitched()) {
-            username = "${SpringSecurityUtils.getSwitchedUserOriginalUsername()} as ${username}"
-        }
-        return username
+        return SpringSecurityUtils.isSwitched() ? username : "${SpringSecurityUtils.getSwitchedUserOriginalUsername()} as ${username}"
     }
 }

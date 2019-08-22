@@ -101,6 +101,7 @@ class DataSwapService {
     /**
      * @return The {@link SeqTrack}, possibly with a new type.
      */
+    @SuppressWarnings("ParameterReassignment")
     SeqTrack changeSeqType(SeqTrack seqTrack, SeqType newSeqType) {
         assert seqTrack.class == seqTrack.seqType.seqTrackClass
         if (seqTrack.seqType.id != newSeqType.id) {
@@ -1660,14 +1661,17 @@ ln -s '${newDirectFileName}' \\
     private void completeOmittedNewValuesAndLog(Map<String, String> swapMap, String label, StringBuilder log) {
         log << "\n  swapping ${label}:"
 
-        swapMap.each { old, neww ->
+        swapMap.each { String old, String neww ->
+            String newValue
             // was the value omitted?
             if ((old.size() != 0) && !neww) {
                 swapMap.put(old, old)
-                neww = old
+                newValue = old
+            } else {
+                newValue = neww
             }
 
-            log << "\n    - ${old} --> ${neww}"
+            log << "\n    - ${old} --> ${newValue}"
         }
     }
 }

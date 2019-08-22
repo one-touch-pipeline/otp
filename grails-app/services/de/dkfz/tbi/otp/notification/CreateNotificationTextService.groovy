@@ -107,10 +107,10 @@ class CreateNotificationTextService {
     }
 
 
-    String installationNotification(ProcessingStatus status) {
-        assert status
+    String installationNotification(ProcessingStatus statusInput) {
+        assert statusInput
 
-        status = new ProcessingStatus(status.seqTrackProcessingStatuses.findAll {
+        ProcessingStatus status = new ProcessingStatus(statusInput.seqTrackProcessingStatuses.findAll {
             it.installationProcessingStatus == ALL_DONE
         })
 
@@ -149,10 +149,10 @@ class CreateNotificationTextService {
     }
 
 
-    String alignmentNotification(ProcessingStatus status) {
-        assert status
+    String alignmentNotification(ProcessingStatus statusInput) {
+        assert statusInput
 
-        status = new ProcessingStatus(status.seqTrackProcessingStatuses.findAll {
+        ProcessingStatus status = new ProcessingStatus(statusInput.seqTrackProcessingStatuses.findAll {
             it.alignmentProcessingStatus == ALL_DONE
         })
 

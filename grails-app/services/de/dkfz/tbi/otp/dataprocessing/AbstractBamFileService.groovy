@@ -64,7 +64,7 @@ class AbstractBamFileService {
     void assignedToMergingSet(AbstractBamFile bamFile) {
         notNull(bamFile, "the input bam file for the method assignedToMergingSet is null")
         bamFile.status = State.PROCESSED
-        assertSave(bamFile)
+        bamFile.save(flush: true)
     }
 
     /**
@@ -169,13 +169,5 @@ class AbstractBamFileService {
 
     static AbstractBamFile saveBamFile(AbstractBamFile bamFile) {
         return bamFile.save(flush: true)
-    }
-
-    private def assertSave(def object) {
-        object = object.save(flush: true)
-        if (!object) {
-            throw new SavingException(object.toString())
-        }
-        return object
     }
 }

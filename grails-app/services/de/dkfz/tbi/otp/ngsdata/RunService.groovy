@@ -52,7 +52,7 @@ class RunService {
      * @return Run
      */
 
-    List<Run> listRuns(boolean sortOrder, RunSortColumn column, RunFiltering filtering, String filter) {
+    List<Run> listRuns(boolean sortOrder, RunSortColumn column, RunFiltering filtering, String filterString) {
         List seqCenters = seqCenterService.allSeqCenters()
         if (!seqCenters) {
             return []
@@ -60,8 +60,8 @@ class RunService {
         def c = Run.createCriteria()
         return c.list {
             'in'('seqCenter', seqCenters)
-            if (filter.length() >= 3) {
-                filter = "%${filter}%"
+            if (filterString.length() >= 3) {
+                String filter = "%${filterString}%"
                 or {
                     ilike("name", filter)
                     seqCenter {
@@ -110,13 +110,13 @@ class RunService {
      * @param filter Restrict on this search filter if at least three characters
      * @return Number of Runs matching the filtering
      */
-    int countRun(RunFiltering filtering, String filter) {
+    int countRun(RunFiltering filtering, String filterString) {
         if (filtering.enabled) {
             def c = Run.createCriteria()
             return c.get {
                 'in'('seqCenter', seqCenterService.allSeqCenters())
-                if (filter.length() >= 3) {
-                    filter = "%${filter}%"
+                if (filterString.length() >= 3) {
+                    String filter = "%${filterString}%"
                     or {
                         ilike("name", filter)
                         seqCenter {

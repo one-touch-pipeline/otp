@@ -1693,12 +1693,9 @@ class ClusterJobServiceIntegrationSpec extends Specification implements DomainFa
         return job
     }
 
-    private static List createClusterJobWithRun(Run run = null, Map clusterJobProps = [:]) {
+    private static List createClusterJobWithRun(Run inputRun = null, Map clusterJobProps = [:]) {
         ClusterJob job = createClusterJob(clusterJobProps)
-
-        if (!run) {
-            run = DomainFactory.createRun().save([flush: true])
-        }
+        Run run = inputRun ?: DomainFactory.createRun().save([flush: true])
 
         DomainFactory.createProcessParameter(job.processingStep.process, 'de.dkfz.tbi.otp.ngsdata.Run', run.id.toString())
 

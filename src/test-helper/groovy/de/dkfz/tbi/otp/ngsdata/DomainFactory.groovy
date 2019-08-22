@@ -1197,10 +1197,6 @@ class DomainFactory {
     }
 
     static List<ProcessingOption> createReferenceGenomeAndAnalysisProcessingOptions(String value = null) {
-        if (!value) {
-            value = createReferenceGenome().name
-        }
-
         return [
                 OptionName.PIPELINE_SOPHIA_REFERENCE_GENOME,
                 OptionName.PIPELINE_ACESEQ_REFERENCE_GENOME,
@@ -1210,7 +1206,7 @@ class DomainFactory {
                     name: it,
                     type: null,
                     project: null,
-                    value: value,
+                    value: value ?: createReferenceGenome().name,
             )
         }
     }
@@ -1464,9 +1460,8 @@ class DomainFactory {
     }
 
     static AceseqQc createAceseqQc(Map properties = [:], Map bamFile1Properties = [:], Map bamFile2Properties = [:], AceseqInstance aceseqInstance = null) {
-        aceseqInstance = aceseqInstance ?: createAceseqInstanceWithRoddyBamFiles(properties, bamFile1Properties, bamFile2Properties)
         return createDomainObject(AceseqQc, [
-                aceseqInstance  : aceseqInstance,
+                aceseqInstance  : aceseqInstance ?: createAceseqInstanceWithRoddyBamFiles(properties, bamFile1Properties, bamFile2Properties),
                 number          : 1,
                 tcc             : 1,
                 ploidyFactor    : '1.0',

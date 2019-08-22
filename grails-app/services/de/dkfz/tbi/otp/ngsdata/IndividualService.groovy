@@ -93,7 +93,7 @@ class IndividualService {
      * @param filter Filter restrictions
      * @return List of Individuals matching the criterias and ACL restricted
      * */
-    List<Individual> listIndividuals(boolean sortOrder, IndividualSortColumn column, IndividualFiltering filtering, String filter) {
+    List<Individual> listIndividuals(boolean sortOrder, IndividualSortColumn column, IndividualFiltering filtering, String filterString) {
         List projects = projectService.getAllProjects()
         if (!projects) {
             return []
@@ -102,7 +102,7 @@ class IndividualService {
         return c.list {
             'in'('project', projects)
             if (filter.length() >= 3) {
-                filter = "%${filter}%"
+                String filter = "%${filterString}%"
                 or {
                     ilike("pid", filter)
                     ilike("mockFullName", filter)
@@ -157,13 +157,13 @@ class IndividualService {
      * @param filter Restrict on this search filter if at least three characters
      * @return Number of Individuals matching the filtering
      */
-    int countIndividual(IndividualFiltering filtering, String filter) {
-        if (filtering.enabled || filter.length() >= 3) {
+    int countIndividual(IndividualFiltering filtering, String filterString) {
+        if (filtering.enabled || filterString.length() >= 3) {
             def c = Individual.createCriteria()
             return c.get {
                 'in'('project', projectService.getAllProjects())
-                if (filter.length() >= 3) {
-                    filter = "%${filter}%"
+                if (filterString.length() >= 3) {
+                    String filter = "%${filterString}%"
                     or {
                         ilike("pid", filter)
                         ilike("mockFullName", filter)
@@ -209,7 +209,7 @@ class IndividualService {
         } else {
             // shortcut for unfiltered results
             List<Project> projects = projectService.getAllProjects()
-            return projects ? Individual.countByProjectInList(projects) : []
+            return projects ? Individual.countByProjectInList(projects) : 0
         }
     }
 

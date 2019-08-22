@@ -139,15 +139,15 @@ class FastqcDataFilesService {
      */
     InputStream getInputStreamFromZipFile(DataFile dataFile, String withinZipPath) {
         String zipPath = fastqcOutputFile(dataFile)
-        withinZipPath = "${fastqcFileNameWithoutZipSuffix(dataFile)}/${withinZipPath}"
+        String zipEntryPath = "${fastqcFileNameWithoutZipSuffix(dataFile)}/${withinZipPath}"
         File input = new File(zipPath)
         if (!input.canRead()) {
             throw new FileNotReadableException(input.path)
         }
         ZipFile zipFile = new ZipFile(input)
-        ZipEntry zipEntry = zipFile.getEntry(withinZipPath)
+        ZipEntry zipEntry = zipFile.getEntry(zipEntryPath)
         if (!zipEntry) {
-            throw new FileNotReadableException(withinZipPath)
+            throw new FileNotReadableException(zipEntryPath)
         }
         return zipFile.getInputStream(zipEntry)
     }

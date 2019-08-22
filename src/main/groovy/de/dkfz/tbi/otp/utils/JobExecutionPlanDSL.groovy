@@ -94,6 +94,7 @@ class JobExecutionPlanDSL {
         }
     }
 
+    @SuppressWarnings('ParameterReassignment')
     private static def startJobClosure = { JobExecutionPlan jep, Boolean startJobDefined, String startName, String bean, closure = null ->
         assert !startJobDefined, "Only one Start Job Definition can be defined per Job Execution Plan"
         StartJobDefinition startJobDefinition = new StartJobDefinition(name: startName, bean: bean, plan: jep)

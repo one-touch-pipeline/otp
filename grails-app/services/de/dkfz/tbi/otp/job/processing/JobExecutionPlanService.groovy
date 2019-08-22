@@ -64,16 +64,7 @@ class JobExecutionPlanService {
         if (plan.obsoleted) {
             return false
         }
-        boolean before = plan.enabled
-        plan.enabled = true
-        plan = plan.save(flush: true)
-        if (!plan) {
-            log.error("JobExecutionPlan ${plan.id} could not be enabled")
-            return before
-        }
-        JobExecutionPlanChangedEvent event = new JobExecutionPlanChangedEvent(this, plan.id)
-        grailsApplication.mainContext.publishEvent(event)
-        return plan.enabled
+        return changePlanStatus(plan, true)
     }
 
     /**
@@ -83,11 +74,15 @@ class JobExecutionPlanService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     boolean disablePlan(JobExecutionPlan plan) {
+        return changePlanStatus(plan, false)
+    }
+
+    private boolean changePlanStatus(JobExecutionPlan plan, boolean enable) {
         boolean before = plan.enabled
-        plan.enabled = false
-        plan = plan.save(flush: true)
+        plan.enabled = enable
+        plan.save(flush: true)
         if (!plan) {
-            log.error("JobExecutionPlan ${plan.id} could not be disabled")
+            log.error("JobExecutionPlan ${plan.id} could not be ${enable ? 'enabled': 'disabled'}")
             return before
         }
         JobExecutionPlanChangedEvent event = new JobExecutionPlanChangedEvent(this, plan.id)

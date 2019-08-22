@@ -367,7 +367,7 @@ All the Rules that will be used for OTP
         priority = HIGH
     }
     ParameterReassignment {
-        priority = HIGH
+        priority = CRITICAL
     }
     //PublicMethodsBeforeNonPublicMethods //does not fit with OTP-Convention of grouping related methods by topic
     //StaticFieldsBeforeInstanceFields //does not fit with OTP-Convention of Services before class fields including statics
