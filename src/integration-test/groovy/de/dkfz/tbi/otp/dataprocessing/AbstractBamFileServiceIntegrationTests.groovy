@@ -23,7 +23,8 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.junit.*
+import org.junit.After
+import org.junit.Test
 
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile.BamType

@@ -23,10 +23,8 @@ package de.dkfz.tbi.otp.dataprocessing.runYapsa
 
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
-import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenome
-import de.dkfz.tbi.otp.utils.Entity
 
 /**
  * An execution of the RunYAPSA workflow.

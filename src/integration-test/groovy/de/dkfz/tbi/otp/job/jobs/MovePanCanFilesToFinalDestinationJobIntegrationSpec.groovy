@@ -33,8 +33,6 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 
-import java.time.Duration
-
 class MovePanCanFilesToFinalDestinationJobIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation {
 
     static final int READ_COUNTS = 1

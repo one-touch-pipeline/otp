@@ -23,9 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import spock.lang.Shared
-import spock.lang.Specification
-import spock.lang.Unroll
+import spock.lang.*
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.DomainFactory

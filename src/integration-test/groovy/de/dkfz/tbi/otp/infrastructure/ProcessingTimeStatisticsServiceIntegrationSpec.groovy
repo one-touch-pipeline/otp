@@ -32,7 +32,6 @@ import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.ProcessingTimeStatisticsService
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Rollback
 @Integration

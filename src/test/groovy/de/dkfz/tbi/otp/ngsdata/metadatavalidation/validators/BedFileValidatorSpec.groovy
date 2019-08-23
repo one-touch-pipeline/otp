@@ -21,19 +21,15 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
-import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
-import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
-import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
-import de.dkfz.tbi.otp.parser.SampleIdentifierParser
+import de.dkfz.tbi.otp.parser.*
 import de.dkfz.tbi.util.spreadsheet.validation.Level
 import de.dkfz.tbi.util.spreadsheet.validation.Problem
 

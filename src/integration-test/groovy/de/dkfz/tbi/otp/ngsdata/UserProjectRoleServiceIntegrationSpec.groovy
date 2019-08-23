@@ -27,7 +27,8 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.security.authentication.AuthenticationTrustResolver
-import spock.lang.*
+import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption

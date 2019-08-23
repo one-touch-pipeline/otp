@@ -21,9 +21,10 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
-import de.dkfz.tbi.otp.dataprocessing.*
+
+import de.dkfz.tbi.otp.dataprocessing.AbstractQualityAssessment
+import de.dkfz.tbi.otp.dataprocessing.QualityAssessmentWithMergedPass
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
-import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 import de.dkfz.tbi.otp.qcTrafficLight.QcTrafficLightValue
 

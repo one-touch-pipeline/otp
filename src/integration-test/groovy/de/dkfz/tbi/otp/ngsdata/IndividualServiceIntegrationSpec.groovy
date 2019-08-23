@@ -30,12 +30,8 @@ import org.springframework.security.access.AccessDeniedException
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.security.UserAndRoles
-
-import static org.junit.Assert.assertNull
-import static org.junit.Assert.assertSame
 
 @Rollback
 @Integration

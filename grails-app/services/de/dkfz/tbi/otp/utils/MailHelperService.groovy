@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.utils
 
 import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
-import grails.plugins.mail.MailMessageBuilder
 import grails.plugins.mail.MailService
 import org.springframework.beans.factory.annotation.Autowired
 

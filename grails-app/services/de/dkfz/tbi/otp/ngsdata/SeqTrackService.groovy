@@ -33,14 +33,13 @@ import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.LogMessage
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.job.processing.ProcessingException
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import javax.sql.DataSource
 import java.nio.file.Paths
 import java.text.MessageFormat
 
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 import static org.springframework.util.Assert.notNull
 
 @Transactional
@@ -389,7 +388,7 @@ LIMIT 1
     }
 
     static void logToSeqTrack(SeqTrack seqTrack, String message, boolean saveInSeqTrack = true) {
-        threadLog?.info(MessageFormat.format(message, " " + seqTrack))
+        LogThreadLocal.threadLog?.info(MessageFormat.format(message, " " + seqTrack))
         if (saveInSeqTrack) {
             seqTrack.save(flush: true)
             SeqTrack.withTransaction {

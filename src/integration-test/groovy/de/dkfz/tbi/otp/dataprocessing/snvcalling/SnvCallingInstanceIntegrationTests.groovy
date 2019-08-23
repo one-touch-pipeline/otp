@@ -23,10 +23,8 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import org.junit.Before
 import org.junit.Test
 
-import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 @Rollback

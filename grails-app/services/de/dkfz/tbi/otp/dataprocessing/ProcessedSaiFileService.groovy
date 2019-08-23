@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import grails.gorm.transactions.Transactional
 
-import de.dkfz.tbi.otp.ngsdata.SavingException
 import de.dkfz.tbi.otp.ngsdata.SeqTrack
 
 @Transactional

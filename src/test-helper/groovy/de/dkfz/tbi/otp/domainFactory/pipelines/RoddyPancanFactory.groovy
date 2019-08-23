@@ -21,14 +21,9 @@
  */
 package de.dkfz.tbi.otp.domainFactory.pipelines
 
-import de.dkfz.tbi.otp.dataprocessing.RoddyBamFile
-import de.dkfz.tbi.otp.dataprocessing.RoddyMergedBamQa
-import de.dkfz.tbi.otp.dataprocessing.RoddyQualityAssessment
-import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.LibraryLayout
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.ngsdata.*
 
 trait RoddyPancanFactory implements IsAlignment, IsRoddy {
 

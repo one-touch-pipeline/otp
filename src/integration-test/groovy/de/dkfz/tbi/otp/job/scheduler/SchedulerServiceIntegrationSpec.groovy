@@ -34,11 +34,13 @@ import de.dkfz.tbi.otp.job.jobs.*
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.RestartCheckerService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.SessionUtils
 
-import static org.junit.Assert.*
+import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertTrue
 
 @Rollback
 @Integration

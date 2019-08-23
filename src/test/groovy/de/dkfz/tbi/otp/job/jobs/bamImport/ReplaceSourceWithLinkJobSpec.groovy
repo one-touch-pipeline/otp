@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.job.jobs.bamImport
 
-
 import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -41,7 +40,6 @@ import de.dkfz.tbi.otp.utils.*
 
 import java.nio.file.FileSystems
 import java.nio.file.Files
-import java.nio.file.Path
 
 class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 

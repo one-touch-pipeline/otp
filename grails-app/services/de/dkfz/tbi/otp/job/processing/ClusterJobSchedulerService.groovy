@@ -49,7 +49,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.CLUSTER_SUBMISSIONS_FAST_TRACK_QUEUE
-import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.getThreadLog
 
 /**
  * This class contains methods to communicate with the cluster job scheduler.
@@ -176,7 +175,7 @@ class ClusterJobSchedulerService {
         )
         retrieveAndSaveJobInformationAfterJobStarted(clusterJob)
 
-        threadLog?.info("Log file: ${clusterJob.jobLog}")
+        LogThreadLocal.threadLog?.info("Log file: ${clusterJob.jobLog}")
 
         return job.getJobID().shortID
     }
@@ -239,12 +238,12 @@ class ClusterJobSchedulerService {
                 throw new OtpException("Jobstate is ${JobState.UNKNOWN}")
             }
         } catch (Throwable e) {
-            threadLog?.warn("Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId}, try again", e)
+            LogThreadLocal.threadLog?.warn("Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId}, try again", e)
             Thread.sleep(WAITING_TIME_FOR_SECOND_TRY_IN_MILLISECONDS)
             try {
                 jobInfo = jobManager.queryExtendedJobStateById([beJobID]).get(beJobID)
             } catch (Throwable e2) {
-                threadLog?.warn("Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId} the second time", e2)
+                LogThreadLocal.threadLog?.warn("Failed to fill in runtime statistics after start for ${clusterJob.clusterJobId} the second time", e2)
             }
         }
         if (jobInfo) {

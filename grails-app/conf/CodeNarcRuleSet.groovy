@@ -50,6 +50,7 @@ All the Rules that will be used for OTP
     rule("file:grails-app/codenarcRules/AnnotationsForStartJobsRule.groovy")
     rule("file:grails-app/codenarcRules/AnnotationsForJobsRule.groovy")
     rule("file:grails-app/codenarcRules/ExplicitFlushForSaveRule.groovy")
+    rule("file:grails-app/codenarcRules/UnusedImportWithoutAutowiredRule.groovy")
 
     // rulesets/basic.xml
     AssertWithinFinallyBlock {
@@ -819,9 +820,7 @@ All the Rules that will be used for OTP
     UnnecessaryGroovyImport {
         priority = MIDDLE
     }
-    /*UnusedImport {
-        priority = CRITICAL //TODO
-    }*/
+    //UnusedImport //replaced by UnusedImportWithoutAutowiredRule
 
     // rulesets/jdbc.xml
     DirectConnectionManagement {

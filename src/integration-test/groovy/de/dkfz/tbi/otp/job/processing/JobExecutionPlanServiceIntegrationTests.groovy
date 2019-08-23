@@ -25,7 +25,8 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import grails.util.Holders
-import org.junit.*
+import org.junit.After
+import org.junit.Test
 import org.springframework.security.access.AccessDeniedException
 
 import de.dkfz.tbi.TestCase

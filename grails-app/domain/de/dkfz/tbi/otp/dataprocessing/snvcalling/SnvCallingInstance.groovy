@@ -23,9 +23,6 @@ package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
 import org.hibernate.Hibernate
 
-import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
-import de.dkfz.tbi.otp.utils.Entity
-
 /**
  * @deprecated: succeeded by {@link RoddySnvCallingInstance}
  */

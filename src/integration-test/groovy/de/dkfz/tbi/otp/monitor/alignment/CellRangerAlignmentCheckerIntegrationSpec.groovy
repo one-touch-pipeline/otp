@@ -26,9 +26,7 @@ import grails.transaction.Rollback
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 
 @Rollback
 class CellRangerAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerIntegrationSpec implements CellRangerFactory {

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi
 
-import grails.validation.Validateable
 import org.junit.Assert
 import org.springframework.validation.Errors
 import org.springframework.validation.FieldError

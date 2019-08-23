@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import org.hibernate.Hibernate
 
-import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 
 abstract class RoddyQualityAssessment extends AbstractQualityAssessment implements QualityAssessmentWithMergedPass {
