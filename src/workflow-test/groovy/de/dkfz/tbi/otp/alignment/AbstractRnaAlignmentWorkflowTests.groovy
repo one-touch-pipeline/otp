@@ -26,6 +26,7 @@ import grails.plugin.springsecurity.SpringSecurityUtils
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.SessionUtils
 
@@ -35,9 +36,9 @@ import java.time.Duration
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests {
+abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentWorkflowTests implements DomainFactoryCore {
 
-    void "testAlignLanesOnly_NoBaseBamExist_OneLane_allFine"() { //TODO seems to be bugged for Single
+    void "testAlignLanesOnly_NoBaseBamExist_OneLane_allFine"() {
         given:
         SessionUtils.withNewSession {
             createProjectConfigRna(exactlyOneElement(MergingWorkPackage.findAll()), [:])
@@ -161,53 +162,53 @@ abstract class AbstractRnaAlignmentWorkflowTests extends AbstractRoddyAlignmentW
                 gcFileName: "gencode.v19.annotation_plain.transcripts.autosomal_transcriptTypeProteinCoding_nonPseudo.1KGRef.gc",
         )
 
-        ToolName toolNameGatk = DomainFactory.createToolName(
+        ToolName toolNameGatk = createToolName(
                 name: "GENOME_GATK_INDEX",
                 path: "gatk",
                 type: ToolName.Type.RNA,
         )
-        ToolName toolNameStar200 = DomainFactory.createToolName(
+        ToolName toolNameStar200 = createToolName(
                 name: "GENOME_STAR_INDEX_200",
                 path: "star_200",
                 type: ToolName.Type.RNA,
         )
-        ToolName toolNameKallisto = DomainFactory.createToolName(
+        ToolName toolNameKallisto = createToolName(
                 name: ProjectService.GENOME_KALLISTO_INDEX,
                 path: "kallisto",
                 type: ToolName.Type.RNA,
         )
-        ToolName toolNameArribaFusions = DomainFactory.createToolName(
+        ToolName toolNameArribaFusions = createToolName(
                 name: ProjectService.ARRIBA_KNOWN_FUSIONS,
                 path: "arriba-fusion",
                 type: ToolName.Type.RNA,
         )
-        ToolName toolNameArribaBlacklist = DomainFactory.createToolName(
+        ToolName toolNameArribaBlacklist = createToolName(
                 name: ProjectService.ARRIBA_BLACKLIST,
                 path: "arriba-blacklist",
                 type: ToolName.Type.RNA,
         )
 
-        ReferenceGenomeIndex referenceGenomeIndexGatk = DomainFactory.createReferenceGenomeIndex(
+        ReferenceGenomeIndex referenceGenomeIndexGatk = createReferenceGenomeIndex(
                 referenceGenome: workPackage.referenceGenome,
                 toolName: toolNameGatk,
                 path: "hs37d5_PhiX.fa",
         )
-        ReferenceGenomeIndex referenceGenomeIndexStar200 = DomainFactory.createReferenceGenomeIndex(
+        ReferenceGenomeIndex referenceGenomeIndexStar200 = createReferenceGenomeIndex(
                 referenceGenome: workPackage.referenceGenome,
                 toolName: toolNameStar200,
                 path: "STAR_2.5.2b_1KGRef_PhiX_Gencode19_200bp",
         )
-        ReferenceGenomeIndex referenceGenomeIndexKallisto = DomainFactory.createReferenceGenomeIndex(
+        ReferenceGenomeIndex referenceGenomeIndexKallisto = createReferenceGenomeIndex(
                 referenceGenome: workPackage.referenceGenome,
                 toolName: toolNameKallisto,
                 path: "kallisto-0.43.0_1KGRef_Gencode19_k31.index",
         )
-        ReferenceGenomeIndex referenceGenomeIndexArribaFusions = DomainFactory.createReferenceGenomeIndex(
+        ReferenceGenomeIndex referenceGenomeIndexArribaFusions = createReferenceGenomeIndex(
                 referenceGenome: workPackage.referenceGenome,
                 toolName: toolNameArribaFusions,
                 path: "known_fusions_CancerGeneCensus_gencode19_2017-01-16.tsv.gz",
         )
-        ReferenceGenomeIndex referenceGenomeIndexArribaBlacklist = DomainFactory.createReferenceGenomeIndex(
+        ReferenceGenomeIndex referenceGenomeIndexArribaBlacklist = createReferenceGenomeIndex(
                 referenceGenome: workPackage.referenceGenome,
                 toolName: toolNameArribaBlacklist,
                 path: "blacklist_hs37d5_gencode19_2017-01-09.tsv.gz",
