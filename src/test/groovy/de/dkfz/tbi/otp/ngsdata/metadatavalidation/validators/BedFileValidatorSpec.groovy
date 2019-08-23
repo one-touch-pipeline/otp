@@ -138,7 +138,7 @@ class BedFileValidatorSpec extends Specification implements DataTest {
                                 ParsedSampleIdentifier tryParse(String sampleIdentifier) {
                                     Matcher match = sampleIdentifier =~ /${PARSE_PREFIX}_(.*)_(.*)_(.*)/
                                     if (match.matches()) {
-                                        return new DefaultParsedSampleIdentifier(match.group(1), match.group(2), match.group(3), sampleIdentifier)
+                                        return new DefaultParsedSampleIdentifier(match.group(1), match.group(2), match.group(3), sampleIdentifier, null)
                                     } else {
                                         return null
                                     }

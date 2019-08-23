@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.parser.inform
 
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
@@ -33,6 +34,8 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
 
     static final String REGEX = createRegex()
 
+    static final int PAD_LEFT = 2
+
     @Override
     DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {
         Matcher matcher = sampleIdentifier =~ REGEX
@@ -42,6 +45,7 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
                     matcher.group('pid'),
                     buildSampleTypeDbName(matcher),
                     sampleIdentifier,
+                    SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
             )
         }
         return null
@@ -49,7 +53,7 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
 
     @Override
     boolean tryParsePid(String pid) {
-        return pid =~ "^" + getPidRegex() + /$/
+        return pid =~ "^" + pidRegex + /$/
     }
 
     @Override
@@ -65,11 +69,11 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
         if (matcher.group('sampleTypeNumber') == 'X') {
             tissueType << "0X"
         } else {
-            tissueType << "${matcher.group('sampleTypeNumber')}".padLeft(2,'0')
+            tissueType << "${matcher.group('sampleTypeNumber')}".padLeft(PAD_LEFT, '0')
         }
         tissueType << matcher.group('sampleTypeOrderNumber')
         tissueType << '-'
-        tissueType << matcher.group('orderNumber').padLeft(2,'0')
+        tissueType << matcher.group('orderNumber').padLeft(PAD_LEFT, '0')
 
         return tissueType.join('')
     }
@@ -88,7 +92,7 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
 
         String sampleId = "(${sampleTypeNumber}${tissueTypeKey}${sampleTypeOrderNumber}_[DRPI]${orderNumber})"
         return "^" +
-                "(?<pid>${getPidRegex()})_" +
+                "(?<pid>${pidRegex})_" +
                 "${sampleId}" +
                 /$/
     }

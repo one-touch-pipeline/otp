@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.parser.hipo
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.ngsdata.SampleType
+
 class HipoSampleIdentifierParserSpec extends Specification {
 
     @SuppressWarnings('JUnitPublicProperty')
@@ -43,6 +45,7 @@ class HipoSampleIdentifierParserSpec extends Specification {
         identifier.sampleNumber == sampleNumber
         identifier.sampleTypeDbName == "TUMOR${sampleNumber}".toString()
         identifier.fullSampleName == fullSampleName
+        identifier.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
         sampleNumber << ['0', '00', '1', '01', '2', '02', '10', '11']

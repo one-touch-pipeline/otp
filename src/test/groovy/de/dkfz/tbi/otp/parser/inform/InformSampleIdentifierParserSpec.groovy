@@ -21,16 +21,18 @@
  */
 package de.dkfz.tbi.otp.parser.inform
 
-
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.DefaultParsedSampleIdentifier
 
 class InformSampleIdentifierParserSpec extends Specification {
 
+    @SuppressWarnings('JUnitPublicProperty')
     InformSampleIdentifierParser informSampleIdentifierParser = new InformSampleIdentifierParser()
 
+    @SuppressWarnings(['CyclomaticComplexity'])
     @Unroll('INFORM identifier #input is parsed to PID #pid, sample type name #sampleTypeDbName')
     void "test parse valid input"() {
         given:
@@ -47,6 +49,7 @@ class InformSampleIdentifierParserSpec extends Specification {
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleTypeDbName
         defaultParsedSampleIdentifier.fullSampleName == input
+        defaultParsedSampleIdentifier.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
         input              || pid        | sampleTypeDbName

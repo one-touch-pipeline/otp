@@ -331,7 +331,7 @@ Project 'C':
                 parseSampleIdentifier: { String sampleIdentifier, Project project ->
                     Matcher matcher = PATTERN.matcher(sampleIdentifier)
                     if (matcher.matches()) {
-                        return new DefaultParsedSampleIdentifier(matcher.group(1), matcher.group(2), matcher.group(3), sampleIdentifier)
+                        return new DefaultParsedSampleIdentifier(matcher.group(1), matcher.group(2), matcher.group(3), sampleIdentifier, null)
                     } else {
                         return null
                     }

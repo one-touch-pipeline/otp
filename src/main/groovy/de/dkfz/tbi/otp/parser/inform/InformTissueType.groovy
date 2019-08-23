@@ -34,6 +34,7 @@ enum InformTissueType {
     private InformTissueType(String key) {
         this.key = key
     }
+
     static InformTissueType fromKey(String key) {
         InformTissueType informTissueType = values().find { it.key == key }
         if (informTissueType == null) {
@@ -41,5 +42,4 @@ enum InformTissueType {
         }
         return informTissueType
     }
-
 }

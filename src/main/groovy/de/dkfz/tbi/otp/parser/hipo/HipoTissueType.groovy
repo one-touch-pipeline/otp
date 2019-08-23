@@ -21,31 +21,36 @@
  */
 package de.dkfz.tbi.otp.parser.hipo
 
+import de.dkfz.tbi.otp.ngsdata.SampleType
+
 /**
  * Tissue types as defined by the HIPO project.
  */
 enum HipoTissueType {
-    TUMOR                     ('T'),
-    METASTASIS                ('M'),
-    SPHERE                    ('S'),
-    XENOGRAFT                 ('X'),
-    BLOOD                     ('B'),
-    CONTROL                   ('N'),
-    CELL                      ('C'),
-    INVASIVE_MARGINS          ('I'),
-    PATIENT_DERIVED_CULTURE   ('P'),
-    CULTURE_DERIVED_XENOGRAFT ('Q'),
-    PLASMA                    ('L'),
-    BUFFY_COAT                ('F'),
-    NORMAL_SORTED_CELLS       ('Z'),
-    TUMOR_INTERVAL_DEBULKING_SURGERY ('E'),
-    EXTERNAL_CONTROL          ('K'),
-    LYMPH_NODES               ('A'),
+    TUMOR                               ('T'),
+    METASTASIS                          ('M'),
+    SPHERE                              ('S'),
+    XENOGRAFT                           ('X', SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC),
+    BLOOD                               ('B'),
+    CONTROL                             ('N'),
+    CELL                                ('C'),
+    INVASIVE_MARGINS                    ('I'),
+    PATIENT_DERIVED_CULTURE             ('P', SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC),
+    CULTURE_DERIVED_XENOGRAFT           ('Q'),
+    PLASMA                              ('L'),
+    BUFFY_COAT                          ('F'),
+    NORMAL_SORTED_CELLS                 ('Z'),
+    TUMOR_INTERVAL_DEBULKING_SURGERY    ('E'),
+    EXTERNAL_CONTROL                    ('K'),
+    LYMPH_NODES                         ('A'),
 
     final char key
 
-    private HipoTissueType(String key) {
-        this.key = key
+    final SampleType.SpecificReferenceGenome specificReferenceGenome
+
+    private HipoTissueType(String key, SampleType.SpecificReferenceGenome specificReferenceGenome = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT) {
+        this.key = key as char
+        this.specificReferenceGenome = specificReferenceGenome
     }
 
     /**
@@ -53,6 +58,9 @@ enum HipoTissueType {
      * {@link HipoTissueType} with that key exists.
      */
     static HipoTissueType fromKey(String key) {
-        return values().find { it.key == key }
+        char keyChar = key as char
+        return values().find {
+            it.key == keyChar
+        }
     }
 }

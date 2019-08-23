@@ -27,6 +27,7 @@ import org.springframework.context.ApplicationContext
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.OtpRuntimeException
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
@@ -37,9 +38,9 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
 class SampleIdentifierServiceSpec extends Specification implements DataTest, ServiceUnitTest<SampleIdentifierService>, DomainFactoryCore {
 
-    private static Spreadsheet.Delimiter defaultDelimiter = Spreadsheet.Delimiter.COMMA
-    private static SampleType.SpecificReferenceGenome defaultSpecRefGen = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-    private static String header = SampleIdentifierService.BulkSampleCreationHeader.getHeaders(defaultDelimiter)
+    private static final Spreadsheet.Delimiter DEFAULT_DELIMITER = Spreadsheet.Delimiter.COMMA
+    private static final SampleType.SpecificReferenceGenome DEFAULT_SPECIFIC_REF_GEN = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+    private static final String HEADER = SampleIdentifierService.BulkSampleCreationHeader.getHeaders(DEFAULT_DELIMITER)
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -58,7 +59,8 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         Closure<String> get = { String key ->
             return properties[key] ?: HelperUtils.uniqueString
         }
-        return new DefaultParsedSampleIdentifier(get('projectName'), get('pid'), get('sampleTypeDbName'), get('fullSampleName'))
+        return new DefaultParsedSampleIdentifier(get('projectName'), get('pid'), get('sampleTypeDbName'), get('fullSampleName'),
+                properties.containsKey('useSpecificReferenceGenome') ? properties.useSpecificReferenceGenome : DEFAULT_SPECIFIC_REF_GEN)
     }
 
     void "test findProject, when project exists, should return it"() {
@@ -81,30 +83,8 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         service.findProject(identifier)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown()
         e.message == "Project ${identifier.projectName} does not exist."
-    }
-
-    @Unroll
-    void "deriveSpecificReferenceGenome, test xenograft prefix recognition (sampleTypeName=#sampleTypeName)"() {
-        when:
-        SampleType.SpecificReferenceGenome result = service.deriveSpecificReferenceGenome(sampleTypeName)
-
-        then:
-        result == expectedSpecificReferenceGenome
-
-        where:
-        sampleTypeName            | expectedSpecificReferenceGenome
-        "XENOGRAFT"               | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        "PATIENT-DERIVED-CULTURE" | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        "ORGANOID"                | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        "XENOGRAFT_01"            | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        "patient-derived-culture" | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        "patient_derived_culture" | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
-        "ORGAN"                   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        "TUMOR01"                 | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        "CONTROL_01"              | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        "METASTASIS-02"           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
     }
 
     private void callAndAssertFindOrSaveIndividual(ParsedSampleIdentifier identifier) {
@@ -144,12 +124,12 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         service.findOrSaveIndividual(identifier)
 
         then:
-        def e = thrown(RuntimeException)
+        RuntimeException e = thrown()
         e.message.contains("already exists, but belongs to project")
     }
 
-    private void callAndAssertFindOrSaveSample(ParsedSampleIdentifier identifier, SampleType.SpecificReferenceGenome specificReferenceGenome) {
-        Sample result = service.findOrSaveSample(identifier, specificReferenceGenome)
+    private void callAndAssertFindOrSaveSample(ParsedSampleIdentifier identifier) {
+        Sample result = service.findOrSaveSample(identifier)
 
         assert result.sampleType.name == identifier.sampleTypeDbName
         assert result.individual.pid == identifier.pid
@@ -161,22 +141,26 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         given:
         Sample sample = createSample()
         ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(
-                projectName     : sample.project.name,
-                pid             : sample.individual.pid,
+                projectName: sample.project.name,
+                pid: sample.individual.pid,
                 sampleTypeDbName: sample.sampleType.name,
+                useSpecificReferenceGenome: null,
         )
 
         expect:
-        callAndAssertFindOrSaveSample(identifier, null)
+        callAndAssertFindOrSaveSample(identifier)
     }
 
     void "test findOrSaveSample, when sample does not exist, should create it"() {
         given:
         Project project = createProject()
-        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(projectName: project.name)
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier([
+                projectName               : project.name,
+                useSpecificReferenceGenome: DEFAULT_SPECIFIC_REF_GEN,
+        ])
 
         expect:
-        callAndAssertFindOrSaveSample(identifier, defaultSpecRefGen)
+        callAndAssertFindOrSaveSample(identifier)
     }
 
     void "test findOrSaveSample, when sample does not exist but sample type does, should create it"() {
@@ -184,14 +168,14 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         Project project = createProject()
         SampleType sampleType = createSampleType()
         ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(
-                projectName     : project.name,
-                pid             : HelperUtils.uniqueString,
+                projectName: project.name,
+                pid: HelperUtils.uniqueString,
                 sampleTypeDbName: sampleType.name,
+                useSpecificReferenceGenome: null,
         )
 
-
         expect:
-        callAndAssertFindOrSaveSample(identifier, null)
+        callAndAssertFindOrSaveSample(identifier)
     }
 
     void "test findOrSaveSample, when requested sample type with underscore exist, then use it and create sample with it"() {
@@ -202,26 +186,27 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         sampleType.save(flush: true)
 
         ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(
-                projectName     : project.name,
-                pid             : HelperUtils.uniqueString,
+                projectName: project.name,
+                pid: HelperUtils.uniqueString,
                 sampleTypeDbName: sampleType.name,
+                useSpecificReferenceGenome: null,
         )
 
         expect:
-        callAndAssertFindOrSaveSample(identifier, null)
+        callAndAssertFindOrSaveSample(identifier)
     }
 
     void "test findOrSaveSample, when requested sample type with underscore does not exist, should create it with minus instead of underscore"() {
         given:
         Project project = createProject()
         ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(
-                projectName     : project.name,
-                pid             : HelperUtils.uniqueString,
+                projectName: project.name,
+                pid: HelperUtils.uniqueString,
                 sampleTypeDbName: 'underscore_test',
         )
 
         when:
-        Sample result = service.findOrSaveSample(identifier, SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT)
+        Sample result = service.findOrSaveSample(identifier)
 
         then:
         result.sampleType.name == 'underscore-test'
@@ -230,12 +215,17 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         containSame(Sample.list(), [result])
     }
 
-    void "findOrSaveSampleType, non existing sample type name is created with given specificReferenceGenome"() {
+    @Unroll
+    void "findOrSaveSampleType, non existing sample type name is created with given specificReferenceGenome (#specificReferenceGenome)"() {
         given:
         String sampleTypeName = "to-be-created"
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier([
+                sampleTypeDbName          : sampleTypeName,
+                useSpecificReferenceGenome: specificReferenceGenome,
+        ])
 
         when:
-        SampleType result = service.findOrSaveSampleType(sampleTypeName, specificReferenceGenome)
+        SampleType result = service.findOrSaveSampleType(identifier)
 
         then:
         result.name == sampleTypeName
@@ -245,34 +235,81 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         specificReferenceGenome << SampleType.SpecificReferenceGenome.values()
     }
 
+    void "findOrSaveSampleType, when non existing sample type name containing underscore, then create sample type using minus instead of underscore"() {
+        given:
+        String sampleTypeName = "to_be_created"
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier([
+                sampleTypeDbName          : sampleTypeName,
+                useSpecificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
+        ])
+
+        when:
+        SampleType result = service.findOrSaveSampleType(identifier)
+
+        then:
+        result.name == "to-be-created"
+    }
+
+    void "findOrSaveSampleType, when existing sample type name containing underscore, then return this sample type"() {
+        given:
+        String sampleTypeName = "to_be_created"
+        SampleType sampleType = createSampleType()
+        sampleType.name = sampleTypeName
+        sampleType.save(flush: true)
+
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier([
+                sampleTypeDbName          : sampleTypeName,
+                useSpecificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
+        ])
+
+        when:
+        SampleType result = service.findOrSaveSampleType(identifier)
+
+        then:
+        result.name == sampleTypeName
+    }
+
     void "findOrSaveSampleType, non existing sample type name causes exception without specificReferenceGenome"() {
         given:
         String sampleTypeName = "does-not-exist-yet"
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier([
+                sampleTypeDbName          : sampleTypeName,
+                useSpecificReferenceGenome: null,
+        ])
 
         when:
-        service.findOrSaveSampleType(sampleTypeName, null)
+        service.findOrSaveSampleType(identifier)
 
         then:
         RuntimeException e = thrown()
-        e.message == "SampleType \'${sampleTypeName}\' does not exist"
+        e.message == "SampleType \'${sampleTypeName}\' does not exist and useSpecificReferenceGenome is not defined"
     }
 
-    void "findOrSaveSampleType, sampleType is found and returned regardless of given specificReferenceGenome"() {
+    @Unroll
+    void "findOrSaveSampleType, sampleType is found and returned regardless of given specificReferenceGenome (#specificReferenceGenome)"() {
         given:
         String sampleTypeName = "existing"
-        SampleType sampleType = createSampleType(name: sampleTypeName)
+        SampleType sampleType = createSampleType([
+                name                   : sampleTypeName,
+                specificReferenceGenome: SampleType.SpecificReferenceGenome.UNKNOWN,
+        ])
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier([
+                sampleTypeDbName          : sampleTypeName,
+                useSpecificReferenceGenome: specificReferenceGenome,
+        ])
 
         when:
-        SampleType result = service.findOrSaveSampleType(sampleTypeName, specificReferenceGenome)
+        SampleType result = service.findOrSaveSampleType(identifier)
 
         then:
         result == sampleType
+        result.specificReferenceGenome == SampleType.SpecificReferenceGenome.UNKNOWN
 
         where:
         specificReferenceGenome << [
-                defaultSpecRefGen,
+                SampleType.SpecificReferenceGenome.values().toList(),
                 null,
-        ]
+        ].flatten()
     }
 
     private SampleIdentifier getSampleIdentifier(String projectName, String pid, String sampleTypeName) {
@@ -287,54 +324,8 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         )
     }
 
-    void "parsedIdentifierMatchesFoundIdentifier, matching identifiers"() {
-        given:
-        String projectName = "projectName"
-        String pid = "pid"
-        String sampleTypeName = "sampleTypeName"
-        DefaultParsedSampleIdentifier parsedIdentifier = makeParsedSampleIdentifier(
-                projectName     : projectName,
-                pid             : pid,
-                sampleTypeDbName: sampleTypeName,
-        )
-        SampleIdentifier foundIdentifier = getSampleIdentifier(projectName, pid, sampleTypeName)
-
-        when:
-        boolean result = service.parsedIdentifierMatchesFoundIdentifier(parsedIdentifier, foundIdentifier)
-
-        then:
-        result
-    }
-
-    void "parsedIdentifierMatchesFoundIdentifier, mismatching identifiers"() {
-        given:
-        String projectName = "projectName"
-        String pid = "pid"
-        String sampleTypeName = "sampleTypeName"
-
-        DefaultParsedSampleIdentifier parsedIdentifier = makeParsedSampleIdentifier(
-                projectName     : projectName + suffix[0],
-                pid             : pid + suffix[1],
-                sampleTypeDbName: sampleTypeName + suffix[2],
-        )
-        SampleIdentifier foundIdentifier = getSampleIdentifier(projectName, pid, sampleTypeName)
-
-        when:
-        boolean result = service.parsedIdentifierMatchesFoundIdentifier(parsedIdentifier, foundIdentifier)
-
-        then:
-        !result
-
-        where:
-        suffix << [
-                ["a", "", ""],
-                ["", "b", ""],
-                ["", "", "c"],
-        ]
-    }
-
-    private void callAndAssertFindOrSaveSampleIdentifier(ParsedSampleIdentifier identifier, SampleType.SpecificReferenceGenome specificReferenceGenome) {
-        SampleIdentifier result = service.findOrSaveSampleIdentifier(identifier, specificReferenceGenome)
+    private void callAndAssertFindOrSaveSampleIdentifier(ParsedSampleIdentifier identifier) {
+        SampleIdentifier result = service.findOrSaveSampleIdentifier(identifier)
 
         assert result.name == identifier.fullSampleName
         assert result.sampleType.name == identifier.sampleTypeDbName
@@ -343,42 +334,30 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         assert containSame(SampleIdentifier.list(), [result])
     }
 
-    void "test findOrSaveSampleIdentifier, when sample identifier belongs to correct sample, should return it"() {
+    void "test findOrSaveSampleIdentifier, when sample identifier exist, then should return it"() {
         given:
         SampleIdentifier sampleIdentifier = createSampleIdentifier()
-        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier([
                 projectName     : sampleIdentifier.project.name,
                 pid             : sampleIdentifier.individual.pid,
                 sampleTypeDbName: sampleIdentifier.sampleType.name,
                 fullSampleName  : sampleIdentifier.name,
-        )
+        ])
 
         expect:
-        callAndAssertFindOrSaveSampleIdentifier(identifier, null)
+        callAndAssertFindOrSaveSampleIdentifier(identifier)
     }
 
     void "test findOrSaveSampleIdentifier, when sample identifier does not exist, should create it"() {
         given:
         Project project = createProject()
-        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(projectName: project.name)
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier([
+                projectName               : project.name,
+                useSpecificReferenceGenome: DEFAULT_SPECIFIC_REF_GEN,
+        ])
 
         expect:
-        callAndAssertFindOrSaveSampleIdentifier(identifier, defaultSpecRefGen)
-    }
-
-    void "test findOrSaveSampleIdentifier, when sample identifier belongs to other sample, should fail"() {
-        given:
-        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier()
-        createSampleIdentifier(
-                name: identifier.fullSampleName,
-        )
-
-        when:
-        service.findOrSaveSampleIdentifier(identifier, null)
-
-        then:
-        def e = thrown(RuntimeException)
-        e.message.contains("already exists, but belongs to sample")
+        callAndAssertFindOrSaveSampleIdentifier(identifier)
     }
 
     void "test parseAndFindOrSaveSampleIdentifier, not parsable, should return null"() {
@@ -415,9 +394,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
     }
 
     private SampleIdentifierService createSampleIdentifierService() {
-        SampleIdentifierService sampleIdentifierService = Spy(SampleIdentifierService) {
-            findOrSaveSampleIdentifier(_, _) >> { }
-        }
+        SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
         sampleIdentifierService.applicationContext = Mock(ApplicationContext) {
             getBean(_) >> {
                 return new BulkSampleCreationValidator()
@@ -442,27 +419,16 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         "mul_ti_ple" | "mul-ti-ple"
     }
 
-    void "sanitizeParsedSampleIdentifier returns sanitized identifier"() {
-        given:
-        DefaultParsedSampleIdentifier parsedIdentifier = makeParsedSampleIdentifier(sampleTypeDbName: "UNDER_SCORE")
-
-        when:
-        DefaultParsedSampleIdentifier sanitized = service.sanitizeParsedSampleIdentifier(parsedIdentifier)
-
-        then:
-        sanitized.sampleTypeDbName == "UNDER-SCORE"
-    }
-
     @Unroll
     void "test createBulkSamples with correct values (useName=#useName)"() {
         given:
         SampleIdentifierService sampleIdentifierService = createSampleIdentifierService()
         List<String> output
         Project project = createProject()
-        String context = "${header}\n${useName ? project.name : ''},test,test,test"
+        String context = "${HEADER}\n${useName ? project.name : ''},test,test,test"
 
         when:
-        output = sampleIdentifierService.createBulkSamples(context, defaultDelimiter, project, defaultSpecRefGen)
+        output = sampleIdentifierService.createBulkSamples(context, DEFAULT_DELIMITER, project, DEFAULT_SPECIFIC_REF_GEN)
 
         then:
         output == []
@@ -478,7 +444,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         Project project = createProject()
 
         when:
-        output = sampleIdentifierService.createBulkSamples('invalidHeader\ntest,test,test', defaultDelimiter, project, defaultSpecRefGen)
+        output = sampleIdentifierService.createBulkSamples('invalidHeader\ntest,test,test', DEFAULT_DELIMITER, project, DEFAULT_SPECIFIC_REF_GEN)
 
         then:
         containSame(output, [
@@ -495,7 +461,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         Project project = createProject()
 
         when:
-        output = sampleIdentifierService.createBulkSamples("${header}\ninvalidProject,test,test,test", defaultDelimiter, project, defaultSpecRefGen)
+        output = sampleIdentifierService.createBulkSamples("${HEADER}\ninvalidProject,test,test,test", DEFAULT_DELIMITER, project, DEFAULT_SPECIFIC_REF_GEN)
 
         then:
         containSame(output, ["Could not find Project 'invalidProject'"])
@@ -508,7 +474,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         Project project = createProject()
 
         when:
-        output = sampleIdentifierService.createBulkSamples("${header},UNKNOWN_HEADER\n${project.name},test,test,test,test", defaultDelimiter, project, defaultSpecRefGen)
+        output = sampleIdentifierService.createBulkSamples("${HEADER},UNKNOWN_HEADER\n${project.name},test,test,test,test", DEFAULT_DELIMITER, project, DEFAULT_SPECIFIC_REF_GEN)
 
         then:
         containSame(output, ["The column header 'UNKNOWN_HEADER' is unknown"])
@@ -532,5 +498,51 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
 
         where:
         delimiter << Spreadsheet.Delimiter.values()
+    }
+
+    void "checkSampleIdentifier, when identifier and parsed identifier match, succeed"() {
+        given:
+        SampleIdentifier sampleIdentifier = createSampleIdentifier()
+        ParsedSampleIdentifier parsedSampleIdentifier = new DefaultParsedSampleIdentifier([
+                projectName               : sampleIdentifier.individual.project.name,
+                pid                       : sampleIdentifier.individual.pid,
+                sampleTypeDbName          : sampleIdentifier.sampleType.name,
+                fullSampleName            : sampleIdentifier.name,
+                useSpecificReferenceGenome: null
+        ])
+
+        when:
+        createSampleIdentifierService().checkSampleIdentifier(parsedSampleIdentifier, sampleIdentifier)
+
+        then:
+        noExceptionThrown()
+    }
+
+    @Unroll
+    void "checkSampleIdentifier, when identifier and parsed identifier not match in #property, throw exception"() {
+        given:
+        SampleIdentifier sampleIdentifier = createSampleIdentifier()
+        ParsedSampleIdentifier parsedSampleIdentifier = new DefaultParsedSampleIdentifier([
+                projectName               : sampleIdentifier.individual.project.name,
+                pid                       : sampleIdentifier.individual.pid,
+                sampleTypeDbName          : sampleIdentifier.sampleType.name,
+                fullSampleName            : sampleIdentifier.name,
+                useSpecificReferenceGenome: null
+        ] + [
+                (property): value
+        ])
+
+        when:
+        createSampleIdentifierService().checkSampleIdentifier(parsedSampleIdentifier, sampleIdentifier)
+
+        then:
+        OtpRuntimeException e = thrown()
+        e.message.contains(message)
+
+        where:
+        property           | value        || message
+        'projectName'      | 'otherProject'    || 'The sample identifier already exist, but is connected to project'
+        'pid'              | 'otherPid'        || 'The sample identifier already exist, but is connected to individual'
+        'sampleTypeDbName' | 'otherSampleType' || 'The sample identifier already exist, but is connected to sample type'
     }
 }

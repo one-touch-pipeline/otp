@@ -23,6 +23,8 @@ package de.dkfz.tbi.otp.parser
 
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.ngsdata.SampleType
+
 import java.util.regex.Matcher
 
 @Component
@@ -40,12 +42,13 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
                 matcher.group('pid'),
                 matcher.group('sampleType'),
                 sampleIdentifier,
+                SampleType.SpecificReferenceGenome.UNKNOWN,
         )
     }
 
     @Override
     boolean tryParsePid(String pid) {
-        return pid =~ "^" + getPidRegex() + /$/
+        return pid =~ "^" + pidRegex + /$/
     }
 
     @Override
@@ -55,9 +58,9 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
 
     protected static String createRegex() {
         return "^" +
-                "\\((?<project>${getProjectRegex()})\\)" +
-                "\\((?<pid>${getPidRegex()})\\)" +
-                "\\((?<sampleType>${getSampleType()})\\)" +
+                "\\((?<project>${projectRegex})\\)" +
+                "\\((?<pid>${pidRegex})\\)" +
+                "\\((?<sampleType>${sampleType})\\)" +
                 /$/
     }
 

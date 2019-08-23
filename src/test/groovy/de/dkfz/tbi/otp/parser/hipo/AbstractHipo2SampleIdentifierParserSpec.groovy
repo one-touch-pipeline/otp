@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.parser.hipo
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
@@ -35,7 +36,7 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
 
     abstract String getProjectName()
 
-    @SuppressWarnings(['CyclomaticComplexity', 'MethodSize'])
+    @SuppressWarnings(['CyclomaticComplexity', 'MethodSize', 'AbcMetric'])
     @Unroll
     void 'tryParse, when identifier is #identifier, parses correctly'() {
         given:
@@ -51,92 +52,93 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
         parsed.pid == fullIdentifier.split("-")[0, 1].join("-")
         parsed.sampleTypeDbName == sampleTypeDbName
         parsed.fullSampleName == fullIdentifier
+        parsed.useSpecificReferenceGenome == specificReferenceGenome
 
         where:
-        identifier         || sampleTypeDbName
-        '123ABC-N0-D1'     || 'CONTROL0-01'
+        identifier         || sampleTypeDbName                       | specificReferenceGenome
+        '123ABC-N0-D1'     || 'CONTROL0-01'                          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         //different pids
-        '123ABC-T0-D1'     || 'TUMOR0-01'
-        '123456-T0-D1'     || 'TUMOR0-01'
-        'ABCDEF-T0-D1'     || 'TUMOR0-01'
-        '1234-T0-D1'       || 'TUMOR0-01'
-        'ABCD-T0-D1'       || 'TUMOR0-01'
-        'AB12-T0-D1'       || 'TUMOR0-01'
-        '12AB-T0-D1'       || 'TUMOR0-01'
+        '123ABC-T0-D1'     || 'TUMOR0-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123456-T0-D1'     || 'TUMOR0-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'ABCDEF-T0-D1'     || 'TUMOR0-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '1234-T0-D1'       || 'TUMOR0-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'ABCD-T0-D1'       || 'TUMOR0-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        'AB12-T0-D1'       || 'TUMOR0-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '12AB-T0-D1'       || 'TUMOR0-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         //different sample types
-        '123ABC-T0-D1'     || 'TUMOR0-01'
-        '123ABC-M0-D1'     || 'METASTASIS0-01'
-        '123ABC-S0-D1'     || 'SPHERE0-01'
-        '123ABC-X0-D1'     || 'XENOGRAFT0-01'
-        '123ABC-B0-D1'     || 'BLOOD0-01'
-        '123ABC-N0-D1'     || 'CONTROL0-01'
-        '123ABC-C0-D1'     || 'CELL0-01'
-        '123ABC-I0-D1'     || 'INVASIVE_MARGINS0-01'
-        '123ABC-P0-D1'     || 'PATIENT_DERIVED_CULTURE0-01'
-        '123ABC-Q0-D1'     || 'CULTURE_DERIVED_XENOGRAFT0-01'
-        '123ABC-L0-D1'     || 'PLASMA0-01'
-        '123ABC-F0-D1'     || 'BUFFY_COAT0-01'
-        '123ABC-Z0-D1'     || 'NORMAL_SORTED_CELLS0-01'
-        '123ABC-E0-D1'     || 'TUMOR_INTERVAL_DEBULKING_SURGERY0-01'
-        '123ABC-K0-D1'     || 'EXTERNAL_CONTROL0-01'
-        '123ABC-A0-D1'     || 'LYMPH_NODES0-01'
+        '123ABC-T0-D1'     || 'TUMOR0-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-M0-D1'     || 'METASTASIS0-01'                       | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-S0-D1'     || 'SPHERE0-01'                           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-X0-D1'     || 'XENOGRAFT0-01'                        | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+        '123ABC-B0-D1'     || 'BLOOD0-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-N0-D1'     || 'CONTROL0-01'                          | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-C0-D1'     || 'CELL0-01'                             | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-I0-D1'     || 'INVASIVE_MARGINS0-01'                 | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-P0-D1'     || 'PATIENT_DERIVED_CULTURE0-01'          | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+        '123ABC-Q0-D1'     || 'CULTURE_DERIVED_XENOGRAFT0-01'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-L0-D1'     || 'PLASMA0-01'                           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-F0-D1'     || 'BUFFY_COAT0-01'                       | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-Z0-D1'     || 'NORMAL_SORTED_CELLS0-01'              | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-E0-D1'     || 'TUMOR_INTERVAL_DEBULKING_SURGERY0-01' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-K0-D1'     || 'EXTERNAL_CONTROL0-01'                 | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-A0-D1'     || 'LYMPH_NODES0-01'                      | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         //different sample type numbers
-        '123ABC-T0-D1'     || 'TUMOR0-01'
-        '123ABC-T1-D1'     || 'TUMOR1-01'
-        '123ABC-T2-D1'     || 'TUMOR2-01'
-        '123ABC-T12-D1'    || 'TUMOR12-01'
-        '123ABC-T01-D1'    || 'TUMOR01-01'
-        '123ABC-T00-D1'    || 'TUMOR00-01'
+        '123ABC-T0-D1'     || 'TUMOR0-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T1-D1'     || 'TUMOR1-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T2-D1'     || 'TUMOR2-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T12-D1'    || 'TUMOR12-01'                           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T01-D1'    || 'TUMOR01-01'                           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T00-D1'    || 'TUMOR00-01'                           | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         //different analyte types using digits
-        '123ABC-T3-A1'     || 'TUMOR3-01'
-        '123ABC-T3-B1'     || 'TUMOR3-01'
-        '123ABC-T3-D1'     || 'TUMOR3-01'
-        '123ABC-T3-E1'     || 'TUMOR3-01'
-        '123ABC-T3-L1'     || 'TUMOR3-01'
-        '123ABC-T3-M1'     || 'TUMOR3-01'
-        '123ABC-T3-P1'     || 'TUMOR3-01'
-        '123ABC-T3-R1'     || 'TUMOR3-01'
-        '123ABC-T3-T1'     || 'TUMOR3-01'
-        '123ABC-T3-W1'     || 'TUMOR3-01'
-        '123ABC-T3-Y1'     || 'TUMOR3-01'
+        '123ABC-T3-A1'     || 'TUMOR3-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-B1'     || 'TUMOR3-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-D1'     || 'TUMOR3-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-E1'     || 'TUMOR3-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-L1'     || 'TUMOR3-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-M1'     || 'TUMOR3-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-P1'     || 'TUMOR3-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-R1'     || 'TUMOR3-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-T1'     || 'TUMOR3-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-W1'     || 'TUMOR3-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-Y1'     || 'TUMOR3-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         //different analyte numbers
-        '123ABC-T3-L0'     || 'TUMOR3-00'
-        '123ABC-T3-L1'     || 'TUMOR3-01'
-        '123ABC-T3-L2'     || 'TUMOR3-02'
-        '123ABC-T3-L12'    || 'TUMOR3-12'
+        '123ABC-T3-L0'     || 'TUMOR3-00'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-L1'     || 'TUMOR3-01'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-L2'     || 'TUMOR3-02'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-L12'    || 'TUMOR3-12'                            | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         //analyte type: chip seq
-        '123ABC-T3-0C00'   || 'TUMOR3'
-        '123ABC-T3-1C00'   || 'TUMOR3'
-        '123ABC-T3-0C01'   || 'TUMOR3'
-        '123ABC-T3-1C02'   || 'TUMOR3'
-        '123ABC-T3-1C20'   || 'TUMOR3'
+        '123ABC-T3-0C00'   || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-1C00'   || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-0C01'   || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-1C02'   || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-1C20'   || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         //analyte type: single cell
-        '123ABC-T3-G2'     || 'TUMOR3'
-        '123ABC-T3-H2'     || 'TUMOR3'
-        '123ABC-T3-J2'     || 'TUMOR3'
-        '123ABC-T3-S2'     || 'TUMOR3'
+        '123ABC-T3-G2'     || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-H2'     || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-J2'     || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-S2'     || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
-        '123ABC-T3-G20'    || 'TUMOR3'
-        '123ABC-T3-H20'    || 'TUMOR3'
-        '123ABC-T3-J20'    || 'TUMOR3'
-        '123ABC-T3-S20'    || 'TUMOR3'
+        '123ABC-T3-G20'    || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-H20'    || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-J20'    || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-S20'    || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
-        '123ABC-T3-1G20'   || 'TUMOR3'
-        '123ABC-T3-1H20'   || 'TUMOR3'
-        '123ABC-T3-1J20'   || 'TUMOR3'
-        '123ABC-T3-1S20'   || 'TUMOR3'
+        '123ABC-T3-1G20'   || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-1H20'   || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-1J20'   || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-1S20'   || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
-        '123ABC-T3-123H20' || 'TUMOR3'
-        '123ABC-T3-123G20' || 'TUMOR3'
-        '123ABC-T3-123J20' || 'TUMOR3'
-        '123ABC-T3-123S20' || 'TUMOR3'
+        '123ABC-T3-123H20' || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-123G20' || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-123J20' || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-123S20' || 'TUMOR3'                               | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
     }
 
     @Unroll

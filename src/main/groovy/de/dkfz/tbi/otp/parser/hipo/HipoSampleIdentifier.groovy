@@ -25,6 +25,7 @@ import groovy.transform.TupleConstructor
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.ngsdata.SampleType.SpecificReferenceGenome
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 import de.dkfz.tbi.otp.parser.SampleIdentifierParser
 
@@ -69,15 +70,17 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
             }
         }
 
+        String sampleNumber = matcher.group(6)
+
         // all projects except 059 may have only one digit in the sampleNumber
         if (projectNumber != "059") {
-            if (matcher.group(6).length() != 1) {
+            if (sampleNumber.length() != 1) {
                 return null
             }
         }
 
         // if the analyte type is ChiP (C) there shall be two digits behind. For all other cases only one digit is allowed.
-        final int expectedAnalyteNumberDigits = (matcher.group(8) == "C") ? 2 : 1
+        int expectedAnalyteNumberDigits = (matcher.group(8) == "C") ? 2 : 1
         if (matcher.group(9).size() != expectedAnalyteNumberDigits) {
             return null
         }
@@ -86,8 +89,9 @@ class HipoSampleIdentifierParser implements SampleIdentifierParser {
                 /* projectNumber: */ projectNumber,
                 /* pid: */ matcher.group(1),
                 /* tissueType: */ tissueType,
-                /* sampleNumber: */ matcher.group(6),
+                /* sampleNumber: */ sampleNumber,
                 /* experiment: */ matcher.group(7),
+                tissueType.specificReferenceGenome,
         )
     }
 
@@ -130,6 +134,8 @@ class HipoSampleIdentifier implements ParsedSampleIdentifier {
      * Example: D1 (DNA, attempt 1)
      */
     final String analyteTypeAndNumber
+
+    final SpecificReferenceGenome useSpecificReferenceGenome
 
     @Override
     String getProjectName() {

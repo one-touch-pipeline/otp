@@ -21,8 +21,6 @@
  */
 package de.dkfz.tbi.otp.parser
 
-import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
-
 interface SampleIdentifierParser {
 
     ParsedSampleIdentifier tryParse(String sampleIdentifier)

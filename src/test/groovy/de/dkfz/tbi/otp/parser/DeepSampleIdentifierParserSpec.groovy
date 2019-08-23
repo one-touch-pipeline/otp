@@ -24,7 +24,11 @@ package de.dkfz.tbi.otp.parser
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.ngsdata.SampleType
+
 class DeepSampleIdentifierParserSpec extends Specification {
+
+    @SuppressWarnings('JUnitPublicProperty')
     DeepSampleIdentifierParser deepSampleIdentifierParser = new DeepSampleIdentifierParser()
 
     void "test parsing invalid input"() {
@@ -96,10 +100,11 @@ class DeepSampleIdentifierParserSpec extends Specification {
 
         then:
         validPid
-        defaultParsedSampleIdentifier?.projectName == 'DEEP'
-        defaultParsedSampleIdentifier?.pid == pid
-        defaultParsedSampleIdentifier?.sampleTypeDbName == sampleTypeDbName
-        defaultParsedSampleIdentifier?.fullSampleName == fullSampleName
+        defaultParsedSampleIdentifier.projectName == 'DEEP'
+        defaultParsedSampleIdentifier.pid == pid
+        defaultParsedSampleIdentifier.sampleTypeDbName == sampleTypeDbName
+        defaultParsedSampleIdentifier.fullSampleName == fullSampleName
+        defaultParsedSampleIdentifier.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
         input                           || pid                   | sampleTypeDbName  | fullSampleName

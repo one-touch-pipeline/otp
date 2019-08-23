@@ -71,7 +71,8 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
                 return null
             }
 
-            String baseSampleTypeName = "${HipoTissueType.fromKey(matcher.group('tissueType'))}${matcher.group('tissueNumber')}"
+            HipoTissueType hipoTissueType = HipoTissueType.fromKey(matcher.group('tissueType'))
+            String baseSampleTypeName = "${hipoTissueType}${matcher.group('tissueNumber')}"
             String analyteCharOnlyNumber = matcher.group('analyteCharOnlyNumber')
             String analyteSkip = matcher.group('analyteSkip')
             String analyteDigit = matcher.group('analyteDigit')
@@ -92,6 +93,7 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
                     matcher.group('pid'),
                     realSampleTypeName,
                     sampleIdentifier,
+                    hipoTissueType.specificReferenceGenome
             )
         }
         return null

@@ -24,9 +24,11 @@ package de.dkfz.tbi.otp.parser
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.ngsdata.SampleType
+
 class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
 
-    SimpleProjectIndividualSampleTypeParser simpleProjectIndividualSampleTypeParser = new SimpleProjectIndividualSampleTypeParser()
+    private SimpleProjectIndividualSampleTypeParser simpleProjectIndividualSampleTypeParser = new SimpleProjectIndividualSampleTypeParser()
 
     @Unroll('identifier #input is parsed to PID #pid, #sampleType and #project')
     void "test parse valid input"() {
@@ -44,11 +46,11 @@ class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleType
         defaultParsedSampleIdentifier.fullSampleName == input
+        defaultParsedSampleIdentifier.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.UNKNOWN
 
         where:
-        input                           || pid        | sampleType    | project
-        '(hipo_021)(some_pid)(TUMOR01)' || 'some_pid' | 'TUMOR01'     | 'hipo_021'
-
+        input                           || pid        | sampleType | project
+        '(hipo_021)(some_pid)(TUMOR01)' || 'some_pid' | 'TUMOR01'  | 'hipo_021'
     }
 
     @Unroll

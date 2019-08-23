@@ -32,6 +32,7 @@ enum SampleIdentifierParserBeanName {
     INFORM('informSampleIdentifierParser', 'INFORM'),
     OE0290_EORTC('OE0290_EORTC_SampleIdentifierParser', 'OE0290_EORTC'),
     SIMPLE('simpleProjectIndividualSampleTypeParser', 'Simple'),
+    ITCC_4P('iTCC_4P_Parser', 'ITCC-4P'),
 
     final String beanName
     final String displayName

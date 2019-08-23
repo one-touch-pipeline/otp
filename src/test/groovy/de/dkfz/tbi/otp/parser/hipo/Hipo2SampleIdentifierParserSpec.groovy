@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.parser.hipo
 
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 
 @SuppressWarnings('JUnitPublicProperty')
@@ -46,6 +47,7 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
         parsed.pid == identifier.split("-")[0, 1].join("-")
         parsed.sampleTypeDbName == sampleTypeDbName
         parsed.fullSampleName == identifier
+        parsed.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
         identifier          || sampleTypeDbName
