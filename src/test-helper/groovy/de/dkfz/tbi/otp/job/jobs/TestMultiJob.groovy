@@ -39,6 +39,7 @@ class TestMultiJob extends AbstractMultiJob {
         return executeImpl(finishedClusterJobs)
     }
 
+    @SuppressWarnings("UnusedMethodParameter")
     NextAction executeImpl(final Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable {
         throw new Error("This method must be overridden.")
     }

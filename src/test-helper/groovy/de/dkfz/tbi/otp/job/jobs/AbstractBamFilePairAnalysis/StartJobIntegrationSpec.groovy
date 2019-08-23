@@ -57,10 +57,12 @@ trait StartJobIntegrationSpec {
      * provide this method, so that tests in this abstract class can create the correct
      * dependency environment.
      */
+    @SuppressWarnings("UnusedMethodParameter")
     void setDependencyProcessingStatus(SamplePair samplePair, SamplePair.ProcessingStatus dependeeProcessingStatus) {
         throw new UnsupportedOperationException('Not supported for this test')
     }
 
+    @SuppressWarnings("UnusedMethodParameter")
     void createDependeeInstance(SamplePair samplePair, AnalysisProcessingStates dependeeAnalysisProcessingState) {
         throw new UnsupportedOperationException('Not supported for this test')
     }

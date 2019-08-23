@@ -31,7 +31,6 @@ class CreateUserCommand implements Validateable {
     String email
     String realName
     List<Long> role
-    List<Long> group
 
     static constraints = {
         username(validator: { value ->
@@ -43,15 +42,6 @@ class CreateUserCommand implements Validateable {
             boolean valid = true
             value.each { id ->
                 if (!Role.get(id)) {
-                    valid = false
-                }
-            }
-            return valid
-        })
-        group(nullable: true, validator: { value ->
-            boolean valid = true
-            value.each { id ->
-                if (!Group.get(id)) {
                     valid = false
                 }
             }

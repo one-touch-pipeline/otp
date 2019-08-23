@@ -84,8 +84,7 @@ class UserAdministrationController {
                         cmd.username,
                         cmd.email,
                         cmd.realName,
-                        roles,
-                        cmd.group,
+                        roles
                 )
                 flash.message = new FlashMessage(g.message(code: "user.administration.create.success") as String)
             } catch (ValidationException e) {

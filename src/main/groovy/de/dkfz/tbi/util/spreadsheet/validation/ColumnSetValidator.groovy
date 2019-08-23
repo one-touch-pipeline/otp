@@ -36,6 +36,7 @@ abstract class ColumnSetValidator<C extends ValidationContext> implements Valida
     /**
      * A List of all Columns that not are required for the Validator to run, but are needed for certain validation
      */
+    @SuppressWarnings("UnusedMethodParameter")
     List<String> getOptionalColumnTitles(C context) {
         return []
     }

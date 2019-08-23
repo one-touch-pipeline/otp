@@ -1174,7 +1174,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     UnusedMethodParameter {
-        priority = HIGH
+        priority = CRITICAL
     }
     UnusedObject {
         priority = CRITICAL

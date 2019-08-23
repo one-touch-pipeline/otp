@@ -64,7 +64,7 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(null, 'ADD_USER')")
-    User createUser(String username, String email, String realName, List<Role> roles = [], List<Long> groups = []) {
+    User createUser(String username, String email, String realName, List<Role> roles = []) {
         User user = new User(username: username,
                              email: email,
                              enabled: true,
