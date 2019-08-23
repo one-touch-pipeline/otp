@@ -32,6 +32,8 @@ import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.job.restarting.RestartHandlerService
 import de.dkfz.tbi.otp.utils.ExceptionUtils
 
+import java.security.SecureRandom
+
 import static org.springframework.util.Assert.notNull
 
 /**
@@ -211,7 +213,7 @@ class Scheduler {
         try {
             doUnsafeErrorHandling(job, exceptionToBeHandled)
         } catch (final Throwable exceptionDuringExceptionHandling) {
-            final String identifier = System.currentTimeMillis() + "-" + sprintf('%016X', new Random().nextLong())
+            final String identifier = System.currentTimeMillis() + "-" + sprintf('%016X', new SecureRandom().nextLong())
             job.log.error "An exception was thrown during exception handling. The original exception (ID ${identifier}), " +
                     "which triggered the exception handling, is:\n" +
                     "${ExceptionUtils.getStackTrace(exceptionToBeHandled)}\n" +

@@ -22,6 +22,7 @@
 
 final String TEST = "*/*test*/*"
 final String SPEC = "*Spec.groovy"
+final String MAIN = "*/*main*/*"
 final String INTEGRATION_SPEC = "*IntegrationSpec.groovy"
 final String CONTROLLER = "*Controller.groovy"
 final String SERVICE = "*Service.groovy"
@@ -972,7 +973,8 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     InsecureRandom {
-        priority = HIGH
+        priority = CRITICAL
+        applyToFileNames = MAIN
     }
     JavaIoPackageAccess {
         priority = MIDDLE
