@@ -278,14 +278,6 @@ class ClusterJobSchedulerService {
             JobState.COMPLETED_UNKNOWN,
             //JobState.UNKNOWN, //This state is used if no mapping is available, so it can also be running
     ].asImmutable()
-
-    private final List<JobState> notFinished = [
-            JobState.HOLD,
-            JobState.QUEUED,
-            JobState.UNSTARTED, // not submitted yet
-            JobState.RUNNING,
-            JobState.SUSPENDED,
-    ].asImmutable()
 }
 
 enum JobSubmissionOption {

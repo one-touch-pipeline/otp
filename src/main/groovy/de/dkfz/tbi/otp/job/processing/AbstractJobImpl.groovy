@@ -59,8 +59,6 @@ abstract class AbstractJobImpl implements Job {
      */
     private long processingStepId
 
-    private final Collection<Parameter> inputParameters = [] as Set
-
     private final Set<Parameter> outputParameters = [] as Set
 
     static enum State {

@@ -1180,7 +1180,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     UnusedPrivateField {
-        priority = HIGH
+        priority = CRITICAL
     }
     UnusedPrivateMethod {
         priority = CRITICAL
