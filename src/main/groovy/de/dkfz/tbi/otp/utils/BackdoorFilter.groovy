@@ -29,8 +29,6 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.User
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.web.context.HttpRequestResponseHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.GenericFilterBean
@@ -102,7 +100,7 @@ class BackdoorFilter extends GenericFilterBean {
         try {
             Authentication authentication = SecurityContextHolder.context.authentication
             if (!authentication || !authentication.isAuthenticated()) {
-                UserDetails userDetails = new User(configService.getBackdoorUser(), "", authorities)
+                Principal userDetails = new Principal(configService.getBackdoorUser(), "OTP Developer")
                 SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
             }
             chain.doFilter(holder.getRequest(), holder.getResponse())
