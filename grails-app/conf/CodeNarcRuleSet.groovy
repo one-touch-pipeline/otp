@@ -1151,7 +1151,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     UnnecessarySemicolon {
-        priority = HIGH
+        priority = CRITICAL
     }
     UnnecessarySetter {
         priority = LOW

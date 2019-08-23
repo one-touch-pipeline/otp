@@ -97,7 +97,7 @@ class FastqcDataFilesService {
                 .replaceAll("\\.bz2\$", "").replaceAll("\\.txt\$", "")
                 .replaceAll("\\.fastq\$", "").replaceAll("\\.fq\$", "")
                 .replaceAll("\\.csfastq\$", "").replaceAll("\\.sam\$", "")
-                .replaceAll("\\.bam\$", "");
+                .replaceAll("\\.bam\$", "")
         return "${body}${FASTQC_FILE_SUFFIX}"
     }
 

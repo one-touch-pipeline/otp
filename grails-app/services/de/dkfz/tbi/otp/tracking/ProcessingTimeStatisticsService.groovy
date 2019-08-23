@@ -168,7 +168,7 @@ ${search ? """
         if (dateString == "") {
             ticket.submissionReceivedNotice = null
         } else {
-            DateFormat format = new SimpleDateFormat(DATE_FORMAT);
+            DateFormat format = new SimpleDateFormat(DATE_FORMAT)
             Date date = format.parse(dateString)
 
             ticket."${property}" = date

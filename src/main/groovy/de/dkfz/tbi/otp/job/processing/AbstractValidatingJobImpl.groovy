@@ -48,7 +48,7 @@ abstract class AbstractValidatingJobImpl extends AbstractEndStateAwareJobImpl im
 
     @Override
     void setValidatorFor(ProcessingStep step) {
-        validatedStep = step;
+        validatedStep = step
     }
 
     @Override

@@ -465,7 +465,7 @@ enum SampleSwapLevel {
     CHANGE(50),
     NOLEVEL(0),
 
-    private final int id;
+    private final int id
 
     SampleSwapLevel(int id) { this.id = id; }
 
