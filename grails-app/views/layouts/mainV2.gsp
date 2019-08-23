@@ -45,11 +45,11 @@ ${assetPath(src: 'v2/otp-favicon.ico')}" type="image/x-icon">
         <div class="col-xs-12 text-right">
             <sec:ifNotSwitched>
                 ${g.message(code: "header.loggedIn", args: [sec.loggedInUserInfo(field: "displayName"), sec.username()])} •
-                <g:link controller='j_spring_security_logout'>${g.message(code: "header.logout")}</g:link>
+                <g:link controller='logout'>${g.message(code: "header.logout")}</g:link>
             </sec:ifNotSwitched>
             <sec:ifSwitched>
                 ${g.message(code: "header.switched", args: [sec.username()])} •
-                <g:link controller='j_spring_security_exit_user'>${g.message(code: "header.switchBack", args: [sec.switchedUserOriginalUsername()])}</g:link>
+                <g:link controller='logout' action='impersonate'>${g.message(code: "header.switchBack", args: [sec.switchedUserOriginalUsername()])}</g:link>
             </sec:ifSwitched>
         </div>
     </sec:ifLoggedIn>
