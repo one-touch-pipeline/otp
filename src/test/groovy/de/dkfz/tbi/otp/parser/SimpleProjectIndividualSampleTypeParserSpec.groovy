@@ -30,7 +30,7 @@ class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
 
     private SimpleProjectIndividualSampleTypeParser simpleProjectIndividualSampleTypeParser = new SimpleProjectIndividualSampleTypeParser()
 
-    @Unroll('identifier #input is parsed to PID #pid, #sampleType and #project')
+    @Unroll('identifier #input is parsed to PID #pid, #sampleType, #project and #identifier')
     void "test parse valid input"() {
         given:
         DefaultParsedSampleIdentifier defaultParsedSampleIdentifier
@@ -45,12 +45,15 @@ class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
         defaultParsedSampleIdentifier.projectName == project
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleType
-        defaultParsedSampleIdentifier.fullSampleName == input
+        defaultParsedSampleIdentifier.fullSampleName == identifier
         defaultParsedSampleIdentifier.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.UNKNOWN
 
         where:
-        input                           || pid        | sampleType | project
-        '(hipo_021)(some_pid)(TUMOR01)' || 'some_pid' | 'TUMOR01'  | 'hipo_021'
+        input                                              || pid        | sampleType | project    | identifier
+        '(hipo_021)(some_pid)(TUMOR01)(DisplayIdentifier)' || 'some_pid' | 'TUMOR01'  | 'hipo_021' | 'DisplayIdentifier'
+        '(hipo_021)(some_pid)(TUMOR01)(with space)'        || 'some_pid' | 'TUMOR01'  | 'hipo_021' | 'with space'
+        '(hipo_021)(some_pid)(TUMOR01)(with_underscore)'   || 'some_pid' | 'TUMOR01'  | 'hipo_021' | 'with_underscore'
+
     }
 
     @Unroll
@@ -65,11 +68,12 @@ class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
         defaultParsedSampleIdentifier == null
 
         where:
-        input                            | problem
-        ''                               | 'empty'
-        null                             | 'null'
-        'hipo_021_some_pid_TUMOR01'      | 'no brackets found'
-        '(hipo_021)(some_pid)(TUMOR_01)' | 'underscore in sample Type'
-        '(hipo_021)(some_pid)'           | 'one group missing'
+        input                                               | problem
+        ''                                                  | 'empty'
+        null                                                | 'null'
+        'hipo_021_some_pid_TUMOR01_DisplayIdentifier'       | 'no brackets found'
+        '(hipo_021)(some_pid)(TUMOR_01)(DisplayIdentifier)' | 'underscore in sample Type'
+        '(hipo_021)(some_pid)(TUMOR_01)'                    | 'one group missing'
+        '(hipo_021)(some_pid)(TUMOR_01)(Display)(toMuch)'   | 'one group to much'
     }
 }

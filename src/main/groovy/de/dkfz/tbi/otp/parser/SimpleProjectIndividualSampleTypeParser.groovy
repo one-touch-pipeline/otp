@@ -41,7 +41,7 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
                 matcher.group('project'),
                 matcher.group('pid'),
                 matcher.group('sampleType'),
-                sampleIdentifier,
+                matcher.group('displayedSampleIdentifier'),
                 SampleType.SpecificReferenceGenome.UNKNOWN,
         )
     }
@@ -61,6 +61,7 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
                 "\\((?<project>${projectRegex})\\)" +
                 "\\((?<pid>${pidRegex})\\)" +
                 "\\((?<sampleType>${sampleType})\\)" +
+                "\\((?<displayedSampleIdentifier>${displayedSampleIdentifier})\\)" +
                 /$/
     }
 
@@ -74,5 +75,9 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
 
     private static String getSampleType() {
         return "[A-Za-z0-9-]+"
+    }
+
+    private static String getDisplayedSampleIdentifier() {
+        return "[^\\(\\)]+"
     }
 }
