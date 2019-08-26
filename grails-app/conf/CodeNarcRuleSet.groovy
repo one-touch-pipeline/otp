@@ -351,7 +351,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     MethodParameterTypeRequired {
-        priority = HIGH
+        priority = CRITICAL
     }
     MethodReturnTypeRequired {
         priority = MIDDLE

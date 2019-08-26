@@ -174,7 +174,7 @@ chmod 440 .* .*
         NextAction.SUCCEED == copyFilesJob.maybeSubmit()
     }
 
-    private RemoteShellHelper getRemoteShellHelper(seqTrack) {
+    private RemoteShellHelper getRemoteShellHelper(SeqTrack seqTrack) {
         Mock(RemoteShellHelper) {
             12 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
                 assert command ==~ "(chmod 2750|chgrp ${seqTrack.project.unixGroup}) .*/${seqTrack.project.dirName}(/.*)?"

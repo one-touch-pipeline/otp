@@ -274,7 +274,7 @@ class ProjectOverviewService {
         }
     }
 
-    List overviewProjectQuery(projectName) {
+    List overviewProjectQuery(String projectName) {
         Project project = Project.findByName(projectName)
         List seq = AggregateSequences.withCriteria {
             eq("projectId", project?.id)

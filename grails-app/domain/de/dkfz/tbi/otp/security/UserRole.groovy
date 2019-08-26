@@ -34,7 +34,7 @@ class UserRole implements Serializable, Entity {
     Role role
 
     @Override
-    boolean equals(other) {
+    boolean equals(Object other) {
         if (!(other instanceof UserRole)) {
             return false
         }

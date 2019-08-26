@@ -28,7 +28,7 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class ClusterJobGeneralController {
 
-
+    @SuppressWarnings("DuplicateNumberLiteral")
     enum GeneralClusterJobsColumns {
         CLUSTER_JOB_ID(0, 'clusterJobId'),
         CLUSTER_JOB_NAME(1, 'clusterJobName'),
@@ -51,24 +51,23 @@ class ClusterJobGeneralController {
         }
     }
 
-
     static final String FORMAT_STRING = "yyyy-MM-dd HH:mm:ss"
 
     ClusterJobService clusterJobService
 
-    def index() {
-        def date = clusterJobService.getLatestJobDate() ?: new LocalDate()
+    Map index() {
+        LocalDate date = clusterJobService.latestJobDate ?: new LocalDate()
         return [latestDate: date]
     }
 
-    def findAllClusterJobsByDateBetween(DataTableCommand cmd) {
+    JSON findAllClusterJobsByDateBetween(DataTableCommand cmd) {
         Map dataToRender = [:]
 
         LocalDate startDate = LocalDate.parse(params.from)
         LocalDate endDate = LocalDate.parse(params.to)
         String sortColumnName = GeneralClusterJobsColumns.fromDataTable(cmd.iSortCol_0).columnName
 
-        def clusterJobs = clusterJobService.findAllClusterJobsByDateBetween(
+        List<ClusterJob> clusterJobs = clusterJobService.findAllClusterJobsByDateBetween(
                 startDate,
                 endDate,
                 cmd.sSearch,
@@ -77,7 +76,7 @@ class ClusterJobGeneralController {
                 sortColumnName,
                 cmd.sSortDir_0
         )
-        def data = clusterJobs.collect {
+        List<String> data = clusterJobs.collect {
             return [
                     it.clusterJobId,
                     it.clusterJobName,
@@ -94,23 +93,23 @@ class ClusterJobGeneralController {
         render dataToRender as JSON
     }
 
-    def getAllExitCodes() {
+    JSON getAllExitCodes() {
         renderPieDataAsJSON(clusterJobService.&findAllExitCodesByDateBetween)
     }
 
-    def getAllExitStatuses() {
+    JSON getAllExitStatuses() {
         renderPieDataAsJSON(clusterJobService.&findAllExitStatusesByDateBetween)
     }
 
-    def getAllFailed() {
+    JSON getAllFailed() {
         renderDataAsJSON(clusterJobService.&findAllFailedByDateBetween, ['failed'])
     }
 
-    def getAllStates() {
+    JSON getAllStates() {
         renderDataAsJSON(clusterJobService.&findAllStatesByDateBetween, ['queued', 'started', 'ended'])
     }
 
-    def getAllStatesTimeDistribution() {
+    JSON getAllStatesTimeDistribution() {
         Map dataToRender = [:]
 
         LocalDate startDate = LocalDate.parse(params.from)
@@ -121,21 +120,21 @@ class ClusterJobGeneralController {
         render dataToRender as JSON
     }
 
-    def getAllAvgCoreUsage() {
+    JSON getAllAvgCoreUsage() {
         renderDataAsJSON(clusterJobService.&findAllAvgCoreUsageByDateBetween, ['cores'])
     }
 
-    def getAllMemoryUsage() {
+    JSON getAllMemoryUsage() {
         renderDataAsJSON(clusterJobService.&findAllMemoryUsageByDateBetween, ['memory'])
     }
 
-    private renderDataAsJSON(Closure method, keys) {
+    private JSON renderDataAsJSON(Closure<Map<String, List>> method, List keys) {
         Map dataToRender = [data: [], labels: [], keys: []]
 
         LocalDate startDate = LocalDate.parse(params.from)
         LocalDate endDate = LocalDate.parse(params.to)
 
-        def results = method(startDate, endDate)
+        Map results = method(startDate, endDate)
         if (keys.size() > 1) {
             keys.each { k ->
                 dataToRender.data << results.data.get(k)
@@ -149,13 +148,13 @@ class ClusterJobGeneralController {
         render dataToRender as JSON
     }
 
-    private renderPieDataAsJSON(Closure method) {
+    private JSON renderPieDataAsJSON(Closure<List> method) {
         Map dataToRender = [data: [], labels: []]
 
         LocalDate startDate = LocalDate.parse(params.from)
         LocalDate endDate = LocalDate.parse(params.to)
 
-        def results = method(startDate, endDate)
+        List results = method(startDate, endDate)
         results.each {
             dataToRender.data << it[1]
             dataToRender.labels << it[0].toString().replace("null", "UNKNOWN") + " (" + it[1].toString() + ")"

@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.utils
 
 import grails.util.Environment
 import org.grails.exceptions.reporting.DefaultStackTraceFilterer
+import org.slf4j.Logger
 
 class ExceptionUtils {
 
@@ -31,7 +32,7 @@ class ExceptionUtils {
      *
      * This is for uncritical exceptions which should not disrupt service in production, but should make tests fail.
      */
-    static void logOrThrow(final def log, final RuntimeException e) {
+    static void logOrThrow(Logger log, RuntimeException e) {
         if (Environment.current == Environment.PRODUCTION) {
             log.error e.message, e
         } else {
@@ -39,21 +40,9 @@ class ExceptionUtils {
         }
     }
 
-    /**
-     * Logs the exception, then throws it unless in {@link Environment#PRODUCTION}.
-     *
-     * This is for uncritical exceptions which should not disrupt service in production, but should make tests fail.
-     */
-    static void logAndThrowUnlessInProduction(final def log, final RuntimeException e) {
-        log.error e.message, e
-        if (Environment.current != Environment.PRODUCTION) {
-            throw e
-        }
-    }
-
     static String getStackTrace(final Throwable t) {
         new DefaultStackTraceFilterer().filter(t)
-        final CharArrayWriter buffer = new CharArrayWriter()
+        CharArrayWriter buffer = new CharArrayWriter()
         t.printStackTrace(new PrintWriter(buffer))
         return buffer.toString()
     }

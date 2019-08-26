@@ -1828,7 +1828,7 @@ class DomainFactory {
         return findOrCreateDomainObject(RoddyWorkflowConfig, createRoddyWorkflowConfigMapHelper(properties), properties, saveAndValidate)
     }
 
-    static private Map createRunYapsaConfigMapHelper(properties) {
+    static private Map createRunYapsaConfigMapHelper(Map properties = [:]) {
         return [
                 pipeline      : createRunYapsaPipelineLazy(),
                 seqType       : { properties.seqType ?: createSeqType() },
