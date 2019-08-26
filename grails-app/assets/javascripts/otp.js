@@ -508,11 +508,11 @@ $.otp.initCommentBox = function (id, element) {
 
     cBox.keyup(function() {
         if(cBox.val() != initVal) {
-            saveCommentElement.enable();
-            cancelCommentElement.enable();
+            saveCommentElement.prop("disabled", false);
+            cancelCommentElement.prop("disabled", false);
         } else {
-            saveCommentElement.prop( "disabled", true);
-            cancelCommentElement.prop( "disabled", true);
+            saveCommentElement.prop("disabled", true);
+            cancelCommentElement.prop("disabled", true);
         };
     });
 
