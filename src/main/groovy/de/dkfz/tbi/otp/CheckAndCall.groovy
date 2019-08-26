@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp
 
 import grails.converters.JSON
 import grails.validation.Validateable
+import grails.validation.ValidationException
 import org.springframework.validation.FieldError
 
 trait CheckAndCall {
@@ -32,8 +33,12 @@ trait CheckAndCall {
         if (cmd.hasErrors()) {
             data = getErrorData(cmd.errors.getFieldError())
         } else {
-            method()
-            data = [success: true] + additionalSuccessReturnValues()
+            try {
+                method()
+                data = [success: true] + additionalSuccessReturnValues()
+            } catch (ValidationException e) {
+                data = getErrorData(e.errors.getFieldError())
+            }
         }
         render data as JSON
     }

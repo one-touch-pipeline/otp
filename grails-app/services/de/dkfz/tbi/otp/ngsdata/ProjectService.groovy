@@ -308,7 +308,7 @@ class ProjectService {
                 "storageUntil",
         ].contains(fieldName)
 
-        project."${fieldName}" = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(fieldValue)
+        project."${fieldName}" = fieldValue ? new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(fieldValue) : null
         project.save(flush: true)
     }
 
