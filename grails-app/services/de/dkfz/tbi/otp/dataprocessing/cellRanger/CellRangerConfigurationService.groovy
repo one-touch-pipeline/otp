@@ -75,10 +75,7 @@ class CellRangerConfigurationService {
             if (ind && it.individual != ind) {
                 return false
             }
-            if (sampleType && it.sampleType != sampleType) {
-                return false
-            }
-            return true
+            return (!sampleType || it.sampleType == sampleType)
         }
 
         return new Samples(

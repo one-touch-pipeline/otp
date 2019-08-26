@@ -101,10 +101,7 @@ class LsdfFilesService {
         if (!dataFile) {
             return false
         }
-        if (!dataFile.used) {
-            return false
-        }
-        return true
+        return dataFile.used
     }
 
     String seqTypeDirectory(DataFile file) {

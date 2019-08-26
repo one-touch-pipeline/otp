@@ -48,10 +48,7 @@ class SampleIdentifier implements Entity {
                 SessionUtils.withNewSession { session ->
                     regexFromProcessingOption = ProcessingOptionService.findOptionSafe(OptionName.VALIDATOR_SAMPLE_IDENTIFIER_REGEX, null, obj.sample?.project)
                 }
-                if (!(val ==~ (regexFromProcessingOption ?: '.+'))) {
-                    return false
-                }
-                return true
+                return val ==~ (regexFromProcessingOption ?: '.+')
             }
         )
         sample()

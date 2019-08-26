@@ -78,10 +78,8 @@ class ReferenceGenomeProjectSeqType implements Entity {
                             .findAllByProjectAndSeqTypeAndSampleTypeAndDeprecatedDateIsNull(obj.project, obj.seqType, obj.sampleType)
                 if (existingObjects.isEmpty()) {
                     return true
-                } else if ((existingObjects.size() == 1) && (existingObjects.contains(obj))) {
-                    return true
                 } else {
-                    return false
+                    return existingObjects.size() == 1 && existingObjects.contains(obj)
                 }
             }
         }

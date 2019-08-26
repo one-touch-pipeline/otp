@@ -1104,7 +1104,7 @@ All the Rules that will be used for OTP
         priority = LOW
     }
     UnnecessaryIfStatement {
-        priority = HIGH
+        priority = CRITICAL
     }
     UnnecessaryInstanceOfCheck {
         priority = CRITICAL

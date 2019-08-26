@@ -78,10 +78,7 @@ class SeqScanStartJob extends AbstractStartJobImpl  {
             return false
         }
         int numberOfRunning = numberOfRunningProcesses()
-        if (numberOfRunning >= MAX_RUNNING) {
-            return false
-        }
-        return true
+        return numberOfRunning < MAX_RUNNING
     }
 
    /**

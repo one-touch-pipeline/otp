@@ -74,10 +74,7 @@ class ShutdownInformation implements Entity {
                 // initiated has to be before succeeded date
                 return false
             }
-            if (info.succeeded == null && info.canceled == null && ShutdownInformation.findBySucceededIsNullAndCanceledIsNull() != info) {
-                return false
-            }
-            return true
+            return !(info.succeeded == null && info.canceled == null && ShutdownInformation.findBySucceededIsNullAndCanceledIsNull() != info)
         })
         canceledBy(nullable: true, validator: { User user, ShutdownInformation info ->
             if (!user) {
@@ -87,11 +84,8 @@ class ShutdownInformation implements Entity {
                 // canceled may not be set if info has succeeded
                 return false
             }
-            if (!info.canceled) {
-                // if it's canceled we need a date
-                return false
-            }
-            return true
+            // if it's canceled we need a date
+            return info.canceled != null
         })
         canceled(nullable: true, validator: { Date date, ShutdownInformation info ->
             if (!date) {
@@ -105,11 +99,8 @@ class ShutdownInformation implements Entity {
                 // if it's canceled we need a user
                 return false
             }
-            if (info.initiated > date) {
-                // initiated has to be before canceled date
-                return false
-            }
-            return true
+            // initiated has to be before canceled date
+            return info.initiated <= date
         })
     }
 }

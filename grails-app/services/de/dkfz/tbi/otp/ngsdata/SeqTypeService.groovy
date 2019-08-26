@@ -48,10 +48,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     }
 
     static boolean isSingleCell(String baseMaterial) {
-        if (baseMaterial in [SeqType.SINGLE_CELL_DNA, SeqType.SINGLE_CELL_RNA]) {
-            return true
-        }
-        return false
+        return baseMaterial in [SeqType.SINGLE_CELL_DNA, SeqType.SINGLE_CELL_RNA]
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

@@ -40,11 +40,6 @@ class CustomRequireCsrfProtectionMatcher implements RequestMatcher {
         if (request.contentType?.contains("multipart/form-data")) {
             return false
         }
-        if ((request.forwardURI - request.contextPath) == "/console/execute") {
-            return false
-        }
-
-        return true
+        return (request.forwardURI - request.contextPath) != "/console/execute"
     }
-
 }

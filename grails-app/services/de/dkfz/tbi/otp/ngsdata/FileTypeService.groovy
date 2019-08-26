@@ -27,21 +27,11 @@ import grails.gorm.transactions.Transactional
 @Transactional
 class FileTypeService {
 
-    boolean fastqcReady(DataFile file) {
-        if (file.fileName.endsWith(".bz2")) {
-            return false
-        }
-        return true
-    }
-
     boolean isGoodSequenceDataFile(DataFile dataFile) {
         if (dataFile.fileWithdrawn) {
             return false
         }
-        if (!isSequenceDataFile(dataFile)) {
-            return false
-        }
-        return true
+        return isSequenceDataFile(dataFile)
     }
 
     boolean isSequenceDataFile(DataFile dataFile) {
