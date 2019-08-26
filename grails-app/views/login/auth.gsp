@@ -24,7 +24,7 @@
 <head>
     <meta name='layout' content='main'/>
     <title><g:message code="springSecurity.login.title"/></title>
-    <asset:stylesheet src="modules/info"/>
+    <asset:stylesheet src="modules/info.css"/>
     <asset:javascript src="common/FocusLogin.js"/>
 </head>
 

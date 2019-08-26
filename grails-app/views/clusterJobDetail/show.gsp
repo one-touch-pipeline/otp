@@ -26,8 +26,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="jobstats.detail.title"/></title>
-    <asset:javascript src="modules/multiprogressbar"/>
-    <asset:stylesheet src="modules/multiprogressbar"/>
+    <asset:javascript src="modules/multiprogressbar.js"/>
+    <asset:stylesheet src="modules/multiprogressbar.css"/>
     <asset:javascript src="pages/clusterJobDetail/show/clusterJobDetail.js"/>
 </head>
 <!--
