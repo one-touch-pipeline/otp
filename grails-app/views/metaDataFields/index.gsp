@@ -31,7 +31,7 @@
 
 
 <body>
-    <div class="body">
+    <div class="body fixedTableHeader wrapTableHeader">
         <h3>
             <g:message code="dataFields.title.caseInsensitive" />
         </h3>
