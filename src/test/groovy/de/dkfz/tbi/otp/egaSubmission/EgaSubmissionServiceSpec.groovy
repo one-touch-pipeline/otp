@@ -26,6 +26,7 @@ import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
@@ -402,5 +403,70 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
         then:
         defaultEgaAliasesForDataFiles.get(bamFile.bamFileName + alias) == "${aliasNameHelper.join("_")}.bam"
+    }
+
+    void "getDataFilesAndAlias, when already DataFiles are connected with the submission, then return these"() {
+        given:
+        SeqTrack seqTrack1 = createSeqTrackWithOneDataFile()
+        SeqTrack seqTrack2 = createSeqTrackWithOneDataFile([
+                sample : seqTrack1.sample,
+                seqType: seqTrack1.seqType,
+        ])
+        DataFile datafile = CollectionUtils.exactlyOneElement(seqTrack2.dataFiles)
+        EgaSubmission egaSubmission = createEgaSubmission([
+                samplesToSubmit: [
+                        createSampleSubmissionObject([
+                                sample      : seqTrack1.sample,
+                                seqType     : seqTrack1.seqType,
+                                useFastqFile: true,
+                        ]),
+                ] as Set,
+                dataFilesToSubmit: [
+                        createDataFileSubmissionObject([
+                                dataFile: datafile,
+                        ]),
+                ] as Set,
+        ])
+        egaSubmissionService.seqTrackService = new SeqTrackService([
+                fileTypeService: new FileTypeService(),
+        ])
+
+        when:
+        List<DataFileAndSampleAlias> list = egaSubmissionService.getDataFilesAndAlias(egaSubmission)
+
+        then:
+        list*.dataFile == [datafile]
+    }
+
+    void "getDataFilesAndAlias, when sample has two lane, then return both"() {
+        given:
+        SeqTrack seqTrack1 = createSeqTrackWithOneDataFile()
+        SeqTrack seqTrack2 = createSeqTrackWithOneDataFile([
+                sample : seqTrack1.sample,
+                seqType: seqTrack1.seqType,
+        ])
+        EgaSubmission egaSubmission = createEgaSubmission([
+                samplesToSubmit: [
+                        createSampleSubmissionObject([
+                                sample      : seqTrack1.sample,
+                                seqType     : seqTrack1.seqType,
+                                useFastqFile: true,
+                        ]),
+                ] as Set,
+        ])
+        egaSubmissionService.seqTrackService = new SeqTrackService([
+                fileTypeService: new FileTypeService(),
+        ])
+
+        List<DataFile> expectedDataFiles = [
+                seqTrack1,
+                seqTrack2,
+        ]*.dataFiles.flatten()
+
+        when:
+        List<DataFileAndSampleAlias> list = egaSubmissionService.getDataFilesAndAlias(egaSubmission)
+
+        then:
+        TestCase.assertContainSame(list*.dataFile, expectedDataFiles)
     }
 }

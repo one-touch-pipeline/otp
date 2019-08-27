@@ -166,7 +166,9 @@ class EgaSubmissionService {
             dataFiles = submission.dataFilesToSubmit*.dataFile
         } else {
             dataFiles = submission.samplesToSubmit.findAll { it.useFastqFile }.collectMany {
-                seqTrackService.getSequenceFilesForSeqTrackIncludingWithdrawn(SeqTrack.findBySampleAndSeqType(it.sample, it.seqType))
+                SeqTrack.findAllBySampleAndSeqType(it.sample, it.seqType).collectMany {
+                    seqTrackService.getSequenceFilesForSeqTrackIncludingWithdrawn(it)
+                }
             }
         }
 
