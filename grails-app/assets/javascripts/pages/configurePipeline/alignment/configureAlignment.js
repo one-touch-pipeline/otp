@@ -113,7 +113,7 @@ $.otp.configureAlignment = {
                         $.each(value, function (i, p) {
                             var outputValue = index.toLowerCase().replace("genome_", "").replace("_index", "") + " - " + p.indexToolVersion;
                             if (outputValue == data.defaultGenomeStarIndex) {
-                                $('.toolVersionSelect_' + search).append($('<option></option>').val(p.id).html(outputValue).selected());
+                                $('.toolVersionSelect_' + search).append($('<option></option>').prop("selected", true).val(p.id).html(outputValue));
                             } else {
                                 $('.toolVersionSelect_' + search).append($('<option></option>').val(p.id).html(outputValue));
                             }

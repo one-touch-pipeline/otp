@@ -21,6 +21,5 @@
  */
 
 //= require /webjars/jquery/1.11.1/jquery.js
-//= require /webjars/jquery-form/4.2.2/jquery.form.min.js
 //= require /webjars/bootstrap/3.3.5/js/bootstrap.js
 //= require otp
