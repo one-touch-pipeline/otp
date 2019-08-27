@@ -1652,11 +1652,12 @@ ln -s '${newDirectFileName}' \\
     }
 
     /**
-     * When an item doesn't change, the 'new' value in the input map can be left empty (i.e. empty string: '') for readability.
+     * When an item of the swapMap should not change, the 'new' value can be left empty (i.e. empty string: '') for readability.
      *
-     * This implied "remains the same" needs to be made explicit for the rest of the script to work.
+     * This function fills in empty values of the swapMap with their corresponding key, thus creating a full map, which enables
+     * us to proceed the same way for changing and un-changing entries.
      *
-     * !Gotcha! the swapMap is mutated in-place as a side-effect!
+     * Note that this function mutates the swapMap in-place!
      */
     private void completeOmittedNewValuesAndLog(Map<String, String> swapMap, String label, StringBuilder log) {
         log << "\n  swapping ${label}:"

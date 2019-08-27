@@ -101,7 +101,7 @@ class IndividualService {
         def c = Individual.createCriteria()
         return c.list {
             'in'('project', projects)
-            if (filter.length() >= 3) {
+            if (filterString.length() >= 3) {
                 String filter = "%${filterString}%"
                 or {
                     ilike("pid", filter)
