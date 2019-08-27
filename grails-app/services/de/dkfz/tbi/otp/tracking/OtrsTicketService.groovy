@@ -82,30 +82,30 @@ class OtrsTicketService {
         return otrsTicket
     }
 
-    @SuppressWarnings('CouldBeElvis')
+
     OtrsTicket createOrResetOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         OtrsTicket otrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
         if (otrsTicket) {
-            otrsTicket.installationFinished = null
-            otrsTicket.fastqcFinished = null
-            otrsTicket.alignmentFinished = null
-            otrsTicket.snvFinished = null
-            otrsTicket.indelFinished = null
-            otrsTicket.sophiaFinished = null
-            otrsTicket.aceseqFinished = null
-            otrsTicket.runYapsaFinished = null
-            otrsTicket.finalNotificationSent = false
+            otrsTicket.with {
+                installationFinished = null
+                fastqcFinished = null
+                alignmentFinished = null
+                snvFinished = null
+                indelFinished = null
+                sophiaFinished = null
+                aceseqFinished = null
+                runYapsaFinished = null
+                finalNotificationSent = false
+            }
             otrsTicket.automaticNotification = automaticNotification
-            if (!otrsTicket.seqCenterComment) {
-                otrsTicket.seqCenterComment = seqCenterComment
-            } else if (seqCenterComment && !otrsTicket.seqCenterComment.contains(seqCenterComment)) {
+            if (seqCenterComment && otrsTicket.seqCenterComment && !otrsTicket.seqCenterComment.contains(seqCenterComment)) {
                 otrsTicket.seqCenterComment += '\n\n' + seqCenterComment
             }
+            otrsTicket.seqCenterComment = otrsTicket.seqCenterComment ?: seqCenterComment
             assert otrsTicket.save(flush: true)
             return otrsTicket
-        } else {
-            return createOtrsTicket(ticketNumber, seqCenterComment, automaticNotification)
         }
+        return createOtrsTicket(ticketNumber, seqCenterComment, automaticNotification)
     }
 
     void resetAnalysisNotification(OtrsTicket otrsTicket) {

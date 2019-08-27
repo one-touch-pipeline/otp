@@ -38,10 +38,6 @@ class Keyword implements Entity {
     }
 
     static Keyword findOrSaveByName(String name) {
-        Keyword keyword = findByName(name)
-        if (!keyword) {
-            keyword = new Keyword([name: name]).save(flush:true)
-        }
-        return keyword
+        return findByName(name) ?: new Keyword(name: name).save(flush: true)
     }
 }

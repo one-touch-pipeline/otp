@@ -85,10 +85,7 @@ class JobExecutionPlanDSL {
                 }
                 // next run
                 outputType = passThroughType
-                mappingJob = mappingJob.next
-                if (!mappingJob) {
-                    mappingJob = firstJob
-                }
+                mappingJob = mappingJob.next ?: firstJob
             }
             ParameterMapping finalMapping = new ParameterMapping(from: outputType, to: inputType, job: jobDefinition)
             finalMapping.save(flush: true)
@@ -138,9 +135,7 @@ class JobExecutionPlanDSL {
         println "In job Closure with " + jobName
         JobDefinition jobDefinition = new JobDefinition(name: jobName, bean: bean, plan: jep, previous: helper.previous)
         jobDefinition.save(flush: true)
-        if (!helper.firstJob) {
-            helper.firstJob = jobDefinition
-        }
+        helper.firstJob = helper.firstJob ?: jobDefinition
         if (helper.previous) {
             helper.previous.next = jobDefinition
             helper.previous.save(flush: true)
@@ -171,9 +166,7 @@ class JobExecutionPlanDSL {
         assert(validatorFor)
         ValidatingJobDefinition jobDefinition = new ValidatingJobDefinition(name: jobName, bean: bean, plan: jep, previous: helper.previous, validatorFor: validatorFor)
         jobDefinition.save(flush: true)
-        if (!helper.firstJob) {
-            helper.firstJob = jobDefinition
-        }
+        helper.firstJob = helper.firstJob ?: jobDefinition
         if (helper.previous) {
             helper.previous.next = jobDefinition
             helper.previous.save(flush: true)

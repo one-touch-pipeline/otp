@@ -126,13 +126,7 @@ class DomainFactory {
     static <T> T findOrCreateDomainObject(Class<T> domainClass, Map defaultCreationProperties, Map requiredSearchProperties, boolean saveAndValidate = true) {
         assert requiredSearchProperties: 'Required search properties are missing.'
 
-        T domainObject = domainClass.findWhere(requiredSearchProperties)
-
-        if (!domainObject) {
-            domainObject = createDomainObject(domainClass, defaultCreationProperties, requiredSearchProperties, saveAndValidate)
-        }
-
-        return domainObject
+        return domainClass.findWhere(requiredSearchProperties) ?: createDomainObject(domainClass, defaultCreationProperties, requiredSearchProperties, saveAndValidate)
     }
 
     static <T> T createDomainWithImportAlias(Class<T> domainClass, Map parameterProperties) {
@@ -661,12 +655,7 @@ class DomainFactory {
         if (referenceGenome && pipeline) {
             mergingWorkPackage = MergingWorkPackage.findWhere(mwpProperties)
         }
-
-        if (!mergingWorkPackage) {
-            mergingWorkPackage = DomainFactory.createMergingWorkPackage(mwpProperties)
-        }
-
-        return mergingWorkPackage
+        return mergingWorkPackage ?: createMergingWorkPackage(mwpProperties)
     }
 
 
@@ -1308,19 +1297,14 @@ class DomainFactory {
             samplePair = createSamplePair(diseaseWorkPackage, controlWorkPackage)
         }
 
-        if (!diseaseBamFile) {
-            diseaseBamFile = createRoddyBamFile(
-                    [workPackage: diseaseWorkPackage] +
-                            (controlBamFile ? [config: controlBamFile.config] : [:]) +
-                            bamFile1Properties
-            )
-        }
-        if (!controlBamFile) {
-            controlBamFile = createRoddyBamFile([
-                    workPackage: controlWorkPackage,
-                    config     : diseaseBamFile.config,
-            ] + bamFile2Properties)
-        }
+        diseaseBamFile = diseaseBamFile ?: createRoddyBamFile([workPackage: diseaseWorkPackage] +
+                (controlBamFile ? [config: controlBamFile.config] : [:]) +
+                bamFile1Properties
+        )
+        controlBamFile = controlBamFile ?: createRoddyBamFile([
+                workPackage: controlWorkPackage,
+                config     : diseaseBamFile.config,
+        ] + bamFile2Properties)
 
         return [
                 instanceName      : "instance-${counter++}",
@@ -1852,10 +1836,8 @@ class DomainFactory {
     }
 
     static Map getMergingProperties(MergingWorkPackage mergingWorkPackage) {
-        SeqPlatform seqPlatform = mergingWorkPackage?.seqPlatformGroup?.seqPlatforms?.sort()?.find()
-        if (!seqPlatform) {
-            seqPlatform = createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: [mergingWorkPackage.seqPlatformGroup])
-        }
+        SeqPlatform seqPlatform = mergingWorkPackage?.seqPlatformGroup?.seqPlatforms?.sort()?.find() ?:
+                createSeqPlatformWithSeqPlatformGroup(seqPlatformGroups: [mergingWorkPackage.seqPlatformGroup])
 
         Map properties = [
                 sample               : mergingWorkPackage.sample,

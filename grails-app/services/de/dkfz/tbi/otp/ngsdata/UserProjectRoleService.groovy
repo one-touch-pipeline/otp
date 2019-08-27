@@ -62,7 +62,8 @@ class UserProjectRoleService {
         assert project: "the project must not be null"
         assert !UserProjectRole.findByUserAndProject(user, project): "User '${user.username ?: user.realName}' is already part of project '${project.name}'"
 
-        String requester = springSecurityService?.principal?.hasProperty("username") ? springSecurityService.principal.username : springSecurityService?.principal
+        String requester = springSecurityService?.principal?.hasProperty("username") ?
+                springSecurityService.principal.username : springSecurityService?.principal
         UserProjectRole oldUPR = UserProjectRole.findByUserAndProject(user, project)
         List<OtpPermissionCode> grantedPermissions = getPermissionDiff(true, flags, oldUPR)
         List<OtpPermissionCode> revokedPermissions = getPermissionDiff(false, flags, oldUPR)
@@ -100,11 +101,11 @@ class UserProjectRoleService {
 
         User user = User.findByUsernameOrEmail(ldapUserDetails.cn, ldapUserDetails.mail)
 
-        if (!user) {
-            user = userService.createUser(ldapUserDetails.cn, ldapUserDetails.mail, ldapUserDetails.realName)
-        } else {
+        if (user) {
             assert user.username: "There is already an external user with email '${user.email}'"
             assert user.username == ldapUserDetails.cn: "The given email address '${user.email}' is already registered for LDAP user '${user.username}'"
+        } else {
+            user = userService.createUser(ldapUserDetails.cn, ldapUserDetails.mail, ldapUserDetails.realName)
         }
 
         UserProjectRole userProjectRole = createUserProjectRole(user, project, projectRole, flags)
@@ -122,11 +123,11 @@ class UserProjectRoleService {
         assert project: "project must not be null"
 
         User user = User.findByEmail(email)
-        if (!user) {
-            user = userService.createUser(null, email, realName)
-        } else {
+        if (user) {
             assert !user.username: "The given email address '${user.email}' is already registered for LDAP user '${user.username}'"
             assert user.realName == realName: "The given email address '${user.email}' is already registered for external user '${user.realName}'"
+        } else {
+            user = userService.createUser(null, email, realName)
         }
 
         UserProjectRole userProjectRole = createUserProjectRole(user, project, projectRole)
@@ -254,7 +255,7 @@ class UserProjectRoleService {
         String body
         if (userIsSubmitter && executingUserIsAdministrativeUser) {
             String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
-            body = createMessage("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter" ,[
+            body = createMessage("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter" , [
                 userIdentifier       : userProjectRole.user.realName ?: userProjectRole.user.username,
                 projectRole          : projectRoleName,
                 projectName          : projectName,
@@ -262,7 +263,7 @@ class UserProjectRoleService {
                 supportTeamSalutation: supportTeamName,
             ])
         } else {
-            body = createMessage("projectUser.notification.newProjectMember.body.userManagerAddedMember" ,[
+            body = createMessage("projectUser.notification.newProjectMember.body.userManagerAddedMember" , [
                 userIdentifier: userProjectRole.user.realName ?: userProjectRole.user.username,
                 projectRole   : projectRoleName,
                 projectName   : projectName,

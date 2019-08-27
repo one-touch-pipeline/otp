@@ -329,7 +329,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     CouldBeElvis {
-        priority = HIGH
+        priority = CRITICAL
     }
     CouldBeSwitchStatement {
         priority = HIGH

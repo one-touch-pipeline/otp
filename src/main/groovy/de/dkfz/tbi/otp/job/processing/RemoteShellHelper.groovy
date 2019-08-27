@@ -133,9 +133,7 @@ class RemoteShellHelper {
         }
         if (!maxSshCalls) {
             synchronized (this) {
-                if (!maxSshCalls) {
-                    maxSshCalls = new Semaphore(processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.MAXIMUM_PARALLEL_SSH_CALLS), true)
-                }
+                maxSshCalls = maxSshCalls ?: new Semaphore(processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.MAXIMUM_PARALLEL_SSH_CALLS), true)
             }
         }
         maxSshCalls.acquire()

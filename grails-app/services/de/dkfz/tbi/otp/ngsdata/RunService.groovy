@@ -175,10 +175,7 @@ class RunService {
         if (identifier?.isLong()) {
             run = Run.get(identifier as Long)
         }
-        if (!run) {
-            run = Run.findByName(identifier)
-        }
-        return run
+        return run ?: Run.findByName(identifier)
     }
 
     /**

@@ -48,19 +48,14 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     ProcessingOptionService processingOptionService
 
     Pipeline getPipeline(SeqTrack seqTrack) {
-        Pipeline pipeline = atMostOneElement(Pipeline.findAllByNameAndType(pipelineName(seqTrack), Pipeline.Type.ALIGNMENT))
-        if (!pipeline) {
-            pipeline = new Pipeline(
-                    name: pipelineName(seqTrack),
-                    type: Pipeline.Type.ALIGNMENT
-            ).save(flush: true)
-        }
-        return pipeline
+        return atMostOneElement(Pipeline.findAllByNameAndType(pipelineName(seqTrack), Pipeline.Type.ALIGNMENT)) ?: new Pipeline(
+                name: pipelineName(seqTrack),
+                type: Pipeline.Type.ALIGNMENT,
+        ).save(flush: true)
     }
 
     @Override
     Collection<MergingWorkPackage> decideAndPrepareForAlignment(SeqTrack seqTrack, boolean forceRealign) {
-
         if (!SeqTrackService.mayAlign(seqTrack)) {
             return Collections.emptyList()
         }
@@ -113,7 +108,6 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     Collection<MergingWorkPackage> findOrSaveWorkPackages(SeqTrack seqTrack,
                                                           ReferenceGenomeProjectSeqType referenceGenomeProjectSeqType,
                                                           Pipeline pipeline) {
-
         // TODO OTP-1401: In the future there may be more than one MWP for the sample and seqType.
         MergingWorkPackage workPackage = atMostOneElement(
                 MergingWorkPackage.findAllWhere(

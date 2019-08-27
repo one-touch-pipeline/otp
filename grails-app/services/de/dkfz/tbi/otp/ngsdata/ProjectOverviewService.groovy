@@ -169,16 +169,9 @@ class ProjectOverviewService {
         String tool = res.get('markDuplicatesVariant')
 
         if (seqType.isRna()) {
-
             tool = MergeConstants.MERGE_TOOL_SAMBAMBA_RNA
-
-        } else if (!tool) {
-
-            tool = res.get("useBioBamBamMarkDuplicates") == 'true' ? MergeConstants.MERGE_TOOL_BIOBAMBAM : MergeConstants.MERGE_TOOL_PICARD
-
         }
-
-        return tool
+        return tool ?: res.get("useBioBamBamMarkDuplicates") == 'true' ? MergeConstants.MERGE_TOOL_BIOBAMBAM : MergeConstants.MERGE_TOOL_PICARD
     }
 
     /**

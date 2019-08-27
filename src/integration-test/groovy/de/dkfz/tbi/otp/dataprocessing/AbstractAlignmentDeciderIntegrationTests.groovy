@@ -395,10 +395,6 @@ class AbstractAlignmentDeciderIntegrationTests {
     }
 
     private static Pipeline findOrSaveByNameAndType(Pipeline.Name name, Pipeline.Type type) {
-        Pipeline pipeline = Pipeline.findByNameAndType(name, type)
-        if (!pipeline) {
-            pipeline = DomainFactory.createPipeline(name, type)
-        }
-        return pipeline
+        return Pipeline.findByNameAndType(name, type) ?: DomainFactory.createPipeline(name, type)
     }
 }

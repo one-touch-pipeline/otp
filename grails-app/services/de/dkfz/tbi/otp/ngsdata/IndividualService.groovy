@@ -55,10 +55,7 @@ class IndividualService {
         if (identifier?.isLong()) {
             individual = Individual.get(identifier as Long)
         }
-        if (!individual) {
-            individual = Individual.findByMockFullName(identifier)
-        }
-        return individual
+        return individual ?: Individual.findByMockFullName(identifier)
     }
 
     @PostAuthorize("hasRole('ROLE_OPERATOR') or (returnObject == null) or hasPermission(returnObject.project, 'OTP_READ_ACCESS')")

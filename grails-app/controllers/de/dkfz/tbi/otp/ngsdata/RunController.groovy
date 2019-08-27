@@ -40,9 +40,7 @@ class RunController {
     }
 
     def show = {
-        if (!params.id) {
-            params.id = "0"
-        }
+        params.id = params.id ?: "0"
         Run run = runService.getRun(params.id)
         if (!run) {
             response.sendError(404)

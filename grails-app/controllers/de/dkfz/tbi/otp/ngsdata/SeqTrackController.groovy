@@ -30,9 +30,7 @@ class SeqTrackController {
     ProcessParameterService processParameterService
 
     Map show() {
-        if (!params.id) {
-            params.id = "0"
-        }
+        params.id = params.id ?: "0"
         SeqTrack seqTrack = seqTrackService.getSeqTrack(params.id)
         if (!seqTrack) {
             response.sendError(404)
