@@ -123,24 +123,24 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
     }
 
     Map sampleInformation(EgaSubmission submission) {
-        Map<String, String> egaSampleAliases = flash.egaSampleAliases ?: [:]
+        Map<EgaMapKey, String> egaSampleAliases = flash.egaSampleAliases ?: [:]
         Map<SampleSubmissionObject, Boolean> existingFastqs = egaSubmissionService.checkFastqFiles(submission)
         Map<SampleSubmissionObject, Boolean> existingBams = egaSubmissionService.checkBamFiles(submission)
-        Map<List<String>, Boolean> selectedFastqs = new HashMap<>(existingBams.size())
-        Map<List<String>, Boolean> selectedBams = new HashMap<>(existingBams.size())
+        Map<EgaMapKey, Boolean> selectedFastqs = new HashMap<>(existingBams.size())
+        Map<EgaMapKey, Boolean> selectedBams = new HashMap<>(existingBams.size())
 
         if (flash.fastqs && flash.bams) {
             existingFastqs.each { key, value ->
-                List<String> newKey = getIdentifierKeyFromSampleSubmissionObject(key)
+                EgaMapKey newKey = getIdentifierKeyFromSampleSubmissionObject(key)
                 selectedFastqs.put(newKey, flash.fastqs.get(newKey) && value)
             }
             existingBams.each { key, value ->
-                List<String> newKey = getIdentifierKeyFromSampleSubmissionObject(key)
+                EgaMapKey newKey = getIdentifierKeyFromSampleSubmissionObject(key)
                 selectedBams.put(newKey, flash.bams.get(newKey) && value)
             }
         } else {
             existingBams.each { key, value ->
-                List<String> newKey = getIdentifierKeyFromSampleSubmissionObject(key)
+                EgaMapKey newKey = getIdentifierKeyFromSampleSubmissionObject(key)
                 selectedFastqs.put(newKey, !value)
                 selectedBams.put(newKey, value)
             }
@@ -552,11 +552,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         render dataToRender as JSON
     }
 
-    List<String> getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
-        return [
-                sampleSubmissionObject.sample.individual.displayName,
-                sampleSubmissionObject.seqType.toString(),
-                sampleSubmissionObject.sample.sampleType.displayName,
-        ]
+    EgaMapKey getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
+        return new EgaMapKey(sampleSubmissionObject)
     }
 }

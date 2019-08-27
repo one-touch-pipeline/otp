@@ -88,8 +88,8 @@ class EgaSubmissionFileService {
         }
     }
 
-    Map<List<String>, String> readEgaSampleAliasesFromFile(Spreadsheet spreadsheet) {
-        Map<List<String>, String> egaSampleAliases = [:]
+    Map<EgaMapKey, String> readEgaSampleAliasesFromFile(Spreadsheet spreadsheet) {
+        Map<EgaMapKey, String> egaSampleAliases = [:]
 
         spreadsheet.dataRows.each {
             egaSampleAliases.put(getIdentifierKey(it), it.getCellByColumnTitle(EGA_SAMPLE_ALIAS.value).text)
@@ -98,11 +98,11 @@ class EgaSubmissionFileService {
         return egaSampleAliases
     }
 
-    Map<List<String>, Boolean> readBoxesFromFile(Spreadsheet spreadsheet, EgaSubmissionService.FileType fileType) {
-        Map<List<String>, Boolean> map = [:]
+    Map<EgaMapKey, Boolean> readBoxesFromFile(Spreadsheet spreadsheet, EgaSubmissionService.FileType fileType) {
+        Map<EgaMapKey, Boolean> map = [:]
 
         spreadsheet.dataRows.each {
-            map.put(getIdentifierKey(it), it.getCellByColumnTitle(FILE_TYPE.value).text.toUpperCase() as EgaSubmissionService.FileType == fileType)
+            map.put(getIdentifierKey(it), (it.getCellByColumnTitle(FILE_TYPE.value).text.toUpperCase().trim() as EgaSubmissionService.FileType) == fileType)
         }
 
         return map
@@ -304,9 +304,7 @@ class EgaSubmissionFileService {
         return "${contentHeader}\n${contentBody}"
     }
 
-    static List<String> getIdentifierKey(Row row) {
-        return [row.getCellByColumnTitle(INDIVIDUAL.value).text,
-                row.getCellByColumnTitle(SAMPLE_TYPE.value).text,
-                row.getCellByColumnTitle(SEQ_TYPE.value).text]
+    static EgaMapKey getIdentifierKey(Row row) {
+        return new EgaMapKey(row)
     }
 }

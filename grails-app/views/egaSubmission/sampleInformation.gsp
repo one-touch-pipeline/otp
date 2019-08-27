@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8"%>
+<%@ page import="de.dkfz.tbi.otp.egaSubmission.EgaMapKey" contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -65,7 +65,7 @@
                         <g:set var="individual" value="${it.sample.individual.displayName}" />
                         <g:set var="seqType" value="${it.seqType.toString()}" />
                         <g:set var="sampleType" value="${it.sample.sampleType.displayName}" />
-                        <g:set var="key" value="${[individual, sampleType, seqType]}" />
+                        <g:set var="key" value="${new EgaMapKey(it)}" />
                         <tr>
                             <g:hiddenField name="sampleObjectId[${i}]" value="${it.id}"/>
                             <td>${individual}</td>

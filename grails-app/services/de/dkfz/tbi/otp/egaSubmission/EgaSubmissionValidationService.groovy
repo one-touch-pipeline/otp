@@ -55,11 +55,11 @@ class EgaSubmissionValidationService {
         String error = ""
 
         if (spreadsheet.dataRows.size() == submission.samplesToSubmit.size()) {
-            List samplesFromDB = submission.samplesToSubmit.collect {
+            List<EgaMapKey> samplesFromDB = submission.samplesToSubmit.collect {
                 getIdentifierKeyFromSampleSubmissionObject(it)
             }.sort()
 
-            List samplesFromFile = spreadsheet.dataRows.collect {
+            List<EgaMapKey> samplesFromFile = spreadsheet.dataRows.collect {
                 egaSubmissionFileService.getIdentifierKey(it)
             }.sort()
 
@@ -160,9 +160,7 @@ class EgaSubmissionValidationService {
         return false
     }
 
-    List<String> getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
-        return [sampleSubmissionObject.sample.individual.displayName,
-                sampleSubmissionObject.sample.sampleType.displayName,
-                sampleSubmissionObject.seqType.toString()]
+    EgaMapKey getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject sampleSubmissionObject) {
+        return new EgaMapKey(sampleSubmissionObject)
     }
 }
