@@ -158,7 +158,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
         setupData()
         roddyBamFile = createBamFile([fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.NEEDS_PROCESSING])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy() {
+        LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy {
             1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
             0 * cleanupWorkDirectory(_, _)
         }
@@ -192,7 +192,7 @@ class LinkFilesToFinalDestinationServiceIntegrationSpec extends Specification im
                 qcTrafficLightStatus: AbstractMergedBamFile.QcTrafficLightStatus.BLOCKED,
         ])
         CreateRoddyFileHelper.createRoddyAlignmentWorkResultFiles(roddyBamFile)
-        LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy() {
+        LinkFilesToFinalDestinationService linkFilesToFinalDestinationService = Spy {
             1 * cleanupOldRnaResults(_, _) >> { RoddyBamFile roddyBamFile, Realm realm -> }
             0 * cleanupWorkDirectory(_, _)
         }

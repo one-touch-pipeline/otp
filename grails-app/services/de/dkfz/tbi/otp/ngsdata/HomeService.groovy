@@ -36,7 +36,7 @@ class HomeService {
             ]
         }
 
-        projectData.collectEntries() { Map<String, String> project ->
+        projectData.collectEntries { Map<String, String> project ->
             List<Sequence> seq = Sequence.createCriteria().listDistinct {
                 eq("projectName", project['name'])
                 projections {

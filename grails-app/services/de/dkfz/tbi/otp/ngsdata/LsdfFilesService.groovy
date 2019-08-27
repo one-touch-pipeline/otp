@@ -141,7 +141,7 @@ class LsdfFilesService {
 
     File getFileViewByPidDirectory(SeqTrack seqTrack) {
         List<DataFile> files = DataFile.findAllBySeqTrack(seqTrack)
-        List<File> paths = files.collect() { DataFile file ->
+        List<File> paths = files.collect { DataFile file ->
             new File(getFileViewByPidPath(file)).parentFile
         }
         return CollectionUtils.exactlyOneElement(paths.unique()).parentFile

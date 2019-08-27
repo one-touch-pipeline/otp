@@ -56,7 +56,7 @@ class SeqPlatformGroup implements Entity, CommentableWithHistory {
         }
         seqPlatforms validator: { Set<SeqPlatform> seqPlatforms1, SeqPlatformGroup seqPlatformGroup, Errors errors ->
             seqPlatforms1.each { SeqPlatform seqPlatform ->
-                List<SeqPlatformGroup> l = withCriteria() {
+                List<SeqPlatformGroup> l = withCriteria {
                     seqPlatforms {
                         eq("id", seqPlatform.id)
                     }

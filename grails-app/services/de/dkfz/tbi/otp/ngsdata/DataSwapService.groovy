@@ -506,7 +506,7 @@ ln -s '${newDirectFileName}' \\
         List<DataFile> newDataFiles = seqTracks ? DataFile.findAllBySeqTrackInList(seqTracks) : []
         List<String> newFastqcFileNames = newDataFiles.collect { fastqcDataFilesService.fastqcOutputFile(it) }
 
-        oldFastqcFileNames.eachWithIndex() { oldFastqcFileName, i ->
+        oldFastqcFileNames.eachWithIndex { oldFastqcFileName, i ->
             bashScriptToMoveFiles << copyAndRemoveFastqcFile(oldFastqcFileName, newFastqcFileNames.get(i), log, failOnMissingFiles)
         }
 
@@ -678,7 +678,7 @@ ln -s '${newDirectFileName}' \\
 
         bashScriptToMoveFiles << "\n\n\n ################ move fastq files ################ \n"
 
-        oldFastqcFileNames.eachWithIndex() { oldFastqcFileName, i ->
+        oldFastqcFileNames.eachWithIndex { oldFastqcFileName, i ->
             bashScriptToMoveFiles << copyAndRemoveFastqcFile(oldFastqcFileName, newFastqcFileNames.get(i), log, failOnMissingFiles)
         }
 
@@ -1624,7 +1624,7 @@ ln -s '${newDirectFileName}' \\
 
         bashScriptToMoveFiles << "\n\n#copy and delete fastqc files\n\n"
 
-        oldFastqcFileNames.eachWithIndex() { oldFastqcFileName, i ->
+        oldFastqcFileNames.eachWithIndex { oldFastqcFileName, i ->
             bashScriptToMoveFiles << copyAndRemoveFastqcFile(oldFastqcFileName, newFastqcFileNames.get(i), log, failOnMissingFiles)
         }
 

@@ -338,7 +338,7 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
                 ].flatten()*.containedSeqTracks,
         ].flatten()
 
-        seqTracks.each() {
+        seqTracks.each {
             DomainFactory.createReferenceGenomeProjectSeqTypeLazy(project: it.project, seqType: it.seqType)
         }
 

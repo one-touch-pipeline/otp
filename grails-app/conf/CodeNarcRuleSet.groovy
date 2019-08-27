@@ -1137,7 +1137,7 @@ All the Rules that will be used for OTP
         priority = MIDDLE
     }
     UnnecessaryParenthesesForMethodCallWithClosure {
-        priority = HIGH
+        priority = CRITICAL
     }
     UnnecessaryPublicModifier {
         priority = CRITICAL

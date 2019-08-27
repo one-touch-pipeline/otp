@@ -66,7 +66,7 @@ class SeqPlatform implements Entity {
             return null
         }
 
-        List<SeqPlatformGroup> seqPlatformGroups = SeqPlatformGroup.withCriteria() {
+        List<SeqPlatformGroup> seqPlatformGroups = SeqPlatformGroup.withCriteria {
             seqPlatforms {
                 eq("id", this.id)
             }
