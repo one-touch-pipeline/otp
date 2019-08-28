@@ -75,7 +75,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     ClassForName {
-        priority = CRITICAL
+        priority = HIGH
     }
     ComparisonOfTwoConstants {
         priority = DEFAULT

@@ -33,7 +33,7 @@ class ProcessParameter implements Entity {
     static constraints = {
         process(nullable: false, unique: true)
         className(nullable: false, validator: { String name ->
-            ProcessParameterObject.isAssignableFrom(ClassLoader.getSystemClassLoader().loadClass(name)) &&
+            ProcessParameterObject.isAssignableFrom(Class.forName(name, true, getClass().getClassLoader())) &&
             !name.contains('$')
         })
     }
