@@ -1,9 +1,4 @@
-%<@ page contentType="text/html;charset=UTF-8" %>
-<html>
-<head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="main"/>
-    <title>%{--
+%{--
   - Copyright 2011-2019 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -24,6 +19,13 @@
   - OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   - SOFTWARE.
   --}%
+
+<%@ page contentType="text/html;charset=UTF-8" %>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
+    <title>
 
 <g:message code="processes.list.title"/></title>
     <asset:javascript src="modules/workflows"/>

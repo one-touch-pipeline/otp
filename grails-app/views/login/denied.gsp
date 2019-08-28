@@ -1,6 +1,4 @@
-<head>
-<meta name='layout' content='main' />
-<title>%{--
+%{--
   - Copyright 2011-2019 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,11 +20,13 @@
   - SOFTWARE.
   --}%
 
-<g:message code="springSecurity.denied.title" /></title>
+<head>
+    <meta name='layout' content='main' />
+    <title><g:message code="springSecurity.denied.title" /></title>
 </head>
 
 <body>
 <div class='body'>
-	<div class='errors'><g:message code="springSecurity.denied.message" /></div>
+    <div class='errors'><g:message code="springSecurity.denied.message" /></div>
 </div>
 </body>

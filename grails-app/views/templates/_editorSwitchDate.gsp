@@ -20,7 +20,6 @@
   - SOFTWARE.
   --}%
 
-
 <div class="edit-switch edit-switch-date">
     <p class="edit-switch-editor" style="display: none">
         <input type="hidden" name="target" value="${link}"/>

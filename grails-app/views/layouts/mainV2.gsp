@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <link rel="shortcut icon" href="%{--
+%{--
   - Copyright 2011-2019 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -27,7 +20,14 @@
   - SOFTWARE.
   --}%
 
-${assetPath(src: 'v2/otp-favicon.ico')}" type="image/x-icon">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="shortcut icon" href="${assetPath(src: 'v2/otp-favicon.ico')}" type="image/x-icon">
     <title><g:layoutTitle default="OTP"/></title>
     <meta name="contextPath" content="${request.contextPath}">
     <meta name="controllerName" content="${controllerName}">

@@ -1,7 +1,4 @@
-<html>
-<head>
-    <meta name="layout" content="info"/>
-    <title>%{--
+%{--
   - Copyright 2011-2019 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,7 +20,10 @@
   - SOFTWARE.
   --}%
 
-<g:message code="info.partners.title" /></title>
+<html>
+<head>
+    <meta name="layout" content="info"/>
+    <title><g:message code="info.partners.title" /></title>
 </head>
 
 <body>

@@ -1,9 +1,4 @@
-<div title="Output parameters">
-    <p>
-        Please specify the output parameters of the failed Jobs.
-    </p>
-    <ul class="crashRecoveryDialog">
-        %{--
+%{--
   - Copyright 2011-2019 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,7 +20,12 @@
   - SOFTWARE.
   --}%
 
-<g:each var="parametersPerJob" in="${parametersPerJobs}">
+<div title="Output parameters">
+    <p>
+        Please specify the output parameters of the failed Jobs.
+    </p>
+    <ul class="crashRecoveryDialog">
+        <g:each var="parametersPerJob" in="${parametersPerJobs}">
             <li>
                 <div class='jobName'>Job: ${parametersPerJob.jobName} (${parametersPerJob.id})</div>
                 <g:if test="${parametersPerJob.parameter.isEmpty()}">

@@ -1,7 +1,4 @@
-<html>
-<head>
-    <meta name='layout' content='main'/>
-    <title>%{--
+%{--
   - Copyright 2011-2019 The OTP authors
   -
   - Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -23,7 +20,10 @@
   - SOFTWARE.
   --}%
 
-<g:message code="springSecurity.login.title"/></title>
+<html>
+<head>
+    <meta name='layout' content='main'/>
+    <title><g:message code="springSecurity.login.title"/></title>
     <asset:stylesheet src="modules/info"/>
     <asset:javascript src="modules/info"/>
 </head>
