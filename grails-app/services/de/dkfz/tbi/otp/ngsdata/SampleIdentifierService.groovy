@@ -180,7 +180,7 @@ class SampleIdentifierService {
             return sampleType
         }
         String sanitizedSampleTypeDbName = getSanitizedSampleTypeDbName(identifier.sampleTypeDbName)
-        Sample sanitizedSampleType = atMostOneElement(SampleType.findAllByName(sanitizedSampleTypeDbName))
+        SampleType sanitizedSampleType = atMostOneElement(SampleType.findAllByName(sanitizedSampleTypeDbName))
         if (sanitizedSampleType) {
             return sanitizedSampleType
         }

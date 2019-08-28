@@ -269,6 +269,26 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         result.name == sampleTypeName
     }
 
+    void "findOrSaveSampleType, when sample type name containing underscore not exist, but with minus exist, then return this sample type"() {
+        given:
+        String sampleTypeName1 = "to_be_created"
+        String sampleTypeName2 = "to-be-created"
+        SampleType sampleType = createSampleType()
+        sampleType.name = sampleTypeName2
+        sampleType.save(flush: true)
+
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier([
+                sampleTypeDbName          : sampleTypeName1,
+                useSpecificReferenceGenome: SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT,
+        ])
+
+        when:
+        SampleType result = service.findOrSaveSampleType(identifier)
+
+        then:
+        result.name == sampleTypeName2
+    }
+
     void "findOrSaveSampleType, non existing sample type name causes exception without specificReferenceGenome"() {
         given:
         String sampleTypeName = "does-not-exist-yet"
