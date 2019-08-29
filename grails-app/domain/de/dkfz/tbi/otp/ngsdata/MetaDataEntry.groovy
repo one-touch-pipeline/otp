@@ -29,25 +29,19 @@ class MetaDataEntry implements Entity {
     DataFile dataFile
     MetaDataKey key
 
-    /**
-     * does the value corresponds to a value
-     * known in database (eg. sample)
-     */
-
+    @Deprecated
     enum Status {
         VALID, INVALID, UNKNOWN
     }
+    @Deprecated
     Status status = Status.UNKNOWN
 
-    /**
-     * was this entry present in metadata file
-     * or was it inferred by the OTP ?
-     */
-
+    @Deprecated
     enum Source {
         MDFILE, SYSTEM, MANUAL
     }
-    Source source
+    @Deprecated
+    Source source = Source.MDFILE
 
     static belongsTo = [
             dataFile: DataFile,

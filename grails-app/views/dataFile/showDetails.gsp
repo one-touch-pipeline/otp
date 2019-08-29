@@ -157,8 +157,6 @@
                         ${metaDataEntry.value}
                     </g:else>
                 </td>
-                <td class="${metaDataEntry.status}">${metaDataEntry.status}</td>
-                <td>${metaDataEntry.source}</td>
             </tr>
         </g:each>
     </table>

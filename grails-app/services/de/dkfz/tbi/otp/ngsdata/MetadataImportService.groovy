@@ -562,7 +562,6 @@ class MetadataImportService {
                     dataFile: dataFile,
                     key: metaDataKey,
                     value: row.cells[it.columnIndex].text,
-                    source: MetaDataEntry.Source.MDFILE,
             ).save(flush: false)
         }
     }
