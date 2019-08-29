@@ -70,6 +70,16 @@ compile:
   script:
     - ./gradlew classes
 
+license:
+  image: groovy:latest
+  stage: build
+  dependencies: []
+  only:
+    - branches
+    - tags
+  script:
+    - groovy scripts/licensecheck.groovy
+
 
 # ------------------------------------------------------
 # jobs stage tests
