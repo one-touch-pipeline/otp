@@ -49,7 +49,6 @@ class MetaDataService {
      * @throws ChangelogException In case the Changelog Entry could not be created
      * @throws MetaDataEntryUpdateException In case the MetaDataEntry could not be updated
      */
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     boolean updateMetaDataEntry(MetaDataEntry entry, String value) throws ChangelogException, MetaDataEntryUpdateException {
         ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
         if (!clazz) {

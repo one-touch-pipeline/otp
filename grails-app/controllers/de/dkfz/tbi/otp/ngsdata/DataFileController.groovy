@@ -73,25 +73,6 @@ class DataFileController {
         render dataToRender as JSON
     }
 
-    def updateMetaData = {
-        MetaDataEntry entry = metaDataService.getMetaDataEntryById(params.id as Long)
-        if (!entry) {
-            Map data = [error: g.message(code: "datafile.metadata.update.notFound", args: [params.id])]
-            render data as JSON
-            return
-        }
-        Map data = [:]
-        try {
-            metaDataService.updateMetaDataEntry(entry, params.value)
-            data.put("success", true)
-        } catch (MetaDataEntryUpdateException e) {
-            data.put("error", g.message(code: "datafile.metadata.update.error"))
-        } catch (ChangelogException e) {
-            data.put("error", g.message(code: "datafile.metadata.update.changelog.error"))
-        }
-        render data as JSON
-    }
-
     def metaDataChangelog = {
         MetaDataEntry entry = metaDataService.getMetaDataEntryById(params.id as Long)
         if (!entry) {

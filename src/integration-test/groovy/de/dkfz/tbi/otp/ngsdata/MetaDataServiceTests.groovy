@@ -216,36 +216,6 @@ class MetaDataServiceTests implements UserAndRoles {
     }
 
     /**
-     * Tests that an anonymous user cannot update a metaDataEntry
-     * if there is no project defined.
-     */
-    @Test
-    void testUpdateMetaDataEntryNoProjectAsAnonymous() {
-        setupData()
-        MetaDataEntry entry = mockEntry()
-        TestCase.shouldFail(AccessDeniedException) {
-            doWithAnonymousAuth {
-                metaDataService.updateMetaDataEntry(entry, "test2")
-            }
-        }
-    }
-
-    /**
-     * Tests that a user cannot update a metaDataEntry
-     * if there is no project defined.
-     */
-    @Test
-    void testUpdateMetaDataEntryNoProjectAsUser() {
-        setupData()
-        MetaDataEntry entry = mockEntry()
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
-            TestCase.shouldFail(AccessDeniedException) {
-                metaDataService.updateMetaDataEntry(entry, "test2")
-            }
-        }
-    }
-
-    /**
      * Tests that an operator user can update a metaDataEntry
      * if there is no project defined.
      */
@@ -267,35 +237,6 @@ class MetaDataServiceTests implements UserAndRoles {
         setupData()
         MetaDataEntry entry = mockEntry()
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
-        }
-    }
-
-    /**
-     * Tests that an anonymous user cannot update a metaDataEntry
-     * if there is no project defined.
-     */
-    @Test
-    void testUpdateMetaDataEntryWithProjectAsAnonymous() {
-        setupData()
-        MetaDataEntry entry = mockEntry()
-        TestCase.shouldFail(AccessDeniedException) {
-            doWithAnonymousAuth {
-                metaDataService.updateMetaDataEntry(entry, "test2")
-            }
-        }
-    }
-
-    @Test
-    void testUpdateMetaDataEntryPermission() {
-        setupData()
-        MetaDataEntry entry = mockEntry()
-        SpringSecurityUtils.doWithAuth(TESTUSER) {
-            TestCase.shouldFail(AccessDeniedException) {
-                metaDataService.updateMetaDataEntry(entry, "test2")
-            }
-        }
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
             assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
         }
     }

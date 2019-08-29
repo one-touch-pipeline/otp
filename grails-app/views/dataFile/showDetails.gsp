@@ -27,7 +27,7 @@
     <meta name="layout" content="main"/>
     <title><g:message code="datafile.showDetails.title"/></title>
     <asset:javascript src="modules/editorSwitch"/>
-    <asset:javascript src="modules/changeLog"/>
+    <asset:javascript src="modules/changeLog.js"/>
 </head>
 <body>
     <div class="body_grow">
@@ -145,22 +145,18 @@
             </tr>
         </table>
         <H1><g:message code="datafile.showDetails.metaDataEntries"/></H1>
+        <p>${g.message(code: "datafile.showDetails.metaDataEntries.explanation")}</p>
         <table>
         <g:each var="metaDataEntry" in="${entries}">
             <tr>
                 <td class="myKey">${metaDataEntry.key.name}</td>
                 <td class="myValue">
-                    <sec:ifAllGranted roles="ROLE_ADMIN">
-                        <otp:editorSwitch roles="ROLE_ADMIN" link="${g.createLink(controller: 'dataFile', action: 'updateMetaData', id: metaDataEntry.id)}" value="${metaDataEntry.value}"/>
-                    </sec:ifAllGranted>
-                    <sec:ifNotGranted roles="ROLE_ADMIN">
-                        <g:if test="${metaDataEntry.key.name == MetaDataColumn.SAMPLE_ID.name() && ProjectOverviewService.PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(dataFile.project.name)}">
-                            <g:message code="datafile.showDetails.hiddenSampleIdentifier"/>
-                        </g:if>
-                        <g:else>
-                            ${metaDataEntry.value}
-                        </g:else>
-                    </sec:ifNotGranted>
+                    <g:if test="${metaDataEntry.key.name == MetaDataColumn.SAMPLE_ID.name() && ProjectOverviewService.PROJECT_TO_HIDE_SAMPLE_IDENTIFIER.contains(dataFile.project.name)}">
+                        <g:message code="datafile.showDetails.hiddenSampleIdentifier"/>
+                    </g:if>
+                    <g:else>
+                        ${metaDataEntry.value}
+                    </g:else>
                 </td>
                 <td class="${metaDataEntry.status}">${metaDataEntry.status}</td>
                 <td>${metaDataEntry.source}</td>

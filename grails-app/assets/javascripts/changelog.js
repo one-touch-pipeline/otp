@@ -23,32 +23,34 @@
 /*global $: false, window: false
  */
 
-$("div.showChangeLog button").click(function () {
-    "use strict";
-    var container = $(this).parent();
-    $.ajax({
-        url: $("input:hidden", container).val(),
-        dataType: 'json',
-        success: function (data) {
-            var tbody, tr, i, dialog, date;
-            tbody = $("table tbody", container);
-            dialog = $("div", container).clone();
-            for (i = 0; i < data.length; i += 1) {
-                tr = tbody.append("<tr>");
-                date = new Date(data[i].timestamp);
-                tr.append("<td title=\"" + date.toLocaleString() + "\">" + $.datepicker.formatDate("yy-mm-dd", date) + "</td>");
-                tr.append("<td>" + data[i].from + "</td>");
-                tr.append("<td>" + data[i].to + "</td>");
-                tr.append("<td>" + data[i].source + "</td>");
-                tr.append("<td>" + data[i].comment + "</td>");
-            }
-            $("div", container).dialog({
-                width: 800,
-                close: function () {
-                    $(this).remove();
+$(function () {
+    $("div.showChangeLog button").click(function () {
+        "use strict";
+        var container = $(this).parent();
+        $.ajax({
+            url: $("input:hidden", container).val(),
+            dataType: 'json',
+            success: function (data) {
+                var tbody, tr, i, dialog, date;
+                tbody = $("table tbody", container);
+                dialog = $("div", container).clone();
+                for (i = 0; i < data.length; i += 1) {
+                    tr = tbody.append("<tr>");
+                    date = new Date(data[i].timestamp);
+                    tr.append("<td title=\"" + date.toLocaleString() + "\">" + $.datepicker.formatDate("yy-mm-dd", date) + "</td>");
+                    tr.append("<td>" + data[i].from + "</td>");
+                    tr.append("<td>" + data[i].to + "</td>");
+                    tr.append("<td>" + data[i].source + "</td>");
+                    tr.append("<td>" + data[i].comment + "</td>");
                 }
-            });
-            container.append(dialog);
-        }
+                $("div", container).dialog({
+                    width: 800,
+                    close: function () {
+                        $(this).remove();
+                    }
+                });
+                container.append(dialog);
+            }
+        });
     });
 });
