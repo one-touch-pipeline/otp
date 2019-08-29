@@ -192,7 +192,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     IfStatementBraces {
-        priority = HIGH
+        priority = CRITICAL
     }
     WhileStatementBraces {
         priority = CRITICAL

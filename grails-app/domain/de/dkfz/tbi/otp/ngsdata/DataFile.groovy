@@ -160,9 +160,13 @@ class DataFile implements Commentable, Entity {
     }
 
     String fileSizeString() {
-        if (fileSize > 1e9) return String.format("%.2f GB", fileSize / 1e9)
-        if (fileSize > 1e6) return String.format("%.2f MB", fileSize / 1e6)
-        if (fileSize > 1e3) return String.format("%.2f kB", fileSize / 1e3)
+        if (fileSize > 1e9) {
+            return String.format("%.2f GB", fileSize / 1e9)
+        } else if (fileSize > 1e6) {
+            return String.format("%.2f MB", fileSize / 1e6)
+        } else if (fileSize > 1e3) {
+            return String.format("%.2f kB", fileSize / 1e3)
+        }
         return fileSize
     }
 
