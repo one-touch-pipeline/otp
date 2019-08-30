@@ -25,8 +25,9 @@ import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
-class DataFileSpec extends Specification implements DataTest {
+class DataFileSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -46,42 +47,40 @@ class DataFileSpec extends Specification implements DataTest {
         ]
     }
 
-
     private final static String SEQUENCE_DIRECTORY = '/sequence/'
-
 
     void "test validate, when mateNumber is whatever and file type is alignment"() {
         given:
-        FileType fileType = DomainFactory.createFileType([type: FileType.Type.ALIGNMENT])
+        FileType fileType = createFileType([type: FileType.Type.ALIGNMENT])
 
         expect:
-        DomainFactory.createDataFile(fileType: fileType)
+        createDataFile(fileType: fileType)
     }
 
     void "test validate, when mateNumber is whatever and file type is sequence (not fastq)"() {
         given:
-        FileType fileType = DomainFactory.createFileType([type: FileType.Type.SEQUENCE, vbpPath: 'SomeOtherDirectory'])
+        FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: 'SomeOtherDirectory'])
 
         expect:
-        DomainFactory.createDataFile(fileType: fileType)
+        createDataFile(fileType: fileType)
     }
 
     void "test validate, when mateNumber is 1 and file type is sequence (fastq)"() {
         given:
-        FileType fileType = DomainFactory.createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+        FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
 
         expect:
-        DomainFactory.createDataFile(fileType: fileType, mateNumber: 1)
+        createDataFile(fileType: fileType, mateNumber: 1)
     }
 
     void "test validate, when mateNumber is 2 and file type is sequence (fastq)"() {
         given:
-        FileType fileType = DomainFactory.createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+        FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
 
         expect:
-        DomainFactory.createDataFile(
-                seqTrack: DomainFactory.createSeqTrack(
-                        seqType: DomainFactory.createSeqType(libraryLayout: LibraryLayout.PAIRED)
+        createDataFile(
+                seqTrack: createSeqTrack(
+                        seqType: createSeqType(libraryLayout: LibraryLayout.PAIRED)
                 ),
                 fileType: fileType,
                 mateNumber: 2,
@@ -90,8 +89,8 @@ class DataFileSpec extends Specification implements DataTest {
 
     void "test validate, when mateNumber is null, should fail"() {
         given:
-        FileType fileType = DomainFactory.createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = DomainFactory.createDataFile([fileType: fileType, mateNumber: null], false)
+        FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+        DataFile dataFile = createDataFile([fileType: fileType, mateNumber: null], false)
 
         expect:
         TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", null)
@@ -99,8 +98,8 @@ class DataFileSpec extends Specification implements DataTest {
 
     void "test validate, when mateNumber is zero, should fail"() {
         given:
-        FileType fileType = DomainFactory.createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = DomainFactory.createDataFile([fileType: fileType, mateNumber: 0], false)
+        FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+        DataFile dataFile = createDataFile([fileType: fileType, mateNumber: 0], false)
 
         expect:
         TestCase.assertAtLeastExpectedValidateError(dataFile, "mateNumber", "validator.invalid", 0)
@@ -108,8 +107,8 @@ class DataFileSpec extends Specification implements DataTest {
 
     void "test validate, when mateNumber is too big, should fail"() {
         given:
-        FileType fileType = DomainFactory.createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
-        DataFile dataFile = DomainFactory.createDataFile([fileType: fileType, mateNumber: 3], false)
+        FileType fileType = createFileType([type: FileType.Type.SEQUENCE, vbpPath: SEQUENCE_DIRECTORY])
+        DataFile dataFile = createDataFile([fileType: fileType, mateNumber: 3], false)
 
         expect:
         TestCase.assertValidateError(dataFile, "mateNumber", "validator.invalid", 3)
@@ -117,22 +116,57 @@ class DataFileSpec extends Specification implements DataTest {
 
     void "test validate, when sequenceLength is a number"() {
         expect:
-        DomainFactory.createDataFile(sequenceLength: "123")
+        createDataFile(sequenceLength: "123")
     }
 
     void "test validate, when sequenceLength is a range"() {
         expect:
-        DomainFactory.createDataFile(sequenceLength: "123-321")
+        createDataFile(sequenceLength: "123-321")
     }
 
     void "test validate, when sequenceLength is invalid, should fail"() {
         given:
-        DataFile dataFile = DomainFactory.createDataFile([sequenceLength: "!1§2%3&"], false)
+        DataFile dataFile = createDataFile([sequenceLength: "!1§2%3&"], false)
 
         when:
         dataFile.validate()
 
         then:
         thrown(RuntimeException)
+    }
+
+    void "getNBasePairs, fails when required properties are null"() {
+        given:
+        DataFile dataFile = createDataFile(nReads: nReads, sequenceLength: sequenceLength)
+
+        when:
+        dataFile.getNBasePairs()
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains(missingValue)
+
+        where:
+        nReads | sequenceLength | missingValue
+        null   | "100"          | "nReads"
+        100    | null           | "sequenceLength"
+        null   | null           | "nReads"
+    }
+
+    void "getNBasePairs, multiplies meanSequenceLength times nReads"() {
+        given:
+        DataFile dataFile = createDataFile(nReads: 100, sequenceLength: sequenceLength)
+        long result
+
+        when:
+        result = dataFile.getNBasePairs()
+
+        then:
+        result == 10000
+
+        where:
+        sequenceLength |_
+        "100"          |_
+        "90-110"       |_
     }
 }

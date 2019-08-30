@@ -20,146 +20,180 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.util.UnitHelper" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<meta name="layout" content="main"/>
-<title>${ind.mockFullName}</title>
-    <asset:javascript src="modules/editorSwitch"/>
-    <asset:javascript src="modules/editSamples"/>
-    <asset:javascript src="modules/changeLog"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
+    <title>${individual.mockFullName}</title>
+    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="modules/editSamples.js"/>
+    <asset:javascript src="modules/changeLog.js"/>
 </head>
 <body>
     <div class="body_grow">
-        <div id="processInfoBox">
-            <h1><g:message code="individual.show.title"/></h1>
-        </div>
-        <div id="individualCommentBox" class="commentBoxContainer">
-            <div id="commentLabel">Comment:</div>
-            <sec:ifNotGranted roles="ROLE_OPERATOR">
-                <textarea id="commentBox" readonly>${comment?.comment}</textarea>
-            </sec:ifNotGranted>
-            <sec:ifAllGranted roles="ROLE_OPERATOR">
-                <textarea id="commentBox">${comment?.comment}</textarea>
-                <div id="commentButtonArea">
-                    <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save" /></button>
-                    <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
-                </div>
-            </sec:ifAllGranted>
-            <div id="commentDateLabel">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')}</div>
-            <div id="commentAuthorLabel">${comment?.author}</div>
-        </div>
-        <div class="tableBlock" id="individualDetailTbl">
-            <input type="hidden" name="individualId" value="${ind.id}"/>
-            <table>
-                <tr>
-                    <td class="myKey"><g:message code="individual.show.details.pid"/></td>
-                    <td class="myValue">${ind.pid}</td>
-                </tr>
-                <tr>
-                    <td class="myKey"><g:message code="individual.show.details.mockPid"/></td>
-                    <td class="myValue"><otp:editorSwitch roles="ROLE_OPERATOR" link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'mockPid'])}" value="${ind.mockPid}"/></td>
-                </tr>
-                <tr>
-                    <td class="myKey"><g:message code="individual.show.details.mockFullName"/></td>
-                    <td class="myValue"><otp:editorSwitch roles="ROLE_OPERATOR" link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'mockFullName'])}" value="${ind.mockFullName}"/></td>
-                </tr>
-                <sec:ifAllGranted roles="ROLE_ADMIN">
+        <h1><g:message code="individual.show.header"/></h1>
+        <br>
+        <div class="individual-grid-wrapper">
+            <div id="individualDetailTbl" class="grid-element individualDetails tableBlock">
+                <input type="hidden" name="individualId" value="${individual.id}"/>
+                <table>
                     <tr>
-                        <td class="myKey"><g:message code="individual.show.details.internIdentifier"/></td>
-                        <td class="myValue"><otp:editorSwitch roles="ROLE_OPERATOR" link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'internIdentifier'])}" value="${ind.internIdentifier}"/></td>
+                        <td class="myKey"><g:message code="individual.show.details.pid"/></td>
+                        <td class="myValue">${individual.pid}</td>
                     </tr>
-                </sec:ifAllGranted>
-                <tr>
-                    <td class="myKey"><g:message code="individual.show.details.type"/></td>
-                    <td class="myValue typeDropDown">
-                        <otp:editorSwitch
-                            roles="ROLE_OPERATOR"
-                            template="dropDown"
-                            link="${g.createLink(controller: 'individual', action: 'updateField', id: ind.id, params: [key: 'type'])}"
-                            value="${ind.type}"
-                            values="${typeDropDown}"/>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="myKey"><g:message code="individual.show.details.project"/></td>
-                    <td class="myValue"><g:link controller="projectOverview" action="index" params="[project: ind.project]">${ind.project.displayName}</g:link></td>
-                </tr>
-            </table>
+                    <tr>
+                        <td class="myKey"><g:message code="individual.show.details.mockPid"/></td>
+                        <td class="myValue">
+                            <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                link="${g.createLink(controller: 'individual', action: 'updateField', id: individual.id, params: [key: 'mockPid'])}"
+                                value="${individual.mockPid}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="myKey"><g:message code="individual.show.details.mockFullName"/></td>
+                        <td class="myValue">
+                            <otp:editorSwitch
+                                    roles="ROLE_OPERATOR"
+                                    link="${g.createLink(controller: 'individual', action: 'updateField', id: individual.id, params: [key: 'mockFullName'])}"
+                                    value="${individual.mockFullName}"/>
+                        </td>
+                    </tr>
+                    <sec:ifAllGranted roles="ROLE_ADMIN">
+                        <tr>
+                            <td class="myKey"><g:message code="individual.show.details.internIdentifier"/></td>
+                            <td class="myValue">
+                                <otp:editorSwitch
+                                        roles="ROLE_OPERATOR"
+                                        link="${g.createLink(controller: 'individual', action: 'updateField', id: individual.id, params: [key: 'internIdentifier'])}"
+                                        value="${individual.internIdentifier}"/>
+                            </td>
+                        </tr>
+                    </sec:ifAllGranted>
+                    <tr>
+                        <td class="myKey"><g:message code="individual.show.details.type"/></td>
+                        <td class="myValue typeDropDown">
+                            <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                template="dropDown"
+                                link="${g.createLink(controller: 'individual', action: 'updateField', id: individual.id, params: [key: 'type'])}"
+                                value="${individual.type}"
+                                values="${typeDropDown}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="myKey"><g:message code="individual.show.details.project"/></td>
+                        <td class="myValue">
+                            <g:link controller="projectOverview"
+                                    action="index"
+                                    params="[project: individual.project]">${individual.project.displayName}</g:link>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="grid-element commentBox">
+                <div id="individualCommentBox" class="commentBoxContainer">
+                    <div id="commentLabel">Comment:</div>
+                    <sec:ifNotGranted roles="ROLE_OPERATOR">
+                        <textarea id="commentBox" readonly>${comment?.comment}</textarea>
+                    </sec:ifNotGranted>
+                    <sec:ifAllGranted roles="ROLE_OPERATOR">
+                        <textarea id="commentBox">${comment?.comment}</textarea>
+                        <div id="commentButtonArea">
+                            <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save"/></button>
+                            <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
+                        </div>
+                    </sec:ifAllGranted>
+                    <div id="commentDateLabel">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')}</div>
+                    <div id="commentAuthorLabel">${comment?.author}</div>
+                </div>
+            </div>
         </div>
-        <h1 id="samples" style="display:inline-block"><g:message code="individual.show.samples"/>
-            <otp:editorSwitch
-                roles="ROLE_OPERATOR"
-                template="newValue"
-                link="${g.createLink(controller: 'individual', action: 'newSampleType', id: ind.id)}"
-                value="${ind.type}"
-                values="${sampleTypeDropDown}"/>
-        </h1>
+
+        <h1 id="samples"><g:message code="individual.show.samples"/></h1>
         <div class="tableBlock">
             <table>
-                <g:each var="sample" in="${ind.samples}">
+                <g:each var="sample" in="${individual.samples}">
                     <tr>
                         <td class="myKey">${sample.sampleType.name}</td>
                         <td class="myValue sample">
                             <sec:access expression="hasRole('ROLE_OPERATOR') or ${!projectBlacklisted}">
-                                <otp:editorSwitch roles="ROLE_OPERATOR" template="sampleIdentifier" link="${g.createLink(controller: 'individual', action: 'updateSamples', id: ind.id)}" value="${sample.sampleIdentifiers}"/>
+                                <otp:editorSwitch
+                                        roles="ROLE_OPERATOR"
+                                        template="sampleIdentifier"
+                                        link="${g.createLink(controller: 'individual', action: 'updateSamples', id: individual.id)}"
+                                        value="${sample.sampleIdentifiers}"/>
                                 <input type="hidden" name="sampleIdentifiersIds" value="${sample.sampleIdentifiers.id}"/>
                             </sec:access>
                         </td>
                     </tr>
                 </g:each>
+                <tr>
+                    <td class="myKey"></td>
+                    <td class="myValue sample">
+                        <otp:editorSwitch
+                            roles="ROLE_OPERATOR"
+                            template="newValue"
+                            link="${g.createLink(controller: 'individual', action: 'newSampleType', id: individual.id)}"
+                            values="${sampleTypeDropDown}"/>
+                    </td>
+                </tr>
             </table>
         </div>
-    <%--${mergedBams}--%>
-        <g:if test="${ind.seqTypes}">
-            <H1><g:message code="individual.show.sequencingScans"/></H1>
-        </g:if>
-        <g:form>
-            <g:each var="type" in="${ind.seqTypes}">
-                <div class="tableBlock">
-                    <h2>${type}</h2>
-                    <table>
-                        <thead>
+
+        <h1><g:message code="individual.show.laneOverview.header"/></h1>
+        <div class="tableBlock">
+            <g:each var="seqType" in="${groupedSeqTrackSets.keySet().sort { it.name }}">
+                <h2>${seqType}</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th><%-- contains withdrawn data warning placeholder --%></th>
+                            <th><%-- details link placeholder --%></th>
+                            <th><g:message code="individual.show.laneOverview.sampleType"/></th>
+                            <th title="${g.message(code: "individual.show.laneOverview.numberOfLanes.tooltip")}"><g:message code="individual.show.laneOverview.numberOfLanes"/></th>
+                            <th><g:message code="individual.show.laneOverview.numberOfBases"/></th>
+                            <th><g:message code="individual.show.laneOverview.numberOfFiles"/></th>
+                            <th><g:message code="individual.show.laneOverview.totalSize"/></th>
+                            <th><g:message code="individual.show.laneOverview.seqPlatform"/></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <g:each var="sampleType" in="${groupedSeqTrackSets[seqType].keySet().sort { it.name }}">
+                            <g:set var="seqTrackSelection" value="[individual: individual.id, seqType: seqType.id, sampleType: sampleType.id]"/>
+                            <g:set var="seqTrackSet" value="${groupedSeqTrackSets[seqType][sampleType]}"/>
                             <tr>
-                                <th></th>
-                                <th><g:message code="individual.show.sequencingScans.type"/></th>
-                                <th><g:message code="individual.show.sequencingScans.platform"/></th>
-                                <th><g:message code="individual.show.sequencingScans.status"/></th>
-                                <th><g:message code="individual.show.sequencingScans.center"/></th>
-                                <th title="<g:message code="projectOverview.mouseOver.lane"/>"><g:message code="individual.show.sequencingScans.numberOfLanes"/></th>
-                                <th><g:message code="individual.show.sequencingScans.numberOfBases"/></th>
-                                <th><g:message code="individual.show.sequencingScans.insertSize"/></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <g:each var="scan" in="${ind.seqScans}">
-                                <g:if test="${scan.seqType.id == type.id}">
-                                    <g:if test="${scan.state != de.dkfz.tbi.otp.ngsdata.SeqScan.State.OBSOLETE}">
-                                        <tr>
-                                            <td><g:link controller="seqScan" action="show" id="${scan.id}"><g:message code="individual.show.sequencingScans.details"/></g:link></td>
-                                            <td><strong>${scan.sample.sampleType.name}</strong></td>
-                                            <td>${scan.seqPlatform}</td>
-                                            <td>${scan.state}</td>
-                                            <td>${scan.seqCenters.toLowerCase()}</td>
-                                            <td>${scan.nLanes}</td>
-                                            <td>${scan.basePairsString()}</td>
-                                            <td>${scan.insertSize}</td>
-                                        </tr>
+                                <td>
+                                    <g:if test="${seqTrackSet.containsWithdrawnData}">
+                                        <img src="${assetPath(src: 'warning.png')}" title="${g.message(code: "individual.show.laneOverview.withdrawnDataWarning.tooltip")}"/>
                                     </g:if>
-                                </g:if>
-                            </g:each>
-                        </tbody>
-                    </table>
-                </div>
+                                </td>
+                                <td><g:link controller="seqTrack" action="seqTrackSet" params="${seqTrackSelection}">Details</g:link></td>
+                                <td><strong>${sampleType}</strong></td>
+
+                                <td>${seqTrackSet.numberOfLanes}</td>
+                                <td title="${seqTrackSet.numberOfBases ? UnitHelper.asNucleobases(seqTrackSet.numberOfBases) : "N/A"}">
+                                    ${seqTrackSet.numberOfBases ? UnitHelper.asNucleobases(seqTrackSet.numberOfBases, true) : "N/A"}
+                                </td>
+
+                                <td>${seqTrackSet.dataFiles.size()}</td>
+                                <td title="${UnitHelper.asBytes(seqTrackSet.totalFileSize)}">${UnitHelper.asBytes(seqTrackSet.totalFileSize, true)}</td>
+
+                                <td>${seqTrackSet.seqPlatforms.join(", ")}</td>
+                            </tr>
+                        </g:each>
+                    </tbody>
+                </table>
             </g:each>
-        </g:form>
+        </div>
     </div>
 </body>
 <asset:script type="text/javascript">
     $(function() {
         $.otp.growBodyInit(240);
-        $.otp.initCommentBox(${ind.id}, "#individualCommentBox");
+        $.otp.initCommentBox(${individual.id}, "#individualCommentBox");
     });
 </asset:script>
 </html>

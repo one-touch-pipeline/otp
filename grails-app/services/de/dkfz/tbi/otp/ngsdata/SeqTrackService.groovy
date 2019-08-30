@@ -289,12 +289,7 @@ LIMIT 1
     }
 
     void fillBaseCount(SeqTrack seqTrack) {
-        long basePairs = 0
-        seqTrack.dataFilesWhereIndexFileIsFalse.each { DataFile file ->
-            assert (file.sequenceLength && file.nReads): "The sequence length or nReads for datafile ${file} are not provided."
-            basePairs += file.meanSequenceLength * file.nReads
-        }
-        seqTrack.nBasePairs = basePairs
+        seqTrack.nBasePairs = seqTrack.dataFilesWhereIndexFileIsFalse.sum { it.getNBasePairs() } as Long ?: 0
         assert seqTrack.save(flush: true)
     }
 
@@ -399,5 +394,23 @@ LIMIT 1
                 seqTrack.save(flush: true)
             }
         }
+    }
+
+    /**
+     * Transforms a List of SeqTracks into a nested Map of SeqTrackSets, grouped by SeqType and then SampleType.
+     *
+     * @param inputSeqTracks the SeqTracks to transform
+     * @return the transformed Map
+     */
+    static Map<SeqType, Map<SampleType, SeqTrackSet>> getSeqTrackSetsGroupedBySeqTypeAndSampleType(List<SeqTrack> inputSeqTracks) {
+        Map<SeqType, Map<SampleType, SeqTrackSet>> fullyGroupedAsSets = [:]
+        inputSeqTracks.groupBy({ it.seqType }, { it.sampleType }).collectEntries(fullyGroupedAsSets) { SeqType seqType, Map<SampleType, List<SeqTrack>> seqTracksPerSampleType ->
+            Map<SampleType, SeqTrackSet> setsPerSampleType = [:]
+            seqTracksPerSampleType.collectEntries(setsPerSampleType) { SampleType sampleType, List<SeqTrack> seqTracks ->
+                return [(sampleType): new SeqTrackSet(seqTracks)]
+            }
+            return [(seqType): setsPerSampleType]
+        }
+        return fullyGroupedAsSets
     }
 }

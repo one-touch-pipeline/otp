@@ -1897,9 +1897,6 @@ td div {
     float: left;
 }
 
-#individualDetailTbl {
-    margin-top: 150px;
-}
 #individualDetailTbl:not(*:root) {
     margin-top: 50px;
 }
@@ -2072,6 +2069,97 @@ div.log {
             grid-column: 2;
         }
     }
+}
+
+.individual-grid-wrapper {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    .grid-element {
+        grid-row: 1;
+        &.individualDetails {
+            grid-column: 1 / span 2;
+        }
+        &.commentBox {
+            grid-column: 3;
+        }
+    }
+}
+
+.color-left-border {
+    border-left: 8px solid #aeaeae;
+    padding-left: 5px;
+    &.slim {
+        border-width: 3px;
+    }
+    &.non {
+        border-color: #ffffff;
+    }
+    &.run {
+        border-color: #b4b4b4;
+    }
+    &.lane {
+        border-color: #6978ff;
+    }
+    &.fastq {
+        border-color: #5fde68;
+    }
+    &.index {
+        border-color: #ded346;
+    }
+}
+.run-information {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: 10px;
+
+    .grid-element {
+        grid-row: 1;
+    }
+}
+.lane-and-datafile-grid-wrapper {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 10px;
+
+    .grid-element {
+        &.cHeader {
+            grid-row: 1;
+            font-weight: bold;
+        }
+        &.lane {
+            grid-row: 2;
+        }
+        &.dataFile {
+        }
+        // columns
+        &.identifier {
+            grid-column: 1 / span 3;
+        }
+        &.bases {
+            grid-column: 4;
+        }
+        &.fileSize {
+            grid-column: 5;
+        }
+        &.reads {
+            grid-column: 6;
+        }
+        &.insertSize {
+            grid-column: 7;
+        }
+    }
+
+    .nonexistent {
+        font-style: italic;
+        text-decoration: line-through;
+    }
+}
+
+.trim-text-with-ellipsis {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .project-info-input {

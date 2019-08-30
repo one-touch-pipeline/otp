@@ -87,7 +87,7 @@ on the general cluster job page
                         <td><g:message code="jobstats.jobSpecific.detail.table.attribute.individual"/></td>
                         <td>
                             <g:if test="${individual != null}">
-                                <g:link controller="individual" action="show" params="[mockPid: individual.mockPid]">${individual.mockPid}</g:link>
+                                <g:link controller="individual" action="show" id="${individual.id}">${individual.mockPid}</g:link>
                             </g:if>
                         </td>
                     </tr>
@@ -251,7 +251,7 @@ on the general cluster job page
                     </tr>
                 </table>
             </div>
-            <asset:script>
+            <asset:script type="text/javascript">
                 $(function() {
                     $.otp.clusterJobDetailProgress.register(${job.id});
                 });

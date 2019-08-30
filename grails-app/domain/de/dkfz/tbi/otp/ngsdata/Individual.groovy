@@ -105,30 +105,11 @@ order by type.name asc, type.libraryLayout
         """.toString(), [ind: this])
     }
 
-    /**
-     * @return List of SeqScan for this Individual ordered
-     */
-    List<SeqScan> getSeqScans() {
-        def c = SeqScan.createCriteria()
-        return c.list {
+    List<SeqTrack> getSeqTracks() {
+        return SeqTrack.createCriteria().list {
             sample {
-                individual {
-                    eq("id", this.id)
-                }
+                eq("individual", this)
             }
-            seqPlatform {
-                order("name")
-                seqPlatformModelLabel {
-                    order("name")
-                }
-            }
-            sample {
-                sampleType {
-                    order ("name")
-                }
-            }
-            order ("state")
-            order ("nLanes")
         }
     }
 

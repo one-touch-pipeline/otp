@@ -176,17 +176,17 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
 
     void "getReadGroupName, when library layout is single, then return file name consist of: 'run', runname, file name till first dot"() {
         given:
-        SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithOneDataFile([:], [vbpFileName: "fileName.fastq.gz"])
+        SeqTrack seqTrack = createSeqTrackWithOneDataFile([:], [vbpFileName: "fileName.fastq.gz"])
 
         expect:
-        "run${seqTrack1.run.name}_${'fileName'}" == seqTrack1.getReadGroupName()
+        "run${seqTrack.run.name}_${'fileName'}" == seqTrack.getReadGroupName()
     }
 
     void "test getNReads, returns null"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createDataFile([seqTrack: seqTrack, nReads: null])
-        DomainFactory.createDataFile([seqTrack: seqTrack, nReads: input])
+        SeqTrack seqTrack = createSeqTrack()
+        createDataFile([seqTrack: seqTrack, nReads: null])
+        createDataFile([seqTrack: seqTrack, nReads: input])
 
         expect:
         seqTrack.getNReads() == null
@@ -199,11 +199,29 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
 
     void "test getNReads, returns sum"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        DomainFactory.createDataFile([seqTrack: seqTrack, nReads: 525])
-        DomainFactory.createDataFile([seqTrack: seqTrack, nReads: 25])
+        SeqTrack seqTrack = createSeqTrack()
+        createDataFile([seqTrack: seqTrack, nReads: 525])
+        createDataFile([seqTrack: seqTrack, nReads: 25])
 
         expect:
         seqTrack.getNReads() == 550
+    }
+
+    void "totalFileSize, returns total fileSize of all DataFiles"() {
+        given:
+        SeqTrack seqTrack = createSeqTrack()
+        createDataFile([seqTrack: seqTrack, fileSize: 100])
+        createDataFile([seqTrack: seqTrack, fileSize: 200])
+
+        expect:
+        seqTrack.totalFileSize() == 300
+    }
+
+    void "totalFileSize, when there are not dataFiles return 0"() {
+        given:
+        SeqTrack seqTrack = createSeqTrack()
+
+        expect:
+        seqTrack.totalFileSize() == 0
     }
 }

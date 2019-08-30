@@ -29,7 +29,7 @@ class SeqTrackController {
     SeqTrackService seqTrackService
     ProcessParameterService processParameterService
 
-    Map show() {
+    def show() {
         params.id = params.id ?: "0"
         SeqTrack seqTrack = seqTrackService.getSeqTrack(params.id)
         if (!seqTrack) {
@@ -44,4 +44,28 @@ class SeqTrackController {
         ]
     }
 
+    def seqTrackSet(SeqTrackSelectionCommand cmd) {
+        List<SeqTrack> seqTracks = SeqTrack.createCriteria().list {
+            sample {
+                eq("individual", cmd.individual)
+                eq("sampleType", cmd.sampleType)
+            }
+            eq("seqType", cmd.seqType)
+        }
+
+        return [
+                seqTrackSet: new SeqTrackSet(seqTracks),
+                lanesPerRun: seqTracks.groupBy { it.run },
+                individual : cmd.individual,
+                sampleType : cmd.sampleType,
+                seqType    : cmd.seqType,
+        ]
+    }
+
+}
+
+class SeqTrackSelectionCommand {
+    Individual individual
+    SeqType seqType
+    SampleType sampleType
 }

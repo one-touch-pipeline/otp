@@ -29,9 +29,10 @@ import de.dkfz.tbi.otp.LogMessage
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
 
-class SeqTrackServiceSpec extends Specification implements DataTest {
+class SeqTrackServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -59,11 +60,11 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
 
     void "test mayAlign, when everything is okay, return true"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(
-                run: DomainFactory.createRun(
-                        seqPlatform: DomainFactory.createSeqPlatformWithSeqPlatformGroup(
-                                seqPlatformGroups: [DomainFactory.createSeqPlatformGroup()])))
-        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
+        SeqTrack seqTrack = createSeqTrackWithOneDataFile(
+                run: createRun(
+                        seqPlatform: createSeqPlatformWithSeqPlatformGroup(
+                                seqPlatformGroups: [createSeqPlatformGroup()])))
+        createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
         expect:
         SeqTrackService.mayAlign(seqTrack)
@@ -71,7 +72,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
 
     void "test mayAlign, when data file is withdrawn, return false"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([:], [
+        SeqTrack seqTrack = createSeqTrackWithOneDataFile([:], [
                 fileWithdrawn: true,
         ])
 
@@ -81,7 +82,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
 
     void "test mayAlign, when no data file, return false"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
+        SeqTrack seqTrack = createSeqTrack()
 
         expect:
         !SeqTrackService.mayAlign(seqTrack)
@@ -89,8 +90,8 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
 
     void "test mayAlign, when wrong file type, return false"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([:], [
-                fileType: DomainFactory.createFileType(type: FileType.Type.SOURCE),
+        SeqTrack seqTrack = createSeqTrackWithOneDataFile([:], [
+                fileType: createFileType(type: FileType.Type.SOURCE),
         ])
 
         expect:
@@ -111,92 +112,57 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
 
     void "test mayAlign, when seq platform group is null, return false"() {
         given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile([
-                run: DomainFactory.createRun(seqPlatform: DomainFactory.createSeqPlatform()),
+        SeqTrack seqTrack = createSeqTrackWithOneDataFile([
+                run: createRun(seqPlatform: createSeqPlatform()),
         ])
-        DomainFactory.createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
+        createMergingCriteriaLazy(project: seqTrack.project, seqType: seqTrack.seqType)
 
         expect:
         !SeqTrackService.mayAlign(seqTrack)
     }
 
-    void "test fillBaseCount, when sequence length does not exist, should fail"() {
+    void "test fillBaseCount, throws exception when one of the DataFiles does not contain nReads or SequenceLength"() {
         given:
-        String sequenceLength = null
-        Long nReads = 12345689
-        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+        SeqTrack seqTrack = createSeqTrack()
+        createDataFile(seqTrack: seqTrack)
+        createDataFile([seqTrack: seqTrack] + add)
 
         when:
         seqTrackService.fillBaseCount(seqTrack)
 
         then:
         thrown(AssertionError)
+
+        where:
+        add                    |_
+        [nReads: null]         |_
+        [sequenceLength: null] |_
     }
 
-    void "test fillBaseCount, when nReads does not exist, should fail"() {
+    void "test fillBaseCount, sets nBasePairs to 0 when there are no DataFiles"() {
         given:
-        String sequenceLength = "101"
-        Long nReads = null
-        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+        SeqTrack seqTrack = createSeqTrack()
 
         when:
         seqTrackService.fillBaseCount(seqTrack)
 
         then:
-        thrown(AssertionError)
+        seqTrack.nBasePairs == 0
     }
 
-
-    void "test fillBaseCount, when sequence length is single value and library layout single"() {
+    void "test fillBaseCount, ignores indexFiles"() {
         given:
-        String sequenceLength = "101"
-        Long nReads = 12345689
-        Long expectedBasePairs = sequenceLength.toInteger() * nReads
-        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
+        SeqTrack seqTrack = createSeqTrack()
+        createDataFile(seqTrack: seqTrack, nReads: 1, sequenceLength: 1)
+        createDataFile(seqTrack: seqTrack, nReads: 2, sequenceLength: 1)
+        createDataFile(seqTrack: seqTrack, nReads: 3, sequenceLength: 1, indexFile: true)
 
         when:
         seqTrackService.fillBaseCount(seqTrack)
 
         then:
-        seqTrack.nBasePairs == expectedBasePairs
+        seqTrack.nBasePairs == 3
     }
-
-
-    void "test fillBaseCount, when sequence length is single value and library layout paired"() {
-        given:
-        String sequenceLength = "101"
-        Long nReads = 12345689
-        Long expectedBasePairs = sequenceLength.toInteger() * nReads * 2
-        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
-        DomainFactory.createSequenceDataFile([nReads: nReads, sequenceLength: sequenceLength, seqTrack: seqTrack])
-        seqTrack.seqType.libraryLayout = LibraryLayout.PAIRED
-
-        when:
-        seqTrackService.fillBaseCount(seqTrack)
-
-        then:
-        seqTrack.nBasePairs == expectedBasePairs
-    }
-
-    void "test fillBaseCount, when sequence length is integer range"() {
-        given:
-        String sequenceLength = "90-100"
-        int meanSequenceLength = sequenceLength.split('-').sum { it.toInteger() } / 2
-        Long nReads = 12345689
-        Long expectedBasePairs = meanSequenceLength * nReads
-        SeqTrack seqTrack = createTestSeqTrack(sequenceLength, nReads)
-
-        when:
-        seqTrackService.fillBaseCount(seqTrack)
-
-        then:
-        seqTrack.nBasePairs == expectedBasePairs
-    }
-
-    private SeqTrack createTestSeqTrack(String sequenceLength, Long nReads) {
-        return DomainFactory.createSeqTrackWithOneDataFile([:], [nReads: nReads, sequenceLength: sequenceLength])
-    }
-
 
     void "test determineAndStoreIfFastqFilesHaveToBeLinked, seqTrack is null, should fail"() {
         when:
@@ -396,5 +362,37 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         DomainFactory.createDataFile(seqTrack: seqTrack, runSegment: runSegment, initialDirectory: path ?: "/link_me")
         DomainFactory.createDataFile(seqTrack: seqTrack, runSegment: runSegment, initialDirectory: path ?: "/link_me")
         return seqTrack
+    }
+
+    void "getSeqTrackSetsGroupedBySeqTypeAndSampleType, basic grouping by seqType and sampleType"() {
+        given:
+        Closure<Map<String, Object>> getProperties = { SeqType seqType, SampleType sampleType ->
+            return [seqType: seqType, sample: createSample(sampleType: sampleType)]
+        }
+        Map<SeqType, Map<SampleType, SeqTrackSet>> result
+        SampleType sampleTypeA = createSampleType()
+        SampleType sampleTypeB = createSampleType()
+        SampleType sampleTypeC = createSampleType()
+        SeqType seqTypeA = createSeqType()
+        SeqType seqTypeB = createSeqType()
+        List<SeqTrack> seqTracks = [
+            createSeqTrack(getProperties(seqTypeA, sampleTypeA)),
+            createSeqTrack(getProperties(seqTypeA, sampleTypeB)),
+            createSeqTrack(getProperties(seqTypeB, sampleTypeC)),
+            createSeqTrack(getProperties(seqTypeB, sampleTypeA)),
+            createSeqTrack(getProperties(seqTypeA, sampleTypeB)),
+            createSeqTrack(getProperties(seqTypeA, sampleTypeC)),
+            createSeqTrack(getProperties(seqTypeB, sampleTypeA)),
+            createSeqTrack(getProperties(seqTypeB, sampleTypeB)),
+            createSeqTrack(getProperties(seqTypeA, sampleTypeC)),
+        ]
+
+        when:
+        result = seqTrackService.getSeqTrackSetsGroupedBySeqTypeAndSampleType(seqTracks)
+
+        then:
+        seqTracks.each {
+            result[it.seqType][it.sampleType].seqTracks.contains(it)
+        }
     }
 }

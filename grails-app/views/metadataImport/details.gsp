@@ -118,7 +118,7 @@
                             seqTrack.seqTrack.ilseId ? "${g.message(code: "metadataImport.details.ilse")} ${seqTrack.seqTrack.ilseId}" : null,
                             seqTrack.seqTrack.project.name,
                     ].findAll().join(', ')},
-                    <g:link controller="individual" action="show" id="${seqTrack.seqTrack.individual.id}">${seqTrack.seqTrack.individual.displayName}</g:link>,
+                    <g:link controller="individual" action="show" id="${seqTrack.seqTrack.individual.id}" params="[individual: seqTrack.seqTrack.individual]">${seqTrack.seqTrack.individual.displayName}</g:link>,
                     ${[
                             seqTrack.seqTrack.sampleType.name,
                             "${seqTrack.seqTrack.seqType.name} ${seqTrack.seqTrack.seqType.libraryLayout}",

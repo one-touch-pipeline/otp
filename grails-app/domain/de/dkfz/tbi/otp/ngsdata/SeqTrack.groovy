@@ -80,7 +80,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
      * <p>
      * Typical values:
      * <ul>
-     * <li>38,000,000,000 in average for WGS, non-mutliplexed</li>
+     * <li>38,000,000,000 in average for WGS, non-multiplexed</li>
      * <li>3,800,000,000 in average for WES, non-multiplexed</li>
      * </ul>
      */
@@ -233,8 +233,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     @Override
     String toString() {
-        return "ST: ${id} lane: ${laneId} run: ${run.name} " +
-                "<br>sample: ${sample} seqType: ${seqType} <br>project: ${project}<br>"
+        return "ST: ${id} lane: ${laneId} run: ${run.name} <br>sample: ${sample} seqType: ${seqType} <br>project: ${project}<br>"
     }
 
     /**
@@ -359,6 +358,10 @@ class SeqTrack implements ProcessParameterObject, Entity {
             return commonFastqFilePrefix
 
         }
+    }
+
+    long totalFileSize() {
+        return getDataFiles().sum { it.fileSize } as Long ?: 0
     }
 
     static mapping = {

@@ -33,40 +33,41 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 class IndividualController {
 
     IndividualService individualService
+    SeqTrackService seqTrackService
     ProjectService projectService
     CommentService commentService
     SampleIdentifierService sampleIdentifierService
 
-    def display = {
+    def display() {
         redirect(action: "show", id: params.id)
     }
 
-    def show = {
-        Individual ind
+    def show() {
+        Individual individual
         if (params.id) {
-            ind = individualService.getIndividual(params.id)
+            individual = individualService.getIndividual(params.id as Long)
         } else if (params.mockPid) {
-            ind = individualService.getIndividualByMockPid(params.mockPid)
+            individual = individualService.getIndividualByMockPid(params.mockPid)
         } else {
-            //neither id not mockPid given, give up
-            response.sendError(404)
-            return
-        }
-        if (!ind) {
             response.sendError(404)
             return
         }
 
-        [
-            ind: ind,
-            comment: ind.comment,
-            typeDropDown: Individual.Type.values(),
-            sampleTypeDropDown: individualService.getSampleTypeNames(),
-            projectBlacklisted: ProjectOverviewService.hideSampleIdentifier(ind.project),
+        if (!individual) {
+            return response.sendError(404)
+        }
+
+        return [
+            individual         : individual,
+            comment            : individual.comment,
+            typeDropDown       : Individual.Type.values(),
+            sampleTypeDropDown : individualService.getSampleTypeNames(),
+            projectBlacklisted : ProjectOverviewService.hideSampleIdentifier(individual.project),
+            groupedSeqTrackSets: seqTrackService.getSeqTrackSetsGroupedBySeqTypeAndSampleType(individual.getSeqTracks()),
         ]
     }
 
-    def list = {
+    def list() {
         Map retValue  = [
             projects: projectService.getAllProjects(),
             individualTypes: Individual.Type.values()

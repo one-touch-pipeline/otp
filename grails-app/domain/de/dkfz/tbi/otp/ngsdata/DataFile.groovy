@@ -203,6 +203,11 @@ class DataFile implements Commentable, Entity {
         dateLastChecked index: 'data_file_date_last_checked_idx'
     }
 
+    long getNBasePairs() {
+        assert nReads: "nReads for datafile ${this} is not provided."
+        assert sequenceLength: "Sequence length for datafile ${this} is not provided."
+        return meanSequenceLength * nReads
+    }
 
     int getMeanSequenceLength() {
         int length
