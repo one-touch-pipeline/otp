@@ -138,7 +138,7 @@ class UserProjectRoleService {
 
     private void sendFileAccessNotifications(UserProjectRole userProjectRole) {
         notifyUsersAboutFileAccessChange(userProjectRole)
-        requestToAddUserToUnixGroupIfRequired(userProjectRole)
+        notifyAdministration(userProjectRole, OperatorAction.ADD)
     }
 
     private void notifyUsersAboutFileAccessChange(UserProjectRole userProjectRole) {
@@ -168,32 +168,10 @@ class UserProjectRoleService {
         mailHelperService.sendEmail(subject, body, user.email, ccs)
     }
 
-    private void requestToAddUserToUnixGroupIfRequired(UserProjectRole userProjectRole) {
-        String[] groupNames = ldapService.getGroupsOfUserByUsername(userProjectRole.user.username)
-        if (!(userProjectRole.project.unixGroup in groupNames)) {
-            notifyAdministration(userProjectRole, OperatorAction.ADD)
-        }
-    }
-
-    private void requestToRemoveUserFromUnixGroupIfRequired(UserProjectRole userProjectRole) {
-        String[] groupNames = ldapService.getGroupsOfUserByUsername(userProjectRole.user.username)
-        List <Project> projects = Project.findAllByUnixGroupAndIdNotEqual(userProjectRole.project.unixGroup, userProjectRole.project.id)
-        if (userProjectRole.project.unixGroup in groupNames && (
-                !projects || !UserProjectRole.findAllByUserAndProjectInListAndAccessToFilesAndEnabled(
-                                userProjectRole.user,
-                                projects,
-                                true,
-                                true
-                        )
-        )) {
-            notifyAdministration(userProjectRole, OperatorAction.REMOVE)
-        }
-    }
-
     private void notifyAdministration(UserProjectRole userProjectRole, OperatorAction action) {
         User requester = User.findByUsername(springSecurityService.authentication.principal.username as String)
         UserProjectRole requesterUserProjectRole = UserProjectRole.findByUserAndProject(requester, userProjectRole.project)
-        String switchedUserAnnotation = SpringSecurityUtils.isSwitched() ? " (switched from ${SpringSecurityUtils.getSwitchedUserOriginalUsername()})" : ""
+        String switchedUserAnnotation = SpringSecurityUtils.switched ? " (switched from ${SpringSecurityUtils.switchedUserOriginalUsername})" : ""
 
         String formattedAction = action.toString().toLowerCase()
         String conjunction = action == OperatorAction.ADD ? 'to' : 'from'
@@ -304,7 +282,7 @@ class UserProjectRoleService {
         if (upr.accessToFiles) {
             sendFileAccessNotifications(upr)
         } else {
-            requestToRemoveUserFromUnixGroupIfRequired(upr)
+            notifyAdministration(upr, OperatorAction.REMOVE)
         }
         String message = getFlagChangeLogMessage("Access to Files", upr.accessToFiles, upr.user.username, upr.project.name)
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_FILES, message)
@@ -355,7 +333,7 @@ class UserProjectRoleService {
             if (enabled) {
                 sendFileAccessNotifications(userProjectRole)
             } else {
-                requestToRemoveUserFromUnixGroupIfRequired(userProjectRole)
+                notifyAdministration(userProjectRole, OperatorAction.REMOVE)
             }
         }
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED,
@@ -411,7 +389,7 @@ class UserProjectRoleService {
         assert templateName
         String template
         try {
-            template = messageSource.getMessage(templateName, [].toArray(), LocaleContextHolder.getLocale())
+            template = messageSource.getMessage(templateName, [].toArray(), LocaleContextHolder.locale)
         } catch (NoSuchMessageException e) {
             return ''
         }

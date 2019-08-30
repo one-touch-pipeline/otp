@@ -42,17 +42,20 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 @Integration
 class UserProjectRoleServiceIntegrationSpec extends Specification implements UserAndRoles, DomainFactoryCore {
 
-    final static String UNIX_GROUP = "UNIX_GROUP"
-    final static String OTHER_GROUP = "OTHER_GROUP"
-    final static String SEARCH = "search"
+    private final static String UNIX_GROUP = "UNIX_GROUP"
+    private final static String OTHER_GROUP = "OTHER_GROUP"
+    private final static String SEARCH = "search"
 
-    final static String EMAIL_SENDER_SALUTATION = "the supportTeam"
-    final static String CLUSTER_NAME = "OTP Cluster"
+    private final static String EMAIL_SENDER_SALUTATION = "the supportTeam"
+    private final static String CLUSTER_NAME = "OTP Cluster"
 
-    final static String EMAIL_LINUX_GROUP_ADMINISTRATION = HelperUtils.randomEmail
-    final static String EMAIL_CLUSTER_ADMINISTRATION = HelperUtils.randomEmail
+    private final static String EMAIL_LINUX_GROUP_ADMINISTRATION = HelperUtils.randomEmail
+    private final static String EMAIL_CLUSTER_ADMINISTRATION = HelperUtils.randomEmail
 
+    @SuppressWarnings('JUnitPublicProperty')
     UserProjectRoleService userProjectRoleService
+
+    @SuppressWarnings('JUnitPublicProperty')
     ProcessingOptionService processingOptionService
 
     void setupData() {
@@ -65,7 +68,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         processingOptionService = new ProcessingOptionService()
         userProjectRoleService = new UserProjectRoleService()
-        userProjectRoleService.messageSource = getMessageSource()
+        userProjectRoleService.messageSource = messageSource
         userProjectRoleService.springSecurityService = springSecurityService
         userProjectRoleService.auditLogService = new AuditLogService()
         userProjectRoleService.auditLogService.springSecurityService = springSecurityService
@@ -158,8 +161,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
-                "${requesterUserProjectRole.user.username}\n${formattedAction}\n${userProjectRole.user.username}\n${conjunction}\n${userProjectRole.project.name}",
-                "${userProjectRole.project.name}\n${userProjectRole.project.unixGroup}\nNone\n${operatorAction}\n${affectedUserUserDetail}\n${requesterUserDetail}",
+                "addToUnixGroup\n${requesterUserProjectRole.user.username}\n${formattedAction}\n${userProjectRole.user.username}\n${conjunction}\n${userProjectRole.project.name}",
+                "addToUnixGroup\n${userProjectRole.project.name}\n${userProjectRole.project.unixGroup}\nNone\n${operatorAction}\n${affectedUserUserDetail}\n${requesterUserDetail}",
                 EMAIL_LINUX_GROUP_ADMINISTRATION,
         )
 
@@ -215,8 +218,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
-                "${switchedUser.username}\n${formattedAction}\n${userProjectRole.user.username}\n${conjunction}\n${userProjectRole.project.name}",
-                "${userProjectRole.project.name}\n${userProjectRole.project.unixGroup}\nNone\n${operatorAction}\n${affectedUserUserDetail}\n${requesterUserDetail}",
+                "addToUnixGroup\n${switchedUser.username}\n${formattedAction}\n${userProjectRole.user.username}\n${conjunction}\n${userProjectRole.project.name}",
+                "addToUnixGroup\n${userProjectRole.project.name}\n${userProjectRole.project.unixGroup}\nNone\n${operatorAction}\n${affectedUserUserDetail}\n${requesterUserDetail}",
                 EMAIL_LINUX_GROUP_ADMINISTRATION,
         )
 
@@ -227,7 +230,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
-    void "updateEnabledStatus, send mails when activating a user with file access (hasLdapGroup=#hasLdapGroup, fileAccess=#fileAccess, newEnabledStatus=#newEnabledStatus)"() {
+    void "updateEnabledStatus, send mails when activating a user with file access (fileAccess=#fileAccess, newEnabledStatus=#newEnabledStatus)"() {
         given:
         setupData()
 
@@ -242,10 +245,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 accessToFiles: fileAccess,
         )
 
-        userProjectRoleService.ldapService = Mock(LdapService) {
-            getGroupsOfUserByUsername(_) >> (hasLdapGroup ? [UNIX_GROUP] : [OTHER_GROUP])
-        }
-
         when:
         SpringSecurityUtils.doWithAuth(requesterUserProjectRole.user.username) {
             userProjectRoleService.updateEnabledStatus(userProjectRole, newEnabledStatus)
@@ -255,25 +254,27 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         userProjectRole.enabled == newEnabledStatus
 
         and: "notification for unix group administration was sent"
-        (fileAccess && hasLdapGroup && !newEnabledStatus ? 1 : 0) * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("REMOVE") }, EMAIL_LINUX_GROUP_ADMINISTRATION)
-        (fileAccess && !hasLdapGroup && newEnabledStatus ? 1 : 0) * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("ADD") }, EMAIL_LINUX_GROUP_ADMINISTRATION)
+        removeMailCount * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("REMOVE") }, EMAIL_LINUX_GROUP_ADMINISTRATION)
+        addMailCount * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("ADD") }, EMAIL_LINUX_GROUP_ADMINISTRATION)
 
         and: "notification for user managers regarding file access was sent"
-        (newEnabledStatus && fileAccess ? 1 : 0) * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, userProjectRole.user.email, _ as List<String>)
+        notifyFileAccess * userProjectRoleService.mailHelperService.sendEmail({
+            it.contains("fileAccessChange")
+        }, _ as String, userProjectRole.user.email, _ as List<String>)
 
         and: "notification for user managers that a user has been enabled was sent"
-        (newEnabledStatus ? 1 : 0) * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, _ as List<String>, [userProjectRole.user.email])
+        notifyEnableUser * userProjectRoleService.mailHelperService.sendEmail({
+            it.contains("newProjectMember")
+        }, _ as String, _ as List<String>, [userProjectRole.user.email])
+
+        0 * userProjectRoleService.mailHelperService.sendEmail(*_)
 
         where:
-        hasLdapGroup | fileAccess | newEnabledStatus
-        false        | true       | false
-        false        | true       | true
-        false        | false      | false
-        false        | false      | true
-        true         | true       | false
-        true         | true       | true
-        true         | false      | false
-        true         | false      | true
+        fileAccess | newEnabledStatus || removeMailCount | addMailCount | notifyEnableUser | notifyFileAccess
+        true       | false            || 1               | 0            | 0                | 0
+        true       | true             || 0               | 1            | 1                | 1
+        false      | false            || 0               | 0            | 0                | 0
+        false      | true             || 0               | 0            | 1                | 0
     }
 
     void "addUserToProjectAndNotifyGroupManagementAuthority, create User if non is found for username or email"() {
@@ -536,7 +537,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         AssertionError e = thrown(AssertionError)
-        e.message.contains("The given email address '${user.email}' is already registered for ${ldap ? "LDAP user '${user.username}'": "external user '${user.realName}'"}")
+        e.message.contains("The given email address '${user.email}' is already registered for ${ldap ? "LDAP user '${user.username}'" : "external user '${user.realName}'"}")
 
         where:
         ldap  | _
@@ -632,10 +633,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
         UserProjectRole executingUPR = DomainFactory.createUserProjectRole(properties)
 
-        String expectedContent = "${executingUPR.user.realName}\n${newUPR.user.realName}\n${newUPR.projectRole.name}\n${newUPR.project.name}"
+        String expectedSubject = "newProjectMember\n${newUPR.project.name}"
+        String expectedContent = "newProjectMember\n${executingUPR.user.realName}\n${newUPR.user.realName}\n${newUPR.projectRole.name}\n${newUPR.project.name}"
         if (authoritative && projectRole == SUBMITTER) {
             String nameAndSalutation = EMAIL_SENDER_SALUTATION
-            expectedContent = "${newUPR.user.realName}\n${newUPR.projectRole.name}\n${newUPR.project.name}\n${nameAndSalutation}\n${nameAndSalutation}"
+            expectedContent = "administrativeUserAddedSubmitter\n${newUPR.user.realName}\n${newUPR.projectRole.name}\n${newUPR.project.name}\n${nameAndSalutation}\n${nameAndSalutation}"
         }
 
         when:
@@ -645,8 +647,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
-                "${newUPR.project.name}",
-                "${expectedContent}",
+                expectedSubject,
+                expectedContent,
                 [executingUPR.user.email],
                 [newUPR.user.email],
         )
@@ -657,116 +659,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         false         | ProjectRole.Basic.SUBMITTER.name()
         true          | null
         false         | null
-    }
-
-    void "requestToAddUserToUnixGroupIfRequired, only send notification when user is not already in group"() {
-        given:
-        setupData()
-
-        userProjectRoleService.ldapService = Mock(LdapService) {
-            getGroupsOfUserByUsername(_) >> unixGroupsOfUser
-        }
-        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
-                project: createProject(unixGroup: UNIX_GROUP)
-        )
-
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService.requestToAddUserToUnixGroupIfRequired(userProjectRole)
-        }
-
-        then:
-        invocations * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
-
-        where:
-        invocations | unixGroupsOfUser
-        0           | [UNIX_GROUP]
-        0           | [UNIX_GROUP, OTHER_GROUP]
-        1           | [OTHER_GROUP]
-        1           | []
-    }
-
-    void "requestToRemoveUserFromUnixGroupIfRequired, user is not in projects with shared unix groups or no others exist"() {
-        given:
-        setupData()
-
-        userProjectRoleService.ldapService = Mock(LdapService) {
-            getGroupsOfUserByUsername(_) >> [unixGroup1]
-        }
-        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
-                project: createProject(unixGroup: unixGroup1)
-        )
-        createProject(unixGroup: unixGroup2)
-
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(userProjectRole)
-        }
-
-        then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
-
-        where:
-        unixGroup1 | unixGroup2
-        "shared"   | "shared"
-        "shared"   | "not_shared"
-    }
-
-    void "requestToRemoveUserFromUnixGroupIfRequired, removed user has no remaining file access role in projects with shared unix group"() {
-        given:
-        setupData()
-
-        userProjectRoleService.ldapService = Mock(LdapService) {
-            getGroupsOfUserByUsername(_) >> [UNIX_GROUP]
-        }
-        User user = DomainFactory.createUser()
-        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
-                user: user,
-                project: createProject(unixGroup: UNIX_GROUP),
-                accessToFiles: true,
-        )
-        DomainFactory.createUserProjectRole(
-                user: user,
-                project: createProject(unixGroup: UNIX_GROUP),
-                accessToFiles: false,
-        )
-
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(userProjectRole)
-        }
-
-        then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
-    }
-
-    void "requestToRemoveUserFromUnixGroupIfRequired, file access role in disabled UserProjectRole"() {
-        given:
-        setupData()
-
-        userProjectRoleService.ldapService = Mock(LdapService) {
-            getGroupsOfUserByUsername(_) >> [UNIX_GROUP]
-        }
-        User user = DomainFactory.createUser()
-        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
-                user: user,
-                project: createProject(unixGroup: UNIX_GROUP),
-                accessToFiles: true
-        )
-        DomainFactory.createUserProjectRole(
-                user: user,
-                project: createProject(unixGroup: UNIX_GROUP),
-                accessToFiles: true,
-                enabled: false
-        )
-
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(userProjectRole)
-        }
-
-        then:
-        1 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
     }
 
     void "notifyUsersAboutFileAccessChange, builds correct content"() {
@@ -787,6 +679,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         String projectName = project.name
         String expectedBody = """\
+            fileAccessChange
             ${userProjectRole.user.realName}
             ${executingUser.realName}
             ${projectName}
@@ -802,7 +695,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
-                projectName,
+                'fileAccessChange\n' + projectName,
                 expectedBody,
                 userProjectRole.user.email,
                 toBeNotified*.user.email,
@@ -814,86 +707,40 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        userProjectRoleService.ldapService = Mock(LdapService) {
-            getGroupsOfUserByUsername(_) >> []
-        }
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
                 project: createProject(unixGroup: UNIX_GROUP),
                 user: User.findByUsername(USER),
                 (flag): false,
         )
-
-        expect:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService."toggle${flag.capitalize()}"(userProjectRole)."${flag}" == true
-        }
-
-        and:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService."toggle${flag.capitalize()}"(userProjectRole)."${flag}" == false
-        }
-
-        where:
-        flag                     | _
-        "accessToOtp"            | _
-        "accessToFiles"          | _
-        "manageUsers"            | _
-        "manageUsersAndDelegate" | _
-        "receivesNotifications"  | _
-    }
-
-    void "requestToRemoveUserFromUnixGroupIfRequired, removed user has file access role in project with same unix group"() {
-        given:
-        setupData()
-
-        userProjectRoleService.ldapService = Mock(LdapService) {
-            getGroupsOfUserByUsername(_) >> [UNIX_GROUP]
-        }
-        User user = DomainFactory.createUser()
-        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
-                user: user,
-                project: createProject(unixGroup: UNIX_GROUP),
-                accessToFiles: true
-        )
-        DomainFactory.createUserProjectRole(
-                user: user,
-                project: createProject(unixGroup: UNIX_GROUP),
-                accessToFiles: true
-        )
+        UserProjectRole enabled, disabled
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(userProjectRole)
+            enabled = userProjectRoleService."toggle${flag.capitalize()}"(userProjectRole)
         }
 
         then:
-        0 * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
-    }
-
-    void "requestToRemoveUserFromUnixGroupIfRequired, only notify when user is in unix group"() {
-        given:
-        setupData()
-
-        userProjectRoleService.ldapService = Mock(LdapService) {
-            getGroupsOfUserByUsername(_) >> ldapResult
-        }
-        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
-                project: createProject(unixGroup: UNIX_GROUP),
-                accessToFiles: true
-        )
+        enabled."${flag}" == true
+        fileAccessMail * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("ADD") }, _ as String)
+        fileAccessMail * userProjectRoleService.mailHelperService.sendEmail({ it.contains("fileAccessChange") }, _ as String, _ as String, _ as List<String>)
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService.requestToRemoveUserFromUnixGroupIfRequired(userProjectRole)
+            disabled = userProjectRoleService."toggle${flag.capitalize()}"(userProjectRole)
         }
 
         then:
-        invocations * userProjectRoleService.mailHelperService.sendEmail(_, _, _)
+        disabled."${flag}" == false
+        fileAccessMail * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("REMOVE") }, _ as String)
+        _ * userProjectRoleService.mailHelperService.sendEmail(*_)
 
         where:
-        ldapResult    | invocations
-        [UNIX_GROUP]  | 1
-        [OTHER_GROUP] | 0
+        flag                     | fileAccessMail
+        "accessToOtp"            | 0
+        "accessToFiles"          | 1
+        "manageUsers"            | 0
+        "manageUsersAndDelegate" | 0
+        "receivesNotifications"  | 0
     }
 
     void "getEmailsOfToBeNotifiedProjectUsers, only return emails of users that receive notification and are enabled"() {
@@ -988,11 +835,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         setupData()
 
         Date baseDate = new Date(0, 0, 10)
-        Date startDate = startDateOffset  == null ? null : baseDate.minus(startDateOffset)
-        Date endDate = endDateOffset == null ? null : baseDate.minus(endDateOffset)
+        Date startDate = startDateOffset  == null ? null : baseDate - startDateOffset
+        Date endDate = endDateOffset == null ? null : baseDate - endDateOffset
 
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole()
-        userProjectRole.user.dateCreated = baseDate.minus(1)
+        userProjectRole.user.dateCreated = baseDate - 1
         userProjectRole.user.save(flush: true)
 
         when:
@@ -1087,28 +934,28 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     PluginAwareResourceBundleMessageSource getMessageSource() {
         return Mock(PluginAwareResourceBundleMessageSource) {
             _ * getMessageInternal("projectUser.notification.addToUnixGroup.subject", [], _) >>
-                    '''${requester}\n${action}\n${username}\n${conjunction}\n${projectName}'''
+                    '''addToUnixGroup\n${requester}\n${action}\n${username}\n${conjunction}\n${projectName}'''
 
             _ * getMessageInternal("projectUser.notification.addToUnixGroup.body", [], _) >>
-                    '''${projectName}\n${projectUnixGroup}\n${projectList}\n${requestedAction}\n${affectedUserUserDetail}\n${requesterUserDetail}'''
+                    '''addToUnixGroup\n${projectName}\n${projectUnixGroup}\n${projectList}\n${requestedAction}\n${affectedUserUserDetail}\n${requesterUserDetail}'''
 
             _ * getMessageInternal("projectUser.notification.addToUnixGroup.userDetail", [], _) >>
                     '''${realName}\n${username}\n${email}\n${role}'''
 
             _ * getMessageInternal("projectUser.notification.newProjectMember.subject", [], _) >>
-                    '''${projectName}'''
+                    '''newProjectMember\n${projectName}'''
 
             _ * getMessageInternal("projectUser.notification.newProjectMember.body.userManagerAddedMember", [], _) >>
-                    '''${executingUser}\n${userIdentifier}\n${projectRole}\n${projectName}'''
+                    '''newProjectMember\n${executingUser}\n${userIdentifier}\n${projectRole}\n${projectName}'''
 
             _ * getMessageInternal("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter", [], _) >>
-                    '''${userIdentifier}\n${projectRole}\n${projectName}\n${supportTeamName}\n${supportTeamSalutation}'''
+                    '''administrativeUserAddedSubmitter\n${userIdentifier}\n${projectRole}\n${projectName}\n${supportTeamName}\n${supportTeamSalutation}'''
 
             _ * getMessageInternal("projectUser.notification.fileAccessChange.subject", [], _) >>
-                    '''${projectName}'''
+                    '''fileAccessChange\n${projectName}'''
 
             _ * getMessageInternal("projectUser.notification.fileAccessChange.body", [], _) >>
-                    '''${username}\n${requester}\n${projectName}\n${dirAnalysis}\n${clusterName}\n${clusterAdministrationEmail}\n${supportTeamSalutation}'''
+                    '''fileAccessChange\n${username}\n${requester}\n${projectName}\n${dirAnalysis}\n${clusterName}\n${clusterAdministrationEmail}\n${supportTeamSalutation}'''
         }
     }
 }
