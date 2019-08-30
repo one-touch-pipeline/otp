@@ -22,8 +22,9 @@
 package de.dkfz.tbi.otp.utils
 
 /**
- * Helper class for referencing another domain class by name.
+ * @deprecated kept for historic data
  */
+@Deprecated
 class ReferencedClass implements Entity {
     String className
 

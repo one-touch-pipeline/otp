@@ -24,6 +24,10 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.ReferencedClass
 
+/**
+ * @deprecated kept for historic data
+ */
+@Deprecated
 class ChangeLog implements Entity {
 
     long rowId

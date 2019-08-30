@@ -27,7 +27,6 @@ import org.joda.time.DateTime
 import org.springframework.security.access.prepost.*
 
 import de.dkfz.tbi.otp.CommentService
-import de.dkfz.tbi.otp.utils.ReferencedClass
 
 @Transactional
 class IndividualService {
@@ -288,36 +287,13 @@ class IndividualService {
 
     /**
      * Updates the given Individual with the new given value.
-     * Creates a ChangeLog entry for this update.
      * @param individual The Individual to update
      * @param key The key to be updated
      * @param value The new value to set
-     * @throws ChangelogException In case the Changelog Entry could not be created
      * @throws IndividualUpdateException In case the Individual could not be updated
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateField(Individual individual, String key, String value) throws ChangelogException, IndividualUpdateException {
-        ReferencedClass clazz = ReferencedClass.findByClassName(individual.class.getName())
-        if (!clazz) {
-            clazz = new ReferencedClass(name: individual.class.getName())
-            clazz.save(flush: true)
-        }
-        // To check if the key handed over matches the field name
-        // value is not used later because the method returns upper case name
-        if (!individual.getDomainClass().getFieldName(key)) {
-            throw new IndividualUpdateException(individual)
-        }
-        ChangeLog changelog = new ChangeLog(
-                rowId: individual.id,
-                referencedClass: clazz,
-                columnName: key,
-                fromValue: "${individual[key]}",
-                toValue: value,
-                comment: "-",
-                source: ChangeLog.Source.MANUAL)
-        if (!changelog.save(flush: true)) {
-            throw new ChangelogException("Creation of changelog failed, errors: " + changelog.errors.toString())
-        }
+    void updateField(Individual individual, String key, String value) throws IndividualUpdateException {
         individual[key] = value
         if (!individual.save(flush: true)) {
             throw new IndividualUpdateException(individual)

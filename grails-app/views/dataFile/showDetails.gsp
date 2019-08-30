@@ -27,7 +27,6 @@
     <meta name="layout" content="main"/>
     <title><g:message code="datafile.showDetails.title"/></title>
     <asset:javascript src="modules/editorSwitch"/>
-    <asset:javascript src="modules/changeLog.js"/>
 </head>
 <body>
     <div class="body_grow">
@@ -160,11 +159,6 @@
                 </td>
                 <td class="${metaDataEntry.status}">${metaDataEntry.status}</td>
                 <td>${metaDataEntry.source}</td>
-                <td>
-                    <g:if test="${changelogs[metaDataEntry]}">
-                        <otp:showChangeLog controller="dataFile" action="metaDataChangelog" id="${metaDataEntry.id}"/>
-                    </g:if>
-                </td>
             </tr>
         </g:each>
     </table>

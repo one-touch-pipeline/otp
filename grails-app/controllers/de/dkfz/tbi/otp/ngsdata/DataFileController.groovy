@@ -46,7 +46,6 @@ class DataFileController {
             return
         }
         List<MetaDataEntry> entries = MetaDataEntry.findAllByDataFile(dataFile, [sort:"key.id"])
-        Map<MetaDataEntry, Boolean> changelogs = metaDataService.checkForChangelog(entries.clone())
         List<String> keys = []
         List<String> values = []
 
@@ -60,7 +59,6 @@ class DataFileController {
                 dataFile: dataFile,
                 entries: entries,
                 values: values*.replaceAll('//', '/'),
-                changelogs: changelogs,
                 comment: dataFile.comment,
                 fastqcAvailable: fastqcResultsService.isFastqcAvailable(dataFile),
         ]
@@ -71,20 +69,6 @@ class DataFileController {
         commentService.saveComment(dataFile, cmd.comment)
         def dataToRender = [date: dataFile.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: dataFile.comment.author]
         render dataToRender as JSON
-    }
-
-    def metaDataChangelog = {
-        MetaDataEntry entry = metaDataService.getMetaDataEntryById(params.id as Long)
-        if (!entry) {
-            List data = []
-            render data as JSON
-            return
-        }
-        List data = []
-        metaDataService.retrieveChangeLog(entry).each { ChangeLog log ->
-            data << [comment: log.comment, from: log.fromValue, to: log.toValue, source: log.source.toString(), timestamp: log.dateCreated]
-        }
-        render data as JSON
     }
 }
 

@@ -22,9 +22,8 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import org.springframework.security.access.prepost.*
+import org.springframework.security.access.prepost.PostAuthorize
 
-import de.dkfz.tbi.otp.utils.ReferencedClass
 import de.dkfz.tbi.otp.utils.StringUtils
 
 @Transactional
@@ -43,77 +42,16 @@ class MetaDataService {
 
     /**
      * Updates the given MetaDataEntry's value to the new given value.
-     * Creates a ChangeLog entry for this update.
      * @param entry The MetaDataEntry to update
      * @param value The new value to set
-     * @throws ChangelogException In case the Changelog Entry could not be created
      * @throws MetaDataEntryUpdateException In case the MetaDataEntry could not be updated
      */
-    boolean updateMetaDataEntry(MetaDataEntry entry, String value) throws ChangelogException, MetaDataEntryUpdateException {
-        ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
-        if (!clazz) {
-            clazz = new ReferencedClass(className: MetaDataEntry.class.getName())
-            clazz.save(flush: true)
-        }
-        ChangeLog changelog = new ChangeLog(
-                rowId: entry.id,
-                referencedClass: clazz,
-                columnName: "value",
-                fromValue: entry.value,
-                toValue: value,
-                comment: "-",
-                source: ChangeLog.Source.MANUAL,
-        )
-        if (!changelog.save(flush: true)) {
-            throw new ChangelogException("Creation of changelog failed, errors: " + changelog.errors.toString())
-        }
+    boolean updateMetaDataEntry(MetaDataEntry entry, String value) throws MetaDataEntryUpdateException {
         entry.value = value
         if (!entry.save(flush: true)) {
             throw new MetaDataEntryUpdateException(entry)
         }
         return true
-    }
-
-    /**
-     * Checks for the list of given Meta Data Entries whether there exists at least one ChangeLog element.
-     * A map is created with the MetaDataEntry as key and a boolean as value. True means there is at least
-     * one ChangeLog entry, false means there is none.
-     *
-     * @param entries The MetaDataEntries for which it should be checked whether there is a ChangeLog
-     * @return Map of MetaDataEntries with boolean information as value whether there is a ChangeLog
-     */
-    @PreFilter("hasRole('ROLE_OPERATOR')")
-    Map<MetaDataEntry, Boolean> checkForChangelog(List<MetaDataEntry> entries) {
-        ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
-        if (!clazz) {
-            Map<MetaDataEntry, Boolean> results = [:]
-            entries.each { MetaDataEntry entry ->
-                results.put(entry, false)
-            }
-            return results
-        }
-        List<Long> rowIds = entries*.id
-        List<ChangeLog> changelogs = rowIds ? ChangeLog.findAllByRowIdInListAndReferencedClass(rowIds, clazz) : []
-        Map<MetaDataEntry, Boolean> results = [:]
-        entries.each { MetaDataEntry entry ->
-            results.put(entry, changelogs.find { it.rowId == entry.id } ? true : false)
-        }
-        return results
-    }
-
-    /**
-     * Retrieves the ChangeLog for the given MetaDataEntry.
-     *
-     * @param entry The MetaDataEntry for which the ChangeLog should be retrieved
-     * @return List of ChangeLog entries
-     */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or ((#entry.dataFile.project != null) and hasPermission(#entry.dataFile.project, 'OTP_READ_ACCESS'))")
-    List<ChangeLog> retrieveChangeLog(MetaDataEntry entry) {
-        ReferencedClass clazz = ReferencedClass.findByClassName(MetaDataEntry.class.getName())
-        if (!clazz) {
-            return []
-        }
-        return ChangeLog.findAllByRowIdAndReferencedClass(entry.id, clazz)
     }
 
     /**

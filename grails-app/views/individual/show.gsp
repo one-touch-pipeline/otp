@@ -28,7 +28,6 @@
     <title>${individual.mockFullName}</title>
     <asset:javascript src="modules/editorSwitch.js"/>
     <asset:javascript src="modules/editSamples.js"/>
-    <asset:javascript src="modules/changeLog.js"/>
 </head>
 <body>
     <div class="body_grow">

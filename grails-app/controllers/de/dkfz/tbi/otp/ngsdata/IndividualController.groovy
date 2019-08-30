@@ -138,8 +138,6 @@ class IndividualController {
             data.put("success", true)
         } catch (IndividualUpdateException e) {
             data.put("error", g.message(code: "individual.update.error"))
-        } catch (ChangelogException e) {
-            data.put("error", g.message(code: "individual.update.changelog.error"))
         }
         render data as JSON
     }
@@ -158,8 +156,6 @@ class IndividualController {
             data.put("success", true)
         } catch (IndividualUpdateException e) {
             data.put("error", g.message(code: "individual.update.error"))
-        } catch (ChangelogException e) {
-            data.put("error", g.message(code: "individual.update.changelog.error"))
         } catch (ValidationException e) {
             data.put("error", e.message)
         }
