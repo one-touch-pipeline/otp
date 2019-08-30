@@ -117,6 +117,7 @@ class ProjectInfo implements Entity {
                     "deletionDate: ${deletionDate ? dateFormat.format(deletionDate) : '-'}",
                     "transferMode: ${transferMode}",
                     "legalBasis: ${legalBasis}",
+                    "dtaId: ${dtaId ?: '-'}",
                     "requester: ${requester}",
                     "ticketID: ${ticketID}",
                     "comment: ${comment}",
