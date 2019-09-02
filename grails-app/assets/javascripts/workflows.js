@@ -78,101 +78,15 @@ $.otp.workflows = {
         return null;
     },
     /**
-     * Left pads the string.
-     *
-     * @param string input string to pad
-     * @param space onto how many characters should be padded
-     * @param padChar the character to use for the padding
-     * @returns {string}
-     */
-    lpad: function (string, space, padChar) {
-        var paddingMask = padChar.repeat(space);
-        return String(paddingMask + string).slice(-paddingMask.length);
-    },
-    /**
-     * Get the english weekday name by its number in the week. Based on a Sunday to Saturday week.
-     * @param dayNumber number of the day in a Sunday to Saturday week
-     */
-    getDayName: function (dayNumber) {
-        return ["Sunday", "Monday" , "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayNumber];
-    },
-    /**
-     * Get the time as a String, formatted in the objectively superior 24h format.
-     * hh:mm:ss
-     * @param date Date object to format
-     */
-    getTimeIn24hFormat: function (date) {
-        return this.lpad(date.getHours(), 2, "0") + ":" + this.lpad(date.getMinutes(), 2, "0") + ":" + this.lpad(date.getSeconds(), 2, "0");
-    },
-    /**
-     * Get the date as a String, formatted in the objectively superior DMY format:
-     * DD.MM.
-     *
-     * @param date Date object to format
-     */
-    getDateInDmFormat: function (date) {
-        return this.lpad(date.getDay(), 2, "0") + "." + this.lpad(date.getMonth() + 1, 2, "0") + ".";
-    },
-    /**
-     * Get the date as a String, formatted in the objectively superior DMY format:
-     * DD.MM.YYYY
-     *
-     * @param date Date object to format
-     */
-    getDateInDmyFormat: function (date) {
-        return this.lpad(date.getDay(), 2, "0") + "." + this.lpad(date.getMonth() + 1, 2, "0") + "." + date.getFullYear();
-    },
-    /**
-     * Get the date and time as a String, formatted as follows:
-     * hh-mm-ss DD.MM.YYYY
-     *
-     * or if truncated:
-     * hh-mm-ss DD.MM.
-     * @param date Date object to format
-     */
-    getDateAndTimeInDmyAnd24hFormat: function (date, truncateYear) {
-        var dateString = truncateYear ? this.getDateInDmFormat(date) : this.getDateInDmyFormat(date);
-        return this.getTimeIn24hFormat(date) + " " + dateString;
-    },
-    /**
-     * Get the date and time as a String, formatted as follows:
-     * DayName hh-mm-ss DD.MM.YYYY
-     * @param date Date object to format
-     */
-    getFullyInformationalTimeFormat: function (date) {
-        return this.getTimeIn24hFormat(date) + " " + this.getDayName(date.getDay()) + " " + this.getDateInDmyFormat(date);
-    },
-    /**
-     * Formats the date in such a way that only relevant changed values are displayed.
-     *
-     * Same day         : hh:mm:ss
-     * Same year        : hh-mm-ss DD.MM.
-     * Totally different: hh-mm-ss DD.MM.YYYY
-
-     * @param date Date object to format
-     */
-    getShortestTimeFormat: function (date) {
-        var now = new Date();
-        var same24hours = ((now.getTime() - date.getTime()) <= 86400000); // 86.400.000 = 24h * 60m * 60s * 1000ms
-        if (same24hours) {
-            return this.getTimeIn24hFormat(date);
-        } else {
-            var truncateYear = (now.getFullYear() == date.getFullYear());
-            return this.getDateAndTimeInDmyAnd24hFormat(date, truncateYear);
-        }
-    },
-
-    /**
      * Helper method to render a date in a common way.
-     * @param value Date in JSON representation
-     * @returns Formatted date
+     *
+     * @param value Map with keys 'full' and 'shortest'
+     * @returns Span element displaying the shortest time and full time as tooltip
      */
     renderDate: function (value) {
         "use strict";
         if (value) {
-            var date;
-            date = new Date(value);
-            return '<span title="' + this.getFullyInformationalTimeFormat(date) + '">' + this.getShortestTimeFormat(date) + '</span>';
+            return '<span title="' + value.full + '">' + value.shortest + '</span>';
         }
         return "-";
     },

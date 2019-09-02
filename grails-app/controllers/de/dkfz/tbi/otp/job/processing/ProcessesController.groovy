@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.restarting.RestartActionService
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
+import de.dkfz.tbi.util.TimestampHelper
 
 import static grails.async.Promises.task
 import static grails.async.Promises.waitAll
@@ -149,8 +150,8 @@ class ProcessesController {
                     finishedProcessesCount  : finishedProcessesCount,
                     failedProcessesCount    : failedProcessCount,
                     runningProcessesCount   : allProcessesCount - finishedProcessesCount,
-                    lastSuccessfulDate      : successDate,
-                    lastFailureDate         : failureDate,
+                    lastSuccessfulDate      : TimestampHelper.asTimestamp(successDate),
+                    lastFailureDate         : TimestampHelper.asTimestamp(failureDate),
             ]
         }
 
@@ -167,9 +168,9 @@ class ProcessesController {
                 case 3: // number of running
                     return a.runningProcessesCount <=> b.runningProcessesCount
                 case 4: // last succeeded
-                    return a.lastSuccessfulDate <=> b.lastSuccessfulDate
+                    return a.lastSuccessfulDate.value <=> b.lastSuccessfulDate.value
                 case 5: // last failed
-                    return a.lastFailureDate <=> b.lastFailureDate
+                    return a.lastFailureDate.value <=> b.lastFailureDate.value
                 case 0:
                 default:
                     return a.name.toLowerCase() <=> b.name.toLowerCase()
@@ -236,8 +237,8 @@ class ProcessesController {
                 process.id,
                 stateForExecutionState(process, latest.state),
                 parameterData,
-                process.started,
-                latest.date,
+                TimestampHelper.asTimestamp(process.started),
+                TimestampHelper.asTimestamp(latest.date),
                 latest.processingStep.jobDefinition.name,
                 [state: latestState, error: latest.error ? latest.error.errorMessage : null, id: latest.processingStep.id],
                 process.comment?.comment?.encodeAsHTML(),
@@ -303,8 +304,8 @@ class ProcessesController {
                     ProcessingStepUpdate update = processService.getLatestProcessingStepUpdate(step)
                     data.put("step", step)
                     data.put("state", update?.state)
-                    data.put("firstUpdate", processService.getFirstUpdate(step))
-                    data.put("lastUpdate", update?.date)
+                    data.put("firstUpdate", TimestampHelper.asTimestamp(processService.getFirstUpdate(step)))
+                    data.put("lastUpdate", TimestampHelper.asTimestamp(update?.date))
                     data.put("duration", processService.getProcessingStepDuration(step))
                     data.put("error", update?.error?.errorMessage)
                 }
@@ -391,7 +392,7 @@ class ProcessesController {
         updates.each { ProcessingStepUpdate update ->
             dataToRender.aaData << [
                 update.id,
-                update.date,
+                TimestampHelper.asTimestamp(update.date),
                 update.state,
                 update.error,
             ]
