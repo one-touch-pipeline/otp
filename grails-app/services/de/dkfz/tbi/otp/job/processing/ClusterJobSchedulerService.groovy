@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.job.processing
 import grails.compiler.GrailsCompileStatic
 import grails.gorm.transactions.Transactional
 import grails.util.Environment
-import groovy.transform.EqualsAndHashCode
 import org.slf4j.event.Level
 
 import de.dkfz.roddy.config.JobLog
@@ -288,19 +287,4 @@ enum JobSubmissionOption {
     QUEUE,
     STORAGE,
     WALLTIME,
-}
-
-@EqualsAndHashCode(includes = ["userName", "realm"])
-class RealmAndUser {
-
-    final Realm realm
-
-    final String userName
-
-    RealmAndUser(final Realm realm, final String userName) {
-        assert realm: "Realm not specified"
-        assert userName: "User name not specified"
-        this.realm = realm
-        this.userName = userName
-    }
 }
