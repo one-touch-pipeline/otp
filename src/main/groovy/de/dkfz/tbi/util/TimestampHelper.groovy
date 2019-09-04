@@ -29,7 +29,7 @@ class TimestampHelper {
     private static final String DATE_PATTERN = "dd.MM.yyyy"
     private static final String SHORT_DATE_PATTERN = "dd.MM."
 
-    private static final String TIME_WEEKDAY_DATE = "dd.MM."
+    private static final String TIME_WEEKDAY_DATE = "${TIME_PATTERN} E ${DATE_PATTERN}"
     private static final String TIME_DATE = "${TIME_PATTERN} ${DATE_PATTERN}"
     private static final String TIME_SHORT_DATE = "${TIME_PATTERN} ${SHORT_DATE_PATTERN}"
 
@@ -39,7 +39,7 @@ class TimestampHelper {
      * Same day         : hh:mm:ss
      * Same year        : hh-mm-ss DD.MM.
      * Totally different: hh-mm-ss DD.MM.YYYY
-
+     *
      * @param date Date object to format
      */
     static String getInShortestTimeFormat(Date date) {
