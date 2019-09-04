@@ -158,7 +158,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([
                 new DataFileAndSampleAlias(
                         dataFile,
-                        sampleSubmissionObject.egaAliasName,
+                        sampleSubmissionObject,
                 ),
         ]).get(dataFile.fileName + dataFile.run)
 
@@ -250,7 +250,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         String dataFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForDataFiles([
                 new DataFileAndSampleAlias(
                         dataFile,
-                        sampleSubmissionObject.egaAliasName,
+                        sampleSubmissionObject,
                 ),
         ]).get(dataFile.fileName + dataFile.run)
 

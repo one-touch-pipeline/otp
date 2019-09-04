@@ -331,19 +331,19 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             } else {
                 Map errors = egaSubmissionValidationService.validateAliases(cmd.egaFileAlias)
                 if (errors.hasErrors) {
-                    pushErrors(errors.errors, cmd.submission)
                     Map egaFileAliases = [:]
                     cmd.egaFileAlias.eachWithIndex { it, i ->
+                        long fastqId = cmd.fastqFile[i] as long
                         DataFile dataFile = cmd.submission.dataFilesToSubmit.find {
-                            it.dataFile.fileName == cmd.filename[i] &&
-                            it.dataFile.run.name == cmd.runName[i]
+                            it.dataFile.id == fastqId
                         }.dataFile
                         egaFileAliases.put(dataFile.fileName + dataFile.run, it)
                     }
                     flash.egaFileAliases = egaFileAliases
+                    pushErrors(errors.errors, cmd.submission)
                 } else {
                     EgaSubmission.withTransaction {
-                        egaSubmissionService.updateDataFileSubmissionObjects(cmd.filename, cmd.egaFileAlias, cmd.submission)
+                        egaSubmissionService.updateDataFileSubmissionObjects(cmd)
                         if (cmd.submission.selectionState != EgaSubmission.SelectionState.SELECT_BAM_FILES) {
                             egaSubmissionFileService.prepareSubmissionForUpload(cmd.submission)
                         }
@@ -360,7 +360,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             EgaSubmission submission = cmd.submission
             Set<SampleSubmissionObject> fastqSamples = submission.samplesToSubmit.findAll { it.useFastqFile }
             List selection = cmd.selectBox.withIndex().collect { it, i ->
-                it ? cmd.egaSampleAlias[i] : null
+                it ? cmd.egaSample[i] : null
             }.findAll().unique()
 
             if (selection.size() != fastqSamples.size()) {
@@ -371,11 +371,11 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 }
                 redirect(action: "editSubmission", params: ['id': cmd.submission.id])
             } else {
-                egaSubmissionService.createDataFileSubmissionObjects(submission, cmd.selectBox, cmd.filename, cmd.egaSampleAlias)
+                egaSubmissionService.createDataFileSubmissionObjects(cmd)
                 redirect(action: "editSubmission", params: ['id': cmd.submission.id])
             }
         } else {
-            pushError("No files to select are detected.", cmd.submission, true)
+            pushError("No files selected", cmd.submission, true)
         }
     }
 
@@ -473,7 +473,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     redirect(action: "editSubmission", params: ['id': cmd.submission.id])
                 }
             } else {
-                pushError("No files to select are detected.", cmd.submission, true)
+                pushError("No files selected", cmd.submission, true)
             }
             return
         }

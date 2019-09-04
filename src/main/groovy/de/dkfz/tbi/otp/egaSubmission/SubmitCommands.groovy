@@ -105,18 +105,15 @@ class SelectFilesDataFilesFormSubmitCommand implements Validateable {
     String saveSelection
     String download
     String saveAliases
-    List<Boolean> selectBox
-    List<String> filename
-    List<String> runName
-    List<String> egaFileAlias
-    List<String> egaSampleAlias
+    List<Boolean> selectBox = []
+    List<String> fastqFile = []
+    List<String> egaSample = []
+    List<String> egaFileAlias = []
 
     static constraints = {
         download nullable: true
-        selectBox nullable: true
         saveSelection nullable: true
         saveAliases nullable: true
-        egaFileAlias nullable: true
     }
 }
 

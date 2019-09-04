@@ -288,39 +288,57 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         bamFilesAndAlias*.sampleAlias == [sampleSubmissionObject.egaAliasName]
     }
 
-    void "test create data file submission objects"() {
+    void "test createDataFileSubmissionObjects"() {
         given:
         EgaSubmission submission = createEgaSubmission()
-        List<Boolean> selectBox = [true, null]
-        List<String> filenames = [DomainFactory.createDataFile().fileName, DomainFactory.createDataFile().fileName]
-        List<String> egaSampleAliases = [
-                createSampleSubmissionObject().egaAliasName,
-                createSampleSubmissionObject().egaAliasName,
+        List<Boolean> selectBox = [
+                true,
+                null,
+                true,
+                false,
+                true,
         ]
+        int size = selectBox.size()
+
+        List<String> fastQFileIds = (1..size).collect { createDataFile() }*.id*.toString()
+        List<String> egaSampleIds = (1..size).collect { createSampleSubmissionObject() }*.id*.toString()
+
+        SelectFilesDataFilesFormSubmitCommand cmd = new SelectFilesDataFilesFormSubmitCommand([
+                submission: submission,
+                selectBox : selectBox,
+                fastqFile : fastQFileIds,
+                egaSample : egaSampleIds,
+        ])
 
         when:
-        egaSubmissionService.createDataFileSubmissionObjects(submission, selectBox, filenames, egaSampleAliases)
+        egaSubmissionService.createDataFileSubmissionObjects(cmd)
 
         then:
         submission.dataFilesToSubmit.size() == DataFileSubmissionObject.findAll().size()
     }
 
-    void "test update data file submission objects"() {
+    void "test updateDataFileSubmissionObjects"() {
         given:
         EgaSubmission submission = createEgaSubmission()
-        List<String> egaFileAliases = ["someMagicAlias"]
-        DataFile dataFile = DomainFactory.createDataFile()
-        List<String> fileNames = [dataFile.fileName]
+        String egaFileAlias = "someMagicAlias"
+        DataFile dataFile = createDataFile()
         DataFileSubmissionObject dataFileSubmissionObject = createDataFileSubmissionObject(
                 dataFile: dataFile,
         )
         submission.addToDataFilesToSubmit(dataFileSubmissionObject)
 
+        SelectFilesDataFilesFormSubmitCommand cmd = new SelectFilesDataFilesFormSubmitCommand([
+                submission  : submission,
+                fastqFile   : [dataFile.id.toString()],
+                egaSample   : [dataFileSubmissionObject.sampleSubmissionObject.id.toString()],
+                egaFileAlias: [egaFileAlias],
+        ])
+
         when:
-        egaSubmissionService.updateDataFileSubmissionObjects(fileNames, egaFileAliases, submission)
+        egaSubmissionService.updateDataFileSubmissionObjects(cmd)
 
         then:
-        dataFileSubmissionObject.egaAliasName == egaFileAliases.first()
+        dataFileSubmissionObject.egaAliasName == egaFileAlias
     }
 
     void "test update bam file submission objects"() {
@@ -352,7 +370,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         )
 
         String alias = "someAlias"
-        List dataFilesAndAliases = [new DataFileAndSampleAlias(dataFile, alias)]
+        List dataFilesAndAliases = [new DataFileAndSampleAlias(dataFile, new SampleSubmissionObject(egaAliasName: alias))]
         List aliasNameHelper = [
                 dataFile.seqType.displayName,
                 dataFile.seqType.libraryLayout,
@@ -414,7 +432,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         ])
         DataFile datafile = CollectionUtils.exactlyOneElement(seqTrack2.dataFiles)
         EgaSubmission egaSubmission = createEgaSubmission([
-                samplesToSubmit: [
+                samplesToSubmit  : [
                         createSampleSubmissionObject([
                                 sample      : seqTrack1.sample,
                                 seqType     : seqTrack1.seqType,

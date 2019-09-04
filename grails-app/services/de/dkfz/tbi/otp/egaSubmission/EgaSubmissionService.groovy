@@ -30,6 +30,8 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+
 @CompileStatic
 @Transactional
 class EgaSubmissionService {
@@ -145,18 +147,21 @@ class EgaSubmissionService {
         return samplesWithSeqType
     }
 
-    void updateDataFileSubmissionObjects(List<String> filenames, List<String> egaFileAlias, EgaSubmission submission) {
-        filenames.eachWithIndex { filename, i ->
+    void updateDataFileSubmissionObjects(SelectFilesDataFilesFormSubmitCommand cmd) {
+        EgaSubmission submission = cmd.submission
+        List<String> egaFileAlias = cmd.egaFileAlias
+        cmd.fastqFile.eachWithIndex { fastqIdString, i ->
+            long fastqId = fastqIdString as long
             DataFileSubmissionObject dataFileSubmissionObject = submission.dataFilesToSubmit.find {
-                it.dataFile.fileName == filename
+                it.dataFile.id == fastqId
             }
             dataFileSubmissionObject.egaAliasName = egaFileAlias[i]
-            dataFileSubmissionObject.save(flush: true)
+            dataFileSubmissionObject.save(flush: false)
         }
         if (submission.samplesToSubmit.any { it.useBamFile } ) {
             submission.selectionState = EgaSubmission.SelectionState.SELECT_BAM_FILES
-            submission.save(flush: true)
         }
+        submission.save(flush: true)
     }
 
     @CompileDynamic
@@ -172,11 +177,10 @@ class EgaSubmissionService {
             }
         }
 
+        Map<Sample, Map<SeqType, List<SampleSubmissionObject>>> submissionObjectsPerSampleAndSeqType = submission.samplesToSubmit.groupBy({ it.sample }, { it.seqType })
         return dataFiles.collect { DataFile file ->
-            new DataFileAndSampleAlias(
-                    file,
-                    submission.samplesToSubmit.find { it.sample == file.seqTrack.sample && it.seqType == file.seqType }.egaAliasName
-            )
+            SampleSubmissionObject sampleSubmissionObject = exactlyOneElement(submissionObjectsPerSampleAndSeqType[file.seqTrack.sample][file.seqTrack.seqType])
+            return new DataFileAndSampleAlias(file, sampleSubmissionObject)
         }.sort()
     }
 
@@ -231,17 +235,18 @@ class EgaSubmissionService {
     }
 
     @CompileDynamic
-    void createDataFileSubmissionObjects(EgaSubmission submission, List<Boolean> selectBox, List<String> filename, List<String> egaSampleAlias) {
-        selectBox.eachWithIndex { it, i ->
+    void createDataFileSubmissionObjects(SelectFilesDataFilesFormSubmitCommand cmd) {
+        EgaSubmission submission = cmd.submission
+        cmd.selectBox.eachWithIndex { it, i ->
             if (it) {
                 DataFileSubmissionObject dataFileSubmissionObject = new DataFileSubmissionObject(
-                        dataFile: DataFile.findByFileName(filename[i]),
-                        sampleSubmissionObject: SampleSubmissionObject.findByEgaAliasName(egaSampleAlias[i])
+                        dataFile: DataFile.get(cmd.fastqFile[i]),
+                        sampleSubmissionObject: SampleSubmissionObject.get(cmd.egaSample[i])
                 ).save(flush: false)
                 submission.addToDataFilesToSubmit(dataFileSubmissionObject)
             }
-            submission.save(flush: true)
         }
+        submission.save(flush: true)
     }
 
     @SuppressWarnings('Instanceof')
@@ -287,7 +292,7 @@ class EgaSubmissionService {
             List aliasNameHelper = [
                     it.dataFile.seqType.displayName,
                     it.dataFile.seqType.libraryLayout,
-                    it.sampleAlias,
+                    it.sampleSubmissionObject.egaAliasName,
                     it.dataFile.seqTrack.normalizedLibraryName,
                     runNameWithoutDate,
                     it.dataFile.seqTrack.laneId,
@@ -336,7 +341,7 @@ class EgaSubmissionService {
 @Canonical
 class DataFileAndSampleAlias implements Comparable<DataFileAndSampleAlias> {
     DataFile dataFile
-    String sampleAlias
+    SampleSubmissionObject sampleSubmissionObject
 
     @Override
     int compareTo(DataFileAndSampleAlias other) {
