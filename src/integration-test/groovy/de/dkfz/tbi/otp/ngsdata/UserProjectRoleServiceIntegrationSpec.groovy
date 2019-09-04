@@ -37,6 +37,7 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 @Rollback
 @Integration
@@ -68,7 +69,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         processingOptionService = new ProcessingOptionService()
         userProjectRoleService = new UserProjectRoleService()
-        userProjectRoleService.messageSource = messageSource
+        userProjectRoleService.messageSourceService = getMessageSourceServiceWithMockedMessageSource()
         userProjectRoleService.springSecurityService = springSecurityService
         userProjectRoleService.auditLogService = new AuditLogService()
         userProjectRoleService.auditLogService.springSecurityService = springSecurityService
@@ -928,6 +929,12 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         projectAuthorities == expectedUsers
+    }
+
+    MessageSourceService getMessageSourceServiceWithMockedMessageSource() {
+        return new MessageSourceService(
+                messageSource: getMessageSource()
+        )
     }
 
     @SuppressWarnings('GStringExpressionWithinString')

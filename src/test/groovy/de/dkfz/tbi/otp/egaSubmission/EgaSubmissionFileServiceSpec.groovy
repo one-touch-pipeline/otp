@@ -35,10 +35,8 @@ import de.dkfz.tbi.otp.domainFactory.submissions.ega.EgaSubmissionFactory
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.security.User
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
 import java.nio.file.FileSystem
@@ -366,7 +364,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         egaSubmissionFileService.processingOptionService = Mock(ProcessingOptionService) {
             1 * findOptionAsString(_) >> recipient
         }
-        egaSubmissionFileService.createNotificationTextService = Mock(CreateNotificationTextService) {
+        egaSubmissionFileService.messageSourceService = Mock(MessageSourceService) {
             1 * createMessage(_, _) >> content
         }
         egaSubmissionFileService.mailHelperService = Mock(MailHelperService) {
@@ -420,7 +418,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         egaSubmissionFileService.processingOptionService = Mock(ProcessingOptionService) {
             1 * findOptionAsString(_) >> recipient
         }
-        egaSubmissionFileService.createNotificationTextService = Mock(CreateNotificationTextService) {
+        egaSubmissionFileService.messageSourceService = Mock(MessageSourceService) {
             1 * createMessage(_, _) >> content
         }
         egaSubmissionFileService.mailHelperService = Mock(MailHelperService) {

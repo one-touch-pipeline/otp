@@ -32,6 +32,7 @@ import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.MessageSourceService
 import de.dkfz.tbi.util.spreadsheet.Row
 import de.dkfz.tbi.util.spreadsheet.Spreadsheet
 
@@ -51,6 +52,7 @@ class EgaSubmissionFileService {
     FileSystemService fileSystemService
     LsdfFilesService lsdfFilesService
     MailHelperService mailHelperService
+    MessageSourceService messageSourceService
     ProcessingOptionService processingOptionService
     SpringSecurityService springSecurityService
 
@@ -248,7 +250,7 @@ class EgaSubmissionFileService {
         User user = springSecurityService.currentUser as User
 
         String subject = "New ${submission}"
-        String content = createNotificationTextService.createMessage('egaSubmission.template.base', [
+        String content = messageSourceService.createMessage('egaSubmission.template.base', [
                 user         : user.realName,
                 project      : submission.project.name,
                 submission   : submission.id,

@@ -28,19 +28,17 @@ import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 @Transactional
 class QcTrafficLightNotificationService {
 
     OtrsTicketService otrsTicketService
-
     CreateNotificationTextService createNotificationTextService
-
     ProcessingOptionService processingOptionService
-
     UserProjectRoleService userProjectRoleService
-
     MailHelperService mailHelperService
+    MessageSourceService messageSourceService
 
     private String createResultsAreBlockedSubject(AbstractMergedBamFile bamFile, boolean toBeSent) {
         StringBuilder subject = new StringBuilder()
@@ -48,7 +46,7 @@ class QcTrafficLightNotificationService {
             subject << 'TO BE SENT: '
         }
 
-        subject << createNotificationTextService.createMessage(
+        subject << messageSourceService.createMessage(
                 "notification.template.alignment.qcTrafficBlockedSubject",
                 [
                         bamFile: bamFile,
@@ -59,7 +57,7 @@ class QcTrafficLightNotificationService {
     }
 
     private String createResultsAreBlockedMessage(AbstractMergedBamFile bamFile) {
-        return createNotificationTextService.createMessage(
+        return messageSourceService.createMessage(
                 "notification.template.alignment.qcTrafficBlockedMessage",
                 [
                         bamFile              : bamFile,

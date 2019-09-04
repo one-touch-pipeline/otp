@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 class QcTrafficLightNotificationServiceSpec extends Specification implements DataTest {
 
@@ -100,7 +101,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                 },
         ])
 
-        service.createNotificationTextService = Mock(CreateNotificationTextService) {
+        service.messageSourceService = Mock(MessageSourceService) {
             1 * createMessage('notification.template.alignment.qcTrafficBlockedSubject', _) >> { String templateName, Map properties ->
                 assert properties.size() == 1
                 assert properties['bamFile'] == bamFile
@@ -113,6 +114,10 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                 assert properties['link'] == LINK
                 return BODY
             }
+            0 * _
+        }
+
+        service.createNotificationTextService = Mock(CreateNotificationTextService) {
             1 * createOtpLinks([bamFile.project], 'alignmentQualityOverview', 'index') >> LINK
             0 * _
         }

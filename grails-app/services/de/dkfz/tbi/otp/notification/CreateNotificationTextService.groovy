@@ -23,11 +23,7 @@ package de.dkfz.tbi.otp.notification
 
 import grails.gorm.transactions.Transactional
 import grails.web.mapping.LinkGenerator
-import groovy.text.SimpleTemplateEngine
-import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.NoSuchMessageException
-import org.springframework.context.i18n.LocaleContextHolder
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -35,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
@@ -48,15 +45,10 @@ class CreateNotificationTextService {
     @Autowired
     LinkGenerator linkGenerator
 
-    @Autowired
-    PluginAwareResourceBundleMessageSource messageSource
-
     LsdfFilesService lsdfFilesService
-
+    MessageSourceService messageSourceService
     ProjectOverviewService projectOverviewService
-
     ProcessingOptionService processingOptionService
-
 
     String notification(OtrsTicket otrsTicket, ProcessingStatus status, ProcessingStep processingStep, Project project) {
         assert otrsTicket
@@ -91,21 +83,20 @@ class CreateNotificationTextService {
 
         String faq = ""
         if (ProcessingOptionService.findOption(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)) {
-            faq = createMessage('notification.template.base.faq', [
+            faq = messageSourceService.createMessage('notification.template.base.faq', [
                     faqLink    : processingOptionService.findOptionAsString(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK),
                     contactMail: processingOptionService.findOptionAsString(OptionName.EMAIL_REPLY_TO),
             ])
         }
 
-        return createMessage('notification.template.base', [
+        return messageSourceService.createMessage('notification.template.base', [
                 stepInformation      : stepInformation,
                 seqCenterComment     : seqCenterComment,
-                addition             : createMessage("notification.template.${processingStep.name().toLowerCase()}.addition"),
+                addition             : messageSourceService.createMessage("notification.template.${processingStep.name().toLowerCase()}.addition"),
                 emailSenderSalutation: processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
                 faq                  : faq,
         ])
     }
-
 
     String installationNotification(ProcessingStatus statusInput) {
         assert statusInput
@@ -134,7 +125,7 @@ class CreateNotificationTextService {
         String directories = getSeqTypeDirectories(seqTracks)
         String otpLinks = createOtpLinks(seqTracks*.project, 'projectOverview', 'laneOverview')
 
-        String message = createMessage('notification.template.installation.base', [
+        String message = messageSourceService.createMessage('notification.template.installation.base', [
                 runs   : runNames,
                 paths  : directories,
                 samples: samples.join('\n'),
@@ -142,12 +133,11 @@ class CreateNotificationTextService {
         ])
 
         if (status.alignmentProcessingStatus != NOTHING_DONE_WONT_DO) {
-            message += '\n' + createMessage('notification.template.installation.furtherProcessing')
+            message += '\n' + messageSourceService.createMessage('notification.template.installation.furtherProcessing')
         }
 
         return message
     }
-
 
     String alignmentNotification(ProcessingStatus statusInput) {
         assert statusInput
@@ -201,7 +191,7 @@ class CreateNotificationTextService {
                 bamFilePerConfig.each { AlignmentConfig config, List<AbstractMergedBamFile> configBamFiles ->
                     AlignmentInfo alignmentInfo = alignmentInfoByConfig.get(config)
                     String individuals = multipleConfigs ? (config.individual ?: "default") : ""
-                    builder << createMessage("notification.template.alignment.processing", [
+                    builder << messageSourceService.createMessage("notification.template.alignment.processing", [
                             seqType           : seqType.displayNameWithLibraryLayout,
                             individuals       : individuals,
                             referenceGenome   : configBamFiles*.referenceGenome.unique().join(', '),
@@ -209,12 +199,12 @@ class CreateNotificationTextService {
                             alignmentParameter: alignmentInfo.alignmentParameter,
                     ])
                     Map<String, Object> codeAndParams = alignmentInfo.getAlignmentSpecificMessageAttributes()
-                    builder << createMessage(codeAndParams.code as String, codeAndParams.params as Map)
+                    builder << messageSourceService.createMessage(codeAndParams.code as String, codeAndParams.params as Map)
                 }
             }
         }
 
-        String message = createMessage("notification.template.alignment.base", [
+        String message = messageSourceService.createMessage("notification.template.alignment.base", [
                 samples         : sampleNames,
                 links           : links,
                 processingValues: builder.toString().trim(),
@@ -226,13 +216,13 @@ class CreateNotificationTextService {
         }
         if (samplePairs[true]) {
             String variantCallingPipelines = samplePairs[true]*.variantCallingWorkflowNames().flatten().unique().sort().join(', ')
-            message += '\n' + createMessage("notification.template.alignment.furtherProcessing", [
+            message += '\n' + messageSourceService.createMessage("notification.template.alignment.furtherProcessing", [
                     samplePairsWillProcess : getSamplePairRepresentation(samplePairs[true]*.samplePair),
                     variantCallingPipelines: variantCallingPipelines,
             ])
         }
         if (samplePairs[false]) {
-            message += '\n' + createMessage("notification.template.alignment.noFurtherProcessing",
+            message += '\n' + messageSourceService.createMessage("notification.template.alignment.noFurtherProcessing",
                     [
                             emailSenderSalutation : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
                             samplePairsWontProcess: getSamplePairRepresentation(samplePairs[false]*.samplePair.findAll {
@@ -244,13 +234,13 @@ class CreateNotificationTextService {
         alignmentInfoByConfig.keySet()*.pipeline*.name.sort().unique().each {
             switch (it) {
                 case Pipeline.Name.PANCAN_ALIGNMENT:
-                    message += '\n' + createMessage("notification.template.references.alignment.pancan")
+                    message += '\n' + messageSourceService.createMessage("notification.template.references.alignment.pancan")
                     break
                 case Pipeline.Name.RODDY_RNA_ALIGNMENT: //no documentation/code available
                 case Pipeline.Name.EXTERNALLY_PROCESSED: //alignment was done externally
                     break
                 case Pipeline.Name.CELL_RANGER:
-                    message += '\n' + createMessage("notification.template.references.alignment.cellRanger")
+                    message += '\n' + messageSourceService.createMessage("notification.template.references.alignment.cellRanger")
                     break
                 default:
                     log.error("Alignment pipeline ${it} is unknown for notification")
@@ -260,7 +250,6 @@ class CreateNotificationTextService {
 
         return message
     }
-
 
     String snvNotification(ProcessingStatus status) {
         return variantCallingNotification(status, SNV, 'notification.template.references.snv')
@@ -298,17 +287,17 @@ class CreateNotificationTextService {
             return ''
         }
         String directories = variantCallingDirectories(samplePairsFinished, notificationStep)
-        String message = createMessage("notification.template.step.processed", [
+        String message = messageSourceService.createMessage("notification.template.step.processed", [
                 displayName        : notificationStep.displayName,
                 samplePairsFinished: getSamplePairRepresentation(samplePairsFinished),
         ])
         if (notificationStep.controllerName && notificationStep.actionName) {
-            message += createMessage("notification.template.step.processed.results.links", [
+            message += messageSourceService.createMessage("notification.template.step.processed.results.links", [
                     displayName: notificationStep.displayName,
                     otpLinks   : createOtpLinks(samplePairsFinished*.project, notificationStep.controllerName, notificationStep.actionName),
             ])
         }
-        message += createMessage("notification.template.step.processed.results.directories", [
+        message += messageSourceService.createMessage("notification.template.step.processed.results.directories", [
                 directories: directories,
         ])
 
@@ -316,7 +305,7 @@ class CreateNotificationTextService {
             it."${notificationStep}ProcessingStatus" != SamplePair.ProcessingStatus.DISABLED
         }
         if (samplePairsNotProcessed) {
-            message += '\n' + createMessage("notification.template.step.notProcessed", [
+            message += '\n' + messageSourceService.createMessage("notification.template.step.notProcessed", [
                     notificationSubject    : notificationStep.notificationSubject,
                     samplePairsNotProcessed: getSamplePairRepresentation(samplePairsNotProcessed),
                     emailSenderSalutation  : processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
@@ -324,7 +313,7 @@ class CreateNotificationTextService {
         }
 
         if (additionalInfo) {
-            message += '\n' + createMessage(additionalInfo)
+            message += '\n' + messageSourceService.createMessage(additionalInfo)
         }
 
         return message
@@ -332,18 +321,7 @@ class CreateNotificationTextService {
 
     String references(String referencesKey) {
         assert referencesKey
-        return createMessage(referencesKey)
-    }
-
-    String createMessage(String templateName, Map properties = [:]) {
-        assert templateName
-        String template
-        try {
-            template = messageSource.getMessage(templateName, [].toArray(), LocaleContextHolder.getLocale())
-        } catch (NoSuchMessageException e) {
-            return ''
-        }
-        return new SimpleTemplateEngine().createTemplate(template).make(properties).toString()
+        return messageSourceService.createMessage(referencesKey)
     }
 
     String createOtpLinks(List<Project> projects, String controller, String action) {
@@ -362,7 +340,6 @@ class CreateNotificationTextService {
             ])
         }.join('\n')
     }
-
 
     String getSampleName(SeqTrack seqTrack) {
         assert seqTrack

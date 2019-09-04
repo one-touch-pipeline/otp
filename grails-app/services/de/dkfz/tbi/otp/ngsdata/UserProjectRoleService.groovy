@@ -24,10 +24,6 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
-import groovy.text.SimpleTemplateEngine
-import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
-import org.springframework.context.NoSuchMessageException
-import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.odcf.audit.impl.DicomAuditLogger
@@ -40,6 +36,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.MailHelperService
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
 
@@ -53,7 +50,7 @@ class UserProjectRoleService {
     AuditLogService auditLogService
     LdapService ldapService
     MailHelperService mailHelperService
-    PluginAwareResourceBundleMessageSource messageSource
+    MessageSourceService messageSourceService
     ProcessingOptionService processingOptionService
     UserService userService
 
@@ -146,14 +143,14 @@ class UserProjectRoleService {
         Project project = userProjectRole.project
         User user = userProjectRole.user
 
-        String subject = createMessage("projectUser.notification.fileAccessChange.subject", [
+        String subject = messageSourceService.createMessage("projectUser.notification.fileAccessChange.subject", [
             projectName: project.name,
         ])
 
         String clusterName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME)
         String clusterAdministrationEmail = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_CLUSTER_ADMINISTRATION)
         String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
-        String body = createMessage("projectUser.notification.fileAccessChange.body", [
+        String body = messageSourceService.createMessage("projectUser.notification.fileAccessChange.body", [
                 username                  : user.realName,
                 requester                 : requester.realName,
                 projectName               : project.name,
@@ -175,7 +172,7 @@ class UserProjectRoleService {
 
         String formattedAction = action.toString().toLowerCase()
         String conjunction = action == OperatorAction.ADD ? 'to' : 'from'
-        String subject = createMessage("projectUser.notification.addToUnixGroup.subject", [
+        String subject = messageSourceService.createMessage("projectUser.notification.addToUnixGroup.subject", [
                 requester  : requester.username,
                 action     : formattedAction,
                 conjunction: conjunction,
@@ -183,13 +180,13 @@ class UserProjectRoleService {
                 projectName: userProjectRole.project.name,
         ])
 
-        String affectedUserUserDetail = createMessage("projectUser.notification.addToUnixGroup.userDetail", [
+        String affectedUserUserDetail = messageSourceService.createMessage("projectUser.notification.addToUnixGroup.userDetail", [
                 realName: userProjectRole.user.realName,
                 username: userProjectRole.user.username,
                 email   : userProjectRole.user.email,
                 role    : userProjectRole.projectRole.name,
         ])
-        String requesterUserDetail = createMessage("projectUser.notification.addToUnixGroup.userDetail", [
+        String requesterUserDetail = messageSourceService.createMessage("projectUser.notification.addToUnixGroup.userDetail", [
                 realName: requester.realName,
                 username: requester.username + switchedUserAnnotation,
                 email   : requester.email,
@@ -197,7 +194,7 @@ class UserProjectRoleService {
         ])
 
         List<Project> otherProjectsOfUnixGroup = Project.findAllByUnixGroup(userProjectRole.project.unixGroup) - userProjectRole.project
-        String body = createMessage("projectUser.notification.addToUnixGroup.body", [
+        String body = messageSourceService.createMessage("projectUser.notification.addToUnixGroup.body", [
                 projectName           : userProjectRole.project,
                 projectUnixGroup      : userProjectRole.project.unixGroup,
                 projectList           : (otherProjectsOfUnixGroup*.name.sort() ?: ["None"]).join(", "),
@@ -228,12 +225,12 @@ class UserProjectRoleService {
         boolean userIsSubmitter = projectRoleName == ProjectRole.Basic.SUBMITTER.name()
         boolean executingUserIsAdministrativeUser = UserRole.findByUserAndRoleInList(executingUser, administrativeRoles)
 
-        String subject = createMessage("projectUser.notification.newProjectMember.subject", [projectName: projectName])
+        String subject = messageSourceService.createMessage("projectUser.notification.newProjectMember.subject", [projectName: projectName])
 
         String body
         if (userIsSubmitter && executingUserIsAdministrativeUser) {
             String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
-            body = createMessage("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter" , [
+            body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter" , [
                 userIdentifier       : userProjectRole.user.realName ?: userProjectRole.user.username,
                 projectRole          : projectRoleName,
                 projectName          : projectName,
@@ -241,7 +238,7 @@ class UserProjectRoleService {
                 supportTeamSalutation: supportTeamName,
             ])
         } else {
-            body = createMessage("projectUser.notification.newProjectMember.body.userManagerAddedMember" , [
+            body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.userManagerAddedMember" , [
                 userIdentifier: userProjectRole.user.realName ?: userProjectRole.user.username,
                 projectRole   : projectRoleName,
                 projectName   : projectName,
@@ -383,17 +380,6 @@ class UserProjectRoleService {
                 }
             }
         } as int
-    }
-
-    private String createMessage(String templateName, Map properties = [:]) {
-        assert templateName
-        String template
-        try {
-            template = messageSource.getMessage(templateName, [].toArray(), LocaleContextHolder.locale)
-        } catch (NoSuchMessageException e) {
-            return ''
-        }
-        return new SimpleTemplateEngine().createTemplate(template).make(properties).toString()
     }
 
     List<String> getEmailsOfToBeNotifiedProjectUsers(Project project) {

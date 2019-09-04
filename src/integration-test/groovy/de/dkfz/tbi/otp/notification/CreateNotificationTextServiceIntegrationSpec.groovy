@@ -36,6 +36,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.ProcessingStatus
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
@@ -112,11 +113,13 @@ faq:${faq}
         }
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
 
-        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
-            1 * getMessageInternal("notification.template.alignment.addition", [], _) >> ""
-            1 * getMessageInternal("notification.template.base.faq", [], _) >> "FAQs"
-            _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
-        }
+        createNotificationTextService.messageSourceService = new MessageSourceService(
+                messageSource: Mock(PluginAwareResourceBundleMessageSource) {
+                    1 * getMessageInternal("notification.template.alignment.addition", [], _) >> ""
+                    1 * getMessageInternal("notification.template.base.faq", [], _) >> "FAQs"
+                    _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
+            }
+        )
 
         when:
         String message = createNotificationTextService.notification(ticket, processingStatus, ALIGNMENT, project)
@@ -138,11 +141,13 @@ faq:${faq}
         }
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
 
-        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
-            1 * getMessageInternal("notification.template.alignment.addition", [], _) >> ""
-            0 * getMessageInternal("notification.template.base.faq", [], _) >> "FAQs"
-            _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
-        }
+        createNotificationTextService.messageSourceService = new MessageSourceService(
+                messageSource: Mock(PluginAwareResourceBundleMessageSource) {
+                    1 * getMessageInternal("notification.template.alignment.addition", [], _) >> ""
+                    0 * getMessageInternal("notification.template.base.faq", [], _) >> "FAQs"
+                    _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
+            }
+        )
 
         when:
         String message = createNotificationTextService.notification(ticket, processingStatus, ALIGNMENT, project)
@@ -188,10 +193,12 @@ faq:${faq}
             (processingStep == RUN_YAPSA ? 1 : 0) *
                     runYapsaNotification(processingStatus) >> RUN_YAPSA.toString()
         }
-        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
-            _ * getMessageInternal("notification.template.seqCenterNote.${CollectionUtils.exactlyOneElement(ticket.findAllSeqTracks()*.seqCenter.unique()).name.toLowerCase()}", [], _) >> generalSeqCenterComment
-            _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
-        }
+        createNotificationTextService.messageSourceService = new MessageSourceService(
+                messageSource: Mock(PluginAwareResourceBundleMessageSource) {
+                    _ * getMessageInternal("notification.template.seqCenterNote.${CollectionUtils.exactlyOneElement(ticket.findAllSeqTracks()*.seqCenter.unique()).name.toLowerCase()}", [], _) >> generalSeqCenterComment
+                    _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
+                }
+        )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
 
         String expectedSeqCenterComment = ""
@@ -286,9 +293,11 @@ faq:
             0 * sophiaNotification(processingStatus) >> SOPHIA.toString()
             0 * aceseqNotification(processingStatus) >> ACESEQ.toString()
         }
-        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
-            _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
-        }
+        createNotificationTextService.messageSourceService = new MessageSourceService(
+                messageSource: Mock(PluginAwareResourceBundleMessageSource) {
+                    _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
+                }
+        )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
 
         String expectedSeqCenterComment

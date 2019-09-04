@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.notification
 
-
 import grails.testing.gorm.DataTest
 import grails.web.mapping.LinkGenerator
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
@@ -39,6 +38,7 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.*
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import static de.dkfz.tbi.otp.tracking.OtrsTicket.ProcessingStep.*
 
@@ -165,33 +165,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         configService = new TestConfigService()
     }
 
-
-    void "createMessage, when template is null, throw assert"() {
-        when:
-        new CreateNotificationTextService().createMessage(null, [:])
-
-        then:
-        AssertionError e = thrown()
-        e.message.contains('assert templateName')
-    }
-
-    @SuppressWarnings("GStringExpressionWithinString")
-    void "createMessage, when template exist, return notification text"() {
-        given:
-        String templateName = "notification.template.base"
-        CreateNotificationTextService createNotificationTextService = new CreateNotificationTextService(
-                messageSource: Mock(PluginAwareResourceBundleMessageSource) {
-                    _ * getMessageInternal("notification.template.base", [], _) >> 'Some text ${placeholder} some text'
-                }
-        )
-
-        when:
-        String message = createNotificationTextService.createMessage(templateName, [placeholder: 'information'])
-
-        then:
-        'Some text information some text' == message
-    }
-
     void "getSampleName, when seqTracks is null, throw assert"() {
         when:
         new CreateNotificationTextService().getSampleName(null)
@@ -200,7 +173,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         AssertionError e = thrown()
         e.message.contains('assert seqTrack')
     }
-
 
     void "getSampleName, when seqTracks exist, return name to display"() {
         given:
@@ -213,7 +185,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         name.contains(seqTrack.individual.displayName)
     }
 
-
     void "getSampleIdentifiers, when no seqTracks exist, throw assert"() {
         when:
         new CreateNotificationTextService().getSampleIdentifiers(null)
@@ -222,7 +193,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         AssertionError e = thrown()
         e.message.contains('assert seqTracks')
     }
-
 
     void "getSampleIdentifiers, when no metadataEntries exist, return only brackets"() {
         given:
@@ -234,7 +204,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         then:
         ' ()' == value
     }
-
 
     void "getSampleIdentifiers, when metadataEntries exist and sample identifier should be hidden, return empty string"() {
         given:
@@ -252,7 +221,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         '' == value
     }
 
-
     void "getSampleIdentifiers, when metadataEntries exist and sample identifier should be shown, return sample identifier in brackets"() {
         given:
         String identifier = 'SomeName'
@@ -268,7 +236,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         then:
         expected == value
     }
-
 
     void "getSampleIdentifiers, when multiple seqtracks exist with multiple sample identifiers, return unique and sorted sample identifiers in brackets"() {
         given:
@@ -298,7 +265,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         expected == value
     }
 
-
     void "getSampleIdentifiers, when samples are mixed, throw assert"() {
         given:
         SeqTrack seqTrack1 = DomainFactory.createSeqTrackWithTwoDataFiles()
@@ -314,7 +280,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         e.message.contains('seqtracks must be of the same project')
     }
 
-
     void "getSeqTypeDirectories, when seqTracks is null, throw assert"() {
         when:
         new CreateNotificationTextService().getSeqTypeDirectories(null)
@@ -323,7 +288,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         AssertionError e = thrown()
         e.message.contains('assert seqTracks')
     }
-
 
     void "getSeqTypeDirectories, return correct paths"() {
         given:
@@ -343,7 +307,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         expected == fileNameString
     }
 
-
     void "getMergingDirectories, when bamFiles is null, throw assert"() {
         when:
         new CreateNotificationTextService().getMergingDirectories(null)
@@ -352,7 +315,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         AssertionError e = thrown()
         e.message.contains('assert bamFiles')
     }
-
 
     void "getMergingDirectories, return correct paths"() {
         given:
@@ -384,7 +346,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         expected == fileNameString
     }
 
-
     void "getMergingDirectories, when seqtype is chipseq, then the path should contain antibody"() {
         given:
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
@@ -404,7 +365,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         expected == fileNameString
     }
 
-
     void "variantCallingDirectories, when samplePairsFinished is null, return empty string"() {
         when:
         new CreateNotificationTextService().variantCallingDirectories(null, SNV)
@@ -412,7 +372,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         then:
         thrown(AssertionError)
     }
-
 
     void "variantCallingDirectories, return correct paths"() {
         given:
@@ -442,7 +401,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         ACESEQ   || "cnv_results"
     }
 
-
     void "getSamplePairRepresentation, when empty sample pair list, should return empty string"() {
         when:
         String samplePairs = new CreateNotificationTextService().getSamplePairRepresentation([])
@@ -450,7 +408,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         then:
         '' == samplePairs
     }
-
 
     void "getSamplePairRepresentation, when sample pair list is not empty, should return sample pair representations"() {
         given:
@@ -470,7 +427,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         expectedSamplePair == samplePairs
     }
 
-
     void "installationNotification, when status is null, throw assert"() {
         when:
         new CreateNotificationTextService().installationNotification(null)
@@ -479,7 +435,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
         AssertionError e = thrown()
         e.message.contains('assert status')
     }
-
 
     @Unroll
     void "installationNotification, return message"() {
@@ -515,7 +470,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                     projectCount * link(_) >> 'link'
                 },
                 lsdfFilesService: new LsdfFilesService(),
-                messageSource: getMessageSource(),
+                messageSourceService: getMessageSourceServiceWithMockedMessageSource(),
         )
 
         List<SeqTrack> seqTracks = [data1.seqTrack]
@@ -636,7 +591,7 @@ ${expectedAlign}"""
                 linkGenerator: Mock(LinkGenerator) {
                     projectCount * link(_) >> 'link'
                 },
-                messageSource: getMessageSource(),
+                messageSourceService: getMessageSourceServiceWithMockedMessageSource(),
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
 
@@ -768,14 +723,16 @@ pancan alignment infos
                 },
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
-        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
-            1 * getMessageInternal("notification.template.alignment.base", [], _) >> ""
-            1 * getMessageInternal("notification.template.alignment.processing", [], _) >> ""
-            1 * getMessageInternal("notification.template.alignment.noFurtherProcessing", [], _) >> ""
-            (singleCell ? 0 : 1) * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
-            (singleCell ? 1 : 0) * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
-            (singleCell ? 0 : 1) * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
-        }
+        createNotificationTextService.messageSourceService = new MessageSourceService(
+                messageSource: Mock(PluginAwareResourceBundleMessageSource) {
+                    1 * getMessageInternal("notification.template.alignment.base", [], _) >> ""
+                    1 * getMessageInternal("notification.template.alignment.processing", [], _) >> ""
+                    1 * getMessageInternal("notification.template.alignment.noFurtherProcessing", [], _) >> ""
+                    (singleCell ? 0 : 1) * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
+                    (singleCell ? 1 : 0) * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
+                    (singleCell ? 0 : 1) * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
+                }
+        )
 
         when:
         createNotificationTextService.alignmentNotification(processingStatus)
@@ -830,16 +787,18 @@ pancan alignment infos
                 processingOptionService: new ProcessingOptionService(),
         )
 
-        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
-            1 * getMessageInternal("notification.template.alignment.base", [], _) >> ""
-            1 * getMessageInternal("notification.template.alignment.processing", [], _) >> ""
+        createNotificationTextService.messageSourceService = new MessageSourceService(
+                messageSource: Mock(PluginAwareResourceBundleMessageSource) {
+                    1 * getMessageInternal("notification.template.alignment.base", [], _) >> ""
+                    1 * getMessageInternal("notification.template.alignment.processing", [], _) >> ""
 
-            countCellRanger * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
-            countRoddy * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
-            countPanCan * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
-            countCellRanger * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
-            0 * _
-        }
+                    countCellRanger * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
+                    countRoddy * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
+                    countPanCan * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
+                    countCellRanger * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
+                    0 * _
+                }
+        )
 
         when:
         createNotificationTextService.alignmentNotification(processingStatus)
@@ -888,15 +847,17 @@ pancan alignment infos
                 processingOptionService: new ProcessingOptionService(),
         )
 
-        createNotificationTextService.messageSource = Mock(PluginAwareResourceBundleMessageSource) {
-            1 * getMessageInternal("notification.template.alignment.base", [], _) >> ""
-            3 * getMessageInternal("notification.template.alignment.processing", [], _) >> ""
-            1 * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
-            2 * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
-            1 * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
-            1 * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
-            0 * _
-        }
+        createNotificationTextService.messageSourceService = new MessageSourceService(
+                messageSource: Mock(PluginAwareResourceBundleMessageSource) {
+                    1 * getMessageInternal("notification.template.alignment.base", [], _) >> ""
+                    3 * getMessageInternal("notification.template.alignment.processing", [], _) >> ""
+                    1 * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
+                    2 * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
+                    1 * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
+                    1 * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
+                    0 * _
+            }
+        )
 
         when:
         createNotificationTextService.alignmentNotification(processingStatus)
@@ -958,13 +919,12 @@ pancan alignment infos
                 linkGenerator: Mock(LinkGenerator) {
                     projectCount * link(_) >> 'link'
                 },
-                messageSource: getMessageSource(),
+                messageSourceService: getMessageSourceServiceWithMockedMessageSource(),
         )
         createNotificationTextService.processingOptionService = new ProcessingOptionService()
 
         List<SamplePair> samplePairWithAnalysis = [data1.samplePair]
         List<SamplePair> samplePairWithoutAnalysis = []
-
 
         switch (dataList.processingStatus) {
             case ProcessingStatus.WorkflowProcessingStatus.ALL_DONE:
@@ -1011,7 +971,6 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
 
         where:
         dataList << pairAnalysisContentsPermutation
-
     }
 
     void "notification, when an argument is null, throw assert"() {
@@ -1032,7 +991,6 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         true   | false  | true           | true    || 'status'
         false  | true   | true           | true    || 'otrsTicket'
     }
-
 
     void "notification, when call for ProcessingStep FASTQC, throw an exception"() {
         when:
@@ -1186,6 +1144,12 @@ mergingParameter: ${data.alignmentInfo.mergeOptions}
 samtoolsProgram: ${data.alignmentInfo.samToolsCommand}"""
     }
 
+    MessageSourceService getMessageSourceServiceWithMockedMessageSource() {
+        return new MessageSourceService(
+            messageSource: getMessageSource()
+        )
+    }
+
     @SuppressWarnings("GStringExpressionWithinString")
     @Override
     PluginAwareResourceBundleMessageSource getMessageSource() {
@@ -1247,7 +1211,6 @@ samplePairsNotProcessed: ${samplePairsNotProcessed}
             _ * getMessageInternal("notification.template.references.runyapsa", [], _) >> '''runYapsa analysis infos\n'''
 
             0 * _
-
         }
     }
 }
