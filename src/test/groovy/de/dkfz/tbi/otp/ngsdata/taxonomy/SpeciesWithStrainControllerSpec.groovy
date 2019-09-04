@@ -148,7 +148,6 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
         List<String> reverseSortedNames = SORTED_NAMES.reverse()
 
         SORTED_NAMES.eachWithIndex { String name, int i ->
-            println("${name} ${i} ${reverseSortedNames[i]}")
             createSpecies(commonName: createCommonName(name: name), scientificName: reverseSortedNames[i])
         }
 
