@@ -55,6 +55,7 @@ class TestConfigService extends ConfigService {
                         OtpProperty.TEST_WORKFLOW_RESULT_DIR,
                         OtpProperty.TEST_TESTING_GROUP,
                         OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP,
+                        OtpProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY,
                 ]
             }
         } else {
@@ -133,6 +134,9 @@ class TestConfigService extends ConfigService {
         return otpProperties.get(OtpProperty.TEST_TESTING_PROJECT_UNIX_GROUP) ?: LocalShellHelper.executeAndWait("id -g -n").assertExitCodeZeroAndStderrEmpty().stdout.trim()
     }
 
+    File getWorkflowTestRoddySharedFilesBaseDir() {
+        return new File(getAndAssertValue(OtpProperty.TEST_WORKFLOW_RODDY_SHARED_FILES_BASE_DIRECTORY))
+    }
 
     private String getAndAssertValue(OtpProperty property) {
         String value = otpProperties.get(property)

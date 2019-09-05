@@ -90,6 +90,7 @@ class AbstractExecutePanCanJobIntegrationTests {
         abstractExecutePanCanJob.bedFileService = new BedFileService()
         abstractExecutePanCanJob.configService = configService
         abstractExecutePanCanJob.chromosomeIdentifierSortingService = new ChromosomeIdentifierSortingService()
+        abstractExecutePanCanJob.processingOptionService = new ProcessingOptionService()
 
         File processingRootPath = configService.getProcessingRootPath()
 
@@ -205,7 +206,7 @@ ${roddyBamFile.individual.pid} \
 --useiodir=${viewByPidString()},${roddyBamFile.workDirectory} \
 --additionalImports=${additionalImports} \
 workflowSpecificParameter \
---cvalues="$workflowSpecificCValues"\
+--cvalues="${workflowSpecificCValues},sharedFilesBaseDirectory:/shared"\
 """
 
         String actualCmd = abstractExecutePanCanJob.prepareAndReturnWorkflowSpecificCommand(roddyBamFile, realm)
@@ -224,7 +225,7 @@ workflowSpecificParameter \
     void testPrepareAndReturnCValues_NoFastTrack_setUpCorrect() {
         setupData()
         String expectedCommand = """\
---cvalues="$workflowSpecificCValues"\
+--cvalues="${workflowSpecificCValues},sharedFilesBaseDirectory:/shared"\
 """
         assert expectedCommand == abstractExecutePanCanJob.prepareAndReturnCValues(roddyBamFile)
     }

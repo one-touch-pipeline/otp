@@ -2222,38 +2222,26 @@ class DomainFactory {
     }
 
     static void createRoddyProcessingOptions(File basePath = TestCase.uniqueNonExistentPath) {
-
-        ProcessingOption processingOptionPath = new ProcessingOption(
-                name: OptionName.RODDY_PATH,
-                type: null,
-                project: null,
-                value: "${basePath}/roddy",
+        createProcessingOptionLazy(
+                OptionName.RODDY_PATH,
+                "${basePath}/roddy",
         )
-        assert processingOptionPath.save(flush: true)
-
-        ProcessingOption processingOptionBaseConfigsPath = new ProcessingOption(
-                name: OptionName.RODDY_BASE_CONFIGS_PATH,
-                type: null,
-                project: null,
-                value: "${basePath}/roddyBaseConfigs",
+        createProcessingOptionLazy(
+                OptionName.RODDY_BASE_CONFIGS_PATH,
+                "${basePath}/roddyBaseConfigs",
         )
-        assert processingOptionBaseConfigsPath.save(flush: true)
-
-        ProcessingOption processingOptionApplicationIni = new ProcessingOption(
-                name: OptionName.RODDY_APPLICATION_INI,
-                type: null,
-                project: null,
-                value: "${basePath}/roddyBaseConfigs/applicationProperties.ini",
+        createProcessingOptionLazy(
+                OptionName.RODDY_APPLICATION_INI,
+                "${basePath}/roddyBaseConfigs/applicationProperties.ini",
         )
-        assert processingOptionApplicationIni.save(flush: true)
-
-        ProcessingOption featureTogglesConfigPath = new ProcessingOption(
-                name: OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH,
-                type: null,
-                project: null,
-                value: "${basePath}/roddyBaseConfigs/featureToggles.ini",
+        createProcessingOptionLazy(
+                OptionName.RODDY_FEATURE_TOGGLES_CONFIG_PATH,
+                "${basePath}/roddyBaseConfigs/featureToggles.ini",
         )
-        assert featureTogglesConfigPath.save(flush: true)
+        createProcessingOptionLazy(
+                OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY,
+                "/shared",
+        )
     }
 
     static IndelQualityControl createIndelQualityControl(Map properties = [:]) {

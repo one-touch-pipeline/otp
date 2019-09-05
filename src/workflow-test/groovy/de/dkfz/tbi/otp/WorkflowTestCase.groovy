@@ -153,6 +153,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             DomainFactory.createProcessingOptionLazy(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
             DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_TIMEOUT, value: 2)
             DomainFactory.createProcessingOptionLazy(name: OptionName.CLUSTER_NAME, value: 'CLUSTER NAME')
+            DomainFactory.createProcessingOptionLazy(name: OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY, value: configService.workflowTestRoddySharedFilesBaseDir)
 
             createUserAndRoles()
             loadWorkflow()

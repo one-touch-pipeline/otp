@@ -291,6 +291,10 @@ class ProcessingOption implements Entity {
                 "Path to featureToggles.ini which contains feature toggles for Roddy",
                 Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH
         ),
+        RODDY_SHARED_FILES_BASE_DIRECTORY(
+                "Directory containing bioinformatics database, reference genomes etc.",
+                Necessity.REQUIRED, null, TypeValidators.ABSOLUTE_PATH
+        ),
 
         //executionRestrictions
         MAXIMUM_NUMBER_OF_JOBS(

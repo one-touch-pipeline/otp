@@ -23,9 +23,7 @@ package de.dkfz.tbi.otp.job.jobs.roddyAlignment
 
 import org.springframework.beans.factory.annotation.Autowired
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
-import de.dkfz.tbi.otp.dataprocessing.ChromosomeIdentifierSortingService
-import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyResult
 import de.dkfz.tbi.otp.infrastructure.CreateLinkOption
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -62,6 +60,9 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
 
     @Autowired
     ChromosomeIdentifierSortingService chromosomeIdentifierSortingService
+
+    @Autowired
+    ProcessingOptionService processingOptionService
 
     protected Path linkBamFileInWorkDirectory(AbstractMergedBamFile abstractMergedBamFile, File workDirectory) {
         Realm realm = abstractMergedBamFile.realm
@@ -113,6 +114,7 @@ abstract class AbstractExecutePanCanJob<R extends RoddyResult> extends AbstractR
     String prepareAndReturnCValues(R roddyResult) {
         assert roddyResult: "roddyResult must not be null"
         List<String> cValues = prepareAndReturnWorkflowSpecificCValues(roddyResult)
+        cValues.add("sharedFilesBaseDirectory:${processingOptionService.findOptionAsString(ProcessingOption.OptionName.RODDY_SHARED_FILES_BASE_DIRECTORY)}")
         return "--cvalues=\"${cValues.join(',').replace('$', '\\$')}\""
     }
 
