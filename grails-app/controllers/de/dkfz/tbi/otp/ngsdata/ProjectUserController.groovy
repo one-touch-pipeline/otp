@@ -353,10 +353,6 @@ class UpdateProjectRoleCommand implements Validateable {
     }
 }
 
-class CopyEmailsToClipboard implements Serializable {
-    Project project
-}
-
 class AddUserToProjectCommand implements Serializable {
         Project project
     boolean addViaLdap = true
