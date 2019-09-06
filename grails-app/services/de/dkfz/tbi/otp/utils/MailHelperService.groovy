@@ -50,7 +50,7 @@ class MailHelperService {
     }
 
     void sendEmail(String emailSubject, String content, List<String> recipients) {
-        sendEmail(emailSubject, content, recipients, defaultReplyToAdress)
+        sendEmail(emailSubject, content, recipients, defaultReplyToAddress)
     }
 
     void sendEmail(String emailSubject, String content, String recipient, List<String> ccs) {
@@ -58,7 +58,7 @@ class MailHelperService {
     }
 
     void sendEmail(String emailSubject, String content, List<String> recipients, List<String> ccs) {
-        sendEmail(emailSubject, content, recipients, ccs, [], defaultReplyToAdress)
+        sendEmail(emailSubject, content, recipients, ccs, [], defaultReplyToAddress)
     }
 
     void sendEmail(String emailSubject, String content, List<String> recipients, String replyToAddress) {
@@ -100,7 +100,7 @@ class MailHelperService {
         return mail.contains("@")
     }
 
-    String getDefaultReplyToAdress() {
+    String getDefaultReplyToAddress() {
         return processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_REPLY_TO)
     }
 }
