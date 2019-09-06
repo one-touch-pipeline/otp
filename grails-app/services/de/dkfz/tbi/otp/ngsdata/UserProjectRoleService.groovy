@@ -319,22 +319,23 @@ class UserProjectRoleService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
-    UserProjectRole updateEnabledStatus(UserProjectRole userProjectRole, boolean enabled) {
+    UserProjectRole toggleEnabled(UserProjectRole userProjectRole) {
         assert userProjectRole: USER_PROJECT_ROLE_REQUIRED
-        userProjectRole.enabled = enabled
+        boolean newEnabled = !userProjectRole.enabled
+        userProjectRole.enabled = newEnabled
         assert userProjectRole.save(flush: true)
-        if (enabled) {
+        if (newEnabled) {
             notifyProjectAuthoritiesAndUser(userProjectRole)
         }
         if (userProjectRole.accessToFiles) {
-            if (enabled) {
+            if (newEnabled) {
                 sendFileAccessNotifications(userProjectRole)
             } else {
                 notifyAdministration(userProjectRole, OperatorAction.REMOVE)
             }
         }
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED,
-                "${enabled ? "En" : "Dis"}abled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
+                "${newEnabled ? "En" : "Dis"}abled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
         return userProjectRole
     }
 

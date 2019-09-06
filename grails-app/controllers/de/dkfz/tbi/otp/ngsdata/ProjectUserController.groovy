@@ -107,16 +107,6 @@ class ProjectUserController implements CheckAndCall {
         ]
     }
 
-    def switchEnabledStatus(SwitchEnabledStatusCommand cmd) {
-        if (cmd.hasErrors()) {
-            flash.message = new FlashMessage("An error occurred", [cmd.errors.getFieldError().code])
-        } else {
-            flash.message = new FlashMessage("User successfully ${cmd.enabled ? 'activated' : 'deactivated'}")
-            userProjectRoleService.updateEnabledStatus(cmd.userProjectRole, cmd.enabled)
-        }
-        redirect(action: "index")
-    }
-
     def addUserToProject(AddUserToProjectCommand cmd) {
         String message
         String errorMessage = null
@@ -199,6 +189,13 @@ class ProjectUserController implements CheckAndCall {
     JSON toggleReceivesNotifications(ToggleValueCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             userProjectRoleService.toggleReceivesNotifications(cmd.userProjectRole)
+        }
+    }
+
+    JSON toggleEnabled(ToggleValueCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
+            userProjectRoleService.toggleEnabled(cmd.userProjectRole)
+            redirect(action: "index")
         }
     }
 
@@ -318,23 +315,6 @@ class UpdateUserEmailCommand implements Validateable {
 
 class ToggleValueCommand implements Validateable {
     UserProjectRole userProjectRole
-}
-
-class SwitchEnabledStatusCommand implements Validateable {
-    UserProjectRole userProjectRole
-    boolean enabled
-
-    static constraints = {
-        enabled(validator: { val, obj ->
-            if (val == obj.userProjectRole?.enabled) {
-                return 'No Change'
-            }
-        })
-    }
-
-    void setEnabled(boolean value) {
-        enabled = !value
-    }
 }
 
 class UpdateProjectRoleCommand implements Validateable {

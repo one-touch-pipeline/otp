@@ -231,7 +231,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
-    void "updateEnabledStatus, send mails when activating a user with file access (fileAccess=#fileAccess, newEnabledStatus=#newEnabledStatus)"() {
+    void "toggleEnabled, send mails when activating a user with file access (fileAccess=#fileAccess, newEnabledStatus=#newEnabledStatus)"() {
         given:
         setupData()
 
@@ -244,15 +244,16 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
                 project: project,
                 accessToFiles: fileAccess,
+                enabled: enabledStatus,
         )
 
         when:
         SpringSecurityUtils.doWithAuth(requesterUserProjectRole.user.username) {
-            userProjectRoleService.updateEnabledStatus(userProjectRole, newEnabledStatus)
+            userProjectRoleService.toggleEnabled(userProjectRole)
         }
 
         then: "new enabled status was set"
-        userProjectRole.enabled == newEnabledStatus
+        userProjectRole.enabled == !enabledStatus
 
         and: "notification for unix group administration was sent"
         removeMailCount * userProjectRoleService.mailHelperService.sendEmail(_ as String, { it.contains("REMOVE") }, EMAIL_LINUX_GROUP_ADMINISTRATION)
@@ -271,11 +272,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         0 * userProjectRoleService.mailHelperService.sendEmail(*_)
 
         where:
-        fileAccess | newEnabledStatus || removeMailCount | addMailCount | notifyEnableUser | notifyFileAccess
-        true       | false            || 1               | 0            | 0                | 0
-        true       | true             || 0               | 1            | 1                | 1
-        false      | false            || 0               | 0            | 0                | 0
-        false      | true             || 0               | 0            | 1                | 0
+        fileAccess | enabledStatus || removeMailCount | addMailCount | notifyEnableUser | notifyFileAccess
+        true       | true          || 1               | 0            | 0                | 0
+        true       | false         || 0               | 1            | 1                | 1
+        false      | true          || 0               | 0            | 0                | 0
+        false      | false         || 0               | 0            | 1                | 0
     }
 
     void "addUserToProjectAndNotifyGroupManagementAuthority, create User if non is found for username or email"() {
