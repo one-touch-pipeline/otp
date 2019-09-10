@@ -43,4 +43,21 @@ class UserProjectRole implements Serializable, Entity {
     boolean getManageUsers() {
         return manageUsers || manageUsersAndDelegate
     }
+
+    static List<String> getAccessRelatedProperties() {
+        return [
+                "projectRole",
+                "enabled",
+                "accessToOtp",
+                "accessToFiles",
+                "manageUsers",
+                "manageUsersAndDelegate",
+                "receivesNotifications",
+        ]
+    }
+
+    boolean equalByAccessRelatedProperties(UserProjectRole userProjectRole) {
+        // we need direct access to the variables via @ to prevent using the custom getter of manageUsers
+        return accessRelatedProperties.every { this.@"$it" == userProjectRole.@"$it" }
+    }
 }

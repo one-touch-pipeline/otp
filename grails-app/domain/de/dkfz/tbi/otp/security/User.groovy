@@ -88,4 +88,9 @@ class User implements Entity {
     Map sanitizedUserMap() {
         return [id: this.id, username: this.username, email: this.email]
     }
+
+    @Override
+    String toString() {
+        return "${username} (${realName})"
+    }
 }

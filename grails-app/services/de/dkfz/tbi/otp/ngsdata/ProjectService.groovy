@@ -895,6 +895,13 @@ echo 'OK'
         assert project.save(flush: true)
     }
 
+    Map<String, List<Project>> getAllProjectsWithSharedUnixGroup() {
+        return Project.list().groupBy { Project project ->
+            project.unixGroup
+        }.findAll { String unixGroup, List<Project> projects ->
+            projects.size() > 1
+        }
+    }
 }
 
 trait ProjectSeqTypeConfiguration {

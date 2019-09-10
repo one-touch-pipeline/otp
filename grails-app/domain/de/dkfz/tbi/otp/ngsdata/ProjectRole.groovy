@@ -69,4 +69,9 @@ class ProjectRole implements Entity {
     private static List<String> asImmutableStringList(List<Basic> list) {
         return list*.toString().asImmutable()
     }
+
+    @Override
+    String toString() {
+        return name
+    }
 }

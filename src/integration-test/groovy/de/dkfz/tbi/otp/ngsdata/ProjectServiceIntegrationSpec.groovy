@@ -1836,6 +1836,40 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         null            | null          || 1
     }
 
+    void "getAllProjectsWithSharedUnixGroup works without any projects"() {
+        given:
+        Map<String, List<Project>> result
+
+        when:
+        result = projectService.getAllProjectsWithSharedUnixGroup()
+
+        then:
+        result == [:]
+    }
+
+    void "getAllProjectsWithSharedUnixGroup properly groups projects and ignores 1:1 unixgroup:project matches"() {
+        given:
+        Map<String, List<Project>> result
+        String unixGroupA = "A"
+        String unixGroupB = "B"
+        String unixGroupC = "C"
+        Project projectA = createProject(unixGroup: unixGroupA)
+        Project projectB = createProject(unixGroup: unixGroupA)
+        Project projectC = createProject(unixGroup: unixGroupB)
+        Project projectD = createProject(unixGroup: unixGroupB)
+        Project projectE = createProject(unixGroup: unixGroupB)
+        createProject(unixGroup: unixGroupC)
+
+        when:
+        result = projectService.getAllProjectsWithSharedUnixGroup()
+
+        then:
+        result == [
+                (unixGroupA): [projectA, projectB],
+                (unixGroupB): [projectC, projectD, projectE],
+        ]
+    }
+
     private File makeStatFile(ReferenceGenome referenceGenome, String statFileName) {
         File statDirectory = referenceGenomeService.pathToChromosomeSizeFilesPerReference(referenceGenome, false)
         assert statDirectory.exists() || statDirectory.mkdirs()
