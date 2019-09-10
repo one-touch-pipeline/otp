@@ -255,7 +255,7 @@ class UserProjectRoleService {
         }
     }
 
-    private String getFlagChangeLogMessage(String flagName, boolean newStatus, String username, String projectName) {
+    private static String getFlagChangeLogMessage(String flagName, boolean newStatus, String username, String projectName) {
         return "${flagName} ${newStatus ? "en" : "dis"}abled for ${username} in ${projectName}"
     }
 

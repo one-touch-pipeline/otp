@@ -28,7 +28,7 @@
     <meta name="layout" content="main" />
     <title><g:message code="projectUser.title" args="[project?.name]"/></title>
     <asset:javascript src="pages/projectUser/index/functions.js"/>
-    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="modules/editorSwitch.js"/>
 </head>
 <body>
     <div class="body">
@@ -68,9 +68,11 @@
                 <g:each in="${enabledProjectUsers}" var="userEntry">
                     <tr>
                         <td>
-                            <img class="ldapThumbnail" src="data:image/png;base64,${userEntry.thumbnailPhoto}" alt=" "/>
+                            <g:if test="${userEntry.thumbnailPhoto}">
+                                <img class="ldapThumbnail" src="data:image/png;base64,${userEntry.thumbnailPhoto}"/>
+                            </g:if>
                         </td>
-                        <td>
+                        <td class="${userEntry.deactivated ? "userDisabled" : ""}">
                             <g:if test="${userEntry.inLdap}">
                                 ${userEntry.realName}
                             </g:if>
@@ -80,9 +82,6 @@
                                         link="${g.createLink(controller: 'projectUser', action: 'updateName', params: ["user.id": userEntry.user.id])}"
                                         value="${userEntry.realName}"/>
                             </g:else>
-                            <g:if test="${userEntry.deactivated}">
-                                <g:message code="projectUser.accessPerson.deactivated"/>
-                            </g:if>
                         </td>
                         <td>${userEntry.user.username}</td>
                         <td>${userEntry.department}</td>
@@ -213,9 +212,11 @@
                 <g:each in="${disabledProjectUsers}" var="userEntry">
                 <tr>
                     <td>
-                        <img class="ldapThumbnail" src="data:image/png;base64,${userEntry.thumbnailPhoto}" alt=""/>
+                        <g:if test="${userEntry.thumbnailPhoto}">
+                            <img class="ldapThumbnail" src="data:image/png;base64,${userEntry.thumbnailPhoto}"/>
+                        </g:if>
                     </td>
-                    <td>
+                    <td class="${userEntry.deactivated ? "userDisabled" : ""}">
                         <g:if test="${userEntry.inLdap}">
                             ${userEntry.realName}
                         </g:if>
@@ -225,9 +226,6 @@
                                     link="${g.createLink(controller: 'projectUser', action: 'updateName', params: ["user.id": userEntry.user.id])}"
                                     value="${userEntry.realName}"/>
                         </g:else>
-                        <g:if test="${userEntry.deactivated}">
-                            <g:message code="projectUser.accessPerson.deactivated"/>
-                        </g:if>
                     </td>
                     <td>${userEntry.user.username}</td>
                     <td>${userEntry.department}</td>
@@ -254,15 +252,14 @@
         </sec:access>
 
         <sec:access expression="hasRole('ROLE_OPERATOR')">
-        <h3>
-            <g:message code="projectUser.notConnected"/>
-        </h3>
-        ${usersWithoutUserProjectRole.join(", ") ?: 'None'}
+            <g:if test="${usersWithoutUserProjectRole || unknownUsersWithFileAccess}">
+                <h3><g:message code="projectUser.additionalUsers.header" args="[project.unixGroup]"/></h3>
+                <h4><g:message code="projectUser.additionalUsers.notConnected"/></h4>
+                ${usersWithoutUserProjectRole.join(", ") ?: 'None'}
 
-        <h3>
-            <g:message code="projectUser.unknownUsers"/>
-        </h3>
-        ${unknownUsersWithFileAccess.join(", ") ?: 'None'}
+                <h4><g:message code="projectUser.additionalUsers.unknownUsers"/></h4>
+                ${unknownUsersWithFileAccess.join(", ") ?: 'None'}
+            </g:if>
         </sec:access>
 
         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">

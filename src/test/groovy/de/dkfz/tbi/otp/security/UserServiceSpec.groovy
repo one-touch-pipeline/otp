@@ -59,5 +59,4 @@ class UserServiceSpec extends Specification {
         then:
         User.count == 1
     }
-
 }

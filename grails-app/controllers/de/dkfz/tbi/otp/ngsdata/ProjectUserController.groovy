@@ -56,47 +56,37 @@ class ProjectUserController implements CheckAndCall {
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
         project = exactlyOneElement(Project.findAllByName(project.name, [fetch: [projectGroup: 'join']]))
 
-        List<User> projectUsers = UserProjectRole.findAllByProject(project)*.user
-        List<String> nonDatabaseUsers = []
+        List<UserProjectRole> userProjectRolesOfProject = UserProjectRole.findAllByProject(project)
+        List<User> projectUsers = userProjectRolesOfProject*.user
 
         String groupDistinguishedName = ldapService.getDistinguishedNameOfGroupByGroupName(project.unixGroup)
-        List<String> groupMemberUsername = ldapService.getGroupMembersByDistinguishedName(groupDistinguishedName)
+        List<String> ldapGroupMemberUsernames = ldapService.getGroupMembersByDistinguishedName(groupDistinguishedName)
 
-        groupMemberUsername.each { String username ->
-            User user = User.findByUsername(username)
-            if (user) {
-                projectUsers.add(user)
-            } else {
-                nonDatabaseUsers.add(username)
-            }
-        }
+        List<User> ldapGroupMemberUsers = User.findAllByUsernameInList(ldapGroupMemberUsernames)
+        projectUsers.addAll(ldapGroupMemberUsers)
+        List<String> nonDatabaseUsers = ldapGroupMemberUsernames - ldapGroupMemberUsers*.username
 
         projectUsers.unique()
         projectUsers.sort { it.username }
 
-        List<UserEntry> enabledProjectUsers = []
-        List<UserEntry> disabledProjectUsers = []
+        List<UserEntry> userEntries = []
         List<String> usersWithoutUserProjectRole = []
         projectUsers.each { User user ->
             LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(user.username)
-            UserProjectRole userProjectRole = UserProjectRole.findByUserAndProject(user, project)
+            UserProjectRole userProjectRole = userProjectRolesOfProject.find { it.user == user }
             if (userProjectRole) {
-                UserEntry userEntry = new UserEntry(user, project, ldapUserDetails)
-                if (userProjectRole.enabled) {
-                    enabledProjectUsers.add(userEntry)
-                } else {
-                    disabledProjectUsers.add(userEntry)
-                }
+                userEntries.add(new UserEntry(user, project, ldapUserDetails))
             } else {
                 usersWithoutUserProjectRole.add(user.username)
             }
         }
+        Map<Boolean, UserEntry> userEntriesByEnabledStatus = userEntries.groupBy { it.userProjectRole.enabled }
 
         return [
                 projects                   : projects,
                 project                    : project,
-                enabledProjectUsers        : enabledProjectUsers,
-                disabledProjectUsers       : disabledProjectUsers,
+                enabledProjectUsers        : userEntriesByEnabledStatus[true],
+                disabledProjectUsers       : userEntriesByEnabledStatus[false],
                 usersWithoutUserProjectRole: usersWithoutUserProjectRole,
                 unknownUsersWithFileAccess : nonDatabaseUsers,
                 availableRoles             : ProjectRole.findAll(),
