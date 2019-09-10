@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
 import groovy.sql.Sql
+import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.config.ConfigService
@@ -103,7 +104,7 @@ class DataSwapService {
      */
     @SuppressWarnings("ParameterReassignment")
     SeqTrack changeSeqType(SeqTrack seqTrack, SeqType newSeqType) {
-        assert seqTrack.class == seqTrack.seqType.seqTrackClass
+        assert Hibernate.getClass(seqTrack) == seqTrack.seqType.seqTrackClass
         if (seqTrack.seqType.id != newSeqType.id) {
             if (seqTrack.class != newSeqType.seqTrackClass) {
                 if (newSeqType.hasAntibodyTarget) {
@@ -111,7 +112,7 @@ class DataSwapService {
                 }
                 Sql sql = new Sql(dataSource)
                 assert 1 == sql.executeUpdate("update seq_track set class = ${newSeqType.seqTrackClass.name} " +
-                        "where id = ${seqTrack.id} and class = ${seqTrack.class.name};")
+                        "where id = ${seqTrack.id} and class = ${Hibernate.getClass(seqTrack).name};")
                 SeqTrack.withSession { session ->
                     session.clear()
                 }
