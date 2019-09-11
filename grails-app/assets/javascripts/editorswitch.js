@@ -159,6 +159,15 @@ $(function() {
         var container, outerContainer;
         container = $(this).parent();
         outerContainer = container.parent();
+
+        var confirmationText = $("button[data-confirmation]", container).attr("data-confirmation");
+        if (confirmationText) {
+            var confirmed = confirm(confirmationText);
+            if (confirmed == false) {
+                return
+            }
+        }
+
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
             dataType: 'json',
@@ -349,6 +358,15 @@ $(function() {
         var container, outerContainer, orgVal, invVal;
         container = $(this).parent();
         outerContainer = container.parent();
+
+        var confirmationText = $("button[data-confirmation]", container).attr("data-confirmation");
+        if (confirmationText) {
+            var confirmed = confirm(confirmationText);
+            if (confirmed == false) {
+                return
+            }
+        }
+
         orgVal = $("input:hidden[name=value]", container).val();
         invVal = (orgVal === "true" ? "false" : "true");
         $.ajax({
