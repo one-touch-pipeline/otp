@@ -35,6 +35,7 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
@@ -42,9 +43,6 @@ import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
 
 @Transactional
 class UserProjectRoleService {
-
-    final static String USER_PROJECT_ROLE_REQUIRED = "the input userProjectRole must not be null"
-    final static String USERNAME_REQUIRED = "the input user needs a username"
 
     SpringSecurityService springSecurityService
     AuditLogService auditLogService
@@ -88,6 +86,14 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
+    void synchedBetweenRelatedProjects(String unixGroup, Closure action) {
+        Project.withTransaction {
+            Project.findAllByUnixGroup(unixGroup).each { Project project ->
+                action(project)
+            }
+        }
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
     void addUserToProjectAndNotifyGroupManagementAuthority(Project project, ProjectRole projectRole, String username, Map flags = [:]) throws AssertionError {
         assert project: "project must not be null"
@@ -105,8 +111,11 @@ class UserProjectRoleService {
             user = userService.createUser(ldapUserDetails.cn, ldapUserDetails.mail, ldapUserDetails.realName)
         }
 
-        UserProjectRole userProjectRole = createUserProjectRole(user, project, projectRole, flags)
+        synchedBetweenRelatedProjects(project.unixGroup) { Project p ->
+            createUserProjectRole(user, p, projectRole, flags)
+        }
 
+        UserProjectRole userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByUserAndProjectAndProjectRole(user, project, projectRole))
         if (userProjectRole.accessToFiles) {
             sendFileAccessNotifications(userProjectRole)
         }
@@ -127,7 +136,11 @@ class UserProjectRoleService {
             user = userService.createUser(null, email, realName)
         }
 
-        UserProjectRole userProjectRole = createUserProjectRole(user, project, projectRole)
+        synchedBetweenRelatedProjects(project.unixGroup) { Project p ->
+            createUserProjectRole(user, p, projectRole)
+        }
+
+        UserProjectRole userProjectRole = CollectionUtils.exactlyOneElement(UserProjectRole.findAllByUserAndProjectAndProjectRole(user, project, projectRole))
 
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.realName} for ${userProjectRole.project.name}")
         notifyProjectAuthoritiesAndUser(userProjectRole)
@@ -177,7 +190,7 @@ class UserProjectRoleService {
                 action     : formattedAction,
                 conjunction: conjunction,
                 username   : userProjectRole.user.username,
-                projectName: userProjectRole.project.name,
+                unixGroup  : userProjectRole.project.unixGroup,
         ])
 
         String affectedUserUserDetail = messageSourceService.createMessage("projectUser.notification.addToUnixGroup.userDetail", [
@@ -193,11 +206,10 @@ class UserProjectRoleService {
                 role    : requesterUserProjectRole ? requesterUserProjectRole.projectRole.name : "Non-Project-User",
         ])
 
-        List<Project> otherProjectsOfUnixGroup = Project.findAllByUnixGroup(userProjectRole.project.unixGroup) - userProjectRole.project
         String body = messageSourceService.createMessage("projectUser.notification.addToUnixGroup.body", [
                 projectName           : userProjectRole.project,
                 projectUnixGroup      : userProjectRole.project.unixGroup,
-                projectList           : (otherProjectsOfUnixGroup*.name.sort() ?: ["None"]).join(", "),
+                projectList           : Project.findAllByUnixGroup(userProjectRole.project.unixGroup)*.name.sort().join(", "),
                 requestedAction       : action,
                 affectedUserUserDetail: affectedUserUserDetail,
                 requesterUserDetail   : requesterUserDetail,
@@ -259,71 +271,86 @@ class UserProjectRoleService {
         return "${flagName} ${newStatus ? "en" : "dis"}abled for ${username} in ${projectName}"
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'MANAGE_USERS')")
-    UserProjectRole toggleAccessToOtp(UserProjectRole upr) {
-        assert upr: USER_PROJECT_ROLE_REQUIRED
-        assert upr.user.username: USERNAME_REQUIRED
-        upr.accessToOtp = !upr.accessToOtp
-        assert upr.save(flush: true)
-        String message = getFlagChangeLogMessage("Access to OTP", upr.accessToOtp, upr.user.username, upr.project.name)
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_OTP, message)
-        return upr
+    List<UserProjectRole> getRelatedUserProjectRoles(UserProjectRole userProjectRole) {
+        List<Project> projectsWithSharedUnixGroup = Project.findAllByUnixGroup(userProjectRole.project.unixGroup)
+        return UserProjectRole.findAllByUserAndProjectInList(userProjectRole.user, projectsWithSharedUnixGroup)
+    }
+
+    void synchedBetweenRelatedUserProjectRoles(UserProjectRole userProjectRole, Closure action) {
+        UserProjectRole.withTransaction {
+            getRelatedUserProjectRoles(userProjectRole).each { UserProjectRole relatedUpr ->
+                action(relatedUpr)
+            }
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'MANAGE_USERS')")
-    UserProjectRole toggleAccessToFiles(UserProjectRole upr) {
-        assert upr: USER_PROJECT_ROLE_REQUIRED
-        assert upr.user.username: USERNAME_REQUIRED
-        upr.accessToFiles = !upr.accessToFiles
-        assert upr.save(flush: true)
-        if (upr.accessToFiles) {
-            sendFileAccessNotifications(upr)
-        } else {
-            notifyAdministration(upr, OperatorAction.REMOVE)
+    UserProjectRole toggleAccessToOtp(UserProjectRole userProjectRole) {
+        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+            upr.accessToOtp = !upr.accessToOtp
+            assert upr.save(flush: true)
+            String message = getFlagChangeLogMessage("Access to OTP", upr.accessToOtp, upr.user.username, upr.project.name)
+            auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_OTP, message)
         }
-        String message = getFlagChangeLogMessage("Access to Files", upr.accessToFiles, upr.user.username, upr.project.name)
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_FILES, message)
-        return upr
+        return userProjectRole
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'MANAGE_USERS')")
+    UserProjectRole toggleAccessToFiles(UserProjectRole userProjectRole) {
+        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+            upr.accessToFiles = !upr.accessToFiles
+            assert upr.save(flush: true)
+            String message = getFlagChangeLogMessage("Access to Files", upr.accessToFiles, upr.user.username, upr.project.name)
+            auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_FILES, message)
+        }
+        if (userProjectRole.accessToFiles) {
+            sendFileAccessNotifications(userProjectRole)
+        } else {
+            notifyAdministration(userProjectRole, OperatorAction.REMOVE)
+        }
+        return userProjectRole
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'DELEGATE_USER_MANAGEMENT')")
-    UserProjectRole toggleManageUsers(UserProjectRole upr) {
-        assert upr: USER_PROJECT_ROLE_REQUIRED
-        assert upr.user.username: USERNAME_REQUIRED
-        upr.manageUsers = !upr.manageUsers
-        assert upr.save(flush: true)
-        String message = getFlagChangeLogMessage("Manage Users", upr.manageUsers, upr.user.username, upr.project.name)
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_MANAGE_USER, message)
-        return upr
+    UserProjectRole toggleManageUsers(UserProjectRole userProjectRole) {
+        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+            upr.manageUsers = !upr.manageUsers
+            assert upr.save(flush: true)
+            String message = getFlagChangeLogMessage("Manage Users", upr.manageUsers, upr.user.username, upr.project.name)
+            auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_MANAGE_USER, message)
+        }
+        return userProjectRole
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    UserProjectRole toggleManageUsersAndDelegate(UserProjectRole upr) {
-        assert upr: USER_PROJECT_ROLE_REQUIRED
-        assert upr.user.username: USERNAME_REQUIRED
-        upr.manageUsersAndDelegate = !upr.manageUsersAndDelegate
-        assert upr.save(flush: true)
-        String message = getFlagChangeLogMessage("Delegate Manage Users", upr.manageUsersAndDelegate, upr.user.username, upr.project.name)
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_DELEGATE_MANAGE_USER, message)
-        return upr
+    UserProjectRole toggleManageUsersAndDelegate(UserProjectRole userProjectRole) {
+        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+            upr.manageUsersAndDelegate = !upr.manageUsersAndDelegate
+            assert upr.save(flush: true)
+            String message = getFlagChangeLogMessage("Delegate Manage Users", upr.manageUsersAndDelegate, upr.user.username, upr.project.name)
+            auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_DELEGATE_MANAGE_USER, message)
+        }
+        return userProjectRole
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'MANAGE_USERS') or #upr.user.username == principal.username")
-    UserProjectRole toggleReceivesNotifications(UserProjectRole upr) {
-        assert upr: USER_PROJECT_ROLE_REQUIRED
-        upr.receivesNotifications = !upr.receivesNotifications
-        assert upr.save(flush: true)
-        String message = getFlagChangeLogMessage("Receives Notification", upr.receivesNotifications, upr.user.username, upr.project.name)
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_RECEIVES_NOTIFICATION, message)
-        return upr
+    UserProjectRole toggleReceivesNotifications(UserProjectRole userProjectRole) {
+        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+            upr.receivesNotifications = !upr.receivesNotifications
+            assert upr.save(flush: true)
+            String message = getFlagChangeLogMessage("Receives Notification", upr.receivesNotifications, upr.user.username, upr.project.name)
+            auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_RECEIVES_NOTIFICATION, message)
+        }
+        return userProjectRole
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole toggleEnabled(UserProjectRole userProjectRole) {
-        assert userProjectRole: USER_PROJECT_ROLE_REQUIRED
         boolean newEnabled = !userProjectRole.enabled
-        userProjectRole.enabled = newEnabled
-        assert userProjectRole.save(flush: true)
+        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+            upr.enabled = !upr.enabled
+            assert upr.save(flush: true)
+        }
         if (newEnabled) {
             notifyProjectAuthoritiesAndUser(userProjectRole)
         }
@@ -334,17 +361,17 @@ class UserProjectRoleService {
                 notifyAdministration(userProjectRole, OperatorAction.REMOVE)
             }
         }
-        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED,
-                "${newEnabled ? "En" : "Dis"}abled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
+        String message = "${newEnabled ? "En" : "Dis"}abled ${userProjectRole.user.username} for ${userProjectRole.project.name}"
+        auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, message)
         return userProjectRole
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole updateProjectRole(UserProjectRole userProjectRole, ProjectRole newProjectRole) {
-        assert userProjectRole: USER_PROJECT_ROLE_REQUIRED
-        assert newProjectRole: "the input projectRole must not be null"
-        userProjectRole.projectRole = newProjectRole
-        assert userProjectRole.save(flush: true)
+        synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
+            upr.projectRole = newProjectRole
+            assert upr.save(flush: true)
+        }
         return userProjectRole
     }
 
