@@ -33,13 +33,26 @@
 <body>
     <div class="body">
     <g:if test="${projects}">
+        <g:set var="sharesUnixGroup" value="${projectsOfUnixGroup.size() > 1}"/>
+        <g:set var="projectsWithSharedUnixGroupListing" value="${projectsOfUnixGroup.sort { it.name }.collect { "\n  - "+it }.join("")}"/>
+        <g:set var="confirmationText" value="${sharesUnixGroup ? g.message(code: "projectUser.sharedUnixGroupConfirmation", args: [projectsWithSharedUnixGroupListing]) : ''}"/>
+        <g:set var="confirmationTextJS" value="${confirmationText.replaceAll("\n", "\\\\n")}"/>
+
         <g:render template="/templates/messages"/>
-        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+
+        <div class="project-user-grid-wrapper">
+            <div class="grid-element" style="grid-column: 1">
+                <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+            </div>
+            <div class="grid-element" style="grid-column: 2">
+                <g:if test="${sharesUnixGroup}">
+                    <span style="white-space: pre-wrap"><g:message code="projectUser.annotation.projectWithSharedUnixGroup" args="[projectsWithSharedUnixGroupListing]"/></span>
+                </g:if>
+            </div>
+        </div>
 
         <div class="otpDataTables projectUserTable enabled">
-            <h3>
-                <g:message code="projectUser.activeUsers" args="[project.displayName]"/>
-            </h3>
+            <h3><g:message code="projectUser.activeUsers" args="[project.displayName]"/></h3>
             <table>
                 <tr>
                     <th></th>
@@ -97,7 +110,8 @@
                                         template="dropDown"
                                         link="${g.createLink(controller: "projectUser", action: "updateProjectRole", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
                                         values="${availableRoles*.name}"
-                                        value="${userEntry.projectRoleName}"/>
+                                        value="${userEntry.projectRoleName}"
+                                        confirmation="${confirmationText}"/>
                             </sec:access>
                             <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                                 ${userEntry.projectRoleName}
@@ -109,7 +123,8 @@
                                     <otp:editorSwitch
                                             template="toggle"
                                             link="${g.createLink(controller: "projectUser", action: "toggleAccessToOtp", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
-                                            value="${userEntry.otpAccess.toBoolean()}"/>
+                                            value="${userEntry.otpAccess.toBoolean()}"
+                                            confirmation="${confirmationText}"/>
                                 </sec:access>
                                 <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                                     <span class="icon-${userEntry.otpAccess}"></span>
@@ -122,7 +137,8 @@
                                                 template="toggle"
                                                 tooltip="${g.message(code: "${userEntry.fileAccess.toolTipKey}")}"
                                                 link="${g.createLink(controller: "projectUser", action: "toggleAccessToFiles", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
-                                                value="${userEntry.fileAccess.toBoolean()}"/>
+                                                value="${userEntry.fileAccess.toBoolean()}"
+                                                confirmation="${confirmationText}"/>
                                     </sec:access>
                                     <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                                         <span></span>
@@ -134,7 +150,8 @@
                                     <otp:editorSwitch
                                             template="toggle"
                                             link="${g.createLink(controller: "projectUser", action: "toggleManageUsers", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
-                                            value="${userEntry.manageUsers.toBoolean()}"/>
+                                            value="${userEntry.manageUsers.toBoolean()}"
+                                            confirmation="${confirmationText}"/>
                                 </sec:access>
                                 <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'DELEGATE_USER_MANAGEMENT')">
                                     <span class="icon-${userEntry.manageUsers}"></span>
@@ -146,7 +163,8 @@
                                             roles="ROLE_OPERATOR"
                                             template="toggle"
                                             link="${g.createLink(controller: "projectUser", action: "toggleManageUsersAndDelegate", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
-                                            value="${userEntry.manageUsersAndDelegate.toBoolean()}"/>
+                                            value="${userEntry.manageUsersAndDelegate.toBoolean()}"
+                                            confirmation="${confirmationText}"/>
                                 </td>
                             </sec:access>
                         </g:if>
@@ -163,7 +181,8 @@
                                 <otp:editorSwitch
                                         template="toggle"
                                         link="${g.createLink(controller: "projectUser", action: "toggleReceivesNotifications", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
-                                        value="${userEntry.receivesNotifications.toBoolean()}"/>
+                                        value="${userEntry.receivesNotifications.toBoolean()}"
+                                        confirmation="${confirmationText}"/>
                             </sec:access>
                             <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS') or ${userEntry.user.username == currentUser.username}">
                                 <span class="icon-${userEntry.receivesNotifications}"></span>
@@ -172,9 +191,9 @@
                         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                             <td>
                                 <g:form action="toggleEnabled" params='["userProjectRole.id": userEntry.userProjectRole.id]'>
-                                    <g:submitButton
-                                            title="${g.message(code: 'projectUser.table.tooltip.activateSwitchButton', args: ["Deactivate"])}"
-                                            name="${g.message(code: 'projectUser.table.deactivateUser')}"/>
+                                    <input type="submit" value="${g.message(code: 'projectUser.table.deactivateUser')}"
+                                           title="${g.message(code: 'projectUser.table.tooltip.activateSwitchButton', args: ["Deactivate"])}"
+                                           onclick='return confirmation("${confirmationTextJS}")'/>
                                 </g:form>
                             </td>
                         </sec:access>
@@ -183,7 +202,7 @@
             </table>
         </div>
         <sec:access expression="hasRole('ROLE_OPERATOR')">
-            <button onclick='getEmails("${project}", "${emails}")' title = "${g.message(code: 'projectUser.table.tooltip.copyEmail')}">
+            <button onclick='getEmails("${project}", "${emails}")' title="${g.message(code: 'projectUser.table.tooltip.copyEmail')}">
                 <g:message code="projectUser.table.copyEmail" /></button>
         </sec:access>
         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
@@ -239,9 +258,9 @@
                     <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                         <td>
                             <g:form action="toggleEnabled" params='["userProjectRole.id": userEntry.userProjectRole.id]'>
-                                <g:submitButton
-                                        title="${g.message(code: 'projectUser.table.tooltip.activateSwitchButton', args: ["Activate"])}"
-                                        name="${g.message(code: 'projectUser.table.reactivateUser')}"/>
+                                <input type="submit" value="${g.message(code: 'projectUser.table.reactivateUser')}"
+                                       title="${g.message(code: 'projectUser.table.tooltip.activateSwitchButton', args: ["Activate"])}"
+                                       onclick='return confirmation("${confirmationTextJS}")'/>
                             </g:form>
                         </td>
                     </sec:access>
@@ -263,9 +282,7 @@
         </sec:access>
 
         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
-            <h3>
-                <g:message code="projectUser.addMember.title"/>
-            </h3>
+            <h3><g:message code="projectUser.addMember.title"/></h3>
             <g:message code="projectUser.annotation.delayedFileAccessChanges"/>
             <g:form class="addUserForm" controller="projectUser" action="addUserToProject" params='["project": project.id]'>
                 <div class="form left">
@@ -353,7 +370,9 @@
                 </sec:access>
                 <div class="addButtonContainer">
                     <input type="hidden" name="projectName" value="${project}">
-                    <g:submitButton class="addButton" name="${g.message(code: 'projectUser.addMember.add')}"/>
+                    <input type="submit" class="addButton" value="${g.message(code: 'projectUser.addMember.add')}"
+                           onclick='return confirmation("${confirmationTextJS}")'/>
+
                     <span class="legalNotice"><g:message code="projectUser.annotation.legalNotice"/></span>
                 </div>
             </g:form>
@@ -373,6 +392,12 @@
     <script>
         function getEmails(project, emails) {
             prompt("Emails for ${project}", emails);
+        }
+        function confirmation(text) {
+            if (text) {
+                return confirm(text);
+            }
+            return true
         }
     </script>
 </body>

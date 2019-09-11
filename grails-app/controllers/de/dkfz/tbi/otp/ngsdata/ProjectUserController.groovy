@@ -85,6 +85,7 @@ class ProjectUserController implements CheckAndCall {
         return [
                 projects                   : projects,
                 project                    : project,
+                projectsOfUnixGroup        : Project.findAllByUnixGroup(project.unixGroup),
                 enabledProjectUsers        : userEntriesByEnabledStatus[true],
                 disabledProjectUsers       : userEntriesByEnabledStatus[false],
                 usersWithoutUserProjectRole: usersWithoutUserProjectRole,
