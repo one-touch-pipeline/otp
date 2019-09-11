@@ -22,14 +22,42 @@
 package de.dkfz.tbi.otp.utils
 
 import groovy.transform.Immutable
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.userdetails.UserDetails
 
 @Immutable
-class Principal {
+class Principal implements UserDetails {
     String username
     String displayName = "OTP Developer"
+    Collection<? extends GrantedAuthority> authorities
 
     @Override
     String toString() {
         return username
+    }
+
+    @Override
+    String getPassword() {
+        return "*"
+    }
+
+    @Override
+    boolean isAccountNonExpired() {
+        return true
+    }
+
+    @Override
+    boolean isAccountNonLocked() {
+        return true
+    }
+
+    @Override
+    boolean isCredentialsNonExpired() {
+        return true
+    }
+
+    @Override
+    boolean isEnabled() {
+        return true
     }
 }
