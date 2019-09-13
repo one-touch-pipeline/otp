@@ -37,13 +37,7 @@
         <otp:seqTrackMainPart seqTrack="${seqTrack}"/>
        <tr>
             <td class="myKey"><g:message code="seqTrack.show.details.hasOriginalBam"/></td>
-            <g:if test="${seqTrack.hasOriginalBam}">
-                <td class="myValue true">
-            </g:if>
-            <g:else>
-                <td class="myValue false">
-            </g:else>
-            </td>
+            <td class="myValue ${seqTrack.hasOriginalBam}"></td>
        </tr>
        <tr>
             <td class="myKey"><g:message code="seqTrack.show.details.nBasePairs"/></td>
@@ -98,20 +92,8 @@
             <tr>
                 <td>${jobExecutionPlan.name}</td>
                 <td>${jobExecutionPlan.planVersion}</td>
-                <g:if test="${jobExecutionPlan.obsoleted}">
-                    <td class="myValue true">
-                </g:if>
-                <g:else>
-                    <td class="myValue false">
-                </g:else>
-                </td>
-                <g:if test="${jobExecutionPlan.enabled}">
-                    <td class="myValue true">
-                </g:if>
-                <g:else>
-                    <td class="myValue false">
-                </g:else>
-                </td>
+                <td class="myValue ${jobExecutionPlan.obsoleted}"></td>
+                <td class="myValue ${jobExecutionPlan.enabled}"></td>
             </tr>
         </g:each>
         </tbody>
