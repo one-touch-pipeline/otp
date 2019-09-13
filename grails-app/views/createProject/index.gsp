@@ -129,7 +129,7 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.endDate"/></td>
-                <td><input type="date" name="endDateInput" value="${cmd.endDate?.format("yyyy-MM-dd") ?: defaultDate}"/></td>
+                <td><input type="date" name="endDateInput" value="${cmd.endDate?.format("yyyy-MM-dd") ?: ""}"/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.storageUntil"/></td>
