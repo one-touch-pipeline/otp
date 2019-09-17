@@ -68,9 +68,6 @@ DataFile.withTransaction {
                     executingUser
             )
             assert dataFile.save(flush: true)
-
-            final MetaDataEntry metaDataEntry = exactlyOneElement(MetaDataEntry.findAllWhere(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.MD5.toString()))))
-            ctx.metaDataService.updateMetaDataEntry(metaDataEntry, newMd5sum)
         } else {
             println "Nothing done for ${fileName} with md5sum ${newMd5sum}"
         }

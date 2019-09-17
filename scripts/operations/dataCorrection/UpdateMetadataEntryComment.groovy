@@ -19,7 +19,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package operations.dataCorrection
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -30,7 +29,7 @@ import de.dkfz.tbi.util.spreadsheet.Spreadsheet
  * Script to add/change the COMMENT for meta data entries
  * The input for this script is the path to a tsv file containing
  * SAMPLE_ID's (which should be unique) and their associated COMMENT.
- * (You can use either a normal metadata tsv file, or create a new file with just these two columns)
+ * (You can use either the normal metadata tsv file used for import, or create a new file with just these two columns)
  */
 
 
@@ -38,8 +37,6 @@ File input = new File("/absolute/path/to/file.tsv")
 
 
 /////////////////////////////////////////////////////
-
-MetaDataService metaDataService = ctx.metaDataService
 
 Spreadsheet s = new Spreadsheet(input.text)
 
@@ -61,8 +58,8 @@ s.dataRows.each { Row row ->
     } as List<MetaDataEntry>
     String comment = row.getCellByColumnTitle(MetaDataColumn.COMMENT.name()).text
     entries.each { MetaDataEntry entry ->
-        println entry.dataFile
-        metaDataService.updateMetaDataEntry(entry, comment)
+        entry.value = comment
+        entry.save(flush: true)
     }
 }
 

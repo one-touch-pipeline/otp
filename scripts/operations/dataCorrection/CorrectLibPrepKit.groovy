@@ -102,20 +102,12 @@ SeqTrack.withTransaction {
         seqTrack.kitInfoReliability = InformationReliability.KNOWN
         DataFile.findAllBySeqTrack(seqTrack).each {
             MetaDataEntry entry = CollectionUtils.atMostOneElement(MetaDataEntry.findAllByDataFileAndKey(it, key))
-            if (!entry) {
-                entry = new MetaDataEntry(
-                        key: key,
-                        dataFile: it,
-                        value: '',
-                )
-            }
 
             String oldComment = it.comment?.comment ?: ''
-            String newComment = "Correct ${entry.value} to ${libPrepKit},\n${commentInfo}".trim()
+            String newComment = "Correct ${entry?.value} to ${libPrepKit},\n${commentInfo}".trim()
             String combinedComment = (oldComment ? "$oldComment\n\n" : '') + newComment
             println "    $entry"
             println newComment
-            entry.value = libPrepKit
             commentService.saveComment(it, combinedComment)
         }
 

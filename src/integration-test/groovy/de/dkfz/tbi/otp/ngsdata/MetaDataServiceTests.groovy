@@ -216,58 +216,6 @@ class MetaDataServiceTests implements UserAndRoles {
     }
 
     /**
-     * Tests that an operator user can update a metaDataEntry
-     * if there is no project defined.
-     */
-    @Test
-    void testUpdateMetaDataEntryNoProjectAsOperator() {
-        setupData()
-        MetaDataEntry entry = mockEntry()
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
-        }
-    }
-
-    /**
-     * Tests that an admin user can update a metaDataEntry
-     * if there is no project defined.
-     */
-    @Test
-    void testUpdateMetaDataEntryNoProjectAsAdmin() {
-        setupData()
-        MetaDataEntry entry = mockEntry()
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
-        }
-    }
-
-    /**
-     * Tests that an operator user can update a metaDataEntry
-     * if there is no project defined.
-     */
-    @Test
-    void testUpdateMetaDataEntryWithProjectAsOperator() {
-        setupData()
-        MetaDataEntry entry = mockEntry()
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
-        }
-    }
-
-    /**
-     * Tests that an admin user can update a metaDataEntry
-     * if there is no project defined.
-     */
-    @Test
-    void testUpdateMetaDataEntryWithProjectAsAdmin() {
-        setupData()
-        MetaDataEntry entry = mockEntry()
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            assertTrue(metaDataService.updateMetaDataEntry(entry, "test2"))
-        }
-    }
-
-    /**
      * Creates a very simple MetaDataEntry with minimum required fields.
      */
     private MetaDataEntry mockEntry() {

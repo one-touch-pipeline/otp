@@ -64,7 +64,7 @@ List<SeqTrack> seqTracks = """
 assert comment: 'Please provide a comment why the data are set to withdrawn'
 SeqTrack.withTransaction {
     UnWithdrawer.ctx = ctx
-    UnWithdrawer.comment = comment
+    UnWithdrawer.comment = comment.trim()
     seqTracks.each {
         UnWithdrawer.unwithdraw(it)
     }
@@ -84,35 +84,11 @@ class UnWithdrawer {
     }
 
     static void unwithdraw(final DataFile dataFile) {
-        final MetaDataEntry withdrawnEntry = atMostOneElement(MetaDataEntry.findAllWhere(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.WITHDRAWN.toString()))))
-        if (!withdrawnEntry) {
-            withdrawnEntry = new MetaDataEntry(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.WITHDRAWN.toString())), value: '', source: MetaDataEntry.Source.MANUAL)
-            withdrawnEntry.save(flush: true)
-        }
-        if (withdrawnEntry.value != '0') {
-            ctx.metaDataService.updateMetaDataEntry(withdrawnEntry, '0')
-        }
-
-        final MetaDataEntry unwithdrawnDateEntry = atMostOneElement(MetaDataEntry.findAllWhere(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName("UNWITHDRAWN_DATE"))))
-        if (!unwithdrawnDateEntry) {
-            unwithdrawnDateEntry = new MetaDataEntry(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName("UNWITHDRAWN_DATE")), value: '', source: MetaDataEntry.Source.MANUAL)
-            unwithdrawnDateEntry.save(flush: true)
-        }
-        if (!(unwithdrawnDateEntry.value ==~ /^[0-9]{4}-[0-1][0-9]-[0-3][0-9]$/)) {
-            ctx.metaDataService.updateMetaDataEntry(unwithdrawnDateEntry, LocalDate.now().toString())
-        }
-
-        final MetaDataEntry withdrawnCommentEntry = atMostOneElement(MetaDataEntry.findAllWhere(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName("WITHDRAWN_COMMENT"))))
-        if (!withdrawnCommentEntry) {
-            withdrawnCommentEntry = new MetaDataEntry(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName("WITHDRAWN_COMMENT")), value: '', source: MetaDataEntry.Source.MANUAL)
-            withdrawnCommentEntry.save(flush: true)
-        }
-        if (!(withdrawnCommentEntry.value.contains(comment))) {
-            def c = withdrawnCommentEntry.value ? "${withdrawnCommentEntry.value}, ${comment}" : comment
-            ctx.metaDataService.updateMetaDataEntry(withdrawnCommentEntry, c)
-        }
-
         println "Unwithdrawing DataFile ${dataFile}"
+        dataFile.withdrawnDate = null
+        if (!dataFile.withdrawnComment?.contains(comment)) {
+            dataFile.withdrawnComment = "${dataFile.withdrawnComment ? "${dataFile.withdrawnComment}\n": ""}${comment}"
+        }
         dataFile.fileWithdrawn = false
         assert dataFile.save(flush: true)
     }

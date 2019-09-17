@@ -20,14 +20,11 @@
  * SOFTWARE.
  */
 
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.*
-import de.dkfz.tbi.otp.utils.logging.*
-import org.joda.time.*
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
-
+import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 /**
  * Script to withdrawn a sample.
@@ -62,7 +59,7 @@ List<SeqTrack> seqTracks = """
 assert comment: 'Please provide a comment why the data are set to withdrawn'
 SeqTrack.withTransaction {
     Withdrawer.ctx = ctx
-    Withdrawer.comment = comment
+    Withdrawer.comment = comment.trim()
     seqTracks.each {
         Withdrawer.withdraw(it)
     }
@@ -74,6 +71,7 @@ class Withdrawer {
     static ctx
 
     static String comment
+    static Date date = new Date()
 
     static void withdraw(final SeqTrack seqTrack) {
         println "\n\nwithdraw $seqTrack"
@@ -109,35 +107,11 @@ class Withdrawer {
     }
 
     static void withdraw(final DataFile dataFile) {
-        final MetaDataEntry withdrawnEntry = atMostOneElement(MetaDataEntry.findAllWhere(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.WITHDRAWN.toString()))))
-        if (!withdrawnEntry) {
-            withdrawnEntry = new MetaDataEntry(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.WITHDRAWN.toString())), value: '', source: MetaDataEntry.Source.MANUAL)
-            withdrawnEntry.save(flush: true)
-        }
-        if (withdrawnEntry.value != '1') {
-            ctx.metaDataService.updateMetaDataEntry(withdrawnEntry, '1')
-        }
-
-        final MetaDataEntry withdrawnDateEntry = atMostOneElement(MetaDataEntry.findAllWhere(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.WITHDRAWN_DATE.toString()))))
-        if (!withdrawnDateEntry) {
-            withdrawnDateEntry = new MetaDataEntry(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName(MetaDataColumn.WITHDRAWN_DATE.toString())), value: '', source: MetaDataEntry.Source.MANUAL)
-            withdrawnDateEntry.save(flush: true)
-        }
-        if (!(withdrawnDateEntry.value ==~ /^[0-9]{4}-[0-1][0-9]-[0-3][0-9]$/)) {
-            ctx.metaDataService.updateMetaDataEntry(withdrawnDateEntry, LocalDate.now().toString())
-        }
-
-        final MetaDataEntry withdrawnCommentEntry = atMostOneElement(MetaDataEntry.findAllWhere(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName("WITHDRAWN_COMMENT"))))
-        if (!withdrawnCommentEntry) {
-            withdrawnCommentEntry = new MetaDataEntry(dataFile: dataFile, key: exactlyOneElement(MetaDataKey.findAllByName("WITHDRAWN_COMMENT")), value: '', source: MetaDataEntry.Source.MANUAL)
-            withdrawnCommentEntry.save(flush: true)
-        }
-        if (!(withdrawnCommentEntry.value.contains(comment))) {
-            def c = withdrawnCommentEntry.value ? "${withdrawnCommentEntry.value}\n${comment}" : comment
-            ctx.metaDataService.updateMetaDataEntry(withdrawnCommentEntry, c)
-        }
-
         println "Withdrawing DataFile ${dataFile}"
+        dataFile.withdrawnDate = date
+        if (!dataFile.withdrawnComment?.contains(comment)) {
+            dataFile.withdrawnComment = "${dataFile.withdrawnComment ? "${dataFile.withdrawnComment}\n": ""}${comment}"
+        }
         dataFile.fileWithdrawn = true
         assert dataFile.save(flush: true)
     }

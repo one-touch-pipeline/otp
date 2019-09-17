@@ -142,6 +142,14 @@
                 <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.isWithdrawn"/></td>
                 <td class="${dataFile.fileWithdrawn}">${dataFile.fileWithdrawn}</td>
             </tr>
+            <tr>
+                <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.withdrawnDate"/></td>
+                <td class="myValue">${dataFile.withdrawnDate?.format("yyyy-MM-dd HH:mm") ?: "-"}</td>
+            </tr>
+            <tr>
+                <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.withdrawnComment"/></td>
+                <td class="myValue">${dataFile.withdrawnComment ?: "-"}</td>
+            </tr>
         </table>
         <H1><g:message code="datafile.showDetails.metaDataEntries"/></H1>
         <p>${g.message(code: "datafile.showDetails.metaDataEntries.explanation")}</p>

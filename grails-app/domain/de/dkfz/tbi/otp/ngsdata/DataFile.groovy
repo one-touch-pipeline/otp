@@ -48,6 +48,8 @@ class DataFile implements Commentable, Entity {
     Date dateLastChecked = null    // when fileExists was last updated
 
     boolean fileWithdrawn = false
+    Date withdrawnDate
+    String withdrawnComment
 
     boolean used = false           // is this file used in any seqTrack
     boolean fileExists = false     // does file exists in file system
@@ -157,6 +159,10 @@ class DataFile implements Commentable, Entity {
                 return false
             }
         })
+        withdrawnDate nullable: true, validator: { val, obj ->
+            return !val || obj.fileWithdrawn
+        }
+        withdrawnComment nullable: true
     }
 
     String fileSizeString() {

@@ -41,20 +41,6 @@ class MetaDataService {
     }
 
     /**
-     * Updates the given MetaDataEntry's value to the new given value.
-     * @param entry The MetaDataEntry to update
-     * @param value The new value to set
-     * @throws MetaDataEntryUpdateException In case the MetaDataEntry could not be updated
-     */
-    boolean updateMetaDataEntry(MetaDataEntry entry, String value) throws MetaDataEntryUpdateException {
-        entry.value = value
-        if (!entry.save(flush: true)) {
-            throw new MetaDataEntryUpdateException(entry)
-        }
-        return true
-    }
-
-    /**
      * Retrieves the DataFile identified by the given ID in an ACL aware manner.
      * @param id The Id of the DataFile.
      * @return DataFile if it exists, otherwise null

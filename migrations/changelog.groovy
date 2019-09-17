@@ -249,4 +249,6 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2019/otp-160.groovy'
+
+    include file: 'changelogs/2019/delete-changelog.groovy'
 }

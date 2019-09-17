@@ -278,6 +278,7 @@ class MetaDataExport {
         put(MD5, dataFile.md5sum)
         put(MATE, dataFile.mateNumber?.toString())
         put(WITHDRAWN, dataFile.fileWithdrawn ? '1' : null)
+        put(WITHDRAWN_DATE, dataFile.withdrawnDate?.format("yyyy-MM-dd"))
 
         Run run = dataFile.run
         put(RUN_ID, run.name)
