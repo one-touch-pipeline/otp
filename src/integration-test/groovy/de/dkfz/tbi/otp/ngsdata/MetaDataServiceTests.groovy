@@ -225,7 +225,7 @@ class MetaDataServiceTests implements UserAndRoles {
         MetaDataKey key = new MetaDataKey(name: "Test")
         assertTrue(key.validate())
         assertNotNull(key.save(flush: true))
-        MetaDataEntry entry = new MetaDataEntry(value: "test", dataFile: dataFile, key: key, source: MetaDataEntry.Source.MANUAL)
+        MetaDataEntry entry = new MetaDataEntry(value: "test", dataFile: dataFile, key: key)
         assertTrue(entry.validate())
         entry = entry.save(flush: true)
         assertNotNull(entry)

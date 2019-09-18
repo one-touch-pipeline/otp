@@ -683,7 +683,6 @@ ${ILSE_NO}                      -             1234          1234          -     
                 dataFile: dataFile1,
                 key: key,
                 value: md5a,
-                source: MetaDataEntry.Source.MDFILE,
         )
 
         if (includeOptional) {

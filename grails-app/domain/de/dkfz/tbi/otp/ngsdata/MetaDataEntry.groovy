@@ -29,20 +29,6 @@ class MetaDataEntry implements Entity {
     DataFile dataFile
     MetaDataKey key
 
-    @Deprecated
-    enum Status {
-        VALID, INVALID, UNKNOWN
-    }
-    @Deprecated
-    Status status = Status.UNKNOWN
-
-    @Deprecated
-    enum Source {
-        MDFILE, SYSTEM, MANUAL
-    }
-    @Deprecated
-    Source source = Source.MDFILE
-
     static belongsTo = [
             dataFile: DataFile,
             key: MetaDataKey,

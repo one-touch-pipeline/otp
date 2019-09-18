@@ -2180,8 +2180,6 @@ class DomainFactory {
                 value   : "value_${counter++}",
                 dataFile: { createDataFile() },
                 key     : { createMetaDataKey() },
-                status  : MetaDataEntry.Status.VALID,
-                source  : MetaDataEntry.Source.MDFILE,
         ], properties)
     }
 
@@ -2192,8 +2190,6 @@ class DomainFactory {
                 value: value,
                 dataFile: dataFile,
                 key: metaDataKey,
-                status: MetaDataEntry.Status.VALID,
-                source: MetaDataEntry.Source.MDFILE,
         )
     }
 
