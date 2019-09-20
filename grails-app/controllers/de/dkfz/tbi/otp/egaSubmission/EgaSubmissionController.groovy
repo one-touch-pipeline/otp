@@ -238,6 +238,12 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                         SeqType.findById(sampleAndSeqType[1] as long)
                 )
             }
+            if (!cmd.sampleAndSeqType || cmd.sampleAndSeqType?.isEmpty()) {
+                flash.message = new FlashMessage(
+                        g.message(code: "egaSubmission.selectSamples.warning.message") as String,
+                        g.message(code: "egaSubmission.selectSamples.warning.request") as String,
+                )
+            }
             redirect(action: "editSubmission", params: ['id': cmd.submission.id])
         }
     }

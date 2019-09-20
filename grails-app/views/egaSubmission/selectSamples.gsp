@@ -30,6 +30,7 @@
 </head>
 <body>
     <div class="body">
+        <g:render template="/templates/messages"/>
         <g:link style="float: right" action="helpPage" fragment="selectSamples" target="_blank">
             <g:img file="info.png"/>
         </g:link>
