@@ -313,14 +313,13 @@ class MetadataImportService {
         Long timeImportStarted = System.currentTimeMillis()
         log.debug('import started')
         RunSegment runSegment = new RunSegment(
-                align: align,
                 otrsTicket: ticketNumber ? otrsTicketService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
                 importMode: importMode,
         )
         assert runSegment.save(flush: false)
         Long timeStarted = System.currentTimeMillis()
         log.debug('runs stared')
-        importRuns(context, runSegment, context.spreadsheet.dataRows)
+        importRuns(context, runSegment, context.spreadsheet.dataRows, align)
         log.debug("runs stopped took: ${System.currentTimeMillis() - timeStarted}")
 
         runSegment.refresh()
@@ -387,7 +386,7 @@ class MetadataImportService {
         }
     }
 
-    private void importRuns(MetadataValidationContext context, RunSegment runSegment, Collection<Row> metadataFileRows) {
+    private void importRuns(MetadataValidationContext context, RunSegment runSegment, Collection<Row> metadataFileRows, boolean align) {
         metadataFileRows.groupBy { it.getCellByColumnTitle(RUN_ID.name()).text }.each { String runName, List<Row> rows ->
             Run run = Run.findWhere(
                     name: runName,
@@ -415,12 +414,12 @@ class MetadataImportService {
 
             Long timeStarted = System.currentTimeMillis()
             log.debug('seqTracks started')
-            importSeqTracks(context, runSegment, run, rows)
+            importSeqTracks(context, runSegment, run, rows, align)
             log.debug("seqTracks stopped took: ${System.currentTimeMillis() - timeStarted}")
         }
     }
 
-    private void importSeqTracks(MetadataValidationContext context, RunSegment runSegment, Run run, Collection<Row> runRows) {
+    private void importSeqTracks(MetadataValidationContext context, RunSegment runSegment, Run run, Collection<Row> runRows, boolean align) {
         Map<String, List<Row>> runsGroupedByLane = runRows.groupBy {
             MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
         }
@@ -502,7 +501,10 @@ class MetadataImportService {
             log.debug("dataFiles stopped took: ${System.currentTimeMillis() - timeStarted}")
             assert seqTrack.save(flush: true) //needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
 
-            Collection<MergingWorkPackage> mergingWorkPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
+            Collection<MergingWorkPackage> mergingWorkPackages = []
+            if (align) {
+                mergingWorkPackages = seqTrackService.decideAndPrepareForAlignment(seqTrack)
+            }
             seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(seqTrack, !mergingWorkPackages.empty)
             samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)
         }

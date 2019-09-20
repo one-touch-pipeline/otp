@@ -37,12 +37,6 @@ class RunSegment implements Entity {
             dataFiles: DataFile,
     ]
 
-    /**
-     * This flag specifies if the lanes, which are in this {@link RunSegment} shall be aligned automatically.
-     * Per default they shall be aligned.
-     */
-    Boolean align = true
-
     OtrsTicket otrsTicket
 
     enum ImportMode {
@@ -53,7 +47,6 @@ class RunSegment implements Entity {
 
     static constraints = {
         //the field can be null, since for the old data the information is not needed; only for new incoming runSegments
-        align(nullable: true)
         otrsTicket(nullable: true)
     }
 

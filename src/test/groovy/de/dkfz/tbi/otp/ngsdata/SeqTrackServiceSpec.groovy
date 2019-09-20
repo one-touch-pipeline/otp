@@ -97,21 +97,6 @@ class SeqTrackServiceSpec extends Specification implements DataTest {
         !SeqTrackService.mayAlign(seqTrack)
     }
 
-    void "test mayAlign, when run segment must not align, return false"() {
-        given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        RunSegment runSegment = DomainFactory.createRunSegment(
-                align: false,
-        )
-        DomainFactory.createDataFile(
-                seqTrack: seqTrack,
-                runSegment: runSegment,
-        )
-
-        expect:
-        !SeqTrackService.mayAlign(seqTrack)
-    }
-
     void "test mayAlign, when exome kit information reliability is UNKNOWN_VERIFIED, return false"() {
         given:
         SeqTrack seqTrack = DomainFactory.createExomeSeqTrack(

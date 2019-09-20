@@ -202,16 +202,6 @@ class SeqTrackService {
             return false
         }
 
-        if (DataFile.withCriteria {
-            eq 'seqTrack', seqTrack
-            runSegment {
-                eq 'align', false
-            }
-        }) {
-            notAligning('alignment is disabled for the RunSegment')
-            return false
-        }
-
         if (seqTrack instanceof ExomeSeqTrack &&
                 seqTrack.libraryPreparationKit == null &&
                 seqTrack.kitInfoReliability == InformationReliability.UNKNOWN_VERIFIED) {

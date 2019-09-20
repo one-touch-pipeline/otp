@@ -620,7 +620,6 @@ ${ILSE_NO}                      -             1234          1234          -     
         // runSegment
         RunSegment.count == 1
         RunSegment runSegment = RunSegment.findWhere(
-                align: align,
                 otrsTicket: otrsTicket,
                 importMode: importMode,
         )
@@ -843,7 +842,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             ])
         }
 
-        seqTrackCount * service.seqTrackService.decideAndPrepareForAlignment(!null) >> []
+        (align ? 1 : 0 * seqTrackCount) * service.seqTrackService.decideAndPrepareForAlignment(!null) >> []
         seqTrackCount * service.seqTrackService.determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
 
         cleanup:
@@ -892,7 +891,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             0 * _
         }
         service.seqTrackService = Mock(SeqTrackService) {
-            1 * decideAndPrepareForAlignment(!null) >> []
+            0 * decideAndPrepareForAlignment(!null) >> []
             1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
@@ -969,7 +968,6 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         // runSegment
         RunSegment.count == 1
         RunSegment runSegment = RunSegment.findWhere(
-                align: false,
                 otrsTicket: null,
                 importMode: RunSegment.ImportMode.MANUAL
         )
@@ -1071,7 +1069,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
             0 * _
         }
         service.seqTrackService = Mock(SeqTrackService) {
-            1 * decideAndPrepareForAlignment(!null) >> []
+            0 * decideAndPrepareForAlignment(!null) >> []
             1 * determineAndStoreIfFastqFilesHaveToBeLinked(!null, false)
         }
         service.seqPlatformService = Mock(SeqPlatformService) {
@@ -1177,7 +1175,6 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         // runSegment
         RunSegment.count == 1
         RunSegment runSegment = RunSegment.findWhere(
-                align: false,
                 otrsTicket: null,
                 importMode: RunSegment.ImportMode.MANUAL
         )
