@@ -31,9 +31,11 @@
 <body>
     <div class="body">
         <g:render template="/templates/messages"/>
+
         <g:link style="float: right" action="helpPage" fragment="selectSamples" target="_blank">
             <g:img file="info.png"/>
         </g:link>
+
         <h3><g:message code="egaSubmission.selectSamples.title"/></h3>
         <div class="searchCriteriaTableSequences">
             <table id="searchCriteriaTable" style="display: inline-block">
@@ -52,31 +54,30 @@
                                               option="${seqTypes}"
                                               noSelection="${["none": message(code:"otp.filter.seqType")]}"/>
                                 </td>
-                                <td class="value">
-                                </td>
                             </tr>
                         </table>
                     </td>
                 </tr>
             </table>
         </div>
+
         <g:form controller="egaSubmission" action="selectSamplesForm">
             <div class="otpDataTables">
-                <otp:dataTable
-                    codes="${[
-                            '',
-                            'egaSubmission.individual',
-                            'egaSubmission.seqType',
-                            'egaSubmission.sampleType',
-                    ]}"
-                    id="selectSamplesTable" />
+                <g:set var="dataTableHeaders" value="${[
+                        'individual',
+                        'seqType',
+                        'sampleType'
+                ]}"/>
+                <otp:dataTable codes="${[''] + dataTableHeaders.collect { "egaSubmission.${it}" }}" id="selectSamplesTable" />
             </div>
             <g:hiddenField name="submission.id" value="${submissionId}" />
             <g:submitButton name="next" value="${message(code: 'egaSubmission.selectSamples.next')}"/>
         </g:form>
-        <asset:script>
+
+        <asset:script type="text/javascript">
             $(function() {
-                $.otp.selectSamplesTable.selectSamples("${samplesWithSeqType}");
+                var table = $.otp.selectSamplesTable.selectableSampleList([${raw("\"" + dataTableHeaders.join("\",\"") + "\"")}], "${samplesWithSeqType}");
+                $.otp.selectSamplesTable.applySeqTypeFilter(table, "${dataTableHeaders.findIndexOf { it == "seqType" } + 1}");
             });
         </asset:script>
     </div>

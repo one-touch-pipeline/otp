@@ -25,9 +25,17 @@
 
 $.otp.selectSamplesTable = {
 
-    selectSamples: function (preSelectedSamples) {
+    /**
+     * Gathers all samples of the selected project and displays them with PID, SeqType and SampleType.
+     * It also adds a checkbox for selection in the first column.
+     *
+     * @param header array of additional columns after the selection column
+     * @param preSelectedSamples a list of samples to preselect, defined by "<Sample ID><SampleType Name>"
+     * @returns datatable object
+     */
+    selectableSampleList: function (header, preSelectedSamples) {
         "use strict";
-        var oTable = $('#selectSamplesTable').dataTable({
+        return $('#selectSamplesTable').dataTable({
             sDom: '<i> T rt<"clear">',
             oTableTools: $.otp.tableTools,
             bFilter: true,
@@ -60,27 +68,34 @@ $.otp.selectSamplesTable = {
                     },
                     "success": function (json) {
                         for (var i = 0; i < json.aaData.length; i += 1) {
-                            var column = json.aaData[i];
-                            var currentSampleAndSeqType = parseInt(column[0].split("-")[0]) + column[3];
-                            var checked = preSelectedSamples.includes(currentSampleAndSeqType) ? 'checked' : '';
-                            column[0] = '<input type="checkbox" name="sampleAndSeqType" value="'+ column[0] + '" ' + checked + '/>';
+                            var entry = json.aaData[i];
+                            var checked = preSelectedSamples.includes(entry["sampleId"] + entry["seqType"]) ? 'checked' : '';
+                            json.aaData[i][0] = '<input type="checkbox" name="sampleAndSeqType" value="' + entry["identifier"] + '" ' + checked + '/>';
+                            for (var c = 0; c < header.length; c++) {
+                                json.aaData[i][c + 1] = entry[header[c]]
+                            }
                         }
                         fnCallback(json);
                     }
                 });
             }
         });
+    },
 
-        $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), oTable, false, function () {
-            var select = $('#searchCriteriaTableSeqType').find('select')[0],
-                column = 3;
+    /**
+     * Applies a filter on the SeqType column of the datatable.
+     *
+     * @param table the target datatable
+     * @param seqTypeColumnIndex index of the column containing the SeqType
+     */
+    applySeqTypeFilter: function (table, seqTypeColumnIndex) {
+        $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), table, false, function () {
+            var select = $('#searchCriteriaTableSeqType').find('select')[0];
             if (select.selectedIndex !== 0) {
-                oTable.fnFilter('^' + select.value + '$', column, true);
+                table.fnFilter('^' + select.value + '$', seqTypeColumnIndex, true);
             } else {
-                oTable.fnFilter('', column);
+                table.fnFilter('', seqTypeColumnIndex);
             }
         });
-
-        return oTable;
     }
 };

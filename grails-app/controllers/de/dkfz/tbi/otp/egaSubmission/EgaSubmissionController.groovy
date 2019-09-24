@@ -533,22 +533,16 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         Project project = projectService.getProjectByName(params.project)
         Map dataToRender = cmd.dataToRender()
 
-        List data = []
-        List<List> sampleSeqType = egaSubmissionService.getSampleAndSeqType(project)
+        List<Map<String, String>> data = []
+        List<SampleAndSeqTypeProjection> samplesWithSeqType = egaSubmissionService.getSamplesWithSeqType(project)
 
-        sampleSeqType.sort { a,b ->
-            a[1] <=> b[1] ?: a[3].toString() <=> b[3].toString() ?: a[2] <=> b[2]
-        }.each {
-            long sampleId = it[0]
-            String individualPid = it[1]
-            String sampleTypeName = it[2]
-            SeqType seqType = it[3]
-
+        samplesWithSeqType.sort().each {
             data.add([
-                "${sampleId}-${seqType.id}",
-                individualPid,
-                seqType.toString(),
-                sampleTypeName,
+                identifier: "${it.sampleId}-${it.seqTypeId}",
+                sampleId  : "${it.sampleId}",
+                individual: it.pid,
+                seqType   : it.seqTypeString,
+                sampleType: it.sampleTypeName,
             ])
         }
 

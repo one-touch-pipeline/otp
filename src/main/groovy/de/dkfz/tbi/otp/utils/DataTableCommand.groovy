@@ -54,7 +54,7 @@ class DataTableCommand implements Validateable {
             iSortCol_0: this.iSortCol_0,
             sSortDir_0: this.sSortDir_0,
             aaData: [],
-            ]
+        ]
     }
 
     boolean getSortOrder() {

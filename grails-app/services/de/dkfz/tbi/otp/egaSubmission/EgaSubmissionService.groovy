@@ -265,7 +265,7 @@ class EgaSubmissionService {
     }
 
     @CompileDynamic
-    List<List> getSampleAndSeqType(Project project) {
+    List<SampleAndSeqTypeProjection> getSamplesWithSeqType(Project project) {
         return SeqTrack.createCriteria().list {
             projections {
                 sample {
@@ -281,7 +281,15 @@ class EgaSubmissionService {
                 }
                 property('seqType')
             }
-        }.unique()
+        }.unique().collect {
+            return new SampleAndSeqTypeProjection(
+                    sampleId:       it[0],
+                    pid:            it[1],
+                    sampleTypeName: it[2],
+                    seqTypeId:      it[3].id,
+                    seqTypeString:  it[3].toString(),
+            )
+        }
     }
 
     Map generateDefaultEgaAliasesForDataFiles(List<DataFileAndSampleAlias> dataFilesAndAliases) {
@@ -365,5 +373,21 @@ class BamFileAndSampleAlias implements Comparable<BamFileAndSampleAlias> {
         return this.bamFile.individual.displayName <=> other.bamFile.individual.displayName ?:
                 this.bamFile.seqType.toString() <=> other.bamFile.seqType.toString() ?:
                         this.bamFile.sampleType.displayName <=> other.bamFile.sampleType.displayName
+    }
+}
+
+@Canonical
+class SampleAndSeqTypeProjection implements Comparable<SampleAndSeqTypeProjection> {
+    long sampleId
+    String pid
+    String sampleTypeName
+    long seqTypeId
+    String seqTypeString
+
+    @Override
+    int compareTo(SampleAndSeqTypeProjection other) {
+        return this.pid <=> other.pid ?:
+                this.seqTypeString <=> other.seqTypeString ?:
+                        this.sampleTypeName <=> other.sampleTypeName
     }
 }
