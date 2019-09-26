@@ -97,5 +97,9 @@ $.otp.selectSamplesTable = {
                 table.fnFilter('', seqTypeColumnIndex);
             }
         });
+    },
+
+    removeFilterOnColumn: function (table, seqTypeColumnIndex) {
+        table.fnFilter('', seqTypeColumnIndex);
     }
 };

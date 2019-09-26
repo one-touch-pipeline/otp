@@ -71,13 +71,19 @@
                 <otp:dataTable codes="${[''] + dataTableHeaders.collect { "egaSubmission.${it}" }}" id="selectSamplesTable" />
             </div>
             <g:hiddenField name="submission.id" value="${submissionId}" />
-            <g:submitButton name="next" value="${message(code: 'egaSubmission.selectSamples.next')}"/>
+            <g:set var="nextButton" value="next"/>
+            <input type="submit" name="${nextButton}" id="${nextButton}" value="${message(code: 'egaSubmission.selectSamples.next')}">
         </g:form>
+        <g:set var="seqTypeColumnIndex" value="${dataTableHeaders.findIndexOf { it == "seqType" } + 1}"/>
 
         <asset:script type="text/javascript">
             $(function() {
-                var table = $.otp.selectSamplesTable.selectableSampleList([${raw("\"" + dataTableHeaders.join("\",\"") + "\"")}], "${samplesWithSeqType}");
-                $.otp.selectSamplesTable.applySeqTypeFilter(table, "${dataTableHeaders.findIndexOf { it == "seqType" } + 1}");
+                let table = $.otp.selectSamplesTable.selectableSampleList([${raw("\"" + dataTableHeaders.join("\",\"") + "\"")}], "${samplesWithSeqType}");
+                $.otp.selectSamplesTable.applySeqTypeFilter(table, "${seqTypeColumnIndex}");
+
+                $('#${nextButton}').click(function() {
+                    $.otp.selectSamplesTable.removeFilterOnColumn(table, "${seqTypeColumnIndex}");
+                });
             });
         </asset:script>
     </div>
