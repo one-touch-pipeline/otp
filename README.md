@@ -77,7 +77,6 @@ We're still getting a feel for how to develop OTP in the open, after almost a de
 
 Some things on our current to-do list:
 
-* get our issue tracker outside the firewall (not as easy as it sounds, given the personal nature of most genomic data)
 * run our CI/CD in the open
 * rebuild our review process with tooling accessible to the wider public.
 
