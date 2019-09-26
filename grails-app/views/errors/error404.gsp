@@ -27,7 +27,9 @@
         <title><g:message code="error.404.title"/></title>
     </head>
     <body>
-        <h1><g:message code="error.404.title"/></h1>
-        <p><g:message code="error.404.explanation" args="${[notFound]}"/></p>
+        <div class="body" style="overflow: auto;">
+            <h1><g:message code="error.404.title"/></h1>
+            <p><g:message code="error.404.explanation" args="${[notFound]}"/></p>
+        </div>
     </body>
 </html>

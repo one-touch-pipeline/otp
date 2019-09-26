@@ -27,7 +27,9 @@
         <title><g:message code="error.403.title"/></title>
     </head>
     <body>
-        <h1><g:message code="error.403.title"/></h1>
-        <p><g:message code="error.403.explanation"/></p>
+        <div class="body" style="overflow: auto;">
+            <h1><g:message code="error.403.title"/></h1>
+            <p><g:message code="error.403.explanation"/></p>
+        </div>
     </body>
 </html>
