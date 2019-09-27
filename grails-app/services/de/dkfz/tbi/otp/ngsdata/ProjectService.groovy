@@ -238,12 +238,24 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void deleteProjectInfo(ProjectInfoCommand cmd) throws IOException {
+        cmd.validate()
+        assert !cmd.errors.hasErrors()
+        ProjectInfo projectInfo = cmd.projectInfo
+        FileSystem fs = fileSystemService.getRemoteFileSystem(projectInfo.project.realm)
+        Path path = fs.getPath(projectInfo.getPath())
+        fileService.deleteDirectoryRecursively(path)
+        projectInfo.project = null
+        projectInfo.delete(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     byte[] getProjectInfoContent(ProjectInfo projectInfo) {
         assert projectInfo: "No ProjectInfo given"
         FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
         Path file = fs.getPath(projectInfo.path)
 
-        return Files.exists(file) ? file.bytes : []
+        return Files.exists(file) ? file.bytes : [] as byte[]
     }
 
     private ProjectInfo createProjectInfo(Project project, String fileName) {

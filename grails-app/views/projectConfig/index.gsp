@@ -377,6 +377,12 @@
                                     <g:formatDate date="${projectInfo.dateCreated}" format="yyyy-MM-dd"/>
                                     <br><g:message code="projectOverview.projectInfo.path"/>
                                     <g:link action="download" params='["projectInfo.id": projectInfo.id]'>${projectInfo.getPath()}</g:link>
+                                    <g:form action="deleteProjectInfo" useToken="true" style="display: inline"
+                                                  onSubmit="\$.otp.projectConfig.confirmProjectInfoDelete(event);">
+                                        |
+                                        <input type="hidden" name="projectInfo.id" value="${projectInfo.id}"/>
+                                        <g:submitButton name="${g.message(code: "projectOverview.projectInfo.deleteProjectInfo")}"/>
+                                    </g:form>
                                     <g:if test="${projectInfo.hasAdditionalInfos()}">
                                         <br><g:message code="projectOverview.projectInfo.additional"/> ${projectInfo.additionalInfos}
                                         <g:if test="${!projectInfo.deletionDate}">

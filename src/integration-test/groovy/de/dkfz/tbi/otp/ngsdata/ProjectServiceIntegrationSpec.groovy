@@ -1632,7 +1632,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         Project project = createProject()
-        byte[] projectInfoContent = []
+        byte[] projectInfoContent
         MockMultipartFile mockMultipartFile = new MockMultipartFile(FILE_NAME, CONTENT)
         mockMultipartFile.originalFilename = FILE_NAME
 
@@ -1644,6 +1644,17 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         projectInfoContent == CONTENT
+        project.projectInfos.size() == 1
+/* TODO: otp-163
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            projectService.deleteProjectInfo(new ProjectInfoCommand(projectInfo: CollectionUtils.exactlyOneElement(project.projectInfos)))
+        }
+
+        then:
+        project.projectInfos.size() == 0
+        ProjectInfo.count == 0
+*/
     }
 
     void "test copyProjectInfoToProjectFolder, when no file exists, returns []"() {

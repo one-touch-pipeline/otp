@@ -161,5 +161,15 @@ $.otp.projectConfig = {
         if (!window.confirm('Are you sure that the DTA data should be marked as deleted?')) {
             event.preventDefault();
         }
+    },
+
+    confirmProjectInfoDelete: function(event) {
+        if (!window.confirm('Are you sure that you want to permanently delete this File?')) {
+            event.preventDefault();
+            return;
+        }
+        if (!window.confirm('Are you really sure? This can not be undone!')) {
+            event.preventDefault();
+        }
     }
 };

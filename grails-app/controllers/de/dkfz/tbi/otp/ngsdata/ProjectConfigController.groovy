@@ -297,6 +297,25 @@ class ProjectConfigController implements CheckAndCall {
         redirect(action: "index")
     }
 
+    @SuppressWarnings('CatchException')
+    def deleteProjectInfo(ProjectInfoCommand cmd) {
+        withForm {
+            if (cmd.hasErrors()) {
+                flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.errorDeleteFile") as String, cmd.errors)
+            } else {
+                try {
+                    projectService.deleteProjectInfo(cmd)
+                } catch (Exception e) {
+                    log.error(e.message, e)
+                    flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.exceptionMessage") as String, e.toString())
+                }
+            }
+        }.invalidToken {
+            flash.message = new FlashMessage(g.message(code: "default.invalid.session") as String, '')
+        }
+        redirect(action: "index")
+    }
+
     JSON snvDropDown() {
         render Project.Snv.values() as JSON
     }
