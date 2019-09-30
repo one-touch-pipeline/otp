@@ -752,11 +752,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        User user = DomainFactory.createUser()
         List<UserProjectRole> userProjectRoles = 2.collect {
             DomainFactory.createUserProjectRole(
                     project: createProject(unixGroup: UNIX_GROUP),
-                    user: user,
                     (flag): false,
             )
         }
@@ -793,6 +791,29 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         "manageUsersAndDelegate" | 0
         "receivesNotifications"  | 0
         "enabled"                | 0
+    }
+
+    @Unroll
+    void "test #flag access as project user"() {
+        given:
+        setupData()
+
+        User user = DomainFactory.createUser()
+        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
+                project: createProject(unixGroup: UNIX_GROUP),
+                (flag): false,
+        )
+
+        when:
+        SpringSecurityUtils.doWithAuth(user.username) {
+            userProjectRoleService."toggle${flag.capitalize()}"(userProjectRole)
+        }
+
+        then:
+        userProjectRole."${flag}" == true
+
+        where:
+        flag << ["accessToOtp", "accessToFiles", "manageUsers", "manageUsersAndDelegate", "receivesNotifications", "enabled"]
     }
 
     void "getEmailsOfToBeNotifiedProjectUsers, only return emails of users that receive notification and are enabled"() {

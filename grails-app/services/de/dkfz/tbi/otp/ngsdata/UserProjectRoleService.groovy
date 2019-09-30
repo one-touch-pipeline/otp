@@ -284,7 +284,7 @@ class UserProjectRoleService {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'MANAGE_USERS')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole toggleAccessToOtp(UserProjectRole userProjectRole) {
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.accessToOtp = !upr.accessToOtp
@@ -295,7 +295,7 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'MANAGE_USERS')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS')")
     UserProjectRole toggleAccessToFiles(UserProjectRole userProjectRole) {
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.accessToFiles = !upr.accessToFiles
@@ -311,7 +311,7 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'DELEGATE_USER_MANAGEMENT')")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'DELEGATE_USER_MANAGEMENT')")
     UserProjectRole toggleManageUsers(UserProjectRole userProjectRole) {
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.manageUsers = !upr.manageUsers
@@ -333,7 +333,7 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#upr.project, 'MANAGE_USERS') or #upr.user.username == principal.username")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS') or #upr.user.username == principal.username")
     UserProjectRole toggleReceivesNotifications(UserProjectRole userProjectRole) {
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.receivesNotifications = !upr.receivesNotifications
