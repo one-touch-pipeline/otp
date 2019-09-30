@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqTrack
  * and produced by the merging process identified by the
  * given {@link MergingPass}
  */
+@Deprecated
 class ProcessedMergedBamFile extends AbstractMergedBamFile implements ProcessParameterObject {
 
     MergingPass mergingPass

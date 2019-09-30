@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.utils.Entity
 
+@Deprecated
 class AlignmentLog implements Entity {
 
     // quality control flag

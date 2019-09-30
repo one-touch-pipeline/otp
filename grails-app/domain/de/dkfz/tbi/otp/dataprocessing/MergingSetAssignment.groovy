@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * many to many connection between
  * {@link MergingSet} and {@link ProcessedBamFile}
  */
+@Deprecated
 class MergingSetAssignment implements Entity {
 
     MergingSet mergingSet

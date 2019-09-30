@@ -25,6 +25,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 
+@Deprecated
 class AlignmentPass implements ProcessParameterObject, Entity {
 
     enum AlignmentState {
