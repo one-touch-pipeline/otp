@@ -24,13 +24,15 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.converters.JSON
 import org.springframework.validation.FieldError
 
-import de.dkfz.tbi.otp.ProjectSelection
-import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.otp.utils.FormatHelper
+
+import java.nio.file.AccessDeniedException
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -110,6 +112,7 @@ class AlignmentQualityOverviewController {
             'alignment.quality.individual',
             'alignment.quality.sampleType',
             'alignment.quality.qcStatus',
+            'alignment.quality.cell.ranger.summary',
             'alignment.quality.cell.ranger.cells.expected',
             'alignment.quality.cell.ranger.cells.enforced',
             'alignment.quality.cell.ranger.estimatedNumberOfCells',
@@ -149,6 +152,8 @@ class AlignmentQualityOverviewController {
     ReferenceGenomeService referenceGenomeService
 
     SeqTypeService seqTypeService
+
+    CellRangerService cellRangerService
 
     ProjectService projectService
     ProjectSelectionService projectSelectionService
@@ -292,8 +297,8 @@ class AlignmentQualityOverviewController {
             String comment = abstractMergedBamFile.comment ? "\n${abstractMergedBamFile.comment?.comment}\n${abstractMergedBamFile.comment?.author}" : ""
             Map<String, TableCellValue> map = [
                     pid               : new TableCellValue(
-                            abstractMergedBamFile.individual.displayName, null,
-                            g.createLink(
+                            value: abstractMergedBamFile.individual.displayName,
+                            link : g.createLink(
                                     controller: 'individual',
                                     action: 'show',
                                     id: abstractMergedBamFile.individual.id,
@@ -318,7 +323,7 @@ class AlignmentQualityOverviewController {
             ]
 
             Map<String, Double> qcKeysMap = [
-                    "insertSizeMedian": readLength,
+                    insertSizeMedian: readLength,
             ]
             List<String> qcKeys = [
                     "percentMappedReads",
@@ -390,6 +395,17 @@ class AlignmentQualityOverviewController {
                     break
 
                 case SeqTypeNames._10X_SCRNA.seqTypeName:
+                    map << [
+                            summary: new TableCellValue(
+                                value: "summary",
+                                link : g.createLink(
+                                        action: 'viewCellRangerSummary',
+                                        params: [
+                                                "singleCellBamFile.id": ((SingleCellBamFile) abstractMergedBamFile).id,
+                                        ],
+                                ).toString()
+                            ),
+                    ]
                     qcKeys += [
                             'expectedCells',
                             'enforcedCells',
@@ -423,6 +439,20 @@ class AlignmentQualityOverviewController {
         render dataToRender as JSON
     }
 
+    def viewCellRangerSummary(ViewCellRangerSummaryCommand cmd) {
+        String content
+        try {
+            content = cellRangerService.getWebSummaryResultFileContent(cmd.singleCellBamFile)
+        } catch (FileNotFoundException e) {
+            flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.fileNotFound") as String, e.getMessage())
+            redirect(action: "index")
+        } catch (AccessDeniedException e) {
+            flash.message = new FlashMessage(g.message(code: "alignment.quality.exception.accessDenied") as String, e.getMessage())
+            redirect(action: "index")
+        }
+        render text: content, contentType: "text/html", encoding: "UTF-8"
+    }
+
     private static AbstractQualityAssessment getQualityAssessmentForFirstMatchingChromosomeName(Map<String,
             List<AbstractQualityAssessment>> qualityAssessmentMergedPassGroupedByChromosome, List<String> chromosomeNames) {
         return exactlyOneElement(chromosomeNames.findResult { qualityAssessmentMergedPassGroupedByChromosome.get(it) })
@@ -431,6 +461,10 @@ class AlignmentQualityOverviewController {
 
 class AlignmentQcCommand {
     SeqType seqType
+}
+
+class ViewCellRangerSummaryCommand {
+    SingleCellBamFile singleCellBamFile
 }
 
 @SuppressWarnings('SerializableClassMustDefineSerialVersionUID')

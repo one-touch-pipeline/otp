@@ -44,9 +44,10 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
 
     static final String METRICS_SUMMARY_CSV_FILE_NAME = "metrics_summary.csv"
 
+    static final String WEB_SUMMARY_HTML_FILE_NAME = "web_summary.html"
 
     static final List<String> CREATED_RESULT_FILES = [
-            'web_summary.html',
+            WEB_SUMMARY_HTML_FILE_NAME,
             METRICS_SUMMARY_CSV_FILE_NAME,
             ORIGINAL_BAM_FILE_NAME,
             ORIGINAL_BAI_FILE_NAME,
@@ -190,6 +191,10 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
 
     File getQualityAssessmentCsvFile() {
         return new File(resultDirectory, METRICS_SUMMARY_CSV_FILE_NAME)
+    }
+
+    File getWebSummaryResultFile() {
+        return new File(resultDirectory, WEB_SUMMARY_HTML_FILE_NAME)
     }
 
     @Override

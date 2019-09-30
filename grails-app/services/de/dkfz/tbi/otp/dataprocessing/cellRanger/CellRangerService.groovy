@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.gorm.transactions.Transactional
 import groovy.transform.TupleConstructor
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
@@ -221,5 +222,14 @@ class CellRangerService {
         singleCellBamFile.fileExists = true
         singleCellBamFile.dateFromFileSystem = new Date(Files.getLastModifiedTime(bamFile).toMillis())
         assert singleCellBamFile.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#singleCellBamFile.project, 'OTP_READ_ACCESS')")
+    String getWebSummaryResultFileContent(SingleCellBamFile singleCellBamFile) throws FileNotFoundException {
+        File file = singleCellBamFile.webSummaryResultFile
+        if (!file.exists()) {
+            throw new FileNotFoundException(file.path)
+        }
+        return file.text
     }
 }

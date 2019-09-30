@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.job.jobs.cellRanger
 
+import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.AccessDeniedException
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -33,33 +36,45 @@ import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CreateFileHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 @Rollback
 @Integration
-class CellRangerServiceIntegrationSpec extends Specification implements CellRangerFactory {
+class CellRangerServiceIntegrationSpec extends Specification implements UserAndRoles, CellRangerFactory {
 
     @Rule
     public TemporaryFolder temporaryFolder
 
+    @Autowired
     CellRangerService cellRangerService
 
     SingleCellBamFile singleCellBamFile
-    File file
+    File metricsSummaryFile
+    File webSummaryFile
 
     void setupData() {
+        createUserAndRoles()
         cellRangerService = new CellRangerService()
         cellRangerService.fileSystemService = new TestFileSystemService()
+        setupSingleCellBamFile()
+    }
+
+    void setupSingleCellBamFile() {
         singleCellBamFile = createBamFile()
-        file = new File(temporaryFolder.newFolder(), "${HelperUtils.uniqueString}_metrics_summary.csv")
-        singleCellBamFile.metaClass.getQualityAssessmentCsvFile = { return file }
+        metricsSummaryFile = new File(temporaryFolder.newFolder(), "${HelperUtils.uniqueString}_metrics_summary.csv")
+        singleCellBamFile.metaClass.getQualityAssessmentCsvFile = { return metricsSummaryFile }
+        webSummaryFile = new File(temporaryFolder.newFolder(), "${HelperUtils.uniqueString}_web_summary.csv")
+        singleCellBamFile.metaClass.getWebSummaryResultFile = { return webSummaryFile }
     }
 
     void "parseCellRangerQaStatistics, all values are parsed and stored in CellRangerQualityAssessment"() {
         given:
         setupData()
-        createQaFileOnFileSystem(file)
+        createQaFileOnFileSystem(metricsSummaryFile)
 
         when:
         CellRangerQualityAssessment cellRangerQualityAssessment = cellRangerService.parseCellRangerQaStatistics(singleCellBamFile)
@@ -74,7 +89,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements CellRang
     void "parseCellRangerQaStatistics, unparsable value #value cause an exception"() {
         given:
         setupData()
-        createQaFileOnFileSystem(file, [(key): value])
+        createQaFileOnFileSystem(metricsSummaryFile, [(key): value])
 
         when:
         cellRangerService.parseCellRangerQaStatistics(singleCellBamFile)
@@ -93,7 +108,7 @@ class CellRangerServiceIntegrationSpec extends Specification implements CellRang
     void "parseCellRangerQaStatistics, missing columns cause an exception"() {
         given:
         setupData()
-        file = CreateFileHelper.createFile(
+        metricsSummaryFile = CreateFileHelper.createFile(
                 new File(temporaryFolder.newFolder(), "${HelperUtils.uniqueString}_metrics_summary.csv"),
                 "column1,column2\ncontent1,content2"
         )
@@ -104,5 +119,45 @@ class CellRangerServiceIntegrationSpec extends Specification implements CellRang
         then:
         AssertionError e = thrown()
         e.message.contains("can not be found in")
+    }
+
+    void "getWebSummaryResultFileContent, access granted for project user and operator"() {
+        given:
+        setupData()
+        String content = ""
+        webSummaryFile = CreateFileHelper.createFile(singleCellBamFile.webSummaryResultFile, "content")
+        if (username == "projectUser") {
+            User user = DomainFactory.createUser(username: username)
+            addUserWithReadAccessToProject(user, singleCellBamFile.project)
+        }
+
+        when:
+        SpringSecurityUtils.doWithAuth(username) {
+            content = cellRangerService.getWebSummaryResultFileContent(singleCellBamFile)
+        }
+
+        then:
+        content == "content"
+
+        where:
+        username      |_
+        OPERATOR      |_
+        "projectUser" |_
+    }
+
+    void "getWebSummaryResultFileContent, access denied for non project user"() {
+        given:
+        createUserAndRoles()
+        setupSingleCellBamFile()
+        webSummaryFile = CreateFileHelper.createFile(singleCellBamFile.webSummaryResultFile, "content")
+
+        when:
+        SpringSecurityUtils.doWithAuth(TESTUSER) {
+            cellRangerService.getWebSummaryResultFileContent(singleCellBamFile)
+        }
+
+        then:
+        AccessDeniedException e = thrown()
+        e.message.contains("Access is denied")
     }
 }

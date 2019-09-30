@@ -177,6 +177,7 @@ $.otp.alignmentQualityOverviewTable = {
                                 ]);
                             } else if (seqType === '10x_scRNA PAIRED singleCell') {
                                 columnNames = columnNames.concat([
+                                    'summary',
                                     'expectedCells',
                                     'enforcedCells',
                                     'estimatedNumberOfCells',

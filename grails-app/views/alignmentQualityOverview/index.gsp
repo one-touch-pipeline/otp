@@ -32,6 +32,8 @@
 
 <body>
     <div class="body">
+    <g:render template="/templates/messages"/>
+
     <g:if test="${projects}">
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
         <g:if test="${seqType}">
