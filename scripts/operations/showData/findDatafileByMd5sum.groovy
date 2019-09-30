@@ -24,11 +24,20 @@ import de.dkfz.tbi.otp.ngsdata.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
+/**
+ * This script looks up DataFiles for the given md5sums. It lists Project, PID, SeqType, SampleType and SAMPLE_ID.
+ * Simply list the md5sums in the input section below.
+ */
+
+// Input
+
 String md5sums = """
 # md5sum 1
 # md5sum 2
 
 """
+
+// Code
 
 Closure<List<String>> nameStringToList = { String nameString ->
     List<String> list = []
