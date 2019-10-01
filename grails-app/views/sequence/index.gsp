@@ -83,24 +83,7 @@
             </p>
         </div>
         <div class="otpDataTables">
-        <otp:dataTable codes="${[
-                    'sequence.list.headers.project',
-                    'sequence.list.headers.individual',
-                    'sequence.list.headers.sampleType',
-                    'sequence.list.headers.seqType',
-                    'sequence.list.headers.libLayout',
-                    'sequence.list.headers.singleCell',
-                    'sequence.list.headers.seqCenter',
-                    'sequence.list.headers.libPrepKit',
-                    'sequence.list.headers.run',
-                    'sequence.list.headers.lane',
-                    'sequence.list.headers.library',
-                    'sequence.list.headers.fastqc',
-                    'sequence.list.headers.ilseId',
-                    'sequence.list.headers.warning',
-                    'sequence.list.headers.fileExists',
-                    'sequence.list.headers.date'
-            ]}" id="sequenceTable"/>
+        <otp:dataTable codes="${tableHeader}" id="sequenceTable"/>
         </div>
     <asset:script type="text/javascript">
         $(function() {

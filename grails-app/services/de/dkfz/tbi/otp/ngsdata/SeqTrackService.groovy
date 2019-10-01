@@ -83,7 +83,7 @@ class SeqTrackService {
      * @param filtering Filtering restrictions
      * @return List of matching Sequences
      */
-    List<Sequence> listSequences(int offset, int max, boolean sortOrder, SequenceSortColumn column, SequenceFiltering filtering) {
+    List<Sequence> listSequences(int offset, int max, boolean sortOrder, SequenceColumn column, SequenceFiltering filtering) {
         if (filtering.enabled) {
             def c = Sequence.createCriteria()
             return c.list {

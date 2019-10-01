@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 import groovy.json.JsonSlurper
+import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -35,6 +36,7 @@ class SequenceController {
     def index() {
         List<SeqType> seqTypes = SeqType.list(sort: "name", order: "asc")
         [
+            tableHeader: SequenceColumn.values()*.message,
             projects: projectService.getAllProjects(),
             sampleTypes: SampleType.list(sort: "name", order: "asc"),
             seqTypes: new TreeSet(seqTypes.collect { it.displayName }),
@@ -53,7 +55,7 @@ class SequenceController {
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
         List<Sequence> sequences = seqTrackService.listSequences(cmd.iDisplayStart, cmd.iDisplayLength, cmd.sortOrder,
-                SequenceSortColumn.fromDataTable(cmd.iSortCol_0), filtering)
+                SequenceColumn.fromDataTable(cmd.iSortCol_0), filtering)
         List<DataFile> dataFiles = sequences ? fastqcResultsService.fastQCFiles(sequences) : []
         Map<Long, List<DataFile>> seqTrackIdDataFileMap = dataFiles.groupBy {
             it.seqTrack.id
@@ -90,9 +92,9 @@ class SequenceController {
     def exportAll(DataTableCommand cmd) {
         SequenceFiltering filtering = SequenceFiltering.fromJSON(params.filtering)
 
-        List<Sequence> sequences = seqTrackService.listSequences(0, -1, cmd.sortOrder, SequenceSortColumn.fromDataTable(cmd.iSortCol_0), filtering)
+        List<Sequence> sequences = seqTrackService.listSequences(0, -1, cmd.sortOrder, SequenceColumn.fromDataTable(cmd.iSortCol_0), filtering)
 
-        def contentBody = sequences.collect { def row ->
+        String contentBody = sequences.collect { Sequence row ->
             [
                     row.projectName,
                     row.mockPid,
@@ -111,91 +113,43 @@ class SequenceController {
                     row.dateCreated?.format("yyyy-MM-dd"),
             ].join(",")
         }.join("\n")
-        def contentHeader = [
-            'Project',
-            'Individual',
-            'Sample Type',
-            'Sequence Type',
-            'Library Layout',
-            'Single Cell',
-            'Sequence Center',
-            'Library Preparation Kit',
-            'Run',
-            'Lane',
-            'Library',
-            'ILSe',
-            'Known issues',
-            'File Exists',
-            'Run Date',
-        ].join(',')
-        def content = "${contentHeader}\n${contentBody}\n"
+        String contentHeader = (SequenceColumn.values() - SequenceColumn.FASTQC)
+                .collect { g.message(code: it.message) }
+                .join(',').replace("<br/>", " ")
+        String content = "${contentHeader}\n${contentBody}\n"
         response.setContentType("application/octet-stream")
         response.setHeader("Content-disposition", "filename=sequence_export.csv")
         response.outputStream << content.toString().bytes
     }
 }
 
-enum SequenceSortColumn {
-    PROJECT("projectName"),
-    INDIVIDUAL("mockPid"),
-    SAMPLE_TYPE("sampleTypeName"),
-    SEQ_TYPE("seqTypeName"),
-    LIBRARY_LAYOUT("libraryLayout"),
-    SINGLE_CELL("singleCell"),
-    SEQ_CENTER("seqCenterName"),
-    LIBRARY_PREPARATION_KIT("libraryPreparationKit"),
-    RUN("name"),
-    LANE("laneId"),
-    LIBRARY("libraryName"),
-    FASTQC("fastqcState"),
-    ILSEID("ilseId"),
-    KNOWN_ISSUES("problem"),
-    FILE_EXISTS("fileExists"),
-    DATE("dateCreated")
+@TupleConstructor
+enum SequenceColumn {
+    PROJECT("sequence.list.headers.project", "projectName"),
+    INDIVIDUAL("sequence.list.headers.individual", "mockPid"),
+    SAMPLE_TYPE("sequence.list.headers.sampleType", "sampleTypeName"),
+    SEQ_TYPE("sequence.list.headers.seqType", "seqTypeName"),
+    LIBRARY_LAYOUT("sequence.list.headers.libLayout", "libraryLayout"),
+    SINGLE_CELL("sequence.list.headers.singleCell", "singleCell"),
+    SEQ_CENTER("sequence.list.headers.seqCenter", "seqCenterName"),
+    LIBRARY_PREPARATION_KIT("sequence.list.headers.libPrepKit", "libraryPreparationKit"),
+    RUN("sequence.list.headers.run", "name"),
+    LANE("sequence.list.headers.lane", "laneId"),
+    LIBRARY("sequence.list.headers.library", "libraryName"),
+    FASTQC("sequence.list.headers.fastqc", "fastqcState"),
+    ILSEID("sequence.list.headers.ilseId", "ilseId"),
+    KNOWN_ISSUES("sequence.list.headers.warning", "problem"),
+    FILE_EXISTS("sequence.list.headers.fileExists", "fileExists"),
+    DATE("sequence.list.headers.date", "dateCreated"),
 
-    private final String columnName
+    final String message
+    final String columnName
 
-    SequenceSortColumn(String column) {
-        this.columnName = column
-    }
-
-    static SequenceSortColumn fromDataTable(int column) {
-        switch (column) {
-            case 0:
-                return SequenceSortColumn.PROJECT
-            case 1:
-                return SequenceSortColumn.INDIVIDUAL
-            case 2:
-                return SequenceSortColumn.SAMPLE_TYPE
-            case 3:
-                return SequenceSortColumn.SEQ_TYPE
-            case 4:
-                return SequenceSortColumn.LIBRARY_LAYOUT
-            case 5:
-                return SequenceSortColumn.SINGLE_CELL
-            case 6:
-                return SequenceSortColumn.SEQ_CENTER
-            case 7:
-                return SequenceSortColumn.LIBRARY_PREPARATION_KIT
-            case 8:
-                return SequenceSortColumn.RUN
-            case 9:
-                return SequenceSortColumn.LANE
-            case 10:
-                return SequenceSortColumn.LIBRARY
-            case 11:
-                return SequenceSortColumn.FASTQC
-            case 12:
-                return SequenceSortColumn.ILSEID
-            case 13:
-                return SequenceSortColumn.KNOWN_ISSUES
-            case 14:
-                return SequenceSortColumn.FILE_EXISTS
-            case 15:
-                return SequenceSortColumn.DATE
-            default:
-                return SequenceSortColumn.PROJECT
+    static SequenceColumn fromDataTable(int column) {
+        if (column >= values().size() || column < 0) {
+            return PROJECT
         }
+        return values()[column]
     }
 }
 
