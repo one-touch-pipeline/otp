@@ -30,6 +30,7 @@ st.insert_size,
 st.has_original_bam,
 st.problem,
 lpk.short_display_name AS library_preparation_kit,
+at.name AS antibody_target,
 r.name,
 r.date_executed,
 r.date_created,
@@ -80,6 +81,9 @@ ON sp.seq_platform_model_label_id = spml.id
 LEFT OUTER JOIN sequencing_kit_label skl
 ON sp.sequencing_kit_label_id = skl.id
 LEFT OUTER JOIN library_preparation_kit lpk
-ON st.library_preparation_kit_id = lpk.id;
+ON st.library_preparation_kit_id = lpk.id
+LEFT OUTER JOIN antibody_target at
+ON st.antibody_target_id = at.id
+;
 
 COMMIT;

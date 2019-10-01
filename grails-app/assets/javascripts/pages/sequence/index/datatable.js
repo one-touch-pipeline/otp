@@ -123,6 +123,7 @@ $.otp.sequence = {
                                 row.seqCenterName,
                                 row.libraryPreparationKit ?
                                     "<span title='" + row.libraryPreparationKit + "'>" + row.libraryPreparationKit + "</span>" : "",
+                                row.antibodyTarget,
                                 $.otp.createLinkMarkup({
                                     controller: 'run',
                                     action: 'show',

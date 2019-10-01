@@ -117,6 +117,9 @@ class Sequence implements Serializable {
     /** fields from {@link LibraryPreparationKit} */
     String libraryPreparationKit
 
+    /** fields from {@link AntibodyTarget} */
+    String antibodyTarget
+
     /** fields from {@link DataFile} */
     boolean fileExists
 
