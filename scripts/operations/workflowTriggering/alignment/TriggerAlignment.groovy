@@ -105,9 +105,6 @@ LogThreadLocal.withThreadLog(System.out, {
 
         /*
         //make all used run segments alignable
-        if (seqTracks) {
-            DataFile.findAllBySeqTrackInList(seqTracks)*.runSegment.unique()*.align = true
-        }
         //trigger alignment
         seqTracks.each {
             ctx.seqTrackService.decideAndPrepareForAlignment(it)
