@@ -25,7 +25,11 @@ import de.dkfz.tbi.otp.analysis.pair.bamfiles.SeqTypeAndInputBamFilesHCC1187Div8
 import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.ngsdata.SeqTypeService
 
-class WgsAceseqWorkflowTests extends AbstractAceseqWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div8 {
+class WgsAceseqWithRoddyBamFileWorkflowTests extends AbstractAceseqWorkflowTests implements SeqTypeAndInputBamFilesHCC1187Div8 {
+
+    void setupSpec() {
+        ignoreExternalBamFileTest = true
+    }
 
     @Override
     SeqType seqTypeToUse() {

@@ -21,6 +21,9 @@
  */
 package de.dkfz.tbi.otp.analysis.pair
 
+import org.junit.Assume
+import spock.lang.Shared
+
 import de.dkfz.tbi.otp.dataprocessing.AnalysisProcessingStates
 import de.dkfz.tbi.otp.dataprocessing.BamFilePairAnalysis
 import de.dkfz.tbi.otp.infrastructure.FileService
@@ -29,12 +32,25 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 
 abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends BamFilePairAnalysis> extends AbstractBamFilePairAnalysisWorkflowTests {
 
+    /**
+     * These two options have been added to speedup testing.
+     * It is not possible to automatically execute multiple test methods in parallel
+     * if they are located in the same class.
+     * Therefore you have to create two classes and only activate one of the two tests in each.
+     **/
+    @Shared
+    boolean ignoreRoddyBamFileTest = false
+
+    @Shared
+    boolean ignoreExternalBamFileTest = false
+
     void setupData() {
         createConfig()
     }
 
     void "testWholeWorkflowWithRoddyBamFile"() {
         given:
+        Assume.assumeFalse(ignoreRoddyBamFileTest)
         SessionUtils.withNewSession {
             setupRoddyBamFile()
             setupData()
@@ -49,6 +65,7 @@ abstract class AbstractRoddyBamFilePairAnalysisWorkflowTests<Instance extends Ba
 
     void "testWholeWorkflowWithExternalBamFile"() {
         given:
+        Assume.assumeFalse(ignoreExternalBamFileTest)
         SessionUtils.withNewSession {
             setupExternalBamFile()
             setupData()
