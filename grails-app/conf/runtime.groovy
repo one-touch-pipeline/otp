@@ -207,3 +207,9 @@ environments {
         }
     }
 }
+
+// mail config
+grails.mail.host = otpProperties.getProperty(OtpProperty.CONFIG_EMAIL_SERVER.key) ?: OtpProperty.CONFIG_EMAIL_SERVER.defaultValue
+grails.mail.port = (otpProperties.getProperty(OtpProperty.CONFIG_EMAIL_PORT.key) ?: OtpProperty.CONFIG_EMAIL_PORT.defaultValue) as int
+grails.mail.username = otpProperties.getProperty(OtpProperty.CONFIG_EMAIL_USERNAME.key) ?: OtpProperty.CONFIG_EMAIL_USERNAME.defaultValue
+grails.mail.password = otpProperties.getProperty(OtpProperty.CONFIG_EMAIL_PASSWORD.key) ?: OtpProperty.CONFIG_EMAIL_PASSWORD.defaultValue
