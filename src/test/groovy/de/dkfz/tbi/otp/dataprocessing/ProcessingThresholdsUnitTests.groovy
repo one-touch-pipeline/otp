@@ -35,7 +35,7 @@ import de.dkfz.tbi.otp.ngsdata.*
         Project,
         Realm,
         SeqType,
-        SampleType
+        SampleType,
 ])
 class ProcessingThresholdsUnitTests {
 

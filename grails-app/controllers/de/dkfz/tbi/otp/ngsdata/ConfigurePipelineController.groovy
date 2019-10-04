@@ -274,7 +274,7 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
                     deprecateConfigurations: cmd.deprecateConfigurations,
                     sampleTypes            : cmd.sampleTypeIds.collect {
                         return CollectionUtils.exactlyOneElement(SampleType.findAllById(it))
-                    }
+                    },
             ])
             projectService.configureRnaAlignmentReferenceGenome(rnaConfiguration)
             result << [message: 'The reference genome settings were saved successfully']

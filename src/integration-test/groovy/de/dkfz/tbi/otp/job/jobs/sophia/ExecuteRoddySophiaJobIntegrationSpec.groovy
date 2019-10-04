@@ -140,7 +140,7 @@ class ExecuteRoddySophiaJobIntegrationSpec extends Specification {
                 },
                 sophiaService             : Mock(SophiaService) {
                     1 * validateInputBamFiles(_) >> { }
-                }
+                },
         ])
         SophiaInstance sophiaInstance = DomainFactory.createSophiaInstanceWithRoddyBamFiles()
 

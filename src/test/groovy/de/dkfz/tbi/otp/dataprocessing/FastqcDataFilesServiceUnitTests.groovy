@@ -48,7 +48,7 @@ import static org.junit.Assert.assertEquals
         SeqPlatformModelLabel,
         SeqTrack,
         SeqType,
-        SoftwareTool
+        SoftwareTool,
 ])
 @TestFor(FastqcDataFilesService)
 class FastqcDataFilesServiceUnitTests {

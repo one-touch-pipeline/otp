@@ -352,7 +352,7 @@ class ProcessesController {
         return [
                 step: step,
                 hasLog: processService.processingStepLogExists(step),
-                clusterJobs: ClusterJob.findAllByProcessingStep(step).sort { it.clusterJobId }
+                clusterJobs: ClusterJob.findAllByProcessingStep(step).sort { it.clusterJobId },
         ]
     }
 
@@ -461,7 +461,7 @@ class ProcessesController {
                     controller: GrailsNameUtils.getShortName(parameter.className),
                     action: "show",
                     id: parameter.value,
-                    text: parameter.toObject().toString()
+                    text: parameter.toObject().toString(),
                 ]
             } else {
                 // not a class, just use the value

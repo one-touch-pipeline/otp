@@ -315,7 +315,7 @@ class DomainFactory {
         return createDomainObject(Process, [
                 started         : new Date(),
                 startJobClass   : "startJobClass",
-                jobExecutionPlan: { createJobExecutionPlan() }
+                jobExecutionPlan: { createJobExecutionPlan() },
         ], properties)
     }
 
@@ -424,7 +424,7 @@ class DomainFactory {
                     (1..3).collect {
                         createJobDefinition()
                     }
-                }
+                },
         ], properties)
     }
 

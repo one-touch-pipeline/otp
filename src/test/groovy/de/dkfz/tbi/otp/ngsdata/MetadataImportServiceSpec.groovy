@@ -592,7 +592,7 @@ ${ILSE_NO}                      -             1234          1234          -     
         }
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 lines.collect { it*.replaceFirst(/^-$/, '').join('\t') }.join('\n'),
-                [metadataFile: file.toPath(), directoryStructure: directoryStructure]
+                [metadataFile: file.toPath(), directoryStructure: directoryStructure,]
         )
 
         when:

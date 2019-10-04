@@ -45,7 +45,7 @@ class BamMetadataImportController {
                 cmd                   : cmd,
                 furtherFiles          : cmd.furtherFilePaths ?: [""],
                 context               : bamMetadataValidationContext,
-                implementedValidations: bamMetadataImportService.getImplementedValidations()
+                implementedValidations: bamMetadataImportService.getImplementedValidations(),
         ]
     }
 

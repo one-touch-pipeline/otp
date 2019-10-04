@@ -81,7 +81,7 @@ trait ConfigurePipelineHelper {
 
     Map getValues(Project project, SeqType seqType, Pipeline pipeline) {
         List<RoddyWorkflowConfig> latestConfig = RoddyWorkflowConfig.findAllByProjectAndSeqTypeAndPipelineAndIndividualIsNull(
-                project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1]
+                project, seqType, pipeline, [sort: 'id', order: 'desc', max: 1,]
         )
         String configVersion = workflowConfigService.getNextConfigVersion(CollectionUtils.atMostOneElement(latestConfig)?.configVersion)
 

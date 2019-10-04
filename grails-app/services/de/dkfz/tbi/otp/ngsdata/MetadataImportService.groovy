@@ -436,7 +436,7 @@ class MetadataImportService {
 
             SeqType seqType = seqTypeService.findByNameOrImportAlias(
                     seqTypeMaybeTagmentationName(seqTypeRaw, tagmentationRaw),
-                    [libraryLayout: libLayout, singleCell: isSingleCell]
+                    [libraryLayout: libLayout, singleCell: isSingleCell],
             )
             String pipelineVersionString = uniqueColumnValue(rows, PIPELINE_VERSION) ?: 'unknown'
             String sampleIdString = uniqueColumnValue(rows, SAMPLE_ID)

@@ -108,7 +108,7 @@ class BedFileSpec extends Specification implements DataTest {
         where:
         targetSize << [
                 0,
-                -1
+                -1,
         ]
     }
 }

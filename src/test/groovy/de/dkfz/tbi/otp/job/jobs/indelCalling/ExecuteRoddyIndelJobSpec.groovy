@@ -278,7 +278,7 @@ class ExecuteRoddyIndelJobSpec extends Specification implements DataTest {
                 },
                 indelCallingService       : Mock(IndelCallingService) {
                     1 * validateInputBamFiles(_) >> { }
-                }
+                },
         ])
         IndelCallingInstance indelCallingInstance = DomainFactory.createIndelCallingInstanceWithRoddyBamFiles()
 

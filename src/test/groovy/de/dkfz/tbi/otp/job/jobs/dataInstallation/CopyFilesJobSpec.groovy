@@ -239,8 +239,10 @@ chmod 440 .* .*
         CreateFileHelper.createFile(new File("${dataFile.initialDirectory}/${dataFile.fileName}"))
 
         DomainFactory.createProcessParameter([
-                process: step.process, value: seqTrack.id, className: SeqTrack.class.name])
-
+                process: step.process,
+                value: seqTrack.id,
+                className: SeqTrack.class.name,
+        ])
 
         return seqTrack
     }

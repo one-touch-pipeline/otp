@@ -82,7 +82,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
         MergingWorkPackage workPackage2 = DomainFactory.createMergingWorkPackage([
                 seqType       : workPackage.seqType,
                 sample        : sameSample ? workPackage.sample : DomainFactory.createSample(),
-                antibodyTarget: sameAntibody ? workPackage.antibodyTarget : DomainFactory.createAntibodyTarget()
+                antibodyTarget: sameAntibody ? workPackage.antibodyTarget : DomainFactory.createAntibodyTarget(),
         ], false)
         workPackage2.validate()
 

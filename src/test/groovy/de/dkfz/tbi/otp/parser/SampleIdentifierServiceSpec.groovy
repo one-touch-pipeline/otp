@@ -528,7 +528,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
                 pid                       : sampleIdentifier.individual.pid,
                 sampleTypeDbName          : sampleIdentifier.sampleType.name,
                 fullSampleName            : sampleIdentifier.name,
-                useSpecificReferenceGenome: null
+                useSpecificReferenceGenome: null,
         ])
 
         when:
@@ -547,7 +547,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
                 pid                       : sampleIdentifier.individual.pid,
                 sampleTypeDbName          : sampleIdentifier.sampleType.name,
                 fullSampleName            : sampleIdentifier.name,
-                useSpecificReferenceGenome: null
+                useSpecificReferenceGenome: null,
         ] + [
                 (property): value
         ])

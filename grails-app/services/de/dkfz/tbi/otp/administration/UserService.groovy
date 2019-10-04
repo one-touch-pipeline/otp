@@ -229,7 +229,7 @@ No user exists yet, create user ${currentUser} with admin rights.
                 [Role.ROLE_ADMIN].each {
                     new UserRole([
                             user: user,
-                            role: CollectionUtils.exactlyOneElement(Role.findAllByAuthority(it))
+                            role: CollectionUtils.exactlyOneElement(Role.findAllByAuthority(it)),
                     ]).save(flush: true)
                 }
             }

@@ -38,7 +38,7 @@ class ClusterJobDetailController {
         return [
                 'job'       : clusterJob,
                 'individual': individual,
-                'NA'        : ClusterJob.NOT_AVAILABLE
+                'NA'        : ClusterJob.NOT_AVAILABLE,
         ]
     }
 
@@ -50,8 +50,8 @@ class ClusterJobDetailController {
         dataToRender.data = ["queue", "process"].collectEntries {
             return [it, [
                     percentage: data."${it}".percentage,
-                    time:       applyPeriodFormat(data."${it}".ms as Long)
-                ]
+                    time:       applyPeriodFormat(data."${it}".ms as Long),
+                ],
             ]
         }
 

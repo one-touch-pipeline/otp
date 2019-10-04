@@ -186,7 +186,7 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
                         and mergingWorkPackage.pipeline.name = :pipeLineName
                 """.toString(), [
                 seqTracks                                    : seqTracks,
-                pipeLineName                                 : getPipeLineName()
+                pipeLineName                                 : getPipeLineName(),
         ])
 
         List seqTracksWithoutMergingWorkpackage = seqTracks - list.collect {

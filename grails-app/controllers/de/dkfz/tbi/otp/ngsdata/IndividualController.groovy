@@ -70,7 +70,7 @@ class IndividualController {
     def list() {
         Map retValue  = [
             projects: projectService.getAllProjects(),
-            individualTypes: Individual.Type.values()
+            individualTypes: Individual.Type.values(),
         ]
         return retValue
     }
@@ -90,7 +90,7 @@ class IndividualController {
                 mockFullName: individual.mockFullName,
                 mockPid: individual.mockPid,
                 project: individual.project.toString(),
-                type: individual.type.toString()
+                type: individual.type.toString(),
             ]
         }
         render dataToRender as JSON

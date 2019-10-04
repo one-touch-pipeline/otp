@@ -126,7 +126,7 @@ class Project implements Commentable, Entity {
 
     static hasMany = [
             projectInfos: ProjectInfo,
-            keywords: Keyword
+            keywords: Keyword,
     ]
 
     static belongsTo = [

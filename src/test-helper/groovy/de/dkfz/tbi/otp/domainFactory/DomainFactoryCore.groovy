@@ -42,7 +42,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 realm                         : { DomainFactory.createRealm() },
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling           : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
-                unixGroup                     : "unixGroup_${nextId}"
+                unixGroup                     : "unixGroup_${nextId}",
         ], properties, saveAndValidate)
     }
 

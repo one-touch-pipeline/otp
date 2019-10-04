@@ -45,7 +45,7 @@ import static org.junit.Assert.*
         Realm,
         ReferenceGenome,
         ReferenceGenomeEntry,
-        StatSizeFileName
+        StatSizeFileName,
 ])
 class ReferenceGenomeServiceUnitTests {
 

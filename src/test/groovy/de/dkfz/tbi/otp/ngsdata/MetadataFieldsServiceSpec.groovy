@@ -192,7 +192,7 @@ abstract class MetadataFieldsServiceSpec<T> extends Specification {
     Map<String, Long> createObjectsForImportAliasTests() {
         return [
             DomainFactory.<T> createDomainWithImportAlias(service.clazz, [name: NAME] + properties),
-            DomainFactory.<T> createDomainWithImportAlias(service.clazz, [name: OTHER_NAME, importAlias: [IMPORT_ALIAS]] + otherProperties)
+            DomainFactory.<T> createDomainWithImportAlias(service.clazz, [name: OTHER_NAME, importAlias: [IMPORT_ALIAS]] + otherProperties),
         ].collectEntries {
             [(it.name as String): it.id as Long]
         }

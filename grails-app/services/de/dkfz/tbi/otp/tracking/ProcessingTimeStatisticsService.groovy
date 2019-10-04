@@ -71,7 +71,7 @@ ${search ? """
 
         Map queryOptions = [
             dateFrom: new Timestamp(dateFrom.toDateTimeAtStartOfDay().getMillis()),
-            dateTo: new Timestamp(dateTo.plusDays(1).toDateTimeAtStartOfDay().getMillis())
+            dateTo: new Timestamp(dateTo.plusDays(1).toDateTimeAtStartOfDay().getMillis()),
         ]
 
         if (search) {

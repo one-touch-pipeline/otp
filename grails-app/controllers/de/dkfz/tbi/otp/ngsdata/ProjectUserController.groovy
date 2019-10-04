@@ -94,7 +94,7 @@ class ProjectUserController implements CheckAndCall {
                 hasErrors                  : params.hasErrors,
                 message                    : params.message,
                 emails                     : userProjectRoleService.getEmailsForNotification(project),
-                currentUser                : springSecurityService.getCurrentUser() as User
+                currentUser                : springSecurityService.getCurrentUser() as User,
         ]
     }
 
@@ -117,7 +117,7 @@ class ProjectUserController implements CheckAndCall {
                                 accessToFiles         : cmd.accessToFiles,
                                 manageUsers           : cmd.manageUsers,
                                 manageUsersAndDelegate: cmd.manageUsersAndDelegate,
-                                receivesNotifications : cmd.receivesNotifications
+                                receivesNotifications : cmd.receivesNotifications,
                             ]
                     )
                 } else {

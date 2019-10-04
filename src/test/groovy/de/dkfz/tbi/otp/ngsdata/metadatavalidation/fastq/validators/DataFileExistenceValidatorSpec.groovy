@@ -85,7 +85,7 @@ class DataFileExistenceValidatorSpec extends Specification implements DataTest {
                         "not_found3 A\n" +
                         "not_found3 B\n" +
                         "not_found3 B\n",
-                [directoryStructure: directoryStructure, directoryStructureDescription: 'test directory structure']
+                [directoryStructure: directoryStructure, directoryStructureDescription: 'test directory structure',]
         )
         Collection<Problem> expectedProblems = [
                 new Problem(Collections.emptySet(),

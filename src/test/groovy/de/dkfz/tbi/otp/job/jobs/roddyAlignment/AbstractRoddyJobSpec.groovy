@@ -157,7 +157,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
         assert firstRoddyExecDir.mkdirs()
         CreateJobStateLogFileHelper.createJobStateLogFile(firstRoddyExecDir, [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: identifierA.clusterJobId, statusCode: STATUS_CODE_STARTED]),
-                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: identifierA.clusterJobId, statusCode: STATUS_CODE_FINISHED, timeStamp: 10L])
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: identifierA.clusterJobId, statusCode: STATUS_CODE_FINISHED, timeStamp: 10L]),
         ])
 
         // create jobStateLogFile for the second roddy call
@@ -170,7 +170,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: identifierB.clusterJobId, statusCode: STATUS_CODE_STARTED]),
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: identifierB.clusterJobId, statusCode: STATUS_CODE_FINISHED, timeStamp: 10L]),
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: identifierB.clusterJobId, statusCode: STATUS_CODE_FAILED, timeStamp: 100L]),
-                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: identifierC.clusterJobId, statusCode: STATUS_CODE_STARTED])
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: identifierC.clusterJobId, statusCode: STATUS_CODE_STARTED]),
         ])
         roddyBamFile.roddyExecutionDirectoryNames.add(execDirName1)
         roddyBamFile.roddyExecutionDirectoryNames.add(execDirName2)
@@ -215,7 +215,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
         given:
         JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tmpDir.root, [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, timeStamp: 0L]),
-                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, timeStamp: 10L, statusCode: STATUS_CODE_FAILED])
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, timeStamp: 10L, statusCode: STATUS_CODE_FAILED]),
         ])
 
         expect:
@@ -228,7 +228,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
         JobStateLogFile jobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(tmpDir.root, [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FAILED]),
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FAILED, timeStamp: 5L]),
-                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, timeStamp: 10L])
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, timeStamp: 10L]),
         ])
 
         expect:

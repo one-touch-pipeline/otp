@@ -244,7 +244,7 @@ class JobStateLogFileUnitTests {
         JobStateLogFile JobStateLogFile = CreateJobStateLogFileHelper.createJobStateLogFile(
                 tmpDir.root, [
                 CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: "10"]),
-                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FINISHED, timeStamp: 10L])
+                CreateJobStateLogFileHelper.createJobStateLogFileEntry([clusterJobId: clusterJobIdentifier.clusterJobId, statusCode: STATUS_CODE_FINISHED, timeStamp: 10L]),
         ]
         )
 

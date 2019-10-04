@@ -68,7 +68,7 @@ class TimestampHelper {
         return [
                 shortest: getInShortestTimeFormat(date),
                 full    : new SimpleDateFormat(TIME_WEEKDAY_DATE).format(date),
-                value   : date.getTime()
+                value   : date.getTime(),
         ]
     }
 }

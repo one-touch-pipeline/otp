@@ -379,7 +379,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     TrailingComma {
-        priority = HIGH
+        priority = CRITICAL
     }
     VariableTypeRequired {
         priority = MIDDLE
