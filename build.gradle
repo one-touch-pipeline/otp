@@ -102,7 +102,7 @@ sourceSets {
 task workflowTest(type: Test) {
     testClassesDirs = sourceSets.workflowTest.output.classesDirs
     classpath = sourceSets.workflowTest.runtimeClasspath
-    reports.html.enabled = false
+    reports.html.enabled = true
     testLogging.showStandardStreams = true
     group = LifecycleBasePlugin.VERIFICATION_GROUP
     shouldRunAfter "integrationTest"
