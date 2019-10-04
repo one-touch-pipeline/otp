@@ -576,7 +576,7 @@ All the Rules that will be used for OTP
         priority = LOW
     }
     FileEndsWithoutNewline {
-        priority = MIDDLE
+        priority = CRITICAL
     }
     Indentation {
         priority = MIDDLE
