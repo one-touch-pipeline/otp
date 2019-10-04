@@ -24,15 +24,23 @@ package de.dkfz.tbi.otp.utils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
+import org.springframework.context.NoSuchMessageException
 import spock.lang.Specification
 
 @Rollback
 @Integration
 class MessageSourceServiceIntegrationSpec extends Specification {
 
+    MessageSourceService messageSourceService
+
+    void setupMessageSourceService() {
+        messageSourceService = new MessageSourceService()
+        messageSourceService.messageSource = Mock(PluginAwareResourceBundleMessageSource)
+    }
+
     void "createMessage, when template is null, throw assert"() {
         given:
-        MessageSourceService messageSourceService = new MessageSourceService()
+        setupMessageSourceService()
 
         when:
         messageSourceService.createMessage(null, [:])
@@ -42,11 +50,23 @@ class MessageSourceServiceIntegrationSpec extends Specification {
         e.message.contains('assert templateName')
     }
 
+    void "createMessage, template does not exist, throws exception"() {
+        given:
+        setupMessageSourceService()
+
+        when:
+        messageSourceService.createMessage("non.existent.template")
+
+        then:
+        thrown(NoSuchMessageException)
+    }
+
     @SuppressWarnings("GStringExpressionWithinString")
     void "createMessage, when template exist, return notification text"() {
         given:
+        setupMessageSourceService()
         String templateName = "test.message.name"
-        MessageSourceService messageSourceService = new MessageSourceService(
+        messageSourceService = new MessageSourceService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
                     _ * getMessageInternal(templateName, [], _) >> 'static text ${arg1} ${arg2} more static text'
                 }

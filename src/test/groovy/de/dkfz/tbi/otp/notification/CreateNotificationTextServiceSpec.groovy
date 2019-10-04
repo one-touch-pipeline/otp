@@ -731,6 +731,7 @@ pancan alignment infos
                     (singleCell ? 0 : 1) * getMessageInternal("notification.template.alignment.processing.roddy", [], _) >> ""
                     (singleCell ? 1 : 0) * getMessageInternal("notification.template.alignment.processing.singleCell", [], _) >> ""
                     (singleCell ? 0 : 1) * getMessageInternal("notification.template.references.alignment.pancan", [], _) >> ""
+                    (singleCell ? 1 : 0) * getMessageInternal("notification.template.references.alignment.cellRanger", [], _) >> ""
                 }
         )
 

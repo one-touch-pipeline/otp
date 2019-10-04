@@ -25,7 +25,6 @@ import grails.gorm.transactions.Transactional
 import groovy.text.SimpleTemplateEngine
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.NoSuchMessageException
 import org.springframework.context.i18n.LocaleContextHolder
 
 @Transactional
@@ -36,13 +35,7 @@ class MessageSourceService {
 
     String createMessage(String templateName, Map properties = [:]) {
         assert templateName
-        String template
-        try {
-            template = messageSource.getMessage(templateName, [].toArray(), LocaleContextHolder.locale)
-        } catch (NoSuchMessageException e) {
-            log.error("Could not find message template '${templateName}'", e)
-            return ''
-        }
+        String template = messageSource.getMessage(templateName, [].toArray(), LocaleContextHolder.locale)
         return new SimpleTemplateEngine().createTemplate(template).make(properties).toString()
     }
 }

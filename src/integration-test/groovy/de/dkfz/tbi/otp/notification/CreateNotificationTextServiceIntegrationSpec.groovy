@@ -52,7 +52,6 @@ class CreateNotificationTextServiceIntegrationSpec extends Specification {
 base notification
 stepInformation:${stepInformation}
 seqCenterComment:${seqCenterComment}
-addition:${addition}
 faq:${faq}
 '''
 
@@ -115,7 +114,6 @@ faq:${faq}
 
         createNotificationTextService.messageSourceService = new MessageSourceService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
-                    1 * getMessageInternal("notification.template.alignment.addition", [], _) >> ""
                     1 * getMessageInternal("notification.template.base.faq", [], _) >> "FAQs"
                     _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
             }
@@ -143,7 +141,6 @@ faq:${faq}
 
         createNotificationTextService.messageSourceService = new MessageSourceService(
                 messageSource: Mock(PluginAwareResourceBundleMessageSource) {
-                    1 * getMessageInternal("notification.template.alignment.addition", [], _) >> ""
                     0 * getMessageInternal("notification.template.base.faq", [], _) >> "FAQs"
                     _ * getMessageInternal("notification.template.base", [], _) >> NOTIFICATION_MESSAGE
             }
@@ -225,7 +222,6 @@ ${otrsTicketSeqCenterComment}${otrsTicketSeqCenterComment ? "\n" : ""}${generalS
 base notification
 stepInformation:${processingStep.toString()}
 seqCenterComment:${expectedSeqCenterComment}
-addition:
 faq:
 """
 
@@ -317,7 +313,6 @@ ${otrsTicketSeqCenterComment}
 base notification
 stepInformation:${processingStep.toString()}
 seqCenterComment:${expectedSeqCenterComment}
-addition:
 faq:
 """
 

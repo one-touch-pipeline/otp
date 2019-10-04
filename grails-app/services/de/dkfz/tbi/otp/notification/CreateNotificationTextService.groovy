@@ -92,7 +92,6 @@ class CreateNotificationTextService {
         return messageSourceService.createMessage('notification.template.base', [
                 stepInformation      : stepInformation,
                 seqCenterComment     : seqCenterComment,
-                addition             : messageSourceService.createMessage("notification.template.${processingStep.name().toLowerCase()}.addition"),
                 emailSenderSalutation: processingOptionService.findOptionAsString(OptionName.EMAIL_SENDER_SALUTATION),
                 faq                  : faq,
         ])
