@@ -808,7 +808,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     ImportFromSamePackage {
-        priority = HIGH
+        priority = CRITICAL
     }
     ImportFromSunPackages {
         priority = MIDDLE

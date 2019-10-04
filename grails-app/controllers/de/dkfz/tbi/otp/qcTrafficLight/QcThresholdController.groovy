@@ -25,7 +25,6 @@ import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.qcTrafficLight.UpdateCommand
 
 class QcThresholdController {
     QcThresholdService qcThresholdService
