@@ -215,6 +215,13 @@ class DataFile implements Commentable, Entity {
         return meanSequenceLength * nReads
     }
 
+    Long getNBasePairsOrNull() {
+        if (nReads == null || sequenceLength == null) {
+            return null
+        }
+        return getNBasePairs()
+    }
+
     int getMeanSequenceLength() {
         int length
         if (!this.sequenceLength) {

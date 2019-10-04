@@ -31,7 +31,7 @@
     <div class="body">
         <h1><g:message code="seqTrack.seqTrackSet.header"/></h1>
         <h2><g:message code="seqTrack.seqTrackSet.selectionCriteria.header"/></h2>
-        <table>
+        <table class="seq-track-set-tables">
             <tbody>
                 <tr>
                     <td><g:message code="seqTrack.seqTrackSet.selectionCriteria.individual"/></td>
@@ -49,7 +49,7 @@
         </table>
 
         <h2><g:message code="seqTrack.seqTrackSet.setInfo.header"/></h2>
-        <table>
+        <table class="seq-track-set-tables">
             <tbody>
                 <tr>
                     <td><g:message code="seqTrack.seqTrackSet.setInfo.seqPlatform"/></td>
@@ -66,7 +66,7 @@
                 </tr>
                 <tr>
                     <td><g:message code="seqTrack.seqTrackSet.setInfo.totalNumberOfBases"/></td>
-                    <td>${seqTrackSet.numberOfBases ? "${UnitHelper.asNucleobases(seqTrackSet.numberOfBases, true)} (${UnitHelper.asNucleobases(seqTrackSet.numberOfBases)})" : "N/A"}</td>
+                    <td>${UnitHelper.asNucleobases(seqTrackSet.numberOfBases, true)} (${UnitHelper.asNucleobases(seqTrackSet.numberOfBases)})</td>
                 </tr>
             </tbody>
         </table>
@@ -107,7 +107,7 @@
                         <div class="grid-element lane fileSize" title="${UnitHelper.asBytes(totalFileSize)}">
                             <strong>${UnitHelper.asBytes(totalFileSize, true)}</strong>
                         </div>
-                        <div class="grid-element lane reads" title="${UnitHelper.asReads(totalNReads as long)}">
+                        <div class="grid-element lane reads" title="${UnitHelper.asReads(totalNReads)}">
                             <strong>${UnitHelper.asReads(totalNReads, true)}</strong>
                         </div>
                         <div class="grid-element lane insertSize">
@@ -118,7 +118,7 @@
                             <g:set var="row" value="${i+3}"/>
                             <g:set var="withdrawn" value="${dataFile.fileWithdrawn ? 'withdrawn' : ''}"/>
                             <g:set var="exists" value="${dataFile.fileExists ? '' : 'nonexistent'}"/>
-                            <g:set var="nBasePairs" value="${dataFile.getNBasePairs()}"/>
+                            <g:set var="nBasePairs" value="${dataFile.getNBasePairsOrNull()}"/>
                             <g:set var="fileType" value="${dataFile.indexFile ? "index" : "fastq"}"/>
                             <div class="grid-element identifier dataFile color-left-border ${fileType} ${withdrawn} ${exists} trim-text-with-ellipsis"
                                  style="grid-row: ${row};"
@@ -132,7 +132,7 @@
                                 ${UnitHelper.asBytes(dataFile.fileSize, true)}
                             </div>
                             <div class="grid-element dataFile reads" style="grid-row: ${row}" title="${UnitHelper.asReads(dataFile.nReads)}">
-                                ${UnitHelper.asReads(dataFile.nReads, true)} (${dataFile.sequenceLength})
+                                ${UnitHelper.asReads(dataFile.nReads, true)} (${dataFile.sequenceLength ?: "N/A"})
                             </div>
                         </g:each>
                     </div>
