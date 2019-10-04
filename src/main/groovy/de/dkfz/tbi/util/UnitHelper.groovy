@@ -34,6 +34,8 @@ class UnitHelper {
     private static final List<String> IBI_BYTE_UNITS = ["Ki", "Mi", "Gi", "Ti", "Pi", "Ei"]
     private static final List<String> SI_UNITS = ["k", "M", "G", "T", "P", "E"]
 
+    private static final String NULL_VALUE = "N/A"
+
     /**
      * Makes the given number human readable.
      *
@@ -55,21 +57,30 @@ class UnitHelper {
         return String.format(LOCALE, "%.2f %s%s", number / Math.pow(unitStep, exp), pre, unitSymbol)
     }
 
-    static String asBytes(long numberOfBytes, boolean humanReadable = false) {
+    static String asBytes(Long numberOfBytes, boolean humanReadable = false, boolean nullable = true) {
+        if (numberOfBytes == null && nullable) {
+            return NULL_VALUE
+        }
         if (!humanReadable) {
             return NUMBER_INSTANCE.format(numberOfBytes) + " B"
         }
         return makeNumberHumanReadable(numberOfBytes, "B", IBI_BYTE_UNITS, 1024)
     }
 
-    static String asNucleobases(long numberOfBases, boolean humanReadable = false) {
+    static String asNucleobases(Long numberOfBases, boolean humanReadable = false, boolean nullable = true) {
+        if (numberOfBases == null && nullable) {
+            return NULL_VALUE
+        }
         if (!humanReadable) {
             return NUMBER_INSTANCE.format(numberOfBases) + " Bases"
         }
         return makeNumberHumanReadable(numberOfBases, "Bases", SI_UNITS, 1000)
     }
 
-    static String asReads(long numberOfReads, boolean humanReadable = false) {
+    static String asReads(Long numberOfReads, boolean humanReadable = false, boolean nullable = true) {
+        if (numberOfReads == null && nullable) {
+            return NULL_VALUE
+        }
         if (!humanReadable) {
             return NUMBER_INSTANCE.format(numberOfReads) + " Reads"
         }
