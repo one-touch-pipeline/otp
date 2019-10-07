@@ -91,8 +91,8 @@ $.otp.sequence = {
                                     fastQC += $.otp.createLinkMarkup({
                                         controller: 'fastqcResults',
                                         action: 'show',
-                                        id: row.fastQCFiles[j].id,
-                                        text: "R" + (j + 1)
+                                        id: row.fastQCFiles[j].fastqId,
+                                        text: row.fastQCFiles[j].readName
                                     });
                                     fastQC += " ";
                                 }
