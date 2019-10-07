@@ -85,6 +85,7 @@ class ProjectService {
     RoddyWorkflowConfigService roddyWorkflowConfigService
     ProcessingOptionService processingOptionService
     SpringSecurityService springSecurityService
+    UserProjectRoleService userProjectRoleService
 
     FileService fileService
 
@@ -186,6 +187,8 @@ class ProjectService {
                 organisationUnit: projectParams.organisationUnit,
         ])
         assert project.save(flush: true)
+
+        userProjectRoleService.handleSharedUnixGroupOnProjectCreation(project, projectParams.unixGroup)
 
         createProjectDirectoryIfNeeded(project)
 

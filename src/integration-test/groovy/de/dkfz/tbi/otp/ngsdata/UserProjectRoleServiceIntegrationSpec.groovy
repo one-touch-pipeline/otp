@@ -25,6 +25,7 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
+import grails.validation.ValidationException
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification
@@ -35,9 +36,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.HelperUtils
-import de.dkfz.tbi.otp.utils.MailHelperService
-import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.utils.*
 
 @Rollback
 @Integration
@@ -1002,6 +1001,82 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         then:
         projectAuthorities == expectedUsers
     }
+
+    void "handleSharedUnixGroupOnProjectCreation, project with shared unix group"() {
+        given:
+        setupData()
+        Project projectA = createProject()
+        DomainFactory.createUserProjectRole(project: projectA)
+        Project projectB = createProject(unixGroup: projectA.unixGroup)
+        List<UserProjectRole> result
+
+        when:
+        result = userProjectRoleService.handleSharedUnixGroupOnProjectCreation(projectB, projectB.unixGroup)
+
+        then:
+        result == UserProjectRole.findAllByProject(projectB)
+    }
+
+    void "handleSharedUnixGroupOnProjectCreation, unix group is not shared"() {
+        given:
+        setupData()
+        Project project = createProject()
+        List<UserProjectRole> result
+
+        when:
+        result = userProjectRoleService.handleSharedUnixGroupOnProjectCreation(project, project.unixGroup)
+
+        then:
+        result == []
+    }
+
+    void "copyUserProjectRolesOfProjectToProject, properly creates copies of the UserProjectRoles"() {
+        given:
+        setupData()
+        Project projectA = createProject()
+        List<UserProjectRole> userProjectRolesA = [
+            DomainFactory.createUserProjectRole(project: projectA),
+            DomainFactory.createUserProjectRole(project: projectA),
+            DomainFactory.createUserProjectRole(project: projectA),
+        ]
+        Project projectB = createProject()
+        List<UserProjectRole> userProjectRolesB = []
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRolesB = userProjectRoleService.copyUserProjectRolesOfProjectToProject(projectA, projectB)
+        }
+
+        then:
+        userProjectRolesB.size() == 3
+        userProjectRolesB.every { UserProjectRole itB ->
+            UserProjectRole equalInA = userProjectRolesA.find { UserProjectRole itA ->
+                itA.user.username == itB.user.username
+            }
+            return itB.equalByAccessRelatedProperties(equalInA)
+        }
+    }
+
+    void "copyUserProjectRolesOfProjectToProject, exception and rollback when UserProjectRole for User already exists"() {
+        given:
+        setupData()
+        User user = DomainFactory.createUser()
+        Project projectA = createProject()
+        DomainFactory.createUserProjectRole(project: projectA, user: user)
+        DomainFactory.createUserProjectRole(project: projectA)
+        Project projectB = createProject()
+        DomainFactory.createUserProjectRole(project: projectB, user: user)
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            userProjectRoleService.copyUserProjectRolesOfProjectToProject(projectA, projectB)
+        }
+
+        then:
+        thrown(ValidationException)
+        UserProjectRole.findAllByProject(projectB).size() == 1
+    }
+
 
     MessageSourceService getMessageSourceServiceWithMockedMessageSource() {
         return new MessageSourceService(

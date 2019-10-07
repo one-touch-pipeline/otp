@@ -35,9 +35,7 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.*
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.MailHelperService
-import de.dkfz.tbi.otp.utils.MessageSourceService
+import de.dkfz.tbi.otp.utils.*
 
 import static de.dkfz.tbi.otp.security.DicomAuditUtils.getRealUserName
 
@@ -373,6 +371,31 @@ class UserProjectRoleService {
             assert upr.save(flush: true)
         }
         return userProjectRole
+    }
+
+    List<UserProjectRole> handleSharedUnixGroupOnProjectCreation(Project project, String unixGroup) {
+        Project donorProject = (Project.findAllByUnixGroup(unixGroup) - [project]).find()
+        if (!donorProject) {
+            return []
+        }
+        return copyUserProjectRolesOfProjectToProject(donorProject, project)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<UserProjectRole> copyUserProjectRolesOfProjectToProject(Project projectFrom, Project projectTo) {
+        return UserProjectRole.findAllByProject(projectFrom).collect {
+            return new UserProjectRole(
+                    project               : projectTo,
+                    user                  : it.user,
+                    projectRole           : it.projectRole,
+                    enabled               : it.enabled,
+                    accessToOtp           : it.accessToOtp,
+                    accessToFiles         : it.accessToFiles,
+                    manageUsers           : it.manageUsers,
+                    manageUsersAndDelegate: it.manageUsersAndDelegate,
+                    receivesNotifications : it.receivesNotifications,
+            ).save(flush: true)
+        }
     }
 
     String getEmailsForNotification(Project project) {
