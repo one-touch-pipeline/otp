@@ -330,7 +330,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
     // Example: run140801_SN751_0197_AC4HUVACXX_D2059_AGTCAA_L001
     Map<SeqTrack, File> getSingleLaneQADirectoriesHelper(File baseDirectory) {
-        Map<SeqTrack, File> directoriesPerSeqTrack = new HashMap<SeqTrack, File>()
+        Map<SeqTrack, File> directoriesPerSeqTrack = [:]
         seqTracks.each { SeqTrack seqTrack ->
             String readGroupName = seqTrack.getReadGroupName()
             directoriesPerSeqTrack.put(seqTrack, new File(baseDirectory, readGroupName))
