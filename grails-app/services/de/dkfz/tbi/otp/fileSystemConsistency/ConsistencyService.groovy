@@ -48,7 +48,7 @@ class ConsistencyService {
             return Status.CONSISTENT
         }
         // hack to not evaluate consistency at these files. (will be considered as consistent)
-        if (path.contains("_export.txt.gz")||
+        if (path.contains("_export.txt.gz") ||
             path.contains("_export.txt.tar.bz2")) {
             return Status.CONSISTENT
         }

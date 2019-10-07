@@ -381,7 +381,7 @@ class ProcessService {
      */
     String getProcessingErrorStackTrace(long id) {
         ProcessingError error = ProcessingError.get(id)
-        if(!error) {
+        if (!error) {
             throw new RuntimeException("No Processing Error could be found for the id: " + id)
         }
         if (!error.stackTraceIdentifier) {
@@ -405,7 +405,7 @@ class ProcessService {
             }
             maxResults(1)
             order("id", "desc")
-        }[0]
+        } [0]
     }
 
     String processUrl(Process process) {

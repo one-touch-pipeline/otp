@@ -93,7 +93,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set,
-                        Level.ERROR, "A file with name '${DATAFILE}' already exists for run '${RUN_ID}' and project '${PROJECT}'","At least one project, run and file combination already exists in OTP")
+                        Level.ERROR, "A file with name '${DATAFILE}' already exists for run '${RUN_ID}' and project '${PROJECT}'", "At least one project, run and file combination already exists in OTP")
         ]
         assertContainSame(context.problems, expectedProblems)
     }
@@ -115,7 +115,7 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
         then:
         Collection<Problem> expectedProblems = [
                 new Problem(context.spreadsheet.dataRows[0].cells as Set,
-                        Level.ERROR, "A file with name '${DATAFILE}' already exists for run '${RUN_ID}' and project '${PROJECT}'","At least one project, run and file combination already exists in OTP")
+                        Level.ERROR, "A file with name '${DATAFILE}' already exists for run '${RUN_ID}' and project '${PROJECT}'", "At least one project, run and file combination already exists in OTP")
         ]
         assertContainSame(context.problems, expectedProblems)
     }

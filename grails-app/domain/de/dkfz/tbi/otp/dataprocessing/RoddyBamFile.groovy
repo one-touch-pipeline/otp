@@ -438,7 +438,7 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
 
         assert seqTracks.every { SeqTrack seqTrack ->
             seqTrack.fastqcState == SeqTrack.DataProcessingState.FINISHED
-        }: "Not all Fastqc workflows of all seqtracks are finished"
+        } : "Not all Fastqc workflows of all seqtracks are finished"
 
         List<Integer> numberOfReads = seqTracks.collect { SeqTrack seqTrack ->
             seqTrack.NReads

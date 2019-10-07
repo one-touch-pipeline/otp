@@ -140,9 +140,9 @@ class CellRangerServiceIntegrationSpec extends Specification implements UserAndR
         content == "content"
 
         where:
-        username      |_
-        OPERATOR      |_
-        "projectUser" |_
+        username      | _
+        OPERATOR      | _
+        "projectUser" | _
     }
 
     void "getWebSummaryResultFileContent, access denied for non project user"() {

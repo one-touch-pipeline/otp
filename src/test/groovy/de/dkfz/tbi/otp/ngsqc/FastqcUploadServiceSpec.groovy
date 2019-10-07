@@ -236,7 +236,7 @@ Sequences flagged as poor quality\t0\t
         setupData()
 
         fastqcProcessedFile.dataFile.seqTrack = null
-        fastqcProcessedFile.dataFile.save(flush:true)
+        fastqcProcessedFile.dataFile.save(flush: true)
 
         when:
         fastqcUploadService.uploadFastQCFileContentsToDataBase(fastqcProcessedFile)

@@ -134,9 +134,9 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
         thrown(AssertionError)
 
         where:
-        add                    |_
-        [nReads: null]         |_
-        [sequenceLength: null] |_
+        add                    | _
+        [nReads: null]         | _
+        [sequenceLength: null] | _
     }
 
     void "test fillBaseCount, sets nBasePairs to 0 when there are no DataFiles"() {

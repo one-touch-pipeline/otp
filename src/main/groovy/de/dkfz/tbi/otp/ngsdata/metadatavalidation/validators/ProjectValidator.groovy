@@ -62,7 +62,7 @@ class ProjectValidator extends SingleValueValidator<AbstractMetadataValidationCo
             } else {
                 level = Level.WARNING
             }
-            context.addProblem(cells, level, "The project '${projectName}' is not registered in OTP.","At least one project is not registered in OTP.")
+            context.addProblem(cells, level, "The project '${projectName}' is not registered in OTP.", "At least one project is not registered in OTP.")
         }
     }
 }

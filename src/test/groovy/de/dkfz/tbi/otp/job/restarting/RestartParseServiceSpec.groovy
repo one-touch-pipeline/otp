@@ -215,7 +215,7 @@ class RestartParseServiceSpec extends Specification implements DataTest {
                                     } else {
                                         return TestCase.uniqueNonExistentPath.absolutePath
                                     }
-                                }()
+                                } ()
                         )
                     }
                 }

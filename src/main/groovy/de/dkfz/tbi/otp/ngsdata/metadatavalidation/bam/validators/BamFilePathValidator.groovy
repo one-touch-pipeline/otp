@@ -63,7 +63,8 @@ class BamFilePathValidator extends SingleValueValidator<BamMetadataValidationCon
                 Path bamFile = context.fileSystem.getPath(filePath)
                 if (!Files.isRegularFile(bamFile)) {
                     if (!Files.exists(bamFile)) {
-                        context.addProblem(cells, Level.ERROR, "'${filePath}' does not exist or cannot be accessed by OTP.","At least one file does not exist or cannot be accessed by OTP.")
+                        context.addProblem(cells, Level.ERROR, "'${filePath}' does not exist or cannot be accessed by OTP.",
+                                "At least one file does not exist or cannot be accessed by OTP.")
                     } else {
                         context.addProblem(cells, Level.ERROR, "'${filePath}' is not a file.", "At least one file is not a file.")
                     }

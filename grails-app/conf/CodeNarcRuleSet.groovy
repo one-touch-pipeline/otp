@@ -602,16 +602,16 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     SpaceAfterClosingBrace {
-        priority = LOW
+        priority = CRITICAL
     }
     SpaceAfterComma {
-        priority = HIGH
+        priority = CRITICAL
     }
     SpaceAfterFor {
         priority = CRITICAL
     }
     SpaceAfterIf {
-        priority = HIGH
+        priority = CRITICAL
     }
     SpaceAfterOpeningBrace {
         priority = CRITICAL
@@ -631,10 +631,10 @@ All the Rules that will be used for OTP
     SpaceAroundMapEntryColon {
         characterBeforeColonRegex = /.*/
         characterAfterColonRegex = /\s+/
-        priority = HIGH
+        priority = CRITICAL
     }
     SpaceAroundOperator {
-        priority = HIGH
+        priority = CRITICAL
     }
     SpaceBeforeClosingBrace {
         priority = CRITICAL

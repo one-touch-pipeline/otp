@@ -40,25 +40,25 @@ class ProcessingStepUpdateIntegrationTests {
         jobExecutionPlan.name = "testPlan"
         jobExecutionPlan.planVersion = 0
         jobExecutionPlan.previousPlan = null
-        jobExecutionPlan.save(flush:true)
+        jobExecutionPlan.save(flush: true)
         assertTrue(jobExecutionPlan.validate())
         Process process = new Process()
         process.jobExecutionPlan = jobExecutionPlan
         process.started = new Date(System.currentTimeMillis())
         process.startJobClass = "testStartJob"
-        process.save(flush:true)
+        process.save(flush: true)
         assertTrue(process.validate())
         JobDefinition jobDefinition = new JobDefinition()
         jobDefinition.name = "testJobDefinition"
         jobDefinition.bean = "testJob"
         jobDefinition.plan = jobExecutionPlan
-        jobDefinition.save(flush:true)
+        jobDefinition.save(flush: true)
         assertTrue(jobDefinition.validate())
         // Initialize 1. step
         ProcessingStep processingStep = new ProcessingStep()
         processingStep.process = process
         processingStep.jobDefinition = jobDefinition
-        processingStep.save(flush:true)
+        processingStep.save(flush: true)
         assertTrue(processingStep.validate())
         // Initialize 1. update
         ProcessingStepUpdate processingStepUpdate = new ProcessingStepUpdate()
@@ -70,7 +70,7 @@ class ProcessingStepUpdateIntegrationTests {
         assertFalse(processingStepUpdate.validate())
         processingStepUpdate.state = ExecutionState.CREATED
         processingStepUpdate.date = new Date(System.currentTimeMillis())
-        processingStepUpdate.save(flush:true)
+        processingStepUpdate.save(flush: true)
         // Should validate
         assertTrue(processingStepUpdate.validate())
         processingStepUpdate.processingStep = processingStep
@@ -97,7 +97,7 @@ class ProcessingStepUpdateIntegrationTests {
         jobDefinition2.name = "testJobDefinition2"
         jobDefinition2.bean = "testJob"
         jobDefinition2.plan = jobExecutionPlan
-        assertNotNull(jobDefinition2.save(flush:true))
+        assertNotNull(jobDefinition2.save(flush: true))
         // Initialize 2. step
         ProcessingStep processingStep2 = new ProcessingStep()
         processingStep2.process = process

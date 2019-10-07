@@ -54,7 +54,7 @@ class FastqcResultsController {
 
         String result
 
-        if(!fastqcResultsService.isFastqcAvailable(dataFile)) {
+        if (!fastqcResultsService.isFastqcAvailable(dataFile)) {
             result = message(code: "fastqc.show.notAvailable")
         } else {
             String html = fastqcDataFilesService.getInputStreamFromZipFile(dataFile, "fastqc_report.html").text

@@ -523,7 +523,7 @@ SELECT
             results << [
                     startDate    : new DateTime(it.hourStarted * HOURS_TO_MILLIS),
                     endDate      : new DateTime(it.hourEnded * HOURS_TO_MILLIS),
-                    memoryAvgUsed: it.sumAvgMemoryUsed / (1024**2),
+                    memoryAvgUsed: it.sumAvgMemoryUsed / (1024 ** 2),
             ]
         }
 

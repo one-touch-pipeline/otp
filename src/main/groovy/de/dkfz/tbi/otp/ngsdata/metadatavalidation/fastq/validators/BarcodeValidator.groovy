@@ -55,7 +55,7 @@ class BarcodeValidator extends SingleValueValidator<MetadataValidationContext> i
     @Override
     void validateValue(MetadataValidationContext context, String barcode, Set<Cell> cells) {
         if (!(barcode ==~ MUST_REGEX)) {
-            context.addProblem(cells, Level.ERROR, "'${barcode}' is not a well-formed barcode. It must match the regular expression '${MUST_REGEX}'. It should match the regular expression '${SHOULD_REGEX}'.","At least one barcode is not a well-formed barcode.")
+            context.addProblem(cells, Level.ERROR, "'${barcode}' is not a well-formed barcode. It must match the regular expression '${MUST_REGEX}'. It should match the regular expression '${SHOULD_REGEX}'.", "At least one barcode is not a well-formed barcode.")
         } else if (!(barcode ==~ SHOULD_REGEX) && !barcode.empty) {
             context.addProblem(cells, Level.WARNING, "The barcode '${barcode}' has an unusual format. It should match the regular expression '${SHOULD_REGEX}'.", "At least one barcode has an unusual format.")
         }

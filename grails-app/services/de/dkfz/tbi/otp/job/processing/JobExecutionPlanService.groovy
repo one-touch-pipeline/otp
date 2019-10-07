@@ -82,7 +82,7 @@ class JobExecutionPlanService {
         plan.enabled = enable
         plan.save(flush: true)
         if (!plan) {
-            log.error("JobExecutionPlan ${plan.id} could not be ${enable ? 'enabled': 'disabled'}")
+            log.error("JobExecutionPlan ${plan.id} could not be ${enable ? 'enabled' : 'disabled'}")
             return before
         }
         JobExecutionPlanChangedEvent event = new JobExecutionPlanChangedEvent(this, plan.id)

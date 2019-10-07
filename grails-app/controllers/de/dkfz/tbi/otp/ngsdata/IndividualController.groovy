@@ -356,7 +356,7 @@ class IndividualFiltering {
     List<String> pid = []
     List<String> mockPid = []
     List<String> mockFullName = []
-    List<Individual.Type> type= []
+    List<Individual.Type> type = []
 
     boolean enabled = false
 

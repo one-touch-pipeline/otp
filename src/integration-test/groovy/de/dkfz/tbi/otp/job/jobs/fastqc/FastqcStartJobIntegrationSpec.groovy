@@ -55,7 +55,7 @@ class FastqcStartJobIntegrationSpec extends Specification {
 
         FastqcStartJob fastqcStartJob = new FastqcStartJob()
         fastqcStartJob.schedulerService = Stub(SchedulerService) {
-            createProcess(_,_,_) >> null
+            createProcess(_, _, _) >> null
             isActive() >> true
         }
         fastqcStartJob.optionService = new ProcessingOptionService()

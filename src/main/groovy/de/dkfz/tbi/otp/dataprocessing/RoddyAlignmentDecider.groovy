@@ -44,7 +44,7 @@ abstract class RoddyAlignmentDecider extends AbstractAlignmentDecider {
                 latestValidBamFile.withdrawn) {
             setNeedsProcessing()
         } else {
-            if(forceRealign) {
+            if (forceRealign) {
                 seqTrack.log("Will not align{0} for ${workPackage} " +
                         "because the latest bam file already contains the seqtrack. " +
                         "(You can only realign if you set the latest bam file (ID ${latestValidBamFile.id}) to withdrawn).")

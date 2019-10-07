@@ -134,7 +134,7 @@ class ProcessesController {
 
         processCounts = jobExecutionPlanService.processCount()
         finishedProcessCounts = jobExecutionPlanService.finishedProcessCount()
-        def (failedProcessesResult,lastSuccessDatesResult,lastFailureDatesResult) = waitAll(failedProcessesPromise,lastSuccessDatesPromise,lastFailureDatesPromise)
+        def (failedProcessesResult, lastSuccessDatesResult, lastFailureDatesResult) = waitAll(failedProcessesPromise, lastSuccessDatesPromise, lastFailureDatesPromise)
         plans.each { plan ->
             long allProcessesCount = processCounts[plan.name] ?: 0L
             long finishedProcessesCount = finishedProcessCounts[plan.name] ?: 0L

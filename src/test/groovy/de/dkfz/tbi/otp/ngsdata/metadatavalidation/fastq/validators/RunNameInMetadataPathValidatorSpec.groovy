@@ -47,7 +47,7 @@ class RunNameInMetadataPathValidatorSpec extends Specification {
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.RUN_ID}\n" + data,
                 [
-                        metadataFile: mdFilenameContainsRunName ? Paths.get("run1"): Paths.get("whatever"),
+                        metadataFile: mdFilenameContainsRunName ? Paths.get("run1") : Paths.get("whatever"),
                         directoryStructure: isDataFilesOnGpcfMidTerm ? new DataFilesInGpcfSpecificStructure() : [:],
                 ],
         )

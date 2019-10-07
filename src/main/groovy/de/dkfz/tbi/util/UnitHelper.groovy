@@ -31,7 +31,7 @@ class UnitHelper {
     private static final Locale LOCALE = Locale.US
     private static final NUMBER_INSTANCE = NumberFormat.getNumberInstance(LOCALE)
 
-    private static final List<String> IBI_BYTE_UNITS = ["Ki","Mi","Gi","Ti","Pi","Ei"]
+    private static final List<String> IBI_BYTE_UNITS = ["Ki", "Mi", "Gi", "Ti", "Pi", "Ei"]
     private static final List<String> SI_UNITS = ["k", "M", "G", "T", "P", "E"]
 
     /**
@@ -51,7 +51,7 @@ class UnitHelper {
             return number + " " + unitSymbol
         }
         int exp = (int) (Math.log(number) / Math.log(unitStep))
-        String pre = unitPrefixes[exp-1]
+        String pre = unitPrefixes[exp - 1]
         return String.format(LOCALE, "%.2f %s%s", number / Math.pow(unitStep, exp), pre, unitSymbol)
     }
 

@@ -165,8 +165,8 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
         result == 10000
 
         where:
-        sequenceLength |_
-        "100"          |_
-        "90-110"       |_
+        sequenceLength | _
+        "100"          | _
+        "90-110"       | _
     }
 }

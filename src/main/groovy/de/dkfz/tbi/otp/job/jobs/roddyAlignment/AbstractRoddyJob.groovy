@@ -70,7 +70,7 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
         SessionUtils.withNewSession {
             new Semaphore((int) ProcessingOptionService.findOptionAsNumber(ProcessingOption.OptionName.MAXIMUM_EXECUTED_RODDY_PROCESSES, null, null), true)
         }
-    }()
+    } ()
 
     @Override
     protected final NextAction maybeSubmit() throws Throwable {

@@ -181,7 +181,7 @@ abstract class AbstractJobImpl implements Job {
         if (!parameter) {
             throw new RuntimeException("Required parameter not found")
         }
-        if(parameter.type.className) {
+        if (parameter.type.className) {
             return grailsApplication.getClassForName(parameter.type.className).get(parameter.value.toLong())
         }
         return parameter.value

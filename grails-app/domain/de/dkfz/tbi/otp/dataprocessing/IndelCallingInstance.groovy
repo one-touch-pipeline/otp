@@ -41,7 +41,7 @@ class IndelCallingInstance extends BamFilePairAnalysis implements RoddyAnalysisR
 
     @Override
     String toString() {
-        return "ICI ${id}${withdrawn ? ' (withdrawn)': ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
+        return "ICI ${id}${withdrawn ? ' (withdrawn)' : ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
     }
 
     @Override

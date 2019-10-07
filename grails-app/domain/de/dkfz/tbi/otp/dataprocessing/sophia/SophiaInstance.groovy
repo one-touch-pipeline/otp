@@ -46,7 +46,7 @@ class SophiaInstance extends BamFilePairAnalysis implements RoddyAnalysisResult 
 
     @Override
     String toString() {
-        return "SI ${id}${withdrawn ? ' (withdrawn)': ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
+        return "SI ${id}${withdrawn ? ' (withdrawn)' : ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
     }
 
     @Override
@@ -77,6 +77,6 @@ class SophiaInstance extends BamFilePairAnalysis implements RoddyAnalysisResult 
 
     static SophiaInstance getLatestValidSophiaInstanceForSamplePair(SamplePair samplePair) {
         return SophiaInstance.findBySamplePairAndWithdrawnAndProcessingState(
-                samplePair, false, AnalysisProcessingStates.FINISHED, [max:1, sort: "id", order: "desc"])
+                samplePair, false, AnalysisProcessingStates.FINISHED, [max : 1, sort : "id", order : "desc", ])
     }
 }

@@ -63,6 +63,6 @@ abstract class AbstractSnvCallingInstance extends BamFilePairAnalysis {
 
     @Override
     String toString() {
-        return "SCI ${id} ${withdrawn ? ' (withdrawn)': ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
+        return "SCI ${id} ${withdrawn ? ' (withdrawn)' : ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
     }
 }

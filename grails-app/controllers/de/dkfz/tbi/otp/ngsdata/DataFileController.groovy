@@ -45,7 +45,7 @@ class DataFileController {
             response.sendError(404)
             return
         }
-        List<MetaDataEntry> entries = MetaDataEntry.findAllByDataFile(dataFile, [sort:"key.id"])
+        List<MetaDataEntry> entries = MetaDataEntry.findAllByDataFile(dataFile, [sort: "key.id"])
         List<String> keys = []
         List<String> values = []
 

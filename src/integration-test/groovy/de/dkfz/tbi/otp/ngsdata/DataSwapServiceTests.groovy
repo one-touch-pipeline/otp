@@ -413,9 +413,12 @@ class DataSwapServiceTests implements UserAndRoles {
         AbstractBamFile abstractBamFile = DomainFactory.createRoddyBamFile()
 
         QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: abstractBamFile)
-        RoddyLibraryQa roddyLibraryQa = DomainFactory.createRoddyLibraryQa(qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
-        RoddyMergedBamQa roddyMergedBamQa = DomainFactory.createRoddyMergedBamQa(qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
-        RoddySingleLaneQa roddySingleLaneQa = DomainFactory.createRoddySingleLaneQa(seqTrack: abstractBamFile.seqTracks.iterator().next(), qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases:0, referenceLength: 0)
+        RoddyLibraryQa roddyLibraryQa = DomainFactory.createRoddyLibraryQa(qualityAssessmentMergedPass: qualityAssessmentPass,
+                genomeWithoutNCoverageQcBases: 0, referenceLength: 0)
+        RoddyMergedBamQa roddyMergedBamQa = DomainFactory.createRoddyMergedBamQa(qualityAssessmentMergedPass: qualityAssessmentPass,
+                genomeWithoutNCoverageQcBases: 0, referenceLength: 0)
+        RoddySingleLaneQa roddySingleLaneQa = DomainFactory.createRoddySingleLaneQa(seqTrack: abstractBamFile.seqTracks.iterator().next(),
+                qualityAssessmentMergedPass: qualityAssessmentPass, genomeWithoutNCoverageQcBases: 0, referenceLength: 0)
 
         dataSwapService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
 

@@ -239,7 +239,7 @@ class ClusterJob implements Entity {
     ]
 
     static constraints = {
-        validated(nullable:false)
+        validated(nullable: false)
         realm(nullable: false)
         clusterJobId(blank: false, nullable: false)
         userName blank: false

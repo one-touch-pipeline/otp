@@ -234,7 +234,7 @@ class SeqTrackService {
         // HQL would support IN but doesn't support expressions in ORDER BY clauses,
         // JDBC doesn't support IN directly,
         // and the H2 driver doesn't support PreparedStatement.setArray()
-        String questionMarksSeparatedByCommas = (["?"]* seqTypes.size()).join(",")
+        String questionMarksSeparatedByCommas = (["?"] * seqTypes.size()).join(",")
 
         String query = """\
 SELECT st.id

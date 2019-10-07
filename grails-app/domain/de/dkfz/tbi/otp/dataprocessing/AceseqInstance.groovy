@@ -54,7 +54,7 @@ class AceseqInstance extends BamFilePairAnalysis implements RoddyAnalysisResult 
 
     @Override
     String toString() {
-        return "AI ${id}${withdrawn ? ' (withdrawn)': ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
+        return "AI ${id}${withdrawn ? ' (withdrawn)' : ''}: ${instanceName} ${samplePair.toStringWithoutId()}"
     }
 
     @Override

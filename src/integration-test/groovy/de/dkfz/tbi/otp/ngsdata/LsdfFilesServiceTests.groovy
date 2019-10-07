@@ -122,7 +122,7 @@ class LsdfFilesServiceTests {
 
         seqPlatform = new SeqPlatform()
         seqPlatform.name = instrumentPlatform
-        seqPlatform.seqPlatformModelLabel= seqPlatformModelLabel
+        seqPlatform.seqPlatformModelLabel = seqPlatformModelLabel
         assertNotNull(seqPlatform.save(flush: true))
 
         SeqCenter seqCenter = new SeqCenter()

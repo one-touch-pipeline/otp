@@ -83,8 +83,8 @@ abstract class MetadataFieldsServiceSpec<T> extends Specification {
         T t = service.<T> create(NAME, properties, [IMPORT_ALIAS])
 
         then:
-        t == service.findByNameOrImportAlias(NAME,properties)
-        t == service.findByNameOrImportAlias(IMPORT_ALIAS,properties)
+        t == service.findByNameOrImportAlias(NAME, properties)
+        t == service.findByNameOrImportAlias(IMPORT_ALIAS, properties)
     }
 
     void "test create with name twice, fails"() {
@@ -107,7 +107,7 @@ abstract class MetadataFieldsServiceSpec<T> extends Specification {
 
     void "test create with invalid values for name and importAlias, fails"() {
         when:
-        service.<T> create(name,properties)
+        service.<T> create(name, properties)
 
         then:
         thrown(AssertionError)
