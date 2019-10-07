@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.analysis.pair.runyapsa
 
 import grails.plugin.springsecurity.SpringSecurityUtils
 
-import de.dkfz.tbi.otp.analysis.pair.AbstractRoddyBamFilePairAnalysisWorkflowTests
+import de.dkfz.tbi.otp.analysis.pair.roddy.AbstractRoddyBamFilePairAnalysisWorkflowTests
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance

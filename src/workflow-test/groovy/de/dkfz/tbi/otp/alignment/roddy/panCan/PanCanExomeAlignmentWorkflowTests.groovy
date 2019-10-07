@@ -19,22 +19,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp
+package de.dkfz.tbi.otp.alignment.roddy.panCan
 
-import de.dkfz.tbi.otp.dataInstallation.DataInstallationWorkflowTests
+import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
-/*
- * The idea of the test is that with the old jobExecutionPlan the test would fail since the outputParameter "Realm"
- * would be missing. Since the test do not fail it is shown that the old jobExecutionPlan was updated to the newer one
- * which provides "Realm" as outputParameter.
- */
-class WorkflowExecutionPlanUpdateTests extends DataInstallationWorkflowTests {
+class PanCanExomeAlignmentWorkflowTests extends PanCanAlignmentWorkflowTests {
 
     @Override
-    List<String> getWorkflowScripts() {
-        return [
-                "scripts/workflows/OldDataInstallationWorkflow.groovy",
-                "scripts/workflows/DataInstallationWorkflow.groovy",
-        ]
+    SeqType findSeqType() {
+        return CollectionUtils.exactlyOneElement(SeqType.findAllWhere(
+                name: SeqTypeNames.EXOME.seqTypeName,
+                libraryLayout: LibraryLayout.PAIRED,
+        ))
     }
 }
