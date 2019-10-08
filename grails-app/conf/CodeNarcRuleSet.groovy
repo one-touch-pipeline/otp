@@ -246,7 +246,7 @@ All the Rules that will be used for OTP
 
     // rulesets/concurrency.xml
     BusyWait {
-        priority = HIGH
+        priority = CRITICAL
     }
     DoubleCheckedLocking {
         priority = HIGH

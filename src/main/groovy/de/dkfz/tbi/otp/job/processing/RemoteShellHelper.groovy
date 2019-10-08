@@ -222,6 +222,7 @@ class RemoteShellHelper {
      * @param channel The channel to read from
      * @return The output of the finished process
      */
+    @SuppressWarnings('BusyWait') //the method needs to wait for the channel to end and a wait method is not provided.
     private static ProcessOutput getOutput(ChannelExec channel) {
         OutputStream outputErrorStream = new ByteArrayOutputStream()
         OutputStream outputStream = new ByteArrayOutputStream()
