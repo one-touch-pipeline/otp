@@ -172,7 +172,12 @@ $.otp.workflows = {
                 }, "aTargets": [0] },
                 { "mRender": function (data, type, row) {
                     if (row.allProcessesCount) {
-                        return row.allProcessesCount;
+                        return $.otp.createLinkMarkup({
+                            controller: 'processes',
+                            action: 'plan',
+                            id: row.id,
+                            text: row.allProcessesCount
+                        });
                     }
                     return "-";
                 }, "aTargets": [1] },
