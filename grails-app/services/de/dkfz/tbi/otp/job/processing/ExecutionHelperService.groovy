@@ -49,7 +49,7 @@ class ExecutionHelperService {
         assert group: 'group may not be null'
         ProcessOutput result = remoteShellHelper.executeCommandReturnProcessOutput(realm, "chgrp ${group} ${directory}")
         if (result.exitCode != 0 ) {
-            throw new RuntimeException("Setting group failed: ${result.stderr}; exit code: ${result.exitCode}")
+            throw new RuntimeException("Setting group '${group}' failed: ${result.stderr}; exit code: ${result.exitCode}")
         }
         return result.stdout
     }
