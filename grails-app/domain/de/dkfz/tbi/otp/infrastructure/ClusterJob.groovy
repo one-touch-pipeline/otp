@@ -383,10 +383,6 @@ class ClusterJob implements Entity {
         return formatPeriodAsISOString(cpuTime)
     }
 
-    String getCpuTimePerCoreAsISO () {
-        return formatPeriodAsISOString(new Duration(Math.round(cpuTimePerCore)))
-    }
-
     private String formatPeriodAsISOString (Duration value) {
         return value ? PeriodFormat.getDefault().print(new Period(value.getMillis())) : NOT_AVAILABLE
     }
