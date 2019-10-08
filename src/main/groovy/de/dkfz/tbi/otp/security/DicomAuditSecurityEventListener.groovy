@@ -44,6 +44,8 @@ class DicomAuditSecurityEventListener implements ApplicationListener<AbstractAut
     @Override
     void onApplicationEvent(AbstractAuthenticationEvent event) {
 
+        //if login success (AuthenticationSuccessEvent) then nothing should be done
+
         if (event instanceof AbstractAuthenticationFailureEvent) {
             // Login failure
             DicomAuditLogger.logUserLogin(
@@ -51,8 +53,6 @@ class DicomAuditSecurityEventListener implements ApplicationListener<AbstractAut
                     (event.authentication.principal.hasProperty("username") ?
                             event.authentication.principal.username : event.authentication.principal) as String
             )
-        } else if (event instanceof AuthenticationSuccessEvent) {
-            // Login success, this event fires on any login, automated and interactive
         } else if (event instanceof InteractiveAuthenticationSuccessEvent) {
             // Login success, this event fires only on interactive (Non-automated) login
             DicomAuditLogger.logUserLogin(

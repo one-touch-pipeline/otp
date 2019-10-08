@@ -182,9 +182,9 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
         def processes = ProcessParameter.findAllByValue(objectToCheck.id, [sort: "id"])*.process.findAll {
             it.jobExecutionPlan.name == workflow
         }
-        if (processes.size() == 1) {
-            //normal case, no output needed
-        } else if (processes.size() == 0) {
+
+        //if processes.size() is 1, then nothing should be done
+        if (processes.size() == 0) {
             output << "${INDENT}Attention: no process was created for the object ${valueToShow(object)} (${object.id})"
             output << "${INDENT}Please inform a maintainer"
             noProcess << object.id

@@ -124,7 +124,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     EmptyIfStatement {
-        priority = HIGH
+        priority = CRITICAL
     }
     EmptyInstanceInitializer {
         priority = DEFAULT
