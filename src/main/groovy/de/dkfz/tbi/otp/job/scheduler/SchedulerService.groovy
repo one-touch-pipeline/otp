@@ -171,8 +171,7 @@ class SchedulerService {
             }
         } catch (Exception e) {
             valid = false
-            log.error(e.message)
-            e.printStackTrace()
+            log.error(e.message, e)
         }
         if (valid) {
             lock.lock()

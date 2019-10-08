@@ -907,7 +907,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     PrintStackTrace {
-        priority = HIGH
+        priority = CRITICAL
     }
     Println {
         priority = HIGH
