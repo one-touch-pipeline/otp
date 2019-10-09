@@ -30,7 +30,6 @@
     <asset:javascript src="pages/projectConfig/index/functions.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
-
 <body>
 <div class="body">
     <g:render template="/templates/messages"/>
@@ -371,117 +370,9 @@
                     <tr>
                         <td class="myKey"><g:message code="projectOverview.projectInfos"/></td>
                         <td id="projectInfo" colspan="2">
-                            <g:each var="projectInfo" in="${project.projectInfos.sort { [it.recipientInstitution == null, it.id] }}">
-                                <div style="margin-top: 1em">
-                                    <g:message code="projectOverview.projectInfo.creationDate"/>
-                                    <g:formatDate date="${projectInfo.dateCreated}" format="yyyy-MM-dd"/>
-                                    <br><g:message code="projectOverview.projectInfo.path"/>
-                                    <g:link action="download" params='["projectInfo.id": projectInfo.id]'>${projectInfo.getPath()}</g:link>
-                                    <g:form action="deleteProjectInfo" useToken="true" style="display: inline"
-                                                  onSubmit="\$.otp.projectConfig.confirmProjectInfoDelete(event);">
-                                        |
-                                        <input type="hidden" name="projectInfo.id" value="${projectInfo.id}"/>
-                                        <g:submitButton name="${g.message(code: "projectOverview.projectInfo.deleteProjectInfo")}"/>
-                                    </g:form>
-                                    <g:if test="${projectInfo.hasAdditionalInfos()}">
-                                        <br><g:message code="projectOverview.projectInfo.additional"/> ${projectInfo.additionalInfos}
-                                        <g:if test="${!projectInfo.deletionDate}">
-                                            <g:uploadForm action="markDtaDataAsDeleted" useToken="true" style="display: inline"
-                                                          onSubmit="\$.otp.projectConfig.confirmDtaDelete(event);">
-                                                |
-                                                <input type="hidden" name="projectInfo.id" value="${projectInfo.id}"/>
-                                                <g:submitButton name="${g.message(code: "projectOverview.projectInfo.markDtaDataAsDeleted")}"/>
-                                            </g:uploadForm>
-                                        </g:if>
-                                    </g:if>
-                                </div>
-                            </g:each>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="myKey"><g:message code="projectOverview.projectInfos.upload.info"/></td>
-                        <td>
-                            <g:uploadForm action="addProjectInfo" useToken="true">
-                                <input type="hidden" name="project.id" value="${project.id}"/>
-                                <input type="file" name="projectInfoFile" required="true">
-                                <g:submitButton name="${g.message(code: "projectOverview.projectInfo.add")}"/>
-                            </g:uploadForm>
-                        </td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td class="myKey"><g:message code="projectOverview.projectInfos.upload.dta"/></td>
-                        <td colspan="2">
-                            <g:uploadForm action="addProjectDta" useToken="true">
-                                <input type="hidden" name="project.id" value="${project.id}"/>
-                                <table class="project-info-input">
-                                    <tr>
-                                        <td><g:message code="projectOverview.projectInfo.path"/></td>
-                                        <td><input type="file" name="projectInfoFile" required="true"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><g:message code="projectOverview.projectInfo.recipient.institution"/></td>
-                                        <td><input type="text" value="${addProjectInfos?.recipientInstitution}" name="recipientInstitution" required="true"/>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><g:message code="projectOverview.projectInfo.recipient.person"/></td>
-                                        <td><input type="text" value="${addProjectInfos?.recipientPerson}" name="recipientPerson" required="true"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><g:message code="projectOverview.projectInfo.recipient.account"/></td>
-                                        <td><input type="text" value="${addProjectInfos?.recipientAccount}" name="recipientAccount"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><g:message code="projectOverview.projectInfo.transferDate"/></td>
-                                        <td><input type="date" value="${addProjectInfos?.transferDate?.format("yyyy-MM-dd")}" name="transferDateInput"
-                                                   required="true"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><g:message code="projectOverview.projectInfo.validityDate"/></td>
-                                        <td><input type="date" value="${addProjectInfos?.validityDate?.format("yyyy-MM-dd")}" name="validityDateInput"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><g:message code="projectOverview.projectInfo.transferMode"/></td>
-                                        <td>
-                                            <g:select name="transferMode"
-                                                      noSelection="['': '']"
-                                                      from="${transferModes}"
-                                                      value="${addProjectInfos?.transferMode}"
-                                                      class="dropDown"
-                                                      required="true"/>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><g:message code="projectOverview.projectInfo.legalBasis"/></td>
-                                        <td>
-                                            <g:select name="legalBasis"
-                                                      noSelection="['': '']"
-                                                      from="${legalBasis}"
-                                                      value="${addProjectInfos?.legalBasis}"
-                                                      class="dropDown"
-                                                      required="true"/>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td><g:message code="projectOverview.projectInfo.dtaId"/></td>
-                                        <td><input type="text" value="${addProjectInfos?.dtaId}" name="dtaId"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><g:message code="projectOverview.projectInfo.requester"/></td>
-                                        <td><input type="text" value="${addProjectInfos?.requester}" name="requester" required="true"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><g:message code="projectOverview.projectInfo.ticketID"/></td>
-                                        <td><input type="text" value="${addProjectInfos?.ticketID}" name="ticketID"/></td>
-                                    </tr>
-                                    <tr>
-                                        <td><g:message code="projectOverview.projectInfo.comment"/></td>
-                                        <td><input type="text" value="${addProjectInfos?.comment}" name="comment"/></td>
-                                    </tr>
-                                </table>
-                                <g:submitButton name="${g.message(code: "projectOverview.projectInfo.add")}"/>
-                            </g:uploadForm>
+                            <g:link controller='projectInfo' action='list'>
+                                <g:message code="projectOverview.projectInfos.link" args="[project.projectInfos.size()]"/>
+                            </g:link>
                         </td>
                     </tr>
                 </sec:ifAllGranted>

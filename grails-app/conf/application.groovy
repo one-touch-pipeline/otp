@@ -109,6 +109,9 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
         [pattern: "/projectOverview/mmmlIdentifierMapping/**"            , access: ["hasRole('ROLE_MMML_MAPPING')"]],
         [pattern: "/login/impersonate"                                   , access: ["hasRole('ROLE_SWITCH_USER')"]],
 
+        // restricted access to general pages
+        [pattern: "/projectInfo/list"                                    , access: ["hasRole('ROLE_OPERATOR')"]],
+
         // publicly available pages
         [pattern: "/assets/**"                                           , access: ["permitAll"]],
         [pattern: "/grails-errorhandler/**"                              , access: ["permitAll"]],
@@ -132,12 +135,13 @@ grails.plugin.springsecurity.roleHierarchy = '''
     ROLE_ADMIN > ROLE_SWITCH_USER
 '''
 
+grails.plugin.springsecurity.adh.errorPage = "/errors/error403"
 grails.plugin.springsecurity.useSwitchUserFilter = true
+
 grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/home/index'
 /* TODO: OTP-2282 uncomment when switching to the new layout and remove line above
 grails.plugin.springsecurity.auth.loginFormUrl = "/?login=required"
 grails.plugin.springsecurity.failureHandler.defaultFailureUrl = "/?login=failed"
-grails.plugin.springsecurity.adh.errorPage = null
 grails.plugin.springsecurity.apf.storeLastUsername = true
 //*/
 

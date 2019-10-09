@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 import grails.validation.Validateable
-import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.config.ConfigService
@@ -149,10 +148,7 @@ class ProjectConfigController implements CheckAndCall {
                 cellRangerOverview             : cellRangerOverview,
                 qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
                 allSpeciesWithStrain           : SpeciesWithStrain.list().sort { it.toString() } ?: [],
-                addProjectInfos                : flash?.addProjectInfos,
                 closed                         : project?.closed,
-                transferModes                  : ProjectInfo.TransferMode.values(),
-                legalBasis                     : ProjectInfo.LegalBasis.values(),
         ]
     }
 
@@ -235,85 +231,6 @@ class ProjectConfigController implements CheckAndCall {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, cmd.project)
         }
-    }
-
-    @SuppressWarnings('CatchException')
-    def addProjectInfo(AddProjectInfoCommand cmd) {
-        withForm {
-            if (cmd.hasErrors()) {
-                flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.errorMessage") as String, cmd.errors)
-            } else {
-                try {
-                    projectService.createProjectInfoAndUploadFile(cmd)
-                } catch (Exception e) {
-                    log.error(e.message, e)
-                    flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.exceptionMessage") as String, e.toString())
-                    flash.addProjectInfos = cmd.values()
-                }
-            }
-        }.invalidToken {
-            flash.message = new FlashMessage(g.message(code: "default.invalid.session") as String, '')
-        }
-        redirect(action: "index")
-    }
-
-    @SuppressWarnings('CatchException')
-    def addProjectDta(AddProjectDtaCommand cmd) {
-        withForm {
-            if (cmd.hasErrors()) {
-                flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.errorMessage") as String, cmd.errors)
-                flash.addProjectInfos = cmd.values()
-            } else {
-                try {
-                    projectService.createProjectDtaInfoAndUploadFile(cmd)
-                } catch (Exception e) {
-                    log.error(e.message, e)
-                    flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.exceptionMessage") as String, e.toString())
-                    flash.addProjectInfos = cmd.values()
-                }
-            }
-        }.invalidToken {
-            flash.message = new FlashMessage(g.message(code: "default.invalid.session") as String, '')
-        }
-        redirect(action: "index")
-    }
-
-    @SuppressWarnings('CatchException')
-    def markDtaDataAsDeleted(ProjectInfoCommand cmd) {
-        withForm {
-            if (cmd.hasErrors()) {
-                flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.errorMessage") as String, cmd.errors)
-            } else {
-                try {
-                    projectService.markDtaDataAsDeleted(cmd)
-                } catch (Exception e) {
-                    log.error(e.message, e)
-                    flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.exceptionMessage") as String, e.toString())
-                }
-            }
-        }.invalidToken {
-            flash.message = new FlashMessage(g.message(code: "default.invalid.session") as String, '')
-        }
-        redirect(action: "index")
-    }
-
-    @SuppressWarnings('CatchException')
-    def deleteProjectInfo(ProjectInfoCommand cmd) {
-        withForm {
-            if (cmd.hasErrors()) {
-                flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.errorDeleteFile") as String, cmd.errors)
-            } else {
-                try {
-                    projectService.deleteProjectInfo(cmd)
-                } catch (Exception e) {
-                    log.error(e.message, e)
-                    flash.message = new FlashMessage(g.message(code: "projectOverview.projectInfos.exceptionMessage") as String, e.toString())
-                }
-            }
-        }.invalidToken {
-            flash.message = new FlashMessage(g.message(code: "default.invalid.session") as String, '')
-        }
-        redirect(action: "index")
     }
 
     JSON snvDropDown() {
@@ -468,22 +385,6 @@ class ProjectConfigController implements CheckAndCall {
         dataToRender.aaData = data
         render dataToRender as JSON
     }
-
-    def download(ProjectInfoCommand cmd) {
-        if (cmd.hasErrors()) {
-            response.sendError(404)
-            return
-        }
-
-        byte[] outputFile = projectService.getProjectInfoContent(cmd.projectInfo)
-
-        if (outputFile) {
-            render(file: outputFile, contentType: "application/octet-stream", fileName: cmd.projectInfo.fileName)
-        } else {
-            flash.message = new FlashMessage("No file '${cmd.projectInfo.fileName}' found.")
-            redirect(action: "index")
-        }
-    }
 }
 
 class UpdateProjectCommand implements Validateable {
@@ -494,90 +395,4 @@ class UpdateProjectCommand implements Validateable {
     static constraints = {
         fieldName(nullable: true)
     }
-}
-
-class AddProjectInfoCommand implements Validateable {
-    MultipartFile projectInfoFile
-
-    Project project
-
-    static constraints = {
-        project nullable: false
-        projectInfoFile(validator: { val, obj ->
-            if (val.empty) {
-                return "File is empty"
-            }
-            if (!OtpPath.isValidPathComponent(val.originalFilename)) {
-                return "Invalid file name"
-            }
-            if (ProjectInfo.findAllByProjectAndFileName(obj.project, val.originalFilename).size() != 0) {
-                return "A ProjectInfo with this file name already exists"
-            }
-            if (val.size > ProjectService.PROJECT_INFO_MAX_SIZE) {
-                return "The file exceeds the 20mb file size limit"
-            }
-        })
-    }
-}
-
-class AddProjectDtaCommand extends AddProjectInfoCommand {
-    String recipientInstitution
-    String recipientPerson
-    String recipientAccount
-
-    Date transferDate
-    Date validityDate
-
-    ProjectInfo.TransferMode transferMode
-    ProjectInfo.LegalBasis legalBasis
-    String dtaId
-
-    String requester
-    String ticketID
-    String comment
-
-    static constraints = {
-        recipientInstitution blank: false
-        recipientPerson blank: false
-        recipientAccount nullable: true
-
-        validityDate nullable: true
-
-        dtaId nullable: true
-        requester blank: false
-        ticketID nullable: true
-        comment nullable: true
-    }
-
-    void setTransferDateInput(String transferDate) {
-        if (transferDate) {
-            this.transferDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(transferDate)
-        }
-    }
-
-    void setValidityDateInput(String validityDate) {
-        if (validityDate) {
-            this.validityDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(validityDate)
-        }
-    }
-
-    Map<String, String> values() {
-        return [
-                recipientInstitution: recipientInstitution,
-                recipientPerson     : recipientPerson,
-                recipientAccount    : recipientAccount,
-                transferDate        : transferDate,
-                validityDate        : validityDate,
-                transferMode        : transferMode,
-                legalBasis          : legalBasis,
-                dtaId               : dtaId,
-                requester           : requester,
-                ticketID            : ticketID,
-                comment             : comment,
-        ]
-    }
-}
-
-class ProjectInfoCommand implements Validateable {
-    ProjectInfo projectInfo
 }

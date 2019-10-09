@@ -40,13 +40,11 @@ import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.searchability.Keyword
-import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
-import java.nio.file.attribute.PosixFilePermission
 import java.text.SimpleDateFormat
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
@@ -86,8 +84,8 @@ class ProjectService {
     ProcessingOptionService processingOptionService
     SpringSecurityService springSecurityService
     UserProjectRoleService userProjectRoleService
-
     FileService fileService
+    ProjectInfoService projectInfoService
 
     /**
      * @return List of all available Projects
@@ -193,7 +191,7 @@ class ProjectService {
         createProjectDirectoryIfNeeded(project)
 
         if (projectParams.projectInfoFile) {
-            createProjectInfoAndUploadFile(new AddProjectInfoCommand(project: project, projectInfoFile: projectParams.projectInfoFile))
+            projectInfoService.createProjectInfoAndUploadFile(new AddProjectInfoCommand(project: project, projectInfoFile: projectParams.projectInfoFile))
         }
 
         return project
@@ -210,82 +208,6 @@ class ProjectService {
         executeScript(buildCreateProjectDirectory(project.unixGroup, projectDirectory), project)
         FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
         FileService.waitUntilExists(fs.getPath(projectDirectory.absolutePath))
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void createProjectInfoAndUploadFile(AddProjectInfoCommand cmd) throws IOException {
-        cmd.validate()
-        assert !cmd.errors.hasErrors()
-        ProjectInfo projectInfo = createProjectInfo(cmd.project, cmd.projectInfoFile.originalFilename)
-        uploadProjectInfoToProjectFolder(projectInfo, cmd.projectInfoFile.bytes)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void createProjectDtaInfoAndUploadFile(AddProjectDtaCommand cmd) throws IOException {
-        cmd.validate()
-        assert !cmd.errors.hasErrors()
-        ProjectInfo projectInfo = createProjectInfo(cmd.project, cmd.projectInfoFile.originalFilename)
-        addAdditionalValuesToProjectInfo(projectInfo, cmd, springSecurityService.currentUser as User)
-        uploadProjectInfoToProjectFolder(projectInfo, cmd.projectInfoFile.bytes)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void markDtaDataAsDeleted(ProjectInfoCommand cmd) throws IOException {
-        cmd.validate()
-        assert !cmd.errors.hasErrors()
-        ProjectInfo projectInfo = cmd.projectInfo
-        assert !projectInfo.deletionDate
-        projectInfo.refresh()
-        projectInfo.deletionDate = new Date()
-        projectInfo.save(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void deleteProjectInfo(ProjectInfoCommand cmd) throws IOException {
-        cmd.validate()
-        assert !cmd.errors.hasErrors()
-        ProjectInfo projectInfo = cmd.projectInfo
-        FileSystem fs = fileSystemService.getRemoteFileSystem(projectInfo.project.realm)
-        Path path = fs.getPath(projectInfo.getPath())
-        fileService.deleteDirectoryRecursively(path)
-        projectInfo.project = null
-        projectInfo.delete(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    byte[] getProjectInfoContent(ProjectInfo projectInfo) {
-        assert projectInfo: "No ProjectInfo given"
-        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
-        Path file = fs.getPath(projectInfo.path)
-
-        return Files.exists(file) ? file.bytes : [] as byte[]
-    }
-
-    private ProjectInfo createProjectInfo(Project project, String fileName) {
-        ProjectInfo projectInfo = new ProjectInfo([fileName: fileName])
-        project.addToProjectInfos(projectInfo)
-        project.save(flush: true)
-        return projectInfo
-    }
-
-    private void addAdditionalValuesToProjectInfo(ProjectInfo projectInfo, AddProjectDtaCommand cmd, User performingUser) {
-        projectInfo.performingUser = performingUser
-        cmd.values().each {
-            projectInfo[it.key] = it.value
-        }
-        projectInfo.save(flush: true)
-    }
-
-    private void uploadProjectInfoToProjectFolder(ProjectInfo projectInfo, byte[] content) {
-        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
-        Path projectDirectory = fs.getPath(projectInfo.project.projectDirectory.toString())
-        Path projectInfoDirectory = projectDirectory.resolve(PROJECT_INFO)
-
-        Path file = projectInfoDirectory.resolve(projectInfo.fileName)
-
-        fileService.createFileWithContent(file, content, [
-                PosixFilePermission.OWNER_READ,
-        ] as Set)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
