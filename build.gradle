@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+import com.gradle.scan.plugin.BuildScanPlugin
 import grails.util.Environment
 
 buildscript {
@@ -39,6 +40,15 @@ buildscript {
 plugins {
     id "com.gorylenko.gradle-git-properties" version "2.0.0"
     id "com.github.monosoul.markdown.page.generator" version "2.1.0.1"
+    id "com.gradle.build-scan" version "1.16"
+}
+
+buildScan {
+    termsOfServiceUrl = 'https://gradle.com/terms-of-service'
+    termsOfServiceAgree = 'yes'
+    if (System.getenv('PUBLISH_SCAN') == '1')   {
+        publishAlways()
+    }
 }
 
 group "de.dkfz.tbi"
@@ -50,6 +60,7 @@ apply plugin:"org.grails.grails-web"
 apply plugin:"asset-pipeline"
 apply plugin:"org.grails.grails-gsp"
 apply plugin:"codenarc"
+apply plugin: BuildScanPlugin
 
 repositories {
     mavenLocal()
