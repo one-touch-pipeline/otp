@@ -73,6 +73,11 @@ class RemoteShellHelper {
     private static Semaphore maxSshCalls
 
     /**
+     * Variable to use for synchronisation
+     */
+    private final Object SYNCHRONIZE_VARIABLE = new Object()
+
+    /**
      * Executes a command on a specified host and logs stdout and stderr
      *
      * @param realm The realm which identifies the host
@@ -132,7 +137,7 @@ class RemoteShellHelper {
             throw new ProcessingException("Neither password nor key file for remote connection specified.")
         }
         if (!maxSshCalls) {
-            synchronized (this) {
+            synchronized (SYNCHRONIZE_VARIABLE) {
                 maxSshCalls = maxSshCalls ?: new Semaphore(processingOptionService.findOptionAsInteger(ProcessingOption.OptionName.MAXIMUM_PARALLEL_SSH_CALLS), true)
             }
         }
@@ -157,7 +162,7 @@ class RemoteShellHelper {
             return processOutput
         } catch (Exception e) {
             log.info(e.toString(), e)
-            synchronized (this) {
+            synchronized (SYNCHRONIZE_VARIABLE) {
                 sessionPerRealm.remove(realm)
             }
             throw new ProcessingException(e)
@@ -248,7 +253,7 @@ class RemoteShellHelper {
                 session.sendKeepAliveMsg()
             } catch (Throwable e) {
                 log.error("Send keep alive failed for ${realm} ${session}", e)
-                synchronized (this) {
+                synchronized (SYNCHRONIZE_VARIABLE) {
                     sessionPerRealm.remove(realm)
                 }
             }

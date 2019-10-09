@@ -291,7 +291,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     SynchronizedOnThis {
-        priority = HIGH
+        priority = CRITICAL
     }
     SynchronizedReadObjectMethod {
         priority = DEFAULT
