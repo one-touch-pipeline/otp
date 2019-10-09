@@ -39,6 +39,8 @@ import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.ProcessOutput
 
+import java.nio.file.FileSystems
+
 class ClusterJobSchedulerServiceSpec extends Specification implements DataTest {
 
     @Override
@@ -103,6 +105,9 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest {
         service.fileService = Mock(FileService) {
             1 * createFileWithContent(_, _)
         }
+        service.fileSystemService = Mock(FileSystemService) {
+            1 * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
+        }
 
         when:
         Map<ClusterJobIdentifier, ClusterJobStatus> result = service.retrieveKnownJobsWithState(realm)
@@ -136,6 +141,9 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest {
         }
         service.fileService = Mock(FileService) {
             1 * createFileWithContent(_, _)
+        }
+        service.fileSystemService = Mock(FileSystemService) {
+            1 * getRemoteFileSystemOnDefaultRealm() >> FileSystems.default
         }
 
         when:

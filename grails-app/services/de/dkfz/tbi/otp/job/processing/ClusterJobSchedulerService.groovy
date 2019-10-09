@@ -42,6 +42,7 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 import de.dkfz.tbi.otp.utils.logging.SimpleLogger
 
+import java.nio.file.FileSystem
 import java.nio.file.Path
 import java.time.Duration
 import java.time.LocalDateTime
@@ -75,6 +76,7 @@ class ClusterJobSchedulerService {
     FileService fileService
     JobStatusLoggingService jobStatusLoggingService
     ProcessingOptionService processingOptionService
+    FileSystemService fileSystemService
 
     /**
      * Executes a job on a cluster specified by the realm.
@@ -217,7 +219,10 @@ class ClusterJobSchedulerService {
 
     private Path pathForLogging() {
         String dateDirectory = LocalDateTime.now().format(PATH_FORMATTER)
-        Path baseLogDir = configService.getLoggingRootPath().toPath()
+
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+
+        Path baseLogDir = fileSystem.getPath(configService.getLoggingRootPath().path)
 
         Path logFile = baseLogDir.resolve(CLUSTER_JOBS_STATE_LOG_DIRECTORY).resolve(dateDirectory)
         assert logFile.absolute
