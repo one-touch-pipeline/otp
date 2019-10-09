@@ -201,14 +201,16 @@ generate_changelog:
 # This must only run on the master branch to deploy the only pages site
 # https://docs.gitlab.com/ee/user/project/pages/introduction.html#gitlab-ciyml-for-a-repository-where-theres-also-actual-code
 pages:
-  extends: .abstract_base_template
   stage: public doc
   dependencies:
     - create doc
   script:
     - mv build/docs public
   artifacts:
+    expire_in: 1 day
     paths:
       - public
   only:
     - master
+  variables:
+    GIT_STRATEGY: none
