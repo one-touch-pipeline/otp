@@ -27,8 +27,8 @@ import org.springframework.context.ApplicationContext
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.processing.AbstractOtpJob
 import de.dkfz.tbi.otp.job.processing.ClusterJobSubmissionOptionsService
-import de.dkfz.tbi.otp.job.processing.Job
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.StaticApplicationContextWrapper
 
@@ -115,7 +115,7 @@ enum TypeValidators {
         }
 
         ApplicationContext context = StaticApplicationContextWrapper.context
-        List<String> jobNames = context.getBeanNamesForType(Job.class)
+        List<String> jobNames = context.getBeanNamesForType(AbstractOtpJob.class)
 
         return jobNames.any {
             context.getType(it).getSimpleName() == split[0]
@@ -124,7 +124,7 @@ enum TypeValidators {
 
     private static List<String> allowedValuesForClusterSubmission() {
         ApplicationContext context = StaticApplicationContextWrapper.context
-        List<String> beanNames = context.getBeanNamesForType(Job.class)
+        List<String> beanNames = context.getBeanNamesForType(AbstractOtpJob.class)
         List<String> jobNames = beanNames.collect {
             context.getType(it).getSimpleName()
         }

@@ -27,6 +27,8 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.job.jobs.dataInstallation.CopyFilesJob
+import de.dkfz.tbi.otp.job.jobs.importExternallyMergedBam.ReplaceSourceWithLinkJob
+import de.dkfz.tbi.otp.job.jobs.roddyAlignment.ExecutePanCanJob
 
 @Rollback
 @Integration
@@ -35,16 +37,19 @@ class TypeValidatorsIntegrationSpec extends Specification {
     private static String JOB_NAME = CopyFilesJob.class.getSimpleName()
 
     @Unroll
-    void "check JOB_NAME for value '#value' should return '#ret'"() {
+    void "check JOB_NAME for value '#name' should return '#ret'"() {
         expect:
-        ret == TypeValidators.JOB_NAME_SEQ_TYPE.validate(value)
+        returnValue == TypeValidators.JOB_NAME_SEQ_TYPE.validate(valueClosure())
 
         where:
-        value          || ret
-        JOB_NAME       || true
-        ''             || false
-        null           || false
-        'OtherJobName' || false
+        name                       | valueClosure                                       || returnValue
+        JOB_NAME                   | { JOB_NAME }                                       || true
+        'empty'                    | { '' }                                             || false
+        'null'                     | { null }                                           || false
+        'OtherName'                | { 'OtherJobName' }                                 || false
+        //example for roddy job
+        'ExecutePanCanJob'         | { ExecutePanCanJob.class.getSimpleName() }         || false
+        //example for no cluster job
+        'ReplaceSourceWithLinkJob' | { ReplaceSourceWithLinkJob.class.getSimpleName() } || false
     }
-
 }
