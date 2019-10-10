@@ -381,6 +381,22 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
     }
 
     @Test
+    void testGetLatestNotRestartedProcessingStepUpdate() {
+        setupData()
+        JobExecutionPlan plan = mockPlan()
+        Process process = mockProcess(plan)
+        JobDefinition job = createTestJob("Test", plan)
+        ProcessingStep step = mockProcessingStep(process, job)
+        ProcessingStepUpdate update = mockProcessingStepUpdate(step)
+        ProcessingStepUpdate restarted = mockProcessingStepUpdate(step, ExecutionState.RESTARTED, update)
+
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            assertSame(restarted, processService.getLatestProcessingStepUpdate(step))
+            assertSame(update, processService.getLatestNotRestartedProcessingStepUpdate(step))
+        }
+    }
+
+    @Test
     void testGetFirstUpdatePermission() {
         setupData()
         JobExecutionPlan plan = mockPlan()

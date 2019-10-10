@@ -189,6 +189,14 @@ class ProcessingStep implements Serializable, Entity {
     }
 
     /**
+     * @return The latest {@link ProcessingStepUpdate} belonging to this {@link ProcessingStep} where the
+     * execution state is not 'restarted' or <code>null</code> if this {@link ProcessingStep} has no {@link ProcessingStepUpdate}s.
+     */
+    ProcessingStepUpdate getLatestNotRestartedProcessingStepUpdate() {
+        return ProcessingStepUpdate.findByProcessingStepAndStateNotEqual(this, ExecutionState.RESTARTED, [sort: "id", order: "desc"])
+    }
+
+    /**
      * @return The first {@link ProcessingStepUpdate} belonging to this {@link ProcessingStep} or
      * <code>null</code> if this {@link ProcessingStep} has no {@link ProcessingStepUpdate}s.
      */

@@ -301,7 +301,7 @@ class ProcessesController {
                 SecurityContextHolder.context.authentication = auth
                 Map data = [:]
                 SessionUtils.withNewSession {
-                    ProcessingStepUpdate update = processService.getLatestProcessingStepUpdate(step)
+                    ProcessingStepUpdate update = processService.getLatestNotRestartedProcessingStepUpdate(step)
                     data.put("step", step)
                     data.put("state", update?.state)
                     data.put("firstUpdate", TimestampHelper.asTimestamp(processService.getFirstUpdate(step)))
