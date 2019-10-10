@@ -78,7 +78,7 @@ abstract class AbstractStartJobImpl implements StartJob, ApplicationListener<Job
      * If looks for the start job definition based on the bean name of the current start job class,
      * then for the job execution plan by that job definition.
      */
-    private initializeJobExecutionPlan() {
+    private void initializeJobExecutionPlan() {
         if (!schedulerService.active) {
             return
         }

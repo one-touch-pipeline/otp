@@ -50,6 +50,7 @@ class SeqTrackSet {
         this.numberOfBases = getTotalNumberOfBasesOrNull()
     }
 
+    @SuppressWarnings('ReturnNullFromCatchBlock') //if the number can not be calculated, null should be return
     private Long getTotalNumberOfBasesOrNull() {
         try {
             return dataFiles.findAll { !it.indexFile }.sum { DataFile dataFile ->

@@ -521,7 +521,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     ReturnNullFromCatchBlock {
-        priority = HIGH
+        priority = CRITICAL
     }
     SwallowThreadDeath {
         priority = DEFAULT

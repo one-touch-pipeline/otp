@@ -99,7 +99,7 @@ class FastqcResultsController {
                 stream = fastqcDataFilesService.getInputStreamFromZipFile(dataFile, cmd.path)
             } catch (FileNotReadableException e) {
                 render status: 404
-                return
+                return void
             }
             render file: stream , contentType: "image/png"
         }
