@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.tracking
 
 import grails.gorm.transactions.Transactional
 import org.hibernate.*
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.*
@@ -31,6 +32,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class OtrsTicketService {
+
+    @Autowired
+    NotificationCreator notificationCreator
 
     /**
      * helper do get pessimistic lock for ticket and wait till 10 seconds therefore
@@ -71,7 +75,6 @@ class OtrsTicketService {
         ticket.save(flush: true)
     }
 
-
     OtrsTicket createOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         OtrsTicket otrsTicket = new OtrsTicket(
                 ticketNumber: ticketNumber,
@@ -81,7 +84,6 @@ class OtrsTicketService {
         assert otrsTicket.save(flush: true)
         return otrsTicket
     }
-
 
     OtrsTicket createOrResetOtrsTicket(String ticketNumber, String seqCenterComment, boolean automaticNotification) {
         OtrsTicket otrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber))
@@ -138,7 +140,6 @@ class OtrsTicketService {
         return (otrsIds ? OtrsTicket.findAllByIdInList(otrsIds) : []) as Set
     }
 
-
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void assignOtrsTicketToRunSegment(String ticketNumber, Long runSegmentId) {
         RunSegment runSegment = RunSegment.get(runSegmentId)
@@ -171,7 +172,7 @@ class OtrsTicketService {
         runSegment.otrsTicket = newOtrsTicket
         assert runSegment.save(flush: true)
 
-        ProcessingStatus status = getProcessingStatus(newOtrsTicket.findAllSeqTracks())
+        ProcessingStatus status = notificationCreator.getProcessingStatus(newOtrsTicket.findAllSeqTracks())
         for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
             ProcessingStatus.WorkflowProcessingStatus stepStatus = status."${step}ProcessingStatus"
             if (stepStatus.mightDoMore) {
@@ -184,5 +185,4 @@ class OtrsTicketService {
 
         assert newOtrsTicket.save(flush: true)
     }
-
 }

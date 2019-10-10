@@ -27,10 +27,11 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.ngsdata.RunSegment
-import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.user.UserException
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 
@@ -38,10 +39,18 @@ import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus
 @Integration
 class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFactoryCore {
 
+    private OtrsTicketService otrsTicketService
+
+    void setup() {
+        otrsTicketService = new OtrsTicketService()
+        otrsTicketService.notificationCreator = new NotificationCreator()
+        otrsTicketService.notificationCreator.processingOptionService = new ProcessingOptionService()
+        otrsTicketService.notificationCreator.userProjectRoleService = new UserProjectRoleService()
+    }
+
     @Unroll
     void 'saveStartTimeIfNeeded, when start time for #step is not set yet, then set value'() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
         OtrsTicket otrsTicket = createOtrsTicket()
 
         when:
@@ -58,7 +67,6 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
     void 'saveStartTimeIfNeeded, when start time for #step is already set, then do not change the value'() {
         given:
         Date date = new Date(2000 - 1900, 2, 2)
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
         OtrsTicket otrsTicket = createOtrsTicket([
                 ("${step}Started".toString()): date
         ])
@@ -76,7 +84,6 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
     @Unroll
     void 'saveEndTimeIfNeeded, when end time for #step is not set yet, then set value'() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
         OtrsTicket otrsTicket = createOtrsTicket()
 
         when:
@@ -94,7 +101,6 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
     void 'saveEndTimeIfNeeded, when end time for #step is already set, then do not change the value'() {
         given:
         Date date = new Date(2000 - 1900, 2, 2)
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
         OtrsTicket otrsTicket = createOtrsTicket([
                 ("${step}Finished".toString()): date
         ])
@@ -112,7 +118,6 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
 
     void 'markFinalNotificationSent, when call, then the flag finalNotificationSent should be true'() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
         OtrsTicket otrsTicket = createOtrsTicket([
                 finalNotificationSent: false
         ])
@@ -126,7 +131,6 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
 
     void 'findAllOtrsTickets'() {
         given: "a handfull of tickets and linked and unlinked seqtracks"
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
         OtrsTicket otrsTicket01, otrsTicket02, otrsTicket03
         SeqTrack seqTrack1A, seqTrack1B, seqTrack02, seqTrack03, seqTrackOrphanNoDatafile, seqTrackOrphanWithDatafile
         Set<OtrsTicket> actualBatch, actualSingle, actualOrphanNoDatafile, actualOrphanWithDatafile
@@ -176,10 +180,45 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
         TestCase.assertContainSame(actualOrphanWithDatafile, [])
     }
 
-    void "assignOtrsTicketToRunSegment, no RunSegment for runSegementId, throws AssertionError "() {
+    void "assignOtrsTicketToRunSegment, assign new ticketNumber, ticket already exists"() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
+        OtrsTicket oldOtrsTicket = createOtrsTicket()
+        OtrsTicket newOtrsTicket = createOtrsTicket()
+        RunSegment runSegment = createRunSegment(otrsTicket: oldOtrsTicket)
 
+        when:
+        otrsTicketService.assignOtrsTicketToRunSegment(newOtrsTicket.ticketNumber, runSegment.id)
+
+        then:
+        runSegment.otrsTicket == newOtrsTicket
+    }
+
+    void "assignOtrsTicketToRunSegment, assign new ticketNumber, ticket does not exists"() {
+        given:
+        String newTicketNumber = "2000112201234567"
+        OtrsTicket oldOtrsTicket = createOtrsTicket()
+        RunSegment runSegment = createRunSegment(otrsTicket: oldOtrsTicket)
+
+        when:
+        otrsTicketService.assignOtrsTicketToRunSegment(newTicketNumber, runSegment.id)
+
+        then:
+        runSegment.otrsTicket == CollectionUtils.exactlyOneElement(OtrsTicket.findAllByTicketNumber(newTicketNumber))
+    }
+
+    void "assignOtrsTicketToRunSegment, new ticketNumber equals old ticketNumber, does not fail"() {
+        given:
+        OtrsTicket otrsTicket = createOtrsTicket(ticketNumber: '2000010112345678')
+        RunSegment runSegment = createRunSegment(otrsTicket: otrsTicket)
+
+        when:
+        otrsTicketService.assignOtrsTicketToRunSegment(otrsTicket.ticketNumber, runSegment.id)
+
+        then:
+        runSegment.otrsTicket == otrsTicket
+    }
+
+    void "assignOtrsTicketToRunSegment, no RunSegment for runSegementId, throws AssertionError "() {
         when:
         otrsTicketService.assignOtrsTicketToRunSegment("", 1)
 
@@ -188,29 +227,10 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
         error.message.contains("No RunSegment found")
     }
 
-    void "assignOtrsTicketToRunSegment, new ticketNumber equals old ticketNumber, returns true"() {
-        given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
-
-        OtrsTicket otrsTicket
-        RunSegment runSegment
-
-        otrsTicket = createOtrsTicket(ticketNumber: '2000010112345678')
-        runSegment = createRunSegment(otrsTicket: otrsTicket)
-
-        expect:
-        otrsTicketService.assignOtrsTicketToRunSegment(otrsTicket.ticketNumber, runSegment.id)
-    }
-
     void "assignOtrsTicketToRunSegment, new ticketNumber does not pass custom validation, throws UserException"() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
-
-        OtrsTicket otrsTicket
-        RunSegment runSegment
-
-        otrsTicket = createOtrsTicket(ticketNumber: '2000010112345678')
-        runSegment = createRunSegment(otrsTicket: otrsTicket)
+        OtrsTicket otrsTicket = createOtrsTicket(ticketNumber: '2000010112345678')
+        RunSegment runSegment = createRunSegment(otrsTicket: otrsTicket)
 
         when:
         otrsTicketService.assignOtrsTicketToRunSegment('abc', runSegment.id)
@@ -221,14 +241,9 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
     }
 
     void "assignOtrsTicketToRunSegment, old OtrsTicket consists of several other RunSegements, throws UserException"() {
-        given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
+        OtrsTicket otrsTicket = createOtrsTicket(ticketNumber: '2000010112345678')
+        RunSegment runSegment = createRunSegment(otrsTicket: otrsTicket)
 
-        OtrsTicket otrsTicket
-        RunSegment runSegment
-
-        otrsTicket = createOtrsTicket(ticketNumber: '2000010112345678')
-        runSegment = createRunSegment(otrsTicket: otrsTicket)
         createRunSegment(otrsTicket: otrsTicket)
 
         when:
@@ -241,15 +256,9 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
 
     void "assignOtrsTicketToRunSegment, new OtrsTicket final notification already sent, throws UserException"() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
-
-        OtrsTicket oldOtrsTicket
-        RunSegment runSegment
-        OtrsTicket newOtrsTicket
-
-        oldOtrsTicket = createOtrsTicket(ticketNumber: '2000010112345678')
-        runSegment = createRunSegment(otrsTicket: oldOtrsTicket)
-        newOtrsTicket = createOtrsTicket(ticketNumber: '2000010112345679', finalNotificationSent: true)
+        OtrsTicket oldOtrsTicket = createOtrsTicket(ticketNumber: '2000010112345678')
+        RunSegment runSegment = createRunSegment(otrsTicket: oldOtrsTicket)
+        OtrsTicket newOtrsTicket = createOtrsTicket(ticketNumber: '2000010112345679', finalNotificationSent: true)
 
         when:
         otrsTicketService.assignOtrsTicketToRunSegment(newOtrsTicket.ticketNumber, runSegment.id)
@@ -261,11 +270,6 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
 
     void "assignOtrsTicketToRunSegment, adjust ProcessingStatus of new OtrsTicket"() {
         given:
-        OtrsTicketService otrsTicketService = new OtrsTicketService()
-
-        OtrsTicket newOtrsTicket
-        RunSegment runSegment
-
         Date minDate = new Date() - 1
         Date maxDate = new Date() + 1
 
@@ -280,8 +284,8 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
                 snvStarted: null,
                 snvFinished: null
         )
-        runSegment = createRunSegment(otrsTicket: oldOtrsTicket)
-        newOtrsTicket = createOtrsTicket(
+        RunSegment runSegment = createRunSegment(otrsTicket: oldOtrsTicket)
+        OtrsTicket newOtrsTicket = createOtrsTicket(
                 ticketNumber: '2000010112345679',
                 installationStarted: maxDate,
                 installationFinished: maxDate,
@@ -293,7 +297,7 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
                 snvFinished: null
         )
 
-        otrsTicketService.metaClass.getProcessingStatus = { Set<SeqTrack> set ->
+        otrsTicketService.notificationCreator.metaClass.getProcessingStatus = { Set<SeqTrack> set ->
             return [
                     getInstallationProcessingStatus: { -> ALL_DONE },
                     getFastqcProcessingStatus      : { -> ALL_DONE },
