@@ -74,7 +74,7 @@ class SequenceController {
 
             data.problemDescription = seq.problem?.description
 
-            data.fastQCFiles = seqTrackIdDataFileMap[seq.seqTrackId].sort {
+            data.fastQCFiles = seqTrackIdDataFileMap[seq.seqTrackId]?.sort {
                 [!it.indexFile, it.mateNumber]
             }.collect {
                 [
