@@ -177,9 +177,11 @@ test migration:
 generate_changelog:
   extends: .abstract_base_template
   script:
-    - set -e
     - mkdir -p $ARTIFACTS_BASE_DIRECTORY
+    - set +e
     - LATEST_TAG=$(git describe --abbrev=0 --tags --match "v*.*.*" HEAD^)
+    - set -e
+    - 'if [[ -z "${LATEST_TAG}" ]]; then git fetch --unshallow --tags ; LATEST_TAG=$(git describe --abbrev=0 --tags --match "v*.*.*" HEAD^) ; fi'
     - echo $LATEST_TAG
     - git config gitchangelog.rc-path scripts/gitchangelog/gitchangelog.rc.reference
     - scripts/gitchangelog/gitchangelog.py ^$LATEST_TAG HEAD >> $ARTIFACTS_BASE_DIRECTORY/CHANGELOG.txt
