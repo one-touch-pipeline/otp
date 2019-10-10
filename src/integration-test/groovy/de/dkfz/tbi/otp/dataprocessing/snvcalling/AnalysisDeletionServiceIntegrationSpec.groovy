@@ -26,6 +26,7 @@ import grails.transaction.Rollback
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 
 @Rollback
@@ -37,6 +38,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
     SamplePair samplePair
     RoddySnvCallingInstance snvCallingInstance
     IndelCallingInstance indelCallingInstance
+    SophiaInstance sophiaInstance
     AceseqInstance aceseqInstance
     ProcessedMergedBamFile bamFileTumor2
     SamplePair samplePair2
@@ -52,6 +54,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
                 samplePair    : samplePair,
         )
         indelCallingInstance = DomainFactory.createIndelCallingInstanceWithSameSamplePair(snvCallingInstance)
+        sophiaInstance = DomainFactory.createSophiaInstanceWithSameSamplePair(snvCallingInstance)
         aceseqInstance = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance)
         DomainFactory.createRealm()
 
@@ -64,28 +67,21 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         analysisInstancesDirectories = [
                 snvCallingInstance.getInstancePath().getAbsoluteDataManagementPath(),
                 indelCallingInstance.getInstancePath().getAbsoluteDataManagementPath(),
+                sophiaInstance.getInstancePath().getAbsoluteDataManagementPath(),
                 aceseqInstance.getInstancePath().getAbsoluteDataManagementPath(),
         ]
         analysisSamplePairsDirectories = [
                 snvCallingInstance.samplePair.getSnvSamplePairPath().getAbsoluteDataManagementPath(),
                 indelCallingInstance.samplePair.getIndelSamplePairPath().getAbsoluteDataManagementPath(),
+                sophiaInstance.samplePair.getSophiaSamplePairPath().getAbsoluteDataManagementPath(),
                 aceseqInstance.samplePair.getAceseqSamplePairPath().getAbsoluteDataManagementPath(),
         ]
         samplePairs = [
                 snvCallingInstance.samplePair,
                 indelCallingInstance.samplePair,
+                sophiaInstance.samplePair,
                 aceseqInstance.samplePair,
         ]
-    }
-
-    void cleanupData() {
-        analysisDeletionService = null
-        snvCallingInstance = null
-        indelCallingInstance = null
-        aceseqInstance = null
-        analysisInstancesDirectories = null
-        analysisSamplePairsDirectories = null
-        samplePairs = null
     }
 
     void "delete instance and then delete sample pairs without analysis instances from analysis deletion service with analysis instances finished for control tumor 1"() {
@@ -94,6 +90,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
 
         snvCallingInstance.processingState = AnalysisProcessingStates.FINISHED
         indelCallingInstance.processingState = AnalysisProcessingStates.FINISHED
+        sophiaInstance.processingState = AnalysisProcessingStates.FINISHED
         aceseqInstance.processingState = AnalysisProcessingStates.FINISHED
         List<File> instancesDirectories = []
         List<File> samplePairsDirectories
@@ -112,11 +109,9 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         samplePairsDirectories.containsAll(analysisSamplePairsDirectories)
         RoddySnvCallingInstance.list() == []
         IndelCallingInstance.list() == []
+        SophiaInstance.list() == []
         AceseqInstance.list() == []
         SamplePair.list() == [samplePair2]
-
-        cleanup:
-        cleanupData()
     }
 
     void "delete instance and then delete sample pairs without analysis instances from analysis deletion service with analysis instances finished for control tumor 1 and control tumor 2"() {
@@ -125,6 +120,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
 
         snvCallingInstance.processingState = AnalysisProcessingStates.FINISHED
         indelCallingInstance.processingState = AnalysisProcessingStates.FINISHED
+        sophiaInstance.processingState = AnalysisProcessingStates.FINISHED
         aceseqInstance.processingState = AnalysisProcessingStates.FINISHED
 
         RoddySnvCallingInstance snvCallingInstance2 = DomainFactory.createRoddySnvCallingInstance([
@@ -136,6 +132,7 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         ])
         assert snvCallingInstance2.save(flush: true)
         IndelCallingInstance indelCallingInstance2 = DomainFactory.createIndelCallingInstanceWithSameSamplePair(snvCallingInstance2)
+        SophiaInstance sophiaInstance2 = DomainFactory.createSophiaInstanceWithSameSamplePair(snvCallingInstance2)
         AceseqInstance aceseqInstance2 = DomainFactory.createAceseqInstanceWithSameSamplePair(snvCallingInstance2)
         List<File> instancesDirectories = []
         List<File> samplePairsDirectories
@@ -143,17 +140,20 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         analysisInstancesDirectories.addAll(
                 snvCallingInstance2.getInstancePath().getAbsoluteDataManagementPath(),
                 indelCallingInstance2.getInstancePath().getAbsoluteDataManagementPath(),
-                aceseqInstance2.getInstancePath().getAbsoluteDataManagementPath()
+                sophiaInstance2.getInstancePath().getAbsoluteDataManagementPath(),
+                aceseqInstance2.getInstancePath().getAbsoluteDataManagementPath(),
         )
         analysisSamplePairsDirectories.addAll(
                 snvCallingInstance2.samplePair.getSnvSamplePairPath().getAbsoluteDataManagementPath(),
                 indelCallingInstance2.samplePair.getIndelSamplePairPath().getAbsoluteDataManagementPath(),
-                aceseqInstance2.samplePair.getAceseqSamplePairPath().getAbsoluteDataManagementPath()
+                sophiaInstance2.samplePair.getIndelSamplePairPath().getAbsoluteDataManagementPath(),
+                aceseqInstance2.samplePair.getAceseqSamplePairPath().getAbsoluteDataManagementPath(),
         )
         samplePairs.addAll(
                 snvCallingInstance2.samplePair,
                 indelCallingInstance2.samplePair,
-                aceseqInstance2.samplePair
+                sophiaInstance2.samplePair,
+                aceseqInstance2.samplePair,
         )
 
         when:
@@ -169,10 +169,8 @@ class AnalysisDeletionServiceIntegrationSpec extends Specification {
         samplePairsDirectories.containsAll(analysisSamplePairsDirectories)
         RoddySnvCallingInstance.list() == []
         IndelCallingInstance.list() == []
+        SophiaInstance.list() == []
         AceseqInstance.list() == []
         SamplePair.list() == []
-
-        cleanup:
-        cleanupData()
     }
 }

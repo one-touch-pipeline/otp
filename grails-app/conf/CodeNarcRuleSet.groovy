@@ -333,7 +333,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     CouldBeSwitchStatement {
-        priority = HIGH
+        priority = CRITICAL
     }
     //FieldTypeRequired //does not work well with Grails
     HashtableIsObsolete {

@@ -35,26 +35,30 @@ class AnalysisDeletionService {
      */
     static File deleteInstance(BamFilePairAnalysis analysisInstance) {
         File directory = analysisInstance.getInstancePath().getAbsoluteDataManagementPath()
-        if (analysisInstance instanceof IndelCallingInstance) {
-            List<IndelQualityControl> indelQualityControl = IndelQualityControl.findAllByIndelCallingInstance(analysisInstance, [sort: 'id', order: 'desc'])
-            indelQualityControl.each {
-                it.delete(flush: true)
-            }
-            List<IndelSampleSwapDetection> indelSampleSwapDetections = IndelSampleSwapDetection.findAllByIndelCallingInstance(
-                    analysisInstance, [sort: 'id', order: 'desc'])
-            indelSampleSwapDetections.each {
-                it.delete(flush: true)
-            }
-        } else if (analysisInstance instanceof SophiaInstance) {
-            List<SophiaQc> sophiaQc = SophiaQc.findAllBySophiaInstance(analysisInstance, [sort: 'id', order: 'desc'])
-            sophiaQc.each {
-                it.delete(flush: true)
-            }
-        } else if (analysisInstance instanceof AceseqInstance) {
-            List<AceseqQc> aceseqQc = AceseqQc.findAllByAceseqInstance(analysisInstance, [sort: 'id', order: 'desc'])
-            aceseqQc.each {
-                it.delete(flush: true)
-            }
+        switch (analysisInstance) {
+            case { it instanceof IndelCallingInstance } :
+                List<IndelQualityControl> indelQualityControl = IndelQualityControl.findAllByIndelCallingInstance(analysisInstance, [sort: 'id', order: 'desc'])
+                indelQualityControl.each {
+                    it.delete(flush: true)
+                }
+                List<IndelSampleSwapDetection> indelSampleSwapDetections = IndelSampleSwapDetection.findAllByIndelCallingInstance(
+                        analysisInstance, [sort: 'id', order: 'desc'])
+                indelSampleSwapDetections.each {
+                    it.delete(flush: true)
+                }
+                break
+            case { it instanceof SophiaInstance } :
+                List<SophiaQc> sophiaQc = SophiaQc.findAllBySophiaInstance(analysisInstance, [sort: 'id', order: 'desc'])
+                sophiaQc.each {
+                    it.delete(flush: true)
+                }
+                break
+            case { it instanceof AceseqInstance } :
+                List<AceseqQc> aceseqQc = AceseqQc.findAllByAceseqInstance(analysisInstance, [sort: 'id', order: 'desc'])
+                aceseqQc.each {
+                    it.delete(flush: true)
+                }
+                break
         }
         analysisInstance.delete(flush: true)
         return directory

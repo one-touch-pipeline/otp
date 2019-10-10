@@ -46,33 +46,38 @@ class DicomAuditSecurityEventListener implements ApplicationListener<AbstractAut
 
         //if login success (AuthenticationSuccessEvent) then nothing should be done
 
-        if (event instanceof AbstractAuthenticationFailureEvent) {
-            // Login failure
-            DicomAuditLogger.logUserLogin(
-                    EventIdentification.EventOutcomeIndicator.MINOR_FAILURE,
-                    (event.authentication.principal.hasProperty("username") ?
-                            event.authentication.principal.username : event.authentication.principal) as String
-            )
-        } else if (event instanceof InteractiveAuthenticationSuccessEvent) {
-            // Login success, this event fires only on interactive (Non-automated) login
-            DicomAuditLogger.logUserLogin(
-                    EventIdentification.EventOutcomeIndicator.SUCCESS,
-                    event.authentication.principal.username as String
-            )
-        } else if (event instanceof AuthenticationSwitchUserEvent) {
-            // User switch
-            projectSelectionService.setSelectedProject([], 'none') //clear cache if user switched
-            DicomAuditLogger.logUserSwitched(
-                    EventIdentification.EventOutcomeIndicator.SUCCESS,
-                    DicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
-                    event.getTargetUser()?.getUsername()
-            )
-        } else if (event instanceof AuthorizationFailureEvent) {
-            DicomAuditLogger.logRestrictedFunctionUsed(
-                    EventIdentification.EventOutcomeIndicator.MINOR_FAILURE,
-                    DicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
-                    event.source.hasProperty("request") ? event.source.request.getRequestURI() : "null"
-            )
+        switch (event) {
+            case { it instanceof AbstractAuthenticationFailureEvent } :
+                // Login failure
+                DicomAuditLogger.logUserLogin(
+                        EventIdentification.EventOutcomeIndicator.MINOR_FAILURE,
+                        (event.authentication.principal.hasProperty("username") ?
+                                event.authentication.principal.username : event.authentication.principal) as String
+                )
+                break
+            case { it instanceof InteractiveAuthenticationSuccessEvent } :
+                // Login success, this event fires only on interactive (Non-automated) login
+                DicomAuditLogger.logUserLogin(
+                        EventIdentification.EventOutcomeIndicator.SUCCESS,
+                        event.authentication.principal.username as String
+                )
+                break
+            case { it instanceof AuthenticationSwitchUserEvent } :
+                // User switch
+                projectSelectionService.setSelectedProject([], 'none') //clear cache if user switched
+                DicomAuditLogger.logUserSwitched(
+                        EventIdentification.EventOutcomeIndicator.SUCCESS,
+                        DicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
+                        event.getTargetUser()?.getUsername()
+                )
+                break
+            case { it instanceof AuthorizationFailureEvent } :
+                DicomAuditLogger.logRestrictedFunctionUsed(
+                        EventIdentification.EventOutcomeIndicator.MINOR_FAILURE,
+                        DicomAuditUtils.getRealUserName(event.authentication.principal.username as String),
+                        event.source.hasProperty("request") ? event.source.request.getRequestURI() : "null"
+                )
+                break
         }
     }
 }

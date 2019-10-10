@@ -45,15 +45,19 @@ class OnlyOneRunValidatorSpec extends Specification {
         String secondData = ""
         if (ilse != NONE) {
             header = "${MetaDataColumn.ILSE_NO}\t" + header
-            if (ilse == EMPTY) {
-                firstData = "\t"
-                secondData = "\t"
-            } else if (ilse == DIFFERENT) {
-                firstData = "ilse1\t"
-                secondData = "ilse2\t"
-            } else if (ilse == SAME) {
-                firstData = "ilse1\t"
-                secondData = "ilse1\t"
+            switch (ilse) {
+                case EMPTY:
+                    firstData = "\t"
+                    secondData = "\t"
+                    break
+                case DIFFERENT:
+                    firstData = "ilse1\t"
+                    secondData = "ilse2\t"
+                    break
+                case SAME:
+                    firstData = "ilse1\t"
+                    secondData = "ilse1\t"
+                    break
             }
         }
         firstData += "run1\n"
