@@ -62,7 +62,7 @@ class ProjectUserController implements CheckAndCall {
         String groupDistinguishedName = ldapService.getDistinguishedNameOfGroupByGroupName(project.unixGroup)
         List<String> ldapGroupMemberUsernames = ldapService.getGroupMembersByDistinguishedName(groupDistinguishedName)
 
-        List<User> ldapGroupMemberUsers = User.findAllByUsernameInList(ldapGroupMemberUsernames)
+        List<User> ldapGroupMemberUsers = ldapGroupMemberUsernames ? User.findAllByUsernameInList(ldapGroupMemberUsernames) : []
         projectUsers.addAll(ldapGroupMemberUsers)
         List<String> nonDatabaseUsers = ldapGroupMemberUsernames - ldapGroupMemberUsers*.username
 
