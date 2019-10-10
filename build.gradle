@@ -240,6 +240,7 @@ bootRun {
 }
 
 tasks.withType(Test) {
+    maxParallelForks = System.getenv('MAX_PARALLEL_FORKS')?.isInteger() ? System.getenv('MAX_PARALLEL_FORKS') as int : 1
     systemProperty "geb.env", System.getProperty('geb.env')
     systemProperty "geb.build.reportsDir", reporting.file("geb/integrationTest")
     systemProperty "webdriver.chrome.driver", System.getProperty('webdriver.chrome.driver')
