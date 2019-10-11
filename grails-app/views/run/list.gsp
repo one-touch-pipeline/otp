@@ -78,11 +78,7 @@
             </table>
         </div>
         <div class="otpDataTables">
-            <otp:dataTable codes="${['run.list.name',
-                'run.list.seqCenter',
-                'run.list.dateCreated',
-                'run.list.dateExecuted',
-                ] }" id="runTable"/>
+            <otp:dataTable codes="${tableHeader}" id="runTable"/>
         </div>
     <asset:script>
         $(function() {

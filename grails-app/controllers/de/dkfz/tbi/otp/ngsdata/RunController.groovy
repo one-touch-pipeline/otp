@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 import groovy.json.JsonSlurper
+import groovy.transform.TupleConstructor
 
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
@@ -65,6 +66,7 @@ class RunController {
     def list = {
         Map retValue = [
                 seqCenters: seqCenterService.allSeqCenters(),
+                tableHeader: RunColumn.values()*.message,
                 projects  : projectService.getAllProjects().size(),
         ]
         return retValue
@@ -78,7 +80,7 @@ class RunController {
         dataToRender.iTotalRecords = runService.countRun(filtering, cmd.sSearch)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        runService.listRuns(cmd.sortOrder, RunSortColumn.fromDataTable(cmd.iSortCol_0), filtering, cmd.sSearch).each { run ->
+        runService.listRuns(cmd.sortOrder, RunColumn.fromDataTable(cmd.iSortCol_0), filtering, cmd.sSearch).each { run ->
             dataToRender.aaData << [
                     id          : run.id,
                     name        : run.name,
@@ -91,31 +93,22 @@ class RunController {
     }
 }
 
-enum RunSortColumn {
-    RUN("name"),
-    SEQCENTER("seqCenter"),
-    DATECREATED("dateCreated"),
-    DATEEXECUTED("dateExecuted"),
 
-    private final String columnName
+@TupleConstructor
+enum RunColumn {
+    RUN('run.list.name', "name"),
+    SEQCENTER('run.list.seqCenter', "seqCenter"),
+    DATECREATED('run.list.dateCreated', "dateCreated"),
+    DATEEXECUTED('run.list.dateExecuted', "dateExecuted",),
 
-    RunSortColumn(String column) {
-        this.columnName = column
-    }
+    final String message
+    final String columnName
 
-    static RunSortColumn fromDataTable(int column) {
-        switch (column) {
-            case 0:
-                return RunSortColumn.RUN
-            case 1:
-                return RunSortColumn.SEQCENTER
-            case 2:
-                return RunSortColumn.DATECREATED
-            case 3:
-                return RunSortColumn.DATEEXECUTED
-            default:
-                return RunSortColumn.RUN
+    static RunColumn fromDataTable(int column) {
+        if (column >= values().size() || column < 0) {
+            return RUN
         }
+        return values()[column]
     }
 }
 

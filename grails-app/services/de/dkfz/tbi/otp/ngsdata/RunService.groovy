@@ -52,7 +52,7 @@ class RunService {
      * @return Run
      */
 
-    List<Run> listRuns(boolean sortOrder, RunSortColumn column, RunFiltering filtering, String filterString) {
+    List<Run> listRuns(boolean sortOrder, RunColumn column, RunFiltering filtering, String filterString) {
         List seqCenters = seqCenterService.allSeqCenters()
         if (!seqCenters) {
             return []
