@@ -40,17 +40,8 @@
         </div><br><br><br>
         <div id="clusterJobGeneralTableContainer">
             <div class="otpDataTables">
-                 <otp:dataTable
-                     codes="${[
-                         'jobstats.general.table.id',
-                         'jobstats.general.table.name',
-                         'jobstats.general.table.status',
-                         'jobstats.general.table.queued',
-                         'jobstats.general.table.started',
-                         'jobstats.general.table.ended'
-                     ]}"
-                     id="clusterJobGeneralTable" />
-             </div>
+                 <otp:dataTable codes="${tableHeader}" id="clusterJobGeneralTable" />
+            </div>
         </div>
         <br>
         <div class="progressBarContainer" id="progressBarContainer_generalGraphQueuedStartedEndedProgress">

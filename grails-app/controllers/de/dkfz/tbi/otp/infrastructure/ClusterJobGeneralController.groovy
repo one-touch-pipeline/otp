@@ -22,32 +22,30 @@
 package de.dkfz.tbi.otp.infrastructure
 
 import grails.converters.JSON
+import groovy.transform.TupleConstructor
 import org.joda.time.LocalDate
 
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class ClusterJobGeneralController {
 
-    @SuppressWarnings("DuplicateNumberLiteral")
+    @TupleConstructor
     enum GeneralClusterJobsColumns {
-        CLUSTER_JOB_ID(0, 'clusterJobId'),
-        CLUSTER_JOB_NAME(1, 'clusterJobName'),
-        EXIT_STATUS(2, 'exitStatus'),
-        QUEUED(3, 'queued'),
-        STARTED(4, 'started'),
-        ENDED(5, 'ended')
+        CLUSTER_JOB_ID('jobstats.general.table.id', 'clusterJobId'),
+        CLUSTER_JOB_NAME('jobstats.general.table.name', 'clusterJobName'),
+        EXIT_STATUS('jobstats.general.table.status', 'exitStatus'),
+        QUEUED('jobstats.general.table.queued', 'queued'),
+        STARTED('jobstats.general.table.started', 'started'),
+        ENDED('jobstats.general.table.ended', 'ended'),
 
-        private final int index
-
-        private final String columnName
-
-        GeneralClusterJobsColumns(int index, String column) {
-            this.index = index
-            this.columnName = column
-        }
+        final String message
+        final String columnName
 
         static GeneralClusterJobsColumns fromDataTable(int column) {
-            return values().find { it.index == column } ?: CLUSTER_JOB_ID
+            if (column >= values().size() || column < 0) {
+                return CLUSTER_JOB_ID
+            }
+            return values()[column]
         }
     }
 
@@ -57,7 +55,10 @@ class ClusterJobGeneralController {
 
     Map index() {
         LocalDate date = clusterJobService.latestJobDate ?: new LocalDate()
-        return [latestDate: date]
+        return [
+                tableHeader: GeneralClusterJobsColumns.values()*.message,
+                latestDate: date,
+        ]
     }
 
     JSON findAllClusterJobsByDateBetween(DataTableCommand cmd) {
