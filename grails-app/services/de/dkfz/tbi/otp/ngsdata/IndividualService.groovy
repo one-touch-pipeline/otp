@@ -89,7 +89,7 @@ class IndividualService {
      * @param filter Filter restrictions
      * @return List of Individuals matching the criterias and ACL restricted
      * */
-    List<Individual> listIndividuals(boolean sortOrder, IndividualSortColumn column, IndividualFiltering filtering, String filterString) {
+    List<Individual> listIndividuals(boolean sortOrder, IndividualColumn column, IndividualFiltering filtering, String filterString) {
         List projects = projectService.getAllProjects()
         if (!projects) {
             return []

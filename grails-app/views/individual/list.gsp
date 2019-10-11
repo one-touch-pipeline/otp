@@ -76,13 +76,7 @@
         </table>
         </div>
         <div class="otpDataTables">
-        <otp:dataTable codes="${[
-                    'individual.list.pid',
-                    'individual.list.mockName',
-                    'individual.list.mockPid',
-                    'individual.list.project',
-                    'individual.list.type'
-        ]}" id="individualTable"/>
+            <otp:dataTable codes="${tableHeader}" id="individualTable"/>
         </div>
     <asset:script type="text/javascript">
         $(function() {

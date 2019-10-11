@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.converters.JSON
 import grails.validation.ValidationException
 import groovy.json.JsonSlurper
+import groovy.transform.TupleConstructor
 import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.otp.CommentService
@@ -69,6 +70,7 @@ class IndividualController {
 
     def list() {
         Map retValue  = [
+            tableHeader: IndividualColumn.values()*.message,
             projects: projectService.getAllProjects(),
             individualTypes: Individual.Type.values(),
         ]
@@ -83,7 +85,7 @@ class IndividualController {
         dataToRender.iTotalRecords = individualService.countIndividual(filtering, cmd.sSearch)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        individualService.listIndividuals(cmd.sortOrder, IndividualSortColumn.fromDataTable(cmd.iSortCol_0), filtering, cmd.sSearch).each { individual ->
+        individualService.listIndividuals(cmd.sortOrder, IndividualColumn.fromDataTable(cmd.iSortCol_0), filtering, cmd.sSearch).each { individual ->
             dataToRender.aaData << [
                 id: individual.id,
                 pid: individual.pid,
@@ -192,32 +194,22 @@ class IndividualController {
     }
 }
 
-enum IndividualSortColumn {
-    PID("pid"),
-    MOCKFULLNAME("mockFullName"),
-    MOCKPID("mockPid"),
-    PROJECT("project"),
-    TYPE("type"),
+@TupleConstructor
+enum IndividualColumn {
+    PID('individual.list.pid', "pid"),
+    MOCKFULLNAME('individual.list.mockName', "mockFullName"),
+    MOCKPID('individual.list.mockPid', "mockPid"),
+    PROJECT('individual.list.project', "project"),
+    TYPE('individual.list.type', "type"),
 
-    private final String columnName
+    final String message
+    final String columnName
 
-    IndividualSortColumn(String column) {
-        this.columnName = column
-    }
-
-    static IndividualSortColumn fromDataTable(int column) {
-        switch (column) {
-            case 0:
-                return IndividualSortColumn.PID
-            case 1:
-                return IndividualSortColumn.MOCKFULLNAME
-            case 2:
-                return IndividualSortColumn.MOCKPID
-            case 3:
-                return IndividualSortColumn.PROJECT
-            default:
-                return IndividualSortColumn.TYPE
+    static IndividualColumn fromDataTable(int column) {
+        if (column >= values().size() || column < 0) {
+            return TYPE
         }
+        return values()[column]
     }
 }
 class IndividualCommand {
