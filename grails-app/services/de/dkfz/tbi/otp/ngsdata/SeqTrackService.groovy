@@ -156,6 +156,9 @@ class SeqTrackService {
         if (filtering.libraryPreparationKit) {
             'in'('libraryPreparationKit', filtering.libraryPreparationKit)
         }
+        if (filtering.antibodyTarget) {
+            'in'('antibodyTarget', filtering.antibodyTarget)
+        }
         if (filtering.ilseId) {
             'in'('ilseId', filtering.ilseId)
         }

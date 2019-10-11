@@ -43,6 +43,7 @@ class SequenceController {
             libraryLayouts: new TreeSet(seqTypes.collect { it.libraryLayout }),
             seqCenters: SeqCenter.list(sort: "name", order: "asc"),
             libraryPreparationKits: LibraryPreparationKit.list(sort: "shortDisplayName", order: "asc").shortDisplayName,
+            antibodyTargets: AntibodyTarget.list(sort: "name", order: "asc"),
         ]
     }
 
@@ -169,6 +170,7 @@ class SequenceFiltering {
     List<Integer> seqCenter = []
     List<String> run = []
     List<String> libraryPreparationKit = []
+    List<String> antibodyTarget = []
 
     boolean enabled = false
 
@@ -237,6 +239,12 @@ class SequenceFiltering {
                 case "libraryPreparationKitSelection":
                     if (it.value) {
                         filtering.libraryPreparationKit << it.value
+                        filtering.enabled = true
+                    }
+                    break
+                case "antibodyTargetSelection":
+                    if (it.value) {
+                        filtering.antibodyTarget << it.value
                         filtering.enabled = true
                     }
                     break
