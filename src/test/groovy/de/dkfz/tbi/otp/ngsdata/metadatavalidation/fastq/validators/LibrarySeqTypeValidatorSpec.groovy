@@ -102,21 +102,20 @@ class LibrarySeqTypeValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING, message1, message2),
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, level, message1, message2),
         ]
         assertContainSame(context.problems, expectedProblems)
 
         where:
-        seqTypeName                             | tagmentation | library || message1                                                                                                                                  || message2
-        "seqtype"                               | ""           | "5"     || "The library '5' in column ${CUSTOMER_LIBRARY} indicates tagmentation, but the seqtype 'seqtype' is without tagmentation"                 || LibrarySeqTypeValidator.LIBRARY_WITHOUT_TAGMENTATION
-        "seqtype"                               | "true"       | ""      || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${CUSTOMER_LIBRARY} column." || LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
-        "seqtype${SeqType.TAGMENTATION_SUFFIX}" | ""           | ""      || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${CUSTOMER_LIBRARY} column." || LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
-        "seqtype${SeqType.TAGMENTATION_SUFFIX}" | "true"       | ""      || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${CUSTOMER_LIBRARY} column." || LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
-
+        seqTypeName                             | tagmentation | library | level         || message1                                                                                                                                  || message2
+        "seqtype"                               | ""           | "5"     | Level.WARNING || "The library '5' in column ${CUSTOMER_LIBRARY} indicates tagmentation, but the seqtype 'seqtype' is without tagmentation"                 || LibrarySeqTypeValidator.LIBRARY_WITHOUT_TAGMENTATION
+        "seqtype"                               | "true"       | ""      | Level.ERROR   || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${CUSTOMER_LIBRARY} column." || LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
+        "seqtype${SeqType.TAGMENTATION_SUFFIX}" | ""           | ""      | Level.ERROR   || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${CUSTOMER_LIBRARY} column." || LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
+        "seqtype${SeqType.TAGMENTATION_SUFFIX}" | "true"       | ""      | Level.ERROR   || "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there should be a value in the ${CUSTOMER_LIBRARY} column." || LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY
     }
 
 
-    void 'validate, when CUSTOMER_LIBRARY is missing and SEQUENCING_TYPE has TAGMENTATION, adds warning'() {
+    void 'validate, when CUSTOMER_LIBRARY is missing and SEQUENCING_TYPE has TAGMENTATION, adds error'() {
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SEQUENCING_TYPE}\t${TAGMENTATION_BASED_LIBRARY}\n" +
@@ -130,11 +129,11 @@ class LibrarySeqTypeValidatorSpec extends Specification {
 
         then:
         Collection<Problem> expectedProblems = [
-                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, Level.ERROR,
                         "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there " +
                                 "should be a value in the ${CUSTOMER_LIBRARY} column.",
                         LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY),
-                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.WARNING,
+                new Problem(context.spreadsheet.dataRows[1].cells as Set, Level.ERROR,
                         "For the tagmentation sequencing type 'seqtype${SeqType.TAGMENTATION_SUFFIX}' there " +
                                 "should be a value in the ${CUSTOMER_LIBRARY} column.",
                         LibrarySeqTypeValidator.TAGMENTATION_WITHOUT_LIBRARY),

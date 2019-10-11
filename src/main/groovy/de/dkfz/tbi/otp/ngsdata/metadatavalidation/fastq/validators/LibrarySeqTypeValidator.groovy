@@ -64,7 +64,7 @@ class LibrarySeqTypeValidator extends ValueTuplesValidator<MetadataValidationCon
             String library = valueTuple.getValue(CUSTOMER_LIBRARY.name())
             if (seqType.endsWith(SeqType.TAGMENTATION_SUFFIX)) {
                 if (!library) {
-                    context.addProblem(valueTuple.cells, Level.WARNING,
+                    context.addProblem(valueTuple.cells, Level.ERROR,
                             "For the tagmentation sequencing type '${seqType}' there should be a value in the ${CUSTOMER_LIBRARY} column.",
                             TAGMENTATION_WITHOUT_LIBRARY)
                 }
