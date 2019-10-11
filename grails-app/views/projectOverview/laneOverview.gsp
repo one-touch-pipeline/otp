@@ -26,6 +26,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
     <title>OTP - project overview</title>
+    <asset:javascript src="common/datatablefilter.js"/>
     <asset:javascript src="pages/projectOverview/laneOverview/datatable.js"/>
 </head>
 <body>
