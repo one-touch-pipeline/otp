@@ -34,7 +34,7 @@ enum LibraryLayout {
 
     static LibraryLayout findByName(String name) {
         return values().find {
-            it.name() == name
+            it.name().equalsIgnoreCase(name)
         }
     }
 }

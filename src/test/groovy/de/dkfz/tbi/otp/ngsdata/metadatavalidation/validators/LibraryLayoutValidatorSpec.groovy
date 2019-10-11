@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 import grails.test.mixin.Mock
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -34,10 +35,9 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Mock(SeqType)
-class LibraryLayoutValidatorSpec extends Specification {
+class LibraryLayoutValidatorSpec extends Specification implements DomainFactoryCore {
 
     void 'validate, when column is missing, adds error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "SomeColumn\n" +
@@ -54,15 +54,23 @@ class LibraryLayoutValidatorSpec extends Specification {
     }
 
     void 'validate adds expected error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.LIBRARY_LAYOUT}\n" +
                 "invalidLayout\n" +
                 "${LibraryLayout.PAIRED}\n" +
-                "invalidLayout\n")
-        DomainFactory.createSeqType(libraryLayout: LibraryLayout.PAIRED)
-        DomainFactory.createSeqType(libraryLayout: LibraryLayout.PAIRED)
+                "invalidLayout\n" +
+                "${LibraryLayout.SINGLE}\n" +
+                "${LibraryLayout.MATE_PAIR}\n" +
+                "paired\n" +
+                "single\n" +
+                "mate_pair\n" +
+                "Paired\n" +
+                "Single\n" +
+                "Mate_pair\n"
+        )
+        createSeqType(libraryLayout: LibraryLayout.PAIRED)
+        createSeqType(libraryLayout: LibraryLayout.PAIRED)
 
         when:
         new LibraryLayoutValidator().validate(context)
