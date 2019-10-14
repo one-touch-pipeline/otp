@@ -259,7 +259,7 @@ class TestData {
     }
 
     @Deprecated
-    ExomeSeqTrack createExomeSeqTrack(Run run) {
+    SeqTrack createExomeSeqTrack(Run run) {
         return DomainFactory.createExomeSeqTrack(
             run: run,
             sample: sample,

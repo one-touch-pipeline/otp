@@ -199,18 +199,13 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         if (properties.seqType?.hasAntibodyTarget) {
             return createChipSeqSeqTrack(properties)
         }
-        if (properties.seqType?.isExome()) {
-            return createExomeSeqTrack(properties)
-        }
         return createDomainObject(SeqTrack, getSeqTrackProperties(properties) + [
                 seqType: { createSeqType() },
         ], properties)
     }
 
-    ExomeSeqTrack createExomeSeqTrack(Map properties = [:]) {
-        return createDomainObject(ExomeSeqTrack, getSeqTrackProperties(properties) + [
-                seqType: { DomainFactory.createExomeSeqType() },
-        ], properties)
+    SeqTrack createExomeSeqTrack(Map properties = [:]) {
+        return createSeqTrack(properties + (properties.seqType ? [:] : [seqType: DomainFactory.createExomeSeqType()]))
     }
 
     ChipSeqSeqTrack createChipSeqSeqTrack(Map properties = [:]) {

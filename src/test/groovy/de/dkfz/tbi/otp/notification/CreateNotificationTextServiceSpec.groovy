@@ -55,7 +55,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                 CellRangerMergingWorkPackage,
                 ChipSeqSeqTrack,
                 DataFile,
-                ExomeSeqTrack,
                 FileType,
                 Individual,
                 LibraryPreparationKit,

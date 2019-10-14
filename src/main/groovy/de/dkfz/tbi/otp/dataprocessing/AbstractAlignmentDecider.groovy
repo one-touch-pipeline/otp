@@ -93,7 +93,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
     static boolean hasLibraryPreparationKitAndBedFile(SeqTrack seqTrack) {
         assert seqTrack: "The input seqTrack of method hasLibraryPreparationKitAndBedFile is null"
 
-        if (seqTrack instanceof ExomeSeqTrack) {
+        if (seqTrack.seqType.isExome()) {
             return seqTrack.libraryPreparationKit && seqTrack.configuredReferenceGenome &&
                     BedFile.findWhere(
                             libraryPreparationKit: seqTrack.libraryPreparationKit,

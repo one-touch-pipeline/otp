@@ -1706,7 +1706,7 @@ class DomainFactory {
     }
 
     @Deprecated
-    static ExomeSeqTrack createExomeSeqTrack(Map properties = [:]) {
+    static SeqTrack createExomeSeqTrack(Map properties = [:]) {
         return proxyCore.createExomeSeqTrack(properties)
     }
 

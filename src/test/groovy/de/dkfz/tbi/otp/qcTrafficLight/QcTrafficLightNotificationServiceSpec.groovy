@@ -44,7 +44,6 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                 AbstractMergedBamFile,
                 DataFile,
                 Comment,
-                ExomeSeqTrack,
                 FileType,
                 Individual,
                 LibraryPreparationKit,

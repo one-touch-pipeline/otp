@@ -42,7 +42,7 @@ class AbstractBamFileServiceIntegrationTests {
 
     TestData testData = new TestData()
     SeqTrack seqTrack
-    ExomeSeqTrack exomeSeqTrack
+    SeqTrack exomeSeqTrack
     MergingSet mergingSet
     MergingSet exomeMergingSet
     ProcessedBamFile processedBamFile
@@ -186,7 +186,7 @@ class AbstractBamFileServiceIntegrationTests {
                 )
         assertNotNull(seqTrack.save([flush: true]))
 
-        exomeSeqTrack = new ExomeSeqTrack(
+        exomeSeqTrack = new SeqTrack(
                 laneId: "1",
                 run: run,
                 sample: sample,

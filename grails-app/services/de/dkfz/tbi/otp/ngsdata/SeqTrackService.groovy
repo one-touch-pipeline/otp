@@ -205,7 +205,7 @@ class SeqTrackService {
             return false
         }
 
-        if (seqTrack instanceof ExomeSeqTrack &&
+        if (seqTrack.seqType.isExome() &&
                 seqTrack.libraryPreparationKit == null &&
                 seqTrack.kitInfoReliability == InformationReliability.UNKNOWN_VERIFIED) {
             notAligning('kitInfoReliability is UNKNOWN_VERIFIED')

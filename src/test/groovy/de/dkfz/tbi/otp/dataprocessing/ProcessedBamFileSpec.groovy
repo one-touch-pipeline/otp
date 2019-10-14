@@ -36,7 +36,6 @@ class ProcessedBamFileSpec extends Specification implements DataTest, DomainFact
                 BamFilePairAnalysis,
                 BedFile,
                 DataFile,
-                ExomeSeqTrack,
                 FileType,
                 MergingSetAssignment,
                 ProcessedBamFile,
@@ -52,7 +51,7 @@ class ProcessedBamFileSpec extends Specification implements DataTest, DomainFact
         LibraryPreparationKit libraryPreparationKit = DomainFactory.createLibraryPreparationKit()
         ReferenceGenome referenceGenome = DomainFactory.createReferenceGenomeLazy()
 
-        ExomeSeqTrack exomeSeqTrack = createExomeSeqTrack([
+        SeqTrack exomeSeqTrack = createExomeSeqTrack([
                 seqType              : exomeSeqType,
                 libraryPreparationKit: libraryPreparationKit,
         ])

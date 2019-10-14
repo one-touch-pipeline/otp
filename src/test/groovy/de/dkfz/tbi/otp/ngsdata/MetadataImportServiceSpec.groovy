@@ -67,7 +67,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                 AntibodyTarget,
                 ChipSeqSeqTrack,
                 DataFile,
-                ExomeSeqTrack,
                 FileType,
                 IlseSubmission,
                 Individual,
@@ -687,7 +686,7 @@ ${ILSE_NO}                      -             1234          1234          -     
 
         if (includeOptional) {
             // seqTrack2
-            SeqTrack seqTrack2 = ExomeSeqTrack.findWhere(
+            SeqTrack seqTrack2 = SeqTrack.findWhere(
                     laneId: '1_barcode8',
                     insertSize: 0,
                     run: run1,
@@ -775,7 +774,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             ])
 
             // seqTrack5
-            SeqTrack seqTrack5 = ExomeSeqTrack.findWhere(
+            SeqTrack seqTrack5 = SeqTrack.findWhere(
                     laneId: '3',
                     insertSize: 456,
                     run: run1,

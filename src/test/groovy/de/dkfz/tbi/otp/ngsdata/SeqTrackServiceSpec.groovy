@@ -37,7 +37,6 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
     @Override
     Class[] getDomainClassesToMock() {
         [
-                ExomeSeqTrack,
                 DataFile,
                 LogMessage,
                 MergingCriteria,

@@ -242,7 +242,6 @@ class DataSwapServiceTests implements UserAndRoles {
 
         assert returnedSeqTrack.id == seqTrackId
         assert returnedSeqTrack.seqType.id == exome.id
-        assert returnedSeqTrack.class == ExomeSeqTrack
     }
 
     @Test

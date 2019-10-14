@@ -255,4 +255,8 @@ databaseChangeLog = {
     include file: 'changelogs/2019/delete-mde-status-source.groovy'
 
     include file: 'changelogs/2019/otp-117-create-indexes-for-ega.groovy'
+
+    changeSet(author: "strubelp", id: "otp-149") {
+        sqlFile(path: 'changelogs/2019/otp-149.sql')
+    }
 }

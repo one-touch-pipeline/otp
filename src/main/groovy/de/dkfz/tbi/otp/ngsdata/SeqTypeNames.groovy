@@ -30,7 +30,7 @@ enum SeqTypeNames {
     WHOLE_GENOME_BISULFITE,
     RNA,
     MI_RNA,
-    EXOME("EXON", ExomeSeqTrack),
+    EXOME("EXON"),
     MEDIP,
     SNC_RNA("sncRNA"),
     CHIP_SEQ("ChIP Seq", ChipSeqSeqTrack),

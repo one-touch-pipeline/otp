@@ -43,7 +43,6 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
                 AbstractMergedBamFile,
                 DataFile,
                 Comment,
-                ExomeSeqTrack,
                 FileType,
                 Individual,
                 LibraryPreparationKit,

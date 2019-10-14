@@ -111,7 +111,7 @@ class PanCanAlignmentCheckerIntegrationSpec extends AbstractAlignmentCheckerInte
     }
 
 
-    private ExomeSeqTrack createExomeSeqTrack(boolean createLibraryPreperationKit, boolean createBedFile) {
+    private SeqTrack createExomeSeqTrack(boolean createLibraryPreperationKit, boolean createBedFile) {
         SeqTrack exomeSeqTrack = DomainFactory.createExomeSeqTrack([
                 libraryPreparationKit: createLibraryPreperationKit ? DomainFactory.createLibraryPreparationKit() : null,
                 kitInfoReliability   : createLibraryPreperationKit ? InformationReliability.KNOWN : InformationReliability.UNKNOWN_UNVERIFIED,

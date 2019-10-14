@@ -490,8 +490,7 @@ class MetadataImportService {
                 properties['cellPosition'] = sampleIdentifierService.parseCellPosition(sampleIdString, project)
             }
 
-            SeqTrack seqTrack = seqType.isExome() ? new ExomeSeqTrack(properties) :
-                    seqType.hasAntibodyTarget ? new ChipSeqSeqTrack(properties) :
+            SeqTrack seqTrack = seqType.hasAntibodyTarget ? new ChipSeqSeqTrack(properties) :
                             new SeqTrack(properties)
             assert seqTrack.save(flush: false)
 
