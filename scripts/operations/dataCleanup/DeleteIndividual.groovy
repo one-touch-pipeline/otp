@@ -21,12 +21,15 @@
  */
 
 import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.ngsdata.*
+
+import java.nio.file.Path
 
 // input area
 //----------------------
 
-String pid
+String pid = ""
 
 boolean check = true
 
@@ -34,20 +37,19 @@ boolean check = true
 //script area
 //-----------------------------
 
-assert pid
+assert pid : 'No pid is provided'
 
 DataSwapService dataSwapService = ctx.dataSwapService
+FileService fileService = ctx.fileService
 
-String baseOutputDir = "${ConfigService.getInstance().getScriptOutputPath()}/sample_swap/"
+Path baseOutputDir = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')
 
 Individual.withTransaction {
     List<String> allFilesToRemove = dataSwapService.deleteIndividual(pid, check)
 
-    File deleteFileCmd = dataSwapService.createFileSafely(baseOutputDir, "Delete_${pid}.sh")
-    File deleteFileSecondUserCmd = dataSwapService.createFileSafely(baseOutputDir, "DeleteSecondUser_${pid}.sh")
+    Path deleteFileCmd = fileService.createOrOverwriteScriptOutputFile(baseOutputDir, "Delete_${pid}.sh")
 
     deleteFileCmd << allFilesToRemove[0]
-    deleteFileSecondUserCmd << allFilesToRemove[1]
 
     assert false
 }

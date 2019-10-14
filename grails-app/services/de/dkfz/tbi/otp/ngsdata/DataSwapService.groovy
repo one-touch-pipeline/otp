@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
@@ -739,6 +740,8 @@ ln -s '${newDirectFileName}' \\
         seqTypes.unique().each { SeqType seqType ->
             deletionScript << "rm -rf ${individual.getViewByPidPath(seqType).absoluteDataManagementPath}\n"
         }
+
+        ClusterJob.findAllByIndividual(individual)*.delete(flush: false)
 
         individual.delete(flush: true)
 
