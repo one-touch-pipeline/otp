@@ -134,31 +134,6 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
     }
 
     @Unroll
-    void "test validate sample information form input"() {
-        given:
-        SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject(
-                egaAliasName: "testAlias",
-        )
-        SampleSubmissionObject sampleSubmissionObject2 = createSampleSubmissionObject()
-        List<String> sampleObjectIds = ["${sampleSubmissionObject1.id}", "${sampleSubmissionObject2.id}"]
-
-        when:
-        Map map = egaSubmissionValidationService.validateSampleInformationFormInput(sampleObjectIds, aliases, fileType)
-
-        then:
-        map.hasErrors == hasErrors
-        map.errors.empty || map.errors.contains(errorMessages)
-
-        where:
-        aliases            | fileType                                                                 || hasErrors | errorMessages
-        ["a", "b"]         | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || false     | ""
-        ["a", "a"]         | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || true      | "Not all aliases are unique."
-        ["a", ""]          | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || true      | "For some samples no alias is configured."
-        ["a", "testAlias"] | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || true      | "Alias testAlias already exist."
-        ["a", "b"]         | [EgaSubmissionService.FileType.BAM, null]                                || true      | "For some samples files types are not selected."
-    }
-
-    @Unroll
     void "test validate file type from input"() {
         given:
         List<String> sampleObjectId = [createSampleSubmissionObject().id as String]
@@ -175,5 +150,73 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         fileType | result
         "FASTQ"  | true
         "WRONG"  | false
+    }
+
+    @Unroll
+    void "validateAliases, when '#name', then hasError: #hasError and errorMessage contains '#message'"() {
+        given:
+        createDataFileSubmissionObject([
+                egaAliasName: 'existingDataFileAlias',
+        ])
+        createBamFileSubmissionObject([
+                egaAliasName: 'existingBamFileAlias',
+        ])
+
+        when:
+        Map map = egaSubmissionValidationService.validateAliases(aliases)
+
+        then:
+        map.hasErrors == hasError
+        if (hasError) {
+            assert map.errors.size() == 1
+            assert map.errors.first().contains(message)
+        } else {
+            assert map.errors.empty
+        }
+
+        where:
+        name                               | aliases                        || hasError | message
+        'all fine'                         | ['a', 'b']                     || false    | ''
+        'alias missing'                    | ['a', '', '']                  || true     | 'For some samples no alias is configured'
+        'alias not unique'                 | ['a', 'a', 'b', 'b']           || true     | 'The following aliases are not unique'
+        'alias already exist for datafile' | ['a', 'existingDataFileAlias'] || true     | 'The following aliases already exist'
+        'alias already exist for bam file' | ['a', 'existingBamFileAlias']  || true     | 'The following aliases already exist'
+    }
+
+    @Unroll
+    void "validateSampleInformationFormInput, when aliases are: #aliases, then hasErrors is #hasErrors and message contains #errorMessages"() {
+        given:
+        SampleSubmissionObject sampleSubmissionObject1 = createSampleSubmissionObject(
+                egaAliasName: "testAlias",
+        )
+        SampleSubmissionObject sampleSubmissionObject2 = createSampleSubmissionObject()
+        List<String> sampleObjectIds = ["${sampleSubmissionObject1.id}", "${sampleSubmissionObject2.id}"]
+
+        EgaSubmission egaSubmission = createEgaSubmission([
+                samplesToSubmit: [
+                        sampleSubmissionObject1,
+                        sampleSubmissionObject2,
+                ].toSet()
+        ])
+
+        when:
+        Map map = egaSubmissionValidationService.validateSampleInformationFormInput(egaSubmission, sampleObjectIds, aliases, fileType)
+
+        then:
+        map.hasErrors == hasErrors
+        if (hasErrors) {
+            assert map.errors.size() == 1
+            assert map.errors.first().contains(errorMessages)
+        } else {
+            assert map.errors.empty
+        }
+
+        where:
+        aliases            | fileType                                                                 || hasErrors | errorMessages
+        ["a", "b"]         | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || false     | ""
+        ["a", "a"]         | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || true      | "Not all aliases are unique:"
+        ["a", ""]          | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || true      | "no alias is set."
+        ["a", "testAlias"] | [EgaSubmissionService.FileType.BAM, EgaSubmissionService.FileType.FASTQ] || true      | "The following aliases are already registered in the database: testAlias"
+        ["a", "b"]         | [EgaSubmissionService.FileType.BAM, null]                                || true      | "no file type is selected."
     }
 }

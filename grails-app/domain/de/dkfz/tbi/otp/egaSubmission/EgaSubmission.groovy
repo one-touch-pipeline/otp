@@ -56,15 +56,16 @@ class EgaSubmission implements Entity {
             return (val || obj.state == State.SELECTION)
         }
         bamFilesToSubmit validator: { val, obj ->
-            return (val || obj.state == State.SELECTION || !obj.dataFilesToSubmit?.isEmpty())
+            return (val || obj.state == State.SELECTION || !obj.dataFilesToSubmit?.empty)
         }
         dataFilesToSubmit validator: { val, obj ->
-            return (val || obj.state == State.SELECTION || !obj.bamFilesToSubmit?.isEmpty())
+            return (val || obj.state == State.SELECTION || !obj.bamFilesToSubmit?.empty)
         }
     }
 
     static mapping = {
         studyAbstract type: 'text'
+        project index: 'ega_submission_project_idx'
     }
 
     enum State {

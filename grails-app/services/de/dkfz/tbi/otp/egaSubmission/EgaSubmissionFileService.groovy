@@ -137,8 +137,8 @@ class EgaSubmissionFileService {
 
             contentBody.append([
                     sampleSubmissionObject.sample.individual.displayName,
-                    sampleSubmissionObject.sample.sampleType.displayName,
                     sampleSubmissionObject.seqType.toString(),
+                    sampleSubmissionObject.sample.sampleType.displayName,
                     alias?.getAt(i) ?: "",
                     fileType?.getAt(i) ?: EgaSubmissionService.FileType.FASTQ,
             ].join(",") + "\n")
@@ -146,8 +146,8 @@ class EgaSubmissionFileService {
 
         String contentHeader = [
                 INDIVIDUAL,
-                SAMPLE_TYPE,
                 SEQ_TYPE,
+                SAMPLE_TYPE,
                 EGA_SAMPLE_ALIAS,
                 FILE_TYPE,
         ]*.value.join(",")
@@ -161,11 +161,11 @@ class EgaSubmissionFileService {
         List<DataFileAndSampleAlias> dataFilesAndSampleAliases = egaSubmissionService.getDataFilesAndAlias(submission)
         Map dataFileFileAliases = egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndSampleAliases)
 
-        submission.dataFilesToSubmit.sort { it.sampleSubmissionObject.egaAliasName }.each {
+        dataFilesAndSampleAliases.each {
             contentBody.append([
                     it.dataFile.individual.displayName,
-                    it.dataFile.sampleType.displayName,
                     it.dataFile.seqType.toString(),
+                    it.dataFile.sampleType.displayName,
                     it.sampleSubmissionObject.egaAliasName,
                     it.dataFile.run.seqCenter,
                     it.dataFile.run,
@@ -179,8 +179,8 @@ class EgaSubmissionFileService {
 
         String contentHeader = [
                 INDIVIDUAL,
-                SAMPLE_TYPE,
                 SEQ_TYPE,
+                SAMPLE_TYPE,
                 EGA_SAMPLE_ALIAS,
                 SEQ_CENTER,
                 RUN,
@@ -198,24 +198,23 @@ class EgaSubmissionFileService {
         StringBuilder contentBody = new StringBuilder()
 
         List<BamFileAndSampleAlias> bamFilesAndSampleAliases = egaSubmissionService.getBamFilesAndAlias(submission)
-        bamFilesAndSampleAliases.sort { it.sampleAlias }
         Map bamFileFileAliases = egaSubmissionService.generateDefaultEgaAliasesForBamFiles(bamFilesAndSampleAliases)
 
         bamFilesAndSampleAliases.each {
             contentBody.append([
                     it.bamFile.individual.displayName,
-                    it.bamFile.sampleType.displayName,
                     it.bamFile.seqType.toString(),
-                    it.sampleAlias,
-                    bamFileFileAliases.get(it.bamFile.bamFileName + it.sampleAlias),
+                    it.bamFile.sampleType.displayName,
+                    it.sampleSubmissionObject.egaAliasName,
+                    bamFileFileAliases.get(it.bamFile.bamFileName + it.sampleSubmissionObject.egaAliasName),
                     it.bamFile.bamFileName,
             ].join(",") + "\n")
         }
 
         String contentHeader = [
                 INDIVIDUAL,
-                SAMPLE_TYPE,
                 SEQ_TYPE,
+                SAMPLE_TYPE,
                 EGA_SAMPLE_ALIAS,
                 EGA_FILE_ALIAS,
                 FILENAME,

@@ -167,37 +167,147 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         exception.message.contains("rejected value [[]]")
     }
 
-    void "test save submission object all fine"() {
+    void "createAndSaveSampleSubmissionObjects, when submission is null, then throw an assertion"() {
+        given:
+        Sample sample = createSample()
+        SeqType seqType = createSeqType()
+        String id = "${sample.id}-${seqType.id}"
+
+        when:
+        egaSubmissionService.createAndSaveSampleSubmissionObjects(null, [id])
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('submission')
+    }
+
+    @Unroll
+    void "createAndSaveSampleSubmissionObjects, when sampleIdSeqTypeIdList is #name, then throw an assertion"() {
+        given:
+        EgaSubmission submission = createEgaSubmission()
+
+        when:
+        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, sampleIdSeqTypeIdList)
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('sampleIdSeqTypeIdList')
+
+        where:
+        name    | sampleIdSeqTypeIdList
+        'null'  | null
+        'empty' | []
+    }
+
+    @Unroll
+    void "createAndSaveSampleSubmissionObjects, when a value in sampleIdSeqTypeIdList contains for #name id not a number, then throw a NumberFormatException"() {
+        given:
+        EgaSubmission submission = createEgaSubmission()
+
+        when:
+        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, [idString])
+
+        then:
+        NumberFormatException e = thrown()
+        e.message.contains('For input string')
+
+        where:
+        name      | idString
+        'seqtype' | '1-a'
+        'sample'  | 'a-1'
+    }
+
+    @Unroll
+    void "createAndSaveSampleSubmissionObjects, when a value in sampleIdSeqTypeIdList contains #name numbers, then throw an assertion"() {
+        given:
+        EgaSubmission submission = createEgaSubmission()
+
+        when:
+        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, [idString])
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('sampleAndSeqType.size')
+
+        where:
+        name       | idString
+        'only one' | '1'
+        'three'    | '1-2-3'
+    }
+
+    void "createAndSaveSampleSubmissionObjects, when a sample could not be found, then throw an assertion"() {
         given:
         EgaSubmission submission = createEgaSubmission()
         Sample sample = createSample()
         SeqType seqType = createSeqType()
+        String id = "${sample.id + 1}-${seqType.id}"
 
         when:
-        egaSubmissionService.saveSampleSubmissionObject(submission, sample, seqType)
+        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, [id])
 
         then:
-        !submission.samplesToSubmit.isEmpty()
-        submission.samplesToSubmit.first().seqType == seqType
-        submission.samplesToSubmit.first().sample == sample
+        AssertionError e = thrown()
+        e.message.contains('sample')
     }
 
-    @Unroll
-    void "test save submission object"() {
+    void "createAndSaveSampleSubmissionObjects, when a seqType could not be found, then throw an assertion"() {
         given:
         EgaSubmission submission = createEgaSubmission()
+        Sample sample = createSample()
+        SeqType seqType = createSeqType()
+        String id = "${sample.id}-${seqType.id + 1}"
 
         when:
-        egaSubmissionService.saveSampleSubmissionObject(submission, sample(), seqType())
+        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, [id])
 
         then:
-        ValidationException exception = thrown()
-        exception.message.contains("rejected value [null]")
+        AssertionError e = thrown()
+        e.message.contains('seqType')
+    }
 
-        where:
-        sample                 | seqType
-        ( { null } )           | { createSeqType() }
-        ( { createSample() } ) | { null }
+    void "createAndSaveSampleSubmissionObjects, when a sample is of another project then the submission, then throw an assertion"() {
+        given:
+        EgaSubmission submission = createEgaSubmission()
+        Sample sample = createSample()
+        SeqType seqType = createSeqType()
+        String id = "${sample.id}-${seqType.id}"
+
+        when:
+        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, [id])
+
+        then:
+        AssertionError e = thrown()
+        e.message.contains('project')
+    }
+
+    void "createAndSaveSampleSubmissionObjects, when input is valid, then create the sampleSubmission objects"() {
+        given:
+        EgaSubmission submission = createEgaSubmission()
+        Sample sample1 = createSample(individual: createIndividual(project: submission.project))
+        Sample sample2 = createSample(individual: createIndividual(project: submission.project))
+        Sample sample3 = createSample(individual: createIndividual(project: submission.project))
+        //set name and dirname explicit, since it use the method of IsPipeline and not DomainFactoryCore
+        SeqType seqType1 = createSeqType(name: 'a', dirName: 'a')
+        SeqType seqType2 = createSeqType(name: 'b', dirName: 'b')
+        SeqType seqType3 = createSeqType(name: 'c', dirName: 'c')
+        List<String> ids = [
+                "${sample1.id}-${seqType1.id}",
+                "${sample1.id}-${seqType2.id}",
+                "${sample2.id}-${seqType3.id}",
+                "${sample3.id}-${seqType3.id}",
+        ]*.toString()
+
+        when:
+        egaSubmissionService.createAndSaveSampleSubmissionObjects(submission, ids)
+
+        then:
+        submission.refresh()
+        submission.samplesToSubmit.size() == 4
+        List<String> returnedValues = submission.samplesToSubmit.collect {
+            "${it.sample.id}-${it.seqType.id}".toString()
+        }
+        TestCase.assertContainSame(ids, returnedValues)
+        submission.selectionState == EgaSubmission.SelectionState.SAMPLE_INFORMATION
     }
 
     void "test update submission object all fine"() {
@@ -224,68 +334,8 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         List l = egaSubmissionService.deleteSampleSubmissionObjects(submission)
 
         then:
-        submission.samplesToSubmit.isEmpty()
+        submission.samplesToSubmit.empty
         l == ["${sampleSubmissionObject.sample.id}${sampleSubmissionObject.seqType.toString()}"]
-    }
-
-    @Unroll
-    void "test check file types with data file"() {
-        given:
-        SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        if (withDataFile) {
-            DomainFactory.createDataFile(
-                    seqTrack: seqTrack,
-                    fileWithdrawn: withdrawn,
-            )
-        } else {
-            DomainFactory.createDataFile()
-        }
-
-        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
-                sample: seqTrack.sample,
-                seqType: seqTrack.seqType,
-        )
-
-        EgaSubmission submission = createEgaSubmission(
-                project: seqTrack.project
-        )
-        submission.addToSamplesToSubmit(sampleSubmissionObject)
-        submission.save(flush: true)
-
-        when:
-        Map map = egaSubmissionService.checkFastqFiles(submission)
-
-        then:
-        map.get(sampleSubmissionObject) == result
-
-        where:
-        withDataFile | withdrawn | result
-        true         | false     | true
-        false        | false     | false
-        true         | true      | true
-    }
-
-    void "test get bam files and alias"() {
-        given:
-        EgaSubmission submission = createEgaSubmission()
-        RoddyBamFile bamFile = createBamFile()
-        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
-                sample: bamFile.sample,
-                seqType: bamFile.seqType,
-        )
-        submission.addToSamplesToSubmit(sampleSubmissionObject)
-        BamFileSubmissionObject bamFileSubmissionObject = createBamFileSubmissionObject(
-                bamFile: bamFile,
-                sampleSubmissionObject: sampleSubmissionObject,
-        )
-        submission.addToBamFilesToSubmit(bamFileSubmissionObject)
-
-        when:
-        List bamFilesAndAlias = egaSubmissionService.getBamFilesAndAlias(submission)
-
-        then:
-        bamFilesAndAlias*.bamFile == [bamFile]
-        bamFilesAndAlias*.sampleAlias == [sampleSubmissionObject.egaAliasName]
     }
 
     void "test createDataFileSubmissionObjects"() {
@@ -405,10 +455,13 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
     void "test generate default ega aliases for bam files"() {
         given:
-        RoddyBamFile bamFile = createBamFile()
-
         String alias = "someAlias"
-        List bamFilesAndAliases = [new BamFileAndSampleAlias(bamFile, alias)]
+        RoddyBamFile bamFile = createBamFile()
+        SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject([
+                egaAliasName: alias,
+        ])
+
+        List bamFilesAndAliases = [new BamFileAndSampleAlias(bamFile, sampleSubmissionObject)]
         List aliasNameHelper = [
                 bamFile.seqType.displayName,
                 bamFile.seqType.libraryLayout,
@@ -421,70 +474,5 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
         then:
         defaultEgaAliasesForDataFiles.get(bamFile.bamFileName + alias) == "${aliasNameHelper.join("_")}.bam"
-    }
-
-    void "getDataFilesAndAlias, when already DataFiles are connected with the submission, then return these"() {
-        given:
-        SeqTrack seqTrack1 = createSeqTrackWithOneDataFile()
-        SeqTrack seqTrack2 = createSeqTrackWithOneDataFile([
-                sample : seqTrack1.sample,
-                seqType: seqTrack1.seqType,
-        ])
-        DataFile datafile = CollectionUtils.exactlyOneElement(seqTrack2.dataFiles)
-        EgaSubmission egaSubmission = createEgaSubmission([
-                samplesToSubmit  : [
-                        createSampleSubmissionObject([
-                                sample      : seqTrack1.sample,
-                                seqType     : seqTrack1.seqType,
-                                useFastqFile: true,
-                        ]),
-                ] as Set,
-                dataFilesToSubmit: [
-                        createDataFileSubmissionObject([
-                                dataFile: datafile,
-                        ]),
-                ] as Set,
-        ])
-        egaSubmissionService.seqTrackService = new SeqTrackService([
-                fileTypeService: new FileTypeService(),
-        ])
-
-        when:
-        List<DataFileAndSampleAlias> list = egaSubmissionService.getDataFilesAndAlias(egaSubmission)
-
-        then:
-        list*.dataFile == [datafile]
-    }
-
-    void "getDataFilesAndAlias, when sample has two lane, then return both"() {
-        given:
-        SeqTrack seqTrack1 = createSeqTrackWithOneDataFile()
-        SeqTrack seqTrack2 = createSeqTrackWithOneDataFile([
-                sample : seqTrack1.sample,
-                seqType: seqTrack1.seqType,
-        ])
-        EgaSubmission egaSubmission = createEgaSubmission([
-                samplesToSubmit: [
-                        createSampleSubmissionObject([
-                                sample      : seqTrack1.sample,
-                                seqType     : seqTrack1.seqType,
-                                useFastqFile: true,
-                        ]),
-                ] as Set,
-        ])
-        egaSubmissionService.seqTrackService = new SeqTrackService([
-                fileTypeService: new FileTypeService(),
-        ])
-
-        List<DataFile> expectedDataFiles = [
-                seqTrack1,
-                seqTrack2,
-        ]*.dataFiles.flatten()
-
-        when:
-        List<DataFileAndSampleAlias> list = egaSubmissionService.getDataFilesAndAlias(egaSubmission)
-
-        then:
-        TestCase.assertContainSame(list*.dataFile, expectedDataFiles)
     }
 }

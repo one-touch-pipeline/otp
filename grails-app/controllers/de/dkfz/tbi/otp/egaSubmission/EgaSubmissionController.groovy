@@ -36,23 +36,23 @@ import static de.dkfz.tbi.otp.egaSubmission.EgaSubmissionFileService.EgaColumnNa
 class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     static allowedMethods = [
-            overview          : "GET",
-            newSubmission     : "GET",
-            selectSamples     : "GET",
-            sampleInformation : "GET",
-            selectFastqFiles  : "GET",
-            selectBamFiles    : "GET",
-            sampleMetadata    : "GET",
+            overview                   : "GET",
+            newSubmission              : "GET",
+            selectSamples              : "GET",
+            sampleInformation          : "GET",
+            selectFastqFiles           : "GET",
+            selectBamFiles             : "GET",
+            sampleMetadata             : "GET",
 
-            newSubmissionForm           : "POST",
-            selectSamplesForm           : "POST",
-            sampleInformationUploadForm : "POST",
-            sampleInformationForms      : "POST",
-            selectFilesDataFilesForm    : "POST",
-            dataFilesListFileUploadForm : "POST",
-            bamFilesListFileUploadForm  : "POST",
-            selectFilesBamFilesForm     : "POST",
-            sampleMetadataForm          : "POST",
+            newSubmissionForm          : "POST",
+            selectSamplesForm          : "POST",
+            sampleInformationUploadForm: "POST",
+            sampleInformationForms     : "POST",
+            selectFilesDataFilesForm   : "POST",
+            dataFilesListFileUploadForm: "POST",
+            bamFilesListFileUploadForm : "POST",
+            selectFilesBamFilesForm    : "POST",
+            sampleMetadataForm         : "POST",
     ]
 
     EgaSubmissionService egaSubmissionService
@@ -71,10 +71,10 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         List<EgaSubmission> submissions = EgaSubmission.findAllByProject(project).sort { it.submissionName.toLowerCase() }
 
         return [
-                projects         : projects,
-                project          : project,
-                submissions      : submissions,
-                submissionStates : EgaSubmission.State,
+                projects        : projects,
+                project         : project,
+                submissions     : submissions,
+                submissionStates: EgaSubmission.State,
         ]
     }
 
@@ -150,8 +150,8 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                 submissionId           : submission.id,
                 sampleSubmissionObjects: submission.samplesToSubmit.sort { a, b ->
                     a.sample.individual.displayName <=> b.sample.individual.displayName ?:
-                    a.seqType.toString() <=> b.seqType.toString() ?:
-                    a.sample.sampleType.displayName <=> b.sample.sampleType.displayName
+                            a.seqType.toString() <=> b.seqType.toString() ?:
+                                    a.sample.sampleType.displayName <=> b.sample.sampleType.displayName
                 },
                 egaSampleAliases       : egaSampleAliases,
                 existingFastqs         : existingFastqs,
@@ -166,12 +166,12 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         Map egaFileAliases = flash.egaFileAliases ?: egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndAliasList)
 
         return [
-                submission: submission,
-                dataFileList: dataFilesAndAliasList,
+                submission              : submission,
+                dataFileList            : dataFilesAndAliasList,
                 dataFileSubmissionObject: submission.dataFilesToSubmit,
-                egaFileAliases: egaFileAliases,
-                hasDataFiles: !submission.dataFilesToSubmit.empty,
-                dataFilesHasFileAliases: !submission.dataFilesToSubmit*.egaAliasName.findAll().isEmpty(),
+                egaFileAliases          : egaFileAliases,
+                hasDataFiles            : !submission.dataFilesToSubmit.empty,
+                dataFilesHasFileAliases : !submission.dataFilesToSubmit*.egaAliasName.findAll().empty,
         ]
     }
 
@@ -180,12 +180,12 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         Map egaFileAliases = flash.egaFileAliases ?: egaSubmissionService.generateDefaultEgaAliasesForBamFiles(bamFilesAndAliasList)
 
         return [
-                submission: submission,
-                bamFileList: bamFilesAndAliasList,
+                submission             : submission,
+                bamFileList            : bamFilesAndAliasList,
                 bamFileSubmissionObject: submission.bamFilesToSubmit,
-                egaFileAliases: egaFileAliases,
-                bamFilesHasFileAliases: !submission.bamFilesToSubmit*.egaAliasName.findAll().isEmpty(),
-                hasFiles: !submission.bamFilesToSubmit.empty,
+                egaFileAliases         : egaFileAliases,
+                bamFilesHasFileAliases : !submission.bamFilesToSubmit*.egaAliasName.findAll().empty,
+                hasFiles               : !submission.bamFilesToSubmit.empty,
         ]
     }
 
@@ -204,7 +204,8 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         ]
     }
 
-    def helpPage() { }
+    def helpPage() {
+    }
 
     def newSubmissionForm(NewSubmissionControllerSubmitCommand cmd) {
         if (cmd.submit) {
@@ -229,16 +230,9 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     def selectSamplesForm(SelectSamplesControllerSubmitCommand cmd) {
         if (cmd.next) {
-            cmd.sampleAndSeqType.findAll().each {
-                String[] sampleAndSeqType = it.split("-")
-
-                egaSubmissionService.saveSampleSubmissionObject(
-                        cmd.submission,
-                        Sample.findById(sampleAndSeqType[0] as long),
-                        SeqType.findById(sampleAndSeqType[1] as long)
-                )
-            }
-            if (!cmd.sampleAndSeqType || cmd.sampleAndSeqType?.isEmpty()) {
+            if (cmd.sampleAndSeqType && !cmd.sampleAndSeqType.empty) {
+                egaSubmissionService.createAndSaveSampleSubmissionObjects(cmd.submission, cmd.sampleAndSeqType.findAll())
+            } else {
                 flash.message = new FlashMessage(
                         g.message(code: "egaSubmission.selectSamples.warning.message") as String,
                         g.message(code: "egaSubmission.selectSamples.warning.request") as String,
@@ -258,8 +252,8 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
             Map validateRows = egaSubmissionValidationService.validateRows(spreadsheet, cmd.submission)
             Map validateColumns = egaSubmissionValidationService.validateColumns(spreadsheet, [
                     INDIVIDUAL,
-                    SAMPLE_TYPE,
                     SEQ_TYPE,
+                    SAMPLE_TYPE,
             ])
             if (!validateRows.valid) {
                 pushError(validateRows.error, cmd.submission, true)
@@ -293,7 +287,8 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
 
         if (cmd.next) {
-            Map validateMap = egaSubmissionValidationService.validateSampleInformationFormInput(cmd.sampleObjectId, cmd.egaSampleAlias, cmd.fileType)
+            Map validateMap = egaSubmissionValidationService.validateSampleInformationFormInput(
+                    cmd.submission, cmd.sampleObjectId, cmd.egaSampleAlias, cmd.fileType)
 
             if (validateMap.hasErrors) {
                 flash.egaSampleAliases = validateMap.sampleAliases
@@ -332,17 +327,18 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
 
         if (cmd.saveAliases) {
-            if (cmd.egaFileAlias.isEmpty()) {
+            if (cmd.egaFileAlias.empty) {
                 pushError("No file aliases are configured.", cmd.submission, true)
             } else {
                 Map errors = egaSubmissionValidationService.validateAliases(cmd.egaFileAlias)
                 if (errors.hasErrors) {
+                    Map<Long, DataFile> dataFileMap = cmd.submission.dataFilesToSubmit*.dataFile.collectEntries {
+                        [(it.id): it]
+                    }
                     Map egaFileAliases = [:]
                     cmd.egaFileAlias.eachWithIndex { it, i ->
                         long fastqId = cmd.fastqFile[i] as long
-                        DataFile dataFile = cmd.submission.dataFilesToSubmit.find {
-                            it.dataFile.id == fastqId
-                        }.dataFile
+                        DataFile dataFile = dataFileMap[fastqId]
                         egaFileAliases.put(dataFile.fileName + dataFile.run, it)
                     }
                     flash.egaFileAliases = egaFileAliases
@@ -468,7 +464,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
                     pushErrors(errors.errors, cmd.submission)
                     Map egaFileAliases = [:]
                     cmd.egaFileAlias.eachWithIndex { it, i ->
-                        egaFileAliases.put(AbstractMergedBamFile.findById(cmd.fileId[i] as long).bamFileName + cmd.egaSampleAlias[i], it)
+                        egaFileAliases.put(AbstractMergedBamFile.get(cmd.fileId[i] as long).bamFileName + cmd.egaSampleAlias[i], it)
                     }
                     flash.egaFileAliases = egaFileAliases
                 } else {
@@ -515,7 +511,7 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
     private void pushError(FieldError errors, EgaSubmission submission) {
         pushError("'${errors.rejectedValue}' is not a valid value for '${errors.field}'. Error code: '${errors.code}'",
-                    submission, true)
+                submission, true)
     }
 
     private void pushErrors(List errors, EgaSubmission submission) {
@@ -538,11 +534,11 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
 
         samplesWithSeqType.sort().each {
             data.add([
-                identifier: "${it.sampleId}-${it.seqTypeId}",
-                sampleId  : "${it.sampleId}",
-                individual: it.pid,
-                seqType   : it.seqTypeString,
-                sampleType: it.sampleTypeName,
+                    identifier: "${it.sampleId}-${it.seqTypeId}",
+                    sampleId  : "${it.sampleId}",
+                    individual: it.pid,
+                    seqType   : it.seqTypeString,
+                    sampleType: it.sampleTypeName,
             ])
         }
 

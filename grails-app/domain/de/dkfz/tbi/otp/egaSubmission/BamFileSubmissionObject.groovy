@@ -30,11 +30,17 @@ class BamFileSubmissionObject implements Entity, SubmissionObject {
     SampleSubmissionObject sampleSubmissionObject
 
     static belongsTo = [
-            bamFile: AbstractMergedBamFile,
+            bamFile               : AbstractMergedBamFile,
             sampleSubmissionObject: SampleSubmissionObject,
     ]
 
     static constraints = {
         egaAliasName nullable: true, unique: true
+    }
+
+    static mapping = {
+        bamFile index: 'bam_file_submission_object_bam_file_idx'
+        sampleSubmissionObject index: 'bam_file_submission_object_sample_submission_object_idx'
+        egaAliasName index: 'bam_file_submission_ega_alias_name_idx'
     }
 }

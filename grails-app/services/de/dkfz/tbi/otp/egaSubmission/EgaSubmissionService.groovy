@@ -30,8 +30,6 @@ import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
 import de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
 @CompileStatic
 @Transactional
 class EgaSubmissionService {
@@ -45,8 +43,8 @@ class EgaSubmissionService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(params.project, 'OTP_READ_ACCESS')")
     EgaSubmission createSubmission(Map params) {
-        EgaSubmission submission = new EgaSubmission( params + [
-                state: EgaSubmission.State.SELECTION,
+        EgaSubmission submission = new EgaSubmission(params + [
+                state         : EgaSubmission.State.SELECTION,
                 selectionState: EgaSubmission.SelectionState.SELECT_SAMPLES,
         ])
         assert submission.save(flush: true)
@@ -55,7 +53,7 @@ class EgaSubmissionService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateSubmissionState (EgaSubmission submission, EgaSubmission.State state) {
+    void updateSubmissionState(EgaSubmission submission, EgaSubmission.State state) {
         submission.state = state
         submission.save(flush: true)
     }
@@ -79,40 +77,118 @@ class EgaSubmissionService {
         return seqTypes
     }
 
-    void saveSampleSubmissionObject(EgaSubmission submission, Sample sample, SeqType seqType) {
-        SampleSubmissionObject sampleSubmissionObject = new SampleSubmissionObject(
-                sample: sample,
-                seqType: seqType
-        ).save(flush: true)
-        submission.samplesToSubmit.add(sampleSubmissionObject)
+    void createAndSaveSampleSubmissionObjects(EgaSubmission submission, List<String> sampleIdSeqTypeIdList) {
+        assert submission
+        assert sampleIdSeqTypeIdList
+
+        Project project = submission.project
+
+        int size = sampleIdSeqTypeIdList.size()
+        //use explicit collection classes to set the capacity (improve performance)
+        List<SampleIdSeqTypeId> listOfPairOfSampleIdAndSeqTypeId = new ArrayList<SampleIdSeqTypeId>(size)
+        Set<Long> sampleIds = new HashSet<Long>(size)
+        Set<Long> seqTypeIds = new HashSet<Long>(15)
+
+        sampleIdSeqTypeIdList.each {
+            SampleIdSeqTypeId sampleIdSeqTypeId = new SampleIdSeqTypeId(it)
+            sampleIds << sampleIdSeqTypeId.sampleId
+            seqTypeIds << sampleIdSeqTypeId.seqTypeId
+            listOfPairOfSampleIdAndSeqTypeId << sampleIdSeqTypeId
+        }
+        Map<Long, SeqType> seqTypeMap = fetchAndReturnSeqTypePerIdMap(seqTypeIds)
+        Map<Long, Sample> sampleMap = fetchAndReturnSamplePerIdMap(sampleIds)
+        List<SampleSubmissionObject> sampleSubmissionObjects = listOfPairOfSampleIdAndSeqTypeId.collect { SampleIdSeqTypeId sampleIdSeqTypeId ->
+            Sample sample = sampleMap[sampleIdSeqTypeId.sampleId]
+            SeqType seqType = seqTypeMap[sampleIdSeqTypeId.seqTypeId]
+            assert sample: "no sample for ${sampleIdSeqTypeId.sampleId} could be found"
+            assert seqType: "no seqType for ${sampleIdSeqTypeId.seqTypeId} could be found"
+            assert sample.project == project
+            new SampleSubmissionObject(
+                    sample: sample,
+                    seqType: seqType,
+            ).save(flush: false)
+        }
+        submission.samplesToSubmit.addAll(sampleSubmissionObjects)
         submission.selectionState = EgaSubmission.SelectionState.SAMPLE_INFORMATION
         submission.save(flush: true)
     }
 
     @CompileDynamic
-    Map<SampleSubmissionObject, Boolean> checkFastqFiles(EgaSubmission submission) {
+    private Map<Long, Sample> fetchAndReturnSamplePerIdMap(Set<Long> sampleIds) {
+        return Sample.findAllByIdInList(sampleIds.toList()).collectEntries { Sample sample ->
+            assert sample
+            [(sample.id): sample]
+        }
+    }
+
+    @CompileDynamic
+    private Map<Long, SeqType> fetchAndReturnSeqTypePerIdMap(Set<Long> seqTypeIds) {
+        return SeqType.findAllByIdInList(seqTypeIds.toList()).collectEntries { SeqType seqType ->
+            assert seqType
+            [(seqType.id): seqType]
+        }
+    }
+
+    Map<SampleSubmissionObject, Boolean> checkFastqFiles(EgaSubmission egaSubmission) {
         Map<SampleSubmissionObject, Boolean> map = [:]
 
-        submission.samplesToSubmit.each {
-            List<DataFile> dataFiles = SeqTrack.findBySampleAndSeqType(it.sample, it.seqType).dataFiles
-            if (dataFiles.empty) {
-                map.put(it, false)
-            } else {
-                map.put(it, dataFiles.first().fileExists)
-            }
+        String checkFastqFileExistQuery = """
+            select distinct
+                samplesToSubmit.id
+            from
+                EgaSubmission egaSubmission
+                    join egaSubmission.samplesToSubmit samplesToSubmit,
+                DataFile datafile
+                    join datafile.seqTrack seqTrack
+            where
+                egaSubmission = :egaSubmission
+                and samplesToSubmit.sample = seqTrack.sample
+                and samplesToSubmit.seqType = seqTrack.seqType
+                and datafile.fileExists = true
+        """
+
+        Set<Long> submissionSampleIdsWithFastqFiles = SampleSubmissionObject.executeQuery(checkFastqFileExistQuery, [
+                egaSubmission: egaSubmission,
+        ]).toSet()
+
+        egaSubmission.samplesToSubmit.each {
+            map.put(it, submissionSampleIdsWithFastqFiles.contains(it.id))
         }
 
         return map
     }
 
-    Map<SampleSubmissionObject, Boolean> checkBamFiles(EgaSubmission submission) {
-        Map<SampleSubmissionObject, Boolean> map = new HashMap<>(submission.samplesToSubmit.size())
+    Map<SampleSubmissionObject, Boolean> checkBamFiles(EgaSubmission egaSubmission) {
+        Map<SampleSubmissionObject, Boolean> map = new HashMap<>(egaSubmission.samplesToSubmit.size())
 
-        submission.samplesToSubmit.each {
-            SampleSubmissionObject sampleSubmissionObject = it as SampleSubmissionObject
-            map.put(sampleSubmissionObject, !getAbstractMergedBamFiles(sampleSubmissionObject).empty)
+        String checkBamFileExistQuery = """
+            select
+                samplesToSubmit.id,
+                bamFile
+            from
+                EgaSubmission egaSubmission
+                    join egaSubmission.samplesToSubmit samplesToSubmit,
+                AbstractMergedBamFile bamFile
+                    join fetch bamFile.workPackage workPackage
+            where
+                egaSubmission = :egaSubmission
+                and workPackage.bamFileInProjectFolder = bamFile
+                and samplesToSubmit.sample = workPackage.sample
+                and samplesToSubmit.seqType = workPackage.seqType
+                and bamFile.fileOperationStatus = '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
+        """
+
+        Set<Long> submissionSampleIdsWithBamFiles = SampleSubmissionObject.executeQuery(checkBamFileExistQuery, [
+                egaSubmission: egaSubmission,
+        ]).findAll {
+            ((it as List)[1] as AbstractMergedBamFile).mostRecentBamFile
+        }.collect {
+            (it as List)[0] as Long
+        }.toSet()
+
+        egaSubmission.samplesToSubmit.each {
+            map.put(it, submissionSampleIdsWithBamFiles.contains(it.id))
         }
-
         return map
     }
 
@@ -125,7 +201,7 @@ class EgaSubmissionService {
                 sampleSubmissionObject.useFastqFile = fileType[i] == FileType.FASTQ
                 sampleSubmissionObject.save(flush: true)
             }
-            if (submission.samplesToSubmit.any { it.useFastqFile } ) {
+            if (submission.samplesToSubmit.any { it.useFastqFile }) {
                 submission.selectionState = EgaSubmission.SelectionState.SELECT_FASTQ_FILES
             } else {
                 submission.selectionState = EgaSubmission.SelectionState.SELECT_BAM_FILES
@@ -139,7 +215,7 @@ class EgaSubmissionService {
         submission.samplesToSubmit.toArray().each { SampleSubmissionObject it ->
             submission.samplesToSubmit.remove(it)
             samplesWithSeqType.add("${it.sample.id}${it.seqType.toString()}")
-            it.delete()
+            it.delete(flush: false)
         }
         submission.selectionState = EgaSubmission.SelectionState.SELECT_SAMPLES
         submission.save(flush: true)
@@ -150,64 +226,84 @@ class EgaSubmissionService {
     void updateDataFileSubmissionObjects(SelectFilesDataFilesFormSubmitCommand cmd) {
         EgaSubmission submission = cmd.submission
         List<String> egaFileAlias = cmd.egaFileAlias
+        Map<Long, DataFileSubmissionObject> dataFileSubmissionObjectMap = cmd.submission.dataFilesToSubmit.collectEntries {
+            [(it.dataFile.id): it]
+        }
+
         cmd.fastqFile.eachWithIndex { fastqIdString, i ->
             long fastqId = fastqIdString as long
-            DataFileSubmissionObject dataFileSubmissionObject = submission.dataFilesToSubmit.find {
-                it.dataFile.id == fastqId
-            }
+            DataFileSubmissionObject dataFileSubmissionObject = dataFileSubmissionObjectMap[fastqId]
             dataFileSubmissionObject.egaAliasName = egaFileAlias[i]
             dataFileSubmissionObject.save(flush: false)
         }
-        if (submission.samplesToSubmit.any { it.useBamFile } ) {
+        if (submission.samplesToSubmit.any { it.useBamFile }) {
             submission.selectionState = EgaSubmission.SelectionState.SELECT_BAM_FILES
         }
         submission.save(flush: true)
     }
 
-    @CompileDynamic
-    List<DataFileAndSampleAlias> getDataFilesAndAlias(EgaSubmission submission) {
-        List<DataFile> dataFiles
-        if (submission.dataFilesToSubmit) {
-            dataFiles = submission.dataFilesToSubmit*.dataFile
-        } else {
-            dataFiles = submission.samplesToSubmit.findAll { it.useFastqFile }.collectMany {
-                SeqTrack.findAllBySampleAndSeqType(it.sample, it.seqType).collectMany {
-                    seqTrackService.getSequenceFilesForSeqTrackIncludingWithdrawn(it)
-                }
-            }
+    List<DataFileAndSampleAlias> getDataFilesAndAlias(EgaSubmission egaSubmission) {
+        if (egaSubmission.dataFilesToSubmit) {
+            return egaSubmission.dataFilesToSubmit.collect {
+                return new DataFileAndSampleAlias(it.dataFile, it.sampleSubmissionObject)
+            }.sort()
         }
+        String queryFastqFiles = """
+            select
+                dataFile,
+                samplesToSubmit
+            from
+                EgaSubmission egaSubmission
+                    join egaSubmission.samplesToSubmit samplesToSubmit,
+                DataFile dataFile
+                    join dataFile.seqTrack seqTrack
+            where
+                egaSubmission = :egaSubmission
+                and samplesToSubmit.sample = seqTrack.sample
+                and samplesToSubmit.seqType = seqTrack.seqType
+                and samplesToSubmit.useFastqFile = true
+                and dataFile.fileExists = true
+                and dataFile.fileType.type = '${de.dkfz.tbi.otp.ngsdata.FileType.Type.SEQUENCE}'
+            """
 
-        Map<Sample, Map<SeqType, List<SampleSubmissionObject>>> submissionObjectsPerSampleAndSeqType = submission.samplesToSubmit.groupBy({ it.sample }, { it.seqType })
-        return dataFiles.collect { DataFile file ->
-            SampleSubmissionObject sampleSubmissionObject = exactlyOneElement(submissionObjectsPerSampleAndSeqType[file.seqTrack.sample][file.seqTrack.seqType])
-            return new DataFileAndSampleAlias(file, sampleSubmissionObject)
+        return DataFile.executeQuery(queryFastqFiles, [
+                egaSubmission: egaSubmission,
+        ]).collect {
+            List list = it as List
+            new DataFileAndSampleAlias(list[0] as DataFile, list[1] as SampleSubmissionObject)
         }.sort()
     }
 
-    @CompileDynamic
-    List<BamFileAndSampleAlias> getBamFilesAndAlias(EgaSubmission submission) {
-        List<AbstractMergedBamFile> bamFiles
-        if (submission.bamFilesToSubmit) {
-            bamFiles = submission.bamFilesToSubmit*.bamFile
-        } else {
-            bamFiles = submission.samplesToSubmit.findAll { it.useBamFile }.collectMany {
-                getAbstractMergedBamFiles(it)
-            }
+    List<BamFileAndSampleAlias> getBamFilesAndAlias(EgaSubmission egaSubmission) {
+        if (egaSubmission.bamFilesToSubmit) {
+            return egaSubmission.bamFilesToSubmit.collect {
+                new BamFileAndSampleAlias(it.bamFile, it.sampleSubmissionObject)
+            }.sort()
         }
-
-        return bamFiles.collect { AbstractMergedBamFile file ->
-            boolean producedByOtp = !(file instanceof ExternallyProcessedMergedBamFile)
-            boolean withdrawn = file.withdrawn
-            // For normal BAMs created by OTP, there is only one file and the decision was made on the previous page (disabled and checked)
-            // Withdrawn BAMs can be submitted (enabled but unchecked by default) but the user should explicitly confirm that they want to submit "bad data"
-            // Imported BAMs are not supported (disabled and unchecked), regardless of withdrawn state.
-            new BamFileAndSampleAlias(
-                    file,
-                    submission.samplesToSubmit.find { it.sample == file.sample && it.seqType == file.seqType }.egaAliasName,
-                    producedByOtp && withdrawn,
-                    producedByOtp && !withdrawn,
-                    producedByOtp,
-            )
+        String queryBamFile = """
+            select
+                bamFile,
+                samplesToSubmit
+            from
+                EgaSubmission egaSubmission
+                    join egaSubmission.samplesToSubmit samplesToSubmit,
+                AbstractMergedBamFile bamFile
+                    join fetch bamFile.workPackage workPackage
+            where
+                egaSubmission = :egaSubmission
+                and workPackage.bamFileInProjectFolder = bamFile
+                and samplesToSubmit.sample = workPackage.sample
+                and samplesToSubmit.seqType = workPackage.seqType
+                and samplesToSubmit.useBamFile = true
+                and bamFile.fileOperationStatus = '${AbstractMergedBamFile.FileOperationStatus.PROCESSED}'
+            """
+        return SampleSubmissionObject.executeQuery(queryBamFile, [
+                egaSubmission: egaSubmission,
+        ]).findAll {
+            ((it as List)[0] as AbstractMergedBamFile).mostRecentBamFile
+        }.collect {
+            List list = (it as List)
+            new BamFileAndSampleAlias(list[0] as AbstractMergedBamFile, list[1] as SampleSubmissionObject)
         }.sort()
     }
 
@@ -218,19 +314,6 @@ class EgaSubmissionService {
             }
             bamFileSubmissionObject.egaAliasName = egaFileAliases[i]
             bamFileSubmissionObject.save(flush: true)
-        }
-    }
-
-    @CompileDynamic
-    private List<AbstractMergedBamFile> getAbstractMergedBamFiles(SampleSubmissionObject sampleSubmissionObject) {
-        return AbstractMergedBamFile.createCriteria().list {
-            workPackage {
-                eq('sample', sampleSubmissionObject.sample)
-                eq('seqType', sampleSubmissionObject.seqType)
-            }
-            eq('fileOperationStatus', AbstractMergedBamFile.FileOperationStatus.PROCESSED)
-        }.findAll {
-            it.isMostRecentBamFile()
         }
     }
 
@@ -249,19 +332,17 @@ class EgaSubmissionService {
         submission.save(flush: true)
     }
 
-    @SuppressWarnings('Instanceof')
-    @CompileDynamic
     void createBamFileSubmissionObjects(EgaSubmission submission) {
-        getBamFilesAndAlias(submission).each {
-            if (!(it.bamFile instanceof ExternallyProcessedMergedBamFile)) {
-                BamFileSubmissionObject bamFileSubmissionObject = new BamFileSubmissionObject(
-                        bamFile: it.bamFile,
-                        sampleSubmissionObject: SampleSubmissionObject.findByEgaAliasName(it.sampleAlias),
-                ).save(flush: false)
-                submission.addToBamFilesToSubmit(bamFileSubmissionObject)
-            }
-            submission.save(flush: true)
+        getBamFilesAndAlias(submission).findAll {
+            it.producedByOtp && !it.bamFile.withdrawn
+        }.each {
+            BamFileSubmissionObject bamFileSubmissionObject = new BamFileSubmissionObject(
+                    bamFile: it.bamFile,
+                    sampleSubmissionObject: it.sampleSubmissionObject,
+            ).save(flush: false)
+            submission.addToBamFilesToSubmit(bamFileSubmissionObject)
         }
+        submission.save(flush: true)
     }
 
     @CompileDynamic
@@ -282,12 +363,13 @@ class EgaSubmissionService {
                 property('seqType')
             }
         }.unique().collect {
+            SeqType seqType = it[3]
             return new SampleAndSeqTypeProjection(
-                    sampleId:       it[0],
-                    pid:            it[1],
+                    sampleId: it[0],
+                    pid: it[1],
                     sampleTypeName: it[2],
-                    seqTypeId:      it[3].id,
-                    seqTypeString:  it[3].toString(),
+                    seqTypeId: seqType.id,
+                    seqTypeString: seqType.toString(),
             )
         }
     }
@@ -320,11 +402,11 @@ class EgaSubmissionService {
             List aliasNameHelper = [
                     it.bamFile.seqType.displayName,
                     it.bamFile.seqType.libraryLayout,
-                    it.sampleAlias,
+                    it.sampleSubmissionObject.egaAliasName,
                     it.bamFile.md5sum,
             ].findAll()
             String aliasName = "${aliasNameHelper.join("_")}.bam"
-            bamFileAliases.put(it.bamFile.bamFileName + it.sampleAlias, aliasName)
+            bamFileAliases.put(it.bamFile.bamFileName + it.sampleSubmissionObject.egaAliasName, aliasName)
         }
 
         return bamFileAliases
@@ -346,8 +428,10 @@ class EgaSubmissionService {
     }
 }
 
+@CompileStatic
 @Canonical
 class DataFileAndSampleAlias implements Comparable<DataFileAndSampleAlias> {
+
     DataFile dataFile
     SampleSubmissionObject sampleSubmissionObject
 
@@ -355,18 +439,34 @@ class DataFileAndSampleAlias implements Comparable<DataFileAndSampleAlias> {
     int compareTo(DataFileAndSampleAlias other) {
         return this.dataFile.individual.displayName <=> other.dataFile.individual.displayName ?:
                 this.dataFile.seqType.toString() <=> other.dataFile.seqType.toString() ?:
-                        this.dataFile.sampleType.displayName <=> other.dataFile.sampleType.displayName
+                        this.dataFile.sampleType.displayName <=> other.dataFile.sampleType.displayName ?:
+                                this.dataFile.seqTrack.run.name <=> other.dataFile.seqTrack.run.name ?:
+                                        this.dataFile.seqTrack.laneId <=> other.dataFile.seqTrack.laneId ?:
+                                                this.dataFile.mateNumber <=> other.dataFile.mateNumber
     }
-
 }
 
-@Canonical
+@CompileStatic
 class BamFileAndSampleAlias implements Comparable<BamFileAndSampleAlias> {
-    AbstractMergedBamFile bamFile
-    String sampleAlias
-    boolean selectionEditable
-    boolean defaultSelectionState
-    boolean producedByOtp
+    final AbstractMergedBamFile bamFile
+    final SampleSubmissionObject sampleSubmissionObject
+
+    final boolean selectionEditable
+    final boolean defaultSelectionState
+    final boolean producedByOtp
+
+    @SuppressWarnings('Instanceof')
+    BamFileAndSampleAlias(AbstractMergedBamFile bamFile, SampleSubmissionObject sampleSubmissionObject) {
+        this.bamFile = bamFile
+        this.sampleSubmissionObject = sampleSubmissionObject
+
+        // For normal BAMs created by OTP, there is only one file and the decision was made on the previous page (disabled and checked)
+        // Withdrawn BAMs can not be submitted (disabled and unchecked)
+        // Imported BAMs are not supported (disabled and unchecked), regardless of withdrawn state.
+        producedByOtp = !(bamFile instanceof ExternallyProcessedMergedBamFile)
+        selectionEditable = false //Currently editable checkboxes are not supported
+        defaultSelectionState = producedByOtp && !bamFile.withdrawn
+    }
 
     @Override
     int compareTo(BamFileAndSampleAlias other) {
@@ -376,6 +476,7 @@ class BamFileAndSampleAlias implements Comparable<BamFileAndSampleAlias> {
     }
 }
 
+@CompileStatic
 @Canonical
 class SampleAndSeqTypeProjection implements Comparable<SampleAndSeqTypeProjection> {
     long sampleId

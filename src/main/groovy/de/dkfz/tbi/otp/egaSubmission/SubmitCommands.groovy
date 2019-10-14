@@ -26,7 +26,8 @@ import org.springframework.web.multipart.MultipartFile
 
 import de.dkfz.tbi.otp.ngsdata.Project
 
-trait SubmitCommands { }
+trait SubmitCommands {
+}
 
 class NewSubmissionControllerSubmitCommand implements Validateable {
     Project project
@@ -89,9 +90,9 @@ class SampleInformationFormsSubmitCommand implements Validateable {
     String csv
     String next
     String back
-    List<String> sampleObjectId
-    List<EgaSubmissionService.FileType> fileType
-    List<String> egaSampleAlias
+    List<String> sampleObjectId = []
+    List<EgaSubmissionService.FileType> fileType = []
+    List<String> egaSampleAlias = []
 
     static constraints = {
         next nullable: true

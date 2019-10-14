@@ -21,26 +21,23 @@
  */
 package de.dkfz.tbi.otp.egaSubmission
 
-import de.dkfz.tbi.otp.ngsdata.DataFile
-import de.dkfz.tbi.otp.utils.Entity
+import groovy.transform.CompileStatic
 
-class DataFileSubmissionObject implements Entity, SubmissionObject {
+@CompileStatic
+class SampleIdSeqTypeId {
 
-    DataFile dataFile
-    SampleSubmissionObject sampleSubmissionObject
+    final Long sampleId
 
-    static belongsTo = [
-            dataFile              : DataFile,
-            sampleSubmissionObject: SampleSubmissionObject,
-    ]
+    final Long seqTypeId
 
-    static constraints = {
-        egaAliasName nullable: true, unique: true
-    }
-
-    static mapping = {
-        dataFile index: 'data_file_submission_object_data_file_idx'
-        sampleSubmissionObject index: 'data_file_submission_object_sample_submission_object_idx'
-        egaAliasName index: 'data_file_submission_ega_alias_name_idx'
+    /**
+     * @param sampleIDSeqTypeId a string containing the Sample id, a dash, and the SeqType id.
+     */
+    SampleIdSeqTypeId(String sampleIDSeqTypeId) {
+        assert sampleIDSeqTypeId
+        List<Long> sampleAndSeqType = sampleIDSeqTypeId.split('-')*.toLong()
+        assert sampleAndSeqType.size() == 2
+        sampleId = sampleAndSeqType[0]
+        seqTypeId = sampleAndSeqType[1]
     }
 }

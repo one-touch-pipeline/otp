@@ -46,7 +46,7 @@ class EgaSubmissionValidationService {
         }
         return [
                 "hasError": hasError,
-                "error": error,
+                "error"   : error,
         ]
     }
 
@@ -78,75 +78,109 @@ class EgaSubmissionValidationService {
         ]
     }
 
-    @CompileDynamic
-    Map validateSampleInformationFormInput(List<String> sampleObjectId, List<String> alias, List<EgaSubmissionService.FileType> fileType) {
-        List<String> errors = []
-        boolean hasErrors = false
-        Map<List<String>, String> sampleAliases =  [:]
-        Map<List<String>, Boolean> fastqs = [:]
-        Map<List<String>, Boolean> bams = [:]
+    Map validateSampleInformationFormInput(EgaSubmission egaSubmission, List<String> sampleObjectId, List<String> alias,
+                                           List<EgaSubmissionService.FileType> fileType) {
+        List<CharSequence> errors = []
+        Map<EgaMapKey, String> sampleAliases = [:]
+        Map<EgaMapKey, Boolean> fastqs = [:]
+        Map<EgaMapKey, Boolean> bams = [:]
 
-        if (fileType.findAll().size() != sampleObjectId.size()) {
-            hasErrors = true
-            errors += "For some samples files types are not selected."
-        }
-        if (alias.unique(false).size() != sampleObjectId.size()) {
-            hasErrors = true
-            errors += "Not all aliases are unique."
-        }
-        alias.sort(false).each {
-            if (it == "" ) {
-                hasErrors = true
-                errors += "For some samples no alias is configured."
-            }
-            if (SampleSubmissionObject.findByEgaAliasName(it)) {
-                hasErrors = true
-                errors += "Alias ${it} already exist.".toString()
-            }
+        Map<Long, SampleSubmissionObject> sampleSubmissionObjectMap = egaSubmission.samplesToSubmit.collectEntries {
+            [(it.id): it]
         }
 
-        alias.eachWithIndex { it, i ->
-            sampleAliases.put(getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject.get(sampleObjectId[i] as Long)), it)
+        int size = sampleSubmissionObjectMap.size()
+        Map<SampleSubmissionObject, String> sampleSubmissionObjectAliasMap = new HashMap<SampleSubmissionObject, String>(size)
+
+        for (int i = 0; i < size; i++) {
+            SampleSubmissionObject sampleSubmissionObject = sampleSubmissionObjectMap[(sampleObjectId[i] as Long)]
+            EgaMapKey key = getIdentifierKeyFromSampleSubmissionObject(sampleSubmissionObject)
+            String aliasValue = alias[i]
+            EgaSubmissionService.FileType fileTypeValue = fileType[i]
+
+            if (aliasValue) {
+                sampleSubmissionObjectAliasMap[sampleSubmissionObject] = aliasValue
+                sampleAliases.put(key, aliasValue)
+            } else {
+                errors << "For Sample ${sampleSubmissionObject} no alias is set."
+            }
+
+            if (fileType[i]) {
+                fastqs.put(key, fileTypeValue == EgaSubmissionService.FileType.FASTQ)
+                bams.put(key, fileTypeValue == EgaSubmissionService.FileType.BAM)
+            } else {
+                errors << "For Sample ${sampleSubmissionObject} no file type is selected."
+            }
         }
-        sampleObjectId.eachWithIndex { it, i ->
-            fastqs.put(getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject.get(it as Long)), fileType[i] == EgaSubmissionService.FileType.FASTQ)
-            bams.put(getIdentifierKeyFromSampleSubmissionObject(SampleSubmissionObject.get(it as Long)), fileType[i] == EgaSubmissionService.FileType.BAM)
+
+        Map<String, Map<SampleSubmissionObject, String>> aliasWithDuplicates = sampleSubmissionObjectAliasMap.groupBy {
+            it.value
+        }.findAll {
+            it.value.size() > 1
+        }
+        if (aliasWithDuplicates) {
+            List<CharSequence> message = []
+            message << "Not all aliases are unique: "
+
+            aliasWithDuplicates.each {
+                message << "${it.key}: ${it.value.keySet()*.toString().join(', ')}"
+            }
+            errors << message.join('\n    ')
+        }
+
+        List<SampleSubmissionObject> aliasesInDatabase = findAllAliasesInDatabase(sampleAliases.values().toList())
+        if (aliasesInDatabase) {
+            errors << "The following aliases are already registered in the database: ${aliasesInDatabase*.egaAliasName.sort().join(', ')}"
         }
 
         return [
-                hasErrors: hasErrors,
-                errors: errors.unique(),
-                fastqs: fastqs,
-                bams: bams,
+                hasErrors    : !errors.empty,
+                errors       : errors.unique().sort(),
+                fastqs       : fastqs,
+                bams         : bams,
                 sampleAliases: sampleAliases,
         ]
     }
 
     @CompileDynamic
-    Map validateAliases (List<String> alias) {
-        List<String> errors = []
-        boolean hasErrors = false
+    private List<SampleSubmissionObject> findAllAliasesInDatabase(List<String> aliases) {
+        return aliases ? SampleSubmissionObject.findAllByEgaAliasNameInList(aliases) : []
+    }
 
-        if (alias.size() != alias.unique(false).size()) {
-            hasErrors = true
-            errors += "Not all aliases are unique."
+    Map validateAliases(List<String> alias) {
+        List<CharSequence> errors = []
+
+        List<String> duplicateList = alias.groupBy {
+            it
+        }.findAll {
+            it.value.size() > 1
+        }*.key.sort()
+
+        if (duplicateList.contains(null) || duplicateList.contains('')) {
+            errors += "For some samples no alias is configured."
+            duplicateList.removeAll([null, ''])
+        }
+        if (duplicateList) {
+            errors += "The following aliases are not unique: ${duplicateList.join(', ')}"
         }
 
-        alias.sort(false).each {
-            if (it == "" ) {
-                hasErrors = true
-                errors += "For some samples no alias is configured."
-            }
-            if (DataFileSubmissionObject.findByEgaAliasName(it) || BamFileSubmissionObject.findByEgaAliasName(it)) {
-                hasErrors = true
-                errors += "Alias ${it} already exist.".toString()
-            }
+        List<String> existingAliases = findAlreadyUsedAliases(alias)
+        if (existingAliases) {
+            errors += "The following aliases already exist: ${existingAliases.join(', ')}"
         }
 
         return [
-                hasErrors: hasErrors,
-                errors: errors.unique(),
+                hasErrors: !errors.empty,
+                errors   : errors.unique(),
         ]
+    }
+
+    @CompileDynamic
+    private List<String> findAlreadyUsedAliases(List<String> alias) {
+        List<String> existingAliases = []
+        existingAliases.addAll(DataFileSubmissionObject.findAllByEgaAliasNameInList(alias)*.egaAliasName)
+        existingAliases.addAll(BamFileSubmissionObject.findAllByEgaAliasNameInList(alias)*.egaAliasName)
+        return existingAliases.unique().sort()
     }
 
     boolean validateFileTypeFromInput(Spreadsheet spreadsheet) {

@@ -23,11 +23,12 @@
 <%@ page import="de.dkfz.tbi.otp.dataprocessing.ExternallyProcessedMergedBamFile" %>
 <html>
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta name="layout" content="main" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
     <title><g:message code="egaSubmission.selectFiles.bamTitle"/></title>
     <asset:javascript src="pages/egaSubmission/datatable.js"/>
 </head>
+
 <body>
 <div class="body">
     <g:link style="float: right" action="helpPage" fragment="selectBam" target="_blank">
@@ -36,15 +37,15 @@
     <g:render template="/templates/messages"/>
     <div>
         <h3><g:message code="egaSubmission.selectFiles.bamTitle"/></h3>
-        <p>
-            <g:uploadForm action="bamFilesListFileUploadForm">
-                <div class="dialog">
-                    <input type="file" name="file" id="file"/>
-                    <g:hiddenField name="submission.id" value="${submission.id}"/>
-                    <g:submitButton name="upload" value="${message(code: 'egaSubmission.uploadCsv')}" disabled="${!hasFiles || bamFilesHasFileAliases}"/>
-                </div>
-            </g:uploadForm>
-        </p>
+    <p>
+        <g:uploadForm action="bamFilesListFileUploadForm">
+            <div class="dialog">
+                <input type="file" name="file" id="file"/>
+                <g:hiddenField name="submission.id" value="${submission.id}"/>
+                <g:submitButton name="upload" value="${message(code: 'egaSubmission.uploadCsv')}" disabled="${!hasFiles || bamFilesHasFileAliases}"/>
+            </div>
+        </g:uploadForm>
+    </p>
         <div class="otpDataTables">
             <g:form action="selectFilesBamFilesForm">
                 <g:hiddenField name="submission.id" value="${submission.id}"/>
@@ -80,24 +81,29 @@
                             <td>${it.bamFile.individual.displayName}</td>
                             <td>${it.bamFile.seqType.toString()}</td>
                             <td>${it.bamFile.sampleType.displayName}</td>
-                            <td>${it.sampleAlias}<g:hiddenField name="egaSampleAlias[${i}]" value="${it.sampleAlias}"/></td>
+                            <td>${it.sampleSubmissionObject.egaAliasName}<g:hiddenField name="egaSampleAlias[${i}]"
+                                                                                        value="${it.sampleSubmissionObject.egaAliasName}"/></td>
                             <g:if test="${bamFilesHasFileAliases}">
                                 <td>${bamFileSubmissionObject.find {
                                     bamFileSubmissionObject -> bamFileSubmissionObject.bamFile == it.bamFile
                                 }.egaAliasName}</td>
                             </g:if><g:else>
-                                <td><g:textField name="egaFileAlias[${i}]" size="50" value="${egaFileAliases?.getAt(it.bamFile.bamFileName + it.sampleAlias)}" disabled="${!hasFiles}"/></td>
-                            </g:else>
+                            <td><g:textField name="egaFileAlias[${i}]" size="50"
+                                             value="${egaFileAliases?.getAt(it.bamFile.bamFileName + it.sampleSubmissionObject.egaAliasName)}"
+                                             disabled="${!hasFiles}"/></td>
+                        </g:else>
                             <td>${it.bamFile.bamFileName}<g:hiddenField name="fileId[${i}]" value="${it.bamFile.id}"/></td>
-                            <td>${it.producedByOtp? "Yes" : "No"}</td>
+                            <td>${it.producedByOtp ? "Yes" : "No"}</td>
                         </tr>
                     </g:each>
                     </tbody>
                 </table>
+
                 <p>
                     <g:submitButton name="saveSelection" value="${message(code: 'egaSubmission.selectFiles.saveSelection')}" disabled="${hasFiles}"/>
                     >>
-                    <g:submitButton name="saveAliases" value="${message(code: 'egaSubmission.selectFiles.saveAliases')}" disabled="${!hasFiles || bamFilesHasFileAliases}"/>
+                    <g:submitButton name="saveAliases" value="${message(code: 'egaSubmission.selectFiles.saveAliases')}"
+                                    disabled="${!hasFiles || bamFilesHasFileAliases}"/>
                     <g:submitButton name="download" value="${message(code: 'egaSubmission.downloadCsv')}" disabled="${!hasFiles || bamFilesHasFileAliases}"/>
                 </p>
             </g:form>

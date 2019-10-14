@@ -100,18 +100,18 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
         then:
         content == "${INDIVIDUAL.value}," +
-                "${SAMPLE_TYPE.value}," +
                 "${SEQ_TYPE.value}," +
+                "${SAMPLE_TYPE.value}," +
                 "${EGA_SAMPLE_ALIAS.value}," +
                 "${FILE_TYPE.value}\n" +
                 "${sampleSubmissionObject1.sample.individual.displayName}," +
-                "${sampleSubmissionObject1.sample.sampleType.displayName}," +
                 "${sampleSubmissionObject1.seqType.toString()}," +
+                "${sampleSubmissionObject1.sample.sampleType.displayName}," +
                 "${egaSampleAlias[0]}," +
                 "${fileTypes[0]}\n" +
                 "${sampleSubmissionObject2.sample.individual.displayName}," +
-                "${sampleSubmissionObject2.sample.sampleType.displayName}," +
                 "${sampleSubmissionObject2.seqType.toString()}," +
+                "${sampleSubmissionObject2.sample.sampleType.displayName}," +
                 "${egaSampleAlias[1]}," +
                 "${fileTypes[1]}\n"
     }
@@ -165,8 +165,8 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
         then:
         content == "${INDIVIDUAL.value}," +
-                "${SAMPLE_TYPE.value}," +
                 "${SEQ_TYPE.value}," +
+                "${SAMPLE_TYPE.value}," +
                 "${EGA_SAMPLE_ALIAS.value}," +
                 "${SEQ_CENTER.value}," +
                 "${RUN.value}," +
@@ -176,8 +176,8 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
                 "${EGA_FILE_ALIAS.value}," +
                 "${FILENAME.value}\n" +
                 "${dataFileSubmissionObject.dataFile.individual.displayName}," +
-                "${dataFileSubmissionObject.dataFile.sampleType}," +
                 "${dataFileSubmissionObject.dataFile.seqType}," +
+                "${dataFileSubmissionObject.dataFile.sampleType}," +
                 "${dataFileSubmissionObject.sampleSubmissionObject.egaAliasName}," +
                 "${dataFileSubmissionObject.dataFile.run.seqCenter}," +
                 "${dataFileSubmissionObject.dataFile.run}," +
@@ -206,7 +206,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         String bamFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForBamFiles([
                 new BamFileAndSampleAlias(
                         roddyBamFile,
-                        sampleSubmissionObject.egaAliasName,
+                        sampleSubmissionObject,
                 ),
         ]).get(roddyBamFile.bamFileName + sampleSubmissionObject.egaAliasName)
 
@@ -215,14 +215,14 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
 
         then:
         content == "${INDIVIDUAL.value}," +
-                "${SAMPLE_TYPE.value}," +
                 "${SEQ_TYPE.value}," +
+                "${SAMPLE_TYPE.value}," +
                 "${EGA_SAMPLE_ALIAS.value}," +
                 "${EGA_FILE_ALIAS.value}," +
                 "${FILENAME.value}\n" +
                 "${bamFileSubmissionObject.bamFile.individual.displayName}," +
-                "${bamFileSubmissionObject.bamFile.sampleType}," +
                 "${bamFileSubmissionObject.bamFile.seqType}," +
+                "${bamFileSubmissionObject.bamFile.sampleType}," +
                 "${bamFileSubmissionObject.sampleSubmissionObject.egaAliasName}," +
                 "${bamFileAlias}," +
                 "${bamFileSubmissionObject.bamFile.bamFileName}\n"
@@ -232,7 +232,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         given:
         egaSubmissionFileService.egaSubmissionService = new EgaSubmissionService()
         EgaSubmission submission = createEgaSubmission()
-        DataFile dataFile = DomainFactory.createDataFile()
+        DataFile dataFile = createDataFile()
         SampleSubmissionObject sampleSubmissionObject = createSampleSubmissionObject(
                 sample: dataFile.seqTrack.sample,
                 seqType: dataFile.seqType,
@@ -279,7 +279,7 @@ class EgaSubmissionFileServiceSpec extends Specification implements EgaSubmissio
         String bamFileAlias = egaSubmissionFileService.egaSubmissionService.generateDefaultEgaAliasesForBamFiles([
                 new BamFileAndSampleAlias(
                         roddyBamFile,
-                        sampleSubmissionObject.egaAliasName
+                        sampleSubmissionObject
                 ),
         ]).get(roddyBamFile.bamFileName + sampleSubmissionObject.egaAliasName)
 

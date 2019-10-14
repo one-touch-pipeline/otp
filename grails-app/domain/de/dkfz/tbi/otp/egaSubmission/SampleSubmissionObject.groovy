@@ -21,8 +21,7 @@
  */
 package de.dkfz.tbi.otp.egaSubmission
 
-import de.dkfz.tbi.otp.ngsdata.Sample
-import de.dkfz.tbi.otp.ngsdata.SeqType
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 
 class SampleSubmissionObject implements Entity, SubmissionObject {
@@ -38,5 +37,20 @@ class SampleSubmissionObject implements Entity, SubmissionObject {
 
     static constraints = {
         egaAliasName nullable: true, unique: true
+    }
+
+    static mapping = {
+        sample index: 'sample_submission_sample_idx'
+        seqType index: 'sample_submission_seq_type_idx'
+        egaAliasName index: 'sample_submission_ega_alias_name_idx'
+    }
+
+    Project getProject() {
+        sample.project
+    }
+
+    @Override
+    String toString() {
+        "${sample.individual.displayName} ${seqType.displayNameWithLibraryLayout} ${sample.sampleType.displayName}"
     }
 }
