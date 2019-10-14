@@ -197,7 +197,7 @@ class ClusterJobSchedulerService {
         return jobStates.collectEntries { BEJobID jobId, JobState state ->
             [
                     new ClusterJobIdentifier(realm, jobId.id),
-                    (state in finished || state in failed) ? ClusterJobStatus.COMPLETED : ClusterJobStatus.NOT_COMPLETED,
+                    (state in finished || state in failed) ? ClusterJobStatus.COMPLETED : state == JobState.UNKNOWN ? ClusterJobStatus.UNKNOWN : ClusterJobStatus.NOT_COMPLETED,
             ]
         } as Map<ClusterJobIdentifier, ClusterJobStatus>
     }

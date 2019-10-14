@@ -23,5 +23,6 @@ package de.dkfz.tbi.otp.job.scheduler
 
 enum ClusterJobStatus {
     COMPLETED,
-    NOT_COMPLETED
+    NOT_COMPLETED,
+    UNKNOWN
 }

@@ -86,7 +86,8 @@ class ClusterJobMonitor {
             clusterJobs.each { ClusterJob clusterJob ->
                 ClusterJobStatus status = jobStates.get(new ClusterJobIdentifier(clusterJob), ClusterJobStatus.COMPLETED)
                 boolean completed = (status == ClusterJobStatus.COMPLETED)
-                log.debug("Checking cluster job ID ${clusterJob.clusterJobId}: ${completed ? 'finished' : 'still running'}")
+                boolean unknown = (status == ClusterJobStatus.UNKNOWN)
+                log.debug("Checking cluster job ID ${clusterJob.clusterJobId}: ${completed ? 'finished' : unknown ? 'state UNKNOWN' : 'still running'}")
                 if (completed) {
                     handleFinishedClusterJob(clusterJob)
                     finishedClusterJobIds.add(clusterJob.clusterJobId)
