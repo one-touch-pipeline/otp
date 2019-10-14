@@ -245,7 +245,7 @@ class UserEntry {
         this.user = user
         this.userProjectRole = UserProjectRole.findByUserAndProject(user, project)
 
-        this.inLdap = ldapUserDetails?.cn ?: false
+        this.inLdap = ldapUserDetails?.username ?: false
         this.realName = inLdap ? ldapUserDetails.realName : user.realName
         this.thumbnailPhoto = inLdap ? ldapUserDetails.thumbnailPhoto.encodeAsBase64() : ""
         this.department = inLdap ? ldapUserDetails.department : ""

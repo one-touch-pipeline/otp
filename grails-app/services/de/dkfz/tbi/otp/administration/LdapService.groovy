@@ -64,7 +64,7 @@ class LdapService implements InitializingBean {
         }
         return ldapTemplate.search(
                 query().where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
-                        .and(LdapKey.COMMON_NAME).is(username),
+                        .and(configService.ldapSearchAttribute).is(username),
                 new LdapUserDetailsAttributesMapper())[0]
     }
 
@@ -76,7 +76,7 @@ class LdapService implements InitializingBean {
 
         String wildcardedSearch = "*${sanitizedSearchString}*"
         ContainerCriteria dynamicQuery = query()
-                .where(LdapKey.COMMON_NAME).like(wildcardedSearch)
+                .where(configService.ldapSearchAttribute).like(wildcardedSearch)
                 .or(LdapKey.MAIL).like(wildcardedSearch)
                 .or(LdapKey.GIVEN_NAME).like(wildcardedSearch)
                 .or(LdapKey.SURNAME).like(wildcardedSearch)
@@ -90,7 +90,7 @@ class LdapService implements InitializingBean {
 
         return ldapTemplate.search(
                 query().countLimit(countLimit)
-                        .attributes(LdapKey.COMMON_NAME, LdapKey.MAIL, LdapKey.GIVEN_NAME, LdapKey.SURNAME, LdapKey.DEPARTMENT)
+                        .attributes(configService.ldapSearchAttribute, LdapKey.MAIL, LdapKey.GIVEN_NAME, LdapKey.SURNAME, LdapKey.DEPARTMENT)
                         .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.PERSON)
                         .and(LdapKey.MAIL).isPresent()
                         .and(dynamicQuery),
@@ -103,7 +103,7 @@ class LdapService implements InitializingBean {
         }
         return ldapTemplate.search(
                 query().where(LdapKey.OBJECT_CATEGORY).is(LdapKey.GROUP)
-                        .and(LdapKey.COMMON_NAME).is(groupName),
+                        .and(configService.ldapSearchAttribute).is(groupName),
                 new DistinguishedNameAttributesMapper())[0]
     }
 
@@ -124,7 +124,7 @@ class LdapService implements InitializingBean {
         }
         return ldapTemplate.search(
                 query().where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
-                        .and(LdapKey.COMMON_NAME).is(username),
+                        .and(configService.ldapSearchAttribute).is(username),
                 new MemberOfAttributesMapper())[0]
     }
 }
@@ -133,9 +133,9 @@ class LdapUserDetailsAttributesMapper implements AttributesMapper<LdapUserDetail
     @Override
     LdapUserDetails mapFromAttributes(Attributes a) throws NamingException {
         List<String> memberOfList = a.get(LdapKey.MEMBER_OF)?.getAll()?.collect {
-            Matcher matcher = it =~ /CN=(?<cn>[^,]*),.*/
-            if (matcher.matches() && matcher.group(LdapKey.COMMON_NAME)) {
-                return matcher.group(LdapKey.COMMON_NAME)
+            Matcher matcher = it =~ /CN=(?<group>[^,]*),.*/
+            if (matcher.matches() && matcher.group("group")) {
+                return matcher.group("group")
             }
         }
         long accountExpires = (a.get(LdapKey.ACCOUNT_EXPIRES)?.get()?.toString()?.toLong()) ?: 0
@@ -144,7 +144,7 @@ class LdapUserDetailsAttributesMapper implements AttributesMapper<LdapUserDetail
         String sn = a.get(LdapKey.SURNAME)?.get()
         boolean realNameCreatable = givenName && sn
         return new LdapUserDetails([
-                cn               : a.get(LdapKey.COMMON_NAME)?.get()?.toString(),
+                username         : a.get(ConfigService.getInstance().getLdapSearchAttribute())?.get()?.toString(),
                 realName         : realNameCreatable ? "${givenName} ${sn}" : null,
                 mail             : a.get(LdapKey.MAIL)?.get()?.toString(),
                 department       : a.get(LdapKey.DEPARTMENT)?.get()?.toString(),
@@ -171,7 +171,7 @@ class DistinguishedNameAttributesMapper implements AttributesMapper<String> {
 class UsernameAttributesMapper implements AttributesMapper<String> {
     @Override
     String mapFromAttributes(Attributes a) throws NamingException {
-        return a.get(LdapKey.COMMON_NAME)?.get()?.toString()
+        return a.get(ConfigService.getInstance().getLdapSearchAttribute())?.get()?.toString()
     }
 }
 
@@ -179,9 +179,9 @@ class MemberOfAttributesMapper implements AttributesMapper<List<String>> {
     @Override
     List<String> mapFromAttributes(Attributes a) throws NamingException {
         return a.get(LdapKey.MEMBER_OF)?.getAll()?.collect {
-            Matcher matcher = it =~ /CN=(?<cn>[^,]*),.*/
-            if (matcher.matches() && matcher.group(LdapKey.COMMON_NAME)) {
-                return matcher.group(LdapKey.COMMON_NAME)
+            Matcher matcher = it =~ /CN=(?<group>[^,]*),.*/
+            if (matcher.matches() && matcher.group("group")) {
+                return matcher.group("group")
             }
         }
     }
@@ -189,7 +189,7 @@ class MemberOfAttributesMapper implements AttributesMapper<List<String>> {
 
 @Immutable
 class LdapUserDetails {
-    String cn // commonName, holds the username in ldap
+    String username
     String realName
     String mail
     String department

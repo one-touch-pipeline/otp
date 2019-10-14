@@ -71,7 +71,7 @@ if (!Boolean.parseBoolean(otpProperties.getProperty(OtpProperty.LDAP_ENABLED.key
     grails.plugin.springsecurity.ldap.context.server            = otpProperties.getProperty(OtpProperty.LDAP_SERVER.key)
     grails.plugin.springsecurity.ldap.search.base               = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_BASE.key)
     grails.plugin.springsecurity.ldap.authorities.searchSubtree = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_SUBTREE.key)
-    grails.plugin.springsecurity.ldap.search.filter             = otpProperties.getProperty(OtpProperty.LDAP_SEARCH_FILTER.key)
+    grails.plugin.springsecurity.ldap.search.filter             = "(${otpProperties.getProperty(OtpProperty.LDAP_SEARCH_ATTRIBUTE.key)}={0})"
 
     // static options
     grails.plugin.springsecurity.ldap.authorities.ignorePartialResultException = true

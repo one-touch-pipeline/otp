@@ -26,7 +26,6 @@ class LdapKey {
     final static OBJECT_CATEGORY = "objectCategory"
     final static USER = "user"
     final static PERSON = "person"
-    final static COMMON_NAME = "cn"
     final static GIVEN_NAME = "givenName"
     final static SURNAME = "sn"
     final static MAIL = "mail"

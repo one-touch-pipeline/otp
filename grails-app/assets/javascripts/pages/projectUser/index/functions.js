@@ -69,8 +69,8 @@ $.otp.projectUser = {
                         for (var i = 0; i < result.length; i++) {
                             suggestionMap.push({
                                 // autocomplete completes with the 'value' column
-                                'value'      : [result[i].cn, result[i].realName, result[i].mail].join(";"),
-                                'username'   : result[i].cn,
+                                'value'      : [result[i].username, result[i].realName, result[i].mail].join(";"),
+                                'username'   : result[i].username,
                                 'realName'   : result[i].realName,
                                 'email'      : result[i].mail,
                                 'department' : result[i].department

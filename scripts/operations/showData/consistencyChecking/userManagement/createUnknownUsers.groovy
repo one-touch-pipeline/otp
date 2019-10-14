@@ -77,10 +77,10 @@ println(userPropertiesToPrint.join(separator))
 ldapOnlyUsers.each { String username ->
     LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(username)
     try {
-        User user = userService.createUser(ldapUserDetails.cn, ldapUserDetails.mail, ldapUserDetails.realName)
+        User user = userService.createUser(ldapUserDetails.username, ldapUserDetails.mail, ldapUserDetails.realName)
         println(userPropertiesToPrint.collect { user[it] }.join(separator))
     } catch (ValidationException e) {
-        fails << "Failed when creating user '${username}' (cn: ${ldapUserDetails.cn}, mail: ${ldapUserDetails.mail})\n${e}"
+        fails << "Failed when creating user '${username}' (LDAP username: ${ldapUserDetails.username}, mail: ${ldapUserDetails.mail})\n${e}"
     }
 }
 println("\n\nFailed to create:")

@@ -285,7 +285,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
-                cn: "unknownUser",
+                username: "unknownUser",
                 realName: "Unknown User",
                 mail: "unknownUser@dummy.com",
         )
@@ -295,7 +295,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         expect:
-        User.findByUsernameAndEmail(ldapUserDetails.cn, ldapUserDetails.mail) == null
+        User.findByUsernameAndEmail(ldapUserDetails.username, ldapUserDetails.mail) == null
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
@@ -303,7 +303,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        User.findByUsernameAndEmail(ldapUserDetails.cn, ldapUserDetails.mail)
+        User.findByUsernameAndEmail(ldapUserDetails.username, ldapUserDetails.mail)
     }
 
     void "addUserToProjectAndNotifyGroupManagementAuthority, create UserProjectRole for new User"() {
@@ -314,7 +314,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
-                cn: user.username,
+                username: user.username,
                 realName: user.realName,
                 mail: user.email,
         )
@@ -362,7 +362,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = createProject()
         ProjectRole projectRole = DomainFactory.createProjectRole()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
-                cn: 'username',
+                username: 'username',
                 realName: user.realName,
                 mail: user.email,
         )
@@ -387,7 +387,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         User user = DomainFactory.createUser()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
-                cn: user.username,
+                username: user.username,
                 realName: user.realName,
                 mail: user.email,
         )
@@ -433,7 +433,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         User user = DomainFactory.createUser()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
-                cn: "something_else",
+                username: "something_else",
                 realName: user.realName,
                 mail: user.email,
         )
@@ -460,7 +460,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         User user = DomainFactory.createUser()
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
-                cn: user.username,
+                username: user.username,
                 realName: user.realName,
                 mail: user.email,
         )

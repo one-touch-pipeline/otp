@@ -100,13 +100,13 @@ class UserProjectRoleService {
         assert ldapUserDetails: "'${username}' can not be resolved to a user via LDAP"
         assert ldapUserDetails.mail: "Could not get a mail for this user via LDAP"
 
-        User user = User.findByUsernameOrEmail(ldapUserDetails.cn, ldapUserDetails.mail)
+        User user = User.findByUsernameOrEmail(ldapUserDetails.username, ldapUserDetails.mail)
 
         if (user) {
             assert user.username: "There is already an external user with email '${user.email}'"
-            assert user.username == ldapUserDetails.cn: "The given email address '${user.email}' is already registered for LDAP user '${user.username}'"
+            assert user.username == ldapUserDetails.username: "The given email address '${user.email}' is already registered for LDAP user '${user.username}'"
         } else {
-            user = userService.createUser(ldapUserDetails.cn, ldapUserDetails.mail, ldapUserDetails.realName)
+            user = userService.createUser(ldapUserDetails.username, ldapUserDetails.mail, ldapUserDetails.realName)
         }
 
         synchedBetweenRelatedProjects(project.unixGroup) { Project p ->
