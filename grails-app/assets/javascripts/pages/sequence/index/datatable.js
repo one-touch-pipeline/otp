@@ -160,7 +160,7 @@ $.otp.sequence = {
             },
             fnRowCallback: function (nRow) {
                 var fastqc;
-                fastqc = $("td:eq(11)", nRow);
+                fastqc = $("td:eq(12)", nRow);
                 if ($("a", fastqc).length > 0) {
                     fastqc.addClass("true");
                 } else {
@@ -168,15 +168,15 @@ $.otp.sequence = {
                     fastqc.addClass("false");
                     fastqc.text("");
                 }
-                var contamination = $("td:eq(13)", nRow);
+                var contamination = $("td:eq(14)", nRow);
                 if (contamination.text() === "") {
                     contamination.attr("title", "No known problems");
                     contamination.addClass("VALID");
                 } else {
                     contamination.addClass("warning");
                 }
-                var fileExists = $("td:eq(14)", nRow);
-                var fileExistsWithdrawn = $("td:eq(14) span", nRow);
+                var fileExists = $("td:eq(15)", nRow);
+                var fileExistsWithdrawn = $("td:eq(15) span", nRow);
                 if (fileExists.text() === "true" || fileExistsWithdrawn.text() === "true") {
                     fileExists.addClass("VALID");
                 } else {
