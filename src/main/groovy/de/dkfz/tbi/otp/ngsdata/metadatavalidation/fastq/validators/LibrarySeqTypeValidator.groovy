@@ -38,7 +38,7 @@ class LibrarySeqTypeValidator extends ValueTuplesValidator<MetadataValidationCon
 
     @Override
     Collection<String> getDescriptions() {
-        return ["If the sequencing type is '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}', the library should be given."]
+        return ["If the sequencing type is '${SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName}', the library must be given."]
     }
 
     @Override
