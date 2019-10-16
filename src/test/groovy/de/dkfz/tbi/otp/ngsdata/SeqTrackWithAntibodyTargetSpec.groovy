@@ -27,19 +27,19 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 
-class ChipSeqSeqTrackSpec extends Specification implements DataTest, DomainFactoryCore {
+class SeqTrackWithAntibodyTargetSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
         [
-                ChipSeqSeqTrack,
+                SeqTrack,
         ]
     }
 
     @Unroll
     void "validate, when #name, then validation is pass"() {
         given:
-        ChipSeqSeqTrack chipSeqSeqTrack = createChipSeqSeqTrack([
+        SeqTrack chipSeqSeqTrack = createChipSeqSeqTrack([
                 antibody: antibody,
         ])
 
@@ -58,7 +58,7 @@ class ChipSeqSeqTrackSpec extends Specification implements DataTest, DomainFacto
     @Unroll
     void "validate, when AntibodyTarget is null and #name, then validation fail"() {
         given:
-        ChipSeqSeqTrack chipSeqSeqTrack = createChipSeqSeqTrack([
+        SeqTrack chipSeqSeqTrack = createChipSeqSeqTrack([
                 antibody: antibody,
         ])
 

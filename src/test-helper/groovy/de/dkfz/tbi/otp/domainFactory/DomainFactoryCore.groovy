@@ -196,9 +196,6 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     }
 
     SeqTrack createSeqTrack(Map properties = [:]) {
-        if (properties.seqType?.hasAntibodyTarget) {
-            return createChipSeqSeqTrack(properties)
-        }
         return createDomainObject(SeqTrack, getSeqTrackProperties(properties) + [
                 seqType: { createSeqType() },
         ], properties)
@@ -208,11 +205,9 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         return createSeqTrack(properties + (properties.seqType ? [:] : [seqType: DomainFactory.createExomeSeqType()]))
     }
 
-    ChipSeqSeqTrack createChipSeqSeqTrack(Map properties = [:]) {
-        return createDomainObject(ChipSeqSeqTrack, getSeqTrackProperties(properties) + [
-                seqType       : { DomainFactory.createChipSeqType() },
-                antibodyTarget: { createAntibodyTarget() },
-        ], properties)
+    SeqTrack createChipSeqSeqTrack(Map properties = [:]) {
+        return createSeqTrack(properties + (properties.seqType ? [:] : [seqType : DomainFactory.createChipSeqType()]) +
+                (properties.antibodyTarget ? [:] : [antibodyTarget: createAntibodyTarget()]))
     }
 
     SeqTrack createSeqTrackWithOneDataFile(Map seqTrackProperties = [:], Map dataFileProperties = [:]) {

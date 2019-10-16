@@ -230,21 +230,6 @@ class DataSwapServiceTests implements UserAndRoles {
     }
 
     @Test
-    void test_changeSeqType_withClassChange() {
-        setupData()
-        SeqType wgs = DomainFactory.createSeqType(name: SeqTypeNames.WHOLE_GENOME.seqTypeName)
-        SeqType exome = DomainFactory.createSeqType(name: SeqTypeNames.EXOME.seqTypeName)
-        SeqTrack seqTrack = DomainFactory.createSeqTrack(seqType: wgs)
-        assert seqTrack.class == SeqTrack
-        long seqTrackId = seqTrack.id
-
-        SeqTrack returnedSeqTrack = dataSwapService.changeSeqType(seqTrack, exome)
-
-        assert returnedSeqTrack.id == seqTrackId
-        assert returnedSeqTrack.seqType.id == exome.id
-    }
-
-    @Test
     void test_renameSampleIdentifiers() {
         setupData()
 

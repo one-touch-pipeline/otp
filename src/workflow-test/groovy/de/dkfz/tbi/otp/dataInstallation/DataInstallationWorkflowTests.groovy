@@ -109,7 +109,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
 
     void "test ChipSeq DataInstallation"() {
         given:
-        ChipSeqSeqTrack seqTrack
+        SeqTrack seqTrack
         SessionUtils.withNewSession {
             seqTrack = DomainFactory.createChipSeqSeqTrack()
             createDataFiles(seqTrack)

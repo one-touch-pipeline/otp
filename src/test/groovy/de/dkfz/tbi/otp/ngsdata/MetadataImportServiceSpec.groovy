@@ -65,7 +65,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
     Class[] getDomainClassesToMock() {
         [
                 AntibodyTarget,
-                ChipSeqSeqTrack,
                 DataFile,
                 FileType,
                 IlseSubmission,
@@ -717,7 +716,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             ])
 
             // seqTrack3
-            SeqTrack seqTrack3 = ChipSeqSeqTrack.findWhere(
+            SeqTrack seqTrack3 = SeqTrack.findWhere(
                     laneId: '2_barcode7',
                     insertSize: 234,
                     run: run1,
@@ -750,7 +749,7 @@ ${ILSE_NO}                      -             1234          1234          -     
             ])
 
             // seqTrack4
-            SeqTrack seqTrack4 = ChipSeqSeqTrack.findWhere(
+            SeqTrack seqTrack4 = SeqTrack.findWhere(
                     laneId: '2_barcode6',
                     insertSize: 0,
                     run: run1,
@@ -998,7 +997,6 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
                 libraryPreparationKit: null,
         )
         seqTrack.ilseId == null
-        seqTrack.class == ChipSeqSeqTrack
         seqTrack.antibodyTarget == antibodyTarget
 
         Map commonRunDataFileProperties = [

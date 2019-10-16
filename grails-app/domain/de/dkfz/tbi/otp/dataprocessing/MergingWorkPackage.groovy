@@ -144,7 +144,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
             properties += [libraryPreparationKit: seqTrack.libraryPreparationKit]
         }
         if (seqTrack.seqType.hasAntibodyTarget) {
-            properties += [antibodyTarget: ((ChipSeqSeqTrack) seqTrack).antibodyTarget]
+            properties += [antibodyTarget: seqTrack.antibodyTarget]
         }
         return properties
     }

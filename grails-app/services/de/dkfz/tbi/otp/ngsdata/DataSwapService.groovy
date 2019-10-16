@@ -22,8 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import groovy.sql.Sql
-import org.hibernate.Hibernate
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.config.ConfigService
@@ -98,32 +96,6 @@ class DataSwapService {
             it.value = newValue
             it.save(flush: true)
         }
-    }
-
-    /**
-     * @return The {@link SeqTrack}, possibly with a new type.
-     */
-    @SuppressWarnings("ParameterReassignment")
-    SeqTrack changeSeqType(SeqTrack seqTrack, SeqType newSeqType) {
-        assert Hibernate.getClass(seqTrack) == seqTrack.seqType.seqTrackClass
-        if (seqTrack.seqType.id != newSeqType.id) {
-            if (seqTrack.class != newSeqType.seqTrackClass) {
-                if (newSeqType.hasAntibodyTarget) {
-                    throw new UnsupportedOperationException("Changing to ${newSeqType} is not supported yet because new need antibody, which is not avilable.")
-                }
-                Sql sql = new Sql(dataSource)
-                assert 1 == sql.executeUpdate("update seq_track set class = ${newSeqType.seqTrackClass.name} " +
-                        "where id = ${seqTrack.id} and class = ${Hibernate.getClass(seqTrack).name};")
-                SeqTrack.withSession { session ->
-                    session.clear()
-                }
-                seqTrack = SeqTrack.get(seqTrack.id)
-            }
-            assert seqTrack.class == newSeqType.seqTrackClass
-            seqTrack.seqType = newSeqType
-            assert seqTrack.save(flush: true)
-        }
-        return seqTrack
     }
 
     /**
@@ -1615,7 +1587,12 @@ ln -s '${newDirectFileName}' \\
         seqTracks*.sample = newSample
         notNull(seqTracks*.save(flush: true))
         seqTracks = seqTracks.collect {
-            changeSeqType(it, newSeqType)
+            if (newSeqType.hasAntibodyTarget) {
+                throw new UnsupportedOperationException("Changing to ${newSeqType} is not supported yet because new need antibody, which is not avilable.")
+            }
+            it.seqType = newSeqType
+            assert it.save(flush: true)
+            return it
         }
 
         bashScriptToMoveFiles << "\n\n#copy and remove fastq files\n"

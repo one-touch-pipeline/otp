@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.RunSegment; de.dkfz.tbi.otp.tracking.OtrsTicket; org.joda.time.DateTime; de.dkfz.tbi.otp.ngsdata.ChipSeqSeqTrack"
+<%@ page import="de.dkfz.tbi.otp.ngsdata.RunSegment; de.dkfz.tbi.otp.tracking.OtrsTicket; org.joda.time.DateTime"
         contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
@@ -122,8 +122,8 @@
                     ${[
                             seqTrack.seqTrack.sampleType.name,
                             "${seqTrack.seqTrack.seqType.name} ${seqTrack.seqTrack.seqType.libraryLayout}",
-                            seqTrack.seqTrack instanceof ChipSeqSeqTrack ? seqTrack.seqTrack.antibodyTarget.name : null,
-                            seqTrack.seqTrack instanceof ChipSeqSeqTrack ? seqTrack.seqTrack.antibody : null,
+                            seqTrack.seqTrack.antibodyTarget?.name ?: null,
+                            seqTrack.seqTrack.antibody ?: null,
                             seqTrack.seqTrack.libraryPreparationKit?.name,
                             seqTrack.seqTrack.normalizedLibraryName ? "${g.message(code: "metadataImport.details.normalizedLibraryName")} ${seqTrack.seqTrack.normalizedLibraryName}" : null,
                             seqTrack.seqTrack.pipelineVersion?.displayName,

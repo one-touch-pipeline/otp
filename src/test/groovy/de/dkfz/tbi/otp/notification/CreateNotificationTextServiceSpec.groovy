@@ -53,7 +53,6 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                 AntibodyTarget,
                 CellRangerConfig,
                 CellRangerMergingWorkPackage,
-                ChipSeqSeqTrack,
                 DataFile,
                 FileType,
                 Individual,

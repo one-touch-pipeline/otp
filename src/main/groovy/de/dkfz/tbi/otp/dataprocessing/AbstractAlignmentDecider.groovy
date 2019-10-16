@@ -113,7 +113,7 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
                 MergingWorkPackage.findAllWhere(
                         sample: seqTrack.sample,
                         seqType: seqTrack.seqType,
-                        antibodyTarget: seqTrack instanceof ChipSeqSeqTrack ? seqTrack.antibodyTarget : null,
+                        antibodyTarget: seqTrack.seqType.hasAntibodyTarget ? seqTrack.antibodyTarget : null,
                 ))
         if (workPackage) {
             assert workPackage.referenceGenome.id == referenceGenomeProjectSeqType.referenceGenome.id

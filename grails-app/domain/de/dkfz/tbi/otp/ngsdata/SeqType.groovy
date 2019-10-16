@@ -133,10 +133,6 @@ class SeqType implements Entity {
         return SeqTypeNames.fromSeqTypeName(name)
     }
 
-    Class<? extends SeqTrack> getSeqTrackClass() {
-        return seqTypeName?.seqTrackClass ?: SeqTrack
-    }
-
     boolean isExome() {
         return name == SeqTypeNames.EXOME.seqTypeName
     }

@@ -42,8 +42,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
 
     static final String RUN_PREFIX = "run"
 
-    static final Closure<? extends SeqTrack> FACTORY = { Map properties -> new SeqTrack(properties) }
-
     enum DataProcessingState {
         UNKNOWN,
         NOT_STARTED,
@@ -104,6 +102,8 @@ class SeqTrack implements ProcessParameterObject, Entity {
     Sample sample
     SeqType seqType
     SoftwareTool pipelineVersion
+    String antibody
+    AntibodyTarget antibodyTarget
 
     QualityEncoding qualityEncoding = QualityEncoding.UNKNOWN
     DataProcessingState fastqcState = DataProcessingState.UNKNOWN
@@ -143,10 +143,11 @@ class SeqTrack implements ProcessParameterObject, Entity {
     List<LogMessage> logMessages = []
 
     static belongsTo = [
+            antibodyTarget: AntibodyTarget,
+            libraryPreparationKit: LibraryPreparationKit,
             run: Run,
             sample: Sample,
             seqType: SeqType,
-            libraryPreparationKit: LibraryPreparationKit,
     ]
 
     static hasMany = [
@@ -179,6 +180,12 @@ class SeqTrack implements ProcessParameterObject, Entity {
         })
         cellPosition nullable: true
         problem nullable: true
+        antibody(nullable: true, blank: false, validator: { String val, SeqTrack obj ->
+            return obj.antibodyTarget || !val
+        })
+        antibodyTarget(nullable: true, validator: { AntibodyTarget val, SeqTrack obj ->
+            return !obj.seqType?.hasAntibodyTarget == !val
+        })
     }
 
 
@@ -365,11 +372,12 @@ class SeqTrack implements ProcessParameterObject, Entity {
     }
 
     static mapping = {
-        run index: "seq_track_run_idx"
-        sample index: "seq_track_sample_idx"
-        seqType index: "seq_track_seq_type_idx"
-        seqPlatform index: "seq_track_seq_platform_idx"
+        antibodyTarget index: "seq_track_antibody_target_idx"
         libraryPreparationKit index: "seq_track_library_preparation_kit_idx"
         normalizedLibraryName index: "seq_track_normalized_library_name_idx"
+        run index: "seq_track_run_idx"
+        sample index: "seq_track_sample_idx"
+        seqPlatform index: "seq_track_seq_platform_idx"
+        seqType index: "seq_track_seq_type_idx"
     }
 }

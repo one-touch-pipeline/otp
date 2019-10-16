@@ -33,7 +33,7 @@ enum SeqTypeNames {
     EXOME("EXON"),
     MEDIP,
     SNC_RNA("sncRNA"),
-    CHIP_SEQ("ChIP Seq", ChipSeqSeqTrack),
+    CHIP_SEQ("ChIP Seq"),
     WHOLE_GENOME_BISULFITE_TAGMENTATION
 
     /**
@@ -41,12 +41,8 @@ enum SeqTypeNames {
      */
     final String seqTypeName
 
-    final Class<? extends SeqTrack> seqTrackClass
-
-    private SeqTypeNames(String seqTypeName = null,
-                         Class<? extends SeqTrack> seqTrackClass = SeqTrack) {
+    private SeqTypeNames(String seqTypeName = null) {
         this.seqTypeName = seqTypeName ?: name()
-        this.seqTrackClass = seqTrackClass
     }
 
     boolean isWgbs() {

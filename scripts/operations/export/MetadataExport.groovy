@@ -314,9 +314,9 @@ class MetaDataExport {
         put(PROJECT, seqTrack.project.name)
         put(CUSTOMER_LIBRARY, seqTrack.libraryName)
 
-        if (seqTrack instanceof ChipSeqSeqTrack) {
-            put(ANTIBODY_TARGET, ((ChipSeqSeqTrack) seqTrack).antibodyTarget.name)
-            put(ANTIBODY, ((ChipSeqSeqTrack) seqTrack).antibody)
+        if (seqTrack.seqType.hasAntibodyTarget) {
+            put(ANTIBODY_TARGET, seqTrack.antibodyTarget.name)
+            put(ANTIBODY, seqTrack.antibody)
         }
 
         return properties

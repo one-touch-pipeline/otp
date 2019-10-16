@@ -34,7 +34,6 @@ class MergingWorkPackageSpec extends Specification implements DataTest, DomainFa
     @Override
     Class[] getDomainClassesToMock() {
         [
-                ChipSeqSeqTrack,
                 ExternalMergingWorkPackage,
                 ReferenceGenome,
                 Sample,
@@ -75,6 +74,7 @@ class MergingWorkPackageSpec extends Specification implements DataTest, DomainFa
         given:
         LibraryPreparationKit libraryPreparationKit = withLibPrepKit ? createLibraryPreparationKit() : null
         SeqTrack seqTrack = createSeqTrack([
+                antibodyTarget       : withAntibodyTarget ? createAntibodyTarget() : null,
                 libraryPreparationKit: libraryPreparationKit,
                 seqType              : createSeqType([hasAntibodyTarget: withAntibodyTarget]),
         ])

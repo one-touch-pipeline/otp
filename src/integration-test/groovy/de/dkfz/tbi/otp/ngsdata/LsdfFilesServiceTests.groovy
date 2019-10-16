@@ -208,13 +208,13 @@ class LsdfFilesServiceTests {
         final String SEQ_TYPE = SeqTypeNames.CHIP_SEQ.seqTypeName
         final String CHIP_SEQ_SEQUENCING_DIR = "chip_seq_sequencing"
         final String ANTIBODY_TARGET_NAME = "antibody1"
-        SeqType seqType = DomainFactory.createSeqType([name: SEQ_TYPE, dirName:  CHIP_SEQ_SEQUENCING_DIR])
+        SeqType seqType = DomainFactory.createSeqType([name: SEQ_TYPE, dirName:  CHIP_SEQ_SEQUENCING_DIR, hasAntibodyTarget: true])
         // creating required Antibody target objects
         AntibodyTarget antibodyTarget = new AntibodyTarget()
         antibodyTarget.name = ANTIBODY_TARGET_NAME
         assertNotNull(antibodyTarget.save([flush: true]))
 
-        ChipSeqSeqTrack seqTrack = new ChipSeqSeqTrack()
+        SeqTrack seqTrack = new SeqTrack()
         seqTrack.antibodyTarget = antibodyTarget
         seqTrack.laneId = laneNo
         seqTrack.nBasePairs = baseCount
@@ -226,20 +226,6 @@ class LsdfFilesServiceTests {
         assertNotNull(seqTrack.save([flush: true]))
         DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
         String correctPath = "${CHIP_SEQ_SEQUENCING_DIR}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}-${ANTIBODY_TARGET_NAME}/${seqTrack.seqType.libraryLayoutDirName}/run${runName}/${VBP_PATH}/"
-        String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
-        assertEquals(new File(correctPath).path, new File(path).path)
-    }
-
-    /**
-     * This test check for compatibility of old chip seq data, which are loaded as normal {@link SeqTrack}
-     */
-    @Test
-    void testGetFileViewByPidRelativeDirectoryChipSeqUsingSeqTrack() {
-        setupData()
-        SeqTrack seqTrack = createSeqTrack()
-        seqTrack.seqType = DomainFactory.createChipSeqType()
-        DataFile dataFile = createDataFile(seqTrack, fastqR1Filename)
-        String correctPath = "${seqTrack.seqType.dirName}/${VIEW_BY_PID_PATH}/${individualPid}/${sampleTypeName.toLowerCase()}/${seqTrack.seqType.libraryLayoutDirName}/run${runName}/${VBP_PATH}/"
         String path = lsdfFilesService.getFileViewByPidRelativeDirectory(dataFile)
         assertEquals(new File(correctPath).path, new File(path).path)
     }

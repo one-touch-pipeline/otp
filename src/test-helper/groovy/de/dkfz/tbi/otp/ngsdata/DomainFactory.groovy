@@ -1711,7 +1711,7 @@ class DomainFactory {
     }
 
     @Deprecated
-    static ChipSeqSeqTrack createChipSeqSeqTrack(Map properties = [:]) {
+    static SeqTrack createChipSeqSeqTrack(Map properties = [:]) {
         return proxyCore.createChipSeqSeqTrack(properties)
     }
 

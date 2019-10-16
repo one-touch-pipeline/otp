@@ -165,9 +165,8 @@ class LsdfFilesService {
         String pid = seqTrack.sample.individual.pid
         String library = seqTrack.seqType.libraryLayoutDirName
         String sampleTypeDir = seqTrack.sample.sampleType.dirName
-        if (seqTrack instanceof ChipSeqSeqTrack) {
-            ChipSeqSeqTrack chipSeqSeqTrack = seqTrack as ChipSeqSeqTrack
-            AntibodyTarget antibodyTarget = chipSeqSeqTrack.antibodyTarget
+        if (seqTrack.seqType.hasAntibodyTarget) {
+            AntibodyTarget antibodyTarget = seqTrack.antibodyTarget
             String antibodyDirNamePart = antibodyTarget.name
             sampleTypeDir += "-${antibodyDirNamePart}"
         }
