@@ -160,7 +160,7 @@ class ProjectService {
         Project project = new Project([
                 name: projectParams.name,
                 dirName: projectParams.directory,
-                projectPrefix: projectParams.projectPrefix,
+                individualPrefix: projectParams.individualPrefix,
                 realm: configService.defaultRealm,
                 qcThresholdHandling: projectParams.qcThresholdHandling,
                 projectType: projectParams.projectType,
@@ -226,7 +226,7 @@ class ProjectService {
                 "forceCopyFiles",
                 "speciesWithStrain",
                 "closed",
-                "projectPrefix",
+                "individualPrefix",
                 "projectType",
                 "connectedProjects",
                 "subsequentApplication",

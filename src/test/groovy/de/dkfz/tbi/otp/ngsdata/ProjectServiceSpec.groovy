@@ -53,7 +53,7 @@ class ProjectServiceSpec extends Specification implements DataTest {
         ])
         CreateProjectSubmitCommand cmd = new CreateProjectSubmitCommand (
                 name                          : "project",
-                projectPrefix                 : "projectPrefix",
+                individualPrefix              : "individualPrefix",
                 unixGroup                     : "unixGroup",
                 directory                     : dirName,
                 projectType                   : Project.ProjectType.SEQUENCING,

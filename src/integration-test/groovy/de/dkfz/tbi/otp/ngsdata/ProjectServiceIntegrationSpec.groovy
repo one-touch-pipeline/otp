@@ -144,7 +144,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: name,
                 directory: dirName,
-                projectPrefix: 'projectPrefix',
+                individualPrefix: 'individualPrefix',
                 analysisDirectory: dirAnalysis,
                 sampleIdentifierParserBeanName: sampleIdentifierParserBeanName,
                 qcThresholdHandling: qcThresholdHandling,
@@ -194,7 +194,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
                 directory: 'dir',
-                projectPrefix: 'projectPrefix',
+                individualPrefix: 'individualPrefix',
                 analysisDirectory: '/dirA',
                 unixGroup: group,
                 projectGroup: '',
@@ -233,7 +233,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: name,
                 directory: dirName,
-                projectPrefix: 'projectPrefix',
+                individualPrefix: 'individualPrefix',
                 analysisDirectory: '/dirA',
                 unixGroup: group,
                 projectGroup: '',
@@ -270,7 +270,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
                 directory: 'dir',
-                projectPrefix: 'projectPrefix',
+                individualPrefix: 'individualPrefix',
                 analysisDirectory: '/dirA',
                 unixGroup: 'invalidValue',
                 projectGroup: '',
@@ -301,7 +301,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
                 directory: 'dir',
-                projectPrefix: 'projectPrefix',
+                individualPrefix: 'individualPrefix',
                 analysisDirectory: 'invalidDirA',
                 unixGroup: group,
                 projectGroup: '',
@@ -342,7 +342,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
                 directory: 'dir',
-                projectPrefix: 'projectPrefix',
+                individualPrefix: 'individualPrefix',
                 analysisDirectory: '/dirA',
                 unixGroup: group,
                 projectGroup: '',
@@ -390,7 +390,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
                 directory: 'dir',
-                projectPrefix: 'projectPrefix',
+                individualPrefix: 'individualPrefix',
                 analysisDirectory: '/dirA',
                 unixGroup: group,
                 projectGroup: '',
@@ -459,7 +459,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
                 directory: 'dir',
-                projectPrefix: 'projectPrefix',
+                individualPrefix: 'individualPrefix',
                 analysisDirectory: '/dirA',
                 unixGroup: group,
                 projectGroup: '',
@@ -488,7 +488,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
                 name: 'project',
                 directory: 'dir',
-                projectPrefix: 'projectPrefix',
+                individualPrefix: 'individualPrefix',
                 analysisDirectory: '/dirA',
                 unixGroup: group,
                 projectGroup: '',
@@ -509,20 +509,20 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     }
 
     @Unroll
-    void "test updateProjectPrefix valid alias and valid user #username"() {
+    void "test updateIndividualPrefix valid alias and valid user #username"() {
         given:
         setupData()
-        String projectPrefix = "prefix"
+        String individualPrefix = "prefix"
         Project project = Project.findByName("testProject")
         addUserWithReadAccessToProject(User.findByUsername(USER), project)
 
         when:
         SpringSecurityUtils.doWithAuth(username) {
-            projectService.updateProjectField(projectPrefix, 'projectPrefix', project)
+            projectService.updateProjectField(individualPrefix, 'individualPrefix', project)
         }
 
         then:
-        project.projectPrefix == projectPrefix
+        project.individualPrefix == individualPrefix
 
         where:
         username | _
@@ -530,15 +530,15 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         OPERATOR | _
     }
 
-    void "test updateProjectPrefix valid alias and invalid user"() {
+    void "test updateIndividualPrefix valid alias and invalid user"() {
         given:
         setupData()
-        String projectPrefix = "prefix"
+        String individualPrefix = "prefix"
         Project project = Project.findByName("testProject")
 
         when:
         SpringSecurityUtils.doWithAuth(TESTUSER) {
-            projectService.updateProjectField(projectPrefix, 'projectPrefix', project)
+            projectService.updateProjectField(individualPrefix, 'individualPrefix', project)
         }
 
         then:

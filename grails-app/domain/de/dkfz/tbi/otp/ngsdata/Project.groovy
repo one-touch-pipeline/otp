@@ -53,7 +53,7 @@ class Project implements Commentable, Entity {
     Snv snv = Snv.UNKNOWN
 
     String name
-    String projectPrefix
+    String individualPrefix
     String subsequentApplication
     String connectedProjects
     String internalNotes
@@ -61,6 +61,8 @@ class Project implements Commentable, Entity {
     String dirName
     Realm realm
     String dirAnalysis
+
+    boolean uniqueIndividualPrefix = true
 
     short processingPriority = ProcessingPriority.NORMAL.priority
 
@@ -146,7 +148,12 @@ class Project implements Commentable, Entity {
             }
         })
 
-        projectPrefix(unique: true, blank: false)
+        individualPrefix(blank: false, validator: { val, obj ->
+            Project project = Project.findByIndividualPrefixAndIdNotEqual(val, obj.id)
+            if (obj.uniqueIndividualPrefix && project && project.id != obj.id) {
+                return 'this individual prefix is already used in another project'
+            }
+        })
 
         dirName(blank: false, unique: true, validator: { String val ->
             OtpPath.isValidRelativePath(val)

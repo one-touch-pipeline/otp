@@ -78,7 +78,7 @@ class CreateProjectController {
 
 class CreateProjectSubmitCommand implements Serializable {
     String name
-    String projectPrefix
+    String individualPrefix
     String directory
     String analysisDirectory
     String nameInMetadataFiles
@@ -110,7 +110,12 @@ class CreateProjectSubmitCommand implements Serializable {
                 return 'A project with this name exists already'
             }
             if (Project.findByNameInMetadataFiles(val)) {
-                return 'A project with \'' + val + '\' as nameInMetadataFiles exists already'
+                return "A project with ${val} as nameInMetadataFiles exists already"
+            }
+        })
+        individualPrefix(blank: false, validator: { val, obj ->
+            if (Project.findByIndividualPrefix(val)) {
+                return "A project with this individual prefix ${val} already exists"
             }
         })
         directory(blank: false, validator: { val, obj ->

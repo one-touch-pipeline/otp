@@ -46,8 +46,8 @@
                 <td><g:textField name="name" size="130" value="${cmd.name}" required="true"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="createProject.projectPrefix"/></td>
-                <td><g:textField name="projectPrefix" size="130" value="${cmd.projectPrefix}" required="true"/></td>
+                <td class="myKey"><g:message code="createProject.individualPrefix"/></td>
+                <td><g:textField name="individualPrefix" size="130" value="${cmd.individualPrefix}" required="true"/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.directory"/></td>

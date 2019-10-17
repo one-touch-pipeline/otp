@@ -56,13 +56,8 @@
         <div id="projectOverviewDates">
             <table>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.projectPrefix"/></td>
-                    <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'projectPrefix'])}"
-                                value="${project.projectPrefix}"/>
-                    </td>
+                    <td class="myKey"><g:message code="projectOverview.individualPrefix"/></td>
+                    <td>${project.individualPrefix}</td>
                     <td></td>
                 </tr>
                 <tr>

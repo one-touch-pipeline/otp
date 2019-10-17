@@ -117,7 +117,7 @@ $.otp.projectConfig = {
      * @param data holds the data that have been loaded
      */
     initialiseAlignmentInfo: function (data) {
-        $('#loadingDots').remove();
+        $('#loader').remove();
         if (data.alignmentInfo != null) {
             $('#alignment_info_table').css('visibility', 'visible');
             $.otp.projectConfig.createAlignmentTable(data);
@@ -133,7 +133,7 @@ $.otp.projectConfig = {
         $('#alignment_info').css(
             'display', 'inline',
             'vertical-alignment', 'top'
-        ).prepend('<div class="loadingDots" id="loadingDots">Loading</div>');
+        ).prepend('<div id="loader" class="loader"></div>');
     },
 
     /**
