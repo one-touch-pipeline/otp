@@ -27,6 +27,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="layout" content="main" />
     <title><g:message code="projectUser.title" args="[project?.name]"/></title>
+    <asset:javascript src="common/UserAutoComplete.js"/>
     <asset:javascript src="pages/projectUser/index/functions.js"/>
     <asset:javascript src="modules/editorSwitch.js"/>
 </head>
@@ -299,7 +300,7 @@
                         </sec:access>
                         <tr>
                             <td><g:message code="projectUser.addMember.username"/></td>
-                            <td><input id="search" name="searchString" type="text" class="inputField ldapUser autocompleted" autocomplete="off" placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}"></td>
+                            <td class="user-auto-complete"><input name="searchString" type="text" class="inputField ldapUser autocompleted" autocomplete="off" placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}"></td>
                         </tr>
                         <tr>
                             <td><g:message code="projectUser.addMember.role"/></td>
@@ -380,7 +381,6 @@
         </sec:access>
         <asset:script type="text/javascript">
             $(function() {
-                $.otp.projectUser.autocompletion();
                 $.otp.projectUser.formSelect();
             });
         </asset:script>
