@@ -271,4 +271,8 @@ databaseChangeLog = {
     changeSet(author: "strubelp", id: "otp-150") {
         sqlFile(path: 'changelogs/2019/otp-150.sql')
     }
+
+    changeSet(author: "kosnac", id: "drop-processing-type") {
+        sqlFile(path: "changelogs/2019/drop-processing-type.sql")
+    }
 }
