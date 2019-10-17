@@ -21,11 +21,10 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.validation.FieldError
 import org.springframework.web.multipart.MultipartFile
 
+import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ProjectSelectionService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
@@ -35,44 +34,45 @@ import de.dkfz.tbi.otp.searchability.Keyword
 import java.text.SimpleDateFormat
 
 class CreateProjectController {
+    static allowedMethods = [
+            index: "GET",
+            save : "POST",
+    ]
 
-    ConfigService configService
     ProjectService projectService
     ProjectGroupService projectGroupService
     ProjectSelectionService projectSelectionService
 
-    def index(CreateProjectSubmitCommand cmd) {
-        String message
-        boolean hasErrors
-        if (cmd.submit == "Submit") {
-            hasErrors = cmd.hasErrors()
-            if (hasErrors) {
-                FieldError errors = cmd.errors.getFieldError()
-                message = "'" + errors.getRejectedValue() + "' is not a valid value for '" + errors.getField() + "'. Error code: '" + errors.code + "'"
-            } else {
-                Project project = projectService.createProject(cmd)
-                projectSelectionService.setSelectedProject([project], project.name)
-                redirect(controller: "projectConfig")
-            }
-        }
+    def index() {
         return [
-            projectGroups: ["No Group"] + projectGroupService.availableProjectGroups()*.name,
-            tumorEntities: ["No tumor entity"] + TumorEntity.list().sort()*.name,
-            sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values(),
-            qcThresholdHandlings: QcThresholdHandling.values(),
-            defaultQcThresholdHandling: QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
-            processingPriorities: ProcessingPriority.displayPriorities,
-            defaultProcessingPriority: ProcessingPriority.NORMAL,
-            defaultDate: "3000-01-01",
-            projectTypes: Project.ProjectType.values(),
-            defaultProjectType: Project.ProjectType.SEQUENCING,
-            allSpeciesWithStrains: SpeciesWithStrain.list().sort { it.toString() },
-            keywords: Keyword.listOrderByName() ?: [],
-            projects: Project.listOrderByName(),
-            message: message,
-            cmd: cmd,
-            hasErrors: hasErrors,
+                projectGroups                  : ["No Group"] + projectGroupService.availableProjectGroups()*.name,
+                tumorEntities                  : ["No tumor entity"] + TumorEntity.list().sort()*.name,
+                sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values(),
+                qcThresholdHandlings           : QcThresholdHandling.values(),
+                defaultQcThresholdHandling     : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,
+                processingPriorities           : ProcessingPriority.displayPriorities,
+                defaultProcessingPriority      : ProcessingPriority.NORMAL,
+                defaultDate                    : "3000-01-01",
+                projectTypes                   : Project.ProjectType.values(),
+                defaultProjectType             : Project.ProjectType.SEQUENCING,
+                allSpeciesWithStrains          : SpeciesWithStrain.list().sort { it.toString() },
+                keywords                       : Keyword.listOrderByName() ?: [],
+                projects                       : Project.listOrderByName(),
+                cmd                            : flash.cmd as CreateProjectSubmitCommand,
         ]
+    }
+
+    def save(CreateProjectSubmitCommand cmd) {
+        if (cmd.hasErrors()) {
+            flash.cmd = cmd
+            flash.message = new FlashMessage(g.message(code: "createProject.store.failure") as String, cmd.errors)
+            redirect(action: "index")
+        } else {
+            Project project = projectService.createProject(cmd)
+            projectSelectionService.setSelectedProject([project], project.name)
+            flash.message = new FlashMessage(g.message(code: "createProject.store.success") as String)
+            redirect(controller: "projectConfig")
+        }
     }
 }
 
@@ -91,7 +91,6 @@ class CreateProjectSubmitCommand implements Serializable {
     SpeciesWithStrain speciesWithStrain
     MultipartFile projectInfoFile
     String description
-    String submit
     ProcessingPriority processingPriority
     boolean forceCopyFiles
     boolean fingerPrinting = true
