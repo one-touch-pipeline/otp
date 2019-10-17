@@ -428,7 +428,7 @@ class DomainFactory {
         ], properties)
     }
 
-    static void createProcessingOptionForOtrsTicketPrefix(String prefix = "Prefix ${counter++}") {
+    static ProcessingOption createProcessingOptionForOtrsTicketPrefix(String prefix = "Prefix ${counter++}") {
         createProcessingOptionLazy(
                 name: OptionName.TICKET_SYSTEM_NUMBER_PREFIX,
                 type: null,

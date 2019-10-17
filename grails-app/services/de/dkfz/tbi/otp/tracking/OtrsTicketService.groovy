@@ -125,19 +125,19 @@ class OtrsTicketService {
         if (!seqTracks) {
             return [] as Set
         }
-        //set pessimistic lock does not work together with projection, therefore 2 queries used
-        List<Long> otrsIds = DataFile.createCriteria().listDistinct {
+        List<OtrsTicket> otrsTickets = DataFile.createCriteria().listDistinct {
             'in'('seqTrack', seqTracks)
             runSegment {
                 isNotNull('otrsTicket')
                 otrsTicket {
-                    projections {
-                        property('id')
-                    }
+                    order("ticketCreated", "asc")
+                }
+                projections {
+                    property('otrsTicket')
                 }
             }
         }
-        return (otrsIds ? OtrsTicket.findAllByIdInList(otrsIds) : []) as Set
+        return (otrsTickets ?: []) as Set
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

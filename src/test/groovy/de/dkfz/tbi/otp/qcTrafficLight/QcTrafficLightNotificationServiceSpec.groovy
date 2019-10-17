@@ -85,6 +85,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         bamFile.project.save(flush: true)
 
         String emailSenderSalutation = DomainFactory.createProcessingOptionForEmailSenderSalutation().value
+        String prefix = DomainFactory.createProcessingOptionForOtrsTicketPrefix().value
         DomainFactory.createProcessingOptionForNotificationRecipient()
         Set<OtrsTicket> otrsTickets = [
                 DomainFactory.createOtrsTicket([
@@ -93,17 +94,27 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                 ]),
         ] as Set
 
+        String ilseNumbers = ""
+        if (createIlse) {
+            IlseSubmission ilseSubmission = DomainFactory.createIlseSubmission()
+            bamFile.containedSeqTracks.first().ilseSubmission = ilseSubmission
+            bamFile.save(flush: true)
+            ilseNumbers = "[S#${ilseSubmission.ilseNumber}] "
+        }
+
         QcTrafficLightNotificationService service = new QcTrafficLightNotificationService([
                 processingOptionService: new ProcessingOptionService(),
                 otrsTicketService      : Mock(OtrsTicketService) {
-                    1 * findAllOtrsTickets(_) >> otrsTickets
+                    2 * findAllOtrsTickets(_) >> otrsTickets
                 },
         ])
 
         service.messageSourceService = Mock(MessageSourceService) {
             1 * createMessage('notification.template.alignment.qcTrafficBlockedSubject', _) >> { String templateName, Map properties ->
-                assert properties.size() == 1
+                assert properties.size() == 3
                 assert properties['bamFile'] == bamFile
+                assert properties['ticketNumber'] == "${prefix}#${otrsTickets.last().ticketNumber} "
+                assert properties['ilse'] == ilseNumbers
                 return HEADER
             }
             1 * createMessage('notification.template.alignment.qcTrafficBlockedMessage', _) >> { String templateName, Map properties ->
@@ -139,11 +150,12 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         service.informResultsAreBlocked(bamFile)
 
         where:
-        name                                          | finalNotificationSent | automaticNotification | qcTrafficLightNotification | emails    | subjectHeader  || recipientsCount
-        'without userProjectRole'                     | false                 | true                  | true                       | []        | 'TO BE SENT: ' || 1
-        'with userProjectRole'                        | false                 | true                  | true                       | ['email'] | ''             || 2
-        'ticket has already send final notification'  | true                  | true                  | true                       | ['email'] | 'TO BE SENT: ' || 1
-        'ticket has disabled automaticNotification'   | false                 | false                 | true                       | ['email'] | 'TO BE SENT: ' || 1
-        'project has disabled automatic notification' | false                 | true                  | false                      | ['email'] | 'TO BE SENT: ' || 1
+        name                                          | finalNotificationSent | automaticNotification | qcTrafficLightNotification | emails    | subjectHeader  | createIlse   || recipientsCount
+        'without userProjectRole'                     | false                 | true                  | true                       | []        | 'TO BE SENT: ' | false        || 1
+        'with userProjectRole'                        | false                 | true                  | true                       | ['email'] | ''             | false        || 2
+        'ticket has already send final notification'  | true                  | true                  | true                       | ['email'] | 'TO BE SENT: ' | false        || 1
+        'ticket has disabled automaticNotification'   | false                 | false                 | true                       | ['email'] | 'TO BE SENT: ' | false        || 1
+        'project has disabled automatic notification' | false                 | true                  | false                      | ['email'] | 'TO BE SENT: ' | false        || 1
+        'project with ilse numbers'                   | false                 | true                  | false                      | ['email'] | 'TO BE SENT: ' | true         || 1
     }
 }

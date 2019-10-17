@@ -26,9 +26,12 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
+import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
+
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX
 
 @Transactional
 class QcTrafficLightNotificationService {
@@ -45,11 +48,24 @@ class QcTrafficLightNotificationService {
         if (toBeSent) {
             subject << 'TO BE SENT: '
         }
+        String ilse = ""
+        String ticketNumber = ""
+        OtrsTicket ticket = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).last()
+        if (ticket) {
+            String prefix = processingOptionService.findOptionAsString(TICKET_SYSTEM_NUMBER_PREFIX)
+            ticketNumber = "${prefix}#${ticket.ticketNumber} "
+        }
+        List ilseSubmissions = bamFile.containedSeqTracks*.ilseSubmission.findAll().unique()
+        if (ilseSubmissions) {
+            ilse = "[S#${ilseSubmissions*.ilseNumber.sort().join(',')}] "
+        }
 
         subject << messageSourceService.createMessage(
                 "notification.template.alignment.qcTrafficBlockedSubject",
                 [
-                        bamFile: bamFile,
+                        ticketNumber: ticketNumber,
+                        ilse        : ilse,
+                        bamFile     : bamFile,
                 ]
         )
 
