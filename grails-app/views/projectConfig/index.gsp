@@ -132,6 +132,7 @@
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
                                 link="${g.createLink(controller: "projectConfig", action: 'updateTumorEntity', params: ['project.id': project.id, 'fieldName': 'tumorEntity'])}"
+                                noSelection="${['': 'None']}"
                                 values="${tumorEntities}"
                                 value="${project.tumorEntity}"/>
                     </td>
