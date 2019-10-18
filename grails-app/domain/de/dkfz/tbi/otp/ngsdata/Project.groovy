@@ -148,10 +148,12 @@ class Project implements Commentable, Entity {
             }
         })
 
-        individualPrefix(blank: false, validator: { val, obj ->
+        individualPrefix(nullable: true, blank: false, validator: { val, obj ->
             Project project = Project.findByIndividualPrefixAndIdNotEqual(val, obj.id)
             if (obj.uniqueIndividualPrefix && project && project.id != obj.id) {
                 return 'this individual prefix is already used in another project'
+            } else if (obj.uniqueIndividualPrefix && !val) {
+                return 'individual prefix not allowed to be null'
             }
         })
 

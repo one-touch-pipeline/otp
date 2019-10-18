@@ -28,7 +28,7 @@ String projectName = ''
 
 String individualPrefix = ''
 
-/* this must 'true' if you want to set the prefix for more than 1 project
+/* this must 'true' if you want to set the prefix for more than 1 project or 'null'
  * if true -> it will mark all projects with the given prefix as 'old project'
  */
 boolean oldProject = false
@@ -37,18 +37,22 @@ boolean oldProject = false
 //-----------------------------
 // work
 assert projectName : "No project name given"
-assert individualPrefix : "No individual prefix given"
 
 Project.withTransaction {
     Project project = Project.findByName(projectName)
-    Project project1 = Project.findByIndividualPrefix(individualPrefix)
+    Project project1 = null
+    if (individualPrefix) {
+        project1 = Project.findByIndividualPrefix(individualPrefix)
+    } else {
+        individualPrefix = null
+    }
 
     if (project1 && !oldProject) {
         println "A project with this individual prefix ${individualPrefix} already exists"
         return
     }
 
-    if (oldProject) {
+    if (oldProject && individualPrefix) {
         Project.findAllByIndividualPrefix(individualPrefix).each {
             it.uniqueIndividualPrefix = !oldProject
             it.save(flush: true)
