@@ -205,7 +205,7 @@ class ProjectService {
                 return
             }
         }
-        executeScript(buildCreateProjectDirectory(project.unixGroup, projectDirectory), project)
+        executeScript(buildCreateProjectDirectory(project.unixGroup, projectDirectory), project, "0022")
         FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
         FileService.waitUntilExists(fs.getPath(projectDirectory.absolutePath))
     }
@@ -757,20 +757,20 @@ chmod 0440 ${configFilePath}
 
     private String buildCreateProjectDirectory(String unixGroup, File projectDirectory) {
         return """\
-mkdir -p -m 2750 ${projectDirectory}
+mkdir -p -m 2755 ${projectDirectory}
 
 chgrp ${unixGroup} ${projectDirectory}
 chmod 2750 ${projectDirectory}
 """
     }
 
-    private void executeScript(String input, Project project) {
+    private void executeScript(String input, Project project, String mask = "0027") {
         Realm realm = project.realm
         String script = """\
 #!/bin/bash
 set -evx
 
-umask 0027
+umask ${mask}
 
 ${input}
 
