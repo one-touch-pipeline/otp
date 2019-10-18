@@ -166,6 +166,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         true        | true                   || true
     }
 
+    @Unroll
     void "hasPermission, test conditions for project role permissions"() {
         given:
         setupData()
@@ -185,7 +186,7 @@ class OtpPermissionEvaluatorIntegrationSpec extends Specification implements Use
         false       | false       | false                  | "OTP_READ_ACCESS"          || false
         false       | true        | false                  | "OTP_READ_ACCESS"          || true
         true        | false       | false                  | "MANAGE_USERS"             || true
-        false       | false       | true                   | "MANAGE_USERS"             || true
+        false       | false       | true                   | "MANAGE_USERS"             || false
         true        | false       | true                   | "MANAGE_USERS"             || true
         false       | false       | true                   | "DELEGATE_USER_MANAGEMENT" || true
     }

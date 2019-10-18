@@ -121,7 +121,7 @@ class OtpPermissionEvaluator implements PermissionEvaluator {
             case "OTP_READ_ACCESS":
                 return userProjectRole.accessToOtp
             case "MANAGE_USERS":
-                return userProjectRole.getManageUsers()
+                return userProjectRole.manageUsers
             case "DELEGATE_USER_MANAGEMENT":
                 return userProjectRole.manageUsersAndDelegate
             default:

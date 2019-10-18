@@ -148,15 +148,15 @@ class ProjectUserController implements CheckAndCall {
         }
     }
 
-    JSON toggleAccessToOtp(ToggleValueCommand cmd) {
+    JSON setAccessToOtp(SetFlagCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            userProjectRoleService.toggleAccessToOtp(cmd.userProjectRole)
+            userProjectRoleService.setAccessToOtp(cmd.userProjectRole, cmd.value)
         }
     }
 
-    JSON toggleAccessToFiles(ToggleValueCommand cmd) {
+    JSON setAccessToFiles(SetFlagCommand cmd) {
         checkErrorAndCallMethod(cmd, {
-            userProjectRoleService.toggleAccessToFiles(cmd.userProjectRole)
+            userProjectRoleService.setAccessToFiles(cmd.userProjectRole, cmd.value)
         }, {
             LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(cmd.userProjectRole.user.username)
             UserEntry userEntry = new UserEntry(cmd.userProjectRole.user, cmd.userProjectRole.project, ldapUserDetails)
@@ -165,27 +165,27 @@ class ProjectUserController implements CheckAndCall {
         })
     }
 
-    JSON toggleManageUsers(ToggleValueCommand cmd) {
+    JSON setManageUsers(SetFlagCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            userProjectRoleService.toggleManageUsers(cmd.userProjectRole)
+            userProjectRoleService.setManageUsers(cmd.userProjectRole, cmd.value)
         }
     }
 
-    JSON toggleManageUsersAndDelegate(ToggleValueCommand cmd) {
+    JSON setManageUsersAndDelegate(SetFlagCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            userProjectRoleService.toggleManageUsersAndDelegate(cmd.userProjectRole)
+            userProjectRoleService.setManageUsersAndDelegate(cmd.userProjectRole, cmd.value)
         }
     }
 
-    JSON toggleReceivesNotifications(ToggleValueCommand cmd) {
+    JSON setReceivesNotifications(SetFlagCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            userProjectRoleService.toggleReceivesNotifications(cmd.userProjectRole)
+            userProjectRoleService.setReceivesNotifications(cmd.userProjectRole, cmd.value)
         }
     }
 
-    JSON toggleEnabled(ToggleValueCommand cmd) {
+    JSON setEnabled(SetFlagCommand cmd) {
         checkErrorAndCallMethod(cmd) {
-            userProjectRoleService.toggleEnabled(cmd.userProjectRole)
+            userProjectRoleService.setEnabled(cmd.userProjectRole, cmd.value)
             redirect(action: "index")
         }
     }
@@ -304,8 +304,13 @@ class UpdateUserEmailCommand implements Validateable {
     }
 }
 
-class ToggleValueCommand implements Validateable {
+class SetFlagCommand implements Validateable {
     UserProjectRole userProjectRole
+    boolean value
+
+    void setValue(String value) {
+        this.value = value.toBoolean()
+    }
 }
 
 class UpdateProjectRoleCommand implements Validateable {

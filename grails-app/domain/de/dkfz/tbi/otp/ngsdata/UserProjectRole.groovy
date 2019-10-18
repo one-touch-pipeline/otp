@@ -40,10 +40,6 @@ class UserProjectRole implements Serializable, Entity {
         project(unique: 'user')
     }
 
-    boolean getManageUsers() {
-        return manageUsers || manageUsersAndDelegate
-    }
-
     static List<String> getAccessRelatedProperties() {
         return [
                 "projectRole",
@@ -57,7 +53,6 @@ class UserProjectRole implements Serializable, Entity {
     }
 
     boolean equalByAccessRelatedProperties(UserProjectRole userProjectRole) {
-        // we need direct access to the variables via @ to prevent using the custom getter of manageUsers
-        return accessRelatedProperties.every { this.@"$it" == userProjectRole.@"$it" }
+        return accessRelatedProperties.every { this."$it" == userProjectRole."$it" }
     }
 }

@@ -372,6 +372,7 @@ $(function() {
         $.ajax({
             url: $("input:hidden[name=target]", container).val(),
             dataType: 'json',
+            data: {"value": invVal},
             success: function (data) {
                 if (data.success) {
                     $.otp.infoMessage("Data stored successfully");

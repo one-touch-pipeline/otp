@@ -248,7 +248,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         when:
         SpringSecurityUtils.doWithAuth(requesterUserProjectRole.user.username) {
-            userProjectRoleService.toggleEnabled(userProjectRole)
+            userProjectRoleService.setEnabled(userProjectRole, !enabledStatus)
         }
 
         then: "new enabled status was set"
@@ -747,7 +747,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     }
 
     @Unroll
-    void "test #flag toggle function"() {
+    void "test #flag set function"() {
         given:
         setupData()
 
@@ -760,7 +760,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService."toggle${flag.capitalize()}"(userProjectRoles[0])
+            userProjectRoleService."set${flag.capitalize()}"(userProjectRoles[0], true)
         }
 
         then:
@@ -772,7 +772,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService."toggle${flag.capitalize()}"(userProjectRoles[0])
+            userProjectRoleService."set${flag.capitalize()}"(userProjectRoles[0], false)
         }
 
         then:
@@ -805,7 +805,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         when:
         SpringSecurityUtils.doWithAuth(user.username) {
-            userProjectRoleService."toggle${flag.capitalize()}"(userProjectRole)
+            userProjectRoleService."set${flag.capitalize()}"(userProjectRole, true)
         }
 
         then:
