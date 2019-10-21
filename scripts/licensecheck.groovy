@@ -70,6 +70,8 @@ class LicenseCheck {
             "logs",
             "out",
             "target",
+
+            "workflows/cwl/dataInstallation/testInput",
     ].collect { Paths.get(it) }
 
     static List<Path> ignoredFiles = [
