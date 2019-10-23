@@ -297,4 +297,8 @@ databaseChangeLog = {
     include file: 'changelogs/2019/processing-step-update-previous-index.groovy'
 
     include file: 'changelogs/2019/otp-272.groovy'
+
+    changeSet(author: "", id: "project-changes") {
+        sqlFile(path: 'changelogs/2019/project-changes.sql')
+    }
 }

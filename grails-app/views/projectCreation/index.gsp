@@ -77,11 +77,11 @@
                 <td><g:textArea name="description" cols="130" value="${cmd?.description}" style="width: auto" required="true"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.connectedProjects"/></td>
+                <td class="myKey"><g:message code="project.relatedProjects"/></td>
                 <td class="multi-input-field">
-                    <g:each in="${cmd?.connectedProjects?.split(",") ?: [""]}" var="connectedProject" status="i">
+                    <g:each in="${cmd?.relatedProjects?.split(",") ?: [""]}" var="relatedProject" status="i">
                         <div class="field">
-                            <g:textField list="projectList" name="connectedProjectNames" size="130" value="${connectedProject}"/>
+                            <g:textField list="projectList" name="relatedProjectName" size="130" value="${relatedProject}"/>
                             <g:if test="${i == 0}">
                                 <button class="add-field">+</button>
                             </g:if>
@@ -93,8 +93,8 @@
                 </td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.subsequentApplication"/></td>
-                <td><g:textField list="projectList" name="subsequentApplication" size="130" value="${cmd?.subsequentApplication}"/></td>
+                <td class="myKey"><g:message code="project.predecessorProject"/></td>
+                <td><g:textField list="projectList" name="predecessorProject" size="130" value="${cmd?.predecessorProject}"/></td>
             </tr>
             <datalist id="projectList">
                 <g:each in="${projects}" var="project">
@@ -118,8 +118,8 @@
                 <td><g:textField name="costCenter" size="130" value="${cmd?.costCenter}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.organisationUnit"/></td>
-                <td><g:textField name="organisationUnit" size="130" value="${cmd?.organisationUnit}"/></td>
+                <td class="myKey"><g:message code="project.organizationalUnit"/></td>
+                <td><g:textField name="organizationalUnit" size="130" value="${cmd?.organizationalUnit}"/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="project.projectType"/></td>

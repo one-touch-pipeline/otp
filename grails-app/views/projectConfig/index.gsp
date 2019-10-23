@@ -106,22 +106,22 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.connectedProjects"/></td>
+                    <td class="myKey"><g:message code="project.relatedProjects"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'connectedProjects'])}"
-                                value="${project.connectedProjects}"/>
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'relatedProjects'])}"
+                                value="${project.relatedProjects}"/>
                     </td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.subsequentApplication"/></td>
+                    <td class="myKey"><g:message code="project.predecessorProject"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'subsequentApplication'])}"
-                                value="${project.subsequentApplication}"/>
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'predecessorProject'])}"
+                                value="${project.predecessorProject}"/>
                     </td>
                     <td></td>
                 </tr>
@@ -173,12 +173,12 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.organisationUnit"/></td>
+                    <td class="myKey"><g:message code="project.organizationalUnit"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'organisationUnit'])}"
-                                value="${project.organisationUnit}"/>
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'organizationalUnit'])}"
+                                value="${project.organizationalUnit}"/>
                     </td>
                     <td></td>
                 </tr>

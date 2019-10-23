@@ -56,10 +56,10 @@ class Project implements Commentable, Entity {
 
     String name
     String individualPrefix
-    String subsequentApplication
-    String connectedProjects
+    String predecessorProject
+    String relatedProjects
     String internalNotes
-    String organisationUnit
+    String organizationalUnit
     String dirName
     Realm realm
     String dirAnalysis
@@ -194,11 +194,11 @@ class Project implements Commentable, Entity {
 
         endDate(nullable: true)
 
-        organisationUnit(nullable: true)
+        organizationalUnit(nullable: true)
 
-        connectedProjects(nullable: true)
+        relatedProjects(nullable: true)
 
-        subsequentApplication(nullable: true)
+        predecessorProject(nullable: true)
 
         internalNotes(nullable: true)
     }

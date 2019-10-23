@@ -598,30 +598,30 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         given:
         setupData()
         Project project = Project.findByName("testProject")
-        String subsequentApplication = "subsequentApplication"
+        String subsequentApplication = "predecessorProject"
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.updateProjectField(subsequentApplication, "subsequentApplication", project)
+            projectService.updateProjectField(subsequentApplication, "predecessorProject", project)
         }
 
         then:
-        project.subsequentApplication == subsequentApplication
+        project.predecessorProject == subsequentApplication
     }
 
     void "test updateConnectedProjects valid name"() {
         given:
         setupData()
         Project project = Project.findByName("testProject")
-        String connectedProjects = "connectedProjects"
+        String connectedProjects = "relatedProjects"
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.updateProjectField(connectedProjects, "connectedProjects", project)
+            projectService.updateProjectField(connectedProjects, "relatedProjects", project)
         }
 
         then:
-        project.connectedProjects == connectedProjects
+        project.relatedProjects == connectedProjects
     }
 
     void "test updateInternalNotes valid name"() {

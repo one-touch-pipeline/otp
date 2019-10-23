@@ -180,10 +180,10 @@ class ProjectService {
                 speciesWithStrain: projectParams.speciesWithStrain,
                 endDate: projectParams.endDate,
                 keywords: projectParams.keywords,
-                subsequentApplication: projectParams.subsequentApplication,
-                connectedProjects: projectParams.connectedProjects,
+                predecessorProject: projectParams.predecessorProject,
+                relatedProjects: projectParams.relatedProjects,
                 internalNotes: projectParams.internalNotes,
-                organisationUnit: projectParams.organisationUnit,
+                organizationalUnit: projectParams.organizationalUnit,
         ])
         assert project.save(flush: true)
 
@@ -229,9 +229,9 @@ class ProjectService {
                 "closed",
                 "individualPrefix",
                 "projectType",
-                "connectedProjects",
-                "subsequentApplication",
-                "organisationUnit",
+                "relatedProjects",
+                "predecessorProject",
+                "organizationalUnit",
                 "internalNotes",
         ].contains(fieldName)
 

@@ -99,9 +99,9 @@ class ProjectCreationCommand implements Serializable {
     LocalDate endDate
     LocalDate storageUntil
     Project.ProjectType projectType
-    String connectedProjects
-    String subsequentApplication
-    String organisationUnit
+    String relatedProjects
+    String predecessorProject
+    String organizationalUnit
     String internalNotes
 
     static constraints = {
@@ -158,9 +158,9 @@ class ProjectCreationCommand implements Serializable {
         speciesWithStrain(nullable: true)
         keywords(nullable: true)
         endDate(nullable: true)
-        connectedProjects(nullable: true)
-        subsequentApplication(nullable: true)
-        organisationUnit(nullable: true)
+        relatedProjects(nullable: true)
+        predecessorProject(nullable: true)
+        organizationalUnit(nullable: true)
         internalNotes(nullable: true)
     }
 
@@ -205,8 +205,8 @@ class ProjectCreationCommand implements Serializable {
         }
     }
 
-    void setConnectedProjectNames(String connectedProjectNames) {
-        connectedProjects = connectedProjectNames.split(",")*.trim().findAll().join(",")
+    void setRelatedProjectNames(String relatedProjectNames) {
+        relatedProjects = relatedProjectNames.split(",")*.trim().findAll().join(",")
     }
 
     void setEndDateInput(String endDate) {
