@@ -184,6 +184,8 @@ class ProjectService {
                 relatedProjects: projectParams.relatedProjects,
                 internalNotes: projectParams.internalNotes,
                 organizationalUnit: projectParams.organizationalUnit,
+                fundingBody: projectParams.fundingBody,
+                grantId: projectParams.grantId,
         ])
         assert project.save(flush: true)
 
@@ -232,6 +234,8 @@ class ProjectService {
                 "relatedProjects",
                 "predecessorProject",
                 "organizationalUnit",
+                "fundingBody",
+                "grantId",
                 "internalNotes",
         ].contains(fieldName)
 

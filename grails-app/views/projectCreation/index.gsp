@@ -122,6 +122,14 @@
                 <td><g:textField name="organizationalUnit" size="130" value="${cmd?.organizationalUnit}"/></td>
             </tr>
             <tr>
+                <td class="myKey"><g:message code="project.fundingBody"/></td>
+                <td><g:textField name="fundingBody" size="130" value="${cmd?.fundingBody}"/></td>
+            </tr>
+            <tr>
+                <td class="myKey"><g:message code="project.grantId"/></td>
+                <td><g:textField name="grantId" size="130" value="${cmd?.grantId}"/></td>
+            </tr>
+            <tr>
                 <td class="myKey"><g:message code="project.projectType"/></td>
                 <td><g:select class="criteria" id="group" name='projectType' from='${projectTypes}' value="${cmd?.projectType ?: defaultProjectType}" required="true"/></td>
             </tr>

@@ -128,6 +128,9 @@ class Project implements Commentable, Entity {
 
     ProjectType projectType
 
+    String fundingBody
+    String grantId
+
     static hasMany = [
             projectInfos: ProjectInfo,
             keywords: Keyword,
@@ -182,25 +185,18 @@ class Project implements Commentable, Entity {
             }
         })
 
-        comment(nullable: true)
-
-        description(nullable: true)
-
-        costCenter(nullable: true)
-
-        tumorEntity(nullable: true)
-
-        speciesWithStrain(nullable : true)
-
-        endDate(nullable: true)
-
-        organizationalUnit(nullable: true)
-
-        relatedProjects(nullable: true)
-
-        predecessorProject(nullable: true)
-
-        internalNotes(nullable: true)
+        comment nullable: true
+        description nullable: true
+        costCenter nullable: true
+        tumorEntity nullable: true
+        speciesWithStrain nullable: true
+        endDate nullable: true
+        organizationalUnit nullable: true
+        relatedProjects nullable: true
+        predecessorProject nullable: true
+        internalNotes nullable: true
+        fundingBody nullable: true
+        grantId nullable: true
     }
 
     @Override

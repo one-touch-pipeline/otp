@@ -183,6 +183,26 @@
                     <td></td>
                 </tr>
                 <tr>
+                    <td class="myKey"><g:message code="project.fundingBody"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'fundingBody'])}"
+                                value="${project.fundingBody}"/>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="myKey"><g:message code="project.grantId"/></td>
+                    <td>
+                        <otp:editorSwitch
+                                roles="ROLE_OPERATOR"
+                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'grantId'])}"
+                                value="${project.grantId}"/>
+                    </td>
+                    <td></td>
+                </tr>
+                <tr>
                     <td class="myKey"><g:message code="project.projectType"/></td>
                     <td>
                         <otp:editorSwitch

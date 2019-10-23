@@ -102,6 +102,8 @@ class ProjectCreationCommand implements Serializable {
     String relatedProjects
     String predecessorProject
     String organizationalUnit
+    String fundingBody
+    String grantId
     String internalNotes
 
     static constraints = {
@@ -161,6 +163,8 @@ class ProjectCreationCommand implements Serializable {
         relatedProjects(nullable: true)
         predecessorProject(nullable: true)
         organizationalUnit(nullable: true)
+        fundingBody(nullable: true)
+        grantId(nullable: true)
         internalNotes(nullable: true)
     }
 
