@@ -56,17 +56,17 @@
         <div id="projectOverviewDates">
             <table>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.individualPrefix"/></td>
+                    <td class="myKey"><g:message code="project.individualPrefix"/></td>
                     <td>${project.individualPrefix}</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.directory"/></td>
+                    <td class="myKey"><g:message code="project.directory"/></td>
                     <td id="projectDirectory">${directory}</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.analysisDirectory"/></td>
+                    <td class="myKey"><g:message code="project.analysisDirectory"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -76,7 +76,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.keywords"/></td>
+                    <td class="myKey"><g:message code="project.keywords"/></td>
                     <td>
                         <g:if test="${project.keywords}">
                             <otp:editorSwitch
@@ -88,13 +88,13 @@
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     link="${g.createLink(controller: 'projectConfig', action: 'updateKeywords', params: ['project.id': project.id])}"
-                                    value="${g.message(code: 'projectOverview.noKeywords')}"/>
+                                    value="${g.message(code: 'project.noKeywords')}"/>
                         </g:else>
                     </td>
                     <td></td>
                 </tr>
                 <tr id="descriptionRow">
-                    <td class="myKey" style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="projectOverview.description"/></td>
+                    <td class="myKey" style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="project.description"/></td>
                     <td colspan="2">
                         <div style="overflow: auto; max-height: 20em;">
                             <otp:editorSwitch
@@ -106,7 +106,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.connectedProjects"/></td>
+                    <td class="myKey"><g:message code="project.connectedProjects"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -116,7 +116,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.subsequentApplication"/></td>
+                    <td class="myKey"><g:message code="project.subsequentApplication"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -126,7 +126,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.tumorEntity"/></td>
+                    <td class="myKey"><g:message code="project.tumorEntity"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -139,7 +139,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.speciesWithStrain"/></td>
+                    <td class="myKey"><g:message code="project.speciesWithStrain"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -153,7 +153,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.unixGroup"/></td>
+                    <td class="myKey"><g:message code="project.unixGroup"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -163,7 +163,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.costCenter"/></td>
+                    <td class="myKey"><g:message code="project.costCenter"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -173,7 +173,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.organisationUnit"/></td>
+                    <td class="myKey"><g:message code="project.organisationUnit"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -183,7 +183,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.projectType"/></td>
+                    <td class="myKey"><g:message code="project.projectType"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -195,7 +195,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.forceCopyFiles"/></td>
+                    <td class="myKey"><g:message code="project.forceCopyFiles"/></td>
                     <td id="forceCopyFiles">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -207,17 +207,17 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.creationDate"/></td>
+                    <td class="myKey"><g:message code="project.creationDate"/></td>
                     <td id="creation-date">${creationDate}</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.lastDate"/></td>
+                    <td class="myKey"><g:message code="project.lastDate"/></td>
                     <td id="last-received-date">${lastReceivedDate}</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.endDate"/></td>
+                    <td class="myKey"><g:message code="project.endDate"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -228,7 +228,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.storageUntil"/></td>
+                    <td class="myKey"><g:message code="project.storageUntil"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -239,7 +239,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.nameInMetadata"/></td>
+                    <td class="myKey"><g:message code="project.nameInMetadata"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -249,7 +249,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.processingPriority"/></td>
+                    <td class="myKey"><g:message code="project.processingPriority"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -261,12 +261,12 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.group"/></td>
+                    <td class="myKey"><g:message code="project.group"/></td>
                     <td id="group">${project.projectGroup}</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.sampleParser"/></td>
+                    <td class="myKey"><g:message code="project.sampleParser"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -278,7 +278,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.qcThresholdHandling"/></td>
+                    <td class="myKey"><g:message code="project.qcThresholdHandling"/></td>
                     <td id="qcThresholdHandling">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -290,7 +290,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.fingerPrinting"/></td>
+                    <td class="myKey"><g:message code="project.fingerPrinting"/></td>
                     <td id="fingerPrinting">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -302,7 +302,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.processingNotification.message"/></td>
+                    <td class="myKey"><g:message code="project.processingNotification.message"/></td>
                     <td id="processingNotification">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -311,10 +311,10 @@
                                 values="${["true", "false"]}"
                                 value="${project.processingNotification}"/>
                     </td>
-                    <td><g:message code="projectOverview.processingNotification.message.detail"/></td>
+                    <td><g:message code="project.processingNotification.message.detail"/></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.qcTrafficLightNotification.message"/></td>
+                    <td class="myKey"><g:message code="project.qcTrafficLightNotification.message"/></td>
                     <td id="qcTrafficLightNotification">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -323,10 +323,10 @@
                                 values="${["true", "false"]}"
                                 value="${project.qcTrafficLightNotification}"/>
                     </td>
-                    <td><g:message code="projectOverview.qcTrafficLightNotification.message.detail"/></td>
+                    <td><g:message code="project.qcTrafficLightNotification.message.detail"/></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.customFinalNotification.message"/></td>
+                    <td class="myKey"><g:message code="project.customFinalNotification.message"/></td>
                     <td id="customFinalNotification">
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -335,10 +335,10 @@
                                 values="${["true", "false"]}"
                                 value="${project.customFinalNotification}"/>
                     </td>
-                    <td><g:message code="projectOverview.customFinalNotification.message.detail"/></td>
+                    <td><g:message code="project.customFinalNotification.message.detail"/></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="projectOverview.closed"/></td>
+                    <td class="myKey"><g:message code="project.closed"/></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -352,7 +352,7 @@
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <tr>
                         <td class="myKey" style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message
-                                code="projectOverview.internalNotes"/></td>
+                                code="project.internalNotes"/></td>
                         <td colspan="2">
                             <div style="overflow: auto; max-height: 20em;">
                                 <otp:editorSwitch
