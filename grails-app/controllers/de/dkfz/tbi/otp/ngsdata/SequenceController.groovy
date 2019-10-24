@@ -189,9 +189,11 @@ class SequenceFiltering {
                     }
                     break
                 case "individualSearch":
-                    if (it.value && it.value.length() >= 3) {
-                        filtering.individual << it.value
-                        filtering.enabled = true
+                    it.value.split(",").each {
+                        if (it && it.length() >= 3) {
+                            filtering.individual << it.trim()
+                            filtering.enabled = true
+                        }
                     }
                     break
                 case "sampleTypeSelection":
@@ -207,9 +209,11 @@ class SequenceFiltering {
                     }
                     break
                 case "ilseIdSearch":
-                    if (it.value) {
-                        filtering.ilseId << (it.value as Integer)
-                        filtering.enabled = true
+                    it.value.split(",").each {
+                        if (it) {
+                            filtering.ilseId << (it as Integer)
+                            filtering.enabled = true
+                        }
                     }
                     break
                 case "libraryLayoutSelection":
@@ -231,9 +235,11 @@ class SequenceFiltering {
                     }
                     break
                 case "runSearch":
-                    if (it.value && it.value.length() >= 3) {
-                        filtering.run << it.value
-                        filtering.enabled = true
+                    it.value.split(",").each {
+                        if (it && it.length() >= 3) {
+                            filtering.run << it.trim()
+                            filtering.enabled = true
+                        }
                     }
                     break
                 case "libraryPreparationKitSelection":
