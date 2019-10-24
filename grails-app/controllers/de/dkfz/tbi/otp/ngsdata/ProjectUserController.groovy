@@ -31,6 +31,8 @@ import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.administration.*
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.User
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -43,6 +45,7 @@ class ProjectUserController implements CheckAndCall {
     UserProjectRoleService userProjectRoleService
     LdapService ldapService
     SpringSecurityService springSecurityService
+    ProcessingOptionService processingOptionService
 
     def index() {
         List<Project> projects = projectService.getAllProjects()
@@ -64,7 +67,7 @@ class ProjectUserController implements CheckAndCall {
 
         List<User> ldapGroupMemberUsers = ldapGroupMemberUsernames ? User.findAllByUsernameInList(ldapGroupMemberUsernames) : []
         projectUsers.addAll(ldapGroupMemberUsers)
-        List<String> nonDatabaseUsers = ldapGroupMemberUsernames - ldapGroupMemberUsers*.username
+        List<String> nonDatabaseUsers = ldapGroupMemberUsernames - ldapGroupMemberUsers*.username - processingOptionService.findOptionAsList(ProcessingOption.OptionName.GUI_IGNORE_UNREGISTERED_OTP_USERS_FOUND)
 
         projectUsers.unique()
         projectUsers.sort { it.username }

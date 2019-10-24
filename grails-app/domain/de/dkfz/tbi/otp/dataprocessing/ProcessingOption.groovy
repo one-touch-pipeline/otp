@@ -483,6 +483,11 @@ class ProcessingOption implements Entity {
                 "Location specific logo",
                 Necessity.OPTIONAL, "NONE", TypeValidators.INSTANCE_LOGO
         ),
+        GUI_IGNORE_UNREGISTERED_OTP_USERS_FOUND(
+                "This value is used to not show certain members, in a comma separated list," +
+                        " which will not be found under the 'Unregistered OTP user found' section of project members page",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_WORD_TEXT_OPTIONAL
+        ),
 
         //naming
         CLUSTER_NAME(

@@ -32,6 +32,8 @@ import de.dkfz.tbi.otp.ProjectSelection
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.administration.LdapUserDetails
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.*
 
 import static javax.servlet.http.HttpServletResponse.SC_MOVED_TEMPORARILY
@@ -43,6 +45,7 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
     Class[] getDomainClassesToMock() {
         [
                 AclSid,
+                ProcessingOption,
                 Project,
                 ProjectRole,
                 Realm,
@@ -62,6 +65,8 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         User unconnectedUser = DomainFactory.createUser()
         User currentUser = DomainFactory.createUser()
         String unknownUsername = "unknownUser"
+        String ignoredUsername = "ignoredUser"
+        DomainFactory.createProcessingOptionLazy(ProcessingOption.OptionName.GUI_IGNORE_UNREGISTERED_OTP_USERS_FOUND, ignoredUsername)
 
         addUserWithReadAccessToProject(enabledUser, project, true)
         addUserWithReadAccessToProject(disabledUser, project, false)
@@ -78,12 +83,13 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         }
         controller.ldapService = Mock(LdapService) {
             getDistinguishedNameOfGroupByGroupName(_) >> project.unixGroup
-            getGroupMembersByDistinguishedName(_) >> [enabledUser.username, disabledUser.username, unconnectedUser.username, unknownUsername]
+            getGroupMembersByDistinguishedName(_) >> [enabledUser.username, disabledUser.username, unconnectedUser.username, unknownUsername, ignoredUsername]
             getLdapUserDetailsByUsername(_) >> new LdapUserDetails()
         }
         controller.springSecurityService = Mock(SpringSecurityService) {
             getCurrentUser() >> currentUser
         }
+        controller.processingOptionService = new ProcessingOptionService()
 
         when:
         controller.request.method = 'GET'

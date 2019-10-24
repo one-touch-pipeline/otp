@@ -276,7 +276,7 @@
                 <h4><g:message code="projectUser.additionalUsers.notConnected"/></h4>
                 ${usersWithoutUserProjectRole.join(", ") ?: 'None'}
 
-                <h4><g:message code="projectUser.additionalUsers.unknownUsers"/></h4>
+                <h4><g:message code="projectUser.additionalUsers.unregisteredUsers"/></h4>
                 ${unknownUsersWithFileAccess.join(", ") ?: 'None'}
             </g:if>
         </sec:access>
