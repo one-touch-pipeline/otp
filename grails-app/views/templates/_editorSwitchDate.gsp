@@ -23,9 +23,9 @@
 <div class="edit-switch edit-switch-date">
     <p class="edit-switch-editor" style="display: none">
         <input type="hidden" name="target" value="${link}"/>
-        <input type="date" name="date" value="${value?.format("yyyy-MM-dd")}"/>
+        <input type="date" name="date" value="${value}"/>
         <button class="save"><g:message code="default.button.update.label"/></button>
         <button class="cancel"><g:message code="default.button.cancel.label"/></button>
     </p>
-    <p class="edit-switch-label"><span class="wordBreak">${value?.format("yyyy-MM-dd")}</span><button class="edit js-edit">&nbsp;</button></p>
+    <p class="edit-switch-label"><span class="wordBreak">${value}</span><button class="edit js-edit">&nbsp;</button></p>
 </div>

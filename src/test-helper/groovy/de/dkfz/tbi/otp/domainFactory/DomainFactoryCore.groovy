@@ -24,10 +24,12 @@ package de.dkfz.tbi.otp.domainFactory
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
-import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.HelperUtils
+
+import java.time.LocalDate
 
 @SuppressWarnings('MethodCount')
 trait DomainFactoryCore implements DomainFactoryHelper {
@@ -38,7 +40,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 individualPrefix              : "individualPrefix_${nextId}",
                 dirName                       : "projectDirName_${nextId}",
                 projectType                   : Project.ProjectType.SEQUENCING,
-                storageUntil                  : new Date(),
+                storageUntil                  : LocalDate.now(),
                 realm                         : { DomainFactory.createRealm() },
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling           : QcThresholdHandling.CHECK_NOTIFY_AND_BLOCK,

@@ -45,7 +45,8 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
-import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -245,7 +246,7 @@ class ProjectService {
                 "storageUntil",
         ].contains(fieldName)
 
-        project."${fieldName}" = fieldValue ? new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(fieldValue) : null
+        project."${fieldName}" = fieldValue ? LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(fieldValue)) : null
         project.save(flush: true)
     }
 

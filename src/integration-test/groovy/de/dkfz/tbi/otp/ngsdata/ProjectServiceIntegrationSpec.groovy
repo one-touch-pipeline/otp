@@ -51,6 +51,7 @@ import de.dkfz.tbi.otp.utils.*
 import java.nio.file.*
 import java.nio.file.attribute.PosixFileAttributes
 import java.nio.file.attribute.PosixFilePermission
+import java.time.LocalDate
 
 @SuppressWarnings(['ClassSize', 'MethodCount', 'JUnitPublicProperty'])
 @Rollback
@@ -155,7 +156,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 description: description,
                 processingPriority: processingPriority,
                 projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: new Date(),
+                storageUntil: LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -205,7 +206,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: new Date(),
+                storageUntil: LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -244,7 +245,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: new Date(),
+                storageUntil: LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -281,7 +282,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: new Date(),
+                storageUntil: LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -311,7 +312,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 processingPriority: ProcessingPriority.NORMAL,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: new Date(),
+                storageUntil: LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -353,7 +354,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: new Date(),
+                storageUntil: LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -402,7 +403,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: new Date(),
+                storageUntil: LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -468,7 +469,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 description: '',
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
                 processingPriority: ProcessingPriority.NORMAL,
-                storageUntil: new Date(),
+                storageUntil: LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)

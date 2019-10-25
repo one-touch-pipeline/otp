@@ -21,6 +21,7 @@
   --}%
 
 <%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="java.time.format.DateTimeFormatter" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -130,11 +131,11 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="project.endDate"/></td>
-                <td><input type="date" name="endDateInput" value="${cmd?.endDate?.format("yyyy-MM-dd") ?: ""}"/></td>
+                <td><input type="date" name="endDateInput" value="${cmd?.endDate?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: ""}"/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="project.storageUntil"/></td>
-                <td><input type="date" name="storageUntilInput" value="${cmd?.storageUntil?.format("yyyy-MM-dd") ?: defaultDate}" required/></td>
+                <td><input type="date" name="storageUntilInput" value="${cmd?.storageUntil?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: defaultDate}" required/></td>
             </tr>
             <tr>
                 <td class="myKey"><g:message code="project.nameInMetadata"/></td>

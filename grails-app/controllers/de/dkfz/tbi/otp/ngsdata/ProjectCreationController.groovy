@@ -31,7 +31,8 @@ import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.searchability.Keyword
 
-import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class ProjectCreationController {
     static allowedMethods = [
@@ -95,8 +96,8 @@ class ProjectCreationCommand implements Serializable {
     boolean forceCopyFiles
     boolean fingerPrinting = true
     Set<Keyword> keywords
-    Date endDate
-    Date storageUntil
+    LocalDate endDate
+    LocalDate storageUntil
     Project.ProjectType projectType
     String connectedProjects
     String subsequentApplication
@@ -210,11 +211,11 @@ class ProjectCreationCommand implements Serializable {
 
     void setEndDateInput(String endDate) {
         if (endDate) {
-            this.endDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(endDate)
+            this.endDate = LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(endDate))
         }
     }
 
     void setStorageUntilInput(String storageUntil) {
-        this.storageUntil = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(storageUntil)
+        this.storageUntil = LocalDate.from(DateTimeFormatter.ISO_LOCAL_DATE.parse(storageUntil))
     }
 }

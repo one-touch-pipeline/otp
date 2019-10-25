@@ -30,6 +30,8 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.time.LocalDate
+
 class ProjectServiceSpec extends Specification implements DataTest {
 
     @Override
@@ -57,7 +59,7 @@ class ProjectServiceSpec extends Specification implements DataTest {
                 unixGroup                     : "unixGroup",
                 directory                     : dirName,
                 projectType                   : Project.ProjectType.SEQUENCING,
-                storageUntil                  : new Date(),
+                storageUntil                  : LocalDate.now(),
                 qcThresholdHandling           : QcThresholdHandling.CHECK_AND_NOTIFY,
         )
 

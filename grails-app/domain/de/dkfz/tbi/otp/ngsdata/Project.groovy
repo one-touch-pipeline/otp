@@ -29,6 +29,8 @@ import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.Entity
 
+import java.time.LocalDate
+
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class Project implements Commentable, Entity {
@@ -120,9 +122,9 @@ class Project implements Commentable, Entity {
 
     QcThresholdHandling qcThresholdHandling
 
-    Date endDate
+    LocalDate endDate
 
-    Date storageUntil
+    LocalDate storageUntil
 
     ProjectType projectType
 
