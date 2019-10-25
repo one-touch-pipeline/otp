@@ -31,6 +31,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.BamMetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
@@ -44,7 +45,7 @@ import java.nio.file.Paths
 import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 
-class BamMetadataImportServiceSpec extends Specification implements DataTest {
+class BamMetadataImportServiceSpec extends Specification implements DomainFactoryCore, DataTest {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -132,7 +133,8 @@ class BamMetadataImportServiceSpec extends Specification implements DataTest {
 
     void "validateAndImport, when there are no problems, returns an importProcess object"() {
         given:
-        Project project = DomainFactory.createProject(name: "project_01")
+        Project project = createProject(name: "project_01")
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit()
         DomainFactory.createExternallyProcessedPipelineLazy()
         File bamFilesDir = temporaryFolder.newFolder("path-to-bam-files")
         File qualityDirectory = temporaryFolder.newFolder("path-to-bam-files", "qualityDir")
@@ -144,11 +146,11 @@ class BamMetadataImportServiceSpec extends Specification implements DataTest {
         """).getBytes(BamMetadataValidationContext.CHARSET)
 
         (1..4).each {
-            DomainFactory.createReferenceGenome(name: "refGen${it}")
-            Individual individual = DomainFactory.createIndividual(mockPid: "individual${it}", project: project)
-            SampleType sampleType = DomainFactory.createSampleType(name: "sampleType${it}")
-            DomainFactory.createSeqType(name: "seqType${it}", libraryLayout: LibraryLayout.SINGLE)
-            DomainFactory.createSample(individual: individual, sampleType: sampleType)
+            createReferenceGenome(name: "refGen${it}")
+            Individual individual = createIndividual(mockPid: "individual${it}", project: project)
+            SampleType sampleType = createSampleType(name: "sampleType${it}")
+            createSeqType(name: "seqType${it}", libraryLayout: LibraryLayout.SINGLE)
+            createSample(individual: individual, sampleType: sampleType)
         }
 
         List<String> furtherFiles = [
@@ -156,11 +158,12 @@ class BamMetadataImportServiceSpec extends Specification implements DataTest {
                 "qualityFile",
         ]
 
-        Path metadataFile = metaDataFileForTestValidateAndImport(bamFilesDir, qualityControl)
+        Path metadataFile = metaDataFileForTestValidateAndImport(bamFilesDir, qualityControl, libraryPreparationKit)
 
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(metadataFile: metadataFile)
 
         BamMetadataImportService service = new BamMetadataImportService()
+        service.libraryPreparationKitService = new LibraryPreparationKitService()
         service.applicationContext = Mock(ApplicationContext) {
             getBeansOfType(BamMetadataValidator) >> [:]
         }
@@ -221,16 +224,16 @@ class BamMetadataImportServiceSpec extends Specification implements DataTest {
         }
     }
 
-    private Path metaDataFileForTestValidateAndImport(File bamFilesDir, File qualityControl) {
+    private Path metaDataFileForTestValidateAndImport(File bamFilesDir, File qualityControl, LibraryPreparationKit libPrepKit) {
         Path metadataFile = temporaryFolder.newFile("bamMetadata.tsv").toPath()
         metadataFile.bytes = ("""\
 ${REFERENCE_GENOME}\t${SEQUENCING_TYPE}\t${BAM_FILE_PATH}\t${SAMPLE_TYPE}\t${INDIVIDUAL}\t${LIBRARY_LAYOUT}\t${
             PROJECT
-        }\t${COVERAGE}\t${INSERT_SIZE_FILE}\t${QUALITY_CONTROL_FILE}
-refGen1\tseqType1\t${bamFilesDir}/bamfile1_merged.mdup.bam\tsampleType1\tindividual1\t${LibraryLayout.SINGLE}\tproject_01\t\tinsertSize.txt
-refGen2\tseqType2\t${bamFilesDir}/bamfile2_merged.mdup.bam\tsampleType2\tindividual2\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityDir/insertSize.txt
-refGen3\tseqType3\t${bamFilesDir}/bamfile3_merged.mdup.bam\tsampleType3\tindividual3\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityDirinsertSize.txt
-refGen4\tseqType4\t${bamFilesDir}/bamfile4_merged.mdup.bam\tsampleType4\tindividual4\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityFileinsertSize.txt\t${qualityControl.name}
+        }\t${COVERAGE}\t${INSERT_SIZE_FILE}\t${QUALITY_CONTROL_FILE}\t${LIBRARY_PREPARATION_KIT}
+refGen1\tseqType1\t${bamFilesDir}/bamfile1_merged.mdup.bam\tsampleType1\tindividual1\t${LibraryLayout.SINGLE}\tproject_01\t\tinsertSize.txt\t\t${libPrepKit.name}
+refGen2\tseqType2\t${bamFilesDir}/bamfile2_merged.mdup.bam\tsampleType2\tindividual2\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityDir/insertSize.txt\t\t${libPrepKit.name}
+refGen3\tseqType3\t${bamFilesDir}/bamfile3_merged.mdup.bam\tsampleType3\tindividual3\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityDirinsertSize.txt\t\t${libPrepKit.name}
+refGen4\tseqType4\t${bamFilesDir}/bamfile4_merged.mdup.bam\tsampleType4\tindividual4\t${LibraryLayout.SINGLE}\tproject_01\t\tqualityFileinsertSize.txt\t${qualityControl.name}\t${libPrepKit.name}
 """).getBytes(BamMetadataValidationContext.CHARSET)
         return metadataFile
     }

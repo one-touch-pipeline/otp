@@ -21,10 +21,10 @@
  */
 package de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.validators
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import de.dkfz.tbi.otp.ngsdata.LibraryPreparationKit
-import de.dkfz.tbi.otp.ngsdata.SeqTypeNames
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
@@ -34,6 +34,9 @@ import static de.dkfz.tbi.otp.ngsdata.BamMetadataColumn.SEQUENCING_TYPE
 
 @Component
 class LibraryPreparationKitValidator extends ValueTuplesValidator<BamMetadataValidationContext> implements BamMetadataValidator {
+
+    @Autowired
+    LibraryPreparationKitService libraryPreparationKitService
 
     @Override
     Collection<String> getDescriptions() {
@@ -60,7 +63,7 @@ class LibraryPreparationKitValidator extends ValueTuplesValidator<BamMetadataVal
             String seqType = it.getValue(SEQUENCING_TYPE.name())
 
             if (libraryPreparationKit) {
-                if (!LibraryPreparationKit.findByName(libraryPreparationKit)) {
+                if (!libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKit)) {
                     context.addProblem(it.cells, Level.ERROR, "The ${LIBRARY_PREPARATION_KIT} '${libraryPreparationKit}' is not registered in OTP.", "At least one ${LIBRARY_PREPARATION_KIT} is not registered in OTP.")
                 }
             } else {

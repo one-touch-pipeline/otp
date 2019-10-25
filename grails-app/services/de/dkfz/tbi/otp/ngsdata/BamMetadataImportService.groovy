@@ -43,6 +43,8 @@ class BamMetadataImportService {
     @Autowired
     ApplicationContext applicationContext
 
+    LibraryPreparationKitService libraryPreparationKitService
+
     SamplePairDeciderService samplePairDeciderService
 
     FileSystemService fileSystemService
@@ -133,7 +135,7 @@ class BamMetadataImportService {
                         sample: sample,
                         seqType: seqType,
                         pipeline: Pipeline.findByNameAndType(Pipeline.Name.EXTERNALLY_PROCESSED, Pipeline.Type.ALIGNMENT),
-                        libraryPreparationKit: LibraryPreparationKit.findByName(libraryPreparationKit)
+                        libraryPreparationKit: libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKit),
                 )
                 assert emwp.save(flush: true)
 

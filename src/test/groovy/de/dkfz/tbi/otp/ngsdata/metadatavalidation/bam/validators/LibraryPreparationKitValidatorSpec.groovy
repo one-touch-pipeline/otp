@@ -44,6 +44,13 @@ class LibraryPreparationKitValidatorSpec extends Specification implements DataTe
         ]
     }
 
+    LibraryPreparationKitValidator libraryPreparationKitValidator
+
+    void setup() {
+        libraryPreparationKitValidator = new LibraryPreparationKitValidator()
+        libraryPreparationKitValidator.libraryPreparationKitService = new LibraryPreparationKitService()
+    }
+
     void 'validate, when library preparation kit is not registered in OTP, then add expected problem'() {
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext("""\
@@ -57,10 +64,26 @@ EXON\tIndividual1
         ]
 
         when:
-        new LibraryPreparationKitValidator().validate(context)
+        libraryPreparationKitValidator.validate(context)
 
         then:
         containSame(context.problems, expectedProblems)
+    }
+
+    void 'validate, when library preparation kit is registered as an alias in OTP, succeeds'() {
+        given:
+        BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext("""\
+${SEQUENCING_TYPE}\t${LIBRARY_PREPARATION_KIT}
+EXON\tkit_alias
+""")
+
+        DomainFactory.createLibraryPreparationKit(importAlias: ["kit_alias"])
+
+        when:
+        libraryPreparationKitValidator.validate(context)
+
+        then:
+        context.problems.empty
     }
 
     void 'validate, when library preparation kit is registered in OTP and is EXOME, succeeds'() {
@@ -73,7 +96,7 @@ EXON\tIndividual1\t
         DomainFactory.createLibraryPreparationKit([name: "Individual1"])
 
         when:
-        new LibraryPreparationKitValidator().validate(context)
+        libraryPreparationKitValidator.validate(context)
 
         then:
         context.problems.empty
@@ -93,7 +116,7 @@ EXON\tIndividual1\t
         ]
 
         when:
-        new LibraryPreparationKitValidator().validate(context)
+        libraryPreparationKitValidator.validate(context)
 
         then:
         containSame(context.problems, expectedProblems)
@@ -107,7 +130,7 @@ EXON\tIndividual1\t
         )
 
         when:
-        new LibraryPreparationKitValidator().validate(context)
+        libraryPreparationKitValidator.validate(context)
 
         then:
         context.problems.empty
