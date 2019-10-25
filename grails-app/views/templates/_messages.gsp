@@ -35,7 +35,7 @@ To use it, store a `FlashMessage` object in `flash.message`.
                 There are ${(flash.message.errorObject as Errors).errorCount} error(s):<br>
                 <ul>
                     <g:each in="${(flash.message.errorObject as Errors).allErrors}" var="err">
-                        <li>${MessageFormat.format(err.defaultMessage, err.arguments)}: ${err.code}</li>
+                        <li>${g.message(error: err)}</li>
                     </g:each>
                 </ul>
             </g:if>
