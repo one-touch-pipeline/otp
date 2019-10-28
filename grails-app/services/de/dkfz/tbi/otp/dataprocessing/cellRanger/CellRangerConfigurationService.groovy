@@ -23,6 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
+import groovy.transform.Canonical
 import groovy.transform.Immutable
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
@@ -31,12 +32,17 @@ import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.Entity
 
 @Transactional
 class CellRangerConfigurationService {
 
     SeqType getSeqType() {
-        CollectionUtils.exactlyOneElement(getPipeline().getSeqTypes())
+        CollectionUtils.exactlyOneElement(seqTypes)
+    }
+
+    List<SeqType> getSeqTypes() {
+        getPipeline().getSeqTypes()
     }
 
     Pipeline getPipeline() {
@@ -90,59 +96,61 @@ class CellRangerConfigurationService {
         List<Sample> selectedSamples
     }
 
+    @Canonical
+    static class PlatformGroupAndKit {
+        SeqPlatformGroup seqPlatformGroup
+        LibraryPreparationKit libraryPreparationKit
+    }
+
+    Map<PlatformGroupAndKit, List<SeqTrack>> getSeqTracksGroupedByPlatformGroupAndKit(Collection<SeqTrack> seqTracks) {
+        return seqTracks.groupBy { SeqTrack seqTrack ->
+            [
+                    seqPlatformGroup     : seqTrack.getSeqPlatformGroup(),
+                    libraryPreparationKit: seqTrack.libraryPreparationKit,
+            ]
+        }.collectEntries { Map<String, Entity> key, List<SeqTrack> seqTracksPerPlatformGroupAndKit ->
+            PlatformGroupAndKit platformGroupAndKit = new PlatformGroupAndKit(
+                    seqPlatformGroup     : key['seqPlatformGroup'] as SeqPlatformGroup,
+                    libraryPreparationKit: key['libraryPreparationKit'] as LibraryPreparationKit,
+            )
+            return [(platformGroupAndKit): seqTracksPerPlatformGroupAndKit]
+        }
+    }
+
+    /**
+     * Currently it is not supported to have SeqTracks of differing SeqPlatformGroups and LibPrepKits within one
+     * Sample. For SingleCell data the import validator already throws an Error, see {@link MergingPreventionValidator}.
+     */
+    static void constrainSeqTracksGroupedByPlatformGroupAndKit(Map<PlatformGroupAndKit, List<SeqTrack>> map) {
+        assert map.size() <= 1: "Can not handle SeqTracks processed over multiple platforms or with different library preparation kits"
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    Errors createMergingWorkPackage(Integer expectedCells, Integer enforcedCells, Project project, Individual individual1, SampleType sampleType) {
-        List<Sample> samples = new ArrayList(getSamples(project, individual1, sampleType).selectedSamples)
-
+    Errors createMergingWorkPackage(Integer expectedCells, Integer enforcedCells, ReferenceGenomeIndex referenceGenomeIndex, Project project, Individual individual, SampleType sampleType, SeqType seqType) {
+        List<Sample> samples = new ArrayList(getSamples(project, individual, sampleType).selectedSamples)
         CellRangerConfig config = getWorkflowConfig(project)
-        MergingCriteria mergingCriteria = getMergingCriteria(project)
-
         try {
             samples.unique().each { Sample sample ->
-                Set<SeqTrack> seqTracks = new HashSet<SeqTrack>(sample.seqTracks)
-                SeqPlatformGroup seqPlatformGroup
-                LibraryPreparationKit libraryPreparationKit
-
-                if (mergingCriteria.useSeqPlatformGroup != MergingCriteria.SpecificSeqPlatformGroups.IGNORE_FOR_MERGING) {
-                    Map<SeqPlatformGroup, List<SeqTrack>> seqTracksByPlatformGroup = seqTracks.groupBy {
-                        it.seqPlatformGroup
-                    }
-                    if (seqTracksByPlatformGroup.size() < 1) {
-                        seqTracks = seqTracksByPlatformGroup.max { it.value.size() }.value
-                    }
-                    seqPlatformGroup = CollectionUtils.exactlyOneElement(seqTracks*.seqPlatformGroup.unique())
-                } else {
-                    seqPlatformGroup = null
+                Map<PlatformGroupAndKit, List<SeqTrack>> map = getSeqTracksGroupedByPlatformGroupAndKit(sample.seqTracks.findAll { it.seqType == seqType })
+                constrainSeqTracksGroupedByPlatformGroupAndKit(map)
+                map.each { PlatformGroupAndKit platformGroupAndKit, List<SeqTrack> seqTracks ->
+                    new CellRangerMergingWorkPackage(
+                            seqType              : seqType,
+                            pipeline             : pipeline,
+                            sample               : sample,
+                            seqTracks            : seqTracks,
+                            expectedCells        : expectedCells,
+                            enforcedCells        : enforcedCells,
+                            config               : config,
+                            statSizeFileName     : null,
+                            referenceGenomeIndex : referenceGenomeIndex,
+                            referenceGenome      : referenceGenomeIndex.referenceGenome,
+                            antibodyTarget       : null,
+                            seqPlatformGroup     : platformGroupAndKit.seqPlatformGroup,
+                            libraryPreparationKit: platformGroupAndKit.libraryPreparationKit,
+                            needsProcessing      : true,
+                    ).save(flush: true)
                 }
-
-                if (mergingCriteria.useLibPrepKit) {
-                    Map<LibraryPreparationKit, List<SeqTrack>> seqTracksByLibPrepKit = seqTracks.groupBy {
-                        it.libraryPreparationKit
-                    }
-                    if (seqTracksByLibPrepKit.size() < 1) {
-                        seqTracks = seqTracksByLibPrepKit.max { it.value.size() }.value
-                    }
-                    libraryPreparationKit = CollectionUtils.exactlyOneElement(seqTracks*.libraryPreparationKit.unique())
-                } else {
-                    libraryPreparationKit = null
-                }
-
-                CellRangerMergingWorkPackage mwp = new CellRangerMergingWorkPackage(
-                        expectedCells: expectedCells,
-                        enforcedCells: enforcedCells,
-                        config: config,
-                        needsProcessing: true,
-                        seqPlatformGroup: seqPlatformGroup,
-                        statSizeFileName: null,
-                        seqTracks: seqTracks,
-                        sample: sample,
-                        seqType: seqType,
-                        referenceGenome: config.referenceGenomeIndex.referenceGenome,
-                        pipeline: pipeline,
-                        antibodyTarget: null,
-                        libraryPreparationKit: libraryPreparationKit,
-                )
-                mwp.save(flush: true)
             }
         } catch (ValidationException e) {
             return e.errors

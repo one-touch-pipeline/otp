@@ -2024,12 +2024,30 @@ div.log {
 
 .cell-ranger-creation-grid-wrapper {
     display: grid;
-    grid-template-columns: 2fr 2fr 2fr 3fr;
-    grid-gap: 12px;
+    grid-gap: 24px;
+    grid-template-rows: auto auto auto;
 
     .scrollable {
         overflow: auto;
         max-height: 12em;
+    }
+
+    .row {
+        &.one {
+            grid-row: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 12px;
+        }
+        &.two {
+            grid-row: 2;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-gap: 12px;
+        }
+        &.three {
+            grid-row: 3;
+        }
     }
 }
 

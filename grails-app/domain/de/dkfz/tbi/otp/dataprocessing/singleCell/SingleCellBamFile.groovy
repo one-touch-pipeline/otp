@@ -79,18 +79,23 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
     ]
 
     static constraints = {
-        workDirectoryName validator: { val, obj ->
-            OtpPath.isValidRelativePath(val) &&
-                    !SingleCellBamFile.findAllByWorkDirectoryName(val).any {
-                        it != obj && it.workPackage == obj.workPackage
-                    }
+        workDirectoryName validator: { String val, SingleCellBamFile obj ->
+            uniquePerWorkPackageAndProperties(obj, ["workDirectoryName": val]) && OtpPath.isValidRelativePath(val)
         }
         seqTracks minSize: 1
-        identifier validator: { val, obj ->
-            !SingleCellBamFile.findAllByIdentifier(val).any {
-                it != obj && it.workPackage == obj.workPackage
-            }
+        identifier validator: { int val, SingleCellBamFile obj ->
+            uniquePerWorkPackageAndProperties(obj, ["identifier": val])
         }
+    }
+
+    /*
+     * A GORM unique constraint on workPackage, like: `workDirectoryName unique: 'workPackage'` does not work
+     * as hibernate seems to have problems applying the constraints when a property with the same name also
+     * exists in a sister class, see RoddyBamFile.workDirectoryName.
+     */
+    private static boolean uniquePerWorkPackageAndProperties(SingleCellBamFile bam, Map properties) {
+        List<SingleCellBamFile> result = findAllWhere([workPackage: bam.workPackage] + properties)
+        return [] == result || [bam] == result
     }
 
     @Override
@@ -120,6 +125,17 @@ class SingleCellBamFile extends AbstractMergedBamFile implements HasIdentifier, 
 
     File getWorkDirectory() {
         return new File(baseDirectory, workDirectoryName)
+    }
+
+    static String buildWorkDirectoryName(CellRangerMergingWorkPackage workPackage, int identifier) {
+        return [
+                "RG_${workPackage.referenceGenome.name ?: '-'}",
+                "TV_${workPackage.referenceGenomeIndex.getToolWithVersion().replace(" ", "-")}",
+                "EC_${workPackage.expectedCells ?: '-'}",
+                "FC_${workPackage.enforcedCells ?: '-'}",
+                "PV_${workPackage.config.programVersion.replace("/", "-")}",
+                "ID_${identifier}",
+        ].join('_')
     }
 
     String getSingleCellSampleName() {

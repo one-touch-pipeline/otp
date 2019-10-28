@@ -1056,8 +1056,8 @@ samplePairsNotProcessed: ${expectedSamplePairsNotProcessed}
         AbstractMergedBamFile abstractMergedBamFile
         if (properties.singleCell == true) {
             alignmentInfo = createSingleCellAlignmentInfo(seqTrack)
-            mergingWorkPackage = CellRangerFactoryInstance.INSTANCE.createMergingWorkPackage(mergingWorkPackageProperties)
-            abstractMergedBamFile = CellRangerFactoryInstance.INSTANCE.createBamFile([workPackage: mergingWorkPackage])
+            mergingWorkPackage = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createMergingWorkPackage(mergingWorkPackageProperties)
+            abstractMergedBamFile = AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createBamFile([workPackage: mergingWorkPackage])
         } else {
             alignmentInfo = createRoddyAlignmentInfo(seqTrack)
             mergingWorkPackage = DomainFactory.createMergingWorkPackage(mergingWorkPackageProperties + [

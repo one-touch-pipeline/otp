@@ -54,12 +54,6 @@ class ConfigureCellRangerPipelineController extends AbstractConfigureNonRoddyPip
 
     @Override
     Map getAdditionalProperties(Project project, SeqType seqType) {
-        CellRangerConfig config = getLatestConfig(project, seqType)
-        ToolName toolName = ToolName.findByNameAndType('CELL_RANGER', ToolName.Type.SINGLE_CELL)
-
-        return [
-                referenceGenomeIndex  : config?.referenceGenomeIndex,
-                referenceGenomeIndexes: toolName.referenceGenomeIndexes,
-        ]
+        return [:]
     }
 }

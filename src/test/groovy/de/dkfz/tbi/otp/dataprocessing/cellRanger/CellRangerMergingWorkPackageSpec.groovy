@@ -40,12 +40,27 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
                 Pipeline,
                 Project,
                 Realm,
+                ReferenceGenome,
+                ReferenceGenomeIndex,
                 SeqType,
         ]
     }
 
+    void "referenceGenome and referenceGenomeIndex.referenceGenome have to be the same object"() {
+        given:
+        ReferenceGenome referenceGenome = createReferenceGenome()
+        ReferenceGenomeIndex referenceGenomeIndex = createReferenceGenomeIndex()
+
+        when:
+        createMergingWorkPackage(referenceGenome: referenceGenome, referenceGenomeIndex: referenceGenomeIndex)
+
+        then:
+        ValidationException e = thrown()
+        e.message =~ CellRangerMergingWorkPackage.REFERENCE_GENOME_SYNCH_ERROR
+    }
+
     @Unroll
-    void "CellRangerMergingWorkPackage, test mutually exclusive validator, fails validation (expectedCells=#expectedCells, enforcedCells=#enforcedCells)"() {
+    void "test mutually exclusive validator, fails validation (expectedCells=#expectedCells, enforcedCells=#enforcedCells)"() {
         when:
         createMergingWorkPackage(expectedCells: expectedCells, enforcedCells: enforcedCells)
 
@@ -60,7 +75,7 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
     }
 
     @Unroll
-    void "CellRangerMergingWorkPackage, test mutually exclusive validator, succeeds validation (expectedCells=#expectedCells, enforcedCells=#enforcedCells)"() {
+    void "test mutually exclusive validator, succeeds validation (expectedCells=#expectedCells, enforcedCells=#enforcedCells)"() {
         when:
         createMergingWorkPackage(expectedCells: expectedCells, enforcedCells: enforcedCells)
 
@@ -73,8 +88,7 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
         null          | 5000
     }
 
-    @Unroll
-    void "CellRangerMergingWorkPackage, expectedCells and enforcedCells are editable"() {
+    void "expectedCells and enforcedCells are editable"() {
         given:
         CellRangerMergingWorkPackage mwp = createMergingWorkPackage(expectedCells: 5000, enforcedCells: null)
 

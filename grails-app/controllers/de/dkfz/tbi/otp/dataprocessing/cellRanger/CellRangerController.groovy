@@ -54,6 +54,7 @@ class CellRangerController {
         assert cmd.validate()
 
         SeqType seqType = cellRangerConfigurationService.seqType
+        List<SeqType> seqTypes = cellRangerConfigurationService.seqTypes
         Pipeline pipeline = cellRangerConfigurationService.pipeline
 
         boolean configExists = cellRangerConfigurationService.getWorkflowConfig(project) && cellRangerConfigurationService.getMergingCriteria(project)
@@ -69,19 +70,23 @@ class CellRangerController {
         List<CellRangerMergingWorkPackage> mwps = samples.selectedSamples ?
                 CellRangerMergingWorkPackage.findAllBySampleInListAndPipeline(samples.selectedSamples, pipeline) : []
 
+        ToolName toolName = ToolName.findByNameAndType('CELL_RANGER', ToolName.Type.SINGLE_CELL)
+
         return [
-                configExists       : configExists,
-                projects           : projects,
-                project            : project,
-                allIndividuals     : allIndividuals,
-                individual         : cmd.individual,
-                allSampleTypes     : allSampleTypes,
-                sampleType         : cmd.sampleType,
-                seqType            : seqType,
-                samples            : samples.selectedSamples,
-                selectedIndividuals: selectedIndividuals,
-                selectedSampleTypes: selectedSampleTypes,
-                mwps               : mwps,
+                configExists          : configExists,
+                projects              : projects,
+                project               : project,
+                allIndividuals        : allIndividuals,
+                individual            : cmd.individual,
+                allSampleTypes        : allSampleTypes,
+                sampleType            : cmd.sampleType,
+                seqType               : seqType,
+                seqTypes              : seqTypes,
+                samples               : samples.selectedSamples,
+                referenceGenomeIndexes: toolName.referenceGenomeIndexes,
+                selectedIndividuals   : selectedIndividuals,
+                selectedSampleTypes   : selectedSampleTypes,
+                mwps                  : mwps,
         ]
     }
 
@@ -105,9 +110,11 @@ class CellRangerController {
         Errors errors = cellRangerConfigurationService.createMergingWorkPackage(
                 expectedCells,
                 enforcedCells,
+                cmd.referenceGenomeIndex,
                 cmd.project,
                 cmd.individual,
-                cmd.sampleType
+                cmd.sampleType,
+                cmd.seqType,
         )
         if (errors) {
             flash.message = new FlashMessage(g.message(code: "cellRanger.store.failure") as String, errors)
@@ -137,5 +144,7 @@ class CellRangerConfigurationCommand extends CellRangerSelectionCommand {
     })
     Integer expectedOrEnforcedCellsValue
 
+    ReferenceGenomeIndex referenceGenomeIndex
     Project project
+    SeqType seqType
 }

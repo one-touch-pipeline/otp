@@ -43,31 +43,69 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
     SeqType seqType
     Individual individual
     SampleType sampleType
-    Sample sample
-    Sample sample2
-    SeqTrack seqTrack
+    Sample sampleA
+    Sample sampleB
+    SeqTrack seqTrackA
+    ReferenceGenomeIndex referenceGenomeIndex
 
     void setupData() {
         createUserAndRoles()
 
         project = createProject()
         seqType = createSeqType()
+        referenceGenomeIndex = createReferenceGenomeIndex()
         Pipeline pipeline = findOrCreatePipeline()
         createConfig(project: project, seqType: seqType, pipeline: pipeline)
 
-        DomainFactory.createMergingCriteria(project: project, seqType: seqType)
+        createMergingCriteria(project: project, seqType: seqType)
 
-        individual = DomainFactory.createIndividual(project: project)
-        sampleType = DomainFactory.createSampleType()
-        sample = createSample(individual: individual, sampleType: sampleType)
-        seqTrack = DomainFactory.createSeqTrack(seqType: seqType, sample: sample)
-        sample.refresh()
+        individual = createIndividual(project: project)
+        sampleType = createSampleType()
+        sampleA = createSample(individual: individual, sampleType: sampleType)
+        seqTrackA = createSeqTrack(seqType: seqType, sample: sampleA)
+        sampleA.refresh()
 
-        Individual individual2 = DomainFactory.createIndividual(project: project)
-        SampleType sampleType2 = DomainFactory.createSampleType()
-        sample2 = createSample(individual: individual2, sampleType: sampleType2)
-        DomainFactory.createSeqTrack(seqType: seqType, sample: sample2)
-        sample2.refresh()
+        Individual individualB = createIndividual(project: project)
+        SampleType sampleTypeB = createSampleType()
+        sampleB = createSample(individual: individualB, sampleType: sampleTypeB)
+        createSeqTrack(seqType: seqType, sample: sampleB)
+        sampleB.refresh()
+    }
+
+    /**
+     * Returns a list of SeqTracks with LibPrepKits and SeqPlatformGroups in such a way that
+     * they will be split into 5 MergingWorkPackages for processing.
+     */
+    List<SeqTrack> setupMultipleSeqTracksOfDifferentSeqPlatformGroupsAndLibPrepKits() {
+        List<LibraryPreparationKit> libPrepKits = (1..4).collect { createLibraryPreparationKit() }
+
+        List<SeqPlatform> seqPlatforms = (1..4).collect { createSeqPlatformWithSeqPlatformGroup() }
+
+        Map<SeqPlatform, Run> runBySeqPlatform = seqPlatforms.collectEntries { SeqPlatform seqPlatform ->
+            [(seqPlatform): createRun(seqPlatform: seqPlatform)]
+        }
+
+        Closure<SeqTrack> createSeqTrackClosure = { SeqPlatform seqPlatform, LibraryPreparationKit libPreparationKit ->
+            Run run = runBySeqPlatform[seqPlatform]
+            return createSeqTrack(sample: sampleA, seqType: seqType, run: run, libraryPreparationKit: libPreparationKit)
+        }
+
+        List<SeqTrack> seqTracks = [
+                createSeqTrackClosure(seqPlatforms[0], libPrepKits[0]),
+                createSeqTrackClosure(seqPlatforms[0], libPrepKits[0]),
+
+                createSeqTrackClosure(seqPlatforms[1], libPrepKits[0]),
+
+                createSeqTrackClosure(seqPlatforms[2], libPrepKits[1]),
+                createSeqTrackClosure(seqPlatforms[2], libPrepKits[1]),
+
+                createSeqTrackClosure(seqPlatforms[3], libPrepKits[2]),
+                createSeqTrackClosure(seqPlatforms[3], libPrepKits[2]),
+
+                createSeqTrackClosure(seqPlatforms[3], libPrepKits[3]),
+        ]
+        sampleA.refresh()
+        return seqTracks
     }
 
     void "test getSamples"() {
@@ -80,8 +118,8 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         }
 
         then:
-        samples.allSamples == [sample, sample2]
-        samples.selectedSamples == [sample]
+        samples.allSamples == [sampleA, sampleB]
+        samples.selectedSamples == [sampleA]
     }
 
     void "test getSamples for whole project"() {
@@ -94,8 +132,25 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         }
 
         then:
-        samples.allSamples == [sample, sample2]
-        samples.selectedSamples == [sample, sample2]
+        samples.allSamples == [sampleA, sampleB]
+        samples.selectedSamples == [sampleA, sampleB]
+    }
+
+    void "test getSeqTracksGroupedByPlatformGroupAndKit properly groups SeqTracks by SeqPlatformGroup and LibPrepKit"() {
+        given:
+        setupData()
+        List<SeqTrack> seqTracks = setupMultipleSeqTracksOfDifferentSeqPlatformGroupsAndLibPrepKits()
+
+        when:
+        Map<CellRangerConfigurationService.PlatformGroupAndKit, List<SeqTrack>> result = cellRangerConfigurationService.getSeqTracksGroupedByPlatformGroupAndKit(seqTracks)
+
+        then:
+        result.size() == 5
+        result.every { CellRangerConfigurationService.PlatformGroupAndKit key, List<SeqTrack> seqTracksOfKey ->
+            seqTracks.findAll {
+                key.seqPlatformGroup == it.seqPlatformGroup && key.libraryPreparationKit == it.libraryPreparationKit
+            } == seqTracksOfKey
+        }
     }
 
     @Unroll
@@ -105,16 +160,17 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
 
         when:
         Errors errors = SpringSecurityUtils.doWithAuth(ADMIN) {
-            cellRangerConfigurationService.createMergingWorkPackage(expectedCells, enforcedCells, project, individual, sampleType)
+            cellRangerConfigurationService.createMergingWorkPackage(expectedCells, enforcedCells, referenceGenomeIndex, project, individual, sampleType, seqType)
         }
 
         then:
         !errors
         CellRangerMergingWorkPackage mwp = CollectionUtils.exactlyOneElement(CellRangerMergingWorkPackage.all)
-        mwp.sample == sample
-        mwp.seqTracks == [seqTrack] as Set
+        mwp.sample == sampleA
+        mwp.seqTracks == [seqTrackA] as Set
         mwp.expectedCells == expectedCells
         mwp.enforcedCells == enforcedCells
+        mwp.referenceGenomeIndex == referenceGenomeIndex
         mwp.project == project
         mwp.seqType == seqType
         mwp.individual == individual
@@ -131,12 +187,58 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
 
         when:
         Errors errors = SpringSecurityUtils.doWithAuth(ADMIN) {
-            cellRangerConfigurationService.createMergingWorkPackage(1, null, project, null, null)
+            cellRangerConfigurationService.createMergingWorkPackage(1, null, referenceGenomeIndex, project, null, null, seqType)
         }
 
         then:
         !errors
-        CellRangerMergingWorkPackage.all.size() == 2
-        CellRangerMergingWorkPackage.all*.sample as Set == [sample, sample2] as Set
+        List<CellRangerMergingWorkPackage> all = CellRangerMergingWorkPackage.all
+        all.size() == 2
+        all*.sample as Set == [sampleA, sampleB] as Set
+    }
+
+    void "test createMergingWorkPackage, creates an mwp for each LibPrepKit-SeqPlatformGroup combination of the SeqTracks"() {
+        given:
+        setupData()
+        List<SeqTrack> seqTracks = setupMultipleSeqTracksOfDifferentSeqPlatformGroupsAndLibPrepKits()
+
+        when:
+        Errors errors = SpringSecurityUtils.doWithAuth(ADMIN) {
+            cellRangerConfigurationService.createMergingWorkPackage(1, null, referenceGenomeIndex, project, sampleA.individual, sampleA.sampleType, seqType)
+        }
+
+        then:
+        !errors
+        seqTracks.size() == 8
+        AssertionError e = thrown(AssertionError)
+        e.message =~ "Can not handle SeqTracks processed over multiple platforms or with different library preparation kits."
+
+        // TODO: when splitting of platforms and kits is implemented, this should be the expected behaviour:
+        /*
+        !errors
+        List<CellRangerMergingWorkPackage> all = CellRangerMergingWorkPackage.all
+        all.size() == 6
+        all*.sample.unique() == [sampleA]
+        (seqTracks + seqTrackA) as Set == all*.seqTracks.flatten() as Set
+        */
+    }
+
+    void "test createMergingWorkPackage, only considers SeqTracks of the given SeqType"() {
+        given:
+        setupData()
+
+        createSeqTrack(sample: sampleA)
+        createSeqTrack(sample: sampleA)
+        createSeqTrack(sample: sampleA)
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            cellRangerConfigurationService.createMergingWorkPackage(1, null, referenceGenomeIndex, project, sampleA.individual, sampleA.sampleType, seqType)
+        }
+
+        then:
+        List<CellRangerMergingWorkPackage> all = CellRangerMergingWorkPackage.all
+        all.size() == 1
+        all*.sample as Set == [sampleA] as Set
     }
 }

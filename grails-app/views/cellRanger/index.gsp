@@ -43,68 +43,89 @@
                               noSelection="${[(""): "All Sample Types"]}"/>
                     <g:select name="individual.id" from="${allIndividuals}" optionKey="id" value="${individual?.id}"
                               noSelection="${[(""): "All Individuals"]}"/>
-                    <g:submitButton name="Submit"/>
+                    <g:submitButton name="Select Samples"/>
                 </g:form>
             </p>
-
+            <br>
             <g:if test="${samples}">
+                <h3>${g.message(code: "cellRanger.header.create")}:</h3>
                 <g:form action="create">
-                    <h3>${g.message(code: "cellRanger.header.create")}:</h3>
+                    <input type="hidden" name="project.id" value="${project?.id}"/>
+                    <input type="hidden" name="sampleType.id" value="${sampleType?.id}"/>
+                    <input type="hidden" name="individual.id" value="${individual?.id}"/>
+
                     <div class="cell-ranger-creation-grid-wrapper">
-                        <input type="hidden" name="project.id" value="${project?.id}"/>
-                        <input type="hidden" name="sampleType.id" value="${sampleType?.id}"/>
-                        <input type="hidden" name="individual.id" value="${individual?.id}"/>
-                        <div>
-                            <strong>${g.message(code: "cellRanger.create.selectedSampleTypes")}:</strong>
-                            <ul class="scrollable">
-                                <g:each in="${selectedSampleTypes}" var="sampleType">
-                                    <li>${sampleType}</li>
-                                </g:each>
-                            </ul>
+                        <div class="row one">
+                            <div style="grid-column: 1">
+                                <strong>${g.message(code: "cellRanger.create.referenceGenomeIndex")}:</strong>
+                                <g:select name="referenceGenomeIndex.id" from="${referenceGenomeIndexes}" optionKey="id" noSelection="${[(""): "Select a reference genome index"]}"/>
+                            </div>
+
+                            <div style="grid-column: 2">
+                                <strong>${g.message(code: "cellRanger.create.seqType")}:</strong>
+                                <g:select name="seqType.id" from="${seqTypes}" optionKey="id"/>
+                            </div>
                         </div>
-                        <div>
-                            <strong>${g.message(code: "cellRanger.create.selectedIndividuals")}:</strong>
-                            <ul class="scrollable">
-                                <g:each in="${selectedIndividuals}" var="individual">
-                                    <li>${individual}</li>
-                                </g:each>
-                            </ul>
+                        <div class="row two">
+                            <div style="grid-column: 1">
+                                <strong>${g.message(code: "cellRanger.create.selectedSampleTypes")}:</strong>
+                                <ul class="scrollable">
+                                    <g:each in="${selectedSampleTypes}" var="sampleType">
+                                        <li>${sampleType}</li>
+                                    </g:each>
+                                </ul>
+                            </div>
+                            <div style="grid-column: 2">
+                                <strong>${g.message(code: "cellRanger.create.selectedIndividuals")}:</strong>
+                                <ul class="scrollable">
+                                    <g:each in="${selectedIndividuals}" var="individual">
+                                        <li>${individual}</li>
+                                    </g:each>
+                                </ul>
+                            </div>
+                            <div style="grid-column: 3">
+                                <strong>${g.message(code: "cellRanger.create.expectedOrEnforcedCells")}:</strong><br><br>
+                                <label>
+                                    <g:radio name="expectedOrEnforcedCells" value="expected" checked="true"/>
+                                    ${g.message(code: "cellRanger.expectedCells")}
+                                </label>
+                                <br>
+                                <label>
+                                    <g:radio name="expectedOrEnforcedCells" value="enforced"/>
+                                    ${g.message(code: "cellRanger.enforcedCells")}
+                                </label>
+                                <br><br>
+                                <label>
+                                    ${g.message(code: "cellRanger.value")}:<br>
+                                    <input name="expectedOrEnforcedCellsValue"/>
+                                </label>
+                            </div>
                         </div>
-                        <div>
-                            <strong>${g.message(code: "cellRanger.create.expectedOrEnforcedCells")}:</strong><br><br>
-                            <label>
-                                <g:radio name="expectedOrEnforcedCells" value="expected" checked="true"/>
-                                ${g.message(code: "cellRanger.expectedCells")}
-                            </label>
-                            <br>
-                            <label>
-                                <g:radio name="expectedOrEnforcedCells" value="enforced"/>
-                                ${g.message(code: "cellRanger.enforcedCells")}
-                            </label>
-                            <br><br>
-                            <label>
-                                ${g.message(code: "cellRanger.value")}:<br>
-                                <input name="expectedOrEnforcedCellsValue"/>
-                            </label>
-                        </div>
-                        <div>
-                            <g:submitButton name="Create"/>
+                        <div class="row three">
+                            <g:submitButton name="Execute CellRanger"/>
                         </div>
                     </div>
                 </g:form>
+                <br>
                 <h3>${g.message(code: "cellRanger.header.processes")}:</h3>
                 <table>
                     <tr>
-                        <th>${g.message(code: "cellRanger.sampleType")}</th>
                         <th>${g.message(code: "cellRanger.individual")}</th>
+                        <th>${g.message(code: "cellRanger.sampleType")}</th>
+                        <th>${g.message(code: "cellRanger.seqType")}</th>
+                        <th>${g.message(code: "cellRanger.referenceGenome")}</th>
+                        <th>${g.message(code: "cellRanger.referenceGenomeIndex")}</th>
                         <th>${g.message(code: "cellRanger.expectedCells")}</th>
                         <th>${g.message(code: "cellRanger.enforcedCells")}</th>
                         <th>${g.message(code: "cellRanger.processingStatus")}</th>
                     </tr>
                     <g:each in="${mwps}" var="mwp">
                         <tr>
-                            <td>${mwp.sampleType} (${mwp})</td>
                             <td>${mwp.individual}</td>
+                            <td>${mwp.sampleType}</td>
+                            <td>${mwp.seqType}</td>
+                            <td>${mwp.referenceGenome}</td>
+                            <td>${mwp.referenceGenomeIndex.toolWithVersion}</td>
                             <td>${mwp.expectedCells}</td>
                             <td>${mwp.enforcedCells}</td>
                             <td>${mwp.bamFileInProjectFolder ? mwp.bamFileInProjectFolder.fileOperationStatus : "N/A"}</td>

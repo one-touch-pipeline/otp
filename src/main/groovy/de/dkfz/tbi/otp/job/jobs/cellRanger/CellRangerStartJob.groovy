@@ -27,6 +27,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.job.jobs.RestartableStartJob
 import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
@@ -50,27 +51,26 @@ class CellRangerStartJob extends AbstractAlignmentStartJob implements Restartabl
             Set<SeqTrack> seqTracks,
             ConfigPerProjectAndSeqType config,
             AbstractMergedBamFile baseBamFile = null) {
-        new SingleCellBamFile(
-                workPackage: mergingWorkPackage,
-                identifier: identifier,
-                workDirectoryName: [
-                        "${mergingWorkPackage.referenceGenome.name}",
-                        "expectedCells_${mergingWorkPackage.expectedCells ?: '-'}",
-                        "forcedCells_${mergingWorkPackage.enforcedCells ?: '-'}",
-                        "programVersion_${mergingWorkPackage.config.programVersion.replace("/", "-")}",
-                ].join('_'),
-                seqTracks: seqTracks,
+        return new SingleCellBamFile(
+                workPackage        : mergingWorkPackage,
+                identifier         : identifier,
+                workDirectoryName  : SingleCellBamFile.buildWorkDirectoryName((CellRangerMergingWorkPackage) mergingWorkPackage, identifier),
+                seqTracks          : seqTracks,
                 fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.INPROGRESS,
         )
     }
 
     @Override
-    ConfigPerProjectAndSeqType getConfig(MergingWorkPackage mergingWorkPackage) {
+    ConfigPerProjectAndSeqType getConfig(MergingWorkPackage mwp) {
         CellRangerConfig config = CollectionUtils.<CellRangerConfig> atMostOneElement(
                 CellRangerConfig.findAllByProjectAndPipelineAndSeqTypeAndObsoleteDate(
-                        mergingWorkPackage.project, mergingWorkPackage.pipeline, mergingWorkPackage.seqType, null))
-        assert config: "Could not find one CellRangerConfig for ${mergingWorkPackage.project}, ${mergingWorkPackage.seqType} " +
-                "and ${mergingWorkPackage.pipeline}"
+                        mwp.project,
+                        mwp.pipeline,
+                        mwp.seqType,
+                        null,
+                )
+        )
+        assert config: "Could not find a ${CellRangerConfig.class.simpleName} for ${mwp.project}, ${mwp.seqType} and ${mwp.pipeline}"
         return config
     }
 

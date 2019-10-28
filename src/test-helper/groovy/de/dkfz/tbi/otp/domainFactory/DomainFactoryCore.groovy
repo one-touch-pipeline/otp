@@ -251,12 +251,16 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     }
 
     ReferenceGenomeIndex createReferenceGenomeIndex(Map properties = [:], boolean saveAndValidate = true) {
-        return createDomainObject(ReferenceGenomeIndex, [
-                referenceGenome : { createReferenceGenome() },
+        ReferenceGenome referenceGenome = properties.referenceGenome ?: createReferenceGenome()
+        ReferenceGenomeIndex referenceGenomeIndex = createDomainObject(ReferenceGenomeIndex, [
+                referenceGenome : referenceGenome,
                 toolName        : { createToolName() },
                 path            : "path_${nextId}",
                 indexToolVersion: "indexToolVersion_${nextId}",
         ], properties, saveAndValidate)
+        referenceGenome.addToReferenceGenomeIndexes(referenceGenomeIndex)
+        referenceGenome.save(flush: true)
+        return referenceGenomeIndex
     }
 
     SeqPlatform createSeqPlatformWithSeqPlatformGroup(Map properties = [:]) {

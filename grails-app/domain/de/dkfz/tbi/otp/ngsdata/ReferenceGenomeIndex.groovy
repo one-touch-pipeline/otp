@@ -46,6 +46,10 @@ class ReferenceGenomeIndex implements Entity {
 
     @Override
     String toString() {
-        return "${referenceGenome.name} ${toolName.name} ${indexToolVersion}"
+        return "${referenceGenome.name} ${toolWithVersion}"
+    }
+
+    String getToolWithVersion() {
+        return "${toolName.name} ${indexToolVersion}"
     }
 }

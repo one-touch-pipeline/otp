@@ -462,7 +462,6 @@
                 <tr>
                     <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.seqType')}</th>
                     <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.version')}</th>
-                    <th>${g.message(code: 'projectOverview.alignmentInformation.cellRanger.referenceGenomeIndex')}</th>
                 </tr>
                 <g:each in="${cellRangerOverview}" var="m">
                     <tr>
@@ -471,9 +470,6 @@
                         </td>
                         <td>
                             ${m.config?.programVersion ?: "Not configured"}
-                        </td>
-                        <td>
-                            ${m.config?.referenceGenomeIndex ?: "Not configured"}
                         </td>
                     </tr>
                 </g:each>

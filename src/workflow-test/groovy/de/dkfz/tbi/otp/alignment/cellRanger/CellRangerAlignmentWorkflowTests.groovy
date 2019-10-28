@@ -41,7 +41,6 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
     SeqType seqType
     CellRangerMergingWorkPackage mwp
 
-
     List<String> fastqFiles = [
             "fastqFiles/10x/normal/paired/pbmc_1k_v3_S1_L001_R1_001.fastq.gz",
             "fastqFiles/10x/normal/paired/pbmc_1k_v3_S1_L001_R2_001.fastq.gz",
@@ -59,32 +58,31 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
             seqType = createSeqType()
 
             ToolName toolName = createToolName(path: "cellranger")
-            ReferenceGenome referenceGenome = createReferenceGenome(path: "hg_GRCh38")
             ReferenceGenomeIndex referenceGenomeIndex = createReferenceGenomeIndex(
-                    toolName: toolName,
-                    path: "1.2.0",
-                    referenceGenome: referenceGenome,
+                    toolName        : toolName,
+                    path            : "1.2.0",
+                    referenceGenome : createReferenceGenome(path: "hg_GRCh38"),
                     indexToolVersion: "1.2.0",
             )
 
             ConfigPerProjectAndSeqType conf = createConfig(
-                    seqType: seqType,
-                    project: project,
-                    programVersion: "cellranger/3.0.1",
-                    referenceGenomeIndex: referenceGenomeIndex,
+                    seqType         : seqType,
+                    project         : project,
+                    programVersion  : "cellranger/3.0.1",
             )
 
             mwp = createMergingWorkPackage(
-                    needsProcessing: true,
-                    sample: sample,
-                    config: conf,
-                    expectedCells: 0, // modified in individual tests
-                    referenceGenome: referenceGenome,
+                    needsProcessing     : true,
+                    sample              : sample,
+                    config              : conf,
+                    expectedCells       : 0, // modified in individual tests
+                    referenceGenome     : referenceGenomeIndex.referenceGenome,
+                    referenceGenomeIndex: referenceGenomeIndex,
             )
 
             setUpRefGenomeDir(mwp, new File(referenceGenomeDirectory, 'hg_GRCh38'))
 
-            DomainFactory.createMergingCriteriaLazy(project: project, seqType: seqType)
+            createMergingCriteriaLazy(project: project, seqType: seqType)
 
             findOrCreatePipeline()
         }
@@ -92,9 +90,9 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
 
     SeqTrack createSeqTrack(String fastq1, String fastq2) {
         SeqTrack seqTrack = DomainFactory.createSeqTrackWithTwoDataFiles(mwp, [
-                seqType: seqType,
+                seqType              : seqType,
                 dataInstallationState: SeqTrack.DataProcessingState.FINISHED,
-                sample: sample,
+                sample               : sample,
         ], [:], [:])
 
         DataFile.findAllBySeqTrack(seqTrack).eachWithIndex { DataFile dataFile, int index ->
@@ -175,7 +173,7 @@ class CellRangerAlignmentWorkflowTests extends AbstractAlignmentWorkflowTest imp
         JsonOutput.toJson([
                 (JobSubmissionOption.WALLTIME): Duration.ofHours(3).toString(),
                 (JobSubmissionOption.MEMORY)  : "60g",
-                (JobSubmissionOption.CORES)  : "16",
+                (JobSubmissionOption.CORES)   : "16",
         ])
     }
 }

@@ -40,13 +40,20 @@ trait CellRangerFactory implements IsAlignment {
         Pipeline pipeline = properties.pipeline ?: findOrCreatePipeline()
         SeqType seqType = properties.seqType ?: createSeqType()
         Sample sample = properties.sample ?: createSample()
+        ReferenceGenomeIndex referenceGenomeIndex = properties.referenceGenomeIndex
+        if (!referenceGenomeIndex) {
+            ReferenceGenome referenceGenome = properties.referenceGenome ?: createReferenceGenome()
+            referenceGenomeIndex = createReferenceGenomeIndex(referenceGenome: referenceGenome)
+        }
         return createDomainObject(CellRangerMergingWorkPackage, baseMergingWorkPackageProperties(properties) + [
-                seqType      : seqType,
-                pipeline     : pipeline,
-                sample       : sample,
-                expectedCells: 5000,
-                enforcedCells: null,
-                config       : {
+                pipeline            : pipeline,
+                seqType             : seqType,
+                sample              : sample,
+                expectedCells       : 5000,
+                enforcedCells       : null,
+                referenceGenome     : referenceGenomeIndex.referenceGenome,
+                referenceGenomeIndex: referenceGenomeIndex,
+                config              : {
                     findOrCreateConfig([
                             pipeline: pipeline,
                             seqType : seqType,
@@ -62,9 +69,9 @@ trait CellRangerFactory implements IsAlignment {
         if (!workPackage) {
             workPackage = createMergingWorkPackage()
             DomainFactory.createReferenceGenomeProjectSeqType(
-                    referenceGenome: workPackage.referenceGenome,
-                    project: workPackage.project,
-                    seqType: workPackage.seqType,
+                    referenceGenome : workPackage.referenceGenome,
+                    project         : workPackage.project,
+                    seqType         : workPackage.seqType,
                     statSizeFileName: workPackage.statSizeFileName,
             )
         }
@@ -102,7 +109,6 @@ trait CellRangerFactory implements IsAlignment {
                 programVersion      : "programmVersion${nextId}",
                 dateCreated         : { new Date() },
                 lastUpdated         : { new Date() },
-                referenceGenomeIndex: createReferenceGenomeIndex(),
         ]
     }
 
@@ -189,8 +195,7 @@ trait CellRangerFactory implements IsAlignment {
 
     CellRangerConfig createCellRangerConfig(Map proper) {
         return createDomainObject(CellRangerConfig, [
-                programVersion:  "${nextId}",
-                referenceGenomeIndex: { createReferenceGenomeIndex() },
+                programVersion: "${nextId}",
         ] + proper, [:])
     }
 

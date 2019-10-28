@@ -32,7 +32,7 @@
     <g:render template="/templates/messages"/>
     <br><g:link controller="projectConfig">Back to Overview</g:link><br><br>
 
-    <h1 style="display: inline"><g:message code="configurePipeline.cellRanger.title" args="[project.name, seqType.displayName]"/></h1>
+    <h1><g:message code="configurePipeline.cellRanger.title" args="[project.name, seqType.displayName]"/></h1>
     <g:form action="update" params='["project.id": project.id, "seqType.id": seqType.id]'>
         <table class="pipelineTable">
             <tr>
@@ -46,13 +46,6 @@
                 <td><g:select name="programVersion" value="${defaultVersion}" from="${availableVersions}" noSelection="${["": "Select version"]}"/></td>
                 <td>${defaultVersion}</td>
                 <td><g:message code="configurePipeline.cellRanger.info"/></td>
-
-            </tr>
-            <tr>
-                <td class="myKey"><g:message code="configurePipeline.referenceGenomeIndex"/></td>
-                <td><g:select name="referenceGenomeIndex.id" value="${referenceGenomeIndex?.id}" from="${referenceGenomeIndexes}" optionKey='id' noSelection="${["": "Select Reference Genome Index"]}"/></td>
-                <td></td>
-                <td>&nbsp;</td>
             </tr>
             <tr>
                 <td colspan="4">&nbsp;</td>

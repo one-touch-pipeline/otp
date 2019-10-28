@@ -40,8 +40,7 @@ class MergingCriteriaService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Errors createOrUpdateMergingCriteria(
-            Project project, SeqType seqType, boolean useLibPrepKit, MergingCriteria.SpecificSeqPlatformGroups useSeqPlatformGroups) {
+    Errors createOrUpdateMergingCriteria(Project project, SeqType seqType, boolean useLibPrepKit, MergingCriteria.SpecificSeqPlatformGroups useSeqPlatformGroups) {
         MergingCriteria mergingCriteria = MergingCriteria.findOrCreateWhere(project: project, seqType: seqType)
         mergingCriteria.useLibPrepKit = useLibPrepKit
         mergingCriteria.useSeqPlatformGroup = useSeqPlatformGroups

@@ -136,7 +136,7 @@ class CellRangerService {
 
         CellRangerMergingWorkPackage workPackage = singleCellBamFile.workPackage
 
-        ReferenceGenomeIndex referenceGenomeIndex = workPackage.config.referenceGenomeIndex
+        ReferenceGenomeIndex referenceGenomeIndex = workPackage.referenceGenomeIndex
 
         File indexFile = referenceGenomeIndexService.getFile(referenceGenomeIndex)
 

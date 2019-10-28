@@ -22,26 +22,34 @@
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class CellRangerMergingWorkPackage extends MergingWorkPackage {
 
     Integer expectedCells
     Integer enforcedCells
+    ReferenceGenomeIndex referenceGenomeIndex
     CellRangerConfig config
 
     private final static MUTUAL_EXCLUSIVITY_ERROR = "expectedCells and enforcedCells are mutually exclusive"
+    private final static REFERENCE_GENOME_SYNCH_ERROR = "referenceGenome and referenceGenomeIndex.referenceGenome have to be the same"
 
     static constraints = {
         sample(validator: { val, obj ->
+            Map properties = [
+                sample               : val,
+                seqType              : obj.seqType,
+                expectedCells        : obj.expectedCells,
+                enforcedCells        : obj.enforcedCells,
+                referenceGenomeIndex : obj.referenceGenomeIndex,
+            ]
+            String uniqueCombinationError = "the combination of " + properties.collect { k, v -> "${k}: ${v}" }.join(", ") + " must be unique"
             CellRangerMergingWorkPackage cellRangerMergingWorkPackage = CollectionUtils.atMostOneElement(
-                    CellRangerMergingWorkPackage.findAllBySampleAndSeqTypeAndExpectedCellsAndEnforcedCells(
-                            val, obj.seqType, obj.expectedCells, obj.enforcedCells),
-                    "More than one MWP exists for sample ${val}, " +
-                            "seqType ${obj.seqType}, " +
-                            "expectedCells ${obj.expectedCells} and enforcedCells ${obj.enforcedCells}")
+                    findAllWhere(properties), "Found more than one ${CellRangerMergingWorkPackage.simpleName} but " + uniqueCombinationError
+            )
             if (cellRangerMergingWorkPackage && cellRangerMergingWorkPackage.id != obj.id) {
-                return "The CellRangerMergingWorkPackage must be unique for one sample and seqType, expectedCells and enforcedCells"
+                return uniqueCombinationError
             }
         })
         expectedCells(nullable: true, validator: { val, obj ->
@@ -54,11 +62,16 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
                 return MUTUAL_EXCLUSIVITY_ERROR
             }
         })
+        referenceGenomeIndex(validator: { val, obj ->
+            if (val.referenceGenome != obj.referenceGenome) {
+                return REFERENCE_GENOME_SYNCH_ERROR
+            }
+        })
         config(nullable: true)
     }
 
     @Override
     String toString() {
-        return "CRMWP ${id}: ${toStringWithoutIdAndPipeline()} ${pipeline?.name}"
+        return "CRMWP ${id}: ${toStringWithoutIdAndPipeline()} ${pipeline?.name} ${referenceGenomeIndex}"
     }
 }

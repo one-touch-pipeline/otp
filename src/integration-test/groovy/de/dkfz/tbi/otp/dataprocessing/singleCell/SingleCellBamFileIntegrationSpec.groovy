@@ -25,6 +25,7 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 
@@ -41,5 +42,18 @@ class SingleCellBamFileIntegrationSpec extends Specification implements CellRang
 
         then:
         expected == singleCellBamFile.overallQualityAssessment
+    }
+
+    void "test buildWorkDirectoryName"() {
+        given:
+        CellRangerMergingWorkPackage workPackage = createMergingWorkPackage(
+                expectedCells: 5000,
+        )
+        String TV = workPackage.referenceGenomeIndex.getToolWithVersion().replace(" ", "-")
+        String PV = workPackage.config.programVersion.replace("/", "-")
+        int ID = 123
+
+        expect:
+        SingleCellBamFile.buildWorkDirectoryName(workPackage, ID) ==~ /^RG_\S+_TV_${TV}_EC_5000_FC_-_PV_${PV}_ID_${ID}$/
     }
 }
