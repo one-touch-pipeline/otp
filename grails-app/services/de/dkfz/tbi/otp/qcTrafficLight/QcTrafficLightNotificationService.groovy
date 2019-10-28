@@ -52,8 +52,7 @@ class QcTrafficLightNotificationService {
         String ticketNumber = ""
         OtrsTicket ticket = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).last()
         if (ticket) {
-            String prefix = processingOptionService.findOptionAsString(TICKET_SYSTEM_NUMBER_PREFIX)
-            ticketNumber = "${prefix}#${ticket.ticketNumber} "
+            ticketNumber = "${ticket.prefixedTicketNumber} "
         }
         List ilseSubmissions = bamFile.containedSeqTracks*.ilseSubmission.findAll().unique()
         if (ilseSubmissions) {

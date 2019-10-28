@@ -48,13 +48,13 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
         ]
     }
 
-    private final static String PREFIX = "the prefix"
-
     private NotificationCreator notificationCreator = new NotificationCreator()
 
     void setup() {
         notificationCreator.processingOptionService = new ProcessingOptionService()
         notificationCreator.userProjectRoleService = new UserProjectRoleService()
+
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix("TICKET_PREFIX")
     }
 
     @Unroll
@@ -166,7 +166,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
             @Override
             void sendEmail(String emailSubject, String content, List<String> recipient) {
                 callCount++
-                assert "${PREFIX}#${ticket.ticketNumber} Processing Status Update".toString() == emailSubject
+                assert "${ticket.prefixedTicketNumber} Processing Status Update".toString() == emailSubject
                 assert [notificationRecipient] == recipient
                 assert expectedContent == content
             }
@@ -186,7 +186,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
         String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
         notificationCreator.mailHelperService = Mock(MailHelperService) {
-            1 * sendEmail("${PREFIX}#${ticket.ticketNumber} Final Processing Status Update", _, [recipient])
+            1 * sendEmail("${ticket.prefixedTicketNumber} Final Processing Status Update", _, [recipient])
         }
 
         expect:
@@ -239,7 +239,6 @@ ILSe 5678, runA, lane 1, ${sampleText}
         notificationCreator.sendOperatorNotification(ticket, [seqTrack1, seqTrack2, seqTrack3] as Set, new ProcessingStatus(), true)
     }
 
-
     void "getProcessingStatus returns expected status"() {
         given:
         SeqTrack seqTrack1 = createSeqTrack([dataInstallationState: st1State])
@@ -272,7 +271,6 @@ ILSe 5678, runA, lane 1, ${sampleText}
         SeqTrack.DataProcessingState.NOT_STARTED | SeqTrack.DataProcessingState.UNKNOWN     || NOTHING_DONE_MIGHT_DO
         SeqTrack.DataProcessingState.UNKNOWN     | SeqTrack.DataProcessingState.UNKNOWN     || NOTHING_DONE_MIGHT_DO
     }
-
 
     @Unroll
     void "CombineStatuses, when input is #input1 and #input2, then result is #result"() {
@@ -307,7 +305,6 @@ ILSe 5678, runA, lane 1, ${sampleText}
         PARTLY_DONE_MIGHT_DO_MORE | ALL_DONE                  || PARTLY_DONE_MIGHT_DO_MORE
         ALL_DONE                  | ALL_DONE                  || ALL_DONE
     }
-
 
     private SeqTrack createSeqTrackforCustomFinalNotification(Project project, IlseSubmission ilseSubmission, OtrsTicket ticket) {
         SeqTrack seqTrack = createSeqTrackWithOneDataFile(

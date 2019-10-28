@@ -202,6 +202,10 @@ class OtrsTicket implements Commentable, Entity {
         }
     }
 
+    String getPrefixedTicketNumber() {
+        return "${ProcessingOptionService.findOption(ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX).value}#${ticketNumber}"
+    }
+
     String getUrl() {
         return "${ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.TICKET_SYSTEM_URL, null, null)}" +
                 "/index.pl?Action=AgentTicketZoom;TicketNumber=${ticketNumber}"

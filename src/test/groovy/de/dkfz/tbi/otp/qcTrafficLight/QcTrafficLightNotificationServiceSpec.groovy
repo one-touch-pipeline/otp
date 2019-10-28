@@ -85,7 +85,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         bamFile.project.save(flush: true)
 
         String emailSenderSalutation = DomainFactory.createProcessingOptionForEmailSenderSalutation().value
-        String prefix = DomainFactory.createProcessingOptionForOtrsTicketPrefix().value
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix()
         DomainFactory.createProcessingOptionForNotificationRecipient()
         Set<OtrsTicket> otrsTickets = [
                 DomainFactory.createOtrsTicket([
@@ -113,7 +113,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
             1 * createMessage('notification.template.alignment.qcTrafficBlockedSubject', _) >> { String templateName, Map properties ->
                 assert properties.size() == 3
                 assert properties['bamFile'] == bamFile
-                assert properties['ticketNumber'] == "${prefix}#${otrsTickets.last().ticketNumber} "
+                assert properties['ticketNumber'] == "${otrsTickets.last().prefixedTicketNumber} "
                 assert properties['ilse'] == ilseNumbers
                 return HEADER
             }
