@@ -32,7 +32,7 @@
     <h3>${g.message(code: "metadataImport.details.multiFiles.headline")}</h3>
     <ul>
     <g:each var="metaDataFile" in="${metaDataFiles}" >
-        <li><g:link action="details" id="${metaDataFile.runSegment.id}">${metaDataFile.filePath}/${metaDataFile.fileName}</g:link></li>
+        <li><g:link action="details" id="${metaDataFile.runSegment.id}">${metaDataFile.fullPath}</g:link></li>
     </g:each>
     </ul>
 </div>

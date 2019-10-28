@@ -94,7 +94,7 @@
     <ul>
         <g:each in="${data.metaDataFiles}" var="metaDataFile">
             <li>
-                ${metaDataFile.filePath}/${metaDataFile.fileName}<br>
+                ${metaDataFile.fullPath}<br>
                 ${g.message(code: "metadataImport.details.dateCreated")} ${new DateTime(metaDataFile.dateCreated).toString("yyyy-MM-dd HH:mm:ss ZZ")}${metaDataFile.md5sum ? ", ${g.message(code: "metadataImport.details.md5")} ${metaDataFile.md5sum}" : ""}
             </li>
         </g:each>

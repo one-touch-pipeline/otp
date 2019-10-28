@@ -50,4 +50,8 @@ class MetaDataFile implements Entity {
     static mapping = {
         runSegment index: "meta_data_file_run_segment_idx"
     }
+
+    String getFullPath() {
+        return "${filePath}/${fileName}"
+    }
 }
