@@ -185,4 +185,12 @@ class OtrsTicketService {
 
         assert newOtrsTicket.save(flush: true)
     }
+
+    List<MetaDataFile> getMetaDataFilesOfOtrsTicket(OtrsTicket otrsTicket) {
+        return MetaDataFile.createCriteria().list {
+            runSegment {
+                eq("otrsTicket", otrsTicket)
+            }
+        } as List<MetaDataFile>
+    }
 }

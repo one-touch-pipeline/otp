@@ -242,6 +242,10 @@ class DataFile implements Commentable, Entity {
         return length
     }
 
+    String getFullInitialPath() {
+        return "${initialDirectory}/${fileName}"
+    }
+
     @Override
     Project getProject() {
         return this.project

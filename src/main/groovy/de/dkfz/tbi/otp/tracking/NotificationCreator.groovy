@@ -40,8 +40,8 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
+import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.NOTHING
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.Done.PARTLY
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
@@ -112,13 +112,13 @@ class NotificationCreator {
         }
         Set<SeqTrack> seqTracks = ticket.findAllSeqTracks()
         ProcessingStatus status = getProcessingStatus(seqTracks, samplePairCreation)
-        boolean anyProcessingStepJustCompleted = false
+        List<OtrsTicket.ProcessingStep> justCompletedProcessingSteps = []
         boolean mightDoMore = false
         for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
             WorkflowProcessingStatus stepStatus = status."${step}ProcessingStatus"
             boolean previousStepFinished = step.dependsOn ? (ticket."${step.dependsOn}Finished" != null) : true
             if (ticket."${step}Finished" == null && stepStatus.done != NOTHING && !stepStatus.mightDoMore && previousStepFinished) {
-                anyProcessingStepJustCompleted = true
+                justCompletedProcessingSteps.add(step)
                 if (otrsTicketService.saveEndTimeIfNeeded(ticket, step)) {
                     sendCustomerNotification(ticket, status, step)
                     LogThreadLocal.getThreadLog()?.info("sent customer notification for OTRS Ticket ${ticket.ticketNumber}: ${step}")
@@ -128,12 +128,16 @@ class NotificationCreator {
                 mightDoMore = true
             }
         }
-        if (anyProcessingStepJustCompleted) {
-            LogThreadLocal.getThreadLog()?.debug("inside if anythingJustCompleted, sending operator notification")
-            sendOperatorNotification(ticket, seqTracks, status, !mightDoMore)
+        if (justCompletedProcessingSteps) {
+            LogThreadLocal.getThreadLog()?.debug("inside if justCompletedProcessingSteps ${justCompletedProcessingSteps}, sending operator notification")
+            sendProcessingStatusOperatorNotification(ticket, seqTracks, status, !mightDoMore)
             if (!mightDoMore) {
                 LogThreadLocal.getThreadLog()?.debug("!mightDoMore: marking as finalNotificationSent")
                 otrsTicketService.markFinalNotificationSent(ticket)
+            }
+            if (justCompletedProcessingSteps.contains(OtrsTicket.ProcessingStep.INSTALLATION)) {
+                LogThreadLocal.getThreadLog()?.debug("installation just completed")
+                sendImportSourceOperatorNotification(ticket)
             }
         }
     }
@@ -159,7 +163,7 @@ class NotificationCreator {
             if (ticket.automaticNotification && project.processingNotification) {
                 recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(project)
             }
-            StringBuilder subject = new StringBuilder("[${processingOptionService.findOptionAsString(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}] ")
+            StringBuilder subject = new StringBuilder("[${ticket.prefixedTicketNumber}] ")
             if (!recipients) {
                 subject.append('TO BE SENT: ')
             }
@@ -179,34 +183,32 @@ class NotificationCreator {
         }
     }
 
-    void sendOperatorNotification(OtrsTicket ticket, Set<SeqTrack> seqTracks, ProcessingStatus status, boolean finalNotification) {
+    void sendProcessingStatusOperatorNotification(OtrsTicket ticket, Set<SeqTrack> seqTracks, ProcessingStatus status, boolean finalNotification) {
         StringBuilder subject = new StringBuilder()
 
-        String prefix = processingOptionService.findOptionAsString(TICKET_SYSTEM_NUMBER_PREFIX)
-        subject.append("$prefix#").append(ticket.ticketNumber)
+        subject.append(ticket.prefixedTicketNumber)
         if (finalNotification) {
             subject.append(' Final')
         }
         subject.append(' Processing Status Update')
 
-        List<String> recipients = []
+        List<String> recipients = [processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)]
 
-        List projects = seqTracks*.project.unique()
+        List<Project> projects = seqTracks*.project.unique()
 
         if (finalNotification && projects.size() == 1 && projects.first().customFinalNotification) {
-            List ilseSubmissions = seqTracks*.ilseSubmission.findAll().unique()
+            List<IlseSubmission> ilseSubmissions = seqTracks*.ilseSubmission.findAll().unique()
             if (ilseSubmissions) {
                 subject.append(" [S#${ilseSubmissions*.ilseNumber.sort().join(',')}]")
             }
-            List individuals = seqTracks*.individual.findAll().unique()
+            List<Individual> individuals = seqTracks*.individual.findAll().unique()
             subject.append(" ${individuals*.pid.sort().join(', ')} ")
-            List seqTypes = seqTracks*.seqType.findAll().unique()
+            List<SeqType> seqTypes = seqTracks*.seqType.findAll().unique()
             subject.append("(${seqTypes*.displayName.sort().join(', ')})")
             if (ticket.automaticNotification) {
-                recipients = userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(projects)
+                recipients.addAll(userProjectRoleService.getEmailsOfToBeNotifiedProjectUsers(projects))
             }
         }
-        recipients << processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)
 
         StringBuilder content = new StringBuilder()
         content.append(status.toString())
@@ -216,6 +218,50 @@ class NotificationCreator {
             content.append('\n')
         }
         mailHelperService.sendEmail(subject.toString(), content.toString(), recipients)
+    }
+
+    void sendImportSourceOperatorNotification(OtrsTicket ticket) {
+        List<String> recipients = [processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)]
+
+        String prefixedTicketNumber = ticket.prefixedTicketNumber
+        String subject = "Import source ready for deletion [${prefixedTicketNumber}]"
+
+        String content = """\
+                |Related Ticket: ${prefixedTicketNumber}
+                |${ticket.url}
+                |
+                |Deletion Script:
+                |
+                |#!/bin/bash
+                |
+                |set -e
+                |""".stripMargin()
+
+        List<String> pathsToDelete = getPathsToDelete(ticket)
+        content += pathsToDelete.collect { "rm ${it}" }.join("\n")
+
+        if (pathsToDelete) {
+            mailHelperService.sendEmail(subject, content, recipients)
+        }
+    }
+
+    private List<String> getPathsToDelete(OtrsTicket otrsTicket) {
+        List<String> allPaths = []
+        otrsTicketService.getMetaDataFilesOfOtrsTicket(otrsTicket).each { MetaDataFile metaDataFile ->
+            allPaths << metaDataFile.fullPath
+            List<String> dataFilePaths = metaDataFile.runSegment.dataFiles.collect { DataFile dataFile ->
+                dataFile.fullInitialPath
+            }
+            allPaths.addAll(dataFilePaths)
+        }
+        return getPrefixBlacklistFilteredStrings(allPaths)
+    }
+
+    private List<String> getPrefixBlacklistFilteredStrings(List<String> strings) {
+        List<String> blacklist = processingOptionService.findOptionAsList(BLACKLIST_IMPORT_SOURCE_NOTIFICATION)
+        return strings.findAll { String path ->
+            blacklist.every { it == "" || !path.startsWith(it) }
+        }
     }
 
     void appendSeqTrackString(StringBuilder sb, SeqTrack seqTrack) {

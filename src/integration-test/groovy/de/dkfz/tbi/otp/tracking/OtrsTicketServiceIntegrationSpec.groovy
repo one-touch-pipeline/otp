@@ -320,4 +320,24 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
         null == newOtrsTicket.snvStarted
         null == newOtrsTicket.snvFinished
     }
+
+    void "getMetaDataFilesOfOtrsTicket, returns all MetaDataFiles associated with the ticket"() {
+        given:
+        OtrsTicket otrsTicket = createOtrsTicket()
+        RunSegment runSegment = createRunSegment(otrsTicket: otrsTicket)
+        List<MetaDataFile> expected = [
+                DomainFactory.createMetaDataFile(runSegment: runSegment),
+                DomainFactory.createMetaDataFile(runSegment: runSegment),
+                DomainFactory.createMetaDataFile(runSegment: runSegment),
+        ]
+
+        RunSegment otherRunSegment = createRunSegment()
+        DomainFactory.createMetaDataFile(runSegment: otherRunSegment)
+
+        when:
+        List<MetaDataFile> result = otrsTicketService.getMetaDataFilesOfOtrsTicket(otrsTicket).sort { it.id }
+
+        then:
+        expected == result
+    }
 }

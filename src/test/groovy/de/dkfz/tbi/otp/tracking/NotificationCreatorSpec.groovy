@@ -43,6 +43,7 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
                 DataFile,
                 ProcessingOption,
                 OtrsTicket,
+                MetaDataFile,
                 SeqTrack,
                 UserProjectRole,
         ]
@@ -53,6 +54,7 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
     void setup() {
         notificationCreator.processingOptionService = new ProcessingOptionService()
         notificationCreator.userProjectRoleService = new UserProjectRoleService()
+        notificationCreator.otrsTicketService = new OtrsTicketService()
 
         DomainFactory.createProcessingOptionForOtrsTicketPrefix("TICKET_PREFIX")
     }
@@ -108,10 +110,9 @@ class NotificationCreatorSpec extends Specification implements DataTest, DomainF
         step << OtrsTicket.ProcessingStep.values()
     }
 
-    void 'sendOperatorNotification, when finalNotification is false, sends normal notification with correct subject and content'() {
+    void 'sendProcessingStatusOperatorNotification, when finalNotification is false, sends normal notification with correct subject and content'() {
         given:
         OtrsTicket ticket = createOtrsTicket()
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
         ProcessingStatus status = [
                 getInstallationProcessingStatus: { -> ALL_DONE },
                 getFastqcProcessingStatus      : { -> PARTLY_DONE_MIGHT_DO_MORE },
@@ -173,16 +174,15 @@ ILSe 5678, runA, lane 1, ${sampleText}
         }
 
         when:
-        notificationCreator.sendOperatorNotification(ticket, seqTracks, status, false)
+        notificationCreator.sendProcessingStatusOperatorNotification(ticket, seqTracks, status, false)
 
         then:
         callCount == 1
     }
 
-    void 'sendOperatorNotification, when finalNotification is true, sends final notification with correct subject'() {
+    void 'sendProcessingStatusOperatorNotification, when finalNotification is true, sends final notification with correct subject'() {
         given:
         OtrsTicket ticket = createOtrsTicket()
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
         String recipient = HelperUtils.randomEmail
         DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
         notificationCreator.mailHelperService = Mock(MailHelperService) {
@@ -190,53 +190,46 @@ ILSe 5678, runA, lane 1, ${sampleText}
         }
 
         expect:
-        notificationCreator.sendOperatorNotification(ticket, [createSeqTrack()] as Set, new ProcessingStatus(), true)
+        notificationCreator.sendProcessingStatusOperatorNotification(ticket, [createSeqTrack()] as Set, new ProcessingStatus(), true)
     }
 
-    void 'sendOperatorNotification, when finalNotification is true and project.customFinalNotification is true and has an Ilse Number, sends final notification with correct subject'() {
+    void 'sendProcessingStatusOperatorNotification, when finalNotification is true and project.customFinalNotification is true and has an Ilse Number, sends final notification with correct subject'() {
         given:
         OtrsTicket ticket = createOtrsTicket()
         SeqTrack seqTrack = createSeqTrackforCustomFinalNotification(createProject(), createIlseSubmission(), ticket)
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
-        String recipient = HelperUtils.randomEmail
-        DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
-        String expectedHeader = "${PREFIX}#${ticket.ticketNumber} Final Processing Status Update [S#${seqTrack.ilseId}] ${seqTrack.individual.pid} " +
+        String recipient = DomainFactory.createProcessingOptionForNotificationRecipient(HelperUtils.randomEmail).value
+        String expectedHeader = "${ticket.prefixedTicketNumber} Final Processing Status Update [S#${seqTrack.ilseId}] ${seqTrack.individual.pid} " +
                 "(${seqTrack.seqType.displayName})"
         notificationCreator.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail(expectedHeader, _, [recipient])
         }
 
         expect:
-        notificationCreator.sendOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
+        notificationCreator.sendProcessingStatusOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
     }
 
-    void 'sendOperatorNotification, when finalNotification is true and project.customFinalNotification is true for multiple seqTracks, sends final notification with correct subject'() {
+    void 'sendProcessingStatusOperatorNotification, when finalNotification is true and project.customFinalNotification is true for multiple seqTracks, sends final notification with correct subject'() {
         given:
         OtrsTicket ticket = createOtrsTicket()
         Project project = createProject()
-        SeqTrack seqTrack1 = createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket)
-        SeqTrack seqTrack2 = createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket)
-        SeqTrack seqTrack3 = createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket)
         List<SeqTrack> seqTracks = [
-                seqTrack1,
-                seqTrack2,
-                seqTrack3,
+                createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket),
+                createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket),
+                createSeqTrackforCustomFinalNotification(project, createIlseSubmission(), ticket),
         ]
 
-        DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
-        String recipient = HelperUtils.randomEmail
-        DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
+        String recipient = DomainFactory.createProcessingOptionForNotificationRecipient(HelperUtils.randomEmail).value
         String ilseString = seqTracks*.ilseId.sort().join(',')
         String pidString = seqTracks*.individual*.pid.sort().join(', ')
         String seqTypeStringString = seqTracks*.seqType*.displayName.sort().join(', ')
-        String expectedHeader = "${PREFIX}#${ticket.ticketNumber} Final Processing Status Update [S#${ilseString}] ${pidString} (${seqTypeStringString})"
+        String expectedHeader = "${ticket.prefixedTicketNumber} Final Processing Status Update [S#${ilseString}] ${pidString} (${seqTypeStringString})"
 
         notificationCreator.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail(expectedHeader, _, [recipient])
         }
 
         expect:
-        notificationCreator.sendOperatorNotification(ticket, [seqTrack1, seqTrack2, seqTrack3] as Set, new ProcessingStatus(), true)
+        notificationCreator.sendProcessingStatusOperatorNotification(ticket, seqTracks as Set, new ProcessingStatus(), true)
     }
 
     void "getProcessingStatus returns expected status"() {
@@ -322,4 +315,29 @@ ILSe 5678, runA, lane 1, ${sampleText}
         return seqTrack
     }
 
+    ProcessingOption setupBlacklistImportSourceNotificationProcessingOption(String blacklist) {
+        return DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION,
+                type: null,
+                project: null,
+                value: blacklist,
+        )
+    }
+
+    @Unroll
+    void "getPrefixBlacklistFilteredStrings properly filters out Strings that are listed in the blacklist"() {
+        when:
+        setupBlacklistImportSourceNotificationProcessingOption(blacklist)
+        List<String> result = notificationCreator.getPrefixBlacklistFilteredStrings(strings)
+
+        then:
+        result == expected
+
+        where:
+        strings                                       | blacklist       | expected
+        ["/data/t1", "/data/t2", "/data/t3"]          | ""              | ["/data/t1", "/data/t2", "/data/t3"]
+        ["/data/t1", "/data/t2", "/filtered/t3"]      | "/filtered"     | ["/data/t1", "/data/t2"]
+        ["/data/t1", "/filtered/no", "/filtered/yes"] | "/filtered/yes" | ["/data/t1", "/filtered/no"]
+        ["/data/t1", "/filtered/no", "/filtered/yes"] | "/filt"         | ["/data/t1"]
+    }
 }

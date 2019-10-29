@@ -139,9 +139,13 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     }
 
     RunSegment createRunSegment(Map properties = [:]) {
-        return createDomainObject(RunSegment, [
+        RunSegment runSegment = createDomainObject(RunSegment, [
                 importMode: RunSegment.ImportMode.AUTOMATIC,
         ], properties)
+        properties.dataFiles.each { DataFile dataFile ->
+            runSegment.addToDataFiles(dataFile)
+        }
+        return runSegment
     }
 
     FileType createFileType(Map properties = [:]) {

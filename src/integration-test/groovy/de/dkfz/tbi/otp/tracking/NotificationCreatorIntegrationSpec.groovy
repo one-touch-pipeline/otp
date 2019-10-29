@@ -56,7 +56,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
     List<ProcessingOption> referenceGenomeProcessingOptions
 
     final static String EMAIL = HelperUtils.getRandomEmail()
-    final static String PREFIX = "the prefix"
+    final static String PREFIX = "TICKET_PREFIX"
 
     static List listPairAnalysis = [
             [
@@ -1601,7 +1601,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
     }
 
-
     SeqTrack createSeqTrack(Sample sample, SeqType seqType, SeqPlatformGroup groupA) {
         SeqTrack seqTrackA = createSeqTrackWithOneDataFile([
                 sample : sample,
@@ -1615,7 +1614,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         return seqTrackA
     }
 
-    void 'sendOperatorNotification, when finalNotification is true and project.customFinalNotification is true and no Ilse, sends final notification with correct subject and to project list'() {
+    void 'sendProcessingStatusOperatorNotification, when finalNotification is true and project.customFinalNotification is true and no Ilse, sends final notification with correct subject and to project list'() {
         given:
         setupData()
 
@@ -1637,17 +1636,192 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                     ],
                     [runSegment: createRunSegment(otrsTicket: ticket), fileLinked: true])
             DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
-            String recipient = HelperUtils.randomEmail
-            DomainFactory.createProcessingOptionForNotificationRecipient(recipient)
-            String expectedHeader = "${PREFIX}#${ticket.ticketNumber} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})"
+            String recipient = DomainFactory.createProcessingOptionForNotificationRecipient(HelperUtils.randomEmail).value
+            String expectedHeader = "${ticket.prefixedTicketNumber} Final Processing Status Update ${seqTrack.individual.pid} (${seqTrack.seqType.displayName})"
             notificationCreator.mailHelperService = Mock(MailHelperService) {
-                1 * sendEmail(expectedHeader, _, [userProjectRole.user.email, recipient])
+                1 * sendEmail(expectedHeader, _, [recipient, userProjectRole.user.email])
             }
         }
 
         expect:
         SessionUtils.withNewSession {
-            notificationCreator.sendOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
+            notificationCreator.sendProcessingStatusOperatorNotification(ticket, [seqTrack] as Set, new ProcessingStatus(), true)
+            return true
+        }
+    }
+
+    ProcessingOption setupBlacklistImportSourceNotificationProcessingOption(String blacklist) {
+        return DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.BLACKLIST_IMPORT_SOURCE_NOTIFICATION,
+                type: null,
+                project: null,
+                value: blacklist,
+        )
+    }
+
+    void "sendImportSourceOperatorNotification, no blacklisted paths"() {
+        given:
+        setupData()
+
+        OtrsTicket otrsTicket
+
+        SessionUtils.withNewSession {
+            DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
+            setupBlacklistImportSourceNotificationProcessingOption("")
+
+            otrsTicket = createOtrsTicket()
+
+            DataFile dataFile = createDataFile()
+            RunSegment runSegment = createRunSegment(otrsTicket: otrsTicket, dataFiles: [dataFile])
+
+            MetaDataFile metaDataFile = DomainFactory.createMetaDataFile(runSegment: runSegment)
+
+            String expectedHeader = "Import source ready for deletion [${otrsTicket.prefixedTicketNumber}]"
+
+            String expectedEnd = [
+                    metaDataFile.fullPath,
+                    dataFile.fullInitialPath,
+            ].collect { "rm ${it}" }.join("\n")
+
+            String recipient = DomainFactory.createProcessingOptionForNotificationRecipient(HelperUtils.randomEmail).value
+
+            notificationCreator.mailHelperService = Mock(MailHelperService) {
+                1 * sendEmail(expectedHeader, { it.endsWith(expectedEnd) }, [recipient])
+            }
+        }
+
+        expect:
+        SessionUtils.withNewSession {
+            notificationCreator.sendImportSourceOperatorNotification(otrsTicket)
+            return true
+        }
+    }
+
+    void "sendImportSourceOperatorNotification, does not send a mail when all paths are filtered out"() {
+        given:
+        setupData()
+
+        OtrsTicket otrsTicket
+
+        SessionUtils.withNewSession {
+            DomainFactory.createProcessingOptionForOtrsTicketPrefix(PREFIX)
+
+            String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
+            otrsTicket = createOtrsTicket()
+
+            RunSegment runSegment = createRunSegment(otrsTicket: otrsTicket, dataFiles: [
+                    createDataFile(initialDirectory: "${blacklisted}"),
+                    createDataFile(initialDirectory: "${blacklisted}"),
+            ])
+            DomainFactory.createMetaDataFile(runSegment: runSegment, filePath: "${blacklisted}")
+
+            notificationCreator.mailHelperService = Mock(MailHelperService) {
+                0 * sendEmail(_, _, _)
+            }
+        }
+
+        expect:
+        SessionUtils.withNewSession {
+            notificationCreator.sendImportSourceOperatorNotification(otrsTicket)
+            return true
+        }
+    }
+
+    void "getPathsToDelete returns the paths of all MetaDataFiles and DataFiles associated with the ticket"() {
+        given:
+        OtrsTicket otrsTicket
+        List<String> expected = []
+
+        SessionUtils.withNewSession {
+            otrsTicket = createOtrsTicket()
+
+            List<DataFile> dataFilesA = [createDataFile(), createDataFile()]
+            RunSegment runSegmentA = createRunSegment(otrsTicket: otrsTicket, dataFiles: dataFilesA)
+
+            List<DataFile> dataFilesB = [createDataFile(), createDataFile(), createDataFile()]
+            RunSegment runSegmentB = createRunSegment(otrsTicket: otrsTicket, dataFiles: dataFilesB)
+
+            List<MetaDataFile> metaDataFiles = [
+                    DomainFactory.createMetaDataFile(runSegment: runSegmentA),
+                    DomainFactory.createMetaDataFile(runSegment: runSegmentB),
+            ]
+
+            expected.addAll(metaDataFiles*.fullPath)
+            expected.addAll(dataFilesA*.fullInitialPath)
+            expected.addAll(dataFilesB*.fullInitialPath)
+        }
+
+        expect:
+        SessionUtils.withNewSession {
+            assert notificationCreator.getPathsToDelete(otrsTicket).sort() == expected.sort()
+            return true
+        }
+    }
+
+    void "getPathsToDelete leaves out blacklisted paths"() {
+        given:
+        OtrsTicket otrsTicket
+        List<String> expected = []
+
+        SessionUtils.withNewSession {
+            String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
+
+            otrsTicket = createOtrsTicket()
+
+            List<DataFile> dataFilesA = [createDataFile(), createDataFile()]
+            RunSegment runSegmentA = createRunSegment(otrsTicket: otrsTicket, dataFiles: dataFilesA)
+
+            Closure<DataFile> createBlacklistedDataFile = {
+                createDataFile(initialDirectory: "${blacklisted}/path/dataFile")
+            }
+            List<DataFile> dataFilesB = [createDataFile()]
+            List<DataFile> dataFilesBBlacklisted = [createBlacklistedDataFile(), createBlacklistedDataFile()]
+            RunSegment runSegmentB = createRunSegment(otrsTicket: otrsTicket, dataFiles: dataFilesB + dataFilesBBlacklisted)
+
+            DomainFactory.createMetaDataFile(runSegment: runSegmentA, filePath: "${blacklisted}/path/metaDataFile")
+            MetaDataFile metaDataFile = DomainFactory.createMetaDataFile(runSegment: runSegmentB)
+
+            expected.addAll(metaDataFile.fullPath)
+            expected.addAll(dataFilesA*.fullInitialPath)
+            expected.addAll(dataFilesB*.fullInitialPath)
+        }
+
+        expect:
+        SessionUtils.withNewSession {
+            assert notificationCreator.getPathsToDelete(otrsTicket).sort() == expected.sort()
+            return true
+        }
+    }
+
+    void "getPathsToDelete returns empty list if all paths are blacklisted"() {
+        given:
+        OtrsTicket otrsTicket
+
+        SessionUtils.withNewSession {
+            String blacklisted = setupBlacklistImportSourceNotificationProcessingOption("/blacklisted").value
+
+            otrsTicket = createOtrsTicket()
+
+            Closure<DataFile> createBlacklistedDataFile = {
+                createDataFile(initialDirectory: "${blacklisted}/path/dataFile")
+            }
+
+            RunSegment runSegmentA = createRunSegment(otrsTicket: otrsTicket, dataFiles: [
+                    createBlacklistedDataFile(),
+            ])
+
+            RunSegment runSegmentB = createRunSegment(otrsTicket: otrsTicket, dataFiles: [
+                    createBlacklistedDataFile(),
+                    createBlacklistedDataFile(),
+            ])
+
+            DomainFactory.createMetaDataFile(runSegment: runSegmentA, filePath: "${blacklisted}/path/metaDataFile")
+            DomainFactory.createMetaDataFile(runSegment: runSegmentB, filePath: "${blacklisted}/path/metaDataFile")
+        }
+
+        expect:
+        SessionUtils.withNewSession {
+            assert notificationCreator.getPathsToDelete(otrsTicket).sort() == []
             return true
         }
     }

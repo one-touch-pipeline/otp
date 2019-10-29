@@ -31,8 +31,6 @@ import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX
-
 @Transactional
 class QcTrafficLightNotificationService {
 

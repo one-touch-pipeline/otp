@@ -361,6 +361,7 @@ class ProcessingOption implements Entity {
             "The amount of time (im minutes) the FileService allows the filesystem until a given commands times out",
             Necessity.OPTIONAL, "0", TypeValidators.POSITIVE_NUMBER
         ),
+
         //realm
         REALM_DEFAULT_VALUE(
                 "The default realm",
@@ -404,6 +405,11 @@ class ProcessingOption implements Entity {
         ),
         NOTIFICATION_TEMPLATE_FAQ_LINK(
                 "Link to FAQs",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+        ),
+
+        BLACKLIST_IMPORT_SOURCE_NOTIFICATION(
+                "Comma separated list of path prefixes which are ignored in the import source notification",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
         ),
 
