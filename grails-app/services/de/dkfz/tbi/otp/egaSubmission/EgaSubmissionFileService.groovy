@@ -266,45 +266,6 @@ class EgaSubmissionFileService {
         submission.save(flush: true)
     }
 
-    String generateSampleMetadataCsvFile(EgaSubmission submission) {
-        StringBuilder contentBody = new StringBuilder()
-        String unknown = "unknown"
-
-        submission.samplesToSubmit.each {
-            contentBody.append([
-                    unknown,
-                    it.egaAliasName,
-                    unknown,
-                    unknown,
-                    unknown,
-                    it.sample.sampleTypeCategory ?: unknown,
-                    unknown,
-                    unknown,
-                    unknown,
-                    unknown,
-                    unknown,
-                    unknown,
-            ].join(",") + "\n")
-        }
-
-        String contentHeader = [
-                TITLE,
-                ALIAS,
-                DESCRIPTION,
-                SUBJECT_ID,
-                BIO_SAMPLE_ID,
-                CASE_OR_CONTROL,
-                GENDER,
-                ORGANISM_PART,
-                ORGANISM,
-                CELL_LINE,
-                REGION,
-                PHENOTYPE,
-        ]*.value.join(",")
-
-        return "${contentHeader}\n${contentBody}"
-    }
-
     static EgaMapKey getIdentifierKey(Row row) {
         return new EgaMapKey(row)
     }

@@ -36,6 +36,8 @@ class EgaSubmissionService {
 
     SeqTrackService seqTrackService
 
+    private final String RAW_PREFIX = "RAW:"
+
     enum FileType {
         BAM,
         FASTQ,
@@ -414,10 +416,19 @@ class EgaSubmissionService {
 
     @CompileDynamic
     List getExperimentalMetadata(EgaSubmission submission) {
-        return SeqTrack.createCriteria().list {
+        List metadata = SeqTrack.createCriteria().list {
             resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)
             projections {
-                'in'('sample', submission.samplesToSubmit*.sample)
+                sample {
+                    'in'('id', submission.samplesToSubmit*.sample.id)
+                    seqTracks {
+                        run {
+                            seqPlatform {
+                                 property('seqPlatformModelLabel', 'seqPlatformModelLabel')
+                            }
+                        }
+                    }
+                }
                 seqType {
                     property('libraryLayout', 'libraryLayout')
                     property('displayName', 'displayName')
@@ -425,6 +436,57 @@ class EgaSubmissionService {
                 property('libraryPreparationKit', 'libraryPreparationKit')
             }
         }.unique()
+
+        metadata.each { Map it ->
+            it.put("mappedEgaPlatformModel", mapEgaPlatformModel(it.seqPlatformModelLabel))
+            it.put("mappedEgaLibrarySource", mapEgaLibrarySource(SeqType.findByDisplayName(it.displayName)))
+            it.put("mappedEgaLibrarySelection", mapEgaLibrarySelection(it.libraryPreparationKit))
+            it.put("mappedEgaLibraryStrategy", mapEgaLibraryStrategy(SeqType.findByDisplayName(it.displayName)))
+        }
+
+        return metadata
+    }
+
+    @CompileDynamic
+    String mapEgaPlatformModel(SeqPlatformModelLabel seqPlatformModelLabel) {
+        if (!seqPlatformModelLabel) {
+            return 'TODO'
+        }
+        return EgaPlatformModel.createCriteria().get {
+            seqPlatformModelLabels {
+                'in'('id', seqPlatformModelLabel.id)
+            }
+        }?.platformModelEgaName ?: "${RAW_PREFIX} ${seqPlatformModelLabel.name}"
+    }
+
+    @CompileDynamic
+    String mapEgaLibrarySelection(LibraryPreparationKit libraryPreparationKit) {
+        if (!libraryPreparationKit) {
+            return 'unspecified'
+        }
+        return EgaLibrarySelection.createCriteria().get {
+            libraryPreparationKits {
+                'in'('id', libraryPreparationKit.id)
+            }
+        }?.librarySelectionEgaName ?: "${RAW_PREFIX} ${libraryPreparationKit.name}"
+    }
+
+    @CompileDynamic
+    String mapEgaLibrarySource(SeqType seqType) {
+        return EgaLibrarySource.createCriteria().get {
+            seqTypes {
+                'in'('id', seqType.id)
+            }
+        }?.librarySourceEgaName ?: "${RAW_PREFIX} ${seqType.displayName}"
+    }
+
+    @CompileDynamic
+    String mapEgaLibraryStrategy(SeqType seqType) {
+        return EgaLibraryStrategy.createCriteria().get {
+            seqTypes {
+                'in'('id', seqType.id)
+            }
+        }?.libraryStrategyEgaName ?: "${RAW_PREFIX} ${seqType.displayName}"
     }
 }
 

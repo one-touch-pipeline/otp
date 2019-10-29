@@ -58,15 +58,15 @@
                     <tr>
                         <td>${submission.project.name}</td>
                         <td>${it.sample.individual.displayName}</td>
-                        <td><g:message code="egaSubmission.unknown"/></td>
+                        <td><g:message code="egaSubmission.egaPid"/> ${it.sample.individual.displayName}</td>
                         <td>${it.sample.displayName}</td>
                         <td>${it.egaAliasName}</td>
                         <td>${it.seqType.toString()}</td>
                         <td><g:message code="egaSubmission.unknown"/></td>
                         <td><g:message code="egaSubmission.unknown"/></td>
                         <td>${it.sample.sampleTypeCategory ?: g.message(code: "egaSubmission.unknown")}</td>
-                        <td><g:message code="egaSubmission.unknown"/></td>
-                        <td><g:message code="egaSubmission.unknown"/></td>
+                        <td>${it.project.speciesWithStrain ?: g.message(code: "egaSubmission.unknown")}</td>
+                        <td>${it.egaAliasName}</td>
                         <td><g:message code="egaSubmission.unknown"/></td>
                         <td><g:message code="egaSubmission.unknown"/></td>
                         <td><g:message code="egaSubmission.unknown"/></td>
@@ -77,14 +77,10 @@
             </tbody>
         </table>
     </div>
-    <g:form action="sampleMetadataForm">
-        <g:hiddenField name="submission.id" value="${submission.id}"/>
-        <g:submitButton name="download" value="Download"/>
-    </g:form>
 </div>
 <asset:script>
     $(function() {
-        $.otp.egaTable.makeDataTable();
+        $.otp.egaTable.makeDownloadableDataTable();
     });
 </asset:script>
 </body>

@@ -50,13 +50,14 @@
             <g:each in="${metadata}">
                 <tr>
                     <td>${submission.studyName}</td>
-                    <td><g:message code="egaSubmission.unknown"/></td>
-                    <td><g:message code="egaSubmission.unknown"/></td>
-                    <td><g:message code="egaSubmission.unknown"/></td>
+                    <td>
+                        ${it.libraryLayout.toString().toLowerCase()} ${it.displayName} on ${it.mappedEgaPlatformModel} ${it.libraryPreparationKit ? " using ${it.libraryPreparationKit}" : ''}</td>
+                    <td>${it.mappedEgaPlatformModel}</td>
+                    <td></td>
                     <td>${it.libraryLayout}</td>
-                    <td><g:message code="egaSubmission.unknown"/></td>
-                    <td><g:message code="egaSubmission.unknown"/></td>
-                    <td>${it.displayName}</td>
+                    <td>${it.mappedEgaLibrarySource}</td>
+                    <td>${it.mappedEgaLibrarySelection}</td>
+                    <td>${it.mappedEgaLibraryStrategy}</td>
                     <td>${it.libraryPreparationKit}</td>
                 </tr>
             </g:each>

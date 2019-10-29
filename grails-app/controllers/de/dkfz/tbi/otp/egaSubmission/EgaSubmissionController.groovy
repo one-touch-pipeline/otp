@@ -488,20 +488,6 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         }
     }
 
-    def sampleMetadataForm(SampleMetadataFormSubmitCommand cmd) {
-        if (cmd.hasErrors()) {
-            pushError(cmd.errors.fieldError, cmd.submission)
-            return
-        }
-
-        if (cmd.download) {
-            String content = egaSubmissionFileService.generateSampleMetadataCsvFile(cmd.submission)
-            response.contentType = CSV.mimeType
-            response.setHeader("Content-disposition", "filename=sample_metadata.csv")
-            response.outputStream << content.bytes
-        }
-    }
-
     private void pushError(String message, EgaSubmission submission, boolean redirectFlag = false) {
         flash.message = new FlashMessage(ERROR_TITLE, [message])
         if (redirectFlag) {
