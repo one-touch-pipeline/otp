@@ -51,8 +51,7 @@ error_handler() {
 }
 
 docker_compose() {
-    # Suppress output to mimic the output of the other script
-    docker-compose -f docker/otp/docker-compose.yml "$@" >/dev/null 2>&1
+    docker-compose -f docker/otp/docker-compose.yml "$@"
 }
 
 rebuild_image() {
