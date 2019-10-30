@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -108,8 +109,15 @@ class SampleType implements Entity {
                 //But for legacy reasons the underscore should be allowed for already existing objects
                 return 'Underscore is not allowed in name'
             }
+            SampleType sampleType = findSampleTypeByName(val)
+            if (sampleType && sampleType != obj) {
+                return "Must be unique ignoring case ('${sampleType.name}' already exists)"
+            }
         })
-        // TODO: OTP-1122: unique constraint for dirName
+    }
+
+    static SampleType findSampleTypeByName(String name) {
+        atMostOneElement(SampleType.findAllByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(name)))
     }
 
     static mapping = {

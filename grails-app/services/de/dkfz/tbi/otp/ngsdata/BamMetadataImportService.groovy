@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -119,7 +120,7 @@ class BamMetadataImportService {
                         }
                     }
                     sampleType {
-                        eq('name', _sampleType)
+                        ilike('name', SqlUtil.replaceWildcardCharactersInLikeExpression(_sampleType))
                     }
                 }
                 assert sample: "No sample found for ${_individual} and ${_sampleType} in ${_project}"

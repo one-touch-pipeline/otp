@@ -24,7 +24,8 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import org.joda.time.DateTime
-import org.springframework.security.access.prepost.*
+import org.springframework.security.access.prepost.PostAuthorize
+import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.CommentService
 
@@ -254,38 +255,6 @@ class IndividualService {
     }
 
     /**
-     * Fetches all SampleIdentifiers available
-     * @return List of SampleIdentifiers
-     */
-    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject.sample.individual.project, 'OTP_READ_ACCESS')")
-    List<SampleIdentifier> getSampleIdentifiers() {
-        return SampleIdentifier.list()
-    }
-
-    /**
-     * Fetches all SampleIdentifiers belonging to the given {@link Individual} and of the {@link SampleType}
-     * @param individualId The id of the {@link Individual} the {@link SampleIdentifier} shall be retrieved
-     * @param sType The {@link SampleType}'s name of which {@link SampleIdentifier}s are fetched
-     * @return List of SampleIdentifiers
-     */
-    @PostFilter("hasRole('ROLE_OPERATOR') or hasPermission(filterObject.sample.individual.project, 'OTP_READ_ACCESS')")
-    List<SampleIdentifier> getSampleIdentifiers(Long individualId, String sType) {
-        List<SampleIdentifier> sampleIdentifiers = SampleIdentifier.withCriteria {
-            sample {
-                and {
-                    individual {
-                        eq('id', individualId)
-                    }
-                    sampleType {
-                        ilike("name", sType)
-                    }
-                }
-            }
-        }
-        return sampleIdentifiers
-    }
-
-    /**
      * Updates the given Individual with the new given value.
      * @param individual The Individual to update
      * @param key The key to be updated
@@ -388,13 +357,14 @@ class IndividualService {
      * @return the SampleType
      */
     private SampleType createSampleType(String name) {
-        SampleType sampleType = SampleType.findByName(name)
+        SampleType sampleType = SampleType.findSampleTypeByName(name)
         if (!sampleType) {
             sampleType = new SampleType(name: name)
             sampleType.save(flush: true)
         }
         return sampleType
     }
+
     /**
      * show the List of Individual per Project
      */

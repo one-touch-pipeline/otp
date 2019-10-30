@@ -136,7 +136,7 @@ class SampleIdentifierService {
                     "and not '${identifier.projectName}'")
         }
         String sanitizedSampleTypeDbName = getSanitizedSampleTypeDbName(identifier.sampleTypeDbName)
-        if (sampleIdentifier.sampleType.name != identifier.sampleTypeDbName && sampleIdentifier.sampleType.name != sanitizedSampleTypeDbName) {
+        if (!sampleIdentifier.sampleType.name.equalsIgnoreCase(identifier.sampleTypeDbName) && !sampleIdentifier.sampleType.name.equalsIgnoreCase(sanitizedSampleTypeDbName)) {
             throw new OtpRuntimeException("The sample identifier already exist, but is connected to sample type '${sampleIdentifier.sampleType}' " +
                     "and not '${identifier.sampleTypeDbName}'")
         }
@@ -175,12 +175,12 @@ class SampleIdentifierService {
     }
 
     SampleType findOrSaveSampleType(ParsedSampleIdentifier identifier) {
-        SampleType sampleType = atMostOneElement(SampleType.findAllByName(identifier.sampleTypeDbName))
+        SampleType sampleType = SampleType.findSampleTypeByName(identifier.sampleTypeDbName)
         if (sampleType) {
             return sampleType
         }
         String sanitizedSampleTypeDbName = getSanitizedSampleTypeDbName(identifier.sampleTypeDbName)
-        SampleType sanitizedSampleType = atMostOneElement(SampleType.findAllByName(sanitizedSampleTypeDbName))
+        SampleType sanitizedSampleType = SampleType.findSampleTypeByName(sanitizedSampleTypeDbName)
         if (sanitizedSampleType) {
             return sanitizedSampleType
         }

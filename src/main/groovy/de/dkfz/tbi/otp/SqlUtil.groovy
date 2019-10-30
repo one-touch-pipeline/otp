@@ -19,37 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata.taxonomy
+package de.dkfz.tbi.otp
 
-import de.dkfz.tbi.otp.SqlUtil
-import de.dkfz.tbi.otp.utils.CollectionUtils
-import de.dkfz.tbi.otp.utils.Entity
+class SqlUtil {
+    private static final String ESCAPE_CHAR = "\\"
 
-class CommonName implements Entity {
-    String name
-
-    static constraints = {
-        name(unique: true, nullable: false, blank: false, validator: { String val, CommonName obj ->
-            if (val && !(val =~ /^[A-Za-z0-9 ]+$/)) {
-                return 'Contains invalid characters'
-            }
-            // custom case insensitive unique constraint
-            String notUniqueError = "CommonName already exists"
-            CommonName ilikeCommonName = CollectionUtils.atMostOneElement(CommonName.findAllByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(val)))
-            if (ilikeCommonName) {
-                if (obj.id) {
-                    if (obj.id != ilikeCommonName.id) {
-                        return notUniqueError
-                    }
-                } else {
-                    return notUniqueError
-                }
-            }
-        })
-    }
-
-    @Override
-    String toString() {
-        return name
+    static String replaceWildcardCharactersInLikeExpression(String value) {
+        return value
+                .replace("\\",  ESCAPE_CHAR + "\\")
+                .replace("_",   ESCAPE_CHAR + "_")
+                .replace("%",   ESCAPE_CHAR + "%")
     }
 }

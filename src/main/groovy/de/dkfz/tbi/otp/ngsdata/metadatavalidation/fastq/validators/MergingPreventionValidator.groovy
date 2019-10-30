@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.*
@@ -121,7 +122,7 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
                     eq("pid", parsedSampleIdentifier.pid)
                 }
                 sampleType {
-                    eq("name", parsedSampleIdentifier.sampleTypeDbName)
+                    ilike("name", SqlUtil.replaceWildcardCharactersInLikeExpression(parsedSampleIdentifier.sampleTypeDbName))
                 }
             } as Sample
 

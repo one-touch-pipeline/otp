@@ -46,7 +46,7 @@ class SampleTypeValidator extends SingleValueValidator<BamMetadataValidationCont
 
     @Override
     void validateValue(BamMetadataValidationContext context, String sampleType, Set<Cell> cells) {
-        if (!SampleType.findByName(sampleType)) {
+        if (!SampleType.findSampleTypeByName(sampleType)) {
             context.addProblem(cells, Level.ERROR, "The sample type '${sampleType}' is not registered in OTP.", "At least one sample type is not registered in OTP.")
         }
     }

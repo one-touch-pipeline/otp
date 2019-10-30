@@ -215,6 +215,28 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         containSame(Sample.list(), [result])
     }
 
+    void "test findOrSaveSample, when requested sample type with different case exists, should use it"() {
+        given:
+        Project project = createProject()
+        SampleType sampleType = createSampleType()
+        sampleType.name = 'BLOOD'
+        sampleType.save(flush: true)
+        ParsedSampleIdentifier identifier = makeParsedSampleIdentifier(
+                projectName: project.name,
+                pid: HelperUtils.uniqueString,
+                sampleTypeDbName: 'blood',
+        )
+
+        when:
+        Sample result = service.findOrSaveSample(identifier)
+
+        then:
+        result.sampleType == sampleType
+        result.individual.pid == identifier.pid
+        result.project.name == identifier.projectName
+        containSame(Sample.list(), [result])
+    }
+
     @Unroll
     void "findOrSaveSampleType, non existing sample type name is created with given specificReferenceGenome (#specificReferenceGenome)"() {
         given:

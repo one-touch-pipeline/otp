@@ -181,11 +181,6 @@ class IndividualController {
         render data as JSON
     }
 
-    def retrieveSampleIdentifiers(RetrieveSampleIdentifiersCommand cmd) {
-        render individualService.getSampleIdentifiers(cmd.id, cmd.sampleType) as JSON
-    }
-
-    // params.id, params.comment, date
     def saveIndividualComment(CommentCommand cmd) {
         Individual individual = individualService.getIndividual(cmd.id)
         commentService.saveComment(individual, cmd.comment)

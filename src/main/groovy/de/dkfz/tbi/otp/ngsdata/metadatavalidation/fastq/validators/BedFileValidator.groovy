@@ -113,7 +113,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
                 return
             }
 
-            sampleType = CollectionUtils.atMostOneElement(SampleType.findAllByName(parsedSampleIdentifier.sampleTypeDbName))
+            sampleType = SampleType.findSampleTypeByName(parsedSampleIdentifier.sampleTypeDbName)
             if (!sampleType) {
                 return
             }
