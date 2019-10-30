@@ -94,6 +94,8 @@ class LicenseCheck {
             "gradlew",
             "grailsw.bat",
             "grailsw",
+
+            "workflows/cwl/dataInstallation/cromwell/config.conf",
     ].collect { Paths.get(it) }
 
 
