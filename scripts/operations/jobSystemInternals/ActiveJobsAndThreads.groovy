@@ -35,7 +35,6 @@ ctx.schedulerService.getRunning().each {
     println "${it}\t(ProcessingStep ID ${it.processingStep.id}, ${it.processingStep.process.jobExecutionPlan.name} on ${atMostOneElement(ProcessParameter.findAllByProcess(it.processingStep.process))?.toObject()}"
 }
 println ""
-println "EXECUTOR SERVICE\nQueue size: ${ctx.executorService.executor.queue.size()}\n"
 println "THREADS"
 Thread.getAllStackTraces().each {
     println "${it.key} (ID ${it.key.id})"
