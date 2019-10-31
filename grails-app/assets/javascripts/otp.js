@@ -91,7 +91,7 @@ $.otp = {
                     if (counter > 0) {
                         link += "&";
                     }
-                    link += parameter + "=" + options.parameters[parameter];
+                    link += parameter + "=" + encodeURIComponent(options.parameters[parameter]);
                     counter += 1;
                 }
             }
