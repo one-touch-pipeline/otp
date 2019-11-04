@@ -96,6 +96,7 @@ class LicenseCheck {
             "grailsw",
 
             "workflows/cwl/dataInstallation/cromwell/config.conf",
+            "workflows/cwl/dataInstallation/wes-service-with-cromwell/config.conf",
     ].collect { Paths.get(it) }
 
 
