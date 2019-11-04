@@ -910,7 +910,7 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     Println {
-        priority = HIGH
+        priority = CRITICAL
     }
     SystemErrPrint {
         priority = DEFAULT

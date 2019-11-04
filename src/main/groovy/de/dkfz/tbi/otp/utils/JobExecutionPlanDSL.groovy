@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.utils
 
+import groovy.util.logging.Slf4j
+
 import de.dkfz.tbi.otp.job.jobs.utils.JobParameterKeys
 import de.dkfz.tbi.otp.job.plan.*
 import de.dkfz.tbi.otp.job.processing.*
@@ -32,6 +34,7 @@ class Helper {
 }
 
 @SuppressWarnings("UnusedPrivateField")
+@Slf4j
 class JobExecutionPlanDSL {
 
     private static Closure constantParameterClosure = { JobDefinition jobDefinition, String typeName, String value ->
@@ -132,7 +135,7 @@ class JobExecutionPlanDSL {
     }
 
     private static Closure jobClosure = { JobExecutionPlan jep, Helper helper, String jobName, String bean, closure = null ->
-        println "In job Closure with " + jobName
+        log.debug("In job Closure with " + jobName)
         JobDefinition jobDefinition = new JobDefinition(name: jobName, bean: bean, plan: jep, previous: helper.previous)
         jobDefinition.save(flush: true)
         helper.firstJob = helper.firstJob ?: jobDefinition
@@ -224,12 +227,12 @@ class JobExecutionPlanDSL {
             if (validate && ctx) {
                 List<String> errors = ctx.planValidatorService.validate(jep)
                 if (!errors.isEmpty()) {
-                    println("Errors found during validation")
-                    errors.each { println(it) }
+                    log.debug("Errors found during validation")
+                    errors.each { log.debug(it) }
                 }
                 assert(errors.isEmpty())
             }
         }
-        println("Plan created")
+        log.debug("Plan created")
     }
 }

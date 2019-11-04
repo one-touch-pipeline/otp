@@ -38,6 +38,7 @@ import java.nio.file.*
 
 import static org.springframework.util.Assert.*
 
+@SuppressWarnings('Println') //This class is written for scripts, so it needs the output in stdout
 @Transactional
 class DataSwapService {
     IndividualService individualService

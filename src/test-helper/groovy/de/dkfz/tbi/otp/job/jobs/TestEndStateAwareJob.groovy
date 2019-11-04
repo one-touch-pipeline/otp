@@ -37,7 +37,6 @@ class TestEndStateAwareJob extends AbstractEndStateAwareJobImpl {
 
     @Override
     void execute() throws Exception {
-        println("Execute method of TestEndStateAwareJob called")
         addOutputParameter("test", "1234")
         addOutputParameter("test2", "1234")
         addOutputParameter("test2", "4321")
