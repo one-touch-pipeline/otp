@@ -58,6 +58,22 @@ class SeqPlatformService {
         return seqPlatform
     }
 
+    List<Map> getDisplayableMetadata() {
+        return SeqPlatform.list().collect {
+            [
+                    name               : it.name,
+                    modelId            : it.seqPlatformModelLabel?.id,
+                    model              : it.seqPlatformModelLabel?.name,
+                    modelImportAliases : it.seqPlatformModelLabel?.importAlias?.sort()?.join(';\n'),
+                    hasModel           : it.seqPlatformModelLabel ? true : false,
+                    seqKitId           : it.sequencingKitLabel?.id,
+                    seqKit             : it.sequencingKitLabel?.name,
+                    seqKitImportAliases: it.sequencingKitLabel?.importAlias?.sort()?.join(';\n'),
+                    hasSeqKit          : it.sequencingKitLabel?.name ? true : false,
+            ]
+        }.sort { "${it.name}, ${it.model}, ${it.seqKit}" }
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SeqPlatform createNewSeqPlatform(String seqPlatformName, String seqPlatformModelLabelName, String sequencingKitLabelName) {
         assert seqPlatformName: "the input seqplatformname '${seqPlatformName}' must not be null"

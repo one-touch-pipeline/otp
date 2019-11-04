@@ -25,6 +25,16 @@ import de.dkfz.tbi.otp.utils.StringUtils
 
 class AntibodyTargetService extends MetadataFieldsService<AntibodyTarget> {
 
+    List<Map> getDisplayableMetadata() {
+        return AntibodyTarget.list(sort: "name", order: "asc").collect {
+            [
+                    id           : it.id,
+                    name         : it.name,
+                    importAliases: it.importAlias?.sort()?.join(';\n'),
+            ]
+        }
+    }
+
     @Override
     protected Class getClazz() {
         return AntibodyTarget

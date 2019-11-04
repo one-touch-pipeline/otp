@@ -27,6 +27,27 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SeqTypeService extends MetadataFieldsService<SeqType> {
 
+    List<Map> getDisplayableMetadata() {
+        return SeqType.list(sort: "name", order: "asc").collect {
+            [
+                    id               : SeqType.findAllByName(it.name)*.id?.sort()?.first(),
+                    name             : it.name,
+                    dirName          : it.dirName,
+                    singleCell       : it.singleCell,
+                    hasAntibodyTarget: it.hasAntibodyTarget,
+                    libraryLayouts   : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().reverse().join(';\n'),
+                    layouts          :
+                            [
+                                    SINGLE   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.SINGLE, it.singleCell) ? true : false,
+                                    PAIRED   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.PAIRED, it.singleCell) ? true : false,
+                                    MATE_PAIR: SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.MATE_PAIR, it.singleCell) ? true : false,
+                            ],
+                    displayName      : it.displayName,
+                    importAliases    : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(';\n'),
+            ]
+        }.unique()
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
     List<SeqType> alignableSeqTypesByProject(Project project) {
         return SeqTrack.createCriteria().listDistinct {

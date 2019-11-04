@@ -416,7 +416,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         setupData()
 
         when:
-        controller.params.type = 'SEQTYPE'
+        controller.params.seqTypeName = 'SEQTYPE'
         controller.params.dirName = 'seqtype'
         controller.params.displayName = 'SEQ TYPE'
         controller.params.single = single
@@ -461,7 +461,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
                 name: 'SEQTYPE', dirName: 'seqtype', displayName: 'SEQ TYPE', importAlias: ['importAlias'], libraryLayout: LibraryLayout.SINGLE)
 
         when:
-        controller.params.type = type
+        controller.params.seqTypeName = type
         controller.params.dirName = dirName
         controller.params.displayName = displayName
         controller.params.single = single

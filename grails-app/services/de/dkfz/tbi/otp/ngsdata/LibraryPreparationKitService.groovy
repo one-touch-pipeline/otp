@@ -27,6 +27,21 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparationKit> {
 
+    List<Map> getDisplayableMetadata() {
+                return LibraryPreparationKit.list(sort: "name", order: "asc").collect { LibraryPreparationKit it ->
+            [
+                    id                              : it.id,
+                    name                            : it.name,
+                    shortDisplayName                : it.shortDisplayName,
+                    adapterFile                     : it.adapterFile,
+                    reverseComplementAdapterSequence: it.reverseComplementAdapterSequence,
+                    importAliases                   : it.importAlias?.sort()?.join(';\n'),
+                    referenceGenomesWithBedFiles    : BedFile.findAllByLibraryPreparationKit(
+                            it, [sort: "referenceGenome.name", order: "asc"])*.referenceGenome*.name.join(';\n'),
+            ]
+        }
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     LibraryPreparationKit addAdapterFileToLibraryPreparationKit(LibraryPreparationKit libraryPreparationKit, String adapterFile) {
         assert libraryPreparationKit : "libraryPreparationKit must not be null"

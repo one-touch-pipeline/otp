@@ -27,9 +27,16 @@ import org.springframework.security.access.prepost.PreAuthorize
 @Transactional
 class SeqCenterService {
 
-    /**
-     * @return List of all available SeqCenters
-     */
+    List<Map> getDisplayableMetadata() {
+        return SeqCenter.list(sort: "name", order: "asc").collect {
+            [
+                    id     : it.id,
+                    name   : it.name,
+                    dirName: it.dirName,
+            ]
+        }
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SeqCenter> allSeqCenters() {
         return SeqCenter.list(sort: "name", order: "asc")

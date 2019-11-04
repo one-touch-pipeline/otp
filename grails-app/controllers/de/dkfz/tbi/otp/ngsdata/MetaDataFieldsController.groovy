@@ -28,83 +28,45 @@ import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 
 class MetaDataFieldsController implements CheckAndCall {
-    LibraryPreparationKitService libraryPreparationKitService
-    SeqTypeService seqTypeService
-    SeqPlatformService seqPlatformService
-    SeqCenterService seqCenterService
-    AntibodyTargetService antibodyTargetService
 
+    static allowedMethods = [
+            index:                  "GET",
+            libraryPreparationKits: "GET",
+            antibodyTargets:        "GET",
+            seqCenters:             "GET",
+            seqPlatforms:           "GET",
+            seqTypes:               "GET",
+            createSeqType:          "POST",
+    ]
+
+    LibraryPreparationKitService libraryPreparationKitService
+    AntibodyTargetService antibodyTargetService
+    SeqCenterService seqCenterService
+    SeqPlatformService seqPlatformService
+    SeqTypeService seqTypeService
 
     def index() {
-        List libraryPreparationKits = LibraryPreparationKit.list(sort: "name", order: "asc").collect { LibraryPreparationKit it ->
-            [
-                    id                              : it.id,
-                    name                            : it.name,
-                    shortDisplayName                : it.shortDisplayName,
-                    adapterFile                     : it.adapterFile,
-                    reverseComplementAdapterSequence: it.reverseComplementAdapterSequence,
-                    importAliases                   : it.importAlias?.sort()?.join(' | '),
-                    referenceGenomesWithBedFiles    : BedFile.findAllByLibraryPreparationKit(
-                            it, [sort: "referenceGenome.name", order: "asc"])*.referenceGenome*.name.join(' | '),
-            ]
-        }
+        redirect action: 'libraryPreparationKits'
+    }
 
-        List antibodyTargets = AntibodyTarget.list(sort: "name", order: "asc").collect {
-            [
-                    id           : it.id,
-                    name         : it.name,
-                    importAliases: it.importAlias?.sort()?.join(' | '),
-            ]
-        }
+    def libraryPreparationKits() {
+        return [libraryPreparationKits: libraryPreparationKitService.getDisplayableMetadata()]
+    }
 
-        List seqCenters = SeqCenter.list(sort: "name", order: "asc").collect {
-            [
-                    id     : it.id,
-                    name   : it.name,
-                    dirName: it.dirName,
-            ]
-        }
+    def antibodyTargets() {
+        return [antibodyTargets: antibodyTargetService.getDisplayableMetadata()]
+    }
 
-        List seqPlatforms = SeqPlatform.list().collect {
-            [
-                    name               : it.name,
-                    modelId            : it.seqPlatformModelLabel?.id,
-                    model              : it.seqPlatformModelLabel?.name,
-                    modelImportAliases : it.seqPlatformModelLabel?.importAlias?.sort()?.join(' | '),
-                    hasModel           : it.seqPlatformModelLabel ? true : false,
-                    seqKitId           : it.sequencingKitLabel?.id,
-                    seqKit             : it.sequencingKitLabel?.name,
-                    seqKitImportAliases: it.sequencingKitLabel?.importAlias?.sort()?.join(' | '),
-                    hasSeqKit          : it.sequencingKitLabel?.name ? true : false,
-            ]
-        }.sort { "${it.name}, ${it.model}, ${it.seqKit}" }
+    def seqCenters() {
+        return [seqCenters: seqCenterService.getDisplayableMetadata()]
+    }
 
-        List seqTypes = SeqType.list(sort: "name", order: "asc").collect {
-            [
-                    id               : SeqType.findAllByName(it.name)*.id?.sort()?.first(),
-                    name             : it.name,
-                    dirName          : it.dirName,
-                    singleCell       : it.singleCell,
-                    hasAntibodyTarget: it.hasAntibodyTarget,
-                    libraryLayouts   : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().reverse().join(' | '),
-                    layouts          :
-                            [
-                                    SINGLE   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.SINGLE, it.singleCell) ? true : false,
-                                    PAIRED   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.PAIRED, it.singleCell) ? true : false,
-                                    MATE_PAIR: SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.MATE_PAIR, it.singleCell) ? true : false,
-                            ],
-                    displayName      : it.displayName,
-                    importAliases    : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(' | '),
-            ]
-        }.unique()
+    def seqPlatforms() {
+        return [seqPlatforms: seqPlatformService.getDisplayableMetadata()]
+    }
 
-        return [
-                antibodyTargets       : antibodyTargets,
-                libraryPreparationKits: libraryPreparationKits,
-                seqCenters            : seqCenters,
-                seqPlatforms          : seqPlatforms,
-                seqTypes              : seqTypes,
-        ]
+    def seqTypes() {
+        return [seqTypes: seqTypeService.getDisplayableMetadata()]
     }
 
     JSON createLibraryPreparationKit(CreateLibraryPreparationKitCommand cmd) {
@@ -188,7 +150,7 @@ class MetaDataFieldsController implements CheckAndCall {
         }
     }
 
-    void createImportAlias(CreateImportAliasCommand cmd) {
+    private void createImportAlias(CreateImportAliasCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             cmd.service.addNewAlias(cmd.id, cmd.importAlias)
         }
@@ -432,13 +394,13 @@ abstract class CreateWithLayoutCommand implements Validateable {
 }
 
 class CreateSeqTypeCommand extends CreateWithLayoutCommand {
-    String type
+    String seqTypeName
     String dirName
     String displayName
     boolean hasAntibodyTarget
 
     static constraints = {
-        type(blank: false, validator: { val, obj ->
+        seqTypeName(blank: false, validator: { val, obj ->
             if (obj.getLibraryLayouts().find {
                 obj.seqTypeService.findByNameOrImportAlias(val, [libraryLayout: it, singleCell: obj.singleCell])
             }) {
@@ -459,8 +421,8 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
         })
     }
 
-    void setType(String type) {
-        this.type = type?.trim()?.replaceAll(" +", " ")
+    void setSeqTypeName(String seqTypeName) {
+        this.seqTypeName = seqTypeName?.trim()?.replaceAll(" +", " ")
     }
 
     void setDirName(String dirName) {
