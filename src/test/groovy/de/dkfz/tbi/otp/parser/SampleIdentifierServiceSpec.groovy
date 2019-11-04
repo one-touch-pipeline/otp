@@ -527,7 +527,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         given:
         SampleIdentifierService sampleIdentifierService = createSampleIdentifierService()
 
-        String d = delimiter.delimiter.toString()
+        String d = delimiter.delimiter
 
         String input = " front${d}back ${d}mid dle${d} m u l t i ${d}  consec  utive\n new line front${d} new line middle ${d}new line back \na${d}b${d}c"
         String expected = "front${d}back${d}mid dle${d}m u l t i${d}consec utive\nnew line front${d}new line middle${d}new line back\na${d}b${d}c"

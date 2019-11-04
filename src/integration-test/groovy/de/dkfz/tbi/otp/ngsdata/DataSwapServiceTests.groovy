@@ -183,7 +183,7 @@ class DataSwapServiceTests implements UserAndRoles {
                     scriptFolder,
             )
         }
-        String output = outputLog.toString()
+        String output = outputLog
         assert output.contains("${DataSwapService.MISSING_FILES_TEXT}\n    ${missedFile}")
         assert output.contains("${DataSwapService.EXCESS_FILES_TEXT}\n    ${unexpectedFile}")
 

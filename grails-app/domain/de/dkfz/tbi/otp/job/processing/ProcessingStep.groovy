@@ -238,7 +238,7 @@ class ProcessingStep implements Serializable, Entity {
         }
         String psId  = this.id
         String psClass = this.getNonQualifiedJobClass()
-        String psWorkflow = this.process.jobExecutionPlan.toString()
+        String psWorkflow = this.process.jobExecutionPlan
         String pid = this.getProcessParameterObject()?.individual?.pid
         return [
                 'otp',

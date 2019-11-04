@@ -234,7 +234,7 @@ class SampleIdentifierService {
      * @return sanitized text
      */
     String removeExcessWhitespaceFromCharacterDelimitedText(String text, Spreadsheet.Delimiter delimiter) {
-        String columnDelimiter = delimiter.delimiter.toString()
+        String columnDelimiter = delimiter.delimiter
         return text
                 .trim()
                 .replaceAll(/ *${columnDelimiter} */, columnDelimiter)

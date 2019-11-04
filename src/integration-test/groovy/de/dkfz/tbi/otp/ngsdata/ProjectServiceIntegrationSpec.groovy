@@ -381,7 +381,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         new File("${projectDirectory}").mkdirs()
-        String group = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group().toString()
+        String group = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group()
 
         then:
         projectDirectory.exists()

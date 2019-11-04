@@ -1164,7 +1164,7 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     UnnecessaryToString {
-        priority = HIGH
+        priority = CRITICAL
     }
     UnnecessaryTransientModifier {
         priority = DEFAULT

@@ -79,6 +79,6 @@ class DataSwapServiceSpec extends Specification implements DataTest, ServiceUnit
   swapping label:
     - key1 --> key1
     - key2 --> key2_value
-    -  --> key3_value""".toString()
+    -  --> key3_value"""
     }
 }

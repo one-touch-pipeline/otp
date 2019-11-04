@@ -529,7 +529,7 @@ where
         workPackage.sample.individual.project = :project
         and workPackage.bamFileInProjectFolder = abstractMergedBamFile
         and fileOperationStatus = :fileOperationStatus
-""".toString(), [project: project, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED])
+""", [project: project, fileOperationStatus: AbstractMergedBamFile.FileOperationStatus.PROCESSED])
     }
 
     List listReferenceGenome(Project project) {

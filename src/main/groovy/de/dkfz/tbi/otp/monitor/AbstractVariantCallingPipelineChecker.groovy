@@ -146,7 +146,7 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                                 and config.pipeline.type = :pipelineType
                                 and config.obsoleteDate is null
                         )
-                """.toString(), [
+                """, [
                 samplePairs : samplePairs,
                 pipelineType: getPipeline().type,
         ])

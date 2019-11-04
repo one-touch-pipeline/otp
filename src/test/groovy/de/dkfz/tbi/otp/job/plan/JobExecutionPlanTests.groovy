@@ -86,6 +86,6 @@ class JobExecutionPlanTests {
 
         assertTrue(jobExecutionPlan.validate())
         assertTrue(jobExecutionPlan.processParameter.is(processParameter))
-        assertEquals("test".toString(), processParameter.value)
+        assertEquals("test", processParameter.value)
     }
 }

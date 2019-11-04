@@ -102,7 +102,7 @@ INNER JOIN scan.sample AS sample
 INNER JOIN scan.seqType as type
 WHERE sample.individual = :ind
 order by type.name asc, type.libraryLayout
-        """.toString(), [ind: this])
+        """, [ind: this])
     }
 
     List<SeqTrack> getSeqTracks() {

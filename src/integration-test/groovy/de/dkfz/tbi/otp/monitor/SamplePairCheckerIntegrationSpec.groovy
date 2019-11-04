@@ -245,7 +245,7 @@ class SamplePairCheckerIntegrationSpec extends Specification {
         then:
         (text == null) == result.empty
         if (text) {
-            String message = result[0].toString()
+            String message = result[0]
             assert message.contains(text)
         }
 

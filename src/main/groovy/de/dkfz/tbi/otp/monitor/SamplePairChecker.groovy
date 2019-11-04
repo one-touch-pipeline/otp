@@ -142,7 +142,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                             sampleTypePerProject.project = bamFile.workPackage.sample.individual.project
                             and sampleTypePerProject.sampleType = bamFile.workPackage.sample.sampleType
                     )
-            """.toString(), [
+            """, [
                 bamFiles: bamFiles,
         ])
     }
@@ -189,7 +189,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                             and processingThresholds.sampleType = bamFile.workPackage.sample.sampleType
                             and processingThresholds.seqType = bamFile.workPackage.seqType
                     )
-            """.toString(), [
+            """, [
                 bamFiles: bamFiles,
         ])
     }
@@ -214,7 +214,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                             mergingWorkPackage1 = bamFile.workPackage
                             or mergingWorkPackage2 = bamFile.workPackage
                     )
-            """.toString(), [
+            """, [
                 bamFiles: bamFiles,
         ])
     }
@@ -261,7 +261,7 @@ class SamplePairChecker extends PipelinesChecker<AbstractMergedBamFile> {
                             )
                         )
                     )
-            """.toString(), [
+            """, [
                 samplePair: allSamplePairs,
         ])
     }
