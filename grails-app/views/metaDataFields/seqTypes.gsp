@@ -27,10 +27,13 @@
     <meta name="layout" content="main"/>
     <title><g:message code="dataFields.title"/></title>
     <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="common/MultiInputField.js"/>
 </head>
 
 <body>
 <div class="body fixedTableHeader wrapTableHeader">
+    <g:render template="/templates/messages"/>
+
     <g:render template="linkBanner"/>
     <h3><g:message code="dataFields.title.caseInsensitive"/></h3>
 
@@ -81,112 +84,72 @@
                 </td>
             </tr>
         </g:each>
-        <td colspan="4">
-            <div class="edit-switch edit-switch-new-free-text-values">
-                <span class="edit-switch-editor" style="display: none">
-                    <h4><g:message code="dataFields.seqType.create.addSeqTypeTitle"/></h4>
-                    <input type="hidden" name="target" value="${g.createLink(controller: 'metaDataFields', action: 'createSeqType')}"/>
-
-                    <div class="dialog">
-                        <table>
-                            <tbody>
-                            <tr class="prop">
-                                <td valign="top" class="name">
-                                    <label for="type">
-                                        <g:message code="dataFields.seqType.create.type"/>
-                                    </label>
-                                </td>
-                                <td valign="top" class="value">
-                                    <input name="type" id="type" type="text"/>
-                                </td>
-                                <td></td>
-                            </tr>
-                            <tr class="prop">
-                                <td valign="top" class="name">
-                                    <label for="directory">
-                                        <g:message code="dataFields.seqType.create.directory"/>
-                                    </label>
-                                </td>
-                                <td valign="top" class="value">
-                                    <input name="dirName" id="directory" type="text"/>
-                                </td>
-                                <td></td>
-                            </tr>
-                            <tr class="prop">
-                                <td valign="top" class="name">
-                                    <label for="name">
-                                        <g:message code="dataFields.seqType.create.name"/>
-                                    </label>
-                                </td>
-                                <td valign="top" class="value">
-                                    <input name="displayName" id="name" type="text"/>
-                                </td>
-                                <td></td>
-                            </tr>
-                            <tr class="prop">
-                                <td colspan="1" valign="top" class="name">
-                                    <label for="singleCell">
-                                        <g:message code="dataFields.seqType.create.singleCell"/>
-                                    </label>
-                                </td>
-                                <td colspan="1" valign="top" class="name">
-                                    <input name="singleCell" id="singleCell" type="checkbox"/>
-                                </td>
-                            </tr>
-                            <tr class="prop">
-                                <td colspan="1" valign="top" class="name">
-                                    <label for="hasAntibodyTarget">
-                                        <g:message code="dataFields.seqType.create.hasAntibodyTarget"/>
-                                    </label>
-                                </td>
-                                <td colspan="1" valign="top" class="name">
-                                    <input name="hasAntibodyTarget" id="hasAntibodyTarget" type="checkbox"/>
-                                </td>
-                            </tr>
-                            <tr class="prop">
-                                <td colspan="1" valign="top" class="name">
-                                    <label for="single">
-                                        <g:message code="dataFields.seqType.create.layout"/>
-                                    </label>
-                                </td>
-                                <td colspan="1" valign="top" class="name">
-                                    <label for="single">
-                                        <g:message code="dataFields.seqType.create.single"/>
-                                    </label>
-                                    <input name="single" id="single" type="checkbox"/>
-                                </td>
-                            </tr>
-                            <tr class="prop">
-                                <td colspan="1">&nbsp;</td>
-                                <td colspan="1" valign="top" class="name">
-                                    <label for="paired">
-                                        <g:message code="dataFields.seqType.create.paired"/>
-                                    </label>
-                                    <input name="paired" id="paired" checked="checked" type="checkbox"/>
-                                </td>
-                            </tr>
-                            <tr class="prop">
-                                <td colspan="1">&nbsp;</td>
-                                <td colspan="1" valign="top" class="value">
-                                    <label for="mate_pair">
-                                        <g:message code="dataFields.seqType.create.mate"/>
-                                    </label>
-                                    <input name="mate_pair" id="mate_pair" type="checkbox"/>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <button class="buttons save"><g:message code="default.button.save.label"/></button>
-                    <button class="buttons cancel"><g:message code="default.button.cancel.label"/></button>
-                </span>
-                <span class="edit-switch-label" style="display: inline;">
-                    <button class="add js-edit">+</button>
-                </span>
-            </div>
-        </td>
         </tbody>
     </table>
+
+    <h4><g:message code="dataFields.seqType.create.addSeqTypeTitle"/></h4>
+    <g:form action="createSeqType" useToken="true">
+        <table style="width: 50%">
+            <tbody>
+            <tr>
+                <td><g:message code="dataFields.seqType.create.seqTypeName"/></td>
+                <td><input name="seqTypeName" id="type" type="text" value="${cmd?.seqTypeName}"/></td>
+            </tr>
+            <tr>
+                <td><g:message code="dataFields.seqType.create.aliases"/></td>
+                <td class="multi-input-field">
+                    <g:each in="${cmd?.aliases ?: [""]}" var="alias" status="i">
+                        <div class="field">
+                            <g:textField list="aliasList" name="aliases" value="${alias}" />
+                            <g:if test="${i == 0}">
+                                <button class="add-field">+</button>
+                            </g:if>
+                            <g:else>
+                                <button class="remove-field">-</button>
+                            </g:else>
+                        </div>
+                    </g:each>
+                </td>
+            </tr>
+            <tr>
+                <td><g:message code="dataFields.seqType.create.name"/></td>
+                <td><input name="displayName" id="name" type="text" value="${cmd?.displayName}"/></td>
+            </tr>
+            <tr>
+                <td><g:message code="dataFields.seqType.create.directory"/></td>
+                <td><input name="dirName" id="directory" type="text" value="${cmd?.dirName}"/></td>
+            </tr>
+            <tr>
+                <td><label for="singleCell"><g:message code="dataFields.seqType.create.singleCell"/></label></td>
+                <td><g:checkBox name="singleCell" id="singleCell" value="${cmd?.singleCell ?: false}"/></td>
+            </tr>
+            <tr>
+                <td><label for="hasAntibodyTarget"><g:message code="dataFields.seqType.create.hasAntibodyTarget"/></label></td>
+                <td><g:checkBox name="hasAntibodyTarget" id="hasAntibodyTarget" value="${cmd?.hasAntibodyTarget ?: false}"/></td>
+            </tr>
+            <tr>
+                <td><g:message code="dataFields.seqType.create.layout"/></td>
+                <td>
+                    <label>
+                        <g:message code="dataFields.seqType.create.single"/>
+                        <g:checkBox id="single" name="single" value="${cmd?.single ?: false}"/>
+                    </label>
+                    |
+                    <label>
+                        <g:message code="dataFields.seqType.create.paired"/>
+                        <g:checkBox id="paired" name="paired" value="${cmd == null || cmd?.paired}"/>
+                    </label>
+                    |
+                    <label>
+                        <g:message code="dataFields.seqType.create.mate"/>
+                        <g:checkBox id="mate_pair" name="mate_pair" value="${cmd?.mate_pair ?: false}"/>
+                    </label>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <g:submitButton name="${g.message(code: "document.createType")}"/>
+    </g:form>
 </div>
 </body>
 </html>

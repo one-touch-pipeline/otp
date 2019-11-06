@@ -24,12 +24,15 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.plugin.springsecurity.acl.AclSid
 import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
+import org.grails.web.servlet.mvc.SynchronizerTokensHolder
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.security.*
+
+import static javax.servlet.http.HttpServletResponse.*
 
 class MetaDataFieldsControllerSpec extends Specification implements ControllerUnitTest<MetaDataFieldsController>, DataTest, UserAndRoles {
 
@@ -81,7 +84,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createLibraryPreparationKit()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         controller.response.json.success
         LibraryPreparationKit.findByName('LibraryPreparationKit')
     }
@@ -100,7 +103,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createLibraryPreparationKit()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         !controller.response.json.success
 
         where:
@@ -125,7 +128,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createLibraryPreparationKitImportAlias()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         controller.response.json.success
         libraryPreparationKit.importAlias.contains('LibraryPreparationKitImportAlias')
     }
@@ -145,7 +148,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createLibraryPreparationKitImportAlias()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         !controller.response.json.success
 
         where:
@@ -162,7 +165,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createAntibodyTarget()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         controller.response.json.success
         AntibodyTarget.findByName('AntibodyTarget')
     }
@@ -180,7 +183,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createAntibodyTarget()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         !controller.response.json.success
 
         where:
@@ -198,7 +201,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSeqCenter()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         controller.response.json.success
         SeqCenter.findByNameAndDirName('SEQCENTER', 'seqcenter')
     }
@@ -217,7 +220,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSeqCenter()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         !controller.response.json.success
 
         where:
@@ -246,7 +249,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSeqPlatform()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         controller.response.json.success
         SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabel(
                 platform,
@@ -284,7 +287,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSeqPlatform()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         controller.response.json.success
         SeqPlatform.findByNameAndSeqPlatformModelLabelAndSequencingKitLabel(
                 platform,
@@ -320,7 +323,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSeqPlatform()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         !controller.response.json.success
 
         where:
@@ -345,7 +348,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSeqPlatformModelLabelImportAlias()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         controller.response.json.success
         controller.seqPlatformService.seqPlatformModelLabelService.findByNameOrImportAlias('SeqPlatformModelLabelAlias')
     }
@@ -364,7 +367,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSeqPlatformModelLabelImportAlias()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         !controller.response.json.success
 
         where:
@@ -384,7 +387,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSequencingKitLabelImportAlias()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         controller.response.json.success
         controller.seqPlatformService.sequencingKitLabelService.findByNameOrImportAlias('SequencingKitLabelAlias')
     }
@@ -403,7 +406,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSequencingKitLabelImportAlias()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         !controller.response.json.success
 
         where:
@@ -411,7 +414,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
     }
 
     @Unroll
-    void "test JSON createSeqType valid input"() {
+    void "createSeqType, valid input"() {
         given:
         setupData()
 
@@ -425,11 +428,18 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.params.singleCell = singleCell
         controller.params.anyLayout = single || paired || mate_pair
         controller.params.seqTypeService = controller.seqTypeService
+
+        SynchronizerTokensHolder tokenHolder = SynchronizerTokensHolder.store(controller.session)
+        controller.params[SynchronizerTokensHolder.TOKEN_URI] = "/metaDataFields/createSeqType"
+        controller.params[SynchronizerTokensHolder.TOKEN_KEY] = tokenHolder.generateToken("/metaDataFields/createSeqType")
+
+        request.method = "POST"
+
         controller.createSeqType()
 
         then:
-        controller.response.status == 200
-        controller.response.json.success
+        controller.response.status == SC_MOVED_TEMPORARILY
+        controller.response.redirectedUrl == "/metaDataFields/seqTypes"
         !single || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', LibraryLayout.SINGLE, singleCell)
         !paired || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', LibraryLayout.PAIRED, singleCell)
         !mate_pair || SeqType.findByNameAndDirNameAndLibraryLayoutAndSingleCell('SEQTYPE', 'seqtype', LibraryLayout.MATE_PAIR, singleCell)
@@ -453,12 +463,17 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
     }
 
     @Unroll
-    void "test JSON createSeqType invalid input"() {
+    void "createSeqType, invalid input"() {
         given:
         setupData()
 
         DomainFactory.createSeqType(
-                name: 'SEQTYPE', dirName: 'seqtype', displayName: 'SEQ TYPE', importAlias: ['importAlias'], libraryLayout: LibraryLayout.SINGLE)
+                name         : 'SEQTYPE',
+                dirName      : 'seqtype',
+                displayName  : 'SEQ TYPE',
+                importAlias  : ['importAlias'],
+                libraryLayout: LibraryLayout.SINGLE
+        )
 
         when:
         controller.params.seqTypeName = type
@@ -470,11 +485,19 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.params.singleCell = singleCell
         controller.params.anyLayout = single || paired || mate_pair
         controller.params.seqTypeService = controller.seqTypeService
+
+        SynchronizerTokensHolder tokenHolder = SynchronizerTokensHolder.store(controller.session)
+        controller.params[SynchronizerTokensHolder.TOKEN_URI] = "/metaDataFields/createSeqType"
+        controller.params[SynchronizerTokensHolder.TOKEN_KEY] = tokenHolder.generateToken("/metaDataFields/createSeqType")
+
+        request.method = "POST"
+
         controller.createSeqType()
 
         then:
-        controller.response.status == 200
-        !controller.response.json.success
+        controller.response.status == SC_MOVED_TEMPORARILY
+        controller.response.redirectedUrl == "/metaDataFields/seqTypes"
+        controller.flash.message.message == "dataFields.seqType.create.failed"
 
         where:
         type       | dirName    | displayName | single | paired | mate_pair | singleCell
@@ -488,6 +511,31 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         'SEQTYPE2' | 'seqtype2' | 'SEQ TYPE'  | true   | false  | false     | false
         'SEQTYPE2' | 'seqtype2' | 'SEQTYPE'   | true   | false  | false     | false
         'SEQTYPE2' | 'seqtype2' | 'SEQTYPE2'  | true   | false  | false     | null
+    }
+
+    void "createSeqType, has invalid token"() {
+        given:
+        setupData()
+
+        when:
+        controller.params.type = 'SEQTYPE'
+        controller.params.dirName = 'seqtype'
+        controller.params.displayName = 'SEQ TYPE'
+        controller.params.single = true
+        controller.params.paired = true
+        controller.params.mate_pair = true
+        controller.params.singleCell = true
+        controller.params.anyLayout = true
+        controller.params.seqTypeService = controller.seqTypeService
+
+        request.method = "POST"
+
+        controller.createSeqType()
+
+        then:
+        controller.response.status == SC_MOVED_TEMPORARILY
+        controller.response.redirectedUrl == "/metaDataFields/seqTypes"
+        controller.flash.message.message == "dataFields.seqType.create.failed.invalidToken"
     }
 
     @Unroll
@@ -511,7 +559,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createLayout()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         controller.response.json.success
         !single || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.SINGLE, singleCell)
         !paired || SeqType.findByNameAndLibraryLayoutAndSingleCell(name, LibraryLayout.PAIRED, singleCell)
@@ -554,7 +602,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createLayout()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         !controller.response.json.success
 
         where:
@@ -613,7 +661,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createSeqTypeImportAlias()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         !controller.response.json.success
 
         where:
@@ -637,7 +685,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createAntibodyTargetImportAlias()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         controller.response.json.success
 
         where:
@@ -658,7 +706,7 @@ class MetaDataFieldsControllerSpec extends Specification implements ControllerUn
         controller.createAntibodyTargetImportAlias()
 
         then:
-        controller.response.status == 200
+        controller.response.status == SC_OK
         !controller.response.json.success
 
         where:

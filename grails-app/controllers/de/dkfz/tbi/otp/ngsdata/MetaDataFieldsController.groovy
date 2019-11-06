@@ -23,8 +23,10 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 import grails.validation.Validateable
+import grails.validation.ValidationException
 
 import de.dkfz.tbi.otp.CheckAndCall
+import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 
 class MetaDataFieldsController implements CheckAndCall {
@@ -66,7 +68,10 @@ class MetaDataFieldsController implements CheckAndCall {
     }
 
     def seqTypes() {
-        return [seqTypes: seqTypeService.getDisplayableMetadata()]
+        return [
+                seqTypes: seqTypeService.getDisplayableMetadata(),
+                cmd     : flash.cmd as CreateSeqTypeCommand,
+        ]
     }
 
     JSON createLibraryPreparationKit(CreateLibraryPreparationKitCommand cmd) {
@@ -127,24 +132,37 @@ class MetaDataFieldsController implements CheckAndCall {
         createImportAlias(cmd)
     }
 
-    JSON createSeqType(CreateSeqTypeCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
-            seqTypeService.createMultiple(cmd.type, cmd.getLibraryLayouts(), [
-                    dirName: cmd.dirName,
-                    displayName: cmd.displayName,
-                    singleCell: cmd.singleCell,
-                    hasAntibodyTarget: cmd.hasAntibodyTarget,
-            ])
+    def createSeqType(CreateSeqTypeCommand cmd) {
+        withForm {
+            flash.cmd = cmd
+            try {
+                assert !cmd.hasErrors()
+                seqTypeService.createMultiple(cmd.seqTypeName, cmd.getLibraryLayouts(), [
+                        dirName          : cmd.dirName,
+                        displayName      : cmd.displayName,
+                        singleCell       : cmd.singleCell,
+                        hasAntibodyTarget: cmd.hasAntibodyTarget,
+                ], cmd.aliases)
+                flash.cmd = null
+                flash.message = new FlashMessage(g.message(code: "dataFields.seqType.create.success") as String)
+            } catch (ValidationException e) {
+                flash.message = new FlashMessage(g.message(code: "dataFields.seqType.create.failed") as String, e.errors)
+            } catch (AssertionError e) {
+                flash.message = new FlashMessage(g.message(code: "dataFields.seqType.create.failed") as String, [e.message])
+            }
+        }.invalidToken {
+            flash.message = new FlashMessage(g.message(code: "dataFields.seqType.create.failed.invalidToken") as String, ["Token is invalid"])
         }
+        redirect(action: "seqTypes")
     }
 
     JSON createLayout(CreateLayoutCommand cmd) {
         SeqType seqType = seqTypeService.findByNameOrImportAlias(cmd.name, [singleCell: cmd.singleCell])
         checkErrorAndCallMethod(cmd) {
             seqTypeService.createMultiple(seqType.name, cmd.getLibraryLayouts(), [
-                    dirName: seqType.dirName,
-                    displayName: seqType.displayName,
-                    singleCell: cmd.singleCell,
+                    dirName          : seqType.dirName,
+                    displayName      : seqType.displayName,
+                    singleCell       : cmd.singleCell,
                     hasAntibodyTarget: seqType.hasAntibodyTarget,
             ], seqType.importAlias.toList())
         }
@@ -398,6 +416,7 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
     String dirName
     String displayName
     boolean hasAntibodyTarget
+    List<String> aliases
 
     static constraints = {
         seqTypeName(blank: false, validator: { val, obj ->
@@ -419,6 +438,7 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
                 return 'default.not.unique.message'
             }
         })
+        aliases(nullable: true)
     }
 
     void setSeqTypeName(String seqTypeName) {
@@ -434,6 +454,10 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
         if (this.displayName.equals("")) {
             this.displayName = null
         }
+    }
+
+    void setAliases(List<String> aliasNames) {
+        aliases = aliasNames ?: []
     }
 }
 

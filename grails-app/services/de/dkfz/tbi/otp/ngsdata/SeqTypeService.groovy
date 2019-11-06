@@ -81,18 +81,14 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
 
         if (libraryLayouts.contains(LibraryLayout.SINGLE)) {
             create(name, properties + [libraryLayout: LibraryLayout.SINGLE], importAliases)
-
         }
         if (libraryLayouts.contains(LibraryLayout.PAIRED)) {
             create(name, properties + [libraryLayout: LibraryLayout.PAIRED], importAliases)
-
         }
         if (libraryLayouts.contains(LibraryLayout.MATE_PAIR)) {
             create(name, properties + [libraryLayout: LibraryLayout.MATE_PAIR], importAliases)
-
         }
     }
-
 
     @Override
     void getTAndAddAlias(String name, String importAlias) {
