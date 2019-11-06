@@ -35,7 +35,7 @@ processingOptionService.createOrUpdate(
 SeqTypeService.indelPipelineSeqTypes.each { SeqType seqType ->
     processingOptionService.createOrUpdate(
             PIPELINE_RODDY_INDEL_DEFAULT_PLUGIN_VERSION,
-            '2.2.0',
+            '2.4.0',
             seqType.roddyName,
     )
 
