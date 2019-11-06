@@ -46,7 +46,7 @@ class ITCC_4P_ParserSpec extends Specification {
         then:
         validPid
         defaultParsedSampleIdentifier
-        defaultParsedSampleIdentifier.projectName == 'ITCC-P4'
+        defaultParsedSampleIdentifier.projectName == 'OE0290_ITCC-P4'
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleTypeDbName
         defaultParsedSampleIdentifier.fullSampleName == input

@@ -33,13 +33,13 @@ import java.util.regex.Matcher
  * Checker for Project ITCC-4P.
  * To be more flexible only the structure but not each allowed char/number is checked.
  */
-@Component
+@Component('iTCC_4P_Parser')
 class ITCC_4P_Parser implements SampleIdentifierParser {
 
     static final String CHAR = /[A-Z]/
 
     /**
-     * Expression for the project name. Only ITCC-P4 supported'
+     * Expression for the project name. Only OE0290_ITCC-P4 supported.
      */
     static final String PROJECT = /(?<project>ITCC-P4)/
 
@@ -92,8 +92,8 @@ class ITCC_4P_Parser implements SampleIdentifierParser {
     DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {
         Matcher matcher = sampleIdentifier =~ REGEX
         if (matcher) {
-            String project = "${matcher.group('project')}"
-            String pid = "${project}_${matcher.group('disease')}"
+            String project = "OE0290_${matcher.group('project')}"
+            String pid = "${matcher.group('project')}_${matcher.group('disease')}"
             String sampleType = "${matcher.group('sampleType')}-${matcher.group('materialType')}-${matcher.group('isolateType')}"
             SampleType.SpecificReferenceGenome specificReferenceGenome = sampleType.startsWith("P") ?
                     SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC : SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
