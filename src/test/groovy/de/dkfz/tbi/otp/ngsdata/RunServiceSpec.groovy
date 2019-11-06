@@ -39,7 +39,7 @@ class RunServiceSpec extends Specification implements DataTest {
                 Project,
                 Realm,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleType,
                 SeqCenter,
@@ -62,15 +62,15 @@ class RunServiceSpec extends Specification implements DataTest {
 
         Run run1 = DomainFactory.createRun(seqPlatform: seqPlatform)
         MetaDataFile run1MetaDataFileA = DomainFactory.createMetaDataFile()
-        DomainFactory.createDataFile(run: run1, runSegment: run1MetaDataFileA.runSegment)
+        DomainFactory.createDataFile(run: run1, fastqImportInstance: run1MetaDataFileA.fastqImportInstance)
         MetaDataFile run1MetaDataFileB = DomainFactory.createMetaDataFile()
-        MetaDataFile run1MetaDataFileC = DomainFactory.createMetaDataFile(runSegment: run1MetaDataFileB.runSegment)
-        DomainFactory.createDataFile(run: run1, runSegment: run1MetaDataFileB.runSegment)
+        MetaDataFile run1MetaDataFileC = DomainFactory.createMetaDataFile(fastqImportInstance: run1MetaDataFileB.fastqImportInstance)
+        DomainFactory.createDataFile(run: run1, fastqImportInstance: run1MetaDataFileB.fastqImportInstance)
 
         Run run2 = DomainFactory.createRun(seqPlatform: seqPlatform)
         MetaDataFile run2MetaDataFile = DomainFactory.createMetaDataFile()
-        DomainFactory.createDataFile(run: run2, runSegment: run2MetaDataFile.runSegment)
-        DomainFactory.createDataFile(run: run2, runSegment: run2MetaDataFile.runSegment)
+        DomainFactory.createDataFile(run: run2, fastqImportInstance: run2MetaDataFile.fastqImportInstance)
+        DomainFactory.createDataFile(run: run2, fastqImportInstance: run2MetaDataFile.fastqImportInstance)
 
         expect:
         runService.retrieveMetaDataFiles(runWithoutDataFile).isEmpty()

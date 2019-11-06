@@ -287,4 +287,8 @@ databaseChangeLog = {
     include file: 'changelogs/2019/otp-137-merge-create-samplepair-services.groovy'
 
     include file: 'changelogs/2019/remove-group.groovy'
+
+    changeSet(author: "m139l", id: "otp-255") {
+        sqlFile(path: 'changelogs/2019/otp-255-rename-run-segment.sql')
+    }
 }

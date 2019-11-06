@@ -23,8 +23,6 @@
 /**
  * script to trigger alignments for a patient or a project or a ilse.
  * It is Possible to restrict the selection to specific SeqTypes
- *
- * The align flag of all used runsegments of the seqtracks are set to true.
  */
 
 import org.hibernate.sql.JoinType
@@ -104,7 +102,6 @@ LogThreadLocal.withThreadLog(System.out, {
         println "--> ${seqTracks.size()} seqtracks in ${seqTracks*.sample.unique().size()} samples"
 
         /*
-        //make all used run segments alignable
         //trigger alignment
         List<AbstractMergingWorkPackage> mergingWorkPackages = seqTracks.collectMany {
             ctx.seqTrackService.decideAndPrepareForAlignment(it)

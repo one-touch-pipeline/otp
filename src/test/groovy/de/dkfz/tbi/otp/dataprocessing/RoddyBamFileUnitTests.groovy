@@ -52,7 +52,7 @@ import static de.dkfz.tbi.TestCase.shouldFail
         SeqPlatformModelLabel,
         ReferenceGenome,
         ReferenceGenomeProjectSeqType,
-        RunSegment,
+        FastqImportInstance,
         FileType,
         DataFile,
         Realm,

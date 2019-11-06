@@ -58,7 +58,7 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
                 ReferenceGenomeProjectSeqType,
                 ReferenceGenomeIndex,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 SeqTrack,
                 Sample,
                 SampleType,

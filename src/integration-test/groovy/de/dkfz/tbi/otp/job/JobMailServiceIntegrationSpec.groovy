@@ -60,7 +60,7 @@ class JobMailServiceIntegrationSpec extends Specification {
 
         DomainFactory.createDataFile([
                 seqTrack: seqTrack,
-                runSegment: DomainFactory.createRunSegment([
+                fastqImportInstance: DomainFactory.createFastqImportInstance([
                         otrsTicket: otrsTicket,
                 ])
         ])

@@ -241,7 +241,7 @@ class NotificationCreator {
         List<String> allPaths = []
         otrsTicketService.getMetaDataFilesOfOtrsTicket(otrsTicket).each { MetaDataFile metaDataFile ->
             allPaths << metaDataFile.fullPath
-            List<String> dataFilePaths = metaDataFile.runSegment.dataFiles.collect { DataFile dataFile ->
+            List<String> dataFilePaths = metaDataFile.fastqImportInstance.dataFiles.collect { DataFile dataFile ->
                 dataFile.fullInitialPath
             }
             allPaths.addAll(dataFilePaths)

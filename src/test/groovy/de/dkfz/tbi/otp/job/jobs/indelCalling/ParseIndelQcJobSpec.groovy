@@ -78,7 +78,7 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
         ]
     }
 

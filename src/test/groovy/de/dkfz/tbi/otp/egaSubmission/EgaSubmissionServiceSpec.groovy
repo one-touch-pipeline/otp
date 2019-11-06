@@ -56,7 +56,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleSubmissionObject,
                 SampleType,

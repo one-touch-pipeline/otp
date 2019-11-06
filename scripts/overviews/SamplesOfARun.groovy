@@ -22,10 +22,8 @@
 
 //Overview of samples of a run
 
-//Show for a run all samples with SeqType and creation date grouped by run segment
+//Show for a run all samples with SeqType and creation date grouped by FastqImportInstance
 
-import de.dkfz.tbi.otp.job.plan.*
-import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 
@@ -33,10 +31,10 @@ import de.dkfz.tbi.otp.ngsdata.*
 Run run = Run.findByName("140819_SN7001149_0212_BC4H1BACXX")
 
 List output = []
-def segments = RunSegment.findAllByRun(run).sort{it.id}
-segments.each { segment ->
-    output << "segment: ${segment.id}"
-    def dataFiles = DataFile.findAllByRunSegment(segment)
+List<FastqImportInstance> fastqImportInstances = FastqImportInstance.findAllByRun(run).sort{it.id}
+fastqImportInstances.each { FastqImportInstance fastqImportInstance ->
+    output << "fastqImportInstance: ${fastqImportInstance.id}"
+    List<DataFile> dataFiles = DataFile.findAllByFastqImportInstance(fastqImportInstance)
     output << dataFiles.findAll{it?.seqTrack}.collect { "${it.dateCreated.format('yyyy-MM-dd')}  ${it.seqTrack.sample} ${it.seqTrack.seqType} ${SampleIdentifier.findAllBySample(it.seqTrack.sample)}" }.sort().unique().join("\n")
     output << ""
 }

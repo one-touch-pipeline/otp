@@ -50,7 +50,7 @@ class AbstractRoddyJobSpec extends Specification implements DataTest {
                 ReferenceGenomeProjectSeqType,
                 RoddyBamFile,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 SeqCenter,
                 SeqPlatform,
                 SeqPlatformGroup,

@@ -71,7 +71,7 @@ class ExecuteRoddySnvJobSpec extends Specification implements DataTest {
                 RoddySnvCallingInstance,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
         ]
     }
 

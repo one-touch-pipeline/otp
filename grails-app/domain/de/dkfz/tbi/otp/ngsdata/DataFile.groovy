@@ -90,21 +90,21 @@ class DataFile implements Commentable, Entity {
     /** @deprecated OTP-2311: Redundant with seqTrack.run  */
     @Deprecated
     Run run
-    /* OTP-2311: runSegment shall be the same for all DataFiles belonging to the same
+    /* OTP-2311: fastqImportInstance shall be the same for all DataFiles belonging to the same
      * SeqTrack, so actually this field should be defined in the SeqTrack class. */
-    RunSegment runSegment
+    FastqImportInstance fastqImportInstance
     SeqTrack seqTrack
     MergingLog mergingLog
     AlignmentLog alignmentLog
     FileType fileType
 
     static belongsTo = [
-            run         : Run,
-            runSegment  : RunSegment,
-            seqTrack    : SeqTrack,
-            mergingLog  : MergingLog,
-            alignmentLog: AlignmentLog,
-            fileType    : FileType,
+            run                : Run,
+            fastqImportInstance: FastqImportInstance,
+            seqTrack           : SeqTrack,
+            mergingLog         : MergingLog,
+            alignmentLog       : AlignmentLog,
+            fileType           : FileType,
     ]
 
     static constraints = {
@@ -198,7 +198,7 @@ class DataFile implements Commentable, Entity {
 
     static mapping = {
         run index: "data_file_run_idx"
-        runSegment index: "data_file_run_segment_idx"
+        fastqImportInstance index: "data_file_fastq_import_instance_idx"
         seqTrack index: "data_file_seq_track_idx"
         mergingLog index: "data_file_merging_log_idx"
         md5sum index: 'data_file_md5sum_idx'

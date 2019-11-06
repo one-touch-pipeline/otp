@@ -64,7 +64,7 @@ class ExecuteRunYapsaJobSpec extends Specification implements DataTest {
                 RoddySnvCallingInstance,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 RunYapsaConfig,
                 RunYapsaInstance,
                 Sample,

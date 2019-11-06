@@ -25,18 +25,15 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
 /**
- * Script to delete a runsegment if it was loaded twice.
+ * Script to delete a FastqImportInstance if it was loaded twice.
  */
 
-long runSegmentId = 0
+long fastqImportInstanceId = 0
 
-
-
-
-RunSegment.withTransaction {
-    RunSegment runSegment = RunSegment.get(runSegmentId)
-    assert runSegment
-    DataFile.findAllByRunSegment(runSegment).each { DataFile dataFile ->
+FastqImportInstance.withTransaction {
+    FastqImportInstance fastqImportInstance = FastqImportInstance.get(fastqImportInstanceId)
+    assert fastqImportInstance
+    DataFile.findAllByFastqImportInstance(fastqImportInstance).each { DataFile dataFile ->
         MetaDataEntry.findAllByDataFile(dataFile).each { MetaDataEntry entry ->
             entry.delete(flush: true)
         }
@@ -59,14 +56,14 @@ RunSegment.withTransaction {
             seqTrack.delete(flush: true)
         }
     }
-    assert DataFile.countByRunSegment(runSegment) == 0
-    MetaDataFile.findAllByRunSegment(runSegment).each {
+    assert DataFile.countByFastqImportInstance(fastqImportInstance) == 0
+    MetaDataFile.findAllByFastqImportInstance(fastqImportInstance).each {
         it.delete(flush: true)
     }
-    assert MetaDataFile.countByRunSegment(runSegment) == 0
-    assert RunSegment.get(runSegmentId) == runSegment
-    runSegment.delete()
-    assert RunSegment.get(runSegmentId) == null
+    assert MetaDataFile.countByFastqImportInstance(fastqImportInstance) == 0
+    assert FastqImportInstance.get(fastqImportInstanceId) == fastqImportInstance
+    fastqImportInstance.delete()
+    assert FastqImportInstance.get(fastqImportInstanceId) == null
     assert false
 }
 ''

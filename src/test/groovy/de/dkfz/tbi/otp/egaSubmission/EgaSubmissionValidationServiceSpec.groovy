@@ -54,7 +54,7 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleSubmissionObject,
                 SampleType,

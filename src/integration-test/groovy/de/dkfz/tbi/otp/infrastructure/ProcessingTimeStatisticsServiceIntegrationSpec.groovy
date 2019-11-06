@@ -133,7 +133,7 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
             return url
         }
 
-        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
+        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
         Run run = DomainFactory.createRun()
         Project projectA = DomainFactory.createProject()
         Project projectB = DomainFactory.createProject()
@@ -141,8 +141,8 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
         Individual individualB = DomainFactory.createIndividual(project: projectB)
         Sample sampleA = DomainFactory.createSample(individual: individualA)
         Sample sampleB = DomainFactory.createSample(individual: individualB)
-        SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleA, ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)], [runSegment: runSegment])
-        SeqTrack seqTrackB = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleB, ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)], [runSegment: runSegment])
+        SeqTrack seqTrackA = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleA, ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 1234)], [fastqImportInstance: fastqImportInstance])
+        SeqTrack seqTrackB = DomainFactory.createSeqTrackWithOneDataFile([run: run, sample: sampleB, ilseSubmission: DomainFactory.createIlseSubmission(ilseNumber: 5678)], [fastqImportInstance: fastqImportInstance])
 
         expect:
         List expect = [
@@ -183,8 +183,8 @@ class ProcessingTimeStatisticsServiceIntegrationSpec extends Specification {
 
     private static List createOtrsTicketWithSeqTrack(Map otrsTicketProperties = [:], Map seqTrackProperties = [:]) {
         OtrsTicket ticket = DomainFactory.createOtrsTicket(otrsTicketProperties)
-        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
-        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(seqTrackProperties, [runSegment: runSegment])
+        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
+        SeqTrack seqTrack = DomainFactory.createSeqTrackWithOneDataFile(seqTrackProperties, [fastqImportInstance: fastqImportInstance])
 
         return [ticket, seqTrack]
     }

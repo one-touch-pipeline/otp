@@ -37,7 +37,7 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
                 Individual,
                 Project,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleType,
                 SeqPlatform,

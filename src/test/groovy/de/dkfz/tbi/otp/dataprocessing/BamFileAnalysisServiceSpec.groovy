@@ -44,7 +44,7 @@ class BamFileAnalysisServiceSpec extends Specification implements DataTest {
                 RoddyBamFile,
                 RoddySnvCallingInstance,
                 RoddyWorkflowConfig,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SamplePair,
                 SampleType,

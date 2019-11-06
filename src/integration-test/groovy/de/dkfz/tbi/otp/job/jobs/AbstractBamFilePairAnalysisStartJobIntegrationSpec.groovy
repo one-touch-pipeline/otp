@@ -99,7 +99,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         given:
         BamFilePairAnalysis instance = getInstance()
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
-        RunSegment.list().each {
+        FastqImportInstance.list().each {
             it.otrsTicket = otrsTicket
             it.save(flush: true)
         }

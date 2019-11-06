@@ -724,9 +724,9 @@ class DataSwapServiceTests implements UserAndRoles {
     }
 
     private void createFastqFiles(List<SeqTrack> seqTracks) {
-        RunSegment runSegment = DomainFactory.createRunSegment()
+        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance()
         DataFile.findAllBySeqTrackInList(seqTracks).each {
-            it.runSegment = runSegment
+            it.fastqImportInstance = fastqImportInstance
             assert it.save(flush: true)
             CreateFileHelper.createFile(new File(lsdfFilesService.getFileViewByPidPath(it)))
         }

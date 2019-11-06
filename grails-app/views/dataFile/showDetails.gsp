@@ -109,7 +109,7 @@
             <sec:ifAllGranted roles="ROLE_OPERATOR">
                 <tr>
                     <td class="myKey"><g:message code="datafile.showDetails.import"/></td>
-                    <td class="myValue"><g:link controller="metadataImport" action="details" id="${dataFile.runSegmentId}">Import</g:link></td>
+                    <td class="myValue"><g:link controller="metadataImport" action="details" id="${dataFile.fastqImportInstanceId}">Import</g:link></td>
                 </tr>
             </sec:ifAllGranted>
         </table>

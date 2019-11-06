@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * Run represents one sequencing Run. It is one of the most important classes
  * in the NGS database. The run is typically submitted all at once, but it
  * could be submitted in parts from different locations and belonging to different
- * projects. The initial locations are stored in RunSegment objects.
+ * projects. The initial locations are stored in FastqImportInstance objects.
  */
 
 class Run implements ProcessParameterObject, Entity {

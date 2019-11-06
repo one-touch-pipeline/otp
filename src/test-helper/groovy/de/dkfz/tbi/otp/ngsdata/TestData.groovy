@@ -58,7 +58,7 @@ class TestData {
     @Deprecated
     Run run
     @Deprecated
-    RunSegment runSegment
+    FastqImportInstance fastqImportInstance
     @Deprecated
     SoftwareTool softwareTool
     @Deprecated
@@ -126,7 +126,7 @@ class TestData {
         run = createRun("testname1")
         assertNotNull(run.save(flush: true))
 
-        runSegment = DomainFactory.createRunSegment()
+        fastqImportInstance = DomainFactory.createFastqImportInstance()
 
         softwareTool = DomainFactory.createSoftwareTool()
         softwareTool.programName = "SOLID"
@@ -139,7 +139,7 @@ class TestData {
 
         fileType = createFileType(FileType.Type.SEQUENCE)
 
-        dataFile = createDataFile(seqTrack, runSegment)
+        dataFile = createDataFile(seqTrack, fastqImportInstance)
         assertNotNull(dataFile.save(flush: true))
 
         referenceGenome = createReferenceGenome()
@@ -196,26 +196,26 @@ class TestData {
     }
 
     @Deprecated
-    DataFile createDataFile(SeqTrack seqTrack, RunSegment runSegment, FileType fileType = this.fileType) {
+    DataFile createDataFile(SeqTrack seqTrack, FastqImportInstance fastqImportInstance, FileType fileType = this.fileType) {
         return createDataFile(
-            seqTrack: seqTrack,
-            runSegment: runSegment,
-            fileType: fileType,
+            seqTrack           : seqTrack,
+            fastqImportInstance: fastqImportInstance,
+            fileType           : fileType,
         )
     }
 
     @Deprecated
     DataFile createDataFile(Map properties = [:]) {
         return DomainFactory.createDataFile([
-            fileName: "datafile",
-            initialDirectory: TestCase.getUniqueNonExistentPath().path,
-            fileExists: true,
-            fileSize: 1,
-            fileType: fileType,
-            seqTrack: seqTrack,
-            runSegment: runSegment,
-            run: run,
-            fileWithdrawn: false,
+            fileName           : "datafile",
+            initialDirectory   : TestCase.getUniqueNonExistentPath().path,
+            fileExists         : true,
+            fileSize           : 1,
+            fileType           : fileType,
+            seqTrack           : seqTrack,
+            fastqImportInstance: fastqImportInstance,
+            run                : run,
+            fileWithdrawn      : false,
         ] + properties)
     }
 

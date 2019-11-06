@@ -206,7 +206,7 @@ class RunService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Collection<MetaDataFile> retrieveMetaDataFiles(Run run) {
         Collection<DataFile> dataFiles = DataFile.findAllByRun(run)
-        return dataFiles ? (dataFiles*.runSegment ? MetaDataFile.findAllByRunSegmentInList(dataFiles*.runSegment) : []) : []
+        return dataFiles ? (dataFiles*.fastqImportInstance ? MetaDataFile.findAllByFastqImportInstanceInList(dataFiles*.fastqImportInstance) : []) : []
     }
 
     /**

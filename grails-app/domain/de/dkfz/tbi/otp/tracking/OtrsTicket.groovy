@@ -158,7 +158,7 @@ class OtrsTicket implements Commentable, Entity {
 
     Date getFirstImportTimestamp() {
         return (Date) MetaDataFile.createCriteria().get {
-            'in'('runSegment', runSegments)
+            'in'('fastqImportInstance', fastqImportInstances)
             projections {
                 min("dateCreated")
             }
@@ -167,23 +167,23 @@ class OtrsTicket implements Commentable, Entity {
 
     Date getLastImportTimestamp() {
         return (Date) MetaDataFile.createCriteria().get {
-            'in'('runSegment', runSegments)
+            'in'('fastqImportInstance', fastqImportInstances)
             projections {
                 max("dateCreated")
             }
         }
     }
 
-    List<RunSegment> getRunSegments() {
+    List<FastqImportInstance> getFastqImportInstances() {
         //Doesn't work as a single Query, probably a Unit test problem
-        return RunSegment.withCriteria {
+        return FastqImportInstance.withCriteria {
             eq ('otrsTicket', this)
         }
     }
 
     Set<SeqTrack> findAllSeqTracks() {
         return new LinkedHashSet<SeqTrack>(SeqTrack.findAll(
-                'FROM SeqTrack st WHERE EXISTS (FROM DataFile df WHERE df.seqTrack = st AND df.runSegment.otrsTicket = :otrsTicket)',
+                'FROM SeqTrack st WHERE EXISTS (FROM DataFile df WHERE df.seqTrack = st AND df.fastqImportInstance.otrsTicket = :otrsTicket)',
                 [otrsTicket: this]
         ))
     }

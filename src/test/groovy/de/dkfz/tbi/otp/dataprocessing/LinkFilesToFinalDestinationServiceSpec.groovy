@@ -61,7 +61,7 @@ class LinkFilesToFinalDestinationServiceSpec extends Specification implements Is
                 RoddyWorkflowConfig,
                 RoddyQualityAssessment,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleType,
                 SeqCenter,

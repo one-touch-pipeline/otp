@@ -54,7 +54,7 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleType,
                 SeqCenter,

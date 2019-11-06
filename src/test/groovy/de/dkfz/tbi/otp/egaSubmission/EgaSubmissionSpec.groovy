@@ -53,7 +53,7 @@ class EgaSubmissionSpec extends Specification implements EgaSubmissionFactory, I
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleSubmissionObject,
                 SampleType,

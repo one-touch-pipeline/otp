@@ -38,7 +38,7 @@ class FastqcUploadServiceSpec extends Specification implements DataTest {
                 Individual,
                 Project,
                 Realm,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleType,
         ]

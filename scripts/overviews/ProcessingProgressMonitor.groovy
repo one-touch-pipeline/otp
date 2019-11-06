@@ -32,7 +32,6 @@ The following code allows to show the processing state for
 ** waiting and running data installation workflow
 ** waiting and running fastqc workflows for data loaded after 1.1.2015 and are not in blacklist
 ** waiting/running alignments
-*** seqTracks which belong to run segments where flag 'align' is set to false are ignored
 *** running OTP alignments (WGS, WES)
 *** running roddy alignments (WGS, WES, WGBS, RNA, ChipSeq) (if not withdrawn)
 ** running variant calling (snv, indel, ...) (if not withdrawn)

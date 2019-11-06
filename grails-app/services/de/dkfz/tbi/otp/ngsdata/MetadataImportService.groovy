@@ -139,7 +139,7 @@ class MetadataImportService {
                 return [(validate(pathWithMd5sum.path, directoryStructure)): pathWithMd5sum.md5sum]
             }
             List<ValidateAndImportResult> results = contexts.collect { context, md5sum ->
-                return importHelperMethod(context, align, RunSegment.ImportMode.MANUAL, ignoreWarnings, md5sum, ticketNumber, seqCenterComment,
+                return importHelperMethod(context, align, FastqImportInstance.ImportMode.MANUAL, ignoreWarnings, md5sum, ticketNumber, seqCenterComment,
                         automaticNotification)
             }
             return results
@@ -155,7 +155,7 @@ class MetadataImportService {
         }
     }
 
-    private ValidateAndImportResult importHelperMethod(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode,
+    private ValidateAndImportResult importHelperMethod(MetadataValidationContext context, boolean align, FastqImportInstance.ImportMode importMode,
                                                        boolean ignoreWarnings, String previousValidationMd5sum, String ticketNumber, String seqCenterComment,
                                                        boolean automaticNotification) {
         MetaDataFile metadataFileObject = null
@@ -221,7 +221,7 @@ class MetadataImportService {
             return validate(it, directoryStructure)
         }
         List<ValidateAndImportResult> results = contexts.collect {
-            return importHelperMethod(it, true, RunSegment.ImportMode.AUTOMATIC, false, null, otrsTicketNumber, null, true)
+            return importHelperMethod(it, true, FastqImportInstance.ImportMode.AUTOMATIC, false, null, otrsTicketNumber, null, true)
         }
         List<MetadataValidationContext> failedValidations = results.findAll { it.metadataFile == null }*.context
         if (failedValidations.isEmpty()) {
@@ -309,28 +309,28 @@ class MetadataImportService {
         return false
     }
 
-    protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, RunSegment.ImportMode importMode, String ticketNumber,
+    protected MetaDataFile importMetadataFile(MetadataValidationContext context, boolean align, FastqImportInstance.ImportMode importMode, String ticketNumber,
                                               String seqCenterComment, boolean automaticNotification) {
         Long timeImportStarted = System.currentTimeMillis()
         log.debug('import started')
-        RunSegment runSegment = new RunSegment(
+        FastqImportInstance fastqImportInstance = new FastqImportInstance(
                 otrsTicket: ticketNumber ? otrsTicketService.createOrResetOtrsTicket(ticketNumber, seqCenterComment, automaticNotification) : null,
                 importMode: importMode,
         )
-        assert runSegment.save(flush: false)
+        assert fastqImportInstance.save(flush: false)
         Long timeStarted = System.currentTimeMillis()
         log.debug('runs stared')
-        importRuns(context, runSegment, context.spreadsheet.dataRows, align)
+        importRuns(context, fastqImportInstance, context.spreadsheet.dataRows, align)
         log.debug("runs stopped took: ${System.currentTimeMillis() - timeStarted}")
 
-        runSegment.refresh()
-        notifyAboutUnsetConfig(runSegment.dataFiles*.seqTrack as List, runSegment.otrsTicket)
+        fastqImportInstance.refresh()
+        notifyAboutUnsetConfig(fastqImportInstance.dataFiles*.seqTrack as List, fastqImportInstance.otrsTicket)
 
         MetaDataFile metaDataFile = new MetaDataFile(
-                fileName: context.metadataFile.fileName.toString(),
-                filePath: context.metadataFile.parent.toString(),
-                md5sum: context.metadataFileMd5sum,
-                runSegment: runSegment,
+                fileName           : context.metadataFile.fileName.toString(),
+                filePath           : context.metadataFile.parent.toString(),
+                md5sum             : context.metadataFileMd5sum,
+                fastqImportInstance: fastqImportInstance,
         )
         assert metaDataFile.save(flush: true)
 
@@ -381,7 +381,7 @@ class MetadataImportService {
         }
     }
 
-    private void importRuns(MetadataValidationContext context, RunSegment runSegment, Collection<Row> metadataFileRows, boolean align) {
+    private void importRuns(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Collection<Row> metadataFileRows, boolean align) {
         metadataFileRows.groupBy { it.getCellByColumnTitle(RUN_ID.name()).text }.each { String runName, List<Row> rows ->
             Run run = Run.findWhere(
                     name: runName,
@@ -409,12 +409,12 @@ class MetadataImportService {
 
             Long timeStarted = System.currentTimeMillis()
             log.debug('seqTracks started')
-            importSeqTracks(context, runSegment, run, rows, align)
+            importSeqTracks(context, fastqImportInstance, run, rows, align)
             log.debug("seqTracks stopped took: ${System.currentTimeMillis() - timeStarted}")
         }
     }
 
-    private void importSeqTracks(MetadataValidationContext context, RunSegment runSegment, Run run, Collection<Row> runRows, boolean align) {
+    private void importSeqTracks(MetadataValidationContext context, FastqImportInstance fastqImportInstance, Run run, Collection<Row> runRows, boolean align) {
         Map<String, List<Row>> runsGroupedByLane = runRows.groupBy {
             MultiplexingService.combineLaneNumberAndBarcode(it.getCellByColumnTitle(LANE_NO.name()).text, extractBarcode(it).value)
         }
@@ -490,7 +490,7 @@ class MetadataImportService {
 
             Long timeStarted = System.currentTimeMillis()
             log.debug("dataFiles started ${index}/${amountOfRows}")
-            importDataFiles(context, runSegment, seqTrack, rows)
+            importDataFiles(context, fastqImportInstance, seqTrack, rows)
             log.debug("dataFiles stopped took: ${System.currentTimeMillis() - timeStarted}")
             assert seqTrack.save(flush: true) //needs to flush the session, so seqTrackService.decideAndPrepareForAlignment can work
 
@@ -503,7 +503,7 @@ class MetadataImportService {
         }
     }
 
-    private static void importDataFiles(MetadataValidationContext context, RunSegment runSegment, SeqTrack seqTrack, Collection<Row> seqTrackRows) {
+    private static void importDataFiles(MetadataValidationContext context, FastqImportInstance fastqImportInstance, SeqTrack seqTrack, Collection<Row> seqTrackRows) {
         Map<String, Collection<Row>> seqTrackRowsByMateNumber = seqTrackRows.groupBy {
             extractMateNumber(it).value
         }
@@ -521,20 +521,20 @@ class MetadataImportService {
             boolean indexFile = matcher.group('index')
 
             DataFile dataFile = new DataFile(
-                    pathName: '',
-                    fileName: file.fileName.toString(),
-                    initialDirectory: file.parent.toString(),
-                    vbpFileName: file.fileName.toString(),
-                    md5sum: row.getCellByColumnTitle(MD5.name()).text.toLowerCase(Locale.ENGLISH),
-                    project: seqTrack.project,
-                    dateExecuted: seqTrack.run.dateExecuted,
-                    used: true,
-                    mateNumber: mate,
-                    indexFile: indexFile,
-                    run: seqTrack.run,
-                    runSegment: runSegment,
-                    seqTrack: seqTrack,
-                    fileType: FileTypeService.getFileType(file.fileName.toString(), FileType.Type.SEQUENCE),
+                    pathName           : '',
+                    fileName           : file.fileName.toString(),
+                    initialDirectory   : file.parent.toString(),
+                    vbpFileName        : file.fileName.toString(),
+                    md5sum             : row.getCellByColumnTitle(MD5.name()).text.toLowerCase(Locale.ENGLISH),
+                    project            : seqTrack.project,
+                    dateExecuted       : seqTrack.run.dateExecuted,
+                    used               : true,
+                    mateNumber         : mate,
+                    indexFile          : indexFile,
+                    run                : seqTrack.run,
+                    fastqImportInstance: fastqImportInstance,
+                    seqTrack           : seqTrack,
+                    fileType           : FileTypeService.getFileType(file.fileName.toString(), FileType.Type.SEQUENCE),
             )
             assert dataFile.save(flush: false)
 

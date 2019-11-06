@@ -55,7 +55,7 @@ FROM OtrsTicket otrsTicket
  WHERE
 ${search ? """
   (EXISTS (FROM DataFile dataFile WHERE
-   dataFile.runSegment.otrsTicket = otrsTicket AND (
+   dataFile.fastqImportInstance.otrsTicket = otrsTicket AND (
     lower(dataFile.seqTrack.sample.individual.project.name) LIKE :search OR
     str(dataFile.seqTrack.ilseSubmission.ilseNumber) LIKE :search OR
     lower(dataFile.seqTrack.run.name) LIKE :search

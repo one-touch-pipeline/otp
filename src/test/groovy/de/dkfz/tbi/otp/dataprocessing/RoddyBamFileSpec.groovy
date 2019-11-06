@@ -55,7 +55,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleType,
                 SeqCenter,

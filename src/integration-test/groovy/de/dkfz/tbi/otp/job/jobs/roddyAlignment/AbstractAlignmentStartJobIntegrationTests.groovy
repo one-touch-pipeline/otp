@@ -384,7 +384,7 @@ class AbstractAlignmentStartJobIntegrationTests {
         setupData()
         MergingWorkPackage mwp = createMergingWorkPackageWithSeqTrackInState(SeqTrack.DataProcessingState.FINISHED)
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
-        DataFile.findAll()*.runSegment = DomainFactory.createRunSegment(otrsTicket: otrsTicket)
+        DataFile.findAll()*.fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: otrsTicket)
         DomainFactory.createRoddyProcessingOptions(TestCase.uniqueNonExistentPath)
         DomainFactory.createRoddyWorkflowConfig([pipeline: mwp.pipeline, project: mwp.project])
 

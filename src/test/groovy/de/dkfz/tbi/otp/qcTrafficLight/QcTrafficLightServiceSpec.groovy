@@ -59,7 +59,7 @@ class QcTrafficLightServiceSpec extends Specification implements RoddyRnaFactory
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleType,
                 SeqType,

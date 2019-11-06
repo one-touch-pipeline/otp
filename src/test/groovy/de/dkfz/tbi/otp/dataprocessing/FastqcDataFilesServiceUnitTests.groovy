@@ -39,7 +39,7 @@ import static org.junit.Assert.assertEquals
         Project,
         Realm,
         Run,
-        RunSegment,
+        FastqImportInstance,
         Sample,
         SampleType,
         SeqCenter,

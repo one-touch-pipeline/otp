@@ -127,7 +127,7 @@ class OtrsTicketService {
         }
         List<OtrsTicket> otrsTickets = DataFile.createCriteria().listDistinct {
             'in'('seqTrack', seqTracks)
-            runSegment {
+            fastqImportInstance {
                 isNotNull('otrsTicket')
                 otrsTicket {
                     order("ticketCreated", "asc")
@@ -141,11 +141,11 @@ class OtrsTicketService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void assignOtrsTicketToRunSegment(String ticketNumber, Long runSegmentId) {
-        RunSegment runSegment = RunSegment.get(runSegmentId)
-        assert runSegment: "No RunSegment found for ${runSegmentId}."
+    void assignOtrsTicketToFastqImportInstance(String ticketNumber, Long fastqImportInstanceId) {
+        FastqImportInstance fastqImportInstance = FastqImportInstance.get(fastqImportInstanceId)
+        assert fastqImportInstance: "No FastqImportInstance found for ${fastqImportInstanceId}."
 
-        OtrsTicket oldOtrsTicket = runSegment.otrsTicket
+        OtrsTicket oldOtrsTicket = fastqImportInstance.otrsTicket
 
         if (oldOtrsTicket && oldOtrsTicket.ticketNumber == ticketNumber) {
             return
@@ -156,10 +156,10 @@ class OtrsTicketService {
                     "An OTRS ticket must consist of 16 successive digits.")
         }
 
-        // assigning a runSegment that belongs to an otrsTicket which consists of several other runSegments is not allowed,
+        // assigning a fastqImportInstance that belongs to an otrsTicket which consists of several other fastqImportInstances is not allowed,
         // because it is not possible to calculate the right "Started"/"Finished" dates
-        if (oldOtrsTicket && oldOtrsTicket.runSegments.size() != 1) {
-            throw new UserException("Assigning a runSegment that belongs to an OTRS-Ticket which consists of several other runSegments is not allowed.")
+        if (oldOtrsTicket && oldOtrsTicket.fastqImportInstances.size() != 1) {
+            throw new UserException("Assigning a fastqImportInstance that belongs to an OTRS-Ticket which consists of several other fastqImportInstances is not allowed.")
         }
 
         OtrsTicket newOtrsTicket = CollectionUtils.atMostOneElement(OtrsTicket.findAllByTicketNumber(ticketNumber)) ?:
@@ -169,8 +169,8 @@ class OtrsTicketService {
             throw new UserException("It is not allowed to assign to an finally notified OTRS-Ticket.")
         }
 
-        runSegment.otrsTicket = newOtrsTicket
-        assert runSegment.save(flush: true)
+        fastqImportInstance.otrsTicket = newOtrsTicket
+        assert fastqImportInstance.save(flush: true)
 
         ProcessingStatus status = notificationCreator.getProcessingStatus(newOtrsTicket.findAllSeqTracks())
         for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
@@ -188,7 +188,7 @@ class OtrsTicketService {
 
     List<MetaDataFile> getMetaDataFilesOfOtrsTicket(OtrsTicket otrsTicket) {
         return MetaDataFile.createCriteria().list {
-            runSegment {
+            fastqImportInstance {
                 eq("otrsTicket", otrsTicket)
             }
         } as List<MetaDataFile>

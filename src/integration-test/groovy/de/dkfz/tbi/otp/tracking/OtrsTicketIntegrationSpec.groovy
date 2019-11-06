@@ -36,15 +36,15 @@ class OtrsTicketIntegrationSpec extends Specification {
     void 'findAllSeqTracks finds expected SeqTracks'() {
         given:
         OtrsTicket ticketA = DomainFactory.createOtrsTicket()
-        RunSegment runSegmentA1 = DomainFactory.createRunSegment(otrsTicket: ticketA)
-        RunSegment runSegmentA2 = DomainFactory.createRunSegment(otrsTicket: ticketA)
-        SeqTrack seqTrackA1 = DomainFactory.createSeqTrackWithOneDataFile([:], [runSegment: runSegmentA1])
-        SeqTrack seqTrackA2 = DomainFactory.createSeqTrackWithOneDataFile([:], [runSegment: runSegmentA2])
-        SeqTrack seqTrackA3 = DomainFactory.createSeqTrackWithOneDataFile([:], [runSegment: runSegmentA2])
+        FastqImportInstance fastqImportInstanceA1 = DomainFactory.createFastqImportInstance(otrsTicket: ticketA)
+        FastqImportInstance fastqImportInstanceA2 = DomainFactory.createFastqImportInstance(otrsTicket: ticketA)
+        SeqTrack seqTrackA1 = DomainFactory.createSeqTrackWithOneDataFile([:], [fastqImportInstance: fastqImportInstanceA1])
+        SeqTrack seqTrackA2 = DomainFactory.createSeqTrackWithOneDataFile([:], [fastqImportInstance: fastqImportInstanceA2])
+        SeqTrack seqTrackA3 = DomainFactory.createSeqTrackWithOneDataFile([:], [fastqImportInstance: fastqImportInstanceA2])
 
         OtrsTicket ticketB = DomainFactory.createOtrsTicket()
-        RunSegment runSegmentB1 = DomainFactory.createRunSegment(otrsTicket: ticketB)
-        SeqTrack seqTrackB1 = DomainFactory.createSeqTrackWithTwoDataFiles([:], [runSegment: runSegmentB1], [:])
+        FastqImportInstance fastqImportInstanceB1 = DomainFactory.createFastqImportInstance(otrsTicket: ticketB)
+        SeqTrack seqTrackB1 = DomainFactory.createSeqTrackWithTwoDataFiles([:], [fastqImportInstance: fastqImportInstanceB1], [:])
 
         OtrsTicket ticketC = DomainFactory.createOtrsTicket()
 

@@ -80,7 +80,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
                 Realm,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleIdentifier,
                 SampleType,
@@ -179,7 +179,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
         MetaDataFile metadataFileObject = new MetaDataFile()
         MetadataImportService service = Spy(MetadataImportService) {
-            1 * importMetadataFile(_, align, RunSegment.ImportMode.MANUAL, TICKET_NUMBER, null, automaticNotification) >> metadataFileObject
+            1 * importMetadataFile(_, align, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, automaticNotification) >> metadataFileObject
             1 * copyMetadataFileIfRequested(_)
         }
         service.applicationContext = Mock(ApplicationContext) {
@@ -246,11 +246,11 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         MetadataImportService service = Spy(MetadataImportService) {
             1 * validate(context1.metadataFile, directoryStructureName) >> { assert imported == 0; context1 }
             1 * validate(context2.metadataFile, directoryStructureName) >> { assert imported == 0; context2 }
-            1 * importMetadataFile(context1, true, RunSegment.ImportMode.MANUAL, TICKET_NUMBER, null, true) >> {
+            1 * importMetadataFile(context1, true, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true) >> {
                 imported++
                 metadataFile1
             }
-            1 * importMetadataFile(context2, true, RunSegment.ImportMode.MANUAL, TICKET_NUMBER, null, true) >> {
+            1 * importMetadataFile(context2, true, FastqImportInstance.ImportMode.MANUAL, TICKET_NUMBER, null, true) >> {
                 imported++
                 metadataFile2
             }
@@ -284,8 +284,8 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
         MetadataImportService service = Spy(MetadataImportService) {
             1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context1
             1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context2
-            1 * importMetadataFile(context1, true, RunSegment.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile1
-            1 * importMetadataFile(context2, true, RunSegment.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile2
+            1 * importMetadataFile(context1, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile1
+            1 * importMetadataFile(context2, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> metadataFile2
         }
         service.fileSystemService = new TestFileSystemService()
 
@@ -312,7 +312,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             1 * validate(context1.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context1
             1 * validate(context2.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context2
             1 * validate(context3.metadataFile, DirectoryStructureBeanName.GPCF_SPECIFIC) >> context3
-            1 * importMetadataFile(context2, true, RunSegment.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> DomainFactory.createMetaDataFile()
+            1 * importMetadataFile(context2, true, FastqImportInstance.ImportMode.AUTOMATIC, TICKET_NUMBER, null, true) >> DomainFactory.createMetaDataFile()
         }
 
         service.fileSystemService = new TestFileSystemService()
@@ -421,7 +421,7 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
 
 
     @Unroll
-    void "importMetadataFile imports correctly"(boolean runExists, boolean includeOptional, boolean align, RunSegment.ImportMode importMode) {
+    void "importMetadataFile imports correctly"(boolean runExists, boolean includeOptional, boolean align, FastqImportInstance.ImportMode importMode) {
         given:
         final String WGBS_T = SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName
         final String WG = SeqTypeNames.WHOLE_GENOME.seqTypeName
@@ -611,21 +611,21 @@ ${ILSE_NO}                      -             1234          1234          -     
         )
         (run2 != null) == includeOptional
 
-        // runSegment
-        RunSegment.count == 1
-        RunSegment runSegment = RunSegment.findWhere(
+        // fastqImportInstance
+        FastqImportInstance.count == 1
+        FastqImportInstance fastqImportInstance = FastqImportInstance.findWhere(
                 otrsTicket: otrsTicket,
                 importMode: importMode,
         )
-        runSegment != null
+        fastqImportInstance != null
 
         // metadataFile
         MetaDataFile.count == 1
         MetaDataFile metadataFile = MetaDataFile.findWhere(
-                fileName: file.name,
-                filePath: file.parent,
-                md5sum: context.metadataFileMd5sum,
-                runSegment: runSegment,
+                fileName           : file.name,
+                filePath           : file.parent,
+                md5sum             : context.metadataFileMd5sum,
+                fastqImportInstance: fastqImportInstance,
         )
         result == metadataFile
 
@@ -635,10 +635,10 @@ ${ILSE_NO}                      -             1234          1234          -     
         MetaDataEntry.count == context.spreadsheet.header.cells.size() * dataFileCount
 
         Map commonDataFileProperties = [
-                pathName  : '',
-                used      : true,
-                runSegment: runSegment,
-                fileType  : fileType,
+                pathName           : '',
+                used               : true,
+                fastqImportInstance: fastqImportInstance,
+                fileType           : fileType,
         ]
         Map commonRun1DataFileProperties = commonDataFileProperties + [
                 dateExecuted: run1Date,
@@ -843,8 +843,8 @@ ${ILSE_NO}                      -             1234          1234          -     
 
         where:
         runExists | includeOptional | align | importMode
-        false     | true            | false | RunSegment.ImportMode.AUTOMATIC
-        true      | false           | true  | RunSegment.ImportMode.MANUAL
+        false     | true            | false | FastqImportInstance.ImportMode.AUTOMATIC
+        true      | false           | true  | FastqImportInstance.ImportMode.MANUAL
     }
 
 
@@ -942,7 +942,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         )
 
         when:
-        MetaDataFile result = service.importMetadataFile(context, false, RunSegment.ImportMode.MANUAL, null, null, false)
+        MetaDataFile result = service.importMetadataFile(context, false, FastqImportInstance.ImportMode.MANUAL, null, null, false)
 
         then:
         // runs
@@ -955,21 +955,21 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         run != null
         run.dateExecuted == date
 
-        // runSegment
-        RunSegment.count == 1
-        RunSegment runSegment = RunSegment.findWhere(
+        // fastqImportInstance
+        FastqImportInstance.count == 1
+        FastqImportInstance fastqImportInstance = FastqImportInstance.findWhere(
                 otrsTicket: null,
-                importMode: RunSegment.ImportMode.MANUAL
+                importMode: FastqImportInstance.ImportMode.MANUAL
         )
-        runSegment != null
+        fastqImportInstance != null
 
         // metadataFile
         MetaDataFile.count == 1
         MetaDataFile metadataFile = MetaDataFile.findWhere(
-                fileName: file.name,
-                filePath: file.parent,
-                md5sum: context.metadataFileMd5sum,
-                runSegment: runSegment,
+                fileName           : file.name,
+                filePath           : file.parent,
+                md5sum             : context.metadataFileMd5sum,
+                fastqImportInstance: fastqImportInstance,
         )
         result == metadataFile
 
@@ -993,14 +993,14 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         seqTrack.antibodyTarget == antibodyTarget
 
         Map commonRunDataFileProperties = [
-                pathName    : '',
-                used        : true,
-                runSegment  : runSegment,
-                fileType    : fileType,
-                dateExecuted: date,
-                run         : run,
-                project     : sampleIdentifier.project,
-                seqTrack    : seqTrack,
+                pathName           : '',
+                used               : true,
+                fastqImportInstance: fastqImportInstance,
+                fileType           : fileType,
+                dateExecuted       : date,
+                run                : run,
+                project            : sampleIdentifier.project,
+                seqTrack           : seqTrack,
         ]
 
         DataFile dataFile1 = DataFile.findWhere(commonRunDataFileProperties + [
@@ -1145,7 +1145,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         )
 
         when:
-        MetaDataFile result = service.importMetadataFile(context, false, RunSegment.ImportMode.MANUAL, null, null, false)
+        MetaDataFile result = service.importMetadataFile(context, false, FastqImportInstance.ImportMode.MANUAL, null, null, false)
 
         then:
         // runs
@@ -1158,21 +1158,21 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         run != null
         run.dateExecuted == date
 
-        // runSegment
-        RunSegment.count == 1
-        RunSegment runSegment = RunSegment.findWhere(
+        // fastqImportInstance
+        FastqImportInstance.count == 1
+        FastqImportInstance fastqImportInstance = FastqImportInstance.findWhere(
                 otrsTicket: null,
-                importMode: RunSegment.ImportMode.MANUAL
+                importMode: FastqImportInstance.ImportMode.MANUAL
         )
-        runSegment != null
+        fastqImportInstance != null
 
         // metadataFile
         MetaDataFile.count == 1
         MetaDataFile metadataFile = MetaDataFile.findWhere(
-                fileName: file.name,
-                filePath: file.parent,
-                md5sum: context.metadataFileMd5sum,
-                runSegment: runSegment,
+                fileName           : file.name,
+                filePath           : file.parent,
+                md5sum             : context.metadataFileMd5sum,
+                fastqImportInstance: fastqImportInstance,
         )
         result == metadataFile
 
@@ -1196,14 +1196,14 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         seqTrack.class == SeqTrack
 
         Map commonRunDataFileProperties = [
-                pathName    : '',
-                used        : true,
-                runSegment  : runSegment,
-                fileType    : fileType,
-                dateExecuted: date,
-                run         : run,
-                project     : sampleIdentifier.project,
-                seqTrack    : seqTrack,
+                pathName           : '',
+                used               : true,
+                fastqImportInstance: fastqImportInstance,
+                fileType           : fileType,
+                dateExecuted       : date,
+                run                : run,
+                project            : sampleIdentifier.project,
+                seqTrack           : seqTrack,
         ]
 
         DataFile dataFile1 = DataFile.findWhere(commonRunDataFileProperties + [

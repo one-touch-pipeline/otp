@@ -57,7 +57,7 @@ class AceseqInstanceSpec extends Specification implements DataTest {
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SamplePair,
                 SampleType,

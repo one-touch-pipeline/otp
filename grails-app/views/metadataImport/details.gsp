@@ -20,7 +20,7 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.RunSegment; de.dkfz.tbi.otp.tracking.OtrsTicket; org.joda.time.DateTime"
+<%@ page import="de.dkfz.tbi.otp.ngsdata.FastqImportInstance; de.dkfz.tbi.otp.tracking.OtrsTicket; org.joda.time.DateTime"
         contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
@@ -43,13 +43,13 @@
                         roles="ROLE_OPERATOR"
                         link="${g.createLink(
                                 controller: 'metadataImport',
-                                action: 'assignOtrsTicketToRunSegment',
-                                id: runSegment.id)}"
-                        url="${runSegment.otrsTicket?.url ?: "#"}"
-                        value="${runSegment.otrsTicket?.ticketNumber ?: g.message(code: "metadataImport.details.ticketMissing")}"/>
+                                action: 'assignOtrsTicketToFastqImportInstance',
+                                id: fastqImportInstance.id)}"
+                        url="${fastqImportInstance.otrsTicket?.url ?: "#"}"
+                        value="${fastqImportInstance.otrsTicket?.ticketNumber ?: g.message(code: "metadataImport.details.ticketMissing")}"/>
             </td>
         </tr>
-        <g:if test="${runSegment.otrsTicket}">
+        <g:if test="${fastqImportInstance.otrsTicket}">
             <tr>
                 <td>
                     <g:message code="metadataImport.otrs.automaticNotificationFlag"/>:
@@ -58,9 +58,9 @@
                     <otp:editorSwitch
                             roles="ROLE_OPERATOR"
                             template="dropDown"
-                            link="${g.createLink(controller: "metadataImport", action: "updateAutomaticNotificationFlag", id: runSegment.otrsTicket.id)}"
+                            link="${g.createLink(controller: "metadataImport", action: "updateAutomaticNotificationFlag", id: fastqImportInstance.otrsTicket.id)}"
                             values="${["true","false"]}"
-                            value="${runSegment.otrsTicket.automaticNotification}"/>
+                            value="${fastqImportInstance.otrsTicket.automaticNotification}"/>
                 </td>
             </tr>
             <tr>
@@ -71,9 +71,9 @@
                     <otp:editorSwitch
                             roles="ROLE_OPERATOR"
                             template="dropDown"
-                            link="${g.createLink(controller: "metadataImport", action: "updateFinalNotificationFlag", id: runSegment.otrsTicket.id)}"
+                            link="${g.createLink(controller: "metadataImport", action: "updateFinalNotificationFlag", id: fastqImportInstance.otrsTicket.id)}"
                             values="${["true","false"]}"
-                            value="${runSegment.otrsTicket.finalNotificationSent}"/>
+                            value="${fastqImportInstance.otrsTicket.finalNotificationSent}"/>
                 </td>
             </tr>
             <tr>
@@ -84,8 +84,8 @@
                     <otp:editorSwitch
                             roles="ROLE_OPERATOR"
                             template="textArea"
-                            link="${g.createLink(controller: "metadataImport", action: "updateSeqCenterComment", id: runSegment.otrsTicket.id)}"
-                            value="${runSegment.otrsTicket.seqCenterComment}"/>
+                            link="${g.createLink(controller: "metadataImport", action: "updateSeqCenterComment", id: fastqImportInstance.otrsTicket.id)}"
+                            value="${fastqImportInstance.otrsTicket.seqCenterComment}"/>
                 </td>
             </tr>
         </g:if>

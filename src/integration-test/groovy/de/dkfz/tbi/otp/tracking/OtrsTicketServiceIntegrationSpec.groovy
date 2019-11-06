@@ -138,22 +138,22 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
         // one ticket, with two seqtracks
         otrsTicket01 = createOtrsTicket()
         seqTrack1A = createSeqTrack()
-        createDataFile(runSegment: createRunSegment(otrsTicket: otrsTicket01), seqTrack: seqTrack1A)
+        createDataFile(fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket01), seqTrack: seqTrack1A)
         seqTrack1B = createSeqTrack()
-        createDataFile(runSegment: createRunSegment(otrsTicket: otrsTicket01), seqTrack: seqTrack1B)
+        createDataFile(fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket01), seqTrack: seqTrack1B)
         // one ticket, one seqtrack
         otrsTicket02 = createOtrsTicket()
         seqTrack02 = createSeqTrack()
-        createDataFile(runSegment: createRunSegment(otrsTicket: otrsTicket02), seqTrack: seqTrack02)
+        createDataFile(fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket02), seqTrack: seqTrack02)
         // another ticket, again one seqtrack
         otrsTicket03 = createOtrsTicket()
         seqTrack03 = createSeqTrack()
-        createDataFile(runSegment: createRunSegment(otrsTicket: otrsTicket03), seqTrack: seqTrack03)
+        createDataFile(fastqImportInstance: createFastqImportInstance(otrsTicket: otrsTicket03), seqTrack: seqTrack03)
         // an orphaned seqtrack, no ticket, no datafile
         seqTrackOrphanNoDatafile = createSeqTrack()
         // an orphaned seqtrack, no ticket, but with a datafile
         seqTrackOrphanWithDatafile = createSeqTrack()
-        createDataFile(runSegment: createRunSegment(), seqTrack: seqTrackOrphanWithDatafile)
+        createDataFile(fastqImportInstance: createFastqImportInstance(), seqTrack: seqTrackOrphanWithDatafile)
 
         when: "looking for seqtrack batches, find all (unique) tickets"
         actualBatch = otrsTicketService.findAllOtrsTickets([seqTrack1A, seqTrack02, seqTrack1B])
@@ -180,95 +180,95 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
         TestCase.assertContainSame(actualOrphanWithDatafile, [])
     }
 
-    void "assignOtrsTicketToRunSegment, assign new ticketNumber, ticket already exists"() {
+    void "assignOtrsTicketToFastqImportInstance, assign new ticketNumber, ticket already exists"() {
         given:
         OtrsTicket oldOtrsTicket = createOtrsTicket()
         OtrsTicket newOtrsTicket = createOtrsTicket()
-        RunSegment runSegment = createRunSegment(otrsTicket: oldOtrsTicket)
+        FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: oldOtrsTicket)
 
         when:
-        otrsTicketService.assignOtrsTicketToRunSegment(newOtrsTicket.ticketNumber, runSegment.id)
+        otrsTicketService.assignOtrsTicketToFastqImportInstance(newOtrsTicket.ticketNumber, fastqImportInstance.id)
 
         then:
-        runSegment.otrsTicket == newOtrsTicket
+        fastqImportInstance.otrsTicket == newOtrsTicket
     }
 
-    void "assignOtrsTicketToRunSegment, assign new ticketNumber, ticket does not exists"() {
+    void "assignOtrsTicketToFastqImportInstance, assign new ticketNumber, ticket does not exists"() {
         given:
         String newTicketNumber = "2000112201234567"
         OtrsTicket oldOtrsTicket = createOtrsTicket()
-        RunSegment runSegment = createRunSegment(otrsTicket: oldOtrsTicket)
+        FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: oldOtrsTicket)
 
         when:
-        otrsTicketService.assignOtrsTicketToRunSegment(newTicketNumber, runSegment.id)
+        otrsTicketService.assignOtrsTicketToFastqImportInstance(newTicketNumber, fastqImportInstance.id)
 
         then:
-        runSegment.otrsTicket == CollectionUtils.exactlyOneElement(OtrsTicket.findAllByTicketNumber(newTicketNumber))
+        fastqImportInstance.otrsTicket == CollectionUtils.exactlyOneElement(OtrsTicket.findAllByTicketNumber(newTicketNumber))
     }
 
-    void "assignOtrsTicketToRunSegment, new ticketNumber equals old ticketNumber, does not fail"() {
+    void "assignOtrsTicketToFastqImportInstance, new ticketNumber equals old ticketNumber, does not fail"() {
         given:
         OtrsTicket otrsTicket = createOtrsTicket(ticketNumber: '2000010112345678')
-        RunSegment runSegment = createRunSegment(otrsTicket: otrsTicket)
+        FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: otrsTicket)
 
         when:
-        otrsTicketService.assignOtrsTicketToRunSegment(otrsTicket.ticketNumber, runSegment.id)
+        otrsTicketService.assignOtrsTicketToFastqImportInstance(otrsTicket.ticketNumber, fastqImportInstance.id)
 
         then:
-        runSegment.otrsTicket == otrsTicket
+        fastqImportInstance.otrsTicket == otrsTicket
     }
 
-    void "assignOtrsTicketToRunSegment, no RunSegment for runSegementId, throws AssertionError "() {
+    void "assignOtrsTicketToFastqImportInstance, no FastqImportInstance for runSegementId, throws AssertionError "() {
         when:
-        otrsTicketService.assignOtrsTicketToRunSegment("", 1)
+        otrsTicketService.assignOtrsTicketToFastqImportInstance("", 1)
 
         then:
         AssertionError error = thrown()
-        error.message.contains("No RunSegment found")
+        error.message.contains("No FastqImportInstance found")
     }
 
-    void "assignOtrsTicketToRunSegment, new ticketNumber does not pass custom validation, throws UserException"() {
+    void "assignOtrsTicketToFastqImportInstance, new ticketNumber does not pass custom validation, throws UserException"() {
         given:
         OtrsTicket otrsTicket = createOtrsTicket(ticketNumber: '2000010112345678')
-        RunSegment runSegment = createRunSegment(otrsTicket: otrsTicket)
+        FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: otrsTicket)
 
         when:
-        otrsTicketService.assignOtrsTicketToRunSegment('abc', runSegment.id)
+        otrsTicketService.assignOtrsTicketToFastqImportInstance('abc', fastqImportInstance.id)
 
         then:
         UserException error = thrown()
         error.message.contains("does not pass validation or error while saving.")
     }
 
-    void "assignOtrsTicketToRunSegment, old OtrsTicket consists of several other RunSegements, throws UserException"() {
+    void "assignOtrsTicketToFastqImportInstance, old OtrsTicket consists of several other RunSegements, throws UserException"() {
         OtrsTicket otrsTicket = createOtrsTicket(ticketNumber: '2000010112345678')
-        RunSegment runSegment = createRunSegment(otrsTicket: otrsTicket)
+        FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: otrsTicket)
 
-        createRunSegment(otrsTicket: otrsTicket)
+        createFastqImportInstance(otrsTicket: otrsTicket)
 
         when:
-        otrsTicketService.assignOtrsTicketToRunSegment('2000010112345679', runSegment.id)
+        otrsTicketService.assignOtrsTicketToFastqImportInstance('2000010112345679', fastqImportInstance.id)
 
         then:
         UserException error = thrown()
-        error.message.contains("Assigning a runSegment that belongs to an OTRS-Ticket which consists of several other runSegments is not allowed.")
+        error.message.contains("Assigning a fastqImportInstance that belongs to an OTRS-Ticket which consists of several other fastqImportInstances is not allowed.")
     }
 
-    void "assignOtrsTicketToRunSegment, new OtrsTicket final notification already sent, throws UserException"() {
+    void "assignOtrsTicketToFastqImportInstance, new OtrsTicket final notification already sent, throws UserException"() {
         given:
         OtrsTicket oldOtrsTicket = createOtrsTicket(ticketNumber: '2000010112345678')
-        RunSegment runSegment = createRunSegment(otrsTicket: oldOtrsTicket)
+        FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: oldOtrsTicket)
         OtrsTicket newOtrsTicket = createOtrsTicket(ticketNumber: '2000010112345679', finalNotificationSent: true)
 
         when:
-        otrsTicketService.assignOtrsTicketToRunSegment(newOtrsTicket.ticketNumber, runSegment.id)
+        otrsTicketService.assignOtrsTicketToFastqImportInstance(newOtrsTicket.ticketNumber, fastqImportInstance.id)
 
         then:
         UserException error = thrown()
         error.message.contains("It is not allowed to assign to an finally notified OTRS-Ticket.")
     }
 
-    void "assignOtrsTicketToRunSegment, adjust ProcessingStatus of new OtrsTicket"() {
+    void "assignOtrsTicketToFastqImportInstance, adjust ProcessingStatus of new OtrsTicket"() {
         given:
         Date minDate = new Date() - 1
         Date maxDate = new Date() + 1
@@ -284,7 +284,7 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
                 snvStarted: null,
                 snvFinished: null
         )
-        RunSegment runSegment = createRunSegment(otrsTicket: oldOtrsTicket)
+        FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: oldOtrsTicket)
         OtrsTicket newOtrsTicket = createOtrsTicket(
                 ticketNumber: '2000010112345679',
                 installationStarted: maxDate,
@@ -307,7 +307,7 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
         }
 
         when:
-        otrsTicketService.assignOtrsTicketToRunSegment(newOtrsTicket.ticketNumber, runSegment.id)
+        otrsTicketService.assignOtrsTicketToFastqImportInstance(newOtrsTicket.ticketNumber, fastqImportInstance.id)
         newOtrsTicket = OtrsTicket.get(newOtrsTicket.id)
 
         then:
@@ -324,15 +324,15 @@ class OtrsTicketServiceIntegrationSpec extends Specification implements DomainFa
     void "getMetaDataFilesOfOtrsTicket, returns all MetaDataFiles associated with the ticket"() {
         given:
         OtrsTicket otrsTicket = createOtrsTicket()
-        RunSegment runSegment = createRunSegment(otrsTicket: otrsTicket)
+        FastqImportInstance fastqImportInstance = createFastqImportInstance(otrsTicket: otrsTicket)
         List<MetaDataFile> expected = [
-                DomainFactory.createMetaDataFile(runSegment: runSegment),
-                DomainFactory.createMetaDataFile(runSegment: runSegment),
-                DomainFactory.createMetaDataFile(runSegment: runSegment),
+                DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance),
+                DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance),
+                DomainFactory.createMetaDataFile(fastqImportInstance: fastqImportInstance),
         ]
 
-        RunSegment otherRunSegment = createRunSegment()
-        DomainFactory.createMetaDataFile(runSegment: otherRunSegment)
+        FastqImportInstance otherFastqImportInstance = createFastqImportInstance()
+        DomainFactory.createMetaDataFile(fastqImportInstance: otherFastqImportInstance)
 
         when:
         List<MetaDataFile> result = otrsTicketService.getMetaDataFilesOfOtrsTicket(otrsTicket).sort { it.id }

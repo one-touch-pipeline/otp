@@ -1513,8 +1513,8 @@ class DomainFactory {
     }
 
     @Deprecated
-    static RunSegment createRunSegment(Map runSegmentProperties = [:]) {
-        return proxyCore.createRunSegment(runSegmentProperties)
+    static FastqImportInstance createFastqImportInstance(Map fastqImportInstanceProperties = [:]) {
+        return proxyCore.createFastqImportInstance(fastqImportInstanceProperties)
     }
 
     @Deprecated
@@ -2200,7 +2200,7 @@ class DomainFactory {
         return createDomainObject(MetaDataFile, [
                 fileName  : "MetaDataFileName_${counter++}",
                 filePath  : TestCase.getUniqueNonExistentPath().path,
-                runSegment: { createRunSegment() },
+                fastqImportInstance: { createFastqImportInstance() },
         ], properties)
     }
 

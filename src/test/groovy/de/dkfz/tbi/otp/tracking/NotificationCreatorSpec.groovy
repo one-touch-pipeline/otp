@@ -309,7 +309,7 @@ ILSe 5678, runA, lane 1, ${sampleText}
                                 )
                         ),
                 ],
-                [runSegment: createRunSegment(otrsTicket: ticket), fileLinked: true])
+                [fastqImportInstance: createFastqImportInstance(otrsTicket: ticket), fileLinked: true])
         project.customFinalNotification = true
         project.save(flush: true)
         return seqTrack

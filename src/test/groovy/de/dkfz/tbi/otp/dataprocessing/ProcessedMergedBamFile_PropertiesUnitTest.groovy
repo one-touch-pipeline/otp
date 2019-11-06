@@ -44,7 +44,7 @@ import de.dkfz.tbi.otp.ngsdata.*
         Sample,
         SoftwareTool,
         ReferenceGenome,
-        RunSegment,
+        FastqImportInstance,
         FileType,
         DataFile,
         Run,

@@ -73,7 +73,7 @@ class CreateNotificationTextServiceSpec extends Specification implements Alignme
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SamplePair,
                 SampleType,

@@ -64,7 +64,7 @@ import de.dkfz.tbi.otp.utils.*
         RoddyBamFile,
         RoddyWorkflowConfig,
         Run,
-        RunSegment,
+        FastqImportInstance,
 ])
 class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFactory {
 

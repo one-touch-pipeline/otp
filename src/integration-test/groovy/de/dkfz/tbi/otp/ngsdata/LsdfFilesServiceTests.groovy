@@ -64,7 +64,7 @@ class LsdfFilesServiceTests {
     Sample sample
     SeqPlatform seqPlatform
     SoftwareTool softwareTool
-    RunSegment runSegment
+    FastqImportInstance fastqImportInstance
     Project project
     FileType fileType
 
@@ -136,15 +136,15 @@ class LsdfFilesServiceTests {
         run.seqPlatform = seqPlatform
         assertNotNull(run.save([flush: true]))
 
-        runSegment = DomainFactory.createRunSegment()
-        assertNotNull(runSegment)
+        fastqImportInstance = DomainFactory.createFastqImportInstance()
+        assertNotNull(fastqImportInstance)
     }
 
     DataFile createDataFile(SeqTrack seqTrack, String fastqFilename) {
         DataFile dataFile = new DataFile()
         dataFile.fileName = fastqFilename
         dataFile.initialDirectory = TestCase.getUniqueNonExistentPath().path
-        dataFile.runSegment = runSegment
+        dataFile.fastqImportInstance = fastqImportInstance
         dataFile.used = true // is this file used in any seqTrack
         dataFile.project = project
         dataFile.run = run

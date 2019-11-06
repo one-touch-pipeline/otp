@@ -162,7 +162,7 @@ faq:${faq}
                 seqCenterComment: otrsTicketSeqCenterComment,
         )
         DomainFactory.createDataFile(
-                runSegment: DomainFactory.createRunSegment(
+                fastqImportInstance: DomainFactory.createFastqImportInstance(
                         otrsTicket: ticket,
                 ),
         )
@@ -260,12 +260,12 @@ faq:
                 seqCenterComment: otrsTicketSeqCenterComment,
         )
         DataFile dataFile1 = DomainFactory.createDataFile(
-                runSegment: DomainFactory.createRunSegment(
+                fastqImportInstance: DomainFactory.createFastqImportInstance(
                         otrsTicket: ticket,
                 ),
         )
         DataFile dataFile2 = DomainFactory.createDataFile(
-                runSegment: DomainFactory.createRunSegment(
+                fastqImportInstance: DomainFactory.createFastqImportInstance(
                         otrsTicket: ticket,
                 ),
         )

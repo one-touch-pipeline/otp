@@ -47,7 +47,7 @@ import de.dkfz.tbi.otp.ngsdata.*
         Realm,
         ReferenceGenome,
         Run,
-        RunSegment,
+        FastqImportInstance,
         Sample,
         SampleType,
         SeqCenter,

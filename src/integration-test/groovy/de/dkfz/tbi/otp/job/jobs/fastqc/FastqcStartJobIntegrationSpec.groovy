@@ -51,7 +51,7 @@ class FastqcStartJobIntegrationSpec extends Specification {
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
         JobExecutionPlan plan = DomainFactory.createJobExecutionPlan(enabled: true)
-        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket), seqTrack: seqTrack)
+        DomainFactory.createDataFile(fastqImportInstance: DomainFactory.createFastqImportInstance(otrsTicket: otrsTicket), seqTrack: seqTrack)
 
         FastqcStartJob fastqcStartJob = new FastqcStartJob()
         fastqcStartJob.schedulerService = Stub(SchedulerService) {

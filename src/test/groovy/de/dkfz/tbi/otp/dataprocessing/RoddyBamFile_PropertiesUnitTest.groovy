@@ -42,7 +42,7 @@ import de.dkfz.tbi.otp.ngsdata.*
         RoddyBamFile,
         RoddyWorkflowConfig,
         Run,
-        RunSegment,
+        FastqImportInstance,
         Sample,
         SampleType,
         SeqCenter,

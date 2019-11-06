@@ -60,7 +60,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleType,
                 SeqType,

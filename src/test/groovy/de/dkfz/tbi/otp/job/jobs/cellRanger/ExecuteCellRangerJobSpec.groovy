@@ -58,7 +58,7 @@ class ExecuteCellRangerJobSpec extends Specification implements CellRangerFactor
                 ReferenceGenomeProjectSeqType,
                 ReferenceGenomeIndex,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 SeqTrack,
                 Sample,
                 SampleType,

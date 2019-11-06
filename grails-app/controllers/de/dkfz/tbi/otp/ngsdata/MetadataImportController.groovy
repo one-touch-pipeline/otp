@@ -120,8 +120,8 @@ class MetadataImportController {
             if (allValid) {
                 log.debug("No problem")
                 if (validateAndImportResults.size() == 1) {
-                    log.debug("This should be the id to the details page: ${validateAndImportResults.first().metadataFile.runSegment.id}")
-                    redirect(action: "details", id: validateAndImportResults.first().metadataFile.runSegment.id)
+                    log.debug("This should be the id to the details page: ${validateAndImportResults.first().metadataFile.fastqImportInstance.id}")
+                    redirect(action: "details", id: validateAndImportResults.first().metadataFile.fastqImportInstance.id)
                 } else {
                     redirect(action: "multiDetails", params: [metaDataFiles: validateAndImportResults*.metadataFile*.id])
                 }
@@ -142,10 +142,10 @@ class MetadataImportController {
     }
 
     def details() {
-        RunSegment runSegment = (RunSegment.get(params.id))
+        FastqImportInstance fastqImportInstance = (FastqImportInstance.get(params.id))
         [
-                data      : getMetadataDetails(runSegment),
-                runSegment: runSegment,
+                data               : getMetadataDetails(fastqImportInstance),
+                fastqImportInstance: fastqImportInstance,
         ]
     }
 
@@ -158,15 +158,15 @@ class MetadataImportController {
         ]
     }
 
-    private MetadataDetails getMetadataDetails(RunSegment importInstance) {
+    private MetadataDetails getMetadataDetails(FastqImportInstance importInstance) {
         List<DataFile> dataFilesNotAssignedToSeqTrack = []
 
-        List<MetaDataFile> metaDataFiles = MetaDataFile.findAllByRunSegment(importInstance, [sort: "dateCreated", order: "desc"])
+        List<MetaDataFile> metaDataFiles = MetaDataFile.findAllByFastqImportInstance(importInstance, [sort: "dateCreated", order: "desc"])
 
         List<DataFile> dataFiles = DataFile.createCriteria().list {
             createAlias('run', 'r')
             createAlias('seqTrack', 'st')
-            eq('runSegment', importInstance)
+            eq('fastqImportInstance', importInstance)
             order('r.name', 'asc')
             order('st.laneId', 'asc')
             order('mateNumber', 'asc')
@@ -199,11 +199,11 @@ class MetadataImportController {
         )
     }
 
-    def assignOtrsTicketToRunSegment() {
+    def assignOtrsTicketToFastqImportInstance() {
         def dataToRender = [:]
 
         try {
-            otrsTicketService.assignOtrsTicketToRunSegment(params.value, params.id as Long)
+            otrsTicketService.assignOtrsTicketToFastqImportInstance(params.value, params.id as Long)
             dataToRender.put("success", true)
         } catch (UserException e) {
             dataToRender.put("error", e.toString())
@@ -243,7 +243,7 @@ class MetadataImportController {
             text.append('Automatic import succeeded :-)')
             results.each {
                 text.append("\n\n${it.context.metadataFile}:\n")
-                text.append(g.createLink(action: 'details', id: it.metadataFile.runSegment.id, absolute: 'true'))
+                text.append(g.createLink(action: 'details', id: it.metadataFile.fastqImportInstance.id, absolute: 'true'))
             }
         } catch (MultiImportFailedException e) {
             if (e.failedValidations.size() == 1) {

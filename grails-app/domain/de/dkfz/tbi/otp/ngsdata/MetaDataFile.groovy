@@ -34,10 +34,10 @@ class MetaDataFile implements Entity {
      */
     String md5sum
 
-    RunSegment runSegment
+    FastqImportInstance fastqImportInstance
 
     static belongsTo = [
-        runSegment: RunSegment,
+        fastqImportInstance: FastqImportInstance,
     ]
 
     static constraints = {
@@ -47,7 +47,7 @@ class MetaDataFile implements Entity {
     }
 
     static mapping = {
-        runSegment index: "meta_data_file_run_segment_idx"
+        fastqImportInstance index: "meta_data_file_fastq_import_instance_idx"
     }
 
     String getFullPath() {

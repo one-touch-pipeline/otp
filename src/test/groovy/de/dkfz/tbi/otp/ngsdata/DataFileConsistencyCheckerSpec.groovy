@@ -32,7 +32,7 @@ class DataFileConsistencyCheckerSpec extends Specification implements DataTest {
         return [
                 DataFile,
                 FileType,
-                RunSegment,
+                FastqImportInstance,
                 SeqTrack,
         ]
     }

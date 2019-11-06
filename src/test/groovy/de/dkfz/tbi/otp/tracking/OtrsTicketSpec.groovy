@@ -37,7 +37,7 @@ class OtrsTicketSpec extends Specification implements DataTest {
                 MetaDataFile,
                 OtrsTicket,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 SeqCenter,
                 SeqPlatform,
                 SeqPlatformGroup,
@@ -88,14 +88,14 @@ class OtrsTicketSpec extends Specification implements DataTest {
         OtrsTicket otrsTicketA = DomainFactory.createOtrsTicket()
         OtrsTicket otrsTicketB = DomainFactory.createOtrsTicket()
 
-        RunSegment runSegmentA = DomainFactory.createRunSegment(otrsTicket: otrsTicketA)
-        RunSegment runSegmentB = DomainFactory.createRunSegment(otrsTicket: otrsTicketB)
+        FastqImportInstance fastqImportInstanceA = DomainFactory.createFastqImportInstance(otrsTicket: otrsTicketA)
+        FastqImportInstance fastqImportInstanceB = DomainFactory.createFastqImportInstance(otrsTicket: otrsTicketB)
 
-        MetaDataFile metadataFileB1 = DomainFactory.createMetaDataFile([runSegment: runSegmentB])
+        MetaDataFile metadataFileB1 = DomainFactory.createMetaDataFile([fastqImportInstance: fastqImportInstanceB])
         assert ThreadUtils.waitFor({ System.currentTimeMillis() > metadataFileB1.dateCreated.time }, 1, 1)
-        MetaDataFile metadataFileA1 = DomainFactory.createMetaDataFile([runSegment: runSegmentA])
+        MetaDataFile metadataFileA1 = DomainFactory.createMetaDataFile([fastqImportInstance: fastqImportInstanceA])
         assert ThreadUtils.waitFor({ System.currentTimeMillis() > metadataFileA1.dateCreated.time }, 1, 1)
-        MetaDataFile metadataFileA2 = DomainFactory.createMetaDataFile([runSegment: runSegmentA])
+        MetaDataFile metadataFileA2 = DomainFactory.createMetaDataFile([fastqImportInstance: fastqImportInstanceA])
 
         assert metadataFileA1.dateCreated > metadataFileB1.dateCreated
         assert metadataFileA2.dateCreated > metadataFileA1.dateCreated

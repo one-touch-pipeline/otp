@@ -167,9 +167,9 @@ class AbstractAlignmentDeciderIntegrationTests {
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
 
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
-        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
+        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
         SeqTrack seqTrack = buildSeqTrack()
-        seqTrack.dataFiles*.runSegment = runSegment
+        seqTrack.dataFiles*.fastqImportInstance = fastqImportInstance
         seqTrack.dataFiles*.save(flush: true)
 
         boolean emailIsSent = false
@@ -221,8 +221,8 @@ class AbstractAlignmentDeciderIntegrationTests {
         String prefix = "PRFX"
         DomainFactory.createProcessingOptionForOtrsTicketPrefix(prefix)
         OtrsTicket ticket = DomainFactory.createOtrsTicket()
-        RunSegment runSegment = DomainFactory.createRunSegment(otrsTicket: ticket)
-        seqTrack.dataFiles*.runSegment = runSegment
+        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance(otrsTicket: ticket)
+        seqTrack.dataFiles*.fastqImportInstance = fastqImportInstance
         seqTrack.dataFiles*.save(flush: true)
 
         boolean emailIsSent = false

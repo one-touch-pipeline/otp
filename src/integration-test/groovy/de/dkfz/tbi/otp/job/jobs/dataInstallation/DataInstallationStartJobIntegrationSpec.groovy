@@ -53,7 +53,7 @@ class DataInstallationStartJobIntegrationSpec extends Specification {
 
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         OtrsTicket otrsTicket = DomainFactory.createOtrsTicket()
-        DomainFactory.createDataFile(runSegment: DomainFactory.createRunSegment(otrsTicket: otrsTicket), seqTrack: seqTrack)
+        DomainFactory.createDataFile(fastqImportInstance: DomainFactory.createFastqImportInstance(otrsTicket: otrsTicket), seqTrack: seqTrack)
 
         when:
         dataInstallationStartJob.execute()

@@ -57,7 +57,7 @@ class RoddySnvCallingInstanceSpec extends Specification implements DataTest {
                 RoddySnvCallingInstance,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SamplePair,
                 SampleType,

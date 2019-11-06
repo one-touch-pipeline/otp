@@ -50,7 +50,7 @@ class RnaRoddyBamFileSpec extends Specification implements RoddyRnaFactory, Data
                 RnaRoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleType,
                 SeqCenter,

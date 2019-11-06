@@ -41,7 +41,7 @@ class ProcessedBamFileSpec extends Specification implements DataTest, DomainFact
                 ProcessedBamFile,
                 ProcessedMergedBamFile,
                 ReferenceGenomeProjectSeqType,
-                RunSegment,
+                FastqImportInstance,
         ]
     }
 

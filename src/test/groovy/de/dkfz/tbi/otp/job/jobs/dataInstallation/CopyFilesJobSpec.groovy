@@ -51,7 +51,7 @@ class CopyFilesJobSpec extends Specification implements DataTest {
                 Project,
                 Realm,
                 Run,
-                RunSegment,
+                FastqImportInstance,
                 Sample,
                 SampleType,
                 SeqCenter,

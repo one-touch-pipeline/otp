@@ -138,14 +138,14 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         ], properties)
     }
 
-    RunSegment createRunSegment(Map properties = [:]) {
-        RunSegment runSegment = createDomainObject(RunSegment, [
-                importMode: RunSegment.ImportMode.AUTOMATIC,
+    FastqImportInstance createFastqImportInstance(Map properties = [:]) {
+        FastqImportInstance fastqImportInstance = createDomainObject(FastqImportInstance, [
+                importMode: FastqImportInstance.ImportMode.AUTOMATIC,
         ], properties)
         properties.dataFiles.each { DataFile dataFile ->
-            runSegment.addToDataFiles(dataFile)
+            fastqImportInstance.addToDataFiles(dataFile)
         }
-        return runSegment
+        return fastqImportInstance
     }
 
     FileType createFileType(Map properties = [:]) {
@@ -163,27 +163,27 @@ trait DomainFactoryCore implements DomainFactoryHelper {
             seqTrack = createSeqTrack(properties.containsKey('run') ? [run: properties.run] : [:])
         }
         return createDomainObject(DataFile, [
-                seqTrack        : seqTrack,
-                project         : seqTrack?.project,
-                run             : seqTrack?.run,
-                runSegment      : { createRunSegment() },
-                fileName        : "DataFileFileName_${nextId}_R1.gz",
-                vbpFileName     : "VbpDataFileFileName_${nextId}_R1.gz",
-                pathName        : "path_${nextId}",
-                initialDirectory: TestCase.getUniqueNonExistentPath().path,
-                md5sum          : { HelperUtils.getRandomMd5sum() },
-                dateExecuted    : new Date(),
-                dateFileSystem  : new Date(),
-                dateCreated     : new Date(),
-                dateLastChecked : new Date(),
-                fileWithdrawn   : false,
-                fileType        : { createFileType() },
-                used            : true,
-                fileExists      : true,
-                fileLinked      : true,
-                fileSize        : nextId,
-                mateNumber      : 1,
-                indexFile       : false,
+                seqTrack           : seqTrack,
+                project            : seqTrack?.project,
+                run                : seqTrack?.run,
+                fastqImportInstance: { createFastqImportInstance() },
+                fileName           : "DataFileFileName_${nextId}_R1.gz",
+                vbpFileName        : "VbpDataFileFileName_${nextId}_R1.gz",
+                pathName           : "path_${nextId}",
+                initialDirectory   : TestCase.getUniqueNonExistentPath().path,
+                md5sum             : { HelperUtils.getRandomMd5sum() },
+                dateExecuted       : new Date(),
+                dateFileSystem     : new Date(),
+                dateCreated        : new Date(),
+                dateLastChecked    : new Date(),
+                fileWithdrawn      : false,
+                fileType           : { createFileType() },
+                used               : true,
+                fileExists         : true,
+                fileLinked         : true,
+                fileSize           : nextId,
+                mateNumber         : 1,
+                indexFile          : false,
         ], properties, saveAndValidate)
     }
 

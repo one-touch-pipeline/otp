@@ -42,7 +42,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
                 MergingCriteria,
                 Pipeline,
                 RoddyWorkflowConfig,
-                RunSegment,
+                FastqImportInstance,
                 SeqCenter,
                 SeqPlatformGroup,
                 SeqTrack,
@@ -286,7 +286,7 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
 
     private SeqTrack createDataForDetermineAndStoreIfFastqFilesHaveToBeLinked(String path = null) {
         Run run = DomainFactory.createRun(seqCenter: DomainFactory.createSeqCenter(importDirsAllowLinking: ["/link_this", "/link_that"]))
-        RunSegment runSegment = DomainFactory.createRunSegment()
+        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance()
         SeqTrack seqTrack = DomainFactory.createSeqTrack(
                 run: run,
                 sample: DomainFactory.createSample(
@@ -295,8 +295,8 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
                         )
                 )
         )
-        DomainFactory.createDataFile(seqTrack: seqTrack, run: run, runSegment: runSegment, initialDirectory: path ?: "/link_this")
-        DomainFactory.createDataFile(seqTrack: seqTrack, run: run, runSegment: runSegment, initialDirectory: path ?: "/link_this")
+        DomainFactory.createDataFile(seqTrack: seqTrack, run: run, fastqImportInstance: fastqImportInstance, initialDirectory: path ?: "/link_this")
+        DomainFactory.createDataFile(seqTrack: seqTrack, run: run, fastqImportInstance: fastqImportInstance, initialDirectory: path ?: "/link_this")
         return seqTrack
     }
 
@@ -353,13 +353,13 @@ class SeqTrackServiceSpec extends Specification implements DataTest, DomainFacto
     }
 
     private SeqTrack createDataForAreFilesLocatedOnMidTermStorage(String path = null) {
-        RunSegment runSegment = DomainFactory.createRunSegment()
+        FastqImportInstance fastqImportInstance = DomainFactory.createFastqImportInstance()
         SeqCenter seqCenter = DomainFactory.createSeqCenter(importDirsAllowLinking: ["/link_me", "/link_this"])
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
         seqTrack.run.seqCenter = seqCenter
         seqTrack.run.save(flush: true)
-        DomainFactory.createDataFile(seqTrack: seqTrack, runSegment: runSegment, initialDirectory: path ?: "/link_me")
-        DomainFactory.createDataFile(seqTrack: seqTrack, runSegment: runSegment, initialDirectory: path ?: "/link_me")
+        DomainFactory.createDataFile(seqTrack: seqTrack, fastqImportInstance: fastqImportInstance, initialDirectory: path ?: "/link_me")
+        DomainFactory.createDataFile(seqTrack: seqTrack, fastqImportInstance: fastqImportInstance, initialDirectory: path ?: "/link_me")
         return seqTrack
     }
 
