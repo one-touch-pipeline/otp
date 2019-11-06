@@ -20,33 +20,15 @@
   - SOFTWARE.
   --}%
 
-<html>
-<head>
-    <meta name="layout" content="info"/>
-    <title><g:message code="info.numbers.title" /></title>
-    <asset:javascript src="modules/graph"/>
-</head>
+<sec:ifNotGranted roles="ROLE_ADMIN">
+    <h1><g:message code="default.no.project"/></h1>
+    <p>${g.message(code: "default.no.project.explain")}</p>
+    <ul>
+        <li>${g.message(code: "default.no.project.pi")}</li>
+        <li><g:link controller="projectRequest">${g.message(code: "default.no.project.request")}</g:link></li>
+    </ul>
+</sec:ifNotGranted>
 
-<body>
-<g:if test="${projects}">
-    <h2><g:message code="info.numbers.title" /></h2>
-    <g:message code="info.numbers.text"/>
-    <div class="homeGraph" style="clear: both; text-align: center" >
-        <span>
-            <canvas id="projectCountPerDate" width="625" height="400">[No canvas support]</canvas>
-        </span>
-        <span>
-            <canvas id="laneCountPerDate" width="625" height="400">[No canvas support]</canvas>
-        </span>
-    </div>
-<asset:script type="text/javascript">
-    $(function() {
-        $.otp.graph.info.init();
-    });
-</asset:script>
-</g:if>
-<g:else>
-    <g:render template="/templates/noProject"/>
-</g:else>
-</body>
-</html>
+<sec:ifAnyGranted roles="ROLE_ADMIN">
+    <p><g:link controller="projectCreation">${g.message(code: "default.no.project.admin")}</g:link></p>
+</sec:ifAnyGranted>

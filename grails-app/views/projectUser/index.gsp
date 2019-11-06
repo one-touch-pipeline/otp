@@ -386,7 +386,7 @@
         </asset:script>
     </g:if>
     <g:else>
-        <h3><g:message code="default.no.project"/></h3>
+        <g:render template="/templates/noProject"/>
     </g:else>
     </div>
     <script>
