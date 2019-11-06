@@ -45,4 +45,12 @@ class Problem {
     String getLevelAndMessage() {
         return level.getName() + ": " + message
     }
+
+    String getLogLikeString() {
+        return "[${level.getName()}]: ${messageWithIndentedMultiline}"
+    }
+
+    String getMessageWithIndentedMultiline(String indent = "    ") {
+        return message.split("\\n").join("\n${indent}")
+    }
 }

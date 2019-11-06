@@ -226,7 +226,7 @@ class MetadataImportController {
             ]
             UserDetails userDetails = new User('TicketSystem', "", authorities)
             SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
-            render text: doAutoImport(params.ticketNumber, params.ilseNumbers), contentType: "text/plain"
+            render text: doAutoImport(params.ticketNumber as String, params.ilseNumbers as String), contentType: "text/plain"
         } finally {
             SecurityContextHolder.context.authentication = authentication
         }
@@ -239,8 +239,7 @@ class MetadataImportController {
         }
         StringBuilder text = new StringBuilder()
         try {
-            Collection<ValidateAndImportResult> results =
-                    metadataImportService.validateAndImportMultiple(otrsTicketNumber, ilseNumbers)
+            Collection<ValidateAndImportResult> results = metadataImportService.validateAndImportMultiple(otrsTicketNumber, ilseNumbers)
             text.append('Automatic import succeeded :-)')
             results.each {
                 text.append("\n\n${it.context.metadataFile}:\n")
@@ -252,19 +251,24 @@ class MetadataImportController {
             } else {
                 text.append('These metadata files failed validation:')
             }
-            e.failedValidations.each {
-                text.append("\n${it.metadataFile}")
+            StringBuilder problems = new StringBuilder()
+            e.failedValidations.each { MetadataValidationContext context ->
+                text.append("\n${context.metadataFile}")
+                problems.append("The following validation summary messages were returned for ${context.metadataFile.fileName}:\n")
+                problems.append("${context.problemsObject.getSortedProblemListString()}\n\n")
             }
             text.append("\n\nClick here for manual import:")
             text.append("\n" + g.createLink(
                     action: 'index',
                     absolute: 'true',
                     params: [
-                            'ticketNumber': otrsTicketNumber,
-                            'paths'       : e.allPaths,
-                            'directoryStructure'   : DirectoryStructureBeanName.GPCF_SPECIFIC,
+                            'ticketNumber'      : otrsTicketNumber,
+                            'paths'             : e.allPaths,
+                            'directoryStructure': DirectoryStructureBeanName.GPCF_SPECIFIC,
                     ])
             )
+            text.append("\n\n")
+            text.append(problems)
         }
         return text
     }

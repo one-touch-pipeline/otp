@@ -54,4 +54,12 @@ class Problems {
     Set<Problem> getProblems(Cell cell) {
         return problemsByCell.get(cell)?.asImmutable() ?: Collections.emptySet()
     }
+
+    String getSortedProblemListString() {
+        return allProblems.sort { a, b ->
+            b.level.intValue() <=> a.level.intValue() ?: a.message <=> b.message
+        }.collect { Problem problem ->
+            "- ${problem.getLogLikeString()}"
+        }.join("\n")
+    }
 }

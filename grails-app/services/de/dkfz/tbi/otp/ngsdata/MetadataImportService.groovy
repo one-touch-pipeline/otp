@@ -209,7 +209,8 @@ class MetadataImportService {
 
     List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, String ilseNumbers) {
         FileSystem fs = fileSystemService.getFilesystemForFastqImport()
-        return validateAndImportMultiple(otrsTicketNumber,
+        return validateAndImportMultiple(
+                otrsTicketNumber,
                 parseIlseNumbers(ilseNumbers).collect { getMetadataFilePathForIlseNumber(it, fs) },
                 DirectoryStructureBeanName.GPCF_SPECIFIC
         )
@@ -220,8 +221,7 @@ class MetadataImportService {
             return validate(it, directoryStructure)
         }
         List<ValidateAndImportResult> results = contexts.collect {
-            return importHelperMethod(it, true, RunSegment.ImportMode.AUTOMATIC, false, null, otrsTicketNumber,
-                    null, true)
+            return importHelperMethod(it, true, RunSegment.ImportMode.AUTOMATIC, false, null, otrsTicketNumber, null, true)
         }
         List<MetadataValidationContext> failedValidations = results.findAll { it.metadataFile == null }*.context
         if (failedValidations.isEmpty()) {
@@ -249,7 +249,8 @@ class MetadataImportService {
     protected static Path getMetadataFilePathForIlseNumber(int ilseNumber, FileSystem fileSystem) {
         String ilseNumberString = Integer.toString(ilseNumber)
         SeqCenter seqCenter = exactlyOneElement(SeqCenter.findAllByAutoImportable(true))
-        return fileSystem.getPath(seqCenter.autoImportDir,
+        return fileSystem.getPath(
+                seqCenter.autoImportDir,
                 ilseNumberString.padLeft(6, '0'),
                 "data",
                 "${ilseNumberString}_meta.tsv"
