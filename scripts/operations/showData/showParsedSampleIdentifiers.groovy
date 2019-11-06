@@ -50,6 +50,7 @@ SampleIdentifierParser parser
 //parser = new InformSampleIdentifierParser()
 //parser = new HipoSampleIdentifierParser()
 //parser = new Hipo2SampleIdentifierParser()
+//parser = new Hipo2SamplePreparationLabSampleIdentifierParser()
 //parser = new ITCC_4P_Parser()
 //parser = new OE0290_EORTC_SampleIdentifierParser()
 //parser = new SimpleProjectIndividualSampleTypeParser()

@@ -30,7 +30,7 @@ import java.util.regex.Matcher
 abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierParser {
 
     private final static String PID = "(?<pid>(?<project>[A-Z][0-9]{2}[A-Z0-9])-[A-Z0-9]{4}([A-Z0-9]{2})?)"
-    private final static String TISSUE = "(?<tissueType>[${HipoTissueType.values()*.key.join('')}])(?<tissueNumber>[0-9]{1,2})"
+    private final static String TISSUE = "(?<tissueType>[${HipoTissueType.values()*.key.join('')}])(?<tissueNumber>[0-9]{1,3})"
 
     //ignore analyte part
     private final static String ANALYTE_CHARS_SINGLE_CELL_IGNORE = 'GHJS'
@@ -65,14 +65,14 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
     DefaultParsedSampleIdentifier tryParse(String sampleIdentifier) {
         Matcher matcher = sampleIdentifier =~ REGEX
         if (matcher.matches()) {
-            String projectNumber = matcher.group('project')
-            String projectName = createProjectName(projectNumber)
-            if (!projectName) {
+            String projectName = createProjectName(matcher.group('project'))
+            String tissueNumber = createTissueNumber(matcher.group('tissueNumber'))
+            if (!projectName || !tissueNumber) {
                 return null
             }
 
             HipoTissueType hipoTissueType = HipoTissueType.fromKey(matcher.group('tissueType'))
-            String baseSampleTypeName = "${hipoTissueType}${matcher.group('tissueNumber')}"
+            String baseSampleTypeName = "${hipoTissueType}${tissueNumber}"
             String analyteCharOnlyNumber = matcher.group('analyteCharOnlyNumber')
             String analyteSkip = matcher.group('analyteSkip')
             String analyteDigit = matcher.group('analyteDigit')
@@ -100,6 +100,10 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
     }
 
     abstract String createProjectName(String projectNumber)
+
+    String createTissueNumber(String tissueNumber) {
+        return (tissueNumber ==~ /[0-9]{1,2}/) ? tissueNumber : null
+    }
 
     @Override
     String tryParseCellPosition(String sampleIdentifier) {

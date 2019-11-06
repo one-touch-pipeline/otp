@@ -19,22 +19,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.parser
+package de.dkfz.tbi.otp.parser.hipo
 
-import groovy.transform.TupleConstructor
+import org.springframework.stereotype.Component
 
-@TupleConstructor
-enum SampleIdentifierParserBeanName {
-    NO_PARSER('', 'No Parser'),
-    DEEP('deepSampleIdentifierParser', 'DEEP'),
-    HIPO('hipoSampleIdentifierParser', 'HIPO'),
-    HIPO2('hipo2SampleIdentifierParser', 'HIPO2'),
-    HIPO2_SPL('hipo2SamplePreparationLabSampleIdentifierParser', 'HIPO2_SPL'),
-    INFORM('informSampleIdentifierParser', 'INFORM'),
-    OE0290_EORTC('OE0290_EORTC_SampleIdentifierParser', 'OE0290_EORTC'),
-    SIMPLE('simpleProjectIndividualSampleTypeParser', 'Simple'),
-    ITCC_4P('iTCC_4P_Parser', 'ITCC-4P'),
+@Component
+class Hipo2SamplePreparationLabSampleIdentifierParser extends Hipo2SampleIdentifierParser {
 
-    final String beanName
-    final String displayName
+    @Override
+    String createTissueNumber(String tissueNumber) {
+        return (tissueNumber ==~ /[0-9]{1,3}/) ? tissueNumber.padLeft(3, "0") : null
+    }
 }

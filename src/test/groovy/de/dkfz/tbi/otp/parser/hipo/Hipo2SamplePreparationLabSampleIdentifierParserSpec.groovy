@@ -27,16 +27,21 @@ import de.dkfz.tbi.otp.ngsdata.SampleType
 import de.dkfz.tbi.otp.parser.ParsedSampleIdentifier
 
 @SuppressWarnings('JUnitPublicProperty')
-class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParserSpec {
+class Hipo2SamplePreparationLabSampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParserSpec {
 
-    Hipo2SampleIdentifierParser parser = new Hipo2SampleIdentifierParser()
+    Hipo2SamplePreparationLabSampleIdentifierParser parser = new Hipo2SamplePreparationLabSampleIdentifierParser()
 
     String validProjectPart = "K12A"
 
     String projectName = "hipo_K12A"
 
+    @Override
+    String transformTissueNumber(String tissueNumber) {
+        return tissueNumber.padLeft(3, '0')
+    }
+
     @Unroll
-    void 'tryParse for projectPart, when identifier is #identifier, parses correctly'() {
+    void 'tryParse for tissue number part, when identifier is #identifier, parses correctly'() {
         when:
         ParsedSampleIdentifier parsed = parser.tryParse(identifier)
         boolean validPid = parser.tryParsePid(identifier.split("-")[0, 1].join("-"))
@@ -50,31 +55,21 @@ class Hipo2SampleIdentifierParserSpec extends AbstractHipo2SampleIdentifierParse
         parsed.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         where:
-        identifier           || sampleTypeDbName
-        'K12A-123ABC-N0-D1'  || 'CONTROL0-01'
-
-        //different project prefixes
-        'S12A-123ABC-T0-D1'  || 'TUMOR0-01'
-        'T12A-123ABC-T0-D1'  || 'TUMOR0-01'
-        'A12A-123ABC-T0-D1'  || 'TUMOR0-01'
-        'B12A-123ABC-T0-D1'  || 'TUMOR0-01'
-        'H12A-123ABC-T0-D1'  || 'TUMOR0-01'
-        'P12A-123ABC-T0-D1'  || 'TUMOR0-01'
-        'K123-123ABC-T0-D1'  || 'TUMOR0-01'
+        identifier            || sampleTypeDbName
+        'H123-123ABC-T1-D1'   || 'TUMOR001-01'
+        'H123-123ABC-T12-D1'  || 'TUMOR012-01'
+        'H123-123ABC-T123-D1' || 'TUMOR123-01'
     }
 
     @Unroll
-    void 'tryParse for project part, when identifier is #identifier, returns null'() {
+    void 'tryParse for tissue number part, when identifier is #identifier, returns null'() {
         expect:
         parser.tryParse(identifier) == null
 
         where:
         identifier << [
-                'K12-123ABC-N0-D1',
-                'K12AB-123ABC-N0-D1',
-                '212A-123ABC-N0-D1',
-                'KABC-123ABC-N0-D1',
-                'K123-123ABC-N012-D1',
+                'H123-123ABC-T-D1',
+                'H123-123ABC-T1234-D1',
         ]
     }
 }
