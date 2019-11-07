@@ -41,7 +41,7 @@ import de.dkfz.tbi.otp.utils.*
  * This block should be all that needs to be changed to generate the swap.
  ********************************************************************************/
 
-swapLabel = 'OTRS-_________________-something-descriptive'
+swapLabel = 'OTRS-________________-something-descriptive'
 
 String sampleName = "pid sampleTypeName"
 
@@ -106,22 +106,22 @@ Closure<ScriptOutput> createSwapScript = { Sample sample, String swapLabel ->
     scriptOutput.script << Snippets.databaseFixingHeader(swapLabel)
 
     swapMap.each { String sampleIdentifier, String newSampleTypeName ->
-        String fileName = "mv_${counter++}_${sample.individual.pid}__${sample.sampleType.name}__to__${newSampleTypeName}"
-
         SampleType newSampleType = SampleType.findByName(newSampleTypeName)
 
-        List<DataFile> dataFiles = MetaDataEntry.findAllByKeyAndValue(sampleIdKey, sampleIdentifier)*.dataFile
-        SeqTrack seqTrack = CollectionUtils.exactlyOneElement(dataFiles*.seqTrack.unique())
+        Map<SeqTrack, List<DataFile>> dataFilesPerSeqTrack = MetaDataEntry.findAllByKeyAndValue(sampleIdKey, sampleIdentifier)*.dataFile.groupBy { it.seqTrack }
+        int seqTrackCounter = 1
+        dataFilesPerSeqTrack.each { SeqTrack seqTrack, List<DataFile> dataFiles ->
+            String fileName = "mv_${counter++}_${sample.individual.pid}_ST_${seqTrackCounter++}__${sample.sampleType.name}__to__${newSampleTypeName}"
+            scriptOutput.meta << "Lane ${seqTrack.id}: ${seqTrack.sample.individual.pid} ${seqTrack.seqType}"
+            scriptOutput.meta << "  ${seqTrack.sample.sampleType.name} -->  ${newSampleTypeName}"
+            dataFiles.each { DataFile dataFile ->
+                scriptOutput.meta << "  * ${dataFile}, ${sampleIdentifier}"
+            }
 
-        scriptOutput.meta << "Lane ${seqTrack.id}: ${seqTrack.sample.individual.pid} ${seqTrack.seqType}"
-        scriptOutput.meta << "  ${seqTrack.sample.sampleType.name} -->  ${newSampleTypeName}"
-        dataFiles.each { DataFile dataFile ->
-            scriptOutput.meta << "  * ${dataFile}, ${sampleIdentifier}"
+            scriptOutput.script << Snippets.indent(Snippets.swapSampleTypeOfLane(seqTrack, fileName, newSampleType), 2)
+
+            files << fileName
         }
-
-        scriptOutput.script << Snippets.indent(Snippets.swapSampleTypeOfLane(seqTrack, fileName, newSampleType), 2)
-
-        files << fileName
     }
 
     scriptOutput.script << """\n
