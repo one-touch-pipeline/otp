@@ -33,7 +33,7 @@
         </sec:ifAllGranted>
     </title>
     <asset:javascript src="modules/defaultPageDependencies.js"/>
-    <asset:javascript src="pages/bamMetadataImport/index/addFurtherFile.js"/>
+    <asset:javascript src="common/MultiInputField.js"/>
 </head>
 <body>
 <g:if test="${context}">
@@ -118,16 +118,16 @@
             </tr>
             <tr>
                 <td><label><g:message code="bamMetadataImport.furtherFile"/></label></td>
-                <td class="input-fields-wrap">
+                <td class="multi-input-field">
                     <g:each in="${furtherFiles}" var="file" status="i">
-                        <div>
+                        <div class="field">
                             <g:textField name="furtherFilePaths" style="width: 1000px" value="${file}"/>
                             <g:if test="${i == 0}">
-                                <button class="add-field-button">+</button>
+                                <button class="add-field">+</button>
                                 <label style="color: red"><g:message code="bamMetadataImport.furtherFile.info"/></label>
                             </g:if>
                             <g:else>
-                                <button class="remove_field">-</button>
+                                <button class="remove-field">-</button>
                             </g:else>
                         </div>
                     </g:each>
@@ -158,10 +158,5 @@
         </g:each>
     </ul>
 </div>
-<asset:script>
-    $(function() {
-        $.otp.bamMetadataImport.addValues();
-    });
-</asset:script>
 </body>
 </html>

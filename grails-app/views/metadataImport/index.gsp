@@ -33,7 +33,7 @@
         </sec:ifAllGranted>
     </title>
     <asset:javascript src="modules/defaultPageDependencies.js"/>
-    <asset:javascript src="pages/metadataImport/index/metaDataImport.js"/>
+    <asset:javascript src="common/MultiInputField.js"/>
 </head>
 <body>
 <g:if test="${contexts}">
@@ -133,15 +133,15 @@
             </sec:ifAllGranted>
             <tr>
                 <td><g:message code="metadataImport.path"/></td>
-                <td class="input-fields-wrap">
+                <td class="multi-input-field">
                     <g:each in="${paths}" var="path" status="i">
-                        <div>
+                        <div class="field">
                             <g:textField name="paths" style="width: 1000px" value="${path}"/>
                             <g:if test="${i == 0}">
-                                <button class="add-field-button">+</button>
+                                <button class="add-field">+</button>
                             </g:if>
                             <g:else>
-                                <button class="remove_field">-</button>
+                                <button class="remove-field">-</button>
                             </g:else>
                         </div>
                     </g:each>
@@ -187,10 +187,5 @@
             </g:each>
         </ul>
     </div>
-<asset:script>
-    $(function() {
-        $.otp.metaDataImport.buttonAction();
-    });
-</asset:script>
 </body>
 </html>

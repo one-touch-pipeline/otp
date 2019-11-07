@@ -26,7 +26,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="otp.menu.createProject"/></title>
-    <asset:javascript src="pages/metadataImport/index/metaDataImport.js"/>
+    <asset:javascript src="common/MultiInputField.js"/>
 </head>
 <body>
     <div class="body">
@@ -59,14 +59,18 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.keywords"/></td>
-                <td id="input-fields-keywords">
-                    <g:if test="${cmd.keywords}">
-                        <g:each var="keyword" in="${cmd.keywords}">
-                            <g:textField list="keywordList" name="keywordNames" size="130" value="${keyword.name}"/>
-                        </g:each>
-                    </g:if>
-                    <g:textField list="keywordList" name="keywordNames" size="130"/>
-                    <button class="add-button keywords-button">+</button>
+                <td class="multi-input-field">
+                    <g:each in="${cmd.keywords*.name ?: [""]}" var="keyword" status="i">
+                        <div class="field">
+                            <g:textField list="keywordList" name="keywordNames" size="130" value="${keyword}" />
+                            <g:if test="${i == 0}">
+                                <button class="add-field">+</button>
+                            </g:if>
+                            <g:else>
+                                <button class="remove-field">-</button>
+                            </g:else>
+                        </div>
+                    </g:each>
                     <datalist id="keywordList">
                         <g:each in="${keywords}" var="keyword">
                             <option value="${keyword.name}">${keyword.name}</option>
@@ -80,14 +84,18 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="createProject.connectedProjects"/></td>
-                <td id="input-fields-connected-projects">
-                    <g:if test="${cmd.connectedProjects}">
-                        <g:each var="connectedProject" in="${cmd.connectedProjects.split(",")}">
+                <td class="multi-input-field">
+                    <g:each in="${cmd.connectedProjects?.split(",") ?: [""]}" var="connectedProject" status="i">
+                        <div class="field">
                             <g:textField list="projectList" name="connectedProjectNames" size="130" value="${connectedProject}"/>
-                        </g:each>
-                    </g:if>
-                    <g:textField list="projectList" name="connectedProjectNames" size="130"/>
-                    <button class="add-button connected-projects-button">+</button>
+                            <g:if test="${i == 0}">
+                                <button class="add-field">+</button>
+                            </g:if>
+                            <g:else>
+                                <button class="remove-field">-</button>
+                            </g:else>
+                        </div>
+                    </g:each>
                 </td>
             </tr>
             <tr>
@@ -178,8 +186,5 @@
         </table>
     </g:uploadForm>
     </div>
-    <asset:script type="text/javascript">
-        $.otp.metaDataImport.addNewField()
-    </asset:script>
 </body>
 </html>
