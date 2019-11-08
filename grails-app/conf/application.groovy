@@ -1,3 +1,5 @@
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
+
 /*
  * Copyright 2011-2019 The OTP authors
  *
@@ -185,7 +187,26 @@ grails.gorm.failOnError=true
 
 // Shared constraints
 grails.gorm.default.constraints = {
-    greaterThanZero validator: { val, obj -> val > 0 }
+    greaterThanZero validator: { val, obj ->
+        if (val <= 0) {
+            return "validator.greater.than.zero"
+        }
+    }
+    pathComponent validator: { val, obj ->
+        if (val && !OtpPath.isValidPathComponent(val)) {
+            return "validator.path.component"
+        }
+    }
+    relativePath validator: { val, obj ->
+        if (val && !OtpPath.isValidRelativePath(val)) {
+            return "validator.relative.path"
+        }
+    }
+    absolutePath validator: { val, obj ->
+        if (val && !OtpPath.isValidAbsolutePath(val)) {
+            return "validator.absolute.path"
+        }
+    }
 }
 grails.gorm.default.mapping = {
     id generator:'sequence'
