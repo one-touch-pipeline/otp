@@ -285,4 +285,6 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2019/otp-137-merge-create-samplepair-services.groovy'
+
+    include file: 'changelogs/2019/remove-group.groovy'
 }
