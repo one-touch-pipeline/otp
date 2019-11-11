@@ -141,7 +141,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         Project project
-        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
+        ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: name,
                 directory: dirName,
                 individualPrefix: 'individualPrefix',
@@ -191,7 +191,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         Project project
-        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
+        ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: 'project',
                 directory: 'dir',
                 individualPrefix: 'individualPrefix',
@@ -230,7 +230,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String group = configService.testingGroup
 
         when:
-        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
+        ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: name,
                 directory: dirName,
                 individualPrefix: 'individualPrefix',
@@ -267,7 +267,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test createProject invalid unix group"() {
         when:
         setupData()
-        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
+        ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: 'project',
                 directory: 'dir',
                 individualPrefix: 'individualPrefix',
@@ -298,7 +298,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String group = configService.testingGroup
 
         when:
-        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
+        ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: 'project',
                 directory: 'dir',
                 individualPrefix: 'individualPrefix',
@@ -339,7 +339,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS).group().toString() != group
 
         when:
-        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
+        ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: 'project',
                 directory: 'dir',
                 individualPrefix: 'individualPrefix',
@@ -387,7 +387,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectDirectory.exists()
 
         when:
-        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
+        ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: 'project',
                 directory: 'dir',
                 individualPrefix: 'individualPrefix',
@@ -456,7 +456,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String group = configService.testingGroup
 
         when:
-        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
+        ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: 'project',
                 directory: 'dir',
                 individualPrefix: 'individualPrefix',
@@ -485,7 +485,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         String group = configService.testingGroup
 
         when:
-        CreateProjectSubmitCommand projectParams = new CreateProjectSubmitCommand(
+        ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: 'project',
                 directory: 'dir',
                 individualPrefix: 'individualPrefix',

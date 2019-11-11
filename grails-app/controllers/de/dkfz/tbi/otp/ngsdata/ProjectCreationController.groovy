@@ -33,7 +33,7 @@ import de.dkfz.tbi.otp.searchability.Keyword
 
 import java.text.SimpleDateFormat
 
-class CreateProjectController {
+class ProjectCreationController {
     static allowedMethods = [
             index: "GET",
             save : "POST",
@@ -58,25 +58,25 @@ class CreateProjectController {
                 allSpeciesWithStrains          : SpeciesWithStrain.list().sort { it.toString() },
                 keywords                       : Keyword.listOrderByName() ?: [],
                 projects                       : Project.listOrderByName(),
-                cmd                            : flash.cmd as CreateProjectSubmitCommand,
+                cmd                            : flash.cmd as ProjectCreationCommand,
         ]
     }
 
-    def save(CreateProjectSubmitCommand cmd) {
+    def save(ProjectCreationCommand cmd) {
         if (cmd.hasErrors()) {
             flash.cmd = cmd
-            flash.message = new FlashMessage(g.message(code: "createProject.store.failure") as String, cmd.errors)
+            flash.message = new FlashMessage(g.message(code: "projectCreation.store.failure") as String, cmd.errors)
             redirect(action: "index")
         } else {
             Project project = projectService.createProject(cmd)
             projectSelectionService.setSelectedProject([project], project.name)
-            flash.message = new FlashMessage(g.message(code: "createProject.store.success") as String)
+            flash.message = new FlashMessage(g.message(code: "projectCreation.store.success") as String)
             redirect(controller: "projectConfig")
         }
     }
 }
 
-class CreateProjectSubmitCommand implements Serializable {
+class ProjectCreationCommand implements Serializable {
     String name
     String individualPrefix
     String directory

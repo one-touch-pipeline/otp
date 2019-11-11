@@ -183,7 +183,7 @@
                                                 <li><g:link controller="sampleIdentifierOverview">${g.message(code: "otp.menu.sampleIdentifierOverview")}</g:link></li>
                                                 <li><g:link controller="metadataImport" action="blacklistedIlseNumbers">${g.message(code: "otp.menu.blacklistedIlseNumbers")}</g:link></li>
                                                 <li role="separator" class="divider"></li>
-                                                <li><g:link controller="createProject">${g.message(code: "otp.menu.createProject")}</g:link></li>
+                                                <li><g:link controller="projectCreation">${g.message(code: "otp.menu.projectCreation")}</g:link></li>
                                                 <li><g:link controller="projectConfig">${g.message(code: "otp.menu.projectConfig")}</g:link></li>
                                                 <li><g:link controller="individual" action="insert">${g.message(code: "otp.menu.createIndividual")}</g:link></li>
                                                 <li><g:link controller="bulkSampleCreation" action="index">${g.message(code: "otp.menu.createSample")}</g:link></li>

@@ -51,7 +51,7 @@ class ProjectServiceSpec extends Specification implements DataTest {
                         (OtpProperty.PATH_PROJECT_ROOT): "/some/nested/root/path",
                 ])
         ])
-        CreateProjectSubmitCommand cmd = new CreateProjectSubmitCommand (
+        ProjectCreationCommand cmd = new ProjectCreationCommand (
                 name                          : "project",
                 individualPrefix              : "individualPrefix",
                 unixGroup                     : "unixGroup",

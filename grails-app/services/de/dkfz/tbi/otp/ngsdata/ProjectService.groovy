@@ -150,7 +150,7 @@ class ProjectService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Project createProject(CreateProjectSubmitCommand projectParams) {
+    Project createProject(ProjectCreationCommand projectParams) {
         assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
         Path rootPath = configService.rootPath.toPath()
         List<String> rootPathElements = rootPath.toList()*.toString()

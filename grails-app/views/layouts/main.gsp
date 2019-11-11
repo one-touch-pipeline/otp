@@ -112,7 +112,7 @@
                                             <li><g:link controller="bamMetadataImport" action="index"><g:message code="otp.menu.bamMetadataImport"/></g:link></li>
                                             <li><g:link controller="sampleIdentifierOverview" action="index"><g:message code="otp.menu.sampleIdentifierOverview"/></g:link></li>
                                             <li><g:link controller="metadataImport" action="blacklistedIlseNumbers"><g:message code="otp.menu.blacklistedIlseNumbers"/></g:link></li>
-                                            <li><g:link controller="createProject" action="index"><g:message code="otp.menu.createProject"/></g:link></li>
+                                            <li><g:link controller="projectCreation" action="index"><g:message code="otp.menu.projectCreation"/></g:link></li>
                                             <li><g:link controller="individual" action="insert"><g:message code="otp.menu.createIndividual"/></g:link></li>
                                             <li><g:link controller="bulkSampleCreation" action="index"><g:message code="otp.menu.createSample"/></g:link></li>
                                             <li><g:link controller="speciesWithStrain" action="index"><g:message code="otp.menu.speciesAndStrains"/></g:link></li>
