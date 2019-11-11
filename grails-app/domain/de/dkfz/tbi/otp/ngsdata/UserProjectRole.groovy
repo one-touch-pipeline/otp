@@ -55,4 +55,9 @@ class UserProjectRole implements Serializable, Entity {
     boolean equalByAccessRelatedProperties(UserProjectRole userProjectRole) {
         return accessRelatedProperties.every { this."$it" == userProjectRole."$it" }
     }
+
+    @Override
+    String toString() {
+        return "UPR ${id}: ${project} ${user} ${projectRole}"
+    }
 }

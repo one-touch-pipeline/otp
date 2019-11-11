@@ -207,7 +207,7 @@ class Project implements Commentable, Entity {
 
     @Override
     String toString() {
-        name
+        return name
     }
 
     static mapping = {
