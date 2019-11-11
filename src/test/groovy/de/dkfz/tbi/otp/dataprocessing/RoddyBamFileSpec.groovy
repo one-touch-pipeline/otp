@@ -261,7 +261,7 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
 
         then:
         ValidationException e = thrown()
-        e.message.contains("a comment is required in case the QC status is set to ACCEPTED, REJECTED or BLOCKED")
+        e.message.contains("comment.missing")
     }
 
 

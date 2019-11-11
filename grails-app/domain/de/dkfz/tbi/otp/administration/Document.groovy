@@ -55,7 +55,7 @@ class Document implements Entity {
         // limit file size to 1MB
         content maxSize: 1024 * 1024, blank: false, validator: {
             if (it.size() == 0) {
-                return "the file must not be empty"
+                return "empty"
             }
         }
     }

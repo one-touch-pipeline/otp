@@ -44,10 +44,10 @@ class MergingCriteria implements Entity {
     static constraints = {
         useLibPrepKit validator : { val, obj ->
             if (obj.seqType.isExome() && !val) {
-                return "In case of Exome data, the libraryPreparationKit must be part of the MergingCriteria"
+                return "exome"
             }
             if (obj.seqType.isWgbs() && val) {
-                return "In case of WGBS data, the libraryPreparationKit must not be part of the MergingCriteria"
+                return "wgbs"
             }
         }
         project unique: 'seqType'

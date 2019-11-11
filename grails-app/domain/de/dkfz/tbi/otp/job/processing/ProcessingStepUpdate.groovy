@@ -111,11 +111,11 @@ class ProcessingStepUpdate implements Serializable, Entity {
             List<ProcessingStepUpdate> stepUpdates = ProcessingStepUpdate.findAllByProcessingStep(obj.processingStep)
             if (stepUpdates.isEmpty() || (stepUpdates.size() == 1 && stepUpdates.first() == obj)) {
                 if (val != ExecutionState.CREATED) {
-                    return "First ProcessingStepUpdate has to be ExecutionState.CREATED"
+                    return "invalid.first"
                 }
             } else {
                 if (val == ExecutionState.CREATED) {
-                    return "Following ProcessingStepUpdates can not be ExecutionState.CREATED"
+                    return "invalid.following"
                 }
             }
         })

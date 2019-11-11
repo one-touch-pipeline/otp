@@ -21,9 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
-
 
 class ReferenceGenomeIndex implements Entity {
 
@@ -34,9 +32,7 @@ class ReferenceGenomeIndex implements Entity {
     String indexToolVersion
 
     static constraints = {
-        path unique: ['toolName', 'referenceGenome'], blank: false, validator: { String val ->
-            OtpPath.isValidRelativePath(val)
-        }
+        path unique: ['toolName', 'referenceGenome'], blank: false, shared: "relativePath"
         indexToolVersion unique: ['toolName', 'referenceGenome'], blank: false
     }
 

@@ -204,19 +204,15 @@ class CreateLibraryPreparationKitCommand implements Validateable {
     static constraints = {
         name(blank: false, validator: { val, obj ->
             if (obj.libraryPreparationKitService.findByNameOrImportAlias(val)) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
         shortDisplayName(blank: false, validator: { val, obj ->
             if (LibraryPreparationKit.findByShortDisplayName(val)) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
-        adapterFile(nullable: true, blank: false, validator: { val, obj ->
-            if (val && !OtpPath.isValidAbsolutePath(val)) {
-                return 'Not a valid file name'
-            }
-        })
+        adapterFile(nullable: true, blank: false, shared: "absolutePath")
         reverseComplementAdapterSequence(nullable: true, blank: false)
     }
 
@@ -241,11 +237,7 @@ class AddAdapterFileToLibraryPreparationKitCommand implements Validateable {
     String adapterFile
     LibraryPreparationKit libraryPreparationKit
     static constraints = {
-        adapterFile blank: false, nullable: false, validator: { val, obj ->
-            if (!OtpPath.isValidAbsolutePath(val)) {
-                return 'Not a valid file name'
-            }
-        }
+        adapterFile blank: false, nullable: false, shared: "absolutePath"
         libraryPreparationKit nullable: false
     }
 
@@ -270,10 +262,10 @@ class CreateAntibodyTargetCommand implements Validateable {
     static constraints = {
         name(blank: false, validator: { val, obj ->
             if (obj.antibodyTargetService.findByNameOrImportAlias(val)) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
             if (!OtpPath.isValidPathComponent(val)) {
-                return 'Invalid Pattern'
+                return 'validator.path.component'
             }
         })
     }
@@ -289,12 +281,12 @@ class CreateSeqCenterCommand implements Validateable {
     static constraints = {
         name(blank: false, validator: { val, obj ->
             if (SeqCenter.findByName(val)) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
         dirName(blank: false, validator: { val, obj ->
             if (SeqCenter.findByDirName(val)) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
     }
@@ -317,7 +309,7 @@ class CreateSeqPlatformCommand implements Validateable {
         platform(blank: false,
                 validator: { val, obj ->
                     if (obj.seqPlatformService.findSeqPlatform(obj.platform, obj.model, obj.kit)) {
-                        return 'Duplicate'
+                        return 'default.not.unique.message'
                     }
                 })
         model(blank: false, nullable: false)
@@ -352,7 +344,7 @@ abstract class CreateImportAliasCommand implements Validateable {
         id(blank: false)
         importAlias(blank: false, validator: { val, obj ->
             if (obj.service.findByNameOrImportAlias(val)) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
     }
@@ -419,7 +411,7 @@ abstract class CreateWithLayoutCommand implements Validateable {
     static constraints = {
         anyLayout(blank: false, validator: { val, obj ->
             if (!(obj.single || obj.paired || obj.mate_pair)) {
-                return 'Empty'
+                return 'none.selected'
             }
         })
     }
@@ -450,19 +442,19 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
             if (obj.getLibraryLayouts().find {
                 obj.seqTypeService.findByNameOrImportAlias(val, [libraryLayout: it, singleCell: obj.singleCell])
             }) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
         dirName(blank: false, validator: { val, obj ->
             if (SeqType.findByDirName(val)) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
         displayName(blank: false, validator: { val, obj ->
             if (obj.getLibraryLayouts().find {
                 obj.seqTypeService.findByNameOrImportAlias(val, [libraryLayout: it, singleCell: obj.singleCell])
             }) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
     }
@@ -489,17 +481,17 @@ class CreateLayoutCommand extends CreateWithLayoutCommand {
     static constraints = {
         single(validator: { val, obj ->
             if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: LibraryLayout.SINGLE, singleCell: obj.singleCell])) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
         paired(validator: { val, obj ->
             if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: LibraryLayout.PAIRED, singleCell: obj.singleCell])) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
         mate_pair(validator: { val, obj ->
             if (val && obj.seqTypeService.findByNameOrImportAlias(obj.name, [libraryLayout: LibraryLayout.MATE_PAIR, singleCell: obj.singleCell])) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
         name(blank: false)

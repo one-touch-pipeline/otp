@@ -97,7 +97,7 @@ class JobErrorDefinitionSpec extends Specification implements DataTest {
 
         then:
         ValidationException e = thrown()
-        e.message.contains("* is not a valid REGEX")
+        e.message.contains("invalid")
     }
 
 }

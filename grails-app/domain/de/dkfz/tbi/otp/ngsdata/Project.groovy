@@ -144,26 +144,22 @@ class Project implements Commentable, Entity {
         name(blank: false, unique: true, validator: { val, obj ->
             Project project = atMostOneElement(Project.findAllByNameInMetadataFiles(val))
             if (project && project.id != obj.id) {
-                return 'this name is already used in another project as nameInMetadataFiles entry'
+                return 'duplicate.metadataFilesName'
             }
         })
 
         individualPrefix(nullable: true, blank: false, validator: { val, obj ->
             Project project = Project.findByIndividualPrefixAndIdNotEqual(val, obj.id)
             if (obj.uniqueIndividualPrefix && project && project.id != obj.id) {
-                return 'this individual prefix is already used in another project'
+                return 'duplicate'
             } else if (obj.uniqueIndividualPrefix && !val) {
-                return 'individual prefix not allowed to be null'
+                return 'default.blank.message'
             }
         })
 
-        dirName(blank: false, unique: true, validator: { String val ->
-            OtpPath.isValidRelativePath(val)
-        })
+        dirName(blank: false, unique: true, shared: "relativePath")
 
-        dirAnalysis(nullable: true, validator: { String val ->
-            !val || OtpPath.isValidAbsolutePath(val)
-        })
+        dirAnalysis(nullable: true, shared: "absolutePath")
 
         realm(nullable: false)
 
@@ -176,10 +172,10 @@ class Project implements Commentable, Entity {
                 Project projectByMetadata = atMostOneElement(Project.findAllByNameInMetadataFiles(val))
                 Project projectByName = atMostOneElement(Project.findAllByName(val))
                 if (projectByMetadata && projectByMetadata.id != obj.id) {
-                    return 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry'
+                    return 'duplicate'
                 }
                 if (projectByName && projectByName.id != obj.id) {
-                    return 'this nameInMetadataFiles is already used in another project as name entry'
+                    return 'duplicate.name'
                 }
             }
         })

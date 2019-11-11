@@ -38,7 +38,7 @@ class IlseSubmission implements Entity, Commentable {
         comment nullable: true, validator: { comment, ilseSubmission ->
             if (ilseSubmission.warning) {
                 if (!comment?.comment) {
-                    return 'a comment need to be provided'
+                    return 'default.blank.message'
                 }
             }
         }

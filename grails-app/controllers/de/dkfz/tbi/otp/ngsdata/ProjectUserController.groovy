@@ -281,7 +281,7 @@ class UpdateUserRealNameCommand implements Validateable {
     static constraints = {
         newName(blank: false, validator: { val, obj ->
             if (val == obj.user?.realName) {
-                return 'No Change'
+                return 'no.change'
             }
         })
     }
@@ -296,9 +296,9 @@ class UpdateUserEmailCommand implements Validateable {
     static constraints = {
         newEmail(nullable: false, email: true, blank: false, validator: { val, obj ->
             if (val == obj.user?.email) {
-                return 'No Change'
+                return 'no.change'
             } else if (User.findByEmail(val)) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
     }
@@ -322,7 +322,7 @@ class UpdateProjectRoleCommand implements Validateable {
     static constraints = {
         newRole(validator: { val, obj ->
             if (val == obj.userProjectRole.projectRole.name) {
-                return 'No Change'
+                return 'no.change'
             }
         })
     }
@@ -350,12 +350,12 @@ class AddUserToProjectCommand implements Serializable {
         addViaLdap(blank: false)
         searchString(nullable: true, validator: { val, obj ->
             if (obj.addViaLdap && !obj.searchString?.trim()) {
-                return "searchString can not be empty"
+                return "empty"
             }
         })
         projectRoleName(nullable: true, validator: { val, obj ->
             if (!obj.projectRoleName) {
-                return "No project role selected"
+                return "empty"
             }
         })
         accessToFiles(blank: false)
@@ -364,12 +364,12 @@ class AddUserToProjectCommand implements Serializable {
         receivesNotifications(blank: false)
         realName(nullable: true, validator: { val, obj ->
             if (!obj.addViaLdap && !obj.realName?.trim()) {
-                return "Real name can not be empty"
+                return "empty"
             }
         })
         email(nullable: true, email: true, validator: { val, obj ->
             if (!obj.addViaLdap && !obj.email?.trim()) {
-                return "Email can not be empty"
+                return "empty"
             }
         })
     }

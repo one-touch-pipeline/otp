@@ -97,25 +97,25 @@ class ExternallyProcessedMergedBamFileSpec extends Specification implements Data
         TestCase.assertAtLeastExpectedValidateError(bamFile, property, constraint, value)
 
         where:
-        property             | constraint          | value
-        'insertSizeFile'     | 'blank'             | ''
-        'insertSizeFile'     | 'maxSize.exceeded'  | '0'.padRight(2000, '0')
-        'insertSizeFile'     | 'validator.invalid' | '/tmp'
-        'insertSizeFile'     | 'validator.invalid' | 'tmp//tmp'
-        'insertSizeFile'     | 'validator.invalid' | 'tmp&tmp'
+        property            | constraint                 | value
+        'insertSizeFile'    | 'blank'                    | ''
+        'insertSizeFile'    | 'maxSize.exceeded'         | '0'.padRight(2000, '0')
+        'insertSizeFile'    | 'validator.relative.path'  | '/tmp'
+        'insertSizeFile'    | 'validator.relative.path'  | 'tmp//tmp'
+        'insertSizeFile'    | 'validator.relative.path'  | 'tmp&tmp'
 
-        'fileName'           | 'nullable'          | null
-        'fileName'           | 'blank'             | ''
-        'fileName'           | 'validator.invalid' | '/tmp'
-        'fileName'           | 'validator.invalid' | 'tmp/tmp'
-        'fileName'           | 'validator.invalid' | 'tmp&tmp'
+        'fileName'          | 'nullable'                 | null
+        'fileName'          | 'blank'                    | ''
+        'fileName'          | 'validator.path.component' | '/tmp'
+        'fileName'          | 'validator.path.component' | 'tmp/tmp'
+        'fileName'          | 'validator.path.component' | 'tmp&tmp'
 
-        'importedFrom'       | 'blank'             | ''
-        'importedFrom'       | 'validator.invalid' | 'tmp'
-        'importedFrom'       | 'validator.invalid' | '/tmp//tmp'
-        'importedFrom'       | 'validator.invalid' | '/tmp&tmp'
+        'importedFrom'      | 'blank'                    | ''
+        'importedFrom'      | 'validator.absolute.path'  | 'tmp'
+        'importedFrom'      | 'validator.absolute.path'  | '/tmp//tmp'
+        'importedFrom'      | 'validator.absolute.path'  | '/tmp&tmp'
 
-        'maximumReadLength'  | 'min.notmet'        | -5
+        'maximumReadLength' | 'min.notmet'               | -5
     }
 
 

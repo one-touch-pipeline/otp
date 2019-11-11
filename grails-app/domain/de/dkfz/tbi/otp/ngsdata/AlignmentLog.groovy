@@ -45,9 +45,6 @@ class AlignmentLog implements Entity {
             seqTrack       : SeqTrack,
     ]
 
-    static constraints = {
-    }
-
     @Override
     String toString() {
         List<DataFile> dataFiles = DataFile.findAllByAlignmentLog(this)

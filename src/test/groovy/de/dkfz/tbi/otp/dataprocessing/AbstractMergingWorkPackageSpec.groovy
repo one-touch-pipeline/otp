@@ -201,7 +201,7 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
         ])
 
         then:
-        TestCase.assertValidateError(workPackage, 'antibodyTarget', "For seqtype '${seqtype}' the antibody target have to be set", workPackage.antibodyTarget)
+        TestCase.assertValidateError(workPackage, 'antibodyTarget', "required", workPackage.antibodyTarget)
     }
 
     void "constraint for antibodyTarget, when seqType is not chip seq and antibodyTarget is set, then validate should create errors"() {
@@ -213,7 +213,7 @@ class AbstractMergingWorkPackageSpec extends Specification implements DataTest {
         ])
 
         then:
-        TestCase.assertValidateError(workPackage, 'antibodyTarget', "For seqtype '${seqType}' the antibody target may not be set", workPackage.antibodyTarget)
+        TestCase.assertValidateError(workPackage, 'antibodyTarget', "not.allowed", workPackage.antibodyTarget)
     }
 
     TestAbstractMergingWorkPackage createTestAbstractMergingWorkPackage(Map properties) {

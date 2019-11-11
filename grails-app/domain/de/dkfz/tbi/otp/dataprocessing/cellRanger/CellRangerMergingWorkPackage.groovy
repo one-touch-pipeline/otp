@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
-import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class CellRangerMergingWorkPackage extends MergingWorkPackage {
 
@@ -31,9 +30,6 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
     Integer enforcedCells
     ReferenceGenomeIndex referenceGenomeIndex
     CellRangerConfig config
-
-    private final static MUTUAL_EXCLUSIVITY_ERROR = "expectedCells and enforcedCells are mutually exclusive"
-    private final static REFERENCE_GENOME_SYNCH_ERROR = "referenceGenome and referenceGenomeIndex.referenceGenome have to be the same"
 
     static constraints = {
         sample(validator: { val, obj ->
@@ -44,27 +40,28 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
                 enforcedCells        : obj.enforcedCells,
                 referenceGenomeIndex : obj.referenceGenomeIndex,
             ]
-            String uniqueCombinationError = "the combination of " + properties.collect { k, v -> "${k}: ${v}" }.join(", ") + " must be unique"
-            CellRangerMergingWorkPackage cellRangerMergingWorkPackage = CollectionUtils.atMostOneElement(
-                    findAllWhere(properties), "Found more than one ${CellRangerMergingWorkPackage.simpleName} but " + uniqueCombinationError
-            )
-            if (cellRangerMergingWorkPackage && cellRangerMergingWorkPackage.id != obj.id) {
-                return uniqueCombinationError
+            String prop = properties.collect { k, v -> "${k}: ${v}" }.join(", ")
+            List<CellRangerMergingWorkPackage> workPackages = findAllWhere(properties)
+            if (workPackages.size() > 1) {
+                return ["unique.combinations", prop]
+            }
+            if (workPackages && workPackages.first().id != obj.id) {
+                return ["unique.combination", prop]
             }
         })
         expectedCells(nullable: true, validator: { val, obj ->
             if (!(val == null ^ obj.enforcedCells == null)) {
-                return MUTUAL_EXCLUSIVITY_ERROR
+                return "exclusive"
             }
         })
         enforcedCells(nullable: true, validator: { val, obj ->
             if (!(val == null ^ obj.expectedCells == null)) {
-                return MUTUAL_EXCLUSIVITY_ERROR
+                return "exclusive"
             }
         })
         referenceGenomeIndex(validator: { val, obj ->
             if (val.referenceGenome != obj.referenceGenome) {
-                return REFERENCE_GENOME_SYNCH_ERROR
+                return "sync"
             }
         })
         config(nullable: true)

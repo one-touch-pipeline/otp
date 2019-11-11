@@ -100,7 +100,7 @@ class CreateBulkSampleCreationCommand {
     static constraints = {
         referenceGenomeSource(nullable: true, validator: { val, obj ->
             if (!(obj.createMissingSampleTypes ^ val == null)) {
-                return "SampleType creation and source have to be defined together"
+                return "missing"
             }
         })
     }

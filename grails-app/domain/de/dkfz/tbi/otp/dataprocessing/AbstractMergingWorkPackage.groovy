@@ -66,11 +66,11 @@ abstract class AbstractMergingWorkPackage implements Entity {
             if (obj.seqType) {
                 if (obj.seqType.hasAntibodyTarget) {
                     if (val == null) {
-                        return "For seqtype '${obj.seqType}' the antibody target have to be set"
+                        return ["required", obj.seqType]
                     }
                 } else {
                     if (val != null) {
-                        return "For seqtype '${obj.seqType}' the antibody target may not be set"
+                        return ["not.allowed", obj.seqType]
                     }
                 }
             } else {

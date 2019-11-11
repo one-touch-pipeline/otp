@@ -31,7 +31,6 @@ class AlignmentParams implements Entity {
     String params
 
     static constraints = {
-        pipeline()
         genome(nullable: true)
         params(nullable: true)
     }

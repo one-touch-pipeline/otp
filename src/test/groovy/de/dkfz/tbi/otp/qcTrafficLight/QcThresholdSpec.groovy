@@ -88,30 +88,30 @@ class QcThresholdSpec extends Specification implements DataTest {
 
         where:
         wtl  | wtu  | etl  | etu  || message
-        40   | 30   | 10   | 50   || 'LOWER warning threshold must be smaller than UPPER warning threshold'
-        0    | 30   | 10   | 50   || 'Lower WARNING threshold must be bigger than lower ERROR threshold'
-        20   | 60   | 10   | 50   || 'Upper WARNING threshold must be smaller than upper ERROR threshold'
-        null | 60   | 10   | 50   || 'Please also set a lower WARNING threshold when defining a lower ERROR threshold'
-        20   | null | 10   | 50   || 'Please also set a upper WARNING threshold when defining a upper ERROR threshold'
-        null | null | 10   | 50   || 'Please also set a lower WARNING threshold when defining a lower ERROR threshold'
-        20   | 60   | null | 50   || 'When setting a lower WARNING threshold, please also define the lower ERROR threshold'
-        20   | null | null | 50   || 'When setting a lower WARNING threshold, please also define the lower ERROR threshold'
-        null | null | null | 50   || 'When leaving the lower thresholds empty, please define BOTH upper warning and upper error thresholds'
-        20   | 60   | 10   | null || 'When setting an upper WARNING threshold, please also define an upper ERROR threshold'
-        null | 60   | 10   | null || 'Please also set a lower WARNING threshold when defining a lower ERROR threshold'
-        null | null | 10   | null || 'Please also set a lower WARNING threshold when defining a lower ERROR threshold'
-        20   | 60   | null | null || 'When setting a lower WARNING threshold, please also define the lower ERROR threshold'
-        null | 60   | null | null || 'When leaving the lower thresholds empty, please define BOTH upper warning and upper error thresholds'
-        20   | null | null | null || 'When setting a lower WARNING threshold, please also define the lower ERROR threshold'
-        null | null | null | null || 'When leaving the lower thresholds empty, please define BOTH upper warning and upper error thresholds'
-        null | 1    | 1    | 1    || 'Please also set a lower WARNING threshold when defining a lower ERROR threshold'
-        1    | 1    | null | 1    || 'When setting a lower WARNING threshold, please also define the lower ERROR threshold'
-        1    | null | 1    | 1    || 'Lower WARNING threshold must be bigger than lower ERROR threshold'
-        1    | 1    | null | 1    || 'When setting a lower WARNING threshold, please also define the lower ERROR threshold'
-        1    | 1    | 1    | null || 'LOWER warning threshold must be smaller than UPPER warning threshold'
-        1    | 1    | 1    | 1    || 'LOWER warning threshold must be smaller than UPPER warning threshold'
-        null | 1    | null | 1    || 'Upper WARNING threshold must be smaller than upper ERROR threshold'
-        1    | null | 1    | null || 'Lower WARNING threshold must be bigger than lower ERROR threshold'
+        40   | 30   | 10   | 50   || 'lower.warning.too.big'
+        0    | 30   | 10   | 50   || 'lower.warning.too.small'
+        20   | 60   | 10   | 50   || 'upper.warning.too.big'
+        null | 60   | 10   | 50   || 'lower.warning.missing'
+        20   | null | 10   | 50   || 'upper.warning.missing'
+        null | null | 10   | 50   || 'lower.warning.missing'
+        20   | 60   | null | 50   || 'lower.error.missing'
+        20   | null | null | 50   || 'lower.error.missing'
+        null | null | null | 50   || 'upper.missing'
+        20   | 60   | 10   | null || 'upper.error.missing'
+        null | 60   | 10   | null || 'lower.warning.missing'
+        null | null | 10   | null || 'lower.warning.missing'
+        20   | 60   | null | null || 'lower.error.missing'
+        null | 60   | null | null || 'upper.missing'
+        20   | null | null | null || 'lower.error.missing'
+        null | null | null | null || 'upper.missing'
+        null | 1    | 1    | 1    || 'lower.warning.missing'
+        1    | 1    | null | 1    || 'lower.error.missing'
+        1    | null | 1    | 1    || 'lower.warning.too.small'
+        1    | 1    | null | 1    || 'lower.error.missing'
+        1    | 1    | 1    | null || 'lower.warning.too.big'
+        1    | 1    | 1    | 1    || 'lower.warning.too.big'
+        null | 1    | null | 1    || 'upper.warning.too.big'
+        1    | null | 1    | null || 'lower.warning.too.small'
     }
 
     @Unroll
@@ -159,8 +159,7 @@ class QcThresholdSpec extends Specification implements DataTest {
 
         then:
         ValidationException e = thrown()
-        e.message.contains("QcThreshold for")
-        e.message.contains("already exists")
+        e.message.contains("unique")
 
         where:
         project                             | _

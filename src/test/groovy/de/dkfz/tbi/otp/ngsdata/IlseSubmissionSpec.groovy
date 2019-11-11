@@ -93,7 +93,7 @@ class IlseSubmissionSpec extends Specification implements DataTest {
         ilseSubmission.warning = true
 
         then:
-        TestCase.assertValidateError(ilseSubmission, 'comment', 'a comment need to be provided', comment)
+        TestCase.assertValidateError(ilseSubmission, 'comment', 'default.blank.message', comment)
 
         where:
         comment << [

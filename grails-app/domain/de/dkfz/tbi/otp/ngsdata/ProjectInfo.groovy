@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -70,9 +69,7 @@ class ProjectInfo implements Entity {
     ]
 
     static constraints = {
-        fileName(blank: false, unique: 'project', validator: { String val ->
-            OtpPath.isValidPathComponent(val)
-        })
+        fileName(blank: false, unique: 'project', shared: "pathComponent")
         recipientInstitution nullable: true
         recipientPerson nullable: true
         recipientAccount nullable: true

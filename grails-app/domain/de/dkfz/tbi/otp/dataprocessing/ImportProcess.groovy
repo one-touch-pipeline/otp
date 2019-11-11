@@ -57,7 +57,7 @@ class ImportProcess implements Entity, ProcessParameterObject {
             }
             for (ImportProcess importProcess : importProcesses) {
                 if (importProcess && importProcess.id != obj.id) {
-                    return "This set of bam files was already imported"
+                    return "already.imported"
                 }
             }
             return true

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -85,7 +84,7 @@ class ReferenceGenomeProjectSeqType implements Entity {
         }
         sampleType(nullable: true)
         deprecatedDate(nullable: true)
-        statSizeFileName nullable: true, blank: false, matches: TAB_FILE_PATTERN, validator: { it == null || OtpPath.isValidPathComponent(it) }
+        statSizeFileName nullable: true, blank: false, matches: TAB_FILE_PATTERN, shared: "pathComponent"
     }
 
     @Override

@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
@@ -40,6 +39,6 @@ class AntibodyTarget implements Entity {
     static hasMany = [importAlias : String]
 
     static constraints = {
-        name(unique: true, blank: false, validator: { OtpPath.isValidPathComponent(it) })
+        name(unique: true, blank: false, shared: "pathComponent")
     }
 }

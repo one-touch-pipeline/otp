@@ -106,56 +106,52 @@ class ProjectCreationCommand implements Serializable {
     static constraints = {
         name(blank: false, validator: { val, obj ->
             if (Project.findByName(val)) {
-                return 'A project with this name exists already'
+                return 'duplicate'
             }
             if (Project.findByNameInMetadataFiles(val)) {
-                return "A project with ${val} as nameInMetadataFiles exists already"
+                return "duplicate.metadataFilesName"
             }
         })
         individualPrefix(blank: false, validator: { val, obj ->
             if (Project.findByIndividualPrefix(val)) {
-                return "A project with this individual prefix ${val} already exists"
+                return "duplicate"
             }
         })
         directory(blank: false, validator: { val, obj ->
             if (Project.findByDirName(val)) {
-                return 'This path \'' + val + '\' is used by another project already'
+                return 'default.not.unique.message'
             }
         })
-        analysisDirectory(validator: { String val ->
-            if (!(!val || OtpPath.isValidAbsolutePath(val))) {
-                return "\'${val}\' is not a valid absolute path"
-            }
-        })
+        analysisDirectory(shared: "absolutePath")
         unixGroup(blank: false, validator: { val, obj ->
             if (val == "") {
-                return 'Empty'
+                return 'default.blank.message'
             }
             if (!(OtpPath.isValidPathComponent(val))) {
-                return 'Unix group contains invalid characters'
+                return 'invalid'
             }
         })
         costCenter(nullable: true)
         nameInMetadataFiles(nullable: true, validator: { val, obj ->
             if (val && Project.findByNameInMetadataFiles(val)) {
-                return '\'' + val + '\' exists already in another project as nameInMetadataFiles entry'
+                return 'duplicate'
             }
             if (Project.findByName(val)) {
-                return '\'' + val + '\' is used in another project as project name'
+                return 'duplicate.name'
             }
         })
         tumorEntity(nullable: true)
         projectInfoFile(nullable: true, validator: { val, obj ->
             if (val?.isEmpty()) {
-                return "File is empty"
+                return "empty"
             }
 
             if (val && !OtpPath.isValidPathComponent(val.originalFilename)) {
-                return "Invalid fileName"
+                return "invalid"
             }
 
             if (val?.getSize() > ProjectService.PROJECT_INFO_MAX_SIZE) {
-                "The File exceeds the 20mb file size limit "
+                "size"
             }
         })
         speciesWithStrain(nullable: true)

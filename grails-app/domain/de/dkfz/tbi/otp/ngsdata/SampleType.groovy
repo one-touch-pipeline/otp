@@ -94,24 +94,21 @@ class SampleType implements Entity {
     SpecificReferenceGenome specificReferenceGenome = SpecificReferenceGenome.UNKNOWN
 
     static constraints = {
-        name(unique: true, validator: { val, obj ->
+        name(unique: true, blank: false, validator: { val, obj ->
             if (val == null) {
                 return true // case checked as nullable constraint
             }
-            if (val.empty) {
-                return 'Name may not be empty'
-            }
             if (!OtpPath.isValidPathComponent(val)) {
-                return 'Invalid chars for path component'
+                return 'validator.path.component'
             }
             if (!obj.id && val.contains('_')) {
                 //Since roddy has problems with underscores in name of SampleTypes, it should not be allowed for new objects.
                 //But for legacy reasons the underscore should be allowed for already existing objects
-                return 'Underscore is not allowed in name'
+                return 'underscore'
             }
             SampleType sampleType = findSampleTypeByName(val)
             if (sampleType && sampleType != obj) {
-                return "Must be unique ignoring case ('${sampleType.name}' already exists)"
+                return ["unique", sampleType.name]
             }
         })
     }

@@ -90,7 +90,7 @@ class IndelQualityControl implements Entity {
 
 
     static constraints = {
-        file(validator: { OtpPath.isValidAbsolutePath(it) })
+        file shared: "absolutePath"
         indelCallingInstance unique: true
     }
 

@@ -66,7 +66,7 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
     boolean adapterTrimmingNeeded = false
 
     static constraints = {
-        configFilePath unique: true, validator: { OtpPath.isValidAbsolutePath(it) }
+        configFilePath unique: true, blank: false, shared: "absolutePath"
         pluginVersion blank: false
         obsoleteDate validator: { val, obj ->
             if (!val) {
@@ -108,10 +108,10 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
         adapterTrimmingNeeded validator: { adapterTrimmingNeeded, config ->
             if (config.pipeline?.type == Pipeline.Type.ALIGNMENT &&
                     (config.seqType?.isRna() || config.seqType?.isWgbs() || config.seqType?.isChipSeq()) && !adapterTrimmingNeeded) {
-                return "adapterTrimmingNeeded must be set for WGBS, ChipSeq and RNA alignment"
+                return "required"
             }
             if (config.pipeline?.type != Pipeline.Type.ALIGNMENT && adapterTrimmingNeeded) {
-                return "adapterTrimmingNeeded must not be set for non-alignment pipelines"
+                return "not.allowed"
             }
             return true
         }

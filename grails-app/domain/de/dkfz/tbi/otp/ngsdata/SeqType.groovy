@@ -78,14 +78,14 @@ class SeqType implements Entity {
         name(blank: false, unique: ['libraryLayout', 'singleCell'])
         dirName(blank: false, unique: ['libraryLayout', 'singleCell'], validator: { String val, SeqType obj ->
             if (!OtpPath.isValidPathComponent(val)) {
-                return "no valid path component"
+                return "validator.path.component"
             }
             if (SeqType.findByDirNameAndSingleCell(obj.dirName, !obj.singleCell)) {
-                return "dir name constraint"
+                return "unique"
             }
             if (SeqType.findByNameAndSingleCell(obj.name, obj.singleCell)) {
                 if (SeqType.findByNameAndSingleCell(obj.name, obj.singleCell).dirName != obj.dirName) {
-                    return "for same name and single cell, the dir name should be the same"
+                    return "same"
                 }
             }
         })

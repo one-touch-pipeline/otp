@@ -63,13 +63,13 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         TestCase.assertValidateError(config, property, constraint, value)
 
         where:
-        property         | constraint          | value
-        'configFilePath' | 'validator.invalid' | 'invalidPath'
-        'pipeline'       | 'nullable'          | null
-        'pluginVersion'  | 'nullable'          | null
-        'pluginVersion'  | 'blank'             | ''
-        'configVersion'  | 'blank'             | ''
-        'configVersion'  | 'matches.invalid'   | 'invalidValue'
+        property         | constraint                | value
+        'configFilePath' | 'validator.absolute.path' | 'invalidPath'
+        'pipeline'       | 'nullable'                | null
+        'pluginVersion'  | 'nullable'                | null
+        'pluginVersion'  | 'blank'                   | ''
+        'configVersion'  | 'blank'                   | ''
+        'configVersion'  | 'matches.invalid'         | 'invalidValue'
     }
 
     void "test constraint, when seqType is null for new object, then validate should return false"() {
@@ -122,8 +122,7 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         config.seqType = DomainFactory.createSeqType(name: seqTypeName)
 
         expect:
-        TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'adapterTrimmingNeeded must be set for WGBS, ChipSeq and RNA alignment',
-                config.adapterTrimmingNeeded)
+        TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'required', config.adapterTrimmingNeeded)
 
         where:
         seqTypeName << [SeqTypeNames.RNA, SeqTypeNames.WHOLE_GENOME_BISULFITE, SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION]
@@ -136,8 +135,7 @@ class RoddyWorkflowConfigSpec extends Specification implements DataTest {
         config.pipeline = DomainFactory.createPipeline(name, type)
 
         expect:
-        TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'adapterTrimmingNeeded must not be set for non-alignment pipelines',
-                config.adapterTrimmingNeeded)
+        TestCase.assertValidateError(config, 'adapterTrimmingNeeded', 'not.allowed', config.adapterTrimmingNeeded)
 
         where:
         type                | name

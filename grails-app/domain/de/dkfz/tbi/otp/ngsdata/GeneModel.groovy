@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 
 class GeneModel implements Entity {
@@ -40,21 +39,11 @@ class GeneModel implements Entity {
     String gcFileName
 
     static constraints = {
-        path unique: 'referenceGenome', blank: false, validator: { String val ->
-            OtpPath.isValidRelativePath(val)
-        }
-        fileName blank: false, validator: { String val ->
-            OtpPath.isValidPathComponent(val)
-        }
-        excludeFileName blank: false, validator: { String val ->
-            OtpPath.isValidPathComponent(val)
-        }
-        dexSeqFileName nullable: true, validator: { String val ->
-            !val || OtpPath.isValidPathComponent(val)
-        }
-        gcFileName nullable: true, validator: { String val ->
-            !val || OtpPath.isValidPathComponent(val)
-        }
+        path unique: 'referenceGenome', blank: false, shared: "relativePath"
+        fileName blank: false, shared: "pathComponent"
+        excludeFileName blank: false, shared: "pathComponent"
+        dexSeqFileName nullable: true, shared: "pathComponent"
+        gcFileName nullable: true, shared: "pathComponent"
     }
 
     @Override

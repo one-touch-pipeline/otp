@@ -21,9 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
-
 
 class ToolName implements Entity {
 
@@ -39,9 +37,7 @@ class ToolName implements Entity {
     static constraints = {
         name unique: true
         type nullable: false
-        path nullable: false, blank: false, unique: true, validator: { String val ->
-            OtpPath.isValidPathComponent(val)
-        }
+        path nullable: false, blank: false, unique: true, shared: "pathComponent"
     }
 
     static hasMany = [

@@ -24,9 +24,7 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.validation.Validateable
 import org.springframework.web.multipart.MultipartFile
 
-import de.dkfz.tbi.otp.FlashMessage
-import de.dkfz.tbi.otp.ProjectSelection
-import de.dkfz.tbi.otp.ProjectSelectionService
+import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 
 import java.text.SimpleDateFormat
@@ -168,16 +166,16 @@ class AddProjectInfoCommand implements Validateable {
         project nullable: false
         projectInfoFile(validator: { val, obj ->
             if (val.empty) {
-                return "File is empty"
+                return "empty"
             }
             if (!OtpPath.isValidPathComponent(val.originalFilename)) {
-                return "Invalid file name"
+                return "invalid.name"
             }
             if (ProjectInfo.findAllByProjectAndFileName(obj.project, val.originalFilename).size() != 0) {
-                return "A ProjectInfo with this file name already exists"
+                return "duplicate"
             }
             if (val.size > ProjectService.PROJECT_INFO_MAX_SIZE) {
-                return "The file exceeds the 20mb file size limit"
+                return "size"
             }
         })
     }

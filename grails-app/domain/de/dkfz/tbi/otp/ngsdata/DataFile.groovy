@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 
 class DataFile implements Commentable, Entity {
@@ -110,12 +109,12 @@ class DataFile implements Commentable, Entity {
 
     static constraints = {
 
-        fileName(validator: { OtpPath.isValidPathComponent(it) })
-        vbpFileName(validator: { OtpPath.isValidPathComponent(it) })
+        fileName(blank: false, shared: "pathComponent")
+        vbpFileName(blank: false, shared: "pathComponent")
 
-        pathName(validator: { it.isEmpty() || OtpPath.isValidRelativePath(it) })
+        pathName(shared: "relativePath")
         md5sum(matches: /^([0-9a-f]{32})|(n\/a)$/) //should not be n/a, but legacy data exists
-        initialDirectory(blank: false, validator: { OtpPath.isValidAbsolutePath(it) })
+        initialDirectory(blank: false, shared: "absolutePath")
 
         project nullable: true,  // Shall not be null, but legacy data exists
                 validator: { Project val, DataFile obj ->
@@ -133,7 +132,7 @@ class DataFile implements Commentable, Entity {
         sequenceLength nullable: true, validator: { val, obj ->
             if (val) {
                 if (!(val.matches(/\d+/) || val.matches(/\d+\-\d+/))) {
-                    throw new RuntimeException("The sequence length of ${obj} with value ${val} is not a valid value (number or range).")
+                    return "invalid"
                 }
             }
         }

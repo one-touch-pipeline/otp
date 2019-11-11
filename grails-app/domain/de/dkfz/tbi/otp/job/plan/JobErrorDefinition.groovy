@@ -55,7 +55,7 @@ class JobErrorDefinition implements Entity {
                Pattern.compile(val)
            }
            catch (PatternSyntaxException e) {
-               return "${val} is not a valid REGEX"
+               return "invalid"
            }
            return true
        })

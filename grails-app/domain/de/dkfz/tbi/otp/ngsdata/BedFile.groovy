@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 
 class BedFile implements Entity {
@@ -65,7 +64,7 @@ class BedFile implements Entity {
     ]
 
     static constraints = {
-        fileName(unique: 'referenceGenome', blank: false, validator: { OtpPath.isValidPathComponent(it) })
+        fileName(unique: 'referenceGenome', blank: false, shared: "pathComponent")
         // alternative primary key (referenceGenome, libraryPreparationKit)
         // we will never have 2 bed files in the db for the same
         // referenceGenome and libraryPreparationKit combination

@@ -208,9 +208,9 @@ class RnaQualityAssessment extends RoddyQualityAssessment implements QcTrafficLi
 
     static def nullIfAndOnlyIfLayoutIsSingle = { val, RnaQualityAssessment obj ->
         if (obj.roddyBamFile.seqType.libraryLayout == LibraryLayout.PAIRED && val == null) {
-            return "value must be set if layout is paired, but is null"
+            return "required"
         } else if (obj.roddyBamFile.seqType.libraryLayout == LibraryLayout.SINGLE && val != null) {
-            return "value must be null if layout is single"
+            return "not.allowed"
         }
     }
 }

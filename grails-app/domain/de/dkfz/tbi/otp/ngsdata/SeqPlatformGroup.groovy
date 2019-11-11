@@ -21,12 +21,11 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.validation.Errors
-
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.CommentableWithHistory
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.ValidatorUtil
 
 /**
  * {@link SeqTrack}s from {@link SeqPlatform}s in the same {@link SeqPlatformGroup} can be merged.
@@ -54,7 +53,7 @@ class SeqPlatformGroup implements Entity, CommentableWithHistory {
             }
             return true
         }
-        seqPlatforms validator: { Set<SeqPlatform> seqPlatforms1, SeqPlatformGroup seqPlatformGroup, Errors errors ->
+        seqPlatforms validator: ValidatorUtil.messageArgs("seqPlatforms") { Set<SeqPlatform> seqPlatforms1, SeqPlatformGroup seqPlatformGroup ->
             seqPlatforms1.each { SeqPlatform seqPlatform ->
                 List<SeqPlatformGroup> l = withCriteria {
                     seqPlatforms {
@@ -70,8 +69,7 @@ class SeqPlatformGroup implements Entity, CommentableWithHistory {
                     }
                 }
                 if (l.size() > 0) {
-                    errors.rejectValue('seqPlatforms',
-                            "seqPlatform '${seqPlatform}' must not be part of multiple groups for mergingCriteria '${seqPlatformGroup.mergingCriteria}'")
+                    rejectValue('invalid', [seqPlatformGroup.mergingCriteria])
                 }
             }
             return

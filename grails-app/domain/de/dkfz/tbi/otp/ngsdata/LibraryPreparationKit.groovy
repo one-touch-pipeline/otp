@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
@@ -50,11 +49,7 @@ class LibraryPreparationKit implements Entity {
     static constraints = {
         name(unique: true, blank: false)
         shortDisplayName(unique: true, blank: false)
-        adapterFile nullable: true, blank: false, validator: { val ->
-            if (val && !OtpPath.isValidAbsolutePath(val)) {
-                return 'Not a valid file name'
-            }
-        }
+        adapterFile nullable: true, blank: false, shared: "absolutePath"
         reverseComplementAdapterSequence nullable: true, blank: false
     }
 

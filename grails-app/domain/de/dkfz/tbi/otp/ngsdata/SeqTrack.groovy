@@ -26,7 +26,6 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.LogMessage
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.StringUtils
@@ -154,7 +153,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
             logMessages: LogMessage,
     ]
     static constraints = {
-        laneId(unique: ['run', 'cellPosition'], validator: { OtpPath.isValidPathComponent(it) })
+        laneId(unique: ['run', 'cellPosition'], blank: false, shared: "pathComponent")
         hasOriginalBam()
         seqType()
         sample()
@@ -172,9 +171,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
                 return val == null
             }
         })
-        libraryName(nullable: true, validator: { String val, SeqTrack obj ->
-            !val || OtpPath.isValidPathComponent(val)
-        })
+        libraryName(nullable: true, shared: "pathComponent")
         normalizedLibraryName(nullable: true, validator: { String val, SeqTrack obj ->
             (val == null) ? (obj.libraryName == null) : (val == normalizeLibraryName(obj.libraryName))
         })

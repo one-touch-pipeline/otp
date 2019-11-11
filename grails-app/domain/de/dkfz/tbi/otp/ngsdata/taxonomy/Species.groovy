@@ -31,7 +31,7 @@ class Species implements Entity {
         commonName(unique: false)
         scientificName(unique: true, blank: false, nullable: false, validator: { String val ->
             if (val && !(val =~ /^[A-Za-z0-9 ]+$/)) {
-                return 'Contains invalid characters'
+                return 'invalid'
             }
         })
     }

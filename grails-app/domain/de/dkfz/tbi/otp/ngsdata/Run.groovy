@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.utils.Entity
@@ -50,7 +49,7 @@ class Run implements ProcessParameterObject, Entity {
     ]
 
     static constraints = {
-        name(blank: false, unique: true, validator: { OtpPath.isValidPathComponent(it) })
+        name(blank: false, unique: true, shared: "pathComponent")
         dateExecuted(nullable: true)
     }
 

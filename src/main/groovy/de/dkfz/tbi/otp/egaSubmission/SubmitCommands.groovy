@@ -55,10 +55,10 @@ class UpdateSubmissionStateSubmitCommand implements Validateable {
         state(validator: { val, obj ->
             if (val != EgaSubmission.State.SELECTION) {
                 if (!obj.submission.samplesToSubmit) {
-                    return 'No samples to submit are selected yet'
+                    return 'no.samples'
                 }
                 if (!obj.submission.bamFilesToSubmit && !obj.submission.dataFilesToSubmit) {
-                    return 'No files to submit are selected yet'
+                    return 'no.files'
                 }
             }
         })

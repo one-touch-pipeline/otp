@@ -26,7 +26,10 @@ import de.dkfz.tbi.otp.utils.Entity
 class MetaDataKey implements Entity {
 
     String name
-    static constraints = { name(unique: true) }
+
+    static constraints = {
+        name unique: true
+    }
 
     @Override
     String toString() {

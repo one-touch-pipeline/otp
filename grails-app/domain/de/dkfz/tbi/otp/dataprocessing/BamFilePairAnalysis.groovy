@@ -81,14 +81,14 @@ abstract class BamFilePairAnalysis implements ProcessParameterObject, Entity {
                     val.fileOperationStatus == FileOperationStatus.PROCESSED &&
                     val.mergingWorkPackage.id == obj.samplePair.mergingWorkPackage2.id
         }
-        instanceName blank: false, unique: 'samplePair', validator: { OtpPath.isValidPathComponent(it) }
+        instanceName blank: false, unique: 'samplePair', shared: "pathComponent"
         config validator: { val ->
             ([SnvConfig, RoddyWorkflowConfig, RunYapsaConfig].any { it.isAssignableFrom(Hibernate.getClass(val)) }) &&
                     val?.pipeline?.type != Pipeline.Type.ALIGNMENT
         }
         qcTrafficLightStatus nullable: true, validator: { status, obj ->
             if ([QcTrafficLightStatus.ACCEPTED, QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED].contains(status) && !obj.comment) {
-                return "a comment is required then the QC status is set to ACCEPTED, REJECTED or BLOCKED"
+                return "comment.missing"
             }
         }
         comment nullable: true

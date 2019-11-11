@@ -36,7 +36,7 @@ class EditUserCommand implements Validateable {
         email(nullable: false, blank: false, email: true, validator: { val, obj ->
             User userByMail = User.findByEmail(val)
             if (userByMail != null && userByMail != obj.user) {
-                return 'Duplicate'
+                return 'default.not.unique.message'
             }
         })
         realName(blank: false)

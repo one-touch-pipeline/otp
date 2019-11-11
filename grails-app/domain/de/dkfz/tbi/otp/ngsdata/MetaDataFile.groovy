@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 
 class MetaDataFile implements Entity {
@@ -42,8 +41,8 @@ class MetaDataFile implements Entity {
     ]
 
     static constraints = {
-        fileName(validator: { OtpPath.isValidPathComponent(it) })
-        filePath(validator: { OtpPath.isValidAbsolutePath(it) })
+        fileName(blank: false, shared: "pathComponent")
+        filePath(blank: false, shared: "absolutePath")
         md5sum(nullable: true, matches: /^[0-9a-f]{32}$/)
     }
 

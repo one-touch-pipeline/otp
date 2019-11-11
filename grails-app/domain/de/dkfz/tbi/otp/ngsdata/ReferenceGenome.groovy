@@ -129,27 +129,26 @@ class ReferenceGenome implements Entity {
      */
     static constraints = {
         name(unique: true, blank: false)
-        path(unique: true, blank: false, validator: { OtpPath.isValidRelativePath(it) })
-        fileNamePrefix(blank: false, validator: { OtpPath.isValidPathComponent(it) })
+        path(unique: true, blank: false, shared: "relativePath")
+        fileNamePrefix(blank: false, shared: "pathComponent")
         length shared: 'greaterThanZero'
         lengthWithoutN shared: 'greaterThanZero'
         lengthRefChromosomes shared: 'greaterThanZero'
         lengthRefChromosomesWithoutN shared: 'greaterThanZero'
-        cytosinePositionsIndex nullable: true, blank: false,
-                validator: { !it || OtpPath.isValidPathComponent(it) }
+        cytosinePositionsIndex nullable: true, blank: false, shared: "pathComponent"
         chromosomePrefix (blank: true)
         chromosomeSuffix (blank: true)
-        chromosomeLengthFilePath(nullable: true, blank: false, validator: { it == null || OtpPath.isValidPathComponent(it) })
+        chromosomeLengthFilePath(nullable: true, blank: false, shared: "pathComponent")
         fingerPrintingFileName nullable: true
-        gcContentFile (nullable: true, validator: { it == null || OtpPath.isValidPathComponent(it) })
-        mappabilityFile (nullable: true, maxSize: 500, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
-        replicationTimeFile (nullable: true, maxSize: 500, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        gcContentFile (nullable: true, blank: false, shared: "pathComponent")
+        mappabilityFile (nullable: true, maxSize: 500, blank: false, shared: "absolutePath")
+        replicationTimeFile (nullable: true, maxSize: 500, blank: false, shared: "absolutePath")
         geneticMapFile (nullable: true, maxSize: 500, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
         knownHaplotypesFile (nullable: true, maxSize: 500, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
         knownHaplotypesLegendFile (nullable: true, maxSize: 500, validator: { it == null || isValidAbsolutePathContainingVariable(it) })
-        geneticMapFileX (nullable: true, maxSize: 500, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
-        knownHaplotypesFileX (nullable: true, maxSize: 500, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
-        knownHaplotypesLegendFileX (nullable: true, maxSize: 500, validator: { it == null || OtpPath.isValidAbsolutePath(it) })
+        geneticMapFileX (nullable: true, maxSize: 500, blank: false, shared: "absolutePath")
+        knownHaplotypesFileX (nullable: true, maxSize: 500, blank: false, shared: "absolutePath")
+        knownHaplotypesLegendFileX (nullable: true, maxSize: 500, blank: false, shared: "absolutePath")
     }
 
     static hasMany = [

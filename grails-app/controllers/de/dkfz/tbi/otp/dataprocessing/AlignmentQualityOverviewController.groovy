@@ -477,17 +477,17 @@ class QcStatusCommand implements Serializable {
     static constraints = {
         comment(blank: false, nullable: false, validator: { val, obj ->
             if (val == obj.abstractBamFile?.comment?.comment) {
-                return "Comment has to change from ${val}"
+                return "not.changed"
             }
         })
         abstractBamFile(nullable: false, validator: { val, obj ->
             if (!((val instanceof RoddyBamFile) || (val instanceof SingleCellBamFile))) {
-                return "${val} is an invalid Value."
+                return "invalid"
             }
         })
-        newValue(blank: false, nullable: false, validator: { val, obj ->
+        newValue(blank: false, nullable: false, validator: { val, obj, errors ->
             if (!(val in AbstractMergedBamFile.QcTrafficLightStatus.values()*.toString())) {
-                return "The qcTrafficLightStatus must be one of ${AbstractMergedBamFile.QcTrafficLightStatus.values().join(", ")} and not ${val}"
+                return ["status", AbstractMergedBamFile.QcTrafficLightStatus.values().join(", ")]
             }
         })
     }

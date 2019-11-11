@@ -45,13 +45,13 @@ class SeqCenter implements Entity {
 
     static constraints = {
         name(blank: false, unique: true)
-        dirName(blank: false, unique: true, validator: { OtpPath.isValidPathComponent(it) })
-        autoImportDir nullable: true, blank: false, unique: true,  validator: { val, obj ->
+        dirName(blank: false, unique: true, shared: "pathComponent")
+        autoImportDir nullable: true, blank: false, unique: true, validator: { val, obj ->
             if (obj.autoImportable && !val) {
-                return "auto import dir must be set if auto import enabled"
+                return "required"
             }
             if (val != null && !OtpPath.isValidAbsolutePath(val)) {
-                return "'${val}' is not a valid absolute path"
+                return "validator.absolute.path"
             }
         }
         importDirsAllowLinking nullable: true, validator: { val ->
@@ -60,7 +60,7 @@ class SeqCenter implements Entity {
                     !OtpPath.isValidAbsolutePath(it)
                 }
                 if (invalidPaths) {
-                    return "'${invalidPaths.join(", ")}' not valid absolute path(s)"
+                    return ["absolute.path", invalidPaths.join(", ")]
                 }
             }
         }

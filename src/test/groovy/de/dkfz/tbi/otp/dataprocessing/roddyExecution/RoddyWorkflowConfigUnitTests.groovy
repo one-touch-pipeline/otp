@@ -77,7 +77,7 @@ class RoddyWorkflowConfigUnitTests {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         roddyWorkflowConfig.configFilePath = ''
 
-        TestCase.assertValidateError(roddyWorkflowConfig, 'configFilePath', 'validator.invalid', '')
+        TestCase.assertValidateError(roddyWorkflowConfig, 'configFilePath', 'blank', '')
     }
 
     @Test
@@ -85,7 +85,7 @@ class RoddyWorkflowConfigUnitTests {
         RoddyWorkflowConfig roddyWorkflowConfig = DomainFactory.createRoddyWorkflowConfig()
         roddyWorkflowConfig.configFilePath = "tmp/"
 
-        TestCase.assertValidateError(roddyWorkflowConfig, 'configFilePath', 'validator.invalid', 'tmp/')
+        TestCase.assertValidateError(roddyWorkflowConfig, 'configFilePath', 'validator.absolute.path', 'tmp/')
     }
 
     @Test

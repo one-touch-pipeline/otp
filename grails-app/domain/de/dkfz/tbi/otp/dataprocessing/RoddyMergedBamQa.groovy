@@ -29,7 +29,7 @@ class RoddyMergedBamQa extends RoddyQualityAssessment implements QcTrafficLightV
         chromosome(validator: { val, obj ->
             RoddyMergedBamQa roddyMergedBamQa = RoddyMergedBamQa.findByQualityAssessmentMergedPassAndChromosome(obj.qualityAssessmentMergedPass, val)
             if (roddyMergedBamQa && roddyMergedBamQa != obj) {
-                return "Unique"
+                return "unique"
             }
         })
     }

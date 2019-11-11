@@ -56,7 +56,7 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
 
         then:
         ValidationException e = thrown()
-        e.message =~ CellRangerMergingWorkPackage.REFERENCE_GENOME_SYNCH_ERROR
+        e.message =~ "sync"
     }
 
     @Unroll
@@ -66,7 +66,7 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
 
         then:
         ValidationException e = thrown()
-        e.message =~ CellRangerMergingWorkPackage.MUTUAL_EXCLUSIVITY_ERROR
+        e.message =~ "exclusive"
 
         where:
         expectedCells | enforcedCells
@@ -109,6 +109,6 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
 
         then:
         ValidationException e = thrown()
-        e.message =~ CellRangerMergingWorkPackage.MUTUAL_EXCLUSIVITY_ERROR
+        e.message =~ "exclusive"
     }
 }

@@ -255,13 +255,13 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ex.message.contains(errorName) && ex.message.contains(errorLocaction)
 
         where:
-        name           | dirName     | nameInMetadataFiles || errorName                                                                                  | errorLocaction
-        'testProject'  | 'dir'       | 'project'           || 'unique'                                                                                   | 'on field \'name\': rejected value [testProject]'
-        'testProject2' | 'dir'       | 'project'           || 'this name is already used in another project as nameInMetadataFiles entry'                | 'on field \'name\': rejected value [testProject2]'
-        'project'      | 'dir'       | 'testProject'       || 'this nameInMetadataFiles is already used in another project as name entry'                | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
-        'project'      | 'dir'       | 'testProject2'      || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
-        'project'      | 'testDir'   | ''                  || 'unique'                                                                                   | 'on field \'dirName\': rejected value [testDir]'
-        'project'      | '/abs/path' | 'project'           || 'custom validation'                                                                        | "on field 'dirName': rejected value [/abs/path];"
+        name           | dirName     | nameInMetadataFiles || errorName                       | errorLocaction
+        'testProject'  | 'dir'       | 'project'           || 'unique'                        | 'on field \'name\': rejected value [testProject]'
+        'testProject2' | 'dir'       | 'project'           || 'duplicate'                     | 'on field \'name\': rejected value [testProject2]'
+        'project'      | 'dir'       | 'testProject'       || 'duplicate.name'                | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
+        'project'      | 'dir'       | 'testProject2'      || 'duplicate.nameInMetadataFiles' | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
+        'project'      | 'testDir'   | ''                  || 'unique'                        | 'on field \'dirName\': rejected value [testDir]'
+        'project'      | '/abs/path' | 'project'           || 'validator.relative.path'       | "on field 'dirName': rejected value [/abs/path];"
     }
 
     void "test createProject invalid unix group"() {
@@ -445,9 +445,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         where:
         name           || errorName                                                                                  | errorLocaction
-        'testProject'  || 'this nameInMetadataFiles is already used in another project as name entry'                | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
-        'testProject2' || 'this nameInMetadataFiles is already used in another project as nameInMetadataFiles entry' | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
-        ''             || 'blank'                                                                                    | 'on field \'nameInMetadataFiles\': rejected value []'
+        'testProject'  || 'duplicate.name'                | 'on field \'nameInMetadataFiles\': rejected value [testProject]'
+        'testProject2' || 'duplicate.nameInMetadataFiles' | 'on field \'nameInMetadataFiles\': rejected value [testProject2]'
+        ''             || 'blank'                         | 'on field \'nameInMetadataFiles\': rejected value []'
     }
 
     void "test createProject without project type should fail"() {

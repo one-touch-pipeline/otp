@@ -66,7 +66,7 @@ class ImportProcessIntegrationSpec extends Specification {
 
         then:
         ValidationException e = thrown()
-        e.message.contains('This set of bam files was already imported')
+        e.message.contains('already.imported')
     }
 
     void "test validate set of externally processed merged bam files partially overlapped by another one throwns an expection"() {
@@ -84,7 +84,7 @@ class ImportProcessIntegrationSpec extends Specification {
 
         then:
         ValidationException e = thrown()
-        e.message.contains('This set of bam files was already imported')
+        e.message.contains('already.imported')
     }
 
     void "test validate two sets of externally processed merged bam files partially overlapped by another one throwns an expection"() {
@@ -105,6 +105,6 @@ class ImportProcessIntegrationSpec extends Specification {
 
         then:
         ValidationException e = thrown()
-        e.message.contains('This set of bam files was already imported')
+        e.message.contains('already.imported')
     }
 }

@@ -148,14 +148,14 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
 
 
     static constraints = {
-        importedFrom nullable: true, blank: false, validator: { it == null || OtpPath.isValidAbsolutePath(it) }
-        fileName blank: false, validator: { OtpPath.isValidPathComponent(it) }
+        importedFrom nullable: true, blank: false, shared: "absolutePath"
+        fileName blank: false, shared: "pathComponent"
         workPackage validator: { val, obj ->
             List<ExternallyProcessedMergedBamFile> epmbfs = ExternallyProcessedMergedBamFile.findAllByFileName(obj.fileName).findAll {
                 it.sample == val.sample && it.seqType == val.seqType && it.referenceGenome == val.referenceGenome
             }
             if (epmbfs && (epmbfs.size() != 1 || CollectionUtils.exactlyOneElement(epmbfs) != obj)) {
-                return "A EPMBF with this fileName, sample, seqType and referenceGenome already exists"
+                return "exists"
             }
 
             val && val.pipeline?.name == Pipeline.Name.EXTERNALLY_PROCESSED &&
@@ -168,9 +168,7 @@ class ExternallyProcessedMergedBamFile extends AbstractMergedBamFile {
             return (val == AbstractMergedBamFile.FileOperationStatus.PROCESSED) ? (obj.md5sum != null) : true
         }
         furtherFiles nullable: true
-        insertSizeFile nullable: true, blank: false, maxSize: 1000, validator: { val ->
-            val == null || OtpPath.isValidRelativePath(val)
-        }
+        insertSizeFile nullable: true, blank: false, maxSize: 1000, shared: "relativePath"
         maximumReadLength nullable: true, min: 0
     }
 

@@ -58,7 +58,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                     MergingWorkPackage.findAllBySampleAndSeqTypeAndAntibodyTarget(val, obj.seqType, obj.antibodyTarget),
                     "More than one MWP exists for sample ${val} and seqType ${obj.seqType} and antibodyTarget ${obj.antibodyTarget}")
             if (mergingWorkPackage && mergingWorkPackage.id != obj.id) {
-                return "The mergingWorkPackage must be unique for one sample and seqType and antibodyTarget"
+                return "unique"
             }
         })
 
@@ -97,7 +97,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                 case Pipeline.Name.RODDY_RNA_ALIGNMENT:
                     return val == null
                 default:
-                    throw new RuntimeException("Pipeline name is unknown: ${obj.pipeline?.name}")
+                    return ["unknown.pipeline",  obj.pipeline?.name]
             }
         }
 

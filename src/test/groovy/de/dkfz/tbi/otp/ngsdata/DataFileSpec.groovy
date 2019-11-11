@@ -128,11 +128,8 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
         given:
         DataFile dataFile = createDataFile([sequenceLength: "!1§2%3&"], false)
 
-        when:
-        dataFile.validate()
-
-        then:
-        thrown(RuntimeException)
+        expect:
+        TestCase.assertValidateError(dataFile, "sequenceLength", "invalid", "!1§2%3&")
     }
 
     void "getNBasePairs, fails when required properties are null"() {

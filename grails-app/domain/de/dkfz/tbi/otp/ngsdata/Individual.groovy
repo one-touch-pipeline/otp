@@ -71,7 +71,7 @@ class Individual implements Commentable, Entity {
     ]
 
     static constraints = {
-        pid(unique: true, nullable: false, validator: { OtpPath.isValidPathComponent(it) })
+        pid(unique: true, nullable: false, blank: false, shared: "pathComponent")
         internIdentifier(nullable: true)
         comment(nullable: true)
     }

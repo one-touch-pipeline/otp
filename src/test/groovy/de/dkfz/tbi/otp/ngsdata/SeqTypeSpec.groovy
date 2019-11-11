@@ -144,7 +144,7 @@ class SeqTypeSpec extends Specification implements DataTest {
         ], false)
 
         then:
-        TestCase.assertValidateError(seqType, "dirName", "for same name and single cell, the dir name should be the same", "name2")
+        TestCase.assertValidateError(seqType, "dirName", "same", "name2")
     }
 
     void "test create SeqTypes with unique Name, singleCell and LibraryLayout but same dirName combination, should fail"() {
@@ -163,7 +163,7 @@ class SeqTypeSpec extends Specification implements DataTest {
         ], false)
 
         then:
-        TestCase.assertValidateError(seqType, "dirName", "dir name constraint", "name1")
+        TestCase.assertValidateError(seqType, "dirName", "unique", "name1")
     }
 
     void "test create SeqType with non valid dirName, should fail"() {
@@ -175,7 +175,7 @@ class SeqTypeSpec extends Specification implements DataTest {
         ], false)
 
         then:
-        TestCase.assertValidateError(seqType, "dirName", "no valid path component", "name1\\")
+        TestCase.assertValidateError(seqType, "dirName", "validator.path.component", "name1\\")
     }
 
     void "ensure only the basic Exome+WholeGenome seqtypes are the 'default' since this assumption is implicit in much old OTP code"() {

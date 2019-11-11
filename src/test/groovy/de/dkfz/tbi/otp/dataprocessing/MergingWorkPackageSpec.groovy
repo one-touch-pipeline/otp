@@ -402,7 +402,7 @@ class MergingWorkPackageSpec extends Specification implements DataTest, DomainFa
         )
 
         then:
-        TestCase.assertValidateError(mergingWorkPackage1, 'sample', 'The mergingWorkPackage must be unique for one sample and seqType and antibodyTarget', mergingWorkPackage.sample)
+        TestCase.assertValidateError(mergingWorkPackage1, 'sample', 'unique', mergingWorkPackage.sample)
     }
 
 }

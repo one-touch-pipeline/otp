@@ -49,9 +49,9 @@ abstract class RoddyQualityAssessment extends AbstractQualityAssessment implemen
 
     static def nullIfAndOnlyIfPerChromosomeQc = { val, RoddyQualityAssessment obj ->
         if (obj.chromosome == ALL && val == null) {
-            return "value must be set for all chromosomes, but is null"
+            return "required"
         } else if (obj.chromosome != ALL && val != null) {
-            return "value must be null for single chromosome ${obj.chromosome}, but is ${val}"
+            return "not.allowed"
         }
     }
 

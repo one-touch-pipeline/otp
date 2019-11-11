@@ -351,14 +351,7 @@ class ConfigureAlignmentPipelineSubmitCommand extends ConfigurePipelineSubmitCom
     static constraints = {
         basedProject(nullable: true)
         copy(nullable: true)
-        statSizeFileName(nullable: true, validator: { val, obj ->
-            if (!val) {
-                return 'Invalid statSizeFileName'
-            }
-            if (!(val ==~ ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN)) {
-                return 'Invalid file name pattern'
-            }
-        })
+        statSizeFileName(nullable: true, blank: false, matches:  ReferenceGenomeProjectSeqType.TAB_FILE_PATTERN)
         bwaMemVersion(nullable: true, validator: { val, obj ->
             obj.seqType.isWgbs() ? true : val != null
         })
@@ -418,35 +411,14 @@ class ConfigurePipelineSubmitCommand extends BaseConfigurePipelineSubmitCommand 
     String submit
 
     static constraints = {
-        pluginName(nullable: true, validator: { val, obj ->
-            if (!val) {
-                return 'Empty'
+        pluginName nullable: true, blank: false, shared: 'pathComponent'
+        pluginVersion nullable: true, blank: false, shared: 'pathComponent'
+        baseProjectConfig nullable: false, blank: false, shared: 'pathComponent'
+        config nullable: true, blank: false, validator: { val, obj ->
+            if (val && !(val ==~ /^v\d+_\d+$/)) {
+                return "mismatch"
             }
-            if (!(OtpPath.isValidPathComponent(val))) {
-                return 'Invalid path component'
-            }
-        })
-        pluginVersion(nullable: true, validator: { val, obj ->
-            if (!val) {
-                return 'Empty'
-            }
-            if (!(OtpPath.isValidPathComponent(val))) {
-                return 'Invalid path component'
-            }
-        })
-        baseProjectConfig(nullable: false, blank: false, validator: { val, obj ->
-            if (val && !OtpPath.isValidPathComponent(val)) {
-                return "Invalid path component"
-            }
-        })
-        config(nullable: true, validator: { val, obj ->
-            if (!val) {
-                return 'Empty'
-            }
-            if (!(val ==~ /^v\d+_\d+$/)) {
-                return "Not a valid config version. Must look like 'v1_0'"
-            }
-        })
+        }
     }
 
     void setConfig(String config) {

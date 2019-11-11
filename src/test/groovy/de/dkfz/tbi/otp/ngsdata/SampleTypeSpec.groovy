@@ -71,13 +71,13 @@ class SampleTypeSpec extends Specification implements DataTest, DomainFactoryCor
         where:
         name          | constraint
         null          | 'nullable'
-        ''            | 'Name may not be empty'
-        'sample_type' | 'Underscore is not allowed in name'
-        'sample type' | 'Invalid chars for path component'
-        'sample!type' | 'Invalid chars for path component'
-        'sample?type' | 'Invalid chars for path component'
-        'sample#type' | 'Invalid chars for path component'
-        'sample&type' | 'Invalid chars for path component'
+        ''            | 'blank'
+        'sample_type' | 'underscore'
+        'sample type' | 'validator.path.component'
+        'sample!type' | 'validator.path.component'
+        'sample?type' | 'validator.path.component'
+        'sample#type' | 'validator.path.component'
+        'sample&type' | 'validator.path.component'
     }
 
     void "validate, when specificReferenceGenome is null, then validation should fail"() {

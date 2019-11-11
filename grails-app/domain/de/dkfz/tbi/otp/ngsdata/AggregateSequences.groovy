@@ -98,6 +98,7 @@ class AggregateSequences implements Serializable {
         id composite: ['seqTypeId', 'seqPlatformId', 'sampleId', 'seqCenterId', 'sampleTypeId', 'individualId', 'projectId']
     }
 
+    // needed for tests
     static constraints = {
         // nullable constraints from SeqPlatform
         seqPlatformModelLabelId(nullable: true)

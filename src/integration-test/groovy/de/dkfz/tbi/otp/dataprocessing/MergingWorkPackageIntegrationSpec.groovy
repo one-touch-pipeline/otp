@@ -68,7 +68,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
         ], false)
 
         then:
-        TestCase.assertValidateError(workPackage2, 'sample', 'The mergingWorkPackage must be unique for one sample and seqType and antibodyTarget', workPackage.sample)
+        TestCase.assertValidateError(workPackage2, 'sample', 'unique', workPackage.sample)
     }
 
     @Unroll
@@ -112,7 +112,7 @@ class MergingWorkPackageIntegrationSpec extends Specification {
         ], false)
 
         then:
-        TestCase.assertValidateError(workPackage2, 'sample', 'The mergingWorkPackage must be unique for one sample and seqType and antibodyTarget', workPackage.sample)
+        TestCase.assertValidateError(workPackage2, 'sample', 'unique', workPackage.sample)
     }
 
 

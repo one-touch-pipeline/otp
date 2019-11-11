@@ -147,7 +147,7 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
         }
         qcTrafficLightStatus nullable: true, validator: { status, obj ->
             if ([QcTrafficLightStatus.ACCEPTED, QcTrafficLightStatus.REJECTED, QcTrafficLightStatus.BLOCKED].contains(status) && !obj.comment) {
-                return "a comment is required in case the QC status is set to ACCEPTED, REJECTED or BLOCKED"
+                return "comment.missing"
             }
         }
         comment nullable: true

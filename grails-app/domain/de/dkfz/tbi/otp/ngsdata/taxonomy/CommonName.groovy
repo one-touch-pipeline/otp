@@ -31,18 +31,17 @@ class CommonName implements Entity {
     static constraints = {
         name(unique: true, nullable: false, blank: false, validator: { String val, CommonName obj ->
             if (val && !(val =~ /^[A-Za-z0-9 ]+$/)) {
-                return 'Contains invalid characters'
+                return 'invalid'
             }
             // custom case insensitive unique constraint
-            String notUniqueError = "CommonName already exists"
             CommonName ilikeCommonName = CollectionUtils.atMostOneElement(CommonName.findAllByNameIlike(SqlUtil.replaceWildcardCharactersInLikeExpression(val)))
             if (ilikeCommonName) {
                 if (obj.id) {
                     if (obj.id != ilikeCommonName.id) {
-                        return notUniqueError
+                        return "default.not.unique.message"
                     }
                 } else {
-                    return notUniqueError
+                    return "default.not.unique.message"
                 }
             }
         })

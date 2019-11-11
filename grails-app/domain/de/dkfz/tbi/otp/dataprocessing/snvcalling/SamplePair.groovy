@@ -21,13 +21,12 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-import org.springframework.validation.Errors
-
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.ValidatorUtil
 
 /**
  * For each individual disease/control pairs are compared in the analysis pipelines. These pairs are defined in the GUI and stored in this domain.
@@ -86,9 +85,9 @@ class SamplePair implements Entity {
     }
 
     static constraints = {
-        mergingWorkPackage2 unique: 'mergingWorkPackage1', validator: { AbstractMergingWorkPackage val, SamplePair obj, Errors errors ->
+        mergingWorkPackage2 unique: 'mergingWorkPackage1', validator: ValidatorUtil.messageArgs("mergingWorkPackage2") { AbstractMergingWorkPackage val, SamplePair obj ->
             if (val == obj.mergingWorkPackage1) {
-                errors.reject(null, "mergingWorkPackage1 and mergingWorkPackage2 are equal.")
+                reject("equal")
             }
             // For one sample pair the individual, the seqType and the pipeline must be the same.
             // To provide the possibility to create sample pairs manually other properties are ignored here.
@@ -96,7 +95,7 @@ class SamplePair implements Entity {
                 def mwp1Value = obj.mergingWorkPackage1."${it}"
                 def mwp2Value = val."${it}"
                 if (mwp1Value != mwp2Value) {
-                    errors.reject(null, "${it} of mergingWorkPackage1 and mergingWorkPackage2 are different:\n${mwp1Value}\n${mwp2Value}")
+                    reject("different", [it, mwp1Value, mwp2Value])
                 }
             }
         }
