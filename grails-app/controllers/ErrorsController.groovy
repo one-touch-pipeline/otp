@@ -33,7 +33,7 @@ class ErrorsController {
             render springSecurityService.isLoggedIn().toString()
             return
         } else {
-            [authenticated: springSecurityService.isLoggedIn()]
+            return [authenticated: springSecurityService.isLoggedIn()]
         }
     }
 
@@ -42,8 +42,12 @@ class ErrorsController {
             render request.forwardURI
             return
         } else {
-            [notFound: request.forwardURI]
+            return [notFound: request.forwardURI]
         }
+    }
+
+    def error405 = {
+        return [method: request.method]
     }
 
     def error500 = {
