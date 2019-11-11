@@ -622,6 +622,34 @@ class MetadataImportService {
         return seqTypeMaybeTagmentationName(seqType, tagmentation)
     }
 
+    static Project getProjectFromMetadata(ValueTuple tuple) {
+        String sampleId = tuple.getValue(SAMPLE_ID.name())
+        String projectName = tuple.getValue(PROJECT.name()) ?: ''
+        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
+        if (sampleIdentifier) {
+            return sampleIdentifier.project
+        } else {
+            Project projectFromProjectColumn = atMostOneElement(Project.findAllByNameOrNameInMetadataFiles(projectName, projectName))
+            if (projectFromProjectColumn) {
+                return projectFromProjectColumn
+            }
+        }
+        return null
+    }
+
+    SeqType getSeqTypeFromMetadata(ValueTuple tuple) {
+        boolean isSingleCell = seqTypeService.isSingleCell(tuple.getValue(BASE_MATERIAL.name()))
+        LibraryLayout libLayout = LibraryLayout.findByName(tuple.getValue(LIBRARY_LAYOUT.name()))
+        if (!libLayout) {
+            return null
+        }
+
+        return seqTypeService.findByNameOrImportAlias(
+                getSeqTypeNameFromMetadata(tuple),
+                [libraryLayout: libLayout, singleCell: isSingleCell],
+        )
+    }
+
     /** small helper to parse seqtypes and boolean-like uservalues into a proper OTP name */
     static String seqTypeMaybeTagmentationName(String seqType, String tagmentationRawValue) {
         boolean isTagmentation = tagmentationRawValue in ["1", "true"]

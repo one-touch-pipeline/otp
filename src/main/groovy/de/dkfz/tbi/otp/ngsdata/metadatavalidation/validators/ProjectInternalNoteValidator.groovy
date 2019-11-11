@@ -23,15 +23,14 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.ngsdata.MetadataImportService
 import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
 class ProjectInternalNoteValidator extends ValueTuplesValidator<ValidationContext> implements MetadataValidator, BamMetadataValidator {
@@ -61,17 +60,9 @@ class ProjectInternalNoteValidator extends ValueTuplesValidator<ValidationContex
     void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         Set<Project> projects = []
         valueTuples.each {
-            String sampleId = it.getValue(SAMPLE_ID.name())
-            String projectName = it.getValue(PROJECT.name()) ?: ''
-            SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
-            if (sampleIdentifier) {
-                projects << sampleIdentifier.project
-
-            } else {
-                Project projectFromProjectColumn = atMostOneElement(Project.findAllByNameOrNameInMetadataFiles(projectName, projectName))
-                if (projectFromProjectColumn) {
-                    projects << projectFromProjectColumn
-                }
+            Project project = MetadataImportService.getProjectFromMetadata(it)
+            if (project) {
+                projects << project
             }
         }
         projects.each { Project project ->

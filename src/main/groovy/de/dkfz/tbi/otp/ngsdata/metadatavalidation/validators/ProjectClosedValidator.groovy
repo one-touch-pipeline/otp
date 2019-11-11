@@ -23,15 +23,14 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.validators
 
 import org.springframework.stereotype.Component
 
+import de.dkfz.tbi.otp.ngsdata.MetadataImportService
 import de.dkfz.tbi.otp.ngsdata.Project
-import de.dkfz.tbi.otp.ngsdata.SampleIdentifier
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.bam.BamMetadataValidator
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.util.spreadsheet.validation.*
 
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.PROJECT
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 @Component
 class ProjectClosedValidator extends ValueTuplesValidator<ValidationContext> implements MetadataValidator, BamMetadataValidator {
@@ -60,12 +59,8 @@ class ProjectClosedValidator extends ValueTuplesValidator<ValidationContext> imp
     @Override
     void validateValueTuples(ValidationContext context, Collection<ValueTuple> valueTuples) {
         valueTuples.each { it ->
-            String sampleId = it.getValue(SAMPLE_ID.name())
-            String projectName = it.getValue(PROJECT.name()) ?: ''
-            Project projectFromProjectColumn = atMostOneElement(Project.findAllByNameOrNameInMetadataFiles(projectName, projectName))
-            SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
+            Project project = MetadataImportService.getProjectFromMetadata(it)
 
-            Project project = sampleIdentifier?.project ?: projectFromProjectColumn
             if (project && project.closed) {
                 context.addProblem(it.cells, Level.ERROR, "The project '${project.name}' is closed.", "At least one project is closed.")
             }
