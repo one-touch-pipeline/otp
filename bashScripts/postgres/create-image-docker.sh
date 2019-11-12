@@ -20,12 +20,38 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -euxo pipefail
+set -Eeuxo pipefail
 
-if hash buildah 2>/dev/null && hash podman 2>/dev/null; then
-  bashScripts/postgres/create-image.sh
-else
-  bashScripts/postgres/create-image-docker.sh
-fi
+trap 'error_handler' SIGINT SIGTERM SIGQUIT EXIT
 
-bashScripts/postgres/apply-dump.sh "$@"
+error_handler() {
+    # don't interfere with 'normal' exit
+    [ $? -eq 0 ] && exit
+
+    echo "Aborting..."
+    stop_and_destroy_container
+    exit
+}
+
+docker_compose() {
+    docker-compose -f docker/otp/docker-compose.yml "$@"
+}
+
+rebuild_image() {
+    docker_compose build --pull
+}
+
+start_container() {
+    docker_compose up -d
+}
+
+stop_and_destroy_container() {
+    docker_compose stop
+    docker_compose rm -f -v
+    echo "Database deleted"
+}
+
+stop_and_destroy_container
+rebuild_image
+start_container
+echo "Database created"

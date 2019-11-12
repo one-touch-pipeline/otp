@@ -22,10 +22,13 @@
 
 set -euxo pipefail
 
-if hash buildah 2>/dev/null && hash podman 2>/dev/null; then
-  bashScripts/postgres/create-image.sh
-else
-  bashScripts/postgres/create-image-docker.sh
+cd docker/otp
+
+if ! podman image exists otp-postgres; then
+  buildah bud -t otp-postgres .
 fi
 
-bashScripts/postgres/apply-dump.sh "$@"
+podman pod rm -f otp-postgres || true
+podman container rm -fv otp-postgres || true
+podman pod create --name otp-postgres -p 127.0.0.1:5432:5432
+podman run -d --pod otp-postgres otp-postgres
