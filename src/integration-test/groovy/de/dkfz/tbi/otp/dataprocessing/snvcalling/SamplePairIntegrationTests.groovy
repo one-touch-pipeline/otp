@@ -62,21 +62,20 @@ class SamplePairIntegrationTests {
     private void testSetNeedsProcessing(final ProcessingStatus processingStatus) {
         MergingWorkPackage mwp1 = DomainFactory.createMergingWorkPackage()
         DomainFactory.createSampleTypePerProject(project: mwp1.project, sampleType: mwp1.sampleType, category: SampleType.Category.DISEASE)
-        final SamplePair nonPersistedSamplePair = SamplePair.createInstance(
+        final SamplePair nonPersistedSamplePair = new SamplePair(
                 mergingWorkPackage1: mwp1,
                 mergingWorkPackage2: DomainFactory.createMergingWorkPackage(mwp1),
-                processingStatus: processingStatus,  // Tests that the instance is persisted even if it already has the correct value.
+                snvProcessingStatus: processingStatus,  // Tests that the instance is persisted even if it already has the correct value.
         )
-        final SamplePair persistedSamplePair = SamplePair.createInstance(
+        final SamplePair persistedSamplePair = DomainFactory.createSamplePair(
                 mergingWorkPackage1: mwp1,
                 mergingWorkPackage2: DomainFactory.createMergingWorkPackage(mwp1),
-                processingStatus: processingStatus == ProcessingStatus.NEEDS_PROCESSING ? ProcessingStatus.NO_PROCESSING_NEEDED : ProcessingStatus.NEEDS_PROCESSING,
+                snvProcessingStatus: processingStatus == ProcessingStatus.NEEDS_PROCESSING ? ProcessingStatus.NO_PROCESSING_NEEDED : ProcessingStatus.NEEDS_PROCESSING,
         )
-        assert persistedSamplePair.save(flush: true)
 
-        nonPersistedSamplePair.setSnvProcessingStatus(processingStatus)
+        nonPersistedSamplePair.snvProcessingStatus = processingStatus
         nonPersistedSamplePair.save(flush: true)
-        persistedSamplePair.setSnvProcessingStatus(processingStatus)
+        persistedSamplePair.snvProcessingStatus = processingStatus
         persistedSamplePair.save(flush: true)
 
         assert nonPersistedSamplePair.snvProcessingStatus == processingStatus

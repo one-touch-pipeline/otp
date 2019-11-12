@@ -21,16 +21,13 @@
  */
 package de.dkfz.tbi.otp.tracking
 
-import groovy.transform.TupleConstructor
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvCallingService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.dataprocessing.sophia.SophiaInstance
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
@@ -77,14 +74,10 @@ class NotificationCreator {
     SnvCallingService snvCallingService
 
     @Autowired
-    SamplePairService samplePairService
-
-    @Autowired
     SophiaService sophiaService
 
     @Autowired
     UserProjectRoleService userProjectRoleService
-
 
     void setStartedForSeqTracks(Collection<SeqTrack> seqTracks, OtrsTicket.ProcessingStep step) {
         setStarted(otrsTicketService.findAllOtrsTickets(seqTracks), step)
@@ -97,21 +90,20 @@ class NotificationCreator {
     }
 
     void processFinished(Set<SeqTrack> seqTracks) {
-        SamplePairCreation samplePairCreation = new SamplePairCreation(samplePairService)
         Set<OtrsTicket> otrsTickets = otrsTicketService.findAllOtrsTickets(seqTracks)
-        LogThreadLocal.getThreadLog()?.debug("evaluating processFinished for SPD: ${samplePairCreation}; OtrsTickets: ${otrsTickets}; " +
+        LogThreadLocal.threadLog?.debug("evaluating processFinished for OtrsTickets: ${otrsTickets}; " +
                 "SeqTracks: ${seqTracks*.id}")
         for (OtrsTicket ticket : otrsTickets) {
-            setFinishedTimestampsAndNotify(ticket, samplePairCreation)
+            setFinishedTimestampsAndNotify(ticket)
         }
     }
 
-    void setFinishedTimestampsAndNotify(OtrsTicket ticket, SamplePairCreation samplePairCreation = new SamplePairCreation(samplePairService)) {
+    void setFinishedTimestampsAndNotify(OtrsTicket ticket) {
         if (ticket.finalNotificationSent) {
             return
         }
         Set<SeqTrack> seqTracks = ticket.findAllSeqTracks()
-        ProcessingStatus status = getProcessingStatus(seqTracks, samplePairCreation)
+        ProcessingStatus status = getProcessingStatus(seqTracks)
         List<OtrsTicket.ProcessingStep> justCompletedProcessingSteps = []
         boolean mightDoMore = false
         for (OtrsTicket.ProcessingStep step : OtrsTicket.ProcessingStep.values()) {
@@ -121,7 +113,7 @@ class NotificationCreator {
                 justCompletedProcessingSteps.add(step)
                 if (otrsTicketService.saveEndTimeIfNeeded(ticket, step)) {
                     sendCustomerNotification(ticket, status, step)
-                    LogThreadLocal.getThreadLog()?.info("sent customer notification for OTRS Ticket ${ticket.ticketNumber}: ${step}")
+                    LogThreadLocal.threadLog?.info("sent customer notification for OTRS Ticket ${ticket.ticketNumber}: ${step}")
                 }
             }
             if (stepStatus.mightDoMore) {
@@ -129,10 +121,10 @@ class NotificationCreator {
             }
         }
         if (justCompletedProcessingSteps) {
-            LogThreadLocal.getThreadLog()?.debug("inside if justCompletedProcessingSteps ${justCompletedProcessingSteps}, sending operator notification")
+            LogThreadLocal.threadLog?.debug("inside if anythingJustCompleted, sending operator notification")
             sendProcessingStatusOperatorNotification(ticket, seqTracks, status, !mightDoMore)
             if (!mightDoMore) {
-                LogThreadLocal.getThreadLog()?.debug("!mightDoMore: marking as finalNotificationSent")
+                LogThreadLocal.threadLog?.debug("!mightDoMore: marking as finalNotificationSent")
                 otrsTicketService.markFinalNotificationSent(ticket)
             }
             if (justCompletedProcessingSteps.contains(OtrsTicket.ProcessingStep.INSTALLATION)) {
@@ -272,15 +264,14 @@ class NotificationCreator {
                 "${seqTrack.sampleType.name}, ${seqTrack.seqType.name} ${seqTrack.seqType.libraryLayout}")
     }
 
-
-    ProcessingStatus getProcessingStatus(Collection<SeqTrack> seqTracks, SamplePairCreation samplePairCreation = new SamplePairCreation(samplePairService)) {
+    ProcessingStatus getProcessingStatus(Collection<SeqTrack> seqTracks) {
         ProcessingStatus status = new ProcessingStatus(seqTracks.collect {
             new SeqTrackProcessingStatus(it,
                     it.dataInstallationState == SeqTrack.DataProcessingState.FINISHED ? ALL_DONE : NOTHING_DONE_MIGHT_DO,
                     it.fastqcState == SeqTrack.DataProcessingState.FINISHED ? ALL_DONE : NOTHING_DONE_MIGHT_DO, [])
         })
         List<MergingWorkPackageProcessingStatus> allMwpStatuses = fillInMergingWorkPackageProcessingStatuses(status.seqTrackProcessingStatuses)
-        fillInSamplePairStatuses(allMwpStatuses, samplePairCreation)
+        fillInSamplePairStatuses(allMwpStatuses)
 
         return status
     }
@@ -344,13 +335,10 @@ class NotificationCreator {
         }
     }
 
-
-    void fillInSamplePairStatuses(Collection<MergingWorkPackageProcessingStatus> mwpStatuses, SamplePairCreation samplePairCreation) {
-        if (mwpStatuses.isEmpty()) {
+    void fillInSamplePairStatuses(Collection<MergingWorkPackageProcessingStatus> mwpStatuses) {
+        if (mwpStatuses.empty) {
             return
         }
-
-        samplePairCreation.createMissingDiseaseControlSamplePairs()
 
         Map<MergingWorkPackage, MergingWorkPackageProcessingStatus> mwpStatusByMwp =
                 mwpStatuses.collectEntries { [it.mergingWorkPackage, it] }
@@ -440,20 +428,5 @@ class NotificationCreator {
             return NOTHING_DONE_WONT_DO
         }
         return WorkflowProcessingStatus.values().find { it.done == done && it.mightDoMore == mightDoMore }
-    }
-
-    @TupleConstructor
-    static class SamplePairCreation {
-
-        SamplePairService samplePairService
-
-        boolean calledCreateMissingDiseaseControlSamplePairs = false
-
-        void createMissingDiseaseControlSamplePairs() {
-            if (!calledCreateMissingDiseaseControlSamplePairs) {
-                samplePairService.createMissingDiseaseControlSamplePairs()
-                calledCreateMissingDiseaseControlSamplePairs = true
-            }
-        }
     }
 }

@@ -68,7 +68,7 @@ SamplePairDeciderService samplePairDeciderService = ctx.samplePairDeciderService
 
 
 SeqTrack.withTransaction {
-    println "\n\n        create following sample pairs:"
+    println "\n\n        finds or creates following sample pairs:"
     println samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages)*.toString().sort().join('\n')
 
     assert false: "DEBUG: transaction intentionally failed to rollback changes"

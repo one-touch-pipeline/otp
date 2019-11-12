@@ -1005,11 +1005,10 @@ class DomainFactory {
     }
 
     static SamplePair createSamplePair(AbstractMergingWorkPackage mergingWorkPackage1, AbstractMergingWorkPackage mergingWorkPackage2, Map properties = [:]) {
-        SamplePair samplePair = SamplePair.createInstance([
+        return createDomainObject(SamplePair, [
                 mergingWorkPackage1: mergingWorkPackage1,
                 mergingWorkPackage2: mergingWorkPackage2,
-        ] + properties)
-        return samplePair.save(flush: true)
+        ], properties)
     }
 
     static

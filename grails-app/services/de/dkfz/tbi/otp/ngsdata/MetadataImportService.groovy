@@ -32,7 +32,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
@@ -40,7 +39,8 @@ import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.AbstractMetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructure
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.directorystructures.DirectoryStructureBeanName
-import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.*
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
+import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
@@ -333,12 +333,6 @@ class MetadataImportService {
                 runSegment: runSegment,
         )
         assert metaDataFile.save(flush: true)
-
-        Long timeSamplePairCreationStarted = System.currentTimeMillis()
-        log.debug('sample pair stared')
-        List<SamplePair> samplePairs = SamplePair.findMissingDiseaseControlSamplePairs()
-        samplePairs*.save(flush: true)
-        log.debug("sample pair stopped:  ${System.currentTimeMillis() - timeSamplePairCreationStarted}")
 
         log.debug("import stopped ${metaDataFile.fileName}:  ${System.currentTimeMillis() - timeImportStarted}")
         return metaDataFile

@@ -20,25 +20,49 @@
  * SOFTWARE.
  */
 
+/**
+ * Create sample pairs for merging work package given by
+ * - pid
+ * - first sampleType (use as disease)
+ * - second sampleType (use as control)
+ * - seqType name
+ *
+ * Notes:
+ * - A mergingWorkPackage has to exist (--> produced bam file)
+ * - the analyses only support the seqTypes WES and WGS
+ * - The libraryLayout is always paired.
+ * - Only bulk seq types are supported.
+ * - If a sample pair already exists, it will not be created. Thus the processing status is not reset and no analyses will run.
+ */
+
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
+//----------------------------------------
+//input area
+
 //Create manual SamplePairs defined by pid, sampleType1, sampleType2 and seqType:
 //PID SAMPLETYPE1 SAMPLETYPE2 SEQTYPE_NAME
-//the sample pair may not exist yet
-List<List<MergingWorkPackage>> samplePairs = """
+String input = """
 
 
-""".split('\n').findAll().collect {
+"""
+
+//----------------------------------------
+//work area
+SamplePairDeciderService samplePairDeciderService = ctx.samplePairDeciderService
+SeqTypeService seqTypeService = ctx.seqTypeService
+
+List<List<MergingWorkPackage>> samplePairs = input.split('\n').findAll().collect {
     String[] split = it.split()
     println "parsed '${it}' into ${split as List}"
 
     Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(split[0]))
-    SampleType sampleType1 = CollectionUtils.exactlyOneElement(SampleType.findAllByName(split[1]))
-    SampleType sampleType2 = CollectionUtils.exactlyOneElement(SampleType.findAllByName(split[2]))
-    SeqType seqType = CollectionUtils.exactlyOneElement(SeqType.findAllByNameAndLibraryLayoutAndSingleCell(split[3], LibraryLayout.PAIRED, false))
+    SampleType sampleType1 = CollectionUtils.exactlyOneElement(SampleType.findSampleTypeByName(split[1]))
+    SampleType sampleType2 = CollectionUtils.exactlyOneElement(SampleType.findSampleTypeByName(split[2]))
+    SeqType seqType = CollectionUtils.exactlyOneElement(seqTypeService.findByNameOrImportAlias(split[3], [libraryLayout: LibraryLayout.PAIRED, singleCell: false]))
     Sample sample1 = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType1))
     Sample sample2 = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType2))
 
@@ -48,17 +72,10 @@ List<List<MergingWorkPackage>> samplePairs = """
     return [mergingWorkPackage1, mergingWorkPackage2]
 }
 
+
 Individual.withTransaction {
     samplePairs.each {
-        AbstractMergingWorkPackage mergingWorkPackage1 = it[0]
-        AbstractMergingWorkPackage mergingWorkPackage2 = it[1]
-
-        SamplePair samplePair = SamplePair.createInstance([
-                mergingWorkPackage1: mergingWorkPackage1,
-                mergingWorkPackage2: mergingWorkPackage2,
-        ])
-
-        samplePair.save(flush: true)
+        samplePairDeciderService.findOrCreateSamplePair(it[0], it[1])
     }
     assert false: "DEBUG: intentionally fail transaction"
 }

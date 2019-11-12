@@ -24,13 +24,14 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.ProjectSelectionService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholds
 import de.dkfz.tbi.otp.dataprocessing.ProcessingThresholdsService
+import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePairDeciderService
 
 class ConfigureAnalysisController {
 
-    IndividualService individualService
     ProcessingThresholdsService processingThresholdsService
     ProjectService projectService
     ProjectSelectionService projectSelectionService
+    SamplePairDeciderService samplePairDeciderService
     SampleTypePerProjectService sampleTypePerProjectService
     SampleTypeService sampleTypeService
 
@@ -66,6 +67,9 @@ class ConfigureAnalysisController {
             }
         }
         projectSelectionService.setSelectedProject([project], project.name)
+
+        samplePairDeciderService.findOrCreateSamplePairsForProject(project)
+
         redirect(controller: "projectConfig")
     }
 
@@ -77,7 +81,7 @@ class ConfigureAnalysisController {
                 sampleTypePerProjects*.sampleType,
                 processingThresholds*.sampleType,
         ].flatten().unique { it.id }.sort { it.name }
-        List<SeqType> seqTypes = SeqTypeService.getAllAnalysableSeqTypes()
+        List<SeqType> seqTypes = SeqTypeService.allAnalysableSeqTypes
         Map groupedDiseaseTypes = sampleTypePerProjects.groupBy { it.sampleType.id }
         Map groupedThresholds = processingThresholds.groupBy([{ it.sampleType.id }, { it.seqType.id }])
         return [

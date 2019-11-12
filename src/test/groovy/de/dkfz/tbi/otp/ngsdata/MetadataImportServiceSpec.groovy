@@ -514,7 +514,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             parseAndFindOrSaveSampleIdentifier(scParse, _) >> createSampleIdentifierForSample2(scParse)
             parseCellPosition(scParse, _) >> { return scParse }
         }
-        SamplePair samplePair = Mock(SamplePair)
 
         service.seqTrackService = Mock(SeqTrackService)
         service.seqPlatformService = Mock(SeqPlatformService) {
@@ -545,9 +544,6 @@ class MetadataImportServiceSpec extends Specification implements DomainFactoryCo
             seqTrackCount * findOrCreateSamplePairs([]) >> []
             0 * _
         }
-        GroovyMock(SamplePair, global: true)
-        1 * SamplePair.findMissingDiseaseControlSamplePairs() >> [samplePair]
-        1 * samplePair.save([flush: true])
 
         File file = new File(new File(TestCase.getUniqueNonExistentPath(), runName1), 'metadata.tsv')
         DirectoryStructure directoryStructure = [
@@ -910,9 +906,6 @@ ${ILSE_NO}                      -             1234          1234          -     
             0 * _
         }
 
-        GroovyMock(SamplePair, global: true)
-        1 * SamplePair.findMissingDiseaseControlSamplePairs() >> []
-
         File file = new File(new File(TestCase.uniqueNonExistentPath, runName), 'metadata.tsv')
         DirectoryStructure directoryStructure = Mock(DirectoryStructure) {
             _ * getRequiredColumnTitles() >> [FASTQ_FILE.name()]
@@ -1083,9 +1076,6 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
             1 * findOrCreateSamplePairs([]) >> []
             0 * _
         }
-
-        GroovyMock(SamplePair, global: true)
-        1 * SamplePair.findMissingDiseaseControlSamplePairs() >> []
 
         File file = new File(new File(TestCase.uniqueNonExistentPath, runName), 'metadata.tsv')
         DirectoryStructure directoryStructure = Mock(DirectoryStructure) {

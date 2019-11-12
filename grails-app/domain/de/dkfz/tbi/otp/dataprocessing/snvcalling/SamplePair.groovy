@@ -44,15 +44,6 @@ class SamplePair implements Entity {
     final static String ACESEQ_RESULTS_PATH_PART = 'cnv_results'
     final static String RUN_YAPSA_RESULTS_PATH_PART = 'mutational_signatures_results'
 
-    /**
-     * Creates an instance. Does <em>not</em> persist it.
-     */
-    static SamplePair createInstance(Map properties) {
-        SamplePair samplePair = new SamplePair(properties)
-        samplePair.relativePath = samplePair.buildPath(SNV_RESULTS_PATH_PART).relativePath.path
-        return samplePair
-    }
-
     static enum ProcessingStatus {
 
         /**
@@ -79,7 +70,6 @@ class SamplePair implements Entity {
     /**
      * not used, only to check whether the path is unique
      */
-    String relativePath
 
     ProcessingStatus snvProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
     ProcessingStatus indelProcessingStatus = ProcessingStatus.NEEDS_PROCESSING
@@ -110,9 +100,6 @@ class SamplePair implements Entity {
                 }
             }
         }
-        relativePath unique: true, validator: { String val, SamplePair obj ->
-            return OtpPath.isValidRelativePath(val) && val == obj.buildPath(SNV_RESULTS_PATH_PART).relativePath.path
-        }
     }
 
     static mapping = {
@@ -120,16 +107,14 @@ class SamplePair implements Entity {
          * sample_pair_snv_idx1 is used by SnvCallingService.samplePairForProcessing.
          * processing_status must be the first column in this index! Grails does not provide a means to specify this, so
          * this must be done via SQL.
-         *
-         * The implicit unique index on (mergingWorkPackage1, mergingWorkPackage2) is used by
-         * SamplePair.findMissingDiseaseControlSamplePairs.
          */
-        mergingWorkPackage1 index: 'sample_pair_snv_idx1,sample_pair_indel_idx1,sample_pair_sophia_idx1,sample_pair_aceseq_idx1'
-        mergingWorkPackage2 index: 'sample_pair_snv_idx1,sample_pair_indel_idx1,sample_pair_sophia_idx1,sample_pair_aceseq_idx1'
+        mergingWorkPackage1 index: 'sample_pair_snv_idx1,sample_pair_indel_idx1,sample_pair_sophia_idx1,sample_pair_aceseq_idx1,sample_pair_runyapsa_idx1'
+        mergingWorkPackage2 index: 'sample_pair_snv_idx1,sample_pair_indel_idx1,sample_pair_sophia_idx1,sample_pair_aceseq_idx1,sample_pair_runyapsa_idx1'
         snvProcessingStatus index: 'sample_pair_snv_idx1'
         indelProcessingStatus index: 'sample_pair_indel_idx1'
         sophiaProcessingStatus index: 'sample_pair_sophia_idx1'
         aceseqProcessingStatus index: 'sample_pair_aceseq_idx1'
+        runYapsaProcessingStatus index: 'sample_pair_runyapsa_idx1'
     }
 
     Project getProject() {
@@ -158,9 +143,7 @@ class SamplePair implements Entity {
      * Example: ${project}/sequencing/exon_sequencing/view-by-pid/${pid}/snv_results/paired/tumor_control
      */
     OtpPath getSnvSamplePairPath() {
-        OtpPath path = buildPath(SNV_RESULTS_PATH_PART)
-        assert relativePath == path.relativePath.path
-        return path
+        return buildPath(SNV_RESULTS_PATH_PART)
     }
 
     OtpPath getIndelSamplePairPath() {
@@ -193,23 +176,23 @@ class SamplePair implements Entity {
     }
 
     AbstractSnvCallingInstance findLatestSnvCallingInstance() {
-        return findLatestInstance(AbstractSnvCallingInstance.class) as AbstractSnvCallingInstance
+        return findLatestInstance(AbstractSnvCallingInstance) as AbstractSnvCallingInstance
     }
 
     IndelCallingInstance findLatestIndelCallingInstance() {
-        return findLatestInstance(IndelCallingInstance.class) as IndelCallingInstance
+        return findLatestInstance(IndelCallingInstance) as IndelCallingInstance
     }
 
     SophiaInstance findLatestSophiaInstance() {
-        return findLatestInstance(SophiaInstance.class) as SophiaInstance
+        return findLatestInstance(SophiaInstance) as SophiaInstance
     }
 
     AceseqInstance findLatestAceseqInstance() {
-        return findLatestInstance(AceseqInstance.class) as AceseqInstance
+        return findLatestInstance(AceseqInstance) as AceseqInstance
     }
 
     RunYapsaInstance findLatestRunYapsaInstance() {
-        return findLatestInstance(RunYapsaInstance.class) as RunYapsaInstance
+        return findLatestInstance(RunYapsaInstance) as RunYapsaInstance
     }
 
     private BamFilePairAnalysis findLatestInstance(Class instanceClass) {
@@ -222,73 +205,5 @@ class SamplePair implements Entity {
             return criteria
         }
         return null
-    }
-
-    /**
-     * The names of the properties of {@link #mergingWorkPackage1} and {@link #mergingWorkPackage2} which must be equal.
-     * Like {@link MergingWorkPackage#getMergingProperties}, except libraryPreparationKit which is not relevant for sample pairs.
-     */
-    static final Collection<String> mergingWorkPackageEqualProperties = [
-            'sample.individual',
-            'seqType',
-            'seqPlatformGroup',
-            'pipeline',
-            'antibodyTarget',
-    ].asImmutable()
-
-    /**
-     * Finds distinct combinations of [mergingWorkPackage1, mergingWorkPackage2] with these criteria:
-     * <ul>
-     *     <li>mergingWorkPackage1 and mergingWorkPackage2 differ only in their sampleType.</li>
-     *     <li>mergingWorkPackage1.sampleType has category {@link SampleType.Category#DISEASE} and
-     *         mergingWorkPackage2.sampleType has category {@link SampleType.Category#CONTROL}.</li>
-     *     <li>neither mergingWorkPackage1.pipeline nor mergingWorkPackage2.pipeline have as name {@link Pipeline.Name#EXTERNALLY_PROCESSED}.
-     *         This is only to avoid the creation of SamplePair instances violating the unique constraint
-     *         on relativePath as long as OTP-1657 in not resolved.</li>
-     *     <li>No SamplePair exists for that combination.</li>
-     * </ul>
-     * The results are returned as SamplePair instances, <em>which have not been persisted yet</em>.
-     */
-    static Collection<SamplePair> findMissingDiseaseControlSamplePairs() {
-        final Collection queryResults = executeQuery("""
-            SELECT DISTINCT
-              mwp1,
-              mwp2
-            FROM
-              MergingWorkPackage mwp1
-                join mwp1.sample.individual.project project_1
-                join mwp1.sample.sampleType sampleType_1,
-              MergingWorkPackage mwp2
-                join mwp2.sample.sampleType sampleType_2,
-              SampleTypePerProject stpp1,
-              SampleTypePerProject stpp2
-            WHERE
-              ${mergingWorkPackageEqualProperties.collect {
-                  "(mwp1.${it} = mwp2.${it} OR mwp1.${it} IS NULL AND mwp2.${it} IS NULL)"
-              }.join(' AND\n')} AND
-              mwp1.seqType IN :analysableSeqTypes AND
-              stpp1.project = project_1 AND
-              stpp2.project = project_1 AND
-              stpp1.sampleType = sampleType_1 AND
-              stpp2.sampleType = sampleType_2 AND
-              stpp1.category = :disease AND
-              stpp2.category = :control AND
-              NOT EXISTS (
-                FROM
-                  SamplePair
-                WHERE
-                  mergingWorkPackage1 = mwp1 AND
-                  mergingWorkPackage2 = mwp2)
-            """.toString(), [
-                disease: SampleType.Category.DISEASE,
-                control: SampleType.Category.CONTROL,
-                analysableSeqTypes: SeqTypeService.getAllAnalysableSeqTypes(),
-            ], [readOnly: true])
-        return queryResults.collect {
-            return createInstance(
-                    mergingWorkPackage1: it[0],
-                    mergingWorkPackage2: it[1]
-            )
-        }
     }
 }

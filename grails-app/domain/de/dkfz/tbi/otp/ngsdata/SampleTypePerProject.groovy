@@ -47,4 +47,10 @@ class SampleTypePerProject implements Entity {
     static constraints = {
         sampleType unique: 'project'
     }
+
+    static mapping = {
+        project index: "sample_type_per_project__project__sample_type__category_idx"
+        sampleType index: "sample_type_per_project__project__sample_type__category_idx,sample_type_per_project__sample_type_idx"
+        category index: "sample_type_per_project__project__sample_type__category_idx,sample_type_per_project__category_idx"
+    }
 }

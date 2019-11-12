@@ -21,17 +21,17 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.snvcalling
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
-class SamplePairDeciderServiceSpec extends Specification implements DataTest {
+class SamplePairDeciderServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -63,7 +63,7 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest {
         ])
         AbstractMergingWorkPackage mergingWorkPackage2 = DomainFactory.createMergingWorkPackageForPipeline(pipelineName2, [
                 seqType: mergingWorkPackage1.seqType,
-                sample : DomainFactory.createSample([individual: mergingWorkPackage1.individual]),
+                sample : createSample([individual: mergingWorkPackage1.individual]),
         ])
         DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackage1, category1)
         DomainFactory.createSampleTypePerProjectForMergingWorkPackage(mergingWorkPackage2, category1.correspondingCategory())
@@ -109,16 +109,15 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest {
         filterSeqPlatformGroup = pipelineName1 == Pipeline.Name.EXTERNALLY_PROCESSED ? 0 : 1
     }
 
-
     void "findOrCreateSamplePairs(mergingWorkPackage), if multiple samples available, create correct sample pairs"() {
         given:
         SeqType seqType = DomainFactory.createAllAlignableSeqTypes().first()
-        Individual individual = DomainFactory.createIndividual()
+        Individual individual = createIndividual()
 
         List<AbstractMergingWorkPackage> mergingWorkPackages = (0..6).collect {
             DomainFactory.createMergingWorkPackage([
                     seqType: seqType,
-                    sample : DomainFactory.createSample([individual: individual]),
+                    sample : createSample([individual: individual]),
             ])
         }
         mergingWorkPackages[0..1].each {
@@ -147,12 +146,11 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest {
         TestCase.assertContainSame(samplePairs*.mergingWorkPackage2, mergingWorkPackages[2..4])
     }
 
-
     void "findOrCreateSamplePairs(mergingWorkPackage), if SeqType is not alignable, return empty list"() {
         given:
         DomainFactory.createAllAlignableSeqTypes()
         AbstractMergingWorkPackage mergingWorkPackage = new MergingWorkPackage([
-                seqType: DomainFactory.createSeqType()
+                seqType: createSeqType()
         ])
 
         SamplePairDeciderService service = new SamplePairDeciderService([
@@ -168,15 +166,15 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest {
         samplePairs.empty
     }
 
-    void "findOrCreateSamplePairs(mergingWorkPackage), if no category is not defined, return empty list"() {
+    void "findOrCreateSamplePairs(mergingWorkPackage), if category is not defined, return empty list"() {
         given:
         AbstractMergingWorkPackage mergingWorkPackage = new MergingWorkPackage([
                 seqType: DomainFactory.createAllAlignableSeqTypes().first(),
                 sample : new Sample([
                         individual: new Individual([
-                                project: DomainFactory.createProject(),
+                                project: createProject(),
                         ]),
-                        sampleType: DomainFactory.createSampleType(),
+                        sampleType: createSampleType(),
                 ]),
         ])
 
@@ -242,12 +240,12 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest {
     void "findOrCreateSamplePairs(mergingWorkPackages), create correct sample pairs for all given MergingWorkPackages"() {
         given:
         SeqType seqType = DomainFactory.createAllAlignableSeqTypes().first()
-        Individual individual = DomainFactory.createIndividual()
+        Individual individual = createIndividual()
 
         List<AbstractMergingWorkPackage> mergingWorkPackages = (0..9).collect {
             DomainFactory.createMergingWorkPackage([
                     seqType: seqType,
-                    sample : DomainFactory.createSample([individual: individual]),
+                    sample : createSample([individual: individual]),
             ])
         }
         mergingWorkPackages[0..3].each {
@@ -287,7 +285,7 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest {
         ].sort()
 
         when:
-        List<AbstractMergingWorkPackage> mergingWorkPackageList  = mergingWorkPackages[0, 1, 6, 7, 8, 9]
+        List<AbstractMergingWorkPackage> mergingWorkPackageList = mergingWorkPackages[0, 1, 6, 7, 8, 9]
         List<SamplePair> samplePairs = service.findOrCreateSamplePairs(mergingWorkPackageList)
 
         then:
@@ -330,7 +328,7 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest {
         MergingWorkPackage disease = DomainFactory.createMergingWorkPackage()
         MergingWorkPackage control = DomainFactory.createMergingWorkPackage([
                 seqType: disease.seqType,
-                sample : DomainFactory.createSample([
+                sample : createSample([
                         individual: disease.individual,
                 ]),
         ])
@@ -349,7 +347,6 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest {
         returnedSamplePairs.mergingWorkPackage1 == disease
         returnedSamplePairs.mergingWorkPackage2 == control
         SamplePair.count() == 1
-
     }
 
     void "findOrCreateSamplePair(disease,  control), if sample pair already exist, return existing one"() {
@@ -360,7 +357,7 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest {
         MergingWorkPackage disease = DomainFactory.createMergingWorkPackage()
         MergingWorkPackage control = DomainFactory.createMergingWorkPackage([
                 seqType: disease.seqType,
-                sample : DomainFactory.createSample([
+                sample : createSample([
                         individual: disease.individual,
                 ]),
         ])
@@ -380,5 +377,4 @@ class SamplePairDeciderServiceSpec extends Specification implements DataTest {
         returnedSamplePairs == samplePair
         SamplePair.count() == 1
     }
-
 }

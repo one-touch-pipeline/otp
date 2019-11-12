@@ -37,7 +37,7 @@ import de.dkfz.tbi.otp.utils.*
 import static de.dkfz.tbi.otp.tracking.ProcessingStatus.WorkflowProcessingStatus.*
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-@SuppressWarnings(['ClassSize', 'MethodCount', 'MethodSize'])
+@SuppressWarnings(['ClassSize', 'MethodCount', 'MethodSize', 'JUnitPublicProperty'])
 class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutRollbackAnnotation implements DomainFactoryCore {
 
     NotificationCreator notificationCreator
@@ -50,7 +50,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
     CreateNotificationTextService createNotificationTextService
     ProcessingOptionService processingOptionService
     UserProjectRoleService UserProjectRoleService
-    SamplePairService samplePairService
     OtrsTicketService otrsTicketService
 
     List<ProcessingOption> referenceGenomeProcessingOptions
@@ -99,7 +98,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
                 createNotificationTextService: createNotificationTextService,
                 processingOptionService: processingOptionService,
                 userProjectRoleService: userProjectRoleService,
-                samplePairService: samplePairService,
                 otrsTicketService: otrsTicketService,
         )
         SessionUtils.withNewSession {
@@ -108,7 +106,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             referenceGenomeProcessingOptions = DomainFactory.createReferenceGenomeAndAnalysisProcessingOptions()
         }
     }
-
 
     void "check that all analyses are provided in the list 'listPairAnalysis'"() {
         given:
@@ -127,7 +124,6 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         expect:
         TestCase.assertContainSame(analysisProcessingSteps, testedProcessingSteps)
     }
-
 
     void 'processFinished calls setFinishedTimestampsAndNotify for the tickets of the passed SeqTracks'() {
         given: "tickets with (at least one) fastQC still in progress"
@@ -204,7 +200,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.setFinishedTimestampsAndNotify(ticket, new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.setFinishedTimestampsAndNotify(ticket)
         }
 
         then:
@@ -243,7 +239,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.setFinishedTimestampsAndNotify(ticket, new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.setFinishedTimestampsAndNotify(ticket)
         }
 
         then:
@@ -304,7 +300,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.setFinishedTimestampsAndNotify(ticket, new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.setFinishedTimestampsAndNotify(ticket)
             ticket = OtrsTicket.get(ticket.id)
         }
 
@@ -405,7 +401,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         }
         when:
         SessionUtils.withNewSession {
-            notificationCreator.setFinishedTimestampsAndNotify(ticket, new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.setFinishedTimestampsAndNotify(ticket)
             ticket = OtrsTicket.get(ticket.id)
         }
 
@@ -485,7 +481,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.setFinishedTimestampsAndNotify(ticket, new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.setFinishedTimestampsAndNotify(ticket)
         }
 
         then:
@@ -1007,7 +1003,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
         setupData()
 
         expect:
-        notificationCreator.fillInSamplePairStatuses([], new NotificationCreator.SamplePairCreation(samplePairService))
+        notificationCreator.fillInSamplePairStatuses([])
     }
 
     void "fillInSamplePairStatuses, no SP, returns NOTHING_DONE_WONT_DO"() {
@@ -1021,7 +1017,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
@@ -1058,7 +1054,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
             analysisInstance = BamFilePairAnalysis.get(analysisInstance.id)
             analysisInstance.withdrawn = true
             analysisInstance.save(flush: true)
-            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
@@ -1094,7 +1090,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
@@ -1151,7 +1147,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
@@ -1196,7 +1192,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
@@ -1227,7 +1223,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
@@ -1263,7 +1259,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
@@ -1296,7 +1292,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
@@ -1333,7 +1329,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.fillInSamplePairStatuses([mwpStatus], new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.fillInSamplePairStatuses([mwpStatus])
         }
 
         then:
@@ -1372,7 +1368,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.fillInSamplePairStatuses([mwp1Status, mwp2Status], new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.fillInSamplePairStatuses([mwp1Status, mwp2Status])
         }
 
         then:
@@ -1409,7 +1405,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.fillInSamplePairStatuses([mwp1Status, mwp2Status], new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.fillInSamplePairStatuses([mwp1Status, mwp2Status])
         }
 
         then:
@@ -1452,7 +1448,7 @@ class NotificationCreatorIntegrationSpec extends AbstractIntegrationSpecWithoutR
 
         when:
         SessionUtils.withNewSession {
-            notificationCreator.fillInSamplePairStatuses([mwp1Status, mwp2Status], new NotificationCreator.SamplePairCreation(samplePairService))
+            notificationCreator.fillInSamplePairStatuses([mwp1Status, mwp2Status])
         }
 
         then:

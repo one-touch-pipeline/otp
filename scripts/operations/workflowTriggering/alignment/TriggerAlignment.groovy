@@ -1,6 +1,3 @@
-
-
-
 /*
  * Copyright 2011-2019 The OTP authors
  *
@@ -30,9 +27,12 @@
  * The align flag of all used runsegments of the seqtracks are set to true.
  */
 
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.utils.logging.*
-import org.hibernate.sql.*
+import org.hibernate.sql.JoinType
+
+import de.dkfz.tbi.otp.dataprocessing.AbstractMergingWorkPackage
+import de.dkfz.tbi.otp.ngsdata.SeqTrack
+import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 LogThreadLocal.withThreadLog(System.out, {
     SeqTrack.withTransaction {
@@ -106,10 +106,16 @@ LogThreadLocal.withThreadLog(System.out, {
         /*
         //make all used run segments alignable
         //trigger alignment
-        seqTracks.each {
+        List<AbstractMergingWorkPackage> mergingWorkPackages = seqTracks.collectMany {
             ctx.seqTrackService.decideAndPrepareForAlignment(it)
-        }
+        }.unique()
+
+        println "\n----------------------\n"
+        println mergingWorkPackages.join('\n')
+        println "\n----------------------\n"
+        println ctx.samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages).join('\n')
         //*/
+
     }
 })
 null // suppress output spam

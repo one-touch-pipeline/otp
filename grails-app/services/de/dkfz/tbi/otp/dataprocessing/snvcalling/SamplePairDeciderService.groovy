@@ -26,8 +26,7 @@ import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.SampleType
-import de.dkfz.tbi.otp.ngsdata.SeqTypeService
+import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @GrailsCompileStatic
@@ -36,16 +35,42 @@ class SamplePairDeciderService {
 
     AbstractMergingWorkPackageService abstractMergingWorkPackageService
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<SamplePair> findOrCreateSamplePairsForProject(Project project) {
+        assert project != null
+
+        final String HQL = """
+            select
+                mwp
+            from
+                AbstractMergingWorkPackage mwp,
+                SampleTypePerProject sampleTypePerProject
+            where
+                mwp.sample.individual.project = :project
+                and mwp.seqType in (:seqTypes)
+                and sampleTypePerProject.category in (:categories)
+                and sampleTypePerProject.project = mwp.sample.individual.project
+                and sampleTypePerProject.sampleType = mwp.sample.sampleType
+            """
+
+        List<AbstractMergingWorkPackage> mergingWorkPackages = AbstractMergingWorkPackage.executeQuery(HQL, [
+                project   : project,
+                seqTypes  : SeqTypeService.allAnalysableSeqTypes,
+                categories: SampleType.Category.values().findAll { it.correspondingCategory() },
+        ])
+        return findOrCreateSamplePairs(mergingWorkPackages)
+    }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SamplePair> findOrCreateSamplePairs(Collection<AbstractMergingWorkPackage> mergingWorkPackages) {
         assert mergingWorkPackages != null
 
-        return mergingWorkPackages.collect { AbstractMergingWorkPackage workPackage ->
+        return mergingWorkPackages.collectMany { AbstractMergingWorkPackage workPackage ->
             findOrCreateSamplePairs(workPackage)
-        }.flatten().unique() as List<SamplePair>
+        }.unique() as List<SamplePair>
     }
 
+    @SuppressWarnings(['Instanceof', 'ConstantAssertExpression']) //Instanceof: The method needs to do a check depending on MergingWorkPackage
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<SamplePair> findOrCreateSamplePairs(AbstractMergingWorkPackage mergingWorkPackage) {
         assert mergingWorkPackage
@@ -111,7 +136,7 @@ class SamplePairDeciderService {
             eq('mergingWorkPackage2', control)
         } as List<SamplePair>)
         if (!samplePair) {
-            samplePair = SamplePair.createInstance(
+            samplePair = new SamplePair(
                     mergingWorkPackage1: disease,
                     mergingWorkPackage2: control,
             )

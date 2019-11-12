@@ -65,7 +65,9 @@
                         </g:each>
                     </tbody>
                 </table>
+
                 <g:submitButton class="blue_label" name="submit" value="submit" onclick="return submitCheck();" ondblclick="return false;"/>
+                <g:message code="configureAnalysis.note.submit"/>
             </g:form>
 
             <script>

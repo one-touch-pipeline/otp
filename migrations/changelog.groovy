@@ -283,4 +283,6 @@ databaseChangeLog = {
     changeSet(author: "", id: "otp-164") {
         sqlFile(path: 'changelogs/2019/otp-164.sql')
     }
+
+    include file: 'changelogs/2019/otp-137-merge-create-samplepair-services.groovy'
 }
