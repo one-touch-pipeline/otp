@@ -42,8 +42,8 @@ class AvoidFindWithoutAllRuleAstVisitor extends AbstractMethodCallExpressionVisi
         Expression method = call.method
         if (method instanceof ConstantExpression) {
             if (((ConstantExpression) method).value instanceof String) {
-                if (((ConstantExpression) method).value instanceof String) {
-                    if (!AstUtil.isSafe(call) && !AstUtil.isSpreadSafe(call)) {
+                if (!AstUtil.isSafe(call) && !AstUtil.isSpreadSafe(call)) {
+                    if (!call.objectExpression.text.endsWith("Service")) {
                         if (((String) ((ConstantExpression) method).value).startsWith('findBy')) {
                             addViolation(call, "Avoid using findBy, instead use findAllBy. Expression: ${call.text}")
                         } else if (((String) ((ConstantExpression) method).value).startsWith('findWhere')) {
