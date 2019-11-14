@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 @Transactional
 class ProcessingThresholdsService {
@@ -38,8 +39,14 @@ class ProcessingThresholdsService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    ProcessingThresholds createOrUpdate(Project project, SampleType sampleType, SeqType seqType, Long numberOfLanes, Double coverage) {
-        ProcessingThresholds processingThresholds = ProcessingThresholds.findByProjectAndSampleTypeAndSeqType(project, sampleType, seqType)
+    ProcessingThresholds createUpdateOrDelete(Project project, SampleType sampleType, SeqType seqType, Integer numberOfLanes, Double coverage) {
+        ProcessingThresholds processingThresholds = CollectionUtils.atMostOneElement(ProcessingThresholds.findAllByProjectAndSampleTypeAndSeqType(project, sampleType, seqType))
+        if (!numberOfLanes && !coverage) {
+            if (processingThresholds) {
+                processingThresholds.delete(flush: true)
+            }
+            return null
+        }
         if (processingThresholds) {
             processingThresholds.numberOfLanes = numberOfLanes
             processingThresholds.coverage = coverage
@@ -50,7 +57,7 @@ class ProcessingThresholdsService {
                             seqType: seqType,
                             numberOfLanes: numberOfLanes,
                             coverage: coverage,
-                            )
+            )
         }
         processingThresholds.save(flush: true)
         return processingThresholds

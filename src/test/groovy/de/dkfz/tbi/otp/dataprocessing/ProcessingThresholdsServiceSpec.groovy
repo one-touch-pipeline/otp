@@ -24,9 +24,13 @@ package de.dkfz.tbi.otp.dataprocessing
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 
-class ProcessingThresholdsServiceSpec extends Specification implements DataTest {
+class ProcessingThresholdsServiceSpec extends Specification implements DataTest, DomainFactoryCore {
+
+    private static final Integer LANES = 1
+    private static final Double COVERAGE = null
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -43,12 +47,13 @@ class ProcessingThresholdsServiceSpec extends Specification implements DataTest 
 
 
     void "test getSeqTracksWithoutProcessingThreshold"() {
+        given:
         List<SeqType> seqTypes = DomainFactory.createAllAnalysableSeqTypes()
 
-        SeqTrack st1 = DomainFactory.createSeqTrack()
-        SeqTrack st2 = DomainFactory.createSeqTrack(seqType: seqTypes.first())
-        SeqTrack st3 = DomainFactory.createSeqTrack()
-        SeqTrack st4 = DomainFactory.createSeqTrack(seqType: seqTypes.first())
+        SeqTrack st1 = createSeqTrack()
+        SeqTrack st2 = createSeqTrack(seqType: seqTypes.first())
+        SeqTrack st3 = createSeqTrack()
+        SeqTrack st4 = createSeqTrack(seqType: seqTypes.first())
         DomainFactory.createProcessingThresholds(project: st1.project, sampleType: st1.sampleType, seqType: st1.seqType)
         DomainFactory.createProcessingThresholds(project: st2.project, sampleType: st2.sampleType, seqType: st2.seqType)
 
@@ -56,5 +61,54 @@ class ProcessingThresholdsServiceSpec extends Specification implements DataTest 
 
         expect:
         [st4] == service.getSeqTracksWithoutProcessingThreshold([st1, st2, st3, st4])
+    }
+
+    void "test createUpdateOrDelete, test create"() {
+        given:
+        ProcessingThresholds processingThresholds
+        Project project = createProject()
+        SampleType sampleType = createSampleType()
+        SeqType seqType = createSeqType()
+
+        ProcessingThresholdsService service = new ProcessingThresholdsService()
+
+        when:
+        processingThresholds = service.createUpdateOrDelete(project, sampleType, seqType, LANES, COVERAGE)
+
+        then:
+        processingThresholds.project == project
+        processingThresholds.sampleType == sampleType
+        processingThresholds.seqType == seqType
+        processingThresholds.numberOfLanes == LANES
+        processingThresholds.coverage == COVERAGE
+    }
+
+    void "test createUpdateOrDelete, test update"() {
+        given:
+        ProcessingThresholds processingThresholds = DomainFactory.createProcessingThresholds()
+        ProcessingThresholdsService service = new ProcessingThresholdsService()
+
+        expect:
+        processingThresholds.numberOfLanes != LANES
+        processingThresholds.coverage != COVERAGE
+
+        when:
+        service.createUpdateOrDelete(processingThresholds.project, processingThresholds.sampleType, processingThresholds.seqType, 1, COVERAGE)
+
+        then:
+        processingThresholds.numberOfLanes == LANES
+        processingThresholds.coverage == COVERAGE
+    }
+
+    void "test createUpdateOrDelete, test delete"() {
+        given:
+        ProcessingThresholds processingThresholds = DomainFactory.createProcessingThresholds()
+        ProcessingThresholdsService service = new ProcessingThresholdsService()
+
+        when:
+        service.createUpdateOrDelete(processingThresholds.project, processingThresholds.sampleType, processingThresholds.seqType, null, null)
+
+        then:
+        ProcessingThresholds.all.size() == 0
     }
 }

@@ -58,11 +58,9 @@ class ConfigureAnalysisController {
                 map['seqTypes'].each { SeqType seqType ->
                     String numberOfLanesString = params["${project.name}!${sampleType.name}!${seqType.name}!${seqType.libraryLayout}!numberOfLanes"]
                     String coverageString = params["${project.name}!${sampleType.name}!${seqType.name}!${seqType.libraryLayout}!coverage"]
-                    Long numberOfLanes = numberOfLanesString ? numberOfLanesString as Long : null
-                    Double coverage = coverageString ? coverageString as Double : null
-                    if (numberOfLanes != null || coverage != null) {
-                        processingThresholdsService.createOrUpdate(project, sampleType, seqType, numberOfLanes, coverage)
-                    }
+                    Integer numberOfLanes = numberOfLanesString ? (numberOfLanesString as Integer) ?: null : null
+                    Double coverage = coverageString ? (coverageString as Double) ?: null : null
+                    processingThresholdsService.createUpdateOrDelete(project, sampleType, seqType, numberOfLanes, coverage)
                 }
             }
         }
