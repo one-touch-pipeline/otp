@@ -20,65 +20,34 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.*
-import de.dkfz.tbi.otp.qcTrafficLight.*
-
-import static de.dkfz.tbi.otp.utils.CollectionUtils.*
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 /**
  * delete a complete project from the OTP database
- * run DeleteProjectContent.groovy first!
+ * AND/OR
+ * removes the complete content of a project from the OTP database
+ * but not the files in the file-system. They are needed to include again to OTP.
+ * When they are in OTP again, it is easy to remove the project manually from the filesystem.
  */
 
 // input area
 //----------------------
 
 String projectName = ""
+boolean deleteOnlyProjectContent = false
 
 //script area
 //-----------------------------
 
-assert projectName
+assert projectName : "No project name given"
 
-
-try {
-    // `flush: true` is intentionally left out at certain places to improve performance
-    Project.withTransaction {
-
-        Project project = exactlyOneElement(Project.findAllByName(projectName))
-
-        /*
-         * Deletes the connection of the project to the reference genome
-         */
-        ReferenceGenomeProjectSeqType.findAllByProject(project)*.delete()
-
-        MergingCriteria.findAllByProject(project)*.delete()
-
-        ProcessingThresholds.findAllByProject(project)*.delete()
-
-        SampleTypePerProject.findAllByProject(project)*.delete()
-
-        /*
-         * Deletes the ProcessingOptions of the project
-         */
-        ProcessingOption.findAllByProject(project)*.delete(flush: true)
-
-        ConfigPerProjectAndSeqType.findAllByProjectAndPreviousConfigIsNotNull(project)*.delete(flush: true)
-        ConfigPerProjectAndSeqType.findAllByProject(project)*.delete(flush: true)
-
-        UserProjectRole.findAllByProject(project)*.delete(flush: true)
-        QcThreshold.findAllByProject(project)*.delete(flush: true)
-        ProjectInfo.findAllByProject(project)*.delete(flush: true)
-
-        /*
-         * Finally delete the project
-         */
-        project.delete(flush: true)
-
-        //just used while testing to make sure that the DB changes are rolled back -> otherwise each time a new DB dump has to be included
-        assert false
+Project.withTransaction {
+    Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName))
+    if (deleteOnlyProjectContent) {
+        ctx.deletionService.deleteProjectContent(project)
+    } else {
+        ctx.deletionService.deleteProject(project)
     }
-} catch (Throwable e) {
-    e.printStackTrace(System.out)
+    assert false : "DEBUG: transaction intentionally failed to rollback changes"
 }
