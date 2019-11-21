@@ -26,4 +26,5 @@
     <li><g:link controller="metaDataFields" action="seqCenters"><g:message code="dataFields.banner.seqCenter"/></g:link></li>
     <li><g:link controller="metaDataFields" action="seqPlatforms"><g:message code="dataFields.banner.seqPlatform"/></g:link></li>
     <li><g:link controller="metaDataFields" action="seqTypes"><g:message code="dataFields.banner.seqType"/></g:link></li>
+    <li><g:link controller="speciesWithStrain" action="index"><g:message code="speciesWithStrain.title"/></g:link></li>
 </ul>
