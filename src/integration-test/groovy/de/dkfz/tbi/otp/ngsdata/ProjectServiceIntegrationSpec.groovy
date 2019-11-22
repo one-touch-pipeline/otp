@@ -480,35 +480,6 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         ex.message.contains("'projectType': rejected value [null]")
     }
 
-    void "test createProject without storage date should fail"() {
-        given:
-        setupData()
-        String group = configService.testingGroup
-
-        when:
-        ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name: 'project',
-                directory: 'dir',
-                individualPrefix: 'individualPrefix',
-                analysisDirectory: '/dirA',
-                unixGroup: group,
-                projectGroup: '',
-                nameInMetadataFiles: 'project',
-                forceCopyFiles: true,
-                description: '',
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
-                processingPriority: ProcessingPriority.NORMAL,
-                projectType: Project.ProjectType.SEQUENCING,
-        )
-        SpringSecurityUtils.doWithAuth(ADMIN) {
-            projectService.createProject(projectParams)
-        }
-
-        then:
-        ValidationException ex = thrown()
-        ex.message.contains("'storageUntil': rejected value [null]")
-    }
-
     @Unroll
     void "test updateIndividualPrefix valid alias and valid user #username"() {
         given:

@@ -170,6 +170,7 @@ class Project implements ProjectPropertiesGivenWithRequest, Commentable, Entity 
         internalNotes nullable: true
         fundingBody nullable: true
         grantId nullable: true
+        storageUntil nullable: true
     }
 
     @Override

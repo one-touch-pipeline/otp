@@ -89,7 +89,7 @@
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
                                     link="${g.createLink(controller: 'projectConfig', action: 'updateKeywords', params: ['project.id': project.id])}"
-                                    value="${g.message(code: 'project.noKeywords')}"/>
+                                    value="${g.message(code: 'project.keywords.empty')}"/>
                         </g:else>
                     </td>
                 </tr>
@@ -241,22 +241,32 @@
                     <td><g:message code="project.endDate"/></td>
                     <td></td>
                     <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                template="date"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['project.id': project.id, 'fieldName': 'endDate'])}"
-                                value="${project.endDate}"/>
+                        <sec:ifAllGranted roles="ROLE_OPERATOR">
+                            <otp:editorSwitch
+                                    roles="ROLE_OPERATOR"
+                                    template="date"
+                                    link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['project.id': project.id, 'fieldName': 'endDate'])}"
+                                    value="${project.endDate}"/>
+                        </sec:ifAllGranted>
+                        <sec:ifNotGranted roles="ROLE_OPERATOR">
+                            ${project.endDate ?: g.message(code: "project.endDate.empty")}
+                        </sec:ifNotGranted>
                     </td>
                 </tr>
                 <tr>
                     <td><g:message code="project.storageUntil"/></td>
                     <td></td>
                     <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                template="date"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['project.id': project.id, 'fieldName': 'storageUntil'])}"
-                                value="${project.storageUntil}"/>
+                        <sec:ifAllGranted roles="ROLE_OPERATOR">
+                            <otp:editorSwitch
+                                    roles="ROLE_OPERATOR"
+                                    template="date"
+                                    link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['project.id': project.id, 'fieldName': 'storageUntil'])}"
+                                    value="${project.storageUntil}"/>
+                        </sec:ifAllGranted>
+                        <sec:ifNotGranted roles="ROLE_OPERATOR">
+                            ${project.storageUntil ?: g.message(code: "project.storageUntil.empty")}
+                        </sec:ifNotGranted>
                     </td>
                 </tr>
                 <tr>

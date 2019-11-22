@@ -305,4 +305,6 @@ databaseChangeLog = {
     changeSet(author: "", id: "project-grant-funding") {
         sqlFile(path: 'changelogs/2019/project-grant-funding.sql')
     }
+
+    include file: 'changelogs/2019/project-storage-until.groovy'
 }
