@@ -307,4 +307,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2019/project-storage-until.groovy'
+
+    changeSet(author: "", id: "otp-194") {
+        sqlFile(path: 'changelogs/2019/otp-194.sql')
+    }
 }

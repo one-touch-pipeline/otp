@@ -39,7 +39,11 @@ class ProjectRole implements Entity {
      * Do not assign any kind of behaviour to roles other than the Basic ProjectRoles.
      */
     static enum Basic {
-        BIOINFORMATICIAN, PI, SUBMITTER
+        PI,
+        DEPUTY_PI,
+        RESPONSIBLE_BIOINFORMATICIAN,
+        BIOINFORMATICIAN,
+        SUBMITTER,
 
         static List<Basic> asList() {
             return values() as List<Basic>

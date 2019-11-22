@@ -23,7 +23,7 @@
 import de.dkfz.tbi.otp.ngsdata.ProjectRole
 
 seed = {
-    // these ProjectRoles have to exist, because they are hardcoded in OTP
+    /// these ProjectRoles have to exist, because they are hardcoded in OTP
     ProjectRole.ALL_BASIC_PROJECT_ROLES.each { String name ->
         projectRole(
                 meta: [
