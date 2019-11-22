@@ -166,7 +166,5 @@ $.otp.projectOverviewTable = {
         }
 
         tableObject.fnAdjustColumnSizing();
-
-
     },
 };

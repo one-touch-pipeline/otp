@@ -99,17 +99,14 @@
                             <th><g:message code="projectOverview.index.sampleID"/></th>
                         </g:if>
                         <g:each var="seqType" in="${seqTypes}">
-                            <th title="<g:message code="projectOverview.mouseOver.lane"/>"><g:message code="projectOverview.index.registeredLanes"/></th>
+                            <th title="<g:message code="projectOverview.mouseOver.lane"/>"><span hidden>${seqType.displayNameWithLibraryLayout}: </span><g:message code="projectOverview.index.registeredLanes"/></th>
                             <g:if test="${seqType.name == SeqTypeNames.RNA.seqTypeName}">
                                 <g:each var="workflow" in="${pipelines}">
-                                    <th>${workflow.displayName}<br><g:message code="projectOverview.index.alignedAndAllLanes"/></th>
+                                    <th><span hidden>${seqType.displayNameWithLibraryLayout}: </span>${workflow.displayName}<br><g:message code="projectOverview.index.alignedAndAllLanes"/></th>
                                 </g:each>
                             </g:if><g:else>
                                 <g:each var="workflow" in="${pipelines}">
-                                    <th>${workflow.displayName}
-                                        <g:if test="${workflow.displayName == 'external'}"><g:message code="projectOverview.index.existsAndCoverage"/></g:if>
-                                        <g:else><g:message code="projectOverview.index.lanesAndCoverage"/></g:else>
-                                    </th>
+                                    <th><span hidden>${seqType.displayNameWithLibraryLayout}: </span>${workflow.displayName}<g:if test="${workflow.displayName == 'external'}"><g:message code="projectOverview.index.existsAndCoverage"/></g:if><g:else><g:message code="projectOverview.index.lanesAndCoverage"/></g:else></th>
                                 </g:each>
                             </g:else>
                         </g:each>

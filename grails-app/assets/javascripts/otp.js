@@ -449,7 +449,10 @@ $.otp.tableButtons = [
     {
         extend: 'csvHtml5',
         text: 'Download CSV',
-        footer: false
+        footer: false,
+        exportOptions: {
+            columns: ':visible'
+        }
     }
 ];
 
