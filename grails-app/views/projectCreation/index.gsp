@@ -28,16 +28,75 @@
     <meta name="layout" content="main"/>
     <title><g:message code="otp.menu.projectCreation"/></title>
     <asset:javascript src="common/MultiInputField.js"/>
+    <asset:javascript src="pages/projectCreation/index.js"/>
 </head>
 <body>
 <div class="body">
     <g:render template="/templates/messages"/>
 
-    <g:uploadForm controller="projectCreation" action="save">
+    <g:form class="projectRequestSelection" action="index" method="GET">
         <table class="key-value-table">
             <tr>
+                <td>${g.message(code: "projectCreation.projectRequest")}</td>
+                <td>
+                    <g:select id="fromRequest" name="fromRequest.id" value="${projectRequest?.id}" from="${projectRequests}" noSelection="${[null:""]}" optionKey="id" optionValue="name"/>
+                </td>
+            </tr>
+        </table>
+    </g:form>
+
+    <g:uploadForm controller="projectCreation" action="save">
+        <table class="key-value-table">
+            <g:if test="${projectRequest}">
+                <g:hiddenField name="projectRequest.id" value="${projectRequest.id}"/>
+                <tr>
+                    <td>${g.message(code: "projectRequest.requester")}</td>
+                    <td>${projectRequest.requester}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.pi")}</td>
+                    <td>${projectRequest.pi}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.deputyPi")}</td>
+                    <td>${projectRequest.deputyPis?.join(", ")}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.responsibleBioinformatician")}</td>
+                    <td>${projectRequest.responsibleBioinformaticians?.join(", ")}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.bioinformatician")}</td>
+                    <td>${projectRequest.bioinformaticians?.join(", ")}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.submitter")}</td>
+                    <td>${projectRequest.submitters?.join(", ")}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.sequencingCenter")}</td>
+                    <td>${projectRequest.sequencingCenter}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.approxNoOfSamples")}</td>
+                    <td>${projectRequest.approxNoOfSamples}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.seqTypes")}</td>
+                    <td>${projectRequest.seqTypes?.join(", ")}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.furtherDataProcessing")}</td>
+                    <td>${projectRequest.furtherDataProcessing}</td>
+                </tr>
+                <tr>
+                    <td>${g.message(code: "projectRequest.comments")}</td>
+                    <td>${projectRequest.comments}</td>
+                </tr>
+            </g:if>
+            <tr>
                 <td><g:message code="project.name"/></td>
-                <td><g:textField name="name" value="${cmd?.name}" required="true"/></td>
+                <td><g:textField name="name" value="${cmd?.name ?: projectRequest?.name}" required="true"/></td>
             </tr>
             <tr>
                 <td><g:message code="project.individualPrefix"/></td>
@@ -54,7 +113,7 @@
             <tr>
                 <td><g:message code="project.keywords"/></td>
                 <td class="multi-input-field">
-                    <g:each in="${cmd?.keywords*.name ?: [""]}" var="keyword" status="i">
+                    <g:each in="${cmd?.keywords*.name ?: projectRequest?.keywords ?: [""]}" var="keyword" status="i">
                         <div class="field">
                             <g:textField list="keywordList" name="keywordNames" value="${keyword}" />
                             <g:if test="${i == 0}">
@@ -74,7 +133,7 @@
             </tr>
             <tr>
                 <td><g:message code="project.description"/></td>
-                <td><g:textArea name="description" value="${cmd?.description}" required="true"/></td>
+                <td><g:textArea name="description" value="${cmd?.description ?: projectRequest?.description}" required="true"/></td>
             </tr>
             <tr>
                 <td><g:message code="project.relatedProjects"/></td>
@@ -94,7 +153,7 @@
             </tr>
             <tr>
                 <td><g:message code="project.predecessorProject"/></td>
-                <td><g:textField list="projectList" name="predecessorProject" value="${cmd?.predecessorProject}"/></td>
+                <td><g:textField list="projectList" name="predecessorProject" value="${cmd?.predecessorProject ?: projectRequest?.predecessorProject}"/></td>
             </tr>
             <datalist id="projectList">
                 <g:each in="${projects}" var="project">
@@ -103,11 +162,11 @@
             </datalist>
             <tr>
                 <td><g:message code="project.tumorEntity"/></td>
-                <td><g:select name='tumorEntityName' from='${tumorEntities}' value="${cmd?.tumorEntity}"/></td>
+                <td><g:select name='tumorEntityName' from='${tumorEntities}' value="${cmd?.tumorEntity ?: projectRequest?.tumorEntity}"/></td>
             </tr>
             <tr>
                 <td><g:message code="project.speciesWithStrain"/></td>
-                <td><g:select name='speciesWithStrain' from='${allSpeciesWithStrains}' value="${cmd?.speciesWithStrain}" optionKey="id" noSelection="${['': 'None']}"/></td>
+                <td><g:select name='speciesWithStrain' from='${allSpeciesWithStrains}' value="${cmd?.speciesWithStrain?: projectRequest?.speciesWithStrain}" optionKey="id" noSelection="${['': 'None']}"/></td>
             </tr>
             <tr>
                 <td><g:message code="project.unixGroup"/></td>
@@ -115,35 +174,35 @@
             </tr>
             <tr>
                 <td><g:message code="project.costCenter"/></td>
-                <td><g:textField name="costCenter" value="${cmd?.costCenter}"/></td>
+                <td><g:textField name="costCenter" value="${cmd?.costCenter ?: projectRequest?.costCenter}"/></td>
             </tr>
             <tr>
                 <td><g:message code="project.organizationalUnit"/></td>
-                <td><g:textField name="organizationalUnit" value="${cmd?.organizationalUnit}"/></td>
+                <td><g:textField name="organizationalUnit" value="${cmd?.organizationalUnit ?: projectRequest?.organizationalUnit}"/></td>
             </tr>
             <tr>
                 <td><g:message code="project.fundingBody"/></td>
-                <td><g:textField name="fundingBody" value="${cmd?.fundingBody}"/></td>
+                <td><g:textField name="fundingBody" value="${cmd?.fundingBody ?: projectRequest?.fundingBody}"/></td>
             </tr>
             <tr>
                 <td><g:message code="project.grantId"/></td>
-                <td><g:textField name="grantId" value="${cmd?.grantId}"/></td>
+                <td><g:textField name="grantId" value="${cmd?.grantId ?: projectRequest?.grantId}"/></td>
             </tr>
             <tr>
                 <td><g:message code="project.projectType"/></td>
-                <td><g:select id="group" name='projectType' from='${projectTypes}' value="${cmd?.projectType ?: defaultProjectType}" required="true"/></td>
+                <td><g:select id="group" name='projectType' from='${projectTypes}' value="${cmd?.projectType ?: projectRequest?.projectType ?: defaultProjectType}" required="true"/></td>
             </tr>
             <tr>
                 <td><g:message code="project.forceCopyFiles"/></td>
-                <td><g:checkBox name="forceCopyFiles" checked="${cmd == null || cmd?.forceCopyFiles}" value="true"/></td>
+                <td><g:checkBox name="forceCopyFiles" checked="${(cmd == null && projectRequest == null) || cmd?.forceCopyFiles || (cmd == null && projectRequest?.forceCopyFiles)}" value="true"/></td>
             </tr>
             <tr>
                 <td><g:message code="project.endDate"/></td>
-                <td><input type="date" name="endDateInput" value="${cmd?.endDate?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: ""}"/></td>
+                <td><input type="date" name="endDateInput" value="${(cmd?.endDate ?: projectRequest?.endDate)?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: ""}"/></td>
             </tr>
             <tr>
                 <td><g:message code="project.storageUntil"/></td>
-                <td><input type="date" name="storageUntilInput" value="${cmd?.storageUntil?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: defaultDate}" required/></td>
+                <td><input type="date" name="storageUntilInput" value="${(cmd?.storageUntil ?: projectRequest?.storageUntil)?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: defaultDate}" required/></td>
             </tr>
             <tr>
                 <td><g:message code="project.nameInMetadata"/></td>

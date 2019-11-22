@@ -29,6 +29,7 @@ import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.i18n.LocaleContextHolder
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.administration.LdapService
@@ -40,6 +41,8 @@ import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
 import java.time.LocalDate
+
+import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
 @Transactional
 class ProjectRequestService {
@@ -140,6 +143,37 @@ class ProjectRequestService {
             return e.errors
         }
         return null
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void update(ProjectRequest request, Project project) {
+        request.status = ProjectRequest.Status.PROJECT_CREATED
+        request.project = project
+        request.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void addUserRolesAndPermissions(ProjectRequest projectRequest) {
+        addUserAndRolesFromProjectRequest([projectRequest.pi], ProjectRequestRole.PI, projectRequest.project)
+        addUserAndRolesFromProjectRequest(projectRequest.deputyPis, ProjectRequestRole.DEPUTY_PI, projectRequest.project)
+        addUserAndRolesFromProjectRequest(projectRequest.responsibleBioinformaticians, ProjectRequestRole.RESPONSIBLE_BIOINFORMATICIAN, projectRequest.project)
+        addUserAndRolesFromProjectRequest(projectRequest.bioinformaticians, ProjectRequestRole.BIOINFORMATICIAN, projectRequest.project)
+        addUserAndRolesFromProjectRequest(projectRequest.submitters, ProjectRequestRole.SUBMITTER, projectRequest.project)
+    }
+
+    private addUserAndRolesFromProjectRequest(Collection<User> users, ProjectRequestRole role, Project project) {
+        users.each { User user ->
+            UserProjectRole upr = userProjectRoleService.createUserProjectRole(
+                    user,
+                    project,
+                    exactlyOneElement(ProjectRole.findAllByName(role.name())),
+            )
+            userProjectRoleService.setAccessToOtp(upr, role.accessToOtp)
+            userProjectRoleService.setAccessToFiles(upr, role.accessToFiles)
+            userProjectRoleService.setManageUsers(upr, role.manageUsers)
+            userProjectRoleService.setManageUsersAndDelegate(upr, role.manageUsersAndDelegate)
+            userProjectRoleService.setReceivesNotifications(upr, role.receivesNotifications)
+        }
     }
 
     private void sendEmailOnCreation(ProjectRequest request) {

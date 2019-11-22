@@ -44,8 +44,12 @@ class ProjectCreationController {
     ProjectGroupService projectGroupService
     ProjectSelectionService projectSelectionService
 
-    def index() {
+    def index(ProjectRequest fromRequest) {
+        List<ProjectRequest> projectRequests = ProjectRequest.findAllByStatus(ProjectRequest.Status.APPROVED_BY_PI_WAITING_FOR_OPERATOR)
+
         return [
+                projectRequests                : projectRequests,
+                projectRequest                 : fromRequest,
                 projectGroups                  : ["No Group"] + projectGroupService.availableProjectGroups()*.name,
                 tumorEntities                  : ["No tumor entity"] + TumorEntity.list().sort()*.name,
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values(),
@@ -67,7 +71,11 @@ class ProjectCreationController {
         if (cmd.hasErrors()) {
             flash.cmd = cmd
             flash.message = new FlashMessage(g.message(code: "projectCreation.store.failure") as String, cmd.errors)
-            redirect(action: "index")
+            redirect(action: "index", params: ["fromRequest.id": cmd.projectRequest?.id])
+        } else if (cmd.projectRequest && Project.findAllByUnixGroup(cmd.unixGroup)) {
+            flash.cmd = cmd
+            flash.message = new FlashMessage(g.message(code: "projectCreation.store.failure") as String, [g.message(code: "projectCreation.store.error") as String])
+            redirect(action: "index", params: ["fromRequest.id": cmd.projectRequest?.id])
         } else {
             Project project = projectService.createProject(cmd)
             projectSelectionService.setSelectedProject([project], project.name)
@@ -105,6 +113,7 @@ class ProjectCreationCommand implements Serializable {
     String fundingBody
     String grantId
     String internalNotes
+    ProjectRequest projectRequest
 
     static constraints = {
         name(blank: false, validator: { val, obj ->
@@ -166,6 +175,7 @@ class ProjectCreationCommand implements Serializable {
         fundingBody(nullable: true)
         grantId(nullable: true)
         internalNotes(nullable: true)
+        projectRequest(nullable: true)
     }
 
     void setName(String name) {

@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.validation.ValidationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.*
@@ -73,20 +72,20 @@ class ProjectService {
 
     @Autowired
     RemoteShellHelper remoteShellHelper
-    ReferenceGenomeService referenceGenomeService
-    ReferenceGenomeIndexService referenceGenomeIndexService
-    GeneModelService geneModelService
-    SophiaService sophiaService
     AceseqService aceseqService
     ConfigService configService
-    FileSystemService fileSystemService
-    WorkflowConfigService workflowConfigService
-    RoddyWorkflowConfigService roddyWorkflowConfigService
-    ProcessingOptionService processingOptionService
-    SpringSecurityService springSecurityService
-    UserProjectRoleService userProjectRoleService
     FileService fileService
+    FileSystemService fileSystemService
+    GeneModelService geneModelService
+    ProcessingOptionService processingOptionService
     ProjectInfoService projectInfoService
+    ProjectRequestService projectRequestService
+    ReferenceGenomeIndexService referenceGenomeIndexService
+    ReferenceGenomeService referenceGenomeService
+    RoddyWorkflowConfigService roddyWorkflowConfigService
+    SophiaService sophiaService
+    UserProjectRoleService userProjectRoleService
+    WorkflowConfigService workflowConfigService
 
     /**
      * @return List of all available Projects
@@ -188,6 +187,11 @@ class ProjectService {
                 grantId: projectParams.grantId,
         ])
         assert project.save(flush: true)
+
+        if (projectParams.projectRequest) {
+            projectRequestService.update(projectParams.projectRequest, project)
+            projectRequestService.addUserRolesAndPermissions(projectParams.projectRequest)
+        }
 
         userProjectRoleService.handleSharedUnixGroupOnProjectCreation(project, projectParams.unixGroup)
 
