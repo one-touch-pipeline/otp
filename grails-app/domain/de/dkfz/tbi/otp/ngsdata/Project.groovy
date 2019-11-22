@@ -24,21 +24,19 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.Entity
 
-import java.time.LocalDate
-
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-class Project implements Commentable, Entity {
+class Project implements ProjectPropertiesGivenWithRequest, Commentable, Entity {
 
     /**
      * This enum defines if SNV calling should be done for this project.
      * Default is unknown
      */
+    @Deprecated
     enum Snv {
         YES,
         NO,
@@ -50,16 +48,12 @@ class Project implements Commentable, Entity {
         USER_MANAGEMENT,
     }
 
-    SpeciesWithStrain speciesWithStrain
-
+    @Deprecated
     Snv snv = Snv.UNKNOWN
 
-    String name
     String individualPrefix
-    String predecessorProject
     String relatedProjects
     String internalNotes
-    String organizationalUnit
     String dirName
     Realm realm
     String dirAnalysis
@@ -72,12 +66,6 @@ class Project implements Commentable, Entity {
      * The name which is used in the {@link MetaDataColumn#PROJECT} column of metadata files.
      */
     String nameInMetadataFiles
-
-    /**
-     * this flag defines if the fastq files of this project have to be copied (instead of linked) regardless of whether
-     * they will be processed or not
-     */
-    boolean forceCopyFiles = false
 
     boolean fingerPrinting = true
 
@@ -106,30 +94,15 @@ class Project implements Commentable, Entity {
 
     Comment comment
 
-    String description
-
     ProjectGroup projectGroup
 
     String unixGroup
-
-    String costCenter
-
-    TumorEntity tumorEntity
 
     AlignmentDeciderBeanName alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT
 
     SampleIdentifierParserBeanName sampleIdentifierParserBeanName = SampleIdentifierParserBeanName.NO_PARSER
 
     QcThresholdHandling qcThresholdHandling
-
-    LocalDate endDate
-
-    LocalDate storageUntil
-
-    ProjectType projectType
-
-    String fundingBody
-    String grantId
 
     static hasMany = [
             projectInfos: ProjectInfo,
