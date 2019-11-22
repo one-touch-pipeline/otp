@@ -1,5 +1,3 @@
-import de.dkfz.tbi.otp.dataprocessing.OtpPath
-
 /*
  * Copyright 2011-2019 The OTP authors
  *
@@ -21,6 +19,7 @@ import de.dkfz.tbi.otp.dataprocessing.OtpPath
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 endpoints {
     enabled = false
     jmx {
@@ -31,27 +30,28 @@ endpoints.enabled = false
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 grails.mime.file.extensions = true // enables the parsing of file extensions from URLs into the request format
 grails.mime.use.accept.header = false
-grails.mime.types = [ html: [
-        'text/html',
-        'application/xhtml+xml',
-],
-                      xml: [
-                              'text/xml',
-                              'application/xml',
-                      ],
-                      text: 'text/plain',
-                      js: 'text/javascript',
-                      rss: 'application/rss+xml',
-                      atom: 'application/atom+xml',
-                      css: 'text/css',
-                      csv: 'text/csv',
-                      all: '*/*',
-                      json: [
-                              'application/json',
-                              'text/json',
-                      ],
-                      form: 'application/x-www-form-urlencoded',
-                      multipartForm: 'multipart/form-data'
+grails.mime.types = [
+        html         : [
+                'text/html',
+                'application/xhtml+xml',
+        ],
+        xml          : [
+                'text/xml',
+                'application/xml',
+        ],
+        text         : 'text/plain',
+        js           : 'text/javascript',
+        rss          : 'application/rss+xml',
+        atom         : 'application/atom+xml',
+        css          : 'text/css',
+        csv          : 'text/csv',
+        all          : '*/*',
+        json         : [
+                'application/json',
+                'text/json',
+        ],
+        form         : 'application/x-www-form-urlencoded',
+        multipartForm: 'multipart/form-data'
 ]
 
 // GSP settings
@@ -193,17 +193,17 @@ grails.gorm.default.constraints = {
         }
     }
     pathComponent validator: { val, obj ->
-        if (val && !OtpPath.isValidPathComponent(val)) {
+        if (val && !de.dkfz.tbi.otp.dataprocessing.OtpPath.isValidPathComponent(val)) {
             return "validator.path.component"
         }
     }
     relativePath validator: { val, obj ->
-        if (val && !OtpPath.isValidRelativePath(val)) {
+        if (val && !de.dkfz.tbi.otp.dataprocessing.OtpPath.isValidRelativePath(val)) {
             return "validator.relative.path"
         }
     }
     absolutePath validator: { val, obj ->
-        if (val && !OtpPath.isValidAbsolutePath(val)) {
+        if (val && !de.dkfz.tbi.otp.dataprocessing.OtpPath.isValidAbsolutePath(val)) {
             return "validator.absolute.path"
         }
     }
