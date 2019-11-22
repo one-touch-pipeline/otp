@@ -441,4 +441,19 @@ $.otp.tableButtons = [
 
 $(document).ready(function() {
     $('#project').select2();
+
+    var t = $('[title]');
+    t.tooltip();
+    t.on('click', function () {
+        $(this)
+            .tooltip({
+                open: function (event, ui) {
+                    var $element = $(event.target);
+                    ui.tooltip.click(function () {
+                        $element.tooltip('close');
+                    });
+                },
+            })
+            .tooltip('open');
+    });
 });

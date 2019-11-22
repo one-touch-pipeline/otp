@@ -54,29 +54,30 @@
         </div>
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
         <div id="projectOverviewDates">
-            <table>
+            <table class="key-value-table">
                 <tr>
-                    <td class="myKey"><g:message code="project.individualPrefix"/></td>
+                    <td><g:message code="project.individualPrefix"/></td>
+                    <td></td>
                     <td>${project.individualPrefix}</td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.directory"/></td>
-                    <td id="projectDirectory">${directory}</td>
+                    <td><g:message code="project.directory"/></td>
                     <td></td>
+                    <td>${directory}</td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.analysisDirectory"/></td>
+                    <td><g:message code="project.analysisDirectory"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'dirAnalysis'])}"
                                 value="${project.dirAnalysis}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.keywords"/></td>
+                    <td><g:message code="project.keywords"/></td>
+                    <td></td>
                     <td>
                         <g:if test="${project.keywords}">
                             <otp:editorSwitch
@@ -91,11 +92,11 @@
                                     value="${g.message(code: 'project.noKeywords')}"/>
                         </g:else>
                     </td>
-                    <td></td>
                 </tr>
-                <tr id="descriptionRow">
-                    <td class="myKey" style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="project.description"/></td>
-                    <td colspan="2">
+                <tr>
+                    <td style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message code="project.description"/></td>
+                    <td></td>
+                    <td>
                         <div style="overflow: auto; max-height: 20em;">
                             <otp:editorSwitch
                                     roles="ROLE_OPERATOR"
@@ -106,27 +107,28 @@
                     </td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.relatedProjects"/></td>
+                    <td><g:message code="project.relatedProjects"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'relatedProjects'])}"
                                 value="${project.relatedProjects}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.predecessorProject"/></td>
+                    <td><g:message code="project.predecessorProject"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'predecessorProject'])}"
                                 value="${project.predecessorProject}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.tumorEntity"/></td>
+                    <td><g:message code="project.tumorEntity"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -136,10 +138,10 @@
                                 values="${tumorEntities}"
                                 value="${project.tumorEntity}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.speciesWithStrain"/></td>
+                    <td><g:message code="project.speciesWithStrain"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -150,60 +152,60 @@
                                 values="${allSpeciesWithStrain}"
                                 value="${project.speciesWithStrain}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.unixGroup"/></td>
+                    <td><g:message code="project.unixGroup"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'unixGroup'])}"
                                 value="${project.unixGroup}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.costCenter"/></td>
+                    <td><g:message code="project.costCenter"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'costCenter'])}"
                                 value="${project.costCenter}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.organizationalUnit"/></td>
+                    <td><g:message code="project.organizationalUnit"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'organizationalUnit'])}"
                                 value="${project.organizationalUnit}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.fundingBody"/></td>
+                    <td><g:message code="project.fundingBody"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'fundingBody'])}"
                                 value="${project.fundingBody}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.grantId"/></td>
+                    <td><g:message code="project.grantId"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'grantId'])}"
                                 value="${project.grantId}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.projectType"/></td>
+                    <td><g:message code="project.projectType"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -212,11 +214,11 @@
                                 values="${projectTypes}"
                                 value="${project.projectType}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.forceCopyFiles"/></td>
-                    <td id="forceCopyFiles">
+                    <td><g:message code="project.forceCopyFiles"/></td>
+                    <td></td>
+                    <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
@@ -224,20 +226,20 @@
                                 values="${["true", "false"]}"
                                 value="${project.forceCopyFiles}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.creationDate"/></td>
-                    <td id="creation-date">${creationDate}</td>
+                    <td><g:message code="project.creationDate"/></td>
                     <td></td>
+                    <td>${creationDate}</td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.lastDate"/></td>
-                    <td id="last-received-date">${lastReceivedDate}</td>
+                    <td><g:message code="project.lastDate"/></td>
                     <td></td>
+                    <td>${lastReceivedDate}</td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.endDate"/></td>
+                    <td><g:message code="project.endDate"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -245,10 +247,10 @@
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['project.id': project.id, 'fieldName': 'endDate'])}"
                                 value="${project.endDate}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.storageUntil"/></td>
+                    <td><g:message code="project.storageUntil"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -256,20 +258,20 @@
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProjectFieldDate', params: ['project.id': project.id, 'fieldName': 'storageUntil'])}"
                                 value="${project.storageUntil}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.nameInMetadata"/></td>
+                    <td><g:message code="project.nameInMetadata"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'nameInMetadataFiles'])}"
                                 value="${project.nameInMetadataFiles}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.processingPriority"/></td>
+                    <td><g:message code="project.processingPriority"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -278,15 +280,15 @@
                                 values="${processingPriorities}"
                                 value="${processingPriority ?: ""}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.group"/></td>
+                    <td><g:message code="project.group"/></td>
                     <td id="group">${project.projectGroup}</td>
                     <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.sampleParser"/></td>
+                    <td><g:message code="project.sampleParser"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -295,11 +297,11 @@
                                 values="${sampleIdentifierParserBeanNames}"
                                 value="${project.sampleIdentifierParserBeanName}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.qcThresholdHandling"/></td>
-                    <td id="qcThresholdHandling">
+                    <td><g:message code="project.qcThresholdHandling"/></td>
+                    <td></td>
+                    <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
@@ -307,11 +309,11 @@
                                 values="${qcThresholdHandlingDropdown}"
                                 value="${project.qcThresholdHandling}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.fingerPrinting"/></td>
-                    <td id="fingerPrinting">
+                    <td><g:message code="project.fingerPrinting"/></td>
+                    <td></td>
+                    <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
@@ -319,11 +321,11 @@
                                 values="${["true", "false"]}"
                                 value="${project.fingerPrinting}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.processingNotification.message"/></td>
-                    <td id="processingNotification">
+                    <td><g:message code="project.processingNotification.message"/></td>
+                    <td class="help" title="${g.message(code: "project.processingNotification.message.detail")}"></td>
+                    <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
@@ -331,11 +333,11 @@
                                 values="${["true", "false"]}"
                                 value="${project.processingNotification}"/>
                     </td>
-                    <td><g:message code="project.processingNotification.message.detail"/></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.qcTrafficLightNotification.message"/></td>
-                    <td id="qcTrafficLightNotification">
+                    <td><g:message code="project.qcTrafficLightNotification.message"/></td>
+                    <td class="help" title="${g.message(code: "project.qcTrafficLightNotification.message.detail")}"></td>
+                    <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
@@ -343,11 +345,11 @@
                                 values="${["true", "false"]}"
                                 value="${project.qcTrafficLightNotification}"/>
                     </td>
-                    <td><g:message code="project.qcTrafficLightNotification.message.detail"/></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.customFinalNotification.message"/></td>
-                    <td id="customFinalNotification">
+                    <td><g:message code="project.customFinalNotification.message"/></td>
+                    <td class="help" title="${g.message(code: "project.customFinalNotification.message.detail")}"></td>
+                    <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
                                 template="dropDown"
@@ -355,10 +357,10 @@
                                 values="${["true", "false"]}"
                                 value="${project.customFinalNotification}"/>
                     </td>
-                    <td><g:message code="project.customFinalNotification.message.detail"/></td>
                 </tr>
                 <tr>
-                    <td class="myKey"><g:message code="project.closed"/></td>
+                    <td><g:message code="project.closed"/></td>
+                    <td></td>
                     <td>
                         <otp:editorSwitch
                                 roles="ROLE_OPERATOR"
@@ -367,13 +369,13 @@
                                 values="${["true", "false"]}"
                                 value="${closed}"/>
                     </td>
-                    <td></td>
                 </tr>
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <tr>
-                        <td class="myKey" style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message
+                        <td style="padding-top: 1em; padding-bottom: 1em; vertical-align: 1em"><g:message
                                 code="project.internalNotes"/></td>
-                        <td colspan="2">
+                        <td></td>
+                        <td>
                             <div style="overflow: auto; max-height: 20em;">
                                 <otp:editorSwitch
                                         roles="ROLE_OPERATOR"
@@ -384,8 +386,9 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="myKey"><g:message code="projectOverview.projectInfos"/></td>
-                        <td id="projectInfo" colspan="2">
+                        <td><g:message code="projectOverview.projectInfos"/></td>
+                        <td></td>
+                        <td>
                             <g:link controller='projectInfo' action='list'>
                                 <g:message code="projectOverview.projectInfos.link" args="[project.projectInfos.size()]"/>
                             </g:link>

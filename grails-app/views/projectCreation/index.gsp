@@ -34,29 +34,29 @@
     <g:render template="/templates/messages"/>
 
     <g:uploadForm controller="projectCreation" action="save">
-        <table>
+        <table class="key-value-table">
             <tr>
-                <td class="myKey"><g:message code="project.name"/></td>
-                <td><g:textField name="name" size="130" value="${cmd?.name}" required="true"/></td>
+                <td><g:message code="project.name"/></td>
+                <td><g:textField name="name" value="${cmd?.name}" required="true"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.individualPrefix"/></td>
-                <td><g:textField name="individualPrefix" size="130" value="${cmd?.individualPrefix}" required="true"/></td>
+                <td><g:message code="project.individualPrefix"/></td>
+                <td><g:textField name="individualPrefix" value="${cmd?.individualPrefix}" required="true"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.directory"/></td>
-                <td><g:textField name="directory" size="130" value="${cmd?.directory}" required="true"/></td>
+                <td><g:message code="project.directory"/></td>
+                <td><g:textField name="directory" value="${cmd?.directory}" required="true"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.analysisDirectory"/></td>
-                <td><g:textField name="analysisDirectory" size="130" value="${cmd?.analysisDirectory}" required="true"/></td>
+                <td><g:message code="project.analysisDirectory"/></td>
+                <td><g:textField name="analysisDirectory" value="${cmd?.analysisDirectory}" required="true"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.keywords"/></td>
+                <td><g:message code="project.keywords"/></td>
                 <td class="multi-input-field">
                     <g:each in="${cmd?.keywords*.name ?: [""]}" var="keyword" status="i">
                         <div class="field">
-                            <g:textField list="keywordList" name="keywordNames" size="130" value="${keyword}" />
+                            <g:textField list="keywordList" name="keywordNames" value="${keyword}" />
                             <g:if test="${i == 0}">
                                 <button class="add-field">+</button>
                             </g:if>
@@ -73,15 +73,15 @@
                 </td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.description"/></td>
-                <td><g:textArea name="description" cols="130" value="${cmd?.description}" style="width: auto" required="true"/></td>
+                <td><g:message code="project.description"/></td>
+                <td><g:textArea name="description" value="${cmd?.description}" required="true"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.relatedProjects"/></td>
+                <td><g:message code="project.relatedProjects"/></td>
                 <td class="multi-input-field">
                     <g:each in="${cmd?.relatedProjects?.split(",") ?: [""]}" var="relatedProject" status="i">
                         <div class="field">
-                            <g:textField list="projectList" name="relatedProjectName" size="130" value="${relatedProject}"/>
+                            <g:textField list="projectList" name="relatedProjectName" value="${relatedProject}"/>
                             <g:if test="${i == 0}">
                                 <button class="add-field">+</button>
                             </g:if>
@@ -93,8 +93,8 @@
                 </td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.predecessorProject"/></td>
-                <td><g:textField list="projectList" name="predecessorProject" size="130" value="${cmd?.predecessorProject}"/></td>
+                <td><g:message code="project.predecessorProject"/></td>
+                <td><g:textField list="projectList" name="predecessorProject" value="${cmd?.predecessorProject}"/></td>
             </tr>
             <datalist id="projectList">
                 <g:each in="${projects}" var="project">
@@ -102,78 +102,78 @@
                 </g:each>
             </datalist>
             <tr>
-                <td class="myKey"><g:message code="project.tumorEntity"/></td>
-                <td><g:select class="criteria" name='tumorEntityName' from='${tumorEntities}' value="${cmd?.tumorEntity}"/></td>
+                <td><g:message code="project.tumorEntity"/></td>
+                <td><g:select name='tumorEntityName' from='${tumorEntities}' value="${cmd?.tumorEntity}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.speciesWithStrain"/></td>
-                <td><g:select class="criteria" name='speciesWithStrain' from='${allSpeciesWithStrains}' value="${cmd?.speciesWithStrain}" optionKey="id" noSelection="${['': 'None']}"/></td>
+                <td><g:message code="project.speciesWithStrain"/></td>
+                <td><g:select name='speciesWithStrain' from='${allSpeciesWithStrains}' value="${cmd?.speciesWithStrain}" optionKey="id" noSelection="${['': 'None']}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.unixGroup"/></td>
-                <td><g:textField name="unixGroup" size="130" value="${cmd?.unixGroup}" required="true"/></td>
+                <td><g:message code="project.unixGroup"/></td>
+                <td><g:textField name="unixGroup" value="${cmd?.unixGroup}" required="true"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.costCenter"/></td>
-                <td><g:textField name="costCenter" size="130" value="${cmd?.costCenter}"/></td>
+                <td><g:message code="project.costCenter"/></td>
+                <td><g:textField name="costCenter" value="${cmd?.costCenter}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.organizationalUnit"/></td>
-                <td><g:textField name="organizationalUnit" size="130" value="${cmd?.organizationalUnit}"/></td>
+                <td><g:message code="project.organizationalUnit"/></td>
+                <td><g:textField name="organizationalUnit" value="${cmd?.organizationalUnit}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.fundingBody"/></td>
-                <td><g:textField name="fundingBody" size="130" value="${cmd?.fundingBody}"/></td>
+                <td><g:message code="project.fundingBody"/></td>
+                <td><g:textField name="fundingBody" value="${cmd?.fundingBody}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.grantId"/></td>
-                <td><g:textField name="grantId" size="130" value="${cmd?.grantId}"/></td>
+                <td><g:message code="project.grantId"/></td>
+                <td><g:textField name="grantId" value="${cmd?.grantId}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.projectType"/></td>
-                <td><g:select class="criteria" id="group" name='projectType' from='${projectTypes}' value="${cmd?.projectType ?: defaultProjectType}" required="true"/></td>
+                <td><g:message code="project.projectType"/></td>
+                <td><g:select id="group" name='projectType' from='${projectTypes}' value="${cmd?.projectType ?: defaultProjectType}" required="true"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.forceCopyFiles"/></td>
+                <td><g:message code="project.forceCopyFiles"/></td>
                 <td><g:checkBox name="forceCopyFiles" checked="${cmd == null || cmd?.forceCopyFiles}" value="true"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.endDate"/></td>
+                <td><g:message code="project.endDate"/></td>
                 <td><input type="date" name="endDateInput" value="${cmd?.endDate?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: ""}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.storageUntil"/></td>
+                <td><g:message code="project.storageUntil"/></td>
                 <td><input type="date" name="storageUntilInput" value="${cmd?.storageUntil?.format(DateTimeFormatter.ISO_LOCAL_DATE) ?: defaultDate}" required/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.nameInMetadata"/></td>
-                <td><g:textField name="nameInMetadataFiles" size="130" value="${cmd?.nameInMetadataFiles}"/></td>
+                <td><g:message code="project.nameInMetadata"/></td>
+                <td><g:textField name="nameInMetadataFiles" value="${cmd?.nameInMetadataFiles}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.processingPriority"/></td>
-                <td><g:select class="criteria" id="priority" name='processingPriority' from='${processingPriorities}' value="${cmd?.processingPriority ?: defaultProcessingPriority}" required="true"/></td>
+                <td><g:message code="project.processingPriority"/></td>
+                <td><g:select id="priority" name='processingPriority' from='${processingPriorities}' value="${cmd?.processingPriority ?: defaultProcessingPriority}" required="true"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.projectGroup"/></td>
-                <td><g:select class="criteria" id="group" name='projectGroup' from='${projectGroups}' value="${cmd?.projectGroup}"/></td>
+                <td><g:message code="project.projectGroup"/></td>
+                <td><g:select id="group" name='projectGroup' from='${projectGroups}' value="${cmd?.projectGroup}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.sampleParser"/></td>
-                <td><g:select class="criteria" id="group" name='sampleIdentifierParserBeanName' from='${sampleIdentifierParserBeanNames}' value="${cmd?.sampleIdentifierParserBeanName}" optionValue="displayName"/></td>
+                <td><g:message code="project.sampleParser"/></td>
+                <td><g:select id="group" name='sampleIdentifierParserBeanName' from='${sampleIdentifierParserBeanNames}' value="${cmd?.sampleIdentifierParserBeanName}" optionValue="displayName"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.qcThresholdHandling"/></td>
-                <td><g:select class="criteria" id="group" name='qcThresholdHandling' from='${qcThresholdHandlings}' value="${cmd?.qcThresholdHandling ?: defaultQcThresholdHandling}"/></td>
+                <td><g:message code="project.qcThresholdHandling"/></td>
+                <td><g:select id="group" name='qcThresholdHandling' from='${qcThresholdHandlings}' value="${cmd?.qcThresholdHandling ?: defaultQcThresholdHandling}"/></td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.projectInfo"/></td>
+                <td><g:message code="project.projectInfo"/></td>
                 <td>
                     <input type="file" name="projectInfoFile" id="projectInfoFile"/>
                 </td>
             </tr>
             <tr>
-                <td class="myKey"><g:message code="project.internalNotes"/></td>
-                <td><g:textArea name="internalNotes" cols="130" value="${cmd?.internalNotes}" style="width: auto"/></td>
+                <td><g:message code="project.internalNotes"/></td>
+                <td><g:textArea name="internalNotes" value="${cmd?.internalNotes}"/></td>
             </tr>
             <tr>
                 <td></td>
@@ -182,11 +182,11 @@
 
             %{--if someone want to change this it is hidden now--}%
             <tr hidden>
-                <td class="myKey"><g:message code="project.fingerPrinting"/></td>
+                <td><g:message code="project.fingerPrinting"/></td>
                 <td><g:checkBox name="fingerPrinting" checked="${cmd == null ? true : cmd?.fingerPrinting}" value="true"/></td>
             </tr>
         </table>
     </g:uploadForm>
-    </div>
+</div>
 </body>
 </html>

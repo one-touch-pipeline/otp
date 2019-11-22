@@ -580,13 +580,6 @@ td {
         background: #ffffff;
         background-image: -moz-linear-gradient(right, #ffffff, #aaaff);
     }
-    &.myKey {
-        width: 200px;
-        text-align: right;
-        font-weight: bold;
-        color:  #43619C;
-        padding-right: 1em;
-    }
     &.myValue {
         list-style-type: none;
     }
@@ -597,6 +590,14 @@ td {
     &.tableEntry {
         padding: 0.2em 0.6em;
     }
+}
+
+.myKey {
+    width: 200px;
+    text-align: right;
+    font-weight: bold;
+    color:  #43619C;
+    padding-right: 1em;
 }
 
 .indel-table {
@@ -2216,12 +2217,6 @@ div.log {
     white-space: nowrap;
 }
 
-.project-info-input {
-    input[type='text'], select {
-        width: 500px;
-    }
-}
-
 div.dt-buttons {
     float: right;
 }
@@ -2283,5 +2278,24 @@ ul.metaDataFieldsLinkBanner {
         font-weight: bold;
         font-size: large;
         border-top: 1px solid black
+    }
+}
+
+table.key-value-table {
+    td:first-of-type {
+        .myKey;
+        padding-right: 0;
+    }
+
+    td:nth-of-type(2).help {
+        background: url("help.png") no-repeat center;
+        background-size: 16px;
+        width: 16px;
+    }
+    td:last-of-type {
+        padding-left: 1em;
+        input:not([type='checkbox']):not([type='radio']):not([type='button']):not([type='submit']), textarea, select {
+            width: 750px;
+        }
     }
 }

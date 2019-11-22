@@ -76,7 +76,7 @@
             <div class="project-info-upload-dta">
                 <g:uploadForm action="addProjectDta" useToken="true">
                     <input type="hidden" name="project.id" value="${project.id}"/>
-                    <table class="project-info-input">
+                    <table class="key-value-table">
                         <tr>
                             <td><g:message code="projectInfo.upload.dta.path"/></td>
                             <td><input type="file" name="projectInfoFile" required="required"/></td>
@@ -140,8 +140,11 @@
                             <td><g:message code="projectInfo.upload.dta.comment"/></td>
                             <td><input type="text" value="${addProjectInfos?.comment}" name="comment"/></td>
                         </tr>
+                        <tr>
+                            <td></td>
+                            <td><g:submitButton name="${g.message(code: "projectInfo.upload.dta.add")}"/></td>
+                        </tr>
                     </table>
-                    <g:submitButton name="${g.message(code: "projectInfo.upload.dta.add")}"/>
                 </g:uploadForm>
             </div>
             <br>
