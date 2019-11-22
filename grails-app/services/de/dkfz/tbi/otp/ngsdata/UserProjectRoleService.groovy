@@ -95,19 +95,7 @@ class UserProjectRoleService {
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
     void addUserToProjectAndNotifyGroupManagementAuthority(Project project, ProjectRole projectRole, String username, Map flags = [:]) throws AssertionError {
         assert project: "project must not be null"
-
-        LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(username)
-        assert ldapUserDetails: "'${username}' can not be resolved to a user via LDAP"
-        assert ldapUserDetails.mail: "Could not get a mail for this user via LDAP"
-
-        User user = User.findByUsernameOrEmail(ldapUserDetails.username, ldapUserDetails.mail)
-
-        if (user) {
-            assert user.username: "There is already an external user with email '${user.email}'"
-            assert user.username == ldapUserDetails.username: "The given email address '${user.email}' is already registered for LDAP user '${user.username}'"
-        } else {
-            user = userService.createUser(ldapUserDetails.username, ldapUserDetails.mail, ldapUserDetails.realName)
-        }
+        User user = createUserWithLdapData(username)
 
         synchedBetweenRelatedProjects(project.unixGroup) { Project p ->
             createUserProjectRole(user, p, projectRole, flags)
@@ -120,6 +108,30 @@ class UserProjectRoleService {
 
         auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ENABLED, "Enabled ${userProjectRole.user.username} for ${userProjectRole.project.name}")
         notifyProjectAuthoritiesAndUser(userProjectRole)
+    }
+
+    User createUserWithLdapData(String username) {
+        LdapUserDetails ldapUserDetails = ldapService.getLdapUserDetailsByUsername(username)
+        if (!ldapUserDetails) {
+            throw new LdapUserCreationException("'${username}' can not be resolved to a user via LDAP")
+        }
+        if (!ldapUserDetails.mail) {
+            throw new LdapUserCreationException("Could not get a mail for '${username}' via LDAP")
+        }
+
+        User user = User.findByUsernameOrEmail(ldapUserDetails.username, ldapUserDetails.mail)
+
+        if (user) {
+            if (!user.username) {
+                throw new LdapUserCreationException("There is already an external user with email '${user.email}'")
+            }
+            if (user.username != ldapUserDetails.username) {
+                throw new LdapUserCreationException("The given email address '${user.email}' is already registered for LDAP user '${user.username}'")
+            }
+        } else {
+            user = userService.createUser(ldapUserDetails.username, ldapUserDetails.mail, ldapUserDetails.realName)
+        }
+        return user
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'MANAGE_USERS')")
@@ -477,5 +489,11 @@ class UserProjectRoleService {
             (added == flags.manageUsers)             && (added == !oldUPR?.manageUsers)            ? [OtpPermissionCode.MANAGE_USERS] : [],
             (added == flags.manageUsersAndDelegate)  && (added == !oldUPR?.manageUsersAndDelegate) ? [OtpPermissionCode.DELEGATE_MANAGE_USERS] : [],
         ].flatten()
+    }
+}
+
+class LdapUserCreationException extends RuntimeException {
+    LdapUserCreationException(String message) {
+        super(message)
     }
 }

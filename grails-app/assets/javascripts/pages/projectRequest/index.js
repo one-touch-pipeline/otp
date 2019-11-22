@@ -21,20 +21,12 @@
  */
 
 $(function () {
-    var wrapper = $(".multi-input-field");
-    wrapper.on("click", ".add-field", function (e) {
-        e.preventDefault();
-
-        var parent = $(e.target).parents(".multi-input-field");
-        parent.append("<div class=\"field\">");
-
-        var div = parent.children("div.field:last");
-        div.append($(e.target).siblings("input:first, select:first, textarea:first").clone().val(""));
-        div.append("<button class=\"remove-field\">-</button>")
-    });
-
-    wrapper.on("click", ".remove-field", function (e) {
-        e.preventDefault();
-        $(e.target).parent("div.field").remove();
-    });
+    var input = $("input#storageUntil");
+    $("select#storagePeriod").on("change", function (e) {
+        if ($(e.target).val() === "USER_DEFINED") {
+            input.show()
+        } else {
+            input.hide()
+        }
+    }).trigger("change");
 });

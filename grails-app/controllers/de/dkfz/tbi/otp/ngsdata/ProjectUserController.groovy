@@ -132,7 +132,7 @@ class ProjectUserController implements CheckAndCall {
                     )
                 }
                 message = "Data stored successfully"
-            } catch (AssertionError e) {
+            } catch (LdapUserCreationException | AssertionError e) {
                 message = "An error occurred"
                 errorMessage = e.message
             }

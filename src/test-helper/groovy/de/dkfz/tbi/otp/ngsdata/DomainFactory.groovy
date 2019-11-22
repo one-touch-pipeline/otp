@@ -2624,4 +2624,15 @@ class DomainFactory {
                 project: { createProject() },
         ], properties)
     }
+
+    static ProjectRequest createProjectRequest(Map properties = [:]) {
+        return createDomainObject(ProjectRequest, [
+                name: "name_${counter++}",
+                description: "description_${counter++}",
+                organizationalUnit: "ou_${counter++}",
+                projectType: Project.ProjectType.SEQUENCING,
+                requester: createUser(),
+                pi: createUser(),
+        ], properties)
+    }
 }

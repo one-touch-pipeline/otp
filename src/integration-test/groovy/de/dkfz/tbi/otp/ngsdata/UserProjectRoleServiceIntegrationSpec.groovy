@@ -350,7 +350,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        AssertionError e = thrown(AssertionError)
+        LdapUserCreationException e = thrown(LdapUserCreationException)
         e.message.contains('can not be resolved to a user via LDAP')
     }
 
@@ -376,7 +376,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        AssertionError e = thrown(AssertionError)
+        LdapUserCreationException e = thrown(LdapUserCreationException)
         e.message.contains("There is already an external user with email '${user.email}'")
     }
 
@@ -448,7 +448,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         }
 
         then:
-        AssertionError e = thrown()
+        LdapUserCreationException e = thrown(LdapUserCreationException)
         e.message.startsWith("The given email address '${user.email}' is already registered for LDAP user '${user.username}'")
     }
 
