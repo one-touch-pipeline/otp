@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.rnaAlignment.RnaRoddyBamFile
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsRoddy
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.OtrsTicket
@@ -37,23 +38,24 @@ import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 import de.dkfz.tbi.otp.utils.MessageSourceService
 
-class QcTrafficLightNotificationServiceSpec extends Specification implements DataTest {
+class QcTrafficLightNotificationServiceSpec extends Specification implements DataTest, IsRoddy {
 
     @Override
     Class[] getDomainClassesToMock() {
         [
                 AbstractMergedBamFile,
-                DataFile,
                 Comment,
+                DataFile,
+                FastqImportInstance,
                 FileType,
                 Individual,
                 LibraryPreparationKit,
                 MergingCriteria,
                 MergingWorkPackage,
-                Pipeline,
-                Project,
-                ProcessingOption,
                 OtrsTicket,
+                Pipeline,
+                ProcessingOption,
+                Project,
                 Realm,
                 ReferenceGenome,
                 ReferenceGenomeProjectSeqType,
@@ -61,15 +63,14 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                FastqImportInstance,
                 Sample,
                 SampleType,
-                SeqType,
+                SeqCenter,
                 SeqPlatform,
                 SeqPlatformGroup,
                 SeqPlatformModelLabel,
-                SeqCenter,
                 SeqTrack,
+                SeqType,
                 SoftwareTool,
         ]
     }
@@ -81,7 +82,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         final String BODY = 'BODY'
         final String LINK = 'LINK'
 
-        AbstractMergedBamFile bamFile = DomainFactory.createRoddyBamFile([:])
+        AbstractMergedBamFile bamFile = createBamFile()
         bamFile.project.qcTrafficLightNotification = qcTrafficLightNotification
         bamFile.project.save(flush: true)
 
@@ -89,7 +90,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
         DomainFactory.createProcessingOptionForOtrsTicketPrefix()
         DomainFactory.createProcessingOptionForNotificationRecipient()
         Set<OtrsTicket> otrsTickets = [
-                DomainFactory.createOtrsTicket([
+                createOtrsTicket([
                         finalNotificationSent: finalNotificationSent,
                         automaticNotification: automaticNotification,
                 ]),
@@ -97,7 +98,7 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
 
         String ilseNumbers = ""
         if (createIlse) {
-            IlseSubmission ilseSubmission = DomainFactory.createIlseSubmission()
+            IlseSubmission ilseSubmission = createIlseSubmission()
             bamFile.containedSeqTracks.first().ilseSubmission = ilseSubmission
             bamFile.save(flush: true)
             ilseNumbers = "[S#${ilseSubmission.ilseNumber}] "

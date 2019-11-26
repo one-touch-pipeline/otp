@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.qcTrafficLight
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -40,6 +39,7 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
                 AbstractMergedBamFile,
                 Comment,
                 DataFile,
+                FastqImportInstance,
                 FileType,
                 Individual,
                 LibraryPreparationKit,
@@ -54,7 +54,6 @@ class QcTrafficLightCheckServiceSpec extends Specification implements IsRoddy, D
                 RoddyBamFile,
                 RoddyWorkflowConfig,
                 Run,
-                FastqImportInstance,
                 Sample,
                 SampleType,
                 SeqCenter,

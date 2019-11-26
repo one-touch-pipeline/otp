@@ -54,9 +54,9 @@ trait IsRoddy implements IsPipeline {
                     ] : [:]
             workPackage = createMergingWorkPackage(workPackageProperties)
             DomainFactory.createReferenceGenomeProjectSeqType(
-                    referenceGenome: workPackage.referenceGenome,
-                    project: workPackage.project,
-                    seqType: workPackage.seqType,
+                    referenceGenome : workPackage.referenceGenome,
+                    project         : workPackage.project,
+                    seqType         : workPackage.seqType,
                     statSizeFileName: workPackage.statSizeFileName,
             )
         }

@@ -26,6 +26,7 @@ import grails.web.mapping.LinkGenerator
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.ngsdata.IlseSubmission
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
 import de.dkfz.tbi.otp.notification.CreateNotificationTextService
 import de.dkfz.tbi.otp.tracking.OtrsTicket
@@ -51,16 +52,12 @@ class QcTrafficLightNotificationService {
         if (toBeSent) {
             subject << 'TO BE SENT: '
         }
-        String ilse = ""
-        String ticketNumber = ""
-        OtrsTicket ticket = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks).last()
-        if (ticket) {
-            ticketNumber = "${ticket.prefixedTicketNumber} "
-        }
-        List ilseSubmissions = bamFile.containedSeqTracks*.ilseSubmission.findAll().unique()
-        if (ilseSubmissions) {
-            ilse = "[S#${ilseSubmissions*.ilseNumber.sort().join(',')}] "
-        }
+
+        Set<OtrsTicket> tickets = otrsTicketService.findAllOtrsTickets(bamFile.containedSeqTracks)
+        String ticketNumber = tickets ? "${tickets.last().prefixedTicketNumber} " : ""
+
+        List<IlseSubmission> ilseSubmissions = bamFile.containedSeqTracks*.ilseSubmission.findAll().unique()
+        String ilse = ilseSubmissions ? "[S#${ilseSubmissions*.ilseNumber.sort().join(',')}] " : ""
 
         subject << messageSourceService.createMessage(
                 "notification.template.alignment.qcTrafficBlockedSubject",
