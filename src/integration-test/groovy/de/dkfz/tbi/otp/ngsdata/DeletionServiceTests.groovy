@@ -31,6 +31,7 @@ import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AbstractSnvCallingInstance
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
@@ -156,6 +157,18 @@ class DeletionServiceTests implements UserAndRoles {
     }
 
     @Test
+    void testDeleteQualityAssessmentInfoForAbstractBamFile_SingleCellBamFile() throws Exception {
+        setupData()
+        AbstractBamFile abstractBamFile = DomainFactory.proxyCellRanger.createBamFile()
+
+        QualityAssessmentMergedPass qualityAssessmentPass = DomainFactory.createQualityAssessmentMergedPass(abstractMergedBamFile: abstractBamFile)
+
+        deletionService.deleteQualityAssessmentInfoForAbstractBamFile(abstractBamFile)
+
+        assert !QualityAssessmentMergedPass.get(qualityAssessmentPass.id)
+    }
+
+    @Test
     void testDeleteQualityAssessmentInfoForAbstractBamFile_null() throws Exception {
         setupData()
         AbstractBamFile abstractBamFile = null
@@ -251,6 +264,19 @@ class DeletionServiceTests implements UserAndRoles {
 
         assert !RoddyBamFile.get(roddyBamFile.id)
         assert !MergingWorkPackage.get(roddyBamFile.workPackage.id)
+    }
+
+    @Test
+    void testDeleteAllProcessingInformationAndResultOfOneSeqTrack_SingleCellBamFile() throws Exception {
+        setupData()
+        SingleCellBamFile singleCellBamFile = DomainFactory.proxyCellRanger.createBamFile()
+        singleCellBamFile.workPackage.bamFileInProjectFolder = singleCellBamFile
+        singleCellBamFile.workPackage.save(flush: true)
+
+        deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(singleCellBamFile.seqTracks.iterator().next())
+
+        assert !RoddyBamFile.get(singleCellBamFile.id)
+        assert !MergingWorkPackage.get(singleCellBamFile.workPackage.id)
     }
 
     @Test

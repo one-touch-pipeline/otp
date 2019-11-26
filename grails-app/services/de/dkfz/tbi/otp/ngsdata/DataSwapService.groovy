@@ -440,8 +440,8 @@ ln -s '${newDirectFileName}' \\
         createBashScriptRoddy(seqTracks, dirsToDelete, log, bashScriptToMoveFiles, bashScriptToMoveFilesAsOtherUser)
 
         seqTracks.each { SeqTrack seqTrack ->
-            Map dirs = deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
-            dirsToDelete << dirs.get("dirsToDelete")
+            Map<String, List<File>> dirs = deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+            dirsToDelete.addAll(dirs.get("dirsToDelete"))
             bashScriptToMoveFilesAsOtherUser << "#rm -rf ${dirs.get("dirsToDeleteWithOtherUser").join("\n#rm -rf ")}\n"
             groovyConsoleScriptToRestartAlignments << startAlignmentForSeqTrack(seqTrack)
         }
@@ -672,8 +672,6 @@ ln -s '${newDirectFileName}' \\
         createCommentForSwappedDatafiles(dataFiles)
     }
 
-
-
     /**
      * create a bash script to delete files from roddy,
      * the script must be executed as other user
@@ -730,7 +728,7 @@ ln -s '${newDirectFileName}' \\
                         //in case of realignment the work dir could already be deleted
                         it.exists()
                     },
-            ].flatten() as Set
+            ].flatten() as Set<File>
 
             List<RoddyBamFile> wgbsRoddyBamFiles = roddyBamFiles.findAll { it.seqType.isWgbs() }
             if (wgbsRoddyBamFiles) {
@@ -738,7 +736,7 @@ ln -s '${newDirectFileName}' \\
                 expectedContent.addAll(wgbsRoddyBamFiles*.finalMethylationDirectory)
             }
 
-            Set<File> foundFiles = roddyBamFiles*.baseDirectory.unique()*.listFiles().flatten() as Set
+            Set<File> foundFiles = roddyBamFiles*.baseDirectory.unique()*.listFiles().flatten() as Set<File>
             if (foundFiles != expectedContent) {
                 List<File> missingFiles = (expectedContent - foundFiles).sort()
                 List<File> excessFiles = (foundFiles - expectedContent).sort()
@@ -756,7 +754,7 @@ ln -s '${newDirectFileName}' \\
             bashScriptToMoveFiles << "#rm -rf ${roddyBamFiles*.baseDirectory.unique().join(" ")}\n"
 
             seqTrackList.each { SeqTrack seqTrack ->
-                dirsToDelete << deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, enableChecks).get("dirsToDelete")
+                dirsToDelete.addAll(deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, enableChecks).get("dirsToDelete"))
             }
         }
     }

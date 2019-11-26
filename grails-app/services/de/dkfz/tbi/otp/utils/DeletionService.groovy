@@ -25,6 +25,9 @@ import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
@@ -35,6 +38,7 @@ import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 
 import java.nio.file.Path
 
+import static de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment.*
 import static org.springframework.util.Assert.*
 
 @SuppressWarnings('Println') //This class is written for scripts, so it needs the output in stdout
@@ -294,6 +298,13 @@ class DeletionService {
                 RoddyQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
             }
             qualityAssessmentMergedPasses*.delete(flush: true)
+
+        } else if (abstractBamFile instanceof SingleCellBamFile) {
+            List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
+            if (qualityAssessmentMergedPasses) {
+                CellRangerQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete()
+            }
+            qualityAssessmentMergedPasses*.delete()
         } else {
             throw new RuntimeException("This BamFile type " + abstractBamFile + " is not supported")
         }
@@ -336,8 +347,8 @@ class DeletionService {
                 deleteQualityAssessmentInfoForAbstractBamFile(processedMergedBamFile)
                 MergingSetAssignment.findAllByBamFile(processedMergedBamFile)*.delete(flush: true)
 
-                dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
-                        SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
+                dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
+                        SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage)))
                 processedMergedBamFile.delete(flush: true)
             }
 
@@ -417,8 +428,8 @@ class DeletionService {
             ProcessedBamFile.findAllByAlignmentPass(alignmentPass).each { ProcessedBamFile processedBamFile ->
                 deleteQualityAssessmentInfoForAbstractBamFile(processedBamFile)
                 Map<String, List<File>> processingDirsToDelete = deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
-                dirsToDelete << processingDirsToDelete["dirsToDelete"]
-                dirsToDeleteWithOtherUser << processingDirsToDelete["dirsToDeleteWithOtherUser"]
+                dirsToDelete.addAll(processingDirsToDelete["dirsToDelete"])
+                dirsToDeleteWithOtherUser.addAll(processingDirsToDelete["dirsToDeleteWithOtherUser"])
 
                 processedBamFile.delete(flush: true)
             }
@@ -460,6 +471,26 @@ class DeletionService {
                 mergingWorkPackage.delete(flush: true)
             }
         }
+        // for SingleCellBamFiles
+        List<SingleCellBamFile> singleCellBamFiles = SingleCellBamFile.createCriteria().list {
+            seqTracks {
+                eq("id", seqTrack.id)
+            }
+        }
+
+        CellRangerMergingWorkPackage crmwp = null
+        singleCellBamFiles.each { SingleCellBamFile bamFile ->
+            crmwp = bamFile.mergingWorkPackage
+            crmwp.bamFileInProjectFolder = null
+            crmwp.save(flush: true)
+            deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
+            dirsToDelete << bamFile.workDirectory
+            bamFile.delete(flush: true)
+            if (!SingleCellBamFile.findByWorkPackage(crmwp)) {
+                crmwp.delete(flush: true)
+            }
+        }
+
         return ["dirsToDelete": dirsToDelete,
                 "dirsToDeleteWithOtherUser": dirsToDeleteWithOtherUser,]
     }
