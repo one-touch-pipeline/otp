@@ -161,6 +161,7 @@ class DeletionService {
      * @param sampleTypeName the name of the sample type the sample belongs to should be deleted
      * @param dataFileList A list of the file name of the datafiles to be deleted
      */
+    /* is currently not used anywhere, the decision if this will be delete entirely will be taken in another issue
     void deleteSample(String projectName, String pid, String sampleTypeName, List<String> dataFileList, StringBuilder log) {
         log << "\n\ndelete ${pid} ${sampleTypeName} of ${projectName}"
 
@@ -178,9 +179,9 @@ class DeletionService {
         SampleType sampleType = SampleType.findByName(sampleTypeName)
         notNull(sampleType, "sample type ${sampleTypeName} not found")
 
-        Sample sample = getSingleSampleForIndividualAndSampleType(individual, sampleType, log)
+        Sample sample = dataSwapService.getSingleSampleForIndividualAndSampleType(individual, sampleType, log)
 
-        List<SeqTrack> seqTracks = getAndShowSeqTracksForSample(sample, log)
+        List<SeqTrack> seqTracks = dataSwapService.getAndShowSeqTracksForSample(sample, log)
         assert !seqTracks || !AlignmentPass.findBySeqTrackInList(seqTracks)
 
         dataSwapService.throwExceptionInCaseOfExternalMergedBamFileIsAttached(seqTracks)
@@ -225,7 +226,7 @@ class DeletionService {
 
         sample.delete(flush: true)
         log << "\n    deleted sample ${sample}"
-    }
+    }*/
 
     /**
      * Removes all fastQC information about the dataFile
