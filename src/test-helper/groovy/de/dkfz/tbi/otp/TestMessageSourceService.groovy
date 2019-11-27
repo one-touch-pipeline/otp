@@ -19,28 +19,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.utils
+package de.dkfz.tbi.otp
 
-import grails.gorm.transactions.Transactional
-import groovy.text.SimpleTemplateEngine
-import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
-import org.springframework.beans.factory.annotation.Autowired
+import grails.util.BuildSettings
 import org.springframework.context.MessageSource
 import org.springframework.context.i18n.LocaleContextHolder
+import org.springframework.context.support.StaticMessageSource
 
-@Transactional
-class MessageSourceService {
+import de.dkfz.tbi.otp.utils.MessageSourceService
 
-    @Autowired
-    PluginAwareResourceBundleMessageSource messageSource
+@SuppressWarnings('JavaIoPackageAccess')
+class TestMessageSourceService extends MessageSourceService {
 
-    MessageSource getMessageSourceInstance() {
-        return messageSource
+    static Locale defaultLocale = LocaleContextHolder.locale
+
+    StaticMessageSource staticMessageSource = new StaticMessageSource()
+
+    static Properties parseMessagePropertiesFile() {
+        File i18nFile = new File(BuildSettings.BASE_DIR, "grails-app/i18n/messages.properties")
+        Properties properties = new Properties()
+        properties.load(new FileInputStream(i18nFile as File))
+        return properties
     }
 
-    String createMessage(String templateName, Map properties = [:]) {
-        assert templateName
-        String template = getMessageSourceInstance().getMessage(templateName, [].toArray(), LocaleContextHolder.locale)
-        return new SimpleTemplateEngine().createTemplate(template).make(properties).toString()
+    TestMessageSourceService() {
+        parseMessagePropertiesFile().each { key, value ->
+            staticMessageSource.addMessage(key.toString(), defaultLocale, value.toString())
+        }
+    }
+
+    @Override
+    MessageSource getMessageSourceInstance() {
+        return staticMessageSource
     }
 }
