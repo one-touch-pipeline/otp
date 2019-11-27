@@ -26,140 +26,138 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="individual.insert.title"/></title>
-    <asset:javascript src="pages/individual/insert/addIndividual.js"/>
+    <asset:javascript src="pages/individual/insert/functions.js"/>
+    <asset:javascript src="common/MultiInputField.js"/>
+
 </head>
 <body>
     <div class="body">
+    <g:render template="/templates/messages"/>
+
     <g:if test="${projects}">
         <h1><g:message code="individual.insert.title"/></h1>
-        <form id="add-individual-form" method="POST">
-            <div class="dialog">
-                <table>
+        <g:form controller="individual" action="save">
+            <div>
+                <table class="key-value-table">
                     <tbody>
-                        <tr class="prop">
-                            <td valign="top" class="name">
-                                <label for="pid"><g:message code="individual.insert.ichipPid"/></label>
-                            </td>
-                            <td valign="top" class="value ${hasErrors(bean:individual,field:'pid','errors')}">
-                                <input type="text" id="pid" name="pid" />
+                        <tr>
+                            <td>
+                                <label for="identifier"><g:message code="individual.insert.identifier"/></label>
                             </td>
                             <td>
+                                <input type="text" id="identifier" name="identifier" value="${cmd?.identifier}"/>
                             </td>
                         </tr>
-                        <tr class="prop">
-                            <td valign="top" class="name">
+                        <tr>
+                            <td>
                                 <label for="project"><g:message code="individual.insert.project"/></label>
                             </td>
-                            <td valign="top" class="value ${hasErrors(bean:individual,field:'project','errors')}">
-                                <g:select name="project" from="${projects}" optionKey="id" id="project" noSelection="[null: '']" />
-                            </td>
                             <td>
+                                <g:select name="project.id" from="${projects}" optionKey="id" id="project" noSelection="[null: '']" value="${cmd?.project}"/>
                             </td>
                         </tr>
-                        <tr class="prop">
-                            <td valign="top" class="name">
-                                <label for="mockPid"><g:message code="individual.insert.projectPid"/></label>
-                            </td>
-                            <td valign="top" class="value ${hasErrors(bean:individual,field:'mockPid','errors')}">
-                                <input type="text" id="mockPid" name="mockPid" />
+                        <tr>
+                            <td>
+                                <label for="alias"><g:message code="individual.insert.alias"/></label>
                             </td>
                             <td>
+                                <input type="text" id="alias" name="alias" value="${cmd?.alias}"/>
                             </td>
                         </tr>
-                        <tr class="prop">
-                            <td valign="top" class="name">
-                                <label for="mockFullName"><g:message code="individual.insert.mockFullName"/></label>
-                            </td>
-                            <td valign="top" class="value ${hasErrors(bean:individual,field:'mockFullName','errors')}">
-                                <input type="text" id="mockFullName" name="mockFullName" />
+                        <tr>
+                            <td valign="top">
+                                <label for="displayedIdentifier"><g:message code="individual.insert.displayedIdentifier"/></label>
                             </td>
                             <td>
+                                <input type="text" id="displayedIdentifier" name="displayedIdentifier" value="${cmd?.displayedIdentifier}"/>
                             </td>
                         </tr>
-                        <tr class="prop">
-                            <td valign="top" class="name">
+                        <tr>
+                            <td>
                                 <label for="internIdentifier"><g:message code="individual.insert.internIdentifier"/></label>
                             </td>
-                            <td valign="top" class="value ${hasErrors(bean:individual,field:'internIdentifier','errors')}">
-                                <input type="text" id="internIdentifier" name="internIdentifier" />
-                            </td>
-                            <td valign="top" class="optional">
-                                <g:message code="otp.optional"/>
+                            <td>
+                                <input type="text" id="internIdentifier" name="internIdentifier" value="${cmd?.internIdentifier}"/>
+                                <i><g:message code="otp.optional"/></i>
                             </td>
                         </tr>
-                        <tr class="prop">
-                            <td valign="top" class="name">
+                        <tr>
+                            <td>
                                 <label for="individualType"><g:message code="individual.insert.individualType"/></label>
                             </td>
-                            <td valign="top" class="value ${hasErrors(bean:individual,field:'individualType','errors')}">
-                                <g:select name="type" from="${individualTypes}" id="individualType" />
-                            </td>
                             <td>
-                            </td>
-                        </tr>
-                        <tr class="sample">
-                            <td valign="top" class="name">
-                                <label for="sample"><g:message code="individual.insert.sample"/></label>
-                            </td>
-                            <td valign="top" class="sampleType">
-                                <g:select name="sampleType" from="${sampleTypes}" class="dropDown" noSelection="[(null): '']" />
-                            </td>
-                            <td>
-                            </td>
-                        </tr>
-                        <tr class="sampleIdentifier">
-                            <td valign="top" class="name">
-                                <label for="sampleIdentifier"><g:message code="individual.insert.sampleIdentifier"/></label>
-                            </td>
-                            <td valign="top" class="value ${hasErrors(bean:individual,field:'sampleIdentifier','errors')}">
-                                <input type="text" name="sampleIdentifier" class="newSampleIdentifier" />
-                                <div class="newSampleIdentifier">
-                                    <button class="buttons"><g:message code="individual.insert.newSampleIdentifier"/></button>
-                                </div>
-                            </td>
-                            <td>
-                            </td>
-                        </tr>
-                        <tr class="sample hidden">
-                            <td valign="top" class="name">
-                                <label for="sample"><g:message code="individual.insert.sample"/></label>
-                            </td>
-                            <td valign="top" class="sampleType">
-                                <g:select name="sampleType" from="${sampleTypes}" class="dropDown" noSelection="[null: '']" />
-                            </td>
-                            <td>
-                            </td>
-                        </tr>
-                        <tr class="sampleIdentifier hidden">
-                            <td valign="top" class="name">
-                                <label for="sampleIdentifier"><g:message code="individual.insert.sampleIdentifier"/></label>
-                            </td>
-                            <td valign="top" class="value ${hasErrors(bean:individual,field:'sampleIdentifier','errors')}">
-                                <input type="text" name="sampleIdentifier" />
-                                <div class="newSampleIdentifier">
-                                    <button class="buttons"><g:message code="individual.insert.newSampleIdentifier"/></button>
-                                </div>
-                            </td>
-                            <td>
-                            </td>
-                        </tr>
-                        <tr class="newSample">
-                            <td>
-                                <div class="addSample"><button class="buttons"><g:message code="individual.insert.newSample"/></button></div>
+                                <g:select name="type" from="${individualTypes}" id="individualType" value="${cmd?.type}"/>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
-            <div class="buttons">
+                <br>
+                <h3><g:message code="individual.insert.addSample"/></h3>
+                <table class="key-value-table">
+                    <thead>
+                        <tr class="sample hidden">
+                            <th colspan="2">
+                                New Sample
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="sample hidden">
+                            <td>
+                                <label for="sampleType"><g:message code="individual.insert.sampleType"/></label>
+                            </td>
+                            <td>
+                                <g:select name="sampleType" from="${sampleTypes}" class="dropDown" noSelection="[null: '']" />
+                            </td>
+                        </tr>
+                        <tr class="sampleIdentifier hidden">
+                            <td>
+                                <label for="sampleIdentifier"><g:message code="individual.insert.sampleIdentifier"/></label>
+                            </td>
+                            <td class="multi-input-field">
+                                <div class="field">
+                                    <g:textField list="sampleIdentifiersList" name="sampleIdentifiers"/>
+                                    <button type="button" class="add-field">+</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        ${cmd?.samples}
+                        <g:each in="${cmd?.samples ?: []}" var="sample">
+                            <tr class="sample">
+                                <td>
+                                    <label for="sampleType"><g:message code="individual.insert.sampleType"/></label>
+                                </td>
+                                <td>
+                                    <g:select name="sampleType" from="${sampleTypes}" class="dropDown" noSelection="[null: '']" value="${sample.sampleType}"/>
+                                </td>
+                            </tr>
+                            <tr class="sampleIdentifier">
+                                <td>
+                                    <label for="sampleIdentifier"><g:message code="individual.insert.sampleIdentifier"/></label>
+                                </td>
+                                <td class="multi-input-field">
+                                    <g:each in="${sample.sampleIdentifiers ?: [""]}" var="sampleIdentifier" status="i">
+                                        <div class="field">
+                                            <g:textField list="sampleIdentifiersList" name="sampleIdentifiers" value="${sampleIdentifier}" id="sampleIdentifier"/>
+                                            <g:if test="${i == 0}">
+                                                <button type="button" class="add-field">+</button>
+                                            </g:if>
+                                            <g:else>
+                                                <button type="button" class="remove-field">-</button>
+                                            </g:else>
+                                        </div>
+                                    </g:each>
+                                </td>
+                            </tr>
+                        </g:each>
+                    </tbody>
+                </table>
+                <button type="button" class="add-button"><g:message code="individual.insert.newSample"/></button>
                 <input type="submit" value="${g.message(code: 'individual.insert.save')}"/>
+                <g:message code="individual.insert.redirect"/><input type="checkbox" name="checkRedirect">
             </div>
-        </form>
-    <asset:script>
-        $(function() {
-            $.otp.addIndividual.register();
-        });
-    </asset:script>
+        </g:form>
     </g:if>
     <g:else>
         <g:render template="/templates/noProject"/>

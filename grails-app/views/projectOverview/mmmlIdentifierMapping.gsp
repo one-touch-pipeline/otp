@@ -35,7 +35,7 @@
             <otp:dataTable
                 codes="${[
                     'projectOverview.index.dataBaseID',
-                    'individual.insert.mockFullName',
+                    'individual.insert.displayedIdentifier',
                     'individual.insert.internIdentifier',
                 ] }"
                 id="overviewTableMMMLMappingId"/>

@@ -20,4 +20,34 @@
  * SOFTWARE.
  */
 
-//= require ../editsamples.js
+/*jslint browser: true */
+/*global $ */
+
+$(function(){
+    "use strict";
+
+    $(".add-button").click(function (event) {
+        event.preventDefault();
+        // Subtract the hidden element
+        var existingSamples = $("tr.sample").not(".hidden");
+        // also copy event handlers on clone
+        var sampleBoxes = $("tr.hidden").clone(true, true).removeClass("hidden");
+        sampleBoxes.insertAfter($(".sampleIdentifier:last"));
+        sampleBoxes.find("select").attr("name", "samples["+existingSamples.length+"].sampleType");
+        sampleBoxes.find("input").attr("name", "samples["+existingSamples.length+"].sampleIdentifiers");
+    });
+
+    var lastPid = $("#identifier").val();
+    $("#identifier").keyup(function() {
+        var pid = $("#identifier").val();
+        var mockPid = $("#alias").val();
+        var mockFullName = $("#displayedIdentifier").val();
+        if (lastPid == mockPid) {
+            $("#alias").val(pid);
+        }
+        if (lastPid == mockFullName) {
+            $("#displayedIdentifier").val(pid);
+        }
+        lastPid = $("#identifier").val();
+    });
+});

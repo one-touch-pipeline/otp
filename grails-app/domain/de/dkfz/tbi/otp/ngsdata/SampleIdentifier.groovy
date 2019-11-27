@@ -36,22 +36,21 @@ class SampleIdentifier implements Entity {
     ]
 
     static constraints = {
-        name(unique: true, nullable: false, blank: false, minSize: 3,
-            validator: { String val, SampleIdentifier obj ->
-                //should neither start nor end with a space
-                if (val.startsWith(' ') || val.endsWith(' ')) {
-                    return false
-                }
-                String regexFromProcessingOption
-                // Using a new session prevents Hibernate from trying to auto-flush this object, which would fail
-                // because it is still in validation.
-                SessionUtils.withNewSession { session ->
-                    regexFromProcessingOption = ProcessingOptionService.findOptionSafe(OptionName.VALIDATOR_SAMPLE_IDENTIFIER_REGEX, null, obj.sample?.project)
-                }
-                return val ==~ (regexFromProcessingOption ?: '.+')
+        name unique: true, nullable: false, blank: false, minSize: 3, validator: { String val, SampleIdentifier obj ->
+            //should neither start nor end with a space
+            if (val.startsWith(' ') || val.endsWith(' ')) {
+                return 'untrimmed'
             }
-        )
-        sample()
+            String regexFromProcessingOption
+            // Using a new session prevents Hibernate from trying to auto-flush this object, which would fail
+            // because it is still in validation.
+            SessionUtils.withNewSession { session ->
+                regexFromProcessingOption = ProcessingOptionService.findOptionSafe(OptionName.VALIDATOR_SAMPLE_IDENTIFIER_REGEX, null, obj.sample?.project)
+            }
+            if (!(val ==~ (regexFromProcessingOption ?: '.+'))) {
+                return 'unmatching'
+            }
+        }
     }
 
     Project getProject() {

@@ -97,21 +97,18 @@ class SampleIdentifierSpec extends Specification implements DataTest {
         TestCase.assertValidateError(sampleIdentifier2, 'name', 'unique', CORRECT_NAME)
     }
 
-    void "test validate, when name start with space, should fail"() {
+    void "test validate, when name is untrimmed, should fail"() {
         given:
-        final String name = ' aname'
         sampleIdentifier.name = name
 
         expect:
-        TestCase.assertValidateError(sampleIdentifier, 'name', 'validator.invalid', name)
-    }
+        TestCase.assertValidateError(sampleIdentifier, 'name', 'untrimmed', name)
 
-    void "test validate, when name ends with space, should fail"() {
-        given:
-        final String name = 'aname '
-        sampleIdentifier.name = name
-
-        expect:
-        TestCase.assertValidateError(sampleIdentifier, 'name', 'validator.invalid', name)
+        where:
+        name <<  [
+                ' aname',
+                'aname ',
+                ' aname ',
+        ]
     }
 }

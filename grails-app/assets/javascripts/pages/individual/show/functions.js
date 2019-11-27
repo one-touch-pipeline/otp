@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,29 +20,13 @@
  * SOFTWARE.
  */
 
-$(function () {
+/*jslint browser: true */
+/*global $ */
+
+$(function(){
     "use strict";
-    var wrapper = $(".multi-input-field");
-    wrapper.on("click", ".add-field", function (e) {
-        e.preventDefault();
 
-        var parent = $(e.target).parents(".multi-input-field");
-        parent.append("<div class=\"field\">");
-
-        var div = parent.children("div.field:last");
-        div.append($(e.target).siblings("input:first, select:first, textarea:first").clone().val(""));
-        div.append("<button class=\"remove-field\">-</button>");
-    });
-
-    wrapper.on("click", ".remove-field", function (e) {
-        e.preventDefault();
-        $(e.target).parent("div.field").remove();
+    $(".sample-identifier-edit-form").on("reset", function (e) {
+        $.otp.multiInputField.cancel($(this).find($(".multi-input-field")));
     });
 });
-
-$.otp.multiInputField = {
-    cancel: function (target) {
-        "use strict";
-        target.find($(".remove-field").click());
-    }
-};

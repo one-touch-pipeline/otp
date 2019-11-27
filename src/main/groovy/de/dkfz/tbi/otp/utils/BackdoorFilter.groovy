@@ -35,6 +35,7 @@ import org.springframework.web.filter.GenericFilterBean
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.OtpProperty
+import de.dkfz.tbi.otp.security.Role
 
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
@@ -71,7 +72,7 @@ class BackdoorFilter extends GenericFilterBean {
      * The filter injects a user with the ROLE_ADMIN authority
      */
     private List<GrantedAuthority> authorities = [
-            new SimpleGrantedAuthority(de.dkfz.tbi.otp.security.Role.ROLE_ADMIN),
+            new SimpleGrantedAuthority(Role.ROLE_ADMIN),
     ]
 
     @Override

@@ -28,11 +28,14 @@
     <title>${individual.mockFullName}</title>
     <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="modules/editorSwitch.js"/>
-    <asset:javascript src="modules/editSamples.js"/>
+    <asset:javascript src="pages/individual/show/functions.js"/>
+    <asset:javascript src="common/MultiInputField.js"/>
+    <asset:javascript src="taglib/Expandable.js"/>
 </head>
 <body>
     <div class="body">
         <h1><g:message code="individual.show.header"/></h1>
+        <g:render template="/templates/messages"/>
         <br>
         <div class="individual-grid-wrapper">
             <div id="individualDetailTbl" class="grid-element individual-details tableBlock">
@@ -101,27 +104,27 @@
             </div>
         </div>
 
-        <h2 id="samples"><g:message code="individual.show.samples"/></h2>
+        <h2><g:message code="individual.show.samples"/></h2>
         <div class="tableBlock">
             <table>
                 <g:each var="sample" in="${individual.samples}">
                     <tr>
                         <td class="myKey">${sample.sampleType.name}</td>
-                        <td class="myValue sample">
+                        <td class="myValue">
                             <sec:access expression="hasRole('ROLE_OPERATOR') or ${!projectBlacklisted}">
-                                <otp:editorSwitch
-                                        roles="ROLE_OPERATOR"
-                                        template="sampleIdentifier"
-                                        link="${g.createLink(controller: 'individual', action: 'updateSamples', id: individual.id)}"
-                                        value="${sample.sampleIdentifiers}"/>
-                                <input type="hidden" name="sampleIdentifiersIds" value="${sample.sampleIdentifiers.id}"/>
+                                ${sample.sampleIdentifiers.join(", ")}
+                            </sec:access>
+                            <sec:access expression="hasRole('ROLE_OPERATOR')">
+                                <otp:expandable value="${g.message(code: 'individual.show.updateSampleIdentifier')}" collapsed="true">
+                                    <g:render template="editorSampleIdentifier" model="[sample: sample]"></g:render>
+                                </otp:expandable>
                             </sec:access>
                         </td>
                     </tr>
                 </g:each>
                 <tr>
                     <td class="myKey"></td>
-                    <td class="myValue sample">
+                    <td class="myValue">
                         <otp:editorSwitch
                             roles="ROLE_OPERATOR"
                             template="newValue"

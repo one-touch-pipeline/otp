@@ -582,9 +582,62 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         e.message.contains(message)
 
         where:
-        property           | value        || message
+        property           | value             || message
         'projectName'      | 'otherProject'    || 'The sample identifier already exist, but is connected to project'
         'pid'              | 'otherPid'        || 'The sample identifier already exist, but is connected to individual'
         'sampleTypeDbName' | 'otherSampleType' || 'The sample identifier already exist, but is connected to sample type'
+    }
+
+    void "check if updateSampleIdentifierName, save new name of sample identifier"() {
+        given:
+        SampleIdentifier sampleIdentifier = createSampleIdentifier()
+        String name = "New Name"
+        SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
+
+        when:
+        sampleIdentifierService.updateSampleIdentifierName(sampleIdentifier, name)
+
+        then:
+        sampleIdentifier.name == name
+    }
+
+    void "check if createSampleIdentifier, creates a new sample identifier with sample and name"() {
+        given:
+        String name = "New Name"
+        Sample sample = createSample()
+        SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
+
+        when:
+        SampleIdentifier newSampleIdentifier = sampleIdentifierService.createSampleIdentifier(name, sample)
+
+        then:
+        newSampleIdentifier.name == name
+        newSampleIdentifier.sample == sample
+    }
+
+    void "check if getOrCreateSampleIdentifier, creates a new sample identifier when params not don't match"() {
+        given:
+        SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
+        String name = "New name"
+        Sample sample = createSample()
+
+        when:
+        SampleIdentifier newSampleIdentifier = sampleIdentifierService.getOrCreateSampleIdentifier(name, sample)
+
+        then:
+        newSampleIdentifier.name == name
+        newSampleIdentifier.sample == sample
+    }
+
+    void "check if getOrCreateSampleIdentifier, returns the existing sample identifier when params match"() {
+        given:
+        SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
+        SampleIdentifier existingSampleIdentifier = createSampleIdentifier()
+
+        when:
+        SampleIdentifier oldSampleIdentifier = sampleIdentifierService.getOrCreateSampleIdentifier(existingSampleIdentifier.name, existingSampleIdentifier.sample)
+
+        then:
+        existingSampleIdentifier == oldSampleIdentifier
     }
 }

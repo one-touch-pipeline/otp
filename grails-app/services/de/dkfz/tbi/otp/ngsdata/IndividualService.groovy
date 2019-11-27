@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
 import org.joda.time.DateTime
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
@@ -31,7 +30,6 @@ import de.dkfz.tbi.otp.CommentService
 
 @Transactional
 class IndividualService {
-    SpringSecurityService springSecurityService
     SampleIdentifierService sampleIdentifierService
     ProjectService projectService
     CommentService commentService
@@ -213,19 +211,19 @@ class IndividualService {
     /**
      * Creates a new Individual together with depending objects
      *
-     * @param project The Project for which the new Individual should be created
-     * @param command IndividualCommand holding data of objects to be saved
+     * @param cmd IndividualCommand holding data of objects to be saved
      * @return created Individual
      * @throws IndividualCreationException
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Individual createIndividual(Project project, IndividualCommand command, List<SamplesParser> parsedSamples) throws IndividualCreationException {
+    Individual createIndividual(IndividualCommand cmd) throws IndividualCreationException {
         Individual individual = new Individual(
-                pid: command.pid,
-                mockPid: command.mockPid,
-                mockFullName: command.mockFullName,
-                internIdentifier: command.internIdentifier,
-                type: command.individualType, project: project
+                pid: cmd.identifier,
+                mockPid: cmd.alias,
+                mockFullName: cmd.displayedIdentifier,
+                internIdentifier: cmd.internIdentifier,
+                type: cmd.type,
+                project: cmd.project,
         )
         if (!individual.validate()) {
             throw new IndividualCreationException("Individual does not validate")
@@ -233,7 +231,7 @@ class IndividualService {
         if (!individual.save(flush: true)) {
             throw new IndividualCreationException("Individual could not be saved.")
         }
-        createOrUpdateSamples(individual, parsedSamples)
+        createSamples(individual, cmd.samples)
         return individual
     }
 
@@ -270,31 +268,24 @@ class IndividualService {
     }
 
     /**
-     * Creates and updates all given aspects of Samples
-     *
-     * The Samples are handed over as List of {@link SamplesParser}.
-     * Then there is extracted the information, which is
-     * for new Samples the identifier and the type and for
-     * Samples to be updated the id as well. As the parameter
-     * String can be mixed from new and to be updated the method
-     * handles both cases.
+     * Creates Samples
+     * The Samples are handed over as List of {@link SampleCommand}.
      *
      * @param individual The {@link Individual} the Samples are to be associated
-     * @param parsedSamples List of SamplesParser containing the Samples
+     * @param samples List of SampleCommand containing the Samples
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void createOrUpdateSamples(Individual individual, List<SamplesParser> parsedSamples) {
-        parsedSamples.each { SamplesParser parsedSample ->
-            SampleType sampleType = createSampleType(parsedSample.type)
+    void createSamples(Individual individual, List<SampleCommand> samples) {
+        samples.each { SampleCommand sampleCommand ->
+            SampleType sampleType = createSampleType(sampleCommand.sampleType)
             if (!sampleType) {
                 throw new IndividualCreationException("SampleType could not be found nor created.")
             }
             Sample sample = createSample(individual, sampleType)
-            for (entry in parsedSample.updateEntries) {
-                updateSampleIdentifier(entry.value, entry.key as long)
-            }
-            parsedSample.newEntries.each { String sampleIdentifier ->
-                createSampleIdentifier(sampleIdentifier, sample)
+            sampleCommand.sampleIdentifiers.each { String sampleIdentifier ->
+                if (sampleIdentifier.trim() != "") {
+                    sampleIdentifierService.getOrCreateSampleIdentifier(sampleIdentifier, sample)
+                }
             }
         }
     }
@@ -318,37 +309,6 @@ class IndividualService {
             sample.save(flush: true)
         }
         return sample
-    }
-
-    /**
-     * Creates a new {@link SampleIdentifier} if not existing, otherwise the existent {@link SampleIdentifier} is returned
-     * @param name Name of the new {@link Sample}
-     * @param sample {@link Sample} to be associated
-     * @return the {@link SampleIdentifier}
-     */
-    private SampleIdentifier createSampleIdentifier(String name, Sample sample) {
-        SampleIdentifier sampleIdentifier = SampleIdentifier.findByNameAndSample(name, sample)
-        if (!sampleIdentifier) {
-            sampleIdentifier = new SampleIdentifier(name: name, sample: sample)
-            sampleIdentifier.save(flush: true)
-        }
-        return sampleIdentifier
-    }
-
-    /**
-     * Updates the {@link SampleIdentifier} identified by the given id
-     * @param name Name of the {@link Sample} to be updated
-     * @param sample Sample to be associated
-     * @param id The id of the {@link SampleIdentifier} to be updated
-     * @return the updated {@link SampleIdentifier}
-     */
-    private SampleIdentifier updateSampleIdentifier(String name, long id) {
-        SampleIdentifier sampleIdentifier = SampleIdentifier.get(id)
-        if (sampleIdentifier) {
-            sampleIdentifier.name = name
-            sampleIdentifier.save(flush: true)
-        }
-        return sampleIdentifier
     }
 
     /**

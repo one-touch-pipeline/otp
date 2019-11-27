@@ -22,14 +22,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
+import grails.validation.Validateable
 import grails.validation.ValidationException
 import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
-import org.springframework.validation.FieldError
-
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
+
 
 class IndividualController {
 
@@ -38,10 +39,6 @@ class IndividualController {
     ProjectService projectService
     CommentService commentService
     SampleIdentifierService sampleIdentifierService
-
-    def display() {
-        redirect(action: "show", id: params.id)
-    }
 
     def show() {
         Individual individual
@@ -102,28 +99,28 @@ class IndividualController {
         List<Project> projects = projectService.getAllProjects()
         List<Individual.Type> individualTypes = Individual.Type.values()
         List<String> sampleTypes = individualService.getSampleTypeNames()
-        [projects: projects, individualTypes: individualTypes, sampleTypes: sampleTypes]
+        return [
+                projects       : projects,
+                individualTypes: individualTypes,
+                sampleTypes    : sampleTypes,
+                cmd            : flash.cmd as IndividualCommand,
+        ]
     }
 
     def save(IndividualCommand cmd) {
         if (cmd.hasErrors()) {
-            FieldError errors = cmd.errors.getFieldError()
-            Map data = [
-                    success: false,
-                    error  : "'${errors.rejectedValue}' is not a valid value for '${errors.field}'. Error code: '${errors.field}' already exists.",
-            ]
-            render data as JSON
-            return
-        }
-
-        try {
-            List<SamplesParser> parsedSamples = new SamplesParser().insertSamplesFromJSON(cmd.samples)
-            Individual individual = individualService.createIndividual(projectService.getProject(cmd.project), cmd, parsedSamples)
-            Map data = [success: true, id: individual.id]
-            render data as JSON
-        } catch (Throwable e) {
-            Map data = [error: e.message]
-            render data as JSON
+            flash.cmd = cmd
+            flash.message = new FlashMessage(g.message(code: "individual.update.error") as String, cmd.errors)
+            redirect(action: "insert")
+        } else {
+            Individual individual = individualService.createIndividual(cmd)
+            if (cmd.checkRedirect) {
+                redirect(action: "show", id: individual.id)
+            }
+            else {
+                redirect(action: "insert", id: params.individual.id)
+            }
+            flash.message = new FlashMessage(g.message(code: "individual.update.create.success") as String)
         }
     }
 
@@ -140,26 +137,6 @@ class IndividualController {
             data.put("success", true)
         } catch (IndividualUpdateException e) {
             data.put("error", g.message(code: "individual.update.error"))
-        }
-        render data as JSON
-    }
-
-    def updateSamples(UpdateSamplesCommand cmd) {
-        Individual individual = individualService.getIndividual(cmd.id)
-        if (!individual) {
-            Map data = [error: g.message(code: "individual.update.notFound", args: [cmd.id])]
-            render data as JSON
-            return
-        }
-        Map data = [:]
-        try {
-            SamplesParser parsedSamples = new SamplesParser().modifySamplesFromJSON(cmd.samples)
-            individualService.createOrUpdateSamples(individual, [parsedSamples])
-            data.put("success", true)
-        } catch (IndividualUpdateException e) {
-            data.put("error", g.message(code: "individual.update.error"))
-        } catch (ValidationException e) {
-            data.put("error", e.message)
         }
         render data as JSON
     }
@@ -187,6 +164,27 @@ class IndividualController {
         def dataToRender = [date: individual.comment.modificationDate.format('EEE, d MMM yyyy HH:mm'), author: individual.comment.author]
         render dataToRender as JSON
     }
+
+    def editNewSampleIdentifier(UpdateSampleCommand cmd) {
+        if (cmd.hasErrors()) {
+            flash.cmd = cmd
+            flash.message = new FlashMessage(g.message(code: "individual.update.error") as String, cmd.errors)
+        } else {
+            try {
+                cmd.editedSampleIdentifiers.each { EditedSampleIdentifierCommand editedSampleIdentifierCommand ->
+                    sampleIdentifierService.updateSampleIdentifierName(editedSampleIdentifierCommand.sampleIdentifier, editedSampleIdentifierCommand.name)
+                }
+                cmd.newIdentifiersNames.each { String name ->
+                    sampleIdentifierService.createSampleIdentifier(name, cmd.sample)
+                }
+                flash.message = new FlashMessage(g.message(code: "individual.update.create.success") as String)
+            }
+            catch (ValidationException e) {
+                flash.message = new FlashMessage(g.message(code: "individual.update.error") as String, e.errors)
+            }
+        }
+        redirect(action: "show", id: cmd.sample.individual.id)
+    }
 }
 
 @TupleConstructor
@@ -207,28 +205,40 @@ enum IndividualColumn {
         return values()[column]
     }
 }
-class IndividualCommand {
+class IndividualCommand implements Validateable {
     IndividualService individualService
-    ProjectService projectService
 
-    String pid
-    Long project
-    String mockPid
-    String mockFullName
+    String identifier
+    Project project
+    String alias
+    String displayedIdentifier
     String internIdentifier
-    Individual.Type individualType
-    String samples
+    Individual.Type type
+    List<SampleCommand> samples
+    boolean checkRedirect
 
     static constraints = {
-        pid(blank: false, validator: { val, obj ->
-            return val && !obj.individualService.individualExists(val)
+        identifier(blank: false, validator: { val, obj ->
+            if (!(val && !obj.individualService.individualExists(val))) {
+                return 'alreadyExists'
+            }
         })
-        mockPid(blank: false)
-        mockFullName(blank: false)
+        alias(blank: false)
+        displayedIdentifier(blank: false)
         internIdentifier(nullable: true, blank: true)
-        project(min: 0L, validator: { val, obj ->
-            return val && (obj.projectService.getProject(val) != null)
-        })
+    }
+}
+
+class SampleCommand {
+    String sampleType
+    List<String> sampleIdentifiers
+
+    void setSampleIdentifiers(List<String> sampleIdentifiers) {
+        this.sampleIdentifiers = sampleIdentifiers.findAll { it && it != "" }
+    }
+
+    void setSampleType(String sampleType) {
+        this.sampleType = sampleType.findAll { it && it != "" }
     }
 }
 
@@ -248,93 +258,6 @@ class UpdateFieldCommand {
     }
 }
 
-class RetrieveSampleIdentifiersCommand {
-    IndividualService individualService
-
-    Long id
-    String sampleType
-
-    static constraints = {
-        id(min: 0L, validator: { val, obj ->
-            return val && (obj.individualService.getIndividual(val) != null)
-        })
-        sampleType(blank: false)
-    }
-}
-
-class UpdateSamplesCommand {
-    IndividualService individualService
-
-    Long id
-    String samples
-
-    static constraints = {
-        id(min: 0L, validator: { val, obj ->
-            return val && (obj.individualService.getIndividual(val) != null)
-        })
-        samples(blank: false)
-    }
-}
-
-class SamplesParser {
-    Map<String, String> updateEntries = [:]
-    List<String> newEntries = []
-    String type
-
-    SamplesParser modifySamplesFromJSON(String json) {
-        if (!json) {
-            return null
-        }
-        def slurper = new JsonSlurper()
-        SamplesParser samplesParser = new SamplesParser()
-        slurper.parseText(json).eachWithIndex { value, index ->
-            if (index == 0) {
-                samplesParser.type = value.type
-            }
-            if (!isValues(value)) {
-                return // next Sample
-            }
-            if (value.id) {
-                samplesParser.updateEntries.put(value.id.get(0), value.identifier.get(0))
-            } else {
-                samplesParser.newEntries << value.identifier.get(0)
-            }
-        }
-        return samplesParser
-    }
-
-    List<SamplesParser> insertSamplesFromJSON(String json) {
-        if (!json) {
-            return null
-        }
-        def slurper = new JsonSlurper()
-        List<SamplesParser> parsedSamples = []
-        SamplesParser samplesParser
-        slurper.parseText(json).eachWithIndex { value, index ->
-            if (!isValues(value)) {
-                return // next Sample
-            }
-            if (index == 0 || !(parsedSamples.get(index - 1).type.equals(value.type))) {
-                samplesParser = new SamplesParser()
-                samplesParser.type = value.type
-                parsedSamples.add(samplesParser)
-            }
-            value.identifier.each { String v ->
-                samplesParser.newEntries << v
-            }
-        }
-        return parsedSamples
-    }
-
-    private boolean isValues(Map value) {
-        boolean hasType = value.type
-        boolean hasIdentifier = value.identifier.any { !it.empty }
-
-        assert hasType == hasIdentifier : "Please fill in both fields: Sample Type and Sample Identifier"
-
-        return hasType
-    }
-}
 /**
  * Class describing the various filtering to do on Individual page.
  */
@@ -388,5 +311,24 @@ class IndividualFiltering {
             }
         }
         return filtering
+    }
+
+}
+class UpdateSampleCommand implements Validateable {
+    List<EditedSampleIdentifierCommand> editedSampleIdentifiers
+    Sample sample
+    List<String> newIdentifiersNames
+
+    void setNewIdentifiersNames(List<String> newIdentifiersNames) {
+        this.newIdentifiersNames = newIdentifiersNames.findAll { it && it != "" }
+    }
+}
+
+class EditedSampleIdentifierCommand implements Validateable {
+    String name
+    SampleIdentifier sampleIdentifier
+
+    static constraints = {
+        name(blank: false)
     }
 }

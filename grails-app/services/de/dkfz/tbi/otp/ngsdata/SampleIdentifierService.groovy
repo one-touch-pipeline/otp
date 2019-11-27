@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.ObjectError
 
 import de.dkfz.tbi.otp.OtpRuntimeException
@@ -240,5 +241,28 @@ class SampleIdentifierService {
                 .replaceAll(/ *${columnDelimiter} */, columnDelimiter)
                 .replaceAll(/ +/, " ")
                 .replaceAll(/ *\n */, "\n")
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateSampleIdentifierName (SampleIdentifier sampleIdentifier, String name) {
+        sampleIdentifier.name = name
+        sampleIdentifier.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    SampleIdentifier createSampleIdentifier(String name, Sample sample) {
+        SampleIdentifier sampleIdentifier = new SampleIdentifier(name: name, sample: sample)
+        sampleIdentifier.save(flush: true)
+        return sampleIdentifier
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    SampleIdentifier getOrCreateSampleIdentifier(String name, Sample sample) {
+        SampleIdentifier sampleIdentifier = SampleIdentifier.findByNameAndSample(name, sample)
+        if (!sampleIdentifier) {
+            sampleIdentifier = new SampleIdentifier(name: name, sample: sample)
+            sampleIdentifier.save(flush: true)
+        }
+        return sampleIdentifier
     }
 }
