@@ -65,15 +65,15 @@ class RestartHandlerServiceSpec extends Specification implements DataTest {
                     0 * _
                 }
         )
-        ProcessingError error = DomainFactory.createProcessingError()
+        ProcessingStep processingStep = DomainFactory.createProcessingStep()
         Job job = GroovyMock(Job) {
             _ * getLog() >> Mock(Logger) {
                 _ * debug(_)
             }
-            _ * getProcessingStep() >> error.processingStep
+            _ * getProcessingStep() >> processingStep
         }
         if (hasJobErrorDefinitions) {
-            DomainFactory.createJobErrorDefinition([jobDefinitions: [error.processingStep.jobDefinition]])
+            DomainFactory.createJobErrorDefinition([jobDefinitions: [processingStep.jobDefinition]])
         }
 
         when:

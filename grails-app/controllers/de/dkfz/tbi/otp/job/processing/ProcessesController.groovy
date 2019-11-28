@@ -291,7 +291,7 @@ class ProcessesController {
         Map dataToRender = cmd.dataToRender()
         Process process = processService.getProcess(params.id as long)
         List<ProcessingStep> steps = processService.getAllProcessingSteps(process, cmd.iDisplayLength, cmd.iDisplayStart, "id", cmd.sortOrder)
-        dataToRender.iTotalRecords = processService.getNumberOfProcessessingSteps(process)
+        dataToRender.iTotalRecords = processService.getNumberOfProcessingSteps(process)
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
         PromiseList promiseList = new PromiseList()
         def auth = SecurityContextHolder.context.authentication

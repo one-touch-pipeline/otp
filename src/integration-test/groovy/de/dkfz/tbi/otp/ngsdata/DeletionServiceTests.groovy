@@ -322,11 +322,10 @@ class DeletionServiceTests implements UserAndRoles {
     @Test
     void testDeleteRun() throws Exception {
         setupData()
-        StringBuilder outputStringBuilder = new StringBuilder()
         Run run = DomainFactory.createRun()
         DataFile dataFile = DomainFactory.createDataFile(run: run)
 
-        deletionService.deleteRun(run, outputStringBuilder)
+        deletionService.deleteRun(run)
 
         assert !Run.get(run.id)
         assert !DataFile.get(dataFile.id)
@@ -335,11 +334,10 @@ class DeletionServiceTests implements UserAndRoles {
     @Test
     void testDeleteRunByName() throws Exception {
         setupData()
-        StringBuilder outputStringBuilder = new StringBuilder()
         Run run = DomainFactory.createRun()
         DataFile dataFile = DomainFactory.createDataFile(run: run)
 
-        deletionService.deleteRunByName(run.name, outputStringBuilder)
+        deletionService.deleteRunByName(run.name)
 
         assert !Run.get(run.id)
         assert !DataFile.get(dataFile.id)

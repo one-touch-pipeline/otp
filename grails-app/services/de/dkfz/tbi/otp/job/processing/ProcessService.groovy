@@ -22,14 +22,9 @@
 package de.dkfz.tbi.otp.job.processing
 
 import grails.gorm.transactions.Transactional
-import grails.plugin.springsecurity.SpringSecurityService
-import grails.plugin.springsecurity.SpringSecurityUtils
-import grails.plugin.springsecurity.acl.AclUtilService
 import grails.web.mapping.LinkGenerator
 import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.security.acls.domain.BasePermission
-import org.springframework.security.core.context.SecurityContextHolder
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
@@ -50,11 +45,7 @@ class ProcessService {
     /** Required to read the stacktrace for an error. */
     ErrorLogService errorLogService
 
-    AclUtilService aclUtilService
-
     JobExecutionPlanService jobExecutionPlanService
-
-    SpringSecurityService springSecurityService
 
     LinkGenerator grailsLinkGenerator
 
@@ -89,7 +80,7 @@ class ProcessService {
      * @return The number of ProcessingSteps for the given Process
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    int getNumberOfProcessessingSteps(Process process) {
+    int getNumberOfProcessingSteps(Process process) {
         return ProcessingStep.countByProcess(process)
     }
 
@@ -389,6 +380,7 @@ class ProcessService {
      * @param id The id of the ProcessingError
      * @return The stacktrace or throws an exception if not found
      */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     String getProcessingErrorStackTrace(long id) {
         ProcessingError error = ProcessingError.get(id)
         if (!error) {
@@ -397,11 +389,7 @@ class ProcessService {
         if (!error.stackTraceIdentifier) {
             throw new RuntimeException("No stackTrace could be found for the processing error: " + id)
         }
-        if (aclUtilService.hasPermission(SecurityContextHolder.context.authentication, error.processingStepUpdate.processingStep.process.jobExecutionPlan,
-                BasePermission.READ) || (SpringSecurityUtils.ifAllGranted("ROLE_OPERATOR"))) {
-            return errorLogService.loggedError(error.stackTraceIdentifier)
-        }
-        throw new RuntimeException("The authentication was not granted for the processing error: " + id)
+        return errorLogService.loggedError(error.stackTraceIdentifier)
     }
 
     /**

@@ -371,15 +371,6 @@ class DomainFactory {
     static ProcessingError createProcessingError(Map properties = [:]) {
         return createDomainObject(ProcessingError, [
                 errorMessage        : "errorMessage_${counter++}",
-                processingStepUpdate: {
-                    ProcessingStep step = createProcessingStep()
-                    ProcessingStepUpdate update = createProcessingStepUpdate([processingStep: step])
-                    createProcessingStepUpdate([
-                            state         : ExecutionState.FAILURE,
-                            processingStep: step,
-                            previous      : update,
-                    ])
-                },
         ], properties)
     }
 

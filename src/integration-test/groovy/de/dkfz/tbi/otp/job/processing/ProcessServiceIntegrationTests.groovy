@@ -143,11 +143,11 @@ class ProcessServiceIntegrationTests implements UserAndRoles {
         Process process = mockProcess(plan)
 
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            assertEquals(0, processService.getNumberOfProcessessingSteps(process))
+            assertEquals(0, processService.getNumberOfProcessingSteps(process))
         }
         SpringSecurityUtils.doWithAuth(USER) {
             TestCase.shouldFail(AccessDeniedException) {
-                processService.getNumberOfProcessessingSteps(process)
+                processService.getNumberOfProcessingSteps(process)
             }
         }
     }

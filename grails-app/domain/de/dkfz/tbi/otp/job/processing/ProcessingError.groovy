@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.utils.Entity
 
 /**
@@ -35,11 +34,6 @@ import de.dkfz.tbi.otp.utils.Entity
  * @see ProcessingStepUpdate
  */
 class ProcessingError implements Entity {
-
-    /**
-     * The ProcessingStepUpdate this error has been logged for.
-     */
-    ProcessingStepUpdate processingStepUpdate
 
     /**
      * The error message which can be shown in the user interface.
@@ -58,28 +52,8 @@ class ProcessingError implements Entity {
         errorMessage type: 'text'
     }
 
-    static belongsTo = [
-        processingStepUpdate: ProcessingStepUpdate,
-    ]
-
     static constraints = {
-        processingStepUpdate(nullable: false, validator: { val ->
-            return val.state == ExecutionState.FAILURE
-        })
         errorMessage(nullable: false, blank: false)
         stackTraceIdentifier(nullable: true)
     }
-
-    ProcessParameterObject getProcessParameterObject() {
-        return processingStepUpdate.processParameterObject
-    }
-
-    ProcessingStep getProcessingStep() {
-        return processingStepUpdate.processingStep
-    }
-
-    JobDefinition getJobDefinition() {
-        return processingStepUpdate.jobDefinition
-    }
-
 }

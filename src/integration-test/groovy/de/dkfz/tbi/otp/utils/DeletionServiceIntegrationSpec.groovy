@@ -30,7 +30,11 @@ import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.plan.JobDefinition
+import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 
 @Rollback
@@ -183,5 +187,95 @@ class DeletionServiceIntegrationSpec extends Specification implements DomainFact
         then:
         ConfigPerProjectAndSeqType.count() == 0
         Project.count() == 0
+    }
+
+    void "test delete process with dependencies"() {
+        given:
+        setupData()
+        JobExecutionPlan jobExecutionPlan = DomainFactory.createJobExecutionPlan()
+        JobDefinition jobDefinition1 = DomainFactory.createJobDefinition([
+                plan: jobExecutionPlan,
+        ])
+
+        JobDefinition jobDefinition2 = DomainFactory.createJobDefinition([
+                plan: jobExecutionPlan,
+        ])
+
+        JobDefinition jobDefinition3 = DomainFactory.createJobDefinition([
+                plan: jobExecutionPlan,
+        ])
+
+        Process process = DomainFactory.createProcess([
+                jobExecutionPlan:  jobExecutionPlan,
+                finished: true,
+        ])
+
+        ProcessingStep processingStep1 = DomainFactory.createProcessingStep([
+                process: process,
+                jobDefinition: jobDefinition1,
+        ])
+
+        ProcessingStep processingStep2 = DomainFactory.createProcessingStep([
+                process: process,
+                jobDefinition: jobDefinition2,
+                previous: processingStep1,
+        ])
+
+        processingStep1.next = processingStep2
+        processingStep1.save(flush: true)
+
+        ProcessingStep processingStep3 = DomainFactory.createProcessingStep([
+                process: process,
+                jobDefinition: jobDefinition3,
+                previous: processingStep2,
+        ])
+
+        processingStep2.next = processingStep3
+        processingStep2.save(flush: true)
+
+        DomainFactory.createRestartedProcessingStep([
+                process: process,
+                jobDefinition: jobDefinition3,
+                original: processingStep3,
+                previous: processingStep3.previous,
+        ])
+
+        ProcessingStepUpdate processingStepUpdate11 = DomainFactory.createProcessingStepUpdate([
+                processingStep: processingStep1,
+        ])
+
+        ProcessingError processingError =  DomainFactory.createProcessingError()
+
+        ProcessingStepUpdate processingStepUpdate12 = DomainFactory.createProcessingStepUpdate([
+                processingStep: processingStep1,
+                previous: processingStepUpdate11,
+                state: ExecutionState.FAILURE,
+                error: processingError,
+        ])
+
+        DomainFactory.createProcessingStepUpdate([
+                processingStep: processingStep1,
+                previous: processingStepUpdate12,
+        ])
+
+        ClusterJob clusterJob21 = DomainFactory.createClusterJob([
+                processingStep: processingStep2,
+        ])
+
+        DomainFactory.createClusterJob([
+                processingStep: processingStep2,
+                dependencies: [clusterJob21] as Set,
+        ])
+
+        when:
+        deletionService.deleteProcess(process)
+
+        then:
+        ProcessingError.count() == 0
+        ProcessingStepUpdate.count() == 0
+        RestartedProcessingStep.count() == 0
+        ProcessingStep.count() == 0
+        Process.count() == 0
+        ClusterJob.count() == 0
     }
 }

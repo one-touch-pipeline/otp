@@ -127,12 +127,7 @@ class ProcessingStepUpdateIntegrationTests {
         assertTrue(processingStepUpdate2.validate())
         // Initialize error object
         ProcessingError processingError = new ProcessingError()
-        processingError.processingStepUpdate = processingStepUpdate2
         processingError.errorMessage = "To fail the test."
-        // Should fail as update has wrong state
-        assertFalse(processingError.validate())
-        // Assigned update has to be in execution state FAILURE
-        processingStepUpdate2.state = ExecutionState.FAILURE
         assertTrue(processingError.validate())
         // Reassign state to STARTED to produce error
         processingStepUpdate2.state = ExecutionState.STARTED

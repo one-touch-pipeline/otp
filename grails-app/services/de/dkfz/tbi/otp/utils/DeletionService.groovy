@@ -33,13 +33,13 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SamplePair
 import de.dkfz.tbi.otp.fileSystemConsistency.ConsistencyStatus
 import de.dkfz.tbi.otp.infrastructure.ClusterJob
 import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.QcThreshold
 
 import java.nio.file.Path
 
-import static de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment.*
-import static org.springframework.util.Assert.*
+import static org.springframework.util.Assert.notNull
 
 @SuppressWarnings('Println') //This class is written for scripts, so it needs the output in stdout
 @Transactional
@@ -127,6 +127,8 @@ class DeletionService {
                     deletionScriptOtherUser << "rm -rf ${it.absolutePath}\n"
                 }
                 seqTypes.add(seqTrack.seqType)
+
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(seqTrack.id.toString(), seqTrack.class.name))
             }
 
             SeqScan.findAllBySample(sample)*.delete(flush: true)
@@ -138,11 +140,78 @@ class DeletionService {
             deletionScript << "rm -rf ${individual.getViewByPidPath(seqType).absoluteDataManagementPath}\n"
         }
 
-        ClusterJob.findAllByIndividual(individual)*.delete(flush: false)
-
+        deleteClusterJobs(ClusterJob.findAllByIndividual(individual))
         individual.delete(flush: true)
 
         return [deletionScript.toString(), deletionScriptOtherUser.toString()]
+    }
+
+    void deleteProcessParameters(List<ProcessParameter> processParameters) {
+        processParameters.each {
+            deleteProcessParameter(it)
+        }
+    }
+
+    void deleteProcessParameter(ProcessParameter processParameter) {
+        if (processParameter) {
+            Process process = processParameter.process
+            processParameter.delete(flush: true)
+            deleteProcess(process)
+        }
+    }
+
+    void deleteProcess(Process process) {
+        assert process.finished : "process with id ${process.id} not finished"
+        Process.findAllByRestarted(process).each {
+            deleteProcess(it)
+        }
+        deleteProcessingSteps(ProcessingStep.findAllByProcess(process))
+        process.delete(flush: true)
+    }
+
+    void deleteProcessingSteps(List<ProcessingStep> processingSteps) {
+        processingSteps*.next = null
+        processingSteps.sort { -it.id }
+        processingSteps.each {
+            deleteProcessingStep(it)
+        }
+    }
+
+    void deleteProcessingStep(ProcessingStep processingStep) {
+        deleteClusterJobs(ClusterJob.findAllByProcessingStep(processingStep))
+        deleteProcessingStepUpdates(ProcessingStepUpdate.findAllByProcessingStep(processingStep))
+        processingStep.delete(flush: true)
+    }
+
+    void deleteClusterJobs(List<ClusterJob> clusterJobs) {
+        clusterJobs*.dependencies = [] as Set
+        clusterJobs.each {
+            deleteClusterJob(it)
+        }
+    }
+
+    void deleteClusterJob(ClusterJob clusterJob) {
+        clusterJob.delete(flush: true)
+    }
+
+    void deleteProcessingStepUpdates(List<ProcessingStepUpdate> processingStepUpdates) {
+        processingStepUpdates*.previous = null
+        processingStepUpdates.each {
+            deleteProcessingStepUpdate(it)
+        }
+    }
+
+    void deleteProcessingStepUpdate(ProcessingStepUpdate processingStepUpdate) {
+        ProcessingError error = processingStepUpdate.error
+        if (error) {
+            processingStepUpdate.error = null
+            deleteProcessingError(error)
+        }
+        processingStepUpdate.delete(flush: true)
+    }
+
+    void deleteProcessingError(ProcessingError processingError) {
+        processingError.delete(flush: true)
     }
 
     /**
@@ -283,7 +352,10 @@ class DeletionService {
                 OverallQualityAssessment.findAllByQualityAssessmentPassInList(qualityAssessmentPasses)*.delete(flush: true)
             }
 
-            qualityAssessmentPasses*.delete(flush: true)
+            qualityAssessmentPasses.each {
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
+                it.delete(flush: true)
+            }
         } else if (abstractBamFile instanceof ProcessedMergedBamFile) {
             List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
 
@@ -291,7 +363,10 @@ class DeletionService {
                 ChromosomeQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
                 OverallQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
             }
-            qualityAssessmentMergedPasses*.delete(flush: true)
+            qualityAssessmentMergedPasses.each {
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
+                it.delete(flush: true)
+            }
         } else if (abstractBamFile instanceof RoddyBamFile) {
             List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
             if (qualityAssessmentMergedPasses) {
@@ -349,10 +424,15 @@ class DeletionService {
 
                 dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
                         SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage)))
+
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(processedMergedBamFile.id.toString(), processedMergedBamFile.class.name))
                 processedMergedBamFile.delete(flush: true)
             }
 
-            mergingPasses*.delete(flush: true)
+            mergingPasses.each {
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
+                it.delete(flush: true)
+            }
 
             mergingSets.each { MergingSet mergingSet ->
                 // The MergingSet can only be deleted if all corresponding AbstractBamFiles are removed already
@@ -430,7 +510,7 @@ class DeletionService {
                 Map<String, List<File>> processingDirsToDelete = deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
                 dirsToDelete.addAll(processingDirsToDelete["dirsToDelete"])
                 dirsToDeleteWithOtherUser.addAll(processingDirsToDelete["dirsToDeleteWithOtherUser"])
-
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(processedBamFile.id.toString(), processedBamFile.class.name))
                 processedBamFile.delete(flush: true)
             }
             alignmentPass.delete(flush: true)
@@ -453,6 +533,7 @@ class DeletionService {
         if (bamFiles) {
             BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(bamFiles, bamFiles).each {
                 dirsToDeleteWithOtherUser << AnalysisDeletionService.deleteInstance(it)
+                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
             }
         }
 
@@ -463,6 +544,7 @@ class DeletionService {
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
                     SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
+            deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
             if (!RoddyBamFile.findByWorkPackage(mergingWorkPackage)) {
@@ -484,6 +566,7 @@ class DeletionService {
             crmwp.bamFileInProjectFolder = null
             crmwp.save(flush: true)
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
+            deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             dirsToDelete << bamFile.workDirectory
             bamFile.delete(flush: true)
             if (!SingleCellBamFile.findByWorkPackage(crmwp)) {
@@ -526,7 +609,7 @@ class DeletionService {
             dataSwapService.throwExceptionInCaseOfSeqTracksAreOnlyLinked([seqTrack])
         }
 
-        Map<String, List<File>> dirsToDelete = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack)
+        Map<String, List<File>> dirsToDelete = deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, check)
         deleteConnectionFromSeqTrackRepresentingABamFile(seqTrack)
         DataFile.findAllBySeqTrack(seqTrack).each { deleteDataFile(it) }
         MergingAssignment.findAllBySeqTrack(seqTrack)*.delete(flush: true)
@@ -544,26 +627,20 @@ class DeletionService {
      *
      * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
      */
-    List<File> deleteRun(Run run, StringBuilder log) {
+    List<File> deleteRun(Run run) {
         notNull(run, "The input run of the method deleteRun is null")
-        log << "\n\nstart deletion of run ${run}"
         List<File> dirsToDelete = []
 
-        log << "\n  delete data files: "
         DataFile.findAllByRun(run).each {
-            log << "\n     try to delete: ${it}"
             deleteDataFile(it)
         }
 
-        log << "\n  delete seqTracks:"
         SeqTrack.findAllByRun(run).each {
-            log << "\n     try to delete: ${it}"
             dirsToDelete = deleteSeqTrack(it).get("dirsToDelete")
         }
 
-        log << "\n  try to delete run ${run}"
+        deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(run.id.toString(), run.class.name))
         run.delete(flush: true)
-        log << "\nfinish deletion of run ${run}"
         return dirsToDelete
     }
 
@@ -574,16 +651,13 @@ class DeletionService {
      *
      * The function should be called inside a transaction (DOMAIN.withTransaction{}) to roll back changes if an exception occurs or a check fails.
      *
-     * @see #deleteRun(de.dkfz.tbi.otp.ngsdata.Run, java.lang.StringBuilder)
+     * @see #deleteRun(de.dkfz.tbi.otp.ngsdata.Run)
      */
-    List<File> deleteRunByName(String runName, StringBuilder log) {
+    List<File> deleteRunByName(String runName) {
         notNull(runName, "The input runName of the method deleteRunByName is null")
         Run run = Run.findByName(runName)
         notNull(run, "No run with name ${runName} could be found in the database")
-        List<File> dirsToDelete = deleteRun(run, log)
-        log << "the following directories needs to be deleted manually: "
-        log << dirsToDelete.flatten()*.path.join('\n')
-        log << "And do not forget the other files/directories which belongs to the run"
+        List<File> dirsToDelete = deleteRun(run)
         return dirsToDelete
     }
 
