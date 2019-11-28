@@ -74,6 +74,36 @@ class MetaDataFieldsController implements CheckAndCall {
         ]
     }
 
+    JSON updateAutoImportDirectory(UpdateSeqCenterAbsolutePathCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
+            seqCenterService.updateAutoImportDirectory(cmd.seqCenter, cmd.absolutePath)
+        }
+    }
+
+    JSON updateAutoImportable(UpdateSeqCenterFlagCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
+            seqCenterService.updateAutoImportable(cmd.seqCenter, cmd.flag)
+        }
+    }
+
+    JSON updateCopyMetadataFile(UpdateSeqCenterFlagCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
+            seqCenterService.updateCopyMetadateFile(cmd.seqCenter, cmd.flag)
+        }
+    }
+
+    JSON updateImportDirsAllowLinking(ReplaceSeqCenterAbsolutePathCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
+            seqCenterService.updateImportDirsAllowLinking(cmd.seqCenter, cmd.oldAbsolutePath, cmd.absolutePath)
+        }
+    }
+
+    JSON createImportDirsAllowLinking(UpdateSeqCenterAbsolutePathCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
+            seqCenterService.createImportDirsAllowLinking(cmd.seqCenter, cmd.absolutePath)
+        }
+    }
+
     JSON createLibraryPreparationKit(CreateLibraryPreparationKitCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             libraryPreparationKitService.create(cmd.name, [
@@ -486,4 +516,37 @@ class CreateLayoutCommand extends CreateWithLayoutCommand {
     void setId(String id) {
         this.name = id
     }
+}
+
+abstract class SeqCenterCommand implements Validateable {
+    SeqCenter seqCenter
+}
+
+class UpdateSeqCenterFlagCommand extends SeqCenterCommand {
+    boolean flag
+
+    void setValue(String value) {
+        this.flag = Boolean.valueOf(value)
+    }
+}
+
+class UpdateSeqCenterAbsolutePathCommand extends SeqCenterCommand {
+    String absolutePath
+
+    static constraints = {
+        absolutePath nullable: true, blank: true, validator: { val, obj ->
+            if (val != null && !OtpPath.isValidAbsolutePath(val)) {
+                return "validator.absolute.path"
+            }
+        }
+    }
+
+    void setValue(String value) {
+        String trimmedValue = value.trim()
+        this.absolutePath = trimmedValue == "" ? null : trimmedValue
+    }
+}
+
+class ReplaceSeqCenterAbsolutePathCommand extends UpdateSeqCenterAbsolutePathCommand {
+    String oldAbsolutePath
 }

@@ -34,12 +34,17 @@
     <g:render template="linkBanner"/>
     <h3><g:message code="dataFields.title.caseInsensitive"/></h3>
 
-    <h3><g:message code="dataFields.seqCenter.header"/></h3>
+
+
     <table>
         <thead>
         <tr>
-            <th><g:message code="dataFields.seqCenter.name"/></th>
-            <th><g:message code="dataFields.seqCenter.listSeqCenterDirName"/></th>
+            <th title="${g.message(code: "dataFields.seqCenter.name.tooltip")}"><g:message code="dataFields.seqCenter.name"/></th>
+            <th title="${g.message(code: "dataFields.seqCenter.listSeqCenterDirName.tooltip")}"><g:message code="dataFields.seqCenter.listSeqCenterDirName"/></th>
+            <th title="${g.message(code: "dataFields.seqCenter.autoImportDir.tooltip")}"><g:message code="dataFields.seqCenter.autoImportDir"/></th>
+            <th title="${g.message(code: "dataFields.seqCenter.autoImportable.tooltip")}"><g:message code="dataFields.seqCenter.autoImportable"/></th>
+            <th title="${g.message(code: "dataFields.seqCenter.importDirsAllowLinking.tooltip")}"><g:message code="dataFields.seqCenter.importDirsAllowLinking"/></th>
+            <th title="${g.message(code: "dataFields.seqCenter.copyMetadataFile.tooltip")}"><g:message code="dataFields.seqCenter.copyMetadataFile"/></th>
         </tr>
         </thead>
         <tbody>
@@ -47,17 +52,52 @@
             <tr>
                 <td>${seqCenter.name}</td>
                 <td>${seqCenter.dirName}</td>
+                <td>
+                    <otp:editorSwitch
+                            roles="DISABLED"
+                            link="${g.createLink(controller: 'metaDataFields', action: 'updateAutoImportDirectory', params: ['seqCenter.id': seqCenter.id])}"
+                            value="${seqCenter.autoImportDir}"/>
+                </td>
+                <td>
+                    <otp:editorSwitch
+                        roles="DISABLED"
+                        template="dropDown"
+                        link="${g.createLink(controller: 'metaDataFields', action: 'updateAutoImportable', params: ['seqCenter.id': seqCenter.id])}"
+                        values="${["true", "false"]}"
+                        value="${seqCenter.autoImportable}"/>
+                </td>
+                <td>
+                    <g:each var="importDirs" in="${seqCenter.importDirsAllowLinking}">
+                        <otp:editorSwitch
+                            roles="ROLE_OPERATOR"
+                            link="${g.createLink(controller: 'metaDataFields', action: 'updateImportDirsAllowLinking', params: ['seqCenter.id': seqCenter.id, 'oldAbsolutePath': importDirs])}"
+                            value="${importDirs}"/>
+                    </g:each>
+                    <otp:editorSwitchNewValues
+                            roles="ROLE_OPERATOR"
+                            labels="${["Path"]}"
+                            textFields="${["absolutePath"]}"
+                            link="${g.createLink(controller: 'metaDataFields', action: 'createImportDirsAllowLinking', params: ['seqCenter.id': seqCenter.id])}"/>
+                </td>
+                <td>
+                    <otp:editorSwitch
+                        roles="DISABLED"
+                        template="dropDown"
+                        link="${g.createLink(controller: 'metaDataFields', action: 'updateCopyMetadataFile', params: ['seqCenter.id': seqCenter.id])}"
+                        values="${["true", "false"]}"
+                        value="${seqCenter.copyMetadataFile}"/>
+                </td>
             </tr>
         </g:each>
-        <td colspan="2">
-            <otp:editorSwitchNewValues
-                    roles="ROLE_OPERATOR"
-                    labels="${["Name", "Directory"]}"
-                    textFields="${["name", "dirName"]}"
-                    link="${g.createLink(controller: 'metaDataFields', action: 'createSeqCenter')}"/>
-        </td>
         </tbody>
     </table>
+    <otp:editorSwitchNewValues
+            roles="ROLE_OPERATOR"
+            labels="${["Name", "Directory"]}"
+            textFields="${["name", "dirName"]}"
+            link="${g.createLink(controller: 'metaDataFields', action: 'createSeqCenter')}"/>
+    <br>
+    <br>
 </div>
 </body>
 </html>

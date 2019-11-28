@@ -24,7 +24,9 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
-class SeqCenterServiceSpec extends Specification implements DataTest {
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+
+class SeqCenterServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -92,6 +94,78 @@ class SeqCenterServiceSpec extends Specification implements DataTest {
 
         then:
         thrown(AssertionError)
+    }
+
+    void "test updateAutoImportDirectory, when value is set then the object should have that value"() {
+        given:
+        SeqCenter seqCenter = createSeqCenter()
+
+        when:
+        seqCenterService.updateAutoImportDirectory(seqCenter, "/tmp")
+
+        then:
+        seqCenter.autoImportDir == "/tmp"
+    }
+
+    void "test updateAutoImportable, when value is set then the object should have that value"() {
+        given:
+        SeqCenter seqCenter = createSeqCenter([
+                autoImportDir: "/old"
+        ])
+
+        when:
+        seqCenterService.updateAutoImportable(seqCenter, true)
+
+        then:
+        seqCenter.autoImportable
+    }
+
+    void "test updateCopyMetadateFile, when value is set then the object should have that value"() {
+        given:
+        SeqCenter seqCenter = createSeqCenter()
+
+        when:
+        seqCenterService.updateCopyMetadateFile(seqCenter, true)
+
+        then:
+        seqCenter.copyMetadataFile
+    }
+
+    void "test updateImportDirsAllowLinking, when old value is set, old value will be deleted and new value will be set"() {
+        given:
+        SeqCenter seqCenter = createSeqCenter([
+                importDirsAllowLinking: ["/old"] as Set
+        ])
+
+        when:
+        seqCenterService.updateImportDirsAllowLinking(seqCenter, "/old", "/new")
+
+        then:
+        seqCenter.importDirsAllowLinking == ["/new"] as Set
+    }
+
+    void "test createImportDirsAllowLinking, when value is added then the object should have all values"() {
+        given:
+        SeqCenter seqCenter = createSeqCenter([
+                importDirsAllowLinking: ["/old"]
+        ])
+
+        when:
+        seqCenterService.createImportDirsAllowLinking(seqCenter, "/new")
+
+        then:
+        seqCenter.importDirsAllowLinking == ["/new", "/old"] as Set
+    }
+
+    void "test allSeqCenters, should return all saved seq centers"() {
+        given:
+        SeqCenter seqCenter = createSeqCenter()
+
+        when:
+        List<SeqCenter> seqCenters = seqCenterService.allSeqCenters()
+
+        then:
+        seqCenters == [seqCenter]
     }
 }
 

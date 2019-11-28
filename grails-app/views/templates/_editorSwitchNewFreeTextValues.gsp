@@ -21,8 +21,8 @@
   --}%
 
 <div class="edit-switch edit-switch-new-free-text-values" style="display:inline-block">
-        <span class="edit-switch-editor" style="display: none">
-            <input type="hidden" name="target" value="${link}"/>
+    <span class="edit-switch-editor" style="display: none">
+        <input type="hidden" name="target" value="${link}"/>
         <g:set var="i" value="${0}"/>
         <g:each var="field" in="${textFields}">
             <label>${labels[i++]}:

@@ -27,14 +27,41 @@ import org.springframework.security.access.prepost.PreAuthorize
 @Transactional
 class SeqCenterService {
 
-    List<Map> getDisplayableMetadata() {
-        return SeqCenter.list(sort: "name", order: "asc").collect {
-            [
-                    id     : it.id,
-                    name   : it.name,
-                    dirName: it.dirName,
-            ]
+    List<SeqCenter> getDisplayableMetadata() {
+        return SeqCenter.list(sort: "name", order: "asc")
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateAutoImportDirectory(SeqCenter seqCenter, String autoImportDirectory) {
+        seqCenter.autoImportDir = autoImportDirectory
+        seqCenter.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateAutoImportable(SeqCenter seqCenter, boolean autoImportable) {
+        seqCenter.autoImportable = autoImportable
+        seqCenter.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateCopyMetadateFile(SeqCenter seqCenter, boolean copyMetadataFile) {
+        seqCenter.copyMetadataFile = copyMetadataFile
+        seqCenter.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void updateImportDirsAllowLinking(SeqCenter seqCenter, String importDirOld, String importDirNew) {
+        seqCenter.removeFromImportDirsAllowLinking(importDirOld)
+        if (importDirNew) {
+            seqCenter.addToImportDirsAllowLinking(importDirNew)
         }
+        seqCenter.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void createImportDirsAllowLinking(SeqCenter seqCenter, String importDir) {
+        seqCenter.addToImportDirsAllowLinking(importDir)
+        seqCenter.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
