@@ -22,6 +22,8 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
 import grails.gorm.transactions.Transactional
+import grails.web.mapping.LinkGenerator
+import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.UserProjectRoleService
@@ -33,6 +35,9 @@ import de.dkfz.tbi.otp.utils.MessageSourceService
 
 @Transactional
 class QcTrafficLightNotificationService {
+
+    @Autowired
+    LinkGenerator linkGenerator
 
     OtrsTicketService otrsTicketService
     CreateNotificationTextService createNotificationTextService
@@ -70,12 +75,22 @@ class QcTrafficLightNotificationService {
     }
 
     private String createResultsAreBlockedMessage(AbstractMergedBamFile bamFile) {
+        String faq = processingOptionService.findOptionAsString(ProcessingOption.OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)
+        if (faq != "") {
+            faq = messageSourceService.createMessage("notification.template.base.faq", [
+                    faqLink: faq,
+                    contactMail: processingOptionService.findOptionAsString(ProcessingOption.OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL),
+            ])
+        }
+
         return messageSourceService.createMessage(
                 "notification.template.alignment.qcTrafficBlockedMessage",
                 [
                         bamFile              : bamFile,
                         link                 : createNotificationTextService.createOtpLinks([bamFile.project], 'alignmentQualityOverview', 'index'),
                         emailSenderSalutation: processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION),
+                        thresholdPage        : linkGenerator.link(controller: 'qcThreshold', action: 'projectConfiguration', absolute: true, params: ['project': bamFile.project,]),
+                        faq                  : faq,
                 ]
         )
     }

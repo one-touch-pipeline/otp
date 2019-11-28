@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.qcTrafficLight
 
 import grails.testing.gorm.DataTest
+import grails.web.mapping.LinkGenerator
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -118,10 +119,12 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                 return HEADER
             }
             1 * createMessage('notification.template.alignment.qcTrafficBlockedMessage', _) >> { String templateName, Map properties ->
-                assert properties.size() == 3
+                assert properties.size() == 5
                 assert properties['bamFile'] == bamFile
                 assert properties['emailSenderSalutation'] == emailSenderSalutation
                 assert properties['link'] == LINK
+                assert properties['thresholdPage'] == LINK
+                assert properties['faq'] == ""
                 return BODY
             }
             0 * _
@@ -144,6 +147,10 @@ class QcTrafficLightNotificationServiceSpec extends Specification implements Dat
                 assert recipients.size() == recipientsCount
                 assert !recipients.contains(null)
             }
+        }
+
+        service.linkGenerator = Mock(LinkGenerator) {
+            1 * link(_) >> LINK
         }
 
         expect:
