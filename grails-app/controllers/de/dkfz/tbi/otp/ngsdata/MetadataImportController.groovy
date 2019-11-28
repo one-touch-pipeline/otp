@@ -320,7 +320,7 @@ class BlackListedIlseCommand implements Validateable {
     String comment
 
     static constraints = {
-        ilse nullable: false, min: 1000, max: 999999
+        ilse nullable: false, min: 1, max: 999999
         comment nullable: false, blank: false
     }
 }

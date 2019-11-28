@@ -361,7 +361,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
 
     IlseSubmission createIlseSubmission(Map properties = [:], boolean saveAndValidate = true) {
         return createDomainObject(IlseSubmission, [
-                ilseNumber: { nextId % 999000 + 1000 },
+                ilseNumber: { nextId % 999999 },
                 warning   : false,
         ], properties, saveAndValidate)
     }

@@ -51,9 +51,8 @@ class IlseSubmissionSpec extends Specification implements DataTest {
         warning << [true, false]
     }
 
-
     @Unroll
-    void "test constraints ilseNumber invalid"() {
+    void "test constraints ilseNumber valid #value"() {
         given:
         IlseSubmission ilseSubmission = DomainFactory.createIlseSubmission()
 
@@ -61,12 +60,22 @@ class IlseSubmissionSpec extends Specification implements DataTest {
         ilseSubmission.ilseNumber = value
 
         then:
-        TestCase.assertValidateError(ilseSubmission, 'ilseNumber', constraint, value)
+        ilseSubmission.validate()
 
         where:
-        value        || constraint
-        1          || 'min.notmet'
-        1111111111 || 'max.exceeded'
+        value << [1, 12, 123, 1234, 12345, 123456]
+    }
+
+    @Unroll
+    void "test constraints ilseNumber invalid"() {
+        given:
+        IlseSubmission ilseSubmission = DomainFactory.createIlseSubmission()
+
+        when:
+        ilseSubmission.ilseNumber = 1111111111
+
+        then:
+        TestCase.assertValidateError(ilseSubmission, 'ilseNumber', 'max.exceeded', 1111111111)
     }
 
 

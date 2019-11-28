@@ -236,7 +236,7 @@ class MetadataImportService {
      */
     Path getIlseFolder(String ilseId, SeqCenter seqCenter) throws JSchException {
         assert seqCenter
-        if (!(ilseId =~ /^\d{4,6}$/)) {
+        if (!(ilseId =~ /^\d{1,6}$/)) {
             return null
         }
         String ilse = ilseId.padLeft(6, '0')

@@ -63,8 +63,8 @@ class IlseNumberValidator extends ValueTuplesValidator<MetadataValidationContext
                 if (ilseNo != "") {
                     if (!ilseNo.isInteger()) {
                         context.addProblem(tuple.cells, Level.ERROR, "The ILSe number '${ilseNo}' is not an integer.", "At least one ILSe number is not an integer.")
-                    } else if ((ilseNo as int) < 1000 || (ilseNo as int) > 999999) {
-                        context.addProblem(tuple.cells, Level.WARNING, "The ILSe number '${ilseNo}' is out of range [1000..999999].", "At least one ILSe number is out of range [1000..999999].")
+                    } else if ((ilseNo as int) <= 1 || (ilseNo as int) >= 999999) {
+                        context.addProblem(tuple.cells, Level.ERROR, "The ILSe number '${ilseNo}' is out of range [1..999999].", "At least one ILSe number is out of range [1..999999].")
                     } else if (IlseSubmission.findByIlseNumber(ilseNo as int)) {
                         context.addProblem(tuple.cells, Level.WARNING, "The ILSe number '${ilseNo}' already exists.", "At least one ILSe number already exists.")
                     }

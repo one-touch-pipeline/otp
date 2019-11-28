@@ -1553,7 +1553,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         output == null
 
         where:
-        input << [null, '', '123', '1234567', '12a3']
+        input << [null, '', '1234567', '12a3']
     }
 
     void "test getIlseFolder, valid input"() {
@@ -1571,6 +1571,7 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
 
         where:
         input    || output
+        '123'    || FileSystems.default.getPath("/test/SEQ_FACILITY/000/000123")
         '1234'   || FileSystems.default.getPath("/test/SEQ_FACILITY/001/001234")
         '123456' || FileSystems.default.getPath("/test/SEQ_FACILITY/123/123456")
     }
