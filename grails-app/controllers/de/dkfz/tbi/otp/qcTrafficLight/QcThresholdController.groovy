@@ -59,7 +59,7 @@ class QcThresholdController {
             if (project) {
                 projectSelectionService.setSelectedProject([project], project.name)
                 redirect(controller: controllerName, action: actionName)
-                return [:]
+                return
             }
         }
 
