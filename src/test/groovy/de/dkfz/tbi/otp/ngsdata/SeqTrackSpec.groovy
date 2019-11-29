@@ -22,6 +22,7 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.testing.gorm.DataTest
+import grails.validation.ValidationException
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -88,6 +89,31 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         ''            | { createLibraryPreparationKit() } | InformationReliability.UNKNOWN_VERIFIED
         'no'          | { null }                          | InformationReliability.KNOWN
         'no'          | { null }                          | InformationReliability.INFERRED
+    }
+
+    @Unroll
+    void "validate, SeqTrack has to be unique by laneId, run, cellPosition and project"() {
+        given:
+        Map properties = [
+                laneId      : "lane_id",
+                run         : createRun(),
+                cellPosition: "cell_position",
+                sample      : createSample(),
+        ]
+        properties.remove(property)
+
+        SeqTrack seqTrackA = createSeqTrack([cellPosition: "CP_A"] + properties)
+        SeqTrack seqTrackB = createSeqTrack([cellPosition: "CP_B"] + properties)
+        seqTrackB[property] = seqTrackA[property]
+
+        when:
+        seqTrackB.save(flush: true)
+
+        then:
+        thrown(ValidationException)
+
+        where:
+        property << ["laneId", "run", "cellPosition", "sample"]
     }
 
     @Unroll

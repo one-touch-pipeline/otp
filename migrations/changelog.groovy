@@ -291,4 +291,6 @@ databaseChangeLog = {
     changeSet(author: "m139l", id: "otp-255") {
         sqlFile(path: 'changelogs/2019/otp-255-rename-run-segment.sql')
     }
+
+    include file: 'changelogs/2019/drop-seq-track-lane-id-unique-constraint.groovy'
 }

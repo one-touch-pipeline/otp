@@ -26,6 +26,7 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.InformationReliability
 import de.dkfz.tbi.otp.LogMessage
 import de.dkfz.tbi.otp.dataprocessing.AlignmentPass
+import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.utils.Entity
 import de.dkfz.tbi.otp.utils.StringUtils
@@ -153,7 +154,22 @@ class SeqTrack implements ProcessParameterObject, Entity {
             logMessages: LogMessage,
     ]
     static constraints = {
-        laneId(unique: ['run', 'cellPosition'], blank: false, shared: "pathComponent")
+        laneId(blank: false, validator: { String val, SeqTrack obj ->
+            // custom unique constraint on laneId, run, cellPosition and project
+            List<SeqTrack> seqTracks = findAllWhere([
+                "laneId"      : obj.laneId,
+                "run"         : obj.run,
+                "cellPosition": obj.cellPosition,
+            ]).findAll { SeqTrack seqTrack ->
+                seqTrack != obj && seqTrack?.sample?.individual?.project == obj?.individual?.project
+            }
+            if (seqTracks) {
+                return 'default.not.unique.message'
+            }
+            if (!OtpPath.isValidPathComponent(val)) {
+                return 'validator.path.component'
+            }
+        })
         hasOriginalBam()
         seqType()
         sample()
