@@ -37,23 +37,43 @@ bash gradlew dbmGormDiff -q > migrations/changelogs/${year}/${1}.groovy
 prefix="s/\n\s{4}changeSet.*\n\s{8}"
 suffix=".*\n\s{4}\}\n//g"
 changelogPath="migrations/changelogs/${year}/${1}.groovy"
-tables="(job_error_definition_job_error_definition)|(aceseq_instance_roddy_execution_directory_names)|(externally_processed_merged_bam_file_further_files)|\
-(import_process_externally_processed_merged_bam_file)|(merging_work_package_seq_track)|(indel_calling_instance_roddy_execution_directory_names)|\
-(job_error_definition_job_definition)|(roddy_bam_file_seq_track)|(roddy_snv_calling_instance_roddy_execution_directory_names)|\
-(roddy_bam_file_roddy_execution_directory_names)|(seq_track_log_message)|(seq_platform_group_comment)|(single_cell_bam_file_seq_track)|\
-(sophia_instance_roddy_execution_directory_names)|(swap_info_seq_track)|(seq_platform_model_label_import_alias)|(seq_type_import_alias)|\
-(sequencing_kit_label_import_alias)|(antibody_target_import_alias)|(library_preparation_kit_import_alias)|(seq_center_import_dirs_allow_linking)|\
-(ega_submission_bam_file_submission_object)|(ega_submission_data_file_submission_object)|(ega_submission_sample_submission_object)|\
-(cluster_job_cluster_job)|(job_definition_parameter)|\
+
+joinTables="\
+(aceseq_instance_roddy_execution_directory_names)|\
+(antibody_target_import_alias)|\
+(cluster_job_cluster_job)|\
 (ega_library_selection_library_preparation_kit)|\
 (ega_library_source_seq_type)|\
 (ega_library_strategy_seq_type)|\
 (ega_platform_model_seq_platform_model_label)|\
-(software_tool_program_name_program_version_type_key)\
+(ega_submission_bam_file_submission_object)|\
+(ega_submission_data_file_submission_object)|\
+(ega_submission_sample_submission_object)|\
+(externally_processed_merged_bam_file_further_files)|\
+(import_process_externally_processed_merged_bam_file)|\
+(indel_calling_instance_roddy_execution_directory_names)|\
+(job_definition_parameter)|\
+(job_error_definition_job_definition)|\
+(job_error_definition_job_error_definition)|\
+(library_preparation_kit_import_alias)|\
+(merging_work_package_seq_track)|\
+(roddy_bam_file_roddy_execution_directory_names)|\
+(roddy_bam_file_seq_track)|\
+(roddy_snv_calling_instance_roddy_execution_directory_names)|\
+(seq_center_import_dirs_allow_linking)|\
+(seq_platform_group_comment)|\
+(seq_platform_model_label_import_alias)|\
+(seq_track_log_message)|\
+(seq_type_import_alias)|\
+(sequencing_kit_label_import_alias)|\
+(single_cell_bam_file_seq_track)|\
+(software_tool_program_name_program_version_type_key)|\
+(sophia_instance_roddy_execution_directory_names)|\
+(swap_info_seq_track)|\
 "
 
 perl -0pi -e "${prefix}.*file_system_changes_idx${suffix}" $changelogPath
-perl -0pi -e "${prefix}((dropPrimaryKey)|(dropNotNullConstraint)|(dropUniqueConstraint)|(dropForeignKeyConstraint)).*ableName: \"(${tables})\"${suffix}" $changelogPath
+perl -0pi -e "${prefix}((dropPrimaryKey)|(dropNotNullConstraint)|(dropUniqueConstraint)|(dropForeignKeyConstraint)).*ableName: \"(${joinTables})\"${suffix}" $changelogPath
 perl -0pi -e "${prefix}dropIndex.*\n\n\s{8}createIndex.*\{(\n\s{12}column.*\n)+\s{8}\}${suffix}" $changelogPath
 perl -0pi -e "${prefix}dropUniqueConstraint.*\n\n\s{8}addUniqueConstraint${suffix}" $changelogPath
 perl -0pi -e "${prefix}addUniqueConstraint.*columnNames: \"((alignment_pass_id)|(merging_pass_id))\".*tableName: \"abstract_bam_file\"${suffix}" $changelogPath
