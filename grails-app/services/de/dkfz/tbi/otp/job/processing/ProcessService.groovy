@@ -133,7 +133,7 @@ class ProcessService {
         if (!file.exists() || !file.isFile()) {
             return ""
         }
-        return file.getText()
+        return "Log location: ${clusterJob.jobLog}\n\n${file.getText()}"
     }
 
     /**
