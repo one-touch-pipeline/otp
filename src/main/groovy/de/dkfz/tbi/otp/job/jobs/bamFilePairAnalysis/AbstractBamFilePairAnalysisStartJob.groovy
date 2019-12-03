@@ -91,14 +91,13 @@ abstract class AbstractBamFilePairAnalysisStartJob extends AbstractStartJobImpl 
         tryToDeleteResultFilesOfFailedInstance(failedAnalysis)
 
         BamFilePairAnalysis.withTransaction {
-
             failedAnalysis.withdrawn = true
             assert failedAnalysis.save(flush: true)
 
             BamFilePairAnalysis newAnalysis = getBamFileAnalysisService().getAnalysisClass().newInstance(
-                    samplePair: failedAnalysis.samplePair,
-                    instanceName: getInstanceName(failedAnalysis.config),
-                    config: failedAnalysis.config,
+                    samplePair        : failedAnalysis.samplePair,
+                    instanceName      : getInstanceName(failedAnalysis.config),
+                    config            : getConfig(failedAnalysis.samplePair),
                     sampleType1BamFile: failedAnalysis.sampleType1BamFile,
                     sampleType2BamFile: failedAnalysis.sampleType2BamFile,
             )

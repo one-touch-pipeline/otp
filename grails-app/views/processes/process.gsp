@@ -25,7 +25,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
-    <title><g:message code="processes.process.title.listOfProcessingSteps" args="${ [id] }"/> <g:message code="processes.process.title.workflow" args="${ [name] }"/></title>
+    <title><g:message code="processes.process.title.listOfProcessingSteps" args="${[id]}"/> <g:message code="processes.process.title.workflow" args="${[name]}"/></title>
     <asset:javascript src="modules/workflows"/>
 </head>
 <body>
@@ -33,12 +33,12 @@
         <g:render template="/templates/messages"/>
 
         <div id="processInfoBox">
-            <h1><g:message code="processes.process.title.listOfProcessingSteps" args="${ [id] }"/>  <g:link action="plan" id="${planId}"><g:message code="processes.process.title.workflow" args="${ [name] }"/></g:link><br>
+            <h1><g:message code="processes.process.title.listOfProcessingSteps" args="${[id]}"/>  <g:link action="plan" id="${planId}"><g:message code="processes.process.title.workflow" args="${[name]}"/></g:link><br>
             <g:if test="${process.restarted}">
-                <g:message code="processes.process.title.restartedProcessFrom"/>  <g:link action="process" id="${process.restarted.id}"><g:message code="processes.process.title.restartedProcessLink" args="${ [process.restarted.id] }"/></g:link>
+                <g:message code="processes.process.title.restartedProcessFrom"/>  <g:link action="process" id="${process.restarted.id}"><g:message code="processes.process.title.restartedProcessLink" args="${[process.restarted.id]}"/></g:link>
             </g:if>
             <g:if test="${restartedProcess}">
-                <g:message code="processes.process.title.restartedProcess"/>  <g:link action="process" id="${restartedProcess.id}"><g:message code="processes.process.title.restartedProcessLink" args="${ [restartedProcess.id] }"/></g:link>
+                <g:message code="processes.process.title.restartedProcess"/>  <g:link action="process" id="${restartedProcess.id}"><g:message code="processes.process.title.restartedProcessLink" args="${[restartedProcess.id]}"/></g:link>
             </g:if>
             </h1>
             <g:if test="${hasError && !restartedProcess}">

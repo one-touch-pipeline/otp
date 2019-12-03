@@ -243,16 +243,16 @@ class ProcessesController {
     def process() {
         Process process = processService.getProcess(params.id as long)
         [
-                process: process,
-                name: process.jobExecutionPlan.name,
-                id: process.id,
+                process                 : process,
+                name                    : process.jobExecutionPlan.name,
+                id                      : process.id,
                 operatorIsAwareOfFailure: process.operatorIsAwareOfFailure,
-                hasError: processService.getError(process),
-                planId: process.jobExecutionPlan.id,
-                parameter: processParameterData(process),
-                comment: process.comment,
-                restartedProcess: getRestartedProcess(process),
-                showRestartButton: showRestartButton(process),
+                hasError                : processService.getError(process),
+                planId                  : process.jobExecutionPlan.id,
+                parameter               : processParameterData(process),
+                comment                 : process.comment,
+                restartedProcess        : getRestartedProcess(process),
+                showRestartButton       : showRestartButton(process),
         ]
     }
 
