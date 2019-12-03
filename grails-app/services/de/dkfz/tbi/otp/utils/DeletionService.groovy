@@ -528,6 +528,7 @@ class DeletionService {
             seqTracks {
                 eq("id", seqTrack.id)
             }
+            order("id", "desc")
         }
 
         if (bamFiles) {
@@ -545,6 +546,7 @@ class DeletionService {
             dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
                     SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
             deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
+            bamFile.baseBamFile = null
             bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
             if (!RoddyBamFile.findByWorkPackage(mergingWorkPackage)) {
@@ -558,6 +560,7 @@ class DeletionService {
             seqTracks {
                 eq("id", seqTrack.id)
             }
+            order("id", "desc")
         }
 
         CellRangerMergingWorkPackage crmwp = null
