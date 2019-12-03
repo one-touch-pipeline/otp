@@ -35,7 +35,7 @@ class StatisticsController {
 
     static allowedMethods = [
             downloadDirectoriesCSV: "GET",
-            kpi                   : ["GET", "POST"],
+            kpi                   : "GET",
     ]
 
     def downloadDirectoriesCSV() {
@@ -53,8 +53,8 @@ class StatisticsController {
 
     def kpi() {
         ProjectSelection selection = projectSelectionService.getSelectedProject()
-        Date startDate = params.datepickerStartDate ? new SimpleDateFormat("yyyy-MM-dd").parse(params.datepickerStartDate) : null
-        Date endDate = params.datepickerEndDate ? new SimpleDateFormat("yyyy-MM-dd").parse(params.datepickerEndDate) : null
+        Date startDate = params.datepickerStartDate ? new SimpleDateFormat("yyyy-MM-dd").parse(params.start) : null
+        Date endDate = params.datepickerEndDate ? new SimpleDateFormat("yyyy-MM-dd").parse(params.end) : null
 
         if (!selection.projects) {
             return [

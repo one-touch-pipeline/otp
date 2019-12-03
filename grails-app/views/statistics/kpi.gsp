@@ -40,19 +40,19 @@
         </div>
         <div class="col-xs-12 col-sm-12 statistics-container">
             <div class="optionsContainer">
-                <g:form action="kpi" class="form-inline">
+                <g:form action="kpi" class="form-inline" method="get">
                     <div class="input-group">
                         <div class="input-group-addon">
                             <b>${g.message(code: "start.numbers.startDate")}</b>
                         </div>
-                        <input type="date"class="form-control"  id="start" name="datepickerStartDate">
+                        <input type="date"class="form-control" id="start" name="start">
                     </div>
 
                     <div class="input-group">
                         <div class="input-group-addon">
                             <b>${g.message(code: "start.numbers.endDate")}</b>
                         </div>
-                        <input type="date"class="form-control"  id="end" name="datepickerEndDate">
+                        <input type="date"class="form-control" id="end" name="end">
                     </div>
                     <g:actionSubmit class="btn btn-primary" value="${g.message(code: "start.numbers.btnDate")}"
                                     action="kpi"/>
