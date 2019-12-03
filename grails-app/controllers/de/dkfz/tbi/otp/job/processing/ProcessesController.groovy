@@ -93,65 +93,49 @@ class ProcessesController {
         Map dataToRender = cmd.dataToRender()
 
         List<JobExecutionPlan> plans = jobExecutionPlanService.getJobExecutionPlans()
+        List<JobExecutionPlan> plansWithPrevious = jobExecutionPlanService.getJobExecutionPlansWithPreviousVersions()
         dataToRender.iTotalRecords = plans.size()
         dataToRender.iTotalDisplayRecords = dataToRender.iTotalRecords
 
-        Map<String, Long> processCounts
-        Map<String, Long> finishedProcessCounts
+        List<Closure> tasks = [
+                { jobExecutionPlanService.processCount(plansWithPrevious) },
+                { jobExecutionPlanService.failedProcessCount(plansWithPrevious) },
+                { jobExecutionPlanService.finishedProcessCount(plansWithPrevious) },
+                { jobExecutionPlanService.lastProcessDate(plansWithPrevious, ExecutionState.SUCCESS) },
+                { jobExecutionPlanService.lastProcessDate(plansWithPrevious, ExecutionState.FAILURE) },
+        ]
 
         Authentication auth = SecurityContextHolder.context.authentication
-        Promise failedProcessesPromise = task {
-            SecurityContextHolder.context.authentication = auth
-            try {
-                SessionUtils.withNewSession {
-                    jobExecutionPlanService.failedProcessCount()
+        List<Promise> promises = tasks.collect { Closure taskClosure ->
+            task {
+                SecurityContextHolder.context.authentication = auth
+                try {
+                    SessionUtils.withNewSession(taskClosure)
+                } finally {
+                    SecurityContextHolder.context.authentication = null
                 }
-            } finally {
-                SecurityContextHolder.context.authentication = null
             }
         }
 
-        Promise lastSuccessDatesPromise = task {
-            SecurityContextHolder.context.authentication = auth
-            try {
-                SessionUtils.withNewSession {
-                    jobExecutionPlanService.lastProcessDate(ExecutionState.SUCCESS)
-                }
-            } finally {
-                SecurityContextHolder.context.authentication = null
-            }
-        }
-        Promise lastFailureDatesPromise = task {
-            SecurityContextHolder.context.authentication = auth
-            try {
-                SessionUtils.withNewSession {
-                    jobExecutionPlanService.lastProcessDate(ExecutionState.FAILURE)
-                }
-            } finally {
-                SecurityContextHolder.context.authentication = null
-            }
-        }
+        def (processCounts, failedProcesses, finishedProcessCounts, lastSuccessDates, lastFailureDates) = waitAll(promises)
 
-        processCounts = jobExecutionPlanService.processCount()
-        finishedProcessCounts = jobExecutionPlanService.finishedProcessCount()
-        def (failedProcessesResult, lastSuccessDatesResult, lastFailureDatesResult) = waitAll(failedProcessesPromise, lastSuccessDatesPromise, lastFailureDatesPromise)
         plans.each { plan ->
             long allProcessesCount = processCounts[plan.name] ?: 0L
+            long failedProcessCount = failedProcesses[plan.name] ?: 0L
             long finishedProcessesCount = finishedProcessCounts[plan.name] ?: 0L
-            long failedProcessCount = failedProcessesResult[plan.name] ?: 0L
-            Date successDate = lastSuccessDatesResult[plan.name]
-            Date failureDate = lastFailureDatesResult[plan.name]
+            Date successDate = lastSuccessDates[plan.name]
+            Date failureDate = lastFailureDates[plan.name]
 
             dataToRender.aaData << [
-                    name                    : plan.name,
-                    id                      : plan.id,
-                    enabled                 : plan.enabled,
-                    allProcessesCount       : allProcessesCount,
-                    finishedProcessesCount  : finishedProcessesCount,
-                    failedProcessesCount    : failedProcessCount,
-                    runningProcessesCount   : allProcessesCount - finishedProcessesCount,
-                    lastSuccessfulDate      : TimestampHelper.asTimestamp(successDate),
-                    lastFailureDate         : TimestampHelper.asTimestamp(failureDate),
+                    name                  : plan.name,
+                    id                    : plan.id,
+                    enabled               : plan.enabled,
+                    allProcessesCount     : allProcessesCount,
+                    finishedProcessesCount: finishedProcessesCount,
+                    failedProcessesCount  : failedProcessCount,
+                    runningProcessesCount : allProcessesCount - finishedProcessesCount,
+                    lastSuccessfulDate    : TimestampHelper.asTimestamp(successDate),
+                    lastFailureDate       : TimestampHelper.asTimestamp(failureDate),
             ]
         }
 

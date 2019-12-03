@@ -346,12 +346,21 @@ class DomainFactory {
 
     static RestartedProcessingStep createRestartedProcessingStep(Map properties = [:]) {
         ProcessingStep original = properties.original ?: createProcessingStep()
-        return createDomainObject(RestartedProcessingStep, [
+        ProcessingStep next = createDomainObject(RestartedProcessingStep, [
                 jobDefinition: original.jobDefinition,
                 jobClass     : 'someClass',
                 process      : original.process,
                 original     : original,
         ], properties)
+        if (!original.latestProcessingStepUpdate) {
+            createProcessingStepUpdate(original, ExecutionState.CREATED)
+        }
+        createProcessingStepUpdate(original, ExecutionState.RESTARTED)
+        if (original.previous) {
+            original.previous.next = next
+            original.previous.save(flush: true)
+        }
+        return next
     }
 
     static ProcessingStepUpdate createProcessingStepUpdate(Map properties = [:]) {

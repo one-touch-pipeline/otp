@@ -56,6 +56,7 @@ class ProcessingStepUpdate implements Serializable, Entity {
         state index: 'processing_step_update_state_idx'
         processingStep index: 'processing_step_update_processing_step_idx'
         error index: 'processing_step_update_error_idx'
+        previous index: 'processing_step_update_previous_idx'
     }
 
     static belongsTo = [

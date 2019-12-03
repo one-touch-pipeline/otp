@@ -800,11 +800,10 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         createProcessingStepHelper(plan5, ExecutionState.STARTED)
         createProcessingStepHelper(plan5, ExecutionState.SUSPENDED)
 
-
         when:
         def result
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            result = jobExecutionPlanService.failedProcessCount()
+            result = jobExecutionPlanService.failedProcessCount(jobExecutionPlanService.jobExecutionPlansWithPreviousVersions)
         }
 
         then:
@@ -833,7 +832,7 @@ class JobExecutionPlanServiceIntegrationTests implements UserAndRoles {
         when:
         def result
         SpringSecurityUtils.doWithAuth(ADMIN) {
-            result = jobExecutionPlanService.lastProcessDate(ExecutionState.SUCCESS)
+            result = jobExecutionPlanService.lastProcessDate(jobExecutionPlanService.jobExecutionPlansWithPreviousVersions, ExecutionState.SUCCESS)
         }
 
         then:

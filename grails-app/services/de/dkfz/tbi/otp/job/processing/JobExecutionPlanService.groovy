@@ -100,6 +100,12 @@ class JobExecutionPlanService {
         return JobExecutionPlan.findAllByObsoleted(false, [sort: "name", order: "asc"])
     }
 
+    @PostFilter("hasRole('ROLE_OPERATOR')")
+    List<JobExecutionPlan> getJobExecutionPlansWithPreviousVersions() {
+        List<JobExecutionPlan> jobExecutionPlans = getJobExecutionPlans()
+        return JobExecutionPlan.findAllByNameInList(jobExecutionPlans*.name)
+    }
+
     /**
      * Retrieves all Processes for the given JobExecutionPlan.
      * @param plan The Plan whose Processes should be retrieved
@@ -135,24 +141,25 @@ class JobExecutionPlanService {
             JobExecutionPlan plan, int max = 10, int offset = 0, String column = "id", boolean order = false, List<ExecutionState> states = []) {
         final List<Long> plans = withParents(plan).collect { it.id }
         String query = """
-SELECT p, max(u.id)
-FROM ProcessingStepUpdate as u
-INNER JOIN u.processingStep as step
-INNER JOIN step.process as p
-INNER JOIN p.jobExecutionPlan as plan
-WHERE plan.id in (:planIds)
-AND step.next IS NULL
-AND u.id IN (
-    SELECT MAX(u2.id)
-    FROM ProcessingStepUpdate AS u2
-    INNER JOIN u2.processingStep as step2
-    INNER JOIN step2.process as p2
-    INNER JOIN p2.jobExecutionPlan as plan2
-    WHERE plan2.id in (:planIds)
-    AND step2.next IS NULL
-    GROUP BY p2.id
-)
-"""
+        SELECT
+            p, max(u.id)
+        FROM
+            ProcessingStepUpdate as u
+            INNER JOIN u.processingStep as step
+            INNER JOIN step.process as p
+            INNER JOIN p.jobExecutionPlan as plan
+        WHERE
+            plan.id in (:planIds)
+            AND step.next IS NULL
+            AND NOT EXISTS (
+                SELECT
+                    u2.id
+                FROM
+                    ProcessingStepUpdate AS u2
+                WHERE
+                    u2.previous = u
+            )
+        """
         if (states) {
             query = query + "AND u.state IN (:states)\n"
         }
@@ -210,17 +217,20 @@ AND u.id IN (
     Process getLastExecutedProcess(JobExecutionPlan plan) {
         final List<Long> plans = withParents(plan).collect { it.id }
         String query = """
-SELECT p
-FROM ProcessingStepUpdate AS u
-INNER JOIN u.processingStep AS step
-INNER JOIN step.process AS p
-INNER JOIN p.jobExecutionPlan AS plan
-WHERE
-plan.id IN (:planIds)
-AND u.state = 'CREATED'
-AND step.previous IS NULL
-ORDER BY p.id DESC
-"""
+        SELECT
+            p
+        FROM
+            ProcessingStepUpdate AS u
+            INNER JOIN u.processingStep AS step
+            INNER JOIN step.process AS p
+            INNER JOIN p.jobExecutionPlan AS plan
+        WHERE
+            plan.id IN (:planIds)
+            AND u.state = 'CREATED'
+            AND step.previous IS NULL
+        ORDER BY
+            p.id DESC
+        """
 
         List result = Process.executeQuery(query.toString(), [planIds: plans], [max: 1])
         if (result.isEmpty()) {
@@ -244,25 +254,26 @@ ORDER BY p.id DESC
             return plans ? Process.countByJobExecutionPlanInList(plans) : 0
         }
         String query = """
-SELECT COUNT(DISTINCT p.id)
-FROM ProcessingStepUpdate AS u
-INNER JOIN u.processingStep as step
-INNER JOIN step.process as p
-INNER JOIN p.jobExecutionPlan as plan
-WHERE plan.id in (:planIds)
-AND step.next IS NULL
-AND u.state in (:states)
-AND u.id IN (
-    SELECT MAX(u2.id)
-    FROM ProcessingStepUpdate AS u2
-    INNER JOIN u2.processingStep as step2
-    INNER JOIN step2.process as p2
-    INNER JOIN p2.jobExecutionPlan as plan2
-    WHERE plan2.id in (:planIds)
-    AND step2.next IS NULL
-    GROUP BY p2.id
-)
-"""
+        SELECT
+            COUNT(DISTINCT p.id)
+        FROM
+            ProcessingStepUpdate AS u
+            INNER JOIN u.processingStep as step
+            INNER JOIN step.process as p
+            INNER JOIN p.jobExecutionPlan as plan
+        WHERE
+            plan.id in (:planIds)
+            AND step.next IS NULL
+            AND u.state in (:states)
+            AND NOT EXISTS (
+                SELECT
+                    u2.id
+                FROM
+                    ProcessingStepUpdate AS u2
+                WHERE
+                    u2.previous = u
+            )
+        """
         return Process.executeQuery(query.toString(), [planIds: plans.collect { it.id }, states: states])[0] as int
     }
 
@@ -312,10 +323,14 @@ AND u.id IN (
      * Number of processes of each workflow
      * return Map of job execution plan names -> all processes count
      */
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map<String, Long> processCount() {
+    Map<String, Long> processCount(List<JobExecutionPlan> plans = []) {
         Process.createCriteria().list {
             createAlias("jobExecutionPlan", "jep")
+            if (plans) {
+                'in'("jobExecutionPlan", plans)
+            }
             projections {
                 groupProperty("jep.name")
                 count("id")
@@ -330,10 +345,14 @@ AND u.id IN (
      * Number of finished processes of each workflow
      * @return Map of job execution plan names -> finished processes
      */
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map<String, Long> finishedProcessCount() {
+    Map<String, Long> finishedProcessCount(List<JobExecutionPlan> plans = []) {
         Process.createCriteria().list {
             createAlias("jobExecutionPlan", "jep")
+            if (plans) {
+                'in'("jobExecutionPlan", plans)
+            }
             eq("finished", true)
             projections {
                 groupProperty("jep.name")
@@ -349,36 +368,33 @@ AND u.id IN (
      * Number of failed processes of each workflow
      * @return Map of job execution plan names -> failed processes
      */
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map<String, Long> failedProcessCount() {
+    Map<String, Long> failedProcessCount(List<JobExecutionPlan> plans) {
         String query = """
-SELECT
-    plan.name,
-    count(u.id)
-FROM
-    ProcessingStepUpdate as u
-    INNER JOIN u.processingStep as step
-    INNER JOIN step.process as p
-    INNER JOIN p.jobExecutionPlan as plan
-WHERE
-    step.next IS NULL
-    AND u.state = '${ExecutionState.FAILURE}'
-    AND u.id IN (
         SELECT
-            MAX(u2.id)
+            plan.name,
+            COUNT(DISTINCT p.id)
         FROM
-            ProcessingStepUpdate AS u2
-            INNER JOIN u2.processingStep as step2
-            INNER JOIN step2.process as p2
-            INNER JOIN p2.jobExecutionPlan as plan2
+            ProcessingStepUpdate as u
+            INNER JOIN u.processingStep as step
+            INNER JOIN step.process as p
+            INNER JOIN p.jobExecutionPlan as plan
         WHERE
-            step2.next IS NULL
+            plan.id IN (${plans*.id.join(", ")})
+            AND step.next IS NULL
+            AND u.state = '${ExecutionState.FAILURE}'
+            AND NOT EXISTS (
+                SELECT
+                    u2.id
+                FROM
+                    ProcessingStepUpdate AS u2
+                WHERE
+                    u2.previous = u
+            )
         GROUP BY
-            p2.id
-    )
-GROUP BY
-    plan.name
-"""
+            plan.name
+        """
         return Process.executeQuery(query.toString(), []).collectEntries { e ->
             [e[0], e[1]]
         }
@@ -388,14 +404,18 @@ GROUP BY
      * Last process with given state of each workflow
      * @return Map of job execution plan names -> date of last process with given state
      */
+    @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    Map<String, Date> lastProcessDate(ExecutionState state) {
+    Map<String, Date> lastProcessDate(List<JobExecutionPlan> plans, ExecutionState state) {
         ProcessingStepUpdate.createCriteria().list {
-            createAlias("processingStep", "step")
-            createAlias("processingStep.process", "proc")
             createAlias("processingStep.process.jobExecutionPlan", "jep")
-            eq("proc.finished", true)
-            isNull("step.next")
+            processingStep {
+                isNull("next")
+                process {
+                    'in'("jobExecutionPlan", plans)
+                    eq("finished", true)
+                }
+            }
             eq("state", state)
             projections {
                 groupProperty("jep.name")
