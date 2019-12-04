@@ -88,7 +88,7 @@ processingOptionService.createOrUpdate(
 
 processingOptionService.createOrUpdate(
         OptionName.PIPELINE_RODDY_ALIGNMENT_DEFAULT_BASE_PROJECT_CONFIG,
-        "otpAlignmentAndQCWorkflowsWGS-1.1",
+        "otpAlignmentAndQCWorkflowsWGS-1.3",
         SeqTypeService.wholeGenomePairedSeqType.roddyName,
 )
 
