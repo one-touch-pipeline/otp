@@ -70,6 +70,10 @@ class CellRangerController {
         List<CellRangerMergingWorkPackage> mwps = samples.selectedSamples ?
                 CellRangerMergingWorkPackage.findAllBySampleInListAndPipeline(samples.selectedSamples, pipeline) : []
 
+        mwps.sort { a, b ->
+            a.individual.pid <=> b.individual.pid ?: a.sampleType.name <=> b.sampleType.name
+        }
+
         ToolName toolName = ToolName.findByNameAndType('CELL_RANGER', ToolName.Type.SINGLE_CELL)
 
         return [

@@ -76,7 +76,9 @@ $.otp.alignmentQualityOverviewTable = {
                 result ="<span title='" + data.tooltip + "'>" + result + "</span>"
             }
             if (data.link) {
-                result ="<a href='" + data.link + "'>" + result + "</a>"
+                var target = data.linkTarget ? "target='" + data.linkTarget + "'" : "";
+                var href = "href='" + data.link + "'";
+                result ="<a " + target + " " + href + ">" + result + "</a>";
             }
         }
         return result;

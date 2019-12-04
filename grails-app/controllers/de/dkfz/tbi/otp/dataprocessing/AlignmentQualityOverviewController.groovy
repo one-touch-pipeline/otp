@@ -397,9 +397,10 @@ class AlignmentQualityOverviewController {
                 case SeqTypeNames._10X_SCRNA.seqTypeName:
                     map << [
                             summary: new TableCellValue(
-                                value: "summary",
-                                link : g.createLink(
-                                        action: 'viewCellRangerSummary',
+                                value     : "summary",
+                                linkTarget: "_blank",
+                                link      : g.createLink(
+                                        action: "viewCellRangerSummary",
                                         params: [
                                                 "singleCellBamFile.id": ((SingleCellBamFile) abstractMergedBamFile).id,
                                         ],

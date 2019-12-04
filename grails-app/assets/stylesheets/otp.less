@@ -2050,6 +2050,20 @@ div.log {
         }
     }
 }
+.cell-ranger-selection-grid-wrapper {
+    display: grid;
+    grid-gap: 24px;
+    grid-template-columns: 1fr 1fr 12fr;
+
+    .row {
+        &.one {
+            grid-row: 1;
+        }
+        &.two {
+            grid-row: 2;
+        }
+    }
+}
 
 .species-with-strain-grid-wrapper {
     table {

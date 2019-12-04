@@ -215,6 +215,7 @@ class TableCellValue implements Serializable {
     Icon icon
     String status
     long id
+    String linkTarget
 
     enum WarnColor {
         OKAY,
