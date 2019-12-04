@@ -63,7 +63,7 @@ class LdapDaoAuthenticationProvider implements AuthenticationProvider {
         } else if (!user.isEnabled()) {
             throw new DisabledException("User is disabled")
         } else if (!user.isAccountNonExpired()) {
-            throw new AccountExpiredException( "User account has expired")
+            throw new AccountExpiredException("User account has expired")
         }
 
         return ldapAuth

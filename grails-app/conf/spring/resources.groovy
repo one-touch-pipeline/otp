@@ -44,6 +44,8 @@ beans = {
         }
     }
 
+    userDetailsService(UserCreatingUserDetailsService)
+
     permissionEvaluator(OtpPermissionEvaluator) {}
     aclPermissionEvaluator(AclPermissionEvaluator, ref('aclService')) {
         objectIdentityRetrievalStrategy = ref('objectIdentityRetrievalStrategy')

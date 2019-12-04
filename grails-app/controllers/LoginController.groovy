@@ -24,8 +24,11 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.authentication.*
+import org.springframework.security.core.AuthenticationException
 import org.springframework.security.core.context.SecurityContextHolder as SCH
 import org.springframework.security.web.WebAttributes
+
+import de.dkfz.tbi.otp.security.FailedToCreateUserException
 
 import javax.servlet.http.HttpServletResponse
 
@@ -104,13 +107,14 @@ class LoginController {
      */
     def authfail = {
         String msg = ''
-        def exception = session[WebAttributes.AUTHENTICATION_EXCEPTION]
+        AuthenticationException exception = session[WebAttributes.AUTHENTICATION_EXCEPTION] as AuthenticationException
         if (exception) {
             switch (exception.class) {
                 case AccountExpiredException.class: msg = g.message(code: "springSecurity.errors.login.expired"); break
                 case CredentialsExpiredException.class: msg = g.message(code: "springSecurity.errors.login.passwordExpired"); break
                 case DisabledException.class: msg = g.message(code: "springSecurity.errors.login.disabled"); break
                 case LockedException.class: msg = g.message(code: "springSecurity.errors.login.locked"); break
+                case FailedToCreateUserException.class: msg = exception.message; break
                 default: msg = g.message(code: "springSecurity.errors.login.fail"); break
             }
         }

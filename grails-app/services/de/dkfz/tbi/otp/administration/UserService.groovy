@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.administration
 
-import grails.core.GrailsApplication
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
@@ -39,9 +38,6 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
  */
 @Transactional
 class UserService {
-
-    @SuppressWarnings("GrailsStatelessService")
-    GrailsApplication grailsApplication
 
     SpringSecurityService springSecurityService
     ConfigService configService
@@ -63,17 +59,24 @@ class UserService {
         return User.count()
     }
 
+    User createUser(String username, String email, String realName) {
+        User user = new User([
+                username: username,
+                email: email,
+                enabled: true,
+                accountExpired: false,
+                accountLocked: false,
+                passwordExpired: false,
+                password: "*",
+                realName: realName,
+        ])
+        user.save(flush: true)
+        return user
+    }
+
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(null, 'ADD_USER')")
-    User createUser(String username, String email, String realName, List<Role> roles = []) {
-        User user = new User(username: username,
-                             email: email,
-                             enabled: true,
-                             accountExpired: false,
-                             accountLocked: false,
-                             passwordExpired: false,
-                             password: "*",
-                             realName: realName)
-        user = user.save(flush: true)
+    User createUser(String username, String email, String realName, List<Role> roles) {
+        User user = createUser(username, email,  realName)
         roles.each { Role role ->
             addRoleToUser(user, role)
         }
