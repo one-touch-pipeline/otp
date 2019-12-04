@@ -296,21 +296,14 @@ class ProcessService {
             return 0
         }
 
-        List<ExecutionState> nonProcessingStates = [
+        List<ExecutionState> endStates = [
                 ExecutionState.FAILURE,
                 ExecutionState.FINISHED,
                 ExecutionState.SUCCESS,
-                ExecutionState.RESTARTED,
         ]
 
-        Long lastProcessingTime
-        ProcessingStepUpdate lastUpdate = updates.last()
-        if (lastUpdate.state in nonProcessingStates) {
-            lastProcessingTime = lastUpdate.date.time
-        } else {
-            lastProcessingTime = date.time
-        }
-        return lastProcessingTime - updates.first().date.time
+        List<ProcessingStepUpdate> endStateUpdates = updates.findAll { ProcessingStepUpdate update -> update.state in endStates }
+        return (endStateUpdates ? endStateUpdates.last().date.time : date.time) - updates.first().date.time
     }
 
     /**

@@ -26,6 +26,7 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import org.springframework.beans.factory.annotation.Autowired
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.UserAndRoles
@@ -100,6 +101,31 @@ class ProcessServiceIntegrationSpec extends Specification implements UserAndRole
         50 == result
     }
 
+    void "getProcessingStepDuration, multiple FAILURE states, should normally not happen"() {
+        given:
+        setupData()
+        createUpdates([
+                [CREATED,   10],
+                [STARTED,   20],
+                [FINISHED,  30],
+                [FAILURE,   40],
+                [RESUMED,   50],
+                [FINISHED,  60],
+                [FAILURE,   70],
+                [RESTARTED, 80],
+        ])
+
+        Long result
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            result = processService.getProcessingStepDuration(step)
+        }
+
+        then:
+        60 == result
+    }
+
     void "getProcessingStepDuration, typical setup after shutdown"() {
         given:
         setupData()
@@ -124,7 +150,8 @@ class ProcessServiceIntegrationSpec extends Specification implements UserAndRole
         60 == result
     }
 
-    void "getProcessingStepDuration for finished ProcessingStep"() {
+    @Unroll
+    void "getProcessingStepDuration for finished ProcessingStep (#lastState)"() {
         given:
         setupData()
         createUpdates([
@@ -144,7 +171,28 @@ class ProcessServiceIntegrationSpec extends Specification implements UserAndRole
         30 == result
 
         where:
-        lastState << [FAILURE, FINISHED, SUCCESS, RESTARTED]
+        lastState << [FAILURE, FINISHED, SUCCESS]
+    }
+
+    void "getProcessingStepDuration, for restarted ProcessingStep"() {
+        given:
+        setupData()
+        createUpdates([
+                [CREATED,   10],
+                [STARTED,   20],
+                [FAILURE,   40],
+                [RESTARTED, 50],
+        ])
+
+        Long result
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            result = processService.getProcessingStepDuration(step)
+        }
+
+        then:
+        30 == result
     }
 
     void "getProcessingStepDuration for unfinished ProcessingStep"() {
@@ -167,5 +215,20 @@ class ProcessServiceIntegrationSpec extends Specification implements UserAndRole
 
         then:
         50 == result
+    }
+
+    void "getProcessingStepDuration without any updates"() {
+        given:
+        setupData()
+
+        Long result
+
+        when:
+        SpringSecurityUtils.doWithAuth(OPERATOR) {
+            result = processService.getProcessingStepDuration(step)
+        }
+
+        then:
+        0 == result
     }
 }
