@@ -583,7 +583,7 @@ class MetadataImportService {
         Cell barcodeCell = row.getCellByColumnTitle(BARCODE.name())
         if (barcodeCell) {
             cells.add(barcodeCell)
-            barcode = barcodeCell.text ?: null
+            barcode = barcodeCell.text ? barcodeCell.text.replace(',', '-') : null
         } else {
             Cell filenameCell = row.getCellByColumnTitle(FASTQ_FILE.name())
             if (filenameCell) {

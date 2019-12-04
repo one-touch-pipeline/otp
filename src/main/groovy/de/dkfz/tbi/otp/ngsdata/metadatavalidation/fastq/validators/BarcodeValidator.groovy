@@ -34,8 +34,8 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.BARCODE
 @Component
 class BarcodeValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
-    final static String MUST_REGEX = /^[0-9a-zA-Z\-\+\.]*$/
-    final static String SHOULD_REGEX = /^[ACGT]{6,8}|[ACGT]{6,8}\-[ACGT]{6,8}|[0-9]{3}$/
+    final static String MUST_REGEX = /^[0-9a-zA-Z\-\+\.\,]*$/
+    final static String SHOULD_REGEX = /^[ACGT]{6,8}|[ACGT]{6,8}\-[ACGT]{6,8}|[0-9]{3}|([ACGT]{8}\,){3}[ACGT]{8}$/
 
     @Override
     Collection<String> getDescriptions() {

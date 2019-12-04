@@ -1326,6 +1326,18 @@ ${PIPELINE_VERSION}             ${softwareToolIdentifier.name}              ${so
         result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
     }
 
+    void "extractBarcode, when BARCODE column contains entry with a comma and FASTQ_FILE column is missing, returns barcode extracted from BARCODE cell"() {
+        given:
+        Row row = MetadataValidationContextFactory.createContext("${BARCODE}\nACGTACGT,ACGTACGT,ACGTACGT,ACGTACGT").spreadsheet.dataRows[0]
+
+        when:
+        ExtractedValue result = MetadataImportService.extractBarcode(row)
+
+        then:
+        result.value == 'ACGTACGT-ACGTACGT-ACGTACGT-ACGTACGT'
+        result.cells == [row.getCellByColumnTitle(BARCODE.name())] as Set
+    }
+
     void "extractBarcode, when BARCODE column contains entry and filename contains no barcode, returns barcode extracted from BARCODE cell"() {
         given:
         Row row = MetadataValidationContextFactory.createContext("${FASTQ_FILE}\t${BARCODE}\nfile.fastq.gz\tACGTACGT").spreadsheet.dataRows[0]

@@ -41,7 +41,8 @@ class BarcodeValidatorSpec extends Specification {
                 "${MetaDataColumn.BARCODE}\n" +
                 "\n" +
                  "AGGCAGAA\n" +
-                 "AGGCAGAA-AGGCAGAA\n"
+                 "AGGCAGAA-AGGCAGAA\n" +
+                 "AGGCAGAA,AGGCAGAA,AGGCAGAA,AGGCAGAA\n"
         )
 
         when:
