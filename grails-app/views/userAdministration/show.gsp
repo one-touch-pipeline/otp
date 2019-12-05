@@ -28,7 +28,7 @@
         <asset:javascript src="modules/userAdministration.js"/>
     </head>
     <body>
-        <div class="body_grow">
+        <div class="body">
             <g:render template="/templates/messages"/>
             <ul>
                 <li class="button"><g:link action="index"><g:message code="user.administration.backToOverview"/></g:link></li>
@@ -131,7 +131,6 @@
     <asset:script type="text/javascript">
         $(function() {
             $.otp.userAdministration.editUser.register.call($.otp.userAdministration.editUser);
-            $.otp.growBodyInit(240);
         });
     </asset:script>
 </html>

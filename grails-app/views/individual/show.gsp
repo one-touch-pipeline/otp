@@ -30,7 +30,7 @@
     <asset:javascript src="modules/editSamples.js"/>
 </head>
 <body>
-    <div class="body_grow">
+    <div class="body">
         <h1><g:message code="individual.show.header"/></h1>
         <br>
         <div class="individual-grid-wrapper">
@@ -191,7 +191,6 @@
 </body>
 <asset:script type="text/javascript">
     $(function() {
-        $.otp.growBodyInit(240);
         $.otp.initCommentBox(${individual.id}, "#individualCommentBox");
     });
 </asset:script>

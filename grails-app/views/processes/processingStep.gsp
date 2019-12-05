@@ -29,7 +29,7 @@
     <asset:javascript src="modules/workflows"/>
 </head>
 <body>
-    <div class="body_grow">
+    <div class="body">
     <h1><g:message code="processes.processingStep.title" args="${ [step.jobDefinition.name, step.id] }"/></h1>
     <table>
         <thead></thead>
@@ -159,9 +159,4 @@
     </asset:script>
     </div>
 </body>
-<asset:script>
-    $(function() {
-        $.otp.growBodyInit(380);
-    });
-</asset:script>
 </html>

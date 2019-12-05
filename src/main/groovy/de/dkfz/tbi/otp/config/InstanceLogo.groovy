@@ -25,7 +25,7 @@ import groovy.transform.TupleConstructor
 
 @TupleConstructor
 enum InstanceLogo {
-    NONE("header-empty.png"),
+    NONE(""),
     CHARITE("non-free/header-charite.png"),
     DKFZ("non-free/header-dkfz.png"),
 

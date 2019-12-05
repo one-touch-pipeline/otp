@@ -29,7 +29,7 @@
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 <body>
-<div class="body_grow">
+<div class="body">
     <h1><g:message code="job.error.definition.header"/></h1>
     <form class="blue_label" id="projectsGroupbox">
         <span class="blue_label"><g:message code="job.error.definition.jobDefinitionFilter"/> :</span>
@@ -155,9 +155,4 @@
     />
 </div>
 </body>
-<asset:script>
-    $(function() {
-        $.otp.growBodyInit(240);
-    });
-</asset:script>
 </html>

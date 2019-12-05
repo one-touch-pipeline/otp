@@ -361,28 +361,11 @@ $.otp.highlight = function (path) {
     }
 };
 
+/** used for data tables */
 $.otp.resizeBodyInit = function (table, margin) {
     "use strict";
     $(window).resize(function () {
         $(table + '_wrapper' + ' .dataTables_scrollBody').height(($('.body').height() - margin));
-    });
-};
-
-$.otp.growBodyInit = function (margin) {
-    "use strict";
-    var grow_body_h = $('.body_grow').height();
-    if (grow_body_h > ($(window).height() - margin)) {
-        $('body').attr('style', 'overflow-y:scroll');
-        $('.body_position').attr('style', 'margin-left:' + ((($(window).width() - $('.body_grow').width()) / 2) - 11) + 'px;');
-    }
-    $(window).resize(function () {
-        if (grow_body_h > ($(window).height() - margin)) {
-            $('body').attr('style', 'overflow-y:scroll');
-            $('.body_position').attr('style', 'margin-left:' + ((($(window).width() - $('.body_grow').width()) / 2) - 11) + 'px;');
-        } else {
-            $('body').attr('style', 'overflow-y:hidden');
-            $('.body_position').attr('style', 'margin-left:auto;');
-        }
     });
 };
 

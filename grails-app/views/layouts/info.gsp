@@ -70,7 +70,7 @@
             <g:render template="/login/login"/>
         </sec:ifNotLoggedIn>
 
-        <div id="content" style="position: absolute; top: 80px; left: 0px;" >
+        <div id="content">
             <g:layoutBody/>
         </div>
     </div>

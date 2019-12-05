@@ -29,7 +29,7 @@
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 <body>
-    <div class="body_grow">
+    <div class="body">
         <div id="dataFileCommentBox" class="commentBoxContainer">
             <div id="commentLabel">Comment:</div>
             <sec:ifNotGranted roles="ROLE_OPERATOR">
@@ -172,7 +172,6 @@
 </body>
 <asset:script>
     $(function() {
-        $.otp.growBodyInit(240);
         $.otp.initCommentBox(${dataFile.id},"#dataFileCommentBox");
     });
 </asset:script>

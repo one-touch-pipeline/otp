@@ -34,10 +34,6 @@
     <asset:stylesheet src="modules/defaultPageDependencies.css"/>
     <asset:stylesheet src="modules/style.css"/>
     <asset:script type="text/javascript">
-        $('.body').height($(window).height()-260);
-        $(window).resize(function(){
-            $('.body').height($(window).height()-260);
-        });
         $.otp.highlight(window.location.pathname);
     </asset:script>
     <g:layoutHead/>
@@ -45,15 +41,16 @@
 <body id="otp">
 <div class="body_position">
         <div class="header">
-            <img class="radiused" src="${assetPath(src: logo)}" alt=""/>
-            <img src="${assetPath(src: 'non-free/header-otp.png')}" alt="OTP"/>
+            <g:if test="${logo}">
+                <img class="institute-logo" src="${assetPath(src: logo)}" alt=""/>
+            </g:if>
+            <div></div>
+            <img class="otp-logo" src="${assetPath(src: 'non-free/header-otp.png')}" alt="OTP"/>
             <g:if test="${otp.environmentName() != 'production'}">
                 <p class="environmentName"><otp:environmentName/></p>
             </g:if>
         </div>
-        <div class="headerGraphic">
-            <img class="headerGraphicImg" src="${assetPath(src: 'header_graphic.png')}" alt=""/>
-        </div>
+
         <g:if test="${!disableMenu}">
         <div class="menu">
             <div class="menuContainer menuContainerL">
@@ -184,9 +181,9 @@
         <div class="footer" role="contentinfo">
             &copy;2011-2019
             <a href="https://www.dkfz.de" target="_blank">DKFZ</a>,
-            <a href="https://www.uni-heidelberg.de/" target="_blank">Universität Heidelberg</a>,
+            <a href="https://www.uni-heidelberg.de/" target="_blank">Heidelberg University</a>,
             <a href="https://www.charite.de/" target="_blank">Charité</a>,
-            <a href="https://www.klinikum.uni-heidelberg.de/" target="_blank">Universitätsklinikum Heidelberg</a> |
+            <a href="https://www.klinikum.uni-heidelberg.de/" target="_blank">Heidelberg University Hospital</a> |
             <g:link controller="info" action="imprint"><g:message code="info.imprint.link"/></g:link> |
             <g:link controller="privacyPolicy"><g:message code="info.privacyPolicy.link"/></g:link> |
             <g:set var="faqLink" value="${ProcessingOptionService.findOption(OptionName.NOTIFICATION_TEMPLATE_FAQ_LINK)}" />
@@ -198,6 +195,5 @@
         <div id="spinner" class="spinner" style="display:none;"><g:message code="spinner.alt" default="Loading&hellip;"/></div>
     </div>
     <asset:deferredScripts/>
-    <g:render template="/layouts/piwik"/>
 </body>
 </html>

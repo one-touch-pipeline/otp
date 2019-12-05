@@ -26,15 +26,12 @@
 
 /* menu */
 #infoMenu {
-    position: absolute;
-    top: 0;
-    left: 0;
     width: 100%;
     background: #777;
     text-align: center;
     vertical-align: middle;
     display: table;
-    margin: 0;
+    margin: -10px; //because .body has padding -> 10px
     padding: 10px;
 }
 .infoMenuButton {
@@ -108,9 +105,7 @@
 }
 
 #content {
-    position: absolute;
-    left: 0;
-    padding: 10px;
+    padding-top: 5px;
 }
 
 .plotContainer {

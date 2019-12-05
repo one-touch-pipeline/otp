@@ -29,7 +29,7 @@
         <asset:javascript src="modules/editorSwitch"/>
     </head>
 <body>
-    <div class="body_grow">
+    <div class="body">
         <div class="tableBlock">
             <table>
                 <thead>
@@ -76,9 +76,4 @@
         </div>
     </div>
 </body>
-<asset:script type="text/javascript">
-    $(function() {
-        $.otp.growBodyInit(240);
-    });
-</asset:script>
 </html>

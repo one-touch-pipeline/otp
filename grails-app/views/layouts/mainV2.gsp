@@ -300,8 +300,6 @@
     <h2>${g.message(code: "info.contact.postalAddress")}</h2>
     <p class="keep-whitespace">${contactDataPostalAddress}</p>
 </otp:modal>
-
-    <asset:deferredScripts/>
-    <g:render template="/layouts/piwik"/>
+<asset:deferredScripts/>
 </body>
 </html>

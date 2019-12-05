@@ -28,7 +28,7 @@
 <title><g:message code="run.show.title"/></title>
 </head>
 <body>
-  <div class="body_grow">
+  <div class="body">
     <h1><g:message code="run.show.title"/></h1>
 
     <h1><g:message code="run.show.general"/></h1>
@@ -160,9 +160,4 @@
     </div>
   </div>
 </body>
-<asset:script>
-    $(function() {
-        $.otp.growBodyInit(240);
-    });
-</asset:script>
 </html>
