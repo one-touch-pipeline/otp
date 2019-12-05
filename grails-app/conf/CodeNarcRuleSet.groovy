@@ -336,10 +336,13 @@ All the Rules that will be used for OTP
     CouldBeSwitchStatement {
         priority = CRITICAL
     }
-    //FieldTypeRequired //does not work well with Grails
+    FieldTypeRequired {
+        ignoreFieldNames = 'mapping, constraints, hasMany, belongsTo, mappedBy, allowedMethods'
+    }
     HashtableIsObsolete {
         priority = CRITICAL
     }
+    //ImplicitClosureParameter //There are more cases where this would deteriorate code quality instead of improving it
     IfStatementCouldBeTernary {
         priority = MIDDLE
     }
@@ -363,6 +366,8 @@ All the Rules that will be used for OTP
         priority = MIDDLE
         doNotApplyToFileNames = CONTROLLER
     }
+    //NoFloat //Float is fine since we don't use the numbers for calculations
+    //NoDouble //Double is fine since we don't use the numbers for calculations
     /* Since our code use the Date class a lot, it is not possible to avoid it in new code.
     NoJavaUtilDate {
         priority = MIDDLE
