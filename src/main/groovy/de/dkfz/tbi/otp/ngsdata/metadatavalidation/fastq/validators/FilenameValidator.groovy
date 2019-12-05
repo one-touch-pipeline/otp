@@ -36,12 +36,22 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.FASTQ_FILE
 @Component
 class FilenameValidator extends SingleValueValidator<MetadataValidationContext> implements MetadataValidator {
 
+    /**
+     * '_' is required because the AlignmentAndQCWorkflows Roddy Plugin uses it as a
+     * separator to group FastQs.
+     *
+     * See: https://github.com/DKFZ-ODCF/AlignmentAndQCWorkflows
+     * QCPipelineScriptFileServiceHelper.sortAndPairLaneFilesToGroupsForSampleAndRun()
+      */
+    static final List<String> REQUIRED_CHARACTERS = ['_']
+
     @Override
     Collection<String> getDescriptions() {
         return [
                 "The filename must end with '.gz'.",
                 "The filename must contain '_fastq' or '.fastq'.",
                 "The filename must contain only legal characters.",
+                "The filename must contain all required characters. ${requiredCharactersAsReadableList}",
         ]
     }
 
@@ -52,6 +62,7 @@ class FilenameValidator extends SingleValueValidator<MetadataValidationContext> 
 
     @Override
     void validateValue(MetadataValidationContext context, String filename, Set<Cell> cells) {
+        String basename = filename.split("/").last()
         if (!filename.endsWith('.gz')) {
             context.addProblem(cells, Level.ERROR, "Filename '${filename}' does not end with '.gz'.", "At least one filename does not end with '.gz'.")
         }
@@ -63,5 +74,15 @@ class FilenameValidator extends SingleValueValidator<MetadataValidationContext> 
         if (!(OtpPath.isValidPathComponent(filename) || OtpPath.isValidAbsolutePath(filename))) {
             context.addProblem(cells, Level.ERROR, "Filename '${filename}' contains invalid characters.", "At least one filename contains invalid characters.")
         }
+        if (!REQUIRED_CHARACTERS.every { String it -> basename.contains(it) }) {
+            context.addProblem(cells, Level.WARNING,
+                    "Filename '${filename}' does not contain all required characters: ${requiredCharactersAsReadableList}",
+                    "At least one filename does not contain all required characters."
+            )
+        }
+    }
+
+    static String getRequiredCharactersAsReadableList() {
+        return "['${REQUIRED_CHARACTERS.join("', '")}']"
     }
 }
