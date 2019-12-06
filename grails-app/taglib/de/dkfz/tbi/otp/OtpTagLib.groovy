@@ -222,4 +222,31 @@ class OtpTagLib {
         }
         out << "<span title='${cell.tooltip}'>${result}</span>"
     }
+
+    /**
+     * Allows collapsing and expanding wrapped html via a button.
+     *
+     * To be used in conjunction with: taglib/Expandable.js
+     *
+     * @attrs
+     * - value       : text to use for the button, defaults to 'expand'
+     * - collapsed   : starting state when loading the page, defaults to being collapsed
+     * - title       : pass-through for title attribute of button
+     * - wrapperClass: css class to apply to the div containing the wrapped content
+     */
+    def expandable = { attrs, body ->
+        String buttonText = attrs.value ?: "expand"
+        boolean collapsed = attrs.collapsed.toString().toBoolean()
+        String cssClass = collapsed ? "collapsed" : "expanded"
+
+        out << "<button"
+        out << "    class='expandable-button'"
+        out << "    title='${attrs.title ?: g.message(code: 'default.expandable.title')}'"
+        out << ">"
+        out << buttonText
+        out << "</button>"
+        out << "<div class='expandable-container ${cssClass} ${attrs.wrapperClass}'>"
+        out << body()
+        out << "</div>"
+    }
 }
