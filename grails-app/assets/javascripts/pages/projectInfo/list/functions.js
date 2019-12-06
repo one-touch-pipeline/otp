@@ -24,14 +24,14 @@
 /*global $ */
 
 $.otp.projectInfo = {
-    confirmDtaDelete: function(event) {
-        if (!window.confirm('Are you sure that the DTA data should be marked as deleted?')) {
+    confirmCompleteTransfer: function(event) {
+        if (!window.confirm('Are you sure that this transfer is completed? (receipt acknowledged? files deleted? disks wiped? etc..)')) {
             event.preventDefault();
         }
     },
 
     confirmProjectInfoDelete: function(event) {
-        if (!window.confirm('Are you sure that you want to permanently delete this File?')) {
+        if (!window.confirm('Are you sure that you want to permanently delete this document and any transfers based on it?')) {
             event.preventDefault();
             return;
         }

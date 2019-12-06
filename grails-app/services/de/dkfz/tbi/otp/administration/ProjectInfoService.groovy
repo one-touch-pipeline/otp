@@ -19,7 +19,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.administration
 
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
@@ -27,6 +27,8 @@ import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.ngsdata.Project
+import de.dkfz.tbi.otp.ngsdata.ProjectService
 import de.dkfz.tbi.otp.security.User
 
 import java.nio.file.FileSystem
@@ -41,41 +43,48 @@ class ProjectInfoService {
     FileSystemService fileSystemService
     FileService fileService
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void createProjectInfoAndUploadFile(AddProjectInfoCommand cmd) throws IOException {
-        cmd.validate()
-        assert !cmd.errors.hasErrors()
-        ProjectInfo projectInfo = createProjectInfo(cmd.project, cmd.projectInfoFile.originalFilename)
-        uploadProjectInfoToProjectFolder(projectInfo, cmd.projectInfoFile.bytes)
+    @SuppressWarnings('PropertyName') // static helper closure, not a normal property, more like a constant.
+    static Closure SORT_DATE_CREATED_DESC = { a, b ->
+        b.dateCreated <=> a.dateCreated
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void createProjectDtaInfoAndUploadFile(AddProjectDtaCommand cmd) throws IOException {
-        cmd.validate()
-        assert !cmd.errors.hasErrors()
-        ProjectInfo projectInfo = createProjectInfo(cmd.project, cmd.projectInfoFile.originalFilename)
-        addAdditionalValuesToProjectInfo(projectInfo, cmd, springSecurityService.currentUser as User)
-        uploadProjectInfoToProjectFolder(projectInfo, cmd.projectInfoFile.bytes)
+    Map<String, List<ProjectInfo>> getAllProjectInfosSortedByDateDescAndGroupedByDta(Project project) {
+        return project.projectInfos.sort(SORT_DATE_CREATED_DESC).groupBy { it.dta ? "Dta" : "NonDta" }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void markDtaDataAsDeleted(ProjectInfoCommand cmd) throws IOException {
+    ProjectInfo createProjectInfoAndUploadFile(AddProjectInfoCommand cmd) {
         cmd.validate()
         assert !cmd.errors.hasErrors()
-        ProjectInfo projectInfo = cmd.projectInfo
-        assert !projectInfo.deletionDate
-        projectInfo.refresh()
-        projectInfo.deletionDate = new Date()
+        ProjectInfo projectInfo = new ProjectInfo(
+                fileName: cmd.projectInfoFile.originalFilename,
+                comment : cmd.comment,
+        )
+        // if this is a DTA document, see also ProjectInfo.isDta()
+        if (cmd.peerInstitution) {
+            projectInfo.dtaId = cmd.dtaId
+            projectInfo.legalBasis = cmd.legalBasis
+            projectInfo.peerInstitution = cmd.peerInstitution
+            projectInfo.validityDate = cmd.validityDate
+        }
+
+        cmd.project.addToProjectInfos(projectInfo)
+        cmd.project.save(flush: true)
         projectInfo.save(flush: true)
+
+        uploadProjectInfoToProjectFolder(projectInfo, cmd.projectInfoFile.bytes)
+
+        return projectInfo
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void deleteProjectInfo(ProjectInfoCommand cmd) throws IOException {
+    void deleteProjectInfo(ProjectInfoCommand cmd) {
         cmd.validate()
         assert !cmd.errors.hasErrors()
         ProjectInfo projectInfo = cmd.projectInfo
         FileSystem fs = fileSystemService.getRemoteFileSystem(projectInfo.project.realm)
-        Path path = fs.getPath(projectInfo.getPath())
+        Path path = fs.getPath(projectInfo.path)
         fileService.deleteDirectoryRecursively(path)
         projectInfo.project = null
         projectInfo.delete(flush: true)
@@ -90,22 +99,7 @@ class ProjectInfoService {
         return Files.exists(file) ? file.bytes : [] as byte[]
     }
 
-    private ProjectInfo createProjectInfo(Project project, String fileName) {
-        ProjectInfo projectInfo = new ProjectInfo([fileName: fileName])
-        project.addToProjectInfos(projectInfo)
-        project.save(flush: true)
-        return projectInfo
-    }
-
-    private void addAdditionalValuesToProjectInfo(ProjectInfo projectInfo, AddProjectDtaCommand cmd, User performingUser) {
-        projectInfo.performingUser = performingUser
-        cmd.values().each {
-            projectInfo[it.key] = it.value
-        }
-        projectInfo.save(flush: true)
-    }
-
-    private void uploadProjectInfoToProjectFolder(ProjectInfo projectInfo, byte[] content) {
+    private Path uploadProjectInfoToProjectFolder(ProjectInfo projectInfo, byte[] content) {
         FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
         Path projectDirectory = fs.getPath(projectInfo.project.projectDirectory.toString())
         Path projectInfoDirectory = projectDirectory.resolve(ProjectService.PROJECT_INFO)
@@ -115,5 +109,44 @@ class ProjectInfoService {
         fileService.createFileWithContent(file, content, [
                 PosixFilePermission.OWNER_READ,
         ] as Set)
+        return file
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    DataTransfer addTransferToProjectInfo(AddTransferCommand cmd) {
+        DataTransfer xfer = new DataTransfer(
+                projectInfo   : cmd.parentDocument,
+                requester     : cmd.requester,
+                ticketID      : cmd.ticketID,
+                performingUser: springSecurityService.currentUser as User,
+                direction     : cmd.direction,
+                transferMode  : cmd.transferMode,
+                peerPerson    : cmd.peerPerson,
+                peerAccount   : cmd.peerAccount,
+                transferDate  : cmd.transferDate,
+                completionDate: cmd.completionDate,
+                comment       : cmd.comment,
+        )
+        xfer.save(flush: true)
+        return xfer
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void markTransferAsCompleted(DataTransfer xfer) {
+        assert !xfer.completionDate: "DataTransfer already completed"
+        xfer.completionDate = new Date()
+        xfer.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    ProjectInfo updateProjectInfoComment(ProjectInfo projectInfo, String comment) {
+        projectInfo.comment = comment
+        projectInfo.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    DataTransfer updateDataTransferComment(DataTransfer dataTransfer, String comment) {
+        dataTransfer.comment = comment
+        dataTransfer.save(flush: true)
     }
 }

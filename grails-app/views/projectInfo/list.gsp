@@ -20,134 +20,246 @@
   - SOFTWARE.
   --}%
 
-<%@ page import="de.dkfz.tbi.otp.ngsdata.ProjectInfo" contentType="text/html;charset=UTF-8" %>
+<%@ page import="de.dkfz.tbi.otp.administration.ProjectInfo" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="projectInfo.title" args="[project?.name]"/></title>
     <asset:javascript src="pages/projectInfo/list/functions.js"/>
+    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="taglib/Expandable.js"/>
 </head>
 <body>
     <div class="body">
         <g:render template="/templates/messages"/>
+
         <g:if test="${projects}">
             <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
 
-            <h3><g:message code="projectInfo.header.listing"/></h3>
-            <div class="project-info-listing">
-                <g:each var="projectInfo" in="${project.projectInfos.sort { [it.recipientInstitution == null, it.id] }}">
-                    <div style="margin-top: 1em">
-                        <g:message code="projectInfo.upload.dta.creationDate"/>
-                        <g:formatDate date="${projectInfo.dateCreated}" format="yyyy-MM-dd"/>
-                        <br><g:message code="projectInfo.upload.dta.path"/>
-                        <g:link action="download" params='["projectInfo.id": projectInfo.id]'>${projectInfo.getPath()}</g:link>
-                        <g:form action="deleteProjectInfo" useToken="true" style="display: inline"
-                                onSubmit="\$.otp.projectInfo.confirmProjectInfoDelete(event);">
-                            |
-                            <input type="hidden" name="projectInfo.id" value="${projectInfo.id}"/>
-                            <g:submitButton name="${g.message(code: "projectInfo.upload.dta.deleteProjectInfo")}"/>
-                        </g:form>
-                        <g:if test="${projectInfo.hasAdditionalInfos()}">
-                            <br><g:message code="projectInfo.upload.dta.additional"/> ${projectInfo.additionalInfos}
-                            <g:if test="${!projectInfo.deletionDate}">
-                                <g:uploadForm action="markDtaDataAsDeleted" useToken="true" style="display: inline"
-                                              onSubmit="\$.otp.projectInfo.confirmDtaDelete(event);">
-                                    |
-                                    <input type="hidden" name="projectInfo.id" value="${projectInfo.id}"/>
-                                    <g:submitButton name="${g.message(code: "projectInfo.upload.dta.markDtaDataAsDeleted")}"/>
-                                </g:uploadForm>
-                            </g:if>
-                        </g:if>
-                    </div>
-                </g:each>
-            </div>
-
-            <h3><g:message code="projectInfo.header.upload"/></h3>
-            <div class="project-info-upload">
+            <h3><g:message code="projectInfo.header.document.upload"/></h3>
+            <div class="project-info-form-container">
                 <g:uploadForm action="addProjectInfo" useToken="true">
+                    <table class="key-value-table">
+                        <tr>
+                            <td><g:message code="projectInfo.upload.path"/></td>
+                            <td><input type="file" name="projectInfoFile" required></td>
+                        </tr>
+                        <tr>
+                            <td><g:message code="projectInfo.upload.comment"/></td>
+                            <td><g:textArea name="comment" rows="3" value="${docCmd?.comment}"/></td>
+                        </tr>
+                    </table>
                     <input type="hidden" name="project.id" value="${project.id}"/>
-                    <input type="file" name="projectInfoFile" required="required">
-                    <g:submitButton name="${g.message(code: "projectInfo.upload.dta.add")}"/>
+                    <g:submitButton name="${g.message(code: "projectInfo.upload.add")}"/>
                 </g:uploadForm>
             </div>
 
-            <h3><g:message code="projectInfo.header.upload.dta"/></h3>
-            <div class="project-info-upload-dta">
-                <g:uploadForm action="addProjectDta" useToken="true">
+            <hr>
+
+            <h3><g:message code="projectInfo.document.header"/></h3>
+            <div>
+                <ul>
+                    <g:if test="${!projectInfos["NonDta"]}">
+                        <li><g:message code="projectInfo.noDocuments"/></li>
+                    </g:if>
+                    <g:each var="doc" in="${projectInfos["NonDta"]}">
+                        <li id="doc${doc.id}">
+                            <g:link action="download" params='["doc.id": doc.id]'>${doc.path}</g:link>
+                            <br>
+                            <g:message code="projectInfo.dta.transfer.created"/>
+                            <g:formatDate date="${doc.dateCreated}" format="yyyy-MM-dd"/>
+                            <g:form action="deleteProjectInfo" useToken="true" style="display: inline"
+                                    onSubmit="\$.otp.projectInfo.confirmProjectInfoDelete(event);">
+                                <input type="hidden" name="projectInfo.id" value="${doc.id}"/>
+                                <g:submitButton name="${g.message(code: "projectInfo.document.delete")}"/>
+                            </g:form>
+                            <br>
+                            <g:message code="projectInfo.upload.comment"/>:
+                            <div class="comment-box-wrapper">
+                                <otp:editorSwitch
+                                        roles="ROLE_OPERATOR" template="textArea" rows="3" cols="100"
+                                        link="${g.createLink(controller: 'projectInfo', action: 'updateProjectInfoComment', params: ["projectInfo.id": doc.id])}"
+                                        value="${doc.comment}"/>
+                            </div>
+                        </li>
+                    </g:each>
+                </ul>
+            </div>
+
+            <hr>
+
+            <h3><g:message code="projectInfo.dta.header.upload"/></h3>
+            <div class="project-info-form-container">
+                <g:uploadForm action="addProjectInfo" useToken="true">
                     <input type="hidden" name="project.id" value="${project.id}"/>
                     <table class="key-value-table">
                         <tr>
-                            <td><g:message code="projectInfo.upload.dta.path"/></td>
-                            <td><input type="file" name="projectInfoFile" required="required"/></td>
+                            <td><g:message code="projectInfo.upload.path"/></td>
+                            <td><input type="file" name="projectInfoFile" required/></td>
                         </tr>
                         <tr>
-                            <td><g:message code="projectInfo.upload.dta.recipient.institution"/></td>
-                            <td><input type="text" value="${addProjectInfos?.recipientInstitution}" name="recipientInstitution" required="required"/></td>
+                            <td><g:message code="projectInfo.dta.transfer.peerInstitution"/></td>
+                            <td><input type="text" value="${docCmd?.peerInstitution}" name="peerInstitution" required/></td>
                         </tr>
                         <tr>
-                            <td><g:message code="projectInfo.upload.dta.recipient.person"/></td>
-                            <td><input type="text" value="${addProjectInfos?.recipientPerson}" name="recipientPerson" required="required"/></td>
-                        </tr>
-                        <tr>
-                            <td><g:message code="projectInfo.upload.dta.recipient.account"/></td>
-                            <td><input type="text" value="${addProjectInfos?.recipientAccount}" name="recipientAccount"/></td>
-                        </tr>
-                        <tr>
-                            <td><g:message code="projectInfo.upload.dta.transferDate"/></td>
-                            <td><input type="date" value="${addProjectInfos?.transferDate?.format("yyyy-MM-dd")}" name="transferDateInput"
-                                       required="true"/></td>
-                        </tr>
-                        <tr>
-                            <td><g:message code="projectInfo.upload.dta.validityDate"/></td>
-                            <td><input type="date" value="${addProjectInfos?.validityDate?.format("yyyy-MM-dd")}" name="validityDateInput"/></td>
-                        </tr>
-                        <tr>
-                            <td><g:message code="projectInfo.upload.dta.transferMode"/></td>
-                            <td>
-                                <g:select name="transferMode"
-                                          noSelection="['': '']"
-                                          from="${transferModes}"
-                                          value="${addProjectInfos?.transferMode}"
-                                          class="dropDown"
-                                          required="true"/>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><g:message code="projectInfo.upload.dta.legalBasis"/></td>
+                            <td><g:message code="projectInfo.dta.transfer.legalBasis"/></td>
                             <td>
                                 <g:select name="legalBasis"
-                                          noSelection="['': '']"
-                                          from="${legalBasis}"
-                                          value="${addProjectInfos?.legalBasis}"
+                                          from="${legalBases}"
+                                          value="${docCmd?.legalBasis ?: defaultLegalBasis}"
                                           class="dropDown"
                                           required="true"/>
                             </td>
                         </tr>
                         <tr>
-                            <td><g:message code="projectInfo.upload.dta.dtaId"/></td>
-                            <td><input type="text" value="${addProjectInfos?.dtaId}" name="dtaId"/></td>
+                            <td><g:message code="projectInfo.dta.transfer.validityDate"/></td>
+                            <td><input type="date" value="${docCmd?.validityDate?.format("yyyy-MM-dd")}" name="validityDateInput"/></td>
                         </tr>
                         <tr>
-                            <td><g:message code="projectInfo.upload.dta.requester"/></td>
-                            <td><input type="text" value="${addProjectInfos?.requester}" name="requester" required="required"/></td>
+                            <td><g:message code="projectInfo.dta.transfer.dtaId"/></td>
+                            <td><input type="text" value="${docCmd?.dtaId}" name="dtaId"/></td>
                         </tr>
                         <tr>
-                            <td><g:message code="projectInfo.upload.dta.ticketID"/></td>
-                            <td><input type="text" value="${addProjectInfos?.ticketID}" name="ticketID"/></td>
-                        </tr>
-                        <tr>
-                            <td><g:message code="projectInfo.upload.dta.comment"/></td>
-                            <td><input type="text" value="${addProjectInfos?.comment}" name="comment"/></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td><g:submitButton name="${g.message(code: "projectInfo.upload.dta.add")}"/></td>
+                            <td><g:message code="projectInfo.upload.comment"/></td>
+                            <td><g:textArea name="comment" value="${docCmd?.comment}"/></td>
                         </tr>
                     </table>
+                    <g:submitButton name="${g.message(code: "projectInfo.upload.add")}"/>
                 </g:uploadForm>
             </div>
-            <br>
+
+            <hr>
+
+            <h3><g:message code="projectInfo.dta.header"/></h3>
+            <div>
+                <ul>
+                    <g:if test="${!projectInfos["Dta"]}">
+                        <li><g:message code="projectInfo.noDocuments"/></li>
+                    </g:if>
+                    <g:each var="doc" in="${projectInfos["Dta"]}">
+                    <li id="doc${doc.id}" style="margin-top: 2em">
+                        <g:link action="download" params='["doc.id": doc.id]'>${doc.path}</g:link>
+                        <br>
+                        ${doc.dtaId ? "${doc.dtaId}, " : ""}with <strong>${doc.peerInstitution}</strong> (${doc.legalBasis?.name()?.toLowerCase()}),
+                        <g:message code="projectInfo.dta.transfer.created"/>
+                        <g:formatDate date="${doc.dateCreated}" format="yyyy-MM-dd"/>
+                        <g:form action="deleteProjectInfo" useToken="true" style="display: inline"
+                                onSubmit="\$.otp.projectInfo.confirmProjectInfoDelete(event);">
+                            <input type="hidden" name="projectInfo.id" value="${doc.id}"/>
+                            <g:submitButton name="${g.message(code: "projectInfo.dta.delete")}"/>
+                        </g:form>
+                        <br>
+                        <g:message code="projectInfo.upload.comment"/>:
+                        <div class="comment-box-wrapper">
+                            <otp:editorSwitch
+                                    roles="ROLE_OPERATOR" template="textArea" rows="3" cols="100"
+                                    link="${g.createLink(controller: 'projectInfo', action: 'updateProjectInfoComment', params: ["projectInfo.id": doc.id])}"
+                                    value="${doc.comment}"/>
+                        </div>
+                        <ul class="transfer-listing">
+                            <g:if test="${!doc.transfers}">
+                                <li class="other"><g:message code="projectInfo.dta.transfer.noTransfers"/></li>
+                            </g:if>
+                            <g:each var="xfer" in="${doc.transfersSortedByDateCreatedDesc}" >
+                                <li class="${xfer.completionDate ? "completed" : "ongoing"}">
+                                    <g:message code="projectInfo.dta.transfer.transfer" /> ${xfer.id}, ${xfer.direction.adjective} <strong>${xfer.peerPerson} (${xfer.peerAccount ?: "N/A"})</strong>
+                                    via ${xfer.transferMode}
+                                    <br>
+                                    <g:message code="projectInfo.dta.transfer.requestedBy"/> ${xfer.requester} via <a ${xfer.ticketLinkable ? "href=${xfer.ticketLink}" : ""}>${xfer.ticketID}</a>
+                                    <br>
+                                    <g:message code="projectInfo.dta.transfer.new.handledBy"/> ${xfer.performingUser.realName} (${xfer.performingUser.username})
+                                    <br>
+                                    <g:message code="projectInfo.dta.transfer.started"/> <g:formatDate date="${xfer.transferDate}" format="yyyy-MM-dd"/>,
+                                    <g:if test="${xfer.completionDate}">
+                                        <g:message code="projectInfo.dta.transfer.completionDate"/> <g:formatDate date="${xfer.completionDate}" format="yyyy-MM-dd"/>
+                                    </g:if>
+                                    <g:else>
+                                        <g:message code="projectInfo.dta.transfer.completionDate.none"/>
+                                        <g:form action="markTransferAsCompleted" useToken="true" style="display: inline"
+                                                onSubmit="\$.otp.projectInfo.confirmCompleteTransfer(event);">
+                                            <input type="hidden" name="dataTransfer.id" value="${xfer.id}"/>
+                                            <g:submitButton name="${g.message(code:"projectInfo.dta.transfer.new.complete")}"/>
+                                        </g:form>
+                                    </g:else>
+                                    <br>
+                                    <g:message code="projectInfo.upload.comment"/>:
+                                    <div class="comment-box-wrapper">
+                                        <otp:editorSwitch
+                                                roles="ROLE_OPERATOR" template="textArea" rows="3" cols="100"
+                                                link="${g.createLink(controller: 'projectInfo', action: 'updateDataTransferComment', params: ["dataTransfer.id": xfer.id])}"
+                                                value="${xfer.comment}"/>
+                                    </div>
+                                </li>
+                            </g:each>
+                            <li>
+                                <g:set var="cachedXfer" value="${xferCmd?.parentDocument?.id == doc.id}"/>
+                                <otp:expandable value="${g.message(code: 'projectInfo.dta.transfer.new.expand')}" wrapperClass='new-transfer-wrapper' collapsed="${!cachedXfer}">
+                                    <g:form action="addTransfer" useToken="true">
+                                        <%-- since we have this form multiple times, was the previous form content for THIS document? --%>
+                                        <input type="hidden" name="parentDocument.id" value="${doc.id}">
+
+                                        <table class="key-value-table project-info-form-container">
+                                            <tr>
+                                                <td><g:message code="projectInfo.dta.transfer.requestedBy"/></td>
+                                                <td><input type="text" value="${cachedXfer ? xferCmd.requester : ""}" name="requester" required/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><g:message code="projectInfo.dta.transfer.ticketId"/></td>
+                                                <td><input type="text" value="${cachedXfer ? xferCmd.ticketID : ""}" name="ticketID" required/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><g:message code="projectInfo.dta.transfer.new.peerPerson"/></td>
+                                                <td><input type="text" value="${cachedXfer ? xferCmd.peerPerson : ""}" name="peerPerson" required/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><g:message code="projectInfo.dta.transfer.new.peerAccount"/></td>
+                                                <td><input type="text" value="${cachedXfer ? xferCmd.peerAccount : ""}" name="peerAccount"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><g:message code="projectInfo.dta.transfer.new.direction"/></td>
+                                                <td>
+                                                    <g:select name="direction"
+                                                              from="${directions}"
+                                                              value="${cachedXfer ? xferCmd.direction : defaultDirection}"
+                                                              class="dropDown"
+                                                              required="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><g:message code="projectInfo.dta.transfer.transferMode"/></td>
+                                                <td>
+                                                    <g:select name="transferMode"
+                                                              from="${transferModes}"
+                                                              value="${cachedXfer ? xferCmd.transferMode : defaultTransferMode}"
+                                                              class="dropDown"
+                                                              required="true"/>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><g:message code="projectInfo.dta.transfer.new.transferStarted"/></td>
+                                                <td><input type="date" value="${(cachedXfer ? xferCmd.transferDate : new Date()).format("yyyy-MM-dd")}"
+                                                           name="transferDateInput" required/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><g:message code="projectInfo.dta.transfer.completionDate"/></td>
+                                                <td><input type="date" value="${cachedXfer ? xferCmd?.completionDate?.format("yyyy-MM-dd") : ""}"
+                                                           name="transferDateInput"/></td>
+                                            </tr>
+                                            <tr>
+                                                <td><g:message code="projectInfo.upload.comment"/></td>
+                                                <td><g:textArea name="comment" value="${cachedXfer ? xferCmd.comment : ""}"/></td>
+                                            </tr>
+                                        </table>
+                                        <g:submitButton name="${g.message(code:"projectInfo.dta.transfer.new.submit")}"/>
+                                    </g:form>
+                                </otp:expandable>
+                            </li>
+                        </ul>
+                    </li>
+                </g:each>
+                </ul>
+            </div>
         </g:if>
         <g:else>
             <g:render template="/templates/noProject"/>

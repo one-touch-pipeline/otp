@@ -26,6 +26,8 @@ import org.hibernate.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.user.UserException
 import de.dkfz.tbi.otp.utils.CollectionUtils
@@ -192,5 +194,14 @@ class OtrsTicketService {
                 eq("otrsTicket", otrsTicket)
             }
         } as List<MetaDataFile>
+    }
+
+    static String buildTicketDirectLink(OtrsTicket otrsTicket) {
+        return buildTicketDirectLink(otrsTicket.ticketNumber)
+    }
+
+    static String buildTicketDirectLink(String ticketNumber) {
+        return "${ProcessingOptionService.findOptionSafe(ProcessingOption.OptionName.TICKET_SYSTEM_URL, null, null)}" +
+                "/index.pl?Action=AgentTicketZoom;TicketNumber=${ticketNumber}"
     }
 }

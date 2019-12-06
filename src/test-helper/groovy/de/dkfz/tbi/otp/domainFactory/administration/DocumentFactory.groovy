@@ -21,10 +21,9 @@
  */
 package de.dkfz.tbi.otp.domainFactory.administration
 
-import de.dkfz.tbi.otp.administration.Document
-import de.dkfz.tbi.otp.administration.DocumentType
-import de.dkfz.tbi.otp.administration.ProjectInfo
+import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 trait DocumentFactory implements DomainFactoryCore {
@@ -48,6 +47,18 @@ trait DocumentFactory implements DomainFactoryCore {
         return createDomainObject(ProjectInfo, [
                 fileName: "fileName_${nextId}",
                 project : { createProject() },
+        ], properties, saveAndValidate)
+    }
+
+    DataTransfer createDataTransfer(Map properties = [:], boolean saveAndValidate = true) {
+        return createDomainObject(DataTransfer, [
+                projectInfo   : { createProjectInfo() },
+                requester     : "requester_${nextId}",
+                performingUser: { DomainFactory.createUser() },
+                direction     : DataTransfer.Direction.OUTGOING,
+                transferMode  : DataTransfer.TransferMode.ASPERA,
+                peerPerson    : "peerPerson_${nextId}",
+                transferDate  : new Date(),
         ], properties, saveAndValidate)
     }
 }

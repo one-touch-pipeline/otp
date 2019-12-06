@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.utils
 import grails.gorm.transactions.Transactional
 
 import de.dkfz.tbi.otp.CommentService
+import de.dkfz.tbi.otp.administration.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerQualityAssessment
