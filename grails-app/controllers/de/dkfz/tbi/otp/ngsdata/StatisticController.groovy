@@ -76,10 +76,12 @@ class StatisticController {
 
         List sampleCountBySeqType = statisticService.sampleCountPerSequenceType(projectGroup)
 
-        int filterCount = ((sampleCountBySeqType.collect { it[1] }.sum()) ?: 0) / 100
+        int filterCount = ((sampleCountBySeqType.collect { it[1] }.sum()) ?: 0) / 100 * 2
+        int filtered = 0
 
         sampleCountBySeqType.each {
             if (it[1] < filterCount) {
+                filtered += it[1]
                 return
             }
             labels << it[0]
@@ -92,6 +94,13 @@ class StatisticController {
                 return
             }
             labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %"
+        }
+
+        if (filtered > 0) {
+            labels << "Other"
+            values << filtered
+            projectSequenceCount += filtered
+            labelsPercentage << "Other ${Math.round(filtered * 100 / projectSequenceCount)} %"
         }
 
         Map dataToRender = [
@@ -115,13 +124,29 @@ class StatisticController {
 
         List patientsCountBySeqType = statisticService.patientsCountPerSequenceType(projectGroup)
 
+        int filterCount = ((patientsCountBySeqType.collect { it[1] }.sum()) ?: 0) / 100
+        int filtered = 0
+
         patientsCountBySeqType.each {
+            if (it[1] < filterCount) {
+                filtered += it[1]
+                return
+            }
             labels << it[0]
             values << it[1]
             projectSequenceCount += it[1]
         }
 
+        if (filtered > 0) {
+            labels << "Other"
+            values << filtered
+            projectSequenceCount += filtered
+        }
+
         patientsCountBySeqType.each {
+            if (it[1] < filterCount) {
+                return
+            }
             labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %"
         }
 
@@ -146,13 +171,29 @@ class StatisticController {
 
         List projectCountPerSequenceType = statisticService.projectCountPerSequenceType(projectGroup)
 
+        int filterCount = ((projectCountPerSequenceType.collect { it[1] }.sum()) ?: 0) / 100
+        int filtered = 0
+
         projectCountPerSequenceType.each {
+            if (it[1] < filterCount) {
+                filtered += it[1]
+                return
+            }
             labels << it[0]
             values << it[1]
             projectSequenceCount += it[1]
         }
 
+        if (filtered > 0) {
+            labels << "Other"
+            values << filtered
+            projectSequenceCount += filtered
+        }
+
         projectCountPerSequenceType.each {
+            if (it[1] < filterCount) {
+                return
+            }
             labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %"
         }
 

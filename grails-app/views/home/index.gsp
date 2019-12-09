@@ -53,30 +53,25 @@
             </div>
         </div>
         <br>
-        <div style="width: 10px; height: 5px;"></div>
         <h3><g:message code="home.pageTitle.graph"/></h3>
         <form class="blue_label" id="projectsGroupbox">
             <span class="blue_label"><g:message code="home.projectGroupFilter"/> :</span>
             <g:select class="criteria" id="projectGroup_select" name='projectGroup_select' from='${projectGroups}' value='projectGroup' />
         </form>
-        <div class="homeGraph" style="clear: both;" >
-            <div style="float: left; margin-top: 20px; border: 25px solid #E1F1FF;">
-                <canvas id="sampleCountPerSequenceTypePie" width="530" height="380">[No canvas support]</canvas>
+        <div class="homeGraph" style="clear: both; text-align: center">
+            <div>
+                <canvas id="sampleCountPerSequenceTypePie" width="1250" height="400">[No canvas support]</canvas>
             </div>
-            <div style="float: right; margin-top: 20px; border: 25px solid #E1F1FF;">
-                <canvas id="projectCountPerDate" width="530" height="380">[No canvas support]</canvas>
+            <div>
+                <canvas id="projectCountPerDate" width="1250" height="400">[No canvas support]</canvas>
             </div>
-            <div style="float: left; margin-top: 20px; border: 25px solid #E1F1FF;">
-                <canvas id="laneCountPerDate" width="530" height="380">[No canvas support]</canvas>
+            <div>
+                <canvas id="laneCountPerDate" width="625" height="400">[No canvas support]</canvas>
+                <canvas id="gigaBasesPerDay" width="625" height="400">[No canvas support]</canvas>
             </div>
-            <div style="float: right; margin-top: 20px; border: 25px solid #E1F1FF;">
-                <canvas id="gigaBasesPerDay" width="530" height="380">[No canvas support]</canvas>
-            </div>
-            <div style="float: left; margin-top: 20px; border: 25px solid #E1F1FF;" >
-                <canvas id="patientsCountPerSequenceType" width="1165" height="380">[No canvas support]</canvas>
-            </div>
-            <div style="float: left; margin-top: 20px; border: 25px solid #E1F1FF;">
-                <canvas id="projectCountPerSequenceTypeBar" width="1165" height="380">[No canvas support]</canvas>
+            <div>
+                <canvas id="patientsCountPerSequenceType" width="625" height="400">[No canvas support]</canvas>
+                <canvas id="projectCountPerSequenceTypeBar" width="625" height="400">[No canvas support]</canvas>
             </div>
         </div>
         <asset:script type="text/javascript">

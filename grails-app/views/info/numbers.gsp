@@ -31,13 +31,13 @@
 <g:if test="${projects}">
     <h2><g:message code="info.numbers.title" /></h2>
     <g:message code="info.numbers.text"/>
-    <div class="homeGraph" style="clear: both;" >
-        <div class="plotContainer">
-            <canvas id="projectCountPerDate" width="530" height="380">[No canvas support]</canvas>
-        </div>
-        <div class="plotContainer">
-            <canvas id="laneCountPerDate" width="530" height="380">[No canvas support]</canvas>
-        </div>
+    <div class="homeGraph" style="clear: both; text-align: center" >
+        <span>
+            <canvas id="projectCountPerDate" width="625" height="400">[No canvas support]</canvas>
+        </span>
+        <span>
+            <canvas id="laneCountPerDate" width="625" height="400">[No canvas support]</canvas>
+        </span>
     </div>
 <asset:script type="text/javascript">
     $(function() {

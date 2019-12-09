@@ -62,8 +62,8 @@ class StatisticService {
                 groupProperty("seqTypeDisplayName")
                 count("sampleId")
             }
-            order("seqTypeDisplayName")
         }
+        seq.sort { -it[1] }
         return seq
     }
 
