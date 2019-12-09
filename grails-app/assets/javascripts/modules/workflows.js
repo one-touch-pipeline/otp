@@ -22,3 +22,4 @@
 
 //= require jqueryDatatables
 //= require ../workflows.js
+//= require dataTablePagination.js

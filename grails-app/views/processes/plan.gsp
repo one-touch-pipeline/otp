@@ -33,7 +33,7 @@
         <otp:autoRefresh/>
         <h1><g:message code="processes.plan.title" args="${ [state ?: "all", name] }" /></h1>
         <div>
-            <g:img dir="assets/status" file="${enabled ? 'green.png' : 'grey.png'}" style="vertical-align: middle"/>
+            <div id="workflow-status" class="${enabled ? 'dot green' : 'dot grey'}" style="vertical-align: middle"></div>
             <g:if test="${enabled}">
                 <g:message code="processes.plan.workflowIsEnabled"/>
             </g:if>

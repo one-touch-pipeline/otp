@@ -219,7 +219,7 @@ class ProcessesController {
             }
             dataToRender.aaData << [
                 process.id,
-                stateForExecutionState(process, latest.state),
+                latestState,
                 parameterData,
                 TimestampHelper.asTimestamp(process.started),
                 TimestampHelper.asTimestamp(latest.date),
@@ -285,7 +285,7 @@ class ProcessesController {
                 SecurityContextHolder.context.authentication = auth
                 Map data = [:]
                 SessionUtils.withNewSession {
-                    ProcessingStepUpdate update = processService.getLatestNotRestartedProcessingStepUpdate(step)
+                    ProcessingStepUpdate update = processService.getLatestProcessingStepUpdate(step)
                     data.put("step", step)
                     data.put("state", update?.state)
                     data.put("firstUpdate", TimestampHelper.asTimestamp(processService.getFirstUpdate(step)))
@@ -425,16 +425,6 @@ class ProcessesController {
 
     def getProcessingErrorStackTrace() {
         render text: processService.getProcessingErrorStackTrace(params.id as long), contentType: "text/plain"
-    }
-
-    private PlanStatus stateForExecutionState(Process process, ExecutionState state) {
-        if (process.finished && state == ExecutionState.SUCCESS) {
-            return PlanStatus.SUCCESS
-        }
-        if (process.finished && state == ExecutionState.FAILURE) {
-            return PlanStatus.FAILURE
-        }
-        return PlanStatus.RUNNING
     }
 
     private Map<String,String> processParameterData(Process process) {

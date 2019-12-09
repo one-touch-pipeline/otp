@@ -259,16 +259,6 @@ class ProcessService {
     }
 
     /**
-     * Provides access to the latest ProcessingStepUpdate that is not in the state 'restarted' for the given ProcessingStep.
-     * @param step The ProcessingStep for which the latest ProcessingStepUpdate should be retrieved.
-     * @return Latest not 'restarted' ProcessingStepUpdate
-     */
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    ProcessingStepUpdate getLatestNotRestartedProcessingStepUpdate(ProcessingStep step) {
-        return step.latestNotRestartedProcessingStepUpdate
-    }
-
-    /**
      * Retrieves the first update date for the ProcessingStep
      * @param step
      */

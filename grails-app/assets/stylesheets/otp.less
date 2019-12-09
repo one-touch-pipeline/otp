@@ -26,6 +26,7 @@
 @babyblue: #A9BCF5;
 @darkblue: #81BEF7;
 @otpBlack: #222;
+@danger: #c82333;
 @width: 1250px; //if you change this you also have to change the width of "header.png" and "header_operator.png"
 
 .box-shadowed (@x, @y, @radius, @color) {
@@ -1007,6 +1008,7 @@ body {
 #otp .otpDataTables {
     color:black;
     padding-top: 6px;
+    margin-bottom: 5px;
     overflow: auto;
     width:100%;
     border-color: #B4B5B6;
@@ -1941,6 +1943,53 @@ td div {
     width: 50px;
     height: 50px;
     animation: spin 2s linear infinite;
+}
+
+.dot {
+    height: 34px;
+    width: 34px;
+    border-radius: 50%;
+    display: inline-block;
+
+    &.red {
+        background-color: @danger;
+    }
+    &.grey {
+        background-color: grey;
+    }
+    &.blue {
+        background-color: cornflowerblue;
+    }
+    &.green {
+        background-color: mediumseagreen;
+    }
+    &.purple {
+        background-color: purple;
+    }
+}
+
+.sm-loader {
+    border: 7px solid #f3f3f3;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    animation: spin 2s linear infinite;
+
+    &.red {
+        border-right: 7px solid deeppink;
+        border-top: 7px solid @danger;
+        border-bottom: 7px solid hotpink;
+        border-left: 7px solid pink;
+    }
+    &.grey {
+        border-top: 7px solid grey;
+    }
+    &.blue {
+        border-top: 7px solid cornflowerblue;
+    }
+    &.green {
+        border-top: 7px solid mediumseagreen;
+    }
 }
 
 @keyframes spin {

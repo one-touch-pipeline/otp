@@ -77,6 +77,7 @@ class LicenseCheck {
     static List<Path> ignoredFiles = [
             ".gitignore",
             "grails-app/assets/javascripts/messages.i18n",
+            "grails-app/assets/javascripts/modules/dataTablePagination.js",
             "NOTICE.txt",
             "scripts/ReferenceGenome/README.txt",
             "scripts/rollout/readme.txt",

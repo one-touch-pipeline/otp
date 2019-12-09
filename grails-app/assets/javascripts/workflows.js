@@ -24,58 +24,47 @@
 /*global $ */
 $.otp.workflows = {
     /**
-     * Creates the HTML markup for the status image.
+     * Creates the HTML markup for the status.
      * The status is referenced by name:
-     * <ul>
-     * <li>NEW</li>
-     * <li>DISABLED</li>
-     * <li>RUNNING</li>
-     * <li>RUNNINGFAILEDBEFORE</li>
-     * <li>SUCCESS</li>
-     * <li>FAILURE</li>
-     * </ul>
      * @param status The name of the status
-     * @returns HTML string for the status image
+     * @returns HTML string for the status div
      */
-    statusImageHtml: function (status) {
+    statusDivHtml: function (status) {
         "use strict";
-        return '<img src="' + $.otp.createLink({
-            controller: 'assets',
-            action: 'status',
-            id: $.otp.workflows.statusToImage(status)
-        }) + '" alt="' + status + '" title="' + status + '"/>';
+        return '<div class="' + $.otp.workflows.statusToClassName(status) + '"></div>';
     },
 
     /**
      * Converts the status name into the image name which is used to represent the status.
-     * @param status The name as listed in documentation for statusImageHtml
-     * @returns Name of image or {@code null} if incorrect status
-     * @see statusImageHtml
+     * @param status The name as listed in documentation for statusDivHtml
+     * @returns string of image or {@code null} if incorrect status
+     * @see statusDivHtml
      */
-    statusToImage: function (status) {
+    statusToClassName: function (status) {
         "use strict";
         switch (status) {
         case "NEW":
         case "CREATED":
-            return "empty.png";
+            return "";
         case "DISABLED":
         case "SUSPENDED":
-            return "grey.png";
+            return "dot grey";
         case "RUNNING":
         case "STARTED":
         case "RESUMED":
-            return "green_anime.gif";
+            return "sm-loader green";
         case "RUNNINGFAILEDBEFORE":
-            return "red_anime.gif";
+            return "sm-loader red";
         case "FINISHED":
-            return "blue.png";
+            return "dot blue";
         case "SUCCESS":
-            return "green.png";
+            return "dot green";
         case "FAILURE":
+            return "dot red";
         case "RESTARTED":
-            return "red.png";
+            return "dot purple";
         }
-        return null;
+        return "";
     },
     /**
      * Helper method to render a date in a common way.
@@ -242,7 +231,7 @@ $.otp.workflows = {
                 state: state
             }
         }), false, function (json) {
-            var i, j, rowData, stepId, actions;
+            let i, j, rowData, stepId, actions;
             for (i = 0; i < json.aaData.length; i += 1) {
                 rowData = json.aaData[i];
                 rowData[0] = $.otp.createLinkMarkup({
@@ -251,7 +240,7 @@ $.otp.workflows = {
                     id: rowData[0],
                     text: rowData[0]
                 });
-                rowData[1] = $.otp.workflows.statusImageHtml(rowData[1]);
+                rowData[1] = $.otp.workflows.statusDivHtml(rowData[1]);
                 if (rowData[2]) {
                     rowData[2] = rowData[2].text;
                 } else {
@@ -279,13 +268,8 @@ $.otp.workflows = {
                 actions = rowData[8].actions;
                 rowData[8] = "";
                 for (j = 0; j < actions.length; j += 1) {
-                    switch (actions[j]) {
-                    case "restart":
+                    if (actions[j] === "restart") {
                         rowData[8] += $.otp.workflows.createRestartProcessingStepLink(stepId, selector);
-                        break;
-                    default:
-                        // nothing
-                        break;
                     }
                 }
             }
@@ -293,15 +277,18 @@ $.otp.workflows = {
             { "bSortable": true,  "aTargets": [0] },
             { "bSortable": false, "aTargets": [1] },
             { "bSortable": false, "aTargets": [2] },
-            { "bSortable": true, "aTargets": [3] },
+            { "bSortable": true,  "aTargets": [3] },
             { "bSortable": false, "aTargets": [4] },
             { "bSortable": false, "aTargets": [5] },
             { "bSortable": false, "aTargets": [6] },
             { "bSortable": false, "aTargets": [7] },
             { "bSortable": false, "aTargets": [8] }
-        ], undefined, 240, {
+        ], undefined, undefined, {
             iDisplayLength: 25,
-            bPaginate: true
+            bPaginate: true,
+            sPaginationType: "listbox",
+            bScrollCollapse: false,
+            sDom:'<i>prtp<"clear">',
         });
         $("#enable-workflow-button").click(function () {
             $.get($.otp.createLink({
@@ -316,8 +303,7 @@ $.otp.workflows = {
                 $("#enable-workflow-button").hide();
                 $("#disable-workflow-button").show();
                 $("strong", $("#disable-workflow-button").parent()).text("enabled");
-                var image = $("img", $("#disable-workflow-button").parent());
-                image.attr("src", image.attr("src").replace("grey", "green"));
+                $("#workflow-status").removeClass("grey").addClass("green");
             });
         });
         $("#disable-workflow-button").click(function () {
@@ -333,8 +319,7 @@ $.otp.workflows = {
                 $("#disable-workflow-button").hide();
                 $("#enable-workflow-button").show();
                 $("strong", $("#disable-workflow-button").parent()).text("disabled");
-                var image = $("img", $("#disable-workflow-button").parent());
-                image.attr("src", image.attr("src").replace("green", "grey"));
+                $("#workflow-status").removeClass("green").addClass("grey");
             });
         });
     },
@@ -360,7 +345,7 @@ $.otp.workflows = {
                     id: stepId,
                     text: "<div style='padding: 17px 0px 17px 10px;'>"+stepId+"</div>"
                 });
-                rowData[1] = $.otp.workflows.statusImageHtml(rowData[1]);
+                rowData[1] = $.otp.workflows.statusDivHtml(rowData[1]);
                 if (rowData[3]) {
                     rowData[3] = '<span title="' + rowData[3].name + '">' + rowData[3].name.substr(rowData[3].name.lastIndexOf('.') + 1) + "</span><br/>";
                 } else {
