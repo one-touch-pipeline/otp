@@ -33,7 +33,6 @@
     <g:render template="/templates/messages"/>
     <g:if test="${projects}">
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
-        <br><br><br><br>
 
         <g:if test="${configExists}">
             <h3>${g.message(code: "cellRanger.select")}</h3>

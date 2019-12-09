@@ -38,7 +38,7 @@
                 <input type="text" class="dataTable_search" onKeyUp='$.otp.simpleSearch.search(this, "individualTable");' placeholder="min. 3 characters">
             </div>
         </div>
-           <div class= "searchCriteriaTableSequences">
+        <div class="searchCriteriaTableSequences">
         <table id="searchCriteriaTable2">
             <tr>
             <td>

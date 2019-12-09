@@ -20,12 +20,22 @@
   - SOFTWARE.
   --}%
 
-<form class="blue_label" id="projectsGroupbox" action="${g.createLink(controller: 'projectSelection', action: 'select')}">
-    <div style="color: black"><strong>&nbsp;${message(code: "home.projectFilter.project")} : ${project?.name}</strong></div>
-    <label style="color: black" for="project">&nbsp;${message(code: "home.projectFilter.select")} : </label>
+<g:form style="width: min-content" class="project-selection-container" controller="projectSelection" action="select">
     <g:hiddenField name="displayName" value=""/>
     <g:hiddenField name="type" value="PROJECT"/>
     <g:hiddenField name="redirect" value="${request.forwardURI - request.contextPath}"/>
-    <g:select class="criteria" id="project" name='id' autocomplete="off"
-              from='${projects}' value='${project?.id}' optionKey='id' optionValue='displayName' onChange='submit();' />
-</form>
+    <div class="selected-project-label">
+        <strong><g:message code="home.projectFilter.project"/>:</strong>
+    </div>
+    <div class="selected-project-value">
+        <strong>${project?.name}</strong>
+    </div>
+    <div class="select-label">
+        <g:message code="home.projectFilter.select"/>:
+    </div>
+    <div class="project-dropdown">
+        <g:select id="project" name='id' from='${projects}' value='${project?.id}'
+                  optionKey='id' optionValue='displayName'
+                  autocomplete="off" onChange='submit();'/>
+    </div>
+</g:form>

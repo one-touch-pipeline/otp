@@ -34,10 +34,7 @@
     <g:render template="/templates/messages"/>
     <g:if test="${projects}">
     <h1><g:message code="bulk.sample.creation.title"/></h1>
-        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
-
-        <br><br>
-        <br><br>
+    <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
     <p>
         <g:message code="bulk.sample.creation.description"/>
     </p>

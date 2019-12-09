@@ -33,7 +33,7 @@
         <g:render template="/templates/messages"/>
         <g:if test="${projects}">
             <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
-            <br><br><br>
+
             <h3><g:message code="projectInfo.header.listing"/></h3>
             <div class="project-info-listing">
                 <g:each var="projectInfo" in="${project.projectInfos.sort { [it.recipientInstitution == null, it.id] }}">

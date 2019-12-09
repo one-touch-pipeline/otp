@@ -32,7 +32,7 @@
     <div class="body">
     <g:if test="${projects}">
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
-        <br><br><br>
+
         <div class="table">
             <div class="otpDataTables">
                 <otp:dataTable

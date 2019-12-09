@@ -35,16 +35,22 @@
     <g:render template="/templates/messages"/>
 
     <g:if test="${projects}">
-        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
-        <g:if test="${seqType}">
-            <div class="blue_label" id="projectsGroupbox">
-                <span class="blue_label"><g:message code="alignment.quality.seqType"/> :</span>
-                <form style="display: inline">
-                    <g:select class="criteria" id="seqType" name='seqType'
-                              from='${seqTypes}' value='${seqType.id}' optionKey='id' optionValue='displayNameWithLibraryLayout' onChange='submit();'/>
-                </form>
+        <div class="project-selection-header-container">
+            <div class="grid-element">
+                <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
             </div>
-        </g:if>
+            <div class="grid-element">
+                <g:if test="${seqType}">
+                    <div class="blue_label" id="projectsGroupbox">
+                        <span class="blue_label"><g:message code="alignment.quality.seqType"/> :</span>
+                        <form style="display: inline">
+                            <g:select class="criteria" id="seqType" name='seqType'
+                                      from='${seqTypes}' value='${seqType.id}' optionKey='id' optionValue='displayNameWithLibraryLayout' onChange='submit();'/>
+                        </form>
+                    </div>
+                </g:if>
+            </div>
+        </div>
         <div class="otpDataTables alignmentQualityOverviewTable">
             <otp:dataTable
                 codes="${header}"

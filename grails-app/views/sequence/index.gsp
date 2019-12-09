@@ -32,7 +32,7 @@
 <body>
     <div class="body">
     <g:if test="${projects}">
-         <div class= "searchCriteriaTableSequences">
+         <div class="searchCriteriaTableSequences">
          <table id="searchCriteriaTable2">
             <tr>
             <td>

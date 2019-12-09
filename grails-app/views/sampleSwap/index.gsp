@@ -37,7 +37,7 @@
         </g:each>
     </g:each>
     </ul>
-    <div class= "searchCriteriaTableSequences">
+    <div class="searchCriteriaTableSequences">
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
 
         <form class="blue_label" id="projectsGroupbox" action="${g.createLink(controller: 'sampleSwap', action: 'index')}">

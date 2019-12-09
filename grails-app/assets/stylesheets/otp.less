@@ -1400,6 +1400,13 @@ td div {
     border: 2px solid #CCCCCC;
     border-color: #c4d9df #a4c3ca #83afb7;
 }
+.searchCriteriaTableStyle > table {
+    background: #eaf8fc;
+    -moz-border-radius: 17px;
+    border-radius: 17px;
+    border: 2px solid #CCCCCC;
+    border-color: #c4d9df #a4c3ca #83afb7;
+}
 #projectsGroupbox {
     float: left;
     max-width: auto;
@@ -1411,9 +1418,55 @@ td div {
     border: 3px solid #CCCCCC;
     border-color: #c4d9df #a4c3ca #83afb7;
     height: auto;
+}
+
+.project-selection-header-container {
+    display: grid;
+    grid-gap: 24px;
+    grid-template-columns: min-content 1fr;
+
+    .grid-element {
+        grid-row: 1;
+    }
+}
+
+.project-selection-container {
+    // firefox and chrome expect different properties
+    width: fit-content;
+    width: -moz-fit-content;
+
     padding: 4px;
-    margin-top: auto;
-    margin-bottom: 7px;
+
+    -moz-border-radius: 13px;
+    border-radius: 13px;
+    border: 3px solid #CCCCCC;
+    border-color: #c4d9df #a4c3ca #83afb7;
+
+    background-image: -moz-linear-gradient(#fff, #d4e8ec);
+    background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, #d4e8ec),color-stop(1, #fff));
+
+    display: grid;
+    grid-template-columns: min-content min-content;
+    grid-template-rows: auto auto;
+    grid-template-areas:
+            "selected-label selected-value"
+            "select-label select";
+    grid-gap: 2px;
+
+    .selected-project-label {
+        padding-right: 5px;
+        grid-area: selected-label;
+    }
+    .selected-project-value {
+        grid-area: selected-value;
+    }
+    .select-label {
+        grid-area: select-label;
+        align-self: center;
+    }
+    .project-dropdown {
+        grid-area: select;
+    }
 }
 #searchbox {
     float: left;
