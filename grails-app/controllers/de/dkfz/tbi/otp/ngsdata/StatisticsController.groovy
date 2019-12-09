@@ -53,8 +53,8 @@ class StatisticsController {
 
     def kpi() {
         ProjectSelection selection = projectSelectionService.getSelectedProject()
-        Date startDate = params.datepickerStartDate ? new SimpleDateFormat("yyyy-MM-dd").parse(params.start) : null
-        Date endDate = params.datepickerEndDate ? new SimpleDateFormat("yyyy-MM-dd").parse(params.end) : null
+        Date startDate = params.start ? new SimpleDateFormat("yyyy-MM-dd").parse(params.start) : null
+        Date endDate = params.end ? new SimpleDateFormat("yyyy-MM-dd").parse(params.end) : null
 
         if (!selection.projects) {
             return [
@@ -77,8 +77,8 @@ class StatisticsController {
                 numberOfUsers       : users,
                 numberOfCreatedUsers: usersCreated,
                 numberOfClusterJobs : clusterJobs,
-                startDate           : params.datepickerStartDate,
-                endDate             : params.datepickerEndDate,
+                startDate           : params.start,
+                endDate             : params.end,
         ]
     }
 }
