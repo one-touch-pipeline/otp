@@ -343,7 +343,7 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS') or #upr.user.username == principal.username")
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#userProjectRole.project, 'MANAGE_USERS') or #userProjectRole.user.username == principal.username")
     UserProjectRole setReceivesNotifications(UserProjectRole userProjectRole, boolean value) {
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.receivesNotifications = value

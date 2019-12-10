@@ -889,20 +889,23 @@ body {
 }
 
 .menu {
-    .admin  a {
-        width: 105px;
-    }
-    .operator a {
-        width: 105px;
+    .project a {
+        width: 100px;
     }
     .results a {
         width: 100px;
     }
     .statistic a {
-        width: 100px;
+        width: 130px;
+    }
+    .operator a {
+        width: 110px;
+    }
+    .admin a {
+        width: 110px;
     }
     .info a {
-        width: 70px;
+        width: 80px;
     }
 }
 .navigation li:hover ul {
@@ -1076,51 +1079,20 @@ body {
     }
 }
 #otp .otpDataTables.projectUserTable {
-    img.ldapThumbnail {
-        height: auto;
-        max-height: 40px;
-        max-width: 40px;
-    }
     td:nth-child(1) {
-        text-align: center;
-        width: 4%;
-    }
-    td:nth-child(2) {
-        width: 10%;
-    }
-    td:nth-child(3) {
-        width: 2%;
-    }
-    td:nth-child(4) {
-        width: 4%;
-    }
-    td:nth-child(5) {
-        width: 17%;
-    }
-    td:nth-child(6) {
-        width: 14%;
-    }
-    &.enabled {
-        td.small {
-            width: 60px;
-        }
-        td.large {
-            width: 100px;
-        }
-    }
-    &.disabled {
-        td:nth-child(5), td:nth-child(6) {
-            width: 100px;
-        }
-    }
-    td:nth-last-child(2) {
-        width: 6%;
-    }
-    td:last-child {
-        width: 7%;
+        width: 50px;
     }
     td.userDisabled {
         text-decoration: line-through;
+    }
+}
+.ldapThumbnail {
+    // width of 40 has to be changed in conjunction with the thumbnail template
+    text-align: center;
+    .image {
+        height: auto;
+        max-height: 40px;
+        max-width: 40px;
     }
 }
 td span {
@@ -1188,42 +1160,65 @@ td div {
     }
 }
 
+.add-user-grid-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+            "select-int select-ext"
+            "form-int form-ext"
+            "submit submit";
+    grid-gap: 8px;
 
-#otp .addButtonContainer {
-    width: 42%;
-    float: left;
-    clear: left;
-    .addButton {
-        padding: 10px;
-        margin-right: 10px;
-        float: left;
-    }
-    .legalNotice {
-        display: inline;
-        vertical-align: middle;
-    }
-}
-#otp .addUserForm {
-    overflow: auto;
-    input[type=text], select {
-        width: 90%;
-    }
-    .methodSelection {
-        padding: 5px 10px 5px;
-    }
-    .form {
-        width: 35%;
-        margin: 10px 20px 10px 0px;
-        td:nth-child(1) {
-            width: 25%;
+    max-width: 1300px;
+    padding-top: 10px;
+
+    .select {
+        &.internal {
+            grid-area: select-int;
+        }
+        &.external {
+            grid-area: select-ext;
         }
     }
-    .form.left {
-        float: left;
+    .form {
+        input[type=text], select {
+            width: 90%;
+        }
+        td:first-child {
+            width: 1%;
+            white-space: nowrap;
+        }
+        &.internal {
+            grid-area: form-int;
+        }
+        &.external {
+            grid-area: form-ext;
+        }
     }
-    .form.right {
-        float: left;
-        clear: right;
+    .submit-container {
+        grid-area: submit;
+
+        display: grid;
+        grid-template-columns: min-content 1fr;
+
+        div {
+            grid-row: 1;
+        }
+    }
+    #add-button {
+        width: auto;
+        height: 100%;
+        margin-right: 10px;
+    }
+}
+.project-user-header-grid-wrapper {
+    display: grid;
+    grid-template-columns: min-content 1fr;
+
+    .grid-element {
+        grid-row: 1;
+        margin-right: 30px;
     }
 }
 .ui-autocomplete {
@@ -2282,15 +2277,6 @@ div.dt-buttons {
 
 .wrapTableHeader th {
     white-space: normal;
-}
-
-.project-user-grid-wrapper {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-
-    .grid-element {
-        grid-row: 1;
-    }
 }
 
 ul.metaDataFieldsLinkBanner {

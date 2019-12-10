@@ -23,13 +23,34 @@
 /*jslint browser: true */
 /*global $ */
 
-$.otp.projectUser = {
-    formSelect: function() {
-        $('.inputField.nonLdapUser').prop("disabled", true);
-        $('input[type=radio][name=addViaLdap]').change(function() {
-            var ldapUserChecked = (this.value === "true");
-            $('.inputField.ldapUser').prop("disabled", !ldapUserChecked);
-            $('.inputField.nonLdapUser').prop("disabled", ldapUserChecked);
-        });
+$.confirmation = function (text) {
+    if (text) {
+        return confirm(text);
     }
+    return true
 };
+
+$(function() {
+    $('input[type=radio][name=addViaLdap]').change(function() {
+        var ldapUserChecked = (this.value === "true");
+        $('.inputField.ldapUser').prop("disabled", !ldapUserChecked);
+        $('.inputField.nonLdapUser').prop("disabled", ldapUserChecked);
+    }).filter(":checked").trigger("change");
+
+    $('#listEmails').click(function () {
+        var project = $(this).data('project');
+        var emails = $(this).data('emails');
+        prompt("Emails for " + project, emails);
+    });
+
+    $('#add-button, #deactivateButton, #reactivateButton').click(function () {
+        var text = $(this).data('text');
+        this.disabled = true;
+
+        if (!$.confirmation(text)) {
+            this.disabled = false;
+            return false;
+        }
+        return true
+    });
+});
