@@ -26,26 +26,23 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="datafile.showDetails.title"/></title>
+    <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
 <body>
     <div class="body">
-        <div id="dataFileCommentBox" class="commentBoxContainer">
-            <div id="commentLabel">Comment:</div>
-            <sec:ifNotGranted roles="ROLE_OPERATOR">
-                <textarea id="commentBox" readonly>${comment?.comment}</textarea>
-            </sec:ifNotGranted>
-            <sec:ifAllGranted roles="ROLE_OPERATOR">
-                <textarea id="commentBox">${comment?.comment}</textarea>
-                <div id="commentButtonArea">
-                        <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save" /></button>
-                        <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
-                </div>
-            </sec:ifAllGranted>
-            <div id="commentDateLabel">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')}</div>
-            <div id="commentAuthorLabel">${comment?.author}</div>
+        <div class="two-column-grid-container">
+            <div class="grid-element">
+                <h1><g:message code="datafile.showDetails.title"/></h1>
+            </div>
+            <div class="grid-element comment-box">
+                <g:render template="/templates/commentBox" model="[
+                        commentable     : dataFile,
+                        targetController: 'dataFile',
+                        targetAction    : 'saveDataFileComment',
+                ]"/>
+            </div>
         </div>
-        <h1><g:message code="datafile.showDetails.title"/></h1>
         <table>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.runName"/></td>
@@ -170,9 +167,4 @@
     </table>
     </div>
 </body>
-<asset:script>
-    $(function() {
-        $.otp.initCommentBox(${dataFile.id},"#dataFileCommentBox");
-    });
-</asset:script>
 </html>

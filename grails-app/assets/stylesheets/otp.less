@@ -1416,12 +1416,29 @@ td div {
 }
 
 .project-selection-header-container {
-    display: grid;
+    .two-column-grid-container();
     grid-gap: 24px;
     grid-template-columns: min-content 1fr;
+}
+
+.individual-grid-wrapper {
+    .two-column-grid-container();
+    grid-template-columns: 2fr 1fr;
+
+    .individual-details {
+        grid-column: 1 / span 2;
+    }
+}
+
+.two-column-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
 
     .grid-element {
         grid-row: 1;
+        &.comment-box {
+            justify-self: end;
+        }
     }
 }
 
@@ -1544,36 +1561,11 @@ td div {
     width: 750px;
 }
 
-.commentBoxContainer {
-    float: right;
-    width: 300px;
-    height: 150px;
-    margin-right: 50px;
-}
-
-#commentBox {
-    width: 290px;
-    height: 75px;
-    resize: none;
-    margin-top: 10px;
-}
-
-#commentButtonArea {
-    float: left;
-    width: 130px;
-}
-
-#commentDateLabel {
-    float: right;
-    width: 170px;
-    text-align: right;
-    margin-top: 2px;
-}
-
-#commentAuthorLabel {
-    float: right;
-    width: 170px;
-    text-align: right;
+#comment-box-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    grid-gap: 2px;
 }
 
 #saveComment {
@@ -1611,10 +1603,6 @@ td div {
 
 #workflowOverviewTable td:nth-child(8) {
     width: 20px;
-}
-
-#processOverview {
-    margin-top: 150px;
 }
 
 #processOverview:not(*:root) {
@@ -1916,9 +1904,6 @@ td div {
     margin-top: 50px;
 }
 
-#projectOverviewDates {
-    margin-top: 150px;
-}
 .configure {
     text-decoration: none;
 }
@@ -2165,21 +2150,6 @@ div.log {
         .listing {
             grid-row: 1;
             grid-column: 2;
-        }
-    }
-}
-
-.individual-grid-wrapper {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-
-    .grid-element {
-        grid-row: 1;
-        &.individualDetails {
-            grid-column: 1 / span 2;
-        }
-        &.commentBox {
-            grid-column: 3;
         }
     }
 }

@@ -26,6 +26,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title>${individual.mockFullName}</title>
+    <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="modules/editorSwitch.js"/>
     <asset:javascript src="modules/editSamples.js"/>
 </head>
@@ -34,7 +35,7 @@
         <h1><g:message code="individual.show.header"/></h1>
         <br>
         <div class="individual-grid-wrapper">
-            <div id="individualDetailTbl" class="grid-element individualDetails tableBlock">
+            <div id="individualDetailTbl" class="grid-element individual-details tableBlock">
                 <input type="hidden" name="individualId" value="${individual.id}"/>
                 <table>
                     <tr>
@@ -91,23 +92,12 @@
                     </tr>
                 </table>
             </div>
-
-            <div class="grid-element commentBox">
-                <div id="individualCommentBox" class="commentBoxContainer">
-                    <div id="commentLabel">Comment:</div>
-                    <sec:ifNotGranted roles="ROLE_OPERATOR">
-                        <textarea id="commentBox" readonly>${comment?.comment}</textarea>
-                    </sec:ifNotGranted>
-                    <sec:ifAllGranted roles="ROLE_OPERATOR">
-                        <textarea id="commentBox">${comment?.comment}</textarea>
-                        <div id="commentButtonArea">
-                            <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save"/></button>
-                            <button id="cancelComment" disabled><g:message code="commentBox.cancel" /></button>
-                        </div>
-                    </sec:ifAllGranted>
-                    <div id="commentDateLabel">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')}</div>
-                    <div id="commentAuthorLabel">${comment?.author}</div>
-                </div>
+            <div class="grid-element comment-box">
+                <g:render template="/templates/commentBox" model="[
+                        commentable     : individual,
+                        targetController: 'individual',
+                        targetAction    : 'saveIndividualComment',
+                ]"/>
             </div>
         </div>
 
@@ -189,9 +179,4 @@
         </div>
     </div>
 </body>
-<asset:script type="text/javascript">
-    $(function() {
-        $.otp.initCommentBox(${individual.id}, "#individualCommentBox");
-    });
-</asset:script>
 </html>

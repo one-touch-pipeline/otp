@@ -39,7 +39,7 @@
 
         <g:render template="/templates/messages"/>
 
-        <div class="project-user-header-grid-wrapper">
+        <div class="project-selection-header-container">
             <div class="grid-element">
                 <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
             </div>

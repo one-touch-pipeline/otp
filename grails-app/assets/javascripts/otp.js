@@ -369,65 +369,6 @@ $.otp.resizeBodyInit = function (table, margin) {
     });
 };
 
-$.otp.initCommentBox = function (id, element) {
-    "use strict";
-    var cBox = $(element + ' #commentBox');
-    var saveCommentElement = $(element + ' #saveComment');
-    var cancelCommentElement = $(element + ' #cancelComment');
-    var initVal = cBox.val();
-
-    cBox.keyup(function() {
-        if(cBox.val() != initVal) {
-            saveCommentElement.prop("disabled", false);
-            cancelCommentElement.prop("disabled", false);
-        } else {
-            saveCommentElement.prop("disabled", true);
-            cancelCommentElement.prop("disabled", true);
-        };
-    });
-
-    $(element + ' #saveComment').click(function () {
-        var promise
-        if(element == "#individualCommentBox") {
-            promise = $.otp.saveComment(id, cBox.val(), "individual", "saveIndividualComment");
-        } else if (element == "#processCommentBox") {
-            promise = $.otp.saveComment(id, cBox.val(), "processes", "saveProcessComment");
-        } else if (element == "#dataFileCommentBox") {
-            promise = $.otp.saveComment(id, cBox.val(), "dataFile", "saveDataFileComment");
-        } else if (element == "#projectCommentBox") {
-            promise = $.otp.saveComment(id, cBox.val(), "projectConfig", "saveProjectComment");
-        }
-        promise.success(function (data) {
-            $(element + ' #commentDateLabel').html(data.date);
-            $(element + ' #commentAuthorLabel').html(data.author);
-            initVal = cBox.val();
-            saveCommentElement.prop("disabled", true);
-            cancelCommentElement.prop("disabled", true);
-        });
-        promise.error(function () {
-            $.otp.warningMessage("Saving failed");
-        });
-    });
-
-    $(element + ' #cancelComment').click(function () {
-        cBox.val(initVal);
-        saveCommentElement.prop("disabled", true);
-        cancelCommentElement.prop("disabled", true);
-    });
-};
-
-$.otp.saveComment = function (id, comment, controller, action) {
-    "use strict";
-    var url = $.otp.createLink({controller: controller, action: action});
-    return $.ajax({
-        type: "POST",
-        encoding: "UTF-8",
-        url: url,
-        dataType: "json",
-        data: {id: id, comment: comment}
-    });
-};
-
 $.otp.tableButtons = [
     {
         extend: 'csvHtml5',

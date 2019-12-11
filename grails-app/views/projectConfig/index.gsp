@@ -27,6 +27,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="projectOverview.title" args="[project?.name]"/></title>
+    <asset:javascript src="common/CommentBox.js"/>
     <asset:javascript src="pages/projectConfig/index/functions.js"/>
     <asset:javascript src="modules/editorSwitch"/>
 </head>
@@ -34,25 +35,19 @@
 <div class="body">
     <g:render template="/templates/messages"/>
     <g:if test="${projects}">
-        <div id="projectCommentBox" class="commentBoxContainer">
-            <div id="commentLabel">Comment:</div>
-            <g:set var="comment" value="${project.comment}"/>
-            <sec:ifNotGranted roles="ROLE_OPERATOR">
-                <textarea id="commentBox" readonly>${comment?.comment}</textarea>
-            </sec:ifNotGranted>
-            <sec:ifAllGranted roles="ROLE_OPERATOR">
-                <textarea id="commentBox">${comment?.comment}</textarea>
-
-                <div id="commentButtonArea">
-                    <button id="saveComment" disabled>&nbsp;&nbsp;&nbsp;<g:message code="commentBox.save"/></button>
-                    <button id="cancelComment" disabled><g:message code="commentBox.cancel"/></button>
-                </div>
-            </sec:ifAllGranted>
-            <div id="commentDateLabel">${comment?.modificationDate?.format('EEE, d MMM yyyy HH:mm')}</div>
-
-            <div id="commentAuthorLabel">${comment?.author}</div>
+        <div class="project-selection-header-container">
+            <div class="grid-element">
+                <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
+            </div>
+            <div class="grid-element comment-box">
+                <g:render template="/templates/commentBox" model="[
+                        commentable     : project,
+                        targetController: 'projectConfig',
+                        targetAction    : 'saveProjectComment',
+                ]"/>
+            </div>
         </div>
-        <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
+        <br>
         <div id="projectOverviewDates">
             <table class="key-value-table">
                 <tr>
