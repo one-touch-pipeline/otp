@@ -22,4 +22,4 @@
 
 //= require jqueryDatatables
 //= require ../workflows.js
-//= require dataTablePagination.js
+//= require /webjars/datatables-plugins/1.10.20/pagination/select.js
