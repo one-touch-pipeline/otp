@@ -57,7 +57,7 @@
                 </tr>
                 <tr title="<g:message code="egaSubmission.newSubmission.studyAbstract.tooltip"/>">
                     <td class="myKey"><g:message code="egaSubmission.newSubmission.studyAbstract"/></td>
-                    <td><g:textArea name="studyAbstract" value="${cmd?.studyAbstract}"/></td>
+                    <td><g:textArea name="studyAbstract" cols="130" rows="8" value="${cmd?.studyAbstract}"/></td>
                 </tr>
                 <tr title="<g:message code="egaSubmission.newSubmission.pubMedId.tooltip"/>">
                     <td class="myKey"><g:message code="egaSubmission.newSubmission.pubMedId"/></td>
