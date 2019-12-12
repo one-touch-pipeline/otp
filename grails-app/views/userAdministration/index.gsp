@@ -50,9 +50,6 @@
                 ]}" id="userTable"/>
             </div>
         </div>
-        <div class="buttons">
-            <g:link action="create"><g:message code="user.administration.createUser"/></g:link>
-        </div>
     </div>
     <asset:script type="text/javascript">
         $(function() {

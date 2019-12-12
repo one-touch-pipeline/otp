@@ -22,9 +22,7 @@
 package de.dkfz.tbi.otp.administration
 
 import grails.converters.JSON
-import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.annotation.Secured
-import grails.validation.ValidationException
 import org.springframework.validation.FieldError
 
 import de.dkfz.tbi.otp.FlashMessage
@@ -45,18 +43,12 @@ class UserAdministrationController {
 
     static allowedMethods = [
             index: "GET",
-            create: "GET",
-            createUSer: "POST",
     ]
 
     /**
      * Dependency Injection of RemoteUserService
      */
     UserService userService
-    /**
-     * Dependency Injection of SpringSecurityService
-     */
-    SpringSecurityService springSecurityService
 
     LdapService ldapService
 
@@ -65,35 +57,6 @@ class UserAdministrationController {
      */
     def index() {
 
-    }
-
-    /**
-     * Action to show the create User view
-     */
-    def create() {
-        return [ roles: Role.findAll().sort { it.authority } ]
-    }
-
-    def createUser(CreateUserCommand cmd) {
-        if (cmd.hasErrors()) {
-            flash.message = new FlashMessage(g.message(code: "user.administration.create.failure") as String, cmd.errors)
-        } else {
-            try {
-                List<Role> roles = cmd.role ? Role.findAllByIdInList(cmd.role) : []
-                userService.createUser(
-                        cmd.username,
-                        cmd.email,
-                        cmd.realName,
-                        roles
-                )
-                flash.message = new FlashMessage(g.message(code: "user.administration.create.success") as String)
-            } catch (ValidationException e) {
-                flash.message = new FlashMessage(g.message(code: "user.administration.create.failure") as String, e.errors)
-            } catch (Exception e) {
-                flash.message = new FlashMessage(g.message(code: "user.administration.create.failure") as String, e.message)
-            }
-        }
-        redirect(action: "create")
     }
 
     /**
