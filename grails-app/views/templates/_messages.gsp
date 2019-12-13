@@ -32,7 +32,13 @@ To use it, store a `FlashMessage` object in `flash.message`.
         <div>
             ${flash.message.message}<br>
             <g:if test="${flash.message.errorObject}">
-                There are ${(flash.message.errorObject as Errors).errorCount} error(s):<br>
+                <g:if test="${(flash.message.errorObject as Errors).errorCount == 1}">
+                    ${g.message(code: "default.message.error")}
+                </g:if>
+                <g:else>
+                    ${g.message(code: "default.message.errors", args: [(flash.message.errorObject as Errors).errorCount])}
+                </g:else>
+                <br>
                 <ul>
                     <g:each in="${(flash.message.errorObject as Errors).allErrors}" var="err">
                         <li>${g.message(error: err)}</li>
