@@ -29,7 +29,6 @@
 $.otp.individualList = function () {
     "use strict";
     $.otp.individual.register();
-    $.otp.resizeBodyInit('#individualTable', 180);
 };
 
 $.otp.individual = {

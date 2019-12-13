@@ -100,12 +100,7 @@ input, select, textarea, option, button {
         color:red;
     }
 }
-/* BASE LAYOUT */
-html {
-    background-repeat: no-repeat;
-    height: 100%;
-    background-color: #C4C4C4;
-}
+
 /* my styles start here */
 /**
 * tableBlock is used for a div with a header and a table underneath
@@ -736,7 +731,6 @@ input.newSampleIdentifier, div.newSampleIdentifier {
     display: inline-block
 }
 body {
-    overflow-x: hidden;
     min-height: 800px;
 }
 .body_position {
@@ -782,7 +776,10 @@ body {
     margin-bottom: 0;
 }
 .footer {
-    float: left;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    text-align: center;
     width: 100%;
     min-width: @width;
     height: 33px;
@@ -798,20 +795,20 @@ body {
     }
 }
 .menu {
+    background-color: @otpBlack;
     float: left;
     width: 100%;
     height: 40px;
     margin-top: 1px;
 }
 .menuContainer {
-    float: left;
     height: 40px;
 }
 .menuContainerL {
-    width: 81%;
+    float: left;
 }
 .menuContainerR {
-    width: 19%;
+    float: right;
 }
 .menuContainer ul {
     margin: 0;
@@ -926,9 +923,7 @@ body {
     min-width: @width;
     min-height: 600px;
     background-color: #FFF;
-    overflow-y: hidden;
-    overflow-x: hidden;
-    padding: 10px;
+    padding: 10px 10px 33px;
 }
 
 .body_pdf {
@@ -974,7 +969,7 @@ body {
 }
 
 .dataTables_scrollBody {
-    max-height:450px;
+    max-height: 600px;
     overflow-y: auto;
     overflow-x: auto;
 }
@@ -1009,7 +1004,6 @@ body {
     color:black;
     padding-top: 6px;
     margin-bottom: 5px;
-    overflow: auto;
     width:100%;
     border-color: #B4B5B6;
     table {
@@ -2247,7 +2241,8 @@ div.dt-buttons {
 }
 
 .fixedTableHeader th {
-    position: sticky;
+    position: sticky !important;
+    position: -webkit-sticky;
     top: 0;
 }
 

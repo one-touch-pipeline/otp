@@ -121,7 +121,6 @@
     <asset:script type="text/javascript">
         $(function() {
             $.otp.projectOverviewTable.registerLaneOverviewId();
-            $('.dataTables_scrollBody').height($('.body').height()-150);
         });
     </asset:script>
     </g:if>

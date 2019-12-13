@@ -35,7 +35,7 @@ $.otp.sequence = {
         });
 
         $("#sequenceTable").dataTable({
-            dom: '<i> B rt<"clear">S',
+            dom: '<i> B rt<"clear">',
             buttons: [ {
                 extend: 'csv',
                 titleAttr: 'Attention: Download can take a while',
