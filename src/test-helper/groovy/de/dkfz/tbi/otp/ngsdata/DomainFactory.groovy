@@ -28,8 +28,6 @@ import org.joda.time.Duration
 import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.InformationReliability
-import de.dkfz.tbi.otp.administration.Document
-import de.dkfz.tbi.otp.administration.DocumentType
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -2571,21 +2569,6 @@ class DomainFactory {
         ], properties, saveAndValidate)
     }
 
-    static Document createDocument(Map properties = [:]) {
-        return createDomainObject(Document, [
-                content: HelperUtils.getUniqueString().bytes,
-                formatType   : Document.FormatType.PDF,
-                documentType: { createDocumentType() },
-        ], properties)
-    }
-
-    static DocumentType createDocumentType(Map properties = [:]) {
-        return createDomainObject(DocumentType, [
-                title: "title${counter++}",
-                description: 'description',
-        ], properties)
-    }
-
     static AggregateSequences createAggregateSequences(Map properties = [:]) {
         createDomainObject(AggregateSequences, [
                 seqTypeId              : counter++,
@@ -2616,13 +2599,6 @@ class DomainFactory {
                 realmName              : "realmName${counter++}",
                 seqCenterName          : "seqCenterName${counter++}",
                 seqCenterDirName       : "seqCenterDirName${counter++}",
-        ], properties)
-    }
-
-    static ProjectInfo createProjectInfo(Map properties = [:]) {
-        return createDomainObject(ProjectInfo, [
-                fileName: "fileName_${counter++}",
-                project: { createProject() },
         ], properties)
     }
 

@@ -28,13 +28,13 @@ import org.grails.web.servlet.mvc.SynchronizerTokensHolder
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.security.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 import static javax.servlet.http.HttpServletResponse.*
 
-class DocumentControllerSpec extends Specification implements ControllerUnitTest<DocumentController>, DataTest, UserAndRoles {
+class DocumentControllerSpec extends Specification implements ControllerUnitTest<DocumentController>, DataTest, UserAndRoles, DocumentFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -56,7 +56,7 @@ class DocumentControllerSpec extends Specification implements ControllerUnitTest
     void "test upload, successful"() {
         given:
         setupData()
-        DocumentType documentType = DomainFactory.createDocumentType()
+        DocumentType documentType = createDocumentType()
         Document.FormatType formatType = Document.FormatType.CSV
         String content = "ABC"
 
@@ -86,7 +86,7 @@ class DocumentControllerSpec extends Specification implements ControllerUnitTest
     void "test upload, fails because of missing #problem"() {
         given:
         setupData()
-        DocumentType documentType = DomainFactory.createDocumentType()
+        DocumentType documentType = createDocumentType()
         Document.FormatType formatType = Document.FormatType.CSV
         String content = "ABC"
 
@@ -130,11 +130,11 @@ class DocumentControllerSpec extends Specification implements ControllerUnitTest
     void "test download"() {
         given:
         setupData()
-        DocumentType documentType = DomainFactory.createDocumentType()
+        DocumentType documentType = createDocumentType()
         Document.FormatType formatType = Document.FormatType.CSV
         String content = "ABC"
 
-        Document document = DomainFactory.createDocument(
+        Document document = createDocument(
             documentType: documentType,
             content: content,
             formatType: formatType,
@@ -164,11 +164,8 @@ class DocumentControllerSpec extends Specification implements ControllerUnitTest
     void "test manage"() {
         given:
         setupData()
-        DocumentType documentType = DomainFactory.createDocumentType()
-
-        Document document = DomainFactory.createDocument(
-                documentType: documentType,
-        )
+        DocumentType documentType = createDocumentType()
+        Document document = createDocument(documentType: documentType)
 
         when:
         def model = controller.manage()

@@ -29,14 +29,14 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.validation.Errors
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.ngsdata.DomainFactory
+import de.dkfz.tbi.otp.domainFactory.administration.DocumentFactory
 import de.dkfz.tbi.otp.security.UserAndRoles
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
 
 @Rollback
 @Integration
-class DocumentServiceIntegrationSpec extends Specification implements UserAndRoles {
+class DocumentServiceIntegrationSpec extends Specification implements UserAndRoles, DocumentFactory {
 
     private static final String TITLE = "title"
     private static final String DESCRIPTION = "description"
@@ -105,7 +105,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         given:
         setupData()
         Errors errors
-        DocumentType documentType = DomainFactory.createDocumentType()
+        DocumentType documentType = createDocumentType()
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -121,7 +121,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
         given:
         setupData()
         Errors errors
-        Document document = DomainFactory.createDocument()
+        Document document = createDocument()
 
         when:
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -150,7 +150,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
     void "test updateDocument, not authenticated"() {
         given:
         setupData()
-        DocumentType documentType = DomainFactory.createDocumentType()
+        DocumentType documentType = createDocumentType()
 
         when:
         SpringSecurityUtils.doWithAuth(USER) {
@@ -164,7 +164,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
     void "test updateDocument, create new document"() {
         given:
         setupData()
-        DocumentType documentType = DomainFactory.createDocumentType()
+        DocumentType documentType = createDocumentType()
         byte[] content = HelperUtils.getUniqueString().bytes
         Document.FormatType type = Document.FormatType.PDF
 
@@ -183,8 +183,8 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
     void "test updateDocument, update existing document"() {
         given:
         setupData()
-        DocumentType documentType = DomainFactory.createDocumentType()
-        DomainFactory.createDocument([
+        DocumentType documentType = createDocumentType()
+        createDocument([
                 documentType: documentType,
         ])
         byte[] content = HelperUtils.getUniqueString().bytes
@@ -225,7 +225,7 @@ class DocumentServiceIntegrationSpec extends Specification implements UserAndRol
     void "test listDocumentTypes and listDocuments, documentTypes and documents found"() {
         given:
         setupData()
-        Document document = DomainFactory.createDocument()
+        Document document = createDocument()
 
         expect:
         [document] == service.listDocuments()
