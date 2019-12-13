@@ -22,14 +22,18 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
+import grails.validation.ValidationException
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.validation.Errors
+
+import de.dkfz.tbi.otp.SqlUtil
 
 @Transactional
 class SoftwareToolService {
 
     static SoftwareToolIdentifier getBaseCallingTool(String name) {
-        return (SoftwareToolIdentifier)SoftwareToolIdentifier.createCriteria().get {
-            eq('name', name)
+        return (SoftwareToolIdentifier) SoftwareToolIdentifier.createCriteria().get {
+            ilike('name', SqlUtil.replaceWildcardCharactersInLikeExpression(name))
             softwareTool {
                 eq('type', SoftwareTool.Type.BASECALLING)
             }
@@ -37,21 +41,18 @@ class SoftwareToolService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Map<SoftwareTool, List<SoftwareToolIdentifier>> getIdentifiersPerSoftwareTool() {
+        return SoftwareToolIdentifier.list(sort: "name", order: "asc").groupBy { it.softwareTool }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Map<String, List<SoftwareTool>> getSoftwareToolsPerProgramName() {
+        return SoftwareTool.findAllByType(SoftwareTool.Type.BASECALLING, [sort: "programVersion", order: "asc"]).groupBy { it.programName }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SoftwareTool getSoftwareTool(long id) {
         return SoftwareTool.get(id)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<String> uniqueSortedListOfSoftwareToolProgramNames() {
-        return SoftwareTool.createCriteria().list {
-            order("programName", "asc")
-            projections { distinct("programName") }
-        }
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<SoftwareTool> findSoftwareToolsByProgramNameSortedAfterVersion(String programName) {
-        return SoftwareTool.findAllByProgramName(programName, [sort: "programVersion"])
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -61,15 +62,20 @@ class SoftwareToolService {
         return softwareTool.save(flush: true)
     }
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    Errors createSoftwareTool(String programName, String programVersion, SoftwareTool.Type type) {
+        SoftwareTool softwareTool = new SoftwareTool(programName: programName, programVersion: programVersion, type: type)
+        try {
+            softwareTool.save(flush: true)
+        } catch (ValidationException e) {
+            return e.errors
+        }
+        return null
+    }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     SoftwareToolIdentifier getSoftwareToolIdentifier(long id) {
         return SoftwareToolIdentifier.get(id)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<SoftwareToolIdentifier> findSoftwareToolIdentifiersBySoftwareToolSortedAfterName(SoftwareTool softwareTool) {
-        return SoftwareToolIdentifier.findAllBySoftwareTool(softwareTool, [sort: "name"])
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -84,7 +90,7 @@ class SoftwareToolService {
         SoftwareToolIdentifier softwareToolIdentifier = new SoftwareToolIdentifier(
                 name: alias,
                 softwareTool: softwareTool
-                )
+        )
         return softwareToolIdentifier.save(flush: true)
     }
 }

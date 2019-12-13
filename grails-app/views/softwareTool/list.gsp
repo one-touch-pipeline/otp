@@ -29,51 +29,69 @@
         <asset:javascript src="modules/editorSwitch"/>
     </head>
 <body>
-    <div class="body">
-        <div class="tableBlock">
-            <table>
-                <thead>
-                    <tr>
-                        <th><div class="software-tool-table-header"><g:message code="softwareTool.list.tool"/></div></th>
-                        <th><div class="software-tool-table-header"><g:message code="softwareTool.list.version"/></div></th>
-                        <th><div class="software-tool-table-header"><g:message code="softwareTool.list.aliases"/></div></th>
-                    </tr>
-                </thead>
+    <div class="body metaDataFields">
+        <g:render template="/templates/messages"/>
+        <g:render template="/metaDataFields/linkBanner"/>
+
+        <h3><g:message code="softwareTool.list.header"/></h3>
+        <g:form controller="softwareTool" action="createSoftwareTool" method="POST">
+            <table style="width: 50%">
                 <tbody>
-                    <g:each var="softwareTool" in="${softwareTools}">
-                        <tr>
-                            <td class="software-tool-program-name-label" colspan="3">${softwareTool.programName}</td>
-                        </tr>
-                        <g:each var="version" in="${softwareTool.versions}">
-                            <tr  class="software-tool-row">
-                                <td> </td>
-                                <td>
-                                    <div class="software-tool-version-container">
-                                        <otp:editorSwitch
-                                            roles="ROLE_OPERATOR"
-                                            link="${g.createLink(controller: 'softwareTool', action: 'updateSoftwareTool', id: version.id)}"
-                                            value="${version.programVersion} "/>
-                                    </div>
-                                </td>
-                                <td>
-                                    <g:each var="softwareToolIdentifier" in="${version.softwareToolIdentifiers}">
-                                        <otp:editorSwitch
-                                            roles="ROLE_OPERATOR"
-                                            link="${g.createLink(controller: 'softwareTool', action: 'updateSoftwareToolIdentifier', id: softwareToolIdentifier.id)}"
-                                            value="${softwareToolIdentifier.name} "/>
-                                    </g:each>
-                                    <otp:editorSwitch
-                                        roles="ROLE_OPERATOR"
-                                        template="newFreeTextValue"
-                                        link="${g.createLink(controller: 'softwareTool', action: 'createSoftwareToolIdentifier', id: version.id)}"
-                                        value=""/>
-                                </td>
-                            </tr>
-                        </g:each>
-                    </g:each>
+                    <tr>
+                        <td><g:message code="softwareTool.list.tool"/></td>
+                        <td><input name="programName" id="type" type="text" value="${cmd?.programName}"/></td>
+                    </tr>
+                    <tr>
+                        <td><g:message code="softwareTool.list.version"/></td>
+                        <td><input name="programVersion" id="version" type="text" value="${cmd?.programVersion}"></td>
+                    </tr>
                 </tbody>
             </table>
-        </div>
+            <g:submitButton name="${g.message(code: "softwareTool.list.confirmation")}"/>
+        </g:form>
+        <br>
+        <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
+        <table class="software-table">
+            <thead>
+                <tr>
+                    <th><g:message code="softwareTool.list.version"/></th>
+                    <th><g:message code="softwareTool.list.aliases"/></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            <g:each var="programName" in="${(softwareToolPerProgramName.keySet() as List<String>).sort { it.toLowerCase() }}">
+                <tr>
+                    <td colspan="3" class="software-table-name-row">${programName}</td>
+                </tr>
+                <g:each var="softwareTool" in="${softwareToolPerProgramName[programName]}">
+                     <tr>
+                         <td>
+                             <otp:editorSwitch
+                                     roles="ROLE_OPERATOR"
+                                     link="${g.createLink(controller: 'softwareTool', action: 'updateSoftwareTool', id: softwareTool.id)}"
+                                     value="${softwareTool.programVersion}"/>
+                         </td>
+                         <td>
+                             <g:each var="identifier" in="${identifierPerSoftwareTool[softwareTool]}">
+                                 <otp:editorSwitch
+                                         roles="ROLE_OPERATOR"
+                                         link="${g.createLink(controller: 'softwareTool', action: 'updateSoftwareToolIdentifier', id: identifier.id)}"
+                                         value="${identifier.name} "/>
+                             </g:each>
+                         </td>
+                         <td>
+                             <otp:editorSwitch
+                                     roles="ROLE_OPERATOR"
+                                     template="newFreeTextValue"
+                                     link="${g.createLink(controller: 'softwareTool', action: 'createSoftwareToolIdentifier', id: softwareTool.id)}"
+                                     value=""/>
+                         </td>
+                     </tr>
+                </g:each>
+            </g:each>
+            </tbody>
+        </table>
     </div>
 </body>
 </html>

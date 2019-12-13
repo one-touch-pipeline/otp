@@ -21,10 +21,13 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
+import org.springframework.security.access.prepost.PreAuthorize
+
 import de.dkfz.tbi.otp.utils.StringUtils
 
 class AntibodyTargetService extends MetadataFieldsService<AntibodyTarget> {
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map> getDisplayableMetadata() {
         return AntibodyTarget.list(sort: "name", order: "asc").collect {
             [

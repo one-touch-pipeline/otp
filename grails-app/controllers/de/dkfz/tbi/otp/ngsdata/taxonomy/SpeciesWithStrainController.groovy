@@ -33,23 +33,23 @@ class SpeciesWithStrainController {
     StrainService strainService
 
     static allowedMethods = [
-            index: "GET",
+            index                  : "GET",
             createSpeciesWithStrain: "POST",
-            createSpecies: "POST",
-            createStrain: "POST",
+            createSpecies          : "POST",
+            createStrain           : "POST",
     ]
 
     def index() {
-        List<Species> species = Species.list()
+        List<Species> species = speciesWithStrainService.getAllSpecies()
         return [
-            cachedCommonName: flash.commonName ?: '',
-            cachedScientificName: flash.scientificName ?: '',
-            cachedStrainName: flash.strainName ?: '',
+            cachedCommonName           : flash.commonName ?: '',
+            cachedScientificName       : flash.scientificName ?: '',
+            cachedStrainName           : flash.strainName ?: '',
 
-            allSpecies: species.sort { it.toString() },
-            speciesByCommonName: species.groupBy { it.commonName },
-            strains: Strain.list().sort { it.toString() },
-            commonNames: CommonName.list().sort { it.toString() },
+            allSpecies                 : species.sort { it.toString() },
+            speciesByCommonName        : species.groupBy { it.commonName },
+            strains                    : Strain.list().sort { it.toString() },
+            commonNames                : CommonName.list().sort { it.toString() },
             speciesWithStrainsBySpecies: SpeciesWithStrain.list().groupBy { it.species },
         ]
     }

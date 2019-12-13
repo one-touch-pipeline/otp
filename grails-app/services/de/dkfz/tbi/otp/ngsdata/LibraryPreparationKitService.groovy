@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparationKit> {
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map> getDisplayableMetadata() {
                 return LibraryPreparationKit.list(sort: "name", order: "asc").collect { LibraryPreparationKit it ->
             [

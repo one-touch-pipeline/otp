@@ -104,8 +104,9 @@ trait DomainFactoryCore implements DomainFactoryHelper {
 
     SoftwareTool createSoftwareTool(Map properties = [:]) {
         return createDomainObject(SoftwareTool, [
-                programName: "softwareToolProgramName_${nextId}",
-                type       : SoftwareTool.Type.ALIGNMENT,
+                programName   : "programName_${nextId}",
+                programVersion: "programVersion_${nextId}",
+                type          : SoftwareTool.Type.BASECALLING,
         ], properties)
     }
 

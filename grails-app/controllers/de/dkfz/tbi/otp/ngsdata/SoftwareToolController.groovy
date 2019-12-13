@@ -23,36 +23,36 @@ package de.dkfz.tbi.otp.ngsdata
 
 import grails.converters.JSON
 import grails.validation.Validateable
+import org.springframework.validation.Errors
+
+import de.dkfz.tbi.otp.FlashMessage
 
 class SoftwareToolController {
 
+    static allowedMethods = [
+            list                        : "GET",
+            createSoftwareTool          : "POST",
+    ]
+
     SoftwareToolService softwareToolService
 
+    def list() {
+        return [
+                identifierPerSoftwareTool : softwareToolService.getIdentifiersPerSoftwareTool(),
+                softwareToolPerProgramName: softwareToolService.getSoftwareToolsPerProgramName(),
+                cmd                       : flash.cmd as CreateSoftwareToolCommand,
+        ]
+    }
 
-    /**
-     * shows all {@link SoftwareTool}s grouped by name with {@link SoftwareToolIdentifier}
-     */
-    Map list() {
-        List dataToRender = []
-        softwareToolService.uniqueSortedListOfSoftwareToolProgramNames().each { String programName ->
-            List versions = []
-            softwareToolService.findSoftwareToolsByProgramNameSortedAfterVersion(programName).each { SoftwareTool softwareTool ->
-                List aliases = []
-                softwareToolService.findSoftwareToolIdentifiersBySoftwareToolSortedAfterName(softwareTool).each { SoftwareToolIdentifier it ->
-                    aliases << [id: it.id, name: it.name]
-                }
-                versions << [
-                    id: softwareTool.id,
-                    programVersion: softwareTool.programVersion,
-                    softwareToolIdentifiers: aliases,
-                ]
-            }
-            dataToRender << [
-                    programName: programName,
-                    versions: versions,
-            ]
+    def createSoftwareTool(CreateSoftwareToolCommand cmd) {
+        Errors errors = softwareToolService.createSoftwareTool(cmd.programName, cmd.programVersion, SoftwareTool.Type.BASECALLING)
+        if (errors) {
+            flash.message = new FlashMessage(g.message(code:  "softwareTool.list.error") as String, errors)
+            flash.cmd = cmd
+        } else {
+            flash.message = new FlashMessage(g.message(code:  "softwareTool.list.success") as String)
         }
-        return [softwareTools: dataToRender]
+        redirect (action: 'list')
     }
 
     JSON updateSoftwareTool(UpdateCommand cmd) {
@@ -61,7 +61,7 @@ class SoftwareToolController {
             return
         }
         if (softwareToolService.getSoftwareTool(cmd.id) == null) {
-            Map data = [error: "requested software tool with id of " + cmd.id + " could not be found"]
+            Map data = [error: "requested software tool with id of ${cmd.id} could not be found"]
             render data as JSON
             return
         }
@@ -75,7 +75,7 @@ class SoftwareToolController {
             return
         }
         if (softwareToolService.getSoftwareToolIdentifier(cmd.id) == null) {
-            Map data = [error: "requested software tool identifier with id of " + cmd.id + " could not be found"]
+            Map data = [error: "requested software tool identifier with id of ${cmd.id} could not be found"]
             render data as JSON
             return
         }
@@ -89,7 +89,7 @@ class SoftwareToolController {
             return
         }
         if (softwareToolService.getSoftwareTool(cmd.id) == null) {
-            Map data = [error: "requested software tool with id of " + cmd.id + " could not be found"]
+            Map data = [error: "requested software tool with id of ${cmd.id} could not be found"]
             render data as JSON
             return
         }
@@ -97,11 +97,9 @@ class SoftwareToolController {
         Map data = [success: true, softwareToolIdentifier: softwareToolService.createSoftwareToolIdentifier(softwareTool, cmd.value)]
         render data as JSON
     }
-
 }
 
 class UpdateCommand implements Validateable {
-
     Long id
     String value
 
@@ -109,6 +107,11 @@ class UpdateCommand implements Validateable {
         id(min: 0L)
         value(blank: false)
     }
+}
+
+class CreateSoftwareToolCommand implements Validateable {
+    String programName
+    String programVersion
 }
 
 

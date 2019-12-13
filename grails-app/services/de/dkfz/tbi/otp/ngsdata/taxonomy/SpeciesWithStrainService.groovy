@@ -30,6 +30,11 @@ import org.springframework.validation.Errors
 class SpeciesWithStrainService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    List<Species> getAllSpecies() {
+        return Species.list()
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Errors createSpeciesWithStrain(Species species, Strain strain) {
         SpeciesWithStrain speciesWithStrain = new SpeciesWithStrain(
                 species: species,

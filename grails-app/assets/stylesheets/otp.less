@@ -1484,20 +1484,6 @@ td div {
 .sample-identifiers-field-label {
     display: inline;
 }
-.software-tool-program-name-label {
-    background-color: #BFCFFF;
-    font-weight: bold;
-}
-.software-tool-table-header {
-    font-size: 2em;
-    color: black;
-}
-.software-tool-row {
-    background-color: #D5E0FF;
-}
-.software-tool-version-container {
-    width: 125px;
-}
 
 .optional {
     color: blue;
@@ -2272,5 +2258,30 @@ ul.metaDataFieldsLinkBanner {
         color: #000000;
         padding: 8px;
         border: 1px solid black;
+    }
+}
+
+.metaDataFields {
+    .annotation {
+        color: red;
+    }
+}
+
+.software-table {
+    th:nth-child(1) {
+        width: 40%;
+    }
+    th:nth-child(2) {
+        width: 20%;
+    }
+    th:nth-child(3) {
+        width: auto;
+    }
+
+    .software-table-name-row {
+        background-color: white;
+        font-weight: bold;
+        font-size: large;
+        border-top: 1px solid black
     }
 }

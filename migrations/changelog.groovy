@@ -295,4 +295,6 @@ databaseChangeLog = {
     include file: 'changelogs/2019/drop-seq-track-lane-id-unique-constraint.groovy'
 
     include file: 'changelogs/2019/processing-step-update-previous-index.groovy'
+
+    include file: 'changelogs/2019/otp-272.groovy'
 }

@@ -115,7 +115,6 @@
                                             <li><g:link controller="processes" action="list"><g:message code="otp.menu.processes"/></g:link></li>
                                             <li><g:link controller="mergingCriteria" action="defaultSeqPlatformGroupConfiguration"><g:message code="otp.menu.seqPlatformGroup"/></g:link></li>
                                             <li><g:link controller="metaDataFields" action="index"><g:message code="otp.menu.metaDataFields"/></g:link></li>
-                                            <li><g:link controller="softwareTool" action="list"><g:message code="otp.menu.softwareTool"/></g:link></li>
                                             <li><g:link controller="qcThreshold" action="defaultConfiguration"><g:message code="otp.menu.qcThreshold"/></g:link></li>
                                             <li><g:link controller="projectProgress" action="progress"><g:message code="otp.menu.progress"/></g:link></li>
                                             <li><g:link controller="document" action="manage"><g:message code="otp.menu.documents"/></g:link></li>

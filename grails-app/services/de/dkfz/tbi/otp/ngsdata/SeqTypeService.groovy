@@ -27,6 +27,7 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class SeqTypeService extends MetadataFieldsService<SeqType> {
 
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map> getDisplayableMetadata() {
         return SeqType.list(sort: "name", order: "asc").collect {
             [

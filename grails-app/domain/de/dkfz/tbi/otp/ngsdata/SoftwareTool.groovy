@@ -25,17 +25,19 @@ import de.dkfz.tbi.otp.utils.Entity
 
 class SoftwareTool implements Entity {
 
+    enum Type {
+        BASECALLING,
+        @Deprecated
+        ALIGNMENT,
+    }
+
     String programName
     String programVersion
-    enum Type {
-        BASECALLING, ALIGNMENT
-    }
     Type type
 
     static constraints = {
-        programName()
-        programVersion(nullable: true)
-        type()
+        programName(blank: false, unique: ['programVersion', 'type'])
+        programVersion(blank: false)
     }
 
     String getDisplayName() {

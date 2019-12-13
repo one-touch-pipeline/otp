@@ -30,11 +30,11 @@
 </head>
 
 <body>
-<div class="body fixedTableHeader wrapTableHeader">
+<div class="body fixedTableHeader wrapTableHeader metaDataFields">
     <g:render template="linkBanner"/>
-    <h3><g:message code="dataFields.title.caseInsensitive"/></h3>
 
     <h3><g:message code="dataFields.seqPlatform.header"/></h3>
+    <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
     <table>
         <thead>
         <tr>

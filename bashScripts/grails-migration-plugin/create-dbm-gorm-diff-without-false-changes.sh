@@ -48,7 +48,8 @@ tables="(job_error_definition_job_error_definition)|(aceseq_instance_roddy_execu
 (ega_library_selection_library_preparation_kit)|\
 (ega_library_source_seq_type)|\
 (ega_library_strategy_seq_type)|\
-(ega_platform_model_seq_platform_model_label)\
+(ega_platform_model_seq_platform_model_label)|\
+(software_tool_program_name_program_version_type_key)\
 "
 
 perl -0pi -e "${prefix}.*file_system_changes_idx${suffix}" $changelogPath
