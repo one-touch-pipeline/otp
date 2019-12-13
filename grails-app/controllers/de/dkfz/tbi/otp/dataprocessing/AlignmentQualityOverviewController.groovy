@@ -160,14 +160,14 @@ class AlignmentQualityOverviewController {
     QcThresholdService qcThresholdService
     QcTrafficLightService qcTrafficLightService
 
-    Map index(AlignmentQcCommand cmd) {
+    def index(AlignmentQcCommand cmd) {
         String projectName = params.project
         if (projectName) {
             Project project = projectService.getProjectByName(projectName)
             if (project) {
                 projectSelectionService.setSelectedProject([project], project.name)
                 redirect(controller: controllerName, action: actionName)
-                return [:]
+                return
             }
         }
 
@@ -175,6 +175,9 @@ class AlignmentQualityOverviewController {
         ProjectSelection selection = projectSelectionService.selectedProject
 
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
+        if (!project) {
+            return [:]
+        }
 
         List<SeqType> seqTypes = seqTypeService.alignableSeqTypesByProject(project).findAll {
             it.name in SUPPORTED_SEQ_TYPES
