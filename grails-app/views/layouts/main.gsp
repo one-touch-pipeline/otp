@@ -66,7 +66,6 @@
                                         <li><g:link controller="projectOverview" action="index"><g:message code="otp.menu.projectSpecificStatistics"/></g:link></li>
                                         <li><g:link controller="projectConfig" action="index"><g:message code="otp.menu.projectConfig"/></g:link></li>
                                         <li><g:link controller="projectUser" action="index"><g:message code="otp.menu.projectMembers"/></g:link></li>
-                                        <li><g:link controller="projectRequest" action="index"><g:message code="otp.menu.projectRequest"/></g:link></li>
                                         <sec:ifAllGranted roles="ROLE_MMML_MAPPING">
                                             <li class="allGranted"><g:link controller="projectOverview" action="mmmlIdentifierMapping"><g:message code="otp.menu.mmmlIdentifierMapping"/></g:link></li><br>
                                         </sec:ifAllGranted>
