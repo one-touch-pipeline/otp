@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 //Input area
 //------------------------------
 
-swapLabel = 'OTRS-_________________-something-descriptive'
+swapLabel = 'OTRS-________________-something-descriptive'
 
 /***
  * The query to get the seqtracks for the swap.

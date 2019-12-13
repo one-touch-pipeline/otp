@@ -48,7 +48,7 @@ import de.dkfz.tbi.otp.utils.*
  ********************************************************************************/
 
 
-swapLabel = 'OTRS-_________________-something-descriptive'
+swapLabel = 'OTRS-________________-something-descriptive'
 
 def swapMap = [
         ('oldPid')              : 'newPid',

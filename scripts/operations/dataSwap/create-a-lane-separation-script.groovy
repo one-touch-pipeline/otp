@@ -21,16 +21,14 @@
  */
 package operations.dataSwap
 
-
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.*
 
 /**
  * Generation Script which allows to separate lanes of a Sample into different SampleTypes.
  *
- * The script contains three steps.
- *   - creation of missing SampleTypes
- *   - creation of missing Samples
+ * The swap is executed in two steps:
+ *   - creation of missing Samples and SampleTypes, which are required for the swap
  *   - creation of swap script
  */
 
@@ -43,12 +41,9 @@ import de.dkfz.tbi.otp.utils.*
 
 swapLabel = 'OTRS-________________-something-descriptive'
 
-String sampleName = "pid sampleTypeName"
-
 Map<String, String> swapMap = [
-        ('sampleIdentifier'): 'newSampleType',
+        ('pid sampleType sampleIdentifier'): 'newPid newSampleType',
 ]
-
 
 /*********************************************************************************
  * Script area
@@ -57,68 +52,79 @@ Map<String, String> swapMap = [
  * It should not change depending on the swap-details.
  ********************************************************************************/
 
-int counter = 1
 List<String> files = []
 
-Closure<ScriptOutput> createSampleTypeCreationScript = { Sample sample, List<String> sampleTypeNames ->
+Closure<ScriptOutput> createSamplesAndSampleTypesCreationScript = { List<String> sampleNames ->
     ScriptOutput scriptOutput = new ScriptOutput()
 
-    scriptOutput.meta << "Create new SampleTypes:"
-    List<String> namesOfExistingSampleTypes = SampleType.findAllByNameInList(sampleTypeNames)*.name
+    scriptOutput.meta << "Objects to be created:"
 
-    scriptOutput.script << Snippets.databaseFixingBanner()
-    scriptOutput.script << "SampleType.withTransaction {"
-    sampleTypeNames.each { String name ->
-        if (!namesOfExistingSampleTypes.contains(name)) {
-            scriptOutput.meta << "  - ${name}"
-            scriptOutput.script << Snippets.indent(Snippets.createSampleType(name), 1)
-        }
-    }
-    scriptOutput.script << "}"
-
-    return scriptOutput
-}
-
-Closure<ScriptOutput> createSampleCreationScript = { Sample sample, List<String> sampleTypeNames ->
-    ScriptOutput scriptOutput = new ScriptOutput()
-
-    scriptOutput.meta << "Create new Samples for given Individual:"
-    List<String> sampleTypeNamesOfExistingSamples = Sample.findAllByIndividual(sample.individual)*.sampleType.name
+    List<SampleComponents> uniqueParsedSamples = sampleNames.unique().collect { String sampleName -> parseSampleAndGetComponents(sampleName) }
 
     scriptOutput.script << Snippets.databaseFixingBanner()
     scriptOutput.script << "import de.dkfz.tbi.otp.utils.CollectionUtils\n"
+
     scriptOutput.script << "Sample.withTransaction {"
-    sampleTypeNames.each { String name ->
-        if (!sampleTypeNamesOfExistingSamples.contains(name)) {
-            scriptOutput.meta << "  - ${name}"
-            scriptOutput.script << Snippets.indent(Snippets.createSampleForIndividual(sample.individual, name), 2)
+
+    List<SampleType> existingSampleTypes = SampleType.createCriteria().list {
+        or {
+            (uniqueParsedSamples*.sampleTypeName.unique()).each {
+                ilike("name", it)
+            }
         }
     }
+
+    List<String> expectedSampleTypes = uniqueParsedSamples*.sampleTypeName.unique()
+    List<String> sampleTypesToBeCreated = expectedSampleTypes - existingSampleTypes*.name
+
+    scriptOutput.meta << "  * new SampleTypes:"
+    sampleTypesToBeCreated.each { String name ->
+        scriptOutput.meta << "    - ${name}"
+        scriptOutput.script << Snippets.indent(Snippets.createSampleType(name), 1)
+        scriptOutput.containsChanges = true
+    }
+
+    scriptOutput.meta << "  * new Samples:"
+    uniqueParsedSamples.each { SampleComponents components ->
+        Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(components.pid))
+
+        SampleType sampleType = SampleType.findSampleTypeByName(components.sampleTypeName)
+        Sample sample = Sample.findByIndividualAndSampleType(individual, sampleType)
+
+        if (!sample) {
+            scriptOutput.meta << "    - ${components.pid} ${components.sampleTypeName}"
+            scriptOutput.script << Snippets.indent(Snippets.createSample(components.pid, components.sampleTypeName), 1)
+            scriptOutput.containsChanges = true
+        }
+    }
+
     scriptOutput.script << "}"
 
     return scriptOutput
 }
 
-Closure<ScriptOutput> createSwapScript = { Sample sample, String swapLabel ->
+int counter = 1
+Closure<ScriptOutput> createSwapScript = { String swapLabel ->
     ScriptOutput scriptOutput = new ScriptOutput()
-    MetaDataKey sampleIdKey = MetaDataKey.findByName("SAMPLE_ID")
 
     scriptOutput.script << Snippets.databaseFixingHeader(swapLabel)
 
-    swapMap.each { String sampleIdentifier, String newSampleTypeName ->
-        SampleType newSampleType = SampleType.findByName(newSampleTypeName)
+    swapMap.each { String from, String to ->
+        ParsedSwapMapEntry parsedEntry = ParsedSwapMapEntry.parse(from, to)
 
-        Map<SeqTrack, List<DataFile>> dataFilesPerSeqTrack = MetaDataEntry.findAllByKeyAndValue(sampleIdKey, sampleIdentifier)*.dataFile.groupBy { it.seqTrack }
-        int seqTrackCounter = 1
-        dataFilesPerSeqTrack.each { SeqTrack seqTrack, List<DataFile> dataFiles ->
-            String fileName = "mv_${counter++}_${sample.individual.pid}_ST_${seqTrackCounter++}__${sample.sampleType.name}__to__${newSampleTypeName}"
-            scriptOutput.meta << "Lane ${seqTrack.id}: ${seqTrack.sample.individual.pid} ${seqTrack.seqType}"
-            scriptOutput.meta << "  ${seqTrack.sample.sampleType.name} -->  ${newSampleTypeName}"
+        scriptOutput.meta << "${parsedEntry.oldSample} [${parsedEntry.identifier}] --> ${parsedEntry.newSample}"
+
+        Map<SeqTrack, List<DataFile>> dataFilesPerSeqTrack = getDataFilesBySampleIdentifierString(parsedEntry.identifier).groupBy { it.seqTrack }
+        dataFilesPerSeqTrack.eachWithIndex { SeqTrack seqTrack, List<DataFile> dataFiles, int index ->
+            String fileName = "mv_${counter++}_${parsedEntry.oldSampleString}_ST_${index}_${seqTrack.laneId}__to__${parsedEntry.newSampleString}"
+
+            scriptOutput.meta << "  * ${seqTrack.laneId}  ${seqTrack.seqType}"
+
             dataFiles.each { DataFile dataFile ->
-                scriptOutput.meta << "  * ${dataFile}, ${sampleIdentifier}"
+                scriptOutput.meta << "    - ${dataFile}"
             }
 
-            scriptOutput.script << Snippets.indent(Snippets.swapSampleTypeOfLane(seqTrack, fileName, newSampleType), 2)
+            scriptOutput.script << Snippets.indent(Snippets.swapLane(seqTrack, fileName, parsedEntry.newSample), 2)
 
             files << fileName
         }
@@ -155,30 +161,36 @@ ${
     return scriptOutput
 }
 
+/*********************************************************************************
+ * Script execution
+ * This is the actual part of the script which is executed when calling it.
+ ********************************************************************************/
 
-Sample sample = parseSample(sampleName)
-
-List<String> uniqueSampleTypeNames = swapMap.values().toList().unique()
-List<SampleType> allSampleTypes = SampleType.findAllByNameInList(uniqueSampleTypeNames)
-
-boolean allSampleTypesCreated = (allSampleTypes.size() == uniqueSampleTypeNames.size())
-if (!allSampleTypesCreated) {
-    createSampleTypeCreationScript(sample, uniqueSampleTypeNames).printToStdout()
+ScriptOutput samplesAndTypesScriptOutput = createSamplesAndSampleTypesCreationScript(swapMap.values() as List<String>)
+if (samplesAndTypesScriptOutput.containsChanges) {
+    samplesAndTypesScriptOutput.printToStdout()
     return
 }
 
-boolean allSamplesCreated = Sample.findAllByIndividualAndSampleTypeInList(sample.individual, allSampleTypes)
-if (!allSamplesCreated) {
-    createSampleCreationScript(sample, uniqueSampleTypeNames).printToStdout()
-    return
+createSwapScript(swapLabel).printToStdout()
+
+
+/*********************************************************************************
+ * Utility Functions and Classes
+ ********************************************************************************/
+
+private List<DataFile> getDataFilesBySampleIdentifierString(String sampleIdentifier) {
+    return MetaDataEntry.findAllByKeyAndValue(MetaDataKey.findByName("SAMPLE_ID"), sampleIdentifier)*.dataFile
 }
 
-createSwapScript(sample, swapLabel).printToStdout()
-
+private SampleComponents parseSampleAndGetComponents(String sampleName) {
+    return new SampleComponents(sampleName.split(" "))
+}
 
 class ScriptOutput {
     List<String> meta = []
     List<String> script = []
+    boolean containsChanges = false
 
     String getStdoutReady() {
         return Snippets.encloseInMetaDescription(meta.join("\n")) + "\n" + (script.join("\n"))
@@ -189,18 +201,68 @@ class ScriptOutput {
     }
 }
 
+class SampleComponents {
+    String pid
+    String sampleTypeName
 
-/*********************************************************************************
- * Utility Functions
- ********************************************************************************/
+    SampleComponents(String[] componentList) {
+        this.pid = componentList[0]
+        this.sampleTypeName = componentList[1]
+    }
 
-private Sample parseSample(String sampleName) {
-    String[] split = sampleName.split(" ")
-    assert split.size() == 2 : "Sample information could not be parsed, expected format: \"pid sampleTypeName\""
-    return Sample.findByIndividualAndSampleType(
-            CollectionUtils.exactlyOneElement(Individual.findAllByPid(split[0])),
-            CollectionUtils.exactlyOneElement(SampleType.findAllByName(split[1])),
-    )
+    boolean equals(SampleComponents other) {
+        return pid == other.pid && sampleTypeName == other.sampleTypeName
+    }
+
+    @Override
+    String toString() {
+        return "components: ${pid} ${sampleTypeName}"
+    }
+}
+
+class ParsedSwapMapEntry {
+    Sample oldSample
+    String identifier
+    Sample newSample
+
+    ParsedSwapMapEntry(Sample oldSample, String identifier, Sample newSample) {
+        this.oldSample = oldSample
+        this.identifier = identifier
+        this.newSample = newSample
+    }
+
+    static ParsedSwapMapEntry parse(String from, String to) {
+        def (oldPid, oldSampleTypeName, identifier) = from.split(" ")
+        def (newPid, newSampleTypeName) = to.split(" ")
+        return new ParsedSwapMapEntry(
+                getSampleFromPidAndSampleTypeName(oldPid, oldSampleTypeName),
+                identifier,
+                getSampleFromPidAndSampleTypeName(newPid, newSampleTypeName),
+        )
+    }
+
+    String getOldSampleString() {
+        getSampleStringForFilename(oldSample)
+    }
+
+    String getNewSampleString() {
+        getSampleStringForFilename(newSample)
+    }
+
+    private static String getSampleStringForFilename(Sample sample) {
+        return "${sample.individual.pid}_${sample.sampleType.name}"
+    }
+
+    private static Sample getSampleFromPidAndSampleTypeName(String pid, String sampleTypeName) {
+        Individual individual = CollectionUtils.exactlyOneElement(Individual.findAllByPid(pid))
+
+        SampleType sampleType = SampleType.findSampleTypeByName(sampleTypeName)
+        assert sampleType: "SampleType '${sampleTypeName}' could not be found"
+
+        Sample sample = CollectionUtils.exactlyOneElement(Sample.findAllByIndividualAndSampleType(individual, sampleType))
+
+        return sample
+    }
 }
 
 class Snippets {
@@ -253,30 +315,29 @@ try {
 """
     }
 
-    static String createSampleForIndividual(Individual individual, String newSampleTypeName) {
-        return """
+    static String createSample(String pid, String sampleTypeName) {
+        return """\
 assert new Sample(
-\tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${individual.pid}')),
-\tsampleType: CollectionUtils.exactlyOneElement(SampleType.findAllByName('${newSampleTypeName}'))
-).save(flush: true, failOnError: true) : "Error creating new Sample '\${individual.pid} ${newSampleTypeName}'"
-"""
+\tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${pid}')),
+\tsampleType: SampleType.findSampleTypeByName('${sampleTypeName}')
+).save(flush: true, failOnError: true) : "Error creating new Sample '${pid} ${sampleTypeName}'"""
     }
 
     static String createSampleType(String name) {
         return "assert new SampleType(name: '${name}').save(flush: true, failOnError: true) : \"Error creating new SampleType '${name}'\""
     }
 
-    static String swapSampleTypeOfLane(SeqTrack seqTrack, String fileName, SampleType newSampleType) {
+    static String swapLane(SeqTrack seqTrack, String fileName, Sample newSample) {
         StringBuilder snippet = new StringBuilder()
-        snippet << """
+        snippet << """\
 dataSwapService.swapLane(
 \t[
 \t\t'oldProjectName'   : '${seqTrack.sample.individual.project.name}',
 \t\t'newProjectName'   : '${seqTrack.sample.individual.project.name}',
 \t\t'oldPid'           : '${seqTrack.sample.individual.pid}',
-\t\t'newPid'           : '${seqTrack.sample.individual.pid}',
+\t\t'newPid'           : '${newSample.individual.pid}',
 \t\t'oldSampleTypeName': '${seqTrack.sample.sampleType.name}',
-\t\t'newSampleTypeName': '${newSampleType.name}',
+\t\t'newSampleTypeName': '${newSample.sampleType.name}',
 \t\t'oldSeqTypeName'   : '${seqTrack.seqType.name}',
 \t\t'newSeqTypeName'   : '${seqTrack.seqType.name}',
 \t\t'oldSingleCell'    : '${seqTrack.seqType.singleCell}',
@@ -291,8 +352,8 @@ dataSwapService.swapLane(
             snippet << "\t\t'${datafile.fileName}': '',\n"
         }
 
-        snippet << "\t],\n\t\t'${fileName}',\n" +
-                "\t\tlog, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY\n)\n"
+        snippet << "\t],\n\t'${fileName}',\n" +
+                "\tlog, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY\n)\n"
 
         return snippet.toString()
     }
