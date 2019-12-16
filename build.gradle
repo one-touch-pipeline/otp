@@ -258,6 +258,10 @@ tasks.withType(Test) {
 assets {
     minifyJs = true
     minifyCss = true
+    minifyOptions = [
+            languageMode: 'ES6',
+            targetLanguage: 'ES5',
+    ]
 }
 
 codenarc {
