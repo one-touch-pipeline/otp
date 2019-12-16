@@ -231,7 +231,7 @@ $.otp.workflows = {
                 state: state
             }
         }), false, function (json) {
-            let i, j, rowData, stepId, actions;
+            var i, j, rowData, stepId, actions;
             for (i = 0; i < json.aaData.length; i += 1) {
                 rowData = json.aaData[i];
                 rowData[0] = $.otp.createLinkMarkup({
