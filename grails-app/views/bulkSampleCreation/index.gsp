@@ -46,12 +46,12 @@
         <table>
             <tbody>
             <tr>
-                <td><span class="header"><g:message code="individual.insert.project"/></span></td>
+                <td><span class="table-column-header"><g:message code="individual.insert.project"/></span></td>
                 <td>${project}</td>
                 <td><b><g:message code="bulk.sample.creation.multipleProjects"/></b></td>
             </tr>
             <tr>
-                <td><span class="header"><g:message code="bulk.sample.creation.file.upload"/></span></td>
+                <td><span class="table-column-header"><g:message code="bulk.sample.creation.file.upload"/></span></td>
                 <td>
                 <g:uploadForm action="upload">
                     <input type="file" name="content"/>
@@ -66,7 +66,7 @@
             <tr><td colspan="3">&nbsp;</td></tr>
             <g:uploadForm action="submit">
                 <tr>
-                    <td><span class="header"><g:message code="bulk.sample.creation.delimiter"/></span></td>
+                    <td><span class="table-column-header"><g:message code="bulk.sample.creation.delimiter"/></span></td>
                     <td>
                         <g:select name="delimiter" from="${delimiters}" id="delimiter" value="${delimiter}" optionValue="displayName"
                                   noSelection="['': 'Choose a Delimiter']"/>
@@ -74,7 +74,7 @@
                     <td></td>
                 </tr>
                 <tr>
-                    <td><span class="header"><g:message code="bulk.sample.creation.text.upload"/></span></td>
+                    <td><span class="table-column-header"><g:message code="bulk.sample.creation.text.upload"/></span></td>
                     <td>
                         <g:textArea name="sampleText" id="sampleText" style="min-width: 500px;"
                                     value="${sampleText}"/>
@@ -87,7 +87,7 @@
                     </td>
                 </tr>
                 <tr>
-                    <td><span class="header"><g:message code="bulk.sample.creation.referenceGenomeSource"/></span></td>
+                    <td><span class="table-column-header"><g:message code="bulk.sample.creation.referenceGenomeSource"/></span></td>
                     <td>
                         <label onclick="$.otp.bulkSampleCreation.toggleEnable('createMissingSampleTypes', 'referenceGenomeSource', false)">
                             <g:checkBox checked="${createMissingSampleTypes}" name="createMissingSampleTypes" value="${createMissingSampleTypes}" style="vertical-align: middle"/>
