@@ -954,7 +954,7 @@ ln -s '${newDirectFileName}' \\
             seqTracksOfOldSample.each { SeqTrack seqTrack ->
                 bashScriptToMoveFiles << "\n\n#Delete Alignment- & Merging stuff from ${seqTrack} and retrigger Alignment.\n"
                 AlignmentPass.findAllBySeqTrack(seqTrack)
-                dirsToDelete << deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !linkedFilesVerified)
+                dirsToDelete << deletionService.deleteAllProcessingInformationAndResultOfOneSeqTrack(seqTrack, !linkedFilesVerified)
 
                 def alignmentDirType = DataProcessingFilesService.OutputDirectories.ALIGNMENT
                 String baseDir = dataProcessingFilesService.getOutputDirectory(oldIndividual, alignmentDirType)
