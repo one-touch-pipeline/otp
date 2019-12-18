@@ -56,9 +56,9 @@
         </table>
     </g:if>
     <g:else>
-        <li>
-            <ul>${g.message(code: "projectRequest.none")}</ul>
-        </li>
+        <ul>
+            <li>${g.message(code: "projectRequest.none")}</li>
+        </ul>
     </g:else>
     <br>
 
@@ -86,9 +86,9 @@
         </table>
     </g:if>
     <g:else>
-        <li>
-            <ul>${g.message(code: "projectRequest.none")}</ul>
-        </li>
+        <ul>
+            <li>${g.message(code: "projectRequest.none")}</li>
+        </ul>
     </g:else>
     <br>
 
