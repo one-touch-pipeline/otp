@@ -320,7 +320,7 @@ try {
 assert new Sample(
 \tindividual: CollectionUtils.exactlyOneElement(Individual.findAllByPid('${pid}')),
 \tsampleType: SampleType.findSampleTypeByName('${sampleTypeName}')
-).save(flush: true, failOnError: true) : "Error creating new Sample '${pid} ${sampleTypeName}'"""
+).save(flush: true, failOnError: true) : \"Error creating new Sample '${pid} ${sampleTypeName}'\""""
     }
 
     static String createSampleType(String name) {
