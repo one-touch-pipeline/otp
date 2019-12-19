@@ -77,7 +77,7 @@
                                  <otp:editorSwitch
                                          roles="ROLE_OPERATOR"
                                          link="${g.createLink(controller: 'softwareTool', action: 'updateSoftwareToolIdentifier', id: identifier.id)}"
-                                         value="${identifier.name} "/>
+                                         value="${identifier.name}"/>
                              </g:each>
                          </td>
                          <td>
