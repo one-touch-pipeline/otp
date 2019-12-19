@@ -22,26 +22,67 @@
 
 import de.dkfz.tbi.otp.config.*
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.DeletionService
 
 import java.nio.file.Path
 
 // input area
 //----------------------
 
-String projectName
+String projectName = ""
+
+// optional restriction on SeqTracks
+// not selecting any SeqTracks results in the whole project being affected
+List<SeqTrack> seqTracks = SeqTrack.withCriteria {
+    sample {
+        individual {
+            'in'('pid', [
+                    '',
+            ])
+            project {
+                eq('name', projectName)
+            }
+        }
+    }
+    'in'('seqType', [
+            SeqTypeService.getWholeGenomePairedSeqType(),
+            SeqTypeService.getExomePairedSeqType(),
+            SeqTypeService.getWholeGenomeBisulfitePairedSeqType(),
+            SeqTypeService.getWholeGenomeBisulfiteTagmentationPairedSeqType(),
+            SeqTypeService.getRnaSingleSeqType(),
+            SeqTypeService.getRnaPairedSeqType(),
+            SeqTypeService.getChipSeqPairedSeqType(),
+            SeqTypeService.get10xSingleCellRnaSeqType(),
+    ])
+}
 
 //script area
 //-----------------------------
 
 assert projectName
 
+if (seqTracks) {
+    println "Affected SeqTracks:"
+    seqTracks.groupBy { it.individual }.each { Individual individual, List<SeqTrack> seqTracksPerIndividual ->
+        println "  - ${individual}"
+        seqTracksPerIndividual.each { SeqTrack seqTrack ->
+            println "    * ${seqTrack}"
+        }
+    }
+} else {
+    println """\
+    |#########################################################################
+    |# No restriction on specific SeqTracks, entire project will be removed! #
+    |#########################################################################
+    |""".stripMargin()
+
+}
+
 Path baseOutputDir = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')
 
-DataSwapService dataSwapService = ctx.dataSwapService
+DeletionService deletionService = ctx.deletionService
 
 Project.withTransaction {
-
-    dataSwapService.deleteProcessingFilesOfProject(projectName, baseOutputDir)
-
-    assert false
+    deletionService.deleteProcessingFilesOfProject(projectName, baseOutputDir, false, false, seqTracks)
+    assert false: "DEBUG, remove this line to continue"
 }
