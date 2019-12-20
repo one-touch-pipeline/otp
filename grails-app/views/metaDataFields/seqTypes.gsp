@@ -31,7 +31,7 @@
 </head>
 
 <body>
-<div class="body fixedTableHeader wrapTableHeader metaDataFields">
+<div class="body fixed-table-header wrapTableHeader metaDataFields">
     <g:render template="/templates/messages"/>
     <g:render template="linkBanner"/>
 

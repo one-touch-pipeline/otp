@@ -152,7 +152,7 @@
             </g:if>
         </sec:access>
 
-        <div class="otpDataTables projectUserTable">
+        <div class="otpDataTables projectUserTable fixed-table-header">
             <h3><g:message code="projectUser.activeUsers" args="[project.displayName]"/></h3>
             <table>
                 <g:render template="userListingTableHeaderRow" model="[mode: 'enabled', project: project]"/>
@@ -289,7 +289,7 @@
             <h3>
                 <g:message code="projectUser.formerUsers"/>
             </h3>
-            <table>
+            <table class="fixed-table-header">
                 <g:render template="userListingTableHeaderRow" model="[mode: 'disabled', project: project]"/>
                 <g:if test="${!disabledProjectUsers}">
                     <g:render template="noUsersTableRow"/>

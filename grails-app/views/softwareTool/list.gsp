@@ -51,7 +51,7 @@
         </g:form>
         <br>
         <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
-        <table class="software-table">
+        <table class="software-table fixed-table-header">
             <thead>
                 <tr>
                     <th><g:message code="softwareTool.list.version"/></th>

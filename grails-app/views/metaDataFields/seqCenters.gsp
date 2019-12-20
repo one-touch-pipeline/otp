@@ -30,7 +30,7 @@
 </head>
 
 <body>
-<div class="body fixedTableHeader wrapTableHeader metaDataFields">
+<div class="body fixed-table-header wrapTableHeader metaDataFields">
     <g:render template="linkBanner"/>
 
     <h3><g:message code="dataFields.seqCenter.header"/></h3>
