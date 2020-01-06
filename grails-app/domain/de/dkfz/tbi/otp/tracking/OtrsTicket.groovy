@@ -22,9 +22,6 @@
 package de.dkfz.tbi.otp.tracking
 
 import groovy.transform.TupleConstructor
-import org.joda.time.IllegalFieldValueException
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 
 import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
@@ -189,14 +186,8 @@ class OtrsTicket implements Commentable, Entity {
     }
 
     static String ticketNumberConstraint(String val) {
-        if (val =~ /^[0-9]{16}$/) {
-            try {
-                DateTimeFormatter format = DateTimeFormat.forPattern("yyyyMMdd")
-                format.parseDateTime(val.substring(0, 8))
-                return null
-            } catch (IllegalFieldValueException e) {
-                return e.message
-            }
+        if (val =~ /^[0-9]+$/) {
+            return null
         } else {
             return "does not match the required pattern"
         }

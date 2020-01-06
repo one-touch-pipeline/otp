@@ -74,15 +74,6 @@ class OtrsTicketSpec extends Specification implements DataTest {
         ex.message.contains("OtrsTicket.ticketNumber.unique.error")
     }
 
-    def 'test creation, incorrect date' () {
-        when:
-        DomainFactory.createOtrsTicket([ticketNumber: '2000910112345678'])
-
-        then:
-        ValidationException ex = thrown()
-        ex.message.contains("Cannot parse \"20009101\": Value 91 for monthOfYear must be in the range [1,12]")
-    }
-
     def 'getFirstImportTimestamp and getLastImportTimestamp return expected result'() {
         given:
         OtrsTicket otrsTicketA = DomainFactory.createOtrsTicket()

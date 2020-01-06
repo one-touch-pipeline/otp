@@ -153,7 +153,7 @@ class OtrsTicketService {
 
         if (OtrsTicket.ticketNumberConstraint(ticketNumber)) {
             throw new UserException("Ticket number ${ticketNumber} does not pass validation or error while saving. " +
-                    "An OTRS ticket must consist of 16 successive digits.")
+                    "An OTRS ticket must consist only of digits.")
         }
 
         // assigning a fastqImportInstance that belongs to an otrsTicket which consists of several other fastqImportInstances is not allowed,
