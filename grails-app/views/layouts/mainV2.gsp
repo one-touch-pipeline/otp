@@ -274,7 +274,7 @@
                 <li><g:link controller="info" action="imprint"><g:message code="info.imprint.link"/></g:link></li>
                 <li><g:link controller="privacyPolicy"><g:message code="info.privacyPolicy.link"/></g:link></li>
                 <li>
-                    &copy;2011-2019
+                    &copy;2011-2020
                     <a href="https://www.dkfz.de" target="_blank">DKFZ</a>,
                     <a href="https://www.uni-heidelberg.de/" target="_blank">Universität Heidelberg</a>,
                     <a href="https://www.charite.de/" target="_blank">Charité</a>,
