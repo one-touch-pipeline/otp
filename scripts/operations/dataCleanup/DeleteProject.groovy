@@ -44,10 +44,14 @@ assert projectName : "No project name given"
 
 Project.withTransaction {
     Project project = CollectionUtils.exactlyOneElement(Project.findAllByName(projectName))
+    String output = "rm -rf ${project.getProjectDirectory()}"
     if (deleteOnlyProjectContent) {
+        output += "/sequencing/*"
         ctx.deletionService.deleteProjectContent(project)
     } else {
         ctx.deletionService.deleteProject(project)
     }
+    println "Execute the following line:"
+    println output
     assert false : "DEBUG: transaction intentionally failed to rollback changes"
 }
