@@ -73,8 +73,11 @@ class IndelSampleSwapDetection implements Entity {
 
     int somaticSmallVarsInTumorCommonInGnomadPer
 
+    Integer germlineSmallVarsInBothRare
+
 
     static constraints  = {
         indelCallingInstance unique: true
+        germlineSmallVarsInBothRare nullable: true
     }
 }

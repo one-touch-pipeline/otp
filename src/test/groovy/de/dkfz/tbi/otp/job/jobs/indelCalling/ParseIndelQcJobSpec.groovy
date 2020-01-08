@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.job.jobs.indelCalling
 
-
 import grails.testing.gorm.DataTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -138,6 +137,4 @@ class ParseIndelQcJobSpec extends Specification implements DataTest {
         CollectionUtils.exactlyOneElement(IndelQualityControl.list()).indelCallingInstance == indelCallingInstance
         indelCallingInstance.processingState == AnalysisProcessingStates.FINISHED
     }
-
-
 }

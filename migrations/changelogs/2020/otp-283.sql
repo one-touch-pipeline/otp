@@ -1,0 +1,2 @@
+ALTER TABLE indel_sample_swap_detection
+ADD COLUMN germline_Small_Vars_In_Both_Rare INTEGER;

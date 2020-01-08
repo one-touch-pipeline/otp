@@ -2535,6 +2535,7 @@ class DomainFactory {
     "germlineSNVsHeterozygousInBoth":20,
     "somaticSmallVarsInTumorPassPer":21.9,
     "somaticSmallVarsInTumorCommonInGnomadPer":22,
+    "germlineSmallVarsInBothRare":23,
 }
 """
     }

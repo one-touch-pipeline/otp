@@ -158,18 +158,22 @@ $.otp.resultsTable = {
                     row.sampleTypes,
                     row.seqType,
                     row.libPrepKits,
+                    // Indels
                     row.numIndels,
                     row.numIns,
                     row.numDels,
                     row.numSize1_3,
                     row.numSize4_10,
                     plotIndel,
+                    // Swap Checker
                     row.somaticSmallVarsInTumor,
                     row.somaticSmallVarsInControl,
                     row.somaticSmallVarsInTumorCommonInGnomad,
                     row.somaticSmallVarsInControlCommonInGnomad,
                     row.somaticSmallVarsInTumorPass,
                     row.somaticSmallVarsInControlPass,
+                    row.germlineSmallVarsInBothRare,
+                    // TINDA
                     row.tindaSomaticAfterRescue,
                     row.tindaSomaticAfterRescueMedianAlleleFreqInControl,
                     plotTinda,

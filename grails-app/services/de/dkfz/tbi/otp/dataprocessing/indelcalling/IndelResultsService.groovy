@@ -47,6 +47,7 @@ class IndelResultsService extends AbstractAnalysisResultsService<IndelCallingIns
                 numDels: qc?.numDels ?: "",
                 numSize1_3: qc?.numSize1_3 ?: "",
                 numSize4_10: qc?.numDelsSize4_10 ?: "",
+                germlineSmallVarsInBothRare: sampleSwap?.germlineSmallVarsInBothRare != null ? sampleSwap?.germlineSmallVarsInBothRare : "N/A",
                 somaticSmallVarsInTumor: sampleSwap?.somaticSmallVarsInTumor ?: "",
                 somaticSmallVarsInControl: sampleSwap?.somaticSmallVarsInControl ?: "",
                 somaticSmallVarsInTumorCommonInGnomad: sampleSwap?.somaticSmallVarsInTumorCommonInGnomad ?: "",
