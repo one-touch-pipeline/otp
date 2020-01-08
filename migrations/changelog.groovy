@@ -317,4 +317,8 @@ databaseChangeLog = {
     changeSet(author: "strubelp", id: "otp-283") {
         sqlFile(path: 'changelogs/2020/otp-283.sql')
     }
+
+    changeSet(author: "strubelp", id: "otp-306") {
+        sqlFile(path: 'changelogs/2020/otp-306.sql')
+    }
 }

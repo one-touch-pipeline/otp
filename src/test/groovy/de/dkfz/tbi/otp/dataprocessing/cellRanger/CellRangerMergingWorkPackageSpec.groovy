@@ -111,4 +111,29 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
         ValidationException e = thrown()
         e.message =~ "exclusive"
     }
+
+    void "test status constraint, only one mwp with status FINAL and same config and referenceGenomeIndex"() {
+        given:
+        CellRangerMergingWorkPackage mwp1 = createMergingWorkPackage()
+        CellRangerMergingWorkPackage mwp2 = createMergingWorkPackage(config: mwp1.config, referenceGenomeIndex: mwp1.referenceGenomeIndex)
+        createMergingWorkPackage(status: CellRangerMergingWorkPackage.Status.FINAL)
+        createMergingWorkPackage(config: mwp1.config, status: CellRangerMergingWorkPackage.Status.FINAL)
+        createMergingWorkPackage(referenceGenomeIndex: mwp1.referenceGenomeIndex, status: CellRangerMergingWorkPackage.Status.FINAL)
+
+        when:
+        mwp1.status = CellRangerMergingWorkPackage.Status.FINAL
+        mwp1.save(flush: true)
+
+        then: 'no error'
+        true
+
+        when:
+        mwp2.status = CellRangerMergingWorkPackage.Status.FINAL
+        mwp2.save(flush: true)
+
+        then:
+        ValidationException e = thrown()
+        e.message =~ "unique.combination"
+    }
+
 }

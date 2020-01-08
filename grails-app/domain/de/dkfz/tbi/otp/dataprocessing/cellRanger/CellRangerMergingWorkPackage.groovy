@@ -23,13 +23,22 @@ package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
 import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeIndex
+import de.dkfz.tbi.otp.utils.CollectionUtils
 
 class CellRangerMergingWorkPackage extends MergingWorkPackage {
+
+    enum Status {
+        FINAL,
+        NOT_FINAL,
+        UNSET
+    }
 
     Integer expectedCells
     Integer enforcedCells
     ReferenceGenomeIndex referenceGenomeIndex
     CellRangerConfig config
+    Status status = Status.UNSET
+    Date informed
 
     static constraints = {
         sample(validator: { val, obj ->
@@ -65,6 +74,24 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
             }
         })
         config(nullable: true)
+        status(validator: { val , obj ->
+            if (val && val == CellRangerMergingWorkPackage.Status.FINAL) {
+                CellRangerMergingWorkPackage crmwp = CollectionUtils.atMostOneElement(
+                        CellRangerMergingWorkPackage.findAllByConfigAndReferenceGenomeIndexAndStatus(
+                                obj.config,
+                                obj.referenceGenomeIndex,
+                                CellRangerMergingWorkPackage.Status.FINAL
+                        )
+                )
+                if (crmwp && crmwp != obj) {
+                    return [
+                            "unique.combination",
+                            "config: ${obj.config}, referenceGenomeIndex: ${obj.referenceGenomeIndex}, status: ${CellRangerMergingWorkPackage.Status.FINAL}"
+                    ]
+                }
+            }
+        })
+        informed(nullable: true)
     }
 
     @Override
