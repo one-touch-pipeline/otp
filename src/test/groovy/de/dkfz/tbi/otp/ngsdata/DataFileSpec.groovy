@@ -144,10 +144,10 @@ class DataFileSpec extends Specification implements DataTest, DomainFactoryCore 
         e.message.contains(missingValue)
 
         where:
-        nReads | sequenceLength | missingValue
-        null   | "100"          | "nReads"
-        100    | null           | "sequenceLength"
-        null   | null           | "nReads"
+        nReads | sequenceLength || missingValue
+        null   | "100"          || "nReads"
+        100    | null           || "sequenceLength"
+        null   | null           || "nReads"
     }
 
     void "getNBasePairs, multiplies meanSequenceLength times nReads"() {

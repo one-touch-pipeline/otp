@@ -1628,10 +1628,10 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         schedulerService.isJobResumable(processingStep) == result
 
         where:
-        result | jobClass
-        false  | TestJob.class.name
-        true   | ResumableTestJob.class.name
-        true   | ResumableSometimesResumableTestJob.class.name
+        jobClass                                      || result
+        TestJob.class.name                            || false
+        ResumableTestJob.class.name                   || true
+        ResumableSometimesResumableTestJob.class.name || true
     }
 
     @Unroll

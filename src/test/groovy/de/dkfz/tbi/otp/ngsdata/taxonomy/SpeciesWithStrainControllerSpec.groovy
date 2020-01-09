@@ -314,11 +314,11 @@ class SpeciesWithStrainControllerSpec extends Specification implements Controlle
         Species.findByCommonNameAndScientificName(CommonName.findByNameIlike(inputCN), scientificName)
 
         where:
-        inputCN | expectedNumberOfCommonNames
-        "Human" | 2
-        "Mouse" | 1
-        "mouse" | 1
-        "mOuSe" | 1
+        inputCN || expectedNumberOfCommonNames
+        "Human" || 2
+        "Mouse" || 1
+        "mouse" || 1
+        "mOuSe" || 1
     }
 
     void "createSpecies, duplicate scientificNames are invalid input"() {

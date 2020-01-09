@@ -67,14 +67,14 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         ])
 
         expect:
-        AbstractAlignmentDecider.hasLibraryPreparationKitAndBedFile(seqTrack) == (libraryPreparationKit && referenceGenome)
+        AbstractAlignmentDecider.hasLibraryPreparationKitAndBedFile(seqTrack) == result
 
         where:
-        libraryPreparationKitMethod                       | referenceGenomeMethod                       | result
-        ({ null })                                        | ({ null })                                  | false
-        ({ null })                                        | ({ DomainFactory.createReferenceGenome() }) | false
-        ({ DomainFactory.createLibraryPreparationKit() }) | ({ null })                                  | false
-        ({ DomainFactory.createLibraryPreparationKit() }) | ({ DomainFactory.createReferenceGenome() }) | true
+        libraryPreparationKitMethod                       | referenceGenomeMethod                       || result
+        ({ null })                                        | ({ null })                                  || false
+        ({ null })                                        | ({ DomainFactory.createReferenceGenome() }) || false
+        ({ DomainFactory.createLibraryPreparationKit() }) | ({ null })                                  || false
+        ({ DomainFactory.createLibraryPreparationKit() }) | ({ DomainFactory.createReferenceGenome() }) || true
 
     }
 }

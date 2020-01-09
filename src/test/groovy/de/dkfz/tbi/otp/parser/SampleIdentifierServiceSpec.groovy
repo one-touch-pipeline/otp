@@ -430,9 +430,9 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         result.sample.sampleType.name == nameOut
 
         where:
-        nameIn            | nameOut
-        "typical"         | "typical"
-        "with_underscore" | "with-underscore"
+        nameIn            || nameOut
+        "typical"         || "typical"
+        "with_underscore" || "with-underscore"
     }
 
     private SampleIdentifierService createSampleIdentifierService() {
@@ -456,9 +456,9 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         result == expected
 
         where:
-        input        | expected
-        "sin_gle"    | "sin-gle"
-        "mul_ti_ple" | "mul-ti-ple"
+        input        || expected
+        "sin_gle"    || "sin-gle"
+        "mul_ti_ple" || "mul-ti-ple"
     }
 
     @Unroll

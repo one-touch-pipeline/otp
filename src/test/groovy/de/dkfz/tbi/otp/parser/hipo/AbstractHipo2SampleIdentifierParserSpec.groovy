@@ -221,10 +221,10 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
         cellPosition == expectedCellPosition
 
         where:
-        identifier       | expectedCellPosition
-        "123ABC-T0-G1"   | "G1"
-        "123ABC-T0-12C3" | "12C3"
-        "123ABC-T3-1J02" | "1J02"
+        identifier       || expectedCellPosition
+        "123ABC-T0-G1"   || "G1"
+        "123ABC-T0-12C3" || "12C3"
+        "123ABC-T3-1J02" || "1J02"
     }
 
     @SuppressWarnings('JUnitTestMethodWithoutAssert')

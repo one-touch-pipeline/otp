@@ -437,20 +437,20 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
         defaultEgaAliasesForDataFiles.get(dataFile.fileName + dataFile.run) == "${aliasNameHelper.join("_")}.fastq.gz"
 
         where:
-        runName                            | runNameWithoutDate
-        "120111_SN509_0137_BD0CWYACXX"     | "SN509_0137_BD0CWYACXX"
-        "solid0719_20100818_PE_MB3_a"      | "solid0719_PE_MB3_a"
-        "NB501263_25_HVTWTBGXX"            | "NB501263_25_HVTWTBGXX"
-        "SN678_373_C7RM5ACXX"              | "SN678_373_C7RM5ACXX"
-        "Wgbs-oakes-run9"                  | "Wgbs-oakes-run9"
-        "run170629_D00392_0173_BCB26BANXX" | "runD00392_0173_BCB26BANXX"
-        "Rna-oakes-run4"                   | "Rna-oakes-run4"
-        "C6B02ACXX"                        | "C6B02ACXX"
-        "ega_rnaseq_62JP4AAXX"             | "ega_rnaseq_62JP4AAXX"
-        "NB501263_92_HCG7FBGX3"            | "NB501263_92_HCG7FBGX3"
-        "NB501764_HVJ5JBGX5"               | "NB501764_HVJ5JBGX5"
-        "2011-09-10-C05PPACXX"             | "C05PPACXX"
-        "2011-010-10-C05PPACXX"            | "2011-010-10-C05PPACXX"
+        runName                            || runNameWithoutDate
+        "120111_SN509_0137_BD0CWYACXX"     || "SN509_0137_BD0CWYACXX"
+        "solid0719_20100818_PE_MB3_a"      || "solid0719_PE_MB3_a"
+        "NB501263_25_HVTWTBGXX"            || "NB501263_25_HVTWTBGXX"
+        "SN678_373_C7RM5ACXX"              || "SN678_373_C7RM5ACXX"
+        "Wgbs-oakes-run9"                  || "Wgbs-oakes-run9"
+        "run170629_D00392_0173_BCB26BANXX" || "runD00392_0173_BCB26BANXX"
+        "Rna-oakes-run4"                   || "Rna-oakes-run4"
+        "C6B02ACXX"                        || "C6B02ACXX"
+        "ega_rnaseq_62JP4AAXX"             || "ega_rnaseq_62JP4AAXX"
+        "NB501263_92_HCG7FBGX3"            || "NB501263_92_HCG7FBGX3"
+        "NB501764_HVJ5JBGX5"               || "NB501764_HVJ5JBGX5"
+        "2011-09-10-C05PPACXX"             || "C05PPACXX"
+        "2011-010-10-C05PPACXX"            || "2011-010-10-C05PPACXX"
     }
 
     void "test generate default ega aliases for bam files"() {

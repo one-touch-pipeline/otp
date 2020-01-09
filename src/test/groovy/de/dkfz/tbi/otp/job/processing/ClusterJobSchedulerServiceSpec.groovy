@@ -155,15 +155,15 @@ class ClusterJobSchedulerServiceSpec extends Specification implements DataTest {
         result.get(job) == status
 
         where:
-        pbsStatus | status
-        "C"       | ClusterJobStatus.COMPLETED
-        "E"       | ClusterJobStatus.COMPLETED
-        "H"       | ClusterJobStatus.NOT_COMPLETED
-        "Q"       | ClusterJobStatus.NOT_COMPLETED
-        "R"       | ClusterJobStatus.NOT_COMPLETED
-        "T"       | ClusterJobStatus.NOT_COMPLETED
-        "W"       | ClusterJobStatus.NOT_COMPLETED
-        "S"       | ClusterJobStatus.NOT_COMPLETED
+        pbsStatus || status
+        "C"       || ClusterJobStatus.COMPLETED
+        "E"       || ClusterJobStatus.COMPLETED
+        "H"       || ClusterJobStatus.NOT_COMPLETED
+        "Q"       || ClusterJobStatus.NOT_COMPLETED
+        "R"       || ClusterJobStatus.NOT_COMPLETED
+        "T"       || ClusterJobStatus.NOT_COMPLETED
+        "W"       || ClusterJobStatus.NOT_COMPLETED
+        "S"       || ClusterJobStatus.NOT_COMPLETED
     }
 
 

@@ -147,9 +147,9 @@ class EgaSubmissionValidationServiceSpec extends Specification implements EgaSub
         egaSubmissionValidationService.validateFileTypeFromInput(spreadsheet) == result
 
         where:
-        fileType | result
-        "FASTQ"  | true
-        "WRONG"  | false
+        fileType || result
+        "FASTQ"  || true
+        "WRONG"  || false
     }
 
     @Unroll

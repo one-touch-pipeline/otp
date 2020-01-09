@@ -31,11 +31,11 @@ class ClusterJobSubmissionOptionsServiceSpec extends Specification {
         expected == ClusterJobSubmissionOptionsService.convertJsonStringToMap(jsonString)
 
         where:
-        jsonString                           | expected
-        ''                                   | [:]
-        '{"WALLTIME": "30"}'                 | [(JobSubmissionOption.WALLTIME): "30"]
-        '{"WALLTIME": "30", "NODES": "1"}'   | [(JobSubmissionOption.NODES): "1", (JobSubmissionOption.WALLTIME): "30"]
-        '{"WALLTIME": "30", "NODES": "1", }' | [(JobSubmissionOption.NODES): "1", (JobSubmissionOption.WALLTIME): "30"]
+        jsonString                           || expected
+        ''                                   || [:]
+        '{"WALLTIME": "30"}'                 || [(JobSubmissionOption.WALLTIME): "30"]
+        '{"WALLTIME": "30", "NODES": "1"}'   || [(JobSubmissionOption.NODES): "1", (JobSubmissionOption.WALLTIME): "30"]
+        '{"WALLTIME": "30", "NODES": "1", }' || [(JobSubmissionOption.NODES): "1", (JobSubmissionOption.WALLTIME): "30"]
     }
 
     void "test validateOptionString, valid string"() {

@@ -59,12 +59,12 @@ class WorkflowConfigServiceSpec extends Specification implements DataTest {
         nextVersion == expect
 
         where:
-        active   | expect
-        "v1_0"   | "v1_1"
-        "v2_0"   | "v2_1"
-        "vA_0"   | "vA_1"
-        "v4_9"   | "v4_10"
-        "v1_2_3" | "v1_3"
-        "1_2"    | "1_3"
+        active   || expect
+        "v1_0"   || "v1_1"
+        "v2_0"   || "v2_1"
+        "vA_0"   || "vA_1"
+        "v4_9"   || "v4_10"
+        "v1_2_3" || "v1_3"
+        "1_2"    || "1_3"
     }
 }

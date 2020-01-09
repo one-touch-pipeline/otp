@@ -135,9 +135,9 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         extInvocations * controller.userProjectRoleService.addExternalUserToProject(_, _, _, _)
 
         where:
-        addViaLdap | extInvocations | intInvocations
-        true       | 0              | 1
-        false      | 1              | 0
+        addViaLdap || extInvocations | intInvocations
+        true       || 0              | 1
+        false      || 1              | 0
     }
 
     @Unroll
@@ -170,8 +170,8 @@ class ProjectUserControllerSpec extends Specification implements ControllerUnitT
         controller.flash.message.errorList == [errorMessage]
 
         where:
-        addViaLdap | errorMessage
-        true       | "internal"
-        false      | "external"
+        addViaLdap || errorMessage
+        true       || "internal"
+        false      || "external"
     }
 }

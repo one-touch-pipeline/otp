@@ -122,16 +122,16 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         result == SeqTrack.normalizeLibraryName(value)
 
         where:
-        value        | result
-        null         | null
-        ''           | ''
-        '1'          | '1'
-        'lib_1'      | '1'
-        'lib-1'      | '1'
-        'lib000'     | '0'
-        'lib0001'    | '1'
-        'library1'   | '1'
-        'library001' | '1'
+        value        || result
+        null         || null
+        ''           || ''
+        '1'          || '1'
+        'lib_1'      || '1'
+        'lib-1'      || '1'
+        'lib000'     || '0'
+        'lib0001'    || '1'
+        'library1'   || '1'
+        'library001' || '1'
     }
 
     @Unroll
@@ -140,10 +140,10 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         result == SeqTrack.getLongestCommonPrefixBeforeLastUnderscore(value1, value2)
 
         where:
-        value1                  | value2                  | result
-        FIRST_DATAFILE_NAME     | FIRST_DATAFILE_NAME     | '4_NoIndex_L004_R1_complete'
-        FIRST_DATAFILE_NAME     | SECOND_DATAFILE_NAME    | COMMON_PREFIX
-        'NoUnderScoreR1.tar.gz' | 'NoUnderScoreR2.tar.gz' | 'NoUnderScoreR'
+        value1                  | value2                  || result
+        FIRST_DATAFILE_NAME     | FIRST_DATAFILE_NAME     || '4_NoIndex_L004_R1_complete'
+        FIRST_DATAFILE_NAME     | SECOND_DATAFILE_NAME    || COMMON_PREFIX
+        'NoUnderScoreR1.tar.gz' | 'NoUnderScoreR2.tar.gz' || 'NoUnderScoreR'
     }
 
     @Unroll
@@ -155,11 +155,11 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         thrown(AssertionError)
 
         where:
-        value1              | value2               | result
-        null                | SECOND_DATAFILE_NAME | ''
-        FIRST_DATAFILE_NAME | null                 | ''
-        ''                  | SECOND_DATAFILE_NAME | ''
-        FIRST_DATAFILE_NAME | ''                   | ''
+        value1              | value2               || result
+        null                | SECOND_DATAFILE_NAME || ''
+        FIRST_DATAFILE_NAME | null                 || ''
+        ''                  | SECOND_DATAFILE_NAME || ''
+        FIRST_DATAFILE_NAME | ''                   || ''
     }
 
     void "getReadGroupName, when SeqTrack has only one dataFile, then throw AssertionError"() {

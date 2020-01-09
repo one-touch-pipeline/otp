@@ -334,10 +334,10 @@ ILSe 5678, runA, lane 1, ${sampleText}
         result == expected
 
         where:
-        strings                                       | blacklist       | expected
-        ["/data/t1", "/data/t2", "/data/t3"]          | ""              | ["/data/t1", "/data/t2", "/data/t3"]
-        ["/data/t1", "/data/t2", "/filtered/t3"]      | "/filtered"     | ["/data/t1", "/data/t2"]
-        ["/data/t1", "/filtered/no", "/filtered/yes"] | "/filtered/yes" | ["/data/t1", "/filtered/no"]
-        ["/data/t1", "/filtered/no", "/filtered/yes"] | "/filt"         | ["/data/t1"]
+        strings                                       | blacklist       || expected
+        ["/data/t1", "/data/t2", "/data/t3"]          | ""              || ["/data/t1", "/data/t2", "/data/t3"]
+        ["/data/t1", "/data/t2", "/filtered/t3"]      | "/filtered"     || ["/data/t1", "/data/t2"]
+        ["/data/t1", "/filtered/no", "/filtered/yes"] | "/filtered/yes" || ["/data/t1", "/filtered/no"]
+        ["/data/t1", "/filtered/no", "/filtered/yes"] | "/filt"         || ["/data/t1"]
     }
 }

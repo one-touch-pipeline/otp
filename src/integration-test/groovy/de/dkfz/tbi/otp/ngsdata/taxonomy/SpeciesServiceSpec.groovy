@@ -80,9 +80,9 @@ class SpeciesServiceSpec extends Specification implements UserAndRoles, Taxonomy
         }
 
         where:
-        commonName    | expectedError
-        ""            | "cannot be blank"
-        "${MOUSE}#@!" | "Contains invalid characters"
+        commonName    || expectedError
+        ""            || "cannot be blank"
+        "${MOUSE}#@!" || "Contains invalid characters"
     }
 
     @Unroll
@@ -104,8 +104,8 @@ class SpeciesServiceSpec extends Specification implements UserAndRoles, Taxonomy
         }
 
         where:
-        scientificName | expectedError
-        ""             | "cannot be blank"
-        "${MUS}#@!"    | "Contains invalid characters"
+        scientificName || expectedError
+        ""             || "cannot be blank"
+        "${MUS}#@!"    || "Contains invalid characters"
     }
 }
