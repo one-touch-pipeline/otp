@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.plugin.springsecurity.acl.AclSid
 import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
-import org.junit.Ignore
 import spock.lang.Specification
 
 import de.dkfz.tbi.otp.job.processing.ProcessParameter
@@ -102,7 +101,6 @@ class RunControllerSpec extends Specification implements ControllerUnitTest<RunC
         controller.response.status == 404
     }
 
-    @Ignore
     void "testShowRunMinimalData"() {
         given:
         setupData()
@@ -129,7 +127,6 @@ class RunControllerSpec extends Specification implements ControllerUnitTest<RunC
         model.processParameters.isEmpty()
     }
 
-    @Ignore
     void "testShowRunByName"() {
         given:
         setupData()
