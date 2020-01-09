@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.*
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.ProjectService
-import de.dkfz.tbi.util.CommandHelper
+import de.dkfz.tbi.otp.utils.StringUtils
 
 import java.text.SimpleDateFormat
 
@@ -213,7 +213,7 @@ class UpdateProjectInfoCommentCommand extends ProjectInfoCommand {
     }
 
     void setValue(String s) {
-        value = CommandHelper.blankToNull(s)
+        value = StringUtils.blankToNull(s)
     }
 }
 
@@ -225,7 +225,7 @@ class UpdateDataTransferCommentCommand extends DataTransferCommand {
     }
 
     void setValue(String s) {
-        value = CommandHelper.blankToNull(s)
+        value = StringUtils.blankToNull(s)
     }
 }
 
@@ -265,11 +265,11 @@ class AddProjectInfoCommand implements Validateable {
     }
 
     void setComment(String s) {
-        comment = CommandHelper.blankToNull(s)
+        comment = StringUtils.blankToNull(s)
     }
 
     void setDtaId(String s) {
-        dtaId = CommandHelper.blankToNull(s)
+        dtaId = StringUtils.blankToNull(s)
     }
 
     void setValidityDateInput(String validityDate) {
@@ -314,10 +314,10 @@ class AddTransferCommand implements Validateable {
     }
 
     void setComment(String s) {
-        comment = CommandHelper.blankToNull(s)
+        comment = StringUtils.blankToNull(s)
     }
 
     void setPeerAccount(String s) {
-        peerAccount = CommandHelper.blankToNull(s)
+        peerAccount = StringUtils.blankToNull(s)
     }
 }

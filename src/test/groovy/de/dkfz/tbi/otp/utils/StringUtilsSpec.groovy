@@ -80,4 +80,19 @@ class StringUtilsSpec extends Specification {
         [abc: 'b', avc: 'v', ayc: 'y'] | _
         [abc: 'c', abw: 'w', abz: 'z'] | _
     }
+
+    void 'blankToNull - blanks ONLY empty string to null, otherwise keeps as-is'() {
+        expect:
+        StringUtils.blankToNull(s) == expected
+
+        where:
+        s     || expected
+        ''    || null
+        null  || null
+        'foo' || 'foo'
+        ' '   || ' '
+        '\t'  || '\t'
+        '\n'  || '\n'
+        'OTP is awesome, even with trailing spaces   ' ||  'OTP is awesome, even with trailing spaces   '
+    }
 }

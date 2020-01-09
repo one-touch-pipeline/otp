@@ -78,4 +78,15 @@ class StringUtils {
         }
         return result
     }
+
+    /**
+     * Downcast blank string to null for simpler handling of empty fields in the GUI
+     *
+     * @param string to downcast
+     * @return the casted String
+     */
+    @SuppressWarnings("TernaryCouldBeElvis")
+    static String blankToNull(String string) {
+        return string ? string : null
+    }
 }
