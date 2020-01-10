@@ -45,12 +45,16 @@ $(function() {
 
     $('#add-button, #deactivateButton, #reactivateButton').click(function () {
         var text = $(this).data('text');
+        //This is needed to prevent multiple submits
         this.disabled = true;
 
         if (!$.confirmation(text)) {
             this.disabled = false;
             return false;
         }
+
+        //This is needed since Chrome does not submit when the button is disabled, where as Firefox and Edge do
+        $(this).parents('form').submit();
         return true
     });
 });
