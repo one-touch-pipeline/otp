@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.domainFactory.administration
 
+import org.springframework.mock.web.MockMultipartFile
+
 import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -60,5 +62,11 @@ trait DocumentFactory implements DomainFactoryCore {
                 peerPerson    : "peerPerson_${nextId}",
                 transferDate  : new Date(),
         ], properties, saveAndValidate)
+    }
+
+    MockMultipartFile createMultipartFile(String name = "fileName", String originalFilename = "fileName", byte[] content = 0..3) {
+        MockMultipartFile mockMultipartFile = new MockMultipartFile(name, content)
+        mockMultipartFile.originalFilename = originalFilename
+        return mockMultipartFile
     }
 }

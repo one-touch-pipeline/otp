@@ -428,12 +428,6 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
         dataTransfer.comment == "updated"
     }
 
-    MockMultipartFile createMultipartFile(String name = "fileName", String originalFilename = "fileName", byte[] content = 0..3) {
-        MockMultipartFile mockMultipartFile = new MockMultipartFile(name, content)
-        mockMultipartFile.originalFilename = originalFilename
-        return mockMultipartFile
-    }
-
     AddProjectInfoCommand createAddProjectInfoCommand(Map properties = [:]) {
         return new AddProjectInfoCommand([
                 project        : createProject(),
