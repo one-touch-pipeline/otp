@@ -410,7 +410,7 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
     }
 
     @Unroll
-    void "test generate default ega aliases for data files"() {
+    void "test generate default ega aliases for data files - should remove privacy-sensitive sequencing dates from filenames"() {
         given:
         Run run = DomainFactory.createRun(
                 name: runName
@@ -421,6 +421,11 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
 
         String alias = "someAlias"
         List dataFilesAndAliases = [new DataFileAndSampleAlias(dataFile, new SampleSubmissionObject(egaAliasName: alias))]
+
+        when:
+        Map defaultEgaAliasesForDataFiles = egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndAliases)
+
+        then:
         List aliasNameHelper = [
                 dataFile.seqType.displayName,
                 dataFile.seqType.libraryLayout,
@@ -429,11 +434,6 @@ class EgaSubmissionServiceSpec extends Specification implements EgaSubmissionFac
                 dataFile.seqTrack.laneId,
                 "R${dataFile.mateNumber}",
         ]
-
-        when:
-        Map defaultEgaAliasesForDataFiles = egaSubmissionService.generateDefaultEgaAliasesForDataFiles(dataFilesAndAliases)
-
-        then:
         defaultEgaAliasesForDataFiles.get(dataFile.fileName + dataFile.run) == "${aliasNameHelper.join("_")}.fastq.gz"
 
         where:
