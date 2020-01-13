@@ -28,6 +28,7 @@
     <title><g:layoutTitle default="Grails"/></title>
     <asset:javascript src="modules/metadataImportDependencies.js"/>
     <asset:stylesheet src="metadataImport/metadataImport.css"/>
+    <asset:stylesheet src="modules/defaultPageDependencies.css"/>
     <g:layoutHead/>
 </head>
 <body>
