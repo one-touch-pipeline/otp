@@ -71,11 +71,11 @@ abstract class AbstractMultiJob extends AbstractEndStateAwareJobImpl implements 
 
     private void startMonitoring() {
         synchronized (lockForJobCollections) {
-                    Collection<ClusterJob> monitoredClusterJobs = ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
-                    log.info "Waiting for ${monitoredClusterJobs.size()} cluster jobs to finish: ${monitoredClusterJobs*.clusterJobId.sort()}"
-                    monitoredClusterJobs*.checkStatus = ClusterJob.CheckStatus.CHECKING
-                    monitoredClusterJobs*.save(flush: true)
-                }
+            Collection<ClusterJob> monitoredClusterJobs = ClusterJob.findAllByProcessingStepAndValidated(processingStep, false)
+            log.info "Waiting for ${monitoredClusterJobs.size()} cluster jobs to finish: ${monitoredClusterJobs*.clusterJobId.sort()}"
+            monitoredClusterJobs*.checkStatus = ClusterJob.CheckStatus.CHECKING
+            monitoredClusterJobs*.save(flush: true)
+        }
     }
 
     @Override
