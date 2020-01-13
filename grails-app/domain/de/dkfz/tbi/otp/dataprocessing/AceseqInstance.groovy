@@ -77,7 +77,7 @@ class AceseqInstance extends BamFilePairAnalysis implements RoddyAnalysisResult 
             case PlotType.ACESEQ_QC_GC_CORRECTED: return new File(getInstancePlotPath(), "${this.individual.pid}_qc_rep_corrected.png")
             case PlotType.ACESEQ_TCN_DISTANCE_COMBINED_STAR: return new File(getWorkDirectory(), "${this.individual.pid}_tcn_distances_combined_star.png")
             case PlotType.ACESEQ_WG_COVERAGE: return new File(getInstancePlotPath(), "control_${this.individual.pid}_wholeGenome_coverage.png")
-            default: throw new Exception()
+            default: throw new IllegalArgumentException("Unknown AceSeq PlotType \"${plot}\"")
         }
     }
 
@@ -102,7 +102,7 @@ class AceseqInstance extends BamFilePairAnalysis implements RoddyAnalysisResult 
                 //If variables contain dots replace them if not they will be used by Regex
                 pattern = "${this.individual.pid}_plot_".replace('.', '\\.') + '.+_ALL\\.png'
                 break
-            default: throw new Exception()
+            default: throw new IllegalArgumentException("Unknown AceSeq PlotType \"${plot}\"")
         }
 
         if (!getWorkDirectory().exists()) {

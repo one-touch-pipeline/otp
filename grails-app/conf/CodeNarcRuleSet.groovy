@@ -533,10 +533,10 @@ All the Rules that will be used for OTP
         priority = DEFAULT
     }
     ThrowError {
-        priority = HIGH
+        priority = CRITICAL
     }
     ThrowException {
-        priority = HIGH
+        priority = CRITICAL
     }
     ThrowNullPointerException {
         priority = CRITICAL

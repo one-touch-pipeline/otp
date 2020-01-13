@@ -35,17 +35,17 @@ class SometimesResumableTestJob extends AbstractJobImpl implements SometimesResu
 
     @Override
     void execute() throws Exception {
-        throw new Error('should never be called')
+        throw new UnsupportedOperationException('should never be called - this is a test object')
     }
 
     @Override
     void planSuspend() {
-        throw new Error('should never be called')
+        throw new UnsupportedOperationException('should never be called - this is a test object')
     }
 
     @Override
     void cancelSuspend() {
-        throw new Error('should never be called')
+        throw new UnsupportedOperationException('should never be called - this is a test object')
     }
 
     @Override

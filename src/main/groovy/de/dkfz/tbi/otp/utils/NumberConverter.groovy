@@ -39,7 +39,7 @@ class NumberConverter implements ValueConverter {
     Object convert(Object value1) {
         String value = value1.toString().trim()
         if (value.contains(",")) {
-            throw new Exception("Numbers must not contain ','")
+            throw new IllegalArgumentException("Numbers must not contain ','")
         }
 
         if (targetType == Float || targetType == float) {

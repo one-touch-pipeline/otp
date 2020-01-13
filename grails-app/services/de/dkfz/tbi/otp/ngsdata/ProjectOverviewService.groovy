@@ -260,10 +260,10 @@ class ProjectOverviewService {
                 case AlignmentDeciderBeanName.NO_ALIGNMENT:
                     return null
                 default:
-                    throw new Exception("Unknown Alignment configured.")
+                    throw new IllegalArgumentException("Unknown Alignment configured: \"${project.alignmentDeciderBeanName}\"")
             }
         } catch (NoSuchBeanDefinitionException e) {
-            throw new Exception("Alignment is configured wrong!")
+            throw new IllegalArgumentException("Alignment is configured wrong!", e)
         }
     }
 

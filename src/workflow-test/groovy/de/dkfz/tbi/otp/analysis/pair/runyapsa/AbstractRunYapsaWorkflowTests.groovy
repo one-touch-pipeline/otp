@@ -98,7 +98,7 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
         } else if (seqType == SeqTypeService.exomePairedSeqType) {
             sourceSnvCallingInputFile = new File(workflowData, "snvs_stds_somatic_snvs_conf_8_to_10-wes.vcf")
         } else {
-            throw new Exception("The SeqType '${seqType}' is not supported by runYapsa workflow")
+            throw new UnsupportedOperationException("The SeqType '${seqType}' is not supported by runYapsa workflow")
         }
 
         RoddySnvCallingInstance snvCallingInstance = DomainFactory.createRoddySnvCallingInstance(samplePair)

@@ -72,7 +72,7 @@ class ClusterJobManagerFactoryService {
             } else if (realm.jobScheduler == Realm.JobScheduler.LSF) {
                 manager = new LSFJobManager(new BEExecutionServiceAdapter(remoteShellHelper, realm), jobManagerParameters)
             } else {
-                throw new Exception("Unsupported cluster job scheduler")
+                throw new IllegalArgumentException("Unsupported cluster job scheduler \"${realm.jobScheduler}\"")
             }
             managerPerRealm[realm] = manager
         }

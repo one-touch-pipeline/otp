@@ -21,6 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.jobs
 
+import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.job.processing.*
 import de.dkfz.tbi.otp.utils.*
 import groovy.util.logging.Slf4j
@@ -39,6 +40,6 @@ class FailingTestJob extends AbstractJobImpl implements AutoRestartableJob {
 
     @Override
     void execute() throws Exception {
-        throw new Exception(EXCEPTION_MESSAGE)
+        throw new OtpException(EXCEPTION_MESSAGE)
     }
 }

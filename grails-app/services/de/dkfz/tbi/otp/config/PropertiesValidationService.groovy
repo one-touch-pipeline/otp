@@ -25,6 +25,7 @@ import grails.gorm.transactions.Transactional
 import grails.util.Environment
 import groovy.transform.Canonical
 
+import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.dataprocessing.*
 
 @Transactional
@@ -58,7 +59,7 @@ class PropertiesValidationService {
         }
 
         if (!errorList.isEmpty()) {
-            throw new Exception("Configuration is invalid: ${errorList*.toString().join("\n")}")
+            throw new OtpException("Configuration is invalid: ${errorList*.toString().join("\n")}")
         }
     }
 

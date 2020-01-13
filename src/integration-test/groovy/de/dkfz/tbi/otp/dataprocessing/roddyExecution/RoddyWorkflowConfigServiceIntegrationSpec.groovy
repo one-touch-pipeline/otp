@@ -27,6 +27,7 @@ import org.codehaus.groovy.control.io.NullWriter
 import spock.lang.Specification
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.job.processing.TestFileSystemService
 import de.dkfz.tbi.otp.ngsdata.*
@@ -73,7 +74,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
         RoddyWorkflowConfigService service = [
                 importProjectConfigFile: { Project a, SeqType b, String c, Pipeline d, String, String e, Boolean f, Individual g ->
-                    throw new Exception("importProjectConfigFile failed")
+                    throw new OtpException("importProjectConfigFile failed")
                 }
         ] as RoddyWorkflowConfigService
 
@@ -81,7 +82,7 @@ class RoddyWorkflowConfigServiceIntegrationSpec extends Specification {
         service.loadPanCanConfigAndTriggerAlignment(roddyBamFile.project, roddyBamFile.seqType, HelperUtils.uniqueString, roddyBamFile.pipeline, HelperUtils.uniqueString, HelperUtils.uniqueString, false, roddyBamFile.individual)
 
         then:
-        Exception e = thrown()
+        OtpException e = thrown()
         e.message.contains("importProjectConfigFile failed")
         roddyBamFile.mergingWorkPackage.needsProcessing == false
         roddyBamFile.withdrawn == false

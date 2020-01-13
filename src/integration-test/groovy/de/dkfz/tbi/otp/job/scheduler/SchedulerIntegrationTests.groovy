@@ -29,6 +29,7 @@ import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 
 import de.dkfz.tbi.TestCase
+import de.dkfz.tbi.otp.OtpException
 import de.dkfz.tbi.otp.job.JobMailService
 import de.dkfz.tbi.otp.job.jobs.FailingTestJob
 import de.dkfz.tbi.otp.job.plan.*
@@ -260,7 +261,7 @@ class SchedulerIntegrationTests implements UserAndRoles {
             }
         }
 
-        TestCase.shouldFailWithMessageContaining(Exception, FailingTestJob.EXCEPTION_MESSAGE) {
+        TestCase.shouldFailWithMessageContaining(OtpException, FailingTestJob.EXCEPTION_MESSAGE) {
             scheduler.executeJob(job)
         }
         step.refresh()

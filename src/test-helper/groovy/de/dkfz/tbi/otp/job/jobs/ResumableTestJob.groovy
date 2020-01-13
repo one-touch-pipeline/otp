@@ -31,10 +31,8 @@ import org.springframework.stereotype.*
 @ResumableJob
 @Slf4j
 class ResumableTestJob extends AbstractJobImpl {
-
     @Override
     void execute() throws Exception {
-        throw new Error('should never be called')
+        throw new UnsupportedOperationException('should never be called - this is a test object')
     }
-
 }

@@ -677,19 +677,19 @@ class LinkFilesToFinalDestinationServiceIntegrationTests implements DomainFactor
         assert roddyBamFile.save(flush: true)
 
         linkFilesToFinalDestinationService.metaClass.cleanupWorkDirectory = { RoddyBamFile roddyBamFile, Realm realm ->
-            throw new Exception("Should not reach this method")
+            throw new UnsupportedOperationException("Should not reach this method")
         }
         linkFilesToFinalDestinationService.executeRoddyCommandService.metaClass.correctGroups = { RoddyBamFile roddyBamFile, Realm realm ->
-            throw new Exception("Should not reach this method")
+            throw new UnsupportedOperationException("Should not reach this method")
         }
         linkFilesToFinalDestinationService.metaClass.deleteOldLinks = { RoddyBamFile roddyBamFile, Realm realm ->
-            throw new Exception("Should not reach this method")
+            throw new UnsupportedOperationException("Should not reach this method")
         }
         linkFilesToFinalDestinationService.metaClass.linkNewResults = { RoddyBamFile roddyBamFile, Realm realm ->
-            throw new Exception("Should not reach this method")
+            throw new UnsupportedOperationException("Should not reach this method")
         }
         linkFilesToFinalDestinationService.metaClass.cleanupOldResults = { RoddyBamFile roddyBamFile, Realm realm ->
-            throw new Exception("Should not reach this method")
+            throw new UnsupportedOperationException("Should not reach this method")
         }
 
         linkFilesToFinalDestinationService.linkToFinalDestinationAndCleanup(roddyBamFile, realm)
