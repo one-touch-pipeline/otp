@@ -69,7 +69,6 @@ class ProcessingThresholdsUnitTests {
 
         processingThresholds.seqType = new SeqType()
         assert processingThresholds.validate()
-
     }
 
     @Test
@@ -110,7 +109,6 @@ class ProcessingThresholdsUnitTests {
                         )
         assert processingThresholds.validate()
     }
-
 
     @Test
     void testSaveCoverageBelowZero() {

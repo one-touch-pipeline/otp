@@ -39,7 +39,6 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
 
     List<SeqType> seqTypes
 
-
     void setupData() {
         DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createCellRangerAlignableSeqTypes()
@@ -47,14 +46,12 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         seqTypes = checker.seqTypes
     }
 
-
     abstract AbstractAlignmentChecker createAlignmentChecker()
 
     abstract Pipeline createPipeLine()
 
     //for checking with data of other PipeLine
     abstract Pipeline createPipeLineForCrosschecking()
-
 
     List<SeqTrack> createSeqTracks(Map properties = [:]) {
         seqTypes.collect {
@@ -85,7 +82,6 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         }
     }
 
-
     MergingWorkPackage createMWP(Map properties = [:]) {
         return DomainFactory.createMergingWorkPackage([
                 pipeline: createPipeLine(),
@@ -112,7 +108,6 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         }
     }
 
-
     AbstractMergedBamFile createBamFile(MergingWorkPackage mergingWorkPackage, Map properties = [:]) {
         DomainFactory.createRoddyBamFile([
                 workPackage: mergingWorkPackage,
@@ -124,7 +119,6 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
             createBamFile(it, bamProperties)
         }
     }
-
 
     void "test getSeqTracksWithoutCorrespondingAlignmentConfig, when some SamplePairs have a Config and some not some not, return Project and SeqType of SamplePairs without Config"() {
         given:
@@ -176,7 +170,6 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         TestCase.assertContainSame(expected, returnValue)
     }
 
-
     void "mergingWorkPackageForSeqTracks, when for some SeqTracks a MergingWorkPackage exist and for some not, return list of SeqTracks without MergingWorkPackage and List of MergingWorkpackage"() {
         given:
         setupData()
@@ -215,7 +208,6 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         TestCase.assertContainSame(expectedMergingWorkPackage, returnValue.mergingWorkPackages)
     }
 
-
     @Unroll
     void "test getBamFileForMergingWorkPackage, when some mergingWorkPackages have BamFiles and some not, return the correct BamFiles (case showFinished=#showFinished, showWithdrawn=#showWithdrawn)"() {
         given:
@@ -250,7 +242,6 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         false        | true          || 6
         true         | true          || 8
     }
-
 
     void "handle, if SeqTracks given, then return finished BamFile and create output for the others cases"() {
         given:
@@ -395,7 +386,6 @@ abstract class AbstractAlignmentCheckerIntegrationSpec extends Specification {
         then:
         finishedBamFiles == result
     }
-
 
     void "handle, if no SeqTracks given, then return empty list and do not create output"() {
         given:

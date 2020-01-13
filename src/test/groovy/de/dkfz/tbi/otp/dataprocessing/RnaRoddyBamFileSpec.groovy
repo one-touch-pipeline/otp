@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.dataprocessing
 
-
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
 
@@ -32,7 +31,6 @@ import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.*
 
 class RnaRoddyBamFileSpec extends Specification implements RoddyRnaFactory, DataTest {
-
     @Override
     Class[] getDomainClassesToMock() {
         [

@@ -28,7 +28,6 @@ import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
 
 class ProcessingThresholdsServiceSpec extends Specification implements DataTest, DomainFactoryCore {
-
     private static final Integer LANES = 1
     private static final Double COVERAGE = null
 
@@ -44,7 +43,6 @@ class ProcessingThresholdsServiceSpec extends Specification implements DataTest,
                 SeqType,
         ]
     }
-
 
     void "test getSeqTracksWithoutProcessingThreshold"() {
         given:

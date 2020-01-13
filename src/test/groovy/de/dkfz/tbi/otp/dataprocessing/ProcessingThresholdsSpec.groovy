@@ -25,8 +25,6 @@ import spock.lang.Specification
 import spock.lang.Unroll
 
 class ProcessingThresholdsSpec extends Specification {
-
-
     @Unroll
     void "test isAboveLaneThreshold with #laneCount lanes and #threshold threshold should return #result"() {
         setup:

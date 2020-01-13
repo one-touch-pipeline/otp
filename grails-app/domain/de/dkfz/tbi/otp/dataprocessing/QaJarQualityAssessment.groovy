@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.dataprocessing
 import de.dkfz.tbi.otp.qcTrafficLight.QcThresholdEvaluated
 
 abstract class QaJarQualityAssessment extends AbstractQualityAssessment {
-
     /**
      * duplicates count for read 1 and single reads
      */
@@ -122,7 +121,6 @@ abstract class QaJarQualityAssessment extends AbstractQualityAssessment {
      */
     @QcThresholdEvaluated
     double percentReadPairsMapToDiffChrom
-
 
     static constraints = {
         qcBasesMapped(nullable: false)

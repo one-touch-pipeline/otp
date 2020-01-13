@@ -28,10 +28,8 @@ import de.dkfz.tbi.otp.ngsdata.SeqType
 
 class AllAlignmentsChecker extends PipelinesChecker<SeqTrack> {
 
-
     static final String HEADER_NOT_SUPPORTED_SEQTYPES =
             'The following SeqTypes are unsupported by any alignment workflow supported by OTP'
-
 
     @Override
     List handle(List<SeqTrack> seqTracks, MonitorOutputCollector output) {
