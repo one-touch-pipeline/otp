@@ -72,11 +72,11 @@ class StatisticController {
         List<String> labels = []
         List<String> labelsPercentage = []
         List<Integer> values = []
-        int projectSequenceCount = 0
 
         List sampleCountBySeqType = statisticService.sampleCountPerSequenceType(projectGroup)
 
-        int filterCount = ((sampleCountBySeqType.collect { it[1] }.sum()) ?: 0) / 100 * 2
+        int totalCount = sampleCountBySeqType.collect { it[1] }.sum()
+        int filterCount = (totalCount ?: 0) / 100 * 2
         int filtered = 0
 
         sampleCountBySeqType.each {
@@ -86,21 +86,19 @@ class StatisticController {
             }
             labels << it[0]
             values << it[1]
-            projectSequenceCount += it[1]
         }
 
         sampleCountBySeqType.each {
             if (it[1] < filterCount) {
                 return
             }
-            labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %"
+            labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / totalCount)} %"
         }
 
         if (filtered > 0) {
             labels << "Other"
             values << filtered
-            projectSequenceCount += filtered
-            labelsPercentage << "Other ${Math.round(filtered * 100 / projectSequenceCount)} %"
+            labelsPercentage << "Other ${Math.round(filtered * 100 / totalCount)} %"
         }
 
         Map dataToRender = [

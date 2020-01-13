@@ -179,7 +179,7 @@ $.otp.graph.overview = {
                 stroke: 'white',
                 strokestyle: 'white',
                 textSize: 8,
-                title: 'Samples processed by sequencing technologies in ' + $('#projectGroup_select').val(),
+                title: 'Registered samples, by sequencing technologies in ' + $('#projectGroup_select').val(),
                 titleColor: 'black',
                 titleSize: 11,
                 titleX: 'center',
