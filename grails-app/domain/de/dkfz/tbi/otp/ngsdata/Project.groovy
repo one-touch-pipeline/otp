@@ -53,7 +53,6 @@ class Project implements ProjectPropertiesGivenWithRequest, Commentable, Entity 
     Snv snv = Snv.UNKNOWN
 
     String individualPrefix
-    String relatedProjects
     String internalNotes
     String dirName
     Realm realm
@@ -173,7 +172,6 @@ class Project implements ProjectPropertiesGivenWithRequest, Commentable, Entity 
         endDate nullable: true
         organizationalUnit nullable: true
         relatedProjects nullable: true
-        predecessorProject nullable: true
         internalNotes nullable: true
         fundingBody nullable: true
         grantId nullable: true

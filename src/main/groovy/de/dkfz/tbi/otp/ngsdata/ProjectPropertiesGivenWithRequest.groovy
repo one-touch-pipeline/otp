@@ -36,7 +36,7 @@ trait ProjectPropertiesGivenWithRequest {
     LocalDate endDate
     LocalDate storageUntil
 
-    String predecessorProject
+    String relatedProjects
     TumorEntity tumorEntity
     SpeciesWithStrain speciesWithStrain
 

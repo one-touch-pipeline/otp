@@ -74,8 +74,8 @@
             <td>${projectRequest.storageUntil}</td>
         </tr>
         <tr>
-            <td>${g.message(code: "project.predecessorProject")}</td>
-            <td>${projectRequest.predecessorProject}</td>
+            <td>${g.message(code: "project.relatedProjects")}</td>
+            <td>${projectRequest.relatedProjects}</td>
         </tr>
         <tr>
             <td>${g.message(code: "project.tumorEntity")}</td>

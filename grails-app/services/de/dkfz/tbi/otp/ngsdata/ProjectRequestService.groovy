@@ -92,7 +92,7 @@ class ProjectRequestService {
                 storageUntil: cmd.storagePeriod == StoragePeriod.USER_DEFINED ? cmd.storageUntil :
                         cmd.storagePeriod == StoragePeriod.TEN_YEARS ? LocalDate.now().plusYears(10) :
                                 null,
-                predecessorProject: cmd.predecessorProject,
+                relatedProjects: cmd.relatedProjects,
                 tumorEntity: cmd.tumorEntity,
                 speciesWithStrain: cmd.speciesWithStrain,
                 projectType: cmd.projectType,

@@ -112,16 +112,6 @@
                     </td>
                 </tr>
                 <tr>
-                    <td><g:message code="project.predecessorProject"/></td>
-                    <td></td>
-                    <td>
-                        <otp:editorSwitch
-                                roles="ROLE_OPERATOR"
-                                link="${g.createLink(controller: 'projectConfig', action: 'updateProjectField', params: ['project.id': project.id, 'fieldName': 'predecessorProject'])}"
-                                value="${project.predecessorProject}"/>
-                    </td>
-                </tr>
-                <tr>
                     <td><g:message code="project.tumorEntity"/></td>
                     <td></td>
                     <td>

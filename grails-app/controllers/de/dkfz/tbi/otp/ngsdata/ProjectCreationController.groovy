@@ -108,7 +108,6 @@ class ProjectCreationCommand implements Serializable {
     LocalDate storageUntil
     Project.ProjectType projectType
     String relatedProjects
-    String predecessorProject
     String organizationalUnit
     String fundingBody
     String grantId
@@ -170,7 +169,6 @@ class ProjectCreationCommand implements Serializable {
         keywords(nullable: true)
         endDate(nullable: true)
         relatedProjects(nullable: true)
-        predecessorProject(nullable: true)
         organizationalUnit(nullable: true)
         fundingBody(nullable: true)
         grantId(nullable: true)

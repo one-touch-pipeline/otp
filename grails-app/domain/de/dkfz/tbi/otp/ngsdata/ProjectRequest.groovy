@@ -67,7 +67,7 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
         costCenter nullable: true
         endDate nullable: true
         storageUntil nullable: true
-        predecessorProject nullable: true
+        relatedProjects nullable: true
         tumorEntity nullable: true
         speciesWithStrain nullable: true
         sequencingCenter nullable: true

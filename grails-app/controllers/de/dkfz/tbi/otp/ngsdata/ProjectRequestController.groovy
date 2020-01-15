@@ -135,7 +135,7 @@ class ProjectRequestCreationCommand {
     LocalDate endDate
     StoragePeriod storagePeriod
     LocalDate storageUntil
-    String predecessorProject
+    String relatedProjects
     TumorEntity tumorEntity
     SpeciesWithStrain speciesWithStrain
     String projectType

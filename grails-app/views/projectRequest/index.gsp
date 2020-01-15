@@ -163,9 +163,9 @@
             </td>
         </tr>
         <tr>
-            <td><label for="predecessorProject">${g.message(code: "project.predecessorProject")}</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.predecessorProject.detail")}"></td>
-            <td><input name="predecessorProject" id="predecessorProject" value="${cmd?.predecessorProject}"/></td>
+            <td><label for="relatedProjects">${g.message(code: "project.relatedProjects")}</label></td>
+            <td class="help" title="${g.message(code: "projectRequest.relatedProjects.detail")}"></td>
+            <td><input name="relatedProjects" id="relatedProjects" value="${cmd?.relatedProjects}"/></td>
         </tr>
 %{--
         <tr>

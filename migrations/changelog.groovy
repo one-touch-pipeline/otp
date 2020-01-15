@@ -331,4 +331,8 @@ databaseChangeLog = {
     changeSet(author: "", id: "project-request") {
         sqlFile(path: 'changelogs/2020/project-request.sql')
     }
+
+    changeSet(author: "", id: "project-predecessor") {
+        sqlFile(path: 'changelogs/2020/project-predecessor.sql')
+    }
 }

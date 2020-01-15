@@ -134,7 +134,7 @@
             <tr>
                 <td><g:message code="project.relatedProjects"/></td>
                 <td class="multi-input-field">
-                    <g:each in="${cmd?.relatedProjects?.split(",") ?: [""]}" var="relatedProject" status="i">
+                    <g:each in="${(cmd?.relatedProjects ?: projectRequest?.relatedProjects)?.split(",") ?: [""]}" var="relatedProject" status="i">
                         <div class="field">
                             <g:textField list="projectList" name="relatedProjectName" value="${relatedProject}"/>
                             <g:if test="${i == 0}">
@@ -146,10 +146,6 @@
                         </div>
                     </g:each>
                 </td>
-            </tr>
-            <tr>
-                <td><g:message code="project.predecessorProject"/></td>
-                <td><g:textField list="projectList" name="predecessorProject" value="${cmd?.predecessorProject ?: projectRequest?.predecessorProject}"/></td>
             </tr>
             <datalist id="projectList">
                 <g:each in="${projects}" var="project">
