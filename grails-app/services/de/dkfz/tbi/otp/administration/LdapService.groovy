@@ -30,6 +30,7 @@ import org.springframework.ldap.core.support.LdapContextSource
 import org.springframework.ldap.query.ContainerCriteria
 
 import de.dkfz.tbi.otp.config.ConfigService
+import de.dkfz.tbi.otp.security.User
 
 import javax.naming.NamingException
 import javax.naming.directory.Attributes
@@ -126,6 +127,14 @@ class LdapService implements InitializingBean {
                 query().where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
                         .and(configService.ldapSearchAttribute).is(username),
                 new MemberOfAttributesMapper())[0]
+    }
+
+    boolean existsInLdap(User user) {
+        ContainerCriteria query = query()
+                .attributes(configService.ldapSearchAttribute)
+                .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
+                .and(configService.ldapSearchAttribute).is(user.username)
+        return ldapTemplate.search(query, new DistinguishedNameAttributesMapper()).size() >= 1
     }
 }
 

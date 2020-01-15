@@ -56,13 +56,13 @@ class UserManagementInconsistenciesJob {
 
     static String mailSubject = "Detected divergence in user management"
 
-    static List<String> propertiesToDisplay = UserProjectRole.getAccessRelatedProperties()
+    static List<String> propertiesToDisplay = UserProjectRole.accessRelatedProperties
 
     @Scheduled(cron="0 0 5 * * *")
     void execute() {
         List<String> output = []
         SessionUtils.withNewSession {
-            Map<String, List<Project>> projectsWithSharedUnixGroup = projectService.getAllProjectsWithSharedUnixGroup()
+            Map<String, List<Project>> projectsWithSharedUnixGroup = projectService.allProjectsWithSharedUnixGroup
             projectsWithSharedUnixGroup.each { String unixGroup, List<Project> projects ->
                 List<User> allUsersOfUnixGroup = UserProjectRole.findAllByProjectInList(projects)*.user.unique()
 
@@ -101,7 +101,7 @@ class UserManagementInconsistenciesJob {
     }
 
     private void notify(String content) {
-        mailHelperService.sendEmail(mailSubject, content, getRecipients())
+        mailHelperService.sendEmail(mailSubject, content, recipients)
     }
 
     private List<String> getRecipients() {
