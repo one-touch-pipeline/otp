@@ -86,10 +86,6 @@
                     <td>${projectRequest.seqTypes?.join(", ")}</td>
                 </tr>
                 <tr>
-                    <td>${g.message(code: "projectRequest.furtherDataProcessing")}</td>
-                    <td>${projectRequest.furtherDataProcessing}</td>
-                </tr>
-                <tr>
                     <td>${g.message(code: "projectRequest.comments")}</td>
                     <td>${projectRequest.comments}</td>
                 </tr>
@@ -194,7 +190,7 @@
             </tr>
             <tr>
                 <td><g:message code="project.forceCopyFiles"/></td>
-                <td><g:checkBox name="forceCopyFiles" checked="${(cmd == null && projectRequest == null) || cmd?.forceCopyFiles || (cmd == null && projectRequest?.forceCopyFiles)}" value="true"/></td>
+                <td><g:checkBox name="forceCopyFiles" checked="${cmd == null || cmd?.forceCopyFiles}" value="true"/></td>
             </tr>
             <tr>
                 <td><g:message code="project.endDate"/></td>

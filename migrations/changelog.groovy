@@ -327,4 +327,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2020/otp-215-multiple-transfers-per-DTA.groovy'
+
+    changeSet(author: "", id: "project-request") {
+        sqlFile(path: 'changelogs/2020/project-request.sql')
+    }
 }

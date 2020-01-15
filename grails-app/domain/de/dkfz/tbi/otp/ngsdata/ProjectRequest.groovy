@@ -44,7 +44,6 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
     String sequencingCenter
     Integer approxNoOfSamples
     Set<SeqType> seqTypes
-    boolean furtherDataProcessing
     String comments
 
     Set<User> deputyPis
@@ -73,8 +72,6 @@ class ProjectRequest implements ProjectPropertiesGivenWithRequest, Entity {
         speciesWithStrain nullable: true
         sequencingCenter nullable: true
         approxNoOfSamples nullable: true
-        forceCopyFiles nullable: true
-        furtherDataProcessing nullable: true
         comments nullable: true
         fundingBody nullable: true
         grantId nullable: true

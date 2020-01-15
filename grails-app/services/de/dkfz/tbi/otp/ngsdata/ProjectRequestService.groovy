@@ -99,8 +99,6 @@ class ProjectRequestService {
                 sequencingCenter: cmd.sequencingCenter,
                 approxNoOfSamples: cmd.approxNoOfSamples,
                 seqTypes: cmd.seqType,
-                forceCopyFiles: cmd.forceCopyFiles,
-                furtherDataProcessing: cmd.furtherDataProcessing,
                 comments: cmd.comments,
 
                 pi: findOrCreateUsers([cmd.pi]).first(),

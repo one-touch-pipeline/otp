@@ -42,12 +42,6 @@ trait ProjectPropertiesGivenWithRequest {
 
     Project.ProjectType projectType
 
-    /**
-     * this flag defines if the fastq files of this project have to be copied (instead of linked) regardless of whether
-     * they will be processed or not
-     */
-    boolean forceCopyFiles = false
-
     String fundingBody
     String grantId
 }

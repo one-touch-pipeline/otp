@@ -147,8 +147,6 @@ class ProjectRequestCreationCommand {
         return ids.collect { it?.isLong() ? SeqType.get(it as Long) : null }.findAll()
     })
     List<SeqType> seqType = []
-    boolean forceCopyFiles
-    boolean furtherDataProcessing
     String comments
 
     String pi
@@ -182,7 +180,6 @@ class ProjectRequestCreationCommand {
                 return "empty"
             }
         }
-        furtherDataProcessing nullable: true
         comments nullable: true
         pi validator: { val, obj ->
             List<String> pi = [val]

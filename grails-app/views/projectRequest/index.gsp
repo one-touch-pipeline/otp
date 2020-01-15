@@ -98,7 +98,7 @@
     <table class="key-value-table">
         <tr>
             <td><label for="name">${g.message(code: "project.name")}</label></td>
-            <td></td>
+            <td class="help" title="${g.message(code: "projectRequest.name.detail")}"></td>
             <td><input name="name" id="name" value="${cmd?.name}" required/></td>
         </tr>
         <tr>
@@ -108,7 +108,7 @@
         </tr>
         <tr>
             <td><label for="keyword">${g.message(code: "project.keywords")}</label></td>
-            <td></td>
+            <td class="help" title="${g.message(code: "projectRequest.keywords.detail")}"></td>
             <td class="multi-input-field">
                 <g:each in="${cmd?.keywords ?: [""]}" var="keyword" status="i">
                     <div class="field">
@@ -130,12 +130,12 @@
         </tr>
         <tr>
             <td><label for="organizationalUnit">${g.message(code: "project.organizationalUnit")}</label></td>
-            <td></td>
+            <td class="help" title="${g.message(code: "projectRequest.organizationalUnit.detail")}"></td>
             <td><input name="organizationalUnit" id="organizationalUnit" value="${cmd?.organizationalUnit}" required/></td>
         </tr>
         <tr>
             <td><label for="costCenter">${g.message(code: "project.costCenter")}</label></td>
-            <td></td>
+            <td class="help" title="${g.message(code: "projectRequest.costCenter.detail")}"></td>
             <td><input name="costCenter" id="costCenter" value="${cmd?.costCenter}"/></td>
         </tr>
         <tr>
@@ -150,28 +150,30 @@
         </tr>
         <tr>
             <td><label for="endDate">${g.message(code: "project.endDate")}</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.endDate.detail")}"></td>
+            <td></td>
             <td><input name="endDate" id="endDate" value="${cmd?.endDate}" type="date"/></td>
         </tr>
         <tr>
             <td><label for="storagePeriod">${g.message(code: "project.storageUntil")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.storageUntil.detail")}"></td>
             <td>
-                <g:select name="storagePeriod" id="storagePeriod" value="${cmd?.storagePeriod ?: de.dkfz.tbi.otp.ngsdata.StoragePeriod.INFINITELY}" from="${storagePeriods}" optionKey="name" optionValue="description"/>
+                <g:select name="storagePeriod" id="storagePeriod" value="${cmd?.storagePeriod}" from="${storagePeriods}" optionKey="name" optionValue="description" noSelection="${["": ""]}" required="true" />
                 <br>
                 <input name="storageUntil" id="storageUntil" value="${cmd?.storageUntil}" type="date" style="display: none"/>
             </td>
         </tr>
         <tr>
             <td><label for="predecessorProject">${g.message(code: "project.predecessorProject")}</label></td>
-            <td></td>
+            <td class="help" title="${g.message(code: "projectRequest.predecessorProject.detail")}"></td>
             <td><input name="predecessorProject" id="predecessorProject" value="${cmd?.predecessorProject}"/></td>
         </tr>
+%{--
         <tr>
             <td><label for="tumorEntity">${g.message(code: "project.tumorEntity")}</label></td>
             <td></td>
             <td><g:select name="tumorEntity.id" id="tumorEntity" value="${cmd?.tumorEntity?.id}" from="${tumorEntities}" optionValue="name" optionKey="id" noSelection="${[null: ""]}" /></td>
         </tr>
+--}%
         <tr>
             <td><label for="speciesWithStrain">${g.message(code: "project.speciesWithStrain")}</label></td>
             <td></td>
@@ -210,16 +212,6 @@
             </td>
         </tr>
         <tr>
-            <td><label for="forceCopyFiles">${g.message(code: "project.forceCopyFiles")}</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.forceCopyFiles.detail")}"></td>
-            <td><g:checkBox name="forceCopyFiles" id="forceCopyFiles" value="${cmd?.forceCopyFiles}"/></td>
-        </tr>
-        <tr>
-            <td><label for="furtherDataProcessing">${g.message(code: "projectRequest.furtherDataProcessing")}</label></td>
-            <td class="help" title="${g.message(code: "projectRequest.furtherDataProcessing.detail")}"></td>
-            <td><g:checkBox name="furtherDataProcessing" id="furtherDataProcessing" value="${cmd?.furtherDataProcessing}"/></td>
-        </tr>
-        <tr>
             <td><label for="comments">${g.message(code: "projectRequest.comments")}</label></td>
             <td></td>
             <td><textarea name="comments" id="comments">${cmd?.comments}</textarea></td>
@@ -227,7 +219,7 @@
 
         <tr class="user-auto-complete">
             <td><label for="pi">${g.message(code: "projectRequest.pi")}</label></td>
-            <td></td>
+            <td class="help" title="${g.message(code: "projectRequest.pi.detail")}"></td>
             <td><input name="pi" id="pi" type="text" autocomplete="off" placeholder="${g.message(code: 'projectUser.addMember.ldapSearchValues')}" value="${cmd?.pi}" required></td>
         </tr>
         <tr>
@@ -268,7 +260,7 @@
         </tr>
         <tr>
             <td><label for="bioinformatician">${g.message(code: "projectRequest.bioinformatician")}</label></td>
-            <td></td>
+            <td class="help" title="${g.message(code: "projectRequest.bioinformatician.detail")}"></td>
             <td class="multi-input-field user-auto-complete">
                 <g:each in="${cmd?.bioinformaticians ?: [""]}" var="bioinformatician" status="i">
                     <div class="field">
@@ -286,7 +278,7 @@
         </tr>
         <tr>
             <td><label for="submitter">${g.message(code: "projectRequest.submitter")}</label></td>
-            <td></td>
+            <td class="help" title="${g.message(code: "projectRequest.submitter.detail")}"></td>
             <td class="multi-input-field user-auto-complete">
                 <g:each in="${cmd?.submitters ?: [""]}" var="submitter" status="i">
                     <div class="field">

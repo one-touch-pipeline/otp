@@ -102,14 +102,6 @@
             <td>${projectRequest.seqTypes?.join(", ")}</td>
         </tr>
         <tr>
-            <td>${g.message(code: "project.forceCopyFiles")}</td>
-            <td>${projectRequest.forceCopyFiles}</td>
-        </tr>
-        <tr>
-            <td>${g.message(code: "projectRequest.furtherDataProcessing")}</td>
-            <td>${projectRequest.furtherDataProcessing}</td>
-        </tr>
-        <tr>
             <td>${g.message(code: "projectRequest.comments")}</td>
             <td>${projectRequest.comments}</td>
         </tr>
