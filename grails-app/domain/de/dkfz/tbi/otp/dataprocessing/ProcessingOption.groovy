@@ -397,6 +397,10 @@ class ProcessingOption implements Entity {
                 "Email address of the entity managing the cluster",
                 Necessity.REQUIRED, null, TypeValidators.MAIL
         ),
+        EMAIL_OTP_MAINTENANCE(
+                "Email address for all mails to be handled by an OTP maintainer",
+                Necessity.REQUIRED, null, TypeValidators.MAIL
+        ),
 
         NOTIFICATION_TEMPLATE_SEQ_CENTER_NOTE(
                 "Notes from the sequencing center that is sent with every notification mail",

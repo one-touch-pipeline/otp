@@ -150,6 +150,7 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
             DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_SENDER, value: HelperUtils.randomEmail)
             DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION, value: HelperUtils.randomEmail)
             DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_CLUSTER_ADMINISTRATION, value: HelperUtils.randomEmail)
+            DomainFactory.createProcessingOptionLazy(name: OptionName.EMAIL_OTP_MAINTENANCE, value: HelperUtils.randomEmail)
             DomainFactory.createProcessingOptionLazy(name: OptionName.GUI_CONTACT_DATA_SUPPORT_EMAIL, value: HelperUtils.randomEmail)
             DomainFactory.createProcessingOptionLazy(name: OptionName.FILESYSTEM_TIMEOUT, value: 2)
             DomainFactory.createProcessingOptionLazy(name: OptionName.CLUSTER_NAME, value: 'CLUSTER NAME')
@@ -168,7 +169,6 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
                     name: OptionName.RODDY_APPLICATION_INI,
                     value: new File(getInputRootDirectory(), "applicationProperties-test.ini").absolutePath
             )
-
 
             assert schedulerService.running.empty
             assert schedulerService.queue.empty
@@ -231,7 +231,6 @@ abstract class WorkflowTestCase extends Specification implements UserAndRoles, G
         }
         TestCase.cleanTestDirectory()
     }
-
 
     protected void setupDirectoriesAndRealm() {
         // check whether the wf test root dir is mounted

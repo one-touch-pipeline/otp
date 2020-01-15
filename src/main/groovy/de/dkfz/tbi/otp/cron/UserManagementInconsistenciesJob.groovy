@@ -101,11 +101,11 @@ class UserManagementInconsistenciesJob {
     }
 
     private void notify(String content) {
-        mailHelperService.sendEmail(mailSubject, content, getRecipient())
+        mailHelperService.sendEmail(mailSubject, content, getRecipients())
     }
 
-    private String getRecipient() {
-        processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION)
+    private List<String> getRecipients() {
+        return [processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_OTP_MAINTENANCE)]
     }
 
     private static boolean allEqual(List<UserProjectRole> userProjectRoles) {
