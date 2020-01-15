@@ -103,7 +103,7 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
 
         String sampleId = valueTuple.getValue(SAMPLE_ID.name())
         String projectName = valueTuple.getValue(PROJECT.name())
-        Project project = Project.findByName(projectName)
+        Project project = Project.getByNameOrNameInMetadataFiles(projectName)
         Sample sample
         SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
         if (sampleIdentifier) {
@@ -125,7 +125,6 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
                     ilike("name", SqlUtil.replaceWildcardCharactersInLikeExpression(parsedSampleIdentifier.sampleTypeDbName))
                 }
             } as Sample
-
             if (!sample) {
                 return
             }
@@ -136,7 +135,6 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
                 seqType: seqType,
                 antibodyTarget: antibodyTarget,
         )
-
         if (mergingWorkPackages) {
             if (seqType in singleCellSeqTypes) {
                 context.addProblem(valueTuple.cells, Level.ERROR,

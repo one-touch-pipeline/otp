@@ -96,7 +96,7 @@ class BedFileValidator extends ValueTuplesValidator<MetadataValidationContext> i
         String sampleId = valueTuple.getValue(SAMPLE_ID.name())
         String projectName = valueTuple.getValue(PROJECT.name())
 
-        Project project = Project.findByName(projectName)
+        Project project = Project.getByNameOrNameInMetadataFiles(projectName)
         SampleType sampleType
 
         SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
