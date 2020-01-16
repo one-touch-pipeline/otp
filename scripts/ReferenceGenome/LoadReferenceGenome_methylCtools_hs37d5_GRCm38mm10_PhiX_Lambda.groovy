@@ -34,9 +34,10 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 String name = "methylCtools_hs37d5_GRCm38mm10_PhiX_Lambda"
 String path = "bwa06_methylCtools_hs37d5_GRCm38mm10_PhiX_Lambda"
 String fileNamePrefix = "hs37d5_GRCm38mm10_PhiX.conv"
+String cytosinePositionsIndex = "hs37d5_GRCm38mm10_PhiX.CGCH.pos.gz"
 String chromosomePrefix = ""
 String chromosomeSuffix = ""
-String cytosinePositionsIndex = "hs37d5_GRCm38mm10_PhiX.CGCH.pos.gz"
+String fingerPrintingFileName = null
 List<String> statSizeFileNames = [
         "hs37d5_GRCm38mm10_PhiX.chrLenOnlyACGT.tab",
 ]
@@ -199,4 +200,4 @@ List<FastaEntry> fastaEntries = [
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
 referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
-        fastaEntries, statSizeFileNames)
+        fastaEntries, fingerPrintingFileName, statSizeFileNames)

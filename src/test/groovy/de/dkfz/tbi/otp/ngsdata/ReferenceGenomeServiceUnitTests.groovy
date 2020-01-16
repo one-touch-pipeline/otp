@@ -252,6 +252,7 @@ class ReferenceGenomeServiceUnitTests {
         String path = "bwa06_my_reference_gnome"
         String fileNamePrefix = "my_reference_gnome"
         String cytosinePositionsIndex = null
+        String fingerPrintingFileName = "my_fingerprint.bed"
         String statSizeFileName = "my_reference_gnome.fa.chrLenOnlyACGT.tab"
         String chromosomePrefix = ''
         String chromosomeSuffix = ''
@@ -267,12 +268,13 @@ class ReferenceGenomeServiceUnitTests {
         ]
 
         referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
-                fastaEntries, [statSizeFileName])
+                fastaEntries, fingerPrintingFileName, [statSizeFileName])
 
         ReferenceGenome referenceGenome = CollectionUtils.exactlyOneElement(ReferenceGenome.findAllByName(name))
         assert referenceGenome.path == path
         assert referenceGenome.fileNamePrefix == fileNamePrefix
         assert referenceGenome.cytosinePositionsIndex == cytosinePositionsIndex
+        assert referenceGenome.fingerPrintingFileName == fingerPrintingFileName
 
         ReferenceGenomeEntry entry = CollectionUtils.exactlyOneElement(ReferenceGenomeEntry.findAllByName(fastaName))
         assert entry.referenceGenome == referenceGenome

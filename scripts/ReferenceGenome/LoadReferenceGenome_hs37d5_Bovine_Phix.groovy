@@ -34,9 +34,10 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 String name = "hs37d5_Bovine_Phix"
 String path = "bwa06_hs37d5_Bovine_Phix"
 String fileNamePrefix = "hs37d5_PhiX_Btau"
+String cytosinePositionsIndex = null
 String chromosomePrefix = ""
 String chromosomeSuffix = ""
-String cytosinePositionsIndex = null
+String fingerPrintingFileName = null
 List<String> statSizeFileNames = [
         "hs37d5_Bovine_PhiX.fa.chrLenOnly_realChromosomes.tab",
 ]
@@ -11868,4 +11869,4 @@ List<FastaEntry> fastaEntries = [
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
 referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
-        fastaEntries, statSizeFileNames)
+        fastaEntries, fingerPrintingFileName, statSizeFileNames)

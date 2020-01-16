@@ -37,6 +37,7 @@ String fileNamePrefix = "mm10_PhiX_Lambda.conv"
 String cytosinePositionsIndex = "mm10_PhiX_Lambda.pos.gz"
 String chromosomePrefix = "chr"
 String chromosomeSuffix = "chr"
+String fingerPrintingFileName = null
 List<String> statSizeFileNames = [
         "mm10_PhiX_Lambda.fa.chrLenOnlyACGT.tab",
 ]
@@ -70,4 +71,4 @@ List<FastaEntry> fastaEntries = [
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
 referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
-        fastaEntries, statSizeFileNames)
+        fastaEntries, fingerPrintingFileName, statSizeFileNames)

@@ -152,7 +152,7 @@ class ReferenceGenomeService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void loadReferenceGenome(String name, String path, String fileNamePrefix, String cytosinePositionsIndex, String chromosomePrefix, String chromosomeSuffix,
-                                    List<FastaEntry> fastaEntries, List<String> statSizeFileNames) {
+                                    List<FastaEntry> fastaEntries, String fingerPrintingFileName, List<String> statSizeFileNames) {
         // get list of all standard chromosomes (1...22, X, Y)
         List<String> standardChromosomes = Chromosomes.allLabels()
         standardChromosomes.remove("M")
@@ -186,6 +186,7 @@ class ReferenceGenomeService {
         )
         referenceGenome.chromosomePrefix = chromosomePrefix
         referenceGenome.chromosomeSuffix = chromosomeSuffix
+        referenceGenome.fingerPrintingFileName = fingerPrintingFileName
         referenceGenome.save(flush: true)
 
 

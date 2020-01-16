@@ -34,9 +34,10 @@ import de.dkfz.tbi.otp.ngsdata.ReferenceGenomeEntry.Classification
 String name = "hg38"
 String path = "bwa06_hg38"
 String fileNamePrefix = "hg_GRCh38"
+String cytosinePositionsIndex = null
 String chromosomePrefix = ""
 String chromosomeSuffix = ""
-String cytosinePositionsIndex = null
+String fingerPrintingFileName = null
 List<String> statSizeFileNames = [
         "hg_GRCh38.fa.chrLenOnlyACGT.tab",
         "hg_GRCh38.fa.chrLenOnlyACGT_realChromosomes.tab",
@@ -242,4 +243,4 @@ List<FastaEntry> fastaEntries = [
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
 referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
-        fastaEntries, statSizeFileNames)
+        fastaEntries, fingerPrintingFileName, statSizeFileNames)

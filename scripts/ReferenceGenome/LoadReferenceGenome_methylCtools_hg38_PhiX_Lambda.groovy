@@ -37,6 +37,7 @@ String fileNamePrefix = "GCA_000001405.15_GRCh38_no_alt_analysis_set_adapted_nam
 String cytosinePositionsIndex = "GCA_000001405.15_GRCh38_no_alt_analysis_set_adapted_naming_phix_L.pos.gz"
 String chromosomePrefix = "chr"
 String chromosomeSuffix = "chr"
+String fingerPrintingFileName = null
 List<String> statSizeFileNames = [
         "GCA_000001405.15_GRCh38_no_alt_analysis_set_adapted_naming_phix_L.chrLenOnlyACGT.tab",
 ]
@@ -243,4 +244,4 @@ List<FastaEntry> fastaEntries = [
 
 ReferenceGenomeService referenceGenomeService = ctx.referenceGenomeService
 referenceGenomeService.loadReferenceGenome(name, path, fileNamePrefix, cytosinePositionsIndex, chromosomePrefix, chromosomeSuffix,
-        fastaEntries, statSizeFileNames)
+        fastaEntries, fingerPrintingFileName, statSizeFileNames)
