@@ -32,9 +32,11 @@
 <body>
 <div class="body" id="bulk-sample-creation">
     <g:render template="/templates/messages"/>
+
     <g:if test="${projects}">
-    <h1><g:message code="bulk.sample.creation.title"/></h1>
     <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+
+    <h1><g:message code="bulk.sample.creation.title"/></h1>
     <p>
         <g:message code="bulk.sample.creation.description"/>
     </p>
@@ -74,7 +76,7 @@
                     <td><span class="table-column-header"><g:message code="bulk.sample.creation.text.upload"/></span></td>
                     <td>
                         <g:textArea name="sampleText" id="sampleText" style="min-width: 500px;"
-                                    value="${sampleText}"/>
+                                    rows="25" cols="100" value="${sampleText}"/>
                     </td>
                     <td>
                         <g:message code='bulk.sample.creation.text.upload.info'
