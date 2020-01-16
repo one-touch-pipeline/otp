@@ -4,8 +4,7 @@ Reference genomes with Phix or Lambda should mention it in its name
 
 1. Run getReferenceGenomeInfo.py on a fasta file for the new reference genome ${name}
    python ./getReferenceGenomeInfo.py ${name} | tee ~/genome-entries.txt
-2. Create groovy script (LoadReferenceGenome_${name}.groovy); use an exiting file
-   which uses ReferenceGenomeService.loadReferenceGenome as template.
+2. Create groovy script (LoadReferenceGenome_${name}.groovy); use an exiting file as template.
    Insert the output from getReferenceGenomeInfo.py, adjust if necessary.
    Execute the script.
 3. Run WriteReferenceGenomeMetafile.groovy for reference genome ${name} which will
