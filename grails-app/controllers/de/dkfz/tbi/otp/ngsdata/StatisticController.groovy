@@ -74,31 +74,27 @@ class StatisticController {
         List<Integer> values = []
 
         List sampleCountBySeqType = statisticService.sampleCountPerSequenceType(projectGroup)
-
         int totalCount = sampleCountBySeqType.collect { it[1] }.sum()
-        int filterCount = (totalCount ?: 0) / 100 * 2
-        int filtered = 0
+
+        // cut-off value for naming a seqtype in the graph: 2% of total
+        int otherCutOff = (totalCount ?: 0) / 100 * 2
+        int otherCount = 0
 
         sampleCountBySeqType.each {
-            if (it[1] < filterCount) {
-                filtered += it[1]
+            if (it[1] < otherCutOff) {
+                // seqtype represent tiny fraction of total, group into "other"
+                otherCount += it[1]
                 return
             }
             labels << it[0]
             values << it[1]
-        }
-
-        sampleCountBySeqType.each {
-            if (it[1] < filterCount) {
-                return
-            }
             labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / totalCount)} %"
         }
 
-        if (filtered > 0) {
+        if (otherCount > 0) {
             labels << "Other"
-            values << filtered
-            labelsPercentage << "Other ${Math.round(filtered * 100 / totalCount)} %"
+            values << otherCount
+            labelsPercentage << "Other ${Math.round(otherCount * 100 / totalCount)} %"
         }
 
         Map dataToRender = [
