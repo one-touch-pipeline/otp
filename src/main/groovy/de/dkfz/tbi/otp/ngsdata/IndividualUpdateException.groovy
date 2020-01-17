@@ -33,5 +33,4 @@ class IndividualUpdateException extends OtpException {
         super("Updating the Individual with id ${individual.id} failed")
         this.individual = individual
     }
-
 }

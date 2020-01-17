@@ -104,7 +104,6 @@ class BackdoorFilter extends GenericFilterBean {
                 SecurityContextHolder.context.authentication = new UsernamePasswordAuthenticationToken(userDetails, null, authorities)
             }
             chain.doFilter(holder.getRequest(), holder.getResponse())
-
         } finally {
             request.removeAttribute(FILTER_APPLIED)
         }

@@ -261,5 +261,4 @@ abstract class AbstractAlignmentChecker extends PipelinesChecker<SeqTrack> {
     List<SeqTrack> filterWithoutReferenceGenome(List<SeqTrack> seqTracks, MonitorOutputCollector output) {
         return seqTracks
     }
-
 }

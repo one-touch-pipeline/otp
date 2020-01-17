@@ -281,5 +281,4 @@ class ReferenceGenomeProjectSeqTypeSpec extends Specification implements DataTes
         RuntimeException e = thrown()
         e.message.contains('the way to fetch the reference genome is not defined')
     }
-
 }

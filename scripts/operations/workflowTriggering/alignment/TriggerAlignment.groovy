@@ -34,7 +34,6 @@ import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
 LogThreadLocal.withThreadLog(System.out, {
     SeqTrack.withTransaction {
-
         Collection<SeqTrack> seqTracks = SeqTrack.withCriteria {
             or {
                 sample {
@@ -112,7 +111,6 @@ LogThreadLocal.withThreadLog(System.out, {
         println "\n----------------------\n"
         println ctx.samplePairDeciderService.findOrCreateSamplePairs(mergingWorkPackages).join('\n')
         //*/
-
     }
 })
 null // suppress output spam

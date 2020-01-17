@@ -153,7 +153,6 @@ class QcThresholdService {
     Errors createThreshold(Project project, String clasz, String property, SeqType seqType, QcThreshold.ThresholdStrategy condition,
                            Double errorThresholdLower, Double warningThresholdLower,
                            Double warningThresholdUpper, Double errorThresholdUpper, String property2) {
-
         String className = QcThreshold.convertShortToLongName(clasz)
 
         try {

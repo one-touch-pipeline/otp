@@ -228,8 +228,6 @@ class BamFilePairAnalysisSpec extends Specification implements DataTest {
                 config            : DomainFactory.createRoddyWorkflowConfig([seqType: samplePair.seqType, pipeline: snvPipeline]),
         ])
     }
-
-
 }
 
 @Artefact(DomainClassArtefactHandler.TYPE)

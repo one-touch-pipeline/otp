@@ -144,5 +144,4 @@ class SamplePairDeciderService {
         }
         return samplePair
     }
-
 }

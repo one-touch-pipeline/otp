@@ -34,7 +34,6 @@ import static de.dkfz.tbi.TestCase.assertContainSame
 class LaneNumberValidatorSpec extends Specification {
 
     void 'validate adds expected error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.LANE_NO}\n" +

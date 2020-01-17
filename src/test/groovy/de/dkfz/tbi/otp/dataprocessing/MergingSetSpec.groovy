@@ -82,7 +82,6 @@ class MergingSetSpec extends Specification implements DataTest {
         property             | constraint | value
         'status'             | 'nullable' | null
         'mergingWorkPackage' | 'nullable' | null
-
     }
 
 

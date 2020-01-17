@@ -37,7 +37,6 @@ final int LOW = 3
 
 
 ruleset {
-
     description '''
 All the Rules that will be used for OTP
 '''

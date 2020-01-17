@@ -43,5 +43,4 @@ class IncorrectProcessingException extends SchedulerException {
     IncorrectProcessingException(String message, Throwable cause) {
         super(message, cause)
     }
-
 }

@@ -28,7 +28,6 @@ import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
 String workflow = 'ImportExternallyMergedBamWorkflow'
 
 plan(workflow) {
-
     start("start", "importExternallyMergedBamStartJob")
     job("importExternallyMergedBam", "importExternallyMergedBamJob")
     job("replaceSourceWithLink", "replaceSourceWithLinkJob")

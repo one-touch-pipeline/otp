@@ -55,9 +55,7 @@ class UserAdministrationController {
     /**
      * Default action showing the DataTable markup
      */
-    def index() {
-
-    }
+    def index() { }
 
     /**
      * Action returning the DataTable content as JSON

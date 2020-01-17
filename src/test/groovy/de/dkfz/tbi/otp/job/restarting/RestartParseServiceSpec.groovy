@@ -291,8 +291,6 @@ class RestartParseServiceSpec extends Specification implements DataTest {
         JobErrorDefinition.Type.MESSAGE     || 1            || 0               || 0
         JobErrorDefinition.Type.STACKTRACE  || 0            || 1               || 0
         JobErrorDefinition.Type.CLUSTER_LOG || 0            || 0               || 1
-
-
     }
 
     @Unroll

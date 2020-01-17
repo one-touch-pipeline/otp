@@ -35,5 +35,4 @@ class StaticApplicationContextWrapper implements ApplicationContextAware {
     void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         context = applicationContext
     }
-
 }

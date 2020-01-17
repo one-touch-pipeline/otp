@@ -157,7 +157,6 @@ class SnvCallingServiceIntegrationSpec extends Specification {
 
         where:
         number << [1, 2]
-
     }
 
 

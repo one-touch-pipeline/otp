@@ -67,5 +67,4 @@ class SampleIdentifierOverviewController {
         }
         render dataToRender as JSON
     }
-
 }

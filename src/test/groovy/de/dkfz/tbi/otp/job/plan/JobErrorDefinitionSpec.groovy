@@ -99,5 +99,4 @@ class JobErrorDefinitionSpec extends Specification implements DataTest {
         ValidationException e = thrown()
         e.message.contains("invalid")
     }
-
 }

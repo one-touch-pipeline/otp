@@ -44,7 +44,6 @@ class UserServiceSpec extends Specification {
 
         then:
         User.count == 1
-
     }
 
     void "createFirstAdminUserIfNoUserExists, if user already exists, don't create one"() {

@@ -98,7 +98,6 @@ class RoddyBamFileSpec extends Specification implements IsRoddy, DataTest {
         "Final"     | null        | null           | "libNA"       || 'qualitycontrol/libNA/qualitycontrol.json'
         "Final"     | "library1"  | "1"            | "lib1"        || 'qualitycontrol/lib1/qualitycontrol.json'
         "Final"     | "abc"       | "abc"          | "libabc"      || 'qualitycontrol/libabc/qualitycontrol.json'
-
     }
 
 

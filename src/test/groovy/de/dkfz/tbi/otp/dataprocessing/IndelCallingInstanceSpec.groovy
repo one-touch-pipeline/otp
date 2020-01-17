@@ -79,5 +79,4 @@ class IndelCallingInstanceSpec extends Specification implements DataTest {
                 "${instance.sampleType1BamFile.sampleType.dirName}_${instance.sampleType2BamFile.sampleType.dirName}/${instance.instanceName}")
         expectedRelativePath.path == indelInstancePath.relativePath.path
     }
-
 }

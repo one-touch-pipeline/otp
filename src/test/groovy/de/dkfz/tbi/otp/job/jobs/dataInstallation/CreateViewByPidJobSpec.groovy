@@ -116,5 +116,4 @@ class CreateViewByPidJobSpec extends Specification implements DataTest {
         seqTrack.dataInstallationState == SeqTrack.DataProcessingState.FINISHED
         seqTrack.fastqcState == SeqTrack.DataProcessingState.NOT_STARTED
     }
-
 }

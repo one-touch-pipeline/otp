@@ -46,7 +46,6 @@ class ReferenceGenomeValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when column REFERENCE_GENOME missing, then add expected problem'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "SomeColumn\n" +
@@ -65,7 +64,6 @@ class ReferenceGenomeValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when column exist and referenceGenome is registered in OTP, succeeds'() {
-
         given:
         String REF_GEN_NAME = "refGenName"
 
@@ -84,7 +82,6 @@ class ReferenceGenomeValidatorSpec extends Specification implements DataTest {
     }
 
     void 'validate, when column exist but referenceGenome is not registered in OTP, adds problems'() {
-
         given:
         String REF_GEN_NAME = "refGenName"
 

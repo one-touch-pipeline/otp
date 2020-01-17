@@ -139,7 +139,6 @@ class SchedulerServiceSpec extends Specification {
         thrown(IllegalArgumentException)
         service.jobExecutedByCurrentThread == null
         LogThreadLocal.threadLog == null
-
     }
 
 

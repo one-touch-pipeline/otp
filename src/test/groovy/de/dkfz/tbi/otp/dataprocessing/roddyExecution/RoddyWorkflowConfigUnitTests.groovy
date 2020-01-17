@@ -370,5 +370,4 @@ class RoddyWorkflowConfigUnitTests {
         roddyWorkflowConfig.configFilePath = file.path
         CreateFileHelper.createRoddyWorkflowConfig(file, label)
     }
-
 }

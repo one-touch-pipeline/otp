@@ -84,7 +84,6 @@ class LibrarySeqTypeValidatorSpec extends Specification {
         'seqtype'                               | 'true'       | '1'
         "seqtype${SeqType.TAGMENTATION_SUFFIX}" | ''           | '4'
         "seqtype${SeqType.TAGMENTATION_SUFFIX}" | 'true'       | '4'
-
     }
 
     @SuppressWarnings('LineLength')

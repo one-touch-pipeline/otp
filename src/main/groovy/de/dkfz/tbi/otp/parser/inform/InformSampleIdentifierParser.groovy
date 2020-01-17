@@ -96,5 +96,4 @@ class InformSampleIdentifierParser implements SampleIdentifierParser {
                 "${sampleId}" +
                 /$/
     }
-
 }

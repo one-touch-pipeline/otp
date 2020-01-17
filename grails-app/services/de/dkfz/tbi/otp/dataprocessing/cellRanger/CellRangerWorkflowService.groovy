@@ -68,7 +68,6 @@ class CellRangerWorkflowService {
                 fileService.deleteDirectoryRecursively(it)
             }
             assert Files.exists(resultDirectory)
-
         } finally {
             stream?.close()
         }

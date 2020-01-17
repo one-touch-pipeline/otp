@@ -43,7 +43,6 @@ class MetadataValidationContext extends AbstractMetadataValidationContext {
     }
 
     static MetadataValidationContext createFromFile(Path metadataFile, DirectoryStructure directoryStructure, String directoryStructureDescription) {
-
         Map parametersForFile = readAndCheckFile(metadataFile, { Row row ->
             !row.getCellByColumnTitle(FASTQ_FILE.name())?.text?.startsWith('Undetermined')
         })

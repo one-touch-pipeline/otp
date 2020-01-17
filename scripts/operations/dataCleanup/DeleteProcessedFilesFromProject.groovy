@@ -75,7 +75,6 @@ if (seqTracks) {
     |# No restriction on specific SeqTracks, entire project will be removed! #
     |#########################################################################
     |""".stripMargin()
-
 }
 
 Path baseOutputDir = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')

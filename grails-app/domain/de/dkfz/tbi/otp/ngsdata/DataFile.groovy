@@ -108,7 +108,6 @@ class DataFile implements Commentable, Entity {
     ]
 
     static constraints = {
-
         fileName(blank: false, shared: "pathComponent")
         vbpFileName(blank: false, shared: "pathComponent")
 

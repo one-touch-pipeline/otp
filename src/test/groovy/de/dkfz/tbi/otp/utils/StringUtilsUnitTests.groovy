@@ -112,5 +112,4 @@ class StringUtilsUnitTests {
     void testLongestCommonPrefix_DifferentStrings() {
         assert "" == longestCommonPrefix("OneString", "AnotherString")
     }
-
 }

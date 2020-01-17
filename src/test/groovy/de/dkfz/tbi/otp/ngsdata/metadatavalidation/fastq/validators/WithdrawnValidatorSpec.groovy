@@ -33,7 +33,6 @@ import de.dkfz.tbi.util.spreadsheet.validation.Problem
 class WithdrawnValidatorSpec extends Specification {
 
     void 'validate adds expected errors'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.WITHDRAWN}\n" +
@@ -67,7 +66,6 @@ class WithdrawnValidatorSpec extends Specification {
 
 
     void 'validate, when metadata does not contain a column WITHDRAWN, succeeds'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 

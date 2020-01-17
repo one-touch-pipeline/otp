@@ -102,7 +102,6 @@ class ProjectOverviewService {
      * @return new Alignment info
      */
     private RoddyAlignmentInfo generateRoddyAlignmentInfo(ProcessOutput output, SeqType seqType, String pluginVersion) {
-
         Map<String, String> res = extractConfigRoddyOutput(output)
 
         Map bwa = createAlignmentCommandOptionsMap(res, output, seqType)
@@ -158,7 +157,6 @@ class ProjectOverviewService {
         }
 
         return merge
-
     }
 
     /**
@@ -182,29 +180,21 @@ class ProjectOverviewService {
         Map bwa = [:]
 
         if (seqType.isRna()) {
-
             bwa.command = res.get("STAR_VERSION") ? "STAR Version ${res.get("STAR_VERSION")}" : ""
             bwa.options = ['2PASS', 'OUT', 'CHIMERIC', 'INTRONS'].collect { name ->
                 res.get("STAR_PARAMS_${name}".toString())
             }.join(' ')
-
         } else if (res.get("useAcceleratedHardware") == "true") {
-
             bwa.command = res.get("BWA_ACCELERATED_VERSION") ? "bwa-bb Version ${res.get("BWA_ACCELERATED_VERSION")}" : ""
             bwa.options = res.get("BWA_MEM_OPTIONS") + ' ' + res.get("BWA_MEM_CONVEY_ADDITIONAL_OPTIONS")
-
         } else {
-
             bwa.command = res.get("BWA_VERSION") ? "BWA Version ${res.get("BWA_VERSION")}" : ""
             bwa.options = res.get("BWA_MEM_OPTIONS")
-
         }
 
         if (!bwa.command) {
-
             log?.debug("Could not extract alignment configuration from output:\n${output}")
             throw new RuntimeException("Could not extract alignment configuration value from the roddy output")
-
         }
 
         return bwa

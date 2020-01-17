@@ -31,7 +31,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 class ProblemsSpec extends Specification {
 
     void 'test all methods'() {
-
         given:
         Spreadsheet spreadsheet = new Spreadsheet('A1\tB1')
         def (Cell a1, Cell b1) = spreadsheet.header.cells

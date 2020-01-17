@@ -130,7 +130,6 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
     @Override
     protected Map<ClusterJobIdentifier, String> failedOrNotFinishedClusterJobs(
             Collection<? extends ClusterJobIdentifier> finishedClusterJobs) throws Throwable {
-
         RoddyResult roddyResult = getRefreshedProcessParameterObject()
         assert roddyResult
 
@@ -143,7 +142,6 @@ abstract class AbstractRoddyJob<R extends RoddyResult> extends AbstractMaybeSubm
 
     Map<ClusterJobIdentifier, String> analyseFinishedClusterJobs(
             Collection<? extends ClusterJobIdentifier> finishedClusterJobs, JobStateLogFile jobStateLogFile) {
-
         Map<ClusterJobIdentifier, String> failedOrNotFinishedClusterJobs = [:]
 
         finishedClusterJobs.each {

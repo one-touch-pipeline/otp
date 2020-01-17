@@ -80,5 +80,4 @@ class ExecuteRoddyCommandServiceSpec extends Specification implements DataTest {
         then:
         result.empty
     }
-
 }

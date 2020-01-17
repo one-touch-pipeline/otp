@@ -769,7 +769,6 @@ class SchedulerService {
             }
             last.process.finished = true
             last.process.save(flush: true)
-
         } finally {
             lock.unlock()
         }

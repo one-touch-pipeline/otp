@@ -44,5 +44,4 @@ class SchedulerException extends ProcessingException {
     SchedulerException(String message, Throwable cause) {
         super(message, cause)
     }
-
 }

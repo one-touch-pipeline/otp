@@ -104,7 +104,6 @@ class RoddyBamFile extends AbstractMergedBamFile implements RoddyResult, Process
     }
 
     List<String> isConsistentAndContainsNoWithdrawnData() {
-
         List<String> errors = []
 
         def assertAndTrackOnError = { def expression, String errorMessage ->

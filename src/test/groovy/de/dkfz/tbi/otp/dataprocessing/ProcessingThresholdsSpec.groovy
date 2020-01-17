@@ -108,5 +108,4 @@ class ProcessingThresholdsSpec extends Specification {
         AssertionError e = thrown()
         e.message ==~ '.*property coverage of the bam has to be set.*'
     }
-
 }

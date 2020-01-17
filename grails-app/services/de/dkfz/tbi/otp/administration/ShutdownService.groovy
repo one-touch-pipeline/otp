@@ -70,7 +70,6 @@ class ShutdownService implements DisposableBean {
                 suspendResumeableJobs()
                 log.info("OTP is shutting down")
                 DicomAuditLogger.logActorStop(EventOutcomeIndicator.SUCCESS, info.initiatedBy.username)
-
             }
         } else {
             log.warn("OTP is shutting down without a planned shutdown")

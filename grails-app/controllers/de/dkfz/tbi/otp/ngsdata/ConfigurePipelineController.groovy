@@ -262,7 +262,6 @@ class ConfigurePipelineController implements ConfigurePipelineHelper {
             FieldError errors = cmd.errors.getFieldError()
             log.error(errors)
             result << [message: "'${errors.getRejectedValue()}' is not a valid value for '${errors.getField()}'. Error code: '${errors.code}'"]
-
         } else {
             RnaAlignmentReferenceGenomeConfiguration rnaConfiguration = new RnaAlignmentReferenceGenomeConfiguration([
                     project                : cmd.project,

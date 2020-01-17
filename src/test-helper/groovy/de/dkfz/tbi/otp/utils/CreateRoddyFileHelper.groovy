@@ -141,6 +141,5 @@ class CreateRoddyFileHelper {
         aceseqInstance.getAllFiles().each { File plot ->
             CreateFileHelper.createFile(plot)
         }
-
     }
 }

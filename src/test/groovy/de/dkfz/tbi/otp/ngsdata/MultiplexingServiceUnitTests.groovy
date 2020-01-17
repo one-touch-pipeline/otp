@@ -170,5 +170,4 @@ class MultiplexingServiceUnitTests {
         final String fileName = "example_140226${barcodePattern}.bam"
         assert expected == MultiplexingService.barcode(fileName)
     }
-
 }

@@ -307,7 +307,6 @@ class ExecutePanCanJobIntegrationTests implements RoddyRnaFactory {
         assert TestCase.shouldFail(AssertionError) {
             executePanCanJob.workflowSpecificValidation(roddyBamFile)
         }.contains(roddyBamFile.workMergedQATargetExtractJsonFile.path)
-
     }
 
 

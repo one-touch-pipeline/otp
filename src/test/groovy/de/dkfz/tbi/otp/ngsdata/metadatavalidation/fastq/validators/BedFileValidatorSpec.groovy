@@ -129,7 +129,6 @@ class BedFileValidatorSpec extends Specification implements DataTest {
                 sampleIdentifierService: [
                         getSampleIdentifierParser: { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
                             new SampleIdentifierParser() {
-
                                 @Override
                                 ParsedSampleIdentifier tryParse(String sampleIdentifier) {
                                     Matcher match = sampleIdentifier =~ /${PARSE_PREFIX}_(.*)_(.*)_(.*)/

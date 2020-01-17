@@ -52,5 +52,4 @@ class RoddyAceseqStartJob extends AbstractBamFilePairAnalysisStartJob implements
     BamFileAnalysisService getBamFileAnalysisService() {
         return aceseqService
     }
-
 }

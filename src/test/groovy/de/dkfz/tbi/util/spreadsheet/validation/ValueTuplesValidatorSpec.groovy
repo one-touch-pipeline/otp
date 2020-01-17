@@ -48,7 +48,6 @@ class ValueTuplesValidatorSpec extends Specification {
     ValidationContext context = new ValidationContext(spreadsheet)
 
     void test_ValueTuplesValidator_WithMissingRequiredColumn() {
-
         given:
         ValueTuplesValidator<ValidationContext> validator = [
                 getRequiredColumnTitles: { ValidationContext context -> ['B', 'C', 'D'] },
@@ -64,7 +63,6 @@ class ValueTuplesValidatorSpec extends Specification {
     }
 
     void test_ValueTuplesValidator_WithMissingOptionalColumn() {
-
         given:
         Collection<ValueTuple> calledFor = null
         ValueTuplesValidator<ValidationContext> validator = new ValueTuplesValidator<ValidationContext>() {
@@ -101,7 +99,6 @@ class ValueTuplesValidatorSpec extends Specification {
     }
 
     void test_SingleValueValidator() {
-
         given:
         Collection calledFor = []
         SingleValueValidator<ValidationContext> validator = [

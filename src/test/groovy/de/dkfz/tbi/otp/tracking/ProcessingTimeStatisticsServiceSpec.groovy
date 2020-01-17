@@ -42,7 +42,6 @@ class ProcessingTimeStatisticsServiceSpec extends Specification {
 
         expect:
         "-${dateDiff.toString().padLeft(2, '0')}d 00h 00m" == ProcessingTimeStatisticsService.getFormattedPeriod(date, date.minus(dateDiff))
-
     }
 
     void "getFormattedPeriod, when period is positive, return formatted String"() {

@@ -189,5 +189,4 @@ class RoddyWorkflowConfig extends ConfigPerProjectAndSeqType implements Alignmen
     static File getStandardConfigFile(Project project, Pipeline.Name pipelineName, SeqType seqType, String pluginVersion, String configVersion) {
         return new File(getStandardConfigDirectory(project, pipelineName), getConfigFileName(pipelineName, seqType, pluginVersion, configVersion))
     }
-
 }

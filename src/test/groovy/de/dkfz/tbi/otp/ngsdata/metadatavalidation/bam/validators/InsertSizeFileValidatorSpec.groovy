@@ -43,7 +43,6 @@ class InsertSizeFileValidatorSpec extends Specification {
 
     @Unroll
     void 'validate context with errors'() {
-
         given:
         File bamFile = temporaryFolder.newFile('abc')
         File insertFile = temporaryFolder.newFile('insertFile')
@@ -87,7 +86,6 @@ class InsertSizeFileValidatorSpec extends Specification {
     }
 
     void 'validate, when column INSERT_SIZE_FILE is missing, then add expected problem'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "${PROJECT}\t +" +

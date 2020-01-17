@@ -104,5 +104,4 @@ class AllAlignmentsCheckerIntegrationSpec extends Specification implements Roddy
         then:
         [] == result
     }
-
 }

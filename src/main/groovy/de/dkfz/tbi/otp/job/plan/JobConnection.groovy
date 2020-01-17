@@ -29,5 +29,4 @@ class JobConnection {
         this.from = from
         this.to = to
     }
-
 }

@@ -33,7 +33,6 @@ ProcessingOptionService processingOptionService = ctx.ProcessingOptionService
 
 //create default realm
 Realm.withTransaction {
-
     Realm realm = new Realm([
             name                       : realmName,
             jobScheduler               : Realm.JobScheduler.PBS,
@@ -46,6 +45,5 @@ Realm.withTransaction {
     assert realm.save(flush: true)
 
     processingOptionService.createOrUpdate(ProcessingOption.OptionName.REALM_DEFAULT_VALUE, realmName)
-
 }
 ''

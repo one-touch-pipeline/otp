@@ -440,7 +440,6 @@ if (allProcessed) {
             )
         )
         """
-
     }
 
     SamplePair.executeQuery("""

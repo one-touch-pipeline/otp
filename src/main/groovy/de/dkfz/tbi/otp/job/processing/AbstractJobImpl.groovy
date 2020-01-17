@@ -147,7 +147,6 @@ abstract class AbstractJobImpl implements Job {
             default:
                 throw new InvalidStateException("Cannot access output parameters from state " + state)
         }
-
     }
 
     @Override

@@ -424,7 +424,6 @@ SELECT
         Map data = ["queued": [], "started": [], "ended": []]
 
         data.keySet().each {
-
             String query = """
 SELECT
  job.${it} / $HOURS_TO_MILLIS AS hour,
@@ -681,7 +680,6 @@ SELECT
         Map data = ["queued": [], "started": [], "ended": []]
 
         data.keySet().each {
-
             String query = """
 SELECT
  job.${it} / $HOURS_TO_MILLIS AS hour,

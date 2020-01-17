@@ -117,6 +117,4 @@ class ExternallyProcessedMergedBamFileSpec extends Specification implements Data
 
         'maximumReadLength' | 'min.notmet'               | -5
     }
-
-
 }

@@ -203,7 +203,6 @@ class FastqcDataFilesServiceUnitTests {
 
     @Test
     void testGetAndUpdateFastqcProcessedFile() {
-
         FastqcProcessedFile fastqcProcessedFile = DomainFactory.createFastqcProcessedFile(dataFile: dataFile)
 
         assert fastqcProcessedFile == fastqcDataFilesService.getAndUpdateFastqcProcessedFile(fastqcProcessedFile.dataFile)

@@ -67,7 +67,6 @@ class ChromosomesTests {
             "20", "21", "22"]
 
         characterChromosomesLabels = ["X", "Y", "M"]
-
     }
 
     @After

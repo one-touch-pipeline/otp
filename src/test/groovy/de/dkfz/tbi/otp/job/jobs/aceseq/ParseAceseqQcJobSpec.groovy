@@ -109,7 +109,6 @@ class ParseAceseqQcJobSpec extends Specification implements DataTest {
 
         instance.metaClass.getAllFiles = {
             return [aceseqOutputFile]
-
         }
 
         TestConfigService configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFile.path])

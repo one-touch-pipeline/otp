@@ -451,5 +451,4 @@ assert new Sample(
 
         return snippet.toString()
     }
-
 }

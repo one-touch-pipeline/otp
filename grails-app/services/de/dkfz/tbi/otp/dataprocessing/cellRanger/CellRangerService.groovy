@@ -188,7 +188,6 @@ class CellRangerService {
         qcTrafficLightCheckService.handleQcCheck(singleCellBamFile) {
             cellRangerWorkflowService.linkResultFiles(singleCellBamFile)
         }
-
     }
 
     private void completeBamFile(SingleCellBamFile singleCellBamFile) {

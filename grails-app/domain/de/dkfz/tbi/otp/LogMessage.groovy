@@ -30,5 +30,4 @@ class LogMessage implements Entity {
     static mapping = {
         message type: "text"
     }
-
 }

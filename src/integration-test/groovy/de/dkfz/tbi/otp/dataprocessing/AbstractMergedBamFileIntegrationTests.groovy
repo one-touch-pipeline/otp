@@ -138,5 +138,4 @@ class AbstractMergedBamFileIntegrationTests {
 
         assert bamFile.mergingWorkPackage.bamFileInProjectFolder == bamFile
     }
-
 }

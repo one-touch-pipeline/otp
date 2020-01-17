@@ -255,25 +255,21 @@ class CheckedLogger extends MarkerIgnoringBase implements Logger {
     @Override
     void info(String msg) {
         checkConsumedMessage(Level.INFO, msg)
-
     }
 
     @Override
     void info(String format, Object arg) {
         checkConsumedMessage(Level.INFO, format)
-
     }
 
     @Override
     void info(String format, Object arg1, Object arg2) {
         checkConsumedMessage(Level.INFO, format)
-
     }
 
     @Override
     void info(String format, Object... arguments) {
         checkConsumedMessage(Level.INFO, format)
-
     }
 
     @Override

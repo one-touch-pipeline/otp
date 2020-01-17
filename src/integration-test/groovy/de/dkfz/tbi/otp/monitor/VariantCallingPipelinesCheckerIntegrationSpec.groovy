@@ -151,5 +151,4 @@ class VariantCallingPipelinesCheckerIntegrationSpec extends Specification {
         0 * output.showWorkflow(_)
         0 * output.showWorkflow(_, _)
     }
-
 }

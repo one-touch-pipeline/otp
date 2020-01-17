@@ -33,7 +33,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 class SpaceValidatorSpec extends Specification {
 
     void 'validate adds expected errors'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 " x\n" +

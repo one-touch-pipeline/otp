@@ -96,7 +96,6 @@ class SeqTrackServiceIntegrationSpec extends Specification {
         false      | { [fastqcState: UNKNOWN, seqType: SeqTypeService.getExomePairedSeqType()] }
         true       | { [fastqcState: NOT_STARTED] }
         true       | { [fastqcState: NOT_STARTED, seqType: SeqTypeService.getExomePairedSeqType()] }
-
     }
 
     void "getSeqTrackReadyForFastqcProcessing should prioritise alignable over rest"() {

@@ -39,7 +39,6 @@ try {
         out.print("${mergingWorkPackage.id}\t")
         AbstractMergedBamFile bamFile = mergingWorkPackage.bamFileInProjectFolder
         if (bamFile) {
-
             final File file = new File(ctx.abstractMergedBamFileService.destinationDirectory(bamFile), bamFile.bamFileName)
 
             boolean exists = file.exists()

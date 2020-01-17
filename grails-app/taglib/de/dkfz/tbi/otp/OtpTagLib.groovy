@@ -197,7 +197,6 @@ class OtpTagLib {
         out << '<tr class="edit-table-buttons">'
         out << body.call("insideEdiTable": true)
         out << '</tr>'
-
     }
 
     def editTableButtons = { attrs ->

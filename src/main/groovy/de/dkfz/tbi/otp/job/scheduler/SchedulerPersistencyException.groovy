@@ -41,5 +41,4 @@ class SchedulerPersistencyException extends SchedulerException {
     SchedulerPersistencyException(String message, Throwable cause) {
         super(message, cause)
     }
-
 }

@@ -56,7 +56,6 @@ boolean failOnMissingFiles = true
 
 try {
     Individual.withTransaction {
-
         dataSwapService.moveSample(
                 'OldProject', 'NewProject',
                 'OldPid', 'NewPid',

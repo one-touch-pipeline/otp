@@ -57,5 +57,4 @@ class DataProcessingFilesService {
         String postfix = (!dir || dir == OutputDirectories.BASE) ? "" : "${dir.toString().toLowerCase()}/"
         return "${individual.resultsPerPidPath.absoluteDataProcessingPath}/${postfix}"
     }
-
 }

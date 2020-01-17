@@ -37,7 +37,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 class SeqCenterValidatorSpec extends Specification {
 
     void 'validate adds expected error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.CENTER_NAME}\n" +

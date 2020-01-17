@@ -69,8 +69,6 @@ class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> implements D
         NAME                  | _
         IMPORT_ALIAS          | _
         SEQ_TYPE_DISPLAY_NAME | _
-
-
     }
 
     void "test createSeqType fails with null as argument"() {

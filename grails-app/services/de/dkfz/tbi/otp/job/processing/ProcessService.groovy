@@ -128,7 +128,6 @@ class ProcessService {
      */
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     String processingStepClusterJobLog(ClusterJob clusterJob) {
-
         File file = new File(clusterJob.jobLog)
         if (!file.exists() || !file.isFile()) {
             return ""
@@ -392,5 +391,4 @@ class ProcessService {
     String processUrl(Process process) {
         return grailsLinkGenerator.link(controller: 'processes', action: 'process', id: process.id, absolute: true)
     }
-
 }

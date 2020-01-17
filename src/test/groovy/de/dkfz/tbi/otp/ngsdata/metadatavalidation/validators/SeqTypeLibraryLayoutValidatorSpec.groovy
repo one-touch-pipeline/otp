@@ -165,7 +165,6 @@ SeqType1\t${LibraryLayout.SINGLE}\t\twer
     }
 
     void 'validate, when combinations are not in database, adds expected errors'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.LIBRARY_LAYOUT}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\t${MetaDataColumn.BASE_MATERIAL}

@@ -40,5 +40,4 @@ class JobExcecutionException extends ProcessingException {
     JobExcecutionException(String message, Throwable cause) {
         super(message, cause)
     }
-
 }

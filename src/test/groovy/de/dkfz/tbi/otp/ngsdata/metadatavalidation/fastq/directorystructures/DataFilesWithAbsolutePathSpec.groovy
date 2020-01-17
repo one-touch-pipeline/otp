@@ -39,7 +39,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 class DataFilesWithAbsolutePathSpec extends Specification {
 
     void test() {
-
         given:
         File directory = TestCase.uniqueNonExistentPath
         DirectoryStructure directoryStructure = new DataFilesWithAbsolutePath()

@@ -119,6 +119,4 @@ class ProjectRunNameFileNameValidatorIntegrationSpec extends Specification {
         ]
         assertContainSame(context.problems, expectedProblems)
     }
-
-
 }

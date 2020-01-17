@@ -171,5 +171,4 @@ ${seqType.seqTypeName},${seqType.libraryLayout},${antibodyTarget},${antibody}
         ]
         assertContainSame(context.problems, expectedProblems)
     }
-
 }

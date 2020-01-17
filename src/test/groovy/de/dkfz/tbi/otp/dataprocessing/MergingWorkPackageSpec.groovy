@@ -404,5 +404,4 @@ class MergingWorkPackageSpec extends Specification implements DataTest, DomainFa
         then:
         TestCase.assertValidateError(mergingWorkPackage1, 'sample', 'unique', mergingWorkPackage.sample)
     }
-
 }

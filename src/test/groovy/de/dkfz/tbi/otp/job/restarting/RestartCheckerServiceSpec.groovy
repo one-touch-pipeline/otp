@@ -139,5 +139,4 @@ class RestartCheckerServiceSpec extends Specification implements DataTest {
         expect:
         !restartCheckerService.isWorkflowAlreadyRestarted(step)
     }
-
 }

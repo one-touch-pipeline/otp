@@ -73,7 +73,6 @@ class AlignmentValidator extends ValueTuplesValidator<MetadataValidationContext>
                             if (!RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)) {
                                 context.addProblem(Collections.emptySet(), Level.WARNING, "${pipeline.name.name()} is not configured for Project '${project}' and SeqType '${seqType}'", "At least one Alignment is not configured.")
                             }
-
                         } else if (seqType in SeqTypeService.cellRangerAlignableSeqTypes) {
                             if (!projectService.getLatestCellRangerConfig(project, seqType)) {
                                 context.addProblem(Collections.emptySet(), Level.WARNING, "CellRanger is not configured for Project '${project}' and SeqType '${seqType}'", "At least one Alignment is not configured.")

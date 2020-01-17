@@ -71,8 +71,6 @@ abstract class AbstractRunYapsaWorkflowTests extends AbstractRoddyBamFilePairAna
                 seqType       : samplePair.seqType,
                 pipeline      : Pipeline.Name.RUN_YAPSA.pipeline,
         ])
-
-
     }
 
     @Override

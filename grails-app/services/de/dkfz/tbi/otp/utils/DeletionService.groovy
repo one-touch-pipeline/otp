@@ -374,7 +374,6 @@ class DeletionService {
                 RoddyQualityAssessment.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
             }
             qualityAssessmentMergedPasses*.delete(flush: true)
-
         } else if (abstractBamFile instanceof SingleCellBamFile) {
             List<QualityAssessmentMergedPass> qualityAssessmentMergedPasses = QualityAssessmentMergedPass.findAllByAbstractMergedBamFile(abstractBamFile)
             if (qualityAssessmentMergedPasses) {
@@ -681,7 +680,6 @@ class DeletionService {
      */
     List<SeqTrack> deleteProcessingFilesOfProject(String projectName, Path scriptOutputDirectory, boolean everythingVerified = false,
                                                   boolean ignoreWithdrawn = false, List<SeqTrack> explicitSeqTracks = []) throws FileNotFoundException {
-
         Project project = Project.findByName(projectName)
         assert project : "Project does not exist"
 
@@ -770,7 +768,6 @@ class DeletionService {
         output << "delete content in db...\n\n"
 
         seqTracks.each { SeqTrack seqTrack ->
-
             File processingDir = new File(dataProcessingFilesService.getOutputDirectory(
                     seqTrack.individual, DataProcessingFilesService.OutputDirectories.MERGING))
             if (processingDir.exists()) {

@@ -75,6 +75,5 @@ class AbstractAlignmentDeciderIntegrationSpec extends Specification {
         ({ null })                                        | ({ DomainFactory.createReferenceGenome() }) || false
         ({ DomainFactory.createLibraryPreparationKit() }) | ({ null })                                  || false
         ({ DomainFactory.createLibraryPreparationKit() }) | ({ DomainFactory.createReferenceGenome() }) || true
-
     }
 }

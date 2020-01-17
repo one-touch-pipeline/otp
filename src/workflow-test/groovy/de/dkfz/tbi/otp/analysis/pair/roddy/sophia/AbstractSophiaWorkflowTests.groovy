@@ -147,5 +147,4 @@ abstract class AbstractSophiaWorkflowTests extends AbstractRoddyBamFilePairAnaly
     Duration getTimeout() {
         Duration.ofHours(5)
     }
-
 }

@@ -35,7 +35,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 class CoverageValidatorSpec extends Specification {
 
     void 'validate, when column COVERAGE missing, then add expected problem'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext()
         Collection<Problem> expectedProblems = [
@@ -51,7 +50,6 @@ class CoverageValidatorSpec extends Specification {
     }
 
     void 'validate context with errors'() {
-
         given:
         String COVERAGE_NO_DOUBLE = "cov123"
 

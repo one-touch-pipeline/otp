@@ -177,5 +177,4 @@ class ClusterJobJobTypeSpecificController {
 
         return [startDate, endDate, seqType]
     }
-
 }

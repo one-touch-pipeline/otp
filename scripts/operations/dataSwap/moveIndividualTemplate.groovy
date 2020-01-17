@@ -57,7 +57,6 @@ boolean failOnMissingFiles = true
 
 try {
     Individual.withTransaction {
-
         dataSwapService.moveIndividual(
                 'OldProject', 'NewProject',
                 'OldPid', 'NewPid',

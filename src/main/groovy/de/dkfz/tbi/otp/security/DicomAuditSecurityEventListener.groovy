@@ -43,7 +43,6 @@ class DicomAuditSecurityEventListener implements ApplicationListener<AbstractAut
 
     @Override
     void onApplicationEvent(AbstractAuthenticationEvent event) {
-
         //if login success (AuthenticationSuccessEvent) then nothing should be done
 
         switch (event) {

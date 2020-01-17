@@ -78,7 +78,6 @@ class ProjectSelectionService {
         ProjectSelection projectSelection = new ProjectSelection(projects: projects, displayName: displayName)
         session.setAttribute(PROJECT_SELECTION_KEY, projectSelection)
     }
-
 }
 
 class ProjectSelection {

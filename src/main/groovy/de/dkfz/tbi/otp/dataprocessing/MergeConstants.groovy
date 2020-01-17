@@ -36,5 +36,4 @@ interface MergeConstants {
             MERGE_TOOL_BIOBAMBAM,
             MERGE_TOOL_SAMBAMBA,
     ].asImmutable()
-
 }

@@ -141,5 +141,4 @@ class QualityAssessmentMergedPass implements ProcessParameterObject, Entity {
     ReferenceGenome getReferenceGenome() {
         return abstractMergedBamFile.referenceGenome
     }
-
 }

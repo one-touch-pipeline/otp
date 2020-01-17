@@ -31,5 +31,4 @@ class IndividualCreationException extends OtpException {
     IndividualCreationException(String reason) {
         super(reason)
     }
-
 }

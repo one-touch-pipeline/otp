@@ -31,5 +31,4 @@ class WesRunYapsaWorkflowTests extends AbstractRunYapsaWorkflowTests implements 
     SeqType seqTypeToUse() {
         return SeqTypeService.exomePairedSeqType
     }
-
 }

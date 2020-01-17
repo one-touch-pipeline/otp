@@ -35,7 +35,6 @@ import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.SAMPLE_ID
 class SampleLibraryValidatorSpec extends Specification {
 
     void 'validate, when SAMPLE_ID and CUSTOMER_LIBRARY are missing, add error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 
@@ -51,7 +50,6 @@ class SampleLibraryValidatorSpec extends Specification {
     }
 
     void 'validate, when CUSTOMER_LIBRARY is missing, add warning'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\n" +
@@ -70,7 +68,6 @@ class SampleLibraryValidatorSpec extends Specification {
     }
 
     void 'validate, when SAMPLE_ID is missing, add error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${CUSTOMER_LIBRARY}\n" +
@@ -89,7 +86,6 @@ class SampleLibraryValidatorSpec extends Specification {
     }
 
     void 'validate, valid SAMPLE_ID and CUSTOMER_LIBRARY combinations, succeeds'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${CUSTOMER_LIBRARY}\n" +
@@ -107,7 +103,6 @@ class SampleLibraryValidatorSpec extends Specification {
     }
 
     void 'validate, when SAMPLE_ID does contain "lib" and CUSTOMER_LIBRARY is empty, adds warning'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${SAMPLE_ID}\t${CUSTOMER_LIBRARY}\n" +
@@ -123,5 +118,4 @@ class SampleLibraryValidatorSpec extends Specification {
         ]
         assertContainSame(context.problems, expectedProblems)
     }
-
 }

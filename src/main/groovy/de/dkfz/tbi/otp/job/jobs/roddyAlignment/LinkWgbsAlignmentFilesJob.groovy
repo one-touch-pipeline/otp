@@ -61,5 +61,4 @@ class LinkWgbsAlignmentFilesJob extends AbstractEndStateAwareJobImpl {
 
         succeed()
     }
-
 }

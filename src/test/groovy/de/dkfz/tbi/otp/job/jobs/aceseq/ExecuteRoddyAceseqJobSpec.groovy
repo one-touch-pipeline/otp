@@ -184,7 +184,6 @@ class ExecuteRoddyAceseqJobSpec extends Specification implements DataTest {
         then:
         expectedList == returnedList
         LsdfFilesService.ensureFileIsReadableAndNotEmpty(sophiaInstance.getFinalAceseqInputFile())
-
     }
 
 

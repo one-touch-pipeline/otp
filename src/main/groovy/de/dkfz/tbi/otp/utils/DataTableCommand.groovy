@@ -60,5 +60,4 @@ class DataTableCommand implements Validateable {
     boolean getSortOrder() {
         return this.sSortDir_0 == "asc"
     }
-
 }

@@ -101,7 +101,6 @@ class SampleSwapService {
             it.sampleSwapInfos.sort { a, b ->
                 b.level.getValue() <=> a.level.getValue() ?: a.key <=> b.key
             }
-
         }
 
         data.data << new SampleSwapData(validateProject(data) + validateSample(data) + checkAnalysis(data) +
@@ -119,7 +118,6 @@ class SampleSwapService {
             swapInfo.descriptionOfChanges += it.getSampleSwapInfosAsString()
             assert swapInfo.addToSeqTracks(SeqTrack.get(it.seqTrackId)).save(flush: true)
         }
-
     }
 
     private List checkAnalysis(Map data) {
@@ -227,7 +225,6 @@ class SampleSwapService {
                                     "'individual' '${k}' will be created in 'project' '${v.first().newValues.project}'.", SampleSwapLevel.INFO)
                         }
                     }
-
                 } else {
                     sampleSwapInfoData << new SampleSwapInfo(v.first().oldValues.project, v.first().newValues.project, '', 'individual',
                             "You are trying to move the 'individual' '${k}' into multiple projects, this is not allowed. Corresponding rows: " +

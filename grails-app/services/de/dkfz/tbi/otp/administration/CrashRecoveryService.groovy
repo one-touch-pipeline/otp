@@ -147,7 +147,6 @@ class CrashRecoveryService {
                     jobName  : step.jobDefinition.name,
                     parameter: ParameterType.findAllByJobDefinitionAndParameterUsage(step.jobDefinition, ParameterUsage.OUTPUT),
             ]
-
         }
     }
 

@@ -37,7 +37,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 class SequencingKitValidatorSpec extends Specification {
 
     void 'validate, when column is missing, adds warning'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "SomeColumn\n" +
@@ -54,7 +53,6 @@ class SequencingKitValidatorSpec extends Specification {
     }
 
     void 'validate adds expected error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext("""\
 ${MetaDataColumn.SEQUENCING_KIT}

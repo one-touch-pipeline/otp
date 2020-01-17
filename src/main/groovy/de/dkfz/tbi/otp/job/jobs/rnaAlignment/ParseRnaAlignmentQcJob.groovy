@@ -54,5 +54,4 @@ class ParseRnaAlignmentQcJob extends AbstractEndStateAwareJobImpl implements Aut
             succeed()
         }
     }
-
 }

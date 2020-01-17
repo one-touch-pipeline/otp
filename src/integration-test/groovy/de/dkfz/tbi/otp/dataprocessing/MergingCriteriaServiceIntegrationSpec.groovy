@@ -319,7 +319,6 @@ class MergingCriteriaServiceIntegrationSpec extends Specification implements Use
         then:
         SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria).size() == 2
         CollectionUtils.containSame(SeqPlatformGroup.findAllByMergingCriteria(mergingCriteria)*.seqPlatforms, [[seqPlatform] as Set, [seqPlatform1] as Set])
-
     }
 
     void "test findSeqPlatformGroupsForProjectAndSeqType"() {

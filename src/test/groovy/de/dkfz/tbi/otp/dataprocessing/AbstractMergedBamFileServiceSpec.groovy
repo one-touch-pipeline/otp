@@ -70,7 +70,6 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
                 } else {
                     file
                 }
-
             }
             _ * getMd5sum() >> {
                 failCase == 'invalidMd5sum' ? 'invalid' : HelperUtils.randomMd5sum
@@ -97,5 +96,4 @@ class AbstractMergedBamFileServiceSpec extends Specification implements DataTest
         'fileSizeZero'                     || 'assert bamFile.getFileSize()'
         'fileSizeWrong'                    || 'assert file.length() == bamFile.getFileSize()'
     }
-
 }

@@ -170,5 +170,4 @@ class ProjectInternalNoteValidatorSpec extends Specification implements DataTest
         containSame(problem.affectedCells*.cellAddress, Collections.emptySet())
         problem.message.contains("Internal notes for project '${sampleIdentifier.project.name}': ${sampleIdentifier.project.internalNotes}")
     }
-
 }

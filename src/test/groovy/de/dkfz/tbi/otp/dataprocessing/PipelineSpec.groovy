@@ -56,6 +56,5 @@ class PipelineSpec extends Specification implements DataTest {
         Pipeline.Name.RODDY_RNA_ALIGNMENT  | Pipeline.Type.ALIGNMENT || true
         Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Type.ALIGNMENT || true
         Pipeline.Name.EXTERNALLY_PROCESSED | Pipeline.Type.SNV       || false
-
     }
 }

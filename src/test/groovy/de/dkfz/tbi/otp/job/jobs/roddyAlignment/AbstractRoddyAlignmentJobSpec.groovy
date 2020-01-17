@@ -154,7 +154,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
                 }
             }
             0 * ensureCorrectBaseBamFileIsOnFileSystem(_)
-
         }
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
@@ -177,7 +176,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> {
                 throw new AssertionError(errorMessage)
             }
-
         }
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
 
@@ -203,7 +201,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
             validateReadGroups(_) >> { }
             workflowSpecificValidation(_) >> { }
-
         }
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile()
@@ -253,7 +250,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
             validateReadGroups(_) >> { }
             workflowSpecificValidation(_) >> { }
-
         }
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
@@ -285,7 +281,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
             1 * validateReadGroups(_) >> { }
             1 * workflowSpecificValidation(_) >> { }
-
         }
 
         RoddyBamFile roddyBamFile = DomainFactory.createRoddyBamFile([
@@ -316,7 +311,6 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
             1 * ensureCorrectBaseBamFileIsOnFileSystem(_) >> { }
             1 * validateReadGroups(_) >> { }
             1 * workflowSpecificValidation(_) >> { }
-
         }
 
         RoddyBamFile roddyBamFile = RoddyRnaFactory.super.createBamFile([
@@ -466,5 +460,4 @@ class AbstractRoddyAlignmentJobSpec extends Specification implements RoddyRnaFac
         cleanup:
         configService.clean()
     }
-
 }

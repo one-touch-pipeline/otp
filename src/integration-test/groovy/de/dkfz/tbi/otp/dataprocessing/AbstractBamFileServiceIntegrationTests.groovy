@@ -82,7 +82,6 @@ class AbstractBamFileServiceIntegrationTests {
     ].asImmutable()
 
     void setupData() {
-
         Project project = DomainFactory.createProject(
                 name: "project",
                 dirName: "project-dir",

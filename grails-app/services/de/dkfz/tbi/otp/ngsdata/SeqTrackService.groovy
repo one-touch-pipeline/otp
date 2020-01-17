@@ -182,7 +182,6 @@ class SeqTrackService {
     }
 
     static boolean mayAlign(SeqTrack seqTrack, boolean log = true) {
-
         def notAligning = { String reason ->
             if (log) {
                 AbstractAlignmentDecider.logNotAligning(seqTrack, reason)

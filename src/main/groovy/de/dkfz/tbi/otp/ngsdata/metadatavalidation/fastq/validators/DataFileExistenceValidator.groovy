@@ -52,7 +52,6 @@ class DataFileExistenceValidator extends ValueTuplesValidator<MetadataValidation
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> allValueTuples) {
-
         boolean directoryStructureInfoAdded = false
         Closure addDirectoryStructureInfo = {
             if (!directoryStructureInfoAdded) {

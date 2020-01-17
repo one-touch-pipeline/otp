@@ -68,7 +68,6 @@ class AbstractJobImplSpec extends Specification implements DataTest {
         then:
         RuntimeException e = thrown()
         e.message.contains("No sending processing step found for")
-
     }
 
     void "test failedOrNotFinishedClusterJobs, no ClusterJob for send step, throws RunTimeException"() {
@@ -86,7 +85,6 @@ class AbstractJobImplSpec extends Specification implements DataTest {
         then:
         RuntimeException e = thrown()
         e.message.contains("No ClusterJobs found for")
-
     }
 
     void "test failedOrNotFinishedClusterJobs return list of failed or not finished jobs"() {

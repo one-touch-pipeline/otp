@@ -62,7 +62,6 @@ class Md5sumFormatValidator extends SingleValueValidator<AbstractMetadataValidat
         } else {
             checkMd5Sum(context, value, cells)
         }
-
     }
 
     static void checkMd5Sum(AbstractMetadataValidationContext context, String value, Set<Cell> cells) {

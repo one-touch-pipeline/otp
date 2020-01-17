@@ -153,7 +153,6 @@ class SampleSwapController {
         ]
         return output
     }
-
 }
 
 class SampleSwapIndexCommand {

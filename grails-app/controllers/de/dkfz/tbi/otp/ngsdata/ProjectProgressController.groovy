@@ -51,8 +51,6 @@ class ProjectProgressController {
     ProjectProgressService projectProgressService
 
     def progress() {
-
-
         [
             startDate: new Date().minus(8).format('yyyy-MM-dd'),
             endDate: new Date().format('yyyy-MM-dd'),

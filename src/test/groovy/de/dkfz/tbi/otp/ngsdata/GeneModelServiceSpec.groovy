@@ -102,5 +102,4 @@ class GeneModelServiceSpec extends Specification implements DataTest, ServiceUni
         then:
         thrown(AssertionError)
     }
-
 }

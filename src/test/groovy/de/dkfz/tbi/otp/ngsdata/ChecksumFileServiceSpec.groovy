@@ -135,5 +135,4 @@ class ChecksumFileServiceSpec extends Specification implements DataTest {
         'to long'       | '123456789012345678901234567890123'
         'wrong symbols' | '12345678901234567890123456789xyz'
     }
-
 }

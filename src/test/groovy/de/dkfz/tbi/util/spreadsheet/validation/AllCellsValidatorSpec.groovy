@@ -31,7 +31,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.containSame
 class AllCellsValidatorSpec extends Specification {
 
     void test() {
-
         given:
         Spreadsheet spreadsheet = new Spreadsheet('X\tY\nY\tX')
         Set xCells = [spreadsheet.header.cells[0], spreadsheet.dataRows[0].cells[1]] as Set

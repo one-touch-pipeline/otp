@@ -95,7 +95,6 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
              * Cases set manually and should therefor not occur during workflow
              */
             SHOULD_NOT_OCCUR,
-
         }
 
         /**
@@ -239,5 +238,4 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
     }
 
     protected abstract File getPathForFurtherProcessingNoCheck()
-
 }

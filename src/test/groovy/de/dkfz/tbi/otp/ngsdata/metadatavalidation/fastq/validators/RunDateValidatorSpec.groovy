@@ -35,7 +35,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 class RunDateValidatorSpec extends Specification {
 
     void 'validate context with 3 errors'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.RUN_DATE}\n" +
@@ -61,7 +60,6 @@ class RunDateValidatorSpec extends Specification {
     }
 
     void 'validate context without RUN_DATE column'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 

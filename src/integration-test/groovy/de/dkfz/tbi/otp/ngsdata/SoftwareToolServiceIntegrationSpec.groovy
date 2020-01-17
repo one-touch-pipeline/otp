@@ -66,7 +66,6 @@ class SoftwareToolServiceIntegrationSpec extends Specification implements UserAn
         type                          | _
         SoftwareTool.Type.BASECALLING | _
         SoftwareTool.Type.ALIGNMENT   | _
-
     }
 
     private List<SoftwareToolIdentifier> createIdentifierForSoftwareTool(SoftwareTool softwareTool, List<String> identifierNames) {

@@ -39,7 +39,6 @@ abstract class AbstractParseAlignmentQcJob extends AbstractEndStateAwareJobImpl 
 
     @Override
     void execute() {
-
         final RoddyBamFile roddyBamFile = getProcessParameterObject()
 
         // the following line is needed to avoid the following error,

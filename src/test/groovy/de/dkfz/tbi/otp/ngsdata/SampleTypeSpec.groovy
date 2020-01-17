@@ -105,5 +105,4 @@ class SampleTypeSpec extends Specification implements DataTest, DomainFactoryCor
         then:
         !sampleType.errors.hasErrors()
     }
-
 }

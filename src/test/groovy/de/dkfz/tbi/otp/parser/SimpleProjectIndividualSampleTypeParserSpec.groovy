@@ -53,7 +53,6 @@ class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
         '(hipo_021)(some_pid)(TUMOR01)(DisplayIdentifier)' || 'some_pid' | 'TUMOR01'  | 'hipo_021' | 'DisplayIdentifier'
         '(hipo_021)(some_pid)(TUMOR01)(with space)'        || 'some_pid' | 'TUMOR01'  | 'hipo_021' | 'with space'
         '(hipo_021)(some_pid)(TUMOR01)(with_underscore)'   || 'some_pid' | 'TUMOR01'  | 'hipo_021' | 'with_underscore'
-
     }
 
     @Unroll

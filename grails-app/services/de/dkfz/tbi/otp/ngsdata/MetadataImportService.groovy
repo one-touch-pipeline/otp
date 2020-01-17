@@ -121,7 +121,6 @@ class MetadataImportService {
                 Long startTime = System.currentTimeMillis()
                 it.validate(context)
                 log.debug("finished ${it.getClass()} took ${System.currentTimeMillis() - startTime}ms validation started : ${hash}")
-
             }
         }
         return context
@@ -243,7 +242,6 @@ class MetadataImportService {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(configService.getDefaultRealm())
 
         return fileSystem.getPath("${configService.getSeqCenterInboxPath()}/${seqCenter.dirName}/${ilse[0..2]}/${ilse}")
-
     }
 
     protected static Path getMetadataFilePathForIlseNumber(int ilseNumber, FileSystem fileSystem) {

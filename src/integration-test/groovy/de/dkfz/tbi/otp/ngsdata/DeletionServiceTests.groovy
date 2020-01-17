@@ -381,7 +381,6 @@ class DeletionServiceTests implements UserAndRoles {
         TestCase.shouldFail(FileNotFoundException) {
             deletionService.deleteProcessingFilesOfProject(project.name, outputFolder)
         }
-
     }
 
     @Test

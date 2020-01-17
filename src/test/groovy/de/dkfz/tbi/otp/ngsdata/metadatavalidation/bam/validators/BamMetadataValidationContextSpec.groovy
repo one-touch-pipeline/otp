@@ -123,5 +123,4 @@ class BamMetadataValidationContextSpec extends Specification {
         cleanup:
         GroovySystem.metaClassRegistry.removeMetaClass(Files)
     }
-
 }

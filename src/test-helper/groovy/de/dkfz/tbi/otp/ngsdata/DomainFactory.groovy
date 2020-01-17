@@ -2365,7 +2365,6 @@ class DomainFactory {
     }
 
     static void changeSeqType(RoddyBamFile bamFile, SeqType seqType, LibraryLayout libraryName = null) {
-
         bamFile.mergingWorkPackage.seqType = seqType
         if (seqType.isWgbs()) {
             bamFile.mergingWorkPackage.libraryPreparationKit = null

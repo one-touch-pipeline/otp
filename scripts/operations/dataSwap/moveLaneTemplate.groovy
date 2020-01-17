@@ -60,7 +60,6 @@ boolean failOnMissingFiles = true
 
 try {
     Individual.withTransaction {
-
         dataSwapService.swapLane([
                 'oldProjectName'   : 'OldProject',
                 'newProjectName'   : 'NewProject',

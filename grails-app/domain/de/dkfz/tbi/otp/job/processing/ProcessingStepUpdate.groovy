@@ -139,5 +139,4 @@ class ProcessingStepUpdate implements Serializable, Entity {
     JobDefinition getJobDefinition() {
         return processingStep.jobDefinition
     }
-
 }

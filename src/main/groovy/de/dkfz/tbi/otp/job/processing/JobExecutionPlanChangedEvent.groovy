@@ -38,5 +38,4 @@ class JobExecutionPlanChangedEvent extends ApplicationEvent {
         super(source)
         this.planId = planId
     }
-
 }

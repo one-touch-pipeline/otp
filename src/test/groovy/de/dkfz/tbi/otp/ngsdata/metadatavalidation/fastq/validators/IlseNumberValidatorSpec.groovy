@@ -194,5 +194,4 @@ class IlseNumberValidatorSpec extends Specification implements DataTest {
         then:
         context.problems.empty
     }
-
 }

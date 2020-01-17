@@ -158,15 +158,12 @@ class FastqcJobIntegrationTests {
         fastqcJob.fastqcUploadService.metaClass.uploadFastQCFileContentsToDataBase = { FastqcProcessedFile fastqc -> }
 
         try {
-
             fastqcJob.maybeSubmit()
             assert seqTrack.fastqcState == SeqTrack.DataProcessingState.FINISHED
-
         } finally {
             fastqcFile.delete()
             TestCase.cleanTestDirectory()
         }
-
     }
 
 

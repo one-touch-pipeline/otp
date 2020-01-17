@@ -35,7 +35,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 class RunNameValidatorSpec extends Specification {
 
     void 'validate valid run name, succeeds'() {
-
         String ARBITRARY_RUN_NAME = "120111_SN509_0137_BD0CWYACXX"
 
         given:
@@ -53,7 +52,6 @@ class RunNameValidatorSpec extends Specification {
 
 
     void 'validate invalid run name, adds problems'() {
-
         String ARBITRARY_RUN_NAME = "120111_SN509_/something/0137_BD0CWYACXX"
 
         given:
@@ -71,5 +69,4 @@ class RunNameValidatorSpec extends Specification {
         containSame(problem.affectedCells*.cellAddress, ['A2'])
         problem.message.contains("The run name '${ARBITRARY_RUN_NAME}' is not a valid directory name.")
     }
-
 }

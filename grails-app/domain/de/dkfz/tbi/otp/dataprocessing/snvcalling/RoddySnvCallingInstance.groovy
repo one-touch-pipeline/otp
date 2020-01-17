@@ -49,5 +49,4 @@ class RoddySnvCallingInstance extends AbstractSnvCallingInstance implements Rodd
         //The reference genome of the control is used because the tumor can be Xenograft and for these reference genomes SNV fails.
         return sampleType2BamFile.referenceGenome
     }
-
 }

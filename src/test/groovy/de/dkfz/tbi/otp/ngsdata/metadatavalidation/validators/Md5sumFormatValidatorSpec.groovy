@@ -38,7 +38,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 class Md5sumFormatValidatorSpec extends Specification {
 
     void 'validate concerning metadata, adds expected error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.MD5}\n" +
@@ -57,7 +56,6 @@ class Md5sumFormatValidatorSpec extends Specification {
     }
 
     void 'validate concerning bam metadata, allows empty cells'() {
-
         given:
         BamMetadataValidationContext context = BamMetadataValidationContextFactory.createContext(
                 "${BamMetadataColumn.MD5}\n" +

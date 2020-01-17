@@ -201,5 +201,4 @@ class JobErrorDefinitionServiceIntegrationSpec extends Specification {
         ( { DomainFactory.createJobDefinition(name: "NAME") } )     | _
         ( { DomainFactory.createJobDefinition(name: "NEW_NAME") } ) | _
     }
-
 }

@@ -169,7 +169,6 @@ patients.split('\n')*.trim().findAll {
                     println "WARNING: BAM File ${sourceBam} for ${bamFile.individual.pid} ${bamFile.sampleType.getDirName()} ${bamFile.seqType.dirName} doesn't exist"
                 }
             }
-
         }
         addToOutput("")
     }

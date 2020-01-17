@@ -65,5 +65,4 @@ class DataInstallationStartJobIntegrationSpec extends Specification {
         cleanup:
         TestCase.removeMetaClass(SessionUtils)
     }
-
 }

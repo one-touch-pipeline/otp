@@ -198,5 +198,4 @@ trait CellRangerFactory implements IsAlignment {
                 programVersion: "${nextId}",
         ] + proper, [:])
     }
-
 }

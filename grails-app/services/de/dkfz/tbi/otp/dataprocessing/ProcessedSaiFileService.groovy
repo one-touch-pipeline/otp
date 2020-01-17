@@ -62,5 +62,4 @@ class ProcessedSaiFileService {
         filename = filename.substring(0, filename.lastIndexOf("."))
         return "${sampleType}_${runName}_${filename}.sai"
     }
-
 }

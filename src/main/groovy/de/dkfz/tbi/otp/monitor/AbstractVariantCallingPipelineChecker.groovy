@@ -81,7 +81,6 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
 
         List needsProcessing = processingStateMap[SamplePair.ProcessingStatus.NEEDS_PROCESSING]
         if (needsProcessing) {
-
             List<BamFilePairAnalysis> alreadyRunning = analysisAlreadyRunningForSamplePairAndPipeline(needsProcessing)
             output.showRunningWithHeader(HEADER_OLD_INSTANCE_RUNNING, getWorkflowName(), alreadyRunning)
 
@@ -341,7 +340,6 @@ abstract class AbstractVariantCallingPipelineChecker extends PipelinesChecker<Sa
                 if (coverageBamFile < coverage) {
                     reasonsForBlocking << "${key} ${coverageBamFile} of ${coverage}"
                 }
-
             }
             return "${samplePair} (${reasonsForBlocking.join(', ')})"
         }

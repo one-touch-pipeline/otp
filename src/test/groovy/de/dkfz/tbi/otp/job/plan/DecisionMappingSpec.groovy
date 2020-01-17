@@ -65,7 +65,6 @@ class DecisionMappingSpec extends Specification implements DataTest {
         !result
         "nullable" == mapping.errors["definition"].code
         mapping.errors["decision"] == null
-
     }
 
     void "test validate, when definition is recursive, should fail"() {

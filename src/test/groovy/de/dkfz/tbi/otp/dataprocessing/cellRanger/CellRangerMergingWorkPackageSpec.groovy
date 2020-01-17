@@ -135,5 +135,4 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
         ValidationException e = thrown()
         e.message =~ "unique.combination"
     }
-
 }

@@ -37,7 +37,6 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 class SeqTypeValidatorSpec extends Specification {
 
     void 'validate, when column is missing, adds error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "SomeColumn\n" +
@@ -96,7 +95,6 @@ class SeqTypeValidatorSpec extends Specification {
     }
 
     void 'validate, when column TAGMENTATION_BASED_LIBRARY exists, adds expected error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.SEQUENCING_TYPE}\t${MetaDataColumn.TAGMENTATION_BASED_LIBRARY}\n" +

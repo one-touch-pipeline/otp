@@ -81,5 +81,4 @@ class ParsePanCanQcJobIntegrationSpec extends Specification {
                 'NA',
         ]
     }
-
 }

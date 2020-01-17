@@ -137,7 +137,6 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest {
                 sampleIdentifierService: [
                         getSampleIdentifierParser: { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
                             new SampleIdentifierParser() {
-
                                 @Override
                                 ParsedSampleIdentifier tryParse(String sampleIdentifier) {
                                     Matcher match = sampleIdentifier =~ /(.*)ß(.*)ß(.*)/

@@ -133,9 +133,7 @@ void assertThatFileExists(Path path) {
     }
 }
 
-void assertThatFileDoesNotExist(Path path) {
-
-}
+void assertThatFileDoesNotExist(Path path) { }
 
 /**
  * Could be more transactional by linking commands via && and by first copying and only then (after successful copying
@@ -146,7 +144,6 @@ void printShellCommands(Path moveSourceParentPath,
                         String targetSampleType,
                         Map<String, Path> linkTargetPathsBySampleType,
                         ArrayList<String> subDirNames) {
-
     assertThatFileExists(moveTargetParentPath)
 
     subDirNames.each { subDir ->

@@ -79,7 +79,6 @@ class LibraryValidatorSpec extends Specification {
     }
 
     void 'validate, when CUSTOMER_LIBRARY entry is not a valid path component, adds error'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${CUSTOMER_LIBRARY}\n" +
@@ -97,7 +96,6 @@ class LibraryValidatorSpec extends Specification {
     }
 
     void 'validate, when CUSTOMER_LIBRARY entry does not match regular expression, adds warning'() {
-
         given:
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${CUSTOMER_LIBRARY}\n" +

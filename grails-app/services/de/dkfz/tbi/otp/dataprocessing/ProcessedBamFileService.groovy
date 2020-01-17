@@ -85,5 +85,4 @@ class ProcessedBamFileService {
         }
         return "${sampleType}_${runName}_s_${lane}_${layout}${suffix}"
     }
-
 }

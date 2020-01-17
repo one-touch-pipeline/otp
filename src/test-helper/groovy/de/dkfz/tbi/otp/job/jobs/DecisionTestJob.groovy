@@ -38,5 +38,4 @@ class DecisionTestJob extends AbstractDecisionJobImpl {
     void execute() throws Exception {
         setDecision(getAvailableDecisions().first())
     }
-
 }

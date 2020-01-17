@@ -237,7 +237,6 @@ class QcThresholdServiceSpec extends Specification implements DataTest {
                         availableThresholdProperties: availableThresholdProperties
                 ),
         ]
-
     }
 
     void "test getClassesWithPropertiesForProjectAndSeqTypes"() {

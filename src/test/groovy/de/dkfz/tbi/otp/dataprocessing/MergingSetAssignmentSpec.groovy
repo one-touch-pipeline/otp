@@ -114,6 +114,4 @@ class MergingSetAssignmentSpec extends Specification implements DataTest {
         then:
         TestCase.assertValidateError(mtm, 'bamFile', 'validator.invalid', processedBamFile)
     }
-
-
 }

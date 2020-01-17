@@ -101,7 +101,6 @@ class ReferenceGenomeServiceUnitTests {
                         referenceGenome: referenceGenome
                         )
         referenceGenomeEntryTwo.save(flush: true)
-
     }
 
     @After

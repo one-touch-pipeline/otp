@@ -117,5 +117,4 @@ class OverallQualityAssessmentMergedServiceIntegrationSpec extends Specification
         }
         return referenceGenome
     }
-
 }

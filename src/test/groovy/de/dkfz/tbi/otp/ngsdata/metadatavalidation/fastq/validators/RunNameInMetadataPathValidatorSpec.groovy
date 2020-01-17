@@ -100,6 +100,4 @@ class RunNameInMetadataPathValidatorSpec extends Specification {
         'run1' | 'run2'
         'run1' | 'run1'
     }
-
-
 }

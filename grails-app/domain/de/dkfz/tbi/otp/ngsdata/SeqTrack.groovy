@@ -376,7 +376,6 @@ class SeqTrack implements ProcessParameterObject, Entity {
             return matcher.group(1)
         } else {
             return commonFastqFilePrefix
-
         }
     }
 

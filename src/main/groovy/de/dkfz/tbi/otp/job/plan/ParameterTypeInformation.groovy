@@ -46,5 +46,4 @@ class ParameterTypeInformation implements Serializable {
         this.description = type.description
         this.className = type.className
     }
-
 }

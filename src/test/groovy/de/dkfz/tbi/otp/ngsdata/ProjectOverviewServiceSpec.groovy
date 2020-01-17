@@ -269,5 +269,4 @@ class ProjectOverviewServiceSpec extends Specification implements DataTest {
         then:
         CollectionUtils.containSame(list, [rgpst1, rgpst2, rgpst3])
     }
-
 }

@@ -48,6 +48,5 @@ class MetadataValidationContextFactory {
                 properties.directoryStructureDescription ?: "",
                 properties.content ?: ''.bytes
         )
-
     }
 }

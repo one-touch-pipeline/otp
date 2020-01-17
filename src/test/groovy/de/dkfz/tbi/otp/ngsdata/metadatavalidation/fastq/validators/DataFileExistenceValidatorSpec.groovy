@@ -119,5 +119,4 @@ class DataFileExistenceValidatorSpec extends Specification implements DataTest {
         then:
         assertContainSame(context.problems, expectedProblems)
     }
-
 }
