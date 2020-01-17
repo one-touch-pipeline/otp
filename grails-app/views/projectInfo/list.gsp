@@ -65,7 +65,7 @@
                     </g:if>
                     <g:each var="doc" in="${projectInfos["NonDta"]}">
                         <li id="doc${doc.id}">
-                            <g:link action="download" params='["doc.id": doc.id]'>${doc.path}</g:link>
+                            <g:link action="download" params='["projectInfo.id": doc.id]'>${doc.path}</g:link>
                             <br>
                             <g:message code="projectInfo.dta.transfer.created"/>
                             <g:formatDate date="${doc.dateCreated}" format="yyyy-MM-dd"/>
@@ -139,7 +139,7 @@
                     </g:if>
                     <g:each var="doc" in="${projectInfos["Dta"]}">
                     <li id="doc${doc.id}" style="margin-top: 2em">
-                        <g:link action="download" params='["doc.id": doc.id]'>${doc.path}</g:link>
+                        <g:link action="download" params='["projectInfo.id": doc.id]'>${doc.path}</g:link>
                         <br>
                         ${doc.dtaId ? "${doc.dtaId}, " : ""}with <strong>${doc.peerInstitution}</strong> (${doc.legalBasis?.name()?.toLowerCase()}),
                         <g:message code="projectInfo.dta.transfer.created"/>

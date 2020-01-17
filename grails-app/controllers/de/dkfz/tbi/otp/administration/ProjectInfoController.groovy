@@ -168,7 +168,7 @@ class ProjectInfoController implements CheckAndCall {
         if (outputFile) {
             render(file: outputFile, contentType: "application/octet-stream", fileName: cmd.projectInfo.fileName)
         } else {
-            flash.message = new FlashMessage("No file '${cmd.projectInfo.fileName}' found.")
+            flash.message = new FlashMessage("File Not Found", "No file '${cmd.projectInfo.fileName}' found.")
             redirect(action: "list", fragment: "doc${cmd.projectInfo.id}")
         }
     }
