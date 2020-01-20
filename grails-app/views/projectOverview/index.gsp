@@ -116,7 +116,7 @@
                 <canvas id="sampleTypeCountByPatient" width="550">[No canvas support]</canvas>
          </div>
         </div>
-    <asset:script>
+    <asset:script type="text/javascript">
         $(function() {
             $.otp.projectOverviewTable.register();
             $.otp.graph.project.init();
