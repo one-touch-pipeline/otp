@@ -31,10 +31,10 @@
 <body>
 <div class="body">
     <g:render template="/templates/messages"/>
-
 <g:if test="${disableAccept}">
 ${g.message(code: "privacyPolicy.note")}
-<hr>
+    <g:link controller="logout" action="index"><g:message code="otp.menu.logout"/></g:link>
+    <hr>
 </g:if>
 
 <h1>${g.message(code: "privacyPolicy.title")}</h1>
@@ -213,15 +213,16 @@ Hat der Verantwortliche die Sie betreffenden personenbezogenen Daten öffentlich
 <g:if test="${disableAccept}">
     <hr>
     <br>
-    <g:form action="accept">
+    <g:form action="accept" class="inline-element">
         <input type="hidden" name="redirect" value="${request.forwardURI - request.contextPath}"/>
         <input type="checkbox" name="accept" id="accept"/> <label for="accept">${g.message(code: "privacyPolicy.acceptance")}</label><br><br>
-        <button>${g.message(code: "privacyPolicy.continue")}</button>
+            <button>${g.message(code: "privacyPolicy.continue")}</button>
+    </g:form>
+    <g:form controller="logout" action="index" method="GET" class="inline-element">
+            <g:submitButton name="Logout"/>
     </g:form>
     <br>
 </g:if>
-
-
 </div>
 </body>
 </html>

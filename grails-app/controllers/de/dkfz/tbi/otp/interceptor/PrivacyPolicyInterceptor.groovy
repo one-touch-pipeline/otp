@@ -32,7 +32,9 @@ class PrivacyPolicyInterceptor {
     static final String FILTER_APPLIED = "__otp_privacy_policy_filter_applied"
 
     PrivacyPolicyInterceptor() {
-        matchAll().except(controller: 'privacyPolicy', action: 'accept')
+        matchAll()
+                .except(controller: "privacyPolicy", action: "accept")
+                .except(controller: "logout", action: "index")
     }
 
     @Override
