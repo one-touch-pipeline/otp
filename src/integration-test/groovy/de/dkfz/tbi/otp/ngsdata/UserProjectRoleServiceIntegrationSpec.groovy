@@ -27,11 +27,15 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import grails.validation.ValidationException
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import org.springframework.security.authentication.AuthenticationTrustResolver
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.administration.*
+import de.dkfz.tbi.otp.config.OtpProperty
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
@@ -58,6 +62,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     @SuppressWarnings('JUnitPublicProperty')
     ProcessingOptionService processingOptionService
 
+    @Rule
+    public TemporaryFolder temporaryFolder
+
     void setupData() {
         SpringSecurityService springSecurityService = new SpringSecurityService()
         springSecurityService.authenticationTrustResolver = Mock(AuthenticationTrustResolver) {
@@ -68,12 +75,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         processingOptionService = new ProcessingOptionService()
         userProjectRoleService = new UserProjectRoleService()
-        userProjectRoleService.messageSourceService = getMessageSourceServiceWithMockedMessageSource()
+        userProjectRoleService.messageSourceService = messageSourceServiceWithMockedMessageSource
         userProjectRoleService.springSecurityService = springSecurityService
         userProjectRoleService.auditLogService = new AuditLogService()
         userProjectRoleService.auditLogService.springSecurityService = springSecurityService
         userProjectRoleService.mailHelperService = Mock(MailHelperService)
         userProjectRoleService.processingOptionService = new ProcessingOptionService()
+        userProjectRoleService.configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder().path])
 
         DomainFactory.createProcessingOptionLazy(
                 name: ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION,
@@ -146,13 +154,25 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
 
-        Project project = DomainFactory.createProject()
+        Project project = createProject()
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(project: project)
         UserProjectRole requesterUserProjectRole = DomainFactory.createUserProjectRole(project: project)
         String formattedAction = operatorAction.toString().toLowerCase()
 
+        String scriptCommand = "Script path group${formattedAction}user unixGroup userName"
+
+        DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.AD_GROUP_ADD_USER_SNIPPET,
+                value: scriptCommand
+        )
+        DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET,
+                value: scriptCommand,
+        )
+
         String affectedUserUserDetail = "${userProjectRole.user.realName}\n${userProjectRole.user.username}\n${userProjectRole.user.email}\n${userProjectRole.projectRole.name}"
-        String requesterUserDetail = "${requesterUserProjectRole.user.realName}\n${requesterUserProjectRole.user.username}\n${requesterUserProjectRole.user.email}\n${requesterUserProjectRole.projectRole.name}"
+        String requesterUserDetail = "${requesterUserProjectRole.user.realName}\n" +
+                "${requesterUserProjectRole.user.username}\n${requesterUserProjectRole.user.email}\n${requesterUserProjectRole.projectRole.name}"
 
         when:
         SpringSecurityUtils.doWithAuth(requesterUserProjectRole.user.username) {
@@ -162,7 +182,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
                 "addToUnixGroup\n${requesterUserProjectRole.user.username}\n${formattedAction}\n${userProjectRole.user.username}\n${conjunction}\n${userProjectRole.project.unixGroup}",
-                "addToUnixGroup\n${userProjectRole.project.unixGroup}\n${userProjectRole.project.name}\n${operatorAction}\n${affectedUserUserDetail}\n${requesterUserDetail}",
+                "addToUnixGroup\n${userProjectRole.project.unixGroup}\n${userProjectRole.project.name}\n${operatorAction}\n${scriptCommand}\n${affectedUserUserDetail}\n${requesterUserDetail}",
                 EMAIL_LINUX_GROUP_ADMINISTRATION,
         )
 
@@ -206,6 +226,17 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole()
         String formattedAction = operatorAction.toString().toLowerCase()
 
+        String scriptCommand = "Script path group${formattedAction}user unixGroup userName"
+
+        DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.AD_GROUP_ADD_USER_SNIPPET,
+                value: scriptCommand
+        )
+        DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET,
+                value: scriptCommand,
+        )
+
         String affectedUserUserDetail = "${userProjectRole.user.realName}\n${userProjectRole.user.username}\n${userProjectRole.user.email}\n${userProjectRole.projectRole.name}"
         String requesterUserDetail = "${switchedUser.realName}\n${switchedUser.username} (switched from ${executingUser.username})\n${switchedUser.email}\nNon-Project-User"
 
@@ -219,7 +250,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
                 "addToUnixGroup\n${switchedUser.username}\n${formattedAction}\n${userProjectRole.user.username}\n${conjunction}\n${userProjectRole.project.unixGroup}",
-                "addToUnixGroup\n${userProjectRole.project.unixGroup}\n${userProjectRole.project.name}\n${operatorAction}\n${affectedUserUserDetail}\n${requesterUserDetail}",
+                "addToUnixGroup\n${userProjectRole.project.unixGroup}\n${userProjectRole.project.name}\n${operatorAction}\n${scriptCommand}\n${affectedUserUserDetail}\n${requesterUserDetail}",
                 EMAIL_LINUX_GROUP_ADMINISTRATION,
         )
 
@@ -1077,10 +1108,46 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole.findAllByProject(projectB).size() == 1
     }
 
+    void "check if commandTemplate returns the correct String depending of params"() {
+        given:
+        setupData()
+        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
+                user: DomainFactory.createUser(username: "User")
+        )
+
+        String value = "Script path "
+
+        DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET,
+                value: value + "groupadduser unixGroup userName",
+        )
+        DomainFactory.createProcessingOptionLazy(
+                name: ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET,
+                value: value + "groupremoveuser unixGroup userName",
+        )
+
+        when:
+        String scriptCommand = userProjectRoleService.commandTemplate(userProjectRole, operatorAction as UserProjectRoleService.OperatorAction)
+
+        then:
+        switch (operatorAction) {
+            case UserProjectRoleService.OperatorAction.ADD:
+                scriptCommand == value +  "groupadduser ${userProjectRole.project.unixGroup} ${userProjectRole.user.username}"
+                break
+            case UserProjectRoleService.OperatorAction.REMOVE:
+                scriptCommand == value + "groupremoveuser ${userProjectRole.project.unixGroup} ${userProjectRole.user.username}"
+                break
+            default:
+                assert false : "The action ${operatorAction} isn't known."
+        }
+
+        where:
+        operatorAction << UserProjectRoleService.OperatorAction.values()
+    }
 
     MessageSourceService getMessageSourceServiceWithMockedMessageSource() {
         return new MessageSourceService(
-                messageSource: getMessageSource()
+                messageSource: messageSource
         )
     }
 
@@ -1091,7 +1158,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                     '''addToUnixGroup\n${requester}\n${action}\n${username}\n${conjunction}\n${unixGroup}'''
 
             _ * getMessageInternal("projectUser.notification.addToUnixGroup.body", [], _) >>
-                    '''addToUnixGroup\n${projectUnixGroup}\n${projectList}\n${requestedAction}\n${affectedUserUserDetail}\n${requesterUserDetail}'''
+                    '''addToUnixGroup\n${projectUnixGroup}\n${projectList}\n${requestedAction}\n${scriptCommand}\n${affectedUserUserDetail}\n${requesterUserDetail}'''
 
             _ * getMessageInternal("projectUser.notification.addToUnixGroup.userDetail", [], _) >>
                     '''${realName}\n${username}\n${email}\n${role}'''

@@ -45,7 +45,7 @@ class AbstractAlignmentDeciderIntegrationTests {
     @Autowired
     ApplicationContext applicationContext
 
-    AbstractAlignmentDecider decider
+    private AbstractAlignmentDecider decider
 
     final shouldFail = new GroovyTestCase().&shouldFail
 
@@ -158,7 +158,6 @@ class AbstractAlignmentDeciderIntegrationTests {
             decider.decideAndPrepareForAlignment(seqTrack, true)
         })
     }
-
 
     @Test
     void testDecideAndPrepareForAlignment_whenDifferentSeqPlatformGroup_shouldReturnEmptyListAndSendMail() {
@@ -326,7 +325,7 @@ class AbstractAlignmentDeciderIntegrationTests {
 
         exactlyOneElement(ReferenceGenomeProjectSeqType.list()).delete(flush: true)
 
-        shouldFail(RuntimeException.class, {
+        shouldFail(RuntimeException, {
             decider.ensureConfigurationIsComplete(seqTrack)
         })
     }
@@ -345,7 +344,7 @@ class AbstractAlignmentDeciderIntegrationTests {
         DataFile dataFile = testData.createDataFile(seqTrack: seqTrack)
         dataFile.save(flush: true)
 
-        shouldFail(RuntimeException.class, {
+        shouldFail(RuntimeException, {
             decider.ensureConfigurationIsComplete(seqTrack)
         })
     }
@@ -375,7 +374,6 @@ class AbstractAlignmentDeciderIntegrationTests {
 
         assert !decider.canPipelineAlign(seqTrack)
     }
-
 
     private SeqTrack buildSeqTrack() {
         TestData testData = new TestData()

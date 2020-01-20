@@ -416,6 +416,18 @@ class ProcessingOption implements Entity {
                 "Comma separated list of path prefixes which are ignored in the import source notification",
                 Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
         ),
+        @SuppressWarnings('GStringExpressionWithinString')
+        AD_GROUP_ADD_USER_SNIPPET(
+                "Shell program to do AD group changes with, outside of OTP, e.g. adtool." +
+                        " OTP will interpret the placeholders \${unixGroup} and \${userName} when using this template.",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+        ),
+        @SuppressWarnings('GStringExpressionWithinString')
+        AD_GROUP_REMOVE_USER_SNIPPET(
+                "Shell program to do AD group changes with, outside of OTP, e.g. adtool." +
+                        " OTP will interpret the placeholders \${unixGroup} and \${userName} when using this template",
+                Necessity.OPTIONAL, "", TypeValidators.SINGLE_LINE_TEXT
+        ),
 
         // cluster job scheduler
         CLUSTER_SUBMISSIONS_OPTION(

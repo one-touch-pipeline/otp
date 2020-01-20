@@ -24,6 +24,8 @@ package de.dkfz.tbi.otp.ngsdata
 import grails.gorm.transactions.Transactional
 import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
+import groovy.text.SimpleTemplateEngine
+import groovy.transform.TupleConstructor
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.odcf.audit.impl.DicomAuditLogger
@@ -32,6 +34,7 @@ import de.dkfz.odcf.audit.impl.OtpDicomAuditFactory.UniqueIdentifierType
 import de.dkfz.odcf.audit.impl.enums.DicomCode.OtpPermissionCode
 import de.dkfz.odcf.audit.xml.layer.EventIdentification.EventOutcomeIndicator
 import de.dkfz.tbi.otp.administration.*
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.*
@@ -49,6 +52,7 @@ class UserProjectRoleService {
     MessageSourceService messageSourceService
     ProcessingOptionService processingOptionService
     UserService userService
+    ConfigService configService
 
     private UserProjectRole createUserProjectRole(User user, Project project, ProjectRole projectRole, Map flags = [:]) {
         assert user: "the user must not be null"
@@ -57,7 +61,7 @@ class UserProjectRoleService {
 
         String requester = springSecurityService?.principal?.hasProperty("username") ?
                 springSecurityService.principal.username : springSecurityService?.principal
-        UserProjectRole oldUPR = UserProjectRole.findByUserAndProject(user, project)
+        UserProjectRole oldUPR = CollectionUtils.atMostOneElement(UserProjectRole.findAllByUserAndProject(user, project))
         List<OtpPermissionCode> grantedPermissions = getPermissionDiff(true, flags, oldUPR)
         List<OtpPermissionCode> revokedPermissions = getPermissionDiff(false, flags, oldUPR)
 
@@ -119,7 +123,7 @@ class UserProjectRoleService {
             throw new LdapUserCreationException("Could not get a mail for '${username}' via LDAP")
         }
 
-        User user = User.findByUsernameOrEmail(ldapUserDetails.username, ldapUserDetails.mail)
+        User user = CollectionUtils.atMostOneElement(User.findAllByUsernameOrEmail(ldapUserDetails.username, ldapUserDetails.mail))
 
         if (user) {
             if (!user.username) {
@@ -138,7 +142,7 @@ class UserProjectRoleService {
     void addExternalUserToProject(Project project, String realName, String email, ProjectRole projectRole) throws AssertionError {
         assert project: "project must not be null"
 
-        User user = User.findByEmail(email)
+        User user = CollectionUtils.atMostOneElement(User.findAllByEmail(email))
         if (user) {
             assert !user.username: "The given email address '${user.email}' is already registered for LDAP user '${user.username}'"
             assert user.realName == realName: "The given email address '${user.email}' is already registered for external user '${user.realName}'"
@@ -162,12 +166,12 @@ class UserProjectRoleService {
     }
 
     private void notifyUsersAboutFileAccessChange(UserProjectRole userProjectRole) {
-        User requester = User.findByUsername(springSecurityService.authentication.principal.username as String)
+        User requester = CollectionUtils.exactlyOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username as String))
         Project project = userProjectRole.project
         User user = userProjectRole.user
 
         String subject = messageSourceService.createMessage("projectUser.notification.fileAccessChange.subject", [
-            projectName: project.name,
+                projectName: project.name,
         ])
 
         String clusterName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.CLUSTER_NAME)
@@ -181,6 +185,10 @@ class UserProjectRoleService {
                 clusterName               : clusterName,
                 clusterAdministrationEmail: clusterAdministrationEmail,
                 supportTeamSalutation     : supportTeamName,
+                linkProjectDirectory      : LsdfFilesService.getPath(
+                                            configService.rootPath.path,
+                                            project.dirName,
+                                            ),
         ])
 
         List<String> ccs = getUniqueProjectAuthoritiesAndUserManagers(project)*.email.sort()
@@ -189,12 +197,15 @@ class UserProjectRoleService {
     }
 
     private void notifyAdministration(UserProjectRole userProjectRole, OperatorAction action) {
-        User requester = User.findByUsername(springSecurityService.authentication.principal.username as String)
-        UserProjectRole requesterUserProjectRole = UserProjectRole.findByUserAndProject(requester, userProjectRole.project)
+        User requester = CollectionUtils.exactlyOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username as String))
+        UserProjectRole requesterUserProjectRole = CollectionUtils.atMostOneElement(
+                UserProjectRole.findAllByUserAndProject(requester, userProjectRole.project)
+        )
         String switchedUserAnnotation = SpringSecurityUtils.switched ? " (switched from ${SpringSecurityUtils.switchedUserOriginalUsername})" : ""
 
         String formattedAction = action.toString().toLowerCase()
         String conjunction = action == OperatorAction.ADD ? 'to' : 'from'
+        String scriptCommand = commandTemplate(userProjectRole, action)
         String subject = messageSourceService.createMessage("projectUser.notification.addToUnixGroup.subject", [
                 requester  : requester.username,
                 action     : formattedAction,
@@ -223,6 +234,7 @@ class UserProjectRoleService {
                 requestedAction       : action,
                 affectedUserUserDetail: affectedUserUserDetail,
                 requesterUserDetail   : requesterUserDetail,
+                scriptCommand         : scriptCommand,
         ])
 
         String email = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_LINUX_GROUP_ADMINISTRATION)
@@ -232,12 +244,16 @@ class UserProjectRoleService {
                         "at the request of ${requester.username + switchedUserAnnotation}")
     }
 
+    @TupleConstructor
     private enum OperatorAction {
-        ADD, REMOVE
+        ADD(ProcessingOption.OptionName.AD_GROUP_ADD_USER_SNIPPET),
+        REMOVE(ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET),
+
+        final ProcessingOption.OptionName commandTemplateOptionName
     }
 
     private void notifyProjectAuthoritiesAndUser(UserProjectRole userProjectRole) {
-        User executingUser = User.findByUsername(springSecurityService.authentication.principal.username as String)
+        User executingUser = CollectionUtils.exactlyOneElement(User.findAllByUsername(springSecurityService.authentication.principal.username as String))
 
         String projectRoleName = userProjectRole.projectRole.name
         String projectName = userProjectRole.project.name
@@ -245,26 +261,26 @@ class UserProjectRoleService {
         List<Role> administrativeRoles = Role.findAllByAuthorityInList(Role.ADMINISTRATIVE_ROLES)
 
         boolean userIsSubmitter = projectRoleName == ProjectRole.Basic.SUBMITTER.name()
-        boolean executingUserIsAdministrativeUser = UserRole.findByUserAndRoleInList(executingUser, administrativeRoles)
+        boolean executingUserIsAdministrativeUser = CollectionUtils.atMostOneElement(UserRole.findAllByUserAndRoleInList(executingUser, administrativeRoles))
 
         String subject = messageSourceService.createMessage("projectUser.notification.newProjectMember.subject", [projectName: projectName])
 
         String body
         if (userIsSubmitter && executingUserIsAdministrativeUser) {
             String supportTeamName = processingOptionService.findOptionAsString(ProcessingOption.OptionName.EMAIL_SENDER_SALUTATION)
-            body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter" , [
-                userIdentifier       : userProjectRole.user.realName ?: userProjectRole.user.username,
-                projectRole          : projectRoleName,
-                projectName          : projectName,
-                supportTeamName      : supportTeamName,
-                supportTeamSalutation: supportTeamName,
+            body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter", [
+                    userIdentifier       : userProjectRole.user.realName ?: userProjectRole.user.username,
+                    projectRole          : projectRoleName,
+                    projectName          : projectName,
+                    supportTeamName      : supportTeamName,
+                    supportTeamSalutation: supportTeamName,
             ])
         } else {
-            body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.userManagerAddedMember" , [
-                userIdentifier: userProjectRole.user.realName ?: userProjectRole.user.username,
-                projectRole   : projectRoleName,
-                projectName   : projectName,
-                executingUser : executingUser.realName ?: executingUser.username,
+            body = messageSourceService.createMessage("projectUser.notification.newProjectMember.body.userManagerAddedMember", [
+                    userIdentifier: userProjectRole.user.realName ?: userProjectRole.user.username,
+                    projectRole   : projectRoleName,
+                    projectName   : projectName,
+                    executingUser : executingUser.realName ?: executingUser.username,
             ])
         }
 
@@ -396,15 +412,15 @@ class UserProjectRoleService {
     List<UserProjectRole> copyUserProjectRolesOfProjectToProject(Project projectFrom, Project projectTo) {
         return UserProjectRole.findAllByProject(projectFrom).collect {
             return new UserProjectRole(
-                    project               : projectTo,
-                    user                  : it.user,
-                    projectRole           : it.projectRole,
-                    enabled               : it.enabled,
-                    accessToOtp           : it.accessToOtp,
-                    accessToFiles         : it.accessToFiles,
-                    manageUsers           : it.manageUsers,
+                    project: projectTo,
+                    user: it.user,
+                    projectRole: it.projectRole,
+                    enabled: it.enabled,
+                    accessToOtp: it.accessToOtp,
+                    accessToFiles: it.accessToFiles,
+                    manageUsers: it.manageUsers,
                     manageUsersAndDelegate: it.manageUsersAndDelegate,
-                    receivesNotifications : it.receivesNotifications,
+                    receivesNotifications: it.receivesNotifications,
             ).save(flush: true)
         }
     }
@@ -484,11 +500,17 @@ class UserProjectRoleService {
 
     List<OtpPermissionCode> getPermissionDiff(boolean added, Map flags, UserProjectRole oldUPR) {
         return [
-            (added == flags.accessToOtp)             && (added == !oldUPR?.accessToOtp)            ? [OtpPermissionCode.OTP_ACCESS] : [],
-            (added == flags.accessToFiles)           && (added == !oldUPR?.accessToFiles)          ? [OtpPermissionCode.FILE_ACCESS] : [],
-            (added == flags.manageUsers)             && (added == !oldUPR?.manageUsers)            ? [OtpPermissionCode.MANAGE_USERS] : [],
-            (added == flags.manageUsersAndDelegate)  && (added == !oldUPR?.manageUsersAndDelegate) ? [OtpPermissionCode.DELEGATE_MANAGE_USERS] : [],
+                (added == flags.accessToOtp)            && (added == !oldUPR?.accessToOtp) ? [OtpPermissionCode.OTP_ACCESS] : [],
+                (added == flags.accessToFiles)          && (added == !oldUPR?.accessToFiles) ? [OtpPermissionCode.FILE_ACCESS] : [],
+                (added == flags.manageUsers)            && (added == !oldUPR?.manageUsers) ? [OtpPermissionCode.MANAGE_USERS] : [],
+                (added == flags.manageUsersAndDelegate) && (added == !oldUPR?.manageUsersAndDelegate) ? [OtpPermissionCode.DELEGATE_MANAGE_USERS] : [],
         ].flatten()
+    }
+
+    private String commandTemplate(UserProjectRole userProjectRole, OperatorAction action) {
+        String commandTemplateOptionNameContent = processingOptionService.findOptionAsString(action.commandTemplateOptionName)
+        return new SimpleTemplateEngine().createTemplate(commandTemplateOptionNameContent)
+                .make([unixGroup: userProjectRole.project.unixGroup, userName: userProjectRole.user.username]).toString()
     }
 }
 
