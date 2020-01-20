@@ -63,7 +63,7 @@
                             <g:link action="editSubmission" params="['id': it.id]"><g:message code="egaSubmission.overview.continue"/></g:link>
                         </g:if><g:else>
                             <g:link action="sampleMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.sampleMetadata"/></g:link>
-                            |
+                            <br>
                             <g:link action="experimentalMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.experimentalMetadata"/></g:link>
                         </g:else>
                     </td>
