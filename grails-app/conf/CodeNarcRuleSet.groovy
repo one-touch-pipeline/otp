@@ -552,10 +552,10 @@ All the Rules that will be used for OTP
         priority = CRITICAL
     }
     BlockEndsWithBlankLine {
-        priority = LOW
+        priority = CRITICAL
     }
     BlockStartsWithBlankLine {
-        priority = MIDDLE
+        priority = CRITICAL
     }
     BracesForClass {
         priority = DEFAULT
