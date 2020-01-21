@@ -51,11 +51,17 @@
             <th><g:message code="dataFields.libPrepKit.reverseComplementAdapterSequenceShort"/></th>
             <th></th>
             <th><g:message code="dataFields.libPrepKit.genomes"/></th>
+            <th><g:message code="dataFields.legacy"/></th>
         </tr>
         </thead>
         <tbody>
-        <g:each var="libraryPreparationKit" in="${libraryPreparationKits}">
-            <tr>
+        <g:each status="i" var="libraryPreparationKit" in="${libraryPreparationKits}">
+            <g:if test="${libraryPreparationKit.legacy}">
+                <tr class="text-muted">
+            </g:if>
+            <g:else>
+                <tr>
+            </g:else>
                 <td>${libraryPreparationKit.name}</td>
                 <td>${libraryPreparationKit.shortDisplayName}</td>
                 <td><span class="keep-whitespace">${libraryPreparationKit.importAliases}</span></td>
@@ -103,6 +109,14 @@
                             link="${g.createLink(controller: 'metaDataFields', action: 'addAdapterSequenceToLibraryPreparationKit', params: ["libraryPreparationKit.id": libraryPreparationKit.id])}"/>
                 </td>
                 <td><span class="keep-whitespace">${libraryPreparationKit.referenceGenomesWithBedFiles}</span></td>
+                <td>
+                    <g:render template="/templates/slider" model="[
+                            targetAction: 'changeLibPrepKitLegacyState',
+                            objectName  : 'libraryPreparationKit',
+                            object      : libraryPreparationKit,
+                            i           : i,
+                    ]"/>
+                </td>
             </tr>
         </g:each>
         </tbody>

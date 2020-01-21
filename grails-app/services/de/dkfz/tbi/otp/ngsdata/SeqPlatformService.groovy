@@ -62,6 +62,7 @@ class SeqPlatformService {
     List<Map> getDisplayableMetadata() {
         return SeqPlatform.list().collect {
             [
+                    id                 : it.id,
                     name               : it.name,
                     modelId            : it.seqPlatformModelLabel?.id,
                     model              : it.seqPlatformModelLabel?.name,
@@ -71,6 +72,7 @@ class SeqPlatformService {
                     seqKit             : it.sequencingKitLabel?.name,
                     seqKitImportAliases: it.sequencingKitLabel?.importAlias?.sort()?.join(MetadataFieldsService.MULTILINE_JOIN_STRING),
                     hasSeqKit          : it.sequencingKitLabel?.name ? true : false,
+                    legacy             : it.legacy,
             ]
         }.sort { "${it.name}, ${it.model}, ${it.seqKit}" }
     }
@@ -113,5 +115,12 @@ class SeqPlatformService {
                 seqPlatformModelLabel,
                 sequencingKitLabel)
         )
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    SeqPlatform changeLegacyState(SeqPlatform seqPlatform, boolean legacy) {
+        seqPlatform.legacy = legacy
+        assert seqPlatform.save(flush: true)
+        return seqPlatform
     }
 }

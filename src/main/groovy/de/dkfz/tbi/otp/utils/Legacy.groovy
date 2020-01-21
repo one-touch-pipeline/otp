@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,25 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp.utils
 
-import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.utils.MetadataField
+trait Legacy {
 
-/**
- * This class stores the sequencing platform models which were used for sequencing the data.
- * Furthermore a list of possible importAliases is referenced.
- */
-class SeqPlatformModelLabel implements Entity, MetadataField { // to set legacy refer to SeqPlatform
-
-    static hasMany = [importAlias: String]
-
-    static constraints = {
-        name unique: true, blank: false
-    }
-
-    @Override
-    String toString() {
-        return name
-    }
+    boolean legacy = false
 }

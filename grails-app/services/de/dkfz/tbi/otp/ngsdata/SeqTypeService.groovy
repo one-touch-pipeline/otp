@@ -33,6 +33,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
             [
                     id               : SeqType.findAllByName(it.name)*.id?.sort()?.first(),
                     name             : it.name,
+                    legacy           : it.legacy,
                     dirName          : it.dirName,
                     singleCell       : it.singleCell,
                     hasAntibodyTarget: it.hasAntibodyTarget,
@@ -88,6 +89,14 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
         }
         if (libraryLayouts.contains(LibraryLayout.MATE_PAIR)) {
             create(name, properties + [libraryLayout: LibraryLayout.MATE_PAIR], importAliases)
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void changeLegacyState(SeqType seqType, boolean legacy) {
+        SeqType.findAllByNameAndSingleCell(seqType.name, seqType.singleCell).each {
+            it.legacy = legacy
+            assert it.save(flush: true)
         }
     }
 
@@ -196,32 +205,32 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
 
     static List<SeqType> getDefaultOtpAlignableSeqTypes() {
         return [
-                getExomePairedSeqType(),
-                getWholeGenomePairedSeqType(),
+                exomePairedSeqType,
+                wholeGenomePairedSeqType,
         ]
     }
 
     static List<SeqType> getPanCanAlignableSeqTypes() {
         return [
-                getExomePairedSeqType(),
-                getWholeGenomePairedSeqType(),
-                getWholeGenomeBisulfitePairedSeqType(),
-                getWholeGenomeBisulfiteTagmentationPairedSeqType(),
-                getChipSeqPairedSeqType(),
+                exomePairedSeqType,
+                wholeGenomePairedSeqType,
+                wholeGenomeBisulfitePairedSeqType,
+                wholeGenomeBisulfiteTagmentationPairedSeqType,
+                chipSeqPairedSeqType,
         ]
     }
 
     static List<SeqType> getRnaAlignableSeqTypes() {
         return [
-                getRnaPairedSeqType(),
-                getRnaSingleSeqType(),
+                rnaPairedSeqType,
+                rnaSingleSeqType,
         ]
     }
 
     static List<SeqType> getRoddyAlignableSeqTypes() {
         return [
-                getPanCanAlignableSeqTypes(),
-                getRnaAlignableSeqTypes(),
+                panCanAlignableSeqTypes,
+                rnaAlignableSeqTypes,
         ].flatten()
     }
 
@@ -233,9 +242,9 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
 
     static List<SeqType> getAllAlignableSeqTypes() {
         return [
-                getDefaultOtpAlignableSeqTypes(),
-                getRoddyAlignableSeqTypes(),
-                getCellRangerAlignableSeqTypes(),
+                defaultOtpAlignableSeqTypes,
+                roddyAlignableSeqTypes,
+                cellRangerAlignableSeqTypes,
         ].flatten().unique()
     }
 
@@ -252,59 +261,59 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
 
     static List<SeqType> getSnvPipelineSeqTypes() {
         return [
-                getExomePairedSeqType(),
-                getWholeGenomePairedSeqType(),
+                exomePairedSeqType,
+                wholeGenomePairedSeqType,
         ]
     }
 
     static List<SeqType> getIndelPipelineSeqTypes() {
         return [
-                getExomePairedSeqType(),
-                getWholeGenomePairedSeqType(),
+                exomePairedSeqType,
+                wholeGenomePairedSeqType,
         ]
     }
 
     static List<SeqType> getSophiaPipelineSeqTypes() {
         return [
-                getExomePairedSeqType(),
-                getWholeGenomePairedSeqType(),
+                exomePairedSeqType,
+                wholeGenomePairedSeqType,
         ]
     }
 
     static List<SeqType> getAceseqPipelineSeqTypes() {
         return [
-                getWholeGenomePairedSeqType(),
+                wholeGenomePairedSeqType,
         ]
     }
 
     static List<SeqType> getRunYapsaPipelineSeqTypes() {
         return [
-                getExomePairedSeqType(),
-                getWholeGenomePairedSeqType(),
+                exomePairedSeqType,
+                wholeGenomePairedSeqType,
         ]
     }
 
     static List<SeqType> getAllAnalysableSeqTypes() {
         return [
-                getSnvPipelineSeqTypes(),
-                getIndelPipelineSeqTypes(),
-                getSophiaPipelineSeqTypes(),
-                getAceseqPipelineSeqTypes(),
-                getRunYapsaPipelineSeqTypes(),
+                snvPipelineSeqTypes,
+                indelPipelineSeqTypes,
+                sophiaPipelineSeqTypes,
+                aceseqPipelineSeqTypes,
+                runYapsaPipelineSeqTypes,
         ].flatten().unique()
     }
 
     static List<SeqType> getAllProcessableSeqTypes() {
         return [
-                getAllAlignableSeqTypes(),
-                getAllAnalysableSeqTypes(),
+                allAlignableSeqTypes,
+                allAnalysableSeqTypes,
         ].flatten().unique()
     }
 
     static List<SeqType> getSeqTypesIgnoringLibraryPreparationKitForMerging() {
         return [
-                getWholeGenomeBisulfitePairedSeqType(),
-                getWholeGenomeBisulfiteTagmentationPairedSeqType(),
+                wholeGenomeBisulfitePairedSeqType,
+                wholeGenomeBisulfiteTagmentationPairedSeqType,
         ].flatten().unique()
     }
 

@@ -189,6 +189,22 @@ abstract class MetadataFieldsServiceSpec<T> extends Specification {
         thrown(AssertionError)
     }
 
+    void "test changeLegacyState"() {
+        given:
+        T t = DomainFactory.<T> createDomainWithImportAlias(service.clazz, [name: NAME] + properties)
+
+        when:
+        service.changeLegacyState(t, legacy)
+
+        then:
+        t.legacy == legacy
+
+        where:
+        legacy | _
+        true   | _
+        false  | _
+    }
+
     Map<String, Long> createObjectsForImportAliasTests() {
         return [
             DomainFactory.<T> createDomainWithImportAlias(service.clazz, [name: NAME] + properties),

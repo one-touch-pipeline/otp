@@ -23,13 +23,14 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.MetadataField
 
 /*
  * In the GUI and e-mails sent by OTP this shall be called "Sequencing Type" (or "Seq Type" where little space is
  * available), no matter if the library layout is included in the displayed value or not. (Decided together with the OTP
  * Product Owner on 2016-07-19.)
  */
-class SeqType implements Entity {
+class SeqType implements Entity, MetadataField {
 
     final static SINGLE_CELL_DNA = "Single-cell DNA"
 
@@ -49,11 +50,6 @@ class SeqType implements Entity {
             SeqTypeNames.CHIP_SEQ,
     ].asImmutable()
 
-    /**
-     * One of {@link SeqTypeNames#seqTypeName}.
-     * Used in file system paths, for example by ProcessedMergedBamFileService.fileNameNoSuffix(ProcessedMergedBamFile).
-     */
-    String name
     LibraryLayout libraryLayout
     String dirName
 
@@ -72,9 +68,13 @@ class SeqType implements Entity {
      */
     boolean hasAntibodyTarget = false
 
-    static hasMany = [importAlias : String]
+    static hasMany = [importAlias: String]
 
     static constraints = {
+        /**
+         * One of {@link SeqTypeNames#seqTypeName}.
+         * Used in file system paths, for example by ProcessedMergedBamFileService.fileNameNoSuffix(ProcessedMergedBamFile).
+         */
         name(blank: false, unique: ['libraryLayout', 'singleCell'])
         dirName(blank: false, unique: ['libraryLayout', 'singleCell'], validator: { String val, SeqType obj ->
             if (!OtpPath.isValidPathComponent(val)) {

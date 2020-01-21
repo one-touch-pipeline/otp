@@ -140,6 +140,24 @@ class SeqTypeServiceSpec extends MetadataFieldsServiceSpec<SeqType> implements D
         service.findByNameOrImportAlias(NAME, [dirName: "Other${SEQ_TYPE_DIR}", displayName: SEQ_TYPE_DISPLAY_NAME, libraryLayout: LibraryLayout.MATE_PAIR, singleCell: true])
     }
 
+    void "test changeLegacyState of paired end seq type - should always keep single-end and paired-end in sync"() {
+        given:
+        SeqType single = DomainFactory.createSeqType()
+        SeqType paired = DomainFactory.createSeqTypePaired(
+                name: single.name,
+                dirName: single.dirName,
+                singleCell: single.singleCell, // don't care, just keep same
+        )
+        boolean legacy = true
+
+        when:
+        service.changeLegacyState(single, legacy)
+
+        then:
+        single.legacy == legacy
+        paired.legacy == legacy
+    }
+
     @Override
     protected MetadataFieldsService getService() {
         return seqTypeService

@@ -22,21 +22,15 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.MetadataField
 
 /**
  * This class represents an Antibody target which is used
  * for the library creation for chip seq sequencing purpose.
  */
-class AntibodyTarget implements Entity {
+class AntibodyTarget implements Entity, MetadataField {
 
-    /**
-     * Antibody target name.
-     * The name has to be compliant with filesystem naming as is supposed to be used as part of some filepaths.
-     * example: 'H3K4me1'
-     */
-    String name
-
-    static hasMany = [importAlias : String]
+    static hasMany = [importAlias: String]
 
     static constraints = {
         name(unique: true, blank: false, shared: "pathComponent")

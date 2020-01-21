@@ -31,7 +31,7 @@ trait CheckAndCall {
     void checkErrorAndCallMethod(Validateable cmd, Closure method, Closure<Map> additionalSuccessReturnValues = { [:] }) {
         Map data
         if (cmd.hasErrors()) {
-            data = getErrorData(cmd.errors.getFieldError())
+            data = getErrorData(cmd.errors.fieldError)
         } else {
             try {
                 method()
@@ -43,6 +43,19 @@ trait CheckAndCall {
             }
         }
         render data as JSON
+    }
+
+    void checkErrorAndCallMethodWithFlashMessage(Validateable cmd, String msgCode, Closure method) {
+        withForm {
+            if (cmd.hasErrors()) {
+                flash.message = new FlashMessage(g.message(code: "${msgCode}.failed") as String, [cmd.errors.fieldError.code])
+            } else {
+                method()
+                flash.message = new FlashMessage(g.message(code: "${msgCode}.success") as String)
+            }
+        }.invalidToken {
+            flash.message = new FlashMessage(g.message(code: "default.expired.session") as String)
+        }
     }
 
     private Map getErrorData(FieldError errors) {

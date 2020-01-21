@@ -24,10 +24,11 @@ package de.dkfz.tbi.otp.ngsdata
 import de.dkfz.tbi.otp.SqlUtil
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.Legacy
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-class SampleType implements Entity {
+class SampleType implements Entity, Legacy {
 
     /**
      * This enum specifies if the sample type belongs to a disease or a control.

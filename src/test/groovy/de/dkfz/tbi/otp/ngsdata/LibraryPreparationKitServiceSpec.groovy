@@ -218,13 +218,6 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
         adapterSequence << [null, ""]
     }
 
-    void setupServiceForAdapterFileReading() {
-        service.fileSystemService = Mock(FileSystemService) {
-            1 * getRemoteFileSystemOnDefaultRealm() >> { return FileSystems.default }
-        }
-        service.fileService = new FileService()
-    }
-
     void "getAdapterFileContentToRender, returns adapter file content as String"() {
         given:
         setupServiceForAdapterFileReading()
@@ -274,6 +267,13 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
 
         then:
         thrown(AssertionError)
+    }
+
+    void setupServiceForAdapterFileReading() {
+        service.fileSystemService = Mock(FileSystemService) {
+            1 * getRemoteFileSystemOnDefaultRealm() >> { return FileSystems.default }
+        }
+        service.fileService = new FileService()
     }
 
     @Override

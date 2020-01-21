@@ -22,17 +22,16 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.MetadataField
 
 /**
  * This class stores the sequencing kits which were used to prepare the sequencing machines.
  * Furthermore a list of possible aliases is referenced.
  * Should be called "Chemical Version" in the user interface.
  */
-class SequencingKitLabel implements Entity {
+class SequencingKitLabel implements Entity, MetadataField { // to set legacy refer to SeqPlatform
 
-    String name
-
-    static hasMany = [importAlias : String]
+    static hasMany = [importAlias: String]
 
     static constraints = {
         name(unique: true, blank: false)

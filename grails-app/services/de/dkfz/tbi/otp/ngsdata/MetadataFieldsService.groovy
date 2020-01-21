@@ -25,9 +25,10 @@ import grails.gorm.transactions.Transactional
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.MetadataField
 
 @Transactional
-abstract class MetadataFieldsService<T> {
+abstract class MetadataFieldsService<T extends MetadataField> {
 
     // explicit protected is required, see: https://stackoverflow.com/a/20472740/6921511
     protected final static String MULTILINE_JOIN_STRING = ";\n"
@@ -50,6 +51,12 @@ abstract class MetadataFieldsService<T> {
         assert !tFromImportAlias: "importAlias ${importAlias} already exists for ${tFromImportAlias.name}"
 
         getTAndAddAlias(instance.name, importAlias)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void changeLegacyState(T domainObject, boolean legacy) {
+        domainObject.legacy = legacy
+        assert domainObject.save(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")

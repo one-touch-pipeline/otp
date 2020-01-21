@@ -23,10 +23,11 @@ package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.Legacy
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-class SeqPlatform implements Entity {
+class SeqPlatform implements Entity, Legacy {
 
     String name   // eg. solid, illumina
     SeqPlatformModelLabel seqPlatformModelLabel

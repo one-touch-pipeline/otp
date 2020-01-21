@@ -36,6 +36,8 @@ class SeqPlatformServiceSpec extends Specification implements DataTest {
         ]
     }
 
+    SeqPlatformService service = new SeqPlatformService()
+
     final String PLATFORM_NAME = "platform_name"
 
     void "test createNewSeqPlatform, when seq platform name is null, should fail"() {
@@ -100,5 +102,17 @@ class SeqPlatformServiceSpec extends Specification implements DataTest {
         seqPlatform.name == PLATFORM_NAME
         seqPlatform.seqPlatformModelLabel == seqPlatformModelLabel
         seqPlatform.sequencingKitLabel == sequencingKitLabel
+    }
+
+    void "test changeLegacyState"() {
+        given:
+        SeqPlatform seqPlatform = DomainFactory.createSeqPlatformWithSeqPlatformGroup()
+        boolean legacy = true
+
+        when:
+        service.changeLegacyState(seqPlatform, legacy)
+
+        then:
+        seqPlatform.legacy == legacy
     }
 }

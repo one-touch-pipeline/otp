@@ -45,11 +45,17 @@
             <th><g:message code="dataFields.antibodyTarget.name"/></th>
             <th><g:message code="dataFields.antibodyTarget.importAlias"/></th>
             <th></th>
+            <th><g:message code="dataFields.legacy"/></th>
         </tr>
         </thead>
         <tbody>
-        <g:each var="antibodyTarget" in="${antibodyTargets}">
-            <tr>
+        <g:each status="i" var="antibodyTarget" in="${antibodyTargets}">
+            <g:if test="${antibodyTarget.legacy}">
+                <tr class="text-muted">
+            </g:if>
+            <g:else>
+                <tr>
+            </g:else>
                 <td>${antibodyTarget.name}</td>
                 <td class="keep-whitespace">${antibodyTarget.importAliases}</td>
                 <td>
@@ -58,6 +64,14 @@
                             labels="${["Import Alias"]}"
                             textFields="${["importAlias"]}"
                             link="${g.createLink(controller: 'metaDataFields', action: 'createAntibodyTargetImportAlias', id: antibodyTarget.id)}"/>
+                </td>
+                <td>
+                    <g:render template="/templates/slider" model="[
+                            targetAction: 'changeAntibodyTargetLegacyState',
+                            objectName  : 'antibodyTarget',
+                            object      : antibodyTarget,
+                            i           : i,
+                    ]"/>
                 </td>
             </tr>
         </g:each>

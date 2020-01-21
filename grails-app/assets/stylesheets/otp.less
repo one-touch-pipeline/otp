@@ -2432,3 +2432,50 @@ table.key-value-table {
         display: none;
     }
 }
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.slider {
+    display:none;
+}
+
+.slider + label {
+    width: 34px;
+    height: 15px;
+    border-radius: 30px;
+    border: 2px solid #EEE;
+    background-color: #EEE;
+    display: inline-block;
+    content: "";
+    float: left;
+    margin-right: 5px;
+    transition: background-color 0.5s linear;
+}
+
+.slider + label:hover {
+    cursor: pointer;
+}
+
+.slider + label::before {
+    width: 15px;
+    height: 15px;
+    border-radius: 15px;
+    background-color: #fff;
+    display: block;
+    content: "";
+    float: left;
+    margin-right: 5px;
+    transition: margin 0.1s linear;
+    box-shadow: 0 0 5px #aaa;
+}
+
+.slider:checked + label{
+    background-color: #2196F3;
+    border: 2px solid #2196F3;
+}
+
+.slider:checked + label::before {
+    margin: 0 0 0 19px;
+}

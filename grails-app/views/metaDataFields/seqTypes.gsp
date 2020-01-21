@@ -52,11 +52,17 @@
             <th><g:message code="dataFields.seqType.displayNames"/></th>
             <th><g:message code="dataFields.seqType.importAlias"/></th>
             <th></th>
+            <th><g:message code="dataFields.legacy"/></th>
         </tr>
         </thead>
         <tbody>
-        <g:each var="seqType" in="${seqTypes}">
-            <tr>
+        <g:each status="i" var="seqType" in="${seqTypes}">
+            <g:if test="${seqType.legacy}">
+                <tr class="text-muted">
+            </g:if>
+            <g:else>
+                <tr>
+            </g:else>
                 <td>${seqType.name}</td>
                 <td>
                     <asset:image src="${seqType.singleCell ? "ok.png" : "error.png"}"/>
@@ -90,6 +96,14 @@
                             labels="${["Import Alias"]}"
                             textFields="${["importAlias"]}"
                             link="${g.createLink(controller: 'metaDataFields', action: 'createSeqTypeImportAlias', id: seqType.id)}"/>
+                </td>
+                <td>
+                    <g:render template="/templates/slider" model="[
+                            targetAction: 'changeSeqTypeLegacyState',
+                            objectName  : 'seqType',
+                            object      : seqType,
+                            i           : i,
+                    ]"/>
                 </td>
             </tr>
         </g:each>

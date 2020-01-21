@@ -32,13 +32,17 @@ import de.dkfz.tbi.otp.dataprocessing.OtpPath
 class MetaDataFieldsController implements CheckAndCall {
 
     static allowedMethods = [
-            index:                  "GET",
-            libraryPreparationKits: "GET",
-            antibodyTargets:        "GET",
-            seqCenters:             "GET",
-            seqPlatforms:           "GET",
-            seqTypes:               "GET",
-            createSeqType:          "POST",
+            index                          : "GET",
+            libraryPreparationKits         : "GET",
+            antibodyTargets                : "GET",
+            seqCenters                     : "GET",
+            seqPlatforms                   : "GET",
+            seqTypes                       : "GET",
+            createSeqType                  : "POST",
+            changeLibPrepKitLegacyState    : "POST",
+            changeSeqTypeLegacyState       : "POST",
+            changeAntibodyTargetLegacyState: "POST",
+            changeSeqPlatformLegacyState   : "POST",
     ]
 
     LibraryPreparationKitService libraryPreparationKitService
@@ -180,6 +184,34 @@ class MetaDataFieldsController implements CheckAndCall {
 
     JSON createLibraryPreparationKitImportAlias(CreateLibraryPreparationKitImportAliasCommand cmd) {
         createImportAlias(cmd)
+    }
+
+    def changeLibPrepKitLegacyState(LibPrepKitLegacyCommand cmd) {
+        checkErrorAndCallMethodWithFlashMessage(cmd, "dataFields.legacy") {
+            libraryPreparationKitService.changeLegacyState(cmd.libraryPreparationKit, cmd.legacy)
+        }
+        redirect action: 'libraryPreparationKits'
+    }
+
+    def changeSeqTypeLegacyState(SeqTypeLegacyCommand cmd) {
+        checkErrorAndCallMethodWithFlashMessage(cmd, "dataFields.legacy") {
+            seqTypeService.changeLegacyState(cmd.seqType, cmd.legacy)
+        }
+        redirect action: 'seqTypes'
+    }
+
+    def changeAntibodyTargetLegacyState(AntibodyTargetLegacyCommand cmd) {
+        checkErrorAndCallMethodWithFlashMessage(cmd, "dataFields.legacy") {
+            antibodyTargetService.changeLegacyState(cmd.antibodyTarget, cmd.legacy)
+        }
+        redirect action: 'antibodyTargets'
+    }
+
+    def changeSeqPlatformLegacyState(SeqPlatformLegacyCommand cmd) {
+        checkErrorAndCallMethodWithFlashMessage(cmd, "dataFields.legacy") {
+            seqPlatformService.changeLegacyState(cmd.seqPlatform, cmd.legacy)
+        }
+        redirect action: 'seqPlatforms'
     }
 
     def createSeqType(CreateSeqTypeCommand cmd) {
@@ -573,4 +605,24 @@ class UpdateSeqCenterAbsolutePathCommand extends SeqCenterCommand {
 
 class ReplaceSeqCenterAbsolutePathCommand extends UpdateSeqCenterAbsolutePathCommand {
     String oldAbsolutePath
+}
+
+class LegacyCommand implements Validateable {
+    boolean legacy
+}
+
+class LibPrepKitLegacyCommand extends LegacyCommand {
+    LibraryPreparationKit libraryPreparationKit
+}
+
+class SeqTypeLegacyCommand extends LegacyCommand {
+    SeqType seqType
+}
+
+class AntibodyTargetLegacyCommand extends LegacyCommand {
+    AntibodyTarget antibodyTarget
+}
+
+class SeqPlatformLegacyCommand extends LegacyCommand {
+    SeqPlatform seqPlatform
 }

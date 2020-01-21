@@ -22,20 +22,13 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.utils.MetadataField
 
 /**
  * This class represents library preparation kits which are used
  * for the library creation for sequencing purpose.
  */
-class LibraryPreparationKit implements Entity {
-
-    /**
-     * This is supposed to be the canonical human readable name of the kit.
-     * It has to contain the manufacturer + kit name + kit version
-     *
-     * example: 'Agilent SureSelect V4+UTRs'
-     */
-    String name
+class LibraryPreparationKit implements Entity, MetadataField {
 
     String shortDisplayName
 
@@ -44,9 +37,15 @@ class LibraryPreparationKit implements Entity {
     // used for RNA workflow
     String reverseComplementAdapterSequence
 
-    static hasMany = [importAlias : String]
+    static hasMany = [importAlias: String]
 
     static constraints = {
+        /**
+         * This is supposed to be the canonical human readable name of the kit.
+         * It has to contain the manufacturer + kit name + kit version
+         *
+         * example: 'Agilent SureSelect V4+UTRs'
+         */
         name(unique: true, blank: false)
         shortDisplayName(unique: true, blank: false)
         adapterFile nullable: true, blank: false, shared: "absolutePath"

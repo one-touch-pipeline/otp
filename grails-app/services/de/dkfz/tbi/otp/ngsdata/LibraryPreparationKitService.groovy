@@ -41,6 +41,7 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
             [
                     id                              : it.id,
                     name                            : it.name,
+                    legacy                          : it.legacy,
                     shortDisplayName                : it.shortDisplayName,
                     adapterFile                     : it.adapterFile,
                     reverseComplementAdapterSequence: it.reverseComplementAdapterSequence,

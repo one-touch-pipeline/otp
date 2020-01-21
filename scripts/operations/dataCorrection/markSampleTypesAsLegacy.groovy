@@ -19,25 +19,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.utils.Entity
-import de.dkfz.tbi.otp.utils.MetadataField
+import de.dkfz.tbi.otp.ngsdata.*
 
-/**
- * This class stores the sequencing platform models which were used for sequencing the data.
- * Furthermore a list of possible importAliases is referenced.
- */
-class SeqPlatformModelLabel implements Entity, MetadataField { // to set legacy refer to SeqPlatform
+//************ List of Sample Types (one Type per line) ************//
+List sampleTypeNames = """
+#SampleType1
+#SampleType2
 
-    static hasMany = [importAlias: String]
 
-    static constraints = {
-        name unique: true, blank: false
-    }
-
-    @Override
-    String toString() {
-        return name
-    }
+""".split("\n")*.trim().findAll {
+    it && !it.startsWith('#')
 }
+
+//************ legacy or not legacy ************//
+boolean legacy = true
+
+
+/* work area */
+SampleType.withTransaction {
+    sampleTypeNames.each {
+        SampleType sampleType = SampleType.findByName(it)
+        sampleType.legacy = legacy
+        sampleType.save(flush: true)
+    }
+
+    assert false: "DEBUG: transaction intentionally failed to rollback changes"
+}
+
+""

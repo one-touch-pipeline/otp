@@ -49,11 +49,17 @@
             <th><g:message code="dataFields.seqPlatform.listSequencingKitLabel"/></th>
             <th><g:message code="dataFields.seqPlaform.listSequencingKitLabelImportAlias"/></th>
             <th></th>
+            <th><g:message code="dataFields.legacy"/></th>
         </tr>
         </thead>
         <tbody>
-        <g:each var="seqPlatform" in="${seqPlatforms}">
-            <tr>
+        <g:each status="i" var="seqPlatform" in="${seqPlatforms}">
+            <g:if test="${seqPlatform.legacy}">
+                <tr class="text-muted">
+            </g:if>
+            <g:else>
+                <tr>
+            </g:else>
                 <td>${seqPlatform.name}</td>
                 <td>${seqPlatform.model}</td>
                 <td><span class="keep-whitespace">${seqPlatform.modelImportAliases}</span></td>
@@ -76,6 +82,14 @@
                                 textFields="${["importAlias"]}"
                                 link="${g.createLink(controller: 'metaDataFields', action: 'createSequencingKitLabelImportAlias', id: seqPlatform.seqKitId)}"/>
                     </g:if>
+                </td>
+                <td>
+                    <g:render template="/templates/slider" model="[
+                            targetAction: 'changeSeqPlatformLegacyState',
+                            objectName  : 'seqPlatform',
+                            object      : seqPlatform,
+                            i           : i,
+                    ]"/>
                 </td>
             </tr>
         </g:each>

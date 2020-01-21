@@ -33,6 +33,7 @@ class AntibodyTargetService extends MetadataFieldsService<AntibodyTarget> {
             [
                     id           : it.id,
                     name         : it.name,
+                    legacy       : it.legacy,
                     importAliases: it.importAlias?.sort()?.join(MULTILINE_JOIN_STRING),
             ]
         }
