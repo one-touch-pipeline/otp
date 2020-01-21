@@ -34,16 +34,6 @@ abstract class AbstractAnalysisController {
     ProjectSelectionService projectSelectionService
 
     Map results() {
-        String projectName = params.project ?: params.projectName
-        if (projectName) {
-            Project project = projectService.getProjectByName(projectName)
-            if (project) {
-                projectSelectionService.setSelectedProject([project], project.name)
-                redirect(controller: controllerName, action: actionName)
-                return
-            }
-        }
-
         List<Project> projects = projectService.getAllProjects()
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 

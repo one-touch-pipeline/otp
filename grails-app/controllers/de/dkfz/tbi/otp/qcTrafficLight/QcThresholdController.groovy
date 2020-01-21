@@ -53,16 +53,6 @@ class QcThresholdController {
     }
 
     def projectConfiguration() {
-        String projectName = params.project
-        if (projectName) {
-            Project project = projectService.getProjectByName(projectName)
-            if (project) {
-                projectSelectionService.setSelectedProject([project], project.name)
-                redirect(controller: controllerName, action: actionName)
-                return
-            }
-        }
-
         ProjectSelection selection = projectSelectionService.getSelectedProject()
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 

@@ -40,15 +40,6 @@ class ProjectOverviewController {
 
 
     Map index() {
-        String projectName = params.project
-        if (projectName) {
-            Project project = projectService.getProjectByName(projectName)
-            if (project) {
-                projectSelectionService.setSelectedProject([project], project.name)
-                redirect(controller: controllerName, action: actionName)
-                return
-            }
-        }
         List<Project> projects = projectService.getAllProjects()
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 
@@ -65,16 +56,6 @@ class ProjectOverviewController {
      * The table content are retrieved asynchronously from {@link #dataTableSourceLaneOverview} via JavaScript.
      */
     Map laneOverview() {
-        String projectName = params.project
-        if (projectName) {
-            Project project = projectService.getProjectByName(projectName)
-            if (project) {
-                projectSelectionService.setSelectedProject([project], project.name)
-                redirect(controller: controllerName, action: actionName)
-                return
-            }
-        }
-
         List<Project> projects = projectService.getAllProjects()
         ProjectSelection selection = projectSelectionService.getSelectedProject()
 

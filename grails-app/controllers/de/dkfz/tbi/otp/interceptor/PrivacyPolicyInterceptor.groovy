@@ -43,7 +43,7 @@ class PrivacyPolicyInterceptor {
         }
         request.setAttribute(FILTER_APPLIED, true)
 
-        if (!userService.isPrivacyPolicyAccepted()) {
+        if (!userService.privacyPolicyAccepted) {
             forward(controller: "privacyPolicy", action: "index")
             return false
         }

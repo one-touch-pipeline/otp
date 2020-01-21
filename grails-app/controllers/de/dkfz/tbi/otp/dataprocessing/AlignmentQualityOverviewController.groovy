@@ -161,16 +161,6 @@ class AlignmentQualityOverviewController {
     QcTrafficLightService qcTrafficLightService
 
     def index(AlignmentQcCommand cmd) {
-        String projectName = params.project
-        if (projectName) {
-            Project project = projectService.getProjectByName(projectName)
-            if (project) {
-                projectSelectionService.setSelectedProject([project], project.name)
-                redirect(controller: controllerName, action: actionName)
-                return
-            }
-        }
-
         List<Project> projects = projectService.allProjects
         ProjectSelection selection = projectSelectionService.selectedProject
 

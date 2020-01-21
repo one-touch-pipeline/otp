@@ -42,27 +42,39 @@ class ProjectSelectionInterceptor {
     }
 
     @Override
-    boolean before() { true }
+    boolean before() {
+        if (springSecurityService.loggedIn) {
+            String projectName = params.project
+            if (projectName) {
+                Project project = projectService.getProjectByName(projectName)
+                if (project) {
+                    projectSelectionService.setSelectedProject([project], project.name)
+                }
+            }
+        }
+        true
+    }
 
     @Override
     boolean after() {
-        if (model != null && springSecurityService.isLoggedIn()) {
-            model.projectSelection = projectSelectionService.getSelectedProject()
+        if (model != null && springSecurityService.loggedIn) {
+            model.projectSelection = projectSelectionService.selectedProject
 
-            List<Project> allProjects = projectService.getAllProjects()
+            List<Project> allProjects = projectService.allProjects
 
             // projects in groups
             Map<String, List<ProjectSelectionCommand>> availableProjectsInGroups = [:]
             Map<ProjectGroup, List<Project>> projectsMap = allProjects.groupBy { it.projectGroup }
             List<Project> projectsWithoutGroup = projectsMap.remove(null)
             projectsMap.each { ProjectGroup group, List<Project> projects ->
-                String displayName = messageSource.getMessage("header.projectSelection.allGroupOrCategory", [group.name].toArray(), LocaleContextHolder.getLocale())
+                String displayName = messageSource.getMessage("header.projectSelection.allGroupOrCategory", [group.name].toArray(), LocaleContextHolder.locale)
                 availableProjectsInGroups.put(
                         group.name,
-                        [new ProjectSelectionCommand(displayName: displayName, type: ProjectSelectionCommand.Type.GROUP, id: group.id)] +
-                                projects.collect {
-                                    new ProjectSelectionCommand(displayName: it.name, type: ProjectSelectionCommand.Type.PROJECT, id: it.id)
-                                }
+                        [
+                            new ProjectSelectionCommand(displayName: displayName, type: ProjectSelectionCommand.Type.GROUP, id: group.id)
+                        ] + projects.collect {
+                            new ProjectSelectionCommand(displayName: it.name, type: ProjectSelectionCommand.Type.PROJECT, id: it.id)
+                        }
                 )
             }
             model.availableProjectsInGroups = availableProjectsInGroups
@@ -70,10 +82,11 @@ class ProjectSelectionInterceptor {
             // projects not in groups
             List<ProjectSelectionCommand> availableProjectsWithoutGroup = []
             projectsWithoutGroup?.each { Project project ->
-                availableProjectsWithoutGroup.add(new ProjectSelectionCommand(displayName: project.name, type: ProjectSelectionCommand.Type.PROJECT, id: project.id))
+                availableProjectsWithoutGroup.add(
+                        new ProjectSelectionCommand(displayName: project.name, type: ProjectSelectionCommand.Type.PROJECT, id: project.id)
+                )
             }
             model.availableProjectsWithoutGroup = availableProjectsWithoutGroup
-
         }
         true
     }
