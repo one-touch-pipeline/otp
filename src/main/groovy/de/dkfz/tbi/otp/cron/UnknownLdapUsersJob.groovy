@@ -24,16 +24,13 @@ package de.dkfz.tbi.otp.cron
 import groovy.util.logging.Slf4j
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Scope
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.administration.LdapService
-import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.MailHelperService
-import de.dkfz.tbi.otp.utils.SessionUtils
 
 /**
  * Scheduled job to find and report users which can be resolved to an object in LDAP.
@@ -44,16 +41,13 @@ import de.dkfz.tbi.otp.utils.SessionUtils
 @Scope("singleton")
 @Component
 @Slf4j
-class UnknownLdapUsersJob {
+class UnknownLdapUsersJob extends ScheduledJob {
 
     @Autowired
     MailHelperService mailHelperService
 
     @Autowired
     LdapService ldapService
-
-    @Autowired
-    ConfigService configService
 
     @Autowired
     ProcessingOptionService processingOptionService
@@ -96,15 +90,13 @@ class UnknownLdapUsersJob {
         return users.findAll { User user -> !ldapService.existsInLdap(user) }
     }
 
-    @Scheduled(cron="0 0 5 * * *")
-    void execute() {
-        SessionUtils.withNewSession {
-            List<User> unresolvableUsers = getUsersThatCanNotBeFoundInLdap(usersToCheck)
-            if (unresolvableUsers) {
-                sendNotification(buildMailBody(unresolvableUsers))
-            } else {
-                log.info("Job executed, but no unresolved users found")
-            }
+    @Override
+    void wrappedExecute() {
+        List<User> unresolvableUsers = getUsersThatCanNotBeFoundInLdap(usersToCheck)
+        if (unresolvableUsers) {
+            sendNotification(buildMailBody(unresolvableUsers))
+        } else {
+            log.info("Job executed, but no unresolved users found")
         }
     }
 }

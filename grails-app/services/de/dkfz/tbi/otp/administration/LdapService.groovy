@@ -31,6 +31,7 @@ import org.springframework.ldap.query.ContainerCriteria
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.util.LdapHelper
 
 import javax.naming.NamingException
 import javax.naming.directory.Attributes
@@ -50,13 +51,13 @@ class LdapService implements InitializingBean {
         LdapContextSource ldapContextSource = new LdapContextSource()
         ldapTemplate = new LdapTemplate(ldapContextSource)
 
-        ldapContextSource.setUrl(configService.getLdapServer())
-        ldapContextSource.setBase(configService.getLdapSearchBase())
-        ldapContextSource.setUserDn(configService.getLdapManagerDistinguishedName())
-        ldapContextSource.setPassword(configService.getLdapManagerPassword())
+        ldapContextSource.url = configService.ldapServer
+        ldapContextSource.base = configService.ldapSearchBase
+        ldapContextSource.userDn = configService.ldapManagerDistinguishedName
+        ldapContextSource.password = configService.ldapManagerPassword
         ldapContextSource.afterPropertiesSet()
 
-        ldapTemplate.setIgnorePartialResultException(true)
+        ldapTemplate.ignorePartialResultException = true
     }
 
     LdapUserDetails getLdapUserDetailsByUsername(String username) {
@@ -136,6 +137,14 @@ class LdapService implements InitializingBean {
                 .and(configService.ldapSearchAttribute).is(user.username)
         return ldapTemplate.search(query, new DistinguishedNameAttributesMapper()).size() >= 1
     }
+
+    Boolean isAccountExpired(User user) {
+        ContainerCriteria query = query()
+                .attributes(configService.ldapSearchAttribute, LdapKey.ACCOUNT_EXPIRES)
+                .where(LdapKey.OBJECT_CATEGORY).is(LdapKey.USER)
+                .and(configService.ldapSearchAttribute).is(user.username)
+        return ldapTemplate.search(query, new IsAccountExpiredMapper())[0]
+    }
 }
 
 class LdapUserDetailsAttributesMapper implements AttributesMapper<LdapUserDetails> {
@@ -147,8 +156,7 @@ class LdapUserDetailsAttributesMapper implements AttributesMapper<LdapUserDetail
                 return matcher.group("group")
             }
         }
-        long accountExpires = (a.get(LdapKey.ACCOUNT_EXPIRES)?.get()?.toString()?.toLong()) ?: 0
-        boolean deactivated = convertAdTimestampToUnixTimestampInMs(accountExpires) < new Date().getTime()
+        boolean deactivated = LdapHelper.getIsDeactivatedFromAttributes(a)
         String givenName = a.get(LdapKey.GIVEN_NAME)?.get()
         String sn = a.get(LdapKey.SURNAME)?.get()
         boolean realNameCreatable = givenName && sn
@@ -161,12 +169,6 @@ class LdapUserDetailsAttributesMapper implements AttributesMapper<LdapUserDetail
                 deactivated      : deactivated,
                 memberOfGroupList: memberOfList,
         ])
-    }
-
-    private static long convertAdTimestampToUnixTimestampInMs(long windowsEpoch) {
-        // http://meinit.nl/convert-active-directory-lastlogon-time-to-unix-readable-time
-        // in milliseconds because Date.getTime() also returns milliseconds
-        return ((windowsEpoch / 10000000) - 11644473600) * 1000
     }
 }
 
@@ -181,6 +183,13 @@ class UsernameAttributesMapper implements AttributesMapper<String> {
     @Override
     String mapFromAttributes(Attributes a) throws NamingException {
         return a.get(ConfigService.getInstance().getLdapSearchAttribute())?.get()?.toString()
+    }
+}
+
+class IsAccountExpiredMapper implements AttributesMapper<Boolean> {
+    @Override
+    Boolean mapFromAttributes(Attributes a) throws NamingException {
+        return LdapHelper.getIsDeactivatedFromAttributes(a)
     }
 }
 

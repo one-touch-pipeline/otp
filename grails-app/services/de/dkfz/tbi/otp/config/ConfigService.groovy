@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
+import java.time.Clock
 import java.time.ZoneId
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
@@ -150,6 +151,10 @@ class ConfigService implements ApplicationContextAware {
         } else {
             return ZoneId.systemDefault()
         }
+    }
+
+    Clock getClock() {
+        return Clock.system(timeZoneId)
     }
 
     boolean useBackdoor() {

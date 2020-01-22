@@ -23,15 +23,14 @@ package de.dkfz.tbi.otp.security
 
 
 import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.util.TimestampHelper
 
 /**
  * Auto generated class by spring security plugin.
  */
 class User implements Entity {
 
-    /**
-     * the Ad account
-     */
+    // the AD account
     String username
     String password
     boolean enabled
@@ -43,11 +42,15 @@ class User implements Entity {
 
     boolean acceptedPrivacyPolicy
 
+    // the date a user should be deactivated in OTP
+    Date plannedDeactivationDate
+
     static constraints = {
         username(blank: false, unique: true, nullable: true)
         password(blank: false)
         email(nullable: false, unique: true, email: true)
         realName(nullable: true, blank: false)
+        plannedDeactivationDate(nullable: true)
     }
 
     static mapping = {
@@ -87,6 +90,10 @@ class User implements Entity {
      */
     Map sanitizedUserMap() {
         return [id: this.id, username: this.username, email: this.email]
+    }
+
+    String getFormattedPlannedDeactivationDate() {
+        return TimestampHelper.asTimestamp(plannedDeactivationDate)["full"]
     }
 
     @Override

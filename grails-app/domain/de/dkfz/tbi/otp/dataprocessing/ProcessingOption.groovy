@@ -456,6 +456,12 @@ class ProcessingOption implements Entity {
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_LINE_TEXT
         ),
 
+        //ldap
+        LDAP_ACCOUNT_DEACTIVATION_GRACE_PERIOD(
+                "The grace period in days before OTP removes a user from all projects, when they are deactivated in the LDAP",
+                Necessity.REQUIRED, null, TypeValidators.POSITIVE_NUMBER
+        ),
+
         //gui
         GUI_TRACKING_PIWIK_URL(
                 "URL for Piwik Tracking",

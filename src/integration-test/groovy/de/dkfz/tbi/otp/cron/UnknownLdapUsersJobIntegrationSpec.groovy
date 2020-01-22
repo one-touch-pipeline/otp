@@ -25,22 +25,16 @@ import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
 import spock.lang.Specification
 
-import de.dkfz.tbi.TestCase
 import de.dkfz.tbi.otp.administration.LdapService
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.MailHelperService
-import de.dkfz.tbi.otp.utils.SessionUtils
 
 @Rollback
 @Integration
-class UnknownLdapUsersIntegrationSpec extends Specification implements DomainFactoryCore {
-
-    void cleanup() {
-        TestCase.removeMetaClass(SessionUtils)
-    }
+class UnknownLdapUsersJobIntegrationSpec extends Specification implements DomainFactoryCore {
 
     void "getUsersToCheck, only returns enabled users with a username"() {
         given:
@@ -89,10 +83,8 @@ class UnknownLdapUsersIntegrationSpec extends Specification implements DomainFac
         result == usersToNotBeFound
     }
 
-    void "execute, sends a mail containing every unresolvable user"() {
+    void "wrappedExecute, sends a mail containing every unresolvable user"() {
         given:
-        SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
-
         ["A", "B", "C"].collect { String username ->
             return DomainFactory.createUser(username: username)
         }
@@ -113,13 +105,11 @@ class UnknownLdapUsersIntegrationSpec extends Specification implements DomainFac
         ])
 
         expect:
-        job.execute()
+        job.wrappedExecute()
     }
 
-    void "execute, only writes out a log message when no unresolved users were found"() {
+    void "wrappedExecute, only writes out a log message when no unresolved users were found"() {
         given:
-        SessionUtils.metaClass.static.withNewSession = { Closure c -> c() }
-
         DomainFactory.createUser(username: "username", enabled: true)
         UnknownLdapUsersJob job = new UnknownLdapUsersJob([
                 processingOptionService: new ProcessingOptionService(),
@@ -135,6 +125,6 @@ class UnknownLdapUsersIntegrationSpec extends Specification implements DomainFac
         ])
 
         expect:
-        job.execute()
+        job.wrappedExecute()
     }
 }

@@ -86,6 +86,9 @@ class ProcessingOptionService {
     int findOptionAsInteger(OptionName name, String type = null) {
         Integer.parseInt(findOptionAsString(name, type))
     }
+    long findOptionAsLong(OptionName name, String type = null) {
+        Long.parseLong(findOptionAsString(name, type))
+    }
     double findOptionAsDouble(OptionName name, String type = null) {
         Double.parseDouble(findOptionAsString(name, type))
     }

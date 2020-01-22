@@ -196,9 +196,8 @@ class UserService {
 
     void acceptPrivacyPolicy() {
         if (springSecurityService.isLoggedIn()) {
-            User user = springSecurityService.getCurrentUser()
-            user.acceptedPrivacyPolicy = true
-            user.save(flush: true)
+            User user = springSecurityService.getCurrentUser() as User
+            setAcceptPrivacyPolicy(user, true)
         }
     }
 
