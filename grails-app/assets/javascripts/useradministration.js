@@ -58,7 +58,6 @@ $.otp.userAdministration.loadUserList = function () {
         return html;
     };
     $('#userTable').dataTable({
-        // TODO: in future it might be interesting to allow filtering
         bFilter: false,
         bProcessing: true,
         bServerSide: false,
@@ -66,7 +65,8 @@ $.otp.userAdministration.loadUserList = function () {
         bJQueryUI: false,
         bPaginate: false,
         bScrollCollapse: true,
-        sScrollY: ($(window).height() - 440),
+        sScrollY: $(window).height(),
+        aaSorting: [[1, 'asc']],
         sAjaxSource: $.otp.createLink({
             controller: 'userAdministration',
             action: 'dataTableSource'
@@ -79,25 +79,29 @@ $.otp.userAdministration.loadUserList = function () {
                 "data": aoData,
                 "error": function () {
                     // clear the table
-                    fnCallback({aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0});
+                    fnCallback({ aaData: [], iTotalRecords: 0, iTotalDisplayRecords: 0 });
                 },
                 "success": function (json) {
-                    var rowData, userId, i;
+                    var rowData, userId, username, i;
                     for (i = 0; i < json.aaData.length; i += 1) {
                         rowData = json.aaData[i];
-                        userId = rowData[0];
+                        userId = rowData[0].id;
+                        username = rowData[0].username;
                         rowData[0] = $.otp.createLinkMarkup({
                             controller: 'userAdministration',
                             action: 'show',
-                            text: userId,
+                            text: username || "[no username]",
+                            title: userId,
                             parameters: {
                                 "user.id": userId
                             }
                         });
-                        rowData[3] = createUserChangeMarkup(userId, 'enable', rowData[3]);
-                        rowData[4] = createUserChangeMarkup(userId, 'expireAccount', rowData[4]);
-                        rowData[5] = createUserChangeMarkup(userId, 'lockAccount', rowData[5]);
-                        rowData[6] = '<input type="hidden" value="' + rowData[1] + '"/><button class="changeUserButton">Switch to ' + rowData[1] + '</button>';
+                        rowData[4] = createUserChangeMarkup(userId, 'enable', rowData[4]);
+                        rowData[5] = createUserChangeMarkup(userId, 'acceptedPrivacyPolicy', rowData[5]);
+                        rowData[6] = "";
+                        if (username) {
+                            rowData[6] = '<input type="hidden" value="' + username + '"/><button class="changeUserButton">Switch to ' + username + '</button>';
+                        }
                     }
                     fnCallback(json);
                 }
@@ -118,32 +122,6 @@ $.otp.userAdministration.loadUserList = function () {
 };
 
 $.otp.userAdministration.editUser = {
-    submitUserForm: function (event) {
-        "use strict";
-        event.preventDefault();
-        $.ajax({
-            type: 'GET',
-            url: $.otp.createLink({
-                controller: 'userAdministration',
-                action: 'editUser'
-            }),
-            dataType: 'json',
-            cache: 'false',
-            data: {
-                user: $("#edit-user-userid").val(),
-                username: $("#edit-user-username").val(),
-                email: $("#edit-user-email").val(),
-                realName: $("#edit-user-realname").val()
-            },
-            success: function (data) {
-                if (data.error) {
-                    $.otp.warningMessage(data.error);
-                } else if (data.success) {
-                    $.otp.infoMessage("User updated successfully.");
-                }
-            }
-        });
-    },
     /*
      The Role Domain is split in "ROLE_*" and "GROUP_*" Authorities. These are
      kept in different places in the GUI, named after their respective authority.
@@ -156,8 +134,8 @@ $.otp.userAdministration.editUser = {
         if (!(['add', 'remove'].includes(action))) { return; }
 
         var labels = {
-            "add"    : {opposite: "remove", appendToSection: "user"},
-            "remove" : {opposite: "add",    appendToSection: "available"}
+            "add"    : { opposite: "remove", appendToSection: "user" },
+            "remove" : { opposite: "add",    appendToSection: "available" }
         };
 
         var messages = {
@@ -195,9 +173,5 @@ $.otp.userAdministration.editUser = {
                 $.otp.warningMessage(textStatus + " occurred while processing the data. Reason: " + errorThrown);
             }
         });
-    },
-    register: function () {
-        "use strict";
-        $("#edit-user-form").submit(this.submitUserForm);
     }
 };

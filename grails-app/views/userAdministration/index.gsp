@@ -23,7 +23,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-    <title><g:message code="user.administration.header"/></title>
+    <title><g:message code="user.administration.index.title"/></title>
     <meta name="layout" content="main" />
     <asset:javascript src="modules/userAdministration"/>
     <asset:javascript src="modules/jqueryDatatables"/>
@@ -33,19 +33,19 @@
     <div class="body">
         <g:render template="/templates/messages"/>
 
-        <h1><g:message code="user.administration.header"/></h1>
+        <h1><g:message code="user.administration.index.header"/></h1>
         <div>
             <form id="switch-user-form" action="${request.contextPath}/login/impersonate" method="POST">
                 <input type="hidden" name="username"/>
             </form>
             <div class="otpDataTables">
                 <otp:dataTable codes="${[
-                    'user.administration.list.id',
-                    'user.administration.list.username',
-                    'user.administration.list.email',
-                    'user.administration.list.enabled',
-                    'user.administration.list.accountExpired',
-                    'user.administration.list.accountLocked',
+                    'user.administration.user.fields.username',
+                    'user.administration.user.fields.realName',
+                    'user.administration.user.fields.email',
+                    'user.administration.user.fields.plannedDeactivationDate',
+                    'user.administration.user.fields.enabled',
+                    'user.administration.user.fields.acceptedPrivacyPolicy',
                     'otp.blank'
                 ]}" id="userTable"/>
             </div>

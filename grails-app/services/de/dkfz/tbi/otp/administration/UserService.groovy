@@ -110,30 +110,6 @@ class UserService {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    User lockAccount(User user, boolean lock) {
-        assert user: "the input user must not be null"
-        user.accountLocked = lock
-        assert user.save(flush: true)
-        return user
-    }
-
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    User expireAccount(User user, boolean expire) {
-        assert user: "the input user must not be null"
-        user.accountExpired = expire
-        assert user.save(flush: true)
-        return user
-    }
-
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    User expirePassword(User user, boolean expire) {
-        assert user: "the input user must not be null"
-        user.passwordExpired = expire
-        assert user.save(flush: true)
-        return user
-    }
-
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
     List<Role> getAllRoles() {
         return Role.findAllByAuthorityLike("ROLE_%")
     }
@@ -199,6 +175,16 @@ class UserService {
             User user = springSecurityService.getCurrentUser() as User
             setAcceptPrivacyPolicy(user, true)
         }
+    }
+
+    void setAcceptPrivacyPolicy(User user, boolean flag) {
+        user.acceptedPrivacyPolicy = flag
+        user.save(flush: true)
+    }
+
+    void setPlannedDeactivationDateOfUser(User user, Date date) {
+        user.plannedDeactivationDate = date
+        user.save(flush: true)
     }
 
     /**

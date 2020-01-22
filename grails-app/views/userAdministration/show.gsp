@@ -23,45 +23,47 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
     <head>
-        <title><g:message code="user.administration.ui.heading.user"/></title>
+        <title><g:message code="user.administration.show.title"/></title>
         <meta name="layout" content="main" />
         <asset:javascript src="modules/userAdministration.js"/>
     </head>
     <body>
         <div class="body">
             <g:render template="/templates/messages"/>
-            <ul>
-                <li class="button"><g:link action="index"><g:message code="user.administration.backToOverview"/></g:link></li>
-            </ul>
-            <h2><g:message code="user.administration.ui.heading.user"/></h2>
+
+            <h2><g:message code="user.administration.show.header"/></h2>
             <div>
             <g:form controller="userAdministration" action="editUser" params='["user": user.id]'>
-                <table>
+                <table class="key-value-table">
                     <thead></thead>
                     <tbody>
-                    <tr>
-                        <td><g:message code="user.administration.ui.username"/></td>
-                        <td><input type="hidden" id="edit-user-username" name="username" value="${user.username}"/>${user.username}</td>
-                    </tr>
-                    <tr>
-                        <td><g:message code="user.administration.ui.email"/></td>
-                        <td><span><input type="text" id="edit-user-email" name="email" value="${user.email}"/></span></td>
-                    </tr>
-                    <tr>
-                        <td><g:message code="user.administration.ui.realName"/></td>
-                        <td><span><input type="text" id="edit-user-realname" name="realName" value="${user.realName}"/></span></td>
-                    </tr>
+                        <tr>
+                            <td><g:message code="user.administration.user.fields.username"/>:</td>
+                            <td>${user.username}</td>
+                        </tr>
+                        <tr>
+                            <td><g:message code="user.administration.user.fields.realName"/>:</td>
+                            <td><input type="text" name="realName" value="${cmd?.realName ?: user.realName}"/></td>
+                        </tr>
+                        <tr>
+                            <td><g:message code="user.administration.user.fields.email"/>:</td>
+                            <td><input type="text" name="email" value="${cmd?.email ?: user.email}"/></td>
+                        </tr>
+                        <tr>
+                            <td><g:message code="user.administration.user.fields.plannedDeactivationDate"/>:</td>
+                            <td>${user.formattedPlannedDeactivationDate}</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><g:submitButton name="${g.message(code: "user.administration.show.update")}"/></td>
+                        </tr>
                     </tbody>
                 </table>
-                <div class="buttons">
-                    <input type="reset" value="${g.message(code: 'user.administration.cancel')}"/>
-                    <input type="submit" value="${g.message(code: 'user.administration.save')}"/>
-                </div>
             </g:form>
             </div>
             <br>
             <h2><g:message code="user.administration.projectOverview.heading" args="[user.username]"/></h2>
-            <table class="otpDataTables projectOverviewTable">
+            <table class="otpDataTables">
                 <tr>
                     <th><g:message code="user.administration.projectOverview.projectName"/></th>
                     <th><g:message code="user.administration.projectOverview.unixGroup"/></th>
@@ -74,14 +76,18 @@
                     <th><g:message code="user.administration.projectOverview.receivesNotifications"/></th>
                     <th><g:message code="user.administration.projectOverview.enabled"/></th>
                 </tr>
-                <g:if test="${!userProjectRolesSortedByProjectName}">
+                <g:if test="${!userProjectRoles}">
                     <tr>
                         <td><g:message code="user.administration.placeholder.none"/></td>
                     </tr>
                 </g:if>
-                <g:each var="userProjectRole" in="${userProjectRolesSortedByProjectName}">
+                <g:each var="userProjectRole" in="${userProjectRoles}">
                     <tr>
-                        <td>${userProjectRole.project.name}</td>
+                        <td>
+                            <g:link controller="projectUser" action="index" params="['project': userProjectRole.project.name]">
+                                ${userProjectRole.project.name}
+                            </g:link>
+                        </td>
                         <td>${userProjectRole.project.unixGroup}</td>
                         <td>${userProjectRole.project.costCenter}</td>
                         <td>${userProjectRole.projectRole.name}</td>
@@ -97,6 +103,7 @@
             <br>
             <h2><g:message code="user.administration.ldapGroups.heading" args="[user.username]"/></h2>
             ${ldapGroups.sort().join(", ")}
+            <br>
             <g:each var="type" in="${["Group", "Role"]}">
                 <h3 id="${type}_anchor"><g:message code="user.administration.role.heading.manage${type}s" args="[user.username]"/></h3>
                 <g:each var="status" in="${["user", "available"]}">
