@@ -161,7 +161,7 @@
                 </g:if>
                 <g:each in="${enabledProjectUsers}" var="userEntry">
                     <tr>
-                        <td><g:render template="thumbnail" model="[base64Data: userEntry.thumbnailPhoto]"/></td>
+                        <td><g:render template="securedLinkedThumbnail" model="[user: userEntry.user, base64Data: userEntry.thumbnailPhoto]"/></td>
                         <td class="${userEntry.deactivated ? "userDisabled" : ""}">
                             <g:if test="${userEntry.inLdap}">
                                 ${userEntry.realName}
@@ -173,7 +173,7 @@
                                         value="${userEntry.realName}"/>
                             </g:else>
                         </td>
-                        <td>${userEntry.user.username}</td>
+                        <td><g:render template="securedLinkedUsername" model="[user: userEntry.user]"/></td>
                         <td>${userEntry.department}</td>
                         <td>
                             <otp:editorSwitch
@@ -296,7 +296,7 @@
                 </g:if>
                 <g:each in="${disabledProjectUsers}" var="userEntry">
                 <tr>
-                    <td><g:render template="thumbnail" model="[base64Data: userEntry.thumbnailPhoto]"/></td>
+                    <td><g:render template="securedLinkedThumbnail" model="[user: userEntry.user, base64Data: userEntry.thumbnailPhoto]"/></td>
                     <td class="${userEntry.deactivated ? "userDisabled" : ""}">
                         <g:if test="${userEntry.inLdap}">
                             ${userEntry.realName}
@@ -308,7 +308,7 @@
                                     value="${userEntry.realName}"/>
                         </g:else>
                     </td>
-                    <td>${userEntry.user.username}</td>
+                    <td><g:render template="securedLinkedUsername" model="[user: userEntry.user]"/></td>
                     <td>${userEntry.department}</td>
                     <td>
                         <otp:editorSwitch
