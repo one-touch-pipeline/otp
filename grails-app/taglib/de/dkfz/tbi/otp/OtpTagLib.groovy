@@ -112,13 +112,6 @@ class OtpTagLib {
         out << render(template: "/templates/dataTable", model: [id: attrs.id, codes: attrs.codes])
     }
 
-    /**
-     * Renders the main information of SeqTrack to be included into several views.
-     */
-    def seqTrackMainPart = { attrs ->
-        out << render(template: "/templates/seqTrackMainPart", model: [seqTrack: attrs.seqTrack])
-    }
-
     private static String editorSwitchTemplate(String template) {
         switch (template) {
             case "dropDown":

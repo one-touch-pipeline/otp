@@ -23,83 +23,101 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-<meta name="layout" content="main"/>
-<title><g:message code="seqTrack.show.title"/></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="layout" content="main"/>
+    <title><g:message code="seqTrack.show.title"/></title>
 </head>
+
 <body>
-  <div class="body">
+<div class="body">
     <h1><g:message code="seqTrack.show.title"/></h1>
+
     <div class="tableBlock">
-    <input type="hidden" name="seqTrackId" value="${seqTrack.id}"/>
-    <h2><g:message code="seqTrack.show.general"/></h2>
-    <table>
-        <otp:seqTrackMainPart seqTrack="${seqTrack}"/>
-       <tr>
-            <td class="myKey"><g:message code="seqTrack.show.details.hasOriginalBam"/></td>
-            <td class="myValue ${seqTrack.hasOriginalBam}"></td>
-       </tr>
-       <tr>
-            <td class="myKey"><g:message code="seqTrack.show.details.nBasePairs"/></td>
-            <td class="myValue">${seqTrack.nBasePairs}</td>
-       </tr>
-       <tr>
-            <td class="myKey"><g:message code="seqTrack.show.details.nReads"/></td>
-            <td class="myValue">
-                <g:if test="${seqTrack.getNReads()}">
-                    ${seqTrack.getNReads()}
-                </g:if>
-            </td>
-       </tr>
-       <tr>
-            <td class="myKey"><g:message code="seqTrack.show.details.insertSize"/></td>
-            <td class="myValue">${seqTrack.insertSize}</td>
-       </tr>
-       <tr>
-            <td class="myKey"><g:message code="seqTrack.show.details.qualityEncoding"/></td>
-            <td class="myValue">${seqTrack.qualityEncoding}</td>
-       </tr>
-       <tr>
-            <td class="myKey"><g:message code="seqTrack.show.details.alignmentState"/></td>
-            <td class="myValue">${seqTrack.alignmentState}</td>
-       </tr>
-       <tr>
-            <td class="myKey"><g:message code="seqTrack.show.details.fastqcState"/></td>
-            <td class="myValue">${seqTrack.fastqcState}</td>
-       </tr>
-       <tr>
-            <td class="myKey"><g:message code="seqTrack.show.seqPlatform"/></td>
-            <td class="myValue">${seqTrack.seqPlatform.name}</td>
-       </tr>
-       <tr>
-            <td class="myKey"><g:message code="seqTrack.show.pipelineVersion"/></td>
-            <td class="myValue">${seqTrack.pipelineVersion.getDisplayName()}</td>
-       </tr>
-    </table>
-    <g:if test="${jobExecutionPlans}">
-    <h2><g:message code="seqTrack.show.jobExecutionPlan"/></h2>
-    <table>
-        <thead>
+        <input type="hidden" name="seqTrackId" value="${seqTrack.id}"/>
+
+        <h2><g:message code="seqTrack.show.general"/></h2>
+        <table class="key-value-table">
             <tr>
-                <td><g:message code="seqTrack.show.jobExecutionPlan.name"/></td>
-                <td><g:message code="seqTrack.show.jobExecutionPlan.planVersion"/></td>
-                <td><g:message code="seqTrack.show.jobExecutionPlan.obsoleted"/></td>
-                <td><g:message code="seqTrack.show.jobExecutionPlan.enabled"/></td>
+                <td><g:message code="seqTrack.show.details.laneId"/></td>
+                <td>${seqTrack.laneId}</td>
             </tr>
-        </thead>
-        <tbody>
-        <g:each var="jobExecutionPlan" in="${jobExecutionPlans}">
             <tr>
-                <td>${jobExecutionPlan.name}</td>
-                <td>${jobExecutionPlan.planVersion}</td>
-                <td class="myValue ${jobExecutionPlan.obsoleted}"></td>
-                <td class="myValue ${jobExecutionPlan.enabled}"></td>
+                <td><g:message code="seqTrack.show.run"/></td>
+                <td><g:link controller="run" action="show" id="${seqTrack.run.id}">${seqTrack.run.name}</g:link></td>
             </tr>
-        </g:each>
-        </tbody>
-    </table>
-    </g:if>
+            <tr>
+                <td><g:message code="seqTrack.show.sampleType"/></td>
+                <td>${seqTrack.sample.individual.mockPid} ${seqTrack.sample.sampleType.name}</td>
+            </tr>
+            <tr>
+                <td><g:message code="seqTrack.show.seqType"/></td>
+                <td>${seqTrack.seqType.name}</td>
+            </tr>
+            <tr>
+                <td><g:message code="seqTrack.show.details.hasOriginalBam"/></td>
+                <td><span class="icon-${seqTrack.hasOriginalBam}"></span></td>
+            </tr>
+            <tr>
+                <td><g:message code="seqTrack.show.details.nBasePairs"/></td>
+                <td>${seqTrack.nBasePairs}</td>
+            </tr>
+            <tr>
+                <td><g:message code="seqTrack.show.details.nReads"/></td>
+                <td>
+                    <g:if test="${seqTrack.getNReads()}">
+                        ${seqTrack.getNReads()}
+                    </g:if>
+                </td>
+            </tr>
+            <tr>
+                <td><g:message code="seqTrack.show.details.insertSize"/></td>
+                <td>${seqTrack.insertSize}</td>
+            </tr>
+            <tr>
+                <td><g:message code="seqTrack.show.details.qualityEncoding"/></td>
+                <td>${seqTrack.qualityEncoding}</td>
+            </tr>
+            <tr>
+                <td><g:message code="seqTrack.show.details.alignmentState"/></td>
+                <td>${seqTrack.alignmentState}</td>
+            </tr>
+            <tr>
+                <td><g:message code="seqTrack.show.details.fastqcState"/></td>
+                <td>${seqTrack.fastqcState}</td>
+            </tr>
+            <tr>
+                <td><g:message code="seqTrack.show.seqPlatform"/></td>
+                <td>${seqTrack.seqPlatform.name}</td>
+            </tr>
+            <tr>
+                <td><g:message code="seqTrack.show.pipelineVersion"/></td>
+                <td>${seqTrack.pipelineVersion.getDisplayName()}</td>
+            </tr>
+        </table>
+        <g:if test="${jobExecutionPlans}">
+            <h2><g:message code="seqTrack.show.jobExecutionPlan"/></h2>
+            <table>
+                <thead>
+                <tr>
+                    <td><g:message code="seqTrack.show.jobExecutionPlan.name"/></td>
+                    <td><g:message code="seqTrack.show.jobExecutionPlan.planVersion"/></td>
+                    <td><g:message code="seqTrack.show.jobExecutionPlan.obsoleted"/></td>
+                    <td><g:message code="seqTrack.show.jobExecutionPlan.enabled"/></td>
+                </tr>
+                </thead>
+                <tbody>
+                <g:each var="jobExecutionPlan" in="${jobExecutionPlans}">
+                    <tr>
+                        <td>${jobExecutionPlan.name}</td>
+                        <td>${jobExecutionPlan.planVersion}</td>
+                        <td><span class="icon-${jobExecutionPlan.obsoleted}"></span></td>
+                        <td><span class="icon-${jobExecutionPlan.enabled}"></span></td>
+                    </tr>
+                </g:each>
+                </tbody>
+            </table>
+        </g:if>
     </div>
-  </div>
+</div>
 </body>
 </html>
