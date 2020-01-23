@@ -23,18 +23,24 @@
 /*jslint browser: true */
 /*global $ */
 
+$(function() {
+    $.otp.processingTimeStatistics.registerDataTable();
+    $.otp.processingTimeStatistics.registerDatePicker();
+});
+
 $.otp.processingTimeStatistics = {
 
     error: function(msg) {
         "use strict";
 
-        var errorContainer = $('.errorContainer')
-        errorContainer.append("<p>" + msg + "<p/>");
+        var errorContainer = $('.error-container');
+        var errorList = $('.error-list');
+        errorList.append("<p>" + msg + "</p>");
         errorContainer.show();
 
-        $('.closeError').on('click', function() {
-            $(this).parent().children('p').remove();
-            $(this).parent().hide();
+        $('.close-error').on('click', function() {
+            errorList.children('p').remove();
+            errorContainer.hide();
         })
     },
 
@@ -91,16 +97,19 @@ $.otp.processingTimeStatistics = {
         var table = $("#processingTimeStatisticsTable").dataTable({
             bProcessing : true,
             bServerSide : true,
-            bSort : true,
+            bSort : false,
             bJQueryUI : false,
-            bAutoWidth : true,
+            bAutoWidth : false,
             sAjaxSource : $.otp.createLink({
                 controller : 'processingTimeStatistics',
                 action : 'dataTableSource',
-                parameters : {'from': $('#dpFrom').val(), 'to': $('#dpTo').val()}
+                parameters : { 'from': $('#dpFrom').val(), 'to': $('#dpTo').val() }
             }),
-            bScrollCollapse: false,
+            bScrollCollapse: true,
             bPaginate: false,
+            sScrollX: 'auto',
+            sScrollXInner: "100%",
+            sScrollY: 800,
             bDeferRender : true,
             fnServerData : function (sSource, aoData, fnCallback) {
                 var input = $('.dataTables_filter input');
@@ -168,10 +177,6 @@ $.otp.processingTimeStatistics = {
     },
 
     createIsFinished: function(finished, row) {
-        if (finished == true) {
-            return '<div class="finalProcessingStatusSent">' + row + '</div>';
-        } else {
-            return '<div class="finalProcessingStatusNotSent">' + row + '</div>';
-        }
+        return '<span class="' + (finished ? 'finalProcessingStatusSent' : 'finalProcessingStatusNotSent') + '">' + row + '</span>';
     }
 };

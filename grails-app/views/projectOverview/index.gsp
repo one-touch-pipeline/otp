@@ -56,7 +56,7 @@
             <h3 class="statisticTableTitle" >
                 <g:message code="projectOverview.title.centersOverviewTable" />
             </h3>
-           <div class="otpDataTables">
+            <div class="otpDataTables">
                 <otp:dataTable
                     codes="${[
                         'overview.statistic.center.name',

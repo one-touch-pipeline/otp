@@ -2223,6 +2223,54 @@ div.log {
     }
 }
 
+.processing-time-statistics-top-bar {
+    .date-pickers {
+        padding: 10px;
+    }
+    .error-list {
+        background-color: rgb(255, 138, 132);
+        margin-bottom: 20px;
+        margin-top: 20px;
+        p {
+            margin-left: 10px;
+        }
+    }
+}
+
+// this is a dirty leftover and should be removed when a common style for datatables is introduced
+.temp-processing-time-statistics-table-wrapper {
+    .dataTables_filter {
+        display: block;
+    }
+    #processingTimeStatisticsTable_filter {
+        float: left;
+        margin-bottom: 20px;
+        display: block;
+    }
+
+    td {
+        border-right: 1px solid black;
+        text-align: left;
+    }
+    th {
+        font-weight: bold;
+        text-align: left;
+    }
+    tr.odd {
+        background-color: #A5D3FF;
+    }
+    tr.even {
+        background-color: #F3FAFF;
+    }
+
+    .finalProcessingStatusSent {
+        background-color:rgba(150, 180, 150, 0.7);
+    }
+    .finalProcessingStatusNotSent {
+        background-color:rgba(180, 150, 180, 0.7);
+    }
+}
+
 .trim-text-with-ellipsis {
     text-overflow: ellipsis;
     overflow: hidden;
