@@ -173,8 +173,8 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 fileName           : "DataFileFileName_${nextId}_R1.gz",
                 vbpFileName        : "VbpDataFileFileName_${nextId}_R1.gz",
                 pathName           : "path_${nextId}",
-                initialDirectory   : TestCase.getUniqueNonExistentPath().path,
-                md5sum             : { HelperUtils.getRandomMd5sum() },
+                initialDirectory   : TestCase.uniqueNonExistentPath.path,
+                md5sum             : { HelperUtils.randomMd5sum },
                 dateExecuted       : new Date(),
                 dateFileSystem     : new Date(),
                 dateCreated        : new Date(),
@@ -222,7 +222,6 @@ trait DomainFactoryCore implements DomainFactoryHelper {
         createSequenceDataFile(dataFileProperties + [seqTrack: seqTrack])
         return seqTrack
     }
-
 
     private Map getSeqTrackProperties(Map properties = [:]) {
         return [
@@ -305,7 +304,9 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     }
 
     SeqPlatformGroup createSeqPlatformGroup(Map properties = [:]) {
-        return createDomainObject(SeqPlatformGroup, [:], properties)
+        return createDomainObject(SeqPlatformGroup, [
+                seqPlatforms: [] as Set,
+        ], properties)
     }
 
     SeqPlatformGroup createSeqPlatformGroupWithMergingCriteria(Map properties = [:]) {
@@ -324,7 +325,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
     }
 
     MergingCriteria createMergingCriteriaLazy(Map properties) {
-        if ((properties.get("seqType") as SeqType)?.isWgbs() && !properties.hasProperty("useLibPrepKit")) {
+        if ((properties.get("seqType") as SeqType)?.wgbs && !properties.hasProperty("useLibPrepKit")) {
             properties.put("useLibPrepKit", false)
         }
 

@@ -23,12 +23,15 @@ package de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators
 
 import grails.testing.gorm.DataTest
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import de.dkfz.tbi.TestCase
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerConfig
 import de.dkfz.tbi.otp.dataprocessing.cellRanger.CellRangerMergingWorkPackage
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.domainFactory.pipelines.AlignmentPipelineFactory
+import de.dkfz.tbi.otp.domainFactory.pipelines.IsAlignment
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.MetadataValidationContextFactory
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
@@ -41,7 +44,7 @@ import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.NO_ALIGNME
 import static de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName.OTP_ALIGNMENT
 import static de.dkfz.tbi.otp.ngsdata.MetaDataColumn.*
 
-class MergingPreventionValidatorSpec extends Specification implements DataTest {
+class MergingPreventionValidatorSpec extends Specification implements DataTest, DomainFactoryCore, AlignmentPipelineFactory {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -61,8 +64,7 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest {
         ]
     }
 
-
-    void "test validate"() {
+    void "validate, check different cases without warning and with sample exist warning"() {
         given:
         DomainFactory.createRoddyAlignableSeqTypes()
         DomainFactory.createCellRangerAlignableSeqTypes()
@@ -81,25 +83,37 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest {
                 seqType: scSeqType,
         )
         DomainFactory.createSampleIdentifier(sample: scSample, name: "sample1")
+        createMergingCriteria([
+                project: scSample.project,
+                seqType: scSeqType,
+        ])
 
         Sample bulkSample = DomainFactory.proxyCore.createSample()
         bulkSample.individual.project = project
         bulkSample.individual.save(flush: true)
         SeqType bulkSeqType = DomainFactory.proxyRoddy.createSeqType()
-        DomainFactory.proxyRoddy.createMergingWorkPackage(
+        MergingWorkPackage bulkMergingWorkPackage = DomainFactory.proxyRoddy.createMergingWorkPackage(
                 sample: bulkSample,
                 seqType: bulkSeqType,
         )
         DomainFactory.createSampleIdentifier(sample: bulkSample, name: "sample2")
+        createMergingCriteria([
+                project: bulkSample.project,
+                seqType: bulkSeqType,
+        ])
 
         SeqType bulkSeqTypeWithAntibodyTarget = DomainFactory.createChipSeqType()
         AntibodyTarget antibodyTarget = DomainFactory.proxyCore.createAntibodyTarget()
-        DomainFactory.proxyRoddy.createMergingWorkPackage(
+        MergingWorkPackage bulkMergingWorkPackageWithAntibodyTarget = DomainFactory.proxyRoddy.createMergingWorkPackage(
                 sample: bulkSample,
                 seqType: bulkSeqTypeWithAntibodyTarget,
                 antibodyTarget: antibodyTarget,
         )
         DomainFactory.createSampleIdentifier(sample: bulkSample, name: "sample3")
+        createMergingCriteria([
+                project: bulkSample.project,
+                seqType: bulkSeqTypeWithAntibodyTarget,
+        ])
 
         Sample unusedSample = DomainFactory.proxyCore.createSample()
         DomainFactory.createSampleIdentifier(sample: unusedSample, name: "unusedSample")
@@ -107,60 +121,91 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest {
         Sample sampleNoAlignment = DomainFactory.proxyCore.createSample()
         sampleNoAlignment.individual.project.alignmentDeciderBeanName = NO_ALIGNMENT
         sampleNoAlignment.individual.project.save(flush: true)
-        DomainFactory.proxyRoddy.createMergingWorkPackage(
+        MergingWorkPackage noAlignmentMergingWorkPackage = DomainFactory.proxyRoddy.createMergingWorkPackage(
                 sample: sampleNoAlignment,
                 seqType: bulkSeqType,
         )
         DomainFactory.createSampleIdentifier(sample: sampleNoAlignment, name: "sampleNoAlignment")
 
+        SeqPlatform seqPlatform = createSeqPlatform()
+        LibraryPreparationKit libraryPreparationKit = createLibraryPreparationKit()
+
+        //adapt mergingWorkPackages to be match the values used in the MetaDataSheet
+        [
+                bulkMergingWorkPackage,
+                bulkMergingWorkPackageWithAntibodyTarget,
+                noAlignmentMergingWorkPackage,
+        ].each { MergingWorkPackage mergingWorkPackage ->
+            mergingWorkPackage.seqPlatformGroup.seqPlatforms.add(seqPlatform)
+            mergingWorkPackage.seqPlatformGroup.save(flush: true)
+            mergingWorkPackage.libraryPreparationKit = libraryPreparationKit
+            mergingWorkPackage.save(flush: true)
+        }
+
+        String furtherValues = [
+                seqPlatform.name,
+                seqPlatform.seqPlatformModelLabel,
+                "",
+                libraryPreparationKit.name,
+        ].join('\t')
 
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
-                "${SAMPLE_ID}\t${SEQUENCING_TYPE}\t${LIBRARY_LAYOUT}\t${PROJECT}\t${BASE_MATERIAL}\t${ANTIBODY_TARGET}\n" +
-                        "sample1\t${scSeqType.name}\t${scSeqType.libraryLayout.name()}\t\t${SeqType.SINGLE_CELL_DNA}\n" +
-                        "sample2\t${bulkSeqType.name}\t${bulkSeqType.libraryLayout.name()}\t\n" +
-                        "sample3\t${bulkSeqTypeWithAntibodyTarget.name}\t${bulkSeqTypeWithAntibodyTarget.libraryLayout.name()}\t\t\t${antibodyTarget.name}\n" +
-                        "${project.name}ß${scSample.individual.pid}ß${scSample.sampleType.name}\t${scSeqType.name}\t${scSeqType.libraryLayout.name()}\t${project.name}\t${SeqType.SINGLE_CELL_DNA}\n" +
-                        "${project.name}ß${bulkSample.individual.pid}ß${bulkSample.sampleType.name}\t${bulkSeqType.name}\t${bulkSeqType.libraryLayout.name()}\t${project.name}\n" +
-                        "unusedSample\t${bulkSeqType.name}\t${bulkSeqType.libraryLayout.name()}\t\n" +
-                        "sampleNoAlignment\t${bulkSeqType.name}\t${bulkSeqType.libraryLayout.name()}\t\n" +
-                        "unknown_sample\t${scSeqType.name}\t${scSeqType.libraryLayout.name()}\t\t${SeqType.SINGLE_CELL_DNA}\n" +
-                        "sample1\tunknown\t${scSeqType.libraryLayout.name()}\t\t${SeqType.SINGLE_CELL_DNA}\n" +
-                        "sample1\t${scSeqType.name}\tunknown\t\t${SeqType.SINGLE_CELL_DNA}\n" +
-                        "sample1\t${scSeqType.name}\t${scSeqType.libraryLayout.name()}\t\tunknown\n" +
-                        "sample3\t${bulkSeqTypeWithAntibodyTarget.name}\t${bulkSeqTypeWithAntibodyTarget.libraryLayout.name()}\t\t\tunknown\n" +
-                        "${project.name}ß${scSample.individual.pid}ß${scSample.sampleType.name}\t${scSeqType.name}\t${scSeqType.libraryLayout.name()}\tunknown\t${SeqType.SINGLE_CELL_DNA}\n"
+                "${SAMPLE_ID}\t${SEQUENCING_TYPE}\t${LIBRARY_LAYOUT}\t${PROJECT}\t${BASE_MATERIAL}\t${ANTIBODY_TARGET}\t${INSTRUMENT_PLATFORM}\t${INSTRUMENT_MODEL}\t${SEQUENCING_KIT}\t${LIB_PREP_KIT}\n" +
+                        "sample1\t${scSeqType.name}\t${scSeqType.libraryLayout.name()}\t\t${SeqType.SINGLE_CELL_DNA}\t\t${furtherValues}\n" +
+                        "sample2\t${bulkSeqType.name}\t${bulkSeqType.libraryLayout.name()}\t\t\t\t${furtherValues}\n" +
+                        "sample3\t${bulkSeqTypeWithAntibodyTarget.name}\t${bulkSeqTypeWithAntibodyTarget.libraryLayout.name()}\t\t\t${antibodyTarget.name}\t${furtherValues}\n" +
+                        "${project.name}#${scSample.individual.pid}#${scSample.sampleType.name}\t${scSeqType.name}\t${scSeqType.libraryLayout.name()}\t${project.name}\t${SeqType.SINGLE_CELL_DNA}\t\t${furtherValues}\n" +
+                        "${project.name}#${bulkSample.individual.pid}#${bulkSample.sampleType.name}\t${bulkSeqType.name}\t${bulkSeqType.libraryLayout.name()}\t${project.name}\t\t\t${furtherValues}\n" +
+                        "unusedSample\t${bulkSeqType.name}\t${bulkSeqType.libraryLayout.name()}\t\t\t\t${furtherValues}\n" +
+                        "sampleNoAlignment\t${bulkSeqType.name}\t${bulkSeqType.libraryLayout.name()}\t\t\t\t${furtherValues}\n" +
+                        "unknown_sample\t${scSeqType.name}\t${scSeqType.libraryLayout.name()}\t\t\t${SeqType.SINGLE_CELL_DNA}\t${furtherValues}\n" +
+                        "sample1\tunknown\t${scSeqType.libraryLayout.name()}\t\t${SeqType.SINGLE_CELL_DNA}\t\t${furtherValues}\n" +
+                        "sample1\t${scSeqType.name}\tunknown\t\t${SeqType.SINGLE_CELL_DNA}\t\t${furtherValues}\n" +
+                        "sample1\t${scSeqType.name}\t${scSeqType.libraryLayout.name()}\t\tunknown\t\t${furtherValues}\n" +
+                        "sample3\t${bulkSeqTypeWithAntibodyTarget.name}\t${bulkSeqTypeWithAntibodyTarget.libraryLayout.name()}\t\t\tunknown\t${furtherValues}\n" +
+                        "${project.name}#${scSample.individual.pid}#${scSample.sampleType.name}\t${scSeqType.name}\t${scSeqType.libraryLayout.name()}\tunknown\t${SeqType.SINGLE_CELL_DNA}\t\t${furtherValues}\n"
         )
 
-        Validator<MetadataValidationContext> validator = new MergingPreventionValidator(
-                antibodyTargetService: new AntibodyTargetService(),
-                seqTypeService: new SeqTypeService(),
-                sampleIdentifierService: [
-                        getSampleIdentifierParser: { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
-                            new SampleIdentifierParser() {
-                                @Override
-                                ParsedSampleIdentifier tryParse(String sampleIdentifier) {
-                                    Matcher match = sampleIdentifier =~ /(.*)ß(.*)ß(.*)/
-                                    if (match.matches()) {
-                                        return new DefaultParsedSampleIdentifier(match.group(1), match.group(2), match.group(3), sampleIdentifier, null)
-                                    } else {
-                                        return null
-                                    }
-                                }
+        SampleIdentifierParser sampleIdentifierParser = new SampleIdentifierParser() {
 
-                                @SuppressWarnings("UnusedMethodParameter")
-                                @Override
-                                boolean tryParsePid(String pid) {
-                                    return true
-                                }
+            @Override
+            ParsedSampleIdentifier tryParse(String sampleIdentifier) {
+                Matcher match = sampleIdentifier =~ /(.*)#(.*)#(.*)/
+                if (match.matches()) {
+                    return new DefaultParsedSampleIdentifier(match.group(1), match.group(2), match.group(3), sampleIdentifier, null)
+                }
+                return null
+            }
 
-                                @Override
-                                String tryParseCellPosition(String sampleIdentifier) {
-                                    return null
-                                }
-                            }
-                        }
-                ] as SampleIdentifierService,
-        )
+            @SuppressWarnings("UnusedMethodParameter")
+            @Override
+            boolean tryParsePid(String pid) {
+                return true
+            }
+
+            @Override
+            String tryParseCellPosition(String sampleIdentifier) {
+                return null
+            }
+        }
+
+        Validator<MetadataValidationContext> validator = new MergingPreventionValidator([
+                antibodyTargetService       : new AntibodyTargetService(),
+                libraryPreparationKitService: new LibraryPreparationKitService(),
+                metadataImportService       : new MetadataImportService([
+                        seqTypeService: new SeqTypeService(),
+                ]),
+                sampleIdentifierService     : Spy(SampleIdentifierService) {
+                    _ * getSampleIdentifierParser(_) >> { SampleIdentifierParserBeanName sampleIdentifierParserBeanName ->
+                        sampleIdentifierParser
+                    }
+                },
+                seqPlatformService          : new SeqPlatformService([
+                        seqPlatformModelLabelService: new SeqPlatformModelLabelService(),
+                        sequencingKitLabelService   : new SequencingKitLabelService()
+                ]),
+                seqTypeService              : new SeqTypeService(),
+        ])
 
         when:
         validator.validate(context)
@@ -184,5 +229,220 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest {
                         "Sample would be automatically merged with existing samples."),
         ]
         TestCase.assertContainSame(expectedProblems, context.problems)
+    }
+
+    @Unroll
+    void "validate, if compatible mergingWorkPackage exist, add merging warning (case: #name)"() {
+        given:
+        Map data = createData(factory, seqTypeClosure)
+
+        SeqPlatformGroup seqPlatformGroup = data.mergingWorkPackage.seqPlatformGroup
+        seqPlatformGroup.seqPlatforms.add(data.seqPlatform)
+        seqPlatformGroup.save(flush: true)
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(data.content)
+
+        when:
+        data.validator.validate(context)
+
+        then:
+        Collection<Problem> expectedProblems = [
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, errorLevel,
+                        "Sample ${data.mergingWorkPackage.sample.displayName} with sequencing type " +
+                                "${data.mergingWorkPackage.seqType.displayNameWithLibraryLayout} would be automatically merged with existing samples.",
+                        "Sample would be automatically merged with existing samples."),
+        ]
+        TestCase.assertContainSame(expectedProblems, context.problems)
+
+        where:
+        input << CASE_SAMPLE_EXIST_CAUSE_MESSAGE
+
+        name = input.name
+        factory = input.factory
+        seqTypeClosure = input.seqTypeClosure
+        errorLevel = input.errorLevel
+    }
+
+    @Unroll
+    void "validate, if mergingWorkPackage has not compatible seqPlatform, add merging warning (case: #name)"() {
+        given:
+        Map data = createData(factory, seqTypeClosure)
+
+        SeqPlatformGroup seqPlatformGroup = data.mergingWorkPackage.seqPlatformGroup
+        seqPlatformGroup.seqPlatforms.add(createSeqPlatform())
+        seqPlatformGroup.save(flush: true)
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(data.content)
+
+        when:
+        data.validator.validate(context)
+
+        then:
+        Collection<Problem> expectedProblems = [
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, errorLevel,
+                        "Sample ${data.mergingWorkPackage.sample.displayName} with sequencing type " +
+                                "${data.mergingWorkPackage.seqType.displayNameWithLibraryLayout} can not be merged with the existing bam file, since " +
+                                "new seq platform ${data.seqPlatform} is not compable with seq platform group ${data.mergingWorkPackage.seqPlatformGroup}",
+                        "Sample can not be merged with existing data, because merging criteria is incompatible."),
+        ]
+        TestCase.assertContainSame(expectedProblems, context.problems)
+
+        where:
+        input << CASE_SEQ_PLATFORM_DIFFER_CAUSE_MESSAGE
+
+        name = input.name
+        factory = input.factory
+        seqTypeClosure = input.seqTypeClosure
+        errorLevel = input.errorLevel
+    }
+
+    @Unroll
+    void "validate, if libraryPreparationKit is used and different, add merging warning (case: #name)"() {
+        given:
+        Map data = createData(factory, seqTypeClosure)
+
+        SeqPlatformGroup seqPlatformGroup = data.mergingWorkPackage.seqPlatformGroup
+        seqPlatformGroup.seqPlatforms.add(data.seqPlatform)
+        seqPlatformGroup.save(flush: true)
+        data.mergingWorkPackage.libraryPreparationKit = createLibraryPreparationKit()
+        data.mergingWorkPackage.save(flush: true)
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(data.content)
+
+        when:
+        data.validator.validate(context)
+
+        then:
+        Collection<Problem> expectedProblems = [
+                new Problem(context.spreadsheet.dataRows[0].cells as Set, errorLevel,
+                        "Sample ${data.mergingWorkPackage.sample.displayName} with sequencing type " +
+                                "${data.mergingWorkPackage.seqType.displayNameWithLibraryLayout} can not be merged with the existing bam file, since " +
+                                "new library preparation kit ${data.libraryPreparationKit} differs from old library preparation kit ${data.mergingWorkPackage.libraryPreparationKit}",
+                        "Sample can not be merged with existing data, because merging criteria is incompatible."),
+        ]
+        TestCase.assertContainSame(expectedProblems, context.problems)
+
+        where:
+        input << CASE_LIBRARY_PREPARATION_KIT_DIFFER_CAUSE_MESSAGE
+
+        name = input.name
+        factory = input.factory
+        seqTypeClosure = input.seqTypeClosure
+        errorLevel = input.errorLevel
+    }
+
+    static private final List<Map<String, ?>> CASE_LIBRARY_PREPARATION_KIT_DIFFER_CAUSE_MESSAGE = [
+            [
+                    name          : 'pancan wgs paired',
+                    factory       : AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE,
+                    seqTypeClosure: { DomainFactory.createWholeGenomeSeqType() },
+                    errorLevel    : Level.WARNING,
+            ],
+            [
+                    name          : 'pancan wes paired',
+                    factory       : AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE,
+                    seqTypeClosure: { DomainFactory.createExomeSeqType() },
+                    errorLevel    : Level.WARNING,
+            ],
+            [
+                    name          : 'pancan chipseq paired',
+                    factory       : AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE,
+                    seqTypeClosure: { DomainFactory.createChipSeqType() },
+                    errorLevel    : Level.WARNING,
+            ],
+            [
+                    name          : 'pancan rna paired',
+                    factory       : AlignmentPipelineFactory.RoddyRnaFactoryInstance.INSTANCE,
+                    seqTypeClosure: { DomainFactory.createRnaPairedSeqType() },
+                    errorLevel    : Level.WARNING,
+            ],
+            [
+                    name          : 'pancan rna single',
+                    factory       : AlignmentPipelineFactory.RoddyRnaFactoryInstance.INSTANCE,
+                    seqTypeClosure: { DomainFactory.createRnaSingleSeqType() },
+                    errorLevel    : Level.WARNING,
+            ],
+    ]*.asImmutable().asImmutable()
+
+    static private final List<Map<String, ?>> CASE_SEQ_PLATFORM_DIFFER_CAUSE_MESSAGE = CASE_LIBRARY_PREPARATION_KIT_DIFFER_CAUSE_MESSAGE + [
+            [
+                    name          : 'pancan wgbs paired',
+                    factory       : AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE,
+                    seqTypeClosure: { DomainFactory.createWholeGenomeBisulfiteSeqType() },
+                    errorLevel    : Level.WARNING,
+            ],
+            [
+                    name          : 'pancan wgbstag paired',
+                    factory       : AlignmentPipelineFactory.RoddyPancanFactoryInstance.INSTANCE,
+                    seqTypeClosure: { DomainFactory.createWholeGenomeBisulfiteTagmentationSeqType() },
+                    errorLevel    : Level.WARNING,
+            ],
+    ]*.asImmutable().asImmutable()
+
+    static private final List<Map<String, ?>> CASE_SAMPLE_EXIST_CAUSE_MESSAGE = CASE_SEQ_PLATFORM_DIFFER_CAUSE_MESSAGE + [
+            [
+                    name          : 'cellranger paired',
+                    factory       : AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE,
+                    seqTypeClosure: { AlignmentPipelineFactory.CellRangerFactoryInstance.INSTANCE.createSeqType() },
+                    errorLevel    : Level.ERROR,
+            ],
+    ]*.asImmutable().asImmutable()
+
+    private Map<String, ?> createData(IsAlignment alignment, Closure<SeqType> seqTypeClosure) {
+        DomainFactory.createAllAlignableSeqTypes()
+
+        MergingWorkPackage mergingWorkPackage = alignment.createMergingWorkPackage([
+                seqType: seqTypeClosure(),
+        ])
+        mergingWorkPackage.project.alignmentDeciderBeanName = OTP_ALIGNMENT
+        mergingWorkPackage.project.save(flush: true)
+
+        SeqPlatform seqPlatform = createSeqPlatform()
+
+        SampleIdentifier sampleIdentifier = createSampleIdentifier([
+                sample: mergingWorkPackage.sample,
+        ])
+
+        createMergingCriteria([
+                project: mergingWorkPackage.project,
+                seqType: mergingWorkPackage.seqType,
+        ])
+
+        String content = [
+                (PROJECT)            : mergingWorkPackage.project.name,
+                (SAMPLE_ID)          : sampleIdentifier.name,
+                (SEQUENCING_TYPE)    : mergingWorkPackage.seqType.name,
+                (LIBRARY_LAYOUT)     : mergingWorkPackage.seqType.libraryLayout,
+                (BASE_MATERIAL)      : mergingWorkPackage.seqType.singleCell ? SeqType.SINGLE_CELL_DNA : '',
+                (ANTIBODY_TARGET)    : mergingWorkPackage.antibodyTarget?.name ?: '',
+                (INSTRUMENT_PLATFORM): seqPlatform.name,
+                (INSTRUMENT_MODEL)   : seqPlatform.seqPlatformModelLabel.name,
+                (SEQUENCING_KIT)     : seqPlatform.sequencingKitLabel?.name ?: '',
+                (LIB_PREP_KIT)       : mergingWorkPackage.libraryPreparationKit,
+        ].collect { key, value ->
+            [key, value]
+        }.transpose()*.join('\t').join('\n')
+
+        Validator<MetadataValidationContext> validator = new MergingPreventionValidator([
+                antibodyTargetService       : new AntibodyTargetService(),
+                libraryPreparationKitService: new LibraryPreparationKitService(),
+                metadataImportService       : new MetadataImportService([
+                        seqTypeService: new SeqTypeService(),
+                ]),
+                sampleIdentifierService     : new SampleIdentifierService(),
+                seqTypeService              : new SeqTypeService(),
+                seqPlatformService          : new SeqPlatformService([
+                        seqPlatformModelLabelService: new SeqPlatformModelLabelService(),
+                        sequencingKitLabelService   : new SequencingKitLabelService()
+                ]),
+        ])
+
+        return [
+                mergingWorkPackage   : mergingWorkPackage,
+                seqPlatform          : seqPlatform,
+                libraryPreparationKit: mergingWorkPackage.libraryPreparationKit,
+                content              : content,
+                validator            : validator,
+        ]
     }
 }

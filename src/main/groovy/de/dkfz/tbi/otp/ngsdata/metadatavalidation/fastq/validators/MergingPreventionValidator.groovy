@@ -25,8 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.SqlUtil
-import de.dkfz.tbi.otp.dataprocessing.AlignmentDeciderBeanName
-import de.dkfz.tbi.otp.dataprocessing.MergingWorkPackage
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidationContext
 import de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.MetadataValidator
@@ -42,30 +41,41 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
     @Autowired
     AntibodyTargetService antibodyTargetService
     @Autowired
+    LibraryPreparationKitService libraryPreparationKitService
+    @Autowired
+    MetadataImportService metadataImportService
+    @Autowired
     SampleIdentifierService sampleIdentifierService
+    @Autowired
+    SeqPlatformService seqPlatformService
     @Autowired
     SeqTypeService seqTypeService
 
     @Override
     Collection<String> getDescriptions() {
-        return ["Check whether a new sample would be merged with existing samples"]
+        return [
+                "Check whether a new sample would be merged with existing samples",
+                "Check whether a new sample could not be merged because of incompatible merging criteria (seqPlatform, library preparation kit)",
+        ]
     }
 
     @Override
     List<String> getRequiredColumnTitles(MetadataValidationContext context) {
-        return [SAMPLE_ID, SEQUENCING_TYPE, LIBRARY_LAYOUT, PROJECT]*.name()
+        return [SAMPLE_ID, SEQUENCING_TYPE, LIBRARY_LAYOUT, PROJECT, INSTRUMENT_PLATFORM, INSTRUMENT_MODEL]*.name()
     }
 
     @Override
     List<String> getOptionalColumnTitles(MetadataValidationContext context) {
-        return [BASE_MATERIAL, ANTIBODY_TARGET, TAGMENTATION_BASED_LIBRARY]*.name()
+        return [BASE_MATERIAL, ANTIBODY_TARGET, TAGMENTATION_BASED_LIBRARY, SEQUENCING_KIT, LIB_PREP_KIT]*.name()
     }
 
     @Override
-    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingRequiredColumn(MetadataValidationContext context, String columnTitle) {
+    }
 
     @Override
-    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) { }
+    void checkMissingOptionalColumn(MetadataValidationContext context, String columnTitle) {
+    }
 
     @Override
     void validateValueTuples(MetadataValidationContext context, Collection<ValueTuple> valueTuples) {
@@ -77,74 +87,116 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
     private List<SeqType> getSingleCellSeqTypes() {
         SeqTypeService.cellRangerAlignableSeqTypes
     }
+
     private List<SeqType> getBulkSeqTypes() {
         SeqTypeService.roddyAlignableSeqTypes
     }
 
     void validateValueTuple(MetadataValidationContext context, ValueTuple valueTuple) {
-        String seqTypeName = MetadataImportService.getSeqTypeNameFromMetadata(valueTuple)
-        LibraryLayout libraryLayout = LibraryLayout.findByName(valueTuple.getValue(LIBRARY_LAYOUT.name()))
-        if (!libraryLayout) {
-            return
-        }
-        String baseMaterial = valueTuple.getValue(BASE_MATERIAL.name())
-        boolean singleCell = SeqTypeService.isSingleCell(baseMaterial)
-        SeqType seqType = seqTypeService.findByNameOrImportAlias(seqTypeName, [libraryLayout: libraryLayout, singleCell: singleCell])
-
+        SeqType seqType = metadataImportService.getSeqTypeFromMetadata(valueTuple)
         if (!seqType) {
             return
         }
 
-        String antibodyTargetName = valueTuple.getValue(ANTIBODY_TARGET.name()) ?: ""
-        AntibodyTarget antibodyTarget = null
-        if (seqType.hasAntibodyTarget && antibodyTargetName) {
-            antibodyTarget = antibodyTargetService.findByNameOrImportAlias(antibodyTargetName)
+        AntibodyTarget antibodyTarget = findAntibodyTarget(valueTuple, seqType)
+
+        Sample sample = findExistingSampleForValueTuple(valueTuple)
+        if (!sample) {
+            return
         }
 
-        String sampleId = valueTuple.getValue(SAMPLE_ID.name())
-        String projectName = valueTuple.getValue(PROJECT.name())
-        Project project = Project.getByNameOrNameInMetadataFiles(projectName)
-        Sample sample
-        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
-        if (sampleIdentifier) {
-            sample = sampleIdentifier.sample
-            project = sampleIdentifier.project
-        } else {
-            if (!project) {
-                return
-            }
-            ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId, project)
-            if (!parsedSampleIdentifier) {
-                return
-            }
-            sample = Sample.createCriteria().get {
-                individual {
-                    eq("pid", parsedSampleIdentifier.pid)
-                }
-                sampleType {
-                    ilike("name", SqlUtil.replaceWildcardCharactersInLikeExpression(parsedSampleIdentifier.sampleTypeDbName))
-                }
-            } as Sample
-            if (!sample) {
-                return
-            }
+        SeqPlatform seqPlatform = findSeqPlatform(valueTuple)
+        if (!seqPlatform) {
+            return
         }
+
+        String libraryPreparationKitName = valueTuple.getValue(LIB_PREP_KIT.name())
+        LibraryPreparationKit libraryPreparationKit = libraryPreparationKitName ?
+                libraryPreparationKitService.findByNameOrImportAlias(libraryPreparationKitName) : null
 
         List<MergingWorkPackage> mergingWorkPackages = MergingWorkPackage.findAllWhere(
                 sample: sample,
                 seqType: seqType,
                 antibodyTarget: antibodyTarget,
         )
+
         if (mergingWorkPackages) {
+            String messagePrefix = "Sample ${sample.displayName} with sequencing type ${seqType.displayNameWithLibraryLayout}"
             if (seqType in singleCellSeqTypes) {
                 context.addProblem(valueTuple.cells, Level.ERROR,
-                        "Sample ${sample.displayName} with sequencing type ${seqType.displayNameWithLibraryLayout} would be automatically merged with existing samples.",
+                        "${messagePrefix} would be automatically merged with existing samples.",
                         "Sample would be automatically merged with existing samples.")
-            } else if (seqType in bulkSeqTypes && project.alignmentDeciderBeanName != AlignmentDeciderBeanName.NO_ALIGNMENT) {
-                context.addProblem(valueTuple.cells, Level.WARNING,
-                        "Sample ${sample.displayName} with sequencing type ${seqType.displayNameWithLibraryLayout} would be automatically merged with existing samples.",
-                        "Sample would be automatically merged with existing samples.")
+            } else if (seqType in bulkSeqTypes && sample.project.alignmentDeciderBeanName != AlignmentDeciderBeanName.NO_ALIGNMENT) {
+                mergingWorkPackages.each { MergingWorkPackage mergingWorkPackage ->
+                    MergingCriteria mergingCriteria = atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(mergingWorkPackage.project, seqType))
+                    boolean useLibPrepKit = mergingCriteria ? mergingCriteria.useLibPrepKit : true
+                    boolean mergeableSeqPlatform = mergingWorkPackage.seqPlatformGroup.seqPlatforms.contains(seqPlatform)
+                    boolean mergeableLibPrepKit = useLibPrepKit ? mergingWorkPackage.libraryPreparationKit == libraryPreparationKit : true
+
+                    if (mergeableSeqPlatform && mergeableLibPrepKit) {
+                        context.addProblem(valueTuple.cells, Level.WARNING,
+                                "${messagePrefix} would be automatically merged with existing samples.",
+                                "Sample would be automatically merged with existing samples.")
+                    } else {
+                        List<String> warnings = []
+                        if (!mergeableSeqPlatform) {
+                            warnings << "new seq platform ${seqPlatform} is not compable with seq platform group ${mergingWorkPackage.seqPlatformGroup}"
+                        }
+                        if (!mergeableLibPrepKit) {
+                            warnings << "new library preparation kit ${libraryPreparationKit} differs from old library preparation kit ${mergingWorkPackage.libraryPreparationKit}"
+                        }
+                        context.addProblem(valueTuple.cells, Level.WARNING,
+                                "${messagePrefix} can not be merged with the existing bam file, since ${warnings.join(' and ')}",
+                                "Sample can not be merged with existing data, because merging criteria is incompatible.")
+                    }
+                }
             }
         }
+    }
+
+    private AntibodyTarget findAntibodyTarget(ValueTuple valueTuple, SeqType seqType) {
+        String antibodyTargetName = valueTuple.getValue(ANTIBODY_TARGET.name()) ?: ""
+        if (seqType.hasAntibodyTarget && antibodyTargetName) {
+            return antibodyTargetService.findByNameOrImportAlias(antibodyTargetName)
+        }
+        return null
+    }
+
+    private SeqPlatform findSeqPlatform(ValueTuple valueTuple) {
+        return seqPlatformService.findSeqPlatform(
+                valueTuple.getValue(INSTRUMENT_PLATFORM.name()),
+                valueTuple.getValue(INSTRUMENT_MODEL.name()),
+                valueTuple.getValue(SEQUENCING_KIT.name())
+        )
+    }
+
+    private Sample findExistingSampleForValueTuple(ValueTuple valueTuple) {
+        String sampleId = valueTuple.getValue(SAMPLE_ID.name())
+        SampleIdentifier sampleIdentifier = atMostOneElement(SampleIdentifier.findAllByName(sampleId))
+        if (sampleIdentifier) {
+            return sampleIdentifier.sample
+        }
+
+        Project project = metadataImportService.getProjectFromMetadata(valueTuple)
+        if (!project) {
+            return
+        }
+
+        ParsedSampleIdentifier parsedSampleIdentifier = sampleIdentifierService.parseSampleIdentifier(sampleId, project)
+        if (!parsedSampleIdentifier) {
+            return
+        }
+
+        return Sample.createCriteria().get {
+            individual {
+                eq("pid", parsedSampleIdentifier.pid)
+            }
+            sampleType {
+                or {
+                    ilike("name", SqlUtil.replaceWildcardCharactersInLikeExpression(parsedSampleIdentifier.sampleTypeDbName))
+                    ilike("name", SqlUtil.replaceWildcardCharactersInLikeExpression(parsedSampleIdentifier.sampleTypeDbName.replace('_', '-')))
+                }
+            }
+        } as Sample
     }
 }

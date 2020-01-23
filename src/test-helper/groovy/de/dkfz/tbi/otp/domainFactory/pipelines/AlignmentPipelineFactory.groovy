@@ -21,8 +21,7 @@
  */
 package de.dkfz.tbi.otp.domainFactory.pipelines
 
-import de.dkfz.tbi.otp.dataprocessing.AbstractBamFile
-import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.domainFactory.pipelines.cellRanger.CellRangerFactory
 import de.dkfz.tbi.otp.domainFactory.pipelines.roddyRna.RoddyRnaFactory
 import de.dkfz.tbi.otp.ngsdata.DomainFactory
@@ -31,26 +30,53 @@ trait AlignmentPipelineFactory {
 
     static class CellRangerFactoryInstance implements CellRangerFactory {
 
-        static final INSTANCE = new CellRangerFactoryInstance()
+        static final CellRangerFactoryInstance INSTANCE = new CellRangerFactoryInstance()
+    }
+
+    static class RoddyPancanFactoryInstance implements RoddyPancanFactory {
+
+        static final RoddyPancanFactoryInstance INSTANCE = new RoddyPancanFactoryInstance()
     }
 
     static class RoddyRnaFactoryInstance implements RoddyRnaFactory {
 
-        static final INSTANCE = new RoddyRnaFactoryInstance()
+        static final RoddyRnaFactoryInstance INSTANCE = new RoddyRnaFactoryInstance()
     }
 
-
-    private static final Map<Pipeline.Name, Closure<AbstractBamFile>> alignmentCreation = [
-            (Pipeline.Name.DEFAULT_OTP)        : { DomainFactory.createProcessedMergedBamFile() },
-            (Pipeline.Name.PANCAN_ALIGNMENT)   : { DomainFactory.createRoddyBamFile() },
-            (Pipeline.Name.RODDY_RNA_ALIGNMENT): { RoddyRnaFactoryInstance.INSTANCE.createBamFile() },
-            (Pipeline.Name.CELL_RANGER)        : { CellRangerFactoryInstance.INSTANCE.createBamFile() },
+    private static final Map<Pipeline.Name, Map<String, Closure<?>>> ALIGNMENT_CREATION = [
+            (Pipeline.Name.DEFAULT_OTP)        : [
+                    (AbstractMergedBamFile)     : { DomainFactory.createProcessedMergedBamFile() },
+                    (AbstractMergingWorkPackage): {
+                        DomainFactory.createMergingWorkPackage([pipeline: DomainFactory.createDefaultOtpPipeline(), seqType: DomainFactory.createSeqType()])
+                    },
+            ],
+            (Pipeline.Name.PANCAN_ALIGNMENT)   : [
+                    (AbstractMergedBamFile)     : { RoddyPancanFactoryInstance.INSTANCE.createBamFile() },
+                    (AbstractMergingWorkPackage): { RoddyPancanFactoryInstance.INSTANCE.createMergingWorkPackage() },
+            ],
+            (Pipeline.Name.RODDY_RNA_ALIGNMENT): [
+                    (AbstractMergedBamFile)     : { RoddyRnaFactoryInstance.INSTANCE.createBamFile() },
+                    (AbstractMergingWorkPackage): { RoddyRnaFactoryInstance.INSTANCE.createMergingWorkPackage() },
+            ],
+            (Pipeline.Name.CELL_RANGER)        : [
+                    (AbstractMergedBamFile)     : { CellRangerFactoryInstance.INSTANCE.createBamFile() },
+                    (AbstractMergingWorkPackage): { CellRangerFactoryInstance.INSTANCE.createMergingWorkPackage() },
+            ],
     ].asImmutable()
 
-    AbstractBamFile createBamFileForPipelineName(Pipeline.Name pipeline) {
+    private <C> C createObject(Pipeline.Name pipeline, Class<C> closureType) {
         assert pipeline?.type == Pipeline.Type.ALIGNMENT
-        assert alignmentCreation.containsKey(pipeline): "Bam file creation for Pipeline ${pipeline} is not configured"
-        Closure removeMeOnceCodeNarcIsUpdated = alignmentCreation[pipeline]
-        return removeMeOnceCodeNarcIsUpdated()
+        assert ALIGNMENT_CREATION.containsKey(pipeline): "${closureType} creation for Pipeline ${pipeline} is not configured"
+        assert ALIGNMENT_CREATION[pipeline].containsKey(closureType): "${closureType} for ${pipeline}  is not configured"
+        Closure closure = ALIGNMENT_CREATION[pipeline][closureType]
+        return closure()
+    }
+
+    AbstractBamFile createBamFileForPipelineName(Pipeline.Name pipeline) {
+        return createObject(pipeline, AbstractMergedBamFile)
+    }
+
+    MergingWorkPackage createMergingWorkPackageForPipelineName(Pipeline.Name pipeline) {
+        return createObject(pipeline, AbstractMergingWorkPackage)
     }
 }
