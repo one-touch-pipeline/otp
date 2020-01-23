@@ -206,7 +206,7 @@ class ProjectUserController implements CheckAndCall {
     }
 
     JSON getUserSearchSuggestions(UserSearchSuggestionsCommand cmd) {
-        render new JsonBuilder(ldapService.getListOfLdapUserDetailsByUsernameOrMailOrRealName(cmd.searchString, 20)) as JSON
+        render new JsonBuilder(ldapService.getListOfLdapUserDetailsByUsernameOrMailOrRealName(cmd.searchString)) as JSON
     }
 }
 
