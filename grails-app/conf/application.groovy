@@ -146,7 +146,7 @@ grails.plugin.springsecurity.auth.loginFormUrl = "/?login=required"
 grails.plugin.springsecurity.failureHandler.defaultFailureUrl = "/?login=failed"
 grails.plugin.springsecurity.apf.storeLastUsername = true
 //*/
-
+grails.plugin.springsecurity.logout.postOnly = false
 grails.plugin.springsecurity.printStatusMessages = false
 
 // enable event listeners for logging login processes to the Dicom audit log
