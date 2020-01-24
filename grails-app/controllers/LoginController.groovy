@@ -21,6 +21,7 @@
  */
 
 import grails.converters.JSON
+import grails.plugin.springsecurity.SpringSecurityUtils
 import org.springframework.security.authentication.*
 import org.springframework.security.core.AuthenticationException
 import org.springframework.security.web.WebAttributes
@@ -47,6 +48,7 @@ class LoginController extends grails.plugin.springsecurity.LoginController {
         String postUrl = "${request.contextPath}${conf.apf.filterProcessesUrl}"
         return [
                 target             : cmd.target,
+                username           : flash.username,
                 postUrl            : postUrl,
                 rememberMeParameter: conf.rememberMe.parameter,
                 usernameParameter  : conf.apf.usernameParameter,
@@ -76,6 +78,7 @@ class LoginController extends grails.plugin.springsecurity.LoginController {
             render([error: msg] as JSON)
         } else {
             flash.message = msg
+            flash.username = session.getAttribute(SpringSecurityUtils.SPRING_SECURITY_LAST_USERNAME_KEY)
             redirect action: 'auth', params: params
         }
     }
