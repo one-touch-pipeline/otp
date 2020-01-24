@@ -29,6 +29,8 @@ import org.springframework.security.acls.AclPermissionEvaluator
 import de.dkfz.tbi.otp.security.*
 import de.dkfz.tbi.otp.utils.NumberConverter
 
+import static grails.plugin.springsecurity.SpringSecurityUtils.getSecurityConfig
+
 beans = {
     // include Spring Beans with @Component annotation
     xmlns context:"http://www.springframework.org/schema/context"
@@ -52,6 +54,16 @@ beans = {
         objectIdentityGenerator = ref('objectIdentityRetrievalStrategy')
         sidRetrievalStrategy = ref('sidRetrievalStrategy')
         permissionFactory = ref('aclPermissionFactory')
+    }
+
+    // overwrite default 'authenticationEntryPoint'
+    authenticationEntryPoint(TargetUrlEntryPoint, securityConfig.auth.loginFormUrl) {
+        ajaxLoginFormUrl = securityConfig.auth.ajaxLoginFormUrl
+        forceHttps = securityConfig.auth.forceHttps
+        useForward = securityConfig.auth.useForward
+        portMapper = ref('portMapper')
+        portResolver = ref('portResolver')
+        redirectStrategy = ref('redirectStrategy')
     }
 
     // http://stackoverflow.com/questions/10013288/another-unnamed-cachemanager-already-exists-in-the-same-vm-ehcache-2-5

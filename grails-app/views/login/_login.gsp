@@ -26,7 +26,7 @@
 
             <input name="username" id="account" placeholder="${g.message(code: "login.account")}" value="${account}" required>
             <input type="password" name="password" id="password" placeholder="${g.message(code: "login.password")}" required><br/>
-
+            <input type="hidden" name="target" value="${target}"/>
             <input id="loginButton" type="submit" value="Login"/>
         </form>
     </div>

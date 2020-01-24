@@ -31,8 +31,29 @@ import de.dkfz.tbi.otp.security.FailedToCreateUserException
 class LoginController extends grails.plugin.springsecurity.LoginController {
 
     static allowedMethods = [
+            auth: "GET",
             authfail: "GET",
     ]
+
+    /** Show the login page. */
+    def auth(LoginCommand cmd) {
+        assert cmd.validate()
+
+        if (springSecurityService.isLoggedIn()) {
+            redirect uri: cmd.target ?: conf.successHandler.defaultTargetUrl
+            return
+        }
+
+        String postUrl = "${request.contextPath}${conf.apf.filterProcessesUrl}"
+        return [
+                target             : cmd.target,
+                postUrl            : postUrl,
+                rememberMeParameter: conf.rememberMe.parameter,
+                usernameParameter  : conf.apf.usernameParameter,
+                passwordParameter  : conf.apf.passwordParameter,
+                gspLayout          : conf.gsp.layoutAuth,
+        ]
+    }
 
     /** Callback after a failed login. Redirects to the auth page with a warning message. */
     @Override
@@ -56,6 +77,16 @@ class LoginController extends grails.plugin.springsecurity.LoginController {
         } else {
             flash.message = msg
             redirect action: 'auth', params: params
+        }
+    }
+}
+
+class LoginCommand {
+    String target
+
+    static constraints = {
+        target nullable: true, validator: { String val ->
+            !val || val.startsWith("/")
         }
     }
 }

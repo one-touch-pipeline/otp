@@ -140,6 +140,7 @@ grails.plugin.springsecurity.roleHierarchy = '''
 grails.plugin.springsecurity.adh.errorPage = "/errors/error403"
 grails.plugin.springsecurity.useSwitchUserFilter = true
 
+grails.plugin.springsecurity.successHandler.targetUrlParameter = "target"
 grails.plugin.springsecurity.successHandler.defaultTargetUrl = '/home/index'
 /* TODO: OTP-2282 uncomment when switching to the new layout and remove line above
 grails.plugin.springsecurity.auth.loginFormUrl = "/?login=required"
