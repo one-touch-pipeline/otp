@@ -114,6 +114,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         projectService.roddyWorkflowConfigService = new RoddyWorkflowConfigService()
         projectService.roddyWorkflowConfigService.fileSystemService = new TestFileSystemService()
         projectService.roddyWorkflowConfigService.workflowConfigService = new WorkflowConfigService()
+        projectService.mailHelperService = Mock(MailHelperService) {
+            0 * sendEmail(_, _, _)
+        }
 
         DomainFactory.createProcessingOptionLazy([
                 name : OptionName.PIPELINE_RODDY_ALIGNMENT_BWA_VERSION_AVAILABLE,
@@ -124,6 +127,11 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 name : OptionName.PIPELINE_RODDY_ALIGNMENT_SAMBAMBA_VERSION_AVAILABLE,
                 type : null,
                 value: "sambamba",
+        ])
+        DomainFactory.createProcessingOptionLazy([
+                name : OptionName.EMAIL_RECIPIENT_ERRORS,
+                type : null,
+                value: HelperUtils.randomEmail,
         ])
 
         DomainFactory.createProcessingOptionBasePathReferenceGenome(new File(configService.rootPath, "reference_genome").path)
@@ -136,6 +144,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         configService.clean()
     }
 
+    @SuppressWarnings("UnnecessaryObjectReferences")
     void "test createProject valid input"() {
         given:
         setupData()
@@ -143,6 +152,9 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         Project project
+        if (dirAnalysis) {
+            dirAnalysis = "${temporaryFolder.newFolder()}${dirAnalysis}"
+        }
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
                 name: name,
                 directory: dirName,
@@ -186,7 +198,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         'project' | 'dir'   | '/dirA'     | ''             | 'project'           | true           | 'description' | ProcessingPriority.FAST_TRACK | SampleIdentifierParserBeanName.NO_PARSER | QcThresholdHandling.NO_CHECK
     }
 
-    void "test createProject if directory is created"() {
+    void "test createProject if directories are created"() {
         given:
         setupData()
         String group = configService.testingGroup
@@ -197,7 +209,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 name: 'project',
                 directory: 'dir',
                 individualPrefix: 'individualPrefix',
-                analysisDirectory: '/dirA',
+                analysisDirectory: "${temporaryFolder.newFolder()}/dirA",
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -218,11 +230,61 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 configService.rootPath.absolutePath,
                 project.dirName,
         )
-        assert projectDirectory.exists()
+        projectDirectory.exists()
         PosixFileAttributes attrs = Files.readAttributes(projectDirectory.toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
         attrs.group().toString() == group
         TestCase.assertContainSame(attrs.permissions(),
                 [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_EXECUTE])
+
+        and:
+        File projectDirAnalysis = LsdfFilesService.getPath(
+                project.dirAnalysis,
+        )
+        projectDirAnalysis.exists()
+        PosixFileAttributes dirAnalysisAttrs = Files.readAttributes(projectDirAnalysis .toPath(), PosixFileAttributes, LinkOption.NOFOLLOW_LINKS)
+        dirAnalysisAttrs.group().toString() == group
+        TestCase.assertContainSame(dirAnalysisAttrs.permissions(),
+                [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_WRITE, PosixFilePermission.GROUP_EXECUTE])
+    }
+
+    void "test createProject when analysisDirectory can not be created, sends email"() {
+        given:
+        setupData()
+        String group = configService.testingGroup
+
+        when:
+        Project project
+        ProjectCreationCommand projectParams = new ProjectCreationCommand(
+                name: 'project',
+                directory: 'dir',
+                individualPrefix: 'individualPrefix',
+                analysisDirectory: "/dirA",
+                unixGroup: group,
+                projectGroup: '',
+                nameInMetadataFiles: null,
+                forceCopyFiles: false,
+                description: '',
+                processingPriority: ProcessingPriority.NORMAL,
+                sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
+                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
+                projectType: Project.ProjectType.SEQUENCING,
+                storageUntil: LocalDate.now(),
+        )
+        projectService.mailHelperService = Mock(MailHelperService) {
+            1 * sendEmail(_, _, _) >> { String emailSubject, String content, String recipient ->
+                assert emailSubject == "Could not automatically create analysisDir '${projectParams.analysisDirectory}' for Project '${projectParams.name}'."
+                assert content.contains("mkdir: cannot create directory ‘${projectParams.analysisDirectory}’: Permission denied")
+            }
+        }
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            project = projectService.createProject(projectParams)
+        }
+
+        then:
+        File projectDirAnalysis = LsdfFilesService.getPath(
+                project.dirAnalysis,
+        )
+        !projectDirAnalysis.exists()
     }
 
     @Unroll
@@ -345,7 +407,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 name: 'project',
                 directory: 'dir',
                 individualPrefix: 'individualPrefix',
-                analysisDirectory: '/dirA',
+                analysisDirectory: "${temporaryFolder.newFolder()}/dirA",
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -372,8 +434,15 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 configService.rootPath.absolutePath,
                 "/dir",
         )
+        String analysisDir = "${temporaryFolder.newFolder()}/dirA"
         projectService.remoteShellHelper = Mock(RemoteShellHelper) {
-            0 * executeCommand(_, _)
+            1 * executeCommand(_, _) >> { Realm realm, String command ->
+                assert command.contains("mkdir -p -m 2775 ${analysisDir}")
+
+                File script = temporaryFolder.newFile('script.sh')
+                script.text = command
+                return LocalShellHelper.executeAndWait("bash ${script.absolutePath}").assertExitCodeZero().stdout
+            }
         }
         projectService.projectInfoService = Mock(ProjectInfoService) {
             1 * createProjectInfoAndUploadFile(_)
@@ -393,7 +462,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 name: 'project',
                 directory: 'dir',
                 individualPrefix: 'individualPrefix',
-                analysisDirectory: '/dirA',
+                analysisDirectory: analysisDir,
                 unixGroup: group,
                 projectGroup: '',
                 nameInMetadataFiles: null,
@@ -522,8 +591,10 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
     void "test updateAnalysisDirectory valid name"() {
         given:
         setupData()
-        String analysisDirectory = '/dirA'
+        String analysisDirectory = "${temporaryFolder.newFolder()}/dirA"
         Project project = Project.findByName("testProject")
+        project.unixGroup = configService.testingGroup
+        project.save(flush: true)
 
         when:
         assert !project.dirAnalysis

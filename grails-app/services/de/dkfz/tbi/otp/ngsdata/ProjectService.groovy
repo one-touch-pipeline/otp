@@ -88,6 +88,7 @@ class ProjectService {
     SophiaService sophiaService
     UserProjectRoleService userProjectRoleService
     WorkflowConfigService workflowConfigService
+    MailHelperService mailHelperService
 
     /**
      * @return List of all available Projects
@@ -198,6 +199,10 @@ class ProjectService {
 
         createProjectDirectoryIfNeeded(project)
 
+        if (project.dirAnalysis) {
+            createAnalysisDirectoryIfPossible(project)
+        }
+
         if (projectParams.projectInfoFile) {
             projectInfoService.createProjectInfoAndUploadFile(new AddProjectInfoCommand(project: project, projectInfoFile: projectParams.projectInfoFile))
         }
@@ -213,9 +218,38 @@ class ProjectService {
                 return
             }
         }
-        executeScript(buildCreateProjectDirectory(project.unixGroup, projectDirectory), project, "0022")
+        executeScript(buildCreateProjectDirectory(project.unixGroup, projectDirectory.absolutePath), project, "0022")
         FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
         FileService.waitUntilExists(fs.getPath(projectDirectory.absolutePath))
+    }
+
+    private void createAnalysisDirectoryIfPossible(Project project) {
+        assert project.dirAnalysis
+        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
+        Path analysisDirectory = fs.getPath(project.dirAnalysis)
+        if (Files.exists(analysisDirectory)) {
+            return
+        }
+
+        try {
+            executeScript(buildCreateProjectDirectory(project.unixGroup, project.dirAnalysis, '2770', '2775'), project, "0002")
+            FileService.waitUntilExists(analysisDirectory)
+        } catch (AssertionError e) {
+            String recipientsString = processingOptionService.findOptionAsString(OptionName.EMAIL_RECIPIENT_ERRORS)
+            String header = "Could not automatically create analysisDir '${project.dirAnalysis}' for Project '${project.name}'."
+            if (recipientsString) {
+                mailHelperService.sendEmail(
+                        header,
+                        "Automatic creation of analysisDir '${project.dirAnalysis}' for Project '${project.name}' failed. " +
+                                "Make sure that the share exists and that OTP has write access to the already existing base directory," +
+                                " so that the new subfolder can be created.\n ${e.localizedMessage}",
+                        recipientsString)
+            } else {
+                log.warn("ProcessingOption 'EMAIL_RECIPIENT_ERRORS' is not set.")
+                log.warn(header, e)
+                assert false: "ProcessingOption EMAIL_RECIPIENT_ERRORS has to be set so OTP can sent emails about needed manual steps"
+            }
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -245,6 +279,10 @@ class ProjectService {
 
         project."${fieldName}" = fieldValue
         project.save(flush: true)
+
+        if (fieldName == 'dirAnalysis' && project.dirAnalysis) {
+            createAnalysisDirectoryIfPossible(project)
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
@@ -728,14 +766,10 @@ class ProjectService {
                 }, "The selected reference genome is not configured for CNV (from ACEseq) (files are missing).")
     }
 
-    @SuppressWarnings('Indentation')//auto format and codenarc does not match
     Result<ReferenceGenome, String> checkReferenceGenomeForSophia(Project project, SeqType seqType) {
-        return Result.ofNullable(project, "project must not be null")
-                .map { Project p ->
-                    ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(
-                            project, seqType)
-                }
-                .ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
+        return Result.ofNullable(project, "project must not be null").map { Project p ->
+            ReferenceGenomeProjectSeqType.findAllByProjectAndSeqTypeAndSampleTypeIsNullAndDeprecatedDateIsNull(project, seqType)
+        }.ensure({ List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.size() == 1 }, "No reference genome set.")
                 .map { List<ReferenceGenomeProjectSeqType> rgpsts -> rgpsts.first().referenceGenome }
                 .ensure({ ReferenceGenome referenceGenome -> referenceGenome in sophiaService.checkReferenceGenomeMap()['referenceGenomes'] },
                         "Reference genome is not compatible with SOPHIA.")
@@ -764,12 +798,12 @@ chmod 0440 ${configFilePath}
 """
     }
 
-    private String buildCreateProjectDirectory(String unixGroup, File projectDirectory) {
+    private String buildCreateProjectDirectory(String unixGroup, String projectDirectory, String permission = '2750', String initialPermission = '2755') {
         return """\
-mkdir -p -m 2755 ${projectDirectory}
+mkdir -p -m ${initialPermission} ${projectDirectory}
 
 chgrp ${unixGroup} ${projectDirectory}
-chmod 2750 ${projectDirectory}
+chmod ${permission} ${projectDirectory}
 """
     }
 

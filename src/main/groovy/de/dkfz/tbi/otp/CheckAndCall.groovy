@@ -38,6 +38,8 @@ trait CheckAndCall {
                 data = [success: true] + additionalSuccessReturnValues()
             } catch (ValidationException e) {
                 data = getErrorData(e.errors.getFieldError())
+            } catch (AssertionError e) {
+                data = [success: false, error: "An error occurred: ${e.localizedMessage}"]
             }
         }
         render data as JSON
