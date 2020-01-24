@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,19 +20,10 @@
  * SOFTWARE.
  */
 
-seed = {
-    [
-            'Unknown',
-            'Not available',
-    ].each { String name ->
-        strain(
-                meta: [
-                        key   : [
-                                'name',
-                        ],
-                        update: 'false',
-                ],
-                name: name,
-        )
+databaseChangeLog = {
+
+    changeSet(author: "strubelp", id: "Species and strains", runOnChange: "true") {
+        sqlFile(path: 'changelogs/defaultValues/strains.sql')
+        sqlFile(path: 'changelogs/defaultValues/human.sql')
     }
 }
