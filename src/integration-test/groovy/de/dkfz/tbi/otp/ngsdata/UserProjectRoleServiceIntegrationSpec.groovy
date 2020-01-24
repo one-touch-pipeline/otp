@@ -25,7 +25,6 @@ import grails.plugin.springsecurity.SpringSecurityService
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.testing.mixin.integration.Integration
 import grails.transaction.Rollback
-import grails.validation.ValidationException
 import org.grails.spring.context.support.PluginAwareResourceBundleMessageSource
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -1075,75 +1074,58 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         given:
         setupData()
         Project projectA = createProject()
-        DomainFactory.createUserProjectRole(project: projectA)
+        UserProjectRole userProjectRoleA = DomainFactory.createUserProjectRole(project: projectA)
         Project projectB = createProject(unixGroup: projectA.unixGroup)
-        List<UserProjectRole> result
 
         when:
-        result = userProjectRoleService.handleSharedUnixGroupOnProjectCreation(projectB, projectB.unixGroup)
+        userProjectRoleService.handleSharedUnixGroupOnProjectCreation(projectB, projectB.unixGroup)
 
         then:
-        result == UserProjectRole.findAllByProject(projectB)
+        CollectionUtils.exactlyOneElement(UserProjectRole.findAllByProject(projectB)).equalByAccessRelatedProperties(userProjectRoleA)
     }
 
     void "handleSharedUnixGroupOnProjectCreation, unix group is not shared"() {
         given:
         setupData()
         Project project = createProject()
-        List<UserProjectRole> result
 
         when:
-        result = userProjectRoleService.handleSharedUnixGroupOnProjectCreation(project, project.unixGroup)
+        userProjectRoleService.handleSharedUnixGroupOnProjectCreation(project, project.unixGroup)
 
         then:
-        result == []
+        UserProjectRole.findAllByProject(project) == []
     }
 
-    void "copyUserProjectRolesOfProjectToProject, properly creates copies of the UserProjectRoles"() {
+    void "applyUserProjectRolesOntoProject, properly applies, creates new, overwrites already existing"() {
         given:
         setupData()
-        Project projectA = createProject()
-        List<UserProjectRole> userProjectRolesA = [
-            DomainFactory.createUserProjectRole(project: projectA),
-            DomainFactory.createUserProjectRole(project: projectA),
-            DomainFactory.createUserProjectRole(project: projectA),
+        List<User> users = [
+            DomainFactory.createUser(),
+            DomainFactory.createUser(),
+            DomainFactory.createUser(),
         ]
-        Project projectB = createProject()
-        List<UserProjectRole> userProjectRolesB = []
 
-        when:
-        SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRolesB = userProjectRoleService.copyUserProjectRolesOfProjectToProject(projectA, projectB)
-        }
-
-        then:
-        userProjectRolesB.size() == 3
-        userProjectRolesB.every { UserProjectRole itB ->
-            UserProjectRole equalInA = userProjectRolesA.find { UserProjectRole itA ->
-                itA.user.username == itB.user.username
-            }
-            return itB.equalByAccessRelatedProperties(equalInA)
-        }
-    }
-
-    void "copyUserProjectRolesOfProjectToProject, exception and rollback when UserProjectRole for User already exists"() {
-        given:
-        setupData()
-        User user = DomainFactory.createUser()
         Project projectA = createProject()
-        DomainFactory.createUserProjectRole(project: projectA, user: user)
-        DomainFactory.createUserProjectRole(project: projectA)
+        DomainFactory.createUserProjectRole(project: projectA, user: users[0], enabled: false)
+        DomainFactory.createUserProjectRole(project: projectA, user: users[1], manageUsers: true)
+        DomainFactory.createUserProjectRole(project: projectA, user: users[2], accessToOtp: false)
+
         Project projectB = createProject()
-        DomainFactory.createUserProjectRole(project: projectB, user: user)
+        DomainFactory.createUserProjectRole(project: projectB, user: users[0], enabled: false)
+        DomainFactory.createUserProjectRole(project: projectB, user: users[1], manageUsers: true)
 
         when:
         SpringSecurityUtils.doWithAuth(OPERATOR) {
-            userProjectRoleService.copyUserProjectRolesOfProjectToProject(projectA, projectB)
+            userProjectRoleService.applyUserProjectRolesOntoProject(projectA, projectB)
         }
 
         then:
-        thrown(ValidationException)
-        UserProjectRole.findAllByProject(projectB).size() == 1
+        List<UserProjectRole> userProjectRolesA = UserProjectRole.findAllByProject(projectA)
+        List<UserProjectRole> userProjectRolesB = UserProjectRole.findAllByProject(projectB)
+        userProjectRolesB.size() == 3
+        users.every { User user ->
+            (userProjectRolesA.find { it.user == user }).equalByAccessRelatedProperties(userProjectRolesB.find { it.user == user })
+        }
     }
 
     void "commandTemplate uses the correct processing option depending on the operator action"() {

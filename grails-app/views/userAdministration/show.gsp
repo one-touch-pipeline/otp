@@ -34,7 +34,7 @@
             <h1><g:message code="user.administration.show.header"/></h1>
             <div>
             <g:form controller="userAdministration" action="editUser" params='["user": user.id]'>
-                <table class="key-value-table">
+                <table class="key-value-table key-input">
                     <thead></thead>
                     <tbody>
                         <tr>

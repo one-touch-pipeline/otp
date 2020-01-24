@@ -49,4 +49,25 @@ enum ProcessingPriority {
     static getByPriorityNumber(short priority) {
         return values().find { it.priority == priority }
     }
+
+    static getByName(String name) {
+        return values().find { it.name() == name }
+    }
+
+    static getByPriorityNumberOrName(Object object) {
+        switch (object.class) {
+            case ProcessingPriority:
+                return object as ProcessingPriority
+            case String:
+                return getByName(object as String)
+            case Short:
+                return getByPriorityNumber(object as short)
+            default:
+                throw new UnsupportedOperationException("Unsupported class '${object.class}'")
+        }
+    }
+
+    String getNameWithPriority() {
+        return "${name()} (${priority})"
+    }
 }

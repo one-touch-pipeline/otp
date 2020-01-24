@@ -27,8 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.*
 import org.springframework.validation.Errors
 
-import de.dkfz.tbi.otp.administration.AddProjectInfoCommand
-import de.dkfz.tbi.otp.administration.ProjectInfoService
+import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
@@ -157,19 +156,19 @@ class ProjectService {
         assert OtpPath.isValidPathComponent(projectParams.unixGroup): "unixGroup '${projectParams.unixGroup}' contains invalid characters"
         Path rootPath = configService.rootPath.toPath()
         List<String> rootPathElements = rootPath.toList()*.toString()
-        assert rootPathElements.every { !projectParams.directory.startsWith("${it}${File.separator}") } :
-                "project directory (${projectParams.directory}) contains (partial) data processing root path (${rootPath})"
+        assert rootPathElements.every { !projectParams.dirName.startsWith("${it}${File.separator}") } :
+                "project directory (${projectParams.dirName}) contains (partial) data processing root path (${rootPath})"
 
         Project project = new Project([
                 name: projectParams.name,
-                dirName: projectParams.directory,
+                dirName: projectParams.dirName,
                 individualPrefix: projectParams.individualPrefix,
                 realm: configService.defaultRealm,
                 qcThresholdHandling: projectParams.qcThresholdHandling,
                 projectType: projectParams.projectType,
                 storageUntil: projectParams.storageUntil,
                 projectGroup: ProjectGroup.findByName(projectParams.projectGroup),
-                dirAnalysis: projectParams.analysisDirectory,
+                dirAnalysis: projectParams.dirAnalysis,
                 processingPriority: projectParams.processingPriority.priority,
                 forceCopyFiles: projectParams.forceCopyFiles,
                 fingerPrinting: projectParams.fingerPrinting,
@@ -190,9 +189,14 @@ class ProjectService {
         ])
         assert project.save(flush: true)
 
-        if (projectParams.projectRequest) {
-            projectRequestService.update(projectParams.projectRequest, project)
-            projectRequestService.addUserRolesAndPermissions(projectParams.projectRequest)
+        if (!projectParams.ignoreUsersFromBaseObjects) {
+            if (projectParams.projectRequest) {
+                projectRequestService.update(projectParams.projectRequest, project)
+                projectRequestService.addUserRolesAndPermissions(projectParams.projectRequest)
+            }
+            if (projectParams.baseProject) {
+                userProjectRoleService.applyUserProjectRolesOntoProject(projectParams.usersToCopyFromBaseProject as List<UserProjectRole>, project)
+            }
         }
 
         userProjectRoleService.handleSharedUnixGroupOnProjectCreation(project, projectParams.unixGroup)
@@ -206,8 +210,24 @@ class ProjectService {
         if (projectParams.projectInfoFile) {
             projectInfoService.createProjectInfoAndUploadFile(new AddProjectInfoCommand(project: project, projectInfoFile: projectParams.projectInfoFile))
         }
+        if (projectParams.projectInfoToCopy) {
+            Path path = fileSystemService.remoteFileSystemOnDefaultRealm.getPath(projectParams.projectInfoToCopy.getPath())
+            projectInfoService.createProjectInfoByPath(project, path)
+        }
 
         return project
+    }
+
+    List<UserProjectRole> getUsersToCopyFromBaseProject(Project baseProject) {
+        return UserProjectRole.withCriteria {
+            eq("project", baseProject)
+            eq("projectRole", ProjectRole.findByName(ProjectRole.Basic.PI.name()))
+            eq("enabled", true)
+        } as List<UserProjectRole>
+    }
+
+    Set<ProjectInfo> getSelectableBaseProjectInfos(Project baseProject) {
+        return (baseProject ? baseProject.projectInfos.findAll { !it.isDta() } : []) as Set<ProjectInfo>
     }
 
     private void createProjectDirectoryIfNeeded(Project project) {

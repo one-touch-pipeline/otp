@@ -2116,13 +2116,17 @@ div.log {
     }
 }
 
+.scrollable {
+    overflow: auto;
+}
+
 .cell-ranger-creation-grid-wrapper {
     display: grid;
     grid-gap: 24px;
     grid-template-rows: auto auto auto;
 
     .scrollable {
-        overflow: auto;
+        .scrollable;
         max-height: 12em;
     }
 
@@ -2164,7 +2168,7 @@ div.log {
         width: auto;
     }
     .scrollable {
-        overflow: auto;
+        .scrollable;
         max-height: 20em;
     }
 
@@ -2439,21 +2443,57 @@ ul.metaDataFieldsLinkBanner {
     }
 }
 
+textarea.resize-vertical {
+    resize: vertical;
+}
+
 table.key-value-table {
+    .general-input-column-style {
+        padding-left: 1em;
+        input:not([type='checkbox']):not([type='radio']):not([type='button']):not([type='submit']), textarea, select {
+            width: 750px;
+        }
+    }
+    .help-icon {
+        background: url("help.png") no-repeat center;
+        background-size: 16px;
+        width: 16px;
+    }
+
     td:first-of-type {
         .myKey;
         padding-right: 0;
     }
 
-    td:nth-of-type(2).help {
-        background: url("help.png") no-repeat center;
-        background-size: 16px;
-        width: 16px;
+    &.key-help-input {
+        td:nth-of-type(2).help {
+            .help-icon;
+        }
+        td:last-of-type {
+            .general-input-column-style;
+        }
     }
-    td:last-of-type {
-        padding-left: 1em;
-        input:not([type='checkbox']):not([type='radio']):not([type='button']):not([type='submit']), textarea, select {
-            width: 750px;
+
+    &.key-input {
+        td:nth-of-type(2) {
+            .general-input-column-style;
+        }
+    }
+
+    &.key-input-text-text {
+        td:nth-child(2) {
+            width: 800px;
+            .general-input-column-style;
+        }
+        td:nth-child(n+3) {
+            width: 500px;
+            select {
+                width: 500px;
+            }
+            .multiline-display {
+                max-height: 20em;
+                overflow: auto;
+            }
         }
     }
 }
@@ -2539,4 +2579,8 @@ table.key-value-table {
         border-color: #cc0000;
         background: #ffaaaa;
     }
+}
+
+.vertical-align-middle * {
+    vertical-align: middle;
 }

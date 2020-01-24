@@ -40,4 +40,9 @@ class Keyword implements Entity {
     static Keyword findOrSaveByName(String name) {
         return findByName(name) ?: new Keyword(name: name).save(flush: true)
     }
+
+    @Override
+    String toString() {
+        return this.name
+    }
 }

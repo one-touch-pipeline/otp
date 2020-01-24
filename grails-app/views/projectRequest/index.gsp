@@ -96,7 +96,7 @@
     <h2>${g.message(code: "projectRequest.header.new")}</h2>
     <p>${g.message(code: "projectRequest.new.support", args: [contactDataSupportEmail])}</p>
     <g:form action="save">
-    <table class="key-value-table">
+    <table class="key-value-table key-help-input">
         <tr>
             <td><label for="name">${g.message(code: "project.name")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.name.detail")}"></td>
@@ -105,7 +105,7 @@
         <tr>
             <td><label for="description">${g.message(code: "project.description")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.description.detail")}"></td>
-            <td><textarea name="description" id="description" required>${cmd?.description}</textarea></td>
+            <td><textarea class="resize-vertical" name="description" id="description" required>${cmd?.description}</textarea></td>
         </tr>
         <tr>
             <td><label for="keyword">${g.message(code: "project.keywords")}</label></td>
@@ -215,7 +215,7 @@
         <tr>
             <td><label for="comments">${g.message(code: "projectRequest.comments")}</label></td>
             <td></td>
-            <td><textarea name="comments" id="comments">${cmd?.comments}</textarea></td>
+            <td><textarea class="resize-vertical" name="comments" id="comments">${cmd?.comments}</textarea></td>
         </tr>
 
         <tr class="user-auto-complete">

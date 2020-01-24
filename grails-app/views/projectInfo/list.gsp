@@ -42,7 +42,7 @@
             <h2><g:message code="projectInfo.header.document.upload"/></h2>
             <div class="project-info-form-container">
                 <g:uploadForm action="addProjectInfo" useToken="true">
-                    <table class="key-value-table">
+                    <table class="key-value-table key-input">
                         <tr>
                             <td><g:message code="projectInfo.upload.path"/></td>
                             <td><input type="file" name="projectInfoFile" required></td>
@@ -95,7 +95,7 @@
             <div class="project-info-form-container">
                 <g:uploadForm action="addProjectInfo" useToken="true">
                     <input type="hidden" name="project.id" value="${project.id}"/>
-                    <table class="key-value-table">
+                    <table class="key-value-table key-input">
                         <tr>
                             <td><g:message code="projectInfo.upload.path"/></td>
                             <td><input type="file" name="projectInfoFile" required/></td>
@@ -201,7 +201,7 @@
                                         <%-- since we have this form multiple times, was the previous form content for THIS document? --%>
                                         <input type="hidden" name="parentDocument.id" value="${doc.id}">
 
-                                        <table class="key-value-table project-info-form-container">
+                                        <table class="key-value-table key-input project-info-form-container">
                                             <tr>
                                                 <td><g:message code="projectInfo.dta.transfer.requestedBy"/></td>
                                                 <td><input type="text" value="${cachedXfer ? xferCmd.requester : ""}" name="requester" required/></td>

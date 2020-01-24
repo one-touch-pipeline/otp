@@ -36,7 +36,7 @@
         <input type="hidden" name="seqTrackId" value="${seqTrack.id}"/>
 
         <h2><g:message code="seqTrack.show.general"/></h2>
-        <table class="key-value-table">
+        <table class="key-value-table key-input">
             <tr>
                 <td><g:message code="seqTrack.show.details.laneId"/></td>
                 <td>${seqTrack.laneId}</td>

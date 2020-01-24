@@ -79,6 +79,22 @@ class ProjectInfoService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    ProjectInfo createProjectInfoByPath(Project project, Path path) {
+        ProjectInfo projectInfo = new ProjectInfo(
+                fileName: path.fileName.toString(),
+                comment : "File copied from ${path.toAbsolutePath()}" ,
+        )
+
+        project.addToProjectInfos(projectInfo)
+        project.save(flush: true)
+        projectInfo.save(flush: true)
+
+        uploadProjectInfoToProjectFolder(projectInfo, path.bytes)
+
+        return projectInfo
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void deleteProjectInfo(ProjectInfoCommand cmd) {
         cmd.validate()
         assert !cmd.errors.hasErrors()

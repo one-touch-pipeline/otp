@@ -382,6 +382,7 @@ $.otp.tableButtons = [
 
 $(document).ready(function() {
     $('#project').select2();
+    $('.use-select-2').select2();
 
     var t = $('[title]');
     t.tooltip();

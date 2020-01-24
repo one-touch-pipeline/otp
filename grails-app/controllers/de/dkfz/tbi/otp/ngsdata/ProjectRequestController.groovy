@@ -30,6 +30,7 @@ import org.springframework.validation.Errors
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.searchability.Keyword
+import de.dkfz.tbi.otp.utils.StringUtils
 
 import java.time.LocalDate
 
@@ -164,23 +165,26 @@ class ProjectRequestCreationCommand {
             }
         }
         organizationalUnit blank: false
-        costCenter nullable: true
+        costCenter nullable: true, blank: false
+        fundingBody nullable: true, blank: false
+        grantId nullable: true, blank: false
         endDate nullable: true
         storageUntil nullable: true, validator: { val, obj ->
             if (obj.storagePeriod == StoragePeriod.USER_DEFINED && !val) {
                 return "empty"
             }
         }
+        relatedProjects nullable: true, blank: false
         tumorEntity nullable: true
         speciesWithStrain nullable: true
-        sequencingCenter nullable: true
+        sequencingCenter nullable: true, blank: false
         approxNoOfSamples nullable: true
         seqType validator: { val, obj ->
             if (!val) {
                 return "empty"
             }
         }
-        comments nullable: true
+        comments nullable: true, blank: false
         pi validator: { val, obj ->
             List<String> pi = [val]
             List<String> userWithMultipleRoles = (pi.intersect(obj.deputyPis.findAll()) + pi.intersect(obj.responsibleBioinformaticians.findAll()) + pi.intersect(obj.bioinformaticians.findAll()) + pi.intersect(obj.submitters.findAll()) +
@@ -193,12 +197,36 @@ class ProjectRequestCreationCommand {
         }
     }
 
+    void setCostCenter(String s) {
+        costCenter = StringUtils.blankToNull(s)
+    }
+
+    void setFundingBody(String s) {
+        fundingBody = StringUtils.blankToNull(s)
+    }
+
+    void setGrantId(String s) {
+        grantId = StringUtils.blankToNull(s)
+    }
+
+    void setRelatedProjects(String s) {
+        relatedProjects = StringUtils.blankToNull(s)
+    }
+
+    void setSequencingCenter(String s) {
+        sequencingCenter = StringUtils.blankToNull(s)
+    }
+
     void setApproxNoOfSamplesString(String number) {
         try {
             this.approxNoOfSamples = Integer.decode(number)
         } catch (NumberFormatException e) {
             this.approxNoOfSamples = null
         }
+    }
+
+    void setComments(String s) {
+        comments = StringUtils.blankToNull(s)
     }
 }
 

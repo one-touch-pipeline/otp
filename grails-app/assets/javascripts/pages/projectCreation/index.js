@@ -21,10 +21,9 @@
  */
 
 $(function () {
-    var select = $("select#fromRequest");
-    var form = $("form.projectRequestSelection");
+    var form = $("form.projectCreationBasisSelection");
 
-    select.on("change", function (e) {
-        form.submit()
+    $(form).find("select").on("change", function (e) {
+        form.submit();
     });
 });

@@ -196,7 +196,7 @@ class ProjectRequestService {
                 action: "index",
                 absolute: true,
                 params: [
-                        'fromRequest.id': request.id,
+                        'projectRequest.id': request.id,
                 ]
         )
         String message = messageSourceService.createMessage("notification.template.projectRequest2", [

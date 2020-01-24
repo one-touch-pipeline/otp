@@ -402,45 +402,57 @@ class UserProjectRoleService {
         return userProjectRole
     }
 
-    List<UserProjectRole> handleSharedUnixGroupOnProjectCreation(Project project, String unixGroup) {
+    void handleSharedUnixGroupOnProjectCreation(Project project, String unixGroup) {
         Project donorProject = (Project.findAllByUnixGroup(unixGroup) - [project]).find()
         if (!donorProject) {
-            return []
+            return
         }
-        return copyUserProjectRolesOfProjectToProject(donorProject, project)
+        applyUserProjectRolesOntoProject(donorProject, project)
+    }
+
+    /**
+     * Applies all given UserProjectRoles onto the targetProject.
+     * In this context 'applies' means create them in the project if they do not exist, or
+     * update an already existing UserProjectRole for the user with the properties of the
+     * given one.
+     */
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void applyUserProjectRolesOntoProject(List<UserProjectRole> sourceUserProjectRoles, Project targetProject) {
+        List<UserProjectRole> sourceUserProjectRole = sourceUserProjectRoles
+        List<UserProjectRole> targetUserProjectRoles = UserProjectRole.findAllByProject(targetProject)
+        sourceUserProjectRole.each { UserProjectRole userProjectRole ->
+            Map properties = [
+                    project                  : targetProject,
+                    user                     : userProjectRole.user,
+                    projectRole              : userProjectRole.projectRole,
+                    enabled                  : userProjectRole.enabled,
+                    accessToOtp              : userProjectRole.accessToOtp,
+                    accessToFiles            : userProjectRole.accessToFiles,
+                    manageUsers              : userProjectRole.manageUsers,
+                    manageUsersAndDelegate   : userProjectRole.manageUsersAndDelegate,
+                    receivesNotifications    : userProjectRole.receivesNotifications,
+                    fileAccessChangeRequested: userProjectRole.accessToFiles,
+            ]
+            UserProjectRole existingUserProjectRole = targetUserProjectRoles.find { it.user == userProjectRole.user }
+            if (existingUserProjectRole) {
+                properties.each { String property, Object value ->
+                    existingUserProjectRole."$property" = value
+                }
+                existingUserProjectRole.save(flush: true)
+            } else {
+                new UserProjectRole(properties).save(flush: true)
+            }
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<UserProjectRole> copyUserProjectRolesOfProjectToProject(Project projectFrom, Project projectTo) {
-        return UserProjectRole.findAllByProject(projectFrom).collect {
-            return new UserProjectRole(
-                    project: projectTo,
-                    user: it.user,
-                    projectRole: it.projectRole,
-                    enabled: it.enabled,
-                    accessToOtp: it.accessToOtp,
-                    accessToFiles: it.accessToFiles,
-                    manageUsers: it.manageUsers,
-                    manageUsersAndDelegate: it.manageUsersAndDelegate,
-                    receivesNotifications: it.receivesNotifications,
-                    fileAccessChangeRequested: it.accessToFiles,
-            ).save(flush: true)
-        }
+    void applyUserProjectRolesOntoProject(Project sourceProject, Project targetProject) {
+        applyUserProjectRolesOntoProject(UserProjectRole.findAllByProject(sourceProject), targetProject)
     }
 
     String getEmailsForNotification(Project project) {
         assert project: 'No project given'
-
-        Set<String> emails = UserProjectRole.findAllByProjectAndReceivesNotificationsAndEnabled(
-                project,
-                true,
-                true
-        )*.user.findAll { it.enabled }*.email
-
-        if (emails) {
-            return emails.unique().sort().join(',')
-        }
-        return ''
+        return UserProjectRole.findAllByProjectAndReceivesNotificationsAndEnabled(project, true, true)*.user.findAll { it.enabled }*.email?.sort()?.join(',') ?: ''
     }
 
     /**

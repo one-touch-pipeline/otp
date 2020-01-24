@@ -31,7 +31,7 @@
 
     <h1>${g.message(code: "projectRequest.view.title", args: [projectRequest.name])}</h1>
     <g:form action="update">
-    <table class="key-value-table">
+    <table class="key-value-table key-input">
         <tr>
             <td>${g.message(code: "projectRequest.requester")}</td>
             <td>${projectRequest.requester}</td>

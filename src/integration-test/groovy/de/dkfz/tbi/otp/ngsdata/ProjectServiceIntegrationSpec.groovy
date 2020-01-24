@@ -156,20 +156,20 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
             dirAnalysis = "${temporaryFolder.newFolder()}${dirAnalysis}"
         }
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name: name,
-                directory: dirName,
-                individualPrefix: 'individualPrefix',
-                analysisDirectory: dirAnalysis,
+                name                          : name,
+                dirName                       : dirName,
+                individualPrefix              : 'individualPrefix',
+                dirAnalysis                   : dirAnalysis,
                 sampleIdentifierParserBeanName: sampleIdentifierParserBeanName,
-                qcThresholdHandling: qcThresholdHandling,
-                unixGroup: unixGroup,
-                projectGroup: projectGroup,
-                nameInMetadataFiles: nameInMetadataFiles,
-                forceCopyFiles: forceCopyFiles,
-                description: description,
-                processingPriority: processingPriority,
-                projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: LocalDate.now(),
+                qcThresholdHandling           : qcThresholdHandling,
+                unixGroup                     : unixGroup,
+                projectGroup                  : projectGroup,
+                nameInMetadataFiles           : nameInMetadataFiles,
+                forceCopyFiles                : forceCopyFiles,
+                description                   : description,
+                processingPriority            : processingPriority,
+                projectType                   : Project.ProjectType.SEQUENCING,
+                storageUntil                  : LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -206,20 +206,20 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         when:
         Project project
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name: 'project',
-                directory: 'dir',
-                individualPrefix: 'individualPrefix',
-                analysisDirectory: "${temporaryFolder.newFolder()}/dirA",
-                unixGroup: group,
-                projectGroup: '',
-                nameInMetadataFiles: null,
-                forceCopyFiles: false,
-                description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                name                          : 'project',
+                dirName                       : 'dir',
+                individualPrefix              : 'individualPrefix',
+                dirAnalysis                   : "${temporaryFolder.newFolder()}/dirA",
+                unixGroup                     : group,
+                projectGroup                  : '',
+                nameInMetadataFiles           : null,
+                forceCopyFiles                : false,
+                description                   : '',
+                processingPriority            : ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
-                projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: LocalDate.now(),
+                qcThresholdHandling           : QcThresholdHandling.NO_CHECK,
+                projectType                   : Project.ProjectType.SEQUENCING,
+                storageUntil                  : LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             project = projectService.createProject(projectParams)
@@ -247,7 +247,7 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
                 [PosixFilePermission.OWNER_READ, PosixFilePermission.OWNER_WRITE, PosixFilePermission.OWNER_EXECUTE, PosixFilePermission.GROUP_READ, PosixFilePermission.GROUP_WRITE, PosixFilePermission.GROUP_EXECUTE])
     }
 
-    void "test createProject when analysisDirectory can not be created, sends email"() {
+    void "test createProject when dirAnalysis can not be created, sends email"() {
         given:
         setupData()
         String group = configService.testingGroup
@@ -255,25 +255,25 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         when:
         Project project
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name: 'project',
-                directory: 'dir',
-                individualPrefix: 'individualPrefix',
-                analysisDirectory: "/dirA",
-                unixGroup: group,
-                projectGroup: '',
-                nameInMetadataFiles: null,
-                forceCopyFiles: false,
-                description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                name                          : 'project',
+                dirName                       : 'dir',
+                individualPrefix              : 'individualPrefix',
+                dirAnalysis                   : "/dirA",
+                unixGroup                     : group,
+                projectGroup                  : '',
+                nameInMetadataFiles           : null,
+                forceCopyFiles                : false,
+                description                   : '',
+                processingPriority            : ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
-                projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: LocalDate.now(),
+                qcThresholdHandling           : QcThresholdHandling.NO_CHECK,
+                projectType                   : Project.ProjectType.SEQUENCING,
+                storageUntil                  : LocalDate.now(),
         )
         projectService.mailHelperService = Mock(MailHelperService) {
             1 * sendEmail(_, _, _) >> { String emailSubject, String content, String recipient ->
-                assert emailSubject == "Could not automatically create analysisDir '${projectParams.analysisDirectory}' for Project '${projectParams.name}'."
-                assert content.contains("mkdir: cannot create directory ‘${projectParams.analysisDirectory}’: Permission denied")
+                assert emailSubject == "Could not automatically create analysisDir '${projectParams.dirAnalysis}' for Project '${projectParams.name}'."
+                assert content.contains("mkdir: cannot create directory ‘${projectParams.dirAnalysis}’: Permission denied")
             }
         }
         SpringSecurityUtils.doWithAuth(ADMIN) {
@@ -295,20 +295,20 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name: name,
-                directory: dirName,
-                individualPrefix: 'individualPrefix',
-                analysisDirectory: '/dirA',
-                unixGroup: group,
-                projectGroup: '',
-                nameInMetadataFiles: nameInMetadataFiles,
-                forceCopyFiles: true,
-                description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                name                          : name,
+                dirName                       : dirName,
+                individualPrefix              : 'individualPrefix',
+                dirAnalysis                   : '/dirA',
+                unixGroup                     : group,
+                projectGroup                  : '',
+                nameInMetadataFiles           : nameInMetadataFiles,
+                forceCopyFiles                : true,
+                description                   : '',
+                processingPriority            : ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
-                projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: LocalDate.now(),
+                qcThresholdHandling           : QcThresholdHandling.NO_CHECK,
+                projectType                   : Project.ProjectType.SEQUENCING,
+                storageUntil                  : LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -332,28 +332,28 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
         when:
         setupData()
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name: 'project',
-                directory: 'dir',
-                individualPrefix: 'individualPrefix',
-                analysisDirectory: '/dirA',
-                unixGroup: 'invalidValue',
-                projectGroup: '',
-                nameInMetadataFiles: null,
-                forceCopyFiles: false,
-                description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                name                          : 'project',
+                dirName                       : 'dir',
+                individualPrefix              : 'individualPrefix',
+                dirAnalysis                   : '/dirA',
+                unixGroup                     : 'invalidValue',
+                projectGroup                  : '',
+                nameInMetadataFiles           : null,
+                forceCopyFiles                : false,
+                description                   : '',
+                processingPriority            : ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
-                projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: LocalDate.now(),
+                qcThresholdHandling           : QcThresholdHandling.NO_CHECK,
+                projectType                   : Project.ProjectType.SEQUENCING,
+                storageUntil                  : LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
         }
 
         then:
-        AssertionError ex = thrown()
-        ex.message.contains('Expected exit code to be 0, but it is 1')
+        AssertionError e = thrown()
+        e.message.contains('Expected exit code to be 0, but it is 1')
     }
 
     void "test createProject with invalid dirAnalysis"() {
@@ -363,27 +363,27 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name: 'project',
-                directory: 'dir',
-                individualPrefix: 'individualPrefix',
-                analysisDirectory: 'invalidDirA',
-                unixGroup: group,
-                projectGroup: '',
+                name               : 'project',
+                dirName            : 'dir',
+                individualPrefix   : 'individualPrefix',
+                dirAnalysis        : 'invalidDirA',
+                unixGroup          : group,
+                projectGroup       : '',
                 nameInMetadataFiles: null,
-                forceCopyFiles: false,
-                description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                forceCopyFiles     : false,
+                description        : '',
+                processingPriority : ProcessingPriority.NORMAL,
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
-                projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: LocalDate.now(),
+                projectType        : Project.ProjectType.SEQUENCING,
+                storageUntil       : LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
         }
 
         then:
-        ValidationException exception = thrown()
-        exception.message.contains("dirAnalysis")
+        ValidationException e = thrown()
+        e.message.contains("dirAnalysis")
     }
 
     void "test createProject valid input, when directory with wrong unix group already exists"() {
@@ -404,20 +404,20 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name: 'project',
-                directory: 'dir',
-                individualPrefix: 'individualPrefix',
-                analysisDirectory: "${temporaryFolder.newFolder()}/dirA",
-                unixGroup: group,
-                projectGroup: '',
-                nameInMetadataFiles: null,
-                forceCopyFiles: false,
-                description: '',
-                processingPriority: ProcessingPriority.NORMAL,
+                name                          : 'project',
+                dirName                       : 'dir',
+                individualPrefix              : 'individualPrefix',
+                dirAnalysis                   : "${temporaryFolder.newFolder()}/dirA",
+                unixGroup                     : group,
+                projectGroup                  : '',
+                nameInMetadataFiles           : null,
+                forceCopyFiles                : false,
+                description                   : '',
+                processingPriority            : ProcessingPriority.NORMAL,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
-                projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: LocalDate.now(),
+                qcThresholdHandling           : QcThresholdHandling.NO_CHECK,
+                projectType                   : Project.ProjectType.SEQUENCING,
+                storageUntil                  : LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -459,21 +459,21 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name: 'project',
-                directory: 'dir',
-                individualPrefix: 'individualPrefix',
-                analysisDirectory: analysisDir,
-                unixGroup: group,
-                projectGroup: '',
-                nameInMetadataFiles: null,
-                forceCopyFiles: false,
-                description: '',
-                processingPriority: ProcessingPriority.NORMAL,
-                projectInfoFile: mockMultipartFile,
+                name                          : 'project',
+                dirName                       : 'dir',
+                individualPrefix              : 'individualPrefix',
+                dirAnalysis                   : analysisDir,
+                unixGroup                     : group,
+                projectGroup                  : '',
+                nameInMetadataFiles           : null,
+                forceCopyFiles                : false,
+                description                   : '',
+                processingPriority            : ProcessingPriority.NORMAL,
+                projectInfoFile               : mockMultipartFile,
                 sampleIdentifierParserBeanName: SampleIdentifierParserBeanName.NO_PARSER,
-                qcThresholdHandling: QcThresholdHandling.NO_CHECK,
-                projectType: Project.ProjectType.SEQUENCING,
-                storageUntil: LocalDate.now(),
+                qcThresholdHandling           : QcThresholdHandling.NO_CHECK,
+                projectType                   : Project.ProjectType.SEQUENCING,
+                storageUntil                  : LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
@@ -528,26 +528,50 @@ class ProjectServiceIntegrationSpec extends Specification implements UserAndRole
 
         when:
         ProjectCreationCommand projectParams = new ProjectCreationCommand(
-                name: 'project',
-                directory: 'dir',
-                individualPrefix: 'individualPrefix',
-                analysisDirectory: '/dirA',
-                unixGroup: group,
-                projectGroup: '',
+                name               : 'project',
+                dirName            : 'dir',
+                individualPrefix   : 'individualPrefix',
+                dirAnalysis        : '/dirA',
+                unixGroup          : group,
+                projectGroup       : '',
                 nameInMetadataFiles: 'project',
-                forceCopyFiles: true,
-                description: '',
+                forceCopyFiles     : true,
+                description        : '',
                 qcThresholdHandling: QcThresholdHandling.NO_CHECK,
-                processingPriority: ProcessingPriority.NORMAL,
-                storageUntil: LocalDate.now(),
+                processingPriority : ProcessingPriority.NORMAL,
+                storageUntil       : LocalDate.now(),
         )
         SpringSecurityUtils.doWithAuth(ADMIN) {
             projectService.createProject(projectParams)
         }
 
         then:
-        ValidationException ex = thrown()
-        ex.message.contains("'projectType': rejected value [null]")
+        ValidationException e = thrown()
+        e.message.contains("'projectType': rejected value [null]")
+    }
+
+    void "getUsersToCopyFromBaseProject only returns enabled PIs"() {
+        given:
+        baseSetupData()
+        createAllBasicProjectRoles()
+
+        Project project = createProject()
+        ProjectRole pi = ProjectRole.findByName(ProjectRole.Basic.PI.name())
+        ProjectRole bi = ProjectRole.findByName(ProjectRole.Basic.BIOINFORMATICIAN.name())
+
+        Closure<UserProjectRole> createUserProjectRoleHelper = { ProjectRole projectRole, boolean enabled ->
+            return DomainFactory.createUserProjectRole(project: project, projectRole: projectRole, enabled: enabled)
+        }
+
+        List<UserProjectRole> userProjectRoles = [
+                createUserProjectRoleHelper(pi, true),
+                createUserProjectRoleHelper(pi, false),
+                createUserProjectRoleHelper(bi, true),
+                createUserProjectRoleHelper(DomainFactory.createProjectRole(), true),
+        ]
+
+        expect:
+        projectService.getUsersToCopyFromBaseProject(project) == [userProjectRoles[0]]
     }
 
     @Unroll
