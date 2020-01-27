@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -30,8 +29,6 @@ class IlseSubmission implements Entity, Commentable {
     int ilseNumber
 
     boolean warning = false
-
-    Comment comment
 
     static constraints = {
         ilseNumber unique: true, min: 1, max: 999999

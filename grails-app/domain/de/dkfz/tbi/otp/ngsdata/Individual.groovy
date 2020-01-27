@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
@@ -58,8 +57,6 @@ class Individual implements Commentable, Entity {
      * Only admin users are allowed to see this value.
      */
     String internIdentifier
-
-    Comment comment
 
     enum Type { REAL, POOL, CELLLINE, UNDEFINED }
     Type type

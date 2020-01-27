@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -84,8 +83,6 @@ class DataFile implements Commentable, Entity {
     Integer mateNumber
 
     boolean indexFile = false
-
-    Comment comment
 
     /** @deprecated OTP-2311: Redundant with seqTrack.run  */
     @Deprecated

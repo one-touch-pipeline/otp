@@ -23,7 +23,6 @@ package de.dkfz.tbi.otp.tracking
 
 import groovy.transform.TupleConstructor
 
-import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
@@ -105,8 +104,6 @@ class OtrsTicket implements Commentable, Entity {
 
     boolean finalNotificationSent = false
     boolean automaticNotification = true
-
-    Comment comment
 
     String seqCenterComment
 

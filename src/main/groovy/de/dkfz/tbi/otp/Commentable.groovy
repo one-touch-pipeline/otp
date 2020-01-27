@@ -21,8 +21,9 @@
  */
 package de.dkfz.tbi.otp
 
-interface Commentable {
-    Comment getComment()
-    void setComment(Comment comment)
-    abstract getProject()
+import de.dkfz.tbi.otp.ngsdata.Project
+
+trait Commentable {
+    Comment comment
+    abstract Project getProject()
 }

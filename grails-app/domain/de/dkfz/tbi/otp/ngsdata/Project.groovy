@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.administration.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.*
@@ -97,8 +96,6 @@ class Project implements ProjectPropertiesGivenWithRequest, Commentable, Entity 
     boolean closed = false
 
     Set<ProjectInfo> projectInfos
-
-    Comment comment
 
     ProjectGroup projectGroup
 

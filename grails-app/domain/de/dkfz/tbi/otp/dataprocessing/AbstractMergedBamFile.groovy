@@ -24,7 +24,6 @@ package de.dkfz.tbi.otp.dataprocessing
 import groovy.transform.TupleConstructor
 import org.hibernate.Hibernate
 
-import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.ngsdata.*
 
@@ -52,8 +51,6 @@ abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implement
      * whereas in the RoddyBamFile it is only used for documentation of the state.
      */
     FileOperationStatus fileOperationStatus = FileOperationStatus.DECLARED
-
-    Comment comment
 
     QcTrafficLightStatus qcTrafficLightStatus
 

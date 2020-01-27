@@ -21,7 +21,6 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.Comment
 import de.dkfz.tbi.otp.Commentable
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
@@ -70,8 +69,6 @@ class Process implements Serializable, Commentable, Entity {
      * The value is set if this Process has been created in response to the failure of the referenced Process.
      */
     Process restarted
-
-    Comment comment
 
     static mapping = {
         finished index: 'finished_idx'
