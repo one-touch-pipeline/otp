@@ -26,7 +26,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="dataFields.title"/></title>
-    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="pages/metaDataFields/datatable.js"/>
+    <asset:javascript src="pages/metaDataFields/seqPlatforms/datatable.js"/>
 </head>
 
 <body>
@@ -35,7 +37,8 @@
 
     <h3><g:message code="dataFields.seqPlatform.header"/></h3>
     <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
-    <table>
+    <div class="otpDataTables">
+    <table id="metadatafields-datatable">
         <thead>
         <tr>
             <th><g:message code="dataFields.seqPlatform.name"/></th>
@@ -52,7 +55,7 @@
             <tr>
                 <td>${seqPlatform.name}</td>
                 <td>${seqPlatform.model}</td>
-                <td class="keep-whitespace">${seqPlatform.modelImportAliases}</td>
+                <td><span class="keep-whitespace">${seqPlatform.modelImportAliases}</span></td>
                 <td>
                     <g:if test="${seqPlatform.hasModel}">
                         <otp:editorSwitchNewValues
@@ -63,7 +66,7 @@
                     </g:if>
                 </td>
                 <td>${seqPlatform.seqKit}</td>
-                <td class="keep-whitespace">${seqPlatform.seqKitImportAliases}</td>
+                <td><span class="keep-whitespace">${seqPlatform.seqKitImportAliases}</span></td>
                 <td>
                     <g:if test="${seqPlatform.hasSeqKit}">
                         <otp:editorSwitchNewValues
@@ -75,15 +78,16 @@
                 </td>
             </tr>
         </g:each>
-        <td colspan="8">
-            <otp:editorSwitchNewValues
-                    roles="ROLE_OPERATOR"
-                    labels="${["Platform", "Model", "Kit"]}"
-                    textFields="${["platform", "model", "kit"]}"
-                    link="${g.createLink(controller: 'metaDataFields', action: 'createSeqPlatform')}"/>
-        </td>
         </tbody>
     </table>
+    </div>
+    <otp:editorSwitchNewValues
+            roles="ROLE_OPERATOR"
+            labels="${["Platform", "Model", "Kit"]}"
+            textFields="${["platform", "model", "kit"]}"
+            link="${g.createLink(controller: 'metaDataFields', action: 'createSeqPlatform')}"/>
+    <br>
+    <br>
 </div>
 </body>
 </html>

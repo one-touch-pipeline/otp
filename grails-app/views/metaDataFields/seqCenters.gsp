@@ -26,7 +26,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="dataFields.title"/></title>
-    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="pages/metaDataFields/datatable.js"/>
+    <asset:javascript src="pages/metaDataFields/seqCenters/datatable.js"/>
 </head>
 
 <body>
@@ -35,7 +37,8 @@
 
     <h3><g:message code="dataFields.seqCenter.header"/></h3>
     <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
-    <table>
+    <div class="otpDataTables">
+    <table id="metadatafields-datatable">
         <thead>
         <tr>
             <th title="${g.message(code: "dataFields.seqCenter.name.tooltip")}"><g:message code="dataFields.seqCenter.name"/></th>
@@ -43,6 +46,7 @@
             <th title="${g.message(code: "dataFields.seqCenter.autoImportDir.tooltip")}"><g:message code="dataFields.seqCenter.autoImportDir"/></th>
             <th title="${g.message(code: "dataFields.seqCenter.autoImportable.tooltip")}"><g:message code="dataFields.seqCenter.autoImportable"/></th>
             <th title="${g.message(code: "dataFields.seqCenter.importDirsAllowLinking.tooltip")}"><g:message code="dataFields.seqCenter.importDirsAllowLinking"/></th>
+            <th hidden><g:message code="dataFields.seqCenter.importDirsAllowLinking"/></th>
             <th title="${g.message(code: "dataFields.seqCenter.copyMetadataFile.tooltip")}"><g:message code="dataFields.seqCenter.copyMetadataFile"/></th>
         </tr>
         </thead>
@@ -78,6 +82,7 @@
                             textFields="${["absolutePath"]}"
                             link="${g.createLink(controller: 'metaDataFields', action: 'createImportDirsAllowLinking', params: ['seqCenter.id': seqCenter.id])}"/>
                 </td>
+                <td hidden><span class="keep-whitespace">${seqCenter.importDirsAllowLinking.join(";\n")}</span></td>
                 <td>
                     <otp:editorSwitch
                         roles="DISABLED"
@@ -90,6 +95,7 @@
         </g:each>
         </tbody>
     </table>
+    </div>
     <otp:editorSwitchNewValues
             roles="ROLE_OPERATOR"
             labels="${["Name", "Directory"]}"

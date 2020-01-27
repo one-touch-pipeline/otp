@@ -29,6 +29,9 @@ import de.dkfz.tbi.otp.utils.CollectionUtils
 @Transactional
 abstract class MetadataFieldsService<T> {
 
+    // explicit protected is required, see: https://stackoverflow.com/a/20472740/6921511
+    protected final static String MULTILINE_JOIN_STRING = ";\n"
+
     T findByNameOrImportAlias(String nameOrImportAlias, Map properties = [:]) {
         assert nameOrImportAlias: "the input 'nameOrImportAlias' is null"
 

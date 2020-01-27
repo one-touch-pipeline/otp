@@ -36,7 +36,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
                     dirName          : it.dirName,
                     singleCell       : it.singleCell,
                     hasAntibodyTarget: it.hasAntibodyTarget,
-                    libraryLayouts   : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().reverse().join(';\n'),
+                    libraryLayouts   : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().reverse().join(MULTILINE_JOIN_STRING),
                     layouts          :
                             [
                                     SINGLE   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.SINGLE, it.singleCell) ? true : false,
@@ -44,7 +44,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
                                     MATE_PAIR: SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.MATE_PAIR, it.singleCell) ? true : false,
                             ],
                     displayName      : it.displayName,
-                    importAliases    : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(';\n'),
+                    importAliases    : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(MULTILINE_JOIN_STRING),
             ]
         }.unique()
     }

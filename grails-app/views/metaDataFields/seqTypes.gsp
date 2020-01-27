@@ -26,8 +26,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="dataFields.title"/></title>
-    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="modules/editorSwitch.js"/>
     <asset:javascript src="common/MultiInputField.js"/>
+    <asset:javascript src="pages/metaDataFields/datatable.js"/>
+    <asset:javascript src="pages/metaDataFields/seqTypes/datatable.js"/>
 </head>
 
 <body>
@@ -37,7 +39,8 @@
 
     <h3><g:message code="dataFields.seqType.header"/></h3>
     <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
-    <table>
+    <div class="otpDataTables">
+    <table id="metadatafields-datatable">
         <thead>
         <tr>
             <th><g:message code="dataFields.seqType.name"/></th>
@@ -55,11 +58,18 @@
         <g:each var="seqType" in="${seqTypes}">
             <tr>
                 <td>${seqType.name}</td>
-                <td><asset:image src="${seqType.singleCell ? "ok.png" : "error.png"}"/></td>
                 <td>
-                    <asset:image
-                            src="${seqType.hasAntibodyTarget ? "ok.png" : "error.png"}"
-                            title="${g.message(code: "dataFields.seqType.supportsAntibody.${seqType.hasAntibodyTarget}")}"/>
+                    <asset:image src="${seqType.singleCell ? "ok.png" : "error.png"}"/>
+                    <span hidden>${seqType.singleCell}</span>
+                </td>
+                <td>
+                    <g:if test="${seqType.hasAntibodyTarget}">
+                        <asset:image src="ok.png" title="${g.message(code: "dataFields.seqType.supportsAntibody.true")}"/>
+                    </g:if>
+                    <g:else>
+                        <asset:image src="error.png" title="${g.message(code: "dataFields.seqType.supportsAntibody.false")}"/>
+                    </g:else>
+                    <span hidden>${seqType.hasAntibodyTarget}</span>
                 </td>
                 <td>${seqType.dirName}</td>
                 <td class="keep-whitespace">${seqType.libraryLayouts}</td>
@@ -85,6 +95,7 @@
         </g:each>
         </tbody>
     </table>
+    </div>
 
     <h4><g:message code="dataFields.seqType.create.addSeqTypeTitle"/></h4>
     <g:form action="createSeqType" useToken="true">

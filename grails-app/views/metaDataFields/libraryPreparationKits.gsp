@@ -26,7 +26,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="dataFields.title"/></title>
-    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="pages/metaDataFields/datatable.js"/>
+    <asset:javascript src="pages/metaDataFields/libraryPreparationKits/datatable.js"/>
 </head>
 
 <body>
@@ -35,7 +37,8 @@
 
     <h3><g:message code="dataFields.libPrepKit.header"/></h3>
     <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
-    <table>
+    <div class="otpDataTables">
+    <table id="metadatafields-datatable">
         <thead>
         <tr>
             <th><g:message code="dataFields.libPrepKit.name"/></th>
@@ -43,7 +46,9 @@
             <th><g:message code="dataFields.libPrepKit.importAlias"/></th>
             <th></th>
             <th><g:message code="dataFields.libPrepKit.adapterFile"/></th>
+            <th></th>
             <th><g:message code="dataFields.libPrepKit.reverseComplementAdapterSequenceShort"/></th>
+            <th></th>
             <th><g:message code="dataFields.libPrepKit.genomes"/></th>
         </tr>
         </thead>
@@ -52,8 +57,8 @@
             <tr>
                 <td>${libraryPreparationKit.name}</td>
                 <td>${libraryPreparationKit.shortDisplayName}</td>
-                <td class="keep-whitespace">${libraryPreparationKit.importAliases}</td>
-                <td align="right">
+                <td><span class="keep-whitespace">${libraryPreparationKit.importAliases}</span></td>
+                <td>
                     <otp:editorSwitchNewValues
                             roles="ROLE_OPERATOR"
                             labels="${[g.message(code: "dataFields.libPrepKit.importAlias")]}"
@@ -62,45 +67,57 @@
                 </td>
                 <td>
                     <g:if test="${libraryPreparationKit.adapterFile}">
-                        <span title="${libraryPreparationKit.adapterFile}">${new File(libraryPreparationKit.adapterFile).name}</span>
+                        <div class="trim-text-with-ellipsis-left-based adapter-file" title="${libraryPreparationKit.adapterFile}">
+                            <bdi>${libraryPreparationKit.adapterFile}</bdi>
+                        </div>
                     </g:if>
                     <g:else>
-                        <otp:editorSwitchNewValues
-                                roles="ROLE_OPERATOR"
-                                labels="${[g.message(code: "dataFields.libPrepKit.adapterFile")]}"
-                                textFields="${["adapterFile"]}"
-                                link="${g.createLink(controller: 'metaDataFields', action: 'addAdapterFileToLibraryPreparationKit', params: ["libraryPreparationKit.id": libraryPreparationKit.id])}"/>
+                        <g:message code="dataFields.libPrepKit.adapterFile.none"/>
                     </g:else>
                 </td>
                 <td>
-                    <g:if test="${libraryPreparationKit.reverseComplementAdapterSequence}">
-                        <asset:image src="ok.png" title="${libraryPreparationKit.reverseComplementAdapterSequence}"/>
+                    <otp:editorSwitchNewValues
+                            roles="ROLE_OPERATOR"
+                            labels="${[g.message(code: "dataFields.libPrepKit.adapterFile")]}"
+                            textFields="${["adapterFile"]}"
+                            link="${g.createLink(controller: 'metaDataFields', action: 'addAdapterFileToLibraryPreparationKit', params: ["libraryPreparationKit.id": libraryPreparationKit.id])}"/>
+                </td>
+                <td>
+                    <g:set var="sequence" value="${libraryPreparationKit.reverseComplementAdapterSequence}"/>
+                    <g:if test="${sequence}">
+                        <div class="trim-text-with-ellipsis adapter-sequence" title="${sequence}">
+                            <asset:image src="ok.png"/> ${sequence}
+                        </div>
                     </g:if>
                     <g:else>
-                        <otp:editorSwitchNewValues
-                                roles="ROLE_OPERATOR"
-                                labels="${[g.message(code: "dataFields.libPrepKit.reverseComplementAdapterSequenceShort")]}"
-                                textFields="${["reverseComplementAdapterSequence"]}"
-                                link="${g.createLink(controller: 'metaDataFields', action: 'addAdapterSequenceToLibraryPreparationKit', params: ["libraryPreparationKit.id": libraryPreparationKit.id])}"/>
+                        <asset:image src="error.png"/>
+                        <g:message code="dataFields.libPrepKit.adapterSequence.none"/>
                     </g:else>
                 </td>
-                <td class="keep-whitespace">${libraryPreparationKit.referenceGenomesWithBedFiles}</td>
+                <td>
+                    <otp:editorSwitchNewValues
+                            roles="ROLE_OPERATOR"
+                            labels="${[g.message(code: "dataFields.libPrepKit.reverseComplementAdapterSequenceShort")]}"
+                            textFields="${["reverseComplementAdapterSequence"]}"
+                            link="${g.createLink(controller: 'metaDataFields', action: 'addAdapterSequenceToLibraryPreparationKit', params: ["libraryPreparationKit.id": libraryPreparationKit.id])}"/>
+                </td>
+                <td><span class="keep-whitespace">${libraryPreparationKit.referenceGenomesWithBedFiles}</span></td>
             </tr>
         </g:each>
-        <td colspan="3">
-            <otp:editorSwitchNewValues
-                    roles="ROLE_OPERATOR"
-                    labels="${[
-                            g.message(code: "dataFields.libPrepKit.name"),
-                            g.message(code: "dataFields.libPrepKit.shortDisplayName"),
-                            g.message(code: "dataFields.libPrepKit.adapterFile"),
-                            g.message(code: "dataFields.libPrepKit.reverseComplementAdapterSequenceShort"),
-                    ]}"
-                    textFields="${["name", "shortDisplayName", "adapterFile", "reverseComplementAdapterSequence"]}"
-                    link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKit')}"/>
-        </td>
         </tbody>
     </table>
+    </div>
+    <otp:editorSwitchNewValues
+            roles="ROLE_OPERATOR"
+            labels="${[
+                    g.message(code: "dataFields.libPrepKit.name"),
+                    g.message(code: "dataFields.libPrepKit.shortDisplayName"),
+                    g.message(code: "dataFields.libPrepKit.adapterFile"),
+                    g.message(code: "dataFields.libPrepKit.reverseComplementAdapterSequenceShort"),
+            ]}"
+            textFields="${["name", "shortDisplayName", "adapterFile", "reverseComplementAdapterSequence"]}"
+            link="${g.createLink(controller: 'metaDataFields', action: 'createLibraryPreparationKit')}"/>
+    <br><br>
 </div>
 </body>
 </html>

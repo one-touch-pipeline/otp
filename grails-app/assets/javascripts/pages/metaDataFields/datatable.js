@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,32 +19,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
 
-import org.springframework.security.access.prepost.PreAuthorize
+/*jslint browser: true */
+/*global $ */
 
-import de.dkfz.tbi.otp.utils.StringUtils
-
-class AntibodyTargetService extends MetadataFieldsService<AntibodyTarget> {
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    List<Map> getDisplayableMetadata() {
-        return AntibodyTarget.list(sort: "name", order: "asc").collect {
-            [
-                    id           : it.id,
-                    name         : it.name,
-                    importAliases: it.importAlias?.sort()?.join(MULTILINE_JOIN_STRING),
-            ]
-        }
-    }
-
-    @Override
-    protected Class getClazz() {
-        return AntibodyTarget
-    }
-
-    @Override
-    protected AntibodyTarget findByName(String name, Map properties) {
-        return super.findByName(StringUtils.escapeForSqlLike(name), properties)
-    }
-}
+$.otp.exportableMetaDataFieldsTable = function (columnsToExport) {
+    "use strict";
+    return $('#metadatafields-datatable').dataTable({
+        sDom: 'B t',
+        buttons: [
+            {
+                extend: 'csvHtml5',
+                text: 'Download CSV',
+                footer: false,
+                exportOptions: {
+                    columns: columnsToExport
+                }
+            }
+        ],
+        bPaginate: false,
+        ordering: false
+    });
+};

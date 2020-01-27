@@ -26,7 +26,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="main"/>
     <title><g:message code="dataFields.title"/></title>
-    <asset:javascript src="modules/editorSwitch"/>
+    <asset:javascript src="modules/editorSwitch.js"/>
+    <asset:javascript src="pages/metaDataFields/datatable.js"/>
+    <asset:javascript src="pages/metaDataFields/antibodyTargets/datatable.js"/>
 </head>
 
 <body>
@@ -35,7 +37,8 @@
 
     <h3><g:message code="dataFields.antibodyTarget.header"/></h3>
     <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
-    <table>
+    <div class="otpDataTables">
+    <table id="metadatafields-datatable">
         <thead>
         <tr>
             <th><g:message code="dataFields.antibodyTarget.name"/></th>
@@ -57,15 +60,15 @@
                 </td>
             </tr>
         </g:each>
-        <td colspan="1">
-            <otp:editorSwitchNewValues
-                    roles="ROLE_OPERATOR"
-                    labels="${["Name"]}"
-                    textFields="${["name"]}"
-                    link="${g.createLink(controller: 'metaDataFields', action: 'createAntibodyTarget')}"/>
-        </td>
         </tbody>
     </table>
+    </div>
+    <otp:editorSwitchNewValues
+            roles="ROLE_OPERATOR"
+            labels="${["Name"]}"
+            textFields="${["name"]}"
+            link="${g.createLink(controller: 'metaDataFields', action: 'createAntibodyTarget')}"/>
+    <br><br>
 </div>
 </body>
 </html>

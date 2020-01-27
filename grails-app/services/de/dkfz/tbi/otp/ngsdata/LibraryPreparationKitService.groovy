@@ -36,9 +36,9 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
                     shortDisplayName                : it.shortDisplayName,
                     adapterFile                     : it.adapterFile,
                     reverseComplementAdapterSequence: it.reverseComplementAdapterSequence,
-                    importAliases                   : it.importAlias?.sort()?.join(';\n'),
+                    importAliases                   : it.importAlias?.sort()?.join(MULTILINE_JOIN_STRING),
                     referenceGenomesWithBedFiles    : BedFile.findAllByLibraryPreparationKit(
-                            it, [sort: "referenceGenome.name", order: "asc"])*.referenceGenome*.name.join(';\n'),
+                            it, [sort: "referenceGenome.name", order: "asc"])*.referenceGenome*.name.join(MULTILINE_JOIN_STRING),
             ]
         }
     }

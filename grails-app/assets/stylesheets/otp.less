@@ -2277,6 +2277,12 @@ div.log {
     white-space: nowrap;
 }
 
+// This requires the text to be wrapped in a <bdi> tag, see: https://stackoverflow.com/a/22126773/6921511
+.trim-text-with-ellipsis-left-based {
+    .trim-text-with-ellipsis;
+    direction: rtl;
+}
+
 .project-info-form-container {
     width: 800px;
     input[type='text'], textarea {
@@ -2355,6 +2361,12 @@ ul.metaDataFieldsLinkBanner {
     .annotation {
         color: red;
     }
+    .adapter-file {
+        width: 200px;
+    }
+    .adapter-sequence {
+        width: 200px;
+    }
 }
 
 .software-table {
@@ -2368,11 +2380,12 @@ ul.metaDataFieldsLinkBanner {
         width: auto;
     }
 
-    .software-table-name-row {
-        background-color: white;
+    .tool-header-row {
+        td {
+            background-color: #e2e2e2;
+        }
         font-weight: bold;
         font-size: large;
-        border-top: 1px solid black
     }
 }
 

@@ -26,7 +26,9 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
         <meta name="layout" content="main"/>
         <title><g:message code="softwareTool.list.title"/></title>
-        <asset:javascript src="modules/editorSwitch"/>
+        <asset:javascript src="modules/editorSwitch.js"/>
+        <asset:javascript src="pages/metaDataFields/datatable.js"/>
+        <asset:javascript src="pages/metaDataFields/softwareTool/datatable.js"/>
     </head>
 <body>
     <div class="body metaDataFields">
@@ -34,35 +36,28 @@
         <g:render template="/metaDataFields/linkBanner"/>
 
         <h3><g:message code="softwareTool.list.header"/></h3>
-        <g:form controller="softwareTool" action="createSoftwareTool" method="POST">
-            <table style="width: 50%">
-                <tbody>
-                    <tr>
-                        <td><g:message code="softwareTool.list.tool"/></td>
-                        <td><input name="programName" id="type" type="text" value="${cmd?.programName}"/></td>
-                    </tr>
-                    <tr>
-                        <td><g:message code="softwareTool.list.version"/></td>
-                        <td><input name="programVersion" id="version" type="text" value="${cmd?.programVersion}"></td>
-                    </tr>
-                </tbody>
-            </table>
-            <g:submitButton name="${g.message(code: "softwareTool.list.confirmation")}"/>
-        </g:form>
-        <br>
         <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
-        <table class="software-table fixed-table-header">
+        <div class="otpDataTables">
+        <table id="metadatafields-datatable" class="software-table fixed-table-header">
             <thead>
                 <tr>
                     <th><g:message code="softwareTool.list.version"/></th>
                     <th><g:message code="softwareTool.list.aliases"/></th>
                     <th></th>
+                    <th hidden><g:message code="softwareTool.list.tool"/></th>
+                    <th hidden><g:message code="softwareTool.list.version"/></th>
+                    <th hidden><g:message code="softwareTool.list.aliases"/></th>
                 </tr>
             </thead>
             <tbody>
             <g:each var="programName" in="${(softwareToolPerProgramName.keySet() as List<String>).sort { it.toLowerCase() }}">
-                <tr>
-                    <td colspan="3" class="software-table-name-row">${programName}</td>
+                <tr class="tool-header-row">
+                    <td>${programName}</td>
+                    <td></td>
+                    <td></td>
+                    <td hidden></td>
+                    <td hidden></td>
+                    <td hidden></td>
                 </tr>
                 <g:each var="softwareTool" in="${softwareToolPerProgramName[programName]}">
                      <tr>
@@ -87,11 +82,35 @@
                                      link="${g.createLink(controller: 'softwareTool', action: 'createSoftwareToolIdentifier', id: softwareTool.id)}"
                                      value=""/>
                          </td>
+                         <g:render template="exportableListEntry" model="[softwareTool: softwareTool, identifier: identifierPerSoftwareTool[softwareTool]]"/>
                      </tr>
                 </g:each>
             </g:each>
             </tbody>
         </table>
+        </div>
+        <br>
+        <h3><g:message code="softwareTool.list.new.header"/></h3>
+        <g:form controller="softwareTool" action="createSoftwareTool" method="POST">
+            <table style="width: 50%">
+                <tbody>
+                <tr>
+                    <td><g:message code="softwareTool.list.tool"/></td>
+                    <td><g:textField list="programNames" id="type" name="programName" value="${cmd?.programName}" autocomplete="off"/></td>
+                </tr>
+                <tr>
+                    <td><g:message code="softwareTool.list.version"/></td>
+                    <td><input name="programVersion" id="version" type="text" value="${cmd?.programVersion}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <datalist id="programNames">
+                <g:each in="${softwareToolPerProgramName.keySet() as List<String>}" var="programName">
+                    <option value="${programName}">${programName}</option>
+                </g:each>
+            </datalist>
+            <g:submitButton name="${g.message(code: "softwareTool.list.confirmation")}"/>
+        </g:form>
     </div>
 </body>
 </html>
