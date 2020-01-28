@@ -35,6 +35,9 @@ trait Entity {
         if (this.is(other)) {
             return true
         }
+        if (!other) {
+            return false
+        }
         Class thisClass = getClassWithoutInitializingProxy(this)
         Class otherClass = getClassWithoutInitializingProxy(other)
         return (thisClass == otherClass || thisClass.isAssignableFrom(otherClass) || otherClass.isAssignableFrom(thisClass)) &&
