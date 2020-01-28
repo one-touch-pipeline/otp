@@ -20,9 +20,10 @@
  * SOFTWARE.
  */
 
-import de.dkfz.tbi.otp.config.*
+import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.infrastructure.FileService
-import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.ngsdata.Individual
+import de.dkfz.tbi.otp.utils.DeletionService
 
 import java.nio.file.Path
 
@@ -39,13 +40,13 @@ boolean check = true
 
 assert pid : 'No pid is provided'
 
-DataSwapService dataSwapService = ctx.dataSwapService
+DeletionService deletionService = ctx.deletionService
 FileService fileService = ctx.fileService
 
 Path baseOutputDir = ConfigService.getInstance().getScriptOutputPath().toPath().resolve('sample_swap')
 
 Individual.withTransaction {
-    List<String> allFilesToRemove = dataSwapService.deleteIndividual(pid, check)
+    List<String> allFilesToRemove = deletionService.deleteIndividual(pid, check)
 
     Path deleteFileCmd = fileService.createOrOverwriteScriptOutputFile(baseOutputDir, "Delete_${pid}.sh")
 
