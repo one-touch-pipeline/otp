@@ -166,7 +166,7 @@ ${search ? """
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void editTimestampProperty(OtrsTicket ticket, String property, String dateString) {
         if (dateString == "") {
-            ticket.submissionReceivedNotice = null
+            ticket."${property}" = null
         } else {
             DateFormat format = new SimpleDateFormat(DATE_FORMAT)
             Date date = format.parse(dateString)
