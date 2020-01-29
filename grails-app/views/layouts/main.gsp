@@ -67,10 +67,11 @@
                                         <li><g:link controller="projectConfig" action="index"><g:message code="otp.menu.projectConfig"/></g:link></li>
                                         <li><g:link controller="projectUser" action="index"><g:message code="otp.menu.userManagement"/></g:link></li>
                                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
-                                            <li class="allGranted"><g:link controller="projectInfo" action="list"><g:message code="projectOverview.projectInfos" /></g:link> </li><br>
+                                            <li class="allGranted"><g:link controller="projectInfo" action="list"><g:message code="projectOverview.projectInfos" /></g:link></li>
+                                            <li class="allGranted"><g:link controller="projectRequest" action="index"><g:message code="otp.menu.projectRequest"/></g:link></li>
                                         </sec:ifAnyGranted>
                                         <sec:ifAllGranted roles="ROLE_MMML_MAPPING">
-                                            <li class="allGranted"><g:link controller="projectOverview" action="mmmlIdentifierMapping"><g:message code="otp.menu.mmmlIdentifierMapping"/></g:link></li><br>
+                                            <li class="allGranted"><g:link controller="projectOverview" action="mmmlIdentifierMapping"><g:message code="otp.menu.mmmlIdentifierMapping"/></g:link></li>
                                         </sec:ifAllGranted>
                                     </ul>
                                 </li>
@@ -91,7 +92,7 @@
                             </ul>
                         </li>
                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
-                            <li class="menuContainerItem"><g:link controller="egaSubmission" action="overview">EGA</g:link></li>
+                            <li class="menuContainerItem"><g:link controller="egaSubmission" action="overview"><g:message code="otp.menu.ega"/></g:link></li>
                             <li class="navigation menuContainerItem statistic">
                                 <ul>
                                     <li class="allGranted overview_nav_container nav_container"><a class="menuLinkContainer"><g:message code="otp.menu.statistics"/> &#9661;</a>
