@@ -125,7 +125,7 @@ $.otp.alignmentQualityOverviewTable = {
                             table.fnSettings().oFeatures.bServerSide = false;
                         },
                         "success": function (json) {
-                            var seqType = $('#seqType').find('option:selected').text();
+                            var seqType = $('#seqType').data("columns");
                             var columnNames = [
                                 "pid",
                                 "sampleType",
@@ -133,18 +133,18 @@ $.otp.alignmentQualityOverviewTable = {
                             ];
 
                             // coverage
-                            if (seqType === 'WGS PAIRED bulk' || seqType === 'WGBS PAIRED bulk' || seqType === 'WGBS_TAG PAIRED bulk' || seqType === "ChIP PAIRED bulk") {
+                            if (seqType === 'WHOLE_GENOME') {
                                 columnNames = columnNames.concat([
                                     "coverageWithoutN",
                                     "coverageX",
                                     "coverageY",
                                 ]);
-                            } else if (seqType === 'EXOME PAIRED bulk') {
+                            } else if (seqType === 'EXOME') {
                                 columnNames = columnNames.concat([
                                     "onTargetRatio",
                                     "targetCoverage",
                                 ]);
-                            } else if (seqType === 'RNA PAIRED bulk' || seqType === 'RNA SINGLE bulk') {
+                            } else if (seqType === 'RNA') {
                                 columnNames = columnNames.concat([
                                     "totalReadCounter",
                                     "percentDuplicates",
@@ -172,12 +172,12 @@ $.otp.alignmentQualityOverviewTable = {
                             }
 
                             // general information
-                            if (seqType === 'RNA PAIRED bulk' || seqType === 'RNA SINGLE bulk') {
+                            if (seqType === 'RNA') {
                                 columnNames = columnNames.concat([
                                     "kit",
                                     "dateFromFileSystem",
                                 ]);
-                            } else if (seqType === '10x_scRNA PAIRED singleCell') {
+                            } else if (seqType === 'CELL_RANGER') {
                                 columnNames = columnNames.concat([
                                     'summary',
                                     'expectedCells',

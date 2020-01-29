@@ -177,6 +177,7 @@ class AlignmentQualityOverviewController {
         SeqType seqType = (cmd.seqType && seqTypes.contains(cmd.seqType)) ? cmd.seqType : seqTypes[0]
 
         List<String> header
+        String columns = ""
         switch (seqType?.name) {
             case null:
                 header = ['alignment.quality.noSeqType']
@@ -186,15 +187,19 @@ class AlignmentQualityOverviewController {
             case SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName:
             case SeqTypeNames.CHIP_SEQ.seqTypeName:
                 header = HEADER_WHOLE_GENOME
+                columns = "WHOLE_GENOME"
                 break
             case SeqTypeNames.EXOME.seqTypeName:
                 header = HEADER_EXOME
+                columns = "EXOME"
                 break
             case SeqTypeNames.RNA.seqTypeName:
                 header = HEADER_RNA
+                columns = "RNA"
                 break
             case SeqTypeNames._10X_SCRNA.seqTypeName:
                 header = HEADER_CELL_RANGER
+                columns = "CELL_RANGER"
                 break
             default:
                 throw new RuntimeException("How should ${seqType.naturalId} be handled")
@@ -206,6 +211,7 @@ class AlignmentQualityOverviewController {
                 seqTypes: seqTypes,
                 seqType : seqType,
                 header  : header,
+                columns : columns,
         ]
     }
 

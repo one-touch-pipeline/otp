@@ -118,7 +118,7 @@ class SeqType implements Entity, MetadataField {
     }
 
     String getDisplayNameWithLibraryLayout() {
-        return "${displayName} ${libraryLayout} ${singleCell ? 'singleCell' : 'bulk'}"
+        return "${displayName} ${libraryLayout} ${singleCell ? 'single cell' : 'bulk'}"
     }
 
     String getLibraryLayoutDirName() {

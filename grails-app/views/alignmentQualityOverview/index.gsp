@@ -44,7 +44,7 @@
                     <div class="blue_label" id="projectsGroupbox">
                         <span class="blue_label"><g:message code="alignment.quality.seqType"/> :</span>
                         <form style="display: inline">
-                            <g:select class="criteria" id="seqType" name='seqType'
+                            <g:select class="criteria" id="seqType" name='seqType' data-columns="${columns}"
                                       from='${seqTypes}' value='${seqType.id}' optionKey='id' optionValue='displayNameWithLibraryLayout' onChange='submit();'/>
                         </form>
                     </div>
