@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.dataprocessing.runYapsa.RunYapsaConfig
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
@@ -147,6 +148,7 @@ class ProjectConfigController implements CheckAndCall {
                 cellRangerOverview             : cellRangerOverview,
                 qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
                 allSpeciesWithStrain           : SpeciesWithStrain.list().sort { it.toString() } ?: [],
+                allProjectGroups               : ProjectGroup.list(),
                 closed                         : project?.closed,
         ]
     }
@@ -199,6 +201,12 @@ class ProjectConfigController implements CheckAndCall {
     JSON updateTumorEntity(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(TumorEntity.findByName(cmd.value), cmd.fieldName, cmd.project)
+        }
+    }
+
+    JSON updateProjectGroup(UpdateProjectCommand cmd) {
+        checkErrorAndCallMethod(cmd) {
+            projectService.updateProjectField(CollectionUtils.atMostOneElement(ProjectGroup.findAllByName(cmd.value)), cmd.fieldName, cmd.project)
         }
     }
 

@@ -278,8 +278,15 @@
                 </tr>
                 <tr>
                     <td><g:message code="project.group"/></td>
-                    <td id="group">${project.projectGroup}</td>
                     <td></td>
+                    <td><otp:editorSwitch
+                            roles="ROLE_OPERATOR"
+                            template="dropDown"
+                            link="${g.createLink(controller: 'projectConfig', action: 'updateProjectGroup', params: ['project.id': project.id, 'fieldName': 'projectGroup'])}"
+                            noSelection="['':'None']"
+                            values="${allProjectGroups}"
+                            value="${project.projectGroup}"/>
+                    </td>
                 </tr>
                 <tr>
                     <td><g:message code="project.sampleParser"/></td>

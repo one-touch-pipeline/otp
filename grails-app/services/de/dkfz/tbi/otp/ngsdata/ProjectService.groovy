@@ -261,6 +261,7 @@ class ProjectService {
                 "nameInMetadataFiles",
                 "processingPriority",
                 "tumorEntity",
+                "projectGroup",
                 "sampleIdentifierParserBeanName",
                 "qcThresholdHandling",
                 "unixGroup",
