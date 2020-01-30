@@ -46,13 +46,15 @@ class SimpleProjectIndividualSampleTypeParserSpec extends Specification {
         defaultParsedSampleIdentifier.pid == pid
         defaultParsedSampleIdentifier.sampleTypeDbName == sampleType
         defaultParsedSampleIdentifier.fullSampleName == identifier
-        defaultParsedSampleIdentifier.useSpecificReferenceGenome == SampleType.SpecificReferenceGenome.UNKNOWN
+        defaultParsedSampleIdentifier.useSpecificReferenceGenome == specificReferenceGenome
 
         where:
-        input                                              || pid        | sampleType | project    | identifier
-        '(hipo_021)(some_pid)(TUMOR01)(DisplayIdentifier)' || 'some_pid' | 'TUMOR01'  | 'hipo_021' | 'DisplayIdentifier'
-        '(hipo_021)(some_pid)(TUMOR01)(with space)'        || 'some_pid' | 'TUMOR01'  | 'hipo_021' | 'with space'
-        '(hipo_021)(some_pid)(TUMOR01)(with_underscore)'   || 'some_pid' | 'TUMOR01'  | 'hipo_021' | 'with_underscore'
+        input                                                || pid        | sampleType   | project    | identifier          | specificReferenceGenome
+        '(hipo_021)(some_pid)(TUMOR01)(DisplayIdentifier)'   || 'some_pid' | 'TUMOR01'    | 'hipo_021' | 'DisplayIdentifier' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '(hipo_021)(some_pid)(TUMOR01)(with space)'          || 'some_pid' | 'TUMOR01'    | 'hipo_021' | 'with space'        | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '(hipo_021)(some_pid)(TUMOR01)(with_underscore)'     || 'some_pid' | 'TUMOR01'    | 'hipo_021' | 'with_underscore'   | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '(hipo_021)(some_pid)(TUMOR01-x)(DisplayIdentifier)' || 'some_pid' | 'TUMOR01-x'  | 'hipo_021' | 'DisplayIdentifier' | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+        '(hipo_021)(some_pid)(TUMOR01-X)(DisplayIdentifier)' || 'some_pid' | 'TUMOR01-X'  | 'hipo_021' | 'DisplayIdentifier' | SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
     }
 
     @Unroll

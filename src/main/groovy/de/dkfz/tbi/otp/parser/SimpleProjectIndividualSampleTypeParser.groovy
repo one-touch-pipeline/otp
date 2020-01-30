@@ -37,12 +37,14 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
             return null
         }
 
+        String sampleType = matcher.group('sampleType')
+
         return new DefaultParsedSampleIdentifier(
                 matcher.group('project'),
                 matcher.group('pid'),
-                matcher.group('sampleType'),
+                sampleType,
                 matcher.group('displayedSampleIdentifier'),
-                SampleType.SpecificReferenceGenome.UNKNOWN,
+                getSpecificReferenceGenomeFromSampleType(sampleType),
         )
     }
 
@@ -75,6 +77,13 @@ class SimpleProjectIndividualSampleTypeParser implements SampleIdentifierParser 
 
     private static String getSampleType() {
         return "[A-Za-z0-9-]+"
+    }
+
+    private static SampleType.SpecificReferenceGenome getSpecificReferenceGenomeFromSampleType(String sampleType) {
+        if (sampleType.toLowerCase().endsWith("-x")) {
+            return SampleType.SpecificReferenceGenome.USE_SAMPLE_TYPE_SPECIFIC
+        }
+        return SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
     }
 
     private static String getDisplayedSampleIdentifier() {
