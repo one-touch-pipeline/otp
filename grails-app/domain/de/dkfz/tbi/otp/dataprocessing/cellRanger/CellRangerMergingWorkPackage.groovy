@@ -77,7 +77,9 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
         status(validator: { val , obj ->
             if (val && val == CellRangerMergingWorkPackage.Status.FINAL) {
                 CellRangerMergingWorkPackage crmwp = CollectionUtils.atMostOneElement(
-                        CellRangerMergingWorkPackage.findAllByConfigAndReferenceGenomeIndexAndStatus(
+                        CellRangerMergingWorkPackage.findAllBySampleAndSeqTypeAndConfigAndReferenceGenomeIndexAndStatus(
+                                obj.sample,
+                                obj.seqType,
                                 obj.config,
                                 obj.referenceGenomeIndex,
                                 CellRangerMergingWorkPackage.Status.FINAL
@@ -86,7 +88,7 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
                 if (crmwp && crmwp != obj) {
                     return [
                             "unique.combination",
-                            "config: ${obj.config}, referenceGenomeIndex: ${obj.referenceGenomeIndex}, status: ${CellRangerMergingWorkPackage.Status.FINAL}"
+                            "sample: ${obj.sample}, seq type: ${obj.seqType}, config: ${obj.config}, referenceGenomeIndex: ${obj.referenceGenomeIndex}, status: ${CellRangerMergingWorkPackage.Status.FINAL}"
                     ]
                 }
             }

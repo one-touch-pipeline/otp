@@ -112,10 +112,16 @@ class CellRangerMergingWorkPackageSpec extends Specification implements CellRang
         e.message =~ "exclusive"
     }
 
-    void "test status constraint, only one mwp with status FINAL and same config and referenceGenomeIndex"() {
+    void "test status constraint, only one mwp with status FINAL and same sample, seqType, config and referenceGenomeIndex"() {
         given:
-        CellRangerMergingWorkPackage mwp1 = createMergingWorkPackage()
-        CellRangerMergingWorkPackage mwp2 = createMergingWorkPackage(config: mwp1.config, referenceGenomeIndex: mwp1.referenceGenomeIndex)
+        CellRangerMergingWorkPackage mwp1 = createMergingWorkPackage(expectedCells: 1)
+        CellRangerMergingWorkPackage mwp2 = createMergingWorkPackage(
+                expectedCells: 2,
+                sample: mwp1.sample,
+                seqType: mwp1.seqType,
+                config: mwp1.config,
+                referenceGenomeIndex: mwp1.referenceGenomeIndex,
+        )
         createMergingWorkPackage(status: CellRangerMergingWorkPackage.Status.FINAL)
         createMergingWorkPackage(config: mwp1.config, status: CellRangerMergingWorkPackage.Status.FINAL)
         createMergingWorkPackage(referenceGenomeIndex: mwp1.referenceGenomeIndex, status: CellRangerMergingWorkPackage.Status.FINAL)
