@@ -30,7 +30,8 @@
 
 <body>
 <div class="body">
-    <h3><g:message code="metadataImport.blackListedIlseNumbers.create.description"/></h3>
+    <h1><g:message code="metadataImport.blackListedIlseNumbers.title"/></h1>
+    <h2><g:message code="metadataImport.blackListedIlseNumbers.create.description"/></h2>
     <g:if test="${command?.addButton}">
         <ul>
             <g:each in="${command.errors.fieldErrors}" var="error">
@@ -50,7 +51,7 @@
         <g:submitButton name="addButton" value="Add"/>
     </g:form>
 
-    <h3><g:message code="metadataImport.blackListedIlseNumbers.table.description"/></h3>
+    <h2><g:message code="metadataImport.blackListedIlseNumbers.table.description"/></h2>
     <table class="table">
         <tr>
             <th><g:message code="metadataImport.blackListedIlseNumbers.ilse"/></th>

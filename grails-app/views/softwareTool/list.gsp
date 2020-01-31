@@ -35,7 +35,7 @@
         <g:render template="/templates/messages"/>
         <g:render template="/metaDataFields/linkBanner"/>
 
-        <h3><g:message code="softwareTool.list.header"/></h3>
+        <h1><g:message code="softwareTool.list.header"/></h1>
         <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
         <div class="otpDataTables">
         <table id="metadatafields-datatable" class="software-table fixed-table-header">
@@ -90,7 +90,7 @@
         </table>
         </div>
         <br>
-        <h3><g:message code="softwareTool.list.new.header"/></h3>
+        <h2><g:message code="softwareTool.list.new.header"/></h2>
         <g:form controller="softwareTool" action="createSoftwareTool" method="POST">
             <table style="width: 50%">
                 <tbody>

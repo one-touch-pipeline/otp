@@ -34,6 +34,8 @@
 <div class="body">
     <g:render template="/templates/messages"/>
 
+    <h1><g:message code="otp.menu.projectCreation"/></h1>
+
     <g:form class="projectRequestSelection" action="index" method="GET">
         <table class="key-value-table">
             <tr>

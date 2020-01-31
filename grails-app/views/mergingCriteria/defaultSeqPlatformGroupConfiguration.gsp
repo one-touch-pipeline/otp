@@ -31,9 +31,9 @@
 <div class="body">
     <g:render template="/templates/messages"/>
 
-    <h2>${g.message(code: "mergingCriteria.seqPlatformDefinition")}</h2>
+    <h1>${g.message(code: "mergingCriteria.seqPlatformDefinition")}</h1>
 
-    <h3>${g.message(code: "mergingCriteria.seqPlatformDefinition.default")}</h3>
+    <h2>${g.message(code: "mergingCriteria.seqPlatformDefinition.default")}</h2>
 
     <div>
         <g:if test="${!allSeqPlatformsWithoutGroup.empty}">

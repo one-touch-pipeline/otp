@@ -32,7 +32,8 @@
 <div class="body">
     <g:render template="/templates/messages"/>
 
-    <h1>${g.message(code: "projectRequest.header.waiting")}</h1>
+    <h1>${g.message(code: "projectRequest.title")}</h1>
+    <h2>${g.message(code: "projectRequest.header.waiting")}</h2>
     <g:if test="${awaitingRequests}">
         <table>
             <tr>
@@ -62,7 +63,7 @@
     </g:else>
     <br>
 
-    <h1>${g.message(code: "projectRequest.header.createdApproved")}</h1>
+    <h2>${g.message(code: "projectRequest.header.createdApproved")}</h2>
     <g:if test="${createdAndApprovedRequests}">
         <table>
             <tr>
@@ -92,7 +93,7 @@
     </g:else>
     <br>
 
-    <h1>${g.message(code: "projectRequest.header.new")}</h1>
+    <h2>${g.message(code: "projectRequest.header.new")}</h2>
     <p>${g.message(code: "projectRequest.new.support", args: [contactDataSupportEmail])}</p>
     <g:form action="save">
     <table class="key-value-table">

@@ -27,10 +27,10 @@
 </head>
 <body>
     <div class="body">
-        <h3><g:message code="roles.rolesAndGroups.header"/></h3>
+        <h1><g:message code="roles.rolesAndGroups.header"/></h1>
         <g:each in="${roleLists}" var="roleList">
             <g:each in="${roleList}" var="roleAndUsers">
-                <h4>${roleAndUsers.role.authority}</h4>
+                <h2>${roleAndUsers.role.authority}</h2>
                 <g:if test="${roleAndUsers.users.isEmpty()}">
                     ${g.message(code: "roles.noMembers")}
                 </g:if>

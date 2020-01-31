@@ -50,7 +50,7 @@
             </div>
         </div>
         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
-            <h3><g:message code="projectUser.addMember.action" args="[project?.name]"/></h3>
+            <h2><g:message code="projectUser.addMember.action" args="[project?.name]"/></h2>
             <g:message code="projectUser.annotation.delayedFileAccessChanges"/>
             <g:form class="add-user-grid-wrapper" controller="projectUser" action="addUserToProject" params='["project": project.id]'>
                 <sec:access expression="hasRole('ROLE_OPERATOR')">
@@ -143,17 +143,17 @@
 
         <sec:access expression="hasRole('ROLE_OPERATOR')">
             <g:if test="${usersWithoutUserProjectRole || unknownUsersWithFileAccess}">
-                <h3><g:message code="projectUser.additionalUsers.header" args="[project.unixGroup]"/></h3>
-                <h4><g:message code="projectUser.additionalUsers.notConnected"/></h4>
+                <h2><g:message code="projectUser.additionalUsers.header" args="[project.unixGroup]"/></h2>
+                <h3><g:message code="projectUser.additionalUsers.notConnected"/></h3>
                 ${usersWithoutUserProjectRole.join(", ") ?: 'None'}
 
-                <h4><g:message code="projectUser.additionalUsers.unregisteredUsers"/></h4>
+                <h3><g:message code="projectUser.additionalUsers.unregisteredUsers"/></h3>
                 ${unknownUsersWithFileAccess.join(", ") ?: 'None'}
             </g:if>
         </sec:access>
 
         <div class="otpDataTables projectUserTable fixed-table-header">
-            <h3><g:message code="projectUser.activeUsers" args="[project.displayName]"/></h3>
+            <h2><g:message code="projectUser.activeUsers" args="[project.displayName]"/></h2>
             <table>
                 <g:render template="userListingTableHeaderRow" model="[mode: 'enabled', project: project]"/>
                 <g:if test="${!enabledProjectUsers}">
@@ -286,9 +286,7 @@
         </sec:access>
         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
         <div class="otpDataTables projectUserTable">
-            <h3>
-                <g:message code="projectUser.formerUsers"/>
-            </h3>
+            <h2><g:message code="projectUser.formerUsers"/></h2>
             <table class="fixed-table-header">
                 <g:render template="userListingTableHeaderRow" model="[mode: 'disabled', project: project]"/>
                 <g:if test="${!disabledProjectUsers}">

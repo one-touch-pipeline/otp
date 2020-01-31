@@ -32,7 +32,7 @@
     <g:render template="/templates/messages"/>
 
     <g:link controller="projectConfig"> Back to project configuration</g:link>
-    <h2>${g.message(code: "mergingCriteria.title", args: [project.name])}</h2>
+    <h1>${g.message(code: "mergingCriteria.title", args: [project.name])}</h1>
 
     <g:form action="update">
         <table>
@@ -88,12 +88,12 @@
 
 
 
-    <h3>${g.message(code: "mergingCriteria.seqPlatformDefinition")}</h3>
+    <h2>${g.message(code: "mergingCriteria.seqPlatformDefinition")}</h2>
 
     <g:if test="${mergingCriteria.useSeqPlatformGroup in [MergingCriteria.SpecificSeqPlatformGroups.USE_OTP_DEFAULT,
                                                           MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC]}">
         <div style="float:left; width:50%;">
-            <h4>${g.message(code: "mergingCriteria.seqPlatformDefinition.default")}</h4>
+            <h3>${g.message(code: "mergingCriteria.seqPlatformDefinition.default")}</h3>
             <g:if test="${mergingCriteria.useSeqPlatformGroup == MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC}">
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <g:form action="copyAllDefaultToSpecific">
@@ -131,7 +131,7 @@
 
         <div style="float:right; width:50%;">
             <g:if test="${mergingCriteria.useSeqPlatformGroup in [MergingCriteria.SpecificSeqPlatformGroups.USE_PROJECT_SEQ_TYPE_SPECIFIC]}">
-                <h4>${g.message(code: "mergingCriteria.seqPlatformDefinition.specific")}</h4>
+                <h3>${g.message(code: "mergingCriteria.seqPlatformDefinition.specific")}</h3>
 
                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                     <g:if test="${!allSeqPlatformsWithoutGroup.empty}">

@@ -47,6 +47,7 @@
             </div>
         </div>
         <br>
+        <h1><g:message code="projectOverview.title" args="[project?.name]"/></h1>
         <div id="projectOverviewDates">
             <table class="key-value-table">
                 <tr>

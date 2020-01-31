@@ -31,6 +31,7 @@
 <body>
     <div class="body">
         <otp:autoRefresh/>
+        <h1><g:message code="processes.list.title"/></h1>
         <div id="workflowOverview">
             <div class="otpDataTables">
                 <otp:dataTable codes="${[

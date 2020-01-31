@@ -33,12 +33,12 @@
     <g:render template="/templates/messages"/>
 
     <div>
-        <h2>${g.message(code: "qcThreshold.title")}</h2>
+        <h1>${g.message(code: "qcThreshold.title")}</h1>
         <table>
 
             <g:each in="${classesWithProperties}" var="cl">
                 <thead>
-                <tr class="intermediateHeader"><td colspan="9"><h3>${cl.clasz.simpleName}</h3></td></tr>
+                <tr class="intermediateHeader"><td colspan="9"><h2>${cl.clasz.simpleName}</h2></td></tr>
 
                 <tr>
                     <th>${g.message(code: "qcThreshold.property")}</th>

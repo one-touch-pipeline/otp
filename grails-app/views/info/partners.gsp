@@ -27,7 +27,7 @@
 </head>
 
 <body>
-    <h2><g:message code="info.partners.title" /></h2>
+    <h1><g:message code="info.partners.title" /></h1>
         <table style="margin-left: 50px">
             <tr>
                 <td style="padding:15px">

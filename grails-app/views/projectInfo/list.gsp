@@ -37,7 +37,9 @@
         <g:if test="${projects}">
             <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]"/>
 
-            <h3><g:message code="projectInfo.header.document.upload"/></h3>
+            <h1><g:message code="projectInfo.title" args="[project?.name]"/></h1>
+
+            <h2><g:message code="projectInfo.header.document.upload"/></h2>
             <div class="project-info-form-container">
                 <g:uploadForm action="addProjectInfo" useToken="true">
                     <table class="key-value-table">
@@ -57,7 +59,7 @@
 
             <hr>
 
-            <h3><g:message code="projectInfo.document.header"/></h3>
+            <h2><g:message code="projectInfo.document.header"/></h2>
             <div>
                 <ul>
                     <g:if test="${!projectInfos["NonDta"]}">
@@ -89,7 +91,7 @@
 
             <hr>
 
-            <h3><g:message code="projectInfo.dta.header.upload"/></h3>
+            <h2><g:message code="projectInfo.dta.header.upload"/></h2>
             <div class="project-info-form-container">
                 <g:uploadForm action="addProjectInfo" useToken="true">
                     <input type="hidden" name="project.id" value="${project.id}"/>
@@ -131,7 +133,7 @@
 
             <hr>
 
-            <h3><g:message code="projectInfo.dta.header"/></h3>
+            <h2><g:message code="projectInfo.dta.header"/></h2>
             <div>
                 <ul>
                     <g:if test="${!projectInfos["Dta"]}">

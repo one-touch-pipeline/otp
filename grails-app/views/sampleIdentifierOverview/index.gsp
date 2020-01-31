@@ -32,6 +32,7 @@
     <div class="body">
     <g:if test="${projects}">
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
+        <h1>${g.message(code: "sampleIdentifierOverview.index.title")}</h1>
         <div class="otpDataTables">
             <otp:dataTable codes="${[
                     'sampleIdentifierOverview.index.pid',

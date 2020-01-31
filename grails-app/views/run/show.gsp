@@ -31,7 +31,7 @@
   <div class="body">
     <h1><g:message code="run.show.title"/></h1>
 
-    <h1><g:message code="run.show.general"/></h1>
+    <h2><g:message code="run.show.general"/></h2>
 
     <table>
        <tr>
@@ -68,7 +68,7 @@
        </tr>
     </table>
 
-    <h1><g:message code="run.show.processing"/></h1>
+    <h2><g:message code="run.show.processing"/></h2>
     <table>
         <g:each var="processParameter" in="${processParameters}">
         <tr>
@@ -82,7 +82,7 @@
 
 
     <div class="tableBlock">
-        <h1><g:message code="run.show.dataFiles"/></h1>
+        <h3><g:message code="run.show.metadataFiles"/></h3>
         <table>
             <g:each var="file" in="${metaDataFiles}">
             <tbody>
@@ -93,6 +93,7 @@
             </tbody>
             </g:each>
         </table>
+        <h3><g:message code="run.show.dataFiles"/></h3>
         <g:each var="track" in="${seqTracks}">
         <table>
             <thead>
@@ -155,6 +156,9 @@
                     <td class="true"><g:message code="run.show.metaData"/></td>
                 </tr>
             </g:each>
+            <g:if test="${!errorFiles}">
+                <tr><td>None</td></tr>
+            </g:if>
             </tbody>
         </table>
     </div>

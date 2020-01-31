@@ -28,7 +28,7 @@
 </head>
 
 <body>
-<h2><g:message code="info.templates.link"/></h2>
+<h1><g:message code="info.templates.link"/></h1>
 ${g.message(code: "info.template.request")} <a href="mailto:${contactDataSupportEmail}">${contactDataSupportEmail}</a>
 
 <ul>

@@ -27,14 +27,14 @@
 </head>
 
 <body>
-    <h2><g:message code="info.contact.title" /></h2>
+    <h1><g:message code="info.contact.title" /></h1>
     <p>${g.message(code: "info.contact.operatedBy")}</p>
     <p class="keep-whitespace">${contactDataOperatedBy}</p>
-    <h3>${g.message(code: "info.contact.personInCharge")}</h3>
+    <h2>${g.message(code: "info.contact.personInCharge")}</h2>
     <p class="keep-whitespace">${contactDataPersonInCharge}</p>
-    <h3>${g.message(code: "info.contact.postalAddress")}</h3>
+    <h2>${g.message(code: "info.contact.postalAddress")}</h2>
     <p class="keep-whitespace">${contactDataPostalAddress}</p>
-    <h3>${g.message(code: "info.contact.support")}</h3>
+    <h2>${g.message(code: "info.contact.support")}</h2>
     <p class="keep-whitespace"><a href="mailto:${contactDataSupportEmail}">${contactDataSupportEmail}</a></p>
 </body>
 </html>

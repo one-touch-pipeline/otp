@@ -32,18 +32,18 @@
 <body>
     <div class="body">
     <g:if test="${projects}">
-        <h3 class="statisticTitle">
-            <g:message code="projectOverview.pageTitle" />
-        </h3>
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
-        <h4 class="statisticTitle">
+        <h1 class="statisticTitle">
+            <g:message code="projectOverview.pageTitle" args="[project.name]"/>
+        </h1>
+        <div class="statisticTitle">
             <g:message code="projectOverview.numberOfPatient"/>: <span id="patient-count"></span>
-        </h4>
+        </div>
         <div class="table">
             <div style="width: 20px; height: 20px;"></div>
-            <h3 class="statisticTableTitle">
+            <h2 class="statisticTableTitle">
                 <g:message code="projectOverview.table.sampleType.title" />
-            </h3>
+            </h2>
             <div class="otpDataTables">
                 <otp:dataTable
                     codes="${[
@@ -53,9 +53,9 @@
                     id="sampleTypeNameCountBySample" />
             </div>
             <div style="width: 20px; height: 20px;"></div>
-            <h3 class="statisticTableTitle" >
+            <h2 class="statisticTableTitle" >
                 <g:message code="projectOverview.title.centersOverviewTable" />
-            </h3>
+            </h2>
             <div class="otpDataTables">
                 <otp:dataTable
                     codes="${[
@@ -66,8 +66,8 @@
                     id="centerNameRunId" />
             </div>
             <div style="width: 20px; height: 30px;"></div>
-            <h3 class="statisticTableTitle">
-                <g:message code="projectOverview.table.statistic.title" /></h3>
+            <h2 class="statisticTableTitle">
+                <g:message code="projectOverview.table.statistic.title" /></h2>
             <div class="otpDataTables">
                 <otp:dataTable
                     codes="${[
@@ -84,9 +84,9 @@
                     id="projectOverviewTable" />
             </div>
             <div style="width: 20px; height: 40px;"></div>
-            <h3 class="statisticTableTitle">
+            <h2 class="statisticTableTitle">
                 <g:message code="projectOverview.table.seqType.title" />
-            </h3>
+            </h2>
             <div class="otpDataTables">
                 <otp:dataTable
                     codes="${[

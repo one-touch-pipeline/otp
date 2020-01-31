@@ -27,7 +27,7 @@
 </head>
 
 <body>
-    <h2><g:message code="info.about.title" /></h2>
+    <h1><g:message code="info.about.title" /></h1>
     <p class="keep-whitespace">${raw(aboutOtp)}</p>
 </body>
 </html>

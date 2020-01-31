@@ -33,13 +33,13 @@
 
     <g:render template="/metaDataFields/linkBanner"/>
 
-    <h3><g:message code="speciesWithStrain.header"/></h3>
+    <h1><g:message code="speciesWithStrain.header"/></h1>
     <div class="species-with-strain-grid-wrapper">
 
         <div class="grid-element" style="grid-row: 1; grid-column: 1 / span 2;">
             <div class="form-and-listing-grid">
                 <div class="form">
-                    <h3><g:message code="speciesWithStrain.header.createSpeciesWithStrain"/></h3>
+                    <h2><g:message code="speciesWithStrain.header.createSpeciesWithStrain"/></h2>
                     <g:form controller="speciesWithStrain" action="createSpeciesWithStrain">
                         <table>
                             <tr>
@@ -72,7 +72,7 @@
                     </g:form>
                 </div>
                 <div class="listing">
-                    <h3><g:message code="speciesWithStrain.header.existingSpeciesWithStrains"/></h3>
+                    <h2><g:message code="speciesWithStrain.header.existingSpeciesWithStrains"/></h2>
                     <g:if test="${!speciesWithStrainsBySpecies}">
                         <g:message code="speciesWithStrain.label.noSpeciesWithStrainAvailable"/>
                     </g:if>
@@ -97,7 +97,7 @@
         <div class="grid-element" style="grid-row: 2; grid-column: 1;">
             <div class="form-and-listing-grid">
                 <div class="form">
-                    <h3><g:message code="speciesWithStrain.header.createSpecies"/></h3>
+                    <h2><g:message code="speciesWithStrain.header.createSpecies"/></h2>
                     <g:form controller="speciesWithStrain" action="createSpecies">
                         <table>
                             <tr>
@@ -125,7 +125,7 @@
                     </g:form>
                 </div>
                 <div class="listing">
-                    <h3><g:message code="speciesWithStrain.header.existingSpecies"/></h3>
+                    <h2><g:message code="speciesWithStrain.header.existingSpecies"/></h2>
                     <g:if test="${!commonNames}">
                         <g:message code="speciesWithStrain.label.noSpeciesAvailable"/>
                     </g:if>
@@ -150,7 +150,7 @@
         <div class="grid-element" style="grid-row: 2; grid-column: 2;">
             <div class="form-and-listing-grid">
                 <div class="form">
-                    <h3><g:message code="speciesWithStrain.header.createStrain"/></h3>
+                    <h2><g:message code="speciesWithStrain.header.createStrain"/></h2>
                     <g:form controller="speciesWithStrain" action="createStrain">
                         <table>
                             <tr>
@@ -165,7 +165,7 @@
                     </g:form>
                 </div>
                 <div class="listing">
-                    <h3><g:message code="speciesWithStrain.header.existingStrains"/></h3>
+                    <h2><g:message code="speciesWithStrain.header.existingStrains"/></h2>
                     <g:if test="${!strains}">
                         <g:message code="speciesWithStrain.label.noStrainsAvailable"/>
                     </g:if>

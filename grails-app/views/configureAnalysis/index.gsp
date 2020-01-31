@@ -33,7 +33,7 @@
         <div  style="clear: both">
             <g:form >
                 <input name="project.id" type="hidden" value="${project.id}"/>
-                <h3><g:message code="configureAnalysis.title" args="${[project.name]}"/></h3>
+                <h1><g:message code="configureAnalysis.title" args="${[project.name]}"/></h1>
                 <table border="2" class="blue_label">
                     <thead>
                         <tr>

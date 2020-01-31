@@ -27,7 +27,7 @@
 </head>
 
 <body>
-    <h2><g:message code="info.imprint.title" /></h2>
+    <h1><g:message code="info.imprint.title" /></h1>
     <p class="keep-whitespace">${raw(imprint)}</p>
 </body>
 </html>

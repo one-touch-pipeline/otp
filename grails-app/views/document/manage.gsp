@@ -32,7 +32,7 @@
     <g:render template="/templates/messages"/>
 
     <div>
-        <h2><g:message code="otp.menu.documents"/></h2>
+        <h1><g:message code="otp.menu.documents"/></h1>
         <g:message code="document.notice"/>
         <table>
             <tr>

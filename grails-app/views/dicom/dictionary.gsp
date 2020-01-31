@@ -28,7 +28,7 @@
 
     <body>
         <div class="body">
-            <h2><g:message code="dicom.info.dict.title" /></h2>
+            <h1><g:message code="dicom.info.dict.title" /></h1>
             <table>
                 <tr>
                     <th><g:message code="dicom.info.dict.header.codeSystemName"/></th>

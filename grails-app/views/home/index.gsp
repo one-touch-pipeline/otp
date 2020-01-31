@@ -31,7 +31,7 @@
 <body>
     <div class="body">
     <g:if test="${projectQuery}">
-    <h3><g:message code="home.pageTitle"/></h3>
+    <h2><g:message code="home.pageTitle"/></h2>
         <div class="homeTable">
             <table>
                  <thead>
@@ -53,7 +53,7 @@
             </div>
         </div>
         <br>
-        <h3><g:message code="home.pageTitle.graph"/></h3>
+        <h2><g:message code="home.pageTitle.graph"/></h2>
         <form class="blue_label" id="projectsGroupbox">
             <span class="blue_label"><g:message code="home.projectGroupFilter"/> :</span>
             <g:select class="criteria" id="projectGroup_select" name='projectGroup_select' from='${projectGroups}' value='projectGroup' />

@@ -31,7 +31,7 @@
         <div class="body">
             <g:render template="/templates/messages"/>
 
-            <h2><g:message code="user.administration.show.header"/></h2>
+            <h1><g:message code="user.administration.show.header"/></h1>
             <div>
             <g:form controller="userAdministration" action="editUser" params='["user": user.id]'>
                 <table class="key-value-table">
@@ -101,7 +101,7 @@
                 </g:each>
             </table>
             <br>
-            <h2><g:message code="user.administration.ldapGroups.heading" args="[user.username]"/></h2>
+            <h2><g:message code="user.administration.groups.heading" args="[user.username]"/></h2>
             ${ldapGroups.sort().join(", ")}
             <br>
             <g:each var="type" in="${["Group", "Role"]}">

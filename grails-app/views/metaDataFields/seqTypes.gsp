@@ -37,7 +37,7 @@
     <g:render template="/templates/messages"/>
     <g:render template="linkBanner"/>
 
-    <h3><g:message code="dataFields.seqType.header"/></h3>
+    <h1><g:message code="dataFields.seqType.header"/></h1>
     <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
     <div class="otpDataTables">
     <table id="metadatafields-datatable">

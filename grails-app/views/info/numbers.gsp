@@ -29,7 +29,7 @@
 
 <body>
 <g:if test="${projects}">
-    <h2><g:message code="info.numbers.title" /></h2>
+    <h1><g:message code="info.numbers.title" /></h1>
     <g:message code="info.numbers.text"/>
     <div class="homeGraph" style="clear: both; text-align: center" >
         <span>

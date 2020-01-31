@@ -101,7 +101,7 @@
             </div>
         </div>
 
-        <h1 id="samples"><g:message code="individual.show.samples"/></h1>
+        <h2 id="samples"><g:message code="individual.show.samples"/></h2>
         <div class="tableBlock">
             <table>
                 <g:each var="sample" in="${individual.samples}">
@@ -132,10 +132,10 @@
             </table>
         </div>
 
-        <h1><g:message code="individual.show.laneOverview.header"/></h1>
+        <h2><g:message code="individual.show.laneOverview.header"/></h2>
         <div class="tableBlock">
             <g:each var="seqType" in="${groupedSeqTrackSets.keySet().sort { it.name }}">
-                <h2>${seqType}</h2>
+                <h3>${seqType}</h3>
                 <table>
                     <thead>
                         <tr>
