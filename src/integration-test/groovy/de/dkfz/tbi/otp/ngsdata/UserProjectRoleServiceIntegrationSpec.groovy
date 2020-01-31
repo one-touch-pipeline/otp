@@ -53,14 +53,13 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     private final static String EMAIL_SENDER_SALUTATION = "the supportTeam"
     private final static String CLUSTER_NAME = "OTP Cluster"
 
+    private final static String AD_GROUP_TOOL_PATH = "path/to/script.sh"
+
     private final static String EMAIL_LINUX_GROUP_ADMINISTRATION = HelperUtils.randomEmail
     private final static String EMAIL_CLUSTER_ADMINISTRATION = HelperUtils.randomEmail
 
     @SuppressWarnings('JUnitPublicProperty')
     UserProjectRoleService userProjectRoleService
-
-    @SuppressWarnings('JUnitPublicProperty')
-    ProcessingOptionService processingOptionService
 
     @Rule
     public TemporaryFolder temporaryFolder
@@ -73,7 +72,6 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         createUserAndRoles()
         createAllBasicProjectRoles()
 
-        processingOptionService = new ProcessingOptionService()
         userProjectRoleService = new UserProjectRoleService()
         userProjectRoleService.messageSourceService = messageSourceServiceWithMockedMessageSource
         userProjectRoleService.springSecurityService = springSecurityService
@@ -107,6 +105,21 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
                 project: null,
                 value: EMAIL_CLUSTER_ADMINISTRATION,
         )
+    }
+
+    /**
+     * Sets up the ProcessingOption containing the templates for all OperatorActions with basic valid templates
+     */
+    @SuppressWarnings("GStringExpressionWithinString")
+    void setupAdGroupToolSnippetProcessingOptions() {
+        String prefix = AD_GROUP_TOOL_PATH
+        String template = "\${unixGroup} \${username}"
+        Arrays.asList(UserProjectRoleService.OperatorAction.values()).each { UserProjectRoleService.OperatorAction action ->
+            DomainFactory.createProcessingOptionLazy(
+                    name : action.commandTemplateOptionName,
+                    value: "${prefix} ${action.name()} ${template}",
+            )
+        }
     }
 
     @Unroll
@@ -153,26 +166,25 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     void "notifyAdministration sends email with correct content (action=#operatorAction)"() {
         given:
         setupData()
+        setupAdGroupToolSnippetProcessingOptions()
 
         Project project = createProject()
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(project: project)
         UserProjectRole requesterUserProjectRole = DomainFactory.createUserProjectRole(project: project)
         String formattedAction = operatorAction.toString().toLowerCase()
 
-        String scriptCommand = "Script path group${formattedAction}user unixGroup userName"
+        String scriptCommand = "${AD_GROUP_TOOL_PATH} ${operatorAction.name()} ${userProjectRole.project.unixGroup} ${userProjectRole.user.username}"
 
-        DomainFactory.createProcessingOptionLazy(
-                name: ProcessingOption.OptionName.AD_GROUP_ADD_USER_SNIPPET,
-                value: scriptCommand
-        )
-        DomainFactory.createProcessingOptionLazy(
-                name: ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET,
-                value: scriptCommand,
-        )
-
-        String affectedUserUserDetail = "${userProjectRole.user.realName}\n${userProjectRole.user.username}\n${userProjectRole.user.email}\n${userProjectRole.projectRole.name}"
-        String requesterUserDetail = "${requesterUserProjectRole.user.realName}\n" +
-                "${requesterUserProjectRole.user.username}\n${requesterUserProjectRole.user.email}\n${requesterUserProjectRole.projectRole.name}"
+        String affectedUserUserDetail = """\
+            |${userProjectRole.user.realName}
+            |${userProjectRole.user.username}
+            |${userProjectRole.user.email}
+            |${userProjectRole.projectRole.name}""".stripMargin()
+        String requesterUserDetail = """\
+            |${requesterUserProjectRole.user.realName}
+            |${requesterUserProjectRole.user.username}
+            |${requesterUserProjectRole.user.email}
+            |${requesterUserProjectRole.projectRole.name}""".stripMargin()
 
         when:
         SpringSecurityUtils.doWithAuth(requesterUserProjectRole.user.username) {
@@ -181,8 +193,19 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
-                "addToUnixGroup\n${requesterUserProjectRole.user.username}\n${formattedAction}\n${userProjectRole.user.username}\n${conjunction}\n${userProjectRole.project.unixGroup}",
-                "addToUnixGroup\n${userProjectRole.project.unixGroup}\n${userProjectRole.project.name}\n${operatorAction}\n${scriptCommand}\n${affectedUserUserDetail}\n${requesterUserDetail}",
+                """addToUnixGroup
+                |${requesterUserProjectRole.user.username}
+                |${formattedAction}
+                |${userProjectRole.user.username}
+                |${conjunction}
+                |${userProjectRole.project.unixGroup}""".stripMargin(),
+                """addToUnixGroup
+                |${userProjectRole.project.unixGroup}
+                |${userProjectRole.project.name}
+                |${operatorAction}
+                |${scriptCommand}
+                |${affectedUserUserDetail}
+                |${requesterUserDetail}""".stripMargin(),
                 EMAIL_LINUX_GROUP_ADMINISTRATION,
         )
 
@@ -219,6 +242,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
     void "notifyAdministration sends email with unswitched user as requester (action=#operatorAction)"() {
         given:
         setupData()
+        setupAdGroupToolSnippetProcessingOptions()
 
         User executingUser = User.findByUsername(ADMIN)
         User switchedUser = User.findByUsername(OPERATOR)
@@ -226,19 +250,18 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole userProjectRole = DomainFactory.createUserProjectRole()
         String formattedAction = operatorAction.toString().toLowerCase()
 
-        String scriptCommand = "Script path group${formattedAction}user unixGroup userName"
+        String scriptCommand = "${AD_GROUP_TOOL_PATH} ${operatorAction.name()} ${userProjectRole.project.unixGroup} ${userProjectRole.user.username}"
 
-        DomainFactory.createProcessingOptionLazy(
-                name: ProcessingOption.OptionName.AD_GROUP_ADD_USER_SNIPPET,
-                value: scriptCommand
-        )
-        DomainFactory.createProcessingOptionLazy(
-                name: ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET,
-                value: scriptCommand,
-        )
-
-        String affectedUserUserDetail = "${userProjectRole.user.realName}\n${userProjectRole.user.username}\n${userProjectRole.user.email}\n${userProjectRole.projectRole.name}"
-        String requesterUserDetail = "${switchedUser.realName}\n${switchedUser.username} (switched from ${executingUser.username})\n${switchedUser.email}\nNon-Project-User"
+        String affectedUserUserDetail = """\
+            |${userProjectRole.user.realName}
+            |${userProjectRole.user.username}
+            |${userProjectRole.user.email}
+            |${userProjectRole.projectRole.name}""".stripMargin()
+        String requesterUserDetail = """\
+            |${switchedUser.realName}
+            |${switchedUser.username} (switched from ${executingUser.username})
+            |${switchedUser.email}
+            |Non-Project-User""".stripMargin()
 
         when:
         SpringSecurityUtils.doWithAuth(executingUser.username) {
@@ -249,8 +272,19 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         then:
         1 * userProjectRoleService.mailHelperService.sendEmail(
-                "addToUnixGroup\n${switchedUser.username}\n${formattedAction}\n${userProjectRole.user.username}\n${conjunction}\n${userProjectRole.project.unixGroup}",
-                "addToUnixGroup\n${userProjectRole.project.unixGroup}\n${userProjectRole.project.name}\n${operatorAction}\n${scriptCommand}\n${affectedUserUserDetail}\n${requesterUserDetail}",
+                """addToUnixGroup
+                |${switchedUser.username}
+                |${formattedAction}
+                |${userProjectRole.user.username}
+                |${conjunction}
+                |${userProjectRole.project.unixGroup}""".stripMargin(),
+                """addToUnixGroup
+                |${userProjectRole.project.unixGroup}
+                |${userProjectRole.project.name}
+                |${operatorAction}
+                |${scriptCommand}
+                |${affectedUserUserDetail}
+                |${requesterUserDetail}""".stripMargin(),
                 EMAIL_LINUX_GROUP_ADMINISTRATION,
         )
 
@@ -318,7 +352,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
                 username: "unknownUser",
                 realName: "Unknown User",
-                mail: "unknownUser@dummy.com",
+                mail    : "unknownUser@dummy.com",
         )
         userProjectRoleService.userService = new UserService()
         userProjectRoleService.ldapService = Mock(LdapService) {
@@ -347,7 +381,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
                 username: user.username,
                 realName: user.realName,
-                mail: user.email,
+                mail    : user.email,
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
             getLdapUserDetailsByUsername(_) >> ldapUserDetails
@@ -395,7 +429,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
                 username: 'username',
                 realName: user.realName,
-                mail: user.email,
+                mail    : user.email,
         )
         userProjectRoleService.ldapService = Mock(LdapService) {
             getLdapUserDetailsByUsername(_) >> ldapUserDetails
@@ -420,11 +454,11 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
                 username: user.username,
                 realName: user.realName,
-                mail: user.email,
+                mail    : user.email,
         )
         Project project = createProject(unixGroup: UNIX_GROUP)
         UserProjectRole requesterUserProjectRole = DomainFactory.createUserProjectRole(
-                project: project,
+                project    : project,
                 projectRole: PI,
                 manageUsers: true
         )
@@ -466,7 +500,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
                 username: "something_else",
                 realName: user.realName,
-                mail: user.email,
+                mail    : user.email,
         )
 
         userProjectRoleService.ldapService = Mock(LdapService) {
@@ -493,7 +527,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         LdapUserDetails ldapUserDetails = new LdapUserDetails(
                 username: user.username,
                 realName: user.realName,
-                mail: user.email,
+                mail    : user.email,
         )
 
         userProjectRoleService.ldapService = Mock(LdapService) {
@@ -560,8 +594,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = createProject()
 
         DomainFactory.createUserProjectRole(
-                project: project,
-                user: User.findByUsername(OPERATOR),
+                project    : project,
+                user       : User.findByUsername(OPERATOR),
                 manageUsers: true,
         )
 
@@ -583,8 +617,8 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         Project project = createProject()
 
         DomainFactory.createUserProjectRole(
-                project: project,
-                user: User.findByUsername(OPERATOR),
+                project    : project,
+                user       : User.findByUsername(OPERATOR),
                 manageUsers: true,
         )
 
@@ -670,9 +704,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
 
         Project project = DomainFactory.createProject()
         UserProjectRole uprToBeNotified = DomainFactory.createUserProjectRole(
-                user: DomainFactory.createUser(),
-                project: project,
-                projectRole: PI,
+                user                 : DomainFactory.createUser(),
+                project              : project,
+                projectRole          : PI,
                 receivesNotifications: false,
         )
         UserProjectRole newUPR = DomainFactory.createUserProjectRole(project: project)
@@ -1108,75 +1142,108 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         UserProjectRole.findAllByProject(projectB).size() == 1
     }
 
-    void "check if commandTemplate returns the correct String depending of params"() {
+    void "commandTemplate uses the correct processing option depending on the operator action"() {
         given:
         setupData()
-        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole(
-                user: DomainFactory.createUser(username: "User")
-        )
-
-        String value = "Script path "
-
-        DomainFactory.createProcessingOptionLazy(
-                name: ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET,
-                value: value + "groupadduser unixGroup userName",
-        )
-        DomainFactory.createProcessingOptionLazy(
-                name: ProcessingOption.OptionName.AD_GROUP_REMOVE_USER_SNIPPET,
-                value: value + "groupremoveuser unixGroup userName",
-        )
+        setupAdGroupToolSnippetProcessingOptions()
+        UserProjectRole userProjectRole = DomainFactory.createUserProjectRole()
 
         when:
-        String scriptCommand = userProjectRoleService.commandTemplate(userProjectRole, operatorAction as UserProjectRoleService.OperatorAction)
+        String scriptCommand = userProjectRoleService.commandTemplate(userProjectRole, operatorAction)
 
         then:
         switch (operatorAction) {
             case UserProjectRoleService.OperatorAction.ADD:
-                scriptCommand == value +  "groupadduser ${userProjectRole.project.unixGroup} ${userProjectRole.user.username}"
-                break
             case UserProjectRoleService.OperatorAction.REMOVE:
-                scriptCommand == value + "groupremoveuser ${userProjectRole.project.unixGroup} ${userProjectRole.user.username}"
+                scriptCommand == "${AD_GROUP_TOOL_PATH} ${operatorAction.name()} ${userProjectRole.project.unixGroup} ${userProjectRole.user.username}"
                 break
             default:
-                assert false : "The action ${operatorAction} isn't known."
+                throw new UnsupportedOperationException("Unhandled ${UserProjectRoleService.OperatorAction} '${operatorAction}'")
         }
 
         where:
-        operatorAction << UserProjectRoleService.OperatorAction.values()
+        operatorAction << Arrays.asList(UserProjectRoleService.OperatorAction.values())
+    }
+
+    @SuppressWarnings("GStringExpressionWithinString")
+    void "commandTemplate throws exception when not all parameters are mapped"() {
+        given:
+        setupData()
+        DomainFactory.createProcessingOptionLazy(
+                name : ProcessingOption.OptionName.AD_GROUP_ADD_USER_SNIPPET,
+                value: "script.sh add \${unixGroup} \${some_other_property}",
+        )
+
+        when:
+        userProjectRoleService.commandTemplate(DomainFactory.createUserProjectRole(), UserProjectRoleService.OperatorAction.ADD)
+
+        then:
+        thrown(MissingPropertyException)
     }
 
     MessageSourceService getMessageSourceServiceWithMockedMessageSource() {
-        return new MessageSourceService(
-                messageSource: messageSource
-        )
+        return new MessageSourceService(messageSource: messageSource)
     }
 
     @SuppressWarnings('GStringExpressionWithinString')
     PluginAwareResourceBundleMessageSource getMessageSource() {
         return Mock(PluginAwareResourceBundleMessageSource) {
             _ * getMessageInternal("projectUser.notification.addToUnixGroup.subject", [], _) >>
-                    '''addToUnixGroup\n${requester}\n${action}\n${username}\n${conjunction}\n${unixGroup}'''
+                    '''addToUnixGroup
+                    |${requester}
+                    |${action}
+                    |${username}
+                    |${conjunction}
+                    |${unixGroup}'''.stripMargin()
 
             _ * getMessageInternal("projectUser.notification.addToUnixGroup.body", [], _) >>
-                    '''addToUnixGroup\n${projectUnixGroup}\n${projectList}\n${requestedAction}\n${scriptCommand}\n${affectedUserUserDetail}\n${requesterUserDetail}'''
+                    '''addToUnixGroup
+                    |${projectUnixGroup}
+                    |${projectList}
+                    |${requestedAction}
+                    |${scriptCommand}
+                    |${affectedUserUserDetail}
+                    |${requesterUserDetail}'''.stripMargin()
 
             _ * getMessageInternal("projectUser.notification.addToUnixGroup.userDetail", [], _) >>
-                    '''${realName}\n${username}\n${email}\n${role}'''
+                    '''\
+                    |${realName}
+                    |${username}
+                    |${email}
+                    |${role}'''.stripMargin()
 
             _ * getMessageInternal("projectUser.notification.newProjectMember.subject", [], _) >>
-                    '''newProjectMember\n${projectName}'''
+                    '''newProjectMember
+                    |${projectName}'''.stripMargin()
 
             _ * getMessageInternal("projectUser.notification.newProjectMember.body.userManagerAddedMember", [], _) >>
-                    '''newProjectMember\n${executingUser}\n${userIdentifier}\n${projectRole}\n${projectName}'''
+                    '''newProjectMember
+                    |${executingUser}
+                    |${userIdentifier}
+                    |${projectRole}
+                    |${projectName}'''.stripMargin()
 
             _ * getMessageInternal("projectUser.notification.newProjectMember.body.administrativeUserAddedSubmitter", [], _) >>
-                    '''administrativeUserAddedSubmitter\n${userIdentifier}\n${projectRole}\n${projectName}\n${supportTeamName}\n${supportTeamSalutation}'''
+                    '''administrativeUserAddedSubmitter
+                    |${userIdentifier}
+                    |${projectRole}
+                    |${projectName}
+                    |${supportTeamName}
+                    |${supportTeamSalutation}'''.stripMargin()
 
             _ * getMessageInternal("projectUser.notification.fileAccessChange.subject", [], _) >>
-                    '''fileAccessChange\n${projectName}'''
+                    '''fileAccessChange
+                    |${projectName}'''.stripMargin()
 
             _ * getMessageInternal("projectUser.notification.fileAccessChange.body", [], _) >>
-                    '''fileAccessChange\n${username}\n${requester}\n${projectName}\n${dirAnalysis}\n${clusterName}\n${clusterAdministrationEmail}\n${supportTeamSalutation}'''
+                    '''fileAccessChange
+                    |${username}
+                    |${requester}
+                    |${projectName}
+                    |${dirAnalysis}
+                    |${clusterName}
+                    |${clusterAdministrationEmail}
+                    |${supportTeamSalutation}'''.stripMargin()
         }
     }
 }

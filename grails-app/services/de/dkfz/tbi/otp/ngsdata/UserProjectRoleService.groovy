@@ -185,10 +185,7 @@ class UserProjectRoleService {
                 clusterName               : clusterName,
                 clusterAdministrationEmail: clusterAdministrationEmail,
                 supportTeamSalutation     : supportTeamName,
-                linkProjectDirectory      : LsdfFilesService.getPath(
-                                            configService.rootPath.path,
-                                            project.dirName,
-                                            ),
+                linkProjectDirectory      : LsdfFilesService.getPath(configService.rootPath.path, project.dirName),
         ])
 
         List<String> ccs = getUniqueProjectAuthoritiesAndUserManagers(project)*.email.sort()
@@ -508,9 +505,10 @@ class UserProjectRoleService {
     }
 
     private String commandTemplate(UserProjectRole userProjectRole, OperatorAction action) {
-        String commandTemplateOptionNameContent = processingOptionService.findOptionAsString(action.commandTemplateOptionName)
-        return new SimpleTemplateEngine().createTemplate(commandTemplateOptionNameContent)
-                .make([unixGroup: userProjectRole.project.unixGroup, userName: userProjectRole.user.username]).toString()
+        return new SimpleTemplateEngine()
+                .createTemplate(processingOptionService.findOptionAsString(action.commandTemplateOptionName))
+                .make([unixGroup: userProjectRole.project.unixGroup, username: userProjectRole.user.username])
+                .toString()
     }
 }
 
