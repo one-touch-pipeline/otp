@@ -424,10 +424,10 @@ $.otp.graph.info = {
         "use strict";
         var url = $.otp.contextPath;
         RGraph.AJAX(url + '/info/projectCountPerDate', function () {
-            $.otp.graph.overview.projectCountPerDate(this, "OTP");
+            $.otp.graph.overview.projectCountPerDate(this, "All projects");
         });
         RGraph.AJAX(url + '/info/laneCountPerDate', function () {
-            $.otp.graph.overview.laneCountPerDate(this, "OTP");
+            $.otp.graph.overview.laneCountPerDate(this, "All projects");
         });
     }
 };

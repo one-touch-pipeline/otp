@@ -26,6 +26,8 @@ import grails.validation.Validateable
 
 class StatisticController {
 
+    static final String allProjects = "All projects"
+
     StatisticService statisticService
 
     ProjectGroupService projectGroupService
@@ -44,7 +46,7 @@ class StatisticController {
 
     JSON laneCountPerDate(ProjectGroupCommand command) {
         List<Project> projects = null
-        if (command.projectGroupName && command.projectGroupName != "OTP") {
+        if (command.projectGroupName && command.projectGroupName != allProjects) {
             ProjectGroup projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
             projects = projectService.projectByProjectGroup(projectGroup)
         }
@@ -55,7 +57,7 @@ class StatisticController {
 
     JSON gigaBasesPerDay(ProjectGroupCommand command) {
         List<Project> projects = null
-        if (command.projectGroupName && command.projectGroupName != "OTP") {
+        if (command.projectGroupName && command.projectGroupName != allProjects) {
             ProjectGroup projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
             projects = projectService.projectByProjectGroup(projectGroup)
         }
@@ -275,7 +277,7 @@ class ProjectGroupCommand implements Validateable {
 
     static constraints = {
         projectGroupName(nullable: false, validator: { val, ProjectGroupCommand obj ->
-            return val && (val == "OTP" || (obj.projectGroupService.projectGroupByName(val) != null))
+            return val && (val == StatisticController.allProjects || (obj.projectGroupService.projectGroupByName(val) != null))
         })
     }
 }
