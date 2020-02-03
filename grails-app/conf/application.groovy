@@ -158,6 +158,10 @@ grails.plugin.springsecurity.logout.additionalHandlerNames = [
         'dicomAuditLogoutHandler',
 ]
 
+// Use a ThreadLocal as security context holder strategy
+// By default, Grails uses an InheritableThreadLocal, but this does not work with thread pools (used by Grails promises)
+grails.plugin.springsecurity.sch.strategyName = org.springframework.security.core.context.SecurityContextHolder.MODE_THREADLOCAL
+
 //databasemigration configuration
 grails.plugin.databasemigration.changelogLocation = 'migrations'
 grails.plugin.databasemigration.changelogFileName = 'migration-wrapper.groovy'
