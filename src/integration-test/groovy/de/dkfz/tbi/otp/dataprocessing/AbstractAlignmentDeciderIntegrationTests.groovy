@@ -181,8 +181,8 @@ class AbstractAlignmentDeciderIntegrationTests {
         )
 
         decider.mailHelperService.metaClass.sendEmail = { String subject, String content, String recipient ->
-            assert content.contains(prefix)
-            assert content.contains(ticket.ticketNumber)
+            assert subject.contains(prefix)
+            assert subject.contains(ticket.ticketNumber)
             assert subject.contains(seqTrack.sample.toString())
             emailIsSent = true
         }
@@ -227,8 +227,8 @@ class AbstractAlignmentDeciderIntegrationTests {
         boolean emailIsSent = false
 
         decider.mailHelperService.metaClass.sendEmail = { String subject, String content, String recipient ->
-            assert content.contains(prefix)
-            assert content.contains(ticket.ticketNumber)
+            assert subject.contains(prefix)
+            assert subject.contains(ticket.ticketNumber)
             assert subject.contains(seqTrack.sample.toString())
             assert content.contains(seqTrack.libraryPreparationKit.name)
             assert content.contains(workPackage.libraryPreparationKit.name)

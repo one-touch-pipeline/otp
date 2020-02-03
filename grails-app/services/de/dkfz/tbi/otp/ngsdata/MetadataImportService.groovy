@@ -345,8 +345,7 @@ class MetadataImportService {
         if (withoutCategory || withoutThreshold) {
             StringBuilder subject = new StringBuilder()
             if (ticket) {
-                String prefix = processingOptionService.findOptionAsString(ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX)
-                subject.append("[${prefix}#${ticket.ticketNumber}] ")
+                subject.append("[${ticket.prefixedTicketNumber}] ")
             }
             subject.append("Configuration missing for ")
             subject.append([withoutCategory ? "category" : "", withoutThreshold ? "threshold" : ""].findAll().join(" and "))

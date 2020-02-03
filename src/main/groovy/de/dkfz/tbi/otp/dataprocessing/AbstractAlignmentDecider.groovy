@@ -30,7 +30,6 @@ import de.dkfz.tbi.otp.tracking.OtrsTicketService
 import de.dkfz.tbi.otp.utils.MailHelperService
 
 import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.EMAIL_RECIPIENT_NOTIFICATION
-import static de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName.TICKET_SYSTEM_NUMBER_PREFIX
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 abstract class AbstractAlignmentDecider implements AlignmentDecider {
@@ -111,8 +110,8 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         // TODO OTP-1401: In the future there may be more than one MWP for the sample and seqType.
         MergingWorkPackage workPackage = atMostOneElement(
                 MergingWorkPackage.findAllWhere(
-                        sample: seqTrack.sample,
-                        seqType: seqTrack.seqType,
+                        sample        : seqTrack.sample,
+                        seqType       : seqTrack.seqType,
                         antibodyTarget: seqTrack.seqType.hasAntibodyTarget ? seqTrack.antibodyTarget : null,
                 ))
         if (workPackage) {
@@ -121,27 +120,8 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
             assert workPackage.pipeline.id == pipeline.id
             if (!workPackage.satisfiesCriteria(seqTrack)) {
                 logNotAligning(seqTrack, "it does not satisfy the criteria of the existing MergingWorkPackage ${workPackage}.")
-                List<String> body = []
-                body << "A SeqTrack can not be aligned, because it is not compatible with the existing MergingWorkPackage."
-                body << "\nInfos:"
-                MergingWorkPackage.getMergingProperties(seqTrack).each { key, value ->
-                    body << "- ${key}: ${value}"
-                    if (value != workPackage[key]) {
-                        body << "    MergingWorkPackage uses the value: ${workPackage[key]}"
-                    }
-                }
-                OtrsTicket ticket = atMostOneElement(otrsTicketService.findAllOtrsTickets([seqTrack]))
-                if (ticket) {
-                    body << "\nThe corresponding ticket is: ${processingOptionService.findOptionAsString(TICKET_SYSTEM_NUMBER_PREFIX)}#${ticket.ticketNumber}"
-                }
-                body << "\n\nThis e-mail was generated automatically by OTP."
-
-                mailHelperService.sendEmail(
-                        "Will not be aligned: ${seqTrack.ilseId ? "ILSe ${seqTrack.ilseId} " : ""} " +
-                                "${seqTrack.run.name} ${seqTrack.project} ${seqTrack.sample}",
-                        body.join('\n'),
-                        processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION),
-                )
+                Map<String, String> content = buildUnalignableSeqTrackMailContent(workPackage, seqTrack)
+                mailHelperService.sendEmail(content["subject"], content["body"], content["recipient"])
                 return Collections.emptyList()
             }
         } else {
@@ -161,6 +141,62 @@ abstract class AbstractAlignmentDecider implements AlignmentDecider {
         workPackage.save(flush: true)
 
         return [workPackage]
+    }
+
+    Map<String, String> buildUnalignableSeqTrackMailContent(MergingWorkPackage workPackage, SeqTrack seqTrack) {
+        return [
+                "subject"  : buildUnalignableSeqTrackMailSubject(seqTrack),
+                "body"     : buildUnalignableSeqTrackMailBody(workPackage, seqTrack),
+                "recipient": processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION),
+        ]
+    }
+
+    String buildUnalignableSeqTrackMailSubject(SeqTrack seqTrack) {
+        OtrsTicket ticket = atMostOneElement(otrsTicketService.findAllOtrsTickets([seqTrack]))
+        return [
+            ticket ? "[${ticket.prefixedTicketNumber}]" : null,
+            "Will not be aligned:",
+            seqTrack.ilseId ? "[ILSe ${seqTrack.ilseId}]" : null,
+            seqTrack.run.name,
+            seqTrack.project,
+            seqTrack.sample,
+        ].findAll().join(" ")
+    }
+
+    String buildUnalignableSeqTrackMailBody(MergingWorkPackage workPackage, SeqTrack seqTrack) {
+        List<String> propertyOverview = MergingWorkPackage.getMergingProperties(seqTrack).collect { key, value ->
+            return getComparedPropertiesForMail(workPackage, key, value)
+        }
+
+        return """\
+            |Processing was stopped: samples which must be merged according to PID/Sample Type combination could not \
+be merged because of incompatible sequencing platforms or used chemistry.
+            |
+            |OTP considered the following properties when checking for merging:
+            |${propertyOverview.join("\n\n")}
+            |
+            |Please be aware that OTP can currently only handle one bam file, therefore your current samples will not be aligned.
+            |Please contact ${processingOptionService.findOptionAsString(EMAIL_RECIPIENT_NOTIFICATION)} if you wish the samples \
+nevertheless to be merged or if you want to withdraw the old samples (would result in deletion of the old bam files), to align \
+the current ones.""".stripMargin()
+    }
+
+    String getComparedPropertiesForMail(MergingWorkPackage workPackage, String key, Object value) {
+        List<String> props = ["- ${key}: ${transformObjectForMail(value ?: "None")}"]
+        if (value != workPackage[key]) {
+            props << "    Currently active BAM file uses: ${transformObjectForMail(workPackage[key]) ?: "None"}"
+        }
+        return props.join("\n")
+    }
+
+    String transformObjectForMail(Object object) {
+        switch (object.class) {
+            case Sample:
+                Sample sample = (Sample) object
+                return "${sample} from project '${sample.project.name}'"
+            default:
+                return object
+        }
     }
 
     static void logNotAligning(SeqTrack seqTrack, String reason, boolean saveInSeqTrack = true) {

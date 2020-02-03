@@ -53,6 +53,7 @@ class MetadataImportServiceIntegrationSpec extends Specification {
 
     void "test notifyAboutUnsetConfig"() {
         given:
+        DomainFactory.createProcessingOptionForOtrsTicketPrefix("TICKET_PREFIX")
         MetadataImportService service = Spy(MetadataImportService) {
             getSeqTracksWithConfiguredAlignment(_) >> null
         }
