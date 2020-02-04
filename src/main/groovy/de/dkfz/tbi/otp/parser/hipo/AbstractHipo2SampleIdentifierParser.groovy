@@ -30,28 +30,32 @@ import java.util.regex.Matcher
 abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierParser {
 
     private final static String PID = "(?<pid>(?<project>[A-Z][0-9]{2}[A-Z0-9])-[A-Z0-9]{4}([A-Z0-9]{2})?)"
+
     private final static String TISSUE = "(?<tissueType>[${HipoTissueType.values()*.key.join('')}])(?<tissueNumber>[0-9]{1,3})"
 
-    //ignore analyte part
-    private final static String ANALYTE_CHARS_SINGLE_CELL_IGNORE = 'GHJS'
+    //single cell
+    private final static String ANALYTE_CHARS_SINGLE_CELL = 'GHJS'
 
-    //ignore analyte part
+    //chip seq
     private final static String ANALYTE_CHAR_CHIP_SEQ = 'C'
 
     //use only the digits, formatting to two letters
-    private final static String ANALYTE_CHARS_USE_ONLY_NUMBER = 'ABDELMPRTWY'
+    private final static String ANALYTE_CHARS_OTHER = 'ABDELMPRTWY'
 
-    private final static String ANALYTE_CHARS_ALLOW_DIGIT_BEFORE_CHAR =
-            ANALYTE_CHARS_SINGLE_CELL_IGNORE + ANALYTE_CHAR_CHIP_SEQ
+    private final static String ANALYTE_CHARS_NO_DIGIT_BEFORE = ANALYTE_CHARS_OTHER + ANALYTE_CHARS_SINGLE_CELL
 
+    //no chip seq or single cell demultiplex
     private final static String ANALYTE_PATTERN_NO_DIGIT_BEFORE =
-            "(?<analyteCharOnlyNumber>[${ANALYTE_CHARS_USE_ONLY_NUMBER}])(?<analyteDigit>[0-9]{1,2})"
+            "(?<analyteCharOnlyNumber>[${ANALYTE_CHARS_NO_DIGIT_BEFORE}])(?<analyteDigit>[0-9]{1,2})"
 
-    private final static String ANALYTE_PATTERN_ALLOW_DIGIT_BEFORE =
-            "[0-9]*(?<analyteSkip>[${ANALYTE_CHARS_ALLOW_DIGIT_BEFORE_CHAR}])[0-9]{1,2}"
+    private final static String ANALYTE_PATTERN_SKIP_ANALYTE =
+            "[0-9]*(?<analyteSkip>[${ANALYTE_CHAR_CHIP_SEQ}])[0-9]{1,2}"
+
+    private final static String ANALYTE_PATTERN_SINGLE_CELL_DEMULTIPLEX =
+            "[0-9]+(?<analyteSingleCellDemultiplex>[${ANALYTE_CHARS_SINGLE_CELL}])[0-9]{1,2}"
 
     private final static String ANALYTE_PATTERN =
-            "(?<analyte>${ANALYTE_PATTERN_NO_DIGIT_BEFORE}|${ANALYTE_PATTERN_ALLOW_DIGIT_BEFORE})"
+            "(?<analyte>${ANALYTE_PATTERN_NO_DIGIT_BEFORE}|${ANALYTE_PATTERN_SKIP_ANALYTE}|${ANALYTE_PATTERN_SINGLE_CELL_DEMULTIPLEX})"
 
     static final String REGEX = /^${PID}-${TISSUE}-${ANALYTE_PATTERN}$/
 
@@ -75,14 +79,16 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
             String baseSampleTypeName = "${hipoTissueType}${tissueNumber}"
             String analyteCharOnlyNumber = matcher.group('analyteCharOnlyNumber')
             String analyteSkip = matcher.group('analyteSkip')
+            String analyteSingleCellDemultiplex = matcher.group('analyteSingleCellDemultiplex')
             String analyteDigit = matcher.group('analyteDigit')
 
-            String realSampleTypeName = null
-            if (analyteCharOnlyNumber && ANALYTE_CHARS_USE_ONLY_NUMBER.contains(analyteCharOnlyNumber)) {
+            String realSampleTypeName
+            if (analyteCharOnlyNumber && ANALYTE_CHARS_NO_DIGIT_BEFORE.contains(analyteCharOnlyNumber)) {
                 NumberFormat numberFormat = NumberFormat.integerInstance
                 numberFormat.minimumIntegerDigits = 2
                 realSampleTypeName = "${baseSampleTypeName}-${numberFormat.format(analyteDigit.toLong())}"
-            } else if (analyteSkip && ANALYTE_CHARS_ALLOW_DIGIT_BEFORE_CHAR.contains(analyteSkip)) {
+            } else if (analyteSkip && ANALYTE_CHAR_CHIP_SEQ.contains(analyteSkip) ||
+                    analyteSingleCellDemultiplex && ANALYTE_CHARS_SINGLE_CELL.contains(analyteSingleCellDemultiplex)) {
                 realSampleTypeName = baseSampleTypeName
             } else {
                 assert false: 'may not occur'
@@ -107,8 +113,8 @@ abstract class AbstractHipo2SampleIdentifierParser implements SampleIdentifierPa
 
     @Override
     String tryParseCellPosition(String sampleIdentifier) {
-        Matcher matcher = sampleIdentifier =~ /^.*-${ANALYTE_PATTERN}$/
-        if (matcher.matches()) {
+        Matcher matcher = sampleIdentifier =~ REGEX
+        if (matcher.matches() && matcher.group('analyteSingleCellDemultiplex')) {
             return matcher.group('analyte')
         }
         return null

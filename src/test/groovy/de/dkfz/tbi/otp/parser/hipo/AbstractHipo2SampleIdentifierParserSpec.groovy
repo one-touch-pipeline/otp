@@ -126,16 +126,22 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
         '123ABC-T3-1C02'   || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         '123ABC-T3-1C20'   || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
-        //analyte type: single cell
-        '123ABC-T3-G2'     || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        '123ABC-T3-H2'     || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        '123ABC-T3-J2'     || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        '123ABC-T3-S2'     || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        //analyte type: single cell multiplexed
+        '123ABC-T3-G2'     || 'TUMOR'                            | '3'  | '02' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-H2'     || 'TUMOR'                            | '3'  | '02' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-J2'     || 'TUMOR'                            | '3'  | '02' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-S2'     || 'TUMOR'                            | '3'  | '02' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
-        '123ABC-T3-G20'    || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        '123ABC-T3-H20'    || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        '123ABC-T3-J20'    || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
-        '123ABC-T3-S20'    || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-G20'    || 'TUMOR'                            | '3'  | '20' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-H20'    || 'TUMOR'                            | '3'  | '20' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-J20'    || 'TUMOR'                            | '3'  | '20' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-S20'    || 'TUMOR'                            | '3'  | '20' | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+
+        //analyte type: single cell demultiplexed
+        '123ABC-T3-1G2'    || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-1H2'    || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-1J2'    || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
+        '123ABC-T3-1S2'    || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
 
         '123ABC-T3-1G20'   || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
         '123ABC-T3-1H20'   || 'TUMOR'                            | '3'  | null | SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
@@ -186,7 +192,9 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
                 '123ABC-N0-1C123',
                 '123ABC-N0-1C0X',
                 '123ABC-N0-XC01',
+                '123ABC-N0-G123',
                 '123ABC-N0-1G',
+                '123ABC-N0-1G123',
         ]
     }
 
@@ -221,10 +229,14 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
         cellPosition == expectedCellPosition
 
         where:
-        identifier       || expectedCellPosition
-        "123ABC-T0-G1"   || "G1"
-        "123ABC-T0-12C3" || "12C3"
-        "123ABC-T3-1J02" || "1J02"
+        identifier          || expectedCellPosition
+        "123ABC-T0-1G1"     || "1G1"
+        "123ABC-T0-1H1"     || "1H1"
+        "123ABC-T0-1J1"     || "1J1"
+        "123ABC-T0-1S1"     || "1S1"
+        "123ABC-T0-12G3"    || "12G3"
+        "123ABC-T3-1J02"    || "1J02"
+        "123ABC-T3-1234S02" || "1234S02"
     }
 
     @SuppressWarnings('JUnitTestMethodWithoutAssert')
@@ -244,8 +256,13 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
         identifier << [
                 null,
                 "",
-                '123ABC-T0-123C',
-                '123ABC-T0-1C123',
+                "123ABC-T0-G1",
+                "123ABC-T0-H1",
+                "123ABC-T0-J1",
+                "123ABC-T0-1",
+                "123ABC-T0-G1",
+                '123ABC-T0-123J',
+                '123ABC-T0-1J123',
         ]
     }
 }

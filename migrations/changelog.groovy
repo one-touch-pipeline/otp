@@ -341,4 +341,8 @@ databaseChangeLog = {
     changeSet(author: "kosnac", id: "drop-snv-from-project") {
         sqlFile(path: 'changelogs/2020/drop-snv-from-project.sql')
     }
+
+    changeSet(author: "borufka", id: "otp-367-well") {
+        sqlFile(path: 'changelogs/2020/otp-367-well.sql')
+    }
 }
