@@ -21,7 +21,6 @@
   --}%
 
 <%@ page contentType="text/html;charset=UTF-8" %>
-<%@ page import="de.dkfz.tbi.otp.ngsdata.Project.Snv" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
@@ -565,18 +564,6 @@
                         </li>
                     </g:each>
                 </ul>
-                <table class="snv">
-                    <tr>
-                        <td><g:message code="projectOverview.snv"/></td>
-                        <td class="myValue typeDropDown">
-                            <otp:editorSwitch roles="ROLE_OPERATOR"
-                                              template="dropDown"
-                                              link="${g.createLink(controller: 'projectConfig', action: 'updateSnv', params: ['project.id': project.id, 'fieldName': 'snv'])}"
-                                              values="${snvDropDown}"
-                                              value="${project.snv}"/>
-                        </td>
-                    </tr>
-                </table>
                 <br>
             </sec:ifAllGranted>
             <table>
@@ -730,12 +717,11 @@
             </table>
             <br>
         </div>
-        <asset:script>
+        <asset:script type="text/javascript">
             $(function() {
                 $.otp.projectConfig.referenceGenome();
                 $.otp.projectConfig.asynchronousCallAlignmentInfo();
-                $.otp.initCommentBox(${project.id}, "#projectCommentBox");
-        });
+            });
         </asset:script>
     </g:if>
     <g:else>

@@ -32,24 +32,10 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
 class Project implements ProjectPropertiesGivenWithRequest, Commentable, Entity {
 
-    /**
-     * This enum defines if SNV calling should be done for this project.
-     * Default is unknown
-     */
-    @Deprecated
-    enum Snv {
-        YES,
-        NO,
-        UNKNOWN,
-    }
-
     enum ProjectType {
         SEQUENCING,
         USER_MANAGEMENT,
     }
-
-    @Deprecated
-    Snv snv = Snv.UNKNOWN
 
     String individualPrefix
     String internalNotes

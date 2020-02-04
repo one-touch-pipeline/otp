@@ -136,7 +136,6 @@ class ProjectConfigController implements CheckAndCall {
                 sophiaConfigTable              : sophiaConfigTable,
                 aceseqConfigTable              : aceseqConfigTable,
                 runYapsaConfigTable            : runYapsaConfigTable,
-                snvDropDown                    : Project.Snv.values(),
                 directory                      : projectDirectory ?: '',
                 sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
                 tumorEntities                  : TumorEntity.list().sort(),
@@ -203,12 +202,6 @@ class ProjectConfigController implements CheckAndCall {
         }
     }
 
-    JSON updateSnv(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
-            projectService.updateProjectField(Project.Snv.valueOf(cmd.value), cmd.fieldName, cmd.project)
-        }
-    }
-
     JSON updateSampleIdentifierParserBeanName(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(SampleIdentifierParserBeanName.valueOf(cmd.value), cmd.fieldName, cmd.project)
@@ -231,10 +224,6 @@ class ProjectConfigController implements CheckAndCall {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(Boolean.valueOf(cmd.value), cmd.fieldName, cmd.project)
         }
-    }
-
-    JSON snvDropDown() {
-        render Project.Snv.values() as JSON
     }
 
     JSON saveProjectComment(CommentCommand cmd) {

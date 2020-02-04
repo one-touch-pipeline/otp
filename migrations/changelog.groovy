@@ -337,4 +337,8 @@ databaseChangeLog = {
     }
 
     include file: 'changelogs/2019/otp-148.groovy'
+
+    changeSet(author: "kosnac", id: "drop-snv-from-project") {
+        sqlFile(path: 'changelogs/2020/drop-snv-from-project.sql')
+    }
 }

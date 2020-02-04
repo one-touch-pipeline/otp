@@ -260,7 +260,6 @@ class ProjectService {
                 "dirAnalysis",
                 "nameInMetadataFiles",
                 "processingPriority",
-                "snv",
                 "tumorEntity",
                 "sampleIdentifierParserBeanName",
                 "qcThresholdHandling",
