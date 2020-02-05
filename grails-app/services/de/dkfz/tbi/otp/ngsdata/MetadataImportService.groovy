@@ -105,7 +105,7 @@ class MetadataImportService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     // TODO: OTP-1908: Relax this restriction
     MetadataValidationContext validateWithAuth(File metadataFile, DirectoryStructureBeanName directoryStructure) {
-        FileSystem fs = fileSystemService.getFilesystemForFastqImport()
+        FileSystem fs = fileSystemService.filesystemForFastqImport
         return validate(fs.getPath(metadataFile.path), directoryStructure)
     }
 
@@ -207,7 +207,7 @@ class MetadataImportService {
     }
 
     List<ValidateAndImportResult> validateAndImportMultiple(String otrsTicketNumber, String ilseNumbers) {
-        FileSystem fs = fileSystemService.getFilesystemForFastqImport()
+        FileSystem fs = fileSystemService.filesystemForFastqImport
         return validateAndImportMultiple(
                 otrsTicketNumber,
                 parseIlseNumbers(ilseNumbers).collect { getMetadataFilePathForIlseNumber(it, fs) },
@@ -288,7 +288,7 @@ class MetadataImportService {
 
     protected DirectoryStructure getDirectoryStructure(DirectoryStructureBeanName name) {
         DirectoryStructure directoryStructure = applicationContext.getBean(name.beanName, DirectoryStructure)
-        directoryStructure.setFileSystem(fileSystemService?.getFilesystemForFastqImport())
+        directoryStructure.setFileSystem(fileSystemService?.filesystemForFastqImport)
         return directoryStructure
     }
 

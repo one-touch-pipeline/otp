@@ -64,7 +64,7 @@ class BamMetadataImportService {
     }
 
     BamMetadataValidationContext validate(String metadataFile, List<String> furtherFiles) {
-        FileSystem fileSystem = fileSystemService.getFilesystemForBamImport()
+        FileSystem fileSystem = fileSystemService.filesystemForBamImport
         BamMetadataValidationContext context = BamMetadataValidationContext.createFromFile(
                 fileSystem.getPath(metadataFile),
                 furtherFiles,
@@ -87,7 +87,7 @@ class BamMetadataImportService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     Map validateAndImport(String metadataFile, boolean ignoreWarnings, String previousValidationMd5sum, boolean replaceWithLink,
                           boolean triggerAnalysis, List<String> furtherFiles) {
-        FileSystem fileSystem = fileSystemService.getFilesystemForBamImport()
+        FileSystem fileSystem = fileSystemService.filesystemForBamImport
         Project outputProject
         ImportProcess importProcess = new ImportProcess(externallyProcessedMergedBamFiles: [])
         BamMetadataValidationContext context = validate(metadataFile, furtherFiles)

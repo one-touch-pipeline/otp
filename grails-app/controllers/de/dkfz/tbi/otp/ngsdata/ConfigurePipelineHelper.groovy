@@ -88,7 +88,7 @@ trait ConfigurePipelineHelper {
         String latestRoddyConfig = ""
         RoddyWorkflowConfig config = RoddyWorkflowConfig.getLatestForProject(project, seqType, pipeline)
         if (config) {
-            FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
+            FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
             latestRoddyConfig = fs.getPath(config.configFilePath).text
         }
         return [

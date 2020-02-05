@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.config.SshAuthMethod
+import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.ngsdata.Realm
 
@@ -118,44 +119,40 @@ class FileSystemService {
         return getFilesystem(realm)
     }
 
-    FileSystem getFilesystemForProcessingForRealm(Realm realm) throws Throwable {
-        assert realm
-        if (processingOptionService.findOptionAsBoolean(FILESYSTEM_PROCESSING_USE_REMOTE)) {
+    FileSystem getRemoteOrLocalFileSystemByProcessingOption(ProcessingOption.OptionName optionName) throws Throwable {
+        boolean useRemote = processingOptionService.findOptionAsBoolean(optionName)
+        if (useRemote) {
+            return remoteFileSystemOnDefaultRealm
+        } else {
+            return FileSystems.default
+        }
+    }
+
+    FileSystem getRealmOrLocalFileSystemByProcessingOption(ProcessingOption.OptionName optionName) throws Throwable {
+        String realmName = processingOptionService.findOptionAsString(optionName)
+        if (realmName) {
+            Realm realm = Realm.findByName(realmName)
+            assert realm
             getFilesystem(realm)
         } else {
             return FileSystems.default
         }
     }
 
-    FileSystem getFilesystemForConfigFileChecksForRealm(Realm realm) throws Throwable {
-        assert realm
-        if (processingOptionService.findOptionAsBoolean(FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE)) {
-            getFilesystem(realm)
-        } else {
-            return FileSystems.default
-        }
+    FileSystem getFilesystemForProcessingForRealm() throws Throwable {
+        return getRemoteOrLocalFileSystemByProcessingOption(FILESYSTEM_PROCESSING_USE_REMOTE)
+    }
+
+    FileSystem getFilesystemForConfigFileChecksForRealm() throws Throwable {
+        return getRemoteOrLocalFileSystemByProcessingOption(FILESYSTEM_CONFIG_FILE_CHECKS_USE_REMOTE)
     }
 
     FileSystem getFilesystemForFastqImport() throws Throwable {
-        String realmName = processingOptionService.findOptionAsString(FILESYSTEM_FASTQ_IMPORT)
-        if (realmName) {
-            Realm realm = Realm.findByName(realmName)
-            assert realm
-            getFilesystem(realm)
-        } else {
-            return FileSystems.default
-        }
+        return getRealmOrLocalFileSystemByProcessingOption(FILESYSTEM_FASTQ_IMPORT)
     }
 
     FileSystem getFilesystemForBamImport() throws Throwable {
-        String realmName = processingOptionService.findOptionAsString(FILESYSTEM_BAM_IMPORT)
-        if (realmName) {
-            Realm realm = Realm.findByName(realmName)
-            assert realm
-            getFilesystem(realm)
-        } else {
-            return FileSystems.default
-        }
+        return getRealmOrLocalFileSystemByProcessingOption(FILESYSTEM_BAM_IMPORT)
     }
 
     @Scheduled(fixedDelay = 30000L)

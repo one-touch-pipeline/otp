@@ -157,7 +157,7 @@ touch ${checkpoint}
     @Override
     protected void validate() throws Throwable {
         final ImportProcess importProcess = getProcessParameterObject()
-        FileSystem fs = fileSystemService.getFilesystemForBamImport()
+        FileSystem fs = fileSystemService.filesystemForBamImport
 
         final Collection<String> problems = importProcess.externallyProcessedMergedBamFiles.collect {
             String path = it.getBamFile().path

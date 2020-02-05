@@ -321,7 +321,7 @@ class ProjectInfoServiceIntegrationSpec extends Specification implements UserAnd
 
         projectInfoService = new ProjectInfoService([
             fileSystemService: Mock(FileSystemService) {
-                1 * getFilesystemForConfigFileChecksForRealm(_) >> FileSystems.default
+                1 * getFilesystemForConfigFileChecksForRealm() >> FileSystems.default
             },
             fileService      : new FileService(),
         ])

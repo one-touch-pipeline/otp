@@ -39,12 +39,12 @@ class TestFileSystemService extends FileSystemService {
     }
 
     @Override
-    FileSystem getFilesystemForProcessingForRealm(Realm realm) throws Throwable {
+    FileSystem getFilesystemForProcessingForRealm() throws Throwable {
         return FileSystems.default
     }
 
     @Override
-    FileSystem getFilesystemForConfigFileChecksForRealm(Realm realm) throws Throwable {
+    FileSystem getFilesystemForConfigFileChecksForRealm() throws Throwable {
         return FileSystems.default
     }
 

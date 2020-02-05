@@ -114,7 +114,7 @@ class RoddyWorkflowConfigService {
     }
 
     void validateConfig(RoddyWorkflowConfig config) {
-        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(config.project.realm)
+        FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
         Path configFile = fs.getPath(config.configFilePath)
 
         FileService.ensureFileIsReadableAndNotEmpty(configFile)

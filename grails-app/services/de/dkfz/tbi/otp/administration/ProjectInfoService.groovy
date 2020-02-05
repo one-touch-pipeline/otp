@@ -93,14 +93,14 @@ class ProjectInfoService {
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     byte[] getProjectInfoContent(ProjectInfo projectInfo) {
         assert projectInfo: "No ProjectInfo given"
-        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
+        FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
         Path file = fs.getPath(projectInfo.path)
 
         return Files.exists(file) ? file.bytes : [] as byte[]
     }
 
     private Path uploadProjectInfoToProjectFolder(ProjectInfo projectInfo, byte[] content) {
-        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(projectInfo.project.realm)
+        FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
         Path projectDirectory = fs.getPath(projectInfo.project.projectDirectory.toString())
         Path projectInfoDirectory = projectDirectory.resolve(ProjectService.PROJECT_INFO)
 

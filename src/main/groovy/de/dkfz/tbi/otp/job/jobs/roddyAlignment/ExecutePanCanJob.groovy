@@ -87,8 +87,8 @@ class ExecutePanCanJob extends AbstractRoddyAlignmentJob implements AutoRestarta
             dataFiles.sort { it.mateNumber }.each { DataFile dataFile ->
                 String pathName = lsdfFilesService.getFileViewByPidPath(dataFile)
                 FileSystem fs = dataFile.fileLinked ?
-                        fileSystemService.getFilesystemForFastqImport() :
-                        fileSystemService.getFilesystemForProcessingForRealm(dataFile.project.realm)
+                        fileSystemService.filesystemForFastqImport :
+                        fileSystemService.filesystemForProcessingForRealm
                 Path path = fs.getPath(pathName)
                 FileService.ensureFileIsReadableAndNotEmpty(path)
                 assert dataFile.fileSize == Files.size(path)

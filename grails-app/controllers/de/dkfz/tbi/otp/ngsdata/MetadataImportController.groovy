@@ -104,7 +104,7 @@ class MetadataImportController {
         if (cmd.hasErrors()) {
             flash.message = new FlashMessage("Error", cmd.errors)
         } else if (cmd.submit == "Import") {
-            FileSystem fs = fileSystemService.getFilesystemForFastqImport()
+            FileSystem fs = fileSystemService.filesystemForFastqImport
 
             List<MetadataImportService.PathWithMd5sum> pathWithMd5sums = cmd.paths.withIndex().collect {
                 return new MetadataImportService.PathWithMd5sum(fs.getPath(it.first), cmd.md5.get(it.second))

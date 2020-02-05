@@ -219,13 +219,13 @@ class ProjectService {
             }
         }
         executeScript(buildCreateProjectDirectory(project.unixGroup, projectDirectory.absolutePath), project, "0022")
-        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
+        FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
         FileService.waitUntilExists(fs.getPath(projectDirectory.absolutePath))
     }
 
     private void createAnalysisDirectoryIfPossible(Project project) {
         assert project.dirAnalysis
-        FileSystem fs = fileSystemService.getFilesystemForConfigFileChecksForRealm(project.realm)
+        FileSystem fs = fileSystemService.filesystemForConfigFileChecksForRealm
         Path analysisDirectory = fs.getPath(project.dirAnalysis)
         if (Files.exists(analysisDirectory)) {
             return

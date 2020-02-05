@@ -121,8 +121,8 @@ chmod 440 ${targetFile} ${md5SumFileName}
             String targetFile = lsdfFilesService.getFileFinalPath(dataFile)
             try {
                 FileSystem fs = seqTrack.linkedExternally ?
-                        fileSystemService.getFilesystemForFastqImport() :
-                        fileSystemService.getFilesystemForProcessingForRealm(dataFile.project.realm)
+                        fileSystemService.filesystemForFastqImport :
+                        fileSystemService.filesystemForProcessingForRealm
                 Path targetPath = fs.getPath(targetFile)
 
                 fileService.ensureFileIsReadableAndNotEmpty(targetPath)
