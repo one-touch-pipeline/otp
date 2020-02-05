@@ -1100,6 +1100,9 @@ td span {
     .background-usage-hint {
         padding-left: 18px;
     }
+    .background-usage-hint-long {
+        padding-left: 50px;
+    }
     &.icon-true {
         .background-usage-hint;
         background: url(ok.png) left center no-repeat;
@@ -1113,16 +1116,24 @@ td span {
         background: url(ok.png) left center no-repeat;
     }
     &.icon-pendingApproval {
-        .background-usage-hint;
-        background: url(ok_grey.png) left center no-repeat;
+        .background-usage-hint-long;
+        background: url(error-to-ok.png) left center no-repeat;
     }
     &.icon-pendingDenial {
-        .background-usage-hint;
-        background: url(error_grey.png) left center no-repeat;
+        .background-usage-hint-long;
+        background: url(ok-to-error.png) left center no-repeat;
     }
     &.icon-denied {
         .background-usage-hint;
         background: url(error.png) left center no-repeat;
+    }
+    &.icon-inconsistency-approved {
+        .background-usage-hint;
+        background: url(question.png) left center no-repeat;
+    }
+    &.icon-inconsistency-denial {
+        .background-usage-hint;
+        background: url(question.png) left center no-repeat;
     }
 }
 
@@ -1131,24 +1142,30 @@ td div {
     .background-usage-hint {
         padding-left: 18px;
     }
+    .background-usage-hint-long {
+        padding-left: 50px;
+    }
     &.filesAccessHandler-approved span {
         .background-usage-hint;
         background: url(ok.png) left center no-repeat;
         &.icon-false {
-            background: url(error_grey.png) left center no-repeat;
+            .background-usage-hint-long;
+            background: url(ok-to-error.png) left center no-repeat;
         }
     }
     &.filesAccessHandler-pendingApproval span {
-        .background-usage-hint;
-        background: url(ok_grey.png) left center no-repeat;
+        .background-usage-hint-long;
+        background: url(error-to-ok.png) left center no-repeat;
         &.icon-false {
+            .background-usage-hint;
             background: url(error.png) left center no-repeat;
         }
     }
     &.filesAccessHandler-pendingDenial span {
-        .background-usage-hint;
-        background: url(error_grey.png) left center no-repeat;
+        .background-usage-hint-long;
+        background: url(ok-to-error.png) left center no-repeat;
         &.icon-true {
+            .background-usage-hint;
             background: url(ok.png) left center no-repeat;
         }
     }
@@ -1156,7 +1173,28 @@ td div {
         .background-usage-hint;
         background: url(error.png) left center no-repeat;
         &.icon-true {
-            background: url(ok_grey.png) left center no-repeat;
+            .background-usage-hint-long;
+            background: url(error-to-ok.png) left center no-repeat;
+        }
+    }
+    &.filesAccessHandler-inconsistencyApprovial {
+        .icon-true {
+            .background-usage-hint;
+            background: url(question.png) left center no-repeat;
+        }
+        .icon-false {
+            .background-usage-hint-long;
+            background: url(ok-to-error.png) left center no-repeat;
+        }
+    }
+    &.filesAccessHandler-inconsistencyDenial {
+        .icon-false {
+            .background-usage-hint;
+            background: url(question.png) left center no-repeat;
+        }
+        .icon-true {
+            .background-usage-hint-long;
+            background: url(error-to-ok.png) left center no-repeat;
         }
     }
 }

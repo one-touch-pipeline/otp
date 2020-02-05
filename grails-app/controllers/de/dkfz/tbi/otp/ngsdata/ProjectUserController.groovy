@@ -116,11 +116,11 @@ class ProjectUserController implements CheckAndCall {
                             ProjectRole.findByName(cmd.projectRoleName),
                             cmd.searchString,
                             [
-                                accessToOtp           : true,
-                                accessToFiles         : cmd.accessToFiles,
-                                manageUsers           : cmd.manageUsers,
-                                manageUsersAndDelegate: cmd.manageUsersAndDelegate,
-                                receivesNotifications : cmd.receivesNotifications,
+                                    accessToOtp           : true,
+                                    accessToFiles         : cmd.accessToFiles,
+                                    manageUsers           : cmd.manageUsers,
+                                    manageUsersAndDelegate: cmd.manageUsersAndDelegate,
+                                    receivesNotifications : cmd.receivesNotifications,
                             ]
                     )
                 } else {
@@ -215,7 +215,9 @@ enum PermissionStatus {
     APPROVED("projectUser.table.fileAccess.approval.tooltip"),
     PENDING_APPROVAL("projectUser.table.fileAccess.pending.approval.tooltip"),
     PENDING_DENIAL("projectUser.table.fileAccess.pending.denial.tooltip"),
-    DENIED("projectUser.table.fileAccess.denial.tooltip")
+    DENIED("projectUser.table.fileAccess.denial.tooltip"),
+    INCONSISTENCY_APPROVAL("projectUser.table.fileAccess.inconsistency.approval.tooltip"),
+    INCONSISTENCY_DENIAL("projectUser.table.fileAccess.inconsistency.denial.tooltip"),
 
     final String toolTipKey
 
@@ -225,7 +227,11 @@ enum PermissionStatus {
     }
 
     boolean toBoolean() {
-        return this in [APPROVED, PENDING_APPROVAL]
+        return this in [APPROVED, PENDING_APPROVAL, INCONSISTENCY_APPROVAL]
+    }
+
+    boolean isInconsistency() {
+        return this in [INCONSISTENCY_APPROVAL, INCONSISTENCY_DENIAL]
     }
 }
 
@@ -256,22 +262,32 @@ class UserEntry {
         this.deactivated = inLdap ? ldapUserDetails.deactivated : false
 
         this.otpAccess = getPermissionStatus(inLdap && userProjectRole.accessToOtp)
-        this.fileAccess = getPermissionStatus(inLdap && userProjectRole.accessToFiles, project.unixGroup in ldapUserDetails?.memberOfGroupList)
+        this.fileAccess = getFilePermissionStatus(inLdap && userProjectRole.accessToFiles, project.unixGroup in ldapUserDetails?.memberOfGroupList,
+                userProjectRole.fileAccessChangeRequested)
         this.manageUsers = getPermissionStatus(inLdap && userProjectRole.manageUsers)
         this.manageUsersAndDelegate = getPermissionStatus(inLdap && userProjectRole.manageUsersAndDelegate)
         this.receivesNotifications = getPermissionStatus(userProjectRole.receivesNotifications)
     }
 
-    private static PermissionStatus getPermissionStatus(boolean should, boolean is = should) {
+    private static PermissionStatus getPermissionStatus(boolean access) {
+        return access ? PermissionStatus.APPROVED : PermissionStatus.DENIED
+    }
+
+    private static PermissionStatus getFilePermissionStatus(boolean should, boolean is, boolean changeRequested) {
         if (should && is) {
             return PermissionStatus.APPROVED
-        } else if (should && !is) {
-            return PermissionStatus.PENDING_APPROVAL
-        } else if (!should && is) {
-            return PermissionStatus.PENDING_DENIAL
         } else if (!should && !is) {
             return PermissionStatus.DENIED
+        } else if (should && !is && changeRequested) {
+            return PermissionStatus.PENDING_APPROVAL
+        } else if (!should && is && changeRequested) {
+            return PermissionStatus.PENDING_DENIAL
+        } else if (should && !is && !changeRequested) {
+            return PermissionStatus.INCONSISTENCY_DENIAL
+        } else if (!should && is && !changeRequested) {
+            return PermissionStatus.INCONSISTENCY_APPROVAL
         }
+        throw new OtpRuntimeException("Case should not occur: should: ${should}, is: ${is}, changeRequested: ${changeRequested}")
     }
 }
 
@@ -285,6 +301,7 @@ class UpdateUserRealNameCommand implements Validateable {
             }
         })
     }
+
     void setValue(String value) {
         this.newName = value?.trim()?.replaceAll(" +", " ")
     }
@@ -302,6 +319,7 @@ class UpdateUserEmailCommand implements Validateable {
             }
         })
     }
+
     void setValue(String value) {
         this.newEmail = value?.trim()?.replaceAll(" +", " ")
     }
@@ -333,7 +351,7 @@ class UpdateProjectRoleCommand implements Validateable {
 }
 
 class AddUserToProjectCommand implements Serializable {
-        Project project
+    Project project
     boolean addViaLdap = true
 
     String searchString

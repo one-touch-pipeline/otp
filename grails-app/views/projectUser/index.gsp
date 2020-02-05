@@ -215,7 +215,9 @@
                                                 tooltip="${g.message(code: "${userEntry.fileAccess.toolTipKey}")}"
                                                 link="${g.createLink(controller: "projectUser", action: "setAccessToFiles", params: ['userProjectRole.id': userEntry.userProjectRole.id] )}"
                                                 value="${userEntry.fileAccess.toBoolean()}"
-                                                confirmation="${confirmationText}"/>
+                                                confirmation="${confirmationText}"
+                                                pageReload="${userEntry.fileAccess.inconsistency.toString()}"
+                                        />
                                     </sec:access>
                                     <sec:noAccess expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
                                         <span></span>

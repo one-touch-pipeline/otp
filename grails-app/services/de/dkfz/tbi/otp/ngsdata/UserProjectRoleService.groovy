@@ -66,9 +66,10 @@ class UserProjectRoleService {
         List<OtpPermissionCode> revokedPermissions = getPermissionDiff(false, flags, oldUPR)
 
         UserProjectRole userProjectRole = new UserProjectRole([
-                user       : user,
-                project    : project,
-                projectRole: projectRole,
+                user                     : user,
+                project                  : project,
+                projectRole              : projectRole,
+                fileAccessChangeRequested: flags.accessToFiles ?: false,
         ] + flags)
         userProjectRole.save(flush: true)
 
@@ -322,6 +323,7 @@ class UserProjectRoleService {
     UserProjectRole setAccessToFiles(UserProjectRole userProjectRole, boolean value) {
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.accessToFiles = value
+            upr.fileAccessChangeRequested = true
             assert upr.save(flush: true)
             String message = getFlagChangeLogMessage("Access to Files", upr.accessToFiles, upr.user.username, upr.project.name)
             auditLogService.logAction(AuditLog.Action.PROJECT_USER_CHANGED_ACCESS_TO_FILES, message)
@@ -371,6 +373,9 @@ class UserProjectRoleService {
     UserProjectRole setEnabled(UserProjectRole userProjectRole, boolean value) {
         synchedBetweenRelatedUserProjectRoles(userProjectRole) { UserProjectRole upr ->
             upr.enabled = !upr.enabled
+            if (upr.accessToFiles) {
+                upr.fileAccessChangeRequested = true
+            }
             assert upr.save(flush: true)
         }
         if (value) {
@@ -418,6 +423,7 @@ class UserProjectRoleService {
                     manageUsers: it.manageUsers,
                     manageUsersAndDelegate: it.manageUsersAndDelegate,
                     receivesNotifications: it.receivesNotifications,
+                    fileAccessChangeRequested: it.accessToFiles,
             ).save(flush: true)
         }
     }

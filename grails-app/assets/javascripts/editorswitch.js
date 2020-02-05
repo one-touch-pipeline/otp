@@ -383,6 +383,10 @@ $(function() {
                         $("p.edit-switch-label", outerContainer)[0].title = data.tooltip;
                     }
                     $("input:hidden[name=value]", container).attr("value", invVal);
+                    var pageReload = $("button[data-pageReload]", container).attr("data-pageReload");
+                    if (pageReload && pageReload == 'true') {
+                        window.setTimeout(function() { location.reload() }, 100); //reloads page after 0.5 seconds
+                    }
                 } else {
                     $.otp.warningMessage(data.error);
                 }

@@ -488,6 +488,9 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         and: "notification for user managers regarding new user was sent"
         1 * userProjectRoleService.mailHelperService.sendEmail(_ as String, _ as String, _ as List<String>, [user.email])
 
+        and:
+        UserProjectRole.findAllByIdNotEqual(requesterUserProjectRole.id)*.fileAccessChangeRequested == [accessToFiles]
+
         where:
         accessToFiles << [true, false]
     }
@@ -515,6 +518,7 @@ class UserProjectRoleServiceIntegrationSpec extends Specification implements Use
         then:
         LdapUserCreationException e = thrown(LdapUserCreationException)
         e.message.startsWith("The given email address '${user.email}' is already registered for LDAP user '${user.username}'")
+        UserProjectRole.count() == 0
     }
 
     void "addUserToProjectAndNotifyGroupManagementAuthority, synchronizes action for projects with shared unix group"() {

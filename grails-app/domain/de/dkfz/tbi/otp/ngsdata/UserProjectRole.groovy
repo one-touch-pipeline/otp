@@ -36,6 +36,11 @@ class UserProjectRole implements Serializable, Entity {
     boolean manageUsersAndDelegate = false
     boolean receivesNotifications = true
 
+    /**
+     * If a file change was requested and not yet executed
+     */
+    boolean fileAccessChangeRequested = false
+
     static constraints = {
         project(unique: 'user')
     }

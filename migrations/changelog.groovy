@@ -355,4 +355,6 @@ databaseChangeLog = {
     changeSet(author: "strubelp", id: "otp-349") {
         sqlFile(path: 'changelogs/2020/otp-349.sql')
     }
+
+    include file: 'changelogs/2020/otp-334-add-file-change-request-added.groovy'
 }

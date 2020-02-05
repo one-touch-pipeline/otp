@@ -173,6 +173,10 @@ class ConfigService implements ApplicationContextAware {
         }
     }
 
+    boolean getLdapEnabled() {
+        return getBooleanValue(OtpProperty.LDAP_ENABLED)
+    }
+
     String getLdapServer() {
         return otpProperties.get(OtpProperty.LDAP_SERVER)
     }
@@ -219,6 +223,11 @@ class ConfigService implements ApplicationContextAware {
             throw new RuntimeException("${property} is \"${file}\", but only an absolute path is allowed.")
         }
         return file
+    }
+
+    private boolean getBooleanValue(OtpProperty otpPropertiesValue) {
+        return otpProperties.get(otpPropertiesValue) ? Boolean.parseBoolean(otpProperties.get(otpPropertiesValue)) :
+                Boolean.parseBoolean(otpPropertiesValue.defaultValue)
     }
 
     private boolean getBooleanValue(OtpProperty otpPropertiesValue, boolean defaultValue) {
