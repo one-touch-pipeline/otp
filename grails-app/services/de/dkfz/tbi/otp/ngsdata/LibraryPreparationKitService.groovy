@@ -23,9 +23,17 @@ package de.dkfz.tbi.otp.ngsdata
 
 import org.springframework.security.access.prepost.PreAuthorize
 
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.utils.CollectionUtils
 
+import java.nio.charset.StandardCharsets
+import java.nio.file.*
+
 class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparationKit> {
+
+    FileSystemService fileSystemService
+    FileService fileService
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     List<Map> getDisplayableMetadata() {
@@ -59,6 +67,19 @@ class LibraryPreparationKitService extends MetadataFieldsService<LibraryPreparat
         libraryPreparationKit.reverseComplementAdapterSequence = reverseComplementAdapterSequence
         assert libraryPreparationKit.save(flush: true)
         return libraryPreparationKit
+    }
+
+    Path getAdapterFileAsPath(LibraryPreparationKit libraryPreparationKit) {
+        FileSystem fs = fileSystemService.getRemoteFileSystemOnDefaultRealm()
+        return fs.getPath(libraryPreparationKit.adapterFile)
+    }
+
+    String getAdapterFileContentToRender(LibraryPreparationKit libraryPreparationKit) {
+        Path path = getAdapterFileAsPath(libraryPreparationKit)
+        fileService.ensureFileIsReadable(path)
+        long size = Files.size(path)
+        assert size <= 5242880L: "Adapter file is too large to be displayed in the GUI (${size} > 5MB)"
+        return FileService.readFileToString(path, StandardCharsets.US_ASCII)
     }
 
     @Override

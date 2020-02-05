@@ -21,12 +21,20 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-
 import grails.testing.gorm.DataTest
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
+
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
+import de.dkfz.tbi.otp.infrastructure.FileService
+import de.dkfz.tbi.otp.job.processing.FileSystemService
+import de.dkfz.tbi.otp.utils.HelperUtils
+
+import java.nio.file.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
-class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<LibraryPreparationKit> implements DataTest {
+class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<LibraryPreparationKit> implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -34,6 +42,9 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
                 LibraryPreparationKit,
         ]
     }
+
+    @Rule
+    TemporaryFolder temporaryFolder
 
     LibraryPreparationKitService libraryPreparationKitService = new LibraryPreparationKitService()
 
@@ -205,6 +216,64 @@ class LibraryPreparationKitServiceSpec extends MetadataFieldsServiceSpec<Library
 
         where:
         adapterSequence << [null, ""]
+    }
+
+    void setupServiceForAdapterFileReading() {
+        service.fileSystemService = Mock(FileSystemService) {
+            1 * getRemoteFileSystemOnDefaultRealm() >> { return FileSystems.default }
+        }
+        service.fileService = new FileService()
+    }
+
+    void "getAdapterFileContentToRender, returns adapter file content as String"() {
+        given:
+        setupServiceForAdapterFileReading()
+
+        Path adapterFile = temporaryFolder.newFile("${HelperUtils.uniqueString}_adapterfile.fa").toPath()
+        adapterFile.text = content
+
+        LibraryPreparationKit kit = createLibraryPreparationKit(adapterFile: adapterFile.toAbsolutePath())
+
+        expect:
+        content == service.getAdapterFileContentToRender(kit)
+
+        where:
+        content << ["some content", ""]
+    }
+
+    void "getAdapterFileContentToRender, throws assertion exception if file exceeds limit"() {
+        given:
+        setupServiceForAdapterFileReading()
+
+        Path adapterFile = temporaryFolder.newFile("${HelperUtils.uniqueString}_adapterfile.fa").toPath()
+        new RandomAccessFile(adapterFile.toFile(), "rw").setLength(5242880L + 1L)
+
+        LibraryPreparationKit kit = createLibraryPreparationKit(adapterFile: adapterFile.toAbsolutePath())
+
+        when:
+        service.getAdapterFileContentToRender(kit)
+
+        then:
+        AssertionError e = thrown(AssertionError)
+        e.message =~ "Adapter file is too large to be displayed in the GUI"
+    }
+
+    void "getAdapterFileContentToRender, throws exception when file is not readable"() {
+        given:
+        setupServiceForAdapterFileReading()
+
+        String content = "some content"
+        Path adapterFile = temporaryFolder.newFile("${HelperUtils.uniqueString}_adapterfile.fa").toPath()
+        adapterFile.text = content
+        Files.setPosixFilePermissions(adapterFile, [] as Set)
+
+        LibraryPreparationKit kit = createLibraryPreparationKit(adapterFile: adapterFile.toAbsolutePath())
+
+        when:
+        service.getAdapterFileContentToRender(kit)
+
+        then:
+        thrown(AssertionError)
     }
 
     @Override

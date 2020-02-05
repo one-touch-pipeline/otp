@@ -33,6 +33,7 @@
 
 <body>
 <div class="body fixed-table-header wrapTableHeader metaDataFields">
+    <g:render template="/templates/messages"/>
     <g:render template="linkBanner"/>
 
     <h1><g:message code="dataFields.antibodyTarget.header"/></h1>

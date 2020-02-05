@@ -26,6 +26,7 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.*
 
+import java.nio.charset.StandardCharsets
 import java.nio.file.*
 import java.nio.file.attribute.PosixFilePermission
 
@@ -977,6 +978,18 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         thrown(AssertionError)
+    }
+
+    void "readFileToString, returns the file content as a String"() {
+        given:
+        Path path = temporaryFolder.newFile().toPath()
+        path.text = content
+
+        expect:
+        content == FileService.readFileToString(path, StandardCharsets.US_ASCII)
+
+        where:
+        content << [SOME_CONTENT, ""]
     }
 
     //----------------------------------------------------------------------------------------------------

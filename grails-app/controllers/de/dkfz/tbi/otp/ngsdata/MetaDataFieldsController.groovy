@@ -74,6 +74,26 @@ class MetaDataFieldsController implements CheckAndCall {
         ]
     }
 
+    def showAdapterFile(SelectLibraryPreparationKitCommand cmd) {
+        String content = ""
+        if (cmd.libraryPreparationKit) {
+            try {
+                content = libraryPreparationKitService.getAdapterFileContentToRender(cmd.libraryPreparationKit)
+            } catch (AssertionError e) {
+                flash.message = new FlashMessage(g.message(code: "dataFields.adapterFile.error") as String, e.message)
+                redirect(action: "libraryPreparationKits")
+            }
+        } else {
+            flash.message = new FlashMessage(g.message(code: "dataFields.adapterFile.error") as String, ["Library preparation kit does not exist"])
+            redirect(action: "libraryPreparationKits")
+        }
+
+        return [
+                "libraryPreparationKit": cmd.libraryPreparationKit,
+                "adapterFileContent"   : content,
+        ]
+    }
+
     JSON updateAutoImportDirectory(UpdateSeqCenterAbsolutePathCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             seqCenterService.updateAutoImportDirectory(cmd.seqCenter, cmd.absolutePath)
@@ -203,6 +223,10 @@ class MetaDataFieldsController implements CheckAndCall {
             cmd.service.addNewAlias(cmd.id, cmd.importAlias)
         }
     }
+}
+
+class SelectLibraryPreparationKitCommand {
+    LibraryPreparationKit libraryPreparationKit
 }
 
 class CreateLibraryPreparationKitCommand implements Validateable {

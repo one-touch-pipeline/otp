@@ -33,6 +33,7 @@ import de.dkfz.tbi.otp.ngsdata.Realm
 import de.dkfz.tbi.otp.utils.StaticApplicationContextWrapper
 import de.dkfz.tbi.otp.utils.ThreadUtils
 
+import java.nio.charset.Charset
 import java.nio.file.*
 import java.nio.file.attribute.*
 import java.time.Duration
@@ -157,11 +158,15 @@ class FileService {
     }
 
     static void ensureFileIsReadableAndNotEmpty(final Path file) {
+        ensureFileIsReadable(file)
+        assert Files.size(file) > 0L
+    }
+
+    static void ensureFileIsReadable(final Path file) {
         assert file.isAbsolute()
         waitUntilExists(file)
         assert Files.isRegularFile(file)
         assert Files.isReadable(file)
-        assert Files.size(file) > 0L
     }
 
     static void ensureDirIsReadableAndNotEmpty(final Path dir) {
@@ -180,6 +185,10 @@ class FileService {
         waitUntilExists(dir)
         assert Files.isDirectory(dir)
         assert Files.isReadable(dir)
+    }
+
+    static String readFileToString(Path path, Charset encoding) throws IOException {
+        return new String(Files.readAllBytes(path), encoding)
     }
 
     /**

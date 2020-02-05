@@ -364,7 +364,7 @@ class ProcessingOption implements Entity {
 
         //realm
         REALM_DEFAULT_VALUE(
-                "The default realm",
+                "The default realm by name",
                 Necessity.REQUIRED, null, TypeValidators.SINGLE_WORD_TEXT
         ),
 

@@ -33,6 +33,7 @@
 
 <body>
 <div class="body fixed-table-header wrapTableHeader metaDataFields">
+    <g:render template="/templates/messages"/>
     <g:render template="linkBanner"/>
 
     <h1><g:message code="dataFields.libPrepKit.header"/></h1>
@@ -68,7 +69,7 @@
                 <td>
                     <g:if test="${libraryPreparationKit.adapterFile}">
                         <div class="trim-text-with-ellipsis-left-based adapter-file" title="${libraryPreparationKit.adapterFile}">
-                            <bdi>${libraryPreparationKit.adapterFile}</bdi>
+                            <bdi><g:link action="showAdapterFile" params="[libraryPreparationKit: libraryPreparationKit.id]">${libraryPreparationKit.adapterFile}</g:link></bdi>
                         </div>
                     </g:if>
                     <g:else>
