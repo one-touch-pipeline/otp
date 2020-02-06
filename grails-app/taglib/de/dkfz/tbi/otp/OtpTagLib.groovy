@@ -241,4 +241,14 @@ class OtpTagLib {
         out << body()
         out << "</div>"
     }
+
+    /**
+     * A simple colored wrapper to highlight information.
+     */
+    def annotation = { attrs, body ->
+        String subtype = attrs.subtype ?: "none"
+        out << "<div class=\"annotation-box subtype-${subtype}\">"
+        out << body()
+        out << "</div>"
+    }
 }

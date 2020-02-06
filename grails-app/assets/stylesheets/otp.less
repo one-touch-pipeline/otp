@@ -2517,3 +2517,26 @@ table.key-value-table {
 .slider:checked + label::before {
     margin: 0 0 0 19px;
 }
+
+.annotation-box {
+    padding: 10px;
+
+    border-width: 3px;
+    border-style: solid;
+    &.subtype-none {
+        border-color: #000000;
+        background: #fff3f3;
+    }
+    &.subtype-info {
+        border-color: #006dba;
+        background: #b2d1ff;
+    }
+    &.subtype-warning {
+        border-color: #fff04d;
+        background: #feffc1;
+    }
+    &.subtype-error {
+        border-color: #cc0000;
+        background: #ffaaaa;
+    }
+}
