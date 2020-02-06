@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
 import de.dkfz.tbi.otp.utils.Entity
 
@@ -29,7 +29,7 @@ import de.dkfz.tbi.otp.utils.Entity
  * In the GUI and e-mails sent by OTP this shall be called "PID".
  * (Decided together with the OTP Product Owner on 2016-07-19.)
  */
-class Individual implements Commentable, Entity {
+class Individual implements CommentableWithProject, Entity {
 
     /**
      * Identifier used in the file system. It should never change.

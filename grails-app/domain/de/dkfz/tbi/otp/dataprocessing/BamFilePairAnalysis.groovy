@@ -23,7 +23,7 @@ package de.dkfz.tbi.otp.dataprocessing
 
 import org.hibernate.Hibernate
 
-import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.FileOperationStatus
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile.QcTrafficLightStatus
 import de.dkfz.tbi.otp.dataprocessing.roddyExecution.RoddyWorkflowConfig
@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.job.processing.ProcessParameterObject
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.Entity
 
-abstract class BamFilePairAnalysis implements Commentable, ProcessParameterObject, Entity {
+abstract class BamFilePairAnalysis implements CommentableWithProject, ProcessParameterObject, Entity {
     /**
      * Refers to the config file which is stored in the database and is used as a basis for all the files in the filesystem.
      */

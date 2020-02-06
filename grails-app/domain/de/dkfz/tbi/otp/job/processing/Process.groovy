@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.processing
 
-import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.job.plan.JobDefinition
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.ngsdata.Project
@@ -45,7 +45,7 @@ import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
  * @see Job
  * @see StartJob
  */
-class Process implements Serializable, Commentable, Entity {
+class Process implements Serializable, CommentableWithProject, Entity {
     /**
      * The Date when this process was started.
      */

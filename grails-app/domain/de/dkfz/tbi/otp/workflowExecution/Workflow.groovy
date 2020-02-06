@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import de.dkfz.tbi.otp.Commentable
-import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 import java.time.LocalDate
@@ -47,10 +46,5 @@ class Workflow implements Entity, Commentable {
         wesServer nullable: true
         maxParallelRunning shared: 'greaterThanZero'
         comment nullable: true
-    }
-
-    @Override
-    Project getProject() {
-        return null
     }
 }

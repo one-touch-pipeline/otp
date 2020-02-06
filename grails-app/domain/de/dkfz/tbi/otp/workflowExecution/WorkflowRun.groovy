@@ -22,7 +22,6 @@
 package de.dkfz.tbi.otp.workflowExecution
 
 import de.dkfz.tbi.otp.Commentable
-import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.utils.Entity
 
 class WorkflowRun implements Commentable, Entity {
@@ -40,7 +39,6 @@ class WorkflowRun implements Commentable, Entity {
         KILLED,
         //other
         LEGACY,
-
     }
 
     String workDirectory
@@ -82,10 +80,4 @@ class WorkflowRun implements Commentable, Entity {
     static mapping = {
         combinedConfig type: "text"
     }
-
-    @Override
-    Project getProject() {
-        return null
-    }
-
 }

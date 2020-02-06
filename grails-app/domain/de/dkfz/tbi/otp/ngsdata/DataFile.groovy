@@ -21,10 +21,10 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.utils.Entity
 
-class DataFile implements Commentable, Entity {
+class DataFile implements CommentableWithProject, Entity {
 
     String fileName                // file name
     String pathName                // path from run folder to file

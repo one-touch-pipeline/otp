@@ -19,25 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
+package de.dkfz.tbi.otp
 
-import de.dkfz.tbi.otp.Commentable
-import de.dkfz.tbi.otp.utils.Entity
+import de.dkfz.tbi.otp.ngsdata.Project
 
-class IlseSubmission implements Entity, Commentable {
-
-    int ilseNumber
-
-    boolean warning = false
-
-    static constraints = {
-        ilseNumber unique: true, min: 1, max: 999999
-        comment nullable: true, validator: { comment, ilseSubmission ->
-            if (ilseSubmission.warning) {
-                if (!comment?.comment) {
-                    return 'default.blank.message'
-                }
-            }
-        }
-    }
+trait CommentableWithProject implements Commentable {
+    abstract Project getProject()
 }

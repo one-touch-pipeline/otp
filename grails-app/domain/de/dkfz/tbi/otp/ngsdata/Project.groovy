@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.ngsdata
 
-import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.administration.ProjectInfo
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
@@ -30,7 +30,7 @@ import de.dkfz.tbi.otp.utils.Entity
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
-class Project implements ProjectPropertiesGivenWithRequest, Commentable, Entity {
+class Project implements ProjectPropertiesGivenWithRequest, CommentableWithProject, Entity {
 
     enum ProjectType {
         SEQUENCING,

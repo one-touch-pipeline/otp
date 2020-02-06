@@ -151,7 +151,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
                     }
                 },
                 commentService: Mock(CommentService) {
-                    1 * createOrUpdateComment(_, _, _) >> { Commentable commentable, String message, String userName ->
+                    1 * createOrUpdateComment(_, _, _) >> { CommentableWithProject commentable, String message, String userName ->
                         assert message.contains(RestartActionService.WORKFLOW_RESTARTED)
                     }
                 }
@@ -228,7 +228,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
                     }
                 },
                 commentService: Mock(CommentService) {
-                    1 * saveComment(_, _) >> { Commentable commentable, String message ->
+                    1 * saveComment(_, _) >> { CommentableWithProject commentable, String message ->
                         assert message.contains(RestartActionService.WORKFLOW_RESTARTED)
                     }
                 }
@@ -268,7 +268,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
         String messageValue = HelperUtils.uniqueString
         RestartActionService service = new RestartActionService(
                 commentService: Mock(CommentService) {
-                    1 * createOrUpdateComment(_, _, _) >> { Commentable commentable, String message, String userName ->
+                    1 * createOrUpdateComment(_, _, _) >> { CommentableWithProject commentable, String message, String userName ->
                         assert message.contains(messageValue)
                     }
                 }
@@ -292,7 +292,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
         String messageValue = HelperUtils.uniqueString
         RestartActionService service = new RestartActionService(
                 commentService: Mock(CommentService) {
-                    1 * createOrUpdateComment(_, _, _) >> { Commentable commentable, String message, String userName ->
+                    1 * createOrUpdateComment(_, _, _) >> { CommentableWithProject commentable, String message, String userName ->
                         assert message.contains(messageValue)
                         assert message.contains(oldMessageValue)
                     }
@@ -322,7 +322,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
         String messageValue = HelperUtils.uniqueString
         RestartActionService service = new RestartActionService(
                 commentService: Mock(CommentService) {
-                    1 * saveComment(_, _) >> { Commentable commentable, String message ->
+                    1 * saveComment(_, _) >> { CommentableWithProject commentable, String message ->
                         assert message.contains(messageValue)
                     }
                 }
@@ -339,7 +339,7 @@ class RestartActionServiceSpec extends Specification implements DataTest {
         String messageValue = HelperUtils.uniqueString
         RestartActionService service = new RestartActionService(
                 commentService: Mock(CommentService) {
-                    1 * saveComment(_, _) >> { Commentable commentable, String message ->
+                    1 * saveComment(_, _) >> { CommentableWithProject commentable, String message ->
                         assert message.contains(messageValue)
                         assert message.contains(oldMessageValue)
                     }

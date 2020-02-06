@@ -44,7 +44,7 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
     void "test saveComment with Project"() {
         given:
         setupData()
-        Commentable project = DomainFactory.createProject()
+        CommentableWithProject project = DomainFactory.createProject()
         Comment comment
 
         when:
@@ -61,7 +61,7 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
     void "test saveComment with Individual"() {
         given:
         setupData()
-        Commentable individual = DomainFactory.createIndividual()
+        CommentableWithProject individual = DomainFactory.createIndividual()
         Comment comment
 
         when:
@@ -78,7 +78,7 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
     void "test saveComment with Datafile"() {
         given:
         setupData()
-        Commentable datafile = DomainFactory.createDataFile()
+        CommentableWithProject datafile = DomainFactory.createDataFile()
         Comment comment
 
         when:
@@ -95,7 +95,7 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
     void "test saveComment with Process"() {
         given:
         setupData()
-        Commentable process = DomainFactory.createProcess()
+        CommentableWithProject process = DomainFactory.createProcess()
         Comment comment
 
         when:
@@ -112,7 +112,7 @@ class CommentServiceIntegrationSpec extends Specification implements UserAndRole
     void "test createOrUpdateComment with Process"() {
         given:
         setupData()
-        Commentable process = DomainFactory.createProcess()
+        CommentableWithProject process = DomainFactory.createProcess()
 
         when:
         Comment comment = commentService.createOrUpdateComment(process, 'testMessage', USER)

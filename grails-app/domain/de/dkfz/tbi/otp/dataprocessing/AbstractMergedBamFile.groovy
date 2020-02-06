@@ -24,7 +24,7 @@ package de.dkfz.tbi.otp.dataprocessing
 import groovy.transform.TupleConstructor
 import org.hibernate.Hibernate
 
-import de.dkfz.tbi.otp.Commentable
+import de.dkfz.tbi.otp.CommentableWithProject
 import de.dkfz.tbi.otp.ngsdata.*
 
 import static org.springframework.util.Assert.notNull
@@ -33,7 +33,7 @@ import static org.springframework.util.Assert.notNull
  * Represents a single generation of one merged BAM file (whereas a {@link AbstractMergingWorkPackage} represents all
  * generations).
  */
-abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implements Commentable {
+abstract class AbstractMergedBamFile extends AbstractFileSystemBamFile implements CommentableWithProject {
 
     /**
      * Holds the number of lanes which were merged in this bam file
