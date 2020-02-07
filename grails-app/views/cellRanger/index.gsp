@@ -62,11 +62,11 @@
                         <div class="row one">
                             <div>
                                 <strong>${g.message(code: "cellRanger.create.referenceGenomeIndex")}:</strong>
-                                <g:select name="referenceGenomeIndex.id" from="${referenceGenomeIndexes}" optionKey="id" noSelection="${[(""): "Select a reference"]}"/>
+                                <g:select name="referenceGenomeIndex.id" from="${referenceGenomeIndexes}" optionKey="id" noSelection="${[(""): "Select a reference"]}" value="${cmd?.referenceGenomeIndex?.id}"/>
                             </div>
                             <div>
                                 <strong>${g.message(code: "cellRanger.create.seqType")}:</strong>
-                                <g:select name="seqType.id" from="${seqTypes}" optionKey="id"/>
+                                <g:select name="seqType.id" from="${seqTypes}" optionKey="id" value="${cmd?.seqType?.id}"/>
                             </div>
                         </div>
                         <div class="row two">
@@ -89,18 +89,18 @@
                             <div>
                                 <strong>${g.message(code: "cellRanger.create.expectedOrEnforcedCells")}:</strong><br><br>
                                 <label>
-                                    <g:radio name="expectedOrEnforcedCells" value="expected" checked="true"/>
+                                    <g:radio name="expectedOrEnforcedCells" value="expected" checked="${cmd == null || cmd.expectedOrEnforcedCells == "expected"}"/>
                                     ${g.message(code: "cellRanger.expectedCells")}
                                 </label>
                                 <br>
                                 <label>
-                                    <g:radio name="expectedOrEnforcedCells" value="enforced"/>
+                                    <g:radio name="expectedOrEnforcedCells" value="enforced" checked="${cmd?.expectedOrEnforcedCells == "enforced"}"/>
                                     ${g.message(code: "cellRanger.enforcedCells")}
                                 </label>
                                 <br><br>
                                 <label>
                                     ${g.message(code: "cellRanger.value")}:<br>
-                                    <input name="expectedOrEnforcedCellsValue"/>
+                                    <input name="expectedOrEnforcedCellsValue" value="${cmd?.expectedOrEnforcedCellsValue}"/>
                                 </label>
                             </div>
                         </div>

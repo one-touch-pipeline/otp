@@ -77,6 +77,7 @@ class CellRangerController {
         ToolName toolName = ToolName.findByNameAndType('CELL_RANGER', ToolName.Type.SINGLE_CELL)
 
         return [
+                cmd                   : flash.cmd as CellRangerConfigurationCommand,
                 configExists          : configExists,
                 projects              : projects,
                 project               : project,
@@ -95,9 +96,14 @@ class CellRangerController {
     }
 
     def create(CellRangerConfigurationCommand cmd) {
+        Map<String, Object> params = [:]
+        params.put("individual.id", cmd.individual?.id ?: "")
+        params.put("sampleType.id", cmd.sampleType?.id ?: "")
+
         if (!cmd.validate()) {
+            flash.cmd = cmd
             flash.message = new FlashMessage(g.message(code: "cellRanger.store.failure") as String, cmd.errors)
-            redirect(action: "index")
+            redirect(action: "index", params: params)
             return
         }
         Integer expectedCells, enforcedCells
@@ -121,11 +127,12 @@ class CellRangerController {
                 cmd.seqType,
         )
         if (errors) {
+            flash.cmd = cmd
             flash.message = new FlashMessage(g.message(code: "cellRanger.store.failure") as String, errors)
         } else {
             flash.message = new FlashMessage(g.message(code: "cellRanger.store.success") as String)
         }
-        redirect(action: "index")
+        redirect(action: "index", params: params)
     }
 }
 
