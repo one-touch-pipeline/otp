@@ -118,7 +118,7 @@ class IndividualController {
                 redirect(action: "show", id: individual.id)
             }
             else {
-                redirect(action: "insert", id: params.individual.id)
+                redirect(action: "insert", id: individual.id)
             }
             flash.message = new FlashMessage(g.message(code: "individual.update.create.success") as String)
         }
