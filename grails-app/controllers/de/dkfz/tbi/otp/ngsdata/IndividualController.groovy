@@ -26,11 +26,11 @@ import grails.validation.Validateable
 import grails.validation.ValidationException
 import groovy.json.JsonSlurper
 import groovy.transform.TupleConstructor
+
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.utils.CommentCommand
 import de.dkfz.tbi.otp.utils.DataTableCommand
-
 
 class IndividualController {
 
@@ -56,20 +56,20 @@ class IndividualController {
         }
 
         return [
-            individual         : individual,
-            comment            : individual.comment,
-            typeDropDown       : Individual.Type.values(),
-            sampleTypeDropDown : individualService.getSampleTypeNames(),
-            projectBlacklisted : ProjectOverviewService.hideSampleIdentifier(individual.project),
-            groupedSeqTrackSets: seqTrackService.getSeqTrackSetsGroupedBySeqTypeAndSampleType(individual.getSeqTracks()),
+                individual         : individual,
+                comment            : individual.comment,
+                typeDropDown       : Individual.Type.values(),
+                sampleTypeDropDown : individualService.getSampleTypeNames(),
+                projectBlacklisted : ProjectOverviewService.hideSampleIdentifier(individual.project),
+                groupedSeqTrackSets: seqTrackService.getSeqTrackSetsGroupedBySeqTypeAndSampleType(individual.getSeqTracks()),
         ]
     }
 
     def list() {
-        Map retValue  = [
-            tableHeader: IndividualColumn.values()*.message,
-            projects: projectService.getAllProjects(),
-            individualTypes: Individual.Type.values(),
+        Map retValue = [
+                tableHeader    : IndividualColumn.values()*.message,
+                projects       : projectService.getAllProjects(),
+                individualTypes: Individual.Type.values(),
         ]
         return retValue
     }
@@ -84,12 +84,12 @@ class IndividualController {
 
         individualService.listIndividuals(cmd.sortOrder, IndividualColumn.fromDataTable(cmd.iSortCol_0), filtering, cmd.sSearch).each { individual ->
             dataToRender.aaData << [
-                id: individual.id,
-                pid: individual.pid,
-                mockFullName: individual.mockFullName,
-                mockPid: individual.mockPid,
-                project: individual.project.toString(),
-                type: individual.type.toString(),
+                    id          : individual.id,
+                    pid         : individual.pid,
+                    mockFullName: individual.mockFullName,
+                    mockPid     : individual.mockPid,
+                    project     : individual.project.toString(),
+                    type        : individual.type.toString(),
             ]
         }
         render dataToRender as JSON
@@ -112,10 +112,16 @@ class IndividualController {
             flash.cmd = cmd
             flash.message = new FlashMessage(g.message(code: "individual.update.error") as String, cmd.errors)
             redirect(action: "insert")
-        } else {
+            return
+        }
+        try {
             Individual individual = individualService.createIndividual(cmd)
-            redirect(action: cmd.checkRedirect ? "show" : "insert", id: individual.id)
             flash.message = new FlashMessage(g.message(code: "individual.update.create.success") as String)
+            redirect(action: cmd.checkRedirect ? "show" : "insert", id: individual.id)
+        } catch (ValidationException e) {
+            flash.message = new FlashMessage(g.message(code: "individual.update.create.error") as String, e.errors)
+            flash.cmd = cmd
+            redirect(action: "insert")
         }
     }
 
@@ -166,19 +172,20 @@ class IndividualController {
             flash.message = new FlashMessage(g.message(code: "individual.update.error") as String, cmd.errors)
         } else {
             try {
-                cmd.editedSampleIdentifiers.each { EditedSampleIdentifierCommand editedSampleIdentifierCommand ->
-                    if (editedSampleIdentifierCommand.delete) {
-                        sampleIdentifierService.deleteSampleIdentifier(editedSampleIdentifierCommand.sampleIdentifier)
-                    } else {
-                        sampleIdentifierService.updateSampleIdentifierName(editedSampleIdentifierCommand.sampleIdentifier, editedSampleIdentifierCommand.name)
+                Individual.withTransaction {
+                    cmd.editedSampleIdentifiers.each { EditedSampleIdentifierCommand editedSampleIdentifierCommand ->
+                        if (editedSampleIdentifierCommand.delete) {
+                            sampleIdentifierService.deleteSampleIdentifier(editedSampleIdentifierCommand.sampleIdentifier)
+                        } else {
+                            sampleIdentifierService.updateSampleIdentifierName(editedSampleIdentifierCommand.sampleIdentifier, editedSampleIdentifierCommand.name)
+                        }
+                    }
+                    cmd.newIdentifiersNames.findAll().each { String name ->
+                        sampleIdentifierService.createSampleIdentifier(name, cmd.sample)
                     }
                 }
-                cmd.newIdentifiersNames.each { String name ->
-                    sampleIdentifierService.createSampleIdentifier(name, cmd.sample)
-                }
                 flash.message = new FlashMessage(g.message(code: "individual.update.create.success") as String)
-            }
-            catch (ValidationException e) {
+            } catch (ValidationException e) {
                 flash.message = new FlashMessage(g.message(code: "individual.update.error") as String, e.errors)
             }
         }
@@ -204,6 +211,7 @@ enum IndividualColumn {
         return values()[column]
     }
 }
+
 class IndividualCommand implements Validateable {
     IndividualService individualService
 
@@ -231,14 +239,6 @@ class IndividualCommand implements Validateable {
 class SampleCommand {
     String sampleType
     List<String> sampleIdentifiers
-
-    void setSampleIdentifiers(List<String> sampleIdentifiers) {
-        this.sampleIdentifiers = sampleIdentifiers.findAll { it && it != "" }
-    }
-
-    void setSampleType(String sampleType) {
-        this.sampleType = sampleType.findAll { it && it != "" }
-    }
 }
 
 class UpdateFieldCommand {
@@ -313,14 +313,11 @@ class IndividualFiltering {
     }
 
 }
+
 class UpdateSampleCommand implements Validateable {
     List<EditedSampleIdentifierCommand> editedSampleIdentifiers
     Sample sample
     List<String> newIdentifiersNames
-
-    void setNewIdentifiersNames(List<String> newIdentifiersNames) {
-        this.newIdentifiersNames = newIdentifiersNames.findAll { it && it != "" }
-    }
 }
 
 class EditedSampleIdentifierCommand implements Validateable {

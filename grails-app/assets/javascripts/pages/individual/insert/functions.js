@@ -30,6 +30,7 @@ $(function(){
         event.preventDefault();
         // Subtract the hidden element
         var existingSamples = $("tr.sample").not(".hidden");
+
         // also copy event handlers on clone
         var sampleBoxes = $("tr.hidden").clone(true, true).removeClass("hidden");
         sampleBoxes.insertAfter($(".sampleIdentifier:last"));

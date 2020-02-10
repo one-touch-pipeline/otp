@@ -598,7 +598,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
         sampleIdentifierService.updateSampleIdentifierName(sampleIdentifier, SAMPLE_IDENTIFER_NAME)
 
         then:
-            sampleIdentifier.name == SAMPLE_IDENTIFER_NAME
+        sampleIdentifier.name == SAMPLE_IDENTIFER_NAME
     }
 
     void "check if deleteSampleIdentifier, deletes sample identifier"() {

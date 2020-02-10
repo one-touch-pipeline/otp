@@ -225,12 +225,7 @@ class IndividualService {
                 type: cmd.type,
                 project: cmd.project,
         )
-        if (!individual.validate()) {
-            throw new IndividualCreationException("Individual does not validate")
-        }
-        if (!individual.save(flush: true)) {
-            throw new IndividualCreationException("Individual could not be saved.")
-        }
+        individual.save(flush: true)
         createSamples(individual, cmd.samples)
         return individual
     }
@@ -323,21 +318,6 @@ class IndividualService {
             sampleType.save(flush: true)
         }
         return sampleType
-    }
-
-    /**
-     * show the List of Individual per Project
-     */
-    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    List findAllMockPidsByProject(Project project) {
-        List seq = Sequence.withCriteria {
-            eq("projectId", project.id)
-            projections {
-                groupProperty("mockPid")
-            }
-            order("mockPid")
-        }
-        return seq
     }
 
     /**
