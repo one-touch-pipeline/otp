@@ -129,13 +129,13 @@ class InformSampleIdentifierParserSpec extends Specification {
     @Unroll
     void "test tryParseCellPosition is not implemented and always returns null (#identifier)"() {
         given:
-        String cellPosition
+        String singleCellWellLabel
 
         when:
-        cellPosition = informSampleIdentifierParser.tryParseCellPosition(identifier)
+        singleCellWellLabel = informSampleIdentifierParser.tryParseCellPosition(identifier)
 
         then:
-        cellPosition == null
+        singleCellWellLabel == null
 
         where:
         identifier << [

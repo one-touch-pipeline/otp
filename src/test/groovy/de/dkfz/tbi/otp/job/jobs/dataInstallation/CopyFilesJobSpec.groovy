@@ -176,7 +176,7 @@ chmod 440 .* .*
 
     private RemoteShellHelper getRemoteShellHelper(SeqTrack seqTrack) {
         Mock(RemoteShellHelper) {
-            12 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
+            10 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String command ->
                 assert command ==~ "(chmod 2750|chgrp ${seqTrack.project.unixGroup}) .*/${seqTrack.project.dirName}(/.*)?"
                 return new ProcessOutput(command, '', 0)
             }

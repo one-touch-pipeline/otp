@@ -92,18 +92,18 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
     }
 
     @Unroll
-    void "validate, SeqTrack has to be unique by laneId, run, cellPosition and project"() {
+    void "validate, SeqTrack has to be unique by laneId, run, singleCellWellLabel and project"() {
         given:
         Map properties = [
                 laneId      : "lane_id",
                 run         : createRun(),
-                cellPosition: "cell_position",
+                singleCellWellLabel: "singleCellWellLabel",
                 sample      : createSample(),
         ]
         properties.remove(property)
 
-        SeqTrack seqTrackA = createSeqTrack([cellPosition: "CP_A"] + properties)
-        SeqTrack seqTrackB = createSeqTrack([cellPosition: "CP_B"] + properties)
+        SeqTrack seqTrackA = createSeqTrack([singleCellWellLabel: "CP_A"] + properties)
+        SeqTrack seqTrackB = createSeqTrack([singleCellWellLabel: "CP_B"] + properties)
         seqTrackB[property] = seqTrackA[property]
 
         when:
@@ -113,7 +113,7 @@ class SeqTrackSpec extends Specification implements DataTest, DomainFactoryCore 
         thrown(ValidationException)
 
         where:
-        property << ["laneId", "run", "cellPosition", "sample"]
+        property << ["laneId", "run", "singleCellWellLabel", "sample"]
     }
 
     @Unroll

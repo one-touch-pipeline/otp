@@ -220,13 +220,13 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
     void "test tryParseCellPosition valid input #identifier"() {
         given:
         String fullIdentifier = "${validProjectPart}-${identifier}"
-        String cellPosition
+        String singleCellWellLabel
 
         when:
-        cellPosition = parser.tryParseCellPosition(fullIdentifier)
+        singleCellWellLabel = parser.tryParseCellPosition(fullIdentifier)
 
         then:
-        cellPosition == expectedCellPosition
+        singleCellWellLabel == expectedCellPosition
 
         where:
         identifier          || expectedCellPosition
@@ -244,13 +244,13 @@ abstract class AbstractHipo2SampleIdentifierParserSpec extends Specification {
     void "test tryParseCellPosition invalid input #identifier"() {
         given:
         String fullIdentifier = identifier ? "${validProjectPart}-${identifier}" : identifier
-        String cellPosition
+        String singleCellWellLabel
 
         when:
-        cellPosition = parser.tryParseCellPosition(fullIdentifier)
+        singleCellWellLabel = parser.tryParseCellPosition(fullIdentifier)
 
         then:
-        cellPosition == null
+        singleCellWellLabel == null
 
         where:
         identifier << [

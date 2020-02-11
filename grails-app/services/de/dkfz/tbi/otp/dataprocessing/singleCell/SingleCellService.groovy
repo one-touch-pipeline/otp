@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,39 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.dataprocessing.singleCell
 
-import de.dkfz.tbi.otp.dataprocessing.*
-import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
-import de.dkfz.tbi.otp.job.jobs.dataInstallation.*
+import grails.gorm.transactions.Transactional
 
-import static de.dkfz.tbi.otp.utils.JobExecutionPlanDSL.*
+import de.dkfz.tbi.otp.ngsdata.DataFile
+import de.dkfz.tbi.otp.ngsdata.LsdfFilesService
 
-String workflow = 'DataInstallationWorkflow'
+import java.nio.file.Path
+import java.nio.file.Paths
 
-plan(workflow) {
-    start("start", "dataInstallationStartJob")
-    job("copyFilesToFinalLocation", "copyFilesJob")
-    job("createSingleCellAllLinkJob", "createSingleCellAllLinkJob")
-    job("createViewByPid", "createViewByPidJob")
-    job("notifyProcessFinished", "notifyProcessFinishedJob")
+@Transactional
+class SingleCellService {
+
+    static final String MAPPING_FILE = 'mapping.tsv'
+
+    LsdfFilesService lsdfFilesService
+
+    Path singleCellMappingFile(DataFile dataFile) {
+        return Paths.get(lsdfFilesService.getWellAllFileViewByPidPath(dataFile)).resolveSibling(MAPPING_FILE)
+    }
+
+    String mappingEntry(DataFile dataFile) {
+        return "${dataFile.vbpFileName}\t${dataFile.seqTrack.singleCellWellLabel}"
+    }
 }
-
-ProcessingOptionService processingOptionService = ctx.processingOptionService
-
-processingOptionService.createOrUpdate(
-        OptionName.CLUSTER_SUBMISSIONS_OPTION,
-        '{"WALLTIME":"PT12H"}',
-        CopyFilesJob.simpleName,
-)
-
-processingOptionService.createOrUpdate(
-        OptionName.MAXIMUM_NUMBER_OF_JOBS,
-        '5',
-        workflow,
-)
-
-processingOptionService.createOrUpdate(
-        OptionName.MAXIMUM_NUMBER_OF_JOBS_RESERVED_FOR_FAST_TRACK,
-        '0',
-        workflow,
-)

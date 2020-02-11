@@ -135,10 +135,10 @@ class SeqTrack implements ProcessParameterObject, Entity {
     String normalizedLibraryName
 
     /**
-     * For SingleCell data this contains a value we parse out of the analyte part of the Hipo2 identifier.
-     * It is unclear if there is an actual name for this value.
+     * For SingleCell data this contains a label for the position. This can be provide via parser
+     * (as it is done for Hipo2) or by {@link MetaDataColumn#SINGLE_CELL_WELL_LABEL}.
      */
-    String cellPosition
+    String singleCellWellLabel
 
     List<LogMessage> logMessages = []
 
@@ -157,9 +157,9 @@ class SeqTrack implements ProcessParameterObject, Entity {
         laneId(blank: false, validator: { String val, SeqTrack obj ->
             // custom unique constraint on laneId, run, cellPosition and project
             List<SeqTrack> seqTracks = findAllWhere([
-                "laneId"      : obj.laneId,
-                "run"         : obj.run,
-                "cellPosition": obj.cellPosition,
+                    "laneId"             : obj.laneId,
+                    "run"                : obj.run,
+                    "singleCellWellLabel": obj.singleCellWellLabel,
             ]).findAll { SeqTrack seqTrack ->
                 seqTrack != obj && seqTrack?.sample?.individual?.project == obj?.individual?.project
             }
@@ -191,7 +191,7 @@ class SeqTrack implements ProcessParameterObject, Entity {
         normalizedLibraryName(nullable: true, validator: { String val, SeqTrack obj ->
             (val == null) ? (obj.libraryName == null) : (val == normalizeLibraryName(obj.libraryName))
         })
-        cellPosition nullable: true
+        singleCellWellLabel nullable: true
         problem nullable: true
         antibody(nullable: true, blank: false, validator: { String val, SeqTrack obj ->
             return obj.antibodyTarget || !val

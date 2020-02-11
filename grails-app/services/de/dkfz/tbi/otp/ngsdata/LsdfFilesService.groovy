@@ -37,13 +37,16 @@ import static de.dkfz.tbi.otp.utils.logging.LogThreadLocal.threadLog
 
 @Transactional
 class LsdfFilesService {
+
+    static final String SINGLE_CELL_ALL_WELL = '0_all'
+
     @Autowired
     RemoteShellHelper remoteShellHelper
     CreateClusterScriptService createClusterScriptService
 
 
     /**
-     * Similar to {@link java.nio.file.Paths#get(String, String...)} from Java 7.
+     * Similar to {@link java.nio.file.Paths#get(String, String ...)} from Java 7.
      */
     static File getPath(final String first, final String... more) {
         validatePathSegment(first, "first")
@@ -114,6 +117,25 @@ class LsdfFilesService {
         return null
     }
 
+    private String combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(DataFile dataFile, boolean useAllWellDirectory = false) {
+        return combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(dataFile.seqTrack ?: dataFile.alignmentLog.seqTrack, useAllWellDirectory)
+    }
+
+    private String combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(SeqTrack seqTrack, boolean useAllWellDirectory = false) {
+        StringBuilder sb = new StringBuilder()
+        sb << seqTrack.sample.sampleType.dirName
+        if (seqTrack.seqType.hasAntibodyTarget) {
+            AntibodyTarget antibodyTarget = seqTrack.antibodyTarget
+            String antibodyDirNamePart = antibodyTarget.name
+            sb << "-${antibodyDirNamePart}"
+        }
+        if (seqTrack.singleCellWellLabel && seqTrack.seqType.singleCell) {
+            sb << "/"
+            sb << (useAllWellDirectory ? SINGLE_CELL_ALL_WELL : seqTrack.singleCellWellLabel)
+        }
+        return sb.toString()
+    }
+
     String getFileViewByPidPath(long fileId) {
         DataFile file = DataFile.get(fileId)
         if (!file) {
@@ -122,21 +144,31 @@ class LsdfFilesService {
         return getFileViewByPidPath(file)
     }
 
+    String getFileViewByPidPath(DataFile file) {
+        return createFinalPathHelper(file, false)
+    }
+
     /**
-     * Important function.
-     * This function knows view-by-pid data organization schema
-     * If the view by bid path do not apply, the function returns null
-     *
-     * @param DataFile
-     * @return path to view by pid file, or null if vbp does not apply
+     * for single cell data with well identifier, the path in the all directory is returned.
+     * For all other data the same as {@link #getFileViewByPidPath} is returned
      */
-    String getFileViewByPidPath(DataFile file, Sequence sequence = null) {
-        if (!checkFinalPathDefined(file)) {
-            return null
-        }
-        String basePath = file.project.projectSequencingDirectory.path
-        String relativePath = getFileViewByPidRelativePath(file, sequence)
-        return "${basePath}/${relativePath}"
+    String getWellAllFileViewByPidPath(DataFile file) {
+        return createFinalPathHelper(file, true)
+    }
+
+    private String createFinalPathHelper(DataFile file, boolean useAllWellDirectory = false) {
+        OtpPath pidPath = file.individual.getViewByPidPath(file.seqType)
+        String sampleTypeDir = combinedDirectoryNameForSampleTypePlusAntibodyPlusSingleCellWell(file, useAllWellDirectory)
+
+        SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
+
+        return new OtpPath(pidPath,
+                sampleTypeDir,
+                seqTrack.seqType.libraryLayoutDirName,
+                "run${seqTrack.run.name}",
+                file.fileType.vbpPath,
+                file.vbpFileName
+        ).absoluteDataManagementPath.path
     }
 
     File getFileViewByPidDirectory(SeqTrack seqTrack) {
@@ -145,45 +177,6 @@ class LsdfFilesService {
             new File(getFileViewByPidPath(file)).parentFile
         }
         return CollectionUtils.exactlyOneElement(paths.unique()).parentFile
-    }
-
-    String getFileViewByPidRelativePath(DataFile file, Sequence sequence = null) {
-        if (!checkFinalPathDefined(file)) {
-            return null
-        }
-        String directory = sequence ? getFileViewByPidRelativeDirectory(file, sequence) : getFileViewByPidRelativeDirectory(file)
-        return "${directory}/${file.vbpFileName}"
-    }
-
-
-    private String getFileViewByPidRelativeDirectory(DataFile file) {
-        if (!checkFinalPathDefined(file)) {
-            return null
-        }
-        SeqTrack seqTrack = file.seqTrack ?: file.alignmentLog.seqTrack
-        String seqTypeDir = seqTrack.seqType.dirName
-        String pid = seqTrack.sample.individual.pid
-        String library = seqTrack.seqType.libraryLayoutDirName
-        String sampleTypeDir = seqTrack.sample.sampleType.dirName
-        if (seqTrack.seqType.hasAntibodyTarget) {
-            AntibodyTarget antibodyTarget = seqTrack.antibodyTarget
-            String antibodyDirNamePart = antibodyTarget.name
-            sampleTypeDir += "-${antibodyDirNamePart}"
-        }
-        return getFileViewByPidRelativeDirectory(seqTypeDir, pid, sampleTypeDir, library, file.run.name, file.fileType.vbpPath)
-    }
-
-    private String getFileViewByPidRelativeDirectory(DataFile file, Sequence sequence) {
-        return getFileViewByPidRelativeDirectory(sequence.dirName,
-        sequence.pid,
-        sequence.sampleTypeName.toLowerCase(),
-        sequence.libraryLayoutDirName,
-        sequence.name,
-        file.fileType.vbpPath)
-    }
-
-    private String getFileViewByPidRelativeDirectory(String seqTypeDir, String pid, String sampleType, String library, String runName, String vbpPath) {
-        return "${seqTypeDir}/view-by-pid/${pid}/${sampleType}/${library}/run${runName}/${vbpPath}"
     }
 
     @Deprecated
@@ -244,11 +237,11 @@ class LsdfFilesService {
             String path = getPathToRun(file, fullPath)
             if (path) {
                 paths << path
-            } else  {
+            } else {
                 paths << file.initialDirectory
             }
         }
-        return (String[])paths.toArray()
+        return (String[]) paths.toArray()
     }
 
 

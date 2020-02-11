@@ -177,15 +177,15 @@ class DataFile implements Commentable, Entity {
     }
 
     Individual getIndividual() {
-        return seqTrack.individual
+        return seqTrack ? seqTrack.individual : alignmentLog.seqTrack.individual
     }
 
     SampleType getSampleType() {
-        return seqTrack.sampleType
+        return seqTrack ? seqTrack.sampleType : alignmentLog.seqTrack.sampleType
     }
 
     SeqType getSeqType() {
-        return seqTrack.seqType
+        return seqTrack ? seqTrack.seqType : alignmentLog.seqTrack.seqType
     }
 
     String getReadName() {

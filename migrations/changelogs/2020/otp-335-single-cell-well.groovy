@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,42 +19,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.ngsdata
 
-/**
- * Defines the columns of the metadata file
- */
-enum MetaDataColumn {
-    FASTQ_FILE,
-    MD5,
-    CENTER_NAME,
-    RUN_ID,
-    RUN_DATE,
-    LANE_NO,
-    SAMPLE_ID,
-    SEQUENCING_TYPE,
-    ANTIBODY_TARGET,
-    ANTIBODY,
-    INSTRUMENT_PLATFORM,
-    INSTRUMENT_MODEL,
-    PIPELINE_VERSION,
-    ALIGN_TOOL,
-    INSERT_SIZE,
-    LIBRARY_LAYOUT,
-    WITHDRAWN,
-    WITHDRAWN_DATE,
-    COMMENT,
-    BARCODE,
-    LIB_PREP_KIT,
-    SEQUENCING_KIT,
-    ILSE_NO,
-    PROJECT,
-    MATE,
-    CUSTOMER_LIBRARY,
-    SAMPLE_SUBMISSION_TYPE,
-    TAGMENTATION_BASED_LIBRARY,
-    BASE_MATERIAL,
-    PATIENT_ID,
-    BIOMATERIAL_ID,
-    SINGLE_CELL_WELL_LABEL,
+databaseChangeLog = {
+    changeSet(author: "borufka", id: "otp-335") {
+        renameColumn(oldColumnName: "cell_position", newColumnName: "single_cell_well_label", tableName: "seq_track")
+    }
 }

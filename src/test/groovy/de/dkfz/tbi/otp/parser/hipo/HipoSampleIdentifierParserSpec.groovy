@@ -85,13 +85,13 @@ class HipoSampleIdentifierParserSpec extends Specification {
     @Unroll
     void "test tryParseCellPosition is not implemented and always returns null"() {
         given:
-        String cellPosition
+        String singleCellWellLabel
 
         when:
-        cellPosition = parser.tryParseCellPosition(identifier)
+        singleCellWellLabel = parser.tryParseCellPosition(identifier)
 
         then:
-        cellPosition == null
+        singleCellWellLabel == null
 
         where:
         identifier << [

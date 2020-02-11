@@ -139,6 +139,7 @@ enum SequenceColumn {
     RUN("sequence.list.headers.run", "name"),
     LANE("sequence.list.headers.lane", "laneId"),
     LIBRARY("sequence.list.headers.library", "libraryName"),
+    SINGLE_CELL_WELL_LABEL('sequence.list.headers.singleCellWellLabel', 'singleCellWellLabel'),
     FASTQC("sequence.list.headers.fastqc", "fastqcState"),
     ILSEID("sequence.list.headers.ilseId", "ilseId"),
     KNOWN_ISSUES("sequence.list.headers.warning", "problem"),

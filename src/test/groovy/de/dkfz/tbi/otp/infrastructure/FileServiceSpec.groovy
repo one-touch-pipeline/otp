@@ -438,7 +438,7 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         Files.isSymbolicLink(link)
-        Files.readSymbolicLink(link).isAbsolute()
+        Files.readSymbolicLink(link).absolute
         Files.readSymbolicLink(link) == file
     }
 
@@ -478,7 +478,7 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         Files.isSymbolicLink(link)
-        !Files.readSymbolicLink(link).isAbsolute()
+        !Files.readSymbolicLink(link).absolute
         link.parent.resolve(Files.readSymbolicLink(link)).normalize() == file
     }
 
@@ -521,7 +521,7 @@ class FileServiceSpec extends Specification implements DataTest {
 
         then:
         Files.isSymbolicLink(link)
-        !Files.readSymbolicLink(link).isAbsolute()
+        !Files.readSymbolicLink(link).absolute
         link.parent.resolve(Files.readSymbolicLink(link)).normalize() == file
 
         where:
@@ -1021,7 +1021,7 @@ class FileServiceSpec extends Specification implements DataTest {
         fileService.createOrOverwriteScriptOutputFile(newFolder, newName)
 
         then:
-        newFile.text.isEmpty()
+        newFile.text.empty
     }
 
     void "createOrOverwriteScriptOutputFile, new script is editable+executable for both user and group"() {

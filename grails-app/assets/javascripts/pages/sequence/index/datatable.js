@@ -35,7 +35,7 @@ $.otp.sequence = {
         });
 
         $("#sequenceTable").dataTable({
-            dom: '<i> B rt<"clear">',
+            dom: '<i> B rt<"clear">S',
             buttons: [ {
                 extend: 'csv',
                 titleAttr: 'Attention: Download can take a while',
@@ -99,6 +99,7 @@ $.otp.sequence = {
                             } else {
                                 fastQC = row.fastqcState;
                             }
+                            //changes here may require changes in fnRowCallback, where for some column additional values are set
                             rowData = [
                                 $.otp.createLinkMarkup({
                                     controller: 'projectOverview',
@@ -134,6 +135,7 @@ $.otp.sequence = {
                                 row.laneId ?
                                     "<span title='" + row.laneId + "'>" + row.laneId + "</span>" : "",
                                 row.libraryName,
+                                row.singleCellWellLabel,
                                 fastQC,
                                 row.ilseId,
                                 row.problem ?
@@ -160,7 +162,7 @@ $.otp.sequence = {
             },
             fnRowCallback: function (nRow) {
                 var fastqc;
-                fastqc = $("td:eq(12)", nRow);
+                fastqc = $("td:eq(13)", nRow);
                 if ($("a", fastqc).length > 0) {
                     fastqc.addClass("true");
                 } else {
@@ -168,15 +170,15 @@ $.otp.sequence = {
                     fastqc.addClass("false");
                     fastqc.text("");
                 }
-                var contamination = $("td:eq(14)", nRow);
+                var contamination = $("td:eq(15)", nRow);
                 if (contamination.text() === "") {
                     contamination.attr("title", "No known problems");
                     contamination.addClass("VALID");
                 } else {
                     contamination.addClass("warning");
                 }
-                var fileExists = $("td:eq(15)", nRow);
-                var fileExistsWithdrawn = $("td:eq(15) span", nRow);
+                var fileExists = $("td:eq(16)", nRow);
+                var fileExistsWithdrawn = $("td:eq(16) span", nRow);
                 if (fileExists.text() === "true" || fileExistsWithdrawn.text() === "true") {
                     fileExists.addClass("VALID");
                 } else {

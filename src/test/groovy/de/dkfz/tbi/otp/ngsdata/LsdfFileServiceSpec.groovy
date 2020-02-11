@@ -26,22 +26,26 @@ import org.codehaus.groovy.control.io.NullWriter
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.Unroll
 
+import de.dkfz.tbi.otp.TestConfigService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.job.processing.CreateClusterScriptService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
 import de.dkfz.tbi.otp.utils.HelperUtils
 import de.dkfz.tbi.otp.utils.LocalShellHelper
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
-class LsdfFileServiceSpec extends Specification implements DataTest {
+class LsdfFileServiceSpec extends Specification implements DataTest, DomainFactoryCore {
 
     @Override
     Class[] getDomainClassesToMock() {
         [
+                FastqImportInstance,
                 Realm,
+                SeqTrack,
         ]
     }
-
 
     LsdfFilesService service
 
@@ -82,7 +86,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest {
 
         then:
         def e = thrown(AssertionError)
-        e.message =~ /(?i)isAbsolute/
+        e.message =~ /(?i)absolute/
     }
 
     void "test ensureFileIsReadableAndNotEmpty, when path is not absolute, should fail"() {
@@ -94,7 +98,7 @@ class LsdfFileServiceSpec extends Specification implements DataTest {
 
         then:
         def e = thrown(AssertionError)
-        e.message =~ /(?i)isAbsolute/
+        e.message =~ /(?i)absolute/
     }
 
     void "test isFileReadableAndNotEmpty, when does not exist"() {
@@ -132,13 +136,12 @@ class LsdfFileServiceSpec extends Specification implements DataTest {
         File file = tempFolder.newFolder()
 
         when:
-            LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
+        LsdfFilesService.ensureFileIsReadableAndNotEmpty(file)
 
         then:
         def e = thrown(AssertionError)
         e.message =~ /(?i)isRegularFile/
     }
-
 
     void "test isFileReadableAndNotEmpty, when file isn't readable"() {
         given:
@@ -279,7 +282,6 @@ class LsdfFileServiceSpec extends Specification implements DataTest {
         e.message.contains('filesOrDirectories may not be null.')
     }
 
-
     void "test deleteFilesRecursive, when deletion fails, should fail"() {
         given:
         final String MESSAGE = HelperUtils.uniqueString
@@ -316,5 +318,116 @@ class LsdfFileServiceSpec extends Specification implements DataTest {
                 }
         ] as RemoteShellHelper
         return service
+    }
+
+    private Map<String, ?> setUpViewByPidTests(String antiBody, String well, String sampleType, String sampleTypeDirPart) {
+        new TestConfigService()
+
+        SeqType seqType = createSeqType([
+                hasAntibodyTarget: antiBody as boolean,
+                singleCell       : well as boolean,
+        ])
+        AntibodyTarget antibodyTarget = antiBody ? createAntibodyTarget([
+                name: antiBody,
+        ]) : null
+        DataFile dataFile = createDataFile([
+                seqTrack: createSeqTrack([
+                        seqType            : seqType,
+                        sample             : createSample([
+                                sampleType: createSampleType([
+                                        name: sampleType,
+                                ]),
+                        ]),
+                        antibodyTarget     : antibodyTarget,
+                        singleCellWellLabel: well,
+                ]),
+        ])
+
+        String expected = [
+                dataFile.project.projectSequencingDirectory.path,
+                seqType.dirName,
+                "view-by-pid",
+                dataFile.individual.pid,
+                sampleTypeDirPart,
+                seqType.libraryLayoutDirName,
+                "run${dataFile.run.name}",
+                dataFile.fileType.vbpPath,
+                dataFile.vbpFileName,
+        ].join('/')
+
+        return [
+                dataFile: dataFile,
+                expected: expected,
+        ]
+    }
+
+    @Unroll
+    void "getFileViewByPidPath, when antibody is '#antiBody' and single cell well is '#well', then path part is '#sampleTypePart'"() {
+        given:
+        Map<String, ?> data = setUpViewByPidTests(antiBody, well, sampleType, sampleTypePart)
+
+        when:
+        String path = service.getFileViewByPidPath(data.dataFile)
+
+        then:
+        data.expected == path
+
+        where:
+        sampleType | antiBody    | well   || sampleTypePart
+        'control'  | null        | null   || 'control'
+        'Control'  | null        | null   || 'control'
+        'CONTROL'  | null        | null   || 'control'
+        'CONTROL'  | 'anti-body' | null   || 'control-anti-body'
+        'CONTROL'  | null        | 'well' || 'control/well'
+        'CONTROL'  | 'anti-body' | 'well' || 'control-anti-body/well'
+    }
+
+    @Unroll
+    void "getWellAllFileViewByPidPath, when antibody is '#antiBody' and single cell well is '#well', then path part is '#sampleTypePart'"() {
+        given:
+        Map<String, ?> data = setUpViewByPidTests(antiBody, well, sampleType, sampleTypePart)
+
+        when:
+        String path = service.getWellAllFileViewByPidPath(data.dataFile)
+
+        then:
+        data.expected == path
+
+        where:
+        sampleType | antiBody    | well   || sampleTypePart
+        'CONTROL'  | null        | null   || 'control'
+        'CONTROL'  | 'anti-body' | null   || 'control-anti-body'
+        'CONTROL'  | null        | 'well' || 'control/0_all'
+        'CONTROL'  | 'anti-body' | 'well' || 'control-anti-body/0_all'
+    }
+
+    void "getFileViewByPidPath, when datafile is an unaligned single cell bam file, then return expected path"() {
+        given:
+        SeqTrack seqTrack = createSeqTrack()
+
+        DataFile dataFile = createDataFile([
+                seqTrack    : null,
+                alignmentLog: DomainFactory.createAlignmentLog([
+                        seqTrack: seqTrack,
+                ]),
+        ])
+
+        String expected = [
+                seqTrack.project.projectSequencingDirectory.path,
+                seqTrack.seqType.dirName,
+                "view-by-pid",
+                seqTrack.individual.pid,
+                seqTrack.sampleType.dirName,
+                seqTrack.seqType.libraryLayoutDirName,
+                "run${seqTrack.run.name}",
+                dataFile.fileType.vbpPath,
+                dataFile.vbpFileName,
+        ].join('/')
+
+        when:
+        String path = service.getFileViewByPidPath(dataFile)
+
+        then:
+        expected == path
     }
 }

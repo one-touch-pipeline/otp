@@ -26,15 +26,22 @@ import spock.lang.Unroll
 
 import de.dkfz.tbi.otp.WorkflowTestCase
 import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
+import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
 import de.dkfz.tbi.otp.ngsdata.*
+import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.SessionUtils
 
+import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Duration
 
 @SuppressWarnings('JUnitPublicProperty')
-class DataInstallationWorkflowTests extends WorkflowTestCase {
+class DataInstallationWorkflowTests extends WorkflowTestCase implements DomainFactoryCore {
 
     LsdfFilesService lsdfFilesService
+
+    SingleCellService singleCellService
 
     // files to be processed by the tests
     @Shared
@@ -48,7 +55,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
 
     private String md5sum(String filepath) {
         String cmdMd5sum = "md5sum ${filepath}"
-        String output = remoteShellHelper.executeCommand(realm, cmdMd5sum)
+        String output = remoteShellHelper.executeCommandReturnProcessOutput(realm, cmdMd5sum).assertExitCodeZeroAndStderrEmpty().stdout
         String md5sum = output.split().first()
         return md5sum
     }
@@ -71,8 +78,8 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         }
     }
 
-    DataFile createDataFile(SeqTrack seqTrack, Integer mateNumber, String fastqFilename, String fastqFilepath) {
-        return DomainFactory.createDataFile([
+    DataFile createDataFile(SeqTrack seqTrack, Integer mateNumber, String fastqFilename, String fastqFilepath, FileType fileType) {
+        return createDataFile([
                 project         : seqTrack.project,
                 fileName        : fastqFilename,
                 md5sum          : md5sum(fastqFilepath),
@@ -84,6 +91,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
                 mateNumber      : mateNumber,
                 initialDirectory: ftpDir,
                 run             : seqTrack.run,
+                fileType        : fileType,
         ])
     }
 
@@ -111,7 +119,7 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         given:
         SeqTrack seqTrack
         SessionUtils.withNewSession {
-            seqTrack = DomainFactory.createChipSeqSeqTrack()
+            seqTrack = createChipSeqSeqTrack()
             createDataFiles(seqTrack)
             seqTrack.project.realm = realm
             assert seqTrack.project.save(flush: true)
@@ -122,6 +130,78 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
 
         then:
         checkThatWorkflowWasSuccessful(seqTrack)
+    }
+
+    void "test single cell import without well"() {
+        given:
+        SeqTrack seqTrack
+        SessionUtils.withNewSession {
+            seqTrack = createSeqTrack([
+                    seqType            : createSeqType([
+                            libraryLayout: LibraryLayout.PAIRED,
+                            singleCell   : true,
+                    ]),
+                    singleCellWellLabel: null,
+            ])
+            createDataFiles(seqTrack)
+            seqTrack.project.realm = realm
+            assert seqTrack.project.save(flush: true)
+        }
+
+        when:
+        execute()
+
+        then:
+        checkThatWorkflowWasSuccessful(seqTrack)
+    }
+
+    void "test single cell import with well"() {
+        given:
+        List<SeqTrack> seqTracks
+        SessionUtils.withNewSession {
+            SeqType seqType = createSeqType([
+                    libraryLayout: LibraryLayout.PAIRED,
+                    singleCell   : true,
+            ])
+            Run run = createRun()
+            FileType fileType = createFileType()
+            Sample sample = createSample()
+            sample.project.realm = realm
+            assert sample.project.save(flush: true)
+            seqTracks = (1..3).collect {
+                String fileNameR1 = "${it}_${fastqR1Filename}"
+                String fileNameR2 = "${it}_${fastqR2Filename}"
+
+                File softLinkFastqR1Filepath = new File("${ftpDir}/${fileNameR1}")
+                File softLinkFastqR2Filepath = new File("${ftpDir}/${fileNameR2}")
+
+                linkFileUtils.createAndValidateLinks([
+                        (new File(fastqR1Filepath)): softLinkFastqR1Filepath,
+                        (new File(fastqR2Filepath)): softLinkFastqR2Filepath,
+                ], realm)
+
+                SeqTrack seqTrack = createSeqTrack([
+                        run                : run,
+                        seqType            : seqType,
+                        sample             : sample,
+                        singleCellWellLabel: "well_${it}",
+                ])
+
+                createDataFile(seqTrack, 1, fileNameR1, softLinkFastqR1Filepath.absolutePath, fileType)
+                createDataFile(seqTrack, 2, fileNameR2, softLinkFastqR2Filepath.absolutePath, fileType)
+                return seqTrack
+            }
+        }
+
+        when:
+        execute(seqTracks.size())
+
+        then:
+        seqTracks.each { SeqTrack seqTrack ->
+            checkThatWorkflowWasSuccessful(seqTrack)
+            checkWellBasedLinksAreCreatedSuccessful(seqTrack)
+        }
+        checkMappingFileAreCreatedSuccessful(seqTracks)
     }
 
     void "test DataInstallation with FastTrack"() {
@@ -161,14 +241,47 @@ class DataInstallationWorkflowTests extends WorkflowTestCase {
         }
     }
 
+    protected void checkWellBasedLinksAreCreatedSuccessful(SeqTrack seqTrack) {
+        SessionUtils.withNewSession {
+            List<DataFile> dataFiles = seqTrack.dataFiles
+
+            //check links
+            dataFiles.collect {
+                lsdfFilesService.getWellAllFileViewByPidPath(it)
+            }.each {
+                assert new File(it).exists()
+            }
+        }
+    }
+
+    protected void checkMappingFileAreCreatedSuccessful(List<SeqTrack> seqTracks) {
+        SessionUtils.withNewSession {
+            List<DataFile> dataFiles = seqTracks*.dataFiles.flatten()
+
+            //check mapping file exists
+            Path mappingFile = CollectionUtils.exactlyOneElement(dataFiles.collect {
+                singleCellService.singleCellMappingFile(it)
+            }.unique())
+            assert Files.exists(mappingFile)
+
+            //check mappingFileContext
+            String mappingFileContent = mappingFile.text
+            assert mappingFileContent.split('\n').size() == 2 * seqTracks.size()
+            dataFiles.each {
+                assert mappingFileContent.contains(singleCellService.mappingEntry(it))
+            }
+        }
+    }
+
     private void createDataFiles(SeqTrack seqTrack) {
-        createDataFile(seqTrack, 1, fastqR1Filename, fastqR1Filepath)
-        createDataFile(seqTrack, 2, fastqR2Filename, fastqR2Filepath)
+        FileType fileType = createFileType()
+        createDataFile(seqTrack, 1, fastqR1Filename, fastqR1Filepath, fileType)
+        createDataFile(seqTrack, 2, fastqR2Filename, fastqR2Filepath, fileType)
     }
 
     protected SeqTrack createWholeGenomeSetup(boolean linkedExternally = false) {
         SeqType seqType = DomainFactory.createWholeGenomeSeqType()
-        SeqTrack seqTrack = DomainFactory.createSeqTrack([seqType: seqType, linkedExternally: linkedExternally])
+        SeqTrack seqTrack = createSeqTrack([seqType: seqType, linkedExternally: linkedExternally])
         createDataFiles(seqTrack)
         seqTrack.project.realm = realm
         assert seqTrack.project.save(flush: true)

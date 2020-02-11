@@ -172,7 +172,7 @@ trait DomainFactoryCore implements DomainFactoryHelper {
                 fastqImportInstance: { createFastqImportInstance() },
                 fileName           : "DataFileFileName_${nextId}_R1.gz",
                 vbpFileName        : "VbpDataFileFileName_${nextId}_R1.gz",
-                pathName           : "path_${nextId}",
+                pathName           : "",
                 initialDirectory   : TestCase.uniqueNonExistentPath.path,
                 md5sum             : { HelperUtils.randomMd5sum },
                 dateExecuted       : new Date(),

@@ -171,13 +171,13 @@ class ITCC_4P_ParserSpec extends Specification {
     @Unroll
     void "test tryParseCellPosition is not implemented and always returns null (#identifier)"() {
         given:
-        String cellPosition
+        String singleCellWellLabel
 
         when:
-        cellPosition = itcc4PParser.tryParseCellPosition(identifier)
+        singleCellWellLabel = itcc4PParser.tryParseCellPosition(identifier)
 
         then:
-        cellPosition == null
+        singleCellWellLabel == null
 
         where:
         identifier << [

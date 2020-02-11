@@ -66,6 +66,7 @@ class Sequence implements Serializable {
     SeqTrack.QualityEncoding qualityEncoding
     SeqTrack.DataProcessingState fastqcState
     SeqTrack.Problem problem
+    String singleCellWellLabel
 
     /** fields from {@link IlseSubmission} */
     /** actually ilseNumber */

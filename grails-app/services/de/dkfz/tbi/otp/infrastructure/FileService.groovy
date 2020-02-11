@@ -103,6 +103,15 @@ class FileService {
     ].toSet().asImmutable()
 
     /**
+     * User read write group read file permission (640)
+     */
+    static final Set<PosixFilePermission> OWNER_READ_WRITE_GROUP_READ_FILE_PERMISSION = [
+            PosixFilePermission.OWNER_READ,
+            PosixFilePermission.OWNER_WRITE,
+            PosixFilePermission.GROUP_READ,
+    ].toSet().asImmutable()
+
+    /**
      * The default file permissions for bam/bai (444).
      *
      * Some tools require read access for others to work.
@@ -130,7 +139,7 @@ class FileService {
      */
     @SuppressWarnings(['JavaIoPackageAccess', 'UnnecessaryCollectCall'])
     File toFile(Path path) {
-        assert path.isAbsolute()
+        assert path.absolute
         new File(File.separator + path*.toString().join(File.separator))
     }
 
@@ -141,15 +150,19 @@ class FileService {
      */
     Path toPath(File file, FileSystem fileSystem) {
         assert file
-        assert file.isAbsolute()
+        assert file.absolute
         assert fileSystem
 
         fileSystem.getPath(file.path)
     }
 
+    Path changeFileSystem(Path path, FileSystem fileSystem) {
+        toPath(toFile(path), fileSystem)
+    }
+
     @SuppressWarnings('EmptyCatchBlock')
     static boolean isFileReadableAndNotEmpty(final Path file) {
-        assert file.isAbsolute()
+        assert file.absolute
         try {
             waitUntilExists(file)
         } catch (AssertionError e) {
@@ -163,7 +176,7 @@ class FileService {
     }
 
     static void ensureFileIsReadable(final Path file) {
-        assert file.isAbsolute()
+        assert file.absolute
         waitUntilExists(file)
         assert Files.isRegularFile(file)
         assert Files.isReadable(file)
@@ -181,7 +194,7 @@ class FileService {
     }
 
     static void ensureDirIsReadable(final Path dir) {
-        assert dir.isAbsolute()
+        assert dir.absolute
         waitUntilExists(dir)
         assert Files.isDirectory(dir)
         assert Files.isReadable(dir)
@@ -230,7 +243,7 @@ class FileService {
             }
             Files.exists(file) == shouldExist
         }, timeoutInMs, MILLIS_BETWEEN_RETRIES):
-                "${file} on ${file.fileSystem == FileSystems.default ? 'local' : 'remote' } filesystem " +
+                "${file} on ${file.fileSystem == FileSystems.default ? 'local' : 'remote'} filesystem " +
                         "${shouldExist ? 'is not accessible or does not exist' : 'still exists'}"
     }
 
@@ -261,7 +274,7 @@ class FileService {
      */
     void createDirectoryRecursivelyAndSetPermissionsViaBash(Path path, Realm realm, String groupString = '', String permissions = '2750') {
         assert path
-        assert path.isAbsolute()
+        assert path.absolute
 
         createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path, realm, groupString, permissions)
     }
@@ -272,7 +285,16 @@ class FileService {
         } else {
             createDirectoryRecursivelyAndSetPermissionsViaBashInternal(path.parent, realm, groupString, permissions)
 
-            Files.createDirectory(path)
+            try {
+                Files.createDirectory(path)
+            } catch (FileSystemException e) {
+                if (Files.exists(path) && Files.isDirectory(path)) {
+                    return //directory was created by another thread running parallel
+                    //Because SFTP does not use the more specific FileAlreadyExistsException, using of Files.createDirectories(path) does not help,
+                    //which catches only FileAlreadyExistsException.
+                }
+                throw e
+            }
 
             remoteShellHelper.executeCommandReturnProcessOutput(realm, "chmod ${permissions} ${path}").assertExitCodeZeroAndStderrEmpty()
             if (groupString) {
@@ -288,7 +310,7 @@ class FileService {
      */
     void createDirectoryRecursively(Path path) {
         assert path
-        assert path.isAbsolute()
+        assert path.absolute
 
         createDirectoryRecursivelyInternal(path)
     }
@@ -311,7 +333,7 @@ class FileService {
      */
     void deleteDirectoryRecursively(Path path) {
         assert path
-        assert path.isAbsolute()
+        assert path.absolute
 
         if (Files.exists(path)) {
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
@@ -341,7 +363,7 @@ class FileService {
      */
     void createFileWithContent(Path path, String content, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
         assert path
-        assert path.isAbsolute()
+        assert path.absolute
         assert !Files.exists(path)
 
         createDirectoryRecursively(path.parent)
@@ -358,7 +380,7 @@ class FileService {
      */
     void createFileWithContent(Path path, byte[] content, Set<PosixFileAttributes> filePermission = DEFAULT_FILE_PERMISSION) {
         assert path
-        assert path.isAbsolute()
+        assert path.absolute
         assert !Files.exists(path)
 
         createDirectoryRecursively(path.parent)
@@ -526,5 +548,6 @@ enum CreateLinkOption {
     /** If a regular file or a link exist, delete it. For directories it will still fail. */
     DELETE_EXISTING_FILE,
 
-    private CreateLinkOption() { }
+    private CreateLinkOption() {
+    }
 }
