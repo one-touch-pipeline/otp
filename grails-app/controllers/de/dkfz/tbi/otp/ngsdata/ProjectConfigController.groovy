@@ -46,7 +46,6 @@ class ProjectConfigController implements CheckAndCall {
 
     ProjectService projectService
     ProjectOverviewService projectOverviewService
-    SeqTrackService seqTrackService
     ProcessingThresholdsService processingThresholdsService
     CommentService commentService
     ProjectSelectionService projectSelectionService
@@ -68,6 +67,43 @@ class ProjectConfigController implements CheckAndCall {
         project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [projectGroup: 'join']]))
         Map<String, String> dates = getDates(project)
 
+        File projectDirectory
+
+        if (project) {
+            projectDirectory = LsdfFilesService.getPath(
+                    configService.rootPath.path,
+                    project.dirName,
+            )
+        }
+
+        return [
+                projects                       : projects,
+                project                        : project,
+                creationDate                   : dates.creationDate,
+                lastReceivedDate               : dates.lastReceivedDate,
+                directory                      : projectDirectory ?: '',
+                sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
+                tumorEntities                  : TumorEntity.list().sort(),
+                projectTypes                   : Project.ProjectType.values(),
+                processingPriority             : ProcessingPriority.getByPriorityNumber(project?.processingPriority),
+                processingPriorities           : ProcessingPriority.displayPriorities,
+                qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
+                allSpeciesWithStrain           : SpeciesWithStrain.list().sort { it.toString() } ?: [],
+                allProjectGroups               : ProjectGroup.list(),
+                closed                         : project?.closed,
+        ]
+    }
+
+    Map alignment() {
+        List<Project> projects = projectService.allProjects
+        if (!projects) {
+            return [
+                    projects: projects,
+            ]
+        }
+
+        ProjectSelection selection = projectSelectionService.selectedProject
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
         List<MergingCriteria> mergingCriteria = MergingCriteria.findAllByProject(project)
         Map<SeqType, MergingCriteria> seqTypeMergingCriteria = SeqTypeService.allAlignableSeqTypes.collectEntries { SeqType seqType ->
             [(seqType): mergingCriteria.find { it.seqType == seqType }]
@@ -84,6 +120,31 @@ class ProjectConfigController implements CheckAndCall {
             ]
         }
 
+        return [
+                projects                       : projects,
+                project                        : project,
+                seqTypeMergingCriteria         : seqTypeMergingCriteria,
+                roddySeqTypes                  : SeqTypeService.roddyAlignableSeqTypes.sort {
+                    it.displayNameWithLibraryLayout
+                },
+                cellRangerSeqTypes             : SeqTypeService.cellRangerAlignableSeqTypes.sort {
+                    it.displayNameWithLibraryLayout
+                },
+                cellRangerOverview             : cellRangerOverview,
+
+        ]
+    }
+
+    Map analysis() {
+        List<Project> projects = projectService.allProjects
+        if (!projects) {
+            return [
+                    projects: projects,
+            ]
+        }
+
+        ProjectSelection selection = projectSelectionService.selectedProject
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
         List<List> thresholdsTable = createThresholdTable(project)
 
         Pipeline snv = Pipeline.findByName(Pipeline.Name.RODDY_SNV)
@@ -105,27 +166,9 @@ class ProjectConfigController implements CheckAndCall {
             [(it): projectService.checkReferenceGenomeForAceseq(project, it).error]
         }
 
-        File projectDirectory
-
-        if (project) {
-            projectDirectory = LsdfFilesService.getPath(
-                    configService.rootPath.path,
-                    project.dirName,
-            )
-        }
-
         return [
                 projects                       : projects,
                 project                        : project,
-                creationDate                   : dates.creationDate,
-                lastReceivedDate               : dates.lastReceivedDate,
-                seqTypeMergingCriteria         : seqTypeMergingCriteria,
-                roddySeqTypes                  : SeqTypeService.roddyAlignableSeqTypes.sort {
-                    it.displayNameWithLibraryLayout
-                },
-                cellRangerSeqTypes             : SeqTypeService.cellRangerAlignableSeqTypes.sort {
-                    it.displayNameWithLibraryLayout
-                },
                 snvSeqTypes                    : snv.seqTypes,
                 indelSeqTypes                  : indel.seqTypes,
                 sophiaSeqTypes                 : sophia.seqTypes,
@@ -137,19 +180,8 @@ class ProjectConfigController implements CheckAndCall {
                 sophiaConfigTable              : sophiaConfigTable,
                 aceseqConfigTable              : aceseqConfigTable,
                 runYapsaConfigTable            : runYapsaConfigTable,
-                directory                      : projectDirectory ?: '',
-                sampleIdentifierParserBeanNames: SampleIdentifierParserBeanName.values()*.name(),
-                tumorEntities                  : TumorEntity.list().sort(),
-                projectTypes                   : Project.ProjectType.values(),
-                processingPriority             : ProcessingPriority.getByPriorityNumber(project?.processingPriority),
-                processingPriorities           : ProcessingPriority.displayPriorities,
                 checkSophiaReferenceGenome     : checkSophiaReferenceGenome,
                 checkAceseqReferenceGenome     : checkAceseqReferenceGenome,
-                cellRangerOverview             : cellRangerOverview,
-                qcThresholdHandlingDropdown    : QcThresholdHandling.values(),
-                allSpeciesWithStrain           : SpeciesWithStrain.list().sort { it.toString() } ?: [],
-                allProjectGroups               : ProjectGroup.list(),
-                closed                         : project?.closed,
         ]
     }
 

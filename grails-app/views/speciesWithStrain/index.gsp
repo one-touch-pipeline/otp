@@ -31,7 +31,7 @@
 <div class="body">
     <g:render template="/templates/messages"/>
 
-    <g:render template="/metaDataFields/linkBanner"/>
+    <g:render template="/metaDataFields/linkBanner" model="[ active: 'speciesWithStrain']"/>
 
     <h1><g:message code="speciesWithStrain.header"/></h1>
     <div class="species-with-strain-grid-wrapper">

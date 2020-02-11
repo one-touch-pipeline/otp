@@ -65,6 +65,7 @@
                                     <ul>
                                         <li><g:link controller="projectOverview" action="index"><g:message code="otp.menu.projectSpecificStatistics"/></g:link></li>
                                         <li><g:link controller="projectConfig" action="index"><g:message code="otp.menu.projectConfig"/></g:link></li>
+                                        <li><g:link controller="projectConfig" action="alignment"><g:message code="otp.menu.alignmenAndAnalysis"/></g:link></li>
                                         <li><g:link controller="projectUser" action="index"><g:message code="otp.menu.userManagement"/></g:link></li>
                                         <sec:ifAnyGranted roles="ROLE_OPERATOR">
                                             <li class="allGranted"><g:link controller="projectInfo" action="list"><g:message code="projectOverview.projectInfos" /></g:link></li>

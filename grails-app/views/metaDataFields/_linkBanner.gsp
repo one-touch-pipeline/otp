@@ -20,12 +20,12 @@
   - SOFTWARE.
   --}%
 
-<ul class="metaDataFieldsLinkBanner">
-    <li><g:link controller="metaDataFields" action="libraryPreparationKits"><g:message code="dataFields.banner.libPrepKit"/></g:link></li>
-    <li><g:link controller="metaDataFields" action="antibodyTargets"><g:message code="dataFields.banner.antibodyTarget"/></g:link></li>
-    <li><g:link controller="metaDataFields" action="seqCenters"><g:message code="dataFields.banner.seqCenter"/></g:link></li>
-    <li><g:link controller="metaDataFields" action="seqPlatforms"><g:message code="dataFields.banner.seqPlatform"/></g:link></li>
-    <li><g:link controller="metaDataFields" action="seqTypes"><g:message code="dataFields.banner.seqType"/></g:link></li>
-    <li><g:link controller="speciesWithStrain" action="index"><g:message code="speciesWithStrain.title"/></g:link></li>
-    <li><g:link controller="softwareTool" action="list"><g:message code="otp.menu.softwareTool"/></g:link></li>
+<ul class="LinkBanner">
+    <li><g:link controller="metaDataFields" action="libraryPreparationKits" class="${active=='libraryPreparationKits' ? 'active' : ''}"><g:message code="dataFields.banner.libPrepKit"/></g:link></li>
+    <li><g:link controller="metaDataFields" action="antibodyTargets" class="${active=='antibodyTargets' ? 'active' : ''}"><g:message code="dataFields.banner.antibodyTarget"/></g:link></li>
+    <li><g:link controller="metaDataFields" action="seqCenters" class="${active=='seqCenters' ? 'active' : ''}"><g:message code="dataFields.banner.seqCenter"/></g:link></li>
+    <li><g:link controller="metaDataFields" action="seqPlatforms" class="${active=='seqPlatforms' ? 'active' : ''}"><g:message code="dataFields.banner.seqPlatform"/></g:link></li>
+    <li><g:link controller="metaDataFields" action="seqTypes" class="${active=='seqTypes' ? 'active' : ''}"><g:message code="dataFields.banner.seqType"/></g:link></li>
+    <li><g:link controller="speciesWithStrain" action="index" class="${active=='speciesWithStrain' ? 'active' : ''}"><g:message code="speciesWithStrain.title"/></g:link></li>
+    <li><g:link controller="softwareTool" action="list" class="${active=='softwareTool' ? 'active' : ''}"><g:message code="otp.menu.softwareTool"/></g:link></li>
 </ul>

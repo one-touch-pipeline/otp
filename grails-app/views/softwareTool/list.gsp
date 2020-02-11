@@ -33,7 +33,7 @@
 <body>
     <div class="body metaDataFields">
         <g:render template="/templates/messages"/>
-        <g:render template="/metaDataFields/linkBanner"/>
+        <g:render template="/metaDataFields/linkBanner" model="[ active: 'softwareTool']"/>
 
         <h1><g:message code="softwareTool.list.header"/></h1>
         <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>

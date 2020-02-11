@@ -2390,21 +2390,32 @@ div.dt-buttons {
     white-space: normal;
 }
 
-ul.metaDataFieldsLinkBanner {
-    text-align: center;
+ul.LinkBanner {
+    text-align: left;
     list-style-type: none;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid black; // underline our tab-selection to visually merge the tabs
+
     li {
         padding-right: 10px;
         display: inline-block;
+
     }
     a {
         text-decoration: none;
         color: #000000;
+        background: white;
         padding: 8px;
         border: 1px solid black;
+        border-bottom: none; // make it look like a tab
     }
-
+    .active {
+        padding: 10px;
+        border-left-width: 2px;
+        border-right-width: 2px;
+        border-top-width: 2px;
+        font-weight: bold;
+    }
 }
 
 .auto-width {

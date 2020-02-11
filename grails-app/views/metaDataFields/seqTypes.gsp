@@ -35,7 +35,7 @@
 <body>
 <div class="body fixed-table-header wrapTableHeader metaDataFields">
     <g:render template="/templates/messages"/>
-    <g:render template="linkBanner"/>
+    <g:render template="linkBanner" model="[ active: 'seqTypes']"/>
 
     <h1><g:message code="dataFields.seqType.header"/></h1>
     <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
