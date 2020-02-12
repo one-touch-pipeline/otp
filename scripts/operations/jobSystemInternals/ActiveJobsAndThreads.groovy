@@ -32,7 +32,7 @@ ctx.schedulerService.queue.each {
 println ""
 println "RUNNING JOBS"
 ctx.schedulerService.getRunning().each {
-    println "${it}\t(ProcessingStep ID ${it.processingStep.id}, ${it.processingStep.process.jobExecutionPlan.name} on ${atMostOneElement(ProcessParameter.findAllByProcess(it.processingStep.process))?.toObject()}"
+    println "${it}\t(ProcessingStep ID ${it.processingStep.id}, ${it.processingStep.process.jobExecutionPlan.name} on ${atMostOneElement(Artefact.findAllByProcess(it.processingStep.process))?.toObject()}"
 }
 println ""
 println "THREADS"

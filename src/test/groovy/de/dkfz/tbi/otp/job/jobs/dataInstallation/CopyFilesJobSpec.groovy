@@ -47,7 +47,7 @@ class CopyFilesJobSpec extends Specification implements DataTest {
                 JobExecutionPlan,
                 Process,
                 ProcessingStep,
-                ProcessParameter,
+                Artefact,
                 Project,
                 Realm,
                 Run,

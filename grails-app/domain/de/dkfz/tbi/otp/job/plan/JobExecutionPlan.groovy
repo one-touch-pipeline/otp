@@ -21,7 +21,7 @@
  */
 package de.dkfz.tbi.otp.job.plan
 
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.job.processing.Artefact
 import de.dkfz.tbi.otp.utils.Entity
 
 class JobExecutionPlan implements Serializable, Entity {
@@ -58,7 +58,7 @@ class JobExecutionPlan implements Serializable, Entity {
     /**
      * The parameter which is static for the process
      */
-    ProcessParameter processParameter
+    Artefact processParameter
 
     static constraints = {
         name(nullable: false, blank: false, unique: 'planVersion')

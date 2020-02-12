@@ -57,7 +57,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
                 Process,
                 ProcessingOption,
                 ProcessingStep,
-                ProcessParameter,
+                Artefact,
                 Project,
                 Realm,
                 ReferenceGenome,

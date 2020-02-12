@@ -26,7 +26,7 @@ import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
 import org.junit.Test
 
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.job.processing.Artefact
 
 import static org.junit.Assert.*
 
@@ -81,7 +81,7 @@ class JobExecutionPlanTests {
 
         jobExecutionPlan.name = "testPlan"
         assertTrue(jobExecutionPlan.validate())
-        ProcessParameter processParameter = new ProcessParameter(value: "test")
+        Artefact processParameter = new Artefact(value: "test")
         jobExecutionPlan.processParameter = processParameter
 
         assertTrue(jobExecutionPlan.validate())

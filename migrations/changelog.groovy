@@ -347,4 +347,8 @@ databaseChangeLog = {
     }
 
     include file: "changelogs/2020/otp-335-single-cell-well.groovy"
+
+    changeSet(author: "strubelp", id: "otp-349") {
+        sqlFile(path: 'changelogs/2020/otp-349.sql')
+    }
 }

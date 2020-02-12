@@ -325,8 +325,8 @@ class DomainFactory {
         ], properties)
     }
 
-    static ProcessParameter createProcessParameter(Map properties = [:]) {
-        return createDomainObject(ProcessParameter, [
+    static Artefact createProcessParameter(Map properties = [:]) {
+        return createDomainObject(Artefact, [
                 process  : { createProcessingStepUpdate().process },
                 value    : "${counter++}",
                 className: "${counter++}",
@@ -1976,16 +1976,16 @@ class DomainFactory {
         return processingStep
     }
 
-    static ProcessParameter createProcessParameter(final Process process, final ProcessParameterObject parameterValue, Map properties = [:]) {
-        return createDomainObject(ProcessParameter, [
+    static Artefact createProcessParameter(final Process process, final ProcessParameterObject parameterValue, Map properties = [:]) {
+        return createDomainObject(Artefact, [
                 process  : process,
                 className: parameterValue.class.name,
                 value    : parameterValue.id.toString(),
         ], properties)
     }
 
-    static ProcessParameter createProcessParameter(final Process process, final String className, final String value) {
-        return createDomainObject(ProcessParameter, [
+    static Artefact createProcessParameter(final Process process, final String className, final String value) {
+        return createDomainObject(Artefact, [
                 process  : process,
                 className: className,
                 value    : value,

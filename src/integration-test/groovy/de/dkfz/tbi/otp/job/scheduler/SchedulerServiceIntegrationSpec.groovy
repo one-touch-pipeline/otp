@@ -733,7 +733,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         0 == ProcessingStep.count()
 
         when:
-        ProcessParameter processParameter = DomainFactory.createProcessParameter(className: SeqTrack.name, value: "test")
+        Artefact processParameter = DomainFactory.createProcessParameter(className: SeqTrack.name, value: "test")
         schedulerService.createProcess(job, [], processParameter)
 
         then: "verify that the Process is created"
@@ -755,7 +755,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
 
         then:
         areQueueAndRunningEmpty()
-        "test" == ProcessParameter.findByProcess(process).value
+        "test" == Artefact.findByProcess(process).value
     }
 
     void "testDecisions"() {

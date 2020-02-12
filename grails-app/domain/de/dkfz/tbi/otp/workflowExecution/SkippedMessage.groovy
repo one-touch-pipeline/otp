@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,26 +19,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package de.dkfz.tbi.otp.workflowExecution
 
-/**
- * Lists the cluster jobs which are currently being monitored by the {@link ClusterJobMonitor}.
- */
+import de.dkfz.tbi.otp.utils.Entity
 
+class SkippedMessage implements Entity {
 
-import de.dkfz.tbi.otp.infrastructure.ClusterJob
-import de.dkfz.tbi.otp.job.processing.*
-import de.dkfz.tbi.otp.job.scheduler.ClusterJobMonitor
+    enum Category {
+        PREREQUISITE_WORKFLOW_RUN_NOT_SUCCESSFUL,
+        PROJECT_THRESHOLD_REJECTION,
+        WORKFLOW_COVERAGE_REJECTION
+    }
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+    String message
 
+    Category category
 
-ClusterJob.findAllByCheckStatus(ClusterJob.CheckStatus.CHECKING).groupBy {
-    it.processingStep
-}.each { ProcessingStep processingStep, List<ClusterJob> clusterJobs ->
-    Process process = processingStep.process
-    println "ProcessingStep ${processingStep.id}: ${processingStep.jobDefinition.name} on ${atMostOneElement(Artefact.findAllByProcess(process))?.toObject()}"
-    clusterJobs.each {
-        println "  ${it}"
+    static mapping = {
+        message type: "text"
     }
 }
-''

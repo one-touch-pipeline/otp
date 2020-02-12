@@ -1,5 +1,5 @@
 /*
- * Copyright 2011-2019 The OTP authors
+ * Copyright 2011-2020 The OTP authors
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,42 +19,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package de.dkfz.tbi.otp.job.processing
+package de.dkfz.tbi.otp.workflowExecution
 
+import de.dkfz.tbi.otp.Withdrawable
+import de.dkfz.tbi.otp.job.processing.Artefact
 import de.dkfz.tbi.otp.utils.Entity
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
+class WorkflowArtefact implements Withdrawable, Entity {
 
-class ProcessParameter implements Entity {
-    String value
-    String className
-    Process process
+    enum State {
+        PLANNED_OR_RUNNING,
+        SUCCESS,
+        SKIPPED,
+        FAILED,
+        LEGACY,
+    }
+
+    WorkflowRun producedBy
+
+    Artefact artefact
+
+    State state = State.LEGACY
+
+    static belongsTo = [
+            artefact: Artefact
+    ]
 
     static constraints = {
-        process(nullable: false, unique: true)
-        className(nullable: false, validator: { String name ->
-            ProcessParameterObject.isAssignableFrom(Class.forName(name, true, getClass().getClassLoader())) &&
-            !name.contains('$')
-        })
+        producedBy nullable: true
+        withdrawnDate nullable: true
+        withdrawnComment nullable: true, validator: { val, obj ->
+            if (obj.withdrawnDate && !val) {
+                return ['default.when.X.then.Y', 'set', 'withdrawnDate', 'set']
+            }
+        }
     }
 
     static mapping = {
-        process index: "process_parameter_process_idx"
-    }
-
-    /**
-     * Retrieves the domain object instance this ProcessParameter points to in case className is not null.
-     *
-     * If the object does not exists, this method returns null.
-     * @return The domain object instance or null
-     */
-    ProcessParameterObject toObject() {
-        if (className) {
-            List resultList = ProcessParameter.executeQuery("FROM ${className} WHERE id=${value}".toString())
-            if (resultList) {
-                return exactlyOneElement(resultList)
-            }
-        }
-        return null
+        withdrawnComment type: "text"
     }
 }

@@ -187,13 +187,13 @@ abstract class AbstractJobImpl implements Job {
     }
 
     /**
-     * Returns the object which is referenced by the {@link ProcessParameter} for the {@link Process} that this job
+     * Returns the object which is referenced by the {@link Artefact} for the {@link Process} that this job
      * belongs to. If there is no such process parameter or object, this method will throw an exception.
      */
     ProcessParameterObject getProcessParameterObject() {
         ProcessParameterObject object = getProcessParameter().toObject()
         if (object == null) {
-            throw new RuntimeException("Object referenced by ProcessParameter was not found.")
+            throw new RuntimeException("Object referenced by Artefact was not found.")
         }
         return object
     }
@@ -208,8 +208,8 @@ abstract class AbstractJobImpl implements Job {
         return getProcessParameter().value
     }
 
-    ProcessParameter getProcessParameter() {
-        return exactlyOneElement(ProcessParameter.findAllByProcess(processingStep.process))
+    Artefact getProcessParameter() {
+        return exactlyOneElement(Artefact.findAllByProcess(processingStep.process))
     }
 
     Collection<ClusterJob> failedOrNotFinishedClusterJobs() {

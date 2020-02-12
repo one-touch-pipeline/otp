@@ -179,7 +179,7 @@ ${prefix(objectsToStrings(objects, valueToShow).join('\n'))}
     private boolean checkProcessesForObject(String workflow, List noProcess, List processWithError, Object object, Closure valueToShow, Closure extractObjectToCheck) {
         Object objectToCheck = extractObjectToCheck(object)
 
-        def processes = ProcessParameter.findAllByValue(objectToCheck.id, [sort: "id"])*.process.findAll {
+        def processes = Artefact.findAllByValue(objectToCheck.id, [sort: "id"])*.process.findAll {
             it.jobExecutionPlan.name == workflow
         }
 

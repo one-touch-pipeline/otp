@@ -76,6 +76,10 @@ joinTables="\
 (software_tool_program_name_program_version_type_key)|\
 (sophia_instance_roddy_execution_directory_names)|\
 (swap_info_seq_track)|\
+(workflow_run_input_artefacts)|\
+(workflow_run_output_artefacts)|\
+(workflow_run_workflow_config)|\
+(workflow_run_workflow_step)|\
 "
 
 perl -0pi -e "${prefix}.*file_system_changes_idx${suffix}" $changelogPath

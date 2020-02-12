@@ -55,7 +55,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
                 Pipeline,
                 Process,
                 ProcessingStep,
-                ProcessParameter,
+                Artefact,
                 Project,
                 Realm,
                 ReferenceGenome,

@@ -85,7 +85,7 @@ class Process implements Serializable, Commentable, Entity {
     }
 
     ProcessParameterObject getProcessParameterObject() {
-        return atMostOneElement(ProcessParameter.findAllByProcess(this))?.toObject()
+        return atMostOneElement(Artefact.findAllByProcess(this))?.toObject()
     }
 
     @Override

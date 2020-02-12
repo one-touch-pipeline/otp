@@ -38,7 +38,7 @@ class MonitorOutputCollectorIntegrationSpec extends Specification {
     void "addInfoAboutProcessErrors, when all fine, then return nothing"() {
         given:
         SeqTrack seqTrack = DomainFactory.createSeqTrack()
-        ProcessParameter parameter = DomainFactory.createProcessParameter([
+        Artefact parameter = DomainFactory.createProcessParameter([
                 value    : seqTrack.id.longValue(),
                 className: SeqTrack.class.getName(),
         ])

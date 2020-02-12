@@ -26,7 +26,7 @@ import grails.testing.gorm.DataTest
 import grails.testing.web.controllers.ControllerUnitTest
 import spock.lang.Specification
 
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.job.processing.Artefact
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.security.*
 
@@ -44,7 +44,7 @@ class RunControllerSpec extends Specification implements ControllerUnitTest<RunC
                 Run,
                 SeqCenter,
                 MetaDataKey,
-                ProcessParameter,
+                Artefact,
         ]
     }
 

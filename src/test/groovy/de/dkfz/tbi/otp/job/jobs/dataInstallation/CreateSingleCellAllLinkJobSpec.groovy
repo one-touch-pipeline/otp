@@ -27,7 +27,7 @@ import spock.lang.Specification
 import de.dkfz.tbi.otp.TestConfigService
 import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellMappingFileService
 import de.dkfz.tbi.otp.domainFactory.DomainFactoryCore
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.job.processing.Artefact
 import de.dkfz.tbi.otp.job.processing.ProcessingStep
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.LinkFileUtils
@@ -39,7 +39,7 @@ class CreateSingleCellAllLinkJobSpec extends Specification implements DataTest, 
         [
                 DataFile,
                 ProcessingStep,
-                ProcessParameter,
+                Artefact,
         ]
     }
 

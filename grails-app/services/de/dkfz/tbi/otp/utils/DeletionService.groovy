@@ -129,7 +129,7 @@ class DeletionService {
                 }
                 seqTypes.add(seqTrack.seqType)
 
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(seqTrack.id.toString(), seqTrack.class.name))
+                deleteProcessParameters(Artefact.findAllByValueAndClassName(seqTrack.id.toString(), seqTrack.class.name))
             }
 
             SeqScan.findAllBySample(sample)*.delete(flush: true)
@@ -147,13 +147,13 @@ class DeletionService {
         return [deletionScript.toString(), deletionScriptOtherUser.toString()]
     }
 
-    void deleteProcessParameters(List<ProcessParameter> processParameters) {
+    void deleteProcessParameters(List<Artefact> processParameters) {
         processParameters.each {
             deleteProcessParameter(it)
         }
     }
 
-    void deleteProcessParameter(ProcessParameter processParameter) {
+    void deleteProcessParameter(Artefact processParameter) {
         if (processParameter) {
             Process process = processParameter.process
             processParameter.delete(flush: true)
@@ -354,7 +354,7 @@ class DeletionService {
             }
 
             qualityAssessmentPasses.each {
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
+                deleteProcessParameters(Artefact.findAllByValueAndClassName(it.id.toString(), it.class.name))
                 it.delete(flush: true)
             }
         } else if (abstractBamFile instanceof ProcessedMergedBamFile) {
@@ -365,7 +365,7 @@ class DeletionService {
                 OverallQualityAssessmentMerged.findAllByQualityAssessmentMergedPassInList(qualityAssessmentMergedPasses)*.delete(flush: true)
             }
             qualityAssessmentMergedPasses.each {
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
+                deleteProcessParameters(Artefact.findAllByValueAndClassName(it.id.toString(), it.class.name))
                 it.delete(flush: true)
             }
         } else if (abstractBamFile instanceof RoddyBamFile) {
@@ -425,12 +425,12 @@ class DeletionService {
                 dirsToDelete.addAll(analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
                         SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage)))
 
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(processedMergedBamFile.id.toString(), processedMergedBamFile.class.name))
+                deleteProcessParameters(Artefact.findAllByValueAndClassName(processedMergedBamFile.id.toString(), processedMergedBamFile.class.name))
                 processedMergedBamFile.delete(flush: true)
             }
 
             mergingPasses.each {
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
+                deleteProcessParameters(Artefact.findAllByValueAndClassName(it.id.toString(), it.class.name))
                 it.delete(flush: true)
             }
 
@@ -510,7 +510,7 @@ class DeletionService {
                 Map<String, List<File>> processingDirsToDelete = deleteMergingRelatedConnectionsOfBamFile(processedBamFile)
                 dirsToDelete.addAll(processingDirsToDelete["dirsToDelete"])
                 dirsToDeleteWithOtherUser.addAll(processingDirsToDelete["dirsToDeleteWithOtherUser"])
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(processedBamFile.id.toString(), processedBamFile.class.name))
+                deleteProcessParameters(Artefact.findAllByValueAndClassName(processedBamFile.id.toString(), processedBamFile.class.name))
                 processedBamFile.delete(flush: true)
             }
             alignmentPass.delete(flush: true)
@@ -534,7 +534,7 @@ class DeletionService {
         if (bamFiles) {
             BamFilePairAnalysis.findAllBySampleType1BamFileInListOrSampleType2BamFileInList(bamFiles, bamFiles).each {
                 dirsToDeleteWithOtherUser << AnalysisDeletionService.deleteInstance(it)
-                deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(it.id.toString(), it.class.name))
+                deleteProcessParameters(Artefact.findAllByValueAndClassName(it.id.toString(), it.class.name))
             }
         }
 
@@ -545,7 +545,7 @@ class DeletionService {
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
             dirsToDelete << analysisDeletionService.deleteSamplePairsWithoutAnalysisInstances(
                     SamplePair.findAllByMergingWorkPackage1OrMergingWorkPackage2(mergingWorkPackage, mergingWorkPackage))
-            deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
+            deleteProcessParameters(Artefact.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             bamFile.baseBamFile = null
             bamFile.delete(flush: true)
             // The MerginWorkPackage can only be deleted if all corresponding RoddyBamFiles are removed already
@@ -569,7 +569,7 @@ class DeletionService {
             crmwp.bamFileInProjectFolder = null
             crmwp.save(flush: true)
             deleteQualityAssessmentInfoForAbstractBamFile(bamFile)
-            deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
+            deleteProcessParameters(Artefact.findAllByValueAndClassName(bamFile.id.toString(), bamFile.class.name))
             dirsToDelete << bamFile.workDirectory
             bamFile.delete(flush: true)
             if (!SingleCellBamFile.findByWorkPackage(crmwp)) {
@@ -642,7 +642,7 @@ class DeletionService {
             dirsToDelete = deleteSeqTrack(it).get("dirsToDelete")
         }
 
-        deleteProcessParameters(ProcessParameter.findAllByValueAndClassName(run.id.toString(), run.class.name))
+        deleteProcessParameters(Artefact.findAllByValueAndClassName(run.id.toString(), run.class.name))
         run.delete(flush: true)
         return dirsToDelete
     }

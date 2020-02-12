@@ -34,7 +34,7 @@ import de.dkfz.tbi.otp.job.jobs.TestAbstractAlignmentStartJob
 import de.dkfz.tbi.otp.job.jobs.alignment.AbstractAlignmentStartJob
 import de.dkfz.tbi.otp.job.plan.JobExecutionPlan
 import de.dkfz.tbi.otp.job.processing.Process
-import de.dkfz.tbi.otp.job.processing.ProcessParameter
+import de.dkfz.tbi.otp.job.processing.Artefact
 import de.dkfz.tbi.otp.job.scheduler.SchedulerService
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.tracking.OtrsTicket
@@ -374,7 +374,7 @@ class AbstractAlignmentStartJobIntegrationTests {
 
         assert mwp.needsProcessing == false
         Process process = exactlyOneElement(Process.list())
-        ProcessParameter processParameter = exactlyOneElement(ProcessParameter.findAllByProcess(process))
+        Artefact processParameter = exactlyOneElement(Artefact.findAllByProcess(process))
         RoddyBamFile bamFile = processParameter.toObject()
         assertRoddyBamFileConsistencyWithMwp(bamFile, mwp)
     }
