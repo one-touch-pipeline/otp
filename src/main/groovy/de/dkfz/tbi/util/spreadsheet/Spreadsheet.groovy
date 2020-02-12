@@ -24,6 +24,8 @@ package de.dkfz.tbi.util.spreadsheet
 import com.opencsv.*
 import groovy.transform.TupleConstructor
 
+import de.dkfz.tbi.otp.utils.StringUtils
+
 /**
  * An immutable in-memory representation of a tab-separated spreadsheet file
  *
@@ -161,7 +163,7 @@ class Cell {
     protected Cell(Row row, int columnIndex, String text) {
         this.row = row
         this.columnIndex = columnIndex
-        this.text = text
+        this.text = StringUtils.trimAndShortenWhitespace(text)
     }
 
     Spreadsheet getSpreadsheet() {

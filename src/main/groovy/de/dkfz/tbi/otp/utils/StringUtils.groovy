@@ -89,4 +89,14 @@ class StringUtils {
     static String blankToNull(String string) {
         return string ? string : null
     }
+
+    /**
+     * Trims leading and trailing whitespace and shortens contained whitespace to a single whitespace.
+     *
+     * @param string to transform
+     * @return return the transformed string
+     */
+    static String trimAndShortenWhitespace(String string) {
+        return string?.trim()?.replaceAll(" +", " ")
+    }
 }

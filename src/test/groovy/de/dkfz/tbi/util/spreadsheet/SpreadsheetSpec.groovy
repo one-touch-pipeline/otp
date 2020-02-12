@@ -200,4 +200,25 @@ class SpreadsheetSpec extends Specification {
         26 + 26 ** 2 + 26 ** 3 + 1 || 'AAAB'
         26 + 26 ** 2 + 26 ** 3 + 2 || 'AAAC'
     }
+
+    void "Cell constructor trims and shortens whitespace on text"() {
+        given:
+        String document = """\
+            |headerA\theaderB
+            |${given}\tsomething else""".stripMargin()
+
+        Cell cell = new Spreadsheet(document).dataRows[0].cells[0]
+
+        expect:
+        cell.text == expected
+
+        where:
+        given  || expected
+        "x"    || "x"
+        " x"   || "x"
+        "x "   || "x"
+        ""     || ""
+        "  "   || ""
+        "x  x" || "x x"
+    }
 }

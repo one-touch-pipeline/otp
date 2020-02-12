@@ -36,7 +36,6 @@ class BarcodeValidatorSpec extends Specification {
 
     void 'validate, when barcode is valid, succeeds'() {
         given:
-
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.BARCODE}\n" +
                 "\n" +
@@ -46,16 +45,15 @@ class BarcodeValidatorSpec extends Specification {
         )
 
         when:
-            new BarcodeValidator().validate(context)
+        new BarcodeValidator().validate(context)
 
         then:
-            context.problems.empty
+        context.problems.empty
     }
 
 
     void 'validate, when barcode use valid chars but does not pass the regular expression, adds warnings'() {
         given:
-
         MetadataValidationContext context = MetadataValidationContextFactory.createContext(
                 "${MetaDataColumn.BARCODE}\n" +
                 "invalidBarcode\n"
@@ -63,7 +61,6 @@ class BarcodeValidatorSpec extends Specification {
 
         when:
         new BarcodeValidator().validate(context)
-
 
         then:
         Problem problem = exactlyOneElement(context.problems)
@@ -82,7 +79,6 @@ class BarcodeValidatorSpec extends Specification {
         when:
         new BarcodeValidator().validate(context)
 
-
         then:
         Problem problem = exactlyOneElement(context.problems)
         problem.level == Level.ERROR
@@ -90,16 +86,12 @@ class BarcodeValidatorSpec extends Specification {
         problem.message.contains("'${barcode}' is not a well-formed barcode. It must match the regular expression '${BarcodeValidator.MUST_REGEX}'. It should match the regular expression '${BarcodeValidator.SHOULD_REGEX}'.")
 
         where:
-        barcode << [
-                ' ',
-                '_',
-        ]
+        barcode << ['%', '$', '^', '_']
     }
 
 
     void 'validate, when no BARCODE column exists in metadata file, adds warnings'() {
         given:
-
         MetadataValidationContext context = MetadataValidationContextFactory.createContext()
 
         when:
