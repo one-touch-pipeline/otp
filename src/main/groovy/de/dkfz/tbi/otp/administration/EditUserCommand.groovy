@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.administration
 import grails.validation.Validateable
 
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.StringUtils
 
 class EditUserCommand implements Validateable {
     private static final long serialVersionUID = 1L
@@ -43,10 +44,10 @@ class EditUserCommand implements Validateable {
     }
 
     void setEmail(String email) {
-        this.email = email?.trim()?.replaceAll(" +", " ")
+        this.email = StringUtils.trimAndShortenWhitespace(email)
     }
 
     void setRealName(String realName) {
-        this.realName = realName?.trim()?.replaceAll(" +", " ")
+        this.realName = StringUtils.trimAndShortenWhitespace(realName)
     }
 }

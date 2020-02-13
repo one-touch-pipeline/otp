@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.qcTrafficLight.*
 import de.dkfz.tbi.otp.utils.DataTableCommand
 import de.dkfz.tbi.otp.utils.FormatHelper
+import de.dkfz.tbi.otp.utils.StringUtils
 
 import java.nio.file.AccessDeniedException
 
@@ -487,6 +488,6 @@ class QcStatusCommand implements Serializable {
     }
 
     void setComment(String comment) {
-        this.comment = comment?.trim()?.replaceAll(" +", " ")
+        this.comment = StringUtils.trimAndShortenWhitespace(comment)
     }
 }

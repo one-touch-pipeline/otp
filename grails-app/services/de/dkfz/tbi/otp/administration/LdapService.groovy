@@ -31,6 +31,7 @@ import org.springframework.ldap.query.ContainerCriteria
 
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.StringUtils
 import de.dkfz.tbi.util.LdapHelper
 
 import javax.naming.NamingException
@@ -74,7 +75,7 @@ class LdapService implements InitializingBean {
         if (searchString == null) {
             return []
         }
-        String sanitizedSearchString = searchString.trim().replaceAll(" +", " ")
+        String sanitizedSearchString = StringUtils.trimAndShortenWhitespace(searchString)
 
         String wildcardedSearch = "*${sanitizedSearchString}*"
         ContainerCriteria dynamicQuery = query()

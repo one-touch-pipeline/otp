@@ -34,6 +34,7 @@ import de.dkfz.tbi.otp.administration.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.User
+import de.dkfz.tbi.otp.utils.StringUtils
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
 
@@ -303,7 +304,7 @@ class UpdateUserRealNameCommand implements Validateable {
     }
 
     void setValue(String value) {
-        this.newName = value?.trim()?.replaceAll(" +", " ")
+        this.newName = StringUtils.trimAndShortenWhitespace(value)
     }
 }
 
@@ -321,7 +322,7 @@ class UpdateUserEmailCommand implements Validateable {
     }
 
     void setValue(String value) {
-        this.newEmail = value?.trim()?.replaceAll(" +", " ")
+        this.newEmail = StringUtils.trimAndShortenWhitespace(value)
     }
 }
 
@@ -397,15 +398,15 @@ class AddUserToProjectCommand implements Serializable {
     }
 
     void setSearchString(String searchString) {
-        this.searchString = searchString?.trim()?.replaceAll(" +", " ")
+        this.searchString = StringUtils.trimAndShortenWhitespace(searchString)
     }
 
     void setRealName(String realName) {
-        this.realName = realName?.trim()?.replaceAll(" +", " ")
+        this.realName = StringUtils.trimAndShortenWhitespace(realName)
     }
 
     void setEmail(String email) {
-        this.email = email?.trim()?.replaceAll(" ", "")
+        this.email = StringUtils.trimAndShortenWhitespace(email)
     }
 }
 

@@ -81,7 +81,7 @@ class StringUtilsSpec extends Specification {
         [abc: 'c', abw: 'w', abz: 'z'] | _
     }
 
-    void 'blankToNull - blanks ONLY empty string to null, otherwise keeps as-is'() {
+    void 'blankToNull, blanks ONLY empty string to null, otherwise keeps as-is'() {
         expect:
         StringUtils.blankToNull(s) == expected
 
@@ -94,5 +94,19 @@ class StringUtilsSpec extends Specification {
         '\t'  || '\t'
         '\n'  || '\n'
         'OTP is awesome, even with trailing spaces   ' ||  'OTP is awesome, even with trailing spaces   '
+    }
+
+    void 'trimAndShortenWhitespace, trims leading and trailing whitespace, shortens whitespace in the middle'() {
+        expect:
+        StringUtils.trimAndShortenWhitespace(given) == expected
+
+        where:
+        given  || expected
+        "x"    || "x"
+        " x"   || "x"
+        "x "   || "x"
+        ""     || ""
+        "  "   || ""
+        "x  x" || "x x"
     }
 }

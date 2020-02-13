@@ -29,6 +29,7 @@ import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.*
 import de.dkfz.tbi.otp.dataprocessing.ProcessingOption.OptionName
 import de.dkfz.tbi.otp.utils.CollectionUtils
+import de.dkfz.tbi.otp.utils.StringUtils
 
 class ConfigurePipelineController implements ConfigurePipelineHelper {
 
@@ -421,7 +422,7 @@ class ConfigurePipelineSubmitCommand extends BaseConfigurePipelineSubmitCommand 
     }
 
     void setConfig(String config) {
-        this.config = config?.trim()?.replaceAll(" +", " ")
+        this.config = StringUtils.trimAndShortenWhitespace(config)
     }
 }
 

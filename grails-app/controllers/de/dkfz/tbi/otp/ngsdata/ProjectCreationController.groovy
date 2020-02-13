@@ -30,6 +30,7 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingPriority
 import de.dkfz.tbi.otp.ngsdata.taxonomy.SpeciesWithStrain
 import de.dkfz.tbi.otp.parser.SampleIdentifierParserBeanName
 import de.dkfz.tbi.otp.searchability.Keyword
+import de.dkfz.tbi.otp.utils.StringUtils
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -177,22 +178,19 @@ class ProjectCreationCommand implements Serializable {
     }
 
     void setName(String name) {
-        this.name = name?.trim()?.replaceAll(" +", " ")
+        this.name = StringUtils.trimAndShortenWhitespace(name)
     }
 
     void setDirectory(String directory) {
-        this.directory = directory?.trim()?.replaceAll(" +", " ")
+        this.directory = StringUtils.trimAndShortenWhitespace(directory)
     }
 
     void setUnixGroup(String unixGroup) {
-        this.unixGroup = unixGroup?.trim()?.replaceAll(" +", " ")
+        this.unixGroup = StringUtils.trimAndShortenWhitespace(unixGroup)
     }
 
     void setNameInMetadataFiles(String nameInMetadataFiles) {
-        this.nameInMetadataFiles = nameInMetadataFiles?.trim()?.replaceAll(" +", " ")
-        if (this.nameInMetadataFiles == "") {
-            this.nameInMetadataFiles = null
-        }
+        this.nameInMetadataFiles = StringUtils.blankToNull(StringUtils.trimAndShortenWhitespace(nameInMetadataFiles))
     }
 
     void setTumorEntityName(String tumorEntityName) {

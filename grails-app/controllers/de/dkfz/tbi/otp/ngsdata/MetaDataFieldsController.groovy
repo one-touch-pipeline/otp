@@ -28,6 +28,7 @@ import grails.validation.ValidationException
 import de.dkfz.tbi.otp.CheckAndCall
 import de.dkfz.tbi.otp.FlashMessage
 import de.dkfz.tbi.otp.dataprocessing.OtpPath
+import de.dkfz.tbi.otp.utils.StringUtils
 
 class MetaDataFieldsController implements CheckAndCall {
 
@@ -283,11 +284,11 @@ class CreateLibraryPreparationKitCommand implements Validateable {
     }
 
     void setName(String name) {
-        this.name = name?.trim()?.replaceAll(" +", " ") //trims and removes additional white spaces
+        this.name = StringUtils.trimAndShortenWhitespace(name)
     }
 
     void setShortDisplayName(String shortDisplayName) {
-        this.shortDisplayName = shortDisplayName?.trim()?.replaceAll(" +", " ")
+        this.shortDisplayName = StringUtils.trimAndShortenWhitespace(shortDisplayName)
     }
 
     void setAdapterFile(String adapterFile) {
@@ -308,7 +309,7 @@ class AddAdapterFileToLibraryPreparationKitCommand implements Validateable {
     }
 
     void setAdapterFile(String adapterFile) {
-        this.adapterFile = adapterFile?.trim()?.replaceAll(" +", " ")
+        this.adapterFile = StringUtils.trimAndShortenWhitespace(adapterFile)
     }
 }
 
@@ -337,7 +338,7 @@ class CreateAntibodyTargetCommand implements Validateable {
     }
 
     void setName(String name) {
-        this.name = name?.trim()?.replaceAll(" +", " ")
+        this.name = StringUtils.trimAndShortenWhitespace(name)
     }
 }
 
@@ -358,11 +359,11 @@ class CreateSeqCenterCommand implements Validateable {
     }
 
     void setName(String name) {
-        this.name = name?.trim()?.replaceAll(" +", " ")
+        this.name = StringUtils.trimAndShortenWhitespace(name)
     }
 
     void setDirName(String dirName) {
-        this.dirName = dirName?.trim()?.replaceAll(" +", " ")
+        this.dirName = StringUtils.trimAndShortenWhitespace(dirName)
     }
 }
 
@@ -383,21 +384,15 @@ class CreateSeqPlatformCommand implements Validateable {
     }
 
     void setPlatform(String platform) {
-        this.platform = platform?.trim()?.replaceAll(" +", " ")
+        this.platform = StringUtils.trimAndShortenWhitespace(platform)
     }
 
     void setModel(String model) {
-        this.model = model?.trim()?.replaceAll(" +", " ")
-        if (this.model.equals("")) {
-            this.model = null
-        }
+        this.model = StringUtils.blankToNull(StringUtils.trimAndShortenWhitespace(model))
     }
 
     void setKit(String kit) {
-        this.kit = kit?.trim()?.replaceAll(" +", " ")
-        if (this.kit.equals("")) {
-            this.kit = null
-        }
+        this.kit = StringUtils.blankToNull(StringUtils.trimAndShortenWhitespace(kit))
     }
 }
 
@@ -416,7 +411,7 @@ abstract class CreateImportAliasCommand implements Validateable {
     }
 
     void setImportAlias(String importAlias) {
-        this.importAlias = importAlias?.trim()?.replaceAll(" +", " ")
+        this.importAlias = StringUtils.trimAndShortenWhitespace(importAlias)
     }
 }
 
@@ -528,18 +523,15 @@ class CreateSeqTypeCommand extends CreateWithLayoutCommand {
     }
 
     void setSeqTypeName(String seqTypeName) {
-        this.seqTypeName = seqTypeName?.trim()?.replaceAll(" +", " ")
+        this.seqTypeName = StringUtils.trimAndShortenWhitespace(seqTypeName)
     }
 
     void setDirName(String dirName) {
-        this.dirName = dirName?.trim()?.replaceAll(" +", " ")
+        this.dirName = StringUtils.trimAndShortenWhitespace(dirName)
     }
 
     void setDisplayName(String displayName) {
-        this.displayName = displayName?.trim()?.replaceAll(" +", " ")
-        if (this.displayName.equals("")) {
-            this.displayName = null
-        }
+        this.displayName = StringUtils.blankToNull(StringUtils.trimAndShortenWhitespace(displayName))
     }
 
     void setAliases(List<String> aliasNames) {
