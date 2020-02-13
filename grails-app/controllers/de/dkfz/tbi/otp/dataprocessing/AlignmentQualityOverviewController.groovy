@@ -170,6 +170,11 @@ class AlignmentQualityOverviewController {
             return [:]
         }
 
+        if (cmd.sample && cmd.sample.project != project) {
+            response.sendError(404)
+            return
+        }
+
         List<SeqType> seqTypes = seqTypeService.alignableSeqTypesByProject(project).findAll {
             it.name in SUPPORTED_SEQ_TYPES
         }
@@ -212,6 +217,7 @@ class AlignmentQualityOverviewController {
                 seqType : seqType,
                 header  : header,
                 columns : columns,
+                sample  : cmd.sample,
         ]
     }
 
@@ -234,12 +240,10 @@ class AlignmentQualityOverviewController {
     }
 
     @SuppressWarnings(['AbcMetric', 'CyclomaticComplexity', 'MethodSize'])
-    JSON dataTableSource(DataTableCommand cmd) {
+    JSON dataTableSource(AlignmentQcDataTableCommand cmd) {
         Map dataToRender = cmd.dataToRender()
-        Long projectName = params.project as Long
-        Long seqTypeName = params.seqType as Long
 
-        if (!projectName || !seqTypeName) {
+        if (!cmd.project || !cmd.seqType) {
             dataToRender.iTotalRecords = 0
             dataToRender.iTotalDisplayRecords = 0
             dataToRender.aaData = []
@@ -247,10 +251,9 @@ class AlignmentQualityOverviewController {
             return
         }
 
-        Project project = projectService.getProject(projectName)
-        SeqType seqType = SeqType.get(seqTypeName)
+        Project project = projectService.getProject(cmd.project.id)
 
-        List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, seqType)
+        List<AbstractQualityAssessment> dataOverall = overallQualityAssessmentMergedService.findAllByProjectAndSeqType(project, cmd.seqType, cmd.sample)
         List<AbstractQualityAssessment> dataChromosomeXY = chromosomeQualityAssessmentMergedService.qualityAssessmentMergedForSpecificChromosomes(CHROMOSOMES,
                 dataOverall*.qualityAssessmentMergedPass)
         Map<Long, Map<String, List<AbstractQualityAssessment>>> chromosomeMapXY
@@ -261,7 +264,7 @@ class AlignmentQualityOverviewController {
 
         QcThresholdService.ThresholdColorizer thresholdColorizer
         if (dataOverall) {
-            thresholdColorizer = qcThresholdService.createThresholdColorizer(project, seqType, dataOverall.first().class)
+            thresholdColorizer = qcThresholdService.createThresholdColorizer(project, cmd.seqType, dataOverall.first().class)
         }
 
         Map<Long, Map<String, List<ReferenceGenomeEntry>>> chromosomeLengthForChromosome =
@@ -333,7 +336,7 @@ class AlignmentQualityOverviewController {
                     "percentSingletons",
             ]
 
-            switch (seqType.name) {
+            switch (cmd.seqType.name) {
                 case SeqTypeNames.WHOLE_GENOME.seqTypeName:
                 case SeqTypeNames.WHOLE_GENOME_BISULFITE.seqTypeName:
                 case SeqTypeNames.WHOLE_GENOME_BISULFITE_TAGMENTATION.seqTypeName:
@@ -430,7 +433,7 @@ class AlignmentQualityOverviewController {
                     break
 
                 default:
-                    throw new RuntimeException("How should ${seqTypeName} be handled")
+                    throw new RuntimeException("${cmd.seqType.name} cannot be handled")
             }
 
             map += thresholdColorizer.colorize(qcKeysMap, it)
@@ -462,6 +465,21 @@ class AlignmentQualityOverviewController {
 
 class AlignmentQcCommand {
     SeqType seqType
+    Sample sample
+
+    static constraints = {
+        sample nullable: true
+    }
+}
+
+class AlignmentQcDataTableCommand extends DataTableCommand {
+    Project project
+    SeqType seqType
+    Sample sample
+
+    static constraints = {
+        sample nullable: true
+    }
 }
 
 class ViewCellRangerSummaryCommand {

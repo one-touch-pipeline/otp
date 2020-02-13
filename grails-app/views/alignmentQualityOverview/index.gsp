@@ -20,12 +20,10 @@
   - SOFTWARE.
   --}%
 
-<%@ page contentType="text/html;charset=UTF-8"%>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<meta name="layout" content="main" />
-<title><g:message code="alignment.quality.title" args="${[project, seqType]}"/></title>
+    <meta name="layout" content="main" />
+    <title><g:message code="alignment.quality.title" args="${[project, seqType]}"/></title>
     <asset:javascript src="pages/alignmentQualityOverview/index/dataTable.js"/>
     <asset:javascript src="pages/alignmentQualityOverview/index/alignmentQualityOverview.js"/>
 </head>
@@ -50,6 +48,13 @@
                     </div>
                 </g:if>
             </div>
+        </div>
+        <div id="sample" data-sample="${sample?.id}">
+            <g:if test="${sample}">
+                <br>
+                ${g.message(code: "alignment.quality.selectedSample", args: [sample])}
+                <g:link action="index" params="[seqType: seqType.id]">${g.message(code: "alignment.quality.showAll")}</g:link>
+            </g:if>
         </div>
         <div class="otpDataTables alignmentQualityOverviewTable">
             <otp:dataTable

@@ -114,6 +114,10 @@ $.otp.alignmentQualityOverviewTable = {
                         name: "seqType",
                         value: $('#seqType').val()
                     });
+                    aoData.push({
+                        name: "sample",
+                        value: $('#sample').data("sample")
+                    });
                     $.ajax({
                         "dataType": 'json',
                         "type": "POST",

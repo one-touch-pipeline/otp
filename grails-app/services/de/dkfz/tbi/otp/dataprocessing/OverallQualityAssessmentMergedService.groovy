@@ -31,7 +31,7 @@ import de.dkfz.tbi.otp.ngsdata.*
 class OverallQualityAssessmentMergedService {
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
-    List<AbstractQualityAssessment> findAllByProjectAndSeqType(Project project, SeqType seqType) {
+    List<AbstractQualityAssessment> findAllByProjectAndSeqType(Project project, SeqType seqType, Sample sample = null) {
         String maxQualityAssessmentMergedPassIdentifier = """
 select
     max(identifier)
@@ -40,6 +40,8 @@ from
 where
     qualityAssessmentMergedPass.abstractMergedBamFile = abstractMergedBamFile
 """
+
+        String selectSample = sample ? "and mergingWorkPackage.sample = :sample" : ""
 
         final String HQL = """
             select
@@ -52,6 +54,7 @@ where
             where
                 mergingWorkPackage.sample.individual.project = :project
                 and mergingWorkPackage.seqType = :seqType
+                ${selectSample}
                 and qualityAssessmentMergedPass.identifier = ( ${maxQualityAssessmentMergedPassIdentifier})
                 and mergingWorkPackage.bamFileInProjectFolder = abstractMergedBamFile
                 and abstractMergedBamFile.fileOperationStatus = :fileOperationStatus
@@ -77,6 +80,9 @@ where
             roddyMergedBamQaClass: [RoddyMergedBamQa.name, RnaQualityAssessment.name],
             allChromosomes: RoddyQualityAssessment.ALL,
         ]
+        if (sample) {
+            parameters.put("sample", sample)
+        }
 
         List<AbstractQualityAssessment> qas = AbstractQualityAssessment.executeQuery(HQL.toString(), parameters, [readOnly: true])
         return qas
