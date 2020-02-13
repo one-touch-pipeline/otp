@@ -63,7 +63,7 @@
                         <div class="row one">
                             <div>
                                 <strong>${g.message(code: "cellRanger.create.referenceGenomeIndex")}:</strong>
-                                <g:select name="referenceGenomeIndex.id" from="${referenceGenomeIndexes}" optionKey="id" noSelection="${[(""): "Select a reference"]}" value="${cmd?.referenceGenomeIndex?.id}"/>
+                                <g:select name="referenceGenomeIndex.id" from="${referenceGenomeIndexes}" optionKey="id" noSelection="${[(""): "Select a reference"]}" value="${cmd?.referenceGenomeIndex?.id ?: referenceGenomeIndex?.id}"/>
                             </div>
                             <div>
                                 <strong>${g.message(code: "cellRanger.create.seqType")}:</strong>

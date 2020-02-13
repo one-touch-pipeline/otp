@@ -179,7 +179,32 @@ class CellRangerWorkflowServiceSpec extends Specification implements CellRangerF
         }
     }
 
-    void "cleanupOutputDirectory, call correctPathPermissionRecursive for the work directory"() {
+    void "deleteOutputDirectory, call deleteDirectoryRecursively for the work directory"() {
+        given:
+        new TestConfigService(temporaryFolder.newFolder())
+
+        SingleCellBamFile singleCellBamFile = createBamFile()
+        Path workDirectory = singleCellBamFile.workDirectory.toPath()
+
+        CellRangerWorkflowService service = new CellRangerWorkflowService([
+                fileSystemService: Mock(FileSystemService) {
+                    _ * getRemoteFileSystem(_) >> FileSystems.default
+                    0 * _
+                },
+                fileService      : Mock(FileService) {
+                    1 * deleteDirectoryRecursively(workDirectory)
+                    0 * _
+                },
+        ])
+
+        when:
+        service.deleteOutputDirectory(singleCellBamFile)
+
+        then:
+        noExceptionThrown()
+    }
+
+    void "correctFilePermissions, call correctPathPermissionRecursive for the work directory"() {
         given:
         new TestConfigService(temporaryFolder.newFolder())
 

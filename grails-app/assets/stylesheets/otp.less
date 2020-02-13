@@ -526,7 +526,7 @@ th {
     color: #666666;
     font-weight: bold;
     line-height: 1.7em;
-    padding: 0.2em 0.6em;
+    padding: 0.2em 0.1em;
     border-top:  1px solid #DFDFDF;
     border-bottom: 2px solid #DFDFDF;
     white-space: nowrap;
@@ -1909,7 +1909,7 @@ td div {
 .configure {
     text-decoration: none;
 }
-.withdrawn {
+.withdrawn, .deleted {
     color: grey;
     > * {color: grey;}
 }
@@ -2623,4 +2623,11 @@ table.key-value-table {
 
 .vertical-align-middle * {
     vertical-align: middle;
+}
+
+input[type=submit].submitting {
+    background-image: url("spinner.gif");
+    background-repeat: no-repeat;
+    background-position: left;
+    padding-left: 18px;
 }

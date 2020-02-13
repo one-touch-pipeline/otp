@@ -23,19 +23,21 @@ package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
 import grails.gorm.transactions.Transactional
 import grails.validation.ValidationException
-import groovy.transform.Canonical
-import groovy.transform.Immutable
+import groovy.transform.*
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.dataprocessing.MergingCriteria
 import de.dkfz.tbi.otp.dataprocessing.Pipeline
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellBamFile
 import de.dkfz.tbi.otp.ngsdata.*
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.Entity
 
 @Transactional
 class CellRangerConfigurationService {
+
+    CellRangerWorkflowService cellRangerWorkflowService
 
     SeqType getSeqType() {
         CollectionUtils.exactlyOneElement(seqTypes)
@@ -91,6 +93,7 @@ class CellRangerConfigurationService {
     }
 
     @Immutable
+    @ToString
     static class Samples {
         List<Sample> allSamples
         List<Sample> selectedSamples
@@ -119,7 +122,7 @@ class CellRangerConfigurationService {
 
     /**
      * Currently it is not supported to have SeqTracks of differing SeqPlatformGroups and LibPrepKits within one
-     * Sample. For SingleCell data the import validator already throws an Error, see {@link MergingPreventionValidator}.
+     * Sample. For SingleCell data the import validator already throws an Error, see {@link de.dkfz.tbi.otp.ngsdata.metadatavalidation.fastq.validators.MergingPreventionValidator}.
      */
     static void constrainSeqTracksGroupedByPlatformGroupAndKit(Map<PlatformGroupAndKit, List<SeqTrack>> map) {
         assert map.size() <= 1: "Can not handle SeqTracks processed over multiple platforms or with different library preparation kits"
@@ -156,5 +159,42 @@ class CellRangerConfigurationService {
             return e.errors
         }
         return null
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#mwpToKeep.project, 'OTP_READ_ACCESS')")
+    void selectMwpAsFinal(CellRangerMergingWorkPackage mwpToKeep) {
+        List<CellRangerMergingWorkPackage> allMwps = getAllMwps(mwpToKeep.sample, mwpToKeep.seqType, mwpToKeep.config.programVersion, mwpToKeep.referenceGenomeIndex)
+        deleteMwps(allMwps - mwpToKeep)
+
+        mwpToKeep.status = CellRangerMergingWorkPackage.Status.FINAL
+        mwpToKeep.save(flush: true)
+        cellRangerWorkflowService.correctFilePermissions(mwpToKeep.bamFileInProjectFolder as SingleCellBamFile)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#sample.project, 'OTP_READ_ACCESS')")
+    void selectNoneAsFinal(Sample sample, SeqType seqType, String programVersion, ReferenceGenomeIndex reference) {
+        deleteMwps(getAllMwps(sample, seqType, programVersion, reference))
+    }
+
+    private List<CellRangerMergingWorkPackage> getAllMwps(Sample sample, SeqType seqType, String programVersion, ReferenceGenomeIndex reference) {
+        return (CellRangerMergingWorkPackage.createCriteria().list {
+            eq("sample", sample)
+            eq("seqType", seqType)
+            config {
+                eq("programVersion", programVersion)
+            }
+            eq("referenceGenomeIndex", reference)
+        } as List<CellRangerMergingWorkPackage>)
+    }
+
+    private void deleteMwps(List<CellRangerMergingWorkPackage> mwpToDelete) {
+        mwpToDelete.each {
+            assert it.status != CellRangerMergingWorkPackage.Status.FINAL
+        }
+        mwpToDelete.each {
+            it.status = CellRangerMergingWorkPackage.Status.DELETED
+            it.save(flush: true)
+            cellRangerWorkflowService.deleteOutputDirectory(it.bamFileInProjectFolder as SingleCellBamFile)
+        }
     }
 }

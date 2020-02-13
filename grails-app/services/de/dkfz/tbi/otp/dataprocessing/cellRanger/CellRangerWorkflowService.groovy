@@ -73,6 +73,12 @@ class CellRangerWorkflowService {
         }
     }
 
+    void deleteOutputDirectory(SingleCellBamFile singleCellBamFile) {
+        FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
+        Path workDirectory = fileSystem.getPath(singleCellBamFile.workDirectory.absolutePath)
+        fileService.deleteDirectoryRecursively(workDirectory)
+    }
+
     void correctFilePermissions(SingleCellBamFile singleCellBamFile) {
         FileSystem fileSystem = fileSystemService.getRemoteFileSystem(singleCellBamFile.realm)
         Path workDirectory = fileSystem.getPath(singleCellBamFile.workDirectory.absolutePath)

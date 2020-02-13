@@ -21,6 +21,8 @@
  */
 package de.dkfz.tbi.otp.dataprocessing.cellRanger
 
+import grails.validation.ValidationException
+import groovy.transform.Canonical
 import org.springframework.validation.Errors
 
 import de.dkfz.tbi.otp.*
@@ -36,6 +38,8 @@ class CellRangerController {
     static allowedMethods = [
             index : "GET",
             create: "POST",
+            finalRunSelection: "GET",
+            saveFinalRunSelection: "POST",
     ]
 
     static final List<String> ALLOWED_CELL_TYPE = ["neither", "expected", "enforced"]
@@ -87,6 +91,7 @@ class CellRangerController {
                 seqType               : seqType,
                 seqTypes              : seqTypes,
                 samples               : samples.selectedSamples,
+                referenceGenomeIndex  : cmd.reference,
                 referenceGenomeIndexes: toolName.referenceGenomeIndexes,
                 selectedIndividuals   : selectedIndividuals,
                 selectedSampleTypes   : selectedSampleTypes,
@@ -135,11 +140,99 @@ class CellRangerController {
         }
         redirect(action: "index", params: params)
     }
+
+    def finalRunSelection() {
+        List<Project> projects = projectService.getAllProjects()
+        if (!projects) {
+            return [
+                    projects: projects,
+            ]
+        }
+        ProjectSelection selection = projectSelectionService.getSelectedProject()
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
+
+
+        List<CellRangerMergingWorkPackage> mwps = CellRangerMergingWorkPackage.createCriteria().list {
+            sample {
+                individual {
+                    eq("project", project)
+                }
+            }
+        } as List<CellRangerMergingWorkPackage>
+
+        Map<GroupedMwp, List<CellRangerMergingWorkPackage>> grouped = mwps.groupBy({
+            new GroupedMwp(it.sample, it.seqType, it.config.programVersion, it.referenceGenomeIndex)
+        })
+
+        List<GroupedMwp> groupedMwps = grouped.collect { k, v ->
+            k.mwps = v
+            return k
+        }
+
+        groupedMwps.sort()
+        groupedMwps.each { it.mwps.sort() }
+
+        return [
+                project    : project,
+                projects   : projects,
+                groupedMwps: groupedMwps,
+        ]
+    }
+
+    def saveFinalRunSelection(MwpSelectionCommand cmd) {
+        if (!cmd.validate()) {
+            flash.message = new FlashMessage(g.message(code: "cellRanger.selection.failure") as String, cmd.errors)
+            redirect(action: "finalRunSelection")
+            return
+        }
+
+        try {
+            if (cmd.mwp?.isLong()) {
+                cellRangerConfigurationService.selectMwpAsFinal(CellRangerMergingWorkPackage.get(cmd.mwp.toLong()))
+            } else if (cmd.mwp == "delete") {
+                cellRangerConfigurationService.selectNoneAsFinal(cmd.sample, cmd.seqType, cmd.programVersion, cmd.reference)
+            }
+            flash.message = new FlashMessage(g.message(code: "cellRanger.selection.success") as String)
+        } catch (ValidationException e) {
+            flash.message = new FlashMessage(g.message(code: "cellRanger.selection.failure") as String, e.errors)
+        } catch (Exception e) {
+            flash.message = new FlashMessage(g.message(code: "cellRanger.selection.failure") as String, e.message)
+        }
+
+        redirect(action: "finalRunSelection")
+    }
+}
+
+@Canonical
+class GroupedMwp implements Comparable {
+    Sample sample
+    SeqType seqType
+    String programVersion
+    ReferenceGenomeIndex reference
+    List<CellRangerMergingWorkPackage> mwps
+
+    boolean isAtLeastOneInProgress() {
+        mwps.any { !it.bamFileInProjectFolder }
+    }
+
+    boolean isAnyUnsetAndNoneFinal() {
+        mwps.any { it.status == CellRangerMergingWorkPackage.Status.UNSET } && !mwps.any { it.status == CellRangerMergingWorkPackage.Status.FINAL }
+    }
+
+    @Override
+    int compareTo(Object o) {
+        this.sample.individual.displayName <=> o.sample.individual.displayName ?:
+                this.sample.sampleType.displayName <=> o.sample.sampleType.displayName ?:
+                        this.seqType.nameWithLibraryLayout <=> o.seqType.nameWithLibraryLayout ?:
+                                this.programVersion <=> o.programVersion ?:
+                                        this.reference.toString() <=> o.reference.toString()
+    }
 }
 
 class CellRangerSelectionCommand {
     Individual individual
     SampleType sampleType
+    ReferenceGenomeIndex reference
 
     static constraints = {
         individual nullable: true
@@ -161,4 +254,15 @@ class CellRangerConfigurationCommand extends CellRangerSelectionCommand {
             }
         }
     }
+}
+
+class MwpSelectionCommand {
+    Sample sample
+    SeqType seqType
+    String programVersion
+    ReferenceGenomeIndex reference
+
+    // we can't use a CellRangerMergingWorkPackage object here because we need to distinguish
+    // between "delete all" and no radio button selected
+    String mwp
 }

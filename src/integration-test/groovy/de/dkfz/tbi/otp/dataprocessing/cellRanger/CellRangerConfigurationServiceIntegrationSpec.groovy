@@ -241,4 +241,48 @@ class CellRangerConfigurationServiceIntegrationSpec extends Specification implem
         all.size() == 1
         all*.sample as Set == [sampleA] as Set
     }
+
+    void "test selectNoneAsFinal"() {
+        given:
+        createUserAndRoles()
+        CellRangerMergingWorkPackage mwp1 = createMergingWorkPackage(expectedCells: 1)
+        CellRangerMergingWorkPackage mwp2 = createMergingWorkPackage(expectedCells: 2, sample: mwp1.sample, seqType: mwp1.seqType, config: mwp1.config, referenceGenomeIndex: mwp1.referenceGenomeIndex)
+
+        CellRangerConfigurationService cellRangerConfigurationService = new CellRangerConfigurationService()
+        cellRangerConfigurationService.cellRangerWorkflowService = Mock(CellRangerWorkflowService) {
+            0 * correctFilePermissions(_)
+            1 * deleteOutputDirectory(mwp1.bamFileInProjectFolder)
+            1 * deleteOutputDirectory(mwp2.bamFileInProjectFolder)
+        }
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            cellRangerConfigurationService.selectNoneAsFinal(mwp1.sample, mwp1.seqType, mwp1.config.programVersion, mwp1.referenceGenomeIndex)
+        }
+
+        then:
+        [mwp1, mwp2].every { it.status == CellRangerMergingWorkPackage.Status.DELETED }
+    }
+
+    void "test selectMwpAsFinal"() {
+        given:
+        createUserAndRoles()
+        CellRangerMergingWorkPackage mwp1 = createMergingWorkPackage(expectedCells: 1)
+        CellRangerMergingWorkPackage mwp2 = createMergingWorkPackage(expectedCells: 2, sample: mwp1.sample, seqType: mwp1.seqType, config: mwp1.config, referenceGenomeIndex: mwp1.referenceGenomeIndex)
+
+        CellRangerConfigurationService cellRangerConfigurationService = new CellRangerConfigurationService()
+        cellRangerConfigurationService.cellRangerWorkflowService = Mock(CellRangerWorkflowService) {
+            1 * correctFilePermissions(mwp1.bamFileInProjectFolder)
+            1 * deleteOutputDirectory(mwp2.bamFileInProjectFolder)
+        }
+
+        when:
+        SpringSecurityUtils.doWithAuth(ADMIN) {
+            cellRangerConfigurationService.selectMwpAsFinal(mwp1)
+        }
+
+        then:
+        mwp1.status == CellRangerMergingWorkPackage.Status.FINAL
+        mwp2.status == CellRangerMergingWorkPackage.Status.DELETED
+    }
 }
