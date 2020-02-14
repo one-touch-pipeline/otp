@@ -34,6 +34,8 @@ import de.dkfz.tbi.otp.utils.StringUtils
 
 import java.text.SimpleDateFormat
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+
 class ProjectInfoController implements CheckAndCall {
 
     ProjectSelectionService projectSelectionService
@@ -50,8 +52,8 @@ class ProjectInfoController implements CheckAndCall {
 
         ProjectSelection selection = projectSelectionService.selectedProject
 
-        // we need to reload it to get proper access to all properties
-        Project project = Project.get(projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection).id)
+        Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
+        project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [projectInfos: 'join']]))
 
         return [
                 projects           : projects,
