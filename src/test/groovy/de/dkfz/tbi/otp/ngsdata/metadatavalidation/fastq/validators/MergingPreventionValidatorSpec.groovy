@@ -51,6 +51,7 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
         [
                 CellRangerConfig,
                 CellRangerMergingWorkPackage,
+                DataFile,
                 Individual,
                 LibraryPreparationKit,
                 Pipeline,
@@ -78,10 +79,10 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
         scSample.individual.project = project
         scSample.individual.save(flush: true)
         SeqType scSeqType = DomainFactory.proxyCellRanger.createSeqType()
-        DomainFactory.proxyCellRanger.createMergingWorkPackage(
+        addSeqTrack(DomainFactory.proxyCellRanger.createMergingWorkPackage(
                 sample: scSample,
                 seqType: scSeqType,
-        )
+        ))
         DomainFactory.createSampleIdentifier(sample: scSample, name: "sample1")
         createMergingCriteria([
                 project: scSample.project,
@@ -140,6 +141,7 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
             mergingWorkPackage.seqPlatformGroup.save(flush: true)
             mergingWorkPackage.libraryPreparationKit = libraryPreparationKit
             mergingWorkPackage.save(flush: true)
+            addSeqTrack(mergingWorkPackage)
         }
 
         String furtherValues = [
@@ -232,7 +234,7 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
     }
 
     @Unroll
-    void "validate, if compatible mergingWorkPackage exist, add merging warning (case: #name)"() {
+    void "validate, if compatible mergingWorkPackage exist and is not withdrawn, add merging warning (case: #name)"() {
         given:
         Map data = createData(factory, seqTypeClosure)
 
@@ -264,9 +266,35 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
     }
 
     @Unroll
-    void "validate, if mergingWorkPackage has not compatible seqPlatform, add merging warning (case: #name)"() {
+    void "validate, if compatible mergingWorkPackage exist, but has only withdrawn data, do not create warning (case: #name)"() {
         given:
-        Map data = createData(factory, seqTypeClosure)
+        Map data = createData(factory, seqTypeClosure, true)
+
+        SeqPlatformGroup seqPlatformGroup = data.mergingWorkPackage.seqPlatformGroup
+        seqPlatformGroup.seqPlatforms.add(data.seqPlatform)
+        seqPlatformGroup.save(flush: true)
+
+        MetadataValidationContext context = MetadataValidationContextFactory.createContext(data.content)
+
+        when:
+        data.validator.validate(context)
+
+        then:
+        context.problems.empty
+
+        where:
+        input << CASE_SAMPLE_EXIST_CAUSE_MESSAGE
+
+        name = input.name
+        factory = input.factory
+        seqTypeClosure = input.seqTypeClosure
+        errorLevel = input.errorLevel
+    }
+
+    @Unroll
+    void "validate, if mergingWorkPackage has not compatible seqPlatform, add merging warning (case: #name, withdrawn: #withdrawn)"() {
+        given:
+        Map data = createData(factory, seqTypeClosure, withdrawn)
 
         SeqPlatformGroup seqPlatformGroup = data.mergingWorkPackage.seqPlatformGroup
         seqPlatformGroup.seqPlatforms.add(createSeqPlatform())
@@ -282,24 +310,30 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
                 new Problem(context.spreadsheet.dataRows[0].cells as Set, errorLevel,
                         "Sample ${data.mergingWorkPackage.sample.displayName} with sequencing type " +
                                 "${data.mergingWorkPackage.seqType.displayNameWithLibraryLayout} can not be merged with the existing bam file, since " +
-                                "new seq platform ${data.seqPlatform} is not compable with seq platform group ${data.mergingWorkPackage.seqPlatformGroup}",
+                                "new seq platform ${data.seqPlatform} is not compatible with seq platform group ${data.mergingWorkPackage.seqPlatformGroup}",
                         "Sample can not be merged with existing data, because merging criteria is incompatible."),
         ]
         TestCase.assertContainSame(expectedProblems, context.problems)
 
         where:
-        input << CASE_SEQ_PLATFORM_DIFFER_CAUSE_MESSAGE
+        input << CASE_SEQ_PLATFORM_DIFFER_CAUSE_MESSAGE.collectMany {
+            [
+                    [withdrawn: true] + it,
+                    [withdrawn: false] + it,
+            ]
+        }
 
         name = input.name
         factory = input.factory
         seqTypeClosure = input.seqTypeClosure
         errorLevel = input.errorLevel
+        withdrawn = input.withdrawn
     }
 
     @Unroll
-    void "validate, if libraryPreparationKit is used and different, add merging warning (case: #name)"() {
+    void "validate, if libraryPreparationKit is used and different, add merging warning (case: #name, withdrawn: #withdrawn)"() {
         given:
-        Map data = createData(factory, seqTypeClosure)
+        Map data = createData(factory, seqTypeClosure, withdrawn)
 
         SeqPlatformGroup seqPlatformGroup = data.mergingWorkPackage.seqPlatformGroup
         seqPlatformGroup.seqPlatforms.add(data.seqPlatform)
@@ -323,12 +357,18 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
         TestCase.assertContainSame(expectedProblems, context.problems)
 
         where:
-        input << CASE_LIBRARY_PREPARATION_KIT_DIFFER_CAUSE_MESSAGE
+        input << CASE_LIBRARY_PREPARATION_KIT_DIFFER_CAUSE_MESSAGE.collectMany {
+            [
+                    [withdrawn: true] + it,
+                    [withdrawn: false] + it,
+            ]
+        }
 
         name = input.name
         factory = input.factory
         seqTypeClosure = input.seqTypeClosure
         errorLevel = input.errorLevel
+        withdrawn = input.withdrawn
     }
 
     static private final List<Map<String, ?>> CASE_LIBRARY_PREPARATION_KIT_DIFFER_CAUSE_MESSAGE = [
@@ -388,7 +428,7 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
             ],
     ]*.asImmutable().asImmutable()
 
-    private Map<String, ?> createData(IsAlignment alignment, Closure<SeqType> seqTypeClosure) {
+    private Map<String, ?> createData(IsAlignment alignment, Closure<SeqType> seqTypeClosure, boolean withdrawnSeqTracks = false) {
         DomainFactory.createAllAlignableSeqTypes()
 
         MergingWorkPackage mergingWorkPackage = alignment.createMergingWorkPackage([
@@ -397,15 +437,17 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
         mergingWorkPackage.project.alignmentDeciderBeanName = OTP_ALIGNMENT
         mergingWorkPackage.project.save(flush: true)
 
+        createMergingCriteria([
+                project: mergingWorkPackage.project,
+                seqType: mergingWorkPackage.seqType,
+        ])
+
+        addSeqTrack(mergingWorkPackage, withdrawnSeqTracks)
+
         SeqPlatform seqPlatform = createSeqPlatform()
 
         SampleIdentifier sampleIdentifier = createSampleIdentifier([
                 sample: mergingWorkPackage.sample,
-        ])
-
-        createMergingCriteria([
-                project: mergingWorkPackage.project,
-                seqType: mergingWorkPackage.seqType,
         ])
 
         String content = [
@@ -444,5 +486,15 @@ class MergingPreventionValidatorSpec extends Specification implements DataTest, 
                 content              : content,
                 validator            : validator,
         ]
+    }
+
+    private void addSeqTrack(MergingWorkPackage mergingWorkPackage, boolean withdrawnSeqTracks = false) {
+        SeqTrack seqTrack = DomainFactory.createSeqTrack(mergingWorkPackage)
+        createDataFile([
+                seqTrack     : seqTrack,
+                fileWithdrawn: withdrawnSeqTracks,
+        ])
+        mergingWorkPackage.addToSeqTracks(seqTrack)
+        mergingWorkPackage.save(flush: true)
     }
 }

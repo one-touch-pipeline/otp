@@ -123,9 +123,11 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
         if (mergingWorkPackages) {
             String messagePrefix = "Sample ${sample.displayName} with sequencing type ${seqType.displayNameWithLibraryLayout}"
             if (seqType in singleCellSeqTypes) {
-                context.addProblem(valueTuple.cells, Level.ERROR,
-                        "${messagePrefix} would be automatically merged with existing samples.",
-                        "Sample would be automatically merged with existing samples.")
+                if (mergingWorkPackages.any { hasNonWithdrawnSeqTracks(it) }) {
+                    context.addProblem(valueTuple.cells, Level.ERROR,
+                            "${messagePrefix} would be automatically merged with existing samples.",
+                            "Sample would be automatically merged with existing samples.")
+                }
             } else if (seqType in bulkSeqTypes && sample.project.alignmentDeciderBeanName != AlignmentDeciderBeanName.NO_ALIGNMENT) {
                 mergingWorkPackages.each { MergingWorkPackage mergingWorkPackage ->
                     MergingCriteria mergingCriteria = atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(mergingWorkPackage.project, seqType))
@@ -134,13 +136,15 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
                     boolean mergeableLibPrepKit = useLibPrepKit ? mergingWorkPackage.libraryPreparationKit == libraryPreparationKit : true
 
                     if (mergeableSeqPlatform && mergeableLibPrepKit) {
-                        context.addProblem(valueTuple.cells, Level.WARNING,
-                                "${messagePrefix} would be automatically merged with existing samples.",
-                                "Sample would be automatically merged with existing samples.")
+                        if (hasNonWithdrawnSeqTracks(mergingWorkPackage)) {
+                            context.addProblem(valueTuple.cells, Level.WARNING,
+                                    "${messagePrefix} would be automatically merged with existing samples.",
+                                    "Sample would be automatically merged with existing samples.")
+                        }
                     } else {
                         List<String> warnings = []
                         if (!mergeableSeqPlatform) {
-                            warnings << "new seq platform ${seqPlatform} is not compable with seq platform group ${mergingWorkPackage.seqPlatformGroup}"
+                            warnings << "new seq platform ${seqPlatform} is not compatible with seq platform group ${mergingWorkPackage.seqPlatformGroup}"
                         }
                         if (!mergeableLibPrepKit) {
                             warnings << "new library preparation kit ${libraryPreparationKit} differs from old library preparation kit ${mergingWorkPackage.libraryPreparationKit}"
@@ -151,6 +155,12 @@ class MergingPreventionValidator extends ValueTuplesValidator<MetadataValidation
                     }
                 }
             }
+        }
+    }
+
+    private boolean hasNonWithdrawnSeqTracks(MergingWorkPackage mergingWorkPackage) {
+        return mergingWorkPackage.seqTracks.find {
+            !it.withdrawn
         }
     }
 

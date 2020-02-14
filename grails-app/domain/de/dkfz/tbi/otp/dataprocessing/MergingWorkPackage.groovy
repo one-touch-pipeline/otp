@@ -117,7 +117,7 @@ class MergingWorkPackage extends AbstractMergingWorkPackage {
                 seqType         : seqTrack.seqType,
                 seqPlatformGroup: seqTrack.seqPlatformGroup,
         ]
-        if (atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(seqTrack.project, seqTrack.seqType)).useLibPrepKit) {
+        if (atMostOneElement(MergingCriteria.findAllByProjectAndSeqType(seqTrack.project, seqTrack.seqType))?.useLibPrepKit) {
             properties += [libraryPreparationKit: seqTrack.libraryPreparationKit]
         }
         if (seqTrack.seqType.hasAntibodyTarget) {
