@@ -24,6 +24,7 @@ package de.dkfz.tbi.otp.egaSubmission
 import grails.gorm.transactions.Transactional
 import groovy.transform.*
 import org.hibernate.criterion.CriteriaSpecification
+import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 
 import de.dkfz.tbi.otp.dataprocessing.AbstractMergedBamFile
@@ -53,6 +54,12 @@ class EgaSubmissionService {
 
         return submission
     }
+
+    @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject.project, 'OTP_READ_ACCESS')")
+    EgaSubmission getEgaSubmission(Long id) {
+        return EgaSubmission.get(id)
+    }
+
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
     void updateSubmissionState(EgaSubmission submission, EgaSubmission.State state) {

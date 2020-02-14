@@ -62,6 +62,8 @@
                         <g:if test="${it.state == de.dkfz.tbi.otp.egaSubmission.EgaSubmission.State.SELECTION}">
                             <g:link action="editSubmission" params="['id': it.id]"><g:message code="egaSubmission.overview.continue"/></g:link>
                         </g:if><g:else>
+                            <g:link action="studyMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.studyMetadata"/></g:link>
+                            <br>
                             <g:link action="sampleMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.sampleMetadata"/></g:link>
                             <br>
                             <g:link action="experimentalMetadata" params="['id': it.id]"><g:message code="egaSubmission.overview.experimentalMetadata"/></g:link>

@@ -189,19 +189,32 @@ class EgaSubmissionController implements CheckAndCall, SubmitCommands {
         ]
     }
 
+    Map studyMetadata() {
+         getEgaSubmission params.id as Long
+    }
+
     Map sampleMetadata() {
-        return [
-                submission: EgaSubmission.get(params.id)
-        ]
+        getEgaSubmission params.id as Long
     }
 
     Map experimentalMetadata() {
-        EgaSubmission submission = EgaSubmission.get(params.id)
+        getEgaSubmission(params.id as Long) { EgaSubmission egaSubmission ->
+            return [
+                    metadata: egaSubmissionService.getExperimentalMetadata(egaSubmission)
+            ]
+        }
+    }
+
+    private Closure<Map> getEgaSubmission = { Long id, Closure<Map> additionalReturns = { EgaSubmission egaSubmission -> return [:] } ->
+        EgaSubmission egaSubmission = egaSubmissionService.getEgaSubmission(id)
+        if (!egaSubmission) {
+            redirect(action: "overview")
+            return
+        }
 
         return [
-                submission: submission,
-                metadata  : egaSubmissionService.getExperimentalMetadata(submission),
-        ]
+                submission: egaSubmission
+        ] + additionalReturns(egaSubmission)
     }
 
     def helpPage() {
