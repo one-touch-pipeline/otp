@@ -41,6 +41,7 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
     private static final Spreadsheet.Delimiter DEFAULT_DELIMITER = Spreadsheet.Delimiter.COMMA
     private static final SampleType.SpecificReferenceGenome DEFAULT_SPECIFIC_REF_GEN = SampleType.SpecificReferenceGenome.USE_PROJECT_DEFAULT
     private static final String HEADER = SampleIdentifierService.BulkSampleCreationHeader.getHeaders(DEFAULT_DELIMITER)
+    private static final String SAMPLE_IDENTIFER_NAME = "New name"
 
     @Override
     Class[] getDomainClassesToMock() {
@@ -591,41 +592,50 @@ class SampleIdentifierServiceSpec extends Specification implements DataTest, Ser
     void "check if updateSampleIdentifierName, save new name of sample identifier"() {
         given:
         SampleIdentifier sampleIdentifier = createSampleIdentifier()
-        String name = "New Name"
         SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
 
         when:
-        sampleIdentifierService.updateSampleIdentifierName(sampleIdentifier, name)
+        sampleIdentifierService.updateSampleIdentifierName(sampleIdentifier, SAMPLE_IDENTIFER_NAME)
 
         then:
-        sampleIdentifier.name == name
+            sampleIdentifier.name == SAMPLE_IDENTIFER_NAME
+    }
+
+    void "check if deleteSampleIdentifier, deletes sample identifier"() {
+        given:
+        SampleIdentifier sampleIdentifier = createSampleIdentifier()
+        SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
+
+        when:
+        sampleIdentifierService.deleteSampleIdentifier(sampleIdentifier)
+
+        then:
+        sampleIdentifier.findAll().size() == 0
     }
 
     void "check if createSampleIdentifier, creates a new sample identifier with sample and name"() {
         given:
-        String name = "New Name"
         Sample sample = createSample()
         SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
 
         when:
-        SampleIdentifier newSampleIdentifier = sampleIdentifierService.createSampleIdentifier(name, sample)
+        SampleIdentifier newSampleIdentifier = sampleIdentifierService.createSampleIdentifier(SAMPLE_IDENTIFER_NAME, sample)
 
         then:
-        newSampleIdentifier.name == name
+        newSampleIdentifier.name == SAMPLE_IDENTIFER_NAME
         newSampleIdentifier.sample == sample
     }
 
     void "check if getOrCreateSampleIdentifier, creates a new sample identifier when params not don't match"() {
         given:
         SampleIdentifierService sampleIdentifierService = new SampleIdentifierService()
-        String name = "New name"
         Sample sample = createSample()
 
         when:
-        SampleIdentifier newSampleIdentifier = sampleIdentifierService.getOrCreateSampleIdentifier(name, sample)
+        SampleIdentifier newSampleIdentifier = sampleIdentifierService.getOrCreateSampleIdentifier(SAMPLE_IDENTIFER_NAME, sample)
 
         then:
-        newSampleIdentifier.name == name
+        newSampleIdentifier.name == SAMPLE_IDENTIFER_NAME
         newSampleIdentifier.sample == sample
     }
 

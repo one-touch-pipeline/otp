@@ -114,12 +114,7 @@ class IndividualController {
             redirect(action: "insert")
         } else {
             Individual individual = individualService.createIndividual(cmd)
-            if (cmd.checkRedirect) {
-                redirect(action: "show", id: individual.id)
-            }
-            else {
-                redirect(action: "insert", id: individual.id)
-            }
+            redirect(action: cmd.checkRedirect ? "show" : "insert", id: individual.id)
             flash.message = new FlashMessage(g.message(code: "individual.update.create.success") as String)
         }
     }
@@ -172,7 +167,11 @@ class IndividualController {
         } else {
             try {
                 cmd.editedSampleIdentifiers.each { EditedSampleIdentifierCommand editedSampleIdentifierCommand ->
-                    sampleIdentifierService.updateSampleIdentifierName(editedSampleIdentifierCommand.sampleIdentifier, editedSampleIdentifierCommand.name)
+                    if (editedSampleIdentifierCommand.delete) {
+                        sampleIdentifierService.deleteSampleIdentifier(editedSampleIdentifierCommand.sampleIdentifier)
+                    } else {
+                        sampleIdentifierService.updateSampleIdentifierName(editedSampleIdentifierCommand.sampleIdentifier, editedSampleIdentifierCommand.name)
+                    }
                 }
                 cmd.newIdentifiersNames.each { String name ->
                     sampleIdentifierService.createSampleIdentifier(name, cmd.sample)
@@ -327,6 +326,7 @@ class UpdateSampleCommand implements Validateable {
 class EditedSampleIdentifierCommand implements Validateable {
     String name
     SampleIdentifier sampleIdentifier
+    boolean delete
 
     static constraints = {
         name(blank: false)

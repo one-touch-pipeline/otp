@@ -28,12 +28,18 @@
                 <td>
                     <strong><g:message code="individual.show.existingSamples"/></strong>
                 </td>
+                <td>
+                    <strong><g:message code="document.delete"/></strong>
+                </td>
             </tr>
         <g:each in="${sample.sampleIdentifiers}" var="sampleIdentifier" status="i">
             <tr>
                 <td>
                     <input type="text" name="editedSampleIdentifiers[${i}].name" value="${sampleIdentifier.name}"/>
                     <input type="hidden" name="editedSampleIdentifiers[${i}].sampleIdentifier" value="${sampleIdentifier.id}"/>
+                </td>
+                <td>
+                    <input type="checkbox" name="editedSampleIdentifiers[${i}].delete"/>
                 </td>
             </tr>
         </g:each>
@@ -44,6 +50,10 @@
              With this workaround we always add a field to have at least two entries. We filter out empty entries anyways.
              --}%
             <input type="hidden" name="newIdentifiersNames" value=""/>
+            <tr style="background-color: white">
+                <td colspan="2"><hr></td>
+                <td></td>
+            </tr>
             <tr>
                 <td>
                     <strong><g:message code="individual.show.createSample"/></strong>
@@ -63,12 +73,14 @@
                         </div>
                     </g:each>
                 </td>
+                <td></td>
             </tr>
             <tr>
                 <td>
                     <g:submitButton name="update" value="Update"/>
-                    <button type="reset" id="cancel-button">Cancel</button>
+                    <button type="reset" id="cancel-button">Reset</button>
                 </td>
+                <td></td>
             </tr>
         </table>
     </g:form>

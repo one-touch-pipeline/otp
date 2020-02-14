@@ -244,9 +244,14 @@ class SampleIdentifierService {
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateSampleIdentifierName (SampleIdentifier sampleIdentifier, String name) {
-        sampleIdentifier.name = name
-        sampleIdentifier.save(flush: true)
+    void updateSampleIdentifierName(SampleIdentifier sampleIdentifier, String name) {
+            sampleIdentifier.name = name
+            sampleIdentifier.save(flush: true)
+    }
+
+    @PreAuthorize("hasRole('ROLE_OPERATOR')")
+    void deleteSampleIdentifier(SampleIdentifier sampleIdentifier) {
+        sampleIdentifier.delete(flush: true)
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR')")
