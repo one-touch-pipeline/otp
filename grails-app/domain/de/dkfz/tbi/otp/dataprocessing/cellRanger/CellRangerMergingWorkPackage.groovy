@@ -29,8 +29,8 @@ class CellRangerMergingWorkPackage extends MergingWorkPackage {
 
     enum Status {
         FINAL,
-        NOT_FINAL,
-        UNSET
+        DELETED,
+        UNSET,
     }
 
     Integer expectedCells
