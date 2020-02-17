@@ -35,7 +35,8 @@
     </div>
     <div class="project-dropdown">
         %{-- variables are form ProjectSelectionInterceptor --}%
-        <g:select id="project" name='id' from='${availableProjects}' value='${projectSelection?.projects?.first()?.id}'
+        <g:select id="project" name='id' class="use-select-2"
+                  from='${availableProjects}' value='${projectSelection?.projects?.first()?.id}'
                   optionKey='id' optionValue='displayName'
                   autocomplete="off" onChange='submit();'/>
     </div>

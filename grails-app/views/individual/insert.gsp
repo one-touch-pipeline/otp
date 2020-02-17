@@ -108,7 +108,9 @@
                             <label for="sampleType"><g:message code="individual.insert.sampleType"/></label>
                         </td>
                         <td>
-                            <g:select name="sampleType" from="${sampleTypes}" class="dropDown" noSelection="[null: '']"/>
+                            %{-- Don't use select2: This field is cloned (when adding multiple samples), and we don't yet know
+                                 how to deal with that, without breaking event-handlers attached to this tag. --}%
+                            <g:select name="sampleType" class="dont-use-select-2" from="${sampleTypes}" noSelection="[null: '']"/>
                         </td>
                     </tr>
                     <tr class="sampleIdentifier hidden">
@@ -137,8 +139,10 @@
                                     <label for="samples[${sampleCounter}].sampleType"><g:message code="individual.insert.sampleType"/></label>
                                 </td>
                                 <td>
-                                    <g:select name="samples[${sampleCounter}].sampleType" from="${sampleTypes}" class="dropDown" noSelection="[null: '']"
-                                              value="${sample.sampleType}"/>
+                                    %{-- Don't use select2: This field occurs multiple times (when adding multiple samples), and we don't yet know
+                                         how to deal with that, without breaking event-handlers attached to this tag. --}%
+                                    <g:select name="samples[${sampleCounter}].sampleType" class="dont-use-select-2"
+                                              from="${sampleTypes}" noSelection="[null: '']" value="${sample.sampleType}"/>
                                 </td>
                             </tr>
                             <tr class="sampleIdentifier">

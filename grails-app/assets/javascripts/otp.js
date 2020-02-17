@@ -381,8 +381,13 @@ $.otp.tableButtons = [
 ];
 
 $(document).ready(function() {
-    $('#project').select2();
-    $('.use-select-2').select2();
+    // apply select2 fancy search-box to all select-boxes that want it.
+    // Currently opt-in, by setting css-class on the g:select
+    // Since there are some cases where select2 doesn't integrate nicely we also provide
+    // an opt-out class. If you use the opt-out, please leave a comment explaining why!
+    $('.use-select-2').not('.dont-use-select-2').select2({
+        minimumResultsForSearch: 10
+    });
 
     var t = $('[title]');
     t.tooltip();
