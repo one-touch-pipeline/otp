@@ -53,7 +53,7 @@
                 </tr>
                 <tr title="<g:message code="egaSubmission.newSubmission.studyType.tooltip"/>">
                     <td class="myKey"><g:message code="egaSubmission.newSubmission.studyType"/></td>
-                    <td><g:select class="criteria" id="studyType" name='studyType' from='${studyTypes}' value="${cmd?.studyType?: defaultStudyType}"/></td>
+                    <td><g:select class="use-select-2" id="studyType" name='studyType' from='${studyTypes}' value="${cmd?.studyType?: defaultStudyType}"/></td>
                 </tr>
                 <tr title="<g:message code="egaSubmission.newSubmission.studyAbstract.tooltip"/>">
                     <td class="myKey"><g:message code="egaSubmission.newSubmission.studyAbstract"/></td>

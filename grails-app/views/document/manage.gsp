@@ -63,7 +63,9 @@
                         <g:uploadForm action="upload" useToken="true">
                             <input type="hidden" name="documentType.id" value="${document.key.id}"/>
                             <input type="file" name="content" />
-                            <g:select name="formatType" from="${Document.FormatType}" optionValue="displayName" noSelection="${[(""): "Select format type"]}" />
+                            <g:select id="formatType-${document.key.title}" class="use-select-2"
+                                      name="formatType" from="${Document.FormatType}" optionValue="displayName"
+                                      noSelection="${[(""): "Select format type"]}" />
                             <g:submitButton name="${g.message(code: "document.update")}"/>
                         </g:uploadForm>
                     </td>

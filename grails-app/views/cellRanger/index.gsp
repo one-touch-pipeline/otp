@@ -40,12 +40,14 @@
                 <div class="cell-ranger-selection-grid-wrapper">
                     <div>
                         <strong>${g.message(code: "cellRanger.individual")}:</strong><br>
-                        <g:select name="individual.id" from="${allIndividuals}" optionKey="id" value="${individual?.id}"
+                        <g:select class="use-select-2"
+                                  name="individual.id" from="${allIndividuals}" optionKey="id" value="${individual?.id}"
                                   noSelection="${[(""): "All Individuals"]}" onChange="submit()"/>
                     </div>
                     <div>
                         <strong>${g.message(code: "cellRanger.sampleType")}:</strong><br>
-                        <g:select name="sampleType.id" from="${allSampleTypes}" optionKey="id" value="${sampleType?.id}"
+                        <g:select class="use-select-2"
+                                  name="sampleType.id" from="${allSampleTypes}" optionKey="id" value="${sampleType?.id}"
                                   noSelection="${[(""): "All Sample Types"]}" onChange="submit()"/>
                     </div>
                 </div>
@@ -62,11 +64,15 @@
                         <div class="row one">
                             <div>
                                 <strong>${g.message(code: "cellRanger.create.referenceGenomeIndex")}:</strong>
-                                <g:select name="referenceGenomeIndex.id" from="${referenceGenomeIndexes}" optionKey="id" noSelection="${[(""): "Select a reference"]}" value="${cmd?.referenceGenomeIndex?.id ?: referenceGenomeIndex?.id}"/>
+                                <g:select name="referenceGenomeIndex.id" class="use-select-2"
+                                          from="${referenceGenomeIndexes}"
+                                          optionKey="id" value="${cmd?.referenceGenomeIndex?.id ?: referenceGenomeIndex?.id}"
+                                          noSelection="${[(""): "Select a reference"]}" />
                             </div>
                             <div>
                                 <strong>${g.message(code: "cellRanger.create.seqType")}:</strong>
-                                <g:select name="seqType.id" from="${seqTypes}" optionKey="id" value="${cmd?.seqType?.id}"/>
+                                <g:select name="seqType.id" class="use-select-2"
+                                          from="${seqTypes}" optionKey="id" value="${cmd?.seqType?.id}"/>
                             </div>
                         </div>
                         <div class="row two">

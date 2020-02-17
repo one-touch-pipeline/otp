@@ -47,7 +47,7 @@
          <table id="searchCriteriaTable">
             <tr>
                 <td class="attribute">
-                    <select class="criteria" name="criteria">
+                    <select class="use-select-2" name="criteria">
                         <option value="none"><g:message code="individual.search.none"/></option>
                         <option value="projectSelection"><g:message code="individual.search.project"/></option>
                         <option value="pidSearch"><g:message code="individual.search.pid"/></option>
@@ -57,11 +57,13 @@
                     </select>
                 </td>
                 <td class="value">
-                    <g:select class="criteria" name="projectSelection" from="${availableProjects}" optionValue="displayName" optionKey="id" style="display: none"/>
+                    <g:select name="projectSelection" class="criteria use-select-2"
+                              from="${availableProjects}" optionValue="displayName" optionKey="id"
+                              style="display: none"/>
                     <input class="criteria" type="text" name="pidSearch" style="display: none" placeholder="min. 3 characters"/>
                     <input class="criteria" type="text" name="mockFullNameSearch" style="display: none" placeholder="min. 3 characters"/>
                     <input class="criteria" type="text" name="mockPidSearch" style="display: none" placeholder="min. 3 characters"/>
-                    <g:select class="criteria" name="typeSelection" from="${individualTypes}" style="display: none"/>
+                    <g:select class="criteria use-select-2" name="typeSelection" from="${individualTypes}" style="display: none"/>
                 </td>
                 <td class="remove">
                     <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.remove")}" style="display: none"/>

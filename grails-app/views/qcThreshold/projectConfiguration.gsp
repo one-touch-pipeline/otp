@@ -66,7 +66,8 @@
                             <td>
                                 <g:if test="${v.projectExistingThresholds}">
                                     <span class="edit-fields" style="display: none;">
-                                        <g:select class="threshold" name="condition" from="${compare}" value="${v.projectExistingThresholds?.compare}"
+                                        <g:select id="" name="condition" class="threshold use-select-2"
+                                                  from="${compare}" value="${v.projectExistingThresholds?.compare}"
                                                   optionValue="displayName" noSelection="['': 'Select']"/>
                                     </span>
                                     <span class="show-fields">
@@ -86,7 +87,9 @@
                             <td>
                                 <g:if test="${v.projectExistingThresholds}">
                                     <span class="edit-fields" style="display: none;">
-                                        <input class="threshold" name="errorThresholdLower" value="${v.projectExistingThresholds?.errorThresholdLower}" title="${g.message(code: "qcThreshold.lowerError")}">
+                                        <input id="" name="errorThresholdLower" class="threshold"
+                                               value="${v.projectExistingThresholds?.errorThresholdLower}"
+                                               title="${g.message(code: "qcThreshold.lowerError")}">
                                     </span>
                                     <span class="show-fields">
                                         ${v.projectExistingThresholds?.errorThresholdLower}
@@ -105,7 +108,9 @@
                             <td>
                                 <g:if test="${v.projectExistingThresholds}">
                                     <span class="edit-fields" style="display: none;">
-                                        <input class="threshold" name="warningThresholdLower" value="${v.projectExistingThresholds?.warningThresholdLower}" title="${g.message(code: "qcThreshold.lowerWarn")}">
+                                        <input id="" name="warningThresholdLower" class="threshold"
+                                               value="${v.projectExistingThresholds?.warningThresholdLower}"
+                                               title="${g.message(code: "qcThreshold.lowerWarn")}">
                                     </span>
                                     <span class="show-fields">
                                         ${v.projectExistingThresholds?.warningThresholdLower}
@@ -124,7 +129,9 @@
                             <td>
                                 <g:if test="${v.projectExistingThresholds}">
                                     <span class="edit-fields" style="display: none;">
-                                        <input class="threshold" name="warningThresholdUpper" value="${v.projectExistingThresholds?.warningThresholdUpper}" title="${g.message(code: "qcThreshold.upperWarn")}">
+                                        <input id="" name="warningThresholdUpper" class="threshold"
+                                               value="${v.projectExistingThresholds?.warningThresholdUpper}"
+                                               title="${g.message(code: "qcThreshold.upperWarn")}">
                                     </span>
                                     <span class="show-fields">
                                         ${v.projectExistingThresholds?.warningThresholdUpper}
@@ -143,7 +150,7 @@
                             <td>
                                 <g:if test="${v.projectExistingThresholds}">
                                     <span class="edit-fields" style="display: none;">
-                                        <input class="threshold" name="errorThresholdUpper" value="${v.projectExistingThresholds?.errorThresholdUpper}" title="${g.message(code: "qcThreshold.upperError")}">
+                                        <input id="" name="errorThresholdUpper" class="threshold" value="${v.projectExistingThresholds?.errorThresholdUpper}" title="${g.message(code: "qcThreshold.upperError")}">
                                     </span>
                                     <span class="show-fields">
                                         ${v.projectExistingThresholds?.errorThresholdUpper}
@@ -162,7 +169,8 @@
                             <td>
                                 <g:if test="${v.projectExistingThresholds}">
                                     <span class="edit-fields" style="display: none;">
-                                        <g:select class="threshold" name="property2" from="${cl.availableThresholdProperties}"
+                                        <g:select id="" name="property2" class="threshold use-select-2"
+                                                  from="${cl.availableThresholdProperties}"
                                                   value="${v.projectExistingThresholds?.qcProperty2}" noSelection="['': '']"/>
                                     </span>
                                     <span class="show-fields">
@@ -202,30 +210,31 @@
                     <input type="hidden" name="project.id" value="${selectedProject.id}"/>
                     <otp:tableAdd>
                         <td>
-                            <g:select class="threshold" name="property" from="${cl.availableThresholdProperties}"
+                            <g:select id="" name="property" class="threshold use-select-2"
+                                      from="${cl.availableThresholdProperties}" noSelection="['': 'Select']"/>
+                        </td>
+                        <td>
+                            <g:select id="" name="seqType.id" class="threshold use-select-2"
+                                      from="${seqTypes}" optionKey="id" noSelection="['': 'Select']"/>
+                        </td>
+                        <td>
+                            <g:select id="" name="condition" class="threshold use-select-2" from="${compare}" optionValue="displayName"
                                       noSelection="['': 'Select']"/>
                         </td>
                         <td>
-                            <g:select class="threshold" name="seqType.id" from="${seqTypes}" optionKey="id" noSelection="['': 'Select']"/>
+                            <input id="" name="errorThresholdLower" class="threshold" title="${g.message(code: "qcThreshold.lowerError")}">
                         </td>
                         <td>
-                            <g:select class="threshold" name="condition" from="${compare}" optionValue="displayName"
-                                      noSelection="['': 'Select']"/>
+                            <input id="" name="warningThresholdLower" class="threshold" title="${g.message(code: "qcThreshold.lowerWarn")}">
                         </td>
                         <td>
-                            <input class="threshold" name="errorThresholdLower" title="${g.message(code: "qcThreshold.lowerError")}">
+                            <input id="" name="warningThresholdUpper" class="threshold" title="${g.message(code: "qcThreshold.upperWarn")}">
                         </td>
                         <td>
-                            <input class="threshold" name="warningThresholdLower" title="${g.message(code: "qcThreshold.lowerWarn")}">
+                            <input id="" name="errorThresholdUpper" class="threshold" title="${g.message(code: "qcThreshold.upperError")}">
                         </td>
                         <td>
-                            <input class="threshold" name="warningThresholdUpper" title="${g.message(code: "qcThreshold.upperWarn")}">
-                        </td>
-                        <td>
-                            <input class="threshold" name="errorThresholdUpper" title="${g.message(code: "qcThreshold.upperError")}">
-                        </td>
-                        <td>
-                            <g:select class="threshold" name="property2" from="${cl.availableThresholdProperties}"
+                            <g:select id="" name="property2" class="threshold use-select-2" from="${cl.availableThresholdProperties}"
                                       noSelection="['': '']"/>
                         </td>
                         <td>

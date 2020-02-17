@@ -66,7 +66,7 @@
                 </td>
                 <td>
                     <sec:ifAllGranted roles="ROLE_OPERATOR">
-                        <g:select name="useSeqPlatformGroup" value="${mergingCriteria.useSeqPlatformGroup}"
+                        <g:select name="useSeqPlatformGroup" class="use-select-2" value="${mergingCriteria.useSeqPlatformGroup}"
                               from="${MergingCriteria.SpecificSeqPlatformGroups}"/>
                     </sec:ifAllGranted>
                     <sec:ifNotGranted roles="ROLE_OPERATOR">
@@ -140,7 +140,9 @@
                             <ul>
                                 <li>
                                     <g:form action="createNewSpecificGroupAndAddPlatform">
-                                        <g:select name="platform.id" from="${allSeqPlatformsWithoutGroup}" optionKey="id" noSelection="${[null: 'Select to create new group']}"/>
+                                        <g:select id="select_seqPlat_newgroup" name="platform.id" class="use-select-2"
+                                                  from="${allSeqPlatformsWithoutGroup}" optionKey="id"
+                                                  noSelection="${[null: 'Select to create new group']}"/>
                                         <g:hiddenField name="mergingCriteria.id" value="${mergingCriteria.id}"/>
                                             <g:submitButton name="Save"/>
                                     </g:form>
@@ -168,7 +170,10 @@
                                 <sec:ifAllGranted roles="ROLE_OPERATOR">
                                     <li>
                                         <g:form action="addPlatformToExistingSeqPlatformGroup">
-                                            <g:select name="platform.id" from="${allSeqPlatformsWithoutGroup}" optionKey="id" noSelection="${[null: 'Select to add to group']}"/>
+                                            <g:select id="select_seqPlat_${seqPlatformGroup.id}" name="platform.id"
+                                                      class="use-select-2"
+                                                      from="${allSeqPlatformsWithoutGroup}" optionKey="id"
+                                                      noSelection="${[null: 'Select to add to group']}"/>
                                             <g:hiddenField name="group.id" value="${seqPlatformGroup.id}"/>
                                             <g:submitButton name="Save"/>
                                         </g:form>

@@ -51,7 +51,7 @@
                     params='["project.id": project.id, "seqType.id": seqType.id]'>
                 <g:message code="configurePipeline.alignment.copy"/>
 
-                <g:select class="criteria" id="project_select" name='basedProject.id'
+                <g:select class="criteria use-select-2" id="project_select" name='basedProject.id'
                           from='${projects}' optionKey='id' optionValue='name'/>
                 <g:submitButton name="copy" value="Copy"/>
             </g:form>
@@ -68,33 +68,33 @@
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="configurePipeline.alignment.genome"/></td>
-                    <td><g:select class="genome" name="referenceGenome" from="${referenceGenomes}" value="${referenceGenome}"/></td>
+                    <td><g:select class="genome use-select-2" name="referenceGenome" from="${referenceGenomes}" value="${referenceGenome}"/></td>
                     <td>${defaultReferenceGenome}</td>
                     <td><g:message code="configurePipeline.alignment.genome.info"/></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="configurePipeline.alignment.statSizeFileName"/></td>
-                    <td><select id="statSizeFileNames" name="statSizeFileName" value=""${statSizeFileName}/></td>
+                    <td><select class="use-select-2" id="statSizeFileNames" name="statSizeFileName" value=""${statSizeFileName}/></td>
                     <td>&nbsp;</td>
                     <td><g:message code="configurePipeline.alignment.statSizeFileName.info"/></td>
                 </tr>
                 <g:if test="${!isWgbs}">
                     <tr>
                         <td class="myKey"><g:message code="configurePipeline.alignment.bwaVersion"/></td>
-                        <td><g:select name="bwaMemVersion" from="${bwaMemVersions}" value="${bwaMemVersion}"/></td>
+                        <td><g:select class="use-select-2" name="bwaMemVersion" from="${bwaMemVersions}" value="${bwaMemVersion}"/></td>
                         <td>${defaultBwaMemVersion}</td>
                         <td>&nbsp;</td>
                     </tr>
                 </g:if>
                 <tr>
                     <td class="myKey"><g:message code="configurePipeline.alignment.mergeTool"/></td>
-                    <td><g:select name="mergeTool" from="${mergeTools}" value="${mergeTool}"/></td>
+                    <td><g:select class="use-select-2" name="mergeTool" from="${mergeTools}" value="${mergeTool}"/></td>
                     <td>${defaultMergeTool}</td>
                     <td><g:message code="configurePipeline.alignment.mergeTool.info"/></td>
                 </tr>
                 <tr>
                     <td class="myKey"><g:message code="configurePipeline.alignment.sambambaVersion"/></td>
-                    <td><g:select name="sambambaVersion" from="${sambambaVersions}" value="${sambambaVersion}"/></td>
+                    <td><g:select class="use-select-2" name="sambambaVersion" from="${sambambaVersions}" value="${sambambaVersion}"/></td>
                     <td>${defaultSambambaVersion}</td>
                     <td><g:message code="configurePipeline.alignment.sambambaVersion.info"/></td>
                 </tr>

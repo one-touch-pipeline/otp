@@ -32,8 +32,8 @@
 </head>
 
 <body>
-    <div class="body">
-        <g:render template="/templates/messages"/>
+<div class="body">
+    <g:render template="/templates/messages"/>
 
         <h1><g:message code="individual.insert.title"/></h1>
         <g:form controller="individual" action="save">
@@ -53,7 +53,9 @@
                             <label for="project"><g:message code="individual.insert.project"/></label>
                         </td>
                         <td>
-                            <g:select name="project.id" from="${availableProjects}" optionKey="id" id="project" noSelection="[null: '']" value="${cmd?.project?.id}"/>
+                            <g:select id="project" name="project.id" class="use-select-2"
+                                          from="${availableProjects}" optionKey="id" value="${cmd?.project?.id}"
+                                          noSelection="[null: '']"/>
                         </td>
                     </tr>
                     <tr>
@@ -86,7 +88,7 @@
                             <label for="individualType"><g:message code="individual.insert.individualType"/></label>
                         </td>
                         <td>
-                            <g:select name="type" from="${individualTypes}" id="individualType" value="${cmd?.type}"/>
+                            <g:select class="use-select-2" name="type" from="${individualTypes}" id="individualType" value="${cmd?.type}"/>
                         </td>
                     </tr>
                     </tbody>
