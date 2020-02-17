@@ -110,23 +110,25 @@
             </tr>
             <tr>
                 <td class="myKey"><g:message code="configurePipeline.rnaAlignment.genome"/></td>
-                <td><g:select class="genome" name="referenceGenome" from="${referenceGenomes}"
+                <td><g:select class="genome use-select-2" name="referenceGenome" from="${referenceGenomes}"
                               value="${referenceGenome}"/></td>
                 <td>${defaultReferenceGenome}</td>
                 <td>&nbsp;</td>
             </tr>
+
             <tr>
                 <td class="myKey"><g:message code="configurePipeline.rnaAlignment.deprecateConfigurations"/></td>
                 <td><g:checkBox name="deprecateConfigurations" checked="true" value="true"/></td>
                 <td>&nbsp;</td>
                 <td><g:message code="configurePipeline.rnaAlignment.deprecateConfigurations.info"/></td>
             </tr>
+
             <g:each in="${toolNames}">
                 <tr>
                     <td class="myKey">${it}:</td>
                     <td>
-                        <g:select name="toolVersionValue" from="${indexToolVersion}"
-                                  class="dropDown toolVersionSelect_${it}"/>
+                        <g:select id="toolVersionSelect_${it}" name="toolVersionValue" from="${indexToolVersion}"
+                                  class="use-select-2"/>
                     </td>
                     <g:if test="${it == "GENOME_STAR_INDEX"}">
                         <td>${defaultGenomeStarIndex}</td>
@@ -142,15 +144,17 @@
                     <g:message code="configurePipeline.rnaAlignment.geneModel"/>
                 </td>
                 <td valign="top" class="geneModel">
-                    <g:select name="geneModel.id" from="${geneModel}" class="dropDown geneModelSelect"
+                    <g:select name="geneModel.id" from="${geneModel}" class="dropDown geneModelSelect use-select-2"
                               noSelection="[(null): '']"/><br>
                 </td>
                 <td>&nbsp;</td>
                 <td>&nbsp;</td>
             </tr>
+
             <tr>
                 <td colspan="4">&nbsp;</td>
             </tr>
+
             <g:each in="${possibleSampleTypes}" var="entry">
                 <tr>
                     <td class="myKey"><g:message code="${entry.name}"/></td>
@@ -167,9 +171,11 @@
                     <td><g:message code="${entry.info}"/></td>
                 </tr>
             </g:each>
+
             <tr>
                 <td colspan="4">&nbsp;</td>
             </tr>
+
             <tr>
                 <td class="myKey"></td>
                 <td><g:submitButton name="submit" value="Submit"/></td>
