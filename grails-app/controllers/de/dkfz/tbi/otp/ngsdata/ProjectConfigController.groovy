@@ -64,7 +64,6 @@ class ProjectConfigController implements CheckAndCall {
 
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
 
-        project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [projectGroup: 'join']]))
         Map<String, String> dates = getDates(project)
 
         File projectDirectory

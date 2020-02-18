@@ -34,6 +34,8 @@ import org.springframework.security.access.prepost.PreFilter
 import de.dkfz.tbi.otp.ngsdata.Project
 import de.dkfz.tbi.otp.ngsdata.ProjectService
 
+import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
+
 @Transactional
 class ProjectSelectionService {
     ApplicationContext applicationContext
@@ -64,7 +66,7 @@ class ProjectSelectionService {
     @PostAuthorize("hasRole('ROLE_OPERATOR') or returnObject == null or hasPermission(returnObject, 'OTP_READ_ACCESS')")
     Project getProjectFromProjectSelectionOrAllProjects(ProjectSelection projectSelection) {
         if (projectSelection.projects.size() == 1) {
-            return projectSelection.projects.first()
+            return atMostOneElement(Project.findAllByName(projectSelection.projects.first().name, [fetch: [projectGroup: 'join']]))
         } else if (projectService.allProjects.size() > 0) {
             return projectService.allProjects.first()
         } else {

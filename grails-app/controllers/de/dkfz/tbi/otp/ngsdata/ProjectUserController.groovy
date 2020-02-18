@@ -36,8 +36,6 @@ import de.dkfz.tbi.otp.dataprocessing.ProcessingOptionService
 import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.utils.StringUtils
 
-import static de.dkfz.tbi.otp.utils.CollectionUtils.exactlyOneElement
-
 class ProjectUserController implements CheckAndCall {
 
     ProjectService projectService
@@ -58,7 +56,6 @@ class ProjectUserController implements CheckAndCall {
 
         ProjectSelection selection = projectSelectionService.getSelectedProject()
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
-        project = exactlyOneElement(Project.findAllByName(project.name, [fetch: [projectGroup: 'join']]))
 
         List<UserProjectRole> userProjectRolesOfProject = UserProjectRole.findAllByProject(project)
         List<User> projectUsers = userProjectRolesOfProject*.user
