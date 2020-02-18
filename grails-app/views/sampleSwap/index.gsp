@@ -40,7 +40,7 @@
     <div class="searchCriteriaTableSequences">
         <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
 
-        <form class="blue_label" id="projectsGroupbox" action="${g.createLink(controller: 'sampleSwap', action: 'index')}">
+        <form class="rounded-page-header-box" action="${g.createLink(controller: 'sampleSwap', action: 'index')}">
             <div style="color: black"><strong>&nbsp;Individual : ${individual?.pid}</strong></div>
             <label style="color: black" for="project">&nbsp;${message(code: "home.projectFilter.select")} : </label>
             <g:select class="criteria" id="individual" name='individual'

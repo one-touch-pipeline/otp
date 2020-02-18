@@ -33,11 +33,11 @@
 </head>
 <body>
     <div class="body">
-        <h1><g:message code="jobstats.general.title"></g:message></h1><br><br>
-        <div class="optionsContainer">
-            <p>from: <input type="text" class="datePicker" id="dpFrom" value="${latestDate}"></p>
-            <p>to: <input type="text" class="datePicker" id="dpTo" value="${latestDate}"></p>
-        </div><br><br><br>
+        <h1><g:message code="jobstats.general.title"></g:message></h1>
+        <div class="rounded-page-header-box">
+            <span>from: <input type="text" class="datePicker" id="dpFrom" value="${latestDate}"></span>
+            <span>to: <input type="text" class="datePicker" id="dpTo" value="${latestDate}"></span>
+        </div>
         <div id="clusterJobGeneralTableContainer">
             <div class="otpDataTables">
                  <otp:dataTable codes="${tableHeader}" id="clusterJobGeneralTable" />

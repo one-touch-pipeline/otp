@@ -47,17 +47,17 @@
             <div class="empty"><br></div>
         </g:else>
         <g:if test="${projects}">
-            <g:form controller="configurePipeline" action="alignment"
+            <g:form class="rounded-page-header-box" controller="configurePipeline" action="alignment"
                     params='["project.id": project.id, "seqType.id": seqType.id]'>
-                <span class="blue_label"><g:message code="configurePipeline.alignment.copy"/></span>
+                <g:message code="configurePipeline.alignment.copy"/>
 
                 <g:select class="criteria" id="project_select" name='basedProject.id'
                           from='${projects}' optionKey='id' optionValue='name'/>
                 <g:submitButton name="copy" value="Copy"/>
             </g:form>
-            <br>
         </g:if>
-        <g:message code="configurePipeline.alignment.info"/>
+        <otp:annotation subtype="warning"><g:message code="configurePipeline.alignment.info"/></otp:annotation>
+
         <g:form controller="configurePipeline" action="alignment" params='["project.id": project.id, "seqType.id": seqType.id]'>
             <table class="alignmentTable">
                 <tr>

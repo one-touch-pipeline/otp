@@ -31,7 +31,7 @@
 <body>
 <div class="body">
     <h1><g:message code="job.error.definition.header"/></h1>
-    <form class="blue_label" id="projectsGroupbox">
+    <form class="rounded-page-header-box">
         <span class="blue_label"><g:message code="job.error.definition.jobDefinitionFilter"/> :</span>
         <g:select class="criteria" id="job_select" name='job'
                   from='${jobDefinitions}' value='${jobDefinition}' onChange='submit();' />

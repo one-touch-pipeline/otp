@@ -33,29 +33,37 @@
 </head>
 <body>
     <div class="body">
-        <h1><g:message code="jobstats.jobTypeSpecific.title"/></h1><br><br>
-        <div class="optionsContainer">
-            <p>jobclass: <g:select name="jobClassSelect" id="jobClassSelect" from="${jobClasses}"/></p>
-            <p>seqType: <select name="seqTypeSelect" id="seqTypeSelect"></select></p>
-            <p>from: <input type="text" class="datePicker" id="dpFrom" value="${latestDate}"></p>
-            <p>to: <input type="text" class="datePicker" id="dpTo" value="${latestDate}"></p>
-        </div>
-        <div class="optionsContainer">
-            <p>Referencesize in Gigabases:
-                <select list="basesList" id="basesInput" value="3.2348">
-                    <option value="3.2348" selected="selected">3.2348 (WGS)</option>
-                    <option value="0.0350">0.0350 (WES)</option>
-                </select>
-            </p>
-            <p>coverage:
-                <select list="coverageList" id="coverageInput" value="30">
-                    <option value="15">15x</option>
-                    <option value="30" selected="selected">30x</option>
-                    <option value="60">60x</option>
-                    <option value="90">90x</option>
-                    <option value="100">100x</option>
-                </select>
-            </p>
+        <h1><g:message code="jobstats.jobTypeSpecific.title"/></h1>
+
+        <div class="rounded-page-header-box">
+            <div>
+                <span>jobclass: <g:select class="use-select-2" name="jobClassSelect" id="jobClassSelect" from="${jobClasses}"/></span>
+                <span>seqType: <select name="seqTypeSelect" id="seqTypeSelect"></select></span>
+            </div>
+            <br/>
+            <div>
+                <span>from: <input type="text" class="datePicker" id="dpFrom" value="${latestDate}"></span>
+                <span>to: <input type="text" class="datePicker" id="dpTo" value="${latestDate}"></span>
+            </div>
+            <br/>
+
+            <div>
+                <span>Referencesize in Gigabases:
+                    <select list="basesList" id="basesInput" value="3.2348">
+                        <option value="3.2348" selected="selected">3.2348 (WGS)</option>
+                        <option value="0.0350">0.0350 (WES)</option>
+                    </select>
+                </span>
+                <span>coverage:
+                    <select list="coverageList" id="coverageInput" value="30">
+                        <option value="15">15x</option>
+                        <option value="30" selected="selected">30x</option>
+                        <option value="60">60x</option>
+                        <option value="90">90x</option>
+                        <option value="100">100x</option>
+                    </select>
+                </span>
+            </div>
         </div>
         <div id="jobTypeSpecificAverageValues">
             <table>

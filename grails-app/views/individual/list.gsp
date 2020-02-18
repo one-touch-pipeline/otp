@@ -33,7 +33,7 @@
     <div class="body">
     <g:if test="${projects}">
         <div class="dataTable_searchContainer">
-            <div id="searchbox">
+            <div id="searchbox" class="rounded-page-header-box">
                 <span class="blue_label"><g:message code="simple.quick.search"/> :</span>
                 <input type="text" class="dataTable_search" onKeyUp='$.otp.simpleSearch.search(this, "individualTable");' placeholder="min. 3 characters">
             </div>

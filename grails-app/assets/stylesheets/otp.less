@@ -85,6 +85,26 @@
         border: 1px solid black;
     }
 }
+.rounded-page-header-box {
+    padding: 4px;
+
+    // firefox and chrome expect different properties
+    width: fit-content;
+    width: -moz-fit-content;
+    max-width: auto;
+    height: auto;
+
+    margin-top: auto;
+    margin-bottom: 7px;
+
+    background: #eaf8fc;
+    background-image: linear-gradient(#fff, #d4e8ec);
+
+    .border-radius(13px);
+    border: 2px solid;
+    border-color: #c4d9df #a4c3ca #83afb7 #cccccc;
+}
+
 /* FONT STACK */
 body,
 input, select, textarea, option, button {
@@ -161,9 +181,7 @@ div.tableBlock {
     border: 1px solid #cccccc;
     margin: 0.5em 0.5em 0.5em 0.5em;
     padding: 0.2em 0.5em 0.2em 0.5em;
-    -moz-border-radius: 0.3em;
-    -webkit-border-radius: 0.3em;
-    border-radius: 0.3em;
+    .border-radius(0.3em);
     background-color: #DDD;
     color: #666666;
     &:hover, &:focus {
@@ -340,8 +358,10 @@ label {
     margin: 0 0.25em 0 0;
 }
 input, select, textarea, button {
+    color: #444;
     background-color: #fcfcfc;
-    border: 1px solid #cccccc;
+    border: 1px solid #aaa;
+    .border-radius(4px);
     font-size: 1em;
     padding: 0.2em 0.4em;
 }
@@ -356,6 +376,10 @@ input[type=checkbox], input[type=radio] {
     background-color: transparent;
     border: 0;
     padding: 0;
+}
+input[type=text] {
+    height: 28px;
+    box-sizing: border-box;
 }
 input:focus, select:focus, textarea:focus {
     .box-shadowed(0, 0, 0.5em, #ffffff);
@@ -983,8 +1007,7 @@ body {
     background-color: #1E90FF;
     font-size: 13px;
     font-family: Helvetica,Arial,sans-serif;
-    -moz-border-radius: 12px;
-    border-radius: 12px;
+    .border-radius(12px);
     border: 5px solid #CCCCCC;
     padding: 0.1em 0.3em;
     th { color:#FFFFFF;
@@ -1428,30 +1451,10 @@ td div {
 .searchCriteriaTableSequences > table {
     clear: both;
     margin-bottom: 2px;
-    background: #eaf8fc;
-    -moz-border-radius: 17px;
-    border-radius: 17px;
-    border: 2px solid #CCCCCC;
-    border-color: #c4d9df #a4c3ca #83afb7;
+    .rounded-page-header-box
 }
 .searchCriteriaTableStyle > table {
-    background: #eaf8fc;
-    -moz-border-radius: 17px;
-    border-radius: 17px;
-    border: 2px solid #CCCCCC;
-    border-color: #c4d9df #a4c3ca #83afb7;
-}
-#projectsGroupbox {
-    float: left;
-    max-width: auto;
-    background: #eaf8fc;
-    background-image: -moz-linear-gradient(#fff, #d4e8ec);
-    background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, #d4e8ec),color-stop(1, #fff));
-    -moz-border-radius: 13px;
-    border-radius: 13px;
-    border: 3px solid #CCCCCC;
-    border-color: #c4d9df #a4c3ca #83afb7;
-    height: auto;
+    .rounded-page-header-box
 }
 
 .project-selection-header-container {
@@ -1482,19 +1485,7 @@ td div {
 }
 
 .project-selection-container {
-    // firefox and chrome expect different properties
-    width: fit-content;
-    width: -moz-fit-content;
-
-    padding: 4px;
-
-    -moz-border-radius: 13px;
-    border-radius: 13px;
-    border: 3px solid #CCCCCC;
-    border-color: #c4d9df #a4c3ca #83afb7;
-
-    background-image: -moz-linear-gradient(#fff, #d4e8ec);
-    background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, #d4e8ec),color-stop(1, #fff));
+    .rounded-page-header-box;
 
     display: grid;
     grid-template-columns: min-content min-content;
@@ -1519,58 +1510,42 @@ td div {
         grid-area: select;
     }
 }
-#searchbox {
-    float: left;
-    background: #eaf8fc;
-    background-image: -moz-linear-gradient(#fff, #d4e8ec);
-    background-image: -webkit-gradient(linear,left bottom,left top,color-stop(0, #d4e8ec),color-stop(1, #fff));
-    -moz-border-radius: 15px;
-    border-radius: 15px;
-    border: 2px solid #CCCCCC;
-    border-color: #c4d9df #a4c3ca #83afb7;
-    height: auto;
-    padding: 3px;
-    margin-top: auto;
-    margin-bottom: 7px;
-}
+
 .blue_label {
     background-color: #1E90FF;
     font-size: 12px;
     font-family: Helvetica,Arial,sans-serif;
     color: #ffffff;
-    -moz-border-radius: 12px;
-    border-radius: 12px;
+    .border-radius(12px);
     border: 5px solid #CCCCCC;
     padding: 0.1em 0.3em;
-}
-.projectSelectMultiple {
-    margin-top:-25px;
-    margin-left: 14px;
-    margin-bottom:-10px;
-    background-color: #FCFCFC;
 }
 .blue_labelForPlus {
     background-color: #1E90FF;
     font-size: 12px;
     font-family: Helvetica,Arial,sans-serif;
     color: #ffffff;
-    -moz-border-radius: 15px;
-    border-radius: 15px;
+    .border-radius(15px);
     border: 3px solid #CCCCCC;
     padding: 0.2em 0.3em;
 }
+
+.projectSelectMultiple {
+    margin-top:-25px;
+    margin-left: 14px;
+    margin-bottom:-10px;
+    background-color: #FCFCFC;
+}
 .dataTable_search {
     border-collapse: separate;
-    -moz-border-radius: 12px;
-    border-radius: 12px;
+    .border-radius(12px);
     height: auto;
     border: 3.8px solid #CCCCCC;
     padding: 0.3em 1.15em;
     font-size: 10pt;
 }
 .criteria {
-    -moz-border-radius: 10px;
-    border-radius: 10px;
+    .border-radius(10px);
     width: auto;
     height: auto;
     border: 3px solid #CCCCCC;
@@ -1795,25 +1770,6 @@ td div {
     }
 }
 
-.optionsContainer {
-    float: left;
-    width: 100%;
-    height: 30px;
-    margin-left: 0.1em;
-    margin-right: 0.1em;
-    margin-bottom: 5px;
-    background-color: #D8D8D8;
-    p {
-        float: left;
-        margin: 0;
-        margin-left: 10px;
-        margin-top: 3px;
-    }
-    input {
-        width: 100px;
-    }
-}
-
 #scatterGraphicContainer {
     .scatterGraphContainer {
         float: left;
@@ -1897,10 +1853,7 @@ td div {
     clear: both;
     padding-top: 1.2em;
     padding-bottom: 1.0em;
-    margin-top: 4.2em;
-    margin-left: 0.1em;
-    margin-right: 0.1em;
-    margin-bottom: 2.2em;
+    margin: 2.2em 0.1em;
 }
 
 #jobTypeSpecificAverageValues td:first-of-type {
@@ -1992,7 +1945,7 @@ td div {
 .loader {
     border: 8px solid #f3f3f3;
     border-top: 8px solid @darkblue;
-    border-radius: 50%;
+    .border-radius(50%);
     width: 50px;
     height: 50px;
     animation: spin 2s linear infinite;
@@ -2001,7 +1954,7 @@ td div {
 .dot {
     height: 34px;
     width: 34px;
-    border-radius: 50%;
+    .border-radius(50%);
     display: inline-block;
 
     &.red {
@@ -2023,7 +1976,7 @@ td div {
 
 .sm-loader {
     border: 7px solid #f3f3f3;
-    border-radius: 50%;
+    .border-radius(50%);
     width: 20px;
     height: 20px;
     animation: spin 2s linear infinite;
@@ -2533,7 +2486,7 @@ table.key-value-table {
 .slider + label {
     width: 34px;
     height: 15px;
-    border-radius: 30px;
+    .border-radius(30px);
     border: 2px solid #EEE;
     background-color: #EEE;
     display: inline-block;
@@ -2550,7 +2503,7 @@ table.key-value-table {
 .slider + label::before {
     width: 15px;
     height: 15px;
-    border-radius: 15px;
+    .border-radius(15px);
     background-color: #fff;
     display: block;
     content: "";

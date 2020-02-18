@@ -41,7 +41,7 @@
             </div>
             <div class="grid-element">
                 <g:if test="${seqType}">
-                    <div class="blue_label" id="projectsGroupbox">
+                    <div class="rounded-page-header-box">
                         <span class="blue_label"><g:message code="alignment.quality.seqType"/> :</span>
                         <form style="display: inline">
                             <g:select class="criteria" id="seqType" name='seqType' data-columns="${columns}"

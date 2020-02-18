@@ -54,7 +54,7 @@
         </div>
         <br>
         <h2><g:message code="home.pageTitle.graph"/></h2>
-        <form class="blue_label" id="projectsGroupbox">
+        <form class="rounded-page-header-box" id="projectsGroupbox">
             <span class="blue_label"><g:message code="home.projectGroupFilter"/> :</span>
             <g:select class="criteria" id="projectGroup_select" name='projectGroup_select' from='${projectGroups}' value='projectGroup' />
         </form>

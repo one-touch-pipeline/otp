@@ -30,7 +30,7 @@
 </head>
 <body>
   <div class="body">
-    <form class="blue_label" id="projectsGroupbox">
+    <form class="rounded-page-header-box">
         <span class="blue_label">
             <g:message code="search.from.date"/>:<input type="text" class="datePicker" id="startDate" value="${startDate}">
         </span>
