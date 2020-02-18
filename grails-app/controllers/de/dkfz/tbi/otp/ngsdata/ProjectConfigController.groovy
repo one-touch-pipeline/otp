@@ -224,12 +224,6 @@ class ProjectConfigController implements CheckAndCall {
         }
     }
 
-    JSON updateKeywords(UpdateProjectCommand cmd) {
-        checkErrorAndCallMethod(cmd) {
-            projectService.updateKeywords(cmd.value, cmd.project)
-        }
-    }
-
     JSON updateTumorEntity(UpdateProjectCommand cmd) {
         checkErrorAndCallMethod(cmd) {
             projectService.updateProjectField(TumorEntity.findByName(cmd.value), cmd.fieldName, cmd.project)

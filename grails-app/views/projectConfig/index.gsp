@@ -71,21 +71,12 @@
                     </td>
                 </tr>
                 <tr>
-                    <td><g:message code="project.keywords"/></td>
+                    <td class="myKey"><g:message code="project.keywords"/></td>
                     <td></td>
-                    <td>
-                        <g:if test="${project.keywords}">
-                            <otp:editorSwitch
-                                    roles="ROLE_OPERATOR"
-                                    link="${g.createLink(controller: 'projectConfig', action: 'updateKeywords', params: ['project.id': project.id])}"
-                                    value="${project.listAllKeywords()}"/>
-                        </g:if>
-                        <g:else>
-                            <otp:editorSwitch
-                                    roles="ROLE_OPERATOR"
-                                    link="${g.createLink(controller: 'projectConfig', action: 'updateKeywords', params: ['project.id': project.id])}"
-                                    value="${g.message(code: 'project.keywords.empty')}"/>
-                        </g:else>
+                    <td title="<g:message code="project.keywords.addKeywords"/>">
+                        <g:link controller="keyword" action="index">
+                        ${project.keywords*.name.join(", ") ?: g.message(code: "project.keywords.empty")}
+                        </g:link>
                     </td>
                 </tr>
                 <tr>

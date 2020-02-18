@@ -39,7 +39,6 @@ import de.dkfz.tbi.otp.dataprocessing.snvcalling.SnvConfig
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.job.processing.FileSystemService
 import de.dkfz.tbi.otp.job.processing.RemoteShellHelper
-import de.dkfz.tbi.otp.searchability.Keyword
 import de.dkfz.tbi.otp.utils.*
 import de.dkfz.tbi.otp.utils.logging.LogThreadLocal
 
@@ -320,17 +319,6 @@ class ProjectService {
     void configureNoAlignmentDeciderProject(Project project) {
         deprecateAllReferenceGenomesByProject(project)
         project.alignmentDeciderBeanName = AlignmentDeciderBeanName.NO_ALIGNMENT
-        project.save(flush: true)
-    }
-
-    @PreAuthorize("hasRole('ROLE_OPERATOR')")
-    void updateKeywords(String value, Project project) {
-        project.keywords = []
-        value.split(",")*.trim().findAll().each { String name ->
-            Keyword keyword = Keyword.findOrSaveByName(name)
-            project.addToKeywords(keyword)
-        }
-
         project.save(flush: true)
     }
 
