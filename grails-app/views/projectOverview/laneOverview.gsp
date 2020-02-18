@@ -35,43 +35,35 @@
             <div class="grid-element">
                 <g:render template="/templates/projectSelection"/>
             </div>
-            <div class="grid-element searchCriteriaTableStyle">
-                <table id="searchCriteriaTable2" style="display: inline-block">
+            <div class="grid-element rounded-page-header-box" style="display: table;">
+                <span style="display:table-cell; vertical-align: middle"><g:message code="projectOverview.filter.sampleType"/>:</span>
+                <table id="searchCriteriaTableSampleType" style="display:table-cell;">
                     <tr>
-                        <td>
-                            <span class="blue_label"><g:message code="projectOverview.filter.sampleType"/> :</span>
+                        <td class="value">
+                            <g:select name="sampleTypeSelection"
+                                      from='${sampleTypes}' noSelection="${["none": message(code: "otp.filter.sampleType")]}"
+                                      autocomplete="off"/>
                         </td>
-                        <td>
-                            <div class="searchCriteriaTableSampleTypes">
-                                <table id="searchCriteriaTable3">
-                                    <tr>
-                                        <td class="attribute">
-                                            <g:select class="criteria" name="criteria2"
-                                            from='${sampleTypes}' noSelection="${["none": message(code:"otp.filter.sampleType")]}" />
-                                        </td>
-                                    </tr>
-                                </table>
-                            </div>
+                    </tr>
+                </table>
+                <div style="display:table-cell; vertical-align: middle"><g:message code="projectOverview.filter.seqType"/>:</div>
+                <table id="searchCriteriaTableSeqType" style="display:table-cell;">
+                    <tr class="dtf_row">
+                        %{-- css class: little hack: the seqType select is actually the "value" of the filter,
+                             but should behave like "attribute" (that is: add a new row for the next filter).
+                             since "attribute"-handling also triggers the value-updates, all is good. --}%
+                        <td class="attribute">
+                            <span class="dtf_value_span">
+                                <g:select class="dtf_criterium" name="seqTypeSelection" from="${seqTypes}" optionKey="id"
+                                          noSelection="${["none": message(code: "otp.filter.seqType")]}"
+                                          autocomplete="off"/>
+                            </span>
                         </td>
-                        <td>
-                            <span class="blue_label"><g:message code="projectOverview.filter.seqType"/> :</span>
+                        <td class="remove" style="display: none">
+                            <input type="button" value="${g.message(code: "projectOverview.filter.seqType.remove")}"/>
                         </td>
-                        <td>
-                            <table id="searchCriteriaTable">
-                                <tr>
-                                    <td class="attribute">
-                                        <g:select class="criteria" name="criteria" from="${seqTypes}" optionKey="id" noSelection="${["none": message(code:"otp.filter.seqType")]}"/>
-                                    </td>
-                                    <td class="value">
-                                    </td>
-                                    <td class="remove">
-                                        <input class="blue_labelForPlus" type="button" value="${g.message(code: "projectOverview.filter.seqType.remove")}" style="display: none"/>
-                                    </td>
-                                    <td class="add">
-                                        <input class="blue_labelForPlus" type="button" value="${g.message(code: "projectOverview.filter.seqType.add")}" style="display: none"/>
-                                    </td>
-                                </tr>
-                            </table>
+                        <td class="add" style="display: none">
+                            <input type="button" value="${g.message(code: "projectOverview.filter.seqType.add")}"/>
                         </td>
                     </tr>
                 </table>

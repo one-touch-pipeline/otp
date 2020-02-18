@@ -33,50 +33,13 @@
     <div class="body">
         <div class="dataTable_searchContainer">
             <div id="searchbox" class="rounded-page-header-box">
-                <span class="blue_label"><g:message code="simple.quick.search"/> :</span>
+                <g:message code="search.simple.header"/>:
                 <input type="text" class="dataTable_search" onKeyUp='$.otp.simpleSearch.search(this, "individualTable");' placeholder="min. 3 characters">
             </div>
         </div>
-        <div class="searchCriteriaTableSequences">
-        <table id="searchCriteriaTable2">
-            <tr>
-            <td>
-                <span class="blue_label"><g:message code="extended.search"/> :</span>
-            </td>
-           <td>
-         <table id="searchCriteriaTable">
-            <tr>
-                <td class="attribute">
-                    <select class="use-select-2" name="criteria">
-                        <option value="none"><g:message code="individual.search.none"/></option>
-                        <option value="projectSelection"><g:message code="individual.search.project"/></option>
-                        <option value="pidSearch"><g:message code="individual.search.pid"/></option>
-                        <option value="mockFullNameSearch"><g:message code="individual.search.mockFullName"/></option>
-                        <option value="mockPidSearch"><g:message code="individual.search.mockPid"/></option>
-                        <option value="typeSelection"><g:message code="individual.search.type"/></option>
-                    </select>
-                </td>
-                <td class="value">
-                    <g:select name="projectSelection" class="criteria use-select-2"
-                              from="${availableProjects}" optionValue="displayName" optionKey="id"
-                              style="display: none"/>
-                    <input class="criteria" type="text" name="pidSearch" style="display: none" placeholder="min. 3 characters"/>
-                    <input class="criteria" type="text" name="mockFullNameSearch" style="display: none" placeholder="min. 3 characters"/>
-                    <input class="criteria" type="text" name="mockPidSearch" style="display: none" placeholder="min. 3 characters"/>
-                    <g:select class="criteria use-select-2" name="typeSelection" from="${individualTypes}" style="display: none"/>
-                </td>
-                <td class="remove">
-                    <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.remove")}" style="display: none"/>
-                </td>
-                <td class="add">
-                    <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.add")}" style="display: none"/>
-                 </td>
-            </tr>
-        </table>
-        </td>
-        </tr>
-        </table>
-        </div>
+
+        <g:render template="/templates/dataTableFilter" model="[filterTree: filterTree]"/>
+
         <div class="otpDataTables">
             <otp:dataTable codes="${tableHeader}" id="individualTable"/>
         </div>

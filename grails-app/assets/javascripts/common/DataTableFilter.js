@@ -39,12 +39,8 @@ $.otp.dataTableFilter = {
                 if (selection !== "none") {
                     if ($("td.value span#" + selection, element).hasClass('dateSelection')) {
                         result.push({type: selection, value: {
-                                start_day: $("td select[name=" + selection + "_start_day]", element).val(),
-                                start_month: $("td select[name=" + selection + "_start_month]", element).val(),
-                                start_year: $("td select[name=" + selection + "_start_year]", element).val(),
-                                end_day: $("td select[name=" + selection + "_end_day]", element).val(),
-                                end_month: $("td select[name=" + selection + "_end_month]", element).val(),
-                                end_year: $("td select[name=" + selection + "_end_year]", element).val()
+                                start: $("td input[name=" + selection + "_start]", element).val(),
+                                end:   $("td input[name=" + selection + "_end]", element).val(),
                             }});
                     } else {
                         result.push({type: selection, value: $("td select[name=" + selection + "], td input[name=" + selection + "]", element).val()});
@@ -65,7 +61,7 @@ $.otp.dataTableFilter = {
 
         var removeRowOrHideInputs = function (tr) {
             // if there's more than one filter row, remove it, otherwise reset it
-            if ($("tr", tr.parent()).size() > 1) {
+            if (tr.siblings("tr").size() > 0) {
                 // remove row and determine whether to show an add button
                 var lastTr;
                 if (tr.is(":last-child")) {
@@ -74,60 +70,56 @@ $.otp.dataTableFilter = {
                     lastTr = tr.nextAll().last();
                 }
                 tr.detach();
-                if ($("td.remove input", lastTr).is(":visible")) {
-                    $("td.add input", lastTr).show();
+                if ($("td.remove", lastTr).is(":visible")) {
+                    $("td.add", lastTr).show();
                 }
             } else {
                 $("td.attribute select", tr).val("none");
-                $("td.add input", tr).hide();
-                $("td.remove input", tr).hide();
+                $("td.add", tr).hide();
+                $("td.remove", tr).hide();
             }
         };
 
         var searchCriteriaChangeHandler = function (event) {
-            var tr = $(event.target).parent().parent();
-            $("td.value *", tr).hide();
-            $("td.add input", tr).hide();
-            if ($(event.target).val() !== "none") {
-                $("td select[name='" + $(this).val() + "']", tr).show();
-                $("td select[name='" + $(this).val() + "'] option", tr).show();
-                $("td input[name='" + $(this).val() + "']", tr).show();
-                $("td span[id='" + $(this).val() + "']", tr).show();
-                $("td span[id='" + $(this).val() + "'] select", tr).show();
-                $("td span[id='" + $(this).val() + "'] select option", tr).show();
-                $("td.add input", tr).show();
-                $("td.remove input", tr).show();
+            var tr = $(event.target).parents(".dtf_row");
+            $("td.value span.dtf_value_span", tr).hide();
+            var attribute = $(event.target).val();
+            if (attribute !== "none") {
+                $("td span[id='dtf_" + attribute + "']", tr).show();
+                $("td.add", tr).show();
+                $("td.remove", tr).show();
             } else {
+                $("td.add", tr).hide();
                 removeRowOrHideInputs(tr);
             }
             updateSearchCriteria();
         };
-
         var searchCriteriaAddRow = function (event) {
             var tr, cloned;
-            $(event.target).hide();
-            tr = $(event.target).parent().parent();
+
+            tr = $(event.target).parents(".dtf_row");
+            $("td.add", tr).hide();
             cloned = tr.clone();
-            $("td.value *", cloned).hide();
-            $("td.add input", cloned).hide();
-            $("td.remove input", cloned).hide();
+            $("td.value span.dtf_value_span", cloned).hide();
+            $("td.add", cloned).hide();
+            $("td.remove", cloned).hide();
             $("td.attribute select", cloned).val("none");
-            cloned.appendTo($("#searchCriteriaTable"));
+            cloned.appendTo(searchCriteriaTable);
         };
 
-        var searchCriteriaRemoveRow = function () {
-            var tr = $(this).parent().parent();
-            $("td.value *", tr).hide();
+        var searchCriteriaRemoveRow = function (event) {
+            var tr = $(event.target).parents(".dtf_row");
+            $("td.value span.dtf_value_span", tr).hide();
             removeRowOrHideInputs(tr);
             updateSearchCriteria();
         };
 
-        searchCriteriaTable.on("change", "tr td.attribute select", searchCriteriaChangeHandler);
-        searchCriteriaTable.on("click", "tr td.add input[type=button]", searchCriteriaAddRow);
-        searchCriteriaTable.on("click", "tr td.remove input[type=button]", searchCriteriaRemoveRow);
-        searchCriteriaTable.on("change", "tr td.value select", updateSearchCriteria);
-        searchCriteriaTable.on("change", "tr td.value input[type=text]", updateSearchCriteria);
-        searchCriteriaTable.on("keyup", "tr td.value input[type=text]", updateSearchCriteria);
+        searchCriteriaTable.on("change", "select.dtf_criterium",         searchCriteriaChangeHandler);
+        searchCriteriaTable.on("click",  "td.add input[type=button]",    searchCriteriaAddRow);
+        searchCriteriaTable.on("click",  "td.remove input[type=button]", searchCriteriaRemoveRow);
+        searchCriteriaTable.on("change", "td.value select",              updateSearchCriteria);
+        searchCriteriaTable.on("change", "td.value input",               updateSearchCriteria);
+        searchCriteriaTable.on("keyup",  "td.value input[type=text]",    updateSearchCriteria);
 
         return searchCriteria;
     }

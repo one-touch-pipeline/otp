@@ -40,7 +40,7 @@
         <h1><g:message code="egaSubmission.selectSamples.title"/></h1>
         <div class="searchCriteriaTableSequences">
             <table id="searchCriteriaTable" style="display: inline-block">
-                <tr>
+                <tr class="dtf_row">
                     <td id="projectName">${project.name}</td>
                     <td>
                         <span class="blue_label">Filter by <g:message code="egaSubmission.seqType"/>:</span>
@@ -48,7 +48,7 @@
                     <td>
                         <table id="searchCriteriaTableSeqType">
                             <tr>
-                                <td class="attribute">
+                                <td class="value">
                                     <g:select class="criteria"
                                               name="criteria"
                                               from="${seqTypes}"

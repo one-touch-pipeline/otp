@@ -31,6 +31,7 @@ import de.dkfz.tbi.otp.utils.DataTableCommand
 
 class SequenceController {
     SeqTrackService seqTrackService
+    ProjectService projectService
     FastqcResultsService fastqcResultsService
     UserService userService
 
@@ -45,6 +46,34 @@ class SequenceController {
             libraryPreparationKits: LibraryPreparationKit.list(sort: "shortDisplayName", order: "asc").shortDisplayName,
             antibodyTargets: AntibodyTarget.list(sort: "name", order: "asc"),
             showRunLinks: userService.isCurrentUserAllowedToSeeRuns(),
+            filterTree : [
+                    [name : 'projectSelection', msgcode: 'sequence.search.project',
+                     type : 'LIST', from: projectService.getAllProjects(),
+                     value: 'displayName', key: 'id'],
+                    [name: 'individualSearch', msgcode: 'sequence.search.individual',
+                     type: 'TEXT'],
+                    [name : 'sampleTypeSelection', msgcode: 'sequence.search.sample',
+                     type : 'LIST', from: SampleType.list(sort: "name", order: "asc"),
+                     value: 'name', key: 'id'],
+                    [name: 'seqTypeSelection', msgcode: 'sequence.search.seqType',
+                     type: 'LIST', from: seqTypes.collect { it.displayName }.unique()],
+                    [name: 'ilseIdSearch', msgcode: 'sequence.search.ilse',
+                     type: 'TEXT'],
+                    [name: 'libraryLayoutSelection', msgcode: 'sequence.search.libLayout',
+                     type: 'LIST', from: seqTypes.collect { it.libraryLayout }.unique()],
+                    [name: 'singleCell', msgcode: 'sequence.search.singleCell',
+                     type: 'LIST', from: [true, false]],
+                    [name: 'libraryPreparationKitSelection', msgcode: 'sequence.search.libPrepKit',
+                     type: 'LIST', from: LibraryPreparationKit.list(sort: "shortDisplayName", order: "asc")*.shortDisplayName],
+                    [name : 'antibodyTargetSelection', msgcode: 'sequence.search.antibodyTarget',
+                     type : '', from: AntibodyTarget.list(sort: "name", order: "asc"),
+                     value: 'name', key: 'name'],
+                    [name : 'seqCenterSelection', msgcode: 'sequence.search.seqCenter',
+                     type : '', from: SeqCenter.list(sort: "name", order: "asc"),
+                     value: 'name', key: 'id'],
+                    [name: 'runSearch', msgcode: 'sequence.search.run',
+                     type: 'TEXT'],
+            ]
         ]
     }
 

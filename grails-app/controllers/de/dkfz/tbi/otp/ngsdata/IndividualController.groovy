@@ -36,6 +36,7 @@ class IndividualController {
 
     IndividualService individualService
     SeqTrackService seqTrackService
+    ProjectService projectService
     CommentService commentService
     SampleIdentifierService sampleIdentifierService
 
@@ -67,7 +68,16 @@ class IndividualController {
     def list() {
         return [
                 tableHeader    : IndividualColumn.values()*.message,
-                individualTypes: Individual.Type.values(),
+                filterTree: [
+                        [name : 'projectSelection', msgcode: 'individual.search.project',
+                         type : 'LIST', from: projectService.getAllProjects(),,
+                         value: 'displayName', key: 'id'],
+                        [name: 'pidSearch', msgcode: 'individual.search.pid', type: 'TEXT'],
+                        [name: 'mockFullNameSearch', msgcode: 'individual.search.mockFullName', type: 'TEXT'],
+                        [name: 'mockPidSearch', msgcode: 'individual.search.mockPid', type: 'TEXT'],
+                        [name: 'typeSelection', msgcode: 'individual.search.type',
+                         type: 'LIST', from: Individual.Type.values()],
+                ]
         ]
     }
 

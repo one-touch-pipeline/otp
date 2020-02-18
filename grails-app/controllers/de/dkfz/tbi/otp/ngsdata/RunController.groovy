@@ -28,6 +28,8 @@ import groovy.transform.TupleConstructor
 import de.dkfz.tbi.otp.ngsqc.FastqcResultsService
 import de.dkfz.tbi.otp.utils.DataTableCommand
 
+import java.text.SimpleDateFormat
+
 class RunController {
 
     LsdfFilesService lsdfFilesService
@@ -66,6 +68,13 @@ class RunController {
         return [
                 seqCenters: seqCenterService.allSeqCenters(),
                 tableHeader: RunColumn.values()*.message,
+                filterTree : [
+                        [name: 'seqCenterSelection', msgcode: 'run.search.seqCenter', type: 'LIST',
+                         from: seqCenterService.allSeqCenters(), value: 'name', key: 'id'],
+                        [name: 'runSearch', msgcode: 'run.search.run', type: 'TEXT'],
+                        [name: 'dateCreatedSelection', msgcode: 'run.search.dateCreated', type: 'DATE'],
+                        [name: 'dateExecutedSelection', msgcode: 'run.search.dateExecuted', type: 'DATE'],
+                ],
         ]
     }
 
@@ -142,28 +151,20 @@ class RunFiltering {
                     break
                 case "dateCreatedSelection":
                     if (it.value) {
-                        int start_day = it.value.start_day as int
-                        int start_month = it.value.start_month as int
-                        int start_year = it.value.start_year as int
-                        Date dateFrom = new Date(start_year - 1900, start_month - 1, start_day)
-                        int end_day = it.value.end_day as int
-                        int end_month = it.value.end_month as int
-                        int end_year = it.value.end_year as int
-                        Date dateTo = new Date(end_year - 1900, end_month - 1, end_day + 1)
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
+                        Date dateFrom = it.value.start ? sdf.parse(it.value.start) : new Date()
+                        Date dateTo   = it.value.end   ? sdf.parse(it.value.end)   : new Date()
+
                         filtering.dateCreated << [dateFrom, dateTo]
                         filtering.enabled = true
                     }
                     break
                 case "dateExecutedSelection":
                     if (it.value) {
-                        int start_day = it.value.start_day as int
-                        int start_month = it.value.start_month as int
-                        int start_year = it.value.start_year as int
-                        Date dateFrom = new Date(start_year - 1900, start_month - 1, start_day)
-                        int end_day = it.value.end_day as int
-                        int end_month = it.value.end_month as int
-                        int end_year = it.value.end_year as int
-                        Date dateTo = new Date(end_year - 1900, end_month - 1, end_day + 1)
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd")
+                        Date dateFrom = it.value.start ? sdf.parse(it.value.start) : new Date()
+                        Date dateTo   = it.value.end   ? sdf.parse(it.value.end)   : new Date()
+
                         filtering.dateExecuted << [dateFrom, dateTo]
                         filtering.enabled = true
                     }

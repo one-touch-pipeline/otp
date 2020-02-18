@@ -103,7 +103,7 @@ $.otp.projectOverviewTable = {
             }
         });
 
-        $.otp.dataTableFilter.register($('#searchCriteriaTable'), oTableLaneOverview, false, function () {
+        $.otp.dataTableFilter.register($('#searchCriteriaTableSeqType'), oTableLaneOverview, false, function () {
             var ignoredColumns = parseInt($('#laneOverviewId').data('ignore-filter-columns')),
                 workflowSize = parseInt($('#laneOverviewId').data('workflow-size')),
                 seqTypeSize = parseInt($('#laneOverviewId').data('seq-type-size')),
@@ -111,7 +111,7 @@ $.otp.projectOverviewTable = {
                 result = [],
                 i;
 
-            $('#searchCriteriaTable').find('tr').each(function (index, element) {
+            $('#searchCriteriaTableSeqType').find('tr').each(function (index, element) {
                 var idx = $('td.attribute select', element)[0].selectedIndex;
                 if (idx !== 0) {
                     result.push((idx-1) * (workflowSize + 1) + ignoredColumns);
@@ -127,8 +127,8 @@ $.otp.projectOverviewTable = {
             }
         });
 
-        $.otp.dataTableFilter.register($('#searchCriteriaTable3'), oTableLaneOverview, false, function () {
-            var select = $('#searchCriteriaTable3').find('select')[0],
+        $.otp.dataTableFilter.register($('#searchCriteriaTableSampleType'), oTableLaneOverview, false, function () {
+            var select = $('#searchCriteriaTableSampleType').find('select')[0],
                 column = 1;
             if (select.selectedIndex !== 0) {
                 oTableLaneOverview.fnFilter('^' + select.value + '$', column, true);

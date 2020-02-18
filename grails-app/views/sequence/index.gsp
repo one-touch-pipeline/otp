@@ -29,61 +29,16 @@
     <asset:javascript src="common/DataTableFilter.js"/>
     <asset:javascript src="pages/sequence/index/datatable.js"/>
 </head>
+
 <body>
-    <div class="searchCriteriaTableSequences">
-        <input type="hidden" id="showRunLinks" value="${showRunLinks}"/>
-        <table id="searchCriteriaTable2">
-            <tr>
-            <td>
-                <span class="blue_label"><g:message code="extended.search"/> :</span>
-            </td>
-            <td>
-            <table id="searchCriteriaTable">
-                <tr>
-                    <td class="attribute">
-                        <select class="criteria" name="criteria">
-                            <option value="none"><g:message code="sequence.search.none"/></option>
-                            <option value="projectSelection"><g:message code="sequence.search.project"/></option>
-                            <option value="individualSearch"><g:message code="sequence.search.individual"/></option>
-                            <option value="sampleTypeSelection"><g:message code="sequence.search.sample"/></option>
-                            <option value="seqTypeSelection"><g:message code="sequence.search.seqType"/></option>
-                            <option value="ilseIdSearch"><g:message code="sequence.search.ilse"/></option>
-                            <option value="libraryLayoutSelection"><g:message code="sequence.search.libLayout"/></option>
-                            <option value="singleCell"><g:message code="sequence.search.singleCell"/></option>
-                            <option value="libraryPreparationKitSelection"><g:message code="sequence.search.libPrepKit"/></option>
-                            <option value="antibodyTargetSelection"><g:message code="sequence.search.antibodyTarget"/></option>
-                            <option value="seqCenterSelection"><g:message code="sequence.search.seqCenter"/></option>
-                            <option value="runSearch"><g:message code="sequence.search.run"/></option>
-                        </select>
-                    </td>
-                    <td class="value">
-                        <g:select class="criteria" name="projectSelection" from="${availableProjects}" optionValue="displayName" optionKey="id" style="display: none"/>
-                        <input class="criteria" type="text" name="individualSearch" style="display: none" placeholder="min. 3 characters"/>
-                        <g:select class="criteria" name="sampleTypeSelection" from="${sampleTypes}" optionValue="name" optionKey="id" style="display: none"/>
-                        <g:select class="criteria" name="seqTypeSelection" from="${seqTypes}" style="display: none"/>
-                        <input class="criteria" type="text" name="ilseIdSearch" style="display: none"/>
-                        <g:select class="criteria" name="libraryLayoutSelection" from="${libraryLayouts}" style="display: none"/>
-                        <g:select class="criteria" name="singleCell" from="[true, false]" style="display: none"/>
-                        <g:select class="criteria" name="libraryPreparationKitSelection" from="${libraryPreparationKits}" style="display: none"/>
-                        <g:select class="criteria" name="antibodyTargetSelection" from="${antibodyTargets}" optionValue="name" optionKey="name" style="display: none"/>
-                        <g:select class="criteria" name="seqCenterSelection" from="${seqCenters}" optionValue="name" optionKey="id" style="display: none"/>
-                        <input class="criteria" type="text" name="runSearch" style="display: none" placeholder="min. 3 characters"/>
-                    </td>
-                    <td class="remove">
-                        <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.remove")}" style="display: none"/>
-                    </td>
-                    <td class="add">
-                        <input class="blue_labelForPlus" type="button" value="${g.message(code: "otp.filter.add")}" style="display: none"/>
-                    </td>
-                </tr>
-            </table>
-            </td>
-            </tr>
-        </table>
-        <otp:annotation type="info" id="withdrawn_description">
-            <g:message code="sequence.information.withdrawn"/>
-        </otp:annotation>
-    </div>
+    <input type="hidden" id="showRunLinks" value="${showRunLinks}"/>
+
+    <g:render template="/templates/dataTableFilter" model="[filterTree: filterTree]"/>
+
+    <otp:annotation type="info" id="withdrawn_description">
+        <g:message code="sequence.information.withdrawn"/>
+    </otp:annotation>
+
     <div class="otpDataTables">
         <otp:dataTable codes="${tableHeader}" id="sequenceTable"/>
     </div>
@@ -92,6 +47,5 @@
             $.otp.sequence.register();
         });
     </asset:script>
-</div>
 </body>
 </html>
