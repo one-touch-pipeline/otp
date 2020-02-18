@@ -246,8 +246,9 @@ class OtpTagLib {
      * A simple colored wrapper to highlight information.
      */
     def annotation = { attrs, body ->
-        String subtype = attrs.subtype ?: "none"
-        out << "<div class=\"annotation-box subtype-${subtype}\">"
+        String subtype = attrs.remove("subtype") ?: "none"
+
+        out << "<div ${attrs.collect { "${it.key}=\"${it.value}\"" }.join(" ") } class=\"annotation-box subtype-${subtype}\">"
         out << body()
         out << "</div>"
     }
