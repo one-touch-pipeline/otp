@@ -45,13 +45,13 @@ class KeywordController implements CheckAndCall {
 
         ProjectSelection selection = projectSelectionService.selectedProject
 
-        // we need to reload it to get proper access to all properties
         Project project = projectSelectionService.getProjectFromProjectSelectionOrAllProjects(selection)
         project = atMostOneElement(Project.findAllByName(project?.name, [fetch: [keywords: 'join']]))
          return [
-                    keywords                       : Keyword.listOrderByName() ?: [],
-                    projects                       : projects,
-                    project                        : project,
+                 keywords       : Keyword.listOrderByName() ?: [],
+                 projectKeywords: project.keywords.sort(),
+                 projects       : projects,
+                 project        : project,
             ]
         }
 
