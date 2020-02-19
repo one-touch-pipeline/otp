@@ -27,31 +27,25 @@ $.otp = $.otp || {};
 $.otp.graph = {};
 
 $.otp.graph.overview = {
-    init : function() {
+    init: function() {
         "use strict";
         var url = $.otp.contextPath,
             projectGroup = $('#projectGroup_select').val();
-        RGraph.AJAX(url + '/statistic/projectCountPerDate?projectGroupName='
-                + projectGroup, function () {
-                $.otp.graph.overview.projectCountPerDate(this, projectGroup);
-            });
-        RGraph.AJAX(url + '/statistic/laneCountPerDate?projectGroupName='
-               + projectGroup, function () {
-                $.otp.graph.overview.laneCountPerDate(this, projectGroup);
-            });
-        RGraph.AJAX(url + '/statistic/gigaBasesPerDay?projectGroupName='
-            + projectGroup, function () {
+        RGraph.AJAX(url + '/statistic/projectCountPerDate?projectGroupName=' + projectGroup, function () {
+            $.otp.graph.overview.projectCountPerDate(this, projectGroup);
+        });
+        RGraph.AJAX(url + '/statistic/laneCountPerDate?projectGroupName=' + projectGroup, function () {
+            $.otp.graph.overview.laneCountPerDate(this, projectGroup);
+        });
+        RGraph.AJAX(url + '/statistic/gigaBasesPerDay?projectGroupName=' + projectGroup, function () {
             $.otp.graph.overview.gigaBasesPerDay(this, projectGroup);
         });
-        RGraph.AJAX(url + '/statistic/sampleCountPerSequenceType?projectGroupName='
-                + projectGroup, $.otp.graph.overview.sampleCountPerSequenceType);
-        RGraph.AJAX(url + '/statistic/patientsCountPerSequenceType?projectGroupName='
-                + projectGroup, $.otp.graph.overview.patientsCountPerSequenceType);
-        RGraph.AJAX(url + '/statistic/projectCountPerSequenceType?projectGroupName='
-                + projectGroup, $.otp.graph.overview.projectCountPerSequenceType);
+        RGraph.AJAX(url + '/statistic/sampleCountPerSequenceType?projectGroupName=' + projectGroup, $.otp.graph.overview.sampleCountPerSequenceType);
+        RGraph.AJAX(url + '/statistic/patientsCountPerSequenceType?projectGroupName=' + projectGroup, $.otp.graph.overview.patientsCountPerSequenceType);
+        RGraph.AJAX(url + '/statistic/projectCountPerSequenceType?projectGroupName=' + projectGroup, $.otp.graph.overview.projectCountPerSequenceType);
     },
 
-    projectCountPerDate : function(data, project) {
+    projectCountPerDate: function(data, project) {
         "use strict";
         var json = JSON.parse(data.responseText);
         var count = json.count;
@@ -75,7 +69,7 @@ $.otp.graph.overview = {
                 textSize: 8,
                 tickmarks: 'circle',
                 ticksize: 7,
-                title: 'Number of sequencing projects in ' + project,
+                title: 'Number of projects in ' + project,
                 titleColor: 'black',
                 titleSize: 11,
                 titleY: 39,
@@ -88,7 +82,7 @@ $.otp.graph.overview = {
         }).draw();
     },
 
-    laneCountPerDate : function(data, project) {
+    laneCountPerDate: function(data, project) {
         "use strict";
         var json = JSON.parse(data.responseText);
         RGraph.reset(document.getElementById('laneCountPerDate'));
@@ -120,7 +114,7 @@ $.otp.graph.overview = {
         }).draw();
     },
 
-    gigaBasesPerDay : function(data, project) {
+    gigaBasesPerDay: function(data, project) {
         "use strict";
         var json = JSON.parse(data.responseText);
         RGraph.reset(document.getElementById('gigaBasesPerDay'));
@@ -188,7 +182,7 @@ $.otp.graph.overview = {
         }).roundRobin({frames: 13});
     },
 
-    projectCountPerSequenceType : function() {
+    projectCountPerSequenceType: function() {
         "use strict";
         var json = JSON.parse(this.responseText);
         RGraph.reset(document.getElementById('projectCountPerSequenceTypeBar'));
@@ -226,7 +220,7 @@ $.otp.graph.overview = {
         }).draw();
     },
 
-    patientsCountPerSequenceType : function() {
+    patientsCountPerSequenceType: function() {
         "use strict";
         var json = JSON.parse(this.responseText);
         RGraph.reset(document.getElementById('patientsCountPerSequenceType'));
@@ -266,7 +260,7 @@ $.otp.graph.overview = {
 };
 
 $.otp.graph.project = {
-    init : function() {
+    init: function() {
         "use strict";
         var project = $('#project').find('option:selected').text();
         RGraph.AJAX(
@@ -292,7 +286,7 @@ $.otp.graph.project = {
         );
     },
 
-    sampleTypeCountBySeqType : function() {
+    sampleTypeCountBySeqType: function() {
         "use strict";
         var json = JSON.parse(this.responseText);
         RGraph.reset(document.getElementById('sampleTypeCountBySeqType'));
@@ -328,7 +322,7 @@ $.otp.graph.project = {
         }).draw();
     },
 
-    laneCountPerDateByProject : function() {
+    laneCountPerDateByProject: function() {
         "use strict";
         var json = JSON.parse(this.responseText);
         var count = json.count;
@@ -365,7 +359,7 @@ $.otp.graph.project = {
         }).draw();
     },
 
-    sampleTypeCountByPatient : function() {
+    sampleTypeCountByPatient: function() {
         "use strict";
         var json = JSON.parse(this.responseText);
         var canvas = document.getElementById('sampleTypeCountByPatient');

@@ -26,7 +26,7 @@ import grails.validation.Validateable
 
 class StatisticController {
 
-    static final String allProjects = "All projects"
+    static final String ALL_PROJECTS = "All projects"
 
     StatisticService statisticService
 
@@ -34,19 +34,23 @@ class StatisticController {
 
     ProjectService projectService
 
+    private static long getRoundedPercentage(long numerator, long denominator) {
+        return Math.round(numerator * 100 / denominator)
+    }
+
     JSON projectCountPerDate(ProjectGroupCommand command) {
         ProjectGroup projectGroup = null
         if (command.projectGroupName) {
             projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
         }
 
-        List data = statisticService.projectDateSortAfterDate(projectGroup)
+        List data = statisticService.projectCountPerDay(projectGroup)
         render statisticService.projectCountPerDate(data) as JSON
     }
 
     JSON laneCountPerDate(ProjectGroupCommand command) {
         List<Project> projects = null
-        if (command.projectGroupName && command.projectGroupName != allProjects) {
+        if (command.projectGroupName && command.projectGroupName != ALL_PROJECTS) {
             ProjectGroup projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
             projects = projectService.projectByProjectGroup(projectGroup)
         }
@@ -57,7 +61,7 @@ class StatisticController {
 
     JSON gigaBasesPerDay(ProjectGroupCommand command) {
         List<Project> projects = null
-        if (command.projectGroupName && command.projectGroupName != allProjects) {
+        if (command.projectGroupName && command.projectGroupName != ALL_PROJECTS) {
             ProjectGroup projectGroup = projectGroupService.projectGroupByName(command.projectGroupName)
             projects = projectService.projectByProjectGroup(projectGroup)
         }
@@ -90,13 +94,13 @@ class StatisticController {
             }
             labels << it[0]
             values << it[1]
-            labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / totalCount)} %"
+            labelsPercentage << "${it[0]} ${getRoundedPercentage(it[1] as int, totalCount)} %"
         }
 
         if (otherCount > 0) {
             labels << "Other"
             values << otherCount
-            labelsPercentage << "Other ${Math.round(otherCount * 100 / totalCount)} %"
+            labelsPercentage << "Other ${getRoundedPercentage(otherCount, totalCount)} %"
         }
 
         Map dataToRender = [
@@ -143,7 +147,7 @@ class StatisticController {
             if (it[1] < filterCount) {
                 return
             }
-            labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %"
+            labelsPercentage << "${it[0]} ${getRoundedPercentage(it[1] as int, projectSequenceCount)} %"
         }
 
         Map dataToRender = [
@@ -190,7 +194,7 @@ class StatisticController {
             if (it[1] < filterCount) {
                 return
             }
-            labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %"
+            labelsPercentage << "${it[0]} ${getRoundedPercentage(it[1] as int, projectSequenceCount)} %"
         }
 
         Map dataToRender = [
@@ -218,7 +222,7 @@ class StatisticController {
             projectSequenceCount += it[1]
         }
 
-        sampleTypeCount.each { labelsPercentage << "${it[0]} ${Math.round(it[1] * 100 / projectSequenceCount)} %" }
+        sampleTypeCount.each { labelsPercentage << "${it[0]} ${getRoundedPercentage(it[1] as int, projectSequenceCount)} %" }
 
         Map dataToRender = [
                 labels          : labels,
@@ -277,7 +281,7 @@ class ProjectGroupCommand implements Validateable {
 
     static constraints = {
         projectGroupName(nullable: false, validator: { val, ProjectGroupCommand obj ->
-            return val && (val == StatisticController.allProjects || (obj.projectGroupService.projectGroupByName(val) != null))
+            return val && (val == StatisticController.ALL_PROJECTS || (obj.projectGroupService.projectGroupByName(val) != null))
         })
     }
 }

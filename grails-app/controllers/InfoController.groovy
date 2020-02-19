@@ -77,7 +77,7 @@ class InfoController {
     }
 
     JSON projectCountPerDate() {
-        List data = statisticService.projectDateSortAfterDate(null)
+        List data = statisticService.projectCountPerDay(null)
         render statisticService.projectCountPerDate(data) as JSON
     }
 

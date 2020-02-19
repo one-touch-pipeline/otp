@@ -22,34 +22,28 @@
 package de.dkfz.tbi.otp.ngsdata
 
 import grails.gorm.transactions.Transactional
-import groovy.sql.Sql
 import org.joda.time.*
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
-
-import javax.sql.DataSource
 
 @Transactional
 class StatisticService {
 
     ProjectService projectService
-    DataSource dataSource
 
     private DateTimeFormatter simpleDateFormatter = DateTimeFormat.forPattern("MMM yyyy").withLocale(Locale.ENGLISH)
 
-    List projectDateSortAfterDate(ProjectGroup projectGroup) {
-        List seq = Sequence.withCriteria {
+    List projectCountPerDay(ProjectGroup projectGroup) {
+        return Project.withCriteria {
             projections {
                 if (projectGroup) {
-                    List<Project> projects = projectService.projectByProjectGroup(projectGroup)
-                    'in'("projectId", projects*.id)
+                    'in'("id", projectService.projectByProjectGroup(projectGroup)*.id)
                 }
-                min("dateCreated", "minDate")
-                groupProperty("projectName")
+                groupProperty("dateCreated")
+                count("name")
             }
-            order("minDate")
+            order("dateCreated")
         }
-        return seq
     }
 
     List sampleCountPerSequenceType(ProjectGroup projectGroup) {
@@ -83,82 +77,45 @@ class StatisticService {
     }
 
     List laneCountPerDay(List<Project> projectList) {
-        List<Project> projects = projectList ?: Project.findAll()
-
-        def sql = new Sql(dataSource)
-
-        String query = '''
-SELECT
- date_part('year', seq.date_created)::int as year,
- date_part('month', seq.date_created)::int as month,
- date_part('day', seq.date_created)::int as day,
- count(seq.seq_track_id)::int as laneCount
- FROM sequences as seq
- WHERE seq.seq_track_id NOT IN (
-SELECT DISTINCT seq.seq_track_id
- FROM sequences as seq
- JOIN data_file as df
- ON seq.seq_track_id = df.seq_track_id
- WHERE df.file_withdrawn != false) AND
- seq.project_id IN (''' + projects*.id.join(", ") + ''')
- GROUP BY
- date_part('year', seq.date_created),
- date_part('month', seq.date_created),
- date_part('day', seq.date_created)
- ORDER BY
- date_part('year', seq.date_created),
- date_part('month', seq.date_created),
- date_part('day', seq.date_created)
-'''
-        List laneCountPerDay = []
-        if (projects) {
-            sql.eachRow(query) {
-                laneCountPerDay << ["${it.year}-${it.month}-${it.day}" as String, it.laneCount]
-            }
-        }
-
-        return laneCountPerDay
+        return seqTrackPropertyGroupedByDayAndFilteredByProjects("COUNT(DISTINCT st) as s", projectList)
     }
 
     List gigaBasesPerDay(List<Project> projectList) {
-        List<Project> projects = projectList ?: Project.findAll()
+        return seqTrackPropertyGroupedByDayAndFilteredByProjects("(SUM(st.nBasePairs) / 10e9) as g", projectList)
+    }
 
-        def sql = new Sql(dataSource)
-
-        String query = '''
-SELECT
-    date_part('year', seq.date_created)::int as year,
-    date_part('month', seq.date_created)::int as month,
-    date_part('day', seq.date_created)::int as day,
-    (sum(seq.n_base_pairs) / 10e9)::int as gigaBases
-FROM
-    sequences as seq
-WHERE
-    seq.seq_track_id NOT IN (
-        SELECT DISTINCT seq.seq_track_id
-        FROM sequences as seq
-        JOIN data_file as df ON seq.seq_track_id = df.seq_track_id
-        WHERE
-            df.file_withdrawn != false
-    ) AND seq.project_id IN (''' + projects*.id.join(", ") + ''')
- GROUP BY
-    date_part('year', seq.date_created),
-    date_part('month', seq.date_created),
-    date_part('day', seq.date_created)
- ORDER BY
-    date_part('year', seq.date_created),
-    date_part('month', seq.date_created),
-    date_part('day', seq.date_created)
-'''
-        List gigaBasesPerDay = []
-
-        if (projects) {
-            sql.eachRow(query) {
-                gigaBasesPerDay << ["${it.year}-${it.month}-${it.day}" as String, it.gigaBases]
-            }
-        }
-
-        return gigaBasesPerDay
+    /**
+     * Query for fastq datafiles and get the aggregate grouped by a timestamp.
+     *
+     * @param selectAggregateHql an HQL String containing the aggregate function to use in the select
+     * @param dataFileProperty the name of the property in the resulting hql
+     * @param projectList whitelist for projects to use. Using null optimizes the query to use all projects.
+     * @return a List of Lists, with [0] being the date and [1] being the grouped value
+     */
+    private List seqTrackPropertyGroupedByDayAndFilteredByProjects(String selectAggregateHql, List<Project> projectList) {
+        String dataFileTimeStamp = "TO_CHAR(st.dateCreated, 'YYYY-MM-DD')"
+        String hql = """\
+            |SELECT
+            |    ${dataFileTimeStamp},
+            |    ${selectAggregateHql}
+            |FROM
+            |    SeqTrack st
+            |WHERE
+            |    NOT EXISTS (
+            |        SELECT
+            |            df.seqTrack
+            |        FROM
+            |            DataFile df
+            |        WHERE
+            |            df.fileWithdrawn = true
+            |            AND df.seqTrack = st
+            |    )
+            |    ${projectList == null ? "" : "AND st.sample.individual.project.id IN (${projectList*.id?.join(", ")})"}
+            |GROUP BY
+            |    ${dataFileTimeStamp}
+            |ORDER BY
+            |    ${dataFileTimeStamp}""".stripMargin()
+        return DataFile.findAll(hql)
     }
 
     List projectCountPerSequenceType(ProjectGroup projectGroup) {
@@ -213,7 +170,7 @@ WHERE
      * @param data A list containing lists with one element which is a date
      */
     Map projectCountPerDate(List data) {
-        getCountPerDate(data)
+        getCountPerDate(data, true)
     }
 
     private Map getCountPerDate(List data, boolean multiple = false) {
