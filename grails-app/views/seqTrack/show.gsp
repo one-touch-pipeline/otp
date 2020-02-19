@@ -43,7 +43,14 @@
             </tr>
             <tr>
                 <td><g:message code="seqTrack.show.run"/></td>
-                <td><g:link controller="run" action="show" id="${seqTrack.run.id}">${seqTrack.run.name}</g:link></td>
+                <td>
+                    <sec:access expression="hasRole('ROLE_OPERATOR')">
+                        <g:link controller="run" action="show" id="${seqTrack.run.id}">${seqTrack.run.name}</g:link>
+                    </sec:access>
+                    <sec:noAccess expression="hasRole('ROLE_OPERATOR')">
+                        ${seqTrack.run.name}
+                    </sec:noAccess>
+                </td>
             </tr>
             <tr>
                 <td><g:message code="seqTrack.show.sampleType"/></td>

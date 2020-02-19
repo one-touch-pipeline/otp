@@ -77,7 +77,16 @@
             <g:set var="run" value="${entry.key}" />
             <div class="color-left-border run slim">
                 <div class="run-information">
-                    <div class="grid-element"><strong><g:link controller="run" action="show" id="${run.id}">${run.name}</g:link></strong></div>
+                    <div class="grid-element">
+                        <strong>
+                            <sec:access expression="hasRole('ROLE_OPERATOR')">
+                                <g:link controller="run" action="show" id="${run.id}">${run.name}</g:link>
+                            </sec:access>
+                            <sec:noAccess expression="hasRole('ROLE_OPERATOR')">
+                                ${run.name}
+                            </sec:noAccess>
+                        </strong>
+                    </div>
                     <div class="grid-element"><strong><g:message code="seqTrack.seqTrackSet.lanesPerRun.seqCenter"/></strong> ${run.seqCenter}</div>
                     <div class="grid-element"><strong><g:message code="seqTrack.seqTrackSet.lanesPerRun.seqPlatform"/></strong> ${run.seqPlatform}</div>
                 </div>

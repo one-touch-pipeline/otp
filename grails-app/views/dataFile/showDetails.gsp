@@ -47,12 +47,14 @@
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.runName"/></td>
                 <td class="myValue">
-                    <sec:ifAllGranted roles="ROLE_OPERATOR">
-                        <b><g:link controller="run" action="show" params="[id:  dataFile.run.name]">${dataFile.run.name}</g:link></b>
-                    </sec:ifAllGranted>
-                    <sec:ifNotGranted roles="ROLE_OPERATOR">
-                        ${dataFile.run.name}
-                    </sec:ifNotGranted>
+                    <strong>
+                        <sec:ifAllGranted roles="ROLE_OPERATOR">
+                            <g:link controller="run" action="show" params="[id: dataFile.run.name]">${dataFile.run.name}</g:link>
+                        </sec:ifAllGranted>
+                        <sec:ifNotGranted roles="ROLE_OPERATOR">
+                            ${dataFile.run.name}
+                        </sec:ifNotGranted>
+                    </strong>
                 </td>
             </tr>
             <tr>
