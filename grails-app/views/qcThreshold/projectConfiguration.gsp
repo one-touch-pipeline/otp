@@ -34,7 +34,7 @@
 
     <div>
         <h1>${g.message(code: "qcThreshold.title2", args: [project.name])}</h1>
-        ${g.message(code: "qcThreshold.noticeProject")}
+        <otp:annotation type="info">${g.message(code: "qcThreshold.noticeProject")}</otp:annotation>
         <table>
 
             <g:each in="${classesWithProperties}" var="cl">

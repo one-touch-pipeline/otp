@@ -56,7 +56,7 @@
                 <g:submitButton name="copy" value="Copy"/>
             </g:form>
         </g:if>
-        <otp:annotation subtype="warning"><g:message code="configurePipeline.alignment.info"/></otp:annotation>
+        <otp:annotation type="info"><g:message code="configurePipeline.info.defaultValues.exceptIndexes"/></otp:annotation>
 
         <g:form controller="configurePipeline" action="alignment" params='["project.id": project.id, "seqType.id": seqType.id]'>
             <table class="alignmentTable">

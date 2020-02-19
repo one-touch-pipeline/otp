@@ -37,7 +37,7 @@
             <g:img file="info.png"/>
         </g:link>
 
-        <h3><g:message code="egaSubmission.selectSamples.title"/></h3>
+        <h1><g:message code="egaSubmission.selectSamples.title"/></h1>
         <div class="searchCriteriaTableSequences">
             <table id="searchCriteriaTable" style="display: inline-block">
                 <tr>

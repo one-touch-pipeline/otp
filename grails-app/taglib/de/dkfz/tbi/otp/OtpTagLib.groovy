@@ -244,11 +244,13 @@ class OtpTagLib {
 
     /**
      * A simple colored wrapper to highlight information.
+     * @attr type REQUIRED one of info, warning, or error
      */
     def annotation = { attrs, body ->
-        String subtype = attrs.remove("subtype") ?: "none"
+        String type = attrs.remove("type")
+        assert type : "attribute `type` must be given"
 
-        out << "<div ${attrs.collect { "${it.key}=\"${it.value}\"" }.join(" ") } class=\"annotation-box subtype-${subtype}\">"
+        out << "<div ${attrs.collect { "${it.key}=\"${it.value}\"" }.join(" ") } class=\"annotation-box type-${type}\">"
         out << body()
         out << "</div>"
     }

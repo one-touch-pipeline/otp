@@ -72,7 +72,7 @@
         </table>
 
         <h2><g:message code="seqTrack.seqTrackSet.lanesPerRun.header"/></h2>
-        <p style="white-space: pre"><g:message code="seqTrack.seqTrackSet.lanesPerRun.info"/></p>
+        <otp:annotation type="info" style="white-space: pre"><g:message code="seqTrack.seqTrackSet.lanesPerRun.info"/></otp:annotation>
         <g:each var="entry" in="${lanesPerRun}">
             <g:set var="run" value="${entry.key}" />
             <div class="color-left-border run slim">

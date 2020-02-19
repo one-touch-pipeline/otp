@@ -81,10 +81,10 @@
             </td>
             </tr>
         </table>
-             <p id="withdrawn_description">
-                 <g:message code="sequence.information.withdrawn"/>
-            </p>
         </div>
+        <otp:annotation type="info" id="withdrawn_description">
+            <g:message code="sequence.information.withdrawn"/>
+        </otp:annotation>
         <div class="otpDataTables">
         <otp:dataTable codes="${tableHeader}" id="sequenceTable"/>
         </div>

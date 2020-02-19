@@ -30,7 +30,7 @@
 </head>
 <body>
 <div class="body">
-    <h3><g:message code="egaSubmission.experimentalMetadata.header"/></h3>
+    <h1><g:message code="egaSubmission.experimentalMetadata.header"/></h1>
     <div class="otpDataTables">
         <table id="dataTable">
             <thead>

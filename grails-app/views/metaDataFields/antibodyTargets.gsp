@@ -37,7 +37,7 @@
     <g:render template="linkBanner" model="[active: 'antibodyTargets']"/>
 
     <h1><g:message code="dataFields.antibodyTarget.header"/></h1>
-    <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
+    <otp:annotation type="info"><g:message code="dataFields.title.caseInsensitive"/></otp:annotation>
     <div class="otpDataTables">
     <table id="metadatafields-datatable">
         <thead>

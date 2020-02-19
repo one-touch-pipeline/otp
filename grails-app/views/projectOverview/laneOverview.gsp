@@ -78,11 +78,9 @@
                 </table>
             </div>
         </div>
-        <div>
-            <p id="withdrawn_description">
-                Withdrawn data is colored gray.
-            </p>
-        </div>
+        <otp:annotation type="info" id="withdrawn_description">
+            ${g.message(code: "projectOverview.index.information.withdrawn")}
+        </otp:annotation>
         <div class="otpDataTables">
             <table id="laneOverviewId"  data-ignore-filter-columns="${hideSampleIdentifier ? 2 : 3}" data-workflow-size="${pipelines.size()}" data-seq-type-size="${seqTypes.size()}">
                 <thead>

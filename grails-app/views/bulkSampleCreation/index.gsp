@@ -37,9 +37,9 @@
     <g:render template="/templates/projectSelection" model="['project': project, 'projects': projects]" />
 
     <h1><g:message code="bulk.sample.creation.title"/></h1>
-    <p>
+    <otp:annotation type="info">
         <g:message code="bulk.sample.creation.description"/>
-    </p>
+    </otp:annotation>
 
     <div>
         <table>

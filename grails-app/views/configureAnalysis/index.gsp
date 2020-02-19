@@ -66,8 +66,11 @@
                     </tbody>
                 </table>
 
+                <otp:annotation type="info">
+                    <g:message code="configureAnalysis.note.submit"/>
+                </otp:annotation>
+
                 <g:submitButton class="blue_label" name="submit" value="submit" onclick="return submitCheck();" ondblclick="return false;"/>
-                <g:message code="configureAnalysis.note.submit"/>
             </g:form>
 
             <script>

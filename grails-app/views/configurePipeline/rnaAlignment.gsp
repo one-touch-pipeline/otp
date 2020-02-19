@@ -47,7 +47,7 @@
         <div class="empty"><br></div>
     </g:else>
     <h2><g:message code="configurePipeline.alignment.configFile"/></h2>
-    <g:message code="configurePipeline.alignment.info.config.rna"/>
+    <otp:annotation type="info"><g:message code="configurePipeline.info.defaultValues"/></otp:annotation>
     <g:form controller="configurePipeline" action="rnaAlignmentConfig"
             params='["project.id": project.id, "seqType.id": seqType.id]'>
         <table class="alignmentTable">
@@ -92,7 +92,7 @@
     </g:form>
 
     <h2><g:message code="configurePipeline.alignment.referenceGenome"/></h2>
-    <g:message code="configurePipeline.alignment.info"/>
+    <otp:annotation type="info"><g:message code="configurePipeline.info.defaultValues.exceptIndexes"/></otp:annotation>
     <g:form controller="configurePipeline" action="rnaAlignmentReferenceGenome"
             params='["project.id": project.id, "seqType.id": seqType.id]'>
         <table class="alignmentTable">

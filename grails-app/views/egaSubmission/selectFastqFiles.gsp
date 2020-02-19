@@ -36,7 +36,7 @@
     </g:link>
     <g:render template="/templates/messages"/>
     <div>
-        <h3><g:message code="egaSubmission.selectFiles.fastqTitle"/></h3>
+        <h1><g:message code="egaSubmission.selectFiles.fastqTitle"/></h1>
         <p>
             <g:uploadForm action="dataFilesListFileUploadForm">
                 <div class="dialog">

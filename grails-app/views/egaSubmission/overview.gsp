@@ -40,7 +40,7 @@
         <div class="buttons">
             <g:link action="newSubmission" params="[id: project.id]"><g:message code="egaSubmission.overview.newSubmission"/></g:link>
         </div>
-        <h3><g:message code="egaSubmission.overview.header"/></h3>
+        <h1><g:message code="egaSubmission.overview.header"/></h1>
         <table>
             <tr>
                 <th><g:message code="egaSubmission.overview.submissionID"/></th>

@@ -51,9 +51,10 @@
         </div>
         <div id="sample" data-sample="${sample?.id}">
             <g:if test="${sample}">
-                <br>
-                ${g.message(code: "alignment.quality.selectedSample", args: [sample])}
-                <g:link action="index" params="[seqType: seqType.id]">${g.message(code: "alignment.quality.showAll")}</g:link>
+                <otp:annotation type="info">
+                    ${g.message(code: "alignment.quality.selectedSample", args: [sample])}
+                    <g:link action="index" params="[seqType: seqType.id]">${g.message(code: "alignment.quality.showAll")}</g:link>
+                </otp:annotation>
             </g:if>
         </div>
         <div class="otpDataTables alignmentQualityOverviewTable">

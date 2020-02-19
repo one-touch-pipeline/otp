@@ -30,7 +30,7 @@
 
     <body>
         <div class="body">
-            <h2>User documentation</h2>
+            <h1>User documentation</h1>
             <p>
                 To start a new submission click on the menu item "EGA".
                 If you would like to create one submission for several projects, please create them individually for each project with the same name.
@@ -40,7 +40,7 @@
                 or <a href="https://ega-archive.org/submission/FAQ" target="_blank">FAQ</a>.
             </p>
 
-            <h3 id="overview">Overview page</h3>
+            <h2 id="overview">Overview page</h2>
             <p>
                 You can choose three actions:
                 <ul>
@@ -56,7 +56,7 @@
                 If you create a new submission you will be taken to the following page.
             </p>
 
-            <h3 id="new">New submission page</h3>
+            <h2 id="new">New submission page</h2>
             <p>
                 Please enter the following information on this page:
                 <ul>
@@ -75,7 +75,7 @@
                 you will be taken to the next page to select samples.
             </p>
 
-            <h3 id="selectSamples">Select samples page</h3>
+            <h2 id="selectSamples">Select samples page</h2>
             <p>
                 On this page all samples in the selected project are displayed.
                 By clicking on the checkboxes you can select samples.
@@ -88,7 +88,7 @@
                 you will be taken to the next page to select the files to submit for each sample.
             </p>
 
-            <h3 id="sampleInformation">Sample information page</h3>
+            <h2 id="sampleInformation">Sample information page</h2>
             <p>
                 On this page you should complete the following information for each sample:
                 <ul>
@@ -107,7 +107,7 @@
                 you will be taken to the next page to select the concrete files to upload.
             </p>
 
-            <h3 id="selectFastq">Select FASTQ Files page</h3>
+            <h2 id="selectFastq">Select FASTQ Files page</h2>
             <p>
                 If you choose FASTQ in the previous step, you will enter this page.
                 First, you have to choose what data you want to submit.
@@ -125,7 +125,7 @@
                 If you have not selected any BAM files, your submission is now finished and we can start with the upload.
             </p>
 
-            <h3 id="selectBam">Select BAM Files page</h3>
+            <h2 id="selectBam">Select BAM Files page</h2>
             <p>
                 If you choose BAM on the sample information page, you will enter this page.
                 At the moment there is the restriction that only OTP-produced BAM files can be uploaded.

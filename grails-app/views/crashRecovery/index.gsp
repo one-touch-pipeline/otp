@@ -43,9 +43,9 @@
         </div>
         <h1><g:message code="crashRecovery.title"/></h1>
             <g:if test="${!processingOptionsValid}">
-                <div id="infoBox"><div class="errors">
-                    <ul><li>There are invalid processing options: <g:link controller="processingOption">view and correct them here</g:link></li></ul>
-                </div></div>
+                <otp:annotation type="error">
+                    There are invalid processing options: <g:link controller="processingOption">view and correct them here</g:link>
+                </otp:annotation>
             </g:if>
         <div>
             <p>Select one of the Crashed Jobs and click one of the actions underneath the table. Jobs that are at least sometimes resumable are preselected.</p>

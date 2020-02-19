@@ -36,7 +36,7 @@
     </g:link>
     <g:render template="/templates/messages"/>
     <div>
-        <h3><g:message code="egaSubmission.selectFiles.bamTitle"/></h3>
+    <h1><g:message code="egaSubmission.selectFiles.bamTitle"/></h1>
     <p>
         <g:uploadForm action="bamFilesListFileUploadForm">
             <div class="dialog">

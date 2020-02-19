@@ -147,7 +147,7 @@
             </g:else>
         </g:if>
         <g:else>
-            ${g.message(code: "cellRanger.noConfig")}
+            <otp:annotation type="info">${g.message(code: "cellRanger.noConfig")}</otp:annotation>
         </g:else>
     </g:if>
     <g:else>

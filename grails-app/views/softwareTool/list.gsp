@@ -36,7 +36,7 @@
         <g:render template="/metaDataFields/linkBanner" model="[ active: 'softwareTool']"/>
 
         <h1><g:message code="softwareTool.list.header"/></h1>
-        <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
+        <otp:annotation type="info"><g:message code="dataFields.title.caseInsensitive"/></otp:annotation>
         <div class="otpDataTables">
         <table id="metadatafields-datatable" class="software-table fixed-table-header">
             <thead>

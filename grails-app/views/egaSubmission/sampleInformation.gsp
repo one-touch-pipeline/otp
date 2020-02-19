@@ -35,8 +35,8 @@
     </g:link>
     <g:render template="/templates/messages"/>
     <div>
-        <h3><g:message code="egaSubmission.sampleInformation.title"/></h3>
-        <p><b><g:message code="egaSubmission.sampleInformation.aliasArePublic"/></b></p>
+        <h1><g:message code="egaSubmission.sampleInformation.title"/></h1>
+        <otp:annotation type="info"><g:message code="egaSubmission.sampleInformation.aliasArePublic"/></otp:annotation>
         <p>
             <g:uploadForm action="sampleInformationUploadForm">
                 <div class="dialog">

@@ -112,7 +112,7 @@
                 </tr>
             </sec:ifAllGranted>
         </table>
-        <H1><g:message code="datafile.showDetails.dates"/></H1>
+        <h2><g:message code="datafile.showDetails.dates"/></h2>
         <table>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.dates.runExecutionDate"/></td>
@@ -127,7 +127,7 @@
                 <td class="myValue">${dataFile.dateCreated.format("yyyy-MM-dd HH:mm")}</td>
             </tr>
         </table>
-        <H1><g:message code="datafile.showDetails.metaDataStatus"/></H1>
+        <h2><g:message code="datafile.showDetails.metaDataStatus"/></h2>
         <table>
             <tr>
                 <td class="myKey"><g:message code="datafile.showDetails.metaDataStatus.project"/></td>
@@ -150,8 +150,8 @@
                 <td class="myValue">${dataFile.withdrawnComment ?: "-"}</td>
             </tr>
         </table>
-        <H1><g:message code="datafile.showDetails.metaDataEntries"/></H1>
-        <p>${g.message(code: "datafile.showDetails.metaDataEntries.explanation")}</p>
+        <h2><g:message code="datafile.showDetails.metaDataEntries"/></h2>
+        <otp:annotation type="warning">${g.message(code: "datafile.showDetails.metaDataEntries.explanation")}</otp:annotation>
         <table>
         <g:each var="metaDataEntry" in="${entries}">
             <tr>

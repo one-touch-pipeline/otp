@@ -33,7 +33,9 @@
 
     <div>
         <h1><g:message code="otp.menu.documents"/></h1>
-        <g:message code="document.notice"/>
+        <otp:annotation type="info">
+            <g:message code="document.notice"/>
+        </otp:annotation>
         <table>
             <tr>
                 <th><g:message code="document.name"/></th>

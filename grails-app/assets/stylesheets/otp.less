@@ -1460,7 +1460,6 @@ td div {
     max-width: auto;
     margin-top: auto;
     margin-left: auto;
-    margin-bottom: -21px;
     padding: 0px;
 }
 .searchCriteriaTableSequences > table {
@@ -1917,11 +1916,6 @@ td div {
 .withdrawn, .deleted {
     color: grey;
     > * {color: grey;}
-}
-
-#withdrawn_description {
-    float: left;
-    display: none;
 }
 
 .obsoleteMessage {
@@ -2424,9 +2418,6 @@ ul.LinkBanner {
 }
 
 .metaDataFields {
-    .annotation {
-        color: red;
-    }
     .adapter-file {
         width: 200px;
     }
@@ -2604,23 +2595,20 @@ table.key-value-table {
 
 .annotation-box {
     padding: 10px;
+    margin: 5px;
 
     border: 2px solid;
     border-radius: 5px;
 
-    &.subtype-none {
-        border-color: #000000;
-        background: #fff3f3;
-    }
-    &.subtype-info {
+    &.type-info {
         border-color: #006dba;
         background: #b2d1ff;
     }
-    &.subtype-warning {
+    &.type-warning {
         border-color: #fff04d;
         background: #feffc1;
     }
-    &.subtype-error {
+    &.type-error {
         border-color: #cc0000;
         background: #ffaaaa;
     }

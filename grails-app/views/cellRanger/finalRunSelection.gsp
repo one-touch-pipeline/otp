@@ -34,7 +34,7 @@
     <g:render template="/templates/messages"/>
     <h1>${g.message(code: "cellRanger.selection.title", args: [project?.name])}</h1>
 
-    <p>${g.message(code: "cellRanger.selection.info")}</p>
+    <otp:annotation type="info">${g.message(code: "cellRanger.selection.info")}</otp:annotation>
 
     <g:set var="labelId" value="${0}"/>
 

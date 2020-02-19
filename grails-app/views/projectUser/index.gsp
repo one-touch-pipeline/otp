@@ -45,13 +45,15 @@
             </div>
             <div class="grid-element">
                 <g:if test="${sharesUnixGroup}">
-                    <span style="white-space: pre-wrap"><g:message code="projectUser.annotation.projectWithSharedUnixGroup" args="[projectsWithSharedUnixGroupListing]"/></span>
+                    <otp:annotation type="info">
+                        <span style="white-space: pre-wrap"><g:message code="projectUser.annotation.projectWithSharedUnixGroup" args="[projectsWithSharedUnixGroupListing]"/></span>
+                    </otp:annotation>
                 </g:if>
             </div>
         </div>
         <sec:access expression="hasRole('ROLE_OPERATOR') or hasPermission(${project.id}, 'de.dkfz.tbi.otp.ngsdata.Project', 'MANAGE_USERS')">
             <h2><g:message code="projectUser.addMember.action" args="[project?.name]"/></h2>
-            <g:message code="projectUser.annotation.delayedFileAccessChanges"/>
+            <otp:annotation type="info"><g:message code="projectUser.annotation.delayedFileAccessChanges"/></otp:annotation>
             <g:form class="add-user-grid-wrapper" controller="projectUser" action="addUserToProject" params='["project": project.id]'>
                 <sec:access expression="hasRole('ROLE_OPERATOR')">
                     <label class="select internal">
@@ -123,7 +125,7 @@
                                 </td>
                             </tr>
                             <tr>
-                                <td colspan="2"><g:message code="projectUser.addMember.externalUserRestrictions"/></td>
+                                <td colspan="2"><otp:annotation type="info"><g:message code="projectUser.addMember.externalUserRestrictions"/></otp:annotation></td>
                             </tr>
                         </table>
                     </div>
@@ -135,7 +137,7 @@
                                data-text="${confirmationText}"/>
                     </div>
                     <div>
-                        <g:message code="projectUser.annotation.legalNotice"/>
+                        <otp:annotation type="info"><g:message code="projectUser.annotation.legalNotice"/></otp:annotation>
                     </div>
                 </div>
             </g:form>

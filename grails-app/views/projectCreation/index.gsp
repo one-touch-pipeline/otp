@@ -41,9 +41,11 @@
     <h1><g:message code="otp.menu.projectCreation"/></h1>
 
     <h2><g:message code="projectCreation.basis.header"/></h2>
-    <p>
+
+    <otp:annotation type="info">
         <span class="keep-whitespace"><g:message code="projectCreation.basis.annotation"/></span>
-    </p>
+    </otp:annotation>
+
     <g:form class="projectCreationBasisSelection" action="index" method="GET">
         <table class="key-value-table key-input">
             <tr>
@@ -68,7 +70,7 @@
     <h2><g:message code="projectCreation.form.header"/></h2>
     <g:uploadForm controller="projectCreation" action="save">
         <g:if test="${showIgnoreUsersFromBaseObjects}">
-            <otp:annotation subtype="warning">
+            <otp:annotation type="warning">
                 <label class="vertical-align-middle">
                     <strong><g:message code="projectCreation.ignoreUsersFromBaseObjects"/>:</strong>
                     <g:checkBox name="ignoreUsersFromBaseObjects" checked="false" value="true"/>

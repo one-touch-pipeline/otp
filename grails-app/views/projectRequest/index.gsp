@@ -94,7 +94,7 @@
     <br>
 
     <h2>${g.message(code: "projectRequest.header.new")}</h2>
-    <p>${g.message(code: "projectRequest.new.support", args: [contactDataSupportEmail])}</p>
+    <otp:annotation type="info">${g.message(code: "projectRequest.new.support", args: [contactDataSupportEmail])}</otp:annotation>
     <g:form action="save">
     <table class="key-value-table key-help-input">
         <tr>
