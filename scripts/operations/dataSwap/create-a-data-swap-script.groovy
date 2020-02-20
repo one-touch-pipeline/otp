@@ -314,7 +314,7 @@ private int moveOneSample(Project newProject,
             String fileName = "mv_${counter++}_${oldIndividual.pid}_${oldSampleType.name}_${seqTrack.run.name}_${seqTrack.laneId}__to__${newIndividualName}_${newSampleType.displayName}"
             script << Snippets.swapLane(seqTrack, fileName, newDataFileNameClosure,
                     newProject,
-                    oldIndividual, newIndividual,
+                    oldIndividual, newIndividualName,
                     oldSampleType, newSampleType)
             files << fileName
         }
@@ -422,7 +422,7 @@ assert new Sample(
 
     static String swapLane(SeqTrack seqTrack, String fileName, Closure<String> newDataFileNameClosure,
                            Project newProject,
-                           Individual oldIndividual, Individual newIndividual,
+                           Individual oldIndividual, String newIndividual,
                            SampleType oldSampleType, SampleType newSampleType) {
         StringBuilder snippet = new StringBuilder()
         snippet << """
@@ -430,7 +430,7 @@ assert new Sample(
 \t\t'oldProjectName'   : '${oldIndividual.project.name}',
 \t\t'newProjectName'   : '${newProject.name}',
 \t\t'oldPid'           : '${oldIndividual.pid}',
-\t\t'newPid'           : '${newIndividual.pid}',
+\t\t'newPid'           : '${newIndividual}',
 \t\t'oldSampleTypeName': '${oldSampleType.name}',
 \t\t'newSampleTypeName': '${newSampleType.name}',
 \t\t'oldSeqTypeName'   : '${seqTrack.seqType.name}',
@@ -444,7 +444,7 @@ assert new Sample(
 \t\t], [
 """
         DataFile.findAllBySeqTrack(seqTrack, [sort: 'id']).each { datafile ->
-            snippet << "\t\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividual.pid)}',\n"
+            snippet << "\t\t\t'${datafile.fileName}': '${newDataFileNameClosure(datafile, oldIndividual.pid, newIndividual)}',\n"
         }
         snippet << "\t\t],\n\t\t'${fileName}',\n" +
                 "\t\tlog, failOnMissingFiles, SCRIPT_OUTPUT_DIRECTORY\n\t)\n"
