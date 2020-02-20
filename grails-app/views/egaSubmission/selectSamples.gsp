@@ -38,7 +38,7 @@
         </g:link>
 
         <h1><g:message code="egaSubmission.selectSamples.title"/></h1>
-        <div class="searchCriteriaTableSequences">
+        <div class="rounded-page-header-box">
             <table id="searchCriteriaTable" style="display: inline-block">
                 <tr class="dtf_row">
                     <td id="projectName">${project.name}</td>

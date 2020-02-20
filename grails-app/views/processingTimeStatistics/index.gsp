@@ -32,7 +32,7 @@
     <div class="body">
         <g:render template="/templates/messages"/>
 
-        <div class="processing-time-statistics-top-bar">
+        <div class="processing-time-statistics-top-bar rounded-page-header-box">
             <div class="error-container" hidden>
                 <button class="close-error">close errors</button>
                 <div class="error-list"></div>

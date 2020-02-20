@@ -1444,18 +1444,6 @@ td div {
     margin-left: 10px;
 }
 
-.searchCriteriaTableSequences {
-    max-width: auto;
-    margin-top: auto;
-    margin-left: auto;
-    padding: 0px;
-}
-.searchCriteriaTableSequences > table {
-    clear: both;
-    margin-bottom: 2px;
-    .rounded-page-header-box
-}
-
 .project-selection-header-container {
     .two-column-grid-container();
     grid-gap: 24px;
@@ -1525,9 +1513,6 @@ td div {
     font-size: 10pt;
 }
 
-.overviewSearchTable {
-    margin-top: 15px;
-}
 .dataTables_length {
     display: none;
 }
@@ -1555,20 +1540,6 @@ td div {
     grid-gap: 2px;
 }
 
-#saveComment {
-    background-image: url(skin/database_save.png);
-    .comment-button;
-}
-
-#editComment {
-    background-image: url(document-edit.png);
-    .comment-button;
-}
-
-#cancelComment {
-    .comment-button;
-}
-
 .commentSet {
     background-image: url(document-edit.png);
     background-color: transparent;
@@ -1576,32 +1547,17 @@ td div {
     border: 0px;
 }
 
-#commentLabel {
-    font-size: 15px;
+#workflowOverviewTable {
+    td:nth-child(3) {max-width: 500px;}
+    td:nth-child(6) {max-width: 200px;}
+    td:nth-child(8) {width: 20px;}
 }
 
-#workflowOverviewTable td:nth-child(3) {
-    max-width: 500px;
-}
+#processOverview {
+    &:not(*:root) {margin-top: 0px;}
 
-#workflowOverviewTable td:nth-child(6) {
-    max-width: 200px;
-}
-
-#workflowOverviewTable td:nth-child(8) {
-    width: 20px;
-}
-
-#processOverview:not(*:root) {
-    margin-top: 0px;
-}
-
-#processOverview  td:nth-child(3) {
-    max-width: 400px;
-}
-
-#processOverview td:nth-child(4) {
-    max-width: 200px;
+    td:nth-child(3) {max-width: 400px;}
+    td:nth-child(4) {max-width: 200px;}
 }
 
 #clusterJobGeneralTableContainer {
