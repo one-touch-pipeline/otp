@@ -32,7 +32,7 @@
 <div class="body">
     <h1><g:message code="job.error.definition.header"/></h1>
     <form class="rounded-page-header-box">
-        <span class="blue_label"><g:message code="job.error.definition.jobDefinitionFilter"/> :</span>
+        <span><g:message code="job.error.definition.jobDefinitionFilter"/>:</span>
         <g:select class="use-select-2" id="job_select" name='job'
                   from='${jobDefinitions}' value='${jobDefinition}' onChange='submit();' />
     </form>

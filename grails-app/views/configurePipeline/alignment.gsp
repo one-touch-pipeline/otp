@@ -51,7 +51,7 @@
                     params='["project.id": project.id, "seqType.id": seqType.id]'>
                 <g:message code="configurePipeline.alignment.copy"/>
 
-                <g:select class="criteria use-select-2" id="project_select" name='basedProject.id'
+                <g:select class="use-select-2" id="project_select" name='basedProject.id'
                           from='${projects}' optionKey='id' optionValue='name'/>
                 <g:submitButton name="copy" value="Copy"/>
             </g:form>

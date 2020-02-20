@@ -34,7 +34,7 @@
             <g:form >
                 <input name="project.id" type="hidden" value="${project.id}"/>
                 <h1><g:message code="configureAnalysis.title" args="${[project.name]}"/></h1>
-                <table border="2" class="blue_label">
+                <table>
                     <thead>
                         <tr>
                             <th colspan="2">
@@ -70,7 +70,7 @@
                     <g:message code="configureAnalysis.note.submit"/>
                 </otp:annotation>
 
-                <g:submitButton class="blue_label" name="submit" value="Submit" onclick="return submitCheck();" ondblclick="return false;"/>
+                <g:submitButton name="submit" value="Submit" onclick="return submitCheck();" ondblclick="return false;"/>
             </g:form>
 
             <script>

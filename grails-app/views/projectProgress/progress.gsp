@@ -31,22 +31,14 @@
 <body>
   <div class="body">
     <form class="rounded-page-header-box">
-        <span class="blue_label">
-            <g:message code="search.from.date"/>:<input type="text" class="datePicker" id="startDate" value="${startDate}">
-        </span>
+        <span><g:message code="search.from.date"/>:<input type="text" class="datePicker" id="startDate" value="${startDate}"></span>
         <br>
-        <span class="blue_label">
-            <g:message code="search.to.date"/>:<input type="text" class="datePicker" id="endDate" value="${endDate}">
-        </span>
-        <g:select class="projectSelectMultiple blue_label"
-            name="projects"
-            value="${availableProjects}"
-            from="${availableProjects}"
-            optionKey="name"
-            multiple="true"
-        />
+        <span><g:message code="search.to.date"/>:<input type="text" class="datePicker" id="endDate" value="${endDate}"></span>
+        <g:select name="projects" class="projectSelectMultiple"
+                  value="${availableProjects}" from="${availableProjects}"
+                  optionKey="name" multiple="true"/>
 
-        <input id="display" type="button" class="blue_label" name="progress" value=" Display "/>
+        <input id="display" type="button" name="progress" value=" Display "/>
     </form>
   <div class="otpDataTables" >
         <otp:dataTable codes="${[

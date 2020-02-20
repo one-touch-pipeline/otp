@@ -43,14 +43,13 @@
                 <tr class="dtf_row">
                     <td id="projectName">${project.name}</td>
                     <td>
-                        <span class="blue_label">Filter by <g:message code="egaSubmission.seqType"/>:</span>
+                        <span>Filter by <g:message code="egaSubmission.seqType"/>:</span>
                     </td>
                     <td>
                         <table id="searchCriteriaTableSeqType">
                             <tr>
                                 <td class="value">
-                                    <g:select class="criteria"
-                                              name="criteria"
+                                    <g:select name="criteria"
                                               from="${seqTypes}"
                                               option="${seqTypes}"
                                               noSelection="${["none": message(code:"otp.filter.seqType")]}"/>
