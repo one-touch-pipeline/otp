@@ -120,7 +120,7 @@
                 <tr>
                     <td><g:message code="metadataImport.otrs"/></td>
                     <td>
-                        <g:textField name="ticketNumber" size="30" value="${cmd.ticketNumber}"/>&nbsp;&nbsp;&nbsp;
+                        <g:textField name="ticketNumber" size="30" required="true" value="${cmd.ticketNumber}"/>&nbsp;&nbsp;&nbsp;
                         <g:checkBox name="automaticNotification" checked="${cmd.automaticNotification}" value="true"/>
                         <g:message code="metadataImport.otrs.automaticNotificationFlag"/></td>
                 </tr>
