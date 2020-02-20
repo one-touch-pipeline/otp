@@ -39,7 +39,7 @@
         <h1><g:message code="individual.insert.title"/></h1>
         <g:form controller="individual" action="save">
             <div>
-                <table class="key-value-table">
+                <table class="key-value-table key-input">
                     <tbody>
                     <tr>
                         <td>
@@ -95,7 +95,7 @@
                 <br>
 
                 <h3><g:message code="individual.insert.addSample"/></h3>
-                <table class="key-value-table">
+                <table class="key-value-table key-input">
                     <thead>
                     <tr class="hidden">
                         <th colspan="2">

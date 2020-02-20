@@ -2411,6 +2411,19 @@ textarea.resize-vertical {
     resize: vertical;
 }
 
+/*
+  This class provides a common way to format tables which are key-value based.
+
+  To use it apply the class 'key-value-table' onto the table and use one of the subclasses
+  defined in it, to specify the exact behaviour you are looking for.
+
+  Example:
+  <table class="key-value-table key-help-input">
+
+  This would apply the style to a table with at least three columns, where the first and
+  third one are supposed to hold the key and value respectively, while the second one is
+  used for an optional help tooltip.
+ */
 table.key-value-table {
     .general-input-column-style {
         padding-left: 1em;
@@ -2429,6 +2442,12 @@ table.key-value-table {
         padding-right: 0;
     }
 
+    /*
+      Expects at least three columns. First and last one are supposed to be used for key and value
+      respectively. The second column can be used for a help tooltip, when using the class
+      'help'.
+      The last column uses the general input style.
+     */
     &.key-help-input {
         td:nth-of-type(2).help {
             .help-icon;
@@ -2438,12 +2457,25 @@ table.key-value-table {
         }
     }
 
+    /*
+      Expects two columns, first and second one are supposed to be used for key and value
+      respectively. The value column uses the general input style.
+     */
     &.key-input {
         td:nth-of-type(2) {
             .general-input-column-style;
         }
     }
 
+    /*
+      ! This class is highly specific for the project creation table. !
+
+      Expects at least four columns, first and second one are supposed to be used for key
+      and value respectively. The value column uses the general input style.
+
+      Every column after the second one is meant for displaying simple text, with the option
+      to display multiline text by using the 'multiline-display' class.
+     */
     &.key-input-text-text {
         td:nth-child(2) {
             width: 800px;

@@ -34,7 +34,7 @@
 
     <h1><g:message code="dataFields.adapterFile.header" args="[libraryPreparationKit]"/></h1>
 
-    <table class="key-value-table">
+    <table class="key-value-table key-input">
         <tr>
             <td><g:message code="dataFields.libPrepKit.name"/></td>
             <td>${libraryPreparationKit?.name}</td>
