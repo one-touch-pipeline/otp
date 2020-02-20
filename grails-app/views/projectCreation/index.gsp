@@ -175,7 +175,7 @@
             <tr>
                 <td><g:message code="project.keywords"/></td>
                 <td class="multi-input-field">
-                    <g:each in="${source.getAllByFieldName("keywords").flatten().findResults { it ? it.toString() : null }.unique().sort() ?: [""]}" var="keyword" status="i">
+                    <g:each in="${(projectCreationCmd?.keywords ?: source.getAllByFieldName("keywords")).flatten().findResults { it ? it.toString() : null }.unique().sort() ?: [""]}" var="keyword" status="i">
                         <div class="field">
                             <g:textField list="keywordList" name="keywordNames" value="${keyword}" />
                             <g:if test="${i == 0}">
@@ -202,9 +202,9 @@
             <tr>
                 <td><g:message code="project.relatedProjects"/></td>
                 <td class="multi-input-field">
-                    <g:each in="${source.getAllByFieldName("relatedProjects").flatten().findAll().join(",").split(",").toUnique()}" var="relatedProject" status="i">
+                    <g:each in="${(projectCreationCmd?.relatedProjects ?: source.getAllByFieldName("relatedProjects").flatten().findAll().join(",")).split(",").toUnique()}" var="relatedProject" status="i">
                         <div class="field">
-                            <g:textField list="projectList" name="relatedProjectName" value="${relatedProject}"/>
+                            <g:textField list="projectList" name="relatedProjectNames" value="${relatedProject}"/>
                             <g:if test="${i == 0}">
                                 <button class="add-field">+</button>
                             </g:if>
