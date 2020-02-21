@@ -103,6 +103,16 @@
     .border-radius(13px);
     border: 2px solid;
     border-color: #c4d9df #a4c3ca #83afb7 #cccccc;
+
+    // undo some OTP-wide table styling, that is only appropriate for data tables.
+    table {
+        margin: 0;
+        border: none;
+
+        tr {
+            background-color: unset;
+        }
+    }
 }
 
 /* FONT STACK */
