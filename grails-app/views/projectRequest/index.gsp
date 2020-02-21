@@ -167,7 +167,7 @@
             <td><label for="storagePeriod">${g.message(code: "project.storageUntil")}</label></td>
             <td class="help" title="${g.message(code: "projectRequest.storageUntil.detail")}"></td>
             <td>
-                <g:select name="storagePeriod" id="storagePeriod"
+                <g:select name="storagePeriod" class="use-select-2"
                           value="${source.getByFieldName("storagePeriod")}" from="${storagePeriods}"
                           optionKey="name" optionValue="description"
                           noSelection="${["": ""]}" required="true" />
@@ -184,14 +184,17 @@
         <tr>
             <td><label for="tumorEntity">${g.message(code: "project.tumorEntity")}</label></td>
             <td></td>
-            <td><g:select name="tumorEntity.id" id="tumorEntity" value="${cmd?.tumorEntity?.id}" from="${tumorEntities}" optionValue="name" optionKey="id" noSelection="${[null: ""]}" /></td>
+            <td>
+                <g:select name="tumorEntity.id" id="tumorEntity" class="use-select-2"
+                          value="${cmd?.tumorEntity?.id}" from="${tumorEntities}" optionValue="name" optionKey="id"
+                          noSelection="${[null: ""]}" /></td>
         </tr>
 --}%
         <tr>
             <td><label for="speciesWithStrain">${g.message(code: "project.speciesWithStrain")}</label></td>
             <td></td>
             <td>
-                <g:select name="speciesWithStrain.id" id="speciesWithStrain"
+                <g:select id="speciesWithStrain" name="speciesWithStrain.id" class="use-select-2"
                           from="${species}" value="${(source.getByFieldName("speciesWithStrain") as SpeciesWithStrain)?.id}"
                           optionKey="id" noSelection="${['': 'None']}" />
             </td>
@@ -199,7 +202,8 @@
         <tr>
             <td><label for="projectType">${g.message(code: "project.projectType")}</label></td>
             <td></td>
-            <td><g:select name="projectType" id="projectType" value="${source.getByFieldName("projectType")}" from="${projectTypes}"/></td>
+            <td><g:select id="projectType" name="projectType" class="use-select-2"
+                          from="${projectTypes}" value="${source.getByFieldName("projectType")}"/></td>
         </tr>
         <tr>
             <td><label for="sequencingCenter">${g.message(code: "projectRequest.sequencingCenter")}</label></td>
@@ -212,12 +216,12 @@
             <td><input name="approxNoOfSamplesString" id="approxNoOfSamples" type="number" value="${source.getByFieldName("approxNoOfSamples")}"/></td>
         </tr>
         <tr>
-            <td><label for="seqTypes">${g.message(code: "projectRequest.seqTypes")}</label></td>
+            <td>${g.message(code: "projectRequest.seqTypes")}</td>
             <td class="help" title="${g.message(code: "projectRequest.seqTypes.detail")}"></td>
             <td class="multi-input-field">
                 <g:each in="${source.getByFieldName("seqTypes")}" var="seqType" status="i">
                     <div class="field">
-                        <g:select name="seqTypes.id" id="seqTypes"
+                        <g:select id="" name="seqType.id" class="use-select-2"
                                   from="${seqTypes}" value="${seqType?.id ?: ""}"
                                   optionKey="id" optionValue="displayNameWithLibraryLayout"
                                   noSelection="${["": "None"]}"/>
