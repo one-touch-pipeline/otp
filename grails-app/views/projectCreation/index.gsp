@@ -51,7 +51,7 @@
             <tr>
                 <td><g:message code="projectCreation.basis.projectRequest"/></td>
                 <td>
-                    <g:select id="projectRequest" name="projectRequest.id"
+                    <g:select id="projectRequest" name="projectRequest.id" class="use-select-2"
                               value="${projectRequest?.id}" from="${projectRequests}" noSelection="${[null:"No project request selected"]}"
                               optionKey="id" optionValue="name"/>
                 </td>
@@ -225,12 +225,16 @@
             </datalist>
             <tr>
                 <td><g:message code="project.tumorEntity"/></td>
-                <td><g:select name="tumorEntity" from="${tumorEntities}" value="${(source.getByFieldName("tumorEntity") as TumorEntity)?.id}" optionKey="id" noSelection="${['': 'No Tumor Entity']}"/></td>
+                <td><g:select name="tumorEntity" class="use-select-2"
+                              from="${tumorEntities}" value="${(source.getByFieldName("tumorEntity") as TumorEntity)?.id}" optionKey="id"
+                              noSelection="${['': 'No Tumor Entity']}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'tumorEntity', cmd: cmd]"/>
             </tr>
             <tr>
                 <td><g:message code="project.speciesWithStrain"/></td>
-                <td><g:select name="speciesWithStrain" from="${allSpeciesWithStrains}" value="${(source.getByFieldName("speciesWithStrain") as SpeciesWithStrain)?.id}" optionKey="id" noSelection="${['': 'None']}"/></td>
+                <td><g:select name="speciesWithStrain" class="use-select-2"
+                              from="${allSpeciesWithStrains}" value="${(source.getByFieldName("speciesWithStrain") as SpeciesWithStrain)?.id}" optionKey="id"
+                              noSelection="${['': 'None']}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'speciesWithStrain', cmd: cmd]"/>
             </tr>
             <tr>
@@ -260,7 +264,8 @@
             </tr>
             <tr>
                 <td><g:message code="project.projectType"/></td>
-                <td><g:select id="projectType" name='projectType' from='${projectTypes}' value="${source.getByFieldName("projectType")}" required="true"/></td>
+                <td><g:select name='projectType' class="use-select-2"
+                              from='${projectTypes}' value="${source.getByFieldName("projectType")}" required="true"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'projectType', cmd: cmd]"/>
             </tr>
             <tr>
@@ -285,22 +290,28 @@
             </tr>
             <tr>
                 <td><g:message code="project.processingPriority"/></td>
-                <td><g:select id="priority" name="processingPriority" from="${processingPriorities}" value="${ProcessingPriority.getByPriorityNumberOrName(source.getByFieldName("processingPriority"))}" optionValue="nameWithPriority" required="true"/></td>
+                <td><g:select id="priority" name="processingPriority" class="use-select-2"
+                              from="${processingPriorities}" optionValue="nameWithPriority" required="true"
+                              value="${ProcessingPriority.getByPriorityNumberOrName(source.getByFieldName("processingPriority"))}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'processingPriority', cmd: cmd]"/>
             </tr>
             <tr>
                 <td><g:message code="project.group"/></td>
-                <td><g:select id="projectGroup" name="projectGroup" from="${projectGroups}" value="${source.getByFieldName("projectGroup")}" noSelection="${['': 'No Group']}"/></td>
+                <td><g:select name="projectGroup" class="use-select-2"
+                              from="${projectGroups}" value="${source.getByFieldName("projectGroup")}" noSelection="${['': 'No Group']}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'projectGroup', cmd: cmd]"/>
             </tr>
             <tr>
                 <td><g:message code="project.sampleParser"/></td>
-                <td><g:select id="parserBeanName" name="sampleIdentifierParserBeanName" from="${sampleIdentifierParserBeanNames}" value="${source.getByFieldName("sampleIdentifierParserBeanName")}" optionValue="displayName"/></td>
+                <td><g:select id="parserBeanName" name="sampleIdentifierParserBeanName" class="use-select-2"
+                              from="${sampleIdentifierParserBeanNames}" value="${source.getByFieldName("sampleIdentifierParserBeanName")}"
+                              optionValue="displayName"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'sampleIdentifierParserBeanName', cmd: cmd]"/>
             </tr>
             <tr>
                 <td><g:message code="project.qcThresholdHandling"/></td>
-                <td><g:select id="qcThresholdHandling" name="qcThresholdHandling" from="${qcThresholdHandlings}" value="${source.getByFieldName("qcThresholdHandling")}" required="true"/></td>
+                <td><g:select name="qcThresholdHandling" class="use-select-2"
+                              from="${qcThresholdHandlings}" value="${source.getByFieldName("qcThresholdHandling")}" required="true"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'qcThresholdHandling', cmd: cmd]"/>
             </tr>
             <tr>
@@ -309,7 +320,7 @@
                 <td></td>
                 <td>
                     <g:if test="${baseProjectInfos}">
-                        <g:select id="projectInfoToCopy" name="projectInfoToCopy"
+                        <g:select name="projectInfoToCopy" class="use-select-2"
                                   from="${baseProjectInfos}" value="${projectCreationCmd?.projectInfoToCopy?.id}"
                                   optionKey="id" optionValue="path"
                                   noSelection="${['': 'No project info selected']}"/>
