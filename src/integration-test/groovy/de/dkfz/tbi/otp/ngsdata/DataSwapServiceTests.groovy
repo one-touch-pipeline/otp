@@ -315,15 +315,6 @@ class DataSwapServiceTests implements UserAndRoles {
     }
 
     @Test
-    void test_collectFileNamesOfDataFiles() {
-        setupData()
-        DataFile dataFile = DomainFactory.createDataFile(used: false)
-
-        assert [(dataFile): [directFileName: lsdfFilesService.getFileFinalPath(dataFile), vbpFileName: lsdfFilesService.getFileViewByPidPath(dataFile)]] ==
-                dataSwapService.collectFileNamesOfDataFiles([dataFile])
-    }
-
-    @Test
     void testThrowExceptionInCaseOfExternalMergedBamFileIsAttached() throws Exception {
         setupData()
         SeqTrack seqTrack = DomainFactory.createSeqTrack()

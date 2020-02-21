@@ -26,6 +26,7 @@ import grails.gorm.transactions.Transactional
 import de.dkfz.tbi.otp.CommentService
 import de.dkfz.tbi.otp.config.ConfigService
 import de.dkfz.tbi.otp.dataprocessing.*
+import de.dkfz.tbi.otp.dataprocessing.singleCell.SingleCellService
 import de.dkfz.tbi.otp.dataprocessing.snvcalling.AnalysisDeletionService
 import de.dkfz.tbi.otp.infrastructure.FileService
 import de.dkfz.tbi.otp.utils.DeletionService
@@ -34,9 +35,16 @@ import java.nio.file.*
 
 import static org.springframework.util.Assert.*
 
-@SuppressWarnings('Println') //This class is written for scripts, so it needs the output in stdout
+@SuppressWarnings(['JavaIoPackageAccess', 'Println']) //This class is written for scripts, so it needs the output in stdout
 @Transactional
 class DataSwapService {
+
+    static final String DIRECT_FILE_NAME = "directFileName"
+    static final String VBP_FILE_NAME = "vbpFileName"
+    static final String WELL_FILE_NAME = "wellFileName"
+    static final String WELL_MAPPING_FILE_NAME = "wellMappingFileName"
+    static final String WELL_MAPPING_FILE_ENTRY_NAME = "wellMappingFileEntry"
+
     IndividualService individualService
     CommentService commentService
     FastqcDataFilesService fastqcDataFilesService
@@ -48,6 +56,7 @@ class DataSwapService {
     MergedAlignmentDataFileService mergedAlignmentDataFileService
     FileService fileService
     DeletionService deletionService
+    SingleCellService singleCellService
 
     static final String MISSING_FILES_TEXT = "The following files are expected, but not found:"
     static final String EXCESS_FILES_TEXT = "The following files are found, but not expected:"
@@ -231,7 +240,12 @@ mv '${old}' \\
         dataFiles.each { DataFile dataFile ->
             String directFileName = lsdfFilesService.getFileFinalPath(dataFile)
             String vbpFileName = lsdfFilesService.getFileViewByPidPath(dataFile)
-            map[dataFile] = [directFileName: directFileName, vbpFileName: vbpFileName]
+            map[dataFile] = [(DIRECT_FILE_NAME): directFileName, (VBP_FILE_NAME): vbpFileName]
+            if (dataFile.seqType.singleCell && dataFile.seqTrack.singleCellWellLabel) {
+                map[dataFile][WELL_FILE_NAME] = lsdfFilesService.getWellAllFileViewByPidPath(dataFile)
+                map[dataFile][WELL_MAPPING_FILE_NAME] = singleCellService.singleCellMappingFile(dataFile)
+                map[dataFile][WELL_MAPPING_FILE_ENTRY_NAME] = singleCellService.mappingEntry(dataFile)
+            }
         }
         return map
     }
@@ -281,10 +295,11 @@ mv '${old}' \\
             String bashMoveDirectFile = ""
             String bashMoveVbpFile = ""
 
-            String oldDirectFileName = oldDataFileNameMap.find { key, value -> key.id == it.id }.value["directFileName"]
-            String oldVbpFileName = oldDataFileNameMap.find { key, value -> key.id == it.id }.value["vbpFileName"]
+            String oldDirectFileName = oldDataFileNameMap[it][DIRECT_FILE_NAME]
+            String oldVbpFileName = oldDataFileNameMap[it][VBP_FILE_NAME]
+            String oldWellName = oldDataFileNameMap[it][WELL_FILE_NAME]
             File directFile = new File(oldDirectFileName)
-            File vbpFile = new File(oldVbpFileName)
+            File vbpFile
 
             if (directFile.exists()) {
                 filesAlreadyMoved = false
@@ -340,9 +355,51 @@ chmod 440 ${newDirectFileName}
             bashMoveVbpFile += """mkdir -p -m 2750 '${vbpFile.parent}';
 ln -s '${newDirectFileName}' \\
       '${newVbpFileName}'"""
-            bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n\n"
+
+            bashScriptToMoveFiles += "${bashMoveDirectFile}\n${bashMoveVbpFile}\n"
+            if (oldWellName) {
+                bashScriptToMoveFiles += createSingeCellScript(it, oldDataFileNameMap[it])
+            }
+            bashScriptToMoveFiles += '\n\n'
         }
         return bashScriptToMoveFiles
+    }
+
+    protected String createSingeCellScript(DataFile dataFile, Map<String, ?> oldValues) {
+        if (!dataFile.seqType.singleCell || !dataFile.seqTrack.singleCellWellLabel) {
+            return ''
+        }
+        String newDirectFileName = lsdfFilesService.getFileFinalPath(dataFile)
+        String newWellFileName = lsdfFilesService.getWellAllFileViewByPidPath(dataFile)
+        File wellFile = new File(newWellFileName)
+
+        Path mappingFile = singleCellService.singleCellMappingFile(dataFile)
+        String mappingEntry = singleCellService.mappingEntry(dataFile)
+
+        Path oldMappingFile = oldValues[WELL_MAPPING_FILE_NAME]
+
+        return [
+                '',
+                '# Single Cell structure',
+                '## recreate link',
+                "rm -f '${oldValues[WELL_FILE_NAME]}'",
+                "mkdir -p -m 2750 '${wellFile.parent}'",
+                "ln -s '${newDirectFileName}' \\\n      '${wellFile}'",
+                '',
+                '## remove entry from old mapping file',
+                "sed -i '/${oldValues[WELL_MAPPING_FILE_ENTRY_NAME]}/d' ${oldMappingFile}",
+                '',
+                '## add entry to new mapping file',
+                "touch '${mappingFile}'",
+                "echo '${mappingEntry}' >> '${mappingFile}'",
+                '',
+                '## delete mapping file, if empty',
+                "if [ ! -s '${oldMappingFile}' ]",
+                'then',
+                "    rm '${oldMappingFile}'",
+                'fi',
+                '',
+        ].join('\n')
     }
 
     /**
