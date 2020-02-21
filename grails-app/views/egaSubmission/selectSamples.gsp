@@ -49,7 +49,8 @@
                         <table id="searchCriteriaTableSeqType">
                             <tr>
                                 <td class="value">
-                                    <g:select name="criteria"
+                                    <g:select name="seqTypeSelection"
+                                              class="use-select-2"
                                               from="${seqTypes}"
                                               option="${seqTypes}"
                                               noSelection="${["none": message(code:"otp.filter.seqType")]}"/>
