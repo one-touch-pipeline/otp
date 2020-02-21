@@ -47,4 +47,9 @@ class Workflow implements Entity, Commentable {
         maxParallelRunning shared: 'greaterThanZero'
         comment nullable: true
     }
+
+    @Override
+    String toString() {
+        "${name}${deprecatedDate ? " (deprecated)" : ""}"
+    }
 }
