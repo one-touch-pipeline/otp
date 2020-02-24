@@ -53,6 +53,7 @@ import de.dkfz.tbi.otp.security.User
 import de.dkfz.tbi.otp.tracking.OtrsTicket
 import de.dkfz.tbi.otp.utils.CollectionUtils
 import de.dkfz.tbi.otp.utils.HelperUtils
+import de.dkfz.tbi.otp.workflowExecution.*
 
 import static de.dkfz.tbi.otp.utils.CollectionUtils.atMostOneElement
 
@@ -330,6 +331,26 @@ class DomainFactory {
                 process  : { createProcessingStepUpdate().process },
                 value    : "${counter++}",
                 className: "${counter++}",
+        ], properties)
+    }
+
+    static WorkflowArtefact createWorkflowArtefact(Map properties = [:]) {
+        return createDomainObject(WorkflowArtefact, [
+                artefact: { createArtefact() },
+        ], properties)
+    }
+
+    static WorkflowRun createWorkflowRun(Map properties = [:]) {
+        return createDomainObject(WorkflowRun, [
+                workflow: { createWorkflow() },
+        ], properties)
+    }
+
+    static Workflow createWorkflow(Map properties = [:]) {
+        return createDomainObject(Workflow, [
+                name              : "${counter++}",
+                enabled           : true,
+                maxParallelRunning: 1,
         ], properties)
     }
 

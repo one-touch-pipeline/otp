@@ -54,6 +54,7 @@ class DeletionService {
     AnalysisDeletionService analysisDeletionService
     FileService fileService
     DataSwapService dataSwapService
+    WorkflowDeletionService workflowDeletionService
 
 
     void deleteProjectContent(Project project) {
@@ -156,6 +157,9 @@ class DeletionService {
     void deleteArtefact(Artefact artefact) {
         if (artefact) {
             Process process = artefact.process
+            if (artefact.workflowArtefact) {
+                workflowDeletionService.deleteWorkflowArtefact(artefact.workflowArtefact)
+            }
             artefact.delete(flush: true)
             deleteProcess(process)
         }
