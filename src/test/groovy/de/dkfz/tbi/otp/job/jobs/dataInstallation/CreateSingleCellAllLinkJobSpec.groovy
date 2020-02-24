@@ -75,7 +75,7 @@ class CreateSingleCellAllLinkJobSpec extends Specification implements DataTest, 
         File source = new File(createSingleCellAllLinkJob.lsdfFilesService.getFileFinalPath(dataFile))
         File target = new File(createSingleCellAllLinkJob.lsdfFilesService.getWellAllFileViewByPidPath(dataFile))
 
-        DomainFactory.createProcessParameter([
+        DomainFactory.createArtefact([
                 process  : step.process,
                 value    : seqTrack.id,
                 className: SeqTrack.name,

@@ -733,7 +733,7 @@ class SchedulerServiceIntegrationSpec extends Specification implements UserAndRo
         0 == ProcessingStep.count()
 
         when:
-        Artefact processParameter = DomainFactory.createProcessParameter(className: SeqTrack.name, value: "test")
+        Artefact processParameter = DomainFactory.createArtefact(className: SeqTrack.name, value: "test")
         schedulerService.createProcess(job, [], processParameter)
 
         then: "verify that the Process is created"

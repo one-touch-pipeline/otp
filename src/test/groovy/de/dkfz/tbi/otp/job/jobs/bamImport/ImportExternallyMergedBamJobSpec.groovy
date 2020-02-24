@@ -498,7 +498,7 @@ class ImportExternallyMergedBamJobSpec extends Specification implements DataTest
 
         CreateFileHelper.createFile(new File("${importProcess.externallyProcessedMergedBamFiles[0].importedFrom}"))
 
-        DomainFactory.createProcessParameter([
+        DomainFactory.createArtefact([
                 process  : step.process,
                 value    : importProcess.id.toString(),
                 className: ImportProcess.class.name,

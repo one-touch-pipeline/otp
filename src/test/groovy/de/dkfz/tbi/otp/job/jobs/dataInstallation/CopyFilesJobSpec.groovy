@@ -238,7 +238,7 @@ chmod 440 .* .*
         DataFile dataFile = CollectionUtils.exactlyOneElement(seqTrack.dataFiles)
         CreateFileHelper.createFile(new File("${dataFile.initialDirectory}/${dataFile.fileName}"))
 
-        DomainFactory.createProcessParameter([
+        DomainFactory.createArtefact([
                 process: step.process,
                 value: seqTrack.id,
                 className: SeqTrack.class.name,

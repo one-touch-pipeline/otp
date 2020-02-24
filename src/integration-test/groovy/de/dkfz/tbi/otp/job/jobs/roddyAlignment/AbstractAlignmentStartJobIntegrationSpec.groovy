@@ -44,7 +44,7 @@ class AbstractAlignmentStartJobIntegrationSpec extends Specification {
                 md5sum: null,
         )
         Process failedProcess = DomainFactory.createProcess()
-        DomainFactory.createProcessParameter(failedProcess, failedInstance)
+        DomainFactory.createArtefact(failedProcess, failedInstance)
         failedInstance.mergingWorkPackage.bamFileInProjectFolder = failedInstance
         failedInstance.mergingWorkPackage.save(flush: true)
 

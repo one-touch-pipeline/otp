@@ -136,7 +136,7 @@ abstract class AbstractBamFilePairAnalysisStartJobIntegrationSpec extends Specif
         BamFilePairAnalysis failedInstance = getInstance()
 
         Process failedProcess = DomainFactory.createProcess()
-        DomainFactory.createProcessParameter(failedProcess, failedInstance)
+        DomainFactory.createArtefact(failedProcess, failedInstance)
 
         service.remoteShellHelper = Mock(RemoteShellHelper) {
             1 * executeCommandReturnProcessOutput(_, _) >> { Realm realm, String cmd ->

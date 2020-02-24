@@ -159,7 +159,7 @@ class ReplaceSourceWithLinkJobSpec extends Specification implements DataTest {
 
         configService = new TestConfigService([(OtpProperty.PATH_PROJECT_ROOT): temporaryFolder.newFolder("root").path])
 
-        DomainFactory.createProcessParameter([
+        DomainFactory.createArtefact([
                 process  : step.process,
                 value    : importProcess.id.toString(),
                 className: ImportProcess.class.name,

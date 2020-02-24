@@ -325,7 +325,7 @@ class DomainFactory {
         ], properties)
     }
 
-    static Artefact createProcessParameter(Map properties = [:]) {
+    static Artefact createArtefact(Map properties = [:]) {
         return createDomainObject(Artefact, [
                 process  : { createProcessingStepUpdate().process },
                 value    : "${counter++}",
@@ -1943,7 +1943,7 @@ class DomainFactory {
         final Process process = new Process(jobExecutionPlan: jep, started: new Date(), startJobClass: "DontCare")
         assert process.save(flush: true)
         if (processParameterObject != null) {
-            createProcessParameter(process, processParameterObject)
+            createArtefact(process, processParameterObject)
         }
         final ProcessingStep step = new ProcessingStep(jobDefinition: jobDefinition, process: process, jobClass: jobClass)
         assert step.save(flush: true)
@@ -1976,7 +1976,7 @@ class DomainFactory {
         return processingStep
     }
 
-    static Artefact createProcessParameter(final Process process, final ProcessParameterObject parameterValue, Map properties = [:]) {
+    static Artefact createArtefact(final Process process, final ProcessParameterObject parameterValue, Map properties = [:]) {
         return createDomainObject(Artefact, [
                 process  : process,
                 className: parameterValue.class.name,
@@ -1984,7 +1984,7 @@ class DomainFactory {
         ], properties)
     }
 
-    static Artefact createProcessParameter(final Process process, final String className, final String value) {
+    static Artefact createArtefact(final Process process, final String className, final String value) {
         return createDomainObject(Artefact, [
                 process  : process,
                 className: className,
