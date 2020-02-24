@@ -31,13 +31,13 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
     List<Map> getDisplayableMetadata() {
         return SeqType.list(sort: "name", order: "asc").collect {
             [
-                    id               : SeqType.findAllByName(it.name)*.id?.sort()?.first(),
+                    id               : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.id?.sort()?.first(),
                     name             : it.name,
                     legacy           : it.legacy,
                     dirName          : it.dirName,
                     singleCell       : it.singleCell,
                     hasAntibodyTarget: it.hasAntibodyTarget,
-                    libraryLayouts   : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().reverse().join(MULTILINE_JOIN_STRING),
+                    libraryLayouts   : SeqType.findAllByNameAndSingleCell(it.name, it.singleCell)*.libraryLayout.sort().join(MULTILINE_JOIN_STRING),
                     layouts          :
                             [
                                     SINGLE   : SeqType.findByNameAndLibraryLayoutAndSingleCell(it.name, LibraryLayout.SINGLE, it.singleCell) ? true : false,
@@ -47,7 +47,7 @@ class SeqTypeService extends MetadataFieldsService<SeqType> {
                     displayName      : it.displayName,
                     importAliases    : SeqType.findAllByName(it.name)*.importAlias?.flatten()?.unique()?.sort()?.join(MULTILINE_JOIN_STRING),
             ]
-        }.unique()
+        }.unique().sort { it.name.toLowerCase() + it.id }
     }
 
     @PreAuthorize("hasRole('ROLE_OPERATOR') or hasPermission(#project, 'OTP_READ_ACCESS')")
