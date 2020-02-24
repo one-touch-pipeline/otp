@@ -287,7 +287,7 @@
                 <g:render template="baseValueColumns" model="[fieldName: 'processingPriority', cmd: cmd]"/>
             </tr>
             <tr>
-                <td><g:message code="project.projectGroup"/></td>
+                <td><g:message code="project.group"/></td>
                 <td><g:select id="projectGroup" name="projectGroup" from="${projectGroups}" value="${source.getByFieldName("projectGroup")}" noSelection="${['': 'No Group']}"/></td>
                 <g:render template="baseValueColumns" model="[fieldName: 'projectGroup', cmd: cmd]"/>
             </tr>
