@@ -34,7 +34,7 @@
 <body>
 <div class="body fixed-table-header wrapTableHeader metaDataFields">
     <g:render template="/templates/messages"/>
-    <g:render template="linkBanner" model="[ active: 'seqPlatforms']"/>
+    <g:render template="linkBanner" model="[active: 'seqPlatforms']"/>
 
     <h1><g:message code="dataFields.seqPlatform.header"/></h1>
     <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
@@ -42,14 +42,14 @@
     <table id="metadatafields-datatable">
         <thead>
         <tr>
-            <th><g:message code="dataFields.seqPlatform.name"/></th>
-            <th><g:message code="dataFields.seqPlatform.listPlatformModelLabel"/></th>
-            <th><g:message code="dataFields.seqPlatform.listPlatformModelLabelImportAlias"/></th>
+            <th class="export_column"><g:message code="dataFields.seqPlatform.name"/></th>
+            <th class="export_column"><g:message code="dataFields.seqPlatform.listPlatformModelLabel"/></th>
+            <th class="export_column"><g:message code="dataFields.seqPlatform.listPlatformModelLabelImportAlias"/></th>
             <th></th>
-            <th><g:message code="dataFields.seqPlatform.listSequencingKitLabel"/></th>
-            <th><g:message code="dataFields.seqPlaform.listSequencingKitLabelImportAlias"/></th>
+            <th class="export_column"><g:message code="dataFields.seqPlatform.listSequencingKitLabel"/></th>
+            <th class="export_column"><g:message code="dataFields.seqPlaform.listSequencingKitLabelImportAlias"/></th>
             <th></th>
-            <th><g:message code="dataFields.legacy"/></th>
+            <th class="export_column"><g:message code="dataFields.legacy"/></th>
         </tr>
         </thead>
         <tbody>
@@ -90,6 +90,7 @@
                             object      : seqPlatform,
                             i           : i,
                     ]"/>
+                    <span hidden>${seqPlatform.legacy}</span>
                 </td>
             </tr>
         </g:each>

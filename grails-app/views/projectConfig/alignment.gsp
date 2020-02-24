@@ -47,7 +47,7 @@
             </div>
         </div>
         <div>
-            <g:render template="linkBanner" model="[ project: project, active: 'alignment' ]"/>
+            <g:render template="linkBanner" model="[project: project, active: 'alignment' ]"/>
         </div>
         <br>
 

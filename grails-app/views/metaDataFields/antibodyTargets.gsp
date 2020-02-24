@@ -34,7 +34,7 @@
 <body>
 <div class="body fixed-table-header wrapTableHeader metaDataFields">
     <g:render template="/templates/messages"/>
-    <g:render template="linkBanner" model="[ active: 'antibodyTargets']"/>
+    <g:render template="linkBanner" model="[active: 'antibodyTargets']"/>
 
     <h1><g:message code="dataFields.antibodyTarget.header"/></h1>
     <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
@@ -42,10 +42,10 @@
     <table id="metadatafields-datatable">
         <thead>
         <tr>
-            <th><g:message code="dataFields.antibodyTarget.name"/></th>
-            <th><g:message code="dataFields.antibodyTarget.importAlias"/></th>
+            <th class="export_column"><g:message code="dataFields.antibodyTarget.name"/></th>
+            <th class="export_column"><g:message code="dataFields.antibodyTarget.importAlias"/></th>
             <th></th>
-            <th><g:message code="dataFields.legacy"/></th>
+            <th class="export_column"><g:message code="dataFields.legacy"/></th>
         </tr>
         </thead>
         <tbody>
@@ -72,6 +72,7 @@
                             object      : antibodyTarget,
                             i           : i,
                     ]"/>
+                    <span hidden>${antibodyTarget.legacy}</span>
                 </td>
             </tr>
         </g:each>

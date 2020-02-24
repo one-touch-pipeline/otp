@@ -35,7 +35,7 @@
 <body>
 <div class="body fixed-table-header wrapTableHeader metaDataFields">
     <g:render template="/templates/messages"/>
-    <g:render template="linkBanner" model="[ active: 'seqTypes']"/>
+    <g:render template="linkBanner" model="[active: 'seqTypes']"/>
 
     <h1><g:message code="dataFields.seqType.header"/></h1>
     <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
@@ -43,16 +43,16 @@
     <table id="metadatafields-datatable">
         <thead>
         <tr>
-            <th><g:message code="dataFields.seqType.name"/></th>
-            <th><g:message code="dataFields.seqType.singleCell"/></th>
-            <th><g:message code="dataFields.seqType.supportsAntibody"/></th>
-            <th><g:message code="dataFields.seqType.directory"/></th>
-            <th><g:message code="dataFields.seqType.libraryLayouts"/></th>
+            <th class="export_column"><g:message code="dataFields.seqType.name"/></th>
+            <th class="export_column"><g:message code="dataFields.seqType.singleCell"/></th>
+            <th class="export_column"><g:message code="dataFields.seqType.supportsAntibody"/></th>
+            <th class="export_column"><g:message code="dataFields.seqType.directory"/></th>
+            <th class="export_column"><g:message code="dataFields.seqType.libraryLayouts"/></th>
             <th></th>
-            <th><g:message code="dataFields.seqType.displayNames"/></th>
-            <th><g:message code="dataFields.seqType.importAlias"/></th>
+            <th class="export_column"><g:message code="dataFields.seqType.displayNames"/></th>
+            <th class="export_column"><g:message code="dataFields.seqType.importAlias"/></th>
             <th></th>
-            <th><g:message code="dataFields.legacy"/></th>
+            <th class="export_column"><g:message code="dataFields.legacy"/></th>
         </tr>
         </thead>
         <tbody>
@@ -104,6 +104,7 @@
                             object      : seqType,
                             i           : i,
                     ]"/>
+                    <span hidden>${seqType.legacy}</span>
                 </td>
             </tr>
         </g:each>
@@ -111,7 +112,7 @@
     </table>
     </div>
 
-    <h4><g:message code="dataFields.seqType.create.addSeqTypeTitle"/></h4>
+    <h2><g:message code="dataFields.seqType.create.addSeqTypeTitle"/></h2>
     <g:form action="createSeqType" useToken="true">
         <table style="width: 50%">
             <tbody>
@@ -154,17 +155,17 @@
             <tr>
                 <td><g:message code="dataFields.seqType.create.layout"/></td>
                 <td>
-                    <label>
+                    <label class="vertical-align-middle">
                         <g:message code="dataFields.seqType.create.single"/>
                         <g:checkBox id="single" name="single" value="${cmd?.single ?: false}"/>
                     </label>
                     |
-                    <label>
+                    <label class="vertical-align-middle">
                         <g:message code="dataFields.seqType.create.paired"/>
                         <g:checkBox id="paired" name="paired" value="${cmd == null || cmd?.paired}"/>
                     </label>
                     |
-                    <label>
+                    <label class="vertical-align-middle">
                         <g:message code="dataFields.seqType.create.mate"/>
                         <g:checkBox id="mate_pair" name="mate_pair" value="${cmd?.mate_pair ?: false}"/>
                     </label>

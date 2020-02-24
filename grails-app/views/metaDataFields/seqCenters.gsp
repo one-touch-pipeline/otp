@@ -34,7 +34,7 @@
 <body>
 <div class="body fixed-table-header wrapTableHeader metaDataFields">
     <g:render template="/templates/messages"/>
-    <g:render template="linkBanner" model="[ active: 'seqCenters']"/>
+    <g:render template="linkBanner" model="[active: 'seqCenters']"/>
 
     <h1><g:message code="dataFields.seqCenter.header"/></h1>
     <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
@@ -42,13 +42,13 @@
     <table id="metadatafields-datatable">
         <thead>
         <tr>
-            <th title="${g.message(code: "dataFields.seqCenter.name.tooltip")}"><g:message code="dataFields.seqCenter.name"/></th>
-            <th title="${g.message(code: "dataFields.seqCenter.listSeqCenterDirName.tooltip")}"><g:message code="dataFields.seqCenter.listSeqCenterDirName"/></th>
-            <th title="${g.message(code: "dataFields.seqCenter.autoImportDir.tooltip")}"><g:message code="dataFields.seqCenter.autoImportDir"/></th>
-            <th title="${g.message(code: "dataFields.seqCenter.autoImportable.tooltip")}"><g:message code="dataFields.seqCenter.autoImportable"/></th>
+            <th class="export_column" title="${g.message(code: "dataFields.seqCenter.name.tooltip")}"><g:message code="dataFields.seqCenter.name"/></th>
+            <th class="export_column" title="${g.message(code: "dataFields.seqCenter.listSeqCenterDirName.tooltip")}"><g:message code="dataFields.seqCenter.listSeqCenterDirName"/></th>
+            <th class="export_column" title="${g.message(code: "dataFields.seqCenter.autoImportDir.tooltip")}"><g:message code="dataFields.seqCenter.autoImportDir"/></th>
+            <th class="export_column" title="${g.message(code: "dataFields.seqCenter.autoImportable.tooltip")}"><g:message code="dataFields.seqCenter.autoImportable"/></th>
             <th title="${g.message(code: "dataFields.seqCenter.importDirsAllowLinking.tooltip")}"><g:message code="dataFields.seqCenter.importDirsAllowLinking"/></th>
-            <th hidden><g:message code="dataFields.seqCenter.importDirsAllowLinking"/></th>
-            <th title="${g.message(code: "dataFields.seqCenter.copyMetadataFile.tooltip")}"><g:message code="dataFields.seqCenter.copyMetadataFile"/></th>
+            <th class="export_column" hidden><g:message code="dataFields.seqCenter.importDirsAllowLinking"/></th>
+            <th class="export_column" title="${g.message(code: "dataFields.seqCenter.copyMetadataFile.tooltip")}"><g:message code="dataFields.seqCenter.copyMetadataFile"/></th>
         </tr>
         </thead>
         <tbody>

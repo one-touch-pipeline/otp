@@ -44,9 +44,9 @@
                     <th><g:message code="softwareTool.list.version"/></th>
                     <th><g:message code="softwareTool.list.aliases"/></th>
                     <th></th>
-                    <th hidden><g:message code="softwareTool.list.tool"/></th>
-                    <th hidden><g:message code="softwareTool.list.version"/></th>
-                    <th hidden><g:message code="softwareTool.list.aliases"/></th>
+                    <th class="export_column" hidden><g:message code="softwareTool.list.tool"/></th>
+                    <th class="export_column" hidden><g:message code="softwareTool.list.version"/></th>
+                    <th class="export_column" hidden><g:message code="softwareTool.list.aliases"/></th>
                 </tr>
             </thead>
             <tbody>

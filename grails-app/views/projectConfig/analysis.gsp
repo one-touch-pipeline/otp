@@ -46,7 +46,7 @@
             </div>
         </div>
         <div>
-            <g:render template="linkBanner" model="[ project: project, active: 'analysis' ]"/>
+            <g:render template="linkBanner" model="[project: project, active: 'analysis' ]"/>
         </div>
         <br>
 

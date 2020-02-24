@@ -23,7 +23,7 @@
 /*jslint browser: true */
 /*global $ */
 
-$.otp.exportableMetaDataFieldsTable = function (columnsToExport) {
+$.otp.exportableMetaDataFieldsTable = function () {
     "use strict";
     return $('#metadatafields-datatable').dataTable({
         sDom: 'B t',
@@ -33,7 +33,7 @@ $.otp.exportableMetaDataFieldsTable = function (columnsToExport) {
                 text: 'Download CSV',
                 footer: false,
                 exportOptions: {
-                    columns: columnsToExport
+                    columns: '.export_column'
                 }
             }
         ],
@@ -41,3 +41,7 @@ $.otp.exportableMetaDataFieldsTable = function (columnsToExport) {
         ordering: false
     });
 };
+
+$(function() {
+    $.otp.exportableMetaDataFieldsTable();
+});

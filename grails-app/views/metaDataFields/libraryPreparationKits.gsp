@@ -34,7 +34,7 @@
 <body>
 <div class="body fixed-table-header wrapTableHeader metaDataFields">
     <g:render template="/templates/messages"/>
-    <g:render template="linkBanner" model="[ active: 'libraryPreparationKits']"/>
+    <g:render template="linkBanner" model="[active: 'libraryPreparationKits']"/>
 
     <h1><g:message code="dataFields.libPrepKit.header"/></h1>
     <span class="annotation"><g:message code="dataFields.title.caseInsensitive"/></span>
@@ -42,16 +42,16 @@
     <table id="metadatafields-datatable">
         <thead>
         <tr>
-            <th><g:message code="dataFields.libPrepKit.name"/></th>
-            <th><g:message code="dataFields.libPrepKit.shortDisplayName"/></th>
-            <th><g:message code="dataFields.libPrepKit.importAlias"/></th>
+            <th class="export_column"><g:message code="dataFields.libPrepKit.name"/></th>
+            <th class="export_column"><g:message code="dataFields.libPrepKit.shortDisplayName"/></th>
+            <th class="export_column"><g:message code="dataFields.libPrepKit.importAlias"/></th>
             <th></th>
-            <th><g:message code="dataFields.libPrepKit.adapterFile"/></th>
+            <th class="export_column"><g:message code="dataFields.libPrepKit.adapterFile"/></th>
             <th></th>
-            <th><g:message code="dataFields.libPrepKit.reverseComplementAdapterSequenceShort"/></th>
+            <th class="export_column"><g:message code="dataFields.libPrepKit.reverseComplementAdapterSequenceShort"/></th>
             <th></th>
-            <th><g:message code="dataFields.libPrepKit.genomes"/></th>
-            <th><g:message code="dataFields.legacy"/></th>
+            <th class="export_column"><g:message code="dataFields.libPrepKit.genomes"/></th>
+            <th class="export_column"><g:message code="dataFields.legacy"/></th>
         </tr>
         </thead>
         <tbody>
@@ -116,6 +116,7 @@
                             object      : libraryPreparationKit,
                             i           : i,
                     ]"/>
+                    <span hidden>${libraryPreparationKit.legacy}</span>
                 </td>
             </tr>
         </g:each>
